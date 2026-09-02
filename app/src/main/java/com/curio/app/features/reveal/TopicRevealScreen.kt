@@ -242,6 +242,9 @@ fun TopicRevealScreen(
     // finishing its one-time import. Never use the global catalog here: a
     // duplicate title in another category must not open the wrong topic.
     val context = LocalContext.current
+    // Satisfying haptics resolved in composition (never inside the click
+    // lambdas) — firm confirm for saves, light ticks for toggles/actions.
+    val haptics = LocalHapticFeedback.current
     var resolved by remember(topicName, cat.id) { mutableStateOf<CurioTopic?>(null) }
     var showSynopsisDialog by rememberSaveable { mutableStateOf(false) }
     var selectedChapter by remember { mutableStateOf<BookChapter?>(null) }
@@ -249,11 +252,26 @@ fun TopicRevealScreen(
         // Wait for the guarded one-time import before resolving. Reading the
         // cache during import was the source of intermittent blank reveals.
         TopicRepository.init(context)
-        val roomTopic = TopicRepository.findTopic(context, cat.id, topicName)
-        resolved = roomTopic ?: TopicJsonLoader.cached(cat.id)
-            ?.firstOrNull { it.matchesSavedNameStrict(topicName) }
-            ?: TopicJsonLoader.cached(cat.id)
-                ?.firstOrNull { it.matchesSavedName(topicName) }
+        resolved = TopicRepository.findTopic(context, cat.id, topicName)
+            ?: runCatching {
+                // Room may be missing this lane (the one-time import can still
+                // be running, or failed for one lane) — parse + cache + persist
+                // the lane's JSON so the reveal NEVER opens blank. For WILDCARD
+                // topics this merges every lane (the wildcard pool isn't stored
+                // under its own Room category).
+                val pool = TopicJsonLoader.load(cat.id)
+                pool.firstOrNull { it.matchesSavedNameStrict(topicName) }
+                    ?: pool.firstOrNull { it.matchesSavedName(topicName) }
+            }.getOrNull()
+            ?: runCatching {
+                // Last resort (saved wildcard curiosities / renamed topics):
+                // exhaustive search across every lane.
+                TopicCatalog.findByNameAcrossAll(topicName)
+            }.getOrNull()
+        // Keep explored topics durable: persist the resolved topic into the
+        // cached_topics table so it survives even a catalog-table wipe and is
+        // never parsed again on later visits.
+        resolved?.let { TopicRepository.rememberTopic(context, it) }
     }
 
     // v29 — clipboard for the auto-copy on explore: the search query lands on
@@ -710,6 +728,7 @@ fun TopicRevealScreen(
             // v36 — theme-aware surface (category tint, every theme).
             Surface(
                 onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     val topic = resolved ?: return@Surface
                     if (AppPreferences.isTopicPinned(context, cat.id, topic.name)) {
                         AppPreferences.unpinTopic(context, cat.id, topic.name)
@@ -1594,8 +1613,12 @@ private fun RevealStartButton(
     // the two actions read as a unified row instead of mismatched siblings.
     val startShape = RoundedCornerShape(50)
     val contentInk = cat.themedButtonInk()
+    val haptics = LocalHapticFeedback.current
     Button(
-        onClick = onClick,
+        onClick = {
+            haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
+            onClick()
+        },
         enabled = enabled,
         shape = startShape,
         colors = curioButtonColors(
@@ -1665,8 +1688,12 @@ private fun RevealAlreadyButton(
     } else {
         cat.categoryInk().copy(alpha = 0.40f)
     }
+    val haptics = LocalHapticFeedback.current
     Surface(
-        onClick = onClick,
+        onClick = {
+            haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
+            onClick()
+        },
         enabled = enabled,
         shape = RoundedCornerShape(50),
         // v27n — the disabled fill is OPAQUE too (the 45% alpha let the

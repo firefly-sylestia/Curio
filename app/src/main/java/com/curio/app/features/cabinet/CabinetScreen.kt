@@ -46,6 +46,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -155,6 +157,8 @@ private val CategoryIdSaver = Saver<CategoryId?, String>(
 
 @Composable
 fun CabinetScreen(navController: NavController) {
+    // Satisfying haptics: a light tick when an entry is opened / actioned.
+    val haptics = LocalHapticFeedback.current
     // Wide windows (tablet / landscape) spread the grid into more columns.
     val wide = windowWidthSizeClass().isWide
     // Compact hero on tablets/landscape — 192dp instead of 232dp.
@@ -507,6 +511,7 @@ fun CabinetScreen(navController: NavController) {
                                         selectedEntryIds + entry.id
                                     }
                                 } else {
+                                    haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
                                     navController.navigate(
                                         CurioRoutes.entryDetail(entry.id)
                                     ) { launchSingleTop = true }

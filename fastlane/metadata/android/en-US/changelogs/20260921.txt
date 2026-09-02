@@ -1,3 +1,6 @@
+ADD: Satisfying haptics across the app — a confirming buzz when you save, share or land a spin, and light ticks on explore/express-yourself, pinning, opening entries, picks and editor actions.
+FIX: Opening a topic never comes up empty — if a topic isn't in the local database yet it's parsed on demand from the bundled JSON and saved on-device, and every explored topic is remembered locally so it stays loaded and never needs reloading.
+ADD: Book covers (and all fetched images) now download once and are cached on disk — reopening a book later shows its cover instantly, even after an app restart.
 FIX: Share card editor — the Width/Height sliders now show every dimension (Title AND Fact width + height) with clear labels and a live % readout, snapping in clean steps so sizes are precise.
 FIX: Share card editor — typing is now accurate: the text caret sits exactly on the card's text and characters land where the cursor points (the invisible edit field now matches the card's font and position).
 FIX: Editorial share card — the quick fact now wraps only 2 lines beside the big first letter, with the letter top-aligned to the text.

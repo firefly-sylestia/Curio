@@ -37,6 +37,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -149,6 +151,10 @@ fun SaveCaptureScreen(
     editEntryId: String? = null
 ) {
     val context = LocalContext.current
+    // Satisfying haptics: a firm confirm when the capture lands in the
+    // Cabinet, light ticks on toggles. Resolved in composition (never in
+    // the click lambdas themselves).
+    val haptics = LocalHapticFeedback.current
     // v27 — tap an attached image thumb to open the full-screen Lightbox
     // (photo-picker URIs stay byte-for-byte via LightboxTarget). singleTop
     // so swift double-taps never stack a copy.
@@ -1011,7 +1017,10 @@ fun SaveCaptureScreen(
                         screen = "capture"
                     ) { m ->
                         Button(
-                            onClick = performSave,
+                            onClick = {
+                                haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                                performSave()
+                            },
                             enabled = canSave && !saveInProgress,
                             shape = RoundedCornerShape(32.dp),
                             colors = ButtonDefaults.buttonColors(

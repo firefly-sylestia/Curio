@@ -281,4 +281,18 @@ object TopicRepository {
         val dao = CurioDatabase.getInstance(context).topicDao()
         return dao.hasTopics(categoryId.name)
     }
+
+    /**
+     * Persist an EXPLORED topic into the durable `cached_topics` table so it
+     * survives even a catalog-table wipe and never needs re-parsing. Called
+     * from the reveal the moment a topic resolves (cheap insurance for
+     * "always keeps loaded"). Saving to the Cabinet already upserts via this
+     * same table (CaptureRepository.save).
+     */
+    suspend fun rememberTopic(context: Context, topic: CurioTopic) {
+        runCatching {
+            CurioDatabase.getInstance(context).cachedTopicDao()
+                .upsert(CachedTopicEntity.fromCurioTopic(topic))
+        }
+    }
 }

@@ -48,6 +48,8 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -5592,6 +5594,8 @@ fun TopicShareSheet(
     // Hoisted pager state so the Customise panel can switch style via its chips.
     val pagerState = androidx.compose.foundation.pager.rememberPagerState(initialPage = safeIdx.coerceIn(0, styles.lastIndex)) { styles.size }
     val scope = androidx.compose.runtime.rememberCoroutineScope()
+    // Satisfying haptics: confirm on Save/Share, light ticks on Reset/Done.
+    val haptics = LocalHapticFeedback.current
     fun setStyle(i: Int) {
         styleIdx = i.coerceIn(0, styles.lastIndex)
         if (styles.size > 1) scope.launch { pagerState.animateScrollToPage(styleIdx) }
@@ -5882,7 +5886,7 @@ fun TopicShareSheet(
                     // Row 4: Done + Reset icon chips
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
                         // Reset — icon chip
-                        Surface(onClick = { editedTitle = null; editedFact = null; bodyScale = 1f; selectedResizeTarget = ShareCardResizeTarget.TITLE; move = ShareCardMove() }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(36.dp)) {
+                        Surface(onClick = { haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove); editedTitle = null; editedFact = null; bodyScale = 1f; selectedResizeTarget = ShareCardResizeTarget.TITLE; move = ShareCardMove() }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(36.dp)) {
                             Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 CurioIcon(name = CurioIcons.Refresh, tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
                                 Text("Reset", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -5890,7 +5894,7 @@ fun TopicShareSheet(
                         }
                         Spacer(Modifier.width(10.dp))
                         // Done — icon chip
-                        Surface(onClick = { editMode = false }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.primary, modifier = Modifier.height(36.dp)) {
+                        Surface(onClick = { haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove); editMode = false }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.primary, modifier = Modifier.height(36.dp)) {
                             Row(Modifier.padding(horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 CurioIcon(name = CurioIcons.Check, tint = MaterialTheme.colorScheme.onPrimary, size = 14.dp)
                                 Text("Done", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onPrimary)
@@ -5907,6 +5911,7 @@ fun TopicShareSheet(
                 // Save button
                 Surface(
                     onClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                         shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
                             TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move)
                         }, saveToGallery = true)
@@ -5925,6 +5930,7 @@ fun TopicShareSheet(
                 }
                 // Share button
                 Button(onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                     shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
                         TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move)
                     })

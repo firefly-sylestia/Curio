@@ -1,52 +1,56 @@
 # Prompt.md — current request log
 
-## Request: Share-card editor — precise sliders, accurate typing, Editorial wrapping
+## Request: Haptics everywhere + bulletproof topic loading + cache book covers
 
 User request (verbatim):
 
-> "the shar card hegh and width editing with sliders are bad, like i cant know which
-> im editing, and the sliders are not very precise, so fix that, and also when typing
-> the cursor and position its actually typing is accurate too so fix that, and in
-> editorial text wrapping for quick facts, well only do 2 lines alongside the first
-> letter, and start from the same position of the top, so its much better."
+> "add haptics in alot of things, staifying haptics, and improve the json loading as
+> sometimes when i open a topic theres nothing in app room db maybe which saves the
+> loaded and explored topics and always keeps them stay loaded and never reload them
+> or something, youd know the solutin, even from the explored topics or saved, can u
+> save them locally, also the new image fetch for books make it cache and"
 
-### What shipped (this turn, all in `ui/components/TopicShareCard.kt`)
+### What shipped (this turn)
 
-1. **Sliders — explicit labels + readout + snap steps.** Edit mode previously showed
-   TWO sliders whose labels swapped between "Title"/"Fact" based on whichever box was
-   selected — with no value readout and a loose continuous drag. Now FOUR sliders are
-   always visible — **Title width / Title height / Fact width / Fact height** — each
-   with its own label, a live percent readout (`SizeSliderColumn` prints e.g. "Title
-   width · 78%"), and snap steps (width 1%, height ~5% since they drive whole-line
-   counts). Selection state still drives the box outlines/handles on the card.
+1. **Satisfying haptics** (hoisted `val haptics = LocalHapticFeedback.current` per
+   screen — never read inside click lambdas):
+   - TopicRevealScreen: **Start exploring / Express yourself** (`KeyboardTap`),
+     **Pin** toggle (`TextHandleMove`); favourite pill already ticked.
+   - SaveCaptureScreen: Save CTA → **Confirm**.
+   - Share sheet (TopicShareCard): **Save + Share → Confirm**, **Reset + Done →
+     TextHandleMove**.
+   - CabinetScreen: opening an entry → `KeyboardTap`.
+   - HomeScreen: hero/first-run Spin CTAs → `KeyboardTap`.
+   - Existing strong haptics kept: spin wheel ratchet + landing Confirm, bottom-nav
+     ticks, quest completes, constellation, pet designer, reveal favourite.
 
-2. **Typing caret accuracy.** The transparent quick-fact `BasicTextField` had a 6dp
-   content inset AND typed with `bodyMedium` (14sp/20sp) while the card renders its
-   fact in Lora ~9–12sp with ~1.5× leading — so the caret drifted off the visible
-   text and typing landed on different lines/wraps. It now types with **card-matching
-   Lora metrics** (`factFieldStyle` in TopicShareSheet: Lora ~11sp × bodyScale × 1.5
-   leading, transparent color) and **no padding**, so it sits exactly where the card's
-   fact renders and the caret/line-wraps track the visible text.
+2. **Topic loading — the reveal can never come up empty + explored topics stick.**
+   - `TopicRevealScreen` resolution chain: Room `findTopic` → on-demand parse of the
+     lane's JSON via `TopicJsonLoader.load` (caches + persists into Room) → last
+     resort `TopicCatalog.findByNameAcrossAll` (saved wildcard curiosities/renamed
+     topics). The old chain only consulted the warm in-memory cache, which could be
+     empty at cold start → blank "Loading topic…" reveal.
+   - New `TopicRepository.rememberTopic(context, topic)` upserts every **resolved /
+     explored** topic into `cached_topics` (the same durable table saves write), so
+     loaded/explored topics are kept locally forever and never re-parsed.
 
-3. **Editorial drop cap = 2 wrap lines, top-aligned.** The drop-cap initial was a
-   measured 3-line wrap with a 3×-sized letter. Per request it is now a **2-line
-   wrap** (wrap measure + wrap Text maxLines 3 → 2, initial fontSize 3× → 2×), and
-   `LineHeightStyle.Alignment.Top` + `Trim.None` pins the letter to the TOP of its
-   2-line box so it starts level with the first text line (a 2× line height alone
-   vertically centers the glyph).
+3. **Book cover (image) caching.** `MainActivity.onCreate` installs a shared Coil 2.7
+   `ImageLoader` with an explicit memory cache (22%) + disk cache
+   (`cacheDir/curio_image_cache`, 3%), `respectCacheHeaders(false)` (servers'
+   no-cache headers can't bust it) and SvgDecoder — covers download once and hit
+   disk on later visits/restarts.
 
 ### Docs
 
-- Changelog (`fastlane/metadata/android/en-US/changelogs/20260921.txt`) — 3 new FIX
-  bullets on top.
-- `app/AGENTS.md` — updated the v228 Editorial drop-cap description (2-line wrap +
-  top alignment) and added a `v228b` bullet covering the three changes.
+- Changelog (`20260921.txt`) — 3 new bullets on top (haptics, reveal-never-blanks,
+  image caching).
+- `app/AGENTS.md` — Curio Database section extended (`rememberTopic`), plus new
+  bullets for the Coil cache and the haptics placement contract.
 
 ### Verification
 
-- Braces balanced (931/931); imports audited (`LineHeightStyle` added; the pre-edit
-  file already had `LoraFontFamily` + `roundToInt`; `Slider`/`BasicTextField` already
-  imported).
-- `SizeSliderColumn` takes a `modifier` param — `Modifier.weight(1f)` is applied at
-  the Row call sites (it has no RowScope receiver at the helper's top level).
+- Braces balanced in all 7 touched Kotlin files (checked per file).
+- `TopicCatalog` + `matchesSavedName*` were already imported in TopicRevealScreen.
+- Haptics imports (`HapticFeedbackType`, `LocalHapticFeedback`) added where missing
+  (SaveCapture/Cabinet/Home/TopicShareCard).
 - CI compiles on push (no Gradle in this environment).
