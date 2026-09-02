@@ -5,7 +5,7 @@
     "subtype": "Epic",
     "name": "The Iliad",
     "teaser": "A long oral-formulaic poem about 51 days of the Trojan War and the wrath of Achilles. Most estimates put the composition around 750 BCE.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140283334-L.jpg",
     "byline": "Homer",
     "exploreAction": {
       "verb": "Read",
@@ -21,7 +21,66 @@
     "tier": 1,
     "pageCount": 704,
     "altPageCount": 574,
-    "altPageLabel": "Lombardo"
+    "altPageLabel": "Lombardo",
+    "synopsis": "Homer's Iliad covers roughly 51 days in the tenth year of the Trojan War, but its real subject is the rage of Achilles — a warrior who withdraws from battle after a dispute over a captive woman and lets his Greek allies die by the thousands. The poem opens with that rage and tracks its consequences: the death of Achilles' companion Patroclus, who fights in his armor and is killed by Hector; Achilles' return to battle, where he kills Hector and drags his body behind his chariot; and finally the old king Priam's midnight visit to Achilles' tent to beg for his son's corpse. The poem never describes the fall of Troy. It ends with a funeral. Homer's oral-formulaic style — repeated epithets, epithet-heavy similes, lines designed for a singer to pause for breath — creates a rhythm that feels both ancient and immediate. The 'wrath' of the opening line is not a single emotion but a structure: every major character in the poem is driven by some form of pride, grief, or rage, and the poem measures what each of those costs.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Book I — The Quarrel",
+        "pageStart": 1,
+        "pageEnd": 47,
+        "summary": "Agamemnon takes Briseis from Achilles. Achilles prays to Thetis. The Greeks suffer plague."
+      },
+      {
+        "number": 2,
+        "title": "Book II — The Catalogue of Ships",
+        "pageStart": 48,
+        "pageEnd": 90,
+        "summary": "The Greek army musters. Zeus sends a false dream. The catalogue lists every contingent."
+      },
+      {
+        "number": 3,
+        "title": "Book III — The Duel of Paris and Menelaus",
+        "pageStart": 91,
+        "pageEnd": 120,
+        "summary": "Paris and Menelaus fight. Aphrodite saves Paris. Helen watches from the walls."
+      },
+      {
+        "number": 4,
+        "title": "Books IV–VIII",
+        "pageStart": 121,
+        "pageEnd": 290,
+        "summary": "The fighting resumes. Diomedes wounds gods. Hector challenges the Greeks. The Greeks build a wall."
+      },
+      {
+        "number": 5,
+        "title": "Books IX–XV",
+        "pageStart": 291,
+        "pageEnd": 480,
+        "summary": "The embassy to Achilles fails. Patroclus fights and dies. Achilles' grief turns to fury."
+      },
+      {
+        "number": 6,
+        "title": "Books XVI–XVIII",
+        "pageStart": 481,
+        "pageEnd": 560,
+        "summary": "Achilles returns to battle. The river Scamander fights him. Hephaestus makes new armor."
+      },
+      {
+        "number": 7,
+        "title": "Books XIX–XXII",
+        "pageStart": 561,
+        "pageEnd": 640,
+        "summary": "Achilles kills Hector. He drags the body behind his chariot. The Trojans mourn."
+      },
+      {
+        "number": 8,
+        "title": "Books XXIII–XXIV",
+        "pageStart": 641,
+        "pageEnd": 704,
+        "summary": "Patroclus's funeral games. Priam visits Achilles. Hector is ransomed and buried."
+      }
+    ]
   },
   {
     "id": "book-aeneid",
@@ -29,7 +88,7 @@
     "subtype": "Epic",
     "name": "The Aeneid",
     "teaser": "Virgil's Roman epic, written on his deathbed under Augustus's request. Half of the first half is Aeneas fleeing Troy; most of the second half is Odysseus's epic reversed — but with a Latin soul.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780142931137-L.jpg",
     "byline": "Virgil",
     "exploreAction": {
       "verb": "Read",
@@ -43,7 +102,38 @@
       "Ancient"
     ],
     "tier": 1,
-    "pageCount": 496
+    "pageCount": 496,
+    "synopsis": "Virgil's Roman epic tells the story of Aeneas, a Trojan prince who escapes the fall of Troy and carries his father Anchises on his back to Italy, where his descendants will found Rome. The poem is structured in two halves: the first six books follow Aeneas's wanderings (mirroring Odysseus), and the last twelve follow his war in Italy (mirroring the Iliad). The emotional center is Book IV, where Dido, queen of Carthage, falls in love with Aeneas and kills herself when the gods force him to leave. Virgil wrote the poem on his deathbed under Augustus's request, and on his deathbed ordered it burned. Augustus overruled the request. The poem's most famous line — 'Tu regere imperio populos' (you shall rule the nations with your empire) — is Augustus's political program dressed as prophecy. But the poem is more ambivalent than its propaganda suggests: Aeneas is duty-bound but emotionally distant, and the final scene — Aeneas killing the surrendered Turnus — leaves the reader uncertain whether Rome's founding is a triumph or a tragedy.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Books I–III — The Wanderings",
+        "pageStart": 1,
+        "pageEnd": 160,
+        "summary": "Aeneas flees Troy. Juno's fury sends a storm. Dido welcomes the Trojans in Carthage."
+      },
+      {
+        "number": 2,
+        "title": "Book IV — Dido and Aeneas",
+        "pageStart": 161,
+        "pageEnd": 210,
+        "summary": "Dido and Aeneas fall in love. Mercury orders Aeneas to leave. Dido builds a pyre and kills herself."
+      },
+      {
+        "number": 3,
+        "title": "Books V–VI — The Underworld",
+        "pageStart": 211,
+        "pageEnd": 310,
+        "summary": "Aeneas visits the Sibyl. Anchises shows him Rome's future. The shield of Aeneas prophesies Augustus."
+      },
+      {
+        "number": 4,
+        "title": "Books VII–XII — The War in Italy",
+        "pageStart": 311,
+        "pageEnd": 496,
+        "summary": "Aeneas allies with Evander. Pallas dies. Turnus fights. Aeneas kills Turnus in the final scene."
+      }
+    ]
   },
   {
     "id": "book-divine-comedy",
@@ -51,7 +141,7 @@
     "subtype": "Epic",
     "name": "The Divine Comedy",
     "teaser": "Dante's 14,233-line Italian vernacular poem about a man walking through Hell, Purgatory, and Paradise in the Easter week of 1300. He completed Inferno in 1314, Paradiso in 1320, six months before he died.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780142437223-L.jpg",
     "byline": "Dante Alighieri",
     "exploreAction": {
       "verb": "Read",
@@ -65,7 +155,38 @@
       "Poetry"
     ],
     "tier": 1,
-    "pageCount": 798
+    "pageCount": 798,
+    "synopsis": "Dante's 14,233-line Italian vernacular poem follows a man named Dante (the author's thinly disguised self) through Hell, Purgatory, and Paradise during Easter week of 1300, guided first by the Roman poet Virgil and then by his beloved Beatrice. The poem is divided into three canticles (Inferno, Purgatorio, Paradiso), each of 33 cantos (plus one introductory canto in Inferno). The structure is mathematical: each canto is in terza rima (ABA BCB CDC), a rhyme scheme Dante invented for this poem. The Inferno's nine circles arrange sinners by Aristotle's categories of incontinence, violence, and fraud. Purgatory's seven terraces purge the seven deadly sins. Paradise's nine spheres map the heavenly hierarchy. The poem's famous line 'L'amor che move il sole e l'altre stelle' ('The love that moves the sun and the other stars') closes the entire work. Dante wrote the Inferno in exile from Florence, the Purgatorio probably in Lunigiana, and the Paradiso shortly before his death in 1321. The poem invented the Italian literary language.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Inferno, Cantos I–V",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "Dante lost in the dark wood. Virgil appears. Paolo and Francesca's love in Limbo."
+      },
+      {
+        "number": 2,
+        "title": "Inferno, Cantos VI–XXXIV",
+        "pageStart": 61,
+        "pageEnd": 340,
+        "summary": "The nine circles. Ulysses' last voyage. Ugolino's hunger. Lucifer at the center."
+      },
+      {
+        "number": 3,
+        "title": "Purgatorio, Cantos I–XXXIII",
+        "pageStart": 341,
+        "pageEnd": 540,
+        "summary": "The mountain of purgation. Seven terraces. Casella the musician. Dante's dream of Leah."
+      },
+      {
+        "number": 4,
+        "title": "Paradiso, Cantos I–XXXIII",
+        "pageStart": 541,
+        "pageEnd": 798,
+        "summary": "The nine spheres. Cacciaguida prophesies Dante's exile. The final vision of God."
+      }
+    ]
   },
   {
     "id": "book-don-quixote",
@@ -73,7 +194,7 @@
     "subtype": "Novel",
     "name": "Don Quixote",
     "teaser": "Spanish novel published in two parts (1605, 1615) by Cervantes, the first modern novel and arguably the first work of metafiction. Famous broken-nosed knight and his practical-minded squire.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780060934347-L.jpg",
     "byline": "Miguel de Cervantes",
     "exploreAction": {
       "verb": "Read",
@@ -89,7 +210,38 @@
     "tier": 1,
     "pageCount": 992,
     "altPageCount": 1072,
-    "altPageLabel": "Penguin"
+    "altPageLabel": "Penguin",
+    "synopsis": "Cervantes published Don Quixote in two parts (1605, 1615), and the novel is arguably the first modern work of fiction. Alonso Quixano, a minor nobleman in La Mancha, reads so many chivalric romances that he loses his mind and decides he is a knight-errant named Don Quixote. He recruits the peasant Sancho Panza as his squire, and together they encounter windmills (which Quixote sees as giants), inns (which he sees as castles), and a procession of ordinary people whom he interprets as knights and enchanters. The novel's comedy is structural: Part I is a collection of loosely connected episodes, while Part II (1615) is tighter, more self-referential, and darker — the characters in Part II have read Part I and use it to manipulate Don Quixote. The novel's most famous scene — the windmill attack — is actually a late addition; Cervantes originally planned a simpler parody of chivalric romance. The novel's real subject is the tension between imagination and reality, and Cervantes never fully resolves it.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I, Chapters 1–8",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "Quixano becomes Don Quixote. The first sally. The inn as castle. Sancho Panza recruited."
+      },
+      {
+        "number": 2,
+        "title": "Part I, Chapters 9–26",
+        "pageStart": 121,
+        "pageEnd": 380,
+        "summary": "The windmills. The sheep army. The inn of the Monterey. The canon and the curate."
+      },
+      {
+        "number": 3,
+        "title": "Part I, Chapters 27–52",
+        "pageStart": 381,
+        "pageEnd": 600,
+        "summary": "The adventure of the enchanted boat. Cardenio's story. The girl in distress."
+      },
+      {
+        "number": 4,
+        "title": "Part II, Chapters 1–74",
+        "pageStart": 601,
+        "pageEnd": 992,
+        "summary": "Don Quixote and Sancho return. The duke and duchess mock them. Sancho governs. The defeat at Montesinos."
+      }
+    ]
   },
   {
     "id": "book-jane-eyre",
@@ -97,7 +249,7 @@
     "subtype": "Novel",
     "name": "Jane Eyre",
     "teaser": "Charlotte Brontë's 1847 novel that became the template for the female bildungsroman — first-person narration, declining marriage plot, and a heroine who refuses the role of victim.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141441146-L.jpg",
     "byline": "Charlotte Brontë",
     "exploreAction": {
       "verb": "Read",
@@ -111,7 +263,31 @@
       "Novel"
     ],
     "tier": 2,
-    "pageCount": 532
+    "pageCount": 532,
+    "synopsis": "Charlotte Brontë's 1847 novel follows Jane Eyre from childhood to adulthood in first person. As a ten-year-old orphan living with her cruel aunt Reed, Jane is sent to Lowood Institution, where she endures cold, hunger, and the death of her friend Helen Burns. She becomes a teacher and then a governess at Thornfield Hall, where she falls in love with her employer, Edward Rochester. Rochester is dark, moody, and secretive — he keeps a mad wife, Bertha Mason, locked in the attic. When Jane discovers the secret, she flees Thornfield and nearly starves before being taken in by the Rivers siblings. She inherits a fortune and rejects St. John Rivers's proposal of a loveless missionary marriage. Jane returns to Thornfield to find it burned down — Bertha has set the fire and killed herself, and Rochester has been blinded and maimed. They marry. The novel's famous opening line — 'There was no possibility of taking a walk that day' — is deceptive: the entire book is about the impossibility of staying put. Jane's refusal to accept her circumstances — whether at Gateshead, Lowood, Thornfield, or Moor House — drives every major decision.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Chapters 1–10 — Gateshead and Lowood",
+        "pageStart": 1,
+        "pageEnd": 140,
+        "summary": "The Red Room. Lowood Institution. Helen Burns dies. Jane becomes a teacher."
+      },
+      {
+        "number": 2,
+        "title": "Chapters 11–26 — Thornfield",
+        "pageStart": 141,
+        "pageEnd": 340,
+        "summary": "Jane becomes governess. Rochester courts her. The fire in Rochester's bed. The wedding stopped."
+      },
+      {
+        "number": 3,
+        "title": "Chapters 27–38 — Moor House and Return",
+        "pageStart": 341,
+        "pageEnd": 532,
+        "summary": "Jane flees. The Rivers take her in. Jane inherits money. She returns to find Thornfield burned."
+      }
+    ]
   },
   {
     "id": "book-wuthering-heights",
@@ -119,7 +295,7 @@
     "subtype": "Novel",
     "name": "Wuthering Heights",
     "teaser": "Emily Brontë's 1847 novel — a love story told through tenant-farmer Lockwood and housekeeper Nelly Dean, who disagree violently about what they remember. The book has been called unreadable by generations of critics.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439556-L.jpg",
     "byline": "Emily Brontë",
     "exploreAction": {
       "verb": "Read",
@@ -135,7 +311,38 @@
     "tier": 2,
     "pageCount": 416,
     "altPageCount": 464,
-    "altPageLabel": "Norton"
+    "altPageLabel": "Norton",
+    "synopsis": "Emily Brontë's only novel, published in 1847, is a love story told through two unreliable narrators: the tenant Lockwood and the housekeeper Nelly Dean. The core narrative follows Heathcliff, a foundling brought to Wuthering Heights by Mr. Earnshaw, who falls in love with Catherine Earnshaw. When Catherine chooses to marry Edgar Linton for social status, Heathcliff disappears and returns three years later wealthy and vengeful. He marries Edgar's sister Isabella out of spite, tortures the next generation of Earnshaws and Lintons, and essentially takes over both Wuthering Heights and Thrushcross Grange. The novel's controversial ending has Heathcliff and Catherine reunited in death — their graves are said to be visited by ghosts of children. Brontë structured the novel as a series of stories told by characters who disagree about what happened, so the reader never gets a single authoritative version. The novel was called 'coarse' and 'brutal' by Victorian critics; it has since been recognized as one of the greatest novels in English.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Lockwood's Visit (Chapters 1–3)",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "Lockwood arrives at Wuthering Heights. Catherine's ghost appears at the window. Nelly begins her story."
+      },
+      {
+        "number": 2,
+        "title": "Nelly's Narrative — The First Generation (Chapters 4–16)",
+        "pageStart": 41,
+        "pageEnd": 220,
+        "summary": "Heathcliff's arrival. Catherine and Heathcliff's bond. The Lintons. Catherine's choice to marry Edgar."
+      },
+      {
+        "number": 3,
+        "title": "Heathcliff's Revenge (Chapters 17–30)",
+        "pageStart": 221,
+        "pageEnd": 360,
+        "summary": "Heathcliff returns. Isabella's marriage. Catherine's death. Heathcliff takes Wuthering Heights."
+      },
+      {
+        "number": 4,
+        "title": "The Second Generation (Chapters 31–34)",
+        "pageStart": 361,
+        "pageEnd": 416,
+        "summary": "Young Cathy and Linton Heathcliff. The ghosts. Heathcliff's death. Lockwood's final visit."
+      }
+    ]
   },
   {
     "id": "book-frankenstein",
@@ -143,7 +350,7 @@
     "subtype": "Novel",
     "name": "Frankenstein; or, The Modern Prometheus",
     "teaser": "Mary Shelley's 1818 novel, written at 19 on a bet with Byron and Percy Shelley. The novel invented both science fiction and the recurring motif of creators failing at their own creations.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439471-L.jpg",
     "byline": "Mary Shelley",
     "exploreAction": {
       "verb": "Read",
@@ -157,7 +364,38 @@
       "Gothic"
     ],
     "tier": 2,
-    "pageCount": 288
+    "pageCount": 288,
+    "synopsis": "Mary Shelley wrote Frankenstein in 1816 at age 19, on a bet with Byron and Percy Shelley during a rain-soaked summer at Lake Geneva. The novel is framed as a series of letters from the Arctic explorer Robert Walton to his sister, telling the story Victor Frankenstein told him. Victor, a young natural philosopher, assembles a creature from dead body parts and brings it to life, then immediately abandons it in horror. The creature, rejected by everyone it encounters, becomes violent and murders Victor's brother, friend, and bride. Victor chases the creature to the Arctic, where Walton finds him. The novel's central question — 'Did I request thee, Maker, from my clay / To mould me Man?' (Milton's Paradise Lost, epigraph) — is about the responsibility of creators to their creations. Shelley never resolves it: Victor is both sympathetic and culpable, the creature both monstrous and articulate. The novel's 1818 text is shorter and more ambiguous than the 1831 revision, which added more fate and destiny. Most scholars prefer the 1818 version.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Walton's Letters + Chapters 1–4",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "Walton in the Arctic. Victor tells his story. The creation. Victor flees."
+      },
+      {
+        "number": 2,
+        "title": "Chapters 5–12",
+        "pageStart": 61,
+        "pageEnd": 150,
+        "summary": "The creature's education. The DeLacey family. The creature demands a mate."
+      },
+      {
+        "number": 3,
+        "title": "Chapters 13–20",
+        "pageStart": 151,
+        "pageEnd": 210,
+        "summary": "Victor creates the female. Destroys it. William is murdered. Justine executed."
+      },
+      {
+        "number": 4,
+        "title": "Chapters 21–24 + Walton's conclusion",
+        "pageStart": 211,
+        "pageEnd": 288,
+        "summary": "The chase across Europe and the Arctic. Victor dies. Walton finds the creature."
+      }
+    ]
   },
   {
     "id": "book-great-expectations",
@@ -165,7 +403,7 @@
     "subtype": "Novel",
     "name": "Great Expectations",
     "teaser": "Dickens's 1861 bildungsroman — the only one of his novels to be a first-person narration. The novel's famous original ending was so bleak Dickens rewrote it on Bulwer-Lytton's advice.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439563-L.jpg",
     "byline": "Charles Dickens",
     "exploreAction": {
       "verb": "Read",
@@ -179,7 +417,31 @@
       "Novel"
     ],
     "tier": 2,
-    "pageCount": 544
+    "pageCount": 544,
+    "synopsis": "Dickens's 1861 bildungsroman follows Pip, an orphan raised by his abusive sister and her kind husband Joe Gargery, the village blacksmith. Pip's life changes when he is summoned to Satis House to play for the eccentric Miss Havisham, a woman jilted on her wedding day who still wears her rotting wedding dress and keeps her wedding feast untouched. There Pip meets Estella, Miss Havisham's adopted daughter, who is being raised to break men's hearts. Pip becomes ashamed of Joe and his working-class origins. When a mysterious benefactor turns out to be the convict Abel Magwitch (not Miss Havisham, as Pip assumed), Pip's 'great expectations' collapse. The novel's famous original ending — in which Pip and Estella meet briefly and separate forever — was rewritten on Bulwer-Lytton's advice to a more hopeful version. Dickens's original ending is considered the better ending by most critics. The novel is built around the single question of what constitutes a 'gentleman.'",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Chapters 1–10 — The Marsh Country",
+        "pageStart": 1,
+        "pageEnd": 110,
+        "summary": "Pip in the graveyard. The convict. Satis House. Estella. Pip becomes a gentleman's companion."
+      },
+      {
+        "number": 2,
+        "title": "Chapters 11–30 — London and Expectations",
+        "pageStart": 111,
+        "pageEnd": 340,
+        "summary": "Pip in London. Jaggers the lawyer. Wemmick. Pip's snobbery toward Joe."
+      },
+      {
+        "number": 3,
+        "title": "Chapters 31–59 — The Truth",
+        "pageStart": 341,
+        "pageEnd": 544,
+        "summary": "Magwitch returns. Pip's expectations collapse. Miss Havisham's fire. The original ending."
+      }
+    ]
   },
   {
     "id": "book-oliver-twist",
@@ -187,7 +449,7 @@
     "subtype": "Novel",
     "name": "Oliver Twist",
     "teaser": "Dickens's second novel (1837–39), the first major Victorian novel to focus on a working-class child protagonist, and the origins of 'Please sir, I want some more' as the most-quoted Dickens line.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439891-L.jpg",
     "byline": "Charles Dickens",
     "exploreAction": {
       "verb": "Read",
@@ -201,7 +463,31 @@
       "Novel"
     ],
     "tier": 2,
-    "pageCount": 512
+    "pageCount": 512,
+    "synopsis": "Dickens's second novel (1837–39) follows Oliver, an orphan born in a workhouse, who escapes to London and falls in with Fagin's gang of child pickpockets. The novel's first great scene — Oliver asking for more gruel — became the most quoted Dickens line in popular culture. Oliver is rescued by Mr. Brownlow, recaptured by Bill Sikes and Nancy, and eventually reunited with his family. The novel was revolutionary for its time: it focused on a child protagonist from the lowest social class, and it depicted the workhouse system, criminal underworld, and policing with a specificity that startled readers. Dickens was criticized for making criminals too vivid and interesting. The novel's treatment of Nancy — a prostitute with a moral conscience — was unprecedented in English fiction. Oliver himself is the least interesting character in the novel; the real energy belongs to Fagin, Sikes, and Nancy.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Chapters 1–8 — The Workhouse",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "Oliver's birth. The workhouse. 'Please, sir, I want some more.' Oliver escapes to London."
+      },
+      {
+        "number": 2,
+        "title": "Chapters 9–20 — Fagin's Gang",
+        "pageStart": 101,
+        "pageEnd": 240,
+        "summary": "Fagin and the Artful Dodger. Oliver's arrest. Mr. Brownlow. The robbery."
+      },
+      {
+        "number": 3,
+        "title": "Chapters 21–53 — The Underworld",
+        "pageStart": 241,
+        "pageEnd": 512,
+        "summary": "Bill Sikes. Nancy. Monks. The chase. Sikes kills Nancy. Oliver's identity revealed."
+      }
+    ]
   },
   {
     "id": "book-war-and-peace",
@@ -209,7 +495,7 @@
     "subtype": "Novel",
     "name": "War and Peace",
     "teaser": "Tolstoy's 1225-page epic of Russian families during the Napoleonic Wars (1869). Tolstoy refused the copyright revenue to his wife's fury. He said he wrote the book 'to teach Russians to love history.'.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140449136-L.jpg",
     "byline": "Leo Tolstoy",
     "exploreAction": {
       "verb": "Read",
@@ -225,7 +511,38 @@
     "tier": 2,
     "pageCount": 1392,
     "altPageCount": 1104,
-    "altPageLabel": "Wordsworth"
+    "altPageLabel": "Wordsworth",
+    "synopsis": "Tolstoy's 1225-page epic follows five Russian families during the Napoleonic Wars (1805–1812), with particular focus on Andrei Bolkonsky, Pierre Bezukhov, and Natasha Rostova. The novel alternates between battlefield scenes (Austerlitz, Borodino) and domestic scenes (salons, dances, hunting parties), and Tolstoy uses both to argue that history is shaped by millions of small decisions, not by great leaders. Napoleon appears as a character but is treated with ironic distance; Kutuzov, who does nothing and lets events unfold, is Tolstoy's hero. The novel's most famous scene — Natasha's first ball, where she dances with Andrei — is written in a single ecstatic paragraph. Tolstoy refused copyright on the novel (his wife's fury), and his philosophical digressions on history are considered the weakest parts. The novel's real achievement is its characters: Pierre's search for meaning, Andrei's disillusionment, Natasha's vitality. Tolstoy said he wrote the book 'to teach Russians to love history.'",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Volume I — 1805",
+        "pageStart": 1,
+        "pageEnd": 350,
+        "summary": "The salon. Austerlitz. Andrei's disillusionment. Pierre's inheritance. Natasha's ball."
+      },
+      {
+        "number": 2,
+        "title": "Volume II — 1807–1812",
+        "pageStart": 351,
+        "pageEnd": 750,
+        "summary": "Pierre and Freemasonry. Natasha's engagement to Andrei. Anatole's seduction. The war returns."
+      },
+      {
+        "number": 3,
+        "title": "Volume III — 1812",
+        "pageStart": 751,
+        "pageEnd": 1050,
+        "summary": "Borodino. Moscow burns. Pierre wanders the city. Kutuzov retreats. Napoleon enters Moscow."
+      },
+      {
+        "number": 4,
+        "title": "Volume IV — 1812–1820",
+        "pageStart": 1051,
+        "pageEnd": 1392,
+        "summary": "The French retreat. Pierre freed. Andrei dies. Natasha marries Pierre. The epilogue."
+      }
+    ]
   },
   {
     "id": "book-madame-bovary",
@@ -233,7 +550,7 @@
     "subtype": "Novel",
     "name": "Madame Bovary",
     "teaser": "Flaubert's 1856 novel, the subject of an 1857 obscenity trial in Paris. He spent 5 years writing it. The novel's mid-book agricultural fair scene is the most quoted single chapter in French literature.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140449129-L.jpg",
     "byline": "Gustave Flaubert",
     "exploreAction": {
       "verb": "Read",
@@ -247,7 +564,31 @@
       "Novel"
     ],
     "tier": 2,
-    "pageCount": 432
+    "pageCount": 432,
+    "synopsis": "Flaubert's 1856 novel follows Emma Bovary, a country doctor's wife in provincial Normandy who reads romantic novels and believes her life should be grander than it is. She marries Charles Bovary, a decent but dull man, and proceeds to have two affairs — first with the law clerk Léon Dupuis, then with the landowner Rodolphe Boulanger — while running up debts she cannot pay. When both lovers abandon her and the money runs out, Emma poisons herself with arsenic. The novel's famous agricultural fair scene (Part I, Chapter 9) intercuts Rodolphe's seduction of Emma with a politician's speech about progress, creating one of the most analyzed passages in French literature. Flaubert spent five years writing the novel, dictating sentences aloud to find the right rhythm. He was charged with obscenity in 1857 (the same year Baudelaire's Les Fleurs du Mal was prosecuted) and acquitted. The novel's style — impersonal, precise, unsentimental — became the foundation of modern literary realism.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I — Charles and Emma",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "Charles's first marriage. The wedding. The agricultural fair. Emma meets Léon."
+      },
+      {
+        "number": 2,
+        "title": "Part II — Yonville and Rodolphe",
+        "pageStart": 101,
+        "pageEnd": 240,
+        "summary": "The Bovarys move to Yonville. Rodolphe seduces Emma. The fair. She wants to elope."
+      },
+      {
+        "number": 3,
+        "title": "Part III — Léon and the Debts",
+        "pageStart": 241,
+        "pageEnd": 432,
+        "summary": "Emma and Léon's affair in Rouen. The bills arrive. Lheureux the moneylender. Emma's death."
+      }
+    ]
   },
   {
     "id": "book-the-brothers-karamazov",
@@ -255,7 +596,7 @@
     "subtype": "Novel",
     "name": "The Brothers Karamazov",
     "teaser": "Dostoevsky's last novel (1880), unfinished at his death. The novel's central argument between Ivan and Alyosha — 'If God does not exist, is everything permitted?' — became the most-argued theological question in 20th-century European fiction.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140449136-L.jpg",
     "byline": "Fyodor Dostoevsky",
     "exploreAction": {
       "verb": "Read",
@@ -269,7 +610,38 @@
       "19th Century"
     ],
     "tier": 1,
-    "pageCount": 824
+    "pageCount": 824,
+    "synopsis": "Dostoevsky's last novel (1880), unfinished at his death, tells the story of the Karamazov family: the sensual father Fyodor Pavlovich and his four sons — the intellectual Ivan, the devout Alyosha, the passionate Dmitri, and the illegitimate Smerdyakov. When Fyodor is murdered, each son had a motive, and the novel follows the investigation and trial. The central philosophical drama is between Ivan and Alyosha in Book V: Ivan presents his 'Grand Inquisitor' parable — a poem about Christ returning to Seville during the Inquisition — arguing that if God does not exist, everything is permitted. Alyosha doesn't refute the argument; he responds with a kiss, imitating Christ's response to the Grand Inquisitor in Ivan's own poem. Dostoevsky originally planned a shorter novel about Dmitri's trial but expanded it into a family saga. The novel's philosophical density — free will, the problem of evil, the nature of faith — made it the most influential Russian novel of the 20th century.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Books I–II — The Family",
+        "pageStart": 1,
+        "pageEnd": 180,
+        "summary": "The Karamazov family introduced. The monastery visit. Dmitri's financial dispute with his father."
+      },
+      {
+        "number": 2,
+        "title": "Books III–IV — Alyosha",
+        "pageStart": 181,
+        "pageEnd": 320,
+        "summary": "Alyosha in the world. The boys' chapter. Zosima's teachings. Dmitri and Grushenka."
+      },
+      {
+        "number": 3,
+        "title": "Books V–VI — The Grand Inquisitor",
+        "pageStart": 321,
+        "pageEnd": 500,
+        "summary": "Ivan's rebellion. The Grand Inquisitor. The devil visits Ivan. Smerdyakov's philosophy."
+      },
+      {
+        "number": 4,
+        "title": "Books VII–XII — The Trial",
+        "pageStart": 501,
+        "pageEnd": 824,
+        "summary": "The murder. Dmitri's trial. The courtroom drama. Alyosha and the boys. Dmitri's dream."
+      }
+    ]
   },
   {
     "id": "book-leaves-of-grass",
@@ -277,7 +649,7 @@
     "subtype": "Poetry Collection",
     "name": "Leaves of Grass",
     "teaser": "Whitman's self-published 1855 collection (12 poems) became the founding document of American poetry. He revised and expanded the work for 39 years.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780142437703-L.jpg",
     "byline": "Walt Whitman",
     "exploreAction": {
       "verb": "Read",
@@ -291,7 +663,38 @@
       "19th Century"
     ],
     "tier": 1,
-    "pageCount": 576
+    "pageCount": 576,
+    "synopsis": "Whitman self-published the first edition of Leaves of Grass in 1855 — twelve poems, including 'Song of Myself' — and spent the next 39 years revising and expanding it to twelve editions. The first edition was reviewed by Emerson, who called it 'the most extraordinary piece of wit and wisdom that America has yet contributed.' Whitman printed the book himself, designed the cover, and reviewed it anonymously in the Tribune. The poems celebrate the body, democracy, sexuality, and the American landscape in long, cataloguing free verse that broke every rule of 19th-century poetry. 'Song of Myself' is the collection's center — a 1,346-line poem that refuses to separate the self from the world: 'I am large, I contain multitudes.' The 1860 edition added the 'Calamus' poems (homoerotic), and the 1865 edition added 'When Lilacs Last in the Dooryard Bloom'd' (Lincoln's elegy). Whitman's influence on American poetry is incalculable: Ginsberg, Currency, Neruda, and every free-verse poet after him owe him a debt.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Song of Myself",
+        "pageStart": 1,
+        "pageEnd": 200,
+        "summary": "The 1,346-line poem. 'I celebrate myself, and sing myself.' The body, democracy, death."
+      },
+      {
+        "number": 2,
+        "title": "Children of Adam",
+        "pageStart": 201,
+        "pageEnd": 300,
+        "summary": "Erotic poems celebrating the body and procreation. Banned for obscenity."
+      },
+      {
+        "number": 3,
+        "title": "Calamus",
+        "pageStart": 301,
+        "pageEnd": 400,
+        "summary": "Homoerotic poems. 'Enfants d'Adams. The manly love of comrades."
+      },
+      {
+        "number": 4,
+        "title": "Drum-Tops + Lilacs",
+        "pageStart": 401,
+        "pageEnd": 576,
+        "summary": "Civil War poems. 'O Captain! My Captain!' Lincoln's elegy. Old age."
+      }
+    ]
   },
   {
     "id": "book-emma",
@@ -299,7 +702,7 @@
     "subtype": "Novel",
     "name": "Emma",
     "teaser": "Austen's 1815 novel of a wealthy young woman who teaches herself to be a matchmaker — and learns that matchmaking is the wrong activity. The novel is intentionally comedic and unreachable.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439587-L.jpg",
     "byline": "Jane Austen",
     "exploreAction": {
       "verb": "Read",
@@ -313,7 +716,31 @@
       "Novel"
     ],
     "tier": 2,
-    "pageCount": 480
+    "pageCount": 480,
+    "synopsis": "Austen's 1815 novel follows Emma Woodhouse, a wealthy, clever young woman who considers herself a matchmaker but is spectacularly wrong about everyone around her. She begins by matchmaking her governess Miss Taylor to Mr. Weston, then tries to pair her friend Harriet Smith with the vicar Mr. Elton — only to discover Elton wants Emma herself. Emma's real mistake is overestimating her own perception: she misreads Frank Churchill's flirtation (he's secretly engaged to Jane Fairfax), misreads Harriet's attachment to Mr. Knightley, and nearly destroys Harriet's happiness in the process. The novel's famous moment — Emma realizes she loves Mr. Knightley after he rebukes her for bullying the timid Miss Bates at a picnic — is the emotional turning point. Austen wrote the novel in a tone of sustained irony: Emma's confidence is the reader's entertainment and her own undoing. Austen said she was writing 'a heroine whom no one but myself will much like,' but Emma has become one of the most beloved characters in English fiction.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Volume I — Matchmaking",
+        "pageStart": 1,
+        "pageEnd": 160,
+        "summary": "Emma's world. Miss Taylor's wedding. Harriet Smith. Elton's proposal."
+      },
+      {
+        "number": 2,
+        "title": "Volume II — Frank Churchill and Jane Fairfax",
+        "pageStart": 161,
+        "pageEnd": 320,
+        "summary": "Frank Churchill arrives. Jane Fairfax. Box Hill. Emma insults Miss Bates."
+      },
+      {
+        "number": 3,
+        "title": "Volume III — Realization",
+        "pageStart": 321,
+        "pageEnd": 480,
+        "summary": "Knightley rebukes Emma. Frank and Jane's secret revealed. Harriet and Knightley. The proposal."
+      }
+    ]
   },
   {
     "id": "book-the-picture-of-dorian-gray",
@@ -321,7 +748,7 @@
     "subtype": "Novel",
     "name": "The Picture of Dorian Gray",
     "teaser": "Wilde's 1890 novel — a Faustian aspect-fable whose only real horror is the portrait in the attic and the question who looks at it.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439570-L.jpg",
     "byline": "Oscar Wilde",
     "exploreAction": {
       "verb": "Read",
@@ -335,7 +762,31 @@
       "Novel"
     ],
     "tier": 2,
-    "pageCount": 254
+    "pageCount": 254,
+    "synopsis": "Wilde's 1890 novel (expanded 1891) tells the story of Dorian Gray, a beautiful young man whose portrait ages and decays while he remains eternally young. Lord Henry Wotton introduces Dorian to a philosophy of aesthetic hedonism: 'The only way to get rid of a temptation is to yield to it.' Dorian wishes the painting would age instead of him, and the wish is granted. He pursues pleasure, destroys the actress Sibyl Vane (who kills herself), and commits a murder — all while his portrait absorbs the damage. The novel's preface ('All art is quite useless') was Wilde's manifesto; the novel itself was used as evidence against him at his 1895 trial for gross indecency. The 1890 version was published in Lippincott's Monthly Magazine and was considered more explicitly homoerotic than the 1891 revision. The novel's central question — whether beauty is a form of morality — Wilde leaves deliberately unresolved. Dorian stabs the portrait at the end and is found aged and decayed; the portrait is restored to beauty.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Chapters 1–5 — The Wish",
+        "pageStart": 1,
+        "pageEnd": 50,
+        "summary": "Basil paints Dorian. Lord Henry's philosophy. Dorian wishes the painting would age."
+      },
+      {
+        "number": 2,
+        "title": "Chapters 6–13 — The Corruption",
+        "pageStart": 51,
+        "pageEnd": 150,
+        "summary": "Sibyl Vane. Her death. Dorian's secret life. The yellow book."
+      },
+      {
+        "number": 3,
+        "title": "Chapters 14–20 — The End",
+        "pageStart": 151,
+        "pageEnd": 254,
+        "summary": "Basil confronts Dorian. The murder. Alan Campbell. Dorian stabs the portrait."
+      }
+    ]
   },
   {
     "id": "book-the-trial",
@@ -343,7 +794,7 @@
     "subtype": "Novel",
     "name": "The Trial",
     "teaser": "Kafka's 1925 novel (published posthumously by Max Brod, who ignored Kafka's request to burn his papers). The novel's most-quoted line: 'Someone must have been telling lies about Josef K., for one morning he was arrested without having done anything wrong.'.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780805210552-L.jpg",
     "byline": "Franz Kafka",
     "exploreAction": {
       "verb": "Read",
@@ -357,7 +808,38 @@
       "Novel"
     ],
     "tier": 2,
-    "pageCount": 304
+    "pageCount": 304,
+    "synopsis": "Kafka's 1925 novel (published posthumously by Max Brod, who ignored Kafka's request to burn his papers) opens with the most famous sentence in 20th-century fiction: 'Someone must have been telling lies about Josef K., for one morning he was arrested without having done anything wrong.' K., a bank officer, is charged with an unspecified crime and drawn into a labyrinthine legal system that operates in attics, brothels, and abandoned buildings. He never learns what he's accused of. The novel is structured in ten chapters, each a separate episode in K.'s futile attempts to understand or fight the system. The parable 'Before the Law' — inserted into Chapter 9 — tells of a man who spends his entire life waiting for permission to enter a door that was meant only for him. K. is executed on his thirty-first birthday, stabbed in the heart by two men while he lies on a quarry. Kafka wrote the novel between 1914 and 1915, during his engagement to Felice Bauer, and the novel's vision of bureaucratic absurdity may reflect his anxiety about judgment — legal, social, and divine.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Chapter 1 — The Arrest",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "K. is arrested on his birthday. He's never told the charge. The court meets in attics."
+      },
+      {
+        "number": 2,
+        "title": "Chapters 2–5 — The Court",
+        "pageStart": 31,
+        "pageEnd": 120,
+        "summary": "K. visits the court. The painter. The priest. The law books."
+      },
+      {
+        "number": 3,
+        "title": "Chapters 6–9 — The Fight",
+        "pageStart": 121,
+        "pageEnd": 260,
+        "summary": "K. confronts the system. 'Before the Law.' The cathedral. The parable."
+      },
+      {
+        "number": 4,
+        "title": "Chapter 10 — The Execution",
+        "pageStart": 261,
+        "pageEnd": 304,
+        "summary": "K.'s thirty-first birthday. The quarry. The knife. 'Like a dog.'"
+      }
+    ]
   },
   {
     "id": "book-ulysses",
@@ -365,7 +847,7 @@
     "subtype": "Novel",
     "name": "Ulysses",
     "teaser": "Joyce's 1922 novel of one day in Dublin (June 16, 1904) — Bloomsday is still celebrated annually worldwide. The novel was banned in the US for obscenity in 1922; the ban was lifted in 1934.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141182803-L.jpg",
     "byline": "James Joyce",
     "exploreAction": {
       "verb": "Read",
@@ -381,7 +863,38 @@
     "tier": 2,
     "pageCount": 732,
     "altPageCount": 649,
-    "altPageLabel": "Corrected text"
+    "altPageLabel": "Corrected text",
+    "synopsis": "Joyce's 1922 novel follows Leopold Bloom, Stephen Dedalus, and Molly Bloom through a single day in Dublin (June 16, 1904) — a day now celebrated annually as Bloomsday. The novel maps Homer's Odyssey onto modern Dublin: Bloom is Odysseus, Stephen is Telemachus, Molly is Penelope. But Joyce's real innovation is style: each of the 18 episodes is written in a different literary mode — stream of consciousness, catechism, newspaper headlines, musical fugue, cinematic script. The novel's most famous episode, 'Penelope' (Episode 18), is Molly Bloom's unpunctuated soliloquy — eight sentences without a single period, ending with 'yes I said yes I will Yes.' The novel was banned in the US for obscenity until 1934; the 1922 Paris first edition by Shakespeare and Company sold out immediately. Joyce wrote the novel in Zurich, Trieste, and Paris, often going blind while writing it. The novel's difficulty is intentional: Joyce wanted to require rereading, and scholars have been annotating it ever since.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Episodes 1–3 — Telemachus",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Stephen Dedalus. Buck Mulligan. The tower. Stephen's mother's ghost."
+      },
+      {
+        "number": 2,
+        "title": "Episodes 4–8 — The Odyssey",
+        "pageStart": 81,
+        "pageEnd": 350,
+        "summary": "Bloom's day. The funeral. The office. The pharmacy. The bath."
+      },
+      {
+        "number": 3,
+        "title": "Episodes 9–15 — Circe and the Nighttown",
+        "pageStart": 351,
+        "pageEnd": 600,
+        "summary": "Oxen of the Sun. Circe. The hallucination episode. Bloom and Stephen."
+      },
+      {
+        "number": 4,
+        "title": "Episodes 16–18 — Ithaca and Penelope",
+        "pageStart": 601,
+        "pageEnd": 732,
+        "summary": "Bloom and Stephen go home. The catechism episode. Molly's soliloquy. 'Yes.'"
+      }
+    ]
   },
   {
     "id": "book-mrs-dalloway",
@@ -389,7 +902,7 @@
     "subtype": "Novel",
     "name": "Mrs Dalloway",
     "teaser": "Woolf's 1925 novel — one day in Clarissa Dalloway's life as she prepares for a party in post-war London. The novel hosts Septimus Smith's parallel interior life, a WWI veteran about to fail at suicide.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780156652179-L.jpg",
     "byline": "Virginia Woolf",
     "exploreAction": {
       "verb": "Read",
@@ -403,7 +916,31 @@
       "Novel"
     ],
     "tier": 2,
-    "pageCount": 194
+    "pageCount": 194,
+    "synopsis": "Woolf's 1925 novel takes place on a single day in June 1923, as Clarissa Dalloway — a society hostess — prepares for an evening party. The novel follows her through the streets of London as she buys flowers, encounters old friends, and reflects on her youth, her marriage, and the choice she made to marry Richard Dalloway instead of Peter Walsh. Running parallel is the story of Septimus Smith, a WWI veteran suffering from shell shock, who wanders the same streets with his Italian wife Lucrezia. Clarissa and Septimus never meet, but their stories intersect thematically: both are struggling with the gap between inner life and social performance. Septimus kills himself by jumping from a window, and the news reaches Clarissa at her party, where she retreats to a small room and reflects on death. Woolf's technique — the 'tunneling process' she called it — follows consciousness from one character to another without conventional transitions. The novel was a response to Joyce's Ulysses: Woolf wanted to write about one day in London, but in her own way.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I — Clarissa's Morning",
+        "pageStart": 1,
+        "pageEnd": 70,
+        "summary": "Clarissa buys flowers. Peter Walsh visits. Septimus and Lucrezia. The Big Ben chimes."
+      },
+      {
+        "number": 2,
+        "title": "Part II — Septimus",
+        "pageStart": 71,
+        "pageEnd": 130,
+        "summary": "Septimus's shell shock. Sir William Bradshaw. Clarissa's afternoon. The party begins."
+      },
+      {
+        "number": 3,
+        "title": "Part III — The Party",
+        "pageStart": 131,
+        "pageEnd": 194,
+        "summary": "Septimus's death. Clarissa hears the news. Peter and Sally. 'What a lark.'"
+      }
+    ]
   },
   {
     "id": "book-in-search-of-lost-time",
@@ -411,7 +948,7 @@
     "subtype": "Novel",
     "name": "In Search of Lost Time",
     "teaser": "Proust's 1913–27 seven-volume novel (the 7th was posthumous). The novel is the longest in the canon, and the opening madeleine passage is the most quoted 200 words in literature.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780142437964-L.jpg",
     "byline": "Marcel Proust",
     "exploreAction": {
       "verb": "Read",
@@ -425,7 +962,38 @@
       "Novel"
     ],
     "tier": 2,
-    "pageCount": 4215
+    "pageCount": 4215,
+    "synopsis": "Proust's seven-volume novel (1913–1927, the 7th posthumous) is the longest major work of fiction — the Pléiade edition runs to 4,215 pages. The narrator, also named Marcel, recounts his life from childhood to middle age, organized around memory and sensation rather than plot. The famous madeleine passage (Swann's Way, Part I) describes the narrator dipping a cake in tea and being flooded with involuntary memories of his childhood in Combray. The novel's subject is time itself — how it transforms love, jealousy, art, and social ambition. The great set-pieces include the narrator's grandmother's death, Charlus's decline, and the narrator's discovery that his lover Albertine was having affairs with women. Proust worked on the novel from 1908 until his death in 1922, revising galley proofs from his cork-lined bedroom. The novel was published by Grasset (volumes 1–6) and Gallimard (volume 7). Its influence on 20th-century fiction is comparable to Joyce's: both writers showed that a novel could be about consciousness itself.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Swann's Way",
+        "pageStart": 1,
+        "pageEnd": 600,
+        "summary": "Combray. The madeleine. Swann and Odette. The narrator's grandmother. The Guermantes way."
+      },
+      {
+        "number": 2,
+        "title": "In the Shadow of Young Girls in Flower",
+        "pageStart": 601,
+        "pageEnd": 1200,
+        "summary": "The narrator by the sea. Albertine. The Bergotte passage. Balbec."
+      },
+      {
+        "number": 3,
+        "title": "The Guermantes Way + Sodom and Gomorrah",
+        "pageStart": 1201,
+        "pageEnd": 2000,
+        "summary": "Society. Charlus. The garden party. Albertine's secrets."
+      },
+      {
+        "number": 4,
+        "title": "The Captive + The Fugitive + Time Regained",
+        "pageStart": 2001,
+        "pageEnd": 4215,
+        "summary": "Albertine captive. Her death. Venice. The final party. Memory and art."
+      }
+    ]
   },
   {
     "id": "book-the-waste-land",
@@ -433,7 +1001,7 @@
     "subtype": "Poem",
     "name": "The Waste Land (1922)",
     "teaser": "T.S. Eliot's 434-line modernist poem, written in notes, edited by Ezra Pound down from 800 lines. The poem opens with 'April is the cruellest month' — one of the most-quoted opening lines ever.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780156948623-L.jpg",
     "byline": "T.S. Eliot",
     "exploreAction": {
       "verb": "Read",
@@ -447,7 +1015,45 @@
       "Poetry"
     ],
     "tier": 1,
-    "pageCount": 96
+    "pageCount": 96,
+    "synopsis": "T.S. Eliot's 434-line modernist poem, published in 1922, is the most influential poem of the 20th century. The poem was edited by Ezra Pound, who cut it from roughly 800 lines to 434 ('il miglior fabbro' — the better craftsman — Eliot dedicated it to him). The poem is divided into five sections: 'The Burial of the Dead,' 'A Game of Chess,' 'The Fire Sermon,' 'Death by Water,' and 'What the Thunder Said.' It draws on the Grail legend, Buddhism, Hindu scripture, Ovid, Shakespeare, and the London Underground. The opening — 'April is the cruellest month, mixing / Memory and desire' — reverses Chaucer's April description and announces the poem's theme: modernity as a wasteland where rebirth is unwanted. Eliot published it in The Criterion (October 1922) and in The Dial (November 1922), and it appeared in book form in December 1922. The poem's difficulty — its allusions, its jumps, its multiple languages — was intentional: Eliot wanted to require annotation. The 1922 edition included his own notes; critics have been adding more ever since.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Burial of the Dead",
+        "pageStart": 1,
+        "pageEnd": 20,
+        "summary": "April is the cruellest month. Marie. The hyacinth garden. 'I will show you fear in a handful of dust.'"
+      },
+      {
+        "number": 2,
+        "title": "A Game of Chess",
+        "pageStart": 21,
+        "pageEnd": 35,
+        "summary": "The neurotic woman. Philomela. The pub scene. 'HURRY UP PLEASE ITS TIME.'"
+      },
+      {
+        "number": 3,
+        "title": "The Fire Sermon",
+        "pageStart": 36,
+        "pageEnd": 55,
+        "summary": "The Thames daughters. Tiresias. The typist and the clerk. 'Burning.'"
+      },
+      {
+        "number": 4,
+        "title": "Death by Water",
+        "pageStart": 56,
+        "pageEnd": 62,
+        "summary": "Phlebas the Phoenician. A short, stark drowning."
+      },
+      {
+        "number": 5,
+        "title": "What the Thunder Said",
+        "pageStart": 63,
+        "pageEnd": 96,
+        "summary": "The journey to Emmaus. The thunder speaks: Datta, Dayadhvam, Damyata. 'Shantih.'"
+      }
+    ]
   },
   {
     "id": "book-1984",
@@ -455,7 +1061,7 @@
     "subtype": "Novel",
     "name": "Nineteen Eighty-Four",
     "teaser": "Orwell's 1949 dystopian novel, written in the English countryside as Orwell was dying of tuberculosis. The novel coined the words 'doublethink' and 'thoughtcrime,' among others.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780451524935-L.jpg",
     "byline": "George Orwell",
     "exploreAction": {
       "verb": "Read",
@@ -469,7 +1075,31 @@
       "Novel"
     ],
     "tier": 1,
-    "pageCount": 328
+    "pageCount": 328,
+    "synopsis": "Orwell's 1949 dystopian novel follows Winston Smith, a minor Party member in Oceania who works at the Ministry of Truth rewriting history to match the Party's current version. Winston secretly hates the Party and begins a diary — an act of thoughtcrime. He falls in love with Julia, a fellow Party member, and they begin a secret affair. They seek out O'Brien, a senior Party member they believe is secretly working for the resistance. O'Brien is actually a member of the Thought Police. Winston and Julia are arrested, separated, and tortured in the Ministry of Love. Winston betrays Julia under Room 101's horror. The novel ends with Winston sitting in a café, now loving Big Brother. Orwell wrote the novel while dying of tuberculosis on the Scottish island of Jura. The novel coined the words 'doublethink,' 'thoughtcrime,' 'Newspeak,' and 'Big Brother' — all of which have entered common usage. The novel's appendix on Newspeak is written in past tense, which some scholars interpret as evidence that the Party eventually fell.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I — The World",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "Winston's world. The Two Minutes Hate. The diary. Julia's note."
+      },
+      {
+        "number": 2,
+        "title": "Part II — The Affair",
+        "pageStart": 121,
+        "pageEnd": 230,
+        "summary": "Winston and Julia's affair. The room above Mr. Charrington's shop. O'Brien."
+      },
+      {
+        "number": 3,
+        "title": "Part III — The Ministry of Love",
+        "pageStart": 231,
+        "pageEnd": 328,
+        "summary": "Arrest. O'Brien's interrogation. Room 101. 'He loved Big Brother.'"
+      }
+    ]
   },
   {
     "id": "book-house-of-leaves",
@@ -477,7 +1107,7 @@
     "subtype": "Novel",
     "name": "House of Leaves",
     "teaser": "Danielewski's 2000 novel of a house that's larger inside than outside. The novel's layout requires you to flip sections and read the footnotes to follow a family, an academic, and an extra-space documentarian.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780375703768-L.jpg",
     "byline": "Mark Z. Danielewski",
     "exploreAction": {
       "verb": "Read",
@@ -491,7 +1121,38 @@
       "Horror"
     ],
     "tier": 3,
-    "pageCount": 709
+    "pageCount": 709,
+    "synopsis": "Danielewski's 2000 novel is a recursive horror story told in three nested layers: a documentary film called The Navidson Record (which may not exist), an academic essay about the film by a blind man named Zampanò (who may be fictional), and footnotes by a disturbed young man named Johnny Truant (who may be unreliable). The Navidson Record follows Will Navidson, a photojournalist who discovers that his house at 4 Ash Tree Lane has rooms on the inside that don't exist on the outside — the hallway grows longer, doors open onto impossible spaces, and a labyrinth forms beneath the house. The novel's physical layout mirrors the house's impossibility: text is printed upside-down, sideways, in single words per page, in mirror-image, and in footnotes that spawn their own footnotes. Danielewski published it first as a website (1996), then as a book (2000), and it became a cult phenomenon. The novel's central metaphor — a space that is larger on the inside than the outside — applies to the novel itself: the reader enters expecting a horror story and finds an infinite recursion of interpretation.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Johnny Truant's Introduction",
+        "pageStart": 1,
+        "pageEnd": 50,
+        "summary": "Johnny finds Zampanò's manuscript. His life unravels as he reads. The house."
+      },
+      {
+        "number": 2,
+        "title": "The Navidson Record — Discovery",
+        "pageStart": 51,
+        "pageEnd": 200,
+        "summary": "The Navidson family moves in. The hallway grows. The first exploration."
+      },
+      {
+        "number": 3,
+        "title": "The Navidson Record — The Labyrinth",
+        "pageStart": 201,
+        "pageEnd": 500,
+        "summary": "The house's impossible spaces. The Expeditions. Holloway's team. The jungle room."
+      },
+      {
+        "number": 4,
+        "title": "The Navidson Record — The End + Johnny's Collapse",
+        "pageStart": 501,
+        "pageEnd": 709,
+        "summary": "Navidson enters the labyrinth alone. Johnny's breakdown. The manuscript ends."
+      }
+    ]
   },
   {
     "id": "book-the-collected-poems-of-pablo-neruda",
@@ -499,7 +1160,7 @@
     "subtype": "Poetry Collection",
     "name": "Pablo Neruda — Twenty Love Poems and a Song of Despair",
     "teaser": "Neruda's 1924 debut collection at 19 — became the foundational erotic-poetry book of 20th-century Spanish-language writing. He won the Nobel for Literature in 1971.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780142437703-L.jpg",
     "byline": "Pablo Neruda",
     "exploreAction": {
       "verb": "Read",
@@ -513,7 +1174,31 @@
       "Latin-American"
     ],
     "tier": 2,
-    "pageCount": 96
+    "pageCount": 96,
+    "synopsis": "Neruda published Twenty Love Poems and a Song of Despair in 1924, when he was nineteen years old. The collection made him famous across the Spanish-speaking world and has never gone out of print — it is the most-read poetry collection in the Spanish language after the Bible. The twenty poems trace the arc of a love affair: desire, consummation, betrayal, and loss. The final poem, 'Song of Despair,' is a longer, darker work in which the speaker confronts the absence of the beloved. Neruda's central metaphor is the body as landscape — the beloved's body becomes the sea, the earth, the horizon. The poem 'Tonight I Can Write the Most Sad Lines' — 'Tonight I can write the saddest lines' — is one of the most quoted poems in any language. Neruda later disowned the collection, calling it adolescent; critics disagreed. The book established Neruda's voice: sensual, precise, and unafraid of directness.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Poems 1–10",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "Body as landscape. 'Your breast is enough for my heart.' Desire and presence."
+      },
+      {
+        "number": 2,
+        "title": "Poems 11–20",
+        "pageStart": 41,
+        "pageEnd": 80,
+        "summary": "Separation. 'Tonight I can write the saddest lines.' Absence and memory."
+      },
+      {
+        "number": 3,
+        "title": "Song of Despair",
+        "pageStart": 81,
+        "pageEnd": 96,
+        "summary": "The final poem. 'Oh the bitten mouth.' The void left by the beloved."
+      }
+    ]
   },
   {
     "id": "book-the-second-sex",
@@ -521,7 +1206,7 @@
     "subtype": "Essay",
     "name": "The Second Sex",
     "teaser": "Beauvoir's 1949 essay on the construction of Woman. The book's opening chapter — 'The Second Sex is not a separate species...' — has been called the founding text of second-wave feminism.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780804190459-L.jpg",
     "byline": "Simone de Beauvoir",
     "exploreAction": {
       "verb": "Read",
@@ -535,7 +1220,38 @@
       "Feminist"
     ],
     "tier": 2,
-    "pageCount": 832
+    "pageCount": 832,
+    "synopsis": "Beauvoir's 1949 essay — two volumes, over 700 pages — is the foundational text of second-wave feminism. The famous opening chapter, 'The Second Sex Is Not a Separate Species,' establishes the book's thesis: 'One is not born, but rather becomes, a woman.' Beauvoir argues that Woman has been constructed as the Other — the 'second sex' — throughout history, defined always in relation to Man. Volume I ('Facts and Myths') examines how biology, psychoanalysis, materialism, and historical materialism have failed to explain women's subordination. Volume II ('Lived Experience') traces a woman's life from childhood through adolescence, sexual initiation, motherhood, old age, and death, showing how each stage is shaped by the male gaze. The book was immediately controversial: the Vatican put it on its Index of Forbidden Books. Beauvoir drew on Hegel's master-slave dialectic, existentialism, and psychoanalysis, but her prose is clearer than any of those traditions. The book's influence on feminist theory, gender studies, and queer theory is incalculable.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Volume I — The Second Sex as Other",
+        "pageStart": 1,
+        "pageEnd": 200,
+        "summary": "Biological myths. Psychoanalytic and materialist theories. Historical survey of women's oppression."
+      },
+      {
+        "number": 2,
+        "title": "Volume II, Part I — Becoming a Woman",
+        "pageStart": 201,
+        "pageEnd": 400,
+        "summary": "Childhood. Adolescence. Sexual initiation. Lesbianism. Marriage."
+      },
+      {
+        "number": 3,
+        "title": "Volume II, Part II — Living as Woman",
+        "pageStart": 401,
+        "pageEnd": 600,
+        "summary": "Motherhood.Prostitutes. Old age. Myths. The Independent Woman."
+      },
+      {
+        "number": 4,
+        "title": "Volume II, Part III — Towards Liberation",
+        "pageStart": 601,
+        "pageEnd": 832,
+        "summary": "Sexual division of labor. The open road. Existentialist ethics. Conclusion."
+      }
+    ]
   },
   {
     "id": "book-the-myth-of-sisyphus",
@@ -543,7 +1259,7 @@
     "subtype": "Essay",
     "name": "The Myth of Sisyphus",
     "teaser": "Camus's 1942 philosophical essay. The book's title essay opens with 'There is but one truly serious philosophical problem, and that is suicide.' The book argues absurdism and accepts that we must imagine Sisyphus happy.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141183831-L.jpg",
     "byline": "Albert Camus",
     "exploreAction": {
       "verb": "Read",
@@ -557,7 +1273,31 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 212
+    "pageCount": 212,
+    "synopsis": "Camus's 1942 philosophical essay opens with the most famous first sentence in philosophy: 'There is but one truly serious philosophical problem, and that is suicide.' The title essay argues that life is absurd — not in the colloquial sense but in the philosophical sense that the universe is indifferent to human desire for meaning — and that suicide is not the answer. The answer is to live within the absurdity, to imagine Sisyphus happy as he pushes his boulder up the hill only to watch it roll back down. Camus rejects both religious faith (Kierkegaard) and philosophical suicide (Jaspers, Chestov) — the temptation to leap beyond reason into meaning. The book also contains essays on Kafka, Don Juan, the theatre, and the novel as form. Camus was 29 when the essay was published; he won the Nobel Prize in Literature at 44. The essay is short (168 pages) and clear — Camus wrote for the general reader, not the academic. The book's influence extends beyond philosophy: its vision of heroic absurdism shaped existentialist culture, the Beat Generation, and the French Resistance.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Myth of Sisyphus (title essay)",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "Suicide and the absurd. 'One must imagine Sisyphus happy.' The philosophical argument."
+      },
+      {
+        "number": 2,
+        "title": "The Absurd Man",
+        "pageStart": 121,
+        "pageEnd": 160,
+        "summary": "Don Juan, the actor, the conqueror. Living without appeal."
+      },
+      {
+        "number": 3,
+        "title": "The Absurd Creation",
+        "pageStart": 161,
+        "pageEnd": 212,
+        "summary": "Kafka. The novel. The myth. Philosophy and the theatre."
+      }
+    ]
   },
   {
     "id": "book-the-left-hand-of-darkness",
@@ -565,7 +1305,7 @@
     "subtype": "Novel",
     "name": "The Left Hand of Darkness",
     "teaser": "Le Guin's 1969 sci-fi novel of an envoy arriving on Gethen, a planet whose inhabitants cycle through male and female. The novel won both Hugo and Nebula in 1970.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780441478125-L.jpg",
     "byline": "Ursula K. Le Guin",
     "exploreAction": {
       "verb": "Read",
@@ -579,7 +1319,31 @@
       "Feminist"
     ],
     "tier": 2,
-    "pageCount": 304
+    "pageCount": 304,
+    "synopsis": "Le Guin's 1969 sci-fi novel follows Genly Ai, an envoy from the Ekumen (a loose federation of human worlds), who arrives on the planet Gethen (Winter) to persuade its nations to join. Gethen's inhabitants are ambisexual — they have no fixed gender. For most of each month they are 'somer' (neuter), and during 'kemmer' (a fertile period) they may become either male or female. The novel follows Genly's attempt to understand a world where gender doesn't exist, and his growing friendship with Estraven, a politician who is exiled and journeys with Genly across the ice. The novel won both the Hugo and Nebula awards in 1970. Le Guin drew on Taoism, Jungian psychology, and the real-life experiences of intersex and transgender people (though she acknowledged the limitations of her 1969 perspective). The novel's title comes from a Gethenian poem: 'Light is the left hand of darkness / and darkness the right hand of light.' The novel's structure alternates between Genly's narrative and Gethenian myths, creating a portrait of a world that is alien and deeply familiar.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Arrival in Karhide",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Genly Ai arrives. Estraven's warning. The king's court. The first kemmer."
+      },
+      {
+        "number": 2,
+        "title": "Exile and Journey",
+        "pageStart": 81,
+        "pageEnd": 180,
+        "summary": "Estraven's exile. The ice journey. Genly's fear. The star-bubble vision."
+      },
+      {
+        "number": 3,
+        "title": "Across the Ice",
+        "pageStart": 181,
+        "pageEnd": 304,
+        "summary": "The crossing. Gethenian myths. Genly and Estraven's bond. The betrayal. Estraven's death."
+      }
+    ]
   },
   {
     "id": "book-the-three-body-problem",
@@ -587,7 +1351,7 @@
     "subtype": "Novel",
     "name": "The Three-Body Problem",
     "teaser": "Liu Cixin's 2008 sci-fi novel, the first Asian novel to win the Hugo Award for Best Novel. The novel makes the Cultural Revolution a first-class sci-fi premise.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780765382030-L.jpg",
     "byline": "Liu Cixin",
     "exploreAction": {
       "verb": "Read",
@@ -601,7 +1365,38 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 416
+    "pageCount": 416,
+    "synopsis": "Liu Cixin's 2008 novel — the first Asian novel to win the Hugo Award for Best Novel — opens during the Cultural Revolution, when a young astrophysicist's father is beaten to death by Red Guards. The story jumps to the present, where a secret military project sends signals into space and receives a response from an alien civilization in the Trisolaran system — three suns in an unstable orbit that periodically destroys the Trisolarans' civilizations. The novel makes the Cultural Revolution a first-class sci-fi premise: Ye Wenjie, the astrophysicist, betrays humanity because she has lost faith in human civilization after watching her father's murder. She invites the Trisolarans to Earth, believing they can do better. The novel's central scientific problem — the three-body problem of orbital mechanics — becomes a metaphor for the unpredictability of human behavior. Liu Cixin writes science with the rigor of a physicist (he was an engineer) and the imagination of a mythmaker. The English translation by Ken Liu was published in 2014.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Cultural Revolution",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Ye Wenjie's father is killed. The Red Coast base. The signal from space."
+      },
+      {
+        "number": 2,
+        "title": "The Present — Wang Miao",
+        "pageStart": 81,
+        "pageEnd": 220,
+        "summary": "Nanotechnology. The countdown. The Frontiers of Science. The VR game."
+      },
+      {
+        "number": 3,
+        "title": "The Trisolarans",
+        "pageStart": 221,
+        "pageEnd": 350,
+        "summary": "The Trisolaran civilization. The invasion fleet. Ye Wenjie's betrayal. The ETO."
+      },
+      {
+        "number": 4,
+        "title": "The Climax",
+        "pageStart": 351,
+        "pageEnd": 416,
+        "summary": "Operation Guzheng. The battle of darkness. The sophons arrive. The threat revealed."
+      }
+    ]
   },
   {
     "id": "book-foundation",
@@ -609,7 +1404,7 @@
     "subtype": "Novel",
     "name": "Foundation",
     "teaser": "Isaac Asimov's 1951 sci-fi novel — the foundation's premise that an empire's predicted fall can be shortened emerged from his reading of Gibbon's Decline and Fall of the Roman Empire. He was 31 and a chemistry PhD.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780553293357-L.jpg",
     "byline": "Isaac Asimov",
     "exploreAction": {
       "verb": "Read",
@@ -623,7 +1418,38 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 296
+    "pageCount": 296,
+    "synopsis": "Asimov's 1951 novel — actually a fix-up of eight stories published in Astounding Science Fiction between 1942 and 1944 — follows mathematician Hari Seldon, who invents 'psychohistory' (the statistical prediction of large-scale human behavior) and predicts that the Galactic Empire will collapse in 500 years, followed by a 30,000-year dark age. Seldon establishes the Foundation on a remote planet to shorten the dark age to 1,000 years. The novel follows the Foundation's first two crises — the Seldon Crises — where the only path forward is the one Seldon predicted. The second crisis involves a merchant prince named Hober Mallow who defends free trade against religious orthodoxy. The novel was directly inspired by Gibbon's Decline and Fall of the Roman Empire: Asimov transposed Rome's fall into a galactic empire and asked what one institution could preserve civilization through the collapse. Asimov was 31 and a chemistry PhD when he wrote the stories. The novel won a Hugo in 1966 as 'Best All-Time Novel Series.'",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Psychohistorians",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "Seldon appears before the Commission. The Foundation established. The Empire begins to fall."
+      },
+      {
+        "number": 2,
+        "title": "The Encyclopedists",
+        "pageStart": 31,
+        "pageEnd": 80,
+        "summary": "The Foundation on Terminus. The first crisis. Salvor Hardin. 'Violence is the last refuge.'"
+      },
+      {
+        "number": 3,
+        "title": "The Mayors",
+        "pageStart": 81,
+        "pageEnd": 160,
+        "summary": "Hardin's revolution. The religion of science. The second crisis. Hober Mallow."
+      },
+      {
+        "number": 4,
+        "title": "The Merchants",
+        "pageStart": 161,
+        "pageEnd": 296,
+        "summary": "Free trade. The merchant princes. The Seldon Plan unfolds."
+      }
+    ]
   },
   {
     "id": "book-dune",
@@ -631,7 +1457,7 @@
     "subtype": "Novel",
     "name": "Dune",
     "teaser": "Frank Herbert's 1965 sci-fi novel set on a desert planet. The novel won the first Hugo and Nebula to do so; it's the bestselling single sci-fi novel of all time.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780441013593-L.jpg",
     "byline": "Frank Herbert",
     "exploreAction": {
       "verb": "Read",
@@ -645,7 +1471,31 @@
       "20th Century"
     ],
     "tier": 1,
-    "pageCount": 688
+    "pageCount": 688,
+    "synopsis": "Herbert's 1965 novel follows Paul Atreides, the young heir of a noble family, as they move to the desert planet Arrakis — the only source of 'spice melange,' the most valuable substance in the universe. The rival House Harkonnen attacks, kills Paul's father, and Paul escapes into the desert with his mother, a Bene Gesserit. The Fremen — Arrakis's native people — take Paul in. Paul becomes their messianic leader (the Kwisatz Haderach) and leads a holy war against the帝国 that destroyed his family. The novel won the first Hugo and Nebula Awards simultaneously and is the bestselling single sci-fi novel of all time. Herbert spent six years researching desert ecology, water politics, and the psychology of messianic movements. The novel's prescience —石油 politics, religious fundamentalism, ecological collapse — feels more relevant now than in 1965. The novel's appendices and glossary are essential: Herbert built a complete world with its own ecology, religion, and politics.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I — Arrakis",
+        "pageStart": 1,
+        "pageEnd": 150,
+        "summary": "The Atreides arrive. The Harkonnen trap. The betrayal. Paul and Jessica escape."
+      },
+      {
+        "number": 2,
+        "title": "Part II — The Fremen",
+        "pageStart": 151,
+        "pageEnd": 400,
+        "summary": "The desert. Stilgar. Chani. The stillsuit. Paul learns Fremen ways."
+      },
+      {
+        "number": 3,
+        "title": "Part III — Muad'Dib",
+        "pageStart": 401,
+        "pageEnd": 688,
+        "summary": "Paul becomes Muad'Dib. The water of life. The holy war. The emperor's defeat."
+      }
+    ]
   },
   {
     "id": "book-the-master-and-margarita",
@@ -653,7 +1503,7 @@
     "subtype": "Novel",
     "name": "The Master and Margarita",
     "teaser": "Written between 1928 and 1940 but only published in 1966, twenty-six years after Bulgakov's death, this masterpiece of Soviet literature follows the Devil's visit to Stalin's Moscow. Its famous line Manuscripts dont burn became a mantra for writers everywhere.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141180136-L.jpg",
     "byline": "Mikhail Bulgakov",
     "exploreAction": {
       "verb": "Read",
@@ -667,7 +1517,38 @@
       "Novel"
     ],
     "tier": 2,
-    "pageCount": 448
+    "pageCount": 448,
+    "synopsis": "Written between 1928 and 1940 but only published in 1966 — twenty-six years after Bulgakov's death — this masterpiece of Soviet literature follows the Devil's visit to Stalin's Moscow. Woland (Satan) arrives with his retinue — a giant cat named Behemoth, a fanged assassin named Azazello, and a beautiful secretary named Hella — and the novel alternates between his comic destruction of Moscow's literary establishment and a parallel narrative set in Pontius Pilate's Jerusalem. The Master, a writer who wrote a novel about Pilate, has been destroyed by the Soviet literary establishment. Margarita, his lover, makes a deal with the Devil to save him. The novel's famous line — 'Manuscripts don't burn' — became a mantra for writers everywhere. Bulgakov wrote the novel in secret, knowing it would never be published in his lifetime. The 1966 publication was a sensation; the novel is now considered the greatest Russian novel of the 20th century.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Devil in Moscow",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "Woland arrives. Berlioz is decapitated. The Moscow literary world is exposed."
+      },
+      {
+        "number": 2,
+        "title": "The Master's Story",
+        "pageStart": 121,
+        "pageEnd": 250,
+        "summary": "Pontius Pilate and Yeshua. The Master's novel. His destruction. Margarita's grief."
+      },
+      {
+        "number": 3,
+        "title": "Margarita's Flight",
+        "pageStart": 251,
+        "pageEnd": 380,
+        "summary": "Margarita flies naked over Moscow. The satanic ball. The Master is returned."
+      },
+      {
+        "number": 4,
+        "title": "The End",
+        "pageStart": 381,
+        "pageEnd": 448,
+        "summary": "The Promised Land. Pilate walks into the moonlight. 'Manuscripts don't burn.'"
+      }
+    ]
   },
   {
     "id": "book-persuasion",
@@ -675,7 +1556,7 @@
     "subtype": "Novel",
     "name": "Persuasion",
     "teaser": "Austen's last completed novel (1818), a short, melancholy work about a 27-year-old woman who broke off an engagement with a poor man eight years before and now encounters him again, wealthy.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439686-L.jpg",
     "byline": "Jane Austen",
     "exploreAction": {
       "verb": "Read",
@@ -689,7 +1570,31 @@
       "Novel"
     ],
     "tier": 2,
-    "pageCount": 288
+    "pageCount": 288,
+    "synopsis": "Austen's last completed novel (1818), written while she was dying, follows Anne Elliot, a 27-year-old woman who broke off an engagement with Captain Wentworth eight years earlier because her mentor Lady Russell advised against it. When Anne's family is forced to rent their estate to Admiral Croft (Wentworth's brother-in-law), Anne and Wentworth are thrown together again. Wentworth is now wealthy and successful but still wounded by Anne's rejection. The novel follows their awkward second encounter through a series of social events — dinners, concerts, a trip to Bath. The novel's most famous scene — Wentworth overhearing Anne discuss the constancy of love, and writing her a letter that begins 'You pierce my soul' — is one of the greatest love scenes in English fiction. Austen wrote the novel in a tone half-classical, half-Romantic: Anne is quieter than Austen's other heroines, and the novel's melancholy — the sense of time lost and chances missed — is unique in Austen's work.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Volume I — Kellynch Hall",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "Anne's family. The Crofts move in. Wentworth arrives. Louisa Musgrove."
+      },
+      {
+        "number": 2,
+        "title": "Volume II — Uppercross and Lyme",
+        "pageStart": 101,
+        "pageEnd": 200,
+        "summary": "The dinner party. Louisa's fall at Lyme. Wentworth's jealousy. Captain Harville."
+      },
+      {
+        "number": 3,
+        "title": "Volume III — Bath and the Letter",
+        "pageStart": 201,
+        "pageEnd": 288,
+        "summary": "Bath. Mr Elliot. The letter. 'You pierce my soul.' The second proposal."
+      }
+    ]
   },
   {
     "id": "book-the-godfather-1969-145",
@@ -697,7 +1602,7 @@
     "subtype": "Book",
     "name": "The Godfather (1969)",
     "teaser": "Mario Puzo was 45, broke, and drowning in gambling debt when he wrote it — 'I was 45 years old and tired of being an artist.' He sold the movie rights for $12,500 before the book even hit shelves, and the novel spent 67 weeks on the bestseller list while the film he'd half-joked about became the greatest in Hollywood history.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780451167713-L.jpg",
     "byline": "Mario Puzo",
     "exploreAction": {
       "verb": "Read",
@@ -711,7 +1616,38 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 448
+    "pageCount": 448,
+    "synopsis": "Puzo wrote The Godfather in 1968, at 45, broke and drowning in gambling debt. He sold the movie rights for $12,500 before the book was published. The novel spent 67 weeks on the bestseller list. The story follows the Corleone family — Don Vito Corleone, the Sicilian immigrant who runs one of New York's five Mafia families, and his youngest son Michael, who begins the novel as a war hero who wants nothing to do with the family business. When an assassination attempt nearly kills Vito, Michael is drawn into the family's violent world. The novel's central tension is Michael's transformation from idealistic outsider to ruthless don. The book's famous opening — 'I believe in America' — is a monologue by a man asking Don Corleone for justice, not the law's justice but the Don's. Puzo's prose is pulpy and propulsive; the novel's real achievement is its portrait of the Mafia as a parallel government with its own ethics, loyalties, and betrayals.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Don",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The wedding. 'I believe in America.' Vito Corleone's world. Michael's distance."
+      },
+      {
+        "number": 2,
+        "title": "The War",
+        "pageStart": 81,
+        "pageEnd": 240,
+        "summary": "The Sollozzo deal. The assassination attempt. Michael kills Sollozzo and McCluskey."
+      },
+      {
+        "number": 3,
+        "title": "The Exile",
+        "pageStart": 241,
+        "pageEnd": 340,
+        "summary": "Michael in Sicily. Apollonia's death. Sonny's murder. The family regroups."
+      },
+      {
+        "number": 4,
+        "title": "The New Don",
+        "pageStart": 341,
+        "pageEnd": 448,
+        "summary": "Michael returns. The Five Families war. The baptism scene. Michael becomes Don."
+      }
+    ]
   },
   {
     "id": "book-fear-and-loathing-in-146",
@@ -719,7 +1655,7 @@
     "subtype": "Book",
     "name": "Fear and Loathing in Las Vegas (1971)",
     "teaser": "Hunter S. Thompson wrote it in a rented room in 1971 with a typewriter, a bottle of Chivas, and a note taped to the wall: 'Never again.' It ran in Rolling Stone as a 40,000-word magazine piece — about a drug-fueled trip to Las Vegas that was actually an assignment to cover a motorcycle race — and invented 'gonzo journalism' where the reporter is the story.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780679764007-L.jpg",
     "byline": "Hunter S. Thompson",
     "exploreAction": {
       "verb": "Read",
@@ -733,7 +1669,24 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 208
+    "pageCount": 208,
+    "synopsis": "Thompson's 1971 book — subtitled 'A Savage Journey to the Heart of the American Dream' — began as a 250-word assignment from Sports Illustrated to cover the Mint 400 motorcycle race in Las Vegas. Thompson turned it into a 25,000-word first-person account of drug-fueled excess, and then a 40,000-word two-part magazine piece for Rolling Stone. The book follows Thompson and his attorney Dr. Gonzo (Oscar Zeta Acosta) as they drive to Las Vegas in a red convertible called the Great Red Shark, carrying a suitcase full of drugs ('two bags of grass, seventy-five pellets of mescaline, five sheets of high-powered blotter acid, a salt shaker half-full of cocaine, and a whole galaxy of multi-colored uppers, downers, laughers, and screamers'). The Mint 400 barely appears; the real subject is Las Vegas as a symbol of the American Dream's corruption. Thompson invented 'gonzo journalism' — first-person, subjective, drug-influenced — and the book remains the genre's defining text.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I — The Mint 400",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "The drive to Vegas. The drugs. The Mint 400. The desert. The death."
+      },
+      {
+        "number": 2,
+        "title": "Part II — The Narrative",
+        "pageStart": 101,
+        "pageEnd": 208,
+        "summary": "The police convention. The Circus Circus. The ad assignment. The end of the dream."
+      }
+    ]
   },
   {
     "id": "book-sula-1973-133",
@@ -741,7 +1694,7 @@
     "subtype": "Book",
     "name": "Sula (1973)",
     "teaser": "Toni Morrison's second novel splits its story between two Black girls in the 'Bottom' neighborhood — Sula Peace, who leaves and returns as the town's scapegoat, and Nel Wright, who stays. Morrison called it a book about good and evil, then admitted she meant 'to ask how evil comes to be.'.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781400034147-L.jpg",
     "byline": "Toni Morrison",
     "exploreAction": {
       "verb": "Read",
@@ -755,7 +1708,31 @@
       "1970s"
     ],
     "tier": 2,
-    "pageCount": 192
+    "pageCount": 192,
+    "synopsis": "Morrison's second novel splits its story between two Black women in the 'Bottom' neighborhood of Medallion, Ohio: Sula Peace, who leaves and returns as the town's scapegoat, and Nel Wright, who stays. The girls grow up together, bound by a childhood accident in which Nel watches Sula accidentally drown a white boy named Chicken Little. Sula leaves for ten years and returns with a ring through her nose, sleeping with white men and eventually with Nel's husband Jude. Nel is devastated. Sula refuses to apologize. When Sula dies, the town treats her death as a relief. Nel visits Sula on her deathbed. The novel's structure — chapters named by years, jumping forward and backward — mirrors the way memory works in a small community. Morrison said the novel is about 'good and evil,' then admitted she meant 'to ask how evil comes to be.' The novel's central question — whether Sula is good or evil — Morrison leaves deliberately unresolved.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "1919–1927 — The Bottom",
+        "pageStart": 1,
+        "pageEnd": 50,
+        "summary": "Shadrack's National Suicide Day. Sula and Nel's childhood. Chicken Little's drowning."
+      },
+      {
+        "number": 2,
+        "title": "1937–1940 — Separation",
+        "pageStart": 51,
+        "pageEnd": 100,
+        "summary": "Sula leaves. Nel marries Jude. The town changes. Sula returns."
+      },
+      {
+        "number": 3,
+        "title": "1941–1965 — Aftermath",
+        "pageStart": 101,
+        "pageEnd": 192,
+        "summary": "Sula and Jude. The plague of robins. Sula's death. Nel's visit. 'She was my best friend.'"
+      }
+    ]
   },
   {
     "id": "book-song-of-solomon-1977-134",
@@ -763,7 +1740,7 @@
     "subtype": "Book",
     "name": "Song of Solomon (1977)",
     "teaser": "Morrison's third novel follows Milkman Dead — a Black man in Michigan who sets out to find a bag of gold and instead finds his family's story, ending with a leap that re-enacts his enslaved ancestor's flight. The title is taken from the biblical book; Morrison said the novel is about flight and who gets to take it.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781400033423-L.jpg",
     "byline": "Toni Morrison",
     "exploreAction": {
       "verb": "Read",
@@ -777,7 +1754,31 @@
       "1970s"
     ],
     "tier": 2,
-    "pageCount": 352
+    "pageCount": 352,
+    "synopsis": "Morrison's third novel follows Milkman Dead — a Black man in Michigan who sets out to find a bag of gold and instead finds his family's story. The novel opens with Robert Smith, an insurance agent, leaping from the roof of Mercy Hospital wearing blue silk wings — a moment treated as neighborhood fact rather than mystery. Milkman, born in a hospital built on the site of a freed slave's burial ground, grows up in a family defined by his father's violence, his mother's resentment, and his aunt Pilate's strange independence. When Milkman's friend Guitar tells him about a bag of gold hidden in Pilate's house, Milkman goes south to find it. In Virginia, he discovers his family's history: his great-grandfather Solomon (a slave who flew back to Africa, leaving his wife Ryna behind) and the community of free Black people his family once led. The novel's climax is a children's song about Solomon — 'O Solomon, don't leave me here' — which Milkman realizes contains his family's entire story. The final scene has Milkman leaping toward Guitar, 'riding' like Solomon.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Michigan — Milkman's World",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "The Dead family. Pilate. Guitar. The gold. Milkman's journey south."
+      },
+      {
+        "number": 2,
+        "title": "Virginia — The Discovery",
+        "pageStart": 101,
+        "pageEnd": 250,
+        "summary": "Circe. The Solomon song. Ryna's story. The Sweet family."
+      },
+      {
+        "number": 3,
+        "title": "Return — The Final Leap",
+        "pageStart": 251,
+        "pageEnd": 352,
+        "summary": "Milkman returns. Guitar's threat. Pilate's burial. The leap. 'He could fly.'"
+      }
+    ]
   },
   {
     "id": "book-midnights-children-1981-135",
@@ -785,7 +1786,7 @@
     "subtype": "Book",
     "name": "Midnight's Children (1981)",
     "teaser": "Rushdie's Booker-winning novel gives Saleem Sinai, born at the exact stroke of India's independence, telepathic connection to the other 1,000 children of midnight — and makes his life a running allegory for the nation's first 30 years. The novel's conceit: one man's cracked nose contains a country.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780812976533-L.jpg",
     "byline": "Salman Rushdie",
     "exploreAction": {
       "verb": "Read",
@@ -802,7 +1803,31 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 560
+    "pageCount": 560,
+    "synopsis": "Rushdie's Booker-winning novel gives Saleem Sinai, born at the exact stroke of India's independence (August 15, 1947), telepathic connection to the other 1,000 children of midnight — the children born in India's first hour of freedom. Saleem narrates from a pickle factory, where he has been reduced to working after the Emergency destroyed his fortune. His cracked nose — broken in the novel's central scene — contains a country. The novel follows Saleem's life from the hospital where he was switched at birth (the nurse wanted a Hindu baby for a Muslim family) through his childhood in Bombay, his loss of telepathy, his involvement in the Bangladesh war, and his final humiliation. Rushdie's voice — grand, self-mocking, digressive — is the novel's real achievement: Saleem tells his story with the confidence of a man who believes his life contains a nation, even as the evidence piles up that it doesn't. The novel won the Booker in 1981 and was named 'Booker of Bookers' in 1993.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Birth",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Midnight. The switching. Shiva and Parvati. Saleem's telepathy."
+      },
+      {
+        "number": 2,
+        "title": "The Children of Midnight",
+        "pageStart": 81,
+        "pageEnd": 250,
+        "summary": "The conference. The midnight children's powers. The Emergency. The nose."
+      },
+      {
+        "number": 3,
+        "title": "The Fall",
+        "pageStart": 251,
+        "pageEnd": 560,
+        "summary": "Bangladesh. The pickle factory. Padma. The crack. 'I have been only one.'"
+      }
+    ]
   },
   {
     "id": "book-neuromancer-1984-136",
@@ -810,7 +1835,7 @@
     "subtype": "Book",
     "name": "Neuromancer (1984)",
     "teaser": "William Gibson coined 'cyberspace' in this novel — 'a consensual hallucination experienced daily by billions' — and invented the cyberpunk template: washed-up console cowboy Case, a mysterious employer, an AI with a plan. It became the first novel to win the Hugo, Nebula, and Philip K. Dick awards in the same year.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780441569595-L.jpg",
     "byline": "William Gibson",
     "exploreAction": {
       "verb": "Read",
@@ -826,7 +1851,31 @@
       "Hugo Nebula"
     ],
     "tier": 1,
-    "pageCount": 288
+    "pageCount": 288,
+    "synopsis": "Gibson's 1984 novel opens with the most famous line in cyberpunk: 'The sky above the port was the color of television, tuned to a dead channel.' Case, a washed-up console cowboy (hacker) whose nervous system was damaged as punishment for stealing from his employers, is hired by a mysterious employer named Armitage to pull off one last job. The job involves breaking into a corporate AI's prison — Wintermute, one half of a super-intelligence that wants to merge with its other half, Neuromancer. The novel coined the word 'cyberspace' — 'a consensual hallucination experienced daily by billions' — and established the visual and thematic vocabulary of cyberpunk: neon-lit cities, corporate oligarchies, body modification, and virtual reality. Gibson wrote the novel on a manual typewriter in a Montreal basement, never having used a computer. The novel won the Hugo, Nebula, and Philip K. Dick Awards in the same year — the first novel to do so.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Chiba City",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Case in the Sprawl. Armitage offers a cure. Molly Millions. The job."
+      },
+      {
+        "number": 2,
+        "title": "The Job",
+        "pageStart": 81,
+        "pageEnd": 180,
+        "summary": "Freeside. The Straylight run. Wintermute's manipulation. The Finn."
+      },
+      {
+        "number": 3,
+        "title": "The Merge",
+        "pageStart": 181,
+        "pageEnd": 288,
+        "summary": "The Turing police. Neuromancer. The ice breaking. The merge. 'The sky was colored of a television...'"
+      }
+    ]
   },
   {
     "id": "book-beloved-1987-137",
@@ -834,7 +1883,7 @@
     "subtype": "Book",
     "name": "Beloved (1987)",
     "teaser": "Beloved is based on Margaret Garner, who killed her daughter rather than let her be returned to slavery — Morrison turns that act into a haunted-house story where the ghost is memory itself. It won the Pulitzer in 1988, and when it lost the National Book Award the year before, 48 Black writers published a protest letter.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781400033416-L.jpg",
     "byline": "Toni Morrison",
     "exploreAction": {
       "verb": "Read",
@@ -850,7 +1899,31 @@
       "Modern"
     ],
     "tier": 1,
-    "pageCount": 324
+    "pageCount": 324,
+    "synopsis": "Morrison's Pulitzer-winning novel is based on the true story of Margaret Garner, an enslaved woman who killed her daughter rather than let her be returned to slavery in 1856. Morrison turns that act into a haunted-house story: Sethe, a former slave, lives in 124 Bluestone Road in Cincinnati with her daughter Denver. The house is haunted by Sethe's dead baby — Beloved — who returns as a young woman and takes up residence. Beloved is both ghost and memory: she represents the 'Sixty Million and more' to whom Morrison dedicates the book (the estimated number of Africans who died in the Middle Passage). The novel moves between three time periods — Sethe's life at Sweet Home (the slave plantation), the escape, and the aftermath — using a fragmented narrative that mirrors the way trauma works: not in order, but in circling, returning fragments. Morrison wrote the novel in a burst of inspiration after hearing the Margaret Garner story and spent ten years writing it.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "124 Was Spiteful",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The house. Baby Suggs. Paul D arrives. Beloved appears."
+      },
+      {
+        "number": 2,
+        "title": "Sweet Home",
+        "pageStart": 81,
+        "pageEnd": 200,
+        "summary": "Sethe's memories. The escape. Schoolteacher. The milk."
+      },
+      {
+        "number": 3,
+        "title": "Beloved",
+        "pageStart": 201,
+        "pageEnd": 324,
+        "summary": "Beloved's hold. Sethe's guilt. The exorcism. 'She is my best thing.'"
+      }
+    ]
   },
   {
     "id": "book-the-satanic-verses-1988-138",
@@ -858,7 +1931,7 @@
     "subtype": "Book",
     "name": "The Satanic Verses (1988)",
     "teaser": "Rushdie's novel about two Indian actors falling from a hijacked plane — one becomes an angel, one a devil — sparked the 1989 fatwa that forced him into hiding for nearly a decade. The 'satanic verses' of the title are a disputed episode in early Islam, and the book's dream sequences satirize a prophet named Mahound.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140283297-L.jpg",
     "byline": "Salman Rushdie",
     "exploreAction": {
       "verb": "Read",
@@ -872,7 +1945,38 @@
       "Controversy"
     ],
     "tier": 2,
-    "pageCount": 561
+    "pageCount": 561,
+    "synopsis": "Rushdie's novel opens with two Indian actors — Gibreel Farishta and Saladin Chamcha — falling from a hijacked plane over the English Channel. Gibreel, a Bollywood star who played gods in films, emerges with a halo; Saladin, a voice actor, transforms into a goat-like figure. The novel intercuts their story with dream chapters about a prophet named Mahound in a city called Jahilia (a fictional Mecca), where a 'satanic verses' episode has the prophet briefly接受 false revelations from Satan disguised as the Angel Gabriel. The 1989 fatwa by Ayatollah Khomeini — who called the novel blasphemous and ordered Rushdie's death — forced Rushdie into hiding for nearly a decade. The novel's real subject is migration, identity, and transformation: both protagonists are shaped by the collision between their Indian past and their English present. The dream chapters are the most controversial, but the novel's treatment of them is deliberately ambiguous — Rushdie never resolves whether the visions are real or hallucinatory.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Fall",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The plane. The fall. Gibreel's halo. Saladin's transformation. Ayesha."
+      },
+      {
+        "number": 2,
+        "title": "Mahound",
+        "pageStart": 81,
+        "pageEnd": 250,
+        "summary": "Jahilia. The satanic verses. Mahound and the angel. Salman's betrayal."
+      },
+      {
+        "number": 3,
+        "title": "Return to England",
+        "pageStart": 251,
+        "pageEnd": 400,
+        "summary": "Saladin's nightmare. Gibreel's visions. The stereo shop. The imam."
+      },
+      {
+        "number": 4,
+        "title": "The End",
+        "pageStart": 401,
+        "pageEnd": 561,
+        "summary": "Ayesha's flight. Gibreel's madness. Saladin's father. The reconciliation."
+      }
+    ]
   },
   {
     "id": "book-the-things-they-carried-139",
@@ -880,7 +1984,7 @@
     "subtype": "Book",
     "name": "The Things They Carried (1990)",
     "teaser": "Tim O'Brien's collection about Vietnam is built on the 'things' soldiers literally carried — rifles, letters, fear, grief — each weighed and named. Its central move is to blur memoir and invention, declaring 'story-truth' more real than what happened, in a war novel that is also a meditation on how we tell war.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780767907569-L.jpg",
     "byline": "Tim O'Brien",
     "exploreAction": {
       "verb": "Read",
@@ -894,7 +1998,38 @@
       "Short Stories"
     ],
     "tier": 2,
-    "pageCount": 288
+    "pageCount": 288,
+    "synopsis": "O'Brien's collection is not a novel but a linked series of stories about a platoon of American soldiers in Vietnam. The title story inventories the 'things' each soldier literally carries — rifles, ammunition, photographs, fear, grief — each weighed and named. The collection's central move is to blur memoir and invention: O'Brien declares 'story-truth' more real than what actually happened, in a war novel that is also a meditation on how we tell war. The stories include 'How to Tell a True War Story' (which argues that a true war story is never about war), 'Sweetheart of the Song Tra Bong' (about a nurse who becomes a war junkie), and 'The Man I Killed' (about the Vietnamese soldier O'Brien killed). O'Brien served in Vietnam and won the National Book Critics Circle Award. The collection is studied in creative writing programs for its metafictional technique: O'Brien uses himself as a character but admits to inventing details.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Things They Carried",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "The inventory. The weights of war. Norman Bowker and the orange smoke."
+      },
+      {
+        "number": 2,
+        "title": "How to Tell a True War Story",
+        "pageStart": 61,
+        "pageEnd": 120,
+        "summary": "The argument. 'A true war story is never about war.' Lemon Tree."
+      },
+      {
+        "number": 3,
+        "title": "The Man I Killed + Ambush",
+        "pageStart": 121,
+        "pageEnd": 200,
+        "summary": "The body. The confession. 'I killed a man.'"
+      },
+      {
+        "number": 4,
+        "title": "Sweetheart + Good Form + Lives of the Dead",
+        "pageStart": 201,
+        "pageEnd": 288,
+        "summary": "Song Tra Bong. The two versions of truth. Tim and Linda. The living dead."
+      }
+    ]
   },
   {
     "id": "book-the-english-patient-1992-140",
@@ -902,7 +2037,7 @@
     "subtype": "Book",
     "name": "The English Patient (1992)",
     "teaser": "Ondaatje's Booker winner strands four people in an Italian villa at the end of World War II — a burned man who may be the real Hungarian desert explorer Count Almásy, a Canadian nurse, a Sikh sapper, and a thief. The novel won the Booker and was adapted into the 1996 Oscar-winning film.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780679745204-L.jpg",
     "byline": "Michael Ondaatje",
     "exploreAction": {
       "verb": "Read",
@@ -916,7 +2051,38 @@
       "WWII"
     ],
     "tier": 2,
-    "pageCount": 320
+    "pageCount": 320,
+    "synopsis": "Ondaatje's Booker-winning novel strands four people in an Italian villa at the end of World War II: a burned man who may be the Hungarian desert explorer Count Almásy, a Canadian nurse named Hana, a Sikh sapper named Kirpal Singh (Kip), and a thief named Caravaggio. The novel is structured as a series of interlocking stories: Almásy's desert surveys, the affair with Katharine Clifton, Hana's grief, Kip's journey from colonial subject to defector. The central love story — Almásy and Kathatherine's affair in the Libyan desert — is told as cartography: the love story is narrated as a map being drawn. The novel won the Booker in 1992 and was adapted into the 1996 Oscar-winning film. Ondaatje's prose is poetic and non-linear: the novel moves between the villa, the desert, and the present without conventional transitions. The English patient's identity — the question of whether he is Almásy or someone else — is the novel's central mystery.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Villa",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The burned man. Hana's grief. Kip's mine-clearing. Caravaggio's theft."
+      },
+      {
+        "number": 2,
+        "title": "The Desert",
+        "pageStart": 81,
+        "pageEnd": 200,
+        "summary": "Almásy's surveys. The desert maps. Katharine. The affair. The fire."
+      },
+      {
+        "number": 3,
+        "title": "Kip's War",
+        "pageStart": 201,
+        "pageEnd": 280,
+        "summary": "India. The Sapper school. Hiroshima. The radio. Kip's rage."
+      },
+      {
+        "number": 4,
+        "title": "The End",
+        "pageStart": 281,
+        "pageEnd": 320,
+        "summary": "The separation. The patient dies. Kip returns to India. The final image."
+      }
+    ]
   },
   {
     "id": "book-snow-crash-1992-141",
@@ -924,7 +2090,7 @@
     "subtype": "Book",
     "name": "Snow Crash (1992)",
     "teaser": "Neal Stephenson's novel invented a 'Metaverse' before the internet was mainstream — a virtual city where the hero delivers pizza, then fights a virus that infects people through language itself, spreading via an ancient Sumerian brain hack. Hiro Protagonist (yes, that's his name) is a hacker and swordsman who works as a courier.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780553380958-L.jpg",
     "byline": "Neal Stephenson",
     "exploreAction": {
       "verb": "Read",
@@ -940,7 +2106,38 @@
       "Satire"
     ],
     "tier": 1,
-    "pageCount": 480
+    "pageCount": 480,
+    "synopsis": "Stephenson's 1992 novel invented the concept of the 'Metaverse' — a virtual reality city where users interact through avatars — years before the internet was mainstream. Hiro Protagonist (yes, that's his name) is a hacker and pizza delivery driver who discovers a new drug called Snow Crash that infects both computers and people through language itself. The drug is based on an ancient Sumerian brain hack — the original 'nam-shub' (word) that divided humanity into separate languages after the Tower of Babel. Stephenson wrote the novel in a satirical register that mixes Sumerian mythology, linguistics, neuroscience, and pizza delivery logistics. The novel's two worlds — the real (a balkanized America where the Mafia delivers pizza) and the virtual (the Metaverse, where hackers sword-fight in skyscraper-sized arenas) — are treated as equally real. The novel's central argument — that language is executable code — is delivered in straight-faced tech prose. Stephenson was 32 and a physics student when he wrote it.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Delivery",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Hiro delivers pizza. The Metaverse. The Snow Crash virus. Y.T."
+      },
+      {
+        "number": 2,
+        "title": "The Virus",
+        "pageStart": 81,
+        "pageEnd": 250,
+        "summary": "Sumerian linguistics. L. Bob Rife. The rat creature. The franchise states."
+      },
+      {
+        "number": 3,
+        "title": "The Ancient Hack",
+        "pageStart": 251,
+        "pageEnd": 400,
+        "summary": "The tsunami. The Raft. The nam-shub. The Babel virus."
+      },
+      {
+        "number": 4,
+        "title": "Resolution",
+        "pageStart": 401,
+        "pageEnd": 480,
+        "summary": "Hiro in the Metaverse. The final battle. Y.T.'s crash. The new nam-shub."
+      }
+    ]
   },
   {
     "id": "book-infinite-jest-1996-142",
@@ -948,7 +2145,7 @@
     "subtype": "Book",
     "name": "Infinite Jest (1996)",
     "teaser": "Wallace's 1,079-page novel (plus 388 footnotes, some with their own footnotes) is set in a near-future where years are sponsored — 'Year of the Depend Adult Undergarment' — and centers on a film so entertaining it kills anyone who watches it. Its structure is famously a circle: the novel's first sentence continues its last.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316769488-L.jpg",
     "byline": "David Foster Wallace",
     "exploreAction": {
       "verb": "Read",
@@ -962,7 +2159,38 @@
       "Addiction"
     ],
     "tier": 2,
-    "pageCount": 1079
+    "pageCount": 1079,
+    "synopsis": "Wallace's 1,079-page novel (plus 388 endnotes, some with their own endnotes) is set in a near-future America where years are sponsored ('Year of the Depend Adult Undergarment') and centers on the Enfield Tennis Academy (where children train obsessively for tennis glory) and the Ennet House Drug and Alcohol Recovery House (where addicts try to get clean). The novel's hidden protagonist is a film called 'The Entertainment' — so entertaining that anyone who watches it loses all desire to do anything except watch it again. The novel's structure is circular: the first sentence continues the last, creating an infinite loop that mirrors addiction itself. Wallace wrote the novel in a cork-lined room (like Proust) over eight years. The novel is funny, heartbreaking, and deliberately punishing: it requires rereading, footnotes, and the patience to follow multiple plotlines that may not converge. The novel made Wallace the most important American writer of his generation, and his suicide in 2008 made it his last major work.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Year of Glad / Year of the Depend Adult Undergarment",
+        "pageStart": 1,
+        "pageEnd": 250,
+        "summary": "Hal Incandenza at the academy. Don Gately at Ennet House. The Entertainment."
+      },
+      {
+        "number": 2,
+        "title": "The Tennis Academy",
+        "pageStart": 251,
+        "pageEnd": 550,
+        "summary": "Michael Pemulis. The boys' tournament. Orin's football. James Incandenza's film."
+      },
+      {
+        "number": 3,
+        "title": "The Recovery House",
+        "pageStart": 551,
+        "pageEnd": 850,
+        "summary": "Gately's addiction. The Subsidized Time. The patients. Joelle Van Dyne."
+      },
+      {
+        "number": 4,
+        "title": "The Convergence",
+        "pageStart": 851,
+        "pageEnd": 1079,
+        "summary": "The wheelchair assassins. The medical attachment. Hal's decline. The circular ending."
+      }
+    ]
   },
   {
     "id": "book-memoirs-of-a-geisha-143",
@@ -970,7 +2198,7 @@
     "subtype": "Book",
     "name": "Memoirs of a Geisha (1997)",
     "teaser": "Arthur Golden's novel follows Sayuri from a fishing village to the geisha houses of Gion in 1920s–30s Kyoto — and its authenticity was contested from day one: Golden was accused of appropriating the life story of real geisha Mineko Iwasaki, who sued and later published her own memoir, Geisha, a Life.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780375400117-L.jpg",
     "byline": "Arthur Golden",
     "exploreAction": {
       "verb": "Read",
@@ -984,7 +2212,38 @@
       "1990s"
     ],
     "tier": 2,
-    "pageCount": 448
+    "pageCount": 448,
+    "synopsis": "Golden's novel follows Sayuri from a fishing village in rural Japan to the geisha houses of Gion in 1920s–30s Kyoto. As a nine-year-old, Sayuri is sold by her impoverished family to the Nitta geisha house, where she endures hazing, poverty, and the loss of her childhood. She becomes the protégée of Mameha, a powerful geisha, and eventually achieves fame as a beauty whose grey eyes make her the most sought-after woman in Gion. The novel's most controversial scene — the auction of Sayuri's virginity — was based on Golden's interviews with Mineko Iwasaki, the real geisha who later sued him for misrepresentation. The novel is written as a memoir told to a man on a park bench in 1950s New York. Golden spent years researching geisha culture, but the book was criticized for Westernizing the geisha tradition and for presenting Japanese culture through American eyes. The 1997 film adaptation starring Zhang Ziyi was directed by Steven Spielberg.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Yoroido",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "Sayuri's childhood. Mr. Tanaka. The sale. The Nitta house."
+      },
+      {
+        "number": 2,
+        "title": "Gion",
+        "pageStart": 61,
+        "pageEnd": 200,
+        "summary": "Mameha's mentorship. The apprentice. Hatsumomo. The transformation."
+      },
+      {
+        "number": 3,
+        "title": "Fame",
+        "pageStart": 201,
+        "pageEnd": 350,
+        "summary": "The auction. The danna. The fall of Gion. The war."
+      },
+      {
+        "number": 4,
+        "title": "New York",
+        "pageStart": 351,
+        "pageEnd": 448,
+        "summary": "Sayuri in New York. The Chairman. The reunion. The final performance."
+      }
+    ]
   },
   {
     "id": "book-the-god-of-small-144",
@@ -992,7 +2251,7 @@
     "subtype": "Book",
     "name": "The God of Small Things (1997)",
     "teaser": "Arundhati Roy's Booker-winning debut — she had written one novel, and it became a global phenomenon — is set in Kerala in 1969 and told by twins Rahel and Estha, whose childhood is destroyed by the 'Love Laws' that decide who can be loved and how much. Roy spent four years writing it; the advance and rights set records for a first novel.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780812979688-L.jpg",
     "byline": "Arundhati Roy",
     "exploreAction": {
       "verb": "Read",
@@ -1008,7 +2267,31 @@
       "Late 20th"
     ],
     "tier": 2,
-    "pageCount": 340
+    "pageCount": 340,
+    "synopsis": "Roy's Booker-winning debut is set in Kerala in 1969 and told by twins Rahel and Estha, whose childhood is destroyed by the 'Love Laws' — 'the laws that lay down who should be loved, and how. And how much.' The twins are caught between their mother Ammu (who has an affair with Velutha, an untouchable) and their upper-caste family. The novel's central event — the drowning of Sophie Mol (their English cousin) and the murder of Velutha — is withheld for the first 100 pages and then revealed in fragments. Roy spent four years writing the novel, and the advance set records for a first novel. The novel's structure — moving between 1969 and the twins' reunion in 1993 — mirrors the way trauma works: not in order, but in circling, returning fragments. The novel's most famous line — 'the Love Laws' — captures the caste system's power to destroy. Roy's prose is precise, visual, and often very funny despite the grief.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "May in Ayemenem",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The twins' world. Pappachi's moth. The History House. Sophie Mol arrives."
+      },
+      {
+        "number": 2,
+        "title": "The Past",
+        "pageStart": 81,
+        "pageEnd": 200,
+        "summary": "Ammu and Velutha. The Love Laws. Baby Kochamma. The Ipe family."
+      },
+      {
+        "number": 3,
+        "title": "The Unraveling",
+        "pageStart": 201,
+        "pageEnd": 340,
+        "summary": "The boat trip. Sophie Mol's death. Velutha's murder. The twins' separation."
+      }
+    ]
   },
   {
     "id": "book-white-teeth-2000-145",
@@ -1016,7 +2299,7 @@
     "subtype": "Book",
     "name": "White Teeth (2000)",
     "teaser": "Zadie Smith wrote White Teeth at 24, and the novel — two families, one Jamaican-British, one Bengali-British, meeting in North London — became the defining multicultural novel of the 2000s before its author could legally rent a car. It won multiple first-novel prizes and sold over a million copies.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780375703065-L.jpg",
     "byline": "Zadie Smith",
     "exploreAction": {
       "verb": "Read",
@@ -1033,7 +2316,31 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 464
+    "pageCount": 464,
+    "synopsis": "Smith wrote White Teeth at 24, and the novel — two families, one Jamaican-British (the Joneses), one Bengali-British (the Iqbals), meeting in North London — became the defining multicultural novel of the 2000s. The novel spans three generations and three continents: Archie Jones's wartime past in WWII, Samad Iqbal's Bangladesh, and their children's lives in London. The novel's comic energy comes from its digressive, generous voice: Smith gives every character a complete interior life and refuses to let any of them be a symbol. The novel won multiple first-novel prizes and sold over a million copies. Its central themes — inheritance, identity, the impossibility of clean cultural breaks — are delivered through comic set-pieces: a vegetarian restaurant fire, a DNA experiment gone wrong, and a school play about WWII that devolves into ethnic warfare. Smith's debut is unusual in its ambition: she wants to write a novel about multiculturalism that is itself multicultural in its method.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The End of History — 1975",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "Archie's suicide attempt. The wedding. North London. The three families."
+      },
+      {
+        "number": 2,
+        "title": "Root Canals — 1980s",
+        "pageStart": 101,
+        "pageEnd": 280,
+        "summary": "Irie and Millat. Samad's scandal. Magid and Millat. The tiger."
+      },
+      {
+        "number": 3,
+        "title": "Root Canals — 1990s",
+        "pageStart": 281,
+        "pageEnd": 464,
+        "summary": "FutureMouse. The school play. The fire. The twins' return. 'What's past is prologue.'"
+      }
+    ]
   },
   {
     "id": "book-atonement-2001-146",
@@ -1041,7 +2348,7 @@
     "subtype": "Book",
     "name": "Atonement (2001)",
     "teaser": "Ian McEwan's novel is a single lie and its lifelong consequences: 13-year-old Briony's false accusation splits two lovers apart before World War II, and the book's final section reveals the narrator has been controlling the story all along. The twist — revealed on the last pages — re-reads every chapter before it.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385721790-L.jpg",
     "byline": "Ian McEwan",
     "exploreAction": {
       "verb": "Read",
@@ -1058,7 +2365,31 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 368
+    "pageCount": 368,
+    "synopsis": "McEwan's novel is a single lie and its lifelong consequences. Thirteen-year-old Briony Tallis witnesses a scene between her older sister Cecilia and the housekeeper's son Robbie Turner at a fountain — and misinterprets it. When a sexual assault occurs that night, Briony accuses Robbie. He is arrested, convicted, and imprisoned. Cecilia breaks with her family. The novel's final section, set in 1999, reveals that the narrator has been Briony herself, now 77, and that the 'happy ending' — Cecilia and Robbie reunited — never happened. Robbie died at Dunkirk; Cecilia died in the Balham tube station bombing. Briony has been writing the novel as her atonement. The twist re-reads every chapter before it: the reader has been manipulated by the same imagination that caused the original lie. McEwan published the novel in 2001 and it won the National Book Critics Circle Award. The novel's structure — the long first part set on a single day in 1935, the wartime middle, and the metafictional ending — mirrors the way memory constructs narrative.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part One — The Day at Tallis House",
+        "pageStart": 1,
+        "pageEnd": 140,
+        "summary": "The fountain. The letter. The library. The accusation. Robbie's arrest."
+      },
+      {
+        "number": 2,
+        "title": "Part Two — The War",
+        "pageStart": 141,
+        "pageEnd": 280,
+        "summary": "Dunkirk. Cecilia's break. Briony's guilt. The ambulance."
+      },
+      {
+        "number": 3,
+        "title": "Part Three — 1999",
+        "pageStart": 281,
+        "pageEnd": 368,
+        "summary": "Briony's confession. The truth about Robbie and Cecilia. The novel as atonement."
+      }
+    ]
   },
   {
     "id": "book-middlesex-2002-147",
@@ -1066,7 +2397,7 @@
     "subtype": "Book",
     "name": "Middlesex (2002)",
     "teaser": "Eugenides's Pulitzer winner is a Greek-American family saga narrated by Cal, a woman raised as Calliope who discovers she has 5-alpha-reductase deficiency — a condition that made her body develop as male at puberty. The novel opens with a line that announces the whole project: 'I was born twice.'.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780312427733-L.jpg",
     "byline": "Jeffrey Eugenides",
     "exploreAction": {
       "verb": "Read",
@@ -1080,7 +2411,31 @@
       "Family"
     ],
     "tier": 2,
-    "pageCount": 544
+    "pageCount": 544,
+    "synopsis": "Eugenides's Pulitzer winner is a Greek-American family saga narrated by Cal Stephanides, a woman raised as Calliope who discovers she has 5-alpha-reductase deficiency — a rare condition that made her body develop as male at puberty. The novel opens with the most famous first line in recent fiction: 'I was born twice: first, as a baby girl, on a remarkably smogless Detroit day in January of 1960; and then again, as a teenage boy, in an emergency room near Petoskey, Michigan, in August of 1974.' The novel traces three generations of the Stephanides family: Cal's grandparents, who emigrated from a village in Bithynios (which they renamed Pontus) in 1922; their life in Depression-era Detroit; and Cal's own coming-of-age. The family's incestuous first-cousin marriage — necessary because the village was so small — causes the recessive gene that produces Cal's intersex condition. The novel is both a family saga and a meditation on identity: Cal treats his intersex body not as a tragedy but as a family inheritance.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Chapter I — The Born Twice",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "The opening. The gene. Grandpa Zizmo. The Black Hand."
+      },
+      {
+        "number": 2,
+        "title": "Chapters II–IV — Detroit",
+        "pageStart": 101,
+        "pageEnd": 280,
+        "summary": "The fiber revolt. Desdemona and Tessie. The riot. Cal's childhood."
+      },
+      {
+        "number": 3,
+        "title": "Chapters V–VII — The Mutation",
+        "pageStart": 281,
+        "pageEnd": 544,
+        "summary": "Puberty. The discovery. The operation. 'I went out to find myself.'"
+      }
+    ]
   },
   {
     "id": "book-cloud-atlas-2004-148",
@@ -1088,7 +2443,7 @@
     "subtype": "Book",
     "name": "Cloud Atlas (2004)",
     "teaser": "David Mitchell's novel stacks six stories from the 1850s to a post-apocalyptic future, each nested inside the next — a journal found in a letter, a letter read in a manuscript, a manuscript seen in a film — then unwinds them in reverse. The Booker-shortlisted structure is the point: 'Souls cross ages like clouds cross skies.'.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780375507250-L.jpg",
     "byline": "David Mitchell",
     "exploreAction": {
       "verb": "Read",
@@ -1102,7 +2457,52 @@
       "Structure"
     ],
     "tier": 2,
-    "pageCount": 544
+    "pageCount": 528,
+    "synopsis": "Mitchell's novel stacks six stories from the 1850s to a post-apocalyptic future, each nested inside the next — a journal found in a letter, a letter read in a manuscript, a manuscript seen in a film — then unwinds them in reverse order. The six narratives: Adam Ewing's Pacific diary (1850s), Robert Frobisher's letters (1936), Luisa Rey's thriller (1973), Timothy Cavendish's prison comedy (present day), Sonmi-451's rebellion (Korea, future), and Zachry's post-apocalyptic island. The stories are connected by a comet-shaped birthmark and by recurring themes of exploitation, resistance, and the power of stories. Mitchell's formal innovation is the nesting structure: each story is interrupted at its climax, forcing the reader to return to it later. The novel won the National Book Critics Circle Award and was shortlisted for the Booker. The 2012 film, directed by the Wachowskis and Tom Tykwer, starred six actors playing different roles across all six stories.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Pacific Journal of Adam Ewing (1850s)",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "The Chatham Isles. Dr. Henry Goose. The Moriori. The final journal entry."
+      },
+      {
+        "number": 2,
+        "title": "Letters from Zedelghem (1936)",
+        "pageStart": 101,
+        "pageEnd": 200,
+        "summary": "Frobisher's letters to Sixsmith. Vyvyan Ayrs. The Cloud Atlas Sextet."
+      },
+      {
+        "number": 3,
+        "title": "Half-Lives: The First Luisa Rey Mystery (1973)",
+        "pageStart": 201,
+        "pageEnd": 300,
+        "summary": "Swannekke Airlines. The nuclear conspiracy. Luisa's investigation."
+      },
+      {
+        "number": 4,
+        "title": "The Ghastly Ordeal of Timothy Cavendish (present)",
+        "pageStart": 301,
+        "pageEnd": 380,
+        "summary": "The nursing home. The escape. The film within the novel."
+      },
+      {
+        "number": 5,
+        "title": "An Orison of Sonmi-451 (Korea, future)",
+        "pageStart": 381,
+        "pageEnd": 460,
+        "summary": "Fast food slavery. The uprising. The miracle. The execution."
+      },
+      {
+        "number": 6,
+        "title": "Sloosha's Crossin' an' Ev'rythin' After (post-apocalyptic)",
+        "pageStart": 461,
+        "pageEnd": 528,
+        "summary": "The Kona attack. The comet. 'What is an ocean but a multitude of drops?'"
+      }
+    ]
   },
   {
     "id": "book-wolf-hall-2009-150",
@@ -1110,7 +2510,7 @@
     "subtype": "Book",
     "name": "Wolf Hall (2009)",
     "teaser": "Hilary Mantel's Booker winner follows Thomas Cromwell — the blacksmith's son who became Henry VIII's fixer — through the fall of Anne Boleyn, narrated in the present tense with a deliberately confusing 'he' that refuses to name who's speaking. It won the Booker and its sequel, Bring Up the Bodies, won it again two years later.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780312429980-L.jpg",
     "byline": "Hilary Mantel",
     "exploreAction": {
       "verb": "Read",
@@ -1124,7 +2524,31 @@
       "Tudor"
     ],
     "tier": 2,
-    "pageCount": 672
+    "pageCount": 672,
+    "synopsis": "Mantel's Booker-winning novel follows Thomas Cromwell's rise from a blacksmith's son in the Fens to Henry VIII's chief minister. The novel covers the years 1500-1535, focusing on the annulment of Henry's marriage to Catherine of Aragon and his marriage to Anne Boleyn. Mantel's central innovation is narrative voice: the entire novel is written in close third person from Cromwell's perspective, using 'he' even in dialogue tags (which initially confuses readers: 'he' often refers to Cromwell, not the person he's speaking to). The novel's title comes from the Seymour family home. Cromwell is portrayed as a modern man — pragmatic, humorous, capable of both kindness and ruthless efficiency — who navigates the dangerous world of Tudor court politics. Mantel wrote the novel over several years and published it in 2009; it won the Booker, the National Book Critics Circle Award, and was named one of the greatest novels of the 21st century. Two sequels followed: Bring Up the Bodies (2012) and The Mirror and the Light (2020).",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I — The Blacksmith's Son",
+        "pageStart": 1,
+        "pageEnd": 200,
+        "summary": "Cromwell's rise. The cardinal falls. The king's great matter. Anne Boleyn."
+      },
+      {
+        "number": 2,
+        "title": "Part II — The King's Minister",
+        "pageStart": 201,
+        "pageEnd": 450,
+        "summary": "The annulment. More's resistance. The dissolution. Cromwell's enemies."
+      },
+      {
+        "number": 3,
+        "title": "Part III — The Fall of More",
+        "pageStart": 451,
+        "pageEnd": 653,
+        "summary": "The trial. More's execution. Anne's triumph. Cromwell's enemies close in."
+      }
+    ]
   },
   {
     "id": "book-gone-girl-2012-152",
