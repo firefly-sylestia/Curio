@@ -4874,13 +4874,13 @@
     "tier": 1
   },
   {
-    "id": "quote-steve-stanford-the-only-way-to-do-great-work-is-to-love",
+    "id": "quote-steve-jobs-the-only-way-to-do-great-work-is-to-love",
     "categoryId": "QUOTES",
     "subtype": "Quote",
     "name": "The only way to do great work is to love what you do.",
     "teaser": "From Steve Stanford, a contemporary writer whose observations on creativity, resilience, and the human experience have resonated with audiences seeking practical wisdom.",
     "imageUrl": "",
-    "byline": "Steve Stanford",
+    "byline": "Steve Jobs",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Various interviews",
