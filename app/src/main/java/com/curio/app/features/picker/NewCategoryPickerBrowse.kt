@@ -464,8 +464,9 @@ private fun PinsTabContent(
 }
 
 /**
- * One named mix row for the Browse Mixes tab: name + lane teaser, a 3-dot
- * menu offering Edit / Delete, and a Spin pill. [active] marks the mix
+ * One named mix row for the Browse Mixes tab: name + lane teaser, a Spin
+ * pill, and an Edit / Delete menu behind TAP-AND-HOLD (v3xx13 — no visible
+ * 3-dot button; holding the row opens the options). [active] marks the mix
  * currently applied as the deck.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -553,25 +554,9 @@ private fun BrowseMixRow(
                     )
                 }
             }
-            // 3-dot → Edit / Delete menu.
+            // Edit / Delete — behind tap-and-hold only (the row's
+            // onLongClick opens this menu; no visible 3-dot button).
             Box {
-                Surface(
-                    onClick = { menuOpen = true },
-                    shape = RoundedCornerShape(50),
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest
-                ) {
-                    Box(
-                        modifier = Modifier.size(36.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CurioIcon(
-                            name = CurioIcons.MoreVert,
-                            contentDescription = "Mix options",
-                            size = 18.dp,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
                 androidx.compose.material3.DropdownMenu(
                     expanded = menuOpen,
                     onDismissRequest = { menuOpen = false }

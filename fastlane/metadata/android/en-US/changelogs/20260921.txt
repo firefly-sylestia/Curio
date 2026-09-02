@@ -1,5 +1,9 @@
 ADD: Your-mixes cards redesigned as compact "mix stamps" — a leading lane icon, the mix name + lane list and tiny tinted lane-composition dots previewing the mix; tapping a card spins it (the separate inline Spin pill is dropped).
-IMPROVE: Your-mixes cards refined — every mix gets a colour identity (a lead-lane tinted cover), the mix currently playing shows an "Active" ring + label, Edit and Delete are now explicit buttons instead of the hidden 3-dot menu, the header shows your mix count, and the empty state is a "Build your first mix" button.
+FIX: Category tiles in the picker are now borderless in BOTH themes — the light-mode rings on category tiles, the "+ Add" tile and the playing mix card's Active ring are all gone.
+ADD: Mix actions (Edit/Delete) now live behind a tap-and-hold on the mix card — Your-mixes cards and the Browse Mixes tab rows show no 3-dot or action buttons at rest.
+ADD: The mix list header drops its "New" pill — the + button on the bottom action row creates mixes.
+ADD: The category picker remembers your page and scroll — the page (1 or 2) stays the default as before, and each page's scroll position is saved and restored when you reopen the picker (even after an app restart).
+IMPROVE: Your-mixes cards refined — every mix gets a colour identity (a lead-lane tinted cover), the mix currently playing shows an "Active" label, the header shows your mix count, and the empty state is a "Build your first mix" button.
 FIX: Selected category tiles no longer show the check tick — the solid category-tint fill alone marks the pick (the old tick read as a pale dot in dark mode).
 FIX: Hold on a Pinned pill in the picker now reliably opens the Pin/Unpin + Spin actions — the option-pill overlay was rendering off the sheet's visible area and could show nothing on tall sheets.
 FIX: Theme switching keeps its circular reveal when Liquid glass is ON — the frozen frame is now captured from the actual rendered window (PixelCopy) instead of re-rendering the Compose scene, which read back blank over the glass backdrop on some devices and skipped the animation.

@@ -183,6 +183,9 @@ object AppPreferences {
     //   falls back to a curated default list.
     private const val KEY_PICKER_DEFAULT_PAGE = "picker_default_page"   // int — 0 classic, 1 new
     private const val KEY_PICKER_SUGGESTIONS = "picker_suggestions"     // JSON array of CategoryId
+    // v3xx13 — per-page scroll persistence for the sheet's classic/new pager.
+    private const val KEY_PICKER_PAGE0_SCROLL = "picker_page0_scroll"   // "index:offset" of page 0
+    private const val KEY_PICKER_PAGE1_SCROLL = "picker_page1_scroll"   // "index:offset" of page 1
     // v8.34 — custom pet design (Pet designer playground): the imported
     // design's full text (palette + body/curled grids). Always-on when
     // saved — the pet sprite renders this instead of the default until the
@@ -2275,6 +2278,34 @@ object AppPreferences {
             .ifEmpty { defaultSuggestions.toMutableList() }
         cur.remove(id)
         setPickerSuggestions(context, cur)
+    }
+
+    // ── Picker page scroll persistence (v3xx13) ───────────────────────
+    /** Saved scroll position of one picker pager page. */
+    data class PickerScrollPos(val index: Int = 0, val offset: Int = 0)
+
+    private fun encodeScroll(pos: PickerScrollPos): String = "${pos.index}:${pos.offset}"
+
+    private fun decodeScroll(raw: String?): PickerScrollPos =
+        raw?.split(":")?.let { parts ->
+            runCatching { PickerScrollPos(parts[0].toInt(), parts[1].toInt()) }
+                .getOrDefault(PickerScrollPos())
+        } ?: PickerScrollPos()
+
+    /** Saved scroll position of page 0 — the classic picker page. */
+    fun getPickerPage0Scroll(context: Context): PickerScrollPos =
+        decodeScroll(prefs(context).getString(KEY_PICKER_PAGE0_SCROLL, null))
+
+    fun setPickerPage0Scroll(context: Context, pos: PickerScrollPos) {
+        prefs(context).edit().putString(KEY_PICKER_PAGE0_SCROLL, encodeScroll(pos)).apply()
+    }
+
+    /** Saved scroll position of page 1 — the new picker page. */
+    fun getPickerPage1Scroll(context: Context): PickerScrollPos =
+        decodeScroll(prefs(context).getString(KEY_PICKER_PAGE1_SCROLL, null))
+
+    fun setPickerPage1Scroll(context: Context, pos: PickerScrollPos) {
+        prefs(context).edit().putString(KEY_PICKER_PAGE1_SCROLL, encodeScroll(pos)).apply()
     }
 
     // ── Custom pet design (v8.34 — Pet designer playground) ──────────

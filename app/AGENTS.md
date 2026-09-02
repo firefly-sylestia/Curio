@@ -372,6 +372,38 @@ app/src/main/java/com/curio/app/
   state is now a "Build your first mix" CTA (`NewSecondaryOutline`) instead of
   bare text (with zero mixes there was previously no visible way to create one
   on page 2).
+- **v3xx13 — picker: borders GONE entirely, mix actions behind hold, page +
+  scroll persistence.** User: "in dark mode the continue-exploring / browse /
+  page-1 categories all have that white border — remove it, I don't want any
+  border at all"; "in your mixes don't show any 3-dot or edit/delete button,
+  only on tap and hold, and remove that New button (there's one at the bottom
+  already)"; "make page 1/2 remember state persistent, and even the scroll —
+  page should stay default when the user switches it just as it is now".
+  (1) **Borders removed in BOTH themes:** `NewPickerTile` drops the
+  selected/pinned ring, `AddSuggestionTile` drops its outline ring, and
+  `NewMixCard` drops the Active ring — selection now reads ONLY through the
+  solid category-tint fill, pinned through the pin badge, and the playing mix
+  through the "Active" label; the `androidx.compose.foundation.border` import
+  is gone from `NewCategoryPicker.kt`. (v3xx10/v3xx11 had already killed the
+  DARK-mode outlines — the user wanted zero borders anywhere.) (2) **Mix
+  actions behind tap-and-hold:** `NewMixCard` loses its explicit Edit/Delete
+  footer buttons (REVERSES v3xx12) and gains `onLongClick` → a new centered
+  `MixOptionPill` overlay (Edit · Delete, styled like `CategoryOptionPill`)
+  wired through `NewPickerPage.onMixOption` + a sheet-level
+  `mixOptionTarget`; `BrowseMixRow` (Browse Mixes tab) drops its always-
+  visible 3-dot trigger too (its long-press DropdownMenu was already wired).
+  (3) **Header "New" pill removed** from the Your mixes label row — the
+  bottom action row's + already creates mixes; the zero-mixes "Build your
+  first mix" empty-state CTA stays (user picked "keep it"). (4) **Page +
+  scroll persistence:** the `pickerDefaultPageState` default-page behavior is
+  UNCHANGED (intended feature); NEW — each pager page's scroll persists:
+  `classicScroll` / `newScroll` `LazyListState`s are hoisted into
+  `NewCategoryPickerSheet` (page flips keep position live), restored on open
+  via `runCatching { scrollToItem(...) }` (saved index may exceed item count
+  after hidden-lane changes), and saved debounced (300ms `snapshotFlow` +
+  `drop(1)`) to new `KEY_PICKER_PAGE0_SCROLL` / `KEY_PICKER_PAGE1_SCROLL`
+  ("index:offset") behind `AppPreferences.PickerScrollPos`
+  get/set helpers — survives closing the picker AND app restarts.
 - **v3xx11 — picker polish: tick removed, option-pill overlay fixed, dark white-dot gone.**
   User: "remove the tick when selecting … in dark mode the category options still have
   white borders … in new picker the pinned ones doesn't show tap and hold actions".
