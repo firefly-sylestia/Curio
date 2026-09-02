@@ -5383,6 +5383,17 @@ app/src/main/java/com/curio/app/
   - Parallax tilt cue redrawn: `drawGlassTiltEdgeGlow` strokes a ~110° TOP-RIM light arc that slides with
     tiltX and fades in with tilt magnitude — the old full white circle (visible on any tilted phone) is gone.
 
+- **v228b — share-card edit precision pass** (`ui/components/TopicShareCard.kt`). (1)
+  **4 box-size sliders instead of 2 target-conditional ones**: edit mode now shows Title width /
+  Title height / Fact width / Fact height, each with an explicit label, a live percent readout
+  and snap steps (width 1%, height ~5% — they drive whole-line counts) so the user always knows
+  which dimension is being edited and can hit exact sizes (`SizeSliderColumn`). (2) **Typing caret
+  accuracy**: the transparent quick-fact BasicTextField dropped its 6dp content inset and now
+  types with card-matching Lora metrics (`factFieldStyle` in TopicShareSheet, ~11sp × bodyScale,
+  1.5× leading) so the caret sits exactly on the visible text — the old 14sp/20sp bodyMedium
+  wrapped whole lines away from the card's own 9–12sp layout. (3) **Editorial drop cap = 2 wrap
+  lines**: the measured wrap beside the 2× initial is 2 lines (was 3) and the letter is top-aligned
+  via `LineHeightStyle.Alignment.Top`.
 - **v228 — share-card text formats + Editorial drop cap + info-row moves + title no-edit**
   (`ui/components/TopicShareCard.kt`). (1) **MS Word-style formats**: `ShareCardMove` grew
   `factFont: FontFamily?` + `factAlign: TextAlign?` (and `metaDx/metaDy` for info rows);
@@ -5390,12 +5401,13 @@ app/src/main/java/com/curio/app/
   MiddleContent/quote text) — because `move` already flows into the export lambdas, the fonts &
   alignment bake into the saved PNG with zero extra plumbing. Customise panel gained "Fact font"
   (Serif/Sans/Type/Display/Elegant → null/Sora/SpaceMono/Playfair/DMSerif) and "Fact alignment"
-  (Left/Center/Right) pills under the quick-fact size slider. (2) **Editorial drop cap**: the old
-  alignByBaseline 2-line initial is now a measured 3-line wrap — `rememberTextMeasurer` +
+  (Left/Center/Right) pills under the quick-fact size slider. (2) **Editorial drop cap**: `rememberTextMeasurer` +
   `TextLayoutInput` (BOM 2026.05; the `constraints`+`maxLines` combo parses ONLY as named args via
-  TextLayoutInput, NOT the legacy measure override) finds how much body fits in the first 3 lines
-  beside the 3× initial; that chunk renders beside it, the rest continues full-width below
-  (single-char bodies fall back to plain text). (3) **Info rows movable, never editable**: `moveMeta`
+  TextLayoutInput, NOT the legacy measure override) finds how much body fits in the first 2 lines
+  beside the 2× initial; that chunk renders beside it, the rest continues full-width below
+  (single-char bodies fall back to plain text). `LineHeightStyle.Alignment.Top` pins the letter to
+  the TOP of its 2-line box so it starts level with the first text line (a 2× line height alone
+  would vertically center the glyph). (3) **Info rows movable, never editable**: `moveMeta`
   offsets byline/year/footer/colophon in every style; edit mode gained an "M" MoveHandle (bottom
   right) driving metaDx/metaDy. (4) **Title no longer type-editable**: the title BasicTextField is
   now a move/crop outline box only (T handle + edges remain); the quick-fact field keeps typing;

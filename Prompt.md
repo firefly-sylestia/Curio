@@ -1,85 +1,52 @@
 # Prompt.md — current request log
 
-## Request: Revert topic.db, harden JSON loading, fix reveal morph jitter
+## Request: Share-card editor — precise sliders, accurate typing, Editorial wrapping
 
 User request (verbatim):
 
-> "i want you to revert the topic.db chnage from the recent commits, and lets make the json loading alot more bettr, surviving app resrat, and always shwing all of the topics without reloading everytime, and also fixing the topic reveal morph animation somehow it looks jittery now"
+> "the shar card hegh and width editing with sliders are bad, like i cant know which
+> im editing, and the sliders are not very precise, so fix that, and also when typing
+> the cursor and position its actually typing is accurate too so fix that, and in
+> editorial text wrapping for quick facts, well only do 2 lines alongside the first
+> letter, and start from the same position of the top, so its much better."
 
-### Analysis
+### What shipped (this turn, all in `ui/components/TopicShareCard.kt`)
 
-**Recent commits (Sep 2):**
-- PR #66 (merged `182bc5f2`, branch `v0/prebuilt-topic-sqlite`): bundled a 19MB
-  `app/src/main/assets/topics.db` SQLite asset, added `TopicAssetStore.kt`
-  (raw SQLite reads), switched `TopicRepository.init()` to open the asset and
-  `getTopicsForCategory` to query it, and extended `scripts/build_topics_db.py`.
-- PR #67 (`v0/fix-topic-db-reveal`): "persist topic database and smooth reveal
-  morph" — changed `RevealBoundsTransform` to a critically-damped 650/0.98
-  spring (explicitly to kill a "one-frame snap/judder") and dropped the reveal's
-  JSON fallback. **Already reverted** at HEAD via `5ad796d7` (merged `d2bc9c1e`).
+1. **Sliders — explicit labels + readout + snap steps.** Edit mode previously showed
+   TWO sliders whose labels swapped between "Title"/"Fact" based on whichever box was
+   selected — with no value readout and a loose continuous drag. Now FOUR sliders are
+   always visible — **Title width / Title height / Fact width / Fact height** — each
+   with its own label, a live percent readout (`SizeSliderColumn` prints e.g. "Title
+   width · 78%"), and snap steps (width 1%, height ~5% since they drive whole-line
+   counts). Selection state still drives the box outlines/handles on the card.
 
-**Current broken state (HEAD):**
-- `topics.db` still bundled; `TopicRepository.init()` opens it via
-  `TopicAssetStore` and marks initialized WITHOUT populating Room → the splash
-  skips the JSON warm-up, but `TopicJsonLoader.load()` finds Room empty and
-  re-parses JSON lazily per screen anyway → "0 topics" on Home, "Loading…"
-  flashes, and the reveal can blank on cold start.
-- `RevealBoundsTransform` = spring(0.92, 800) → first-frame snap + slight
-  overshoot = the "jittery" reveal morph.
+2. **Typing caret accuracy.** The transparent quick-fact `BasicTextField` had a 6dp
+   content inset AND typed with `bodyMedium` (14sp/20sp) while the card renders its
+   fact in Lora ~9–12sp with ~1.5× leading — so the caret drifted off the visible
+   text and typing landed on different lines/wraps. It now types with **card-matching
+   Lora metrics** (`factFieldStyle` in TopicShareSheet: Lora ~11sp × bodyScale × 1.5
+   leading, transparent color) and **no padding**, so it sits exactly where the card's
+   fact renders and the caret/line-wraps track the visible text.
 
-**Plan:**
-1. **Revert topic.db (PR #66 scope):** delete `assets/topics.db` +
-   `TopicAssetStore.kt`; restore `TopicRepository`'s Room-from-JSON flow and
-   drop the bundled-import plumbing (`importBundledRoomDatabase*`,
-   `getNullableInt`, unused imports); revert `scripts/build_topics_db.py`
-   schema additions.
-2. **JSON loading that survives restarts:** Room is the persistent cache —
-   first launch imports JSON→Room once; every later launch warms the loader
-   cache straight from Room (no JSON re-parse). Gate the JSON re-sync on a
-   persisted app-version marker (runs once per app update, not per launch).
-   MainActivity awaits init before the index/pool warm-up so warm starts never
-   re-parse in the race window.
-3. **Reveal morph fix:** restore the critically-damped
-   `spring(dampingRatio = 0.98f, stiffness = 650f)` bounds transform.
-4. Docs: changelog bullets, `Prompt.md` summary, `app/AGENTS.md` DOX pass.
-
-### What shipped (this turn)
-
-1. **topic.db reverted.** `assets/topics.db` (19MB) and
-   `data/TopicAssetStore.kt` deleted. `TopicRepository` restored to the
-   Room-from-JSON design: `init()` populates Room from the JSON assets when
-   empty, `getTopicsForCategory` reads Room, and the bundled-import plumbing
-   (`importBundledRoomDatabase*`, cursor helper, SQLite imports) is gone.
-   `scripts/build_topics_db.py` reverted to its pre-experiment schema.
-
-2. **JSON loading — persistent, no per-launch reload.**
-   - First launch: JSON parses once into Room's `topics` table.
-   - Every later launch: `init()` warms `TopicJsonLoader` counts + pools from
-     Room before any screen reads them → all topics present instantly ("0
-     topics"/"Loading…" flashes gone), zero JSON re-parse.
-   - Content re-sync now runs only when the app version code changes
-     (`AppPreferences.getTopicCatalogSyncVersion` marker + `BuildConfig.VERSION_CODE`),
-     not on every restart (the old `syncCatalogFromJson` re-read every lane
-     every launch).
-   - `MainActivity` awaits `TopicRepository.init()` before the
-     `loadIndex()`/`preloadAll()` warm-up closes the race that re-parsed JSON
-     on warm starts.
-
-3. **Reveal morph jitter fixed.** `RevealBoundsTransform` back to the
-   critically-damped `spring(dampingRatio = 0.98f, stiffness = 650f)` — no
-   first-frame snap or under-damped settle on the ticket→hero expansion (the
-   smoothing PR #67 shipped got reverted with the topic.db work; the spring fix
-   is restored independently, keeping the reveal's JSON fallback).
+3. **Editorial drop cap = 2 wrap lines, top-aligned.** The drop-cap initial was a
+   measured 3-line wrap with a 3×-sized letter. Per request it is now a **2-line
+   wrap** (wrap measure + wrap Text maxLines 3 → 2, initial fontSize 3× → 2×), and
+   `LineHeightStyle.Alignment.Top` + `Trim.None` pins the letter to the TOP of its
+   2-line box so it starts level with the first text line (a 2× line height alone
+   vertically centers the glyph).
 
 ### Docs
 
-- Changelog (`fastlane/metadata/android/en-US/changelogs/20260921.txt`) updated.
-- `app/AGENTS.md` Curio Database section updated (Room topic cache flow; no
-  bundled topics.db).
+- Changelog (`fastlane/metadata/android/en-US/changelogs/20260921.txt`) — 3 new FIX
+  bullets on top.
+- `app/AGENTS.md` — updated the v228 Editorial drop-cap description (2-line wrap +
+  top alignment) and added a `v228b` bullet covering the three changes.
 
 ### Verification
 
-- No Gradle build in this environment (CI compiles on push).
-- Imports audited by hand (removed `TopicAssetStore`, `SQLiteDatabase`, `File`;
-  added `BuildConfig`); no external callers of the removed APIs found via
-  code_search.
+- Braces balanced (931/931); imports audited (`LineHeightStyle` added; the pre-edit
+  file already had `LoraFontFamily` + `roundToInt`; `Slider`/`BasicTextField` already
+  imported).
+- `SizeSliderColumn` takes a `modifier` param — `Modifier.weight(1f)` is applied at
+  the Row call sites (it has no RowScope receiver at the helper's top level).
+- CI compiles on push (no Gradle in this environment).

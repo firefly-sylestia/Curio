@@ -79,6 +79,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
@@ -1044,9 +1045,10 @@ private fun EditorialCard(
             Spacer(Modifier.height(12.dp))
 
             // Body — clean serif with a standing Lora drop initial. The initial
-            // spans ~3 lines and the text WRAPS around it (measured split): the
-            // first 3 lines run beside the big letter, the rest continues
-            // full-width below. Honor the user's fact format (font + align).
+            // spans 2 lines and the text WRAPS around it (measured split): the
+            // first 2 lines run beside the big letter (top-aligned with it), the
+            // rest continues full-width below. Honor the user's fact format
+            // (font + align).
             val bodySize = when {
                 body.length > 350 -> 8.5.sp; body.length > 260 -> 9.5.sp
                 body.length > 180 -> 10.sp; else -> 11.sp
@@ -1067,16 +1069,24 @@ private fun EditorialCard(
                     val density = androidx.compose.ui.platform.LocalDensity.current
                     val measurer = rememberTextMeasurer()
                     val contentW = with(density) { maxWidth.toPx() }
-                    // The drop-cap initial spans ~3 body lines. Its lineHeight
-                    // is set to 3× one body line so the initial column height
-                    // EXACTLY matches the 3 wrap lines beside it — the old
+                    // The drop-cap initial spans 2 body lines. Its lineHeight
+                    // is set to 2× one body line so the initial column height
+                    // EXACTLY matches the 2 wrap lines beside it — the old
                     // baseline alignment left a height mismatch that made the
                     // full-width rest text overlap the wrapped block.
+                    // LineHeightStyle.Alignment.Top anchors the letter to the TOP
+                    // of its 2-line box so the initial starts at the same
+                    // position as the first text line (a 2× line height alone
+                    // would vertically center the glyph in the box).
                     val bodyLineH = (bodySize.value * 1.45f * bodyScale).sp
                     val initialStyle = TextStyle(
                         fontFamily = LoraFontFamily, fontWeight = FontWeight.Bold,
-                        fontSize = (bodySize.value * 3.0f * bodyScale).sp,
-                        lineHeight = (bodyLineH.value * 3f).sp, color = accentRule
+                        fontSize = (bodySize.value * 2.0f * bodyScale).sp,
+                        lineHeight = (bodyLineH.value * 2f).sp, color = accentRule,
+                        lineHeightStyle = LineHeightStyle(
+                            alignment = LineHeightStyle.Alignment.Top,
+                            trim = LineHeightStyle.Trim.None
+                        )
                     )
                     val initialW = measurer.measure(
                         text = AnnotatedString(initial),
@@ -1084,7 +1094,7 @@ private fun EditorialCard(
                     ).size.width.toFloat()
                     val gap = with(density) { 6.dp.toPx() }
                     val narrowW = (contentW - initialW - gap).toInt().coerceAtLeast(1)
-                    // How much body text fits in the first 3 lines beside the
+                    // How much body text fits in the first 2 lines beside the
                     // initial. Measure at the NARROW width so the rendered wrap
                     // matches the split exactly (no overflow / overlap).
                     val wrap = measurer.measure(
@@ -1092,16 +1102,16 @@ private fun EditorialCard(
                         style = bodyStyle,
                         overflow = TextOverflow.Clip,
                         softWrap = true,
-                        maxLines = 3,
+                        maxLines = 2,
                         constraints = Constraints(maxWidth = narrowW)
                     )
                     val wrapEnd = wrap.getLineEnd((wrap.lineCount - 1).coerceAtLeast(0))
                     val wrapText = bodyRest.take(wrapEnd)
                     val restText = bodyRest.drop(wrapEnd)
                     // Initial column: fixed width = initialW + gap, top-aligned
-                    // so the big letter sits at the top of the block and its 3-
-                    // line height matches the wrap column. Wrap column: the
-                    // narrow width, 3 lines, clipped (never overlapping the
+                    // so the big letter starts at the top of the block and its
+                    // 2-line height matches the wrap column. Wrap column: the
+                    // narrow width, 2 lines, clipped (never overlapping the
                     // initial because it's a sibling column, not baseline-
                     // aligned behind the letter).
                     //
@@ -1121,7 +1131,7 @@ private fun EditorialCard(
                                         .padding(end = 6.dp))
                             }
                             if (wrapText.isNotEmpty()) {
-                                Text(wrapText, style = bodyStyle, maxLines = 3,
+                                Text(wrapText, style = bodyStyle, maxLines = 2,
                                     overflow = TextOverflow.Clip,
                                     modifier = Modifier.weight(1f))
                             }
@@ -5267,6 +5277,10 @@ private fun ArrangeableCard(
     selectedResizeTarget: ShareCardResizeTarget = ShareCardResizeTarget.TITLE,
     move: ShareCardMove = ShareCardMove(),
     onMove: (ShareCardMove) -> Unit = {},
+    // Metrics for the transparent typing field — must match the card's fact
+    // rendering so the caret sits EXACTLY on the visible text (see the
+    // compute in TopicShareSheet).
+    factFieldStyle: TextStyle = MaterialTheme.typography.bodyMedium,
     card: @Composable (EditBoundsCallbacks) -> Unit
 ) {
     // Bounds hub — every style reports where its title / fact / meta text
@@ -5348,7 +5362,12 @@ private fun ArrangeableCard(
                     BasicTextField(
                         value = editFact,
                         onValueChange = onFactChange,
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.Transparent),
+                        // NO padding + card-matching metrics: the field must sit
+                        // EXACTLY where the visible fact renders, otherwise the
+                        // caret appears 6dp+ off and typing lands on the wrong
+                        // line (the old bodyMedium 14sp/20sp wrapped several
+                        // lines away from the card's own Lora 9–12sp layout).
+                        textStyle = factFieldStyle.copy(color = Color.Transparent),
                         cursorBrush = SolidColor(MaterialTheme.colorScheme.tertiary),
                         singleLine = false,
                         maxLines = 12,
@@ -5356,7 +5375,6 @@ private fun ArrangeableCard(
                             .offset(f.left.dp, f.top.dp)
                             .width(f.width.dp)
                             .height(f.height.dp)
-                            .padding(6.dp)
                             .onFocusChanged { if (it.isFocused) onSelectResizeTarget(ShareCardResizeTarget.FACT) }
                             .border(1.dp, if (selectedResizeTarget == ShareCardResizeTarget.FACT) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.tertiary.copy(alpha = 0.35f), RoundedCornerShape(8.dp)),
                         decorationBox = { inner ->
@@ -5412,6 +5430,41 @@ private fun ArrangeableCard(
                 )
             }
         }
+    }
+}
+
+/**
+ * One box-size slider in the inline editor: an explicit label ("Title width")
+ * + a live percent readout + snap steps, so the user always knows which
+ * dimension they're editing and can hit exact sizes instead of an unlabeled
+ * continuous drag. Widths step in 1%, heights in ~5% (they drive whole-line
+ * counts, so finer steps just feel sticky).
+ */
+@Composable
+private fun SizeSliderColumn(
+    label: String,
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    range: ClosedFloatingPointRange<Float>,
+    steps: Int,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("${(value * 100f).roundToInt()}%", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary))
+        }
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = range,
+            steps = steps,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
@@ -5525,6 +5578,17 @@ fun TopicShareSheet(
     // Inline-edit / Customise helpers
     val sourceOptions = available.filter { !isQuotes || it.id != QUICK_FACT_ID }
     val factSizeLabel = (Math.round(bodyScale * 100f) / 100f).toString() + "\u00d7"
+    // The transparent quick-fact typing field must lay out with the SAME
+    // metrics as the card's fact text or the caret drifts off the visible
+    // text. Facts across styles are Lora serif ~9–12sp with ~1.5× line
+    // height, scaled by the fact-size dropdown (bodyScale); the old
+    // 14sp/20sp bodyMedium wrapped whole lines away from the card.
+    val factFieldStyle = TextStyle(
+        fontFamily = LoraFontFamily,
+        fontSize = 11.sp * bodyScale,
+        lineHeight = 16.5.sp * bodyScale,
+        color = Color.Transparent
+    )
     // Hoisted pager state so the Customise panel can switch style via its chips.
     val pagerState = androidx.compose.foundation.pager.rememberPagerState(initialPage = safeIdx.coerceIn(0, styles.lastIndex)) { styles.size }
     val scope = androidx.compose.runtime.rememberCoroutineScope()
@@ -5577,7 +5641,8 @@ fun TopicShareSheet(
                                 onSelectResizeTarget = { selectedResizeTarget = it },
                                 selectedResizeTarget = selectedResizeTarget,
                                 move = move,
-                                onMove = { move = it }
+                                onMove = { move = it },
+                                factFieldStyle = factFieldStyle
                             ) { cb ->
                                 TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move, callbacks = cb)
                             }
@@ -5609,7 +5674,8 @@ fun TopicShareSheet(
                             onFactChange = { editedFact = it },
                             onToggleEdit = { editMode = !editMode },
                             move = move,
-                            onMove = { move = it }
+                            onMove = { move = it },
+                            factFieldStyle = factFieldStyle
                         ) { cb ->
                             TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move, callbacks = cb)
                         }
@@ -5799,28 +5865,21 @@ fun TopicShareSheet(
                             }
                         }
                     }
-                    // Row 2: Width + Height sliders
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text("${if (selectedResizeTarget == ShareCardResizeTarget.TITLE) "Title" else "Fact"} width", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Slider(
-                                value = if (selectedResizeTarget == ShareCardResizeTarget.TITLE) move.titleWidthFrac else move.factWidthFrac,
-                                onValueChange = { value -> move = if (selectedResizeTarget == ShareCardResizeTarget.TITLE) move.copy(titleWidthFrac = value) else move.copy(factWidthFrac = value) },
-                                valueRange = 0.3f..1f,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text("${if (selectedResizeTarget == ShareCardResizeTarget.TITLE) "Title" else "Fact"} height", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Slider(
-                                value = if (selectedResizeTarget == ShareCardResizeTarget.TITLE) move.titleHeightFrac else move.factHeightFrac,
-                                onValueChange = { value -> move = if (selectedResizeTarget == ShareCardResizeTarget.TITLE) move.copy(titleHeightFrac = value) else move.copy(factHeightFrac = value) },
-                                valueRange = 0.35f..2.5f,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
+                    // Row 2: Width sliders — one per box with an EXPLICIT label
+                    // + live percent readout + snap steps, so it's always clear
+                    // which dimension is being edited and sizes can be hit
+                    // precisely (the old target-conditional labels swapped with
+                    // no readout and the continuous drag was sloppy).
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+                        SizeSliderColumn("Title width", move.titleWidthFrac, { move = move.copy(titleWidthFrac = it) }, 0.3f..1f, steps = 69, modifier = Modifier.weight(1f))
+                        SizeSliderColumn("Fact width", move.factWidthFrac, { move = move.copy(factWidthFrac = it) }, 0.3f..1f, steps = 69, modifier = Modifier.weight(1f))
                     }
-                    // Row 3: Done + Reset icon chips
+                    // Row 3: Height sliders — same explicit labels + readout
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+                        SizeSliderColumn("Title height", move.titleHeightFrac, { move = move.copy(titleHeightFrac = it) }, 0.35f..2.5f, steps = 42, modifier = Modifier.weight(1f))
+                        SizeSliderColumn("Fact height", move.factHeightFrac, { move = move.copy(factHeightFrac = it) }, 0.35f..2.5f, steps = 42, modifier = Modifier.weight(1f))
+                    }
+                    // Row 4: Done + Reset icon chips
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
                         // Reset — icon chip
                         Surface(onClick = { editedTitle = null; editedFact = null; bodyScale = 1f; selectedResizeTarget = ShareCardResizeTarget.TITLE; move = ShareCardMove() }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(36.dp)) {

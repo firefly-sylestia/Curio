@@ -1,3 +1,6 @@
+FIX: Share card editor — the Width/Height sliders now show every dimension (Title AND Fact width + height) with clear labels and a live % readout, snapping in clean steps so sizes are precise.
+FIX: Share card editor — typing is now accurate: the text caret sits exactly on the card's text and characters land where the cursor points (the invisible edit field now matches the card's font and position).
+FIX: Editorial share card — the quick fact now wraps only 2 lines beside the big first letter, with the letter top-aligned to the text.
 FIX: Topic catalog loading overhauled — the bundled database experiment is gone; topics now import once from JSON into a persistent on-device cache, so every launch shows all topics instantly (no re-loading) and the catalog survives app restarts.
 FIX: Topic reveal card morph is smooth again — the ticket-to-hero expansion uses a critically damped spring, so it no longer snaps or judders on the first frame.
 ADD: Share card editor — the category badge/pill is now movable via a B handle in edit mode (every card style).
