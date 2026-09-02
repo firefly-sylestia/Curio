@@ -405,7 +405,7 @@ private fun PinsTabContent(
                 // NEUTRAL pin row — no category accent.
                 Surface(
                     shape = shape,
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    color = newPickerIdleFill(),
                     shadowElevation = 0.dp,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -487,7 +487,7 @@ private fun BrowseMixRow(
     val shape = RoundedCornerShape(18.dp)
     Surface(
         shape = shape,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        color = newPickerIdleFill(),
         shadowElevation = 0.dp,
         modifier = Modifier
             .fillMaxWidth()
@@ -706,9 +706,10 @@ private fun NewPickerTabCapsule(
     backdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null
 ) {
     val shape = RoundedCornerShape(50)
-    // SOLID fill in both states — no transparency.
+    // SOLID fill in both states — no transparency. Idle uses the picker's
+    // cream-lift neutral (light mode reads creamy, not dark tan).
     val fill = if (selected) MaterialTheme.colorScheme.secondaryContainer
-               else MaterialTheme.colorScheme.surfaceContainerHigh
+               else newPickerIdleFill()
     Surface(
         onClick = onClick,
         shape = shape,

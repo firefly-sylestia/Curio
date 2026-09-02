@@ -301,6 +301,61 @@ app/src/main/java/com/curio/app/
   (言語/Sprache/langue/…) already renders at the composable level, so
   that IS the background decoration now. Album and all other categories
   untouched; classic untouched.
+- **v3xx7 — category picker UX refinement (overrides parts of v3xx2):**
+  user: "category picker … really bad user experience … holding to start a
+  mix it selects 2 … remove that presets of science etc from page 1 and
+  show the Curio Knowledge and Mix options … use the category tint style
+  when selecting … less dark creamy in light mode … instead of 5 show 6
+  your mixes … hold to remove remove that text, add tap and hold action …
+  when going to add and selecting or unselecting things it doesnt update …
+  when closing the picker and reopening thats when it updates, same in
+  when creating a mix".
+  - **Page 1 = Curio / Knowledge / Mix mode picker** (was preset chips +
+    flat grid). `ClassicPickerPage` now hosts the same `PickerMode` tabs
+    and grouped tap-to-open decks as the classic picker (the private
+    `PickerGroup` / `curioModeGroups` / `knowledgeModeGroups` became
+    internal to share them); the Science/Entertainment/Arts & Stories/
+    History & Ideas preset chips are GONE from the new picker (the classic
+    picker's `CategoryPickerContent` keeps them). Mix mode holds the
+    multi-select grid + Mix/Cancel row.
+  - **Clean start (kills "it auto-selects 2"):** page 1 opens with
+    `multiSelectMode = false` and an EMPTY selection — the old seeding
+    from `getLastSpinCategories` lit up the previous deck's lanes the
+    moment you held a tile to start a mix (e.g. the persisted single lane
+    + the held lane = 2). The v196 model (tap opens a lane; hold is the
+    ONLY way into multi-select) is now applied to page 1 AND to the
+    classic `CategoryPickerContent` (draft mid-session restore kept); the
+    legacy Spin `CategoryPickerSheet` already had it. `CategoriesPicker-
+    Draft` seeding changed accordingly.
+  - **Selection = classic category tint:** `NewPickerTile` selected state
+    is now `themedAccent()` fill + `onAccent()` ink (icon, label, check
+    badge, accent-ink ring + icon-plate tint) — the classic `PickerIcon-
+    Tile` style — instead of the neutral secondaryContainer. Applies
+    everywhere selection renders (page-1 Mix, mix editor, Add sheets).
+  - **Cream light mode:** new `newPickerIdleFill()` helper (classic
+    cream-pill recipe: `lerp(base, curioPillLift(), 0.82f)` in light,
+    unchanged in dark) is the idle fill for every new-picker tile/pill/
+    panel — `NewPickerTile`, `NewPinnedPill`, `NewMixCard`, `AddSuggestion-
+    Tile` (from surfaceContainerLow), `NewPickerCircle`, `NewSecondary-
+    Outline`, the mixes "New" pill, `NewPickerTabCapsule`, `BrowseMixRow`,
+    Pins rows — so the picker reads creamy in light mode, not dark tan.
+  - **Your mixes: 6 visible** then "Show all" (was 5).
+  - **Continue exploring:** the "hold to remove" hint text is REMOVED and
+    holding a lane now opens a Remove pill (`CategoryOptionPill` gained an
+    optional `onRemove` — errorContainer Remove action) that actually
+    removes the lane live. The section reads `pickerSuggestionsState`
+    REACTIVELY (no remember snapshot) so every change shows instantly.
+  - **Live updates everywhere (stale-state fixes):** (1) `MixEditorSheet`
+    selection is now an IMMUTABLE `Set<CategoryId>` — the old in-place
+    `MutableSet` toggle wrote the SAME instance back, so structural
+    equality never triggered recomposition and ticks only appeared when
+    the editor reopened (the batch-show was the "auto-select 2" the user
+    saw); (2) `AddSuggestionSheet` reads the reactive state and toggles
+    against the EFFECTIVE list (defaults seeded), so adding AND unchecking
+    work instantly; (3) `AppPreferences.removePickerSuggestion` seeds from
+    the effective list so removing a default suggestion actually removes
+    it (was a no-op against an empty user list); mix save/delete already
+    recomposed via `savedMixesState`.
 - **v27n — elevation over borders (decided):** cards, chips, pills & sheets
   lift with real shadows instead of hairline outlines (AMOLED keeps the faint
   container step; selected states raise 4–8dp). **Shadow rendering rules:**

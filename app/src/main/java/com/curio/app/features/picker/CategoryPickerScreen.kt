@@ -130,14 +130,15 @@ enum class PickerMode(val label: String, val glyph: String) {
 }
 
 /** One labelled row-group of lanes inside a Curio/Knowledge mode. */
-private data class PickerGroup(val label: String, val lanes: List<CategoryId>)
+internal data class PickerGroup(val label: String, val lanes: List<CategoryId>)
 
 /**
  * The Curio/Knowledge mode lanes, grouped by theme. Mix uses everything +
  * Wildcard (declared separately in [mixModeLaneIds]). Kept as the single
- * source of truth so the picker grid only iterates these groups.
+ * source of truth so the picker grid only iterates these groups. Shared
+ * with the new picker's classic page (page 1), which hosts the same tabs.
  */
-private val curioModeGroups = listOf(
+internal val curioModeGroups = listOf(
     PickerGroup("Music", listOf(CategoryId.ARTISTS, CategoryId.ALBUMS, CategoryId.SONGS)),
     PickerGroup("On screen", listOf(CategoryId.DIRECTORS, CategoryId.FILMS, CategoryId.ANIMATED_MOVIES, CategoryId.SERIES)),
     PickerGroup("Stories", listOf(CategoryId.AUTHORS, CategoryId.BOOKS, CategoryId.MYTHOLOGY, CategoryId.QUOTES)),
@@ -146,7 +147,7 @@ private val curioModeGroups = listOf(
     PickerGroup("Play & taste", listOf(CategoryId.GAMES, CategoryId.SPORTS, CategoryId.FOOD, CategoryId.INTERNET))
 )
 
-private val knowledgeModeGroups = listOf(
+internal val knowledgeModeGroups = listOf(
     PickerGroup("Life sciences", listOf(CategoryId.BIOLOGY, CategoryId.ANIMALS, CategoryId.PLANTS, CategoryId.MEDICINE)),
     PickerGroup("Physical sciences", listOf(CategoryId.CHEMISTRY, CategoryId.GEOLOGY, CategoryId.ASTRONOMY, CategoryId.SCIENTISTS)),
     PickerGroup("How things work", listOf(CategoryId.TECHNOLOGIES, CategoryId.ENGINEERING, CategoryId.DISCOVERIES)),
@@ -269,19 +270,18 @@ fun CategoryPickerContent(
         wildcard + rest
     }
     val draft = CategoryPickerDraft
-    val persistedVisible = remember {
-        AppPreferences.getLastSpinCategories(context)
-            .mapNotNull { id -> categories.firstOrNull { it.id == id } }
-    }
     val gridState = rememberLazyGridState()
     val wide = windowWidthSizeClass().isWide
+    // v27 — fresh opens start CLEAN (v196 model): tap opens a lane, and
+    // tap-and-hold is the ONLY way into multi-select, so holding selects
+    // exactly ONE lane. The old seed-from-persisted-deck lit up the last
+    // deck's lanes too ("it auto-selects 2"). Mid-session draft state (the
+    // user left the picker mid-selection) still restores exactly as before.
     var selectedSlugs by rememberSaveable {
-        mutableStateOf(
-            draft.selected ?: persistedVisible.map { it.id.routeSlug }
-        )
+        mutableStateOf(draft.selected ?: emptyList())
     }
     var multiSelectMode by rememberSaveable {
-        mutableStateOf(if (draft.selected != null) draft.multiSelect else persistedVisible.size > 1)
+        mutableStateOf(draft.selected != null && draft.multiSelect)
     }
     var modeName by rememberSaveable { mutableStateOf(PickerMode.MIX.name) }
     val mode = runCatching { PickerMode.valueOf(modeName) }.getOrDefault(PickerMode.MIX)

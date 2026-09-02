@@ -2292,7 +2292,13 @@ object AppPreferences {
 
     /** Removes a category id from the curated suggestions. */
     fun removePickerSuggestion(context: Context, id: CategoryId) {
+        // Seed from the EFFECTIVE list (defaults when the user list is still
+        // empty) so removing a default suggestion actually removes it — the
+        // old write was a no-op against an empty user list, so the lane
+        // stayed in Continue exploring. An all-removed list is empty again,
+        // which simply falls back to the defaults.
         val cur = getPickerSuggestions(context).toMutableList()
+            .ifEmpty { defaultSuggestions.toMutableList() }
         cur.remove(id)
         setPickerSuggestions(context, cur)
     }
