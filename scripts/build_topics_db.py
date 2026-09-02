@@ -36,10 +36,13 @@ def build(source_dir: Path, output_db: Path) -> None:
                 pageCount INTEGER DEFAULT 0,
                 episodeCount INTEGER DEFAULT 0,
                 altPageLabel TEXT NOT NULL DEFAULT '',
-                altPageCount INTEGER DEFAULT 0
+                altPageCount INTEGER NOT NULL DEFAULT 0,
+                synopsis TEXT NOT NULL DEFAULT '',
+                chapters TEXT NOT NULL DEFAULT ''
             );
-            CREATE INDEX index_topics_categoryId ON topics(categoryId);
+            CREATE INDEX index_topics_categoryId_name ON topics(categoryId, name);
             CREATE INDEX index_topics_name ON topics(name);
+            CREATE INDEX index_topics_subtype ON topics(subtype);
         """)
         rows = []
         for path in files:
@@ -53,6 +56,9 @@ def build(source_dir: Path, output_db: Path) -> None:
                 tags = topic.get("tags", "")
                 if isinstance(tags, list):
                     tags = json.dumps(tags, separators=(",", ":"))
+                chapters = topic.get("chapters", "")
+                if isinstance(chapters, (list, dict)):
+                    chapters = json.dumps(chapters, separators=(",", ":"))
                 rows.append((
                     topic.get("id", ""), topic.get("categoryId", ""),
                     topic.get("subtype", ""), topic.get("name", ""),
@@ -62,8 +68,9 @@ def build(source_dir: Path, output_db: Path) -> None:
                     action.get("durationMinutes", 0), action.get("instruction", ""),
                     topic.get("pageCount", 0), topic.get("episodeCount", 0),
                     topic.get("altPageLabel", ""), topic.get("altPageCount", 0),
+                    topic.get("synopsis", ""), chapters,
                 ))
-        db.executemany("INSERT INTO topics VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
+        db.executemany("INSERT INTO topics VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", rows)
     print(f"topics.db: {len(rows)} topics from {len(files)} files")
 
 
