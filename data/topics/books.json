@@ -34557,5 +34557,1476 @@
       "feminist"
     ],
     "tier": 2
+  },
+  {
+    "id": "book-a-court-of-thorns-and-roses",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "A Court of Thorns and Roses",
+    "teaser": "A huntress is taken to a magical land of faeries.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781635575569-L.jpg",
+    "byline": "Sarah J. Maas",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Court of Thorns and Roses",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "fantasy",
+      "romance",
+      "faerie",
+      "young adult",
+      "retelling"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-invisible-life-of-addie-larue",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "The Invisible Life of Addie LaRue",
+    "teaser": "A woman makes a deal with the devil to live forever but is forgotten by everyone.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780765387561-L.jpg",
+    "byline": "V.E. Schwab",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Invisible Life of Addie LaRue",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "fantasy",
+      "romance",
+      "memory",
+      "immortality",
+      "historical"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-mexican-gothic",
+    "categoryId": "BOOKS",
+    "subtype": "Horror",
+    "name": "Mexican Gothic",
+    "teaser": "A socialite investigates her cousin's mysterious husband in a decaying mansion.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780525520856-L.jpg",
+    "byline": "Silvia Moreno-Garcia",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Mexican Gothic",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "horror",
+      "gothic",
+      "mexican",
+      "feminist",
+      "historical"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-red-white-and-royal-blue",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "Red, White & Royal Blue",
+    "teaser": "The US President's son falls for a British prince.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781250252197-L.jpg",
+    "byline": "Casey McQuiston",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Red, White & Royal Blue",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "romance",
+      "lgbtq",
+      "political",
+      "humor",
+      "contemporary"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-twilight",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "Twilight",
+    "teaser": "A teenage girl falls in love with a vampire.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316067928-L.jpg",
+    "byline": "Stephenie Meyer",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Twilight",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "romance",
+      "vampire",
+      "fantasy",
+      "young adult",
+      "paranormal"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-percy-jackson",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "Percy Jackson and the Lightning Thief",
+    "teaser": "A boy discovers he is the son of Poseidon.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780786838653-L.jpg",
+    "byline": "Rick Riordan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Percy Jackson and the Lightning Thief",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "fantasy",
+      "young adult",
+      "greek mythology",
+      "humor",
+      "adventure"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-silent-patient",
+    "categoryId": "BOOKS",
+    "subtype": "Mystery",
+    "name": "The Silent Patient",
+    "teaser": "A therapist becomes obsessed with a painter who shot her husband.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781250301697-L.jpg",
+    "byline": "Alex Michaelides",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Silent Patient",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "mystery",
+      "thriller",
+      "psychological",
+      "unreliable narrator"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-eleanor-oliphant-is-completely-fine",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Eleanor Oliphant Is Completely Fine",
+    "teaser": "A socially awkward woman discovers the power of human connection.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780735225558-L.jpg",
+    "byline": "Gail Honeyman",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Eleanor Oliphant Is Completely Fine",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "romance",
+      "humor",
+      "contemporary",
+      "loneliness",
+      "friendship"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-such-a-fun-age",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Such a Fun Age",
+    "teaser": "A young black babysitter and her white employer navigate race.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593132425-L.jpg",
+    "byline": "Kiley Reid",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Such a Fun Age",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "satire",
+      "race",
+      "class",
+      "contemporary",
+      "humor"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-babel",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "Babel",
+    "teaser": "Translation is magic in 19th-century Britain.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780063052772-L.jpg",
+    "byline": "R.F. Kuang",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Babel",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "fantasy",
+      "alternate history",
+      "colonialism",
+      "oxford",
+      "translation"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-tomorrow-and-tomorrow-and-tomorrow",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Tomorrow, and Tomorrow, and Tomorrow",
+    "teaser": "Two friends build a video game empire across decades.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593321201-L.jpg",
+    "byline": "Gabrielle Zevin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tomorrow, and Tomorrow, and Tomorrow",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "novel",
+      "friendship",
+      "video games",
+      "contemporary",
+      "creativity"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-piranesi",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "Piranesi",
+    "teaser": "A man lives alone in a labyrinth of infinite halls.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781635575996-L.jpg",
+    "byline": "Susanna Clarke",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Piranesi",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "fantasy",
+      "mystery",
+      "literary fiction",
+      "magical",
+      "british"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-lord-of-the-rings",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "The Lord of the Rings",
+    "teaser": "A hobbit destroys a dark lord's ring of power.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780544003415-L.jpg",
+    "byline": "J.R.R. Tolkien",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Lord of the Rings",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "fantasy",
+      "epic",
+      "classic",
+      "adventure",
+      "middle earth"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-catcher-in-the-rye",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Catcher in the Rye",
+    "teaser": "A teenager wanders New York after being expelled from school.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316769488-L.jpg",
+    "byline": "J.D. Salinger",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Catcher in the Rye",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "american",
+      "classic",
+      "coming of age",
+      "new york",
+      "alienation"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-lord-of-the-flies",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Lord of the Flies",
+    "teaser": "Boys stranded on an island descend into savagery.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780399501487-L.jpg",
+    "byline": "William Golding",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Lord of the Flies",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "british",
+      "classic",
+      "allegory",
+      "survival",
+      "human nature"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-pride-and-prejudice",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "Pride and Prejudice",
+    "teaser": "Elizabeth Bennet and Mr. Darcy battle wits and pride.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439518-L.jpg",
+    "byline": "Jane Austen",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pride and Prejudice",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "british",
+      "romance",
+      "classic",
+      "regency",
+      "social commentary"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-harry-potter-and-the-sorcerers-stone",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "Harry Potter and the Sorcerer's Stone",
+    "teaser": "A boy discovers he is a wizard.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780590353403-L.jpg",
+    "byline": "J.K. Rowling",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Harry Potter and the Sorcerer's Stone",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "fantasy",
+      "young adult",
+      "british",
+      "magic",
+      "classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-life-of-pi",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Life of Pi",
+    "teaser": "A boy survives a shipwreck with a tiger.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780156027328-L.jpg",
+    "byline": "Yann Martel",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Life of Pi",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "canadian",
+      "survival",
+      "philosophy",
+      "spiritual",
+      "classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-outlander",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "Outlander",
+    "teaser": "A WWII nurse travels back to 18th-century Scotland.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780440212560-L.jpg",
+    "byline": "Diana Gabaldon",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Outlander",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "romance",
+      "time travel",
+      "scottish",
+      "historical",
+      "adventure"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-house-in-the-cerulean-sea",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "The House in the Cerulean Sea",
+    "teaser": "A caseworker discovers a secret orphanage of magical children.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781250217318-L.jpg",
+    "byline": "T.J. Klune",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The House in the Cerulean Sea",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "fantasy",
+      "lgbtq",
+      "romance",
+      "heartwarming",
+      "magical"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-a-man-called-ove",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "A Man Called Ove",
+    "teaser": "A curmudgeonly widower finds unexpected friendship.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781476738024-L.jpg",
+    "byline": "Fredrik Backman",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Man Called Ove",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "swedish",
+      "humor",
+      "heartwarming",
+      "contemporary",
+      "friendship"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-pillars-of-the-earth",
+    "categoryId": "BOOKS",
+    "subtype": "Historical Fiction",
+    "name": "The Pillars of the Earth",
+    "teaser": "Building a cathedral in 12th-century England.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780451166890-L.jpg",
+    "byline": "Ken Follett",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Pillars of the Earth",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "historical",
+      "medieval",
+      "british",
+      "architecture",
+      "epic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-tattooist-of-auschwitz",
+    "categoryId": "BOOKS",
+    "subtype": "Historical Fiction",
+    "name": "The Tattooist of Auschwitz",
+    "teaser": "A Jewish man and woman fall in love in Auschwitz.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062797247-L.jpg",
+    "byline": "Heather Morris",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Tattooist of Auschwitz",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "historical",
+      "world war ii",
+      "love story",
+      "holocaust",
+      "auschwitz"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-alice-network",
+    "categoryId": "BOOKS",
+    "subtype": "Historical Fiction",
+    "name": "The Alice Network",
+    "teaser": "A female spy network during World War I.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062654199-L.jpg",
+    "byline": "Kate Quinn",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Alice Network",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "historical",
+      "world war i",
+      "spy",
+      "women",
+      "french"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-in-the-woods",
+    "categoryId": "BOOKS",
+    "subtype": "Mystery",
+    "name": "In the Woods",
+    "teaser": "A detective investigates a child's murder in the woods.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780143034902-L.jpg",
+    "byline": "Tana French",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "In the Woods",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "mystery",
+      "detective",
+      "irish",
+      "psychological",
+      "dublin"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-snowman",
+    "categoryId": "BOOKS",
+    "subtype": "Mystery",
+    "name": "The Snowman",
+    "teaser": "A serial killer sends snowmen to his victims.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780307596970-L.jpg",
+    "byline": "Jo Nesbo",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Snowman",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "mystery",
+      "thriller",
+      "norwegian",
+      "detective",
+      "serial killer"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-maltese-falcon",
+    "categoryId": "BOOKS",
+    "subtype": "Mystery",
+    "name": "The Maltese Falcon",
+    "teaser": "Sam Spade hunts for a statuette and his partner's killer.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140236828-L.jpg",
+    "byline": "Dashiell Hammett",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Maltese Falcon",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "mystery",
+      "noir",
+      "detective",
+      "classic",
+      "hardboiled"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-cuckoos-calling",
+    "categoryId": "BOOKS",
+    "subtype": "Mystery",
+    "name": "The Cuckoo's Calling",
+    "teaser": "A PI investigates a supermodel's death.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316206846-L.jpg",
+    "byline": "Robert Galbraith",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Cuckoo's Calling",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "mystery",
+      "detective",
+      "british",
+      "london",
+      "contemporary"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-still-life",
+    "categoryId": "BOOKS",
+    "subtype": "Mystery",
+    "name": "Still Life",
+    "teaser": "Inspector Gamache investigates a murder in Quebec.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781590514641-L.jpg",
+    "byline": "Louise Penny",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Still Life",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "mystery",
+      "detective",
+      "canadian",
+      "village",
+      "quebec"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-devil-in-the-white-city",
+    "categoryId": "BOOKS",
+    "subtype": "True Crime",
+    "name": "The Devil in the White City",
+    "teaser": "The 1893 World's Fair and a serial killer.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780375725609-L.jpg",
+    "byline": "Erik Larson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Devil in the White City",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "true crime",
+      "history",
+      "chicago",
+      "serial killer",
+      "world fair"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-killers-of-the-flower-moon",
+    "categoryId": "BOOKS",
+    "subtype": "True Crime",
+    "name": "Killers of the Flower Moon",
+    "teaser": "The systematic murder of Osage Indians for their oil money.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385534246-L.jpg",
+    "byline": "David Grann",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Killers of the Flower Moon",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "true crime",
+      "native american",
+      "historical",
+      "oklahoma",
+      "oil"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-into-the-wild",
+    "categoryId": "BOOKS",
+    "subtype": "Travel",
+    "name": "Into the Wild",
+    "teaser": "A young man abandons civilization for Alaska.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385486804-L.jpg",
+    "byline": "Jon Krakauer",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Into the Wild",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "travel",
+      "alaska",
+      "survival",
+      "nonfiction",
+      "adventure"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-eat-pray-love",
+    "categoryId": "BOOKS",
+    "subtype": "Travel",
+    "name": "Eat, Pray, Love",
+    "teaser": "A woman's journey through Italy, India, and Indonesia.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780143038412-L.jpg",
+    "byline": "Elizabeth Gilbert",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Eat, Pray, Love",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "travel",
+      "memoir",
+      "spiritual",
+      "food",
+      "self-discovery"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-a-walk-in-the-woods",
+    "categoryId": "BOOKS",
+    "subtype": "Travel",
+    "name": "A Walk in the Woods",
+    "teaser": "Two friends attempt the Appalachian Trail.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780307279460-L.jpg",
+    "byline": "Bill Bryson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Walk in the Woods",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "travel",
+      "humor",
+      "nature",
+      "hiking",
+      "american"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-art-of-travel",
+    "categoryId": "BOOKS",
+    "subtype": "Travel",
+    "name": "The Art of Travel",
+    "teaser": "Why and how we travel, from a philosophical perspective.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781400043668-L.jpg",
+    "byline": "Alain de Botton",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Art of Travel",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "travel",
+      "philosophy",
+      "culture",
+      "beauty",
+      "essay"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-salt-fat-acid-heat",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "Salt Fat Acid Heat",
+    "teaser": "The four elements of good cooking.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781476753836-L.jpg",
+    "byline": "Samin Nosrat",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Salt Fat Acid Heat",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "food",
+      "cooking",
+      "science",
+      "technique",
+      "guide"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-how-to-win-friends-and-influence-people",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "How to Win Friends and Influence People",
+    "teaser": "The classic guide to interpersonal skills.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780671723651-L.jpg",
+    "byline": "Dale Carnegie",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How to Win Friends and Influence People",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "self-help",
+      "communication",
+      "classic",
+      "business",
+      "psychology"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-grit",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "Grit",
+    "teaser": "The power of passion and perseverance.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781501111105-L.jpg",
+    "byline": "Angela Duckworth",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Grit",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "self-help",
+      "psychology",
+      "education",
+      "motivation",
+      "science"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-zero-to-one",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "Zero to One",
+    "teaser": "Notes on startups, or how to build the future.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780804139298-L.jpg",
+    "byline": "Peter Thiel",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Zero to One",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "business",
+      "startup",
+      "technology",
+      "innovation",
+      "entrepreneurship"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-psychology-of-money",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "The Psychology of Money",
+    "teaser": "Timeless lessons on wealth, greed, and happiness.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780857197696-L.jpg",
+    "byline": "Morgan Housel",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Psychology of Money",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "business",
+      "finance",
+      "psychology",
+      "investing",
+      "behavior"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-astrophysics-for-people-in-a-hurry",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "Astrophysics for People in a Hurry",
+    "teaser": "A brief guide to the universe.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781324003311-L.jpg",
+    "byline": "Neil deGrasse Tyson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Astrophysics for People in a Hurry",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "science",
+      "astrophysics",
+      "space",
+      "popular science",
+      "accessible"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-gene",
+    "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
+    "name": "The Gene",
+    "teaser": "The history and future of genetic science.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781476733500-L.jpg",
+    "byline": "Siddhartha Mukherjee",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Gene",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "science",
+      "genetics",
+      "medicine",
+      "history",
+      "biology"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-steve-jobs",
+    "categoryId": "BOOKS",
+    "subtype": "Biography",
+    "name": "Steve Jobs",
+    "teaser": "The definitive biography of Apple's co-founder.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781451648539-L.jpg",
+    "byline": "Walter Isaacson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Steve Jobs",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "biography",
+      "technology",
+      "apple",
+      "innovation",
+      "business"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-leonardo-da-vinci",
+    "categoryId": "BOOKS",
+    "subtype": "Biography",
+    "name": "Leonardo da Vinci",
+    "teaser": "The life of the ultimate Renaissance man.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781501139154-L.jpg",
+    "byline": "Walter Isaacson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Leonardo da Vinci",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "biography",
+      "art",
+      "science",
+      "renaissance",
+      "invention"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-i-am-malala",
+    "categoryId": "BOOKS",
+    "subtype": "Autobiography",
+    "name": "I Am Malala",
+    "teaser": "The girl who stood up for education.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316327947-L.jpg",
+    "byline": "Malala Yousafzai",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "I Am Malala",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "autobiography",
+      "education",
+      "pakistan",
+      "activism",
+      "nobel"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-glass-castle",
+    "categoryId": "BOOKS",
+    "subtype": "Autobiography",
+    "name": "The Glass Castle",
+    "teaser": "Growing up with eccentric, neglectful parents.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780743247535-L.jpg",
+    "byline": "Jeannette Walls",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Glass Castle",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "autobiography",
+      "memoir",
+      "poverty",
+      "family",
+      "resilience"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-sun-and-her-flowers",
+    "categoryId": "BOOKS",
+    "subtype": "Poetry",
+    "name": "The Sun and Her Flowers",
+    "teaser": "Growth, healing, and self-love.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781449479626-L.jpg",
+    "byline": "Rupi Kaur",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Sun and Her Flowers",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "poetry",
+      "feminist",
+      "contemporary",
+      "healing",
+      "instagram"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-hill-we-climb",
+    "categoryId": "BOOKS",
+    "subtype": "Poetry",
+    "name": "The Hill We Climb",
+    "teaser": "The inaugural poem that captivated the nation.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593300190-L.jpg",
+    "byline": "Amanda Gorman",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Hill We Climb",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "poetry",
+      "american",
+      "inauguration",
+      "feminist",
+      "contemporary"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-interpreter-of-maladies",
+    "categoryId": "BOOKS",
+    "subtype": "Short Stories",
+    "name": "Interpreter of Maladies",
+    "teaser": "Stories of Indian immigrants navigating two cultures.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780618104390-L.jpg",
+    "byline": "Jhumpa Lahiri",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Interpreter of Maladies",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "short stories",
+      "indian",
+      "immigration",
+      "pulitzer",
+      "cultural"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-her-body-and-other-parties",
+    "categoryId": "BOOKS",
+    "subtype": "Short Stories",
+    "name": "Her Body and Other Parties",
+    "teaser": "Horror and feminist fairy tales.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781936747627-L.jpg",
+    "byline": "Carmen Maria Machado",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Her Body and Other Parties",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "short stories",
+      "horror",
+      "feminist",
+      "lgbtq",
+      "surreal"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-friday-black",
+    "categoryId": "BOOKS",
+    "subtype": "Short Stories",
+    "name": "Friday Black",
+    "teaser": "Race, consumerism, and dystopia.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781328577862-L.jpg",
+    "byline": "Nana Kwame Adjei-Brenyah",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Friday Black",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "short stories",
+      "african american",
+      "satire",
+      "dystopian",
+      "race"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-a-good-man-is-hard-to-find",
+    "categoryId": "BOOKS",
+    "subtype": "Short Stories",
+    "name": "A Good Man Is Hard to Find",
+    "teaser": "Grace and violence in the American South.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780156364652-L.jpg",
+    "byline": "Flannery O'Connor",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Good Man Is Hard to Find",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "short stories",
+      "southern gothic",
+      "catholic",
+      "classic",
+      "violence"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-things-they-carried",
+    "categoryId": "BOOKS",
+    "subtype": "Short Stories",
+    "name": "The Things They Carried",
+    "teaser": "American soldiers in Vietnam.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780618706419-L.jpg",
+    "byline": "Tim O'Brien",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Things They Carried",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "short stories",
+      "war",
+      "vietnam",
+      "american",
+      "classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-we-should-all-be-feminists",
+    "categoryId": "BOOKS",
+    "subtype": "Essay",
+    "name": "We Should All Be Feminists",
+    "teaser": "A personal and powerful essay on feminism.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781101911761-L.jpg",
+    "byline": "Chimamanda Ngozi Adichie",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "We Should All Be Feminists",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "essay",
+      "feminist",
+      "african",
+      "contemporary",
+      "empowerment"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-trick-mirror",
+    "categoryId": "BOOKS",
+    "subtype": "Essay",
+    "name": "Trick Mirror",
+    "teaser": "Self-delusion in the digital age.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780525512387-L.jpg",
+    "byline": "Jia Tolentino",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Trick Mirror",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "essay",
+      "internet",
+      "culture",
+      "feminist",
+      "contemporary"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-slouching-towards-bethlehem",
+    "categoryId": "BOOKS",
+    "subtype": "Essay",
+    "name": "Slouching Towards Bethlehem",
+    "teaser": "California and the 1960s.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780374531386-L.jpg",
+    "byline": "Joan Didion",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Slouching Towards Bethlehem",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "essay",
+      "california",
+      "1960s",
+      "american",
+      "classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-charlottes-web",
+    "categoryId": "BOOKS",
+    "subtype": "Children",
+    "name": "Charlotte's Web",
+    "teaser": "A pig and a spider form an unlikely friendship.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780064400558-L.jpg",
+    "byline": "E.B. White",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Charlotte's Web",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "children",
+      "classic",
+      "animals",
+      "friendship",
+      "death"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-speak",
+    "categoryId": "BOOKS",
+    "subtype": "Young Adult",
+    "name": "Speak",
+    "teaser": "A high school freshman finds her voice after a traumatic event.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780312678395-L.jpg",
+    "byline": "Laurie Halse Anderson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Speak",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "young adult",
+      "feminist",
+      "trauma",
+      "coming of age",
+      "high school"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-perks-of-being-a-wallflower",
+    "categoryId": "BOOKS",
+    "subtype": "Young Adult",
+    "name": "The Perks of Being a Wallflower",
+    "teaser": "A sensitive teen navigates high school and mental health.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316769488-L.jpg",
+    "byline": "Stephen Chbosky",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Perks of Being a Wallflower",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "young adult",
+      "coming of age",
+      "mental health",
+      "friendship",
+      "classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-aristotle-and-dante-discover-the-secrets-of-the-universe",
+    "categoryId": "BOOKS",
+    "subtype": "Young Adult",
+    "name": "Aristotle and Dante Discover the Secrets of the Universe",
+    "teaser": "Two Mexican-American teens discover friendship and love.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781442472181-L.jpg",
+    "byline": "Benjamin Alire Saenz",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Aristotle and Dante Discover the Secrets of the Universe",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "young adult",
+      "lgbtq",
+      "mexican american",
+      "coming of age",
+      "romance"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-saga",
+    "categoryId": "BOOKS",
+    "subtype": "Graphic Novel",
+    "name": "Saga",
+    "teaser": "An epic space opera about star-crossed lovers.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781632151148-L.jpg",
+    "byline": "Brian K. Vaughan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Saga",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "graphic novel",
+      "science fiction",
+      "romance",
+      "space",
+      "epic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-moby-dick",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Moby-Dick",
+    "teaser": "A sea captain's obsessive hunt for a white whale.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780142437247-L.jpg",
+    "byline": "Herman Melville",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Moby-Dick",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "american",
+      "classic",
+      "whaling",
+      "obsession",
+      "sea"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-human-acts",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Human Acts",
+    "teaser": "The aftermath of the 1980 Gwangju Uprising in South Korea.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781101946336-L.jpg",
+    "byline": "Han Kang",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Human Acts",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "korean",
+      "political violence",
+      "historical",
+      "grief",
+      "translated"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-shadow-king",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Shadow King",
+    "teaser": "Ethiopian women fight Italian invaders in 1935.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781982152833-L.jpg",
+    "byline": "Maaza Mengiste",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Shadow King",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "ethiopian",
+      "historical",
+      "feminist",
+      "war",
+      "booker nominee"
+    ],
+    "tier": 1
   }
 ]
