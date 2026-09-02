@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -73,7 +74,9 @@ fun BookCoverHubScreen(navController: NavController) {
     val ratedCount = AppPreferences.bookRatingsState.size
 
     fun start(kind: String) {
-        if (busy) return
+        // v320b — fetching is OPT-OUT by default: nothing downloads until
+        // the user flips the toggle below.
+        if (busy || !AppPreferences.bookFetchEnabledState) return
         job = scope.launch {
             busy = true
             done = 0; total = 0; failed = 0
@@ -154,6 +157,49 @@ fun BookCoverHubScreen(navController: NavController) {
             ),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // ── Opt-in / opt-out master switch (v320b) ─────────────────
+            item(key = "master") {
+                val fetchOn = AppPreferences.bookFetchEnabledState
+                Surface(
+                    shape = RoundedCornerShape(18.dp),
+                    color = if (fetchOn) MaterialTheme.colorScheme.secondaryContainer
+                            else MaterialTheme.colorScheme.surfaceContainerHigh,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
+                    ) {
+                        CurioIcon(
+                            if (fetchOn) CurioIcons.Download else CurioIcons.MenuBook, null,
+                            tint = if (fetchOn) MaterialTheme.colorScheme.onSecondaryContainer
+                                   else MaterialTheme.colorScheme.onSurfaceVariant,
+                            size = 20.dp
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                "Book cover fetching",
+                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                if (fetchOn)
+                                    "ON — covers and ratings can be downloaded"
+                                else
+                                    "OFF by default — nothing downloads until you turn this on",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = fetchOn,
+                            onCheckedChange = { AppPreferences.setBookFetchEnabled(context, it) }
+                        )
+                    }
+                }
+            }
+
             // ── Provider picker ────────────────────────────────────────
             item(key = "provider") {
                 Text(
@@ -237,15 +283,16 @@ fun BookCoverHubScreen(navController: NavController) {
 
             // ── Actions ────────────────────────────────────────────────
             item(key = "actions") {
+                val fetchOn = AppPreferences.bookFetchEnabledState
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     HubButton(
                         label = "Fetch all covers",
                         glyph = CurioIcons.Download,
                         emphasize = true,
-                        enabled = !busy,
+                        enabled = fetchOn && !busy,
                         onClick = { start("covers") }
                     )
-                    val retryEnabled = !busy && failedList.isNotEmpty()
+                    val retryEnabled = fetchOn && !busy && failedList.isNotEmpty()
                     HubButton(
                         label = if (failedList.isEmpty()) "Retry failed covers" else "Retry failed (${failedList.size})",
                         glyph = CurioIcons.Refresh,
@@ -257,9 +304,16 @@ fun BookCoverHubScreen(navController: NavController) {
                         label = "Fetch ratings (keyless)",
                         glyph = CurioIcons.Star,
                         emphasize = false,
-                        enabled = !busy,
+                        enabled = fetchOn && !busy,
                         onClick = { start("ratings") }
                     )
+                    if (!fetchOn) {
+                        Text(
+                            "Fetching is off — flip the switch above to download covers and ratings.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
 
@@ -346,11 +400,17 @@ fun BookCoverHubScreen(navController: NavController) {
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.weight(1f)
                             )
-                            if (!busy) {
+                            if (!busy && AppPreferences.bookFetchEnabledState) {
                                 Surface(
                                     onClick = {
                                         job = scope.launch {
                                             busy = true
+                                            // v320b — per-row retry also respects the opt-out.
+                                            if (!AppPreferences.bookFetchEnabledState) {
+                                                busy = false
+                                                job = null
+                                                return@launch
+                                            }
                                             try {
                                                 BookCoverFetch.fetchAll(context, provider, onlyFailed = true) { d, t, f ->
                                                     done = d; total = t; failed = f

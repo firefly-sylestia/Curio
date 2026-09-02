@@ -1381,13 +1381,16 @@ internal fun HoldActionsPill(
     actions: List<HoldAction>,
     onDismiss: () -> Unit
 ) {
-    val scale = remember { Animatable(0.6f) }
-    val alpha = remember { Animatable(0f) }
+    // Named popScale/popAlpha (NOT scale/alpha): inside the graphicsLayer
+    // block below, an outer `val alpha` would shadow the receiver's own
+    // alpha property and break compilation ("val cannot be reassigned").
+    val popScale = remember { Animatable(0.6f) }
+    val popAlpha = remember { Animatable(0f) }
     LaunchedEffect(Unit) {
         // Beautiful morph-in: springy pop + fade, one frame after the
         // overlay appears.
-        scale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
-        alpha.animateTo(1f, tween(140))
+        popScale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
+        popAlpha.animateTo(1f, tween(140))
     }
     Box(
         modifier = Modifier
@@ -1402,9 +1405,11 @@ internal fun HoldActionsPill(
             modifier = Modifier
                 .align(Alignment.Center)
                 .graphicsLayer {
-                    scaleX = scale.value
-                    scaleY = scale.value
-                    alpha = alpha.value
+                    scaleX = popScale.value
+                    scaleY = popScale.value
+                    // `alpha` here is the GraphicsLayerScope var (the local
+                    // is popAlpha, so no shadowing).
+                    alpha = popAlpha.value
                 }
         ) {
             Row(

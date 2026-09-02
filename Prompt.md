@@ -10,6 +10,21 @@ User request (verbatim, condensed):
 > failed-fetched-books option — make book-cover fetching a hub of its own.
 > If possible, add rating fetching too without any API — add it.
 
+## Follow-up (v320b): CI fix + fetch OPT-OUT
+
+CI (`:app:compileDebugKotlin`) failed at `NewCategoryPicker.kt:1407` — the
+morph-in pill's `Animatable` was named `alpha`, shadowing the
+`graphicsLayer` receiver's own `alpha` var ("'val' cannot be reassigned /
+Assignment type mismatch Float vs Animatable"). Renamed to
+`popScale`/`popAlpha`.
+
+Also made book fetching OPT-OUT by default:
+`AppPreferences.bookFetchEnabledState` (`KEY_BOOK_FETCH_ENABLED`, default
+false) — nothing downloads and no Google lookup runs until the user flips
+the toggle at the top of the hub. Hub actions, per-row retries and the
+engine entry points all respect the gate; the Experiments row subtitle
+shows "OFF · open the hub to turn fetching on".
+
 ### What shipped (this turn)
 
 **A. Chapter chips → "CH N" (`TopicRevealScreen.kt`):** the reveal page's

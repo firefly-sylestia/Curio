@@ -190,9 +190,12 @@ object AppPreferences {
     private const val KEY_PICKER_PAGE0_MODE = "picker_page0_mode"            // PickerMode.name
     private const val KEY_PICKER_PAGE0_TAB_SCROLL = "picker_page0_tab_scroll_" // suffix = tab name
     private const val KEY_PICKER_PAGE1_SCROLL = "picker_page1_scroll"   // "index:offset" of page 1
-    // v320 — book-cover hub: which provider the bulk fetch uses, the books
+    // v320/v320b — book-cover hub: whether bulk cover + rating fetching is
+    // ENABLED (opt-out by default — OFF until the user turns it on, so no
+    // surprise data usage), which provider the bulk fetch uses, the books
     // whose covers failed (survive restarts so "Retry failed" works), and
     // the keyless-fetched average ratings (book name → Google Books rating).
+    private const val KEY_BOOK_FETCH_ENABLED = "book_fetch_enabled"    // bool — opt-out, default false
     private const val KEY_BOOK_COVER_PROVIDER = "book_cover_provider"  // BookCoverProvider.name
     private const val KEY_BOOK_COVER_FAILED = "book_cover_failed"     // JSON array of book names
     private const val KEY_BOOK_RATINGS = "book_ratings"               // JSON object name->avg rating
@@ -790,6 +793,8 @@ object AppPreferences {
      * keyless-fetched Google Books average ratings (book name → rating),
      * which the reveal shows as star chips on book topics.
      */
+    var bookFetchEnabledState by mutableStateOf(false)
+        private set
     var bookCoverProviderState by mutableStateOf("OPEN_LIBRARY")
         private set
     var bookCoverFailedState by mutableStateOf<List<String>>(emptyList())
@@ -938,6 +943,7 @@ object AppPreferences {
         classicPickerEnabledState = isClassicPickerEnabled(context)
         pickerMixesSeededState = isPickerMixesSeeded(context)
         lastMixNameState = getLastMixName(context)
+        bookFetchEnabledState = isBookFetchEnabled(context)
         bookCoverProviderState = getBookCoverProvider(context)
         bookCoverFailedState = getBookCoverFailed(context)
         bookRatingsState = getBookRatings(context)
@@ -2314,7 +2320,20 @@ object AppPreferences {
         lastMixNameState = name
     }
 
-    // ── Book-cover hub (v320) ────────────────────────────────────────
+    // ── Book-cover hub (v320 / v320b) ────────────────────────────────
+    /**
+     * Whether bulk book-cover + rating fetching is ENABLED. Opt-OUT by
+     * default (false) — the user flips it on in the hub, so the app never
+     * bulk-downloads covers (or hits Google Books) without explicit consent.
+     */
+    fun isBookFetchEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_BOOK_FETCH_ENABLED, false)
+
+    fun setBookFetchEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_BOOK_FETCH_ENABLED, enabled).apply()
+        bookFetchEnabledState = enabled
+    }
+
     /** The selected cover provider (a BookCoverProvider enum name). */
     fun getBookCoverProvider(context: Context): String =
         prefs(context).getString(KEY_BOOK_COVER_PROVIDER, "OPEN_LIBRARY") ?: "OPEN_LIBRARY"

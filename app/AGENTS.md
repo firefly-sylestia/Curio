@@ -1470,6 +1470,16 @@ app/src/main/java/com/curio/app/
   (3) **Reveal ratings** — the synopsis card header and the book-notes
   sheet header show a compact ★ rating chip when the hub's keyless
   Google Books rating exists for that book.
+  (4) **Opt-OUT by default (v320b)** — bulk fetching is gated behind
+  `AppPreferences.bookFetchEnabledState` (`KEY_BOOK_FETCH_ENABLED`,
+  default false): nothing downloads and no Google lookup runs until the
+  user flips the toggle at the top of the hub. All hub actions, per-row
+  retries, and the engine entry points respect the gate; the Experiments
+  row subtitle surfaces the OFF state. ALSO fixed a CI compile error in
+  `HoldActionsPill` (`NewCategoryPicker.kt`): the morph-in Animatable was
+  named `alpha`, which shadowed the `graphicsLayer` receiver's `alpha`
+  property ("val cannot be reassigned / Float vs Animatable" at
+  line 1407) — renamed to `popScale`/`popAlpha`.
 - **v317 — merged book-notes sheet (Synopsis | Chapters tabs, expands to
   top) + "Also in" from All + share-card editor overhaul + cover fetch
   under Experiments.** (User: synopsis should show only 5 lines on the
