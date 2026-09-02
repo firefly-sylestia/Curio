@@ -1,5 +1,6 @@
 package com.curio.app.features.home
 
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -880,8 +881,16 @@ fun HomeScreen(navController: NavController) {
             // progress lives on Home, not only in the Quests screen. Tap
             // anywhere to open Quests. Reads reactive state, so bars fill
             // the instant an action lands.
+            // The strip's centering modifier lives HERE (ColumnScope — the
+            // same widthIn+align the quest block uses), not inside the
+            // composable: Modifier.align only exists on a ColumnScope.
             HomeDailyStrip(
                 context = context,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .widthIn(max = if (windowWidthSizeClass().isWide) WideContentMaxWidth else Dp.Infinity)
+                    .align(Alignment.CenterHorizontally),
                 onClick = {
                     navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true }
                 }
@@ -1608,6 +1617,7 @@ private fun TopBarPill(
 @Composable
 private fun HomeDailyStrip(
     context: Context,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     val quests = CurioQuests.dailyQuestsFor(CurioQuests.todayEpochDay(), context).filterNot { it.bonus }.take(3)
@@ -1622,11 +1632,7 @@ private fun HomeDailyStrip(
         shape = RoundedCornerShape(20.dp),
         color = if (allDone) accent.copy(alpha = 0.16f)
         else MaterialTheme.colorScheme.surfaceContainerHigh,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .widthIn(max = if (windowWidthSizeClass().isWide) WideContentMaxWidth else Dp.Infinity)
-            .align(Alignment.CenterHorizontally)
+        modifier = modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
             Row(

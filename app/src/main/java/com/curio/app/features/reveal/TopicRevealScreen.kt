@@ -117,6 +117,7 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioPassport
 import com.curio.app.data.CurioPet
+import com.curio.app.data.CurioQuests
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.data.CurioCategory
