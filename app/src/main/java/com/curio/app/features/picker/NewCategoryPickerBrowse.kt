@@ -440,11 +440,6 @@ private fun PinsTabContent(
                                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
-                            Text(
-                                "Hold for options · tap to spin",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
                         }
                         Surface(
                             onClick = {

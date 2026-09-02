@@ -1,3 +1,5 @@
+ADD: Your-mixes cards redesigned as compact "mix stamps" — a leading lane icon, the mix name + lane list, tiny tinted lane-composition dots previewing the mix, and an inline Spin pill (no more tall empty slabs).
+ADD: The "hold for options" hint text is gone from the Pinned section and the pinned rows — holding still works.
 ADD: Category picker page 1 is rebuilt as a Curio / Knowledge / Mix mode picker — the Science / Entertainment preset chips are gone, and the page starts CLEAN every time: tap a lane to open it, and tap-and-hold is the only way into mixing, so holding now selects exactly ONE lane (the old page silently pre-ticked your previous deck's lanes — the "it auto-selects 2" bug).
 ADD: Selected category tiles in the picker now wear the classic category-tint style — a solid fill in the lane's own color with matching icon and check — and idle tiles and panels lift to a soft cream in light mode instead of dark tan.
 ADD: Your mixes grid in the picker shows 6 mixes before the Show all button.

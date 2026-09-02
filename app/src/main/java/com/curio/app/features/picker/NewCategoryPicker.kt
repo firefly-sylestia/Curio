@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -63,6 +64,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.curioPillLift
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.onAccent
@@ -401,7 +403,7 @@ private fun NewPickerPage(
     ) {
         // ── Pinned (taller/wider pills) ──────────────────────────────
         item(key = "pinned-label") {
-            NewSectionLabel("Pinned", hint = if (pinnedList.isNotEmpty()) "hold for options" else null)
+            NewSectionLabel("Pinned")
         }
         if (pinnedList.isEmpty()) {
             item(key = "pinned-empty") {
@@ -885,13 +887,11 @@ private fun NewSectionLabel(label: String, hint: String? = null, withRow: Boolea
 }
 
 /**
- * One named mix CARD (grid cell): name + lane teaser, a Spin pill, and a
- * 3-dot menu (Edit / Delete). [active] marks the mix currently applied.
- *
- * v3xx3 — uniform cell height (every card in the 2-col grid reads alike), a
- * bottom-anchored Spin pill, and the 3-dot menu now opens as an M3 popup
- * (anchored overlay, always on top) instead of an inline surface that pushed
- * the row's layout when expanded.
+ * One named mix CARD (grid cell) — a compact "mix stamp": a leading lane
+ * plate, the mix name + lane teaser, a row of tiny lane composition dots
+ * (the mix's lanes previewed as mini tinted plates) and an inline Spin pill.
+ * 3-dot → Edit / Delete (M3 popup, never pushes the row). [active] marks the
+ * mix currently applied. Uniform 112dp cells so the 2-col grid reads alike.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -905,96 +905,147 @@ private fun NewMixCard(
     modifier: Modifier = Modifier
 ) {
     var menuOpen by remember { mutableStateOf(false) }
-    val shape = RoundedCornerShape(18.dp)
+    val shape = RoundedCornerShape(20.dp)
+    val lanes = mix.laneIds.mapNotNull { id -> categories.firstOrNull { it.id == id } }
+    val lead = lanes.firstOrNull()
     Surface(
         shape = shape,
         color = newPickerIdleFill(),
         shadowElevation = 0.dp,
         modifier = modifier
-            .height(122.dp)
+            .height(112.dp)
             .combinedClickable(
                 onClick = onApply,
                 onLongClick = { menuOpen = true }
             )
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(12.dp)
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+            // ── Header: lane plate + name + 3-dot ─────────────────────
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                    contentAlignment = Alignment.Center
                 ) {
+                    CurioIcon(
+                        name = lead?.iconGlyph ?: CurioIcons.Tune,
+                        contentDescription = null,
+                        size = 20.dp,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Spacer(Modifier.width(9.dp))
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = mix.name,
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
+                        overflow = TextOverflow.Ellipsis
                     )
-                    // 3-dot → Edit / Delete (M3 popup, never pushes the row).
-                    Box {
-                        Surface(
-                            onClick = { menuOpen = true },
-                            shape = RoundedCornerShape(50),
-                            color = MaterialTheme.colorScheme.surfaceContainerHighest
+                    Text(
+                        text = mixTeaser(mix.laneIds, categories),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Spacer(Modifier.width(4.dp))
+                // 3-dot → Edit / Delete (M3 popup, never pushes the row).
+                Box {
+                    Surface(
+                        onClick = { menuOpen = true },
+                        shape = RoundedCornerShape(50),
+                        color = MaterialTheme.colorScheme.surfaceContainerHighest
+                    ) {
+                        Box(
+                            modifier = Modifier.size(28.dp),
+                            contentAlignment = Alignment.Center
                         ) {
-                            Box(
-                                modifier = Modifier.size(26.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CurioIcon(
-                                    name = CurioIcons.MoreVert,
-                                    contentDescription = "Mix options",
-                                    size = 15.dp,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                        androidx.compose.material3.DropdownMenu(
-                            expanded = menuOpen,
-                            onDismissRequest = { menuOpen = false }
-                        ) {
-                            androidx.compose.material3.DropdownMenuItem(
-                                text = { Text("Edit", color = MaterialTheme.colorScheme.onSurface) },
-                                onClick = { menuOpen = false; onMore() }
-                            )
-                            androidx.compose.material3.DropdownMenuItem(
-                                text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
-                                onClick = { menuOpen = false; onDelete() }
+                            CurioIcon(
+                                name = CurioIcons.MoreVert,
+                                contentDescription = "Mix options",
+                                size = 16.dp,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
+                    androidx.compose.material3.DropdownMenu(
+                        expanded = menuOpen,
+                        onDismissRequest = { menuOpen = false }
+                    ) {
+                        androidx.compose.material3.DropdownMenuItem(
+                            text = { Text("Edit", color = MaterialTheme.colorScheme.onSurface) },
+                            onClick = { menuOpen = false; onMore() }
+                        )
+                        androidx.compose.material3.DropdownMenuItem(
+                            text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
+                            onClick = { menuOpen = false; onDelete() }
+                        )
+                    }
                 }
-                Spacer(Modifier.height(5.dp))
-                Text(
-                    text = mixTeaser(mix.laneIds, categories),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
             }
-            // Spin pill — bottom-end, so every cell's action sits in the same
-            // slot regardless of teaser length.
-            Surface(
-                onClick = onApply,
-                shape = RoundedCornerShape(50),
-                color = if (active) MaterialTheme.colorScheme.secondaryContainer
-                        else MaterialTheme.colorScheme.surfaceContainerHighest,
-                modifier = Modifier.align(Alignment.BottomEnd)
+            // ── Footer: lane composition dots + inline Spin pill ─────
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    if (active) "Spinning" else "Spin",
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = if (active) MaterialTheme.colorScheme.onSecondaryContainer
-                            else MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
-                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    lanes.take(4).forEach { cat ->
+                        val ink = cat.categoryInk()
+                        Box(
+                            modifier = Modifier
+                                .size(18.dp)
+                                .clip(CircleShape)
+                                .background(ink.copy(alpha = 0.16f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CurioIcon(
+                                name = cat.iconGlyph,
+                                contentDescription = null,
+                                size = 10.dp,
+                                tint = ink
+                            )
+                        }
+                    }
+                    if (lanes.size > 4) {
+                        Text(
+                            text = "+${lanes.size - 4}",
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 2.dp)
+                        )
+                    }
+                }
+                Spacer(Modifier.weight(1f))
+                Surface(
+                    onClick = onApply,
+                    shape = RoundedCornerShape(50),
+                    color = if (active) MaterialTheme.colorScheme.secondaryContainer
+                            else MaterialTheme.colorScheme.surfaceContainerHighest
+                ) {
+                    Text(
+                        if (active) "Spinning" else "Spin",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        color = if (active) MaterialTheme.colorScheme.onSecondaryContainer
+                                else MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
             }
         }
     }

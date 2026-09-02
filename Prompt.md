@@ -26,7 +26,14 @@ Clarifications asked (ask_user):
 - **Live-state fixes** — `MixEditorSheet` uses an immutable `Set` (recomposes every tap); `AddSuggestionSheet` reads reactive state + toggles the EFFECTIVE list so unchecking defaults works; `AppPreferences.removePickerSuggestion` seeds from the effective list (defaults) before removing.
 - **Fixes the mix grid at 6**: `mixes.take(6)` / `mixes.size > 6`.
 
-Verification: compile/build/lint forbidden in this env (CI validates on push). Braces/parens/brackets balanced via script for the 3 picker files; import set verified for `Color`/`lerp`/`curioPillLift`/`isCurioDarkTheme`/`themedAccent`/`onAccent`/`GridItemSpan`; nested-lazy-grid crash rule respected (page-1 grids are top-level in the pager page; continue-exploring stays manual chunked rows).
+### Follow-up (same request): pinned hints removed + mixes cards redesigned
+
+User: "also in the new picker page 2 remove the hold for options hint, for pinned, and redesign the your mixes cards — they look very bad, so redesign it."
+
+- Pinned section label hint ("hold for options") removed on page 2; the Browse Pins tab row subtitle ("Hold for options · tap to spin") removed too — the hold interaction itself is unchanged (option pill still opens).
+- `NewMixCard` redesigned as a compact "mix stamp" (112dp, was 122dp): leading 38dp lane plate (first lane glyph, Tune fallback), ExtraBold name + one-line teaser, footer row of up to 4 tiny lane-composition dots tinted per lane via `categoryInk()` (16% alpha fill + glyph) with a "+N" overflow chip, and an inline Spin pill bottom-right (no more floating bottom-anchored pill); the 3-dot Edit/Delete popup stays.
+
+Verification: compile/build/lint forbidden in this env (CI validates on push). Braces/parens/brackets balanced via script for the picker files; import set verified for `Color`/`lerp`/`curioPillLift`/`isCurioDarkTheme`/`themedAccent`/`onAccent`/`categoryInk`/`width`/`GridItemSpan`; nested-lazy-grid crash rule respected (page-1 grids are top-level in the pager page; continue-exploring stays manual chunked rows).
 
 ### Progress
 - [x] Ask clarifying questions (auto-select location + light creaming scope).
@@ -35,4 +42,5 @@ Verification: compile/build/lint forbidden in this env (CI validates on push). B
 - [x] Mixes 6 + Show all; Continue-exploring remove pill + live reads; Add sheet + removePickerSuggestion no-op fixes; MixEditorSheet immutable set.
 - [x] Classic `CategoryPickerContent` clean start (same auto-select-2 root cause).
 - [x] Changelog (20260921.txt) + DOX pass (app/AGENTS.md v3xx7).
+- [x] Follow-up: pinned hints removed, mixes cards redesigned (v3xx8), changelog update.
 - [x] Commit & push.

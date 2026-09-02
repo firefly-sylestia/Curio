@@ -356,6 +356,18 @@ app/src/main/java/com/curio/app/
     the effective list so removing a default suggestion actually removes
     it (was a no-op against an empty user list); mix save/delete already
     recomposed via `savedMixesState`.
+- **v3xx8 — page-2 mixes cards redesigned + pinned hints removed.** User:
+  "remove the hold for options hint for pinned … redesign the your mixes
+  cards looks they are bad". (1) The Pinned section label hint ("hold
+  for options") is gone, and the Browse Pins tab row subtitle ("Hold for
+  options · tap to spin") is gone too — holding still opens the option
+  pill, the hint text is just removed. (2) `NewMixCard` is redesigned as
+  a compact "mix stamp" (112dp, was 122dp slabs): a leading 38dp lane
+  plate (first lane's glyph, Tune fallback), name (ExtraBold) + one-line
+  `mixTeaser`, a footer row of up to four 18dp lane-composition dots
+  (tinted per lane via `categoryInk()` at 16% alpha + glyph) with a
+  "+N" overflow chip, and an INLINE Spin pill (no more floating
+  bottom-anchored pill). 3-dot menu (Edit/Delete) unchanged.
 - **v27n — elevation over borders (decided):** cards, chips, pills & sheets
   lift with real shadows instead of hairline outlines (AMOLED keeps the faint
   container step; selected states raise 4–8dp). **Shadow rendering rules:**
