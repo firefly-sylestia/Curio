@@ -1,6 +1,7 @@
 package com.curio.app.features.picker
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -69,7 +71,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.roundToPx
 import kotlin.math.roundToInt
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
@@ -81,7 +82,6 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.curioPillLift
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.onAccent
@@ -1069,17 +1069,12 @@ private fun NewSectionLabel(label: String, hint: String? = null, withRow: Boolea
 
 /**
  * One named mix CARD (grid cell) — a refined "mix stamp":
- *  - a LEAD-LANE cover plate tinted in the mix's first lane's color, so
- *    every mix has a color identity (no more identical grey plates);
- *  - the ExtraBold name + one-line teaser, with an "Active" label (in the
- *    lead lane's accent) on the mix currently applied to the Spin deck;
- *  - the lane-composition dots previewing the mix.
+ *  - a single dark per-mix identity tone for the cover and lane icons;
+ *  - the ExtraBold name + an "Active" label on the applied mix;
+ *  - a selected border and soft fill highlight when the mix is active.
  * Tapping the card spins the mix; tap-and-hold opens the Edit/Delete
- * option pill (v3xx13 — no visible action buttons, no borders on the
- * card; the "Active" label alone marks the playing mix). Uniform 122dp
- * cells so the 2-col grid reads alike; the footer wears each lane's
- * category icon in its own accent chip (v3xx14 — no more washed-out
- * dots / "+N" text).
+ * option pill. The footer uses category icons for recognition, but one
+ * stable mix tone for every icon so light mode stays cohesive.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1096,14 +1091,16 @@ private fun NewMixCard(
     val shape = RoundedCornerShape(20.dp)
     val lanes = mix.laneIds.mapNotNull { id -> categories.firstOrNull { it.id == id } }
     val lead = lanes.firstOrNull()
-    val leadAccent = lead?.themedAccent()
+    val mixTone = namedMixTone(mix)
+    val cardFill = if (active) lerp(newPickerIdleFill(), mixTone, 0.08f) else newPickerIdleFill()
     val holdCenter = remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
     Surface(
         shape = shape,
-        color = newPickerIdleFill(),
+        color = cardFill,
         shadowElevation = 0.dp,
         modifier = modifier
             .height(96.dp)
+            .then(if (active) Modifier.border(2.dp, mixTone, shape) else Modifier)
             .onGloballyPositioned { holdCenter.value = it.boundsInRoot().center }
             .combinedClickable(
                 onClick = onApply,
@@ -1133,12 +1130,11 @@ private fun NewMixCard(
                             // 16% alpha; blend the accent in properly so the
                             // mix keeps a real color identity.
                             .background(
-                                if (leadAccent != null) lerp(
+                                lerp(
                                     MaterialTheme.colorScheme.surfaceContainerHighest,
-                                    leadAccent,
+                                    mixTone,
                                     0.42f
                                 )
-                                else MaterialTheme.colorScheme.surfaceContainerHighest
                             ),
                         contentAlignment = Alignment.Center
                     ) {
@@ -1146,7 +1142,7 @@ private fun NewMixCard(
                             name = lead?.iconGlyph ?: CurioIcons.Tune,
                             contentDescription = null,
                             size = 20.dp,
-                            tint = leadAccent ?: MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = mixTone
                         )
                     }
                     Spacer(Modifier.width(9.dp))
@@ -1158,11 +1154,11 @@ private fun NewMixCard(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
-                        if (active && leadAccent != null) {
+                        if (active) {
                             Text(
                                 "Active",
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                                color = leadAccent,
+                                color = mixTone,
                                 maxLines = 1
                             )
                         }
@@ -1178,19 +1174,18 @@ private fun NewMixCard(
                 ) {
                     val shown = if (lanes.size > 6) lanes.take(5) else lanes
                     shown.forEachIndexed { i, cat ->
-                        val ink = cat.categoryInk()
                         Box(
                             modifier = Modifier
                                 .size(20.dp)
                                 .clip(RoundedCornerShape(7.dp))
-                                .background(ink.copy(alpha = 0.22f)),
+                                .background(mixTone.copy(alpha = 0.22f)),
                             contentAlignment = Alignment.Center
                         ) {
                             CurioIcon(
                                 name = cat.iconGlyph,
                                 contentDescription = null,
                                 size = 12.dp,
-                                tint = ink
+                                tint = mixTone
                             )
                         }
                         if (i < shown.size - 1) Spacer(Modifier.width(5.dp))
@@ -1207,6 +1202,37 @@ private fun NewMixCard(
             }
         }
     }
+}
+
+/**
+ * v3xx — curated DEEP identity tones for saved mixes. NOT category accents:
+ * the old per-lane inks made the card look like a jumble (and washed out in
+ * light mode). Each mix resolves ONE tone deterministically from its stable
+ * id ([NamedMix.createdAtMillis]), so the cover plate, footer chips and
+ * Active label all read as a single per-mix identity — and the active card
+ * gets a highlight ring in the same tone. Dark mode lightens the tone so
+ * the chips stay visible on the dark card surface.
+ */
+private val MIX_IDENTITY_TONES = listOf(
+    Color(0xFF1F2A44), // deep indigo-slate
+    Color(0xFF37474F), // blue-grey
+    Color(0xFF4E342E), // coffee
+    Color(0xFF3E2723), // espresso
+    Color(0xFF1B5E20), // deep green
+    Color(0xFF004D40), // deep teal
+    Color(0xFF4A148C), // deep purple
+    Color(0xFF880E4F), // deep magenta
+    Color(0xFFBF360C), // deep rust
+    Color(0xFF263238)  // charcoal blue
+)
+
+/** The one dark identity color for a saved mix (theme-aware twin in dark mode). */
+@Composable
+private fun namedMixTone(mix: NamedMix): Color {
+    val size = MIX_IDENTITY_TONES.size
+    val i = ((mix.createdAtMillis % size) + size) % size
+    val tone = MIX_IDENTITY_TONES[i.toInt()]
+    return if (isCurioDarkTheme()) lerp(tone, Color.White, 0.58f) else tone
 }
 
 /**
@@ -1433,7 +1459,7 @@ internal fun HoldActionsPill(
                         // ABOVE the finger, clamped inside the screen.
                         val x = (a.x - pillSize.width / 2f).roundToInt()
                             .coerceIn(8, (scrimSize.width - pillSize.width - 8).coerceAtLeast(8))
-                        val y = (a.y - pillSize.height - 14.dp.roundToPx()).roundToInt()
+                        val y = (a.y - pillSize.height - (14.dp.value * density)).roundToInt()
                             .coerceIn(8, (scrimSize.height - pillSize.height - 8).coerceAtLeast(8))
                         IntOffset(x, y)
                     } else {

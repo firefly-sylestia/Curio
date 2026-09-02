@@ -13,6 +13,8 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -255,6 +257,11 @@ val glassBackdrop = rememberLayerBackdrop()
                             isMaxLevel = level >= CurioQuests.maxLevel
                         )
                     }
+                }
+                // v9.x — the level-milestone roadmap: every level reward as a
+                // compact horizontal strip so the whole ladder is visible.
+                item("level-milestones") {
+                    LevelMilestonesCard(level = level)
                 }
                 // v9.x — the pet outfit shop: spend sparkles (earned here) on
                 // cosmetic outfits. The wallet line doubles as the entry.
@@ -551,6 +558,99 @@ private fun LevelCard(level: Int, xp: Int, nextThreshold: Int, progress: Float, 
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+            }
+        }
+    }
+}
+
+/**
+ * v9.x — the level-milestone ROADMAP: every level reward as a compact
+ * horizontal strip. Unlocked milestones wear gold, the NEXT one gets a gold
+ * ring, and locked ones stay dimmed — the whole ladder at a glance.
+ */
+@Composable
+private fun LevelMilestonesCard(level: Int) {
+    val rewards = LevelRewards.Catalog
+    val next = LevelRewards.nextReward(level)
+    CurioSettingsCard {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "Level milestones",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(Modifier.weight(1f))
+                Text(
+                    "$level / ${CurioQuests.maxLevel}",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                rewards.forEach { r ->
+                    val unlocked = level >= r.level
+                    val isNext = next?.id == r.id
+                    Column(
+                        modifier = Modifier.width(84.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(46.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    when {
+                                        unlocked -> curioGoldInk()
+                                        else -> MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.65f)
+                                    }
+                                )
+                                .then(
+                                    if (isNext) Modifier.border(2.dp, curioGoldInk(), CircleShape)
+                                    else Modifier
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CurioIcon(
+                                name = r.glyph,
+                                contentDescription = null,
+                                size = 20.dp,
+                                tint = when {
+                                    unlocked -> if (isCurioDarkTheme()) CurioColors.GoldInk else CurioColors.CreamWhite
+                                    else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                }
+                            )
+                        }
+                        Spacer(Modifier.height(5.dp))
+                        Text(
+                            "Level ${r.level}",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = if (unlocked || isNext) FontWeight.ExtraBold else FontWeight.Medium
+                            ),
+                            color = if (unlocked || isNext) curioGoldInk()
+                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            maxLines = 1
+                        )
+                        Text(
+                            r.title,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (unlocked) MaterialTheme.colorScheme.onSurface
+                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                            textAlign = TextAlign.Center,
+                            minLines = 2,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
             }
         }
     }

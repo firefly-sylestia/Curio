@@ -1502,9 +1502,9 @@ app/src/main/java/com/curio/app/
   CORE dailies with live progress bars, tap → Quests. (5) **Pet reacts
   on Home** — a quest claim sets `CurioPet.pendingQuestNudge`
   (`consumeQuestNudge`), which the Home flower bed consumes to show a
-  one-shot "Quest done! +sparkles ✨" bubble; a quick PLAY bubble
-  (visible when the pet is awake at home) starts a real play moment
-  (`notePlay`, feeding the PLAY daily + persona). (6) **Pet outfit
+  one-shot "Quest done! +sparkles ✨" bubble; play remains available through
+  the pet's own interactions (`notePlay`, feeding the PLAY daily + persona).
+  (6) **Pet outfit
   shop** (`data/PetOutfits.kt` + `features/outfits/OutfitShopScreen.kt`,
   route `OUTFIT_SHOP`, registered in NavHost + center-pop list) —
   pure-cosmetic accessory layers (16×16 art, merged onto the sprite's
@@ -1547,7 +1547,9 @@ app/src/main/java/com/curio/app/
   re-opens the Spin picker sheet like the arrow does); the three in-page
   tabs wear their OWN accent (`BrowseTab.accent()` rose/gold/sage, ink
   on solid fill), the active tab fills SOLID opaque, and capsules grew
-  46→54dp. (2) **Share editor** — `ShareCardMove` grows per-element
+  46→54dp. Saved mix cards now use one stable dark identity tone per mix
+  (rather than mixed category tints) and show a selected border/fill when
+  active. (2) **Share editor** — `ShareCardMove` grows per-element
   format fields (`titleFont/Align/Bold/Italic`, `factBold/Italic`,
   `metaFont/Bold/Italic`, `badgeFont/Bold/Italic`) applied through new
   `titleStyle`/`metaStyle`/`badgeStyle` wrappers (plus `factBodyStyle`
