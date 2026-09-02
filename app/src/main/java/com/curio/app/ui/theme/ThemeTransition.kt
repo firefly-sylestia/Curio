@@ -184,7 +184,10 @@ class CurioThemeTransitionState {
                         val result =
                             if (status == PixelCopy.SUCCESS && !dest.isBlank()) dest else null
                         if (!cont.isCancelled) {
-                            runCatching { cont.resume(result) }
+                            // resumeWith is the one Continuation member with a
+                            // stable signature (the resume(value, onCancellation)
+                            // extension made onCancellation required here).
+                            runCatching { cont.resumeWith(Result.success(result)) }
                         } else {
                             // Cancelled mid-copy: the continuation resumes
                             // with CancellationException on its own — just
