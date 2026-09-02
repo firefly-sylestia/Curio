@@ -4901,7 +4901,7 @@
     "subtype": "Book",
     "name": "The Bee Sting (2023)",
     "teaser": "Paul Murray's Booker-shortlisted Irish novel is 650 pages of family catastrophe narrated from four perspectives — a father selling his BMW online, a mother running from her past, and two teenage children — each chapter a different voice, each hiding a different version of the truth. It's a comic tragedy that builds to a reckoning that never quite arrives.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593715291-L.jpg",
     "byline": "Paul Murray",
     "exploreAction": {
       "verb": "Read",
@@ -4918,7 +4918,31 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 592
+    "pageCount": 580,
+    "synopsis": "Murray's novel follows the Barnes family in rural Ireland as they spiral toward collapse. The patriarch Dick, a once-successful car dealer, has fallen into depression after a financial crash; his wife Imelda is secretly selling off assets to keep the family afloat; their daughter Cass is desperate to escape to university; and their son PJ has run away to Dublin. The novel moves between the family's present crisis and their past, tracing how a single bad decision can unravel a family across generations. Murray's prose is darkly comic and structurally inventive, weaving together multiple timelines and perspectives. The novel was longlisted for the Booker Prize in 2023.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Present",
+        "pageStart": 1,
+        "pageEnd": 180,
+        "summary": "Dick's depression. Imelda's secrets. Cass's escape plan. PJ's disappearance."
+      },
+      {
+        "number": 2,
+        "title": "The Past",
+        "pageStart": 181,
+        "pageEnd": 400,
+        "summary": "How the family fell apart. The bad deal. The history of the house."
+      },
+      {
+        "number": 3,
+        "title": "The Reckoning",
+        "pageStart": 401,
+        "pageEnd": 580,
+        "summary": "The crash. The fire. What remains after the flames."
+      }
+    ]
   },
   {
     "id": "book-tom-lake-2023-216",
@@ -4926,7 +4950,7 @@
     "subtype": "Book",
     "name": "Tom Lake (2023)",
     "teaser": "Ann Patchett's novel is set in the spring of 2020, on a Michigan cherry farm, where three adult daughters are home with their mother — and the novel is mostly the mother telling them about the summer she spent in the 1980s doing community theater with a man who later became a movie star. The novel's frame is the pandemic; its content is the story about a story about love.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780063346925-L.jpg",
     "byline": "Ann Patchett",
     "exploreAction": {
       "verb": "Read",
@@ -4940,7 +4964,31 @@
       "Pandemic"
     ],
     "tier": 2,
-    "pageCount": 320
+    "pageCount": 336,
+    "synopsis": "Patchett's novel follows Lara, a mother of three daughters in Michigan during the COVID-19 pandemic, who tells her daughters the story of her brief romance decades earlier with a famous actor. The novel moves between Lara's present life on a cherry orchard and her past as a young actress in a regional theater production of Our Town, where she fell in love with the play's star. The novel is a meditation on the stories we tell our children, the choices we make, and the lives we might have lived. Patchett wrote the novel during the pandemic, and its themes of quarantine, storytelling, and the passage of time resonated with readers.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Orchard",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "Cherry picking. The pandemic. The daughters. The story begins."
+      },
+      {
+        "number": 2,
+        "title": "The Theater",
+        "pageStart": 101,
+        "pageEnd": 220,
+        "summary": "Our Town. The actor. The romance. The choice."
+      },
+      {
+        "number": 3,
+        "title": "The Return",
+        "pageStart": 221,
+        "pageEnd": 336,
+        "summary": "Back to Michigan. The life chosen. The life unlived."
+      }
+    ]
   },
   {
     "id": "book-the-heaven-earth-grocery-217",
@@ -4948,7 +4996,7 @@
     "subtype": "Book",
     "name": "The Heaven Earth Grocery (2023)",
     "teaser": "James McBride's novel centers on a 1972 discovery: a skeleton in a well in Pottstown, Pennsylvania, behind the Heaven & Earth Grocery Store — the neighborhood's Black and Jewish community's meeting place. The novel moves backward to tell how the body got there, and forward to show a community holding together through a housing crisis, a dance hall, and a haunted boy.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593555132-L.jpg",
     "byline": "James McBride",
     "exploreAction": {
       "verb": "Read",
@@ -4962,7 +5010,58 @@
       "Community"
     ],
     "tier": 2,
-    "pageCount": 400
+    "pageCount": 400,
+    "synopsis": "In 1972, when workers in Pottstown, Pennsylvania, unearth the remains of a child in the foundation of a new building, it ignites an investigation that threads back to the 1920s and the story of a vibrant, diverse small town. James McBride's novel centers on the residents of Chicken Hill, a neighborhood where Black and Jewish families live side by side, bound together by their shared marginalization. When the state of Pennsylvania seeks to institutionalize a young Black deaf boy named Finch, it is Chicken Hill's inhabitants who must decide whether and how to resist. The novel traces the lives of Moshe Ludlow, a Jewish immigrant who runs the Heaven & Earth Grocery Store with his wife Chona; Nate Daise, a Black laborer; and a cast of vivid characters navigating racial prejudice, bureaucratic cruelty, and the quiet heroism of community solidarity. McBride, who won the National Book Award for this novel, writes with warmth and humor about people pushed to the margins of American life, showing how their resilience and mutual care create a world richer than the one that excludes them.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Discovery",
+        "pageRange": "1-35",
+        "summary": "Workers unearth a skeleton during construction in 1972 Pottstown, launching an investigation that reaches back decades."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Chicken Hill",
+        "pageRange": "36-78",
+        "summary": "Introduction to the mixed neighborhood and the Ludlow family's grocery store as a community gathering place."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Store",
+        "pageRange": "79-125",
+        "summary": "Moshe's journey from immigrant to shopkeeper and the growing bonds between Black and Jewish families."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Finch",
+        "pageRange": "126-170",
+        "summary": "The state targets Finch, a deaf Black boy, for institutionalization, and Chicken Hill rallies to protect him."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Chona's Stand",
+        "pageRange": "171-220",
+        "summary": "Chona Ludlow's fierce advocacy and the community's fight against state power."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Reckoning",
+        "pageRange": "221-270",
+        "summary": "The consequences of resistance and the bonds that hold the community together."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Cover-Up",
+        "pageRange": "271-310",
+        "summary": "How the community conspires to protect its own from outside threats."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "Chicken Hill Endures",
+        "pageRange": "311-360",
+        "summary": "The neighborhood's legacy and the revelation that connects the 1972 discovery to the community's secret history."
+      }
+    ]
   },
   {
     "id": "book-lone-women-2023-218",
@@ -4970,7 +5069,7 @@
     "subtype": "Book",
     "name": "Lone Women (2023)",
     "teaser": "Victor LaValle's novel is a 1915 western with a supernatural secret: Adelaide Henry leaves her family's California farm after a fire and travels to Montana with a heavy steamer trunk that she will not let anyone open — because it contains her mother's body, and her mother is not staying dead. The novel is both a pioneer story and a horror story about what women carried to survive.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780525509424-L.jpg",
     "byline": "Victor LaValle",
     "exploreAction": {
       "verb": "Read",
@@ -4984,7 +5083,31 @@
       "Western"
     ],
     "tier": 2,
-    "pageCount": 304
+    "pageCount": 304,
+    "synopsis": "LaValle's novel follows Adelaide Henry, a Black woman in 1915 who flees California for Montana after a family tragedy, claiming a hundred acres under the Homestead Act. Adelaide carries a secret — a steamer trunk that she must never open. The novel is a gothic western that explores the isolation of the American frontier, the violence of white settlement, and the particular loneliness of Black women in the West. LaValle, who writes horror and speculative fiction, infuses the novel with supernatural elements that mirror the very real horrors of racism and misogyny.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "California",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "The fire. The secret. The escape. The train west."
+      },
+      {
+        "number": 2,
+        "title": "Montana",
+        "pageStart": 61,
+        "pageEnd": 200,
+        "summary": "The homestead. The neighbors. The trunk. The isolation."
+      },
+      {
+        "number": 3,
+        "title": "The Frontier",
+        "pageStart": 201,
+        "pageEnd": 304,
+        "summary": "The community. The violence. The truth about the trunk."
+      }
+    ]
   },
   {
     "id": "book-how-to-say-babylon-219",
@@ -4992,7 +5115,7 @@
     "subtype": "Book",
     "name": "How to Say Babylon (2023)",
     "teaser": "Safiya Sinclair's memoir won the National Book Critics Circle Award: growing up in Montego Bay, Jamaica, under a Rastafari father who controlled every aspect of her life — including forbidding her to speak patois, cut her hair, or leave the house — while she escaped through poetry and education. It's a memoir of language as both cage and key.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781982185848-L.jpg",
     "byline": "Safiya Sinclair",
     "exploreAction": {
       "verb": "Read",
@@ -5006,7 +5129,31 @@
       "Poetry"
     ],
     "tier": 2,
-    "pageCount": 368
+    "pageCount": 320,
+    "synopsis": "Sinclair's memoir follows her upbringing in a Rastafarian family in Jamaica, where her father's strict religious code governed every aspect of daily life. As a girl, Sinclair was forbidden from cutting her hair, wearing certain clothes, or attending school — her father's interpretation of Babylon (the corrupt Western world) dictated her existence. The memoir traces Sinclair's gradual rebellion against her father's control, her discovery of poetry, and her eventual escape to America, where she became a poet and professor. The book is both a coming-of-age story and a meditation on language, identity, and the cost of freedom. It won the 2023 National Book Critics Circle Award for Autobiography.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Jamaica",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The family. The hair. The rules. The father's world."
+      },
+      {
+        "number": 2,
+        "title": "Babylon",
+        "pageStart": 81,
+        "pageEnd": 200,
+        "summary": "The rebellion. The poetry. The escape. The cost."
+      },
+      {
+        "number": 3,
+        "title": "America",
+        "pageStart": 201,
+        "pageEnd": 320,
+        "summary": "The new life. The distance. The reconciliation. The voice."
+      }
+    ]
   },
   {
     "id": "book-blackouts-2023-220",
@@ -5014,7 +5161,7 @@
     "subtype": "Book",
     "name": "Blackouts (2023)",
     "teaser": "Justin Torres's National Book Award winner is a conversation between two men — an aging queer historian and a young man — in a shuttered museum-like institution, built around the historical record of the 'Sex Variants' study of the 1930s–40s, which documented queer lives and then buried them. The novel's 'blackouts' are the passages the archive erased, and the book is about restoring them.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593715659-L.jpg",
     "byline": "Justin Torres",
     "exploreAction": {
       "verb": "Read",
@@ -5028,7 +5175,31 @@
       "Experimental"
     ],
     "tier": 2,
-    "pageCount": 304
+    "pageCount": 320,
+    "synopsis": "Torres's novel follows two men — an older man named Juan and a younger narrator — who meet in a desert hotel and spend their days reading through a book called 'Sex Variants,' a 1941 study of queer sexuality that was suppressed by its author's own institution. The novel is a meditation on queer history, memory, and the way knowledge is buried and recovered. Torres uses a fragmented structure — blank pages, redacted text, marginalia — to mirror the way queer lives have been documented and erased. The novel won the 2023 National Book Award for Fiction.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Hotel",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Juan and the narrator. The desert. The book. The stories."
+      },
+      {
+        "number": 2,
+        "title": "Sex Variants",
+        "pageStart": 81,
+        "pageEnd": 220,
+        "summary": "The 1941 study. The suppression. The lives documented."
+      },
+      {
+        "number": 3,
+        "title": "The Blackout",
+        "pageStart": 221,
+        "pageEnd": 320,
+        "summary": "Memory and erasure. The cost of documentation. The end."
+      }
+    ]
   },
   {
     "id": "book-prophet-song-2023-221",
@@ -5036,7 +5207,7 @@
     "subtype": "Book",
     "name": "Prophet Song (2023)",
     "teaser": "Paul Lynch's Booker winner is set in an Ireland sliding into authoritarianism: Eilish Stack, a biology teacher and mother of four, watches her trade unionist husband disappear and then her children, one by one, as the state's grip tightens. Written in a breathless, present-tense style, it won the Booker to some controversy — and reads as the most direct 'what if' about democracy's collapse since the dystopian canon.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780802163394-L.jpg",
     "byline": "Paul Lynch",
     "exploreAction": {
       "verb": "Read",
@@ -5050,7 +5221,31 @@
       "Booker"
     ],
     "tier": 2,
-    "pageCount": 336
+    "pageCount": 320,
+    "synopsis": "Lynch's novel follows Eilish Stack, a mother of four in Dublin, as Ireland descends into authoritarianism. The novel is told in real time — the slow, incremental collapse of democracy — as Eilish watches her husband (a union leader) disappear, her daughter be recruited by the new regime, and her family torn apart by borders and bureaucracy. Lynch has said the novel was inspired by the experiences of Syrian and other refugees — the gradual normalization of atrocity that makes flight necessary. The novel won the 2023 Booker Prize.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Beginning",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Dublin. The protests. The new laws. The husband disappears."
+      },
+      {
+        "number": 2,
+        "title": "The Collapse",
+        "pageStart": 81,
+        "pageEnd": 200,
+        "summary": "The borders. The bureaucracy. The family fractures. The escape."
+      },
+      {
+        "number": 3,
+        "title": "The End",
+        "pageStart": 201,
+        "pageEnd": 320,
+        "summary": "The refugee experience. The loss. The hope."
+      }
+    ]
   },
   {
     "id": "book-this-other-eden-2023-222",
@@ -5058,7 +5253,7 @@
     "subtype": "Book",
     "name": "This Other Eden (2023)",
     "teaser": "Paul Harding's Pulitzer winner is set on Apple Island, a real community of mixed-race and Native families off the Maine coast in 1911, whose residents are being evicted by a eugenics-minded state. It's a novel of a utopia under siege, narrated in the voices of the islanders and the men who would 'save' them by removing them.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780393881127-L.jpg",
     "byline": "Paul Harding",
     "exploreAction": {
       "verb": "Read",
@@ -5072,7 +5267,31 @@
       "Pulitzer"
     ],
     "tier": 2,
-    "pageCount": 256
+    "pageCount": 224,
+    "synopsis": "Harding's novel is based on the true story of Malaga Island, a mixed-race community off the coast of Maine that was forcibly removed by the state of Maine in 1912. The novel follows Benjamin Honey, a biracial apple farmer, and his wife Patience, who live on the island with a small community of Black, mixed-race, and indigenous residents. When a visiting educator discovers the community, she brings it to the attention of the state — with devastating consequences. Harding's prose is dense and lyrical, and the novel is a meditation on the violence of American racial classification.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Island",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "Benjamin and Patience. The community. The island's beauty."
+      },
+      {
+        "number": 2,
+        "title": "The Visitor",
+        "pageStart": 61,
+        "pageEnd": 150,
+        "summary": "The educator. The discovery. The state's attention."
+      },
+      {
+        "number": 3,
+        "title": "The Removal",
+        "pageStart": 151,
+        "pageEnd": 224,
+        "summary": "The forced departure. The scattering. The memory."
+      }
+    ]
   },
   {
     "id": "book-in-memoriam-2023-223",
@@ -5080,7 +5299,7 @@
     "subtype": "Book",
     "name": "In Memoriam (2023)",
     "teaser": "Alice Winn's debut novel follows two boys at an English boarding school in 1914 who are in love but can't say so — and then enlists them in the trenches of the First World War, where their letters and the horror of the Somme force the question. It's a First World War novel told through the letters of the generation that wrote itself into history while dying.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593654392-L.jpg",
     "byline": "Alice Winn",
     "exploreAction": {
       "verb": "Read",
@@ -5094,7 +5313,31 @@
       "WWI"
     ],
     "tier": 2,
-    "pageCount": 400
+    "pageCount": 416,
+    "synopsis": "Winn's debut novel follows two young men at an English public school in 1914 who fall in love just as World War I begins. The novel is a war story and a love story, told through letters, diary entries, and third-person narration. The two protagonists — one a poet, the other a soldier — navigate the impossible double life of queer love in a world that criminalizes it, while the war destroys everything they know. Winn based the novel on real letters and diaries from the period. The novel was longlisted for the Booker Prize in 2023.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The School",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "The friendship. The love. The school. The war begins."
+      },
+      {
+        "number": 2,
+        "title": "The War",
+        "pageStart": 101,
+        "pageEnd": 280,
+        "summary": "The trenches. The letters. The double life. The horror."
+      },
+      {
+        "number": 3,
+        "title": "The End",
+        "pageStart": 281,
+        "pageEnd": 416,
+        "summary": "The final battle. The loss. The memory."
+      }
+    ]
   },
   {
     "id": "book-let-us-descend-2023-224",
@@ -5102,7 +5345,7 @@
     "subtype": "Book",
     "name": "Let Us Descend (2023)",
     "teaser": "Jesmyn Ward's novel follows Annis, an enslaved woman in the Carolinas who is sold south and forced to walk the 'slave coffle' to New Orleans — and who is accompanied by spirits, including Aza, the warrior woman who guards her. It's a ghost-haunted historical novel in which the supernatural is not escape from the horror but the only way to survive it.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781982185763-L.jpg",
     "byline": "Jesmyn Ward",
     "exploreAction": {
       "verb": "Read",
@@ -5116,7 +5359,31 @@
       "Slavery"
     ],
     "tier": 2,
-    "pageCount": 320
+    "pageCount": 304,
+    "synopsis": "Ward's novel follows Annis, an enslaved woman in the antebellum South who is sold from a rice plantation to a New Orleans brothel. The novel is a work of magical realism: Annis is visited by spirits — her mother, her ancestors, and a sword-wielding warrior woman called the Seyti — who guide her through the horror of slavery. Ward draws on the real experiences of enslaved women, particularly the sexual violence they endured, and uses fantasy to give Annis agency in a world designed to strip her of it. The novel's title comes from Dante's Inferno: 'Let us descend into the dark world.'",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Plantation",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Annis's mother. The sale. The journey south. The spirits."
+      },
+      {
+        "number": 2,
+        "title": "New Orleans",
+        "pageStart": 81,
+        "pageEnd": 220,
+        "summary": "The brothel. The violence. The spirits. The sword."
+      },
+      {
+        "number": 3,
+        "title": "The Descent",
+        "pageStart": 221,
+        "pageEnd": 304,
+        "summary": "The escape. The spirits. The freedom. 'Let us descend.'"
+      }
+    ]
   },
   {
     "id": "book-roman-stories-2023-225",
@@ -5124,7 +5391,7 @@
     "subtype": "Book",
     "name": "Roman Stories (2023)",
     "teaser": "Jhumpa Lahiri's collection — written in Italian, her adopted literary language, and translated into English by the author herself — gathers stories of Rome's residents: the Roman-born, the migrants, the tourists, the servants of the rich. It's a portrait of a city told entirely in its outsiders, and a book about what it means to write in a language that isn't yours.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781524749552-L.jpg",
     "byline": "Jhumpa Lahiri",
     "exploreAction": {
       "verb": "Read",
@@ -5138,7 +5405,31 @@
       "Translation"
     ],
     "tier": 2,
-    "pageCount": 224
+    "pageCount": 240,
+    "synopsis": "Lahiri's collection of eight stories is set in Rome, the city where Lahiri has lived since 2011 and writes in Italian. The stories follow immigrants, exiles, and outsiders navigating Rome's layered history and complex social codes. The characters are mostly Indian or American, caught between cultures, languages, and identities. Lahiri's prose — spare, precise, melancholy — captures the particular loneliness of living in a city that is beautiful but indifferent. The collection won the 2023 Pulitzer Prize for Fiction.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Stories 1–3",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The newcomers. The language. The apartment. The distance."
+      },
+      {
+        "number": 2,
+        "title": "Stories 4–6",
+        "pageStart": 81,
+        "pageEnd": 160,
+        "summary": "The marriages. The children. The history. The indifference."
+      },
+      {
+        "number": 3,
+        "title": "Stories 7–8",
+        "pageStart": 161,
+        "pageEnd": 240,
+        "summary": "The departures. The returns. The city that remembers nothing."
+      }
+    ]
   },
   {
     "id": "book-land-of-milk-and-226",
@@ -5146,7 +5437,7 @@
     "subtype": "Book",
     "name": "Land of Milk and Honey (2023)",
     "teaser": "C Pam Zhang's novel is a foodie dystopia: in a near-future America collapsing under climate catastrophe, a young chef is hired to cook for a private community of the ultra-rich who have retreated to a bunker with a fully stocked pantry and a taste for the exotic. It's The Hunger Games for the tasting-menu set — a satire of luxury as the last thing worth saving.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593537244-L.jpg",
     "byline": "C Pam Zhang",
     "exploreAction": {
       "verb": "Read",
@@ -5160,7 +5451,31 @@
       "Satire"
     ],
     "tier": 2,
-    "pageCount": 224
+    "pageCount": 272,
+    "synopsis": "Zhang's novel is set in a near-future world where a smog has blotted out the sun and most of the world's food supply has been destroyed. A young chef is recruited to cook for a wealthy enclave in the Italian Alps, where the rich have retreated to survive the catastrophe. The novel is a meditation on privilege, desire, and the role of food in times of crisis. Zhang's prose is lush and sensory — the food descriptions are vivid enough to taste — and the novel asks what happens when pleasure becomes the only remaining human virtue.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Smog",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "The world after. The chef's recruitment. The enclave."
+      },
+      {
+        "number": 2,
+        "title": "The Enclave",
+        "pageStart": 61,
+        "pageEnd": 180,
+        "summary": "The cooking. The desire. The privilege. The guilt."
+      },
+      {
+        "number": 3,
+        "title": "The Reckoning",
+        "pageStart": 181,
+        "pageEnd": 272,
+        "summary": "The truth about the enclave. The choice. The end."
+      }
+    ]
   },
   {
     "id": "book-family-meal-2023-227",
@@ -5168,7 +5483,7 @@
     "subtype": "Book",
     "name": "Family Meal (2023)",
     "teaser": "Bryan Washington's novel follows Cam, a baker who returns to Houston after his boyfriend TJ dies of an overdose — and moves in with TJ's family, where he begins an affair with TJ's married best friend while working in the family's bakery. It's a novel about grief, food, and the families we make — written in Washington's signature tender-gritty register.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593714492-L.jpg",
     "byline": "Bryan Washington",
     "exploreAction": {
       "verb": "Read",
@@ -5182,7 +5497,31 @@
       "Grief"
     ],
     "tier": 2,
-    "pageCount": 288
+    "pageCount": 256,
+    "synopsis": "Washington's novel follows two former lovers — Cam and TJ — who reunite in Houston after TJ's mother dies. The novel is a meditation on grief, food, and the bonds that survive distance and time. Washington, who won the Dylan Thomas Prize for his debut short story collection Lot, writes about queer Black life with tenderness and precision. The novel's title refers to the ritual of eating together — the way food can be both comfort and confession.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Return",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "TJ's mother's death. The funeral. Cam arrives. The grief."
+      },
+      {
+        "number": 2,
+        "title": "The Kitchen",
+        "pageStart": 81,
+        "pageEnd": 180,
+        "summary": "Cooking together. The memories. The love. The distance."
+      },
+      {
+        "number": 3,
+        "title": "The Meal",
+        "pageStart": 181,
+        "pageEnd": 256,
+        "summary": "The dinner. The confession. The bond that remains."
+      }
+    ]
   },
   {
     "id": "book-moby-dick-1851-228",
@@ -5190,7 +5529,7 @@
     "subtype": "Book",
     "name": "Moby-Dick (1851)",
     "teaser": "Melville's novel — a whaling adventure that becomes a metaphysical epic — was a commercial failure in its time and is now one of the most-studied books in English. Its narrator Ishmael signs onto the Pequod, whose captain, Ahab, is hunting one whale: the white whale that took his leg. The novel is 135 chapters that spend hundreds of pages on the science of whales and then, in three chapters, destroy everyone.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780142437247-L.jpg",
     "byline": "Herman Melville",
     "exploreAction": {
       "verb": "Read",
@@ -5206,9 +5545,33 @@
       "19th Century"
     ],
     "tier": 1,
-    "pageCount": 635,
+    "pageCount": 720,
     "altPageCount": 720,
-    "altPageLabel": "Penguin Classics"
+    "altPageLabel": "Penguin Classics",
+    "synopsis": "Melville's novel follows Ishmael, a young man who signs up for a whaling voyage aboard the Pequod, captained by the monomaniacal Ahab, who is obsessed with hunting the white whale Moby Dick — the creature that took his leg. The novel alternates between Ishmael's observations of whaling life (detailed chapters on cetology, blubber processing, and the mechanics of the hunt) and the increasingly desperate pursuit of the whale. The Pequod encounters other ships, each of which warns Ahab to abandon his quest. Ahab refuses. The final chase destroys the Pequod and kills everyone except Ishmael, who survives by clinging to a coffin buoy. The novel was a commercial failure in Melville's lifetime and was rediscovered in the 1920s; it is now considered the Great American Novel.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Chapters 1–30 — The Voyage",
+        "pageStart": 1,
+        "pageEnd": 200,
+        "summary": "Ishmael and Queequeg. The Pequod. Ahab. The crew. The sea."
+      },
+      {
+        "number": 2,
+        "title": "Chapters 31–80 — The Hunt",
+        "pageStart": 201,
+        "pageEnd": 450,
+        "summary": "Whaling chapters. The White Whale. The doubloon. The prophecy."
+      },
+      {
+        "number": 3,
+        "title": "Chapters 81–135 — The Chase",
+        "pageStart": 451,
+        "pageEnd": 720,
+        "summary": "Three days. The boats. The whale. Ahab's last line. 'And I only am escaped alone.'"
+      }
+    ]
   },
   {
     "id": "book-the-great-gatsby-1925-230",
@@ -5216,7 +5579,7 @@
     "subtype": "Book",
     "name": "The Great Gatsby (1925)",
     "teaser": "Fitzgerald's novel — set in the summer of 1922 and told by Nick Carraway, who rents next door to the mysterious Jay Gatsby — is the definitive American novel about money: Gatsby's parties are legend, his love for Daisy is the engine, and his death is the moral. It sold poorly at publication; it is now a fixture of every American reading list.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780743273565-L.jpg",
     "byline": "F. Scott Fitzgerald",
     "exploreAction": {
       "verb": "Read",
@@ -5230,7 +5593,31 @@
       "Jazz Age"
     ],
     "tier": 2,
-    "pageCount": 180
+    "pageCount": 180,
+    "synopsis": "Fitzgerald's novel follows Nick Carraway, a young Midwesterner who moves to New York in 1922 and becomes neighbors with Jay Gatsby, a mysterious millionaire who throws lavish parties at his West Egg mansion. Nick learns that Gatsby's parties are designed to attract Daisy Buchanan, Nick's cousin and Gatsby's former lover, who is now married to the wealthy Tom Buchanan. The novel traces Gatsby's attempt to reclaim Daisy and the American Dream — a dream that Fitzgerald reveals as hollow, built on money, deception, and nostalgia for a past that never existed. The novel's famous final line — 'So we beat on, boats against the current, borne back ceaselessly into the past' — is one of the most quoted in American literature. The novel was a modest success on publication; it became a classic through its adoption by the US military during WWII and by college curricula in the 1950s.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Nick and Gatsby",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "West Egg. The parties. The green light. Daisy and Tom."
+      },
+      {
+        "number": 2,
+        "title": "The Affair",
+        "pageStart": 41,
+        "pageEnd": 100,
+        "summary": "Gatsby and Daisy reunite. The Plaza Hotel. Tom's revelation."
+      },
+      {
+        "number": 3,
+        "title": "The Crash",
+        "pageStart": 101,
+        "pageEnd": 180,
+        "summary": "Myrtle's death. Gatsby's fall. The funeral. The green light."
+      }
+    ]
   },
   {
     "id": "book-brave-new-world-1932-231",
@@ -5238,7 +5625,7 @@
     "subtype": "Book",
     "name": "Brave New World (1932)",
     "teaser": "Huxley's novel imagined the future as a pleasure-state: people are bred in hatcheries, conditioned by caste, and pacified by the drug soma — and the 'savage' John, raised outside the system, is brought in to be exhibited and destroys himself instead. Huxley's famous claim was that his dystopia was more prophetic than Orwell's: we would be seduced, not tortured.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780060850524-L.jpg",
     "byline": "Aldous Huxley",
     "exploreAction": {
       "verb": "Read",
@@ -5253,7 +5640,31 @@
       "Novel"
     ],
     "tier": 1,
-    "pageCount": 288
+    "pageCount": 288,
+    "synopsis": "Huxley's dystopian novel is set in a World State where humans are genetically engineered, socially conditioned, and kept docile through the pleasure drug soma. The novel follows Bernard Marx, an Alpha who feels alienated from his society, and John the Savage, a man raised on a Native American reservation who is brought to London and finds the 'civilized' world obscene. The novel satirizes the consumer culture, sexual liberation, and technological progress that Huxley saw emerging in the 1930s. The World State's motto — 'Community, Identity, Stability' — is achieved through the elimination of art, religion, family, and individual choice. The novel was written in 1931 and published in 1932; it has never gone out of print.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The World State",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The hatchery. The conditioning. Bernard's alienation. Lenina."
+      },
+      {
+        "number": 2,
+        "title": "John the Savage",
+        "pageStart": 81,
+        "pageEnd": 200,
+        "summary": "The reservation. London. John's disgust. The clash."
+      },
+      {
+        "number": 3,
+        "title": "The End",
+        "pageStart": 201,
+        "pageEnd": 288,
+        "summary": "The soma. The riot. The exile. 'The price of stability.'"
+      }
+    ]
   },
   {
     "id": "book-native-son-1940-232",
@@ -5261,7 +5672,7 @@
     "subtype": "Book",
     "name": "Native Son (1940)",
     "teaser": "Richard Wright's novel was the first by a Black American writer to become a Book-of-the-Month Club selection — and it opens with an accidental murder: Bigger Thomas, a young Black man in Chicago, smothers the white woman who hired him, then tries to escape a justice system that assumes his guilt. Wright wrote it as a provocation, and it worked.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780061120295-L.jpg",
     "byline": "Richard Wright",
     "exploreAction": {
       "verb": "Read",
@@ -5276,7 +5687,31 @@
       "Protest"
     ],
     "tier": 1,
-    "pageCount": 544
+    "pageCount": 544,
+    "synopsis": "Wright's novel follows Bigger Thomas, a young Black man living in poverty in Chicago's South Side, who commits a series of crimes — including murder — that are rooted in the systemic racism that has constrained his entire life. The novel is divided into three sections: 'Fear' (Bigger's crime and its immediate aftermath), 'Flight' (his attempt to escape), and 'Doom' (his trial and execution). Wright wrote the novel in response to the Jack Johnson case and the Scottsboro Boys trial, and it became the first bestselling novel by a Black author. The novel's central argument — that racism doesn't just oppress individuals but shapes their psychology — was revolutionary in 1940. Richard Wright and the novel were both controversial: James Baldwin criticized Wright for reducing Bigger to a stereotype, while others praised the novel's unflinching portrayal of Black rage.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Fear",
+        "pageStart": 1,
+        "pageEnd": 200,
+        "summary": "Bigger's world. The job. The murder. The cover-up."
+      },
+      {
+        "number": 2,
+        "title": "Flight",
+        "pageStart": 201,
+        "pageEnd": 400,
+        "summary": "The escape. The cave. The Communist Party. The capture."
+      },
+      {
+        "number": 3,
+        "title": "Doom",
+        "pageStart": 401,
+        "pageEnd": 544,
+        "summary": "The trial. Boris Max's defense. The execution. 'He was alive, and he was about to die.'"
+      }
+    ]
   },
   {
     "id": "book-the-catcher-in-the-233",
@@ -5284,7 +5719,7 @@
     "subtype": "Book",
     "name": "The Catcher in the Rye (1951)",
     "teaser": "Salinger's novel — the story of Holden Caulfield's three days in New York after being expelled from prep school — has sold 65 million copies and is the most-banned and most-taught American novel of the 20th century. Its title, from a misheard line of a Robert Burns poem, names Holden's fantasy: catching children before they fall off a cliff into adulthood.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316769488-L.jpg",
     "byline": "J.D. Salinger",
     "exploreAction": {
       "verb": "Read",
@@ -5300,7 +5735,31 @@
       "Mid-20th"
     ],
     "tier": 1,
-    "pageCount": 277
+    "pageCount": 277,
+    "synopsis": "Salinger's novel follows Holden Caulfield, a sixteen-year-old who has been expelled from his prep school and spends three days wandering New York City before returning home. Holden narrates in a voice that is simultaneously cynical and vulnerable, ranting about 'phonies' while desperately seeking connection. He visits his former teacher Mr. Antolini, calls old girlfriends, and imagines himself as 'the catcher in the rye' — standing at the edge of a cliff, catching children before they fall. The novel is a study in adolescent alienation: Holden is grief-stricken over his brother Allie's death and terrified of the adult world. The novel was controversial on publication (banned in many schools) and has sold over 65 million copies. Holden's voice — slangy, digressive, heartbreaking — influenced every first-person narrator after him.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Pencey Prep",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "The expulsion. Mr. Spencer. The walkout. The train."
+      },
+      {
+        "number": 2,
+        "title": "New York",
+        "pageStart": 41,
+        "pageEnd": 180,
+        "summary": "The Edmont. Sally Hayes. The nuns. The taxi. The loneliness."
+      },
+      {
+        "number": 3,
+        "title": "The End",
+        "pageStart": 181,
+        "pageEnd": 277,
+        "summary": "Mr. Antolini. The museum. Phoebe. The carousel. 'Don't ever tell anybody anything.'"
+      }
+    ]
   },
   {
     "id": "book-fahrenheit-451-1953-234",
@@ -5308,7 +5767,7 @@
     "subtype": "Book",
     "name": "Fahrenheit 451 (1953)",
     "teaser": "Bradbury's novel is set in a future where firemen burn books instead of stopping fires — and fireman Guy Montag begins to steal the books he's supposed to destroy. Its title is the temperature at which paper burns, and Bradbury wrote it in the Los Angeles Public Library's basement on a rented typewriter at 10 cents for 10 minutes.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781451673319-L.jpg",
     "byline": "Ray Bradbury",
     "exploreAction": {
       "verb": "Read",
@@ -5324,7 +5783,31 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 256
+    "pageCount": 194,
+    "synopsis": "Bradbury's dystopian novel follows Guy Montag, a fireman whose job is to burn books — in the future, reading is illegal, and firemen exist to destroy knowledge rather than preserve it. Montag's life changes when he meets Clarisse, a seventeen-year-old who asks him, 'Are you happy?' He begins to question his work, steals books, and ultimately destroys his own house. The novel is a defense of reading and intellectual freedom, written during the McCarthy era when book banning was a real threat. Bradbury wrote the novel in the basement of UCLA's Powell Library on a rented typewriter, feeding dimes into the machine. The novel's title comes from the temperature at which paper ignites. The 1966 film adaptation by François Truffaut is considered a classic.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Hearth and the Salamander",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "Montag's world. Clarisse. The fire. The first stolen book."
+      },
+      {
+        "number": 2,
+        "title": "The Sieve and the Sand",
+        "pageStart": 61,
+        "pageEnd": 130,
+        "summary": "The books. Faber. The地铁. The parlor wall. The woman with the books."
+      },
+      {
+        "number": 3,
+        "title": "Burning Bright",
+        "pageStart": 131,
+        "pageEnd": 194,
+        "summary": "The hunt. The river. The book people. The city burns."
+      }
+    ]
   },
   {
     "id": "book-lolita-1955-235",
@@ -5332,7 +5815,7 @@
     "subtype": "Book",
     "name": "Lolita (1955)",
     "teaser": "Nabokov's novel is narrated by Humbert Humbert, a middle-aged European professor who obsesses over his stepdaughter, Dolores 'Lolita' Haze — and the book's scandal obscured its design: it is a confession written for a jury, in which the monster is so eloquent that the reader must work to see past him. Nabokov called the novel his 'love affair with the English language.'.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780679720201-L.jpg",
     "byline": "Vladimir Nabokov",
     "exploreAction": {
       "verb": "Read",
@@ -5346,7 +5829,24 @@
       "Unreliable Narrator"
     ],
     "tier": 2,
-    "pageCount": 352
+    "pageCount": 336,
+    "synopsis": "Nabokov's novel is narrated by Humbert Humbert, a European academic who becomes sexually obsessed with Dolores Haze ('Lolita'), a twelve-year-old American girl. The novel follows Humbert's cross-country pursuit of Lolita after he marries her mother to stay close to her, and the years of abuse that follow. Nabokov's genius is in the voice: Humbert is charming, erudite, and witty — and a predator. The novel forces the reader into an uncomfortable complicity: Humbert's prose seduces even as his actions repulse. The novel was first published in Paris by Olympia Press (a pornography publisher) in 1955, then in the US in 1958. It was banned in multiple countries and has been the subject of endless debate about whether it glorifies or condemns pedophilia. Nabokov said the novel was 'a confession disguised as a fiction.'",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part One — Lolita",
+        "pageStart": 1,
+        "pageEnd": 160,
+        "summary": "Humbert's past. Charlotte Haze. The seduction. The obsession."
+      },
+      {
+        "number": 2,
+        "title": "Part Two — On the Road",
+        "pageStart": 161,
+        "pageEnd": 336,
+        "summary": "The motels. Quilty. The discovery. 'Lolita, light of my life.'"
+      }
+    ]
   },
   {
     "id": "book-one-flew-over-the-237",
@@ -5354,7 +5854,7 @@
     "subtype": "Book",
     "name": "One Flew Over the Cuckoo's Nest (1962)",
     "teaser": "Ken Kesey's novel — written after he worked overnight shifts in a VA hospital's psychiatric ward — follows McMurphy, a convict who fakes insanity to serve his sentence in a mental institution, where he wages war on the ward's tyrannical Nurse Ratched. The novel was a counterculture bible, and the film adaptation won five Oscars.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780451163968-L.jpg",
     "byline": "Ken Kesey",
     "exploreAction": {
       "verb": "Read",
@@ -5369,7 +5869,31 @@
       "Institution"
     ],
     "tier": 1,
-    "pageCount": 320
+    "pageCount": 314,
+    "synopsis": "Kesey's novel follows Randle Patrick McMurphy, a convict who pleads insanity to avoid prison and is sent to a mental hospital, where he clashes with Nurse Ratched — the authoritarian nurse who controls the ward through shame, humiliation, and electroshock therapy. The novel is narrated by Chief Bromden, a Native American patient who pretends to be deaf and dumb. McMurphy's rebellion — gambling, smuggling in women, challenging Ratched's authority — inspires the other patients to reclaim their autonomy. The novel is a critique of institutional power, conformity, and the medical establishment's treatment of mental illness. Kesey drew on his own experience working in a psychiatric hospital. The 1975 film adaptation won all five major Academy Awards.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "McMurphy Arrives",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Chief Bromden. The Combine. Nurse Ratched. McMurphy's entrance."
+      },
+      {
+        "number": 2,
+        "title": "The Rebellion",
+        "pageStart": 81,
+        "pageEnd": 220,
+        "summary": "The gambling. The fishing trip. The vote. The shock therapy."
+      },
+      {
+        "number": 3,
+        "title": "The End",
+        "pageStart": 221,
+        "pageEnd": 314,
+        "summary": "McMurphy's lobotomy. Chief Bromden's escape. The window."
+      }
+    ]
   },
   {
     "id": "book-one-hundred-years-of-238",
@@ -5377,7 +5901,7 @@
     "subtype": "Book",
     "name": "One Hundred Years of Solitude (1967)",
     "teaser": "García Márquez's novel follows the Buendía family through seven generations in the fictional town of Macondo — a century of repetition, war, and solitude in which everyone is named José Arcadio or Aureliano until the reader needs a family tree (and the novel provides one). Its opening sentence — 'Many years later, as he faced the firing squad...' — taught a generation of writers how to begin.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780060883287-L.jpg",
     "byline": "Gabriel García Márquez",
     "exploreAction": {
       "verb": "Read",
@@ -5393,7 +5917,38 @@
       "Novel"
     ],
     "tier": 1,
-    "pageCount": 417
+    "pageCount": 417,
+    "synopsis": "García Márquez's masterpiece follows seven generations of the Buendía family in the fictional town of Macondo, Colombia. The novel opens with Colonel Aureliano Buendía facing a firing squad and remembers the day his father founded Macondo. The family's history intertwines with Colombia's civil wars, the arrival of the banana company, and the gradual decay of the town. The novel's magical realism — a woman ascends to heaven while hanging laundry, a rain of yellow flowers falls from the sky, a plague of insomnia strikes the town — creates a world where the supernatural is as real as the historical. García Márquez won the Nobel Prize in Literature in 1982, and the novel has sold over 50 million copies. It is the most widely read Spanish-language novel after Don Quixote.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Founding",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "José Arcadio Buendía. The founding of Macondo. The gypsies. The insomnia plague."
+      },
+      {
+        "number": 2,
+        "title": "The Wars",
+        "pageStart": 101,
+        "pageEnd": 250,
+        "summary": "Colonel Aureliano. The civil wars. The 32 uprisings. The goldfish."
+      },
+      {
+        "number": 3,
+        "title": "The Banana Company",
+        "pageStart": 251,
+        "pageEnd": 350,
+        "summary": "The banana arrives. The massacre. The rain. The decline."
+      },
+      {
+        "number": 4,
+        "title": "The End",
+        "pageStart": 351,
+        "pageEnd": 417,
+        "summary": "The last Aureliano. The manuscript. The wind. 'Races condemned to one hundred years of solitude.'"
+      }
+    ]
   },
   {
     "id": "book-if-on-a-winters-night",
@@ -5401,7 +5956,7 @@
     "subtype": "Book",
     "name": "If on a Winter's Night a Traveler (1979)",
     "teaser": "Italo Calvino's novel that starts in the second person — 'You are about to begin reading Italo Calvino's new novel' — and then keeps restarting. The Reader (you) is the protagonist. Every chapter is the first chapter of a different book that the Reader can never finish because of some absurd publishing error.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780544176560-L.jpg",
     "byline": "Italo Calvino",
     "exploreAction": {
       "verb": "Read",
@@ -5417,7 +5972,31 @@
       "Novel"
     ],
     "tier": 2,
-    "pageCount": 276
+    "pageCount": 260,
+    "synopsis": "Calvino's meta-fictional novel is about reading itself. The reader (addressed as 'You') opens a book called 'If on a Winter's Night a Traveler' and begins reading — only to discover the book is defective. The rest of the novel follows the Reader's attempts to find and finish the correct book, encountering ten different opening chapters of ten different novels, each in a different genre. Calvino's central conceit — that the pleasure of reading lies in the beginning, in the promise of a story — is delivered through a structure that never lets the reader finish anything. The novel is simultaneously a love letter to fiction and a critique of how we consume stories.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Reader",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "You open the book. The defective page. The search begins."
+      },
+      {
+        "number": 2,
+        "title": "The Ten Novels",
+        "pageStart": 81,
+        "pageEnd": 200,
+        "summary": "Ten openings. Ten genres. The Reader's journey. The story within."
+      },
+      {
+        "number": 3,
+        "title": "The End",
+        "pageStart": 201,
+        "pageEnd": 260,
+        "summary": "The convergence. The Other Reader. The final page."
+      }
+    ]
   },
   {
     "id": "book-the-name-of-the-rose",
@@ -5425,7 +6004,7 @@
     "subtype": "Book",
     "name": "The Name of the Rose (1980)",
     "teaser": "Umberto Eco's debut novel — a murder mystery set in a 14th-century monastery where monks are being killed because of a book. Eco was a semiotics professor and the novel is secretly a textbook on medieval philosophy disguised as a thriller. The library is a labyrinth; the killer's motive involves Aristotle's lost treatise on comedy.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780544176560-L.jpg",
     "byline": "Umberto Eco",
     "exploreAction": {
       "verb": "Read",
@@ -5440,7 +6019,31 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 560
+    "pageCount": 536,
+    "synopsis": "Eco's debut novel is a murder mystery set in a 14th-century Italian monastery, where a series of deaths among the monks draws the detective-monk William of Baskerville (a nod to Sherlock Holmes) to investigate. William's young novice Adso narrates the story as an old man, looking back on the case. The murders center on the monastery's forbidden library — the most extensive in Christendom — and the monastery's involvement in a dispute over poverty between the Franciscans and the Pope. Eco, a semiotician, fills the novel with references to medieval philosophy, theology, and literature. The novel won the Strega Prize in 1981 and was adapted into a 1986 film starring Sean Connery.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Arrival",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "William and Adso arrive. The first death. The library. The sect."
+      },
+      {
+        "number": 2,
+        "title": "The Investigation",
+        "pageStart": 121,
+        "pageEnd": 350,
+        "summary": "The seven trumpets. The murders. Jorge. The labyrinth."
+      },
+      {
+        "number": 3,
+        "title": "The Fire",
+        "pageStart": 351,
+        "pageEnd": 536,
+        "summary": "The forbidden book. The fire. The library burns. 'Stat rosa pristina nomine.'"
+      }
+    ]
   },
   {
     "id": "book-the-house-of-the-spirits",
@@ -5448,7 +6051,7 @@
     "subtype": "Book",
     "name": "The House of the Spirits (1982)",
     "teaser": "Isabel Allende's debut novel, written as a letter to her dying grandfather. It follows four generations of the Trueba family through Chile's turbulent 20th century. The magical-realist style — ghosts at the table, clairvoyant children — is Allende's inheritance from Latin American literary tradition, but the feminism is entirely her own.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781501117015-L.jpg",
     "byline": "Isabel Allende",
     "exploreAction": {
       "verb": "Read",
@@ -5463,7 +6066,31 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 496
+    "pageCount": 496,
+    "synopsis": "Allende's debut novel follows the Trueba family across four generations in an unnamed South American country (based on Chile). The patriarch, Esteban Trueba, is a landowner who builds a fortune through violence and ambition; his wife Clara is a clairvoyant who communicates with spirits; their granddaughter Alba is caught in the political upheaval of a military coup. The novel blends magical realism with political history, tracing the family's story from the early 20th century through the 1973 coup (based on the real coup against Salvador Allende, the author's uncle). The novel was published in 1982 and became an international bestseller, introducing magical realism to a global audience.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Founders",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "Esteban and Clara. The big house on the corner. The spirits. The land."
+      },
+      {
+        "number": 2,
+        "title": "The Children",
+        "pageStart": 121,
+        "pageEnd": 300,
+        "summary": "Blanca and Pedro. The political awakening. The strike. The violence."
+      },
+      {
+        "number": 3,
+        "title": "The Grandchildren",
+        "pageStart": 301,
+        "pageEnd": 496,
+        "summary": "Alba. The coup. The torture. The memory. The spirits."
+      }
+    ]
   },
   {
     "id": "book-to-kill-a-mockingbird",
@@ -5471,7 +6098,7 @@
     "subtype": "Book",
     "name": "To Kill a Mockingbird (1960)",
     "teaser": "Harper Lee's only published novel for 55 years (until 'Go Set a Watchman' in 2015). It won the Pulitzer and has sold 40+ million copies. Lee based Scout's friend Dill on her childhood neighbor Truman Capote. She gave her manuscript to an editor who said it might sell 2,500 copies. She never wrote another book and refused almost all interviews.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780061120084-L.jpg",
     "byline": "Harper Lee",
     "exploreAction": {
       "verb": "Read",
@@ -5487,7 +6114,24 @@
       "Race"
     ],
     "tier": 2,
-    "pageCount": 336
+    "pageCount": 281,
+    "synopsis": "Lee's novel follows Scout Finch, a young girl in Depression-era Alabama, whose father Atticus — a lawyer — defends Tom Robinson, a Black man falsely accused of raping a white woman. The novel is told from Scout's perspective, and its power comes from seeing racial injustice through a child's eyes. Atticus's defense of Tom is doomed from the start — the jury convicts despite overwhelming evidence of innocence — but the trial transforms Scout and her brother Jem, forcing them to confront the evil in their community. The novel won the Pulitzer Prize in 1961 and has sold over 40 million copies. It remains one of the most widely read novels in American schools, though it has also been challenged for its use of racial slurs and its depiction of Black characters.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part One — Maycomb",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "Scout and Jem. Boo Radley. Atticus. The town. The trial approaches."
+      },
+      {
+        "number": 2,
+        "title": "Part Two — The Trial",
+        "pageStart": 121,
+        "pageEnd": 281,
+        "summary": "Tom Robinson's trial. The verdict. Bob Ewell. Boo Radley's gift. 'Mockingbirds don't do one thing.'"
+      }
+    ]
   },
   {
     "id": "book-nineteen-eighty-four",
@@ -5495,7 +6139,7 @@
     "subtype": "Book",
     "name": "1984 (1949)",
     "teaser": "Orwell's final novel, written while he was dying of tuberculosis on a remote Scottish island. It was originally called 'The Last Man in Europe.' Every surveillance fear in the novel — telescreens, thought police, newspeak — was Orwell's extrapolation of wartime propaganda and Stalinist purges. The adjective 'Orwellian' entered English within a decade.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780451524935-L.jpg",
     "byline": "George Orwell",
     "exploreAction": {
       "verb": "Read",
@@ -5511,7 +6155,31 @@
       "Classic"
     ],
     "tier": 2,
-    "pageCount": 328
+    "pageCount": 328,
+    "synopsis": "Orwell's dystopian novel follows Winston Smith, a minor Party member in Oceania who works at the Ministry of Truth rewriting history to match the Party's current version. Winston secretly hates the Party and begins a diary — an act of thoughtcrime. He falls in love with Julia, a fellow Party member, and they begin a secret affair. They seek out O'Brien, a senior Party member they believe is secretly working for the resistance. O'Brien is actually a member of the Thought Police. Winston and Julia are arrested, separated, and tortured in the Ministry of Love. Winston betrays Julia under Room 101's horror. The novel ends with Winston sitting in a café, now loving Big Brother. Orwell wrote the novel while dying of tuberculosis on the Scottish island of Jura. The novel coined the words 'doublethink,' 'thoughtcrime,' 'Newspeak,' and 'Big Brother.'",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I — The World",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "Winston's world. The Two Minutes Hate. The diary. Julia's note."
+      },
+      {
+        "number": 2,
+        "title": "Part II — The Affair",
+        "pageStart": 121,
+        "pageEnd": 230,
+        "summary": "Winston and Julia's affair. The room above Mr. Charrington's shop. O'Brien."
+      },
+      {
+        "number": 3,
+        "title": "Part III — The Ministry of Love",
+        "pageStart": 231,
+        "pageEnd": 328,
+        "summary": "Arrest. O'Brien's interrogation. Room 101. 'He loved Big Brother.'"
+      }
+    ]
   },
   {
     "id": "book-anna-karenina",
@@ -5519,7 +6187,7 @@
     "subtype": "Book",
     "name": "Anna Karenina (1878)",
     "teaser": "Tolstoy's novel about a married aristocrat who leaves her husband for a cavalry officer. The novel opens with the most famous first sentence in literature: 'Happy families are all alike; every unhappy family is unhappy in its own way.' Tolstoy originally planned a novella about an adulterous wife but kept adding — the novel now spans 800+ pages and is as much about Levin farming as Anna's tragedy.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780143035008-L.jpg",
     "byline": "Leo Tolstoy",
     "exploreAction": {
       "verb": "Read",
@@ -5537,7 +6205,31 @@
     "tier": 2,
     "pageCount": 864,
     "altPageCount": 752,
-    "altPageLabel": "Dover"
+    "altPageLabel": "Dover",
+    "synopsis": "Tolstoy's novel follows two parallel love stories: Anna Karenina, the beautiful wife of a St. Petersburg bureaucrat, who falls in love with the dashing Count Vronsky and destroys her reputation; and Levin, a country gentleman who struggles with faith, meaning, and his love for Kitty Shcherbatskaya. The novel opens with one of literature's most famous lines: 'Happy families are all alike; every unhappy family is unhappy in its own way.' Tolstoy uses the contrast between Anna's urban tragedy and Levin's rural search for meaning to create a portrait of Russian society in the 1870s. Anna's story is one of the great悲剧 in literature: she destroys herself through jealousy, obsession, and the social conventions that punish women for the same behavior that men escape. Levin's story is Tolstoy's own spiritual autobiography.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Anna and Vronsky",
+        "pageStart": 1,
+        "pageEnd": 300,
+        "summary": "The meeting. The affair. The horse race. The husband. The scandal."
+      },
+      {
+        "number": 2,
+        "title": "Levin and Kitty",
+        "pageStart": 301,
+        "pageEnd": 600,
+        "summary": "The proposal. The farming. The philosophy. The faith."
+      },
+      {
+        "number": 3,
+        "title": "The End",
+        "pageStart": 601,
+        "pageEnd": 864,
+        "summary": "Anna's jealousy. The train. Levin's revelation. 'The light.'"
+      }
+    ]
   },
   {
     "id": "book-the-wind-up-bird-chronicle",
@@ -5545,7 +6237,7 @@
     "subtype": "Book",
     "name": "The Wind-Up Bird Chronicle (1994)",
     "teaser": "Haruki Murakami's novel about a man searching for his missing cat and then his missing wife — and falling into a well, literally and metaphorically. Set partly during the Japanese occupation of Manchuria, the novel connects personal disappearance to historical atrocity. The wind-up bird is invisible but its cry — like a spring winding — drives the plot.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780679750536-L.jpg",
     "byline": "Haruki Murakami",
     "exploreAction": {
       "verb": "Read",
@@ -5560,7 +6252,31 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 640
+    "pageCount": 607,
+    "synopsis": "Murakami's novel follows Toru Okada, a freelance law researcher whose wife Kumiko disappears one afternoon. As Toru searches for her, he encounters a series of eccentric characters — a teenage girl who calls herself Malta Kano, a clairvoyant named Creta Kano, and a mysterious woman named May Kasahara — who lead him into a surreal underground world that mirrors the surface world's reality. The novel is Murakami's most ambitious work, weaving together domestic realism, surrealism, and Japanese history (including wartime atrocities in Manchuria). The wind-up bird of the title is a real bird that Toru hears singing in his garden — a signal that something is wrong.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Disappearance",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "Kumiko vanishes. The empty well. Malta Kano. The search begins."
+      },
+      {
+        "number": 2,
+        "title": "The Underground",
+        "pageStart": 121,
+        "pageEnd": 380,
+        "summary": "Lieutenant Mamiya. The well. The historical violence. The doubling."
+      },
+      {
+        "number": 3,
+        "title": "The Chronology",
+        "pageStart": 381,
+        "pageEnd": 607,
+        "summary": "The connections. The wind-up bird. Kumiko's return. The end."
+      }
+    ]
   },
   {
     "id": "book-the-color-purple",
@@ -5568,7 +6284,7 @@
     "subtype": "Book",
     "name": "The Color Purple (1982)",
     "teaser": "Alice Walker's novel told through letters — first Celie's letters to God, then letters between Celie and her sister Nettie. It won the Pulitzer and the National Book Award. The novel spans 40 years of Celie's life in rural Georgia, from abuse to liberation. Walker's use of Black Southern vernacular was revolutionary — Celie's voice grows in complexity as she ages.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780156028356-L.jpg",
     "byline": "Alice Walker",
     "exploreAction": {
       "verb": "Read",
@@ -5584,7 +6300,31 @@
       "Classic"
     ],
     "tier": 2,
-    "pageCount": 304
+    "pageCount": 295,
+    "synopsis": "Walker's epistolary novel follows Celie, a young Black woman in rural Georgia who writes letters to God after being raped by her stepfather and having her children taken from her. The novel traces Celie's life from the early 1900s through the 1940s, as she endures an abusive marriage to Mr. ______, finds love and independence through her relationship with the singer Shug Avery, and eventually reconnects with her sister Nettie (whose letters from Africa provide a parallel narrative). The novel won the Pulitzer Prize for Fiction in 1983, making Walker the first Black woman to win. The 1985 film adaptation by Steven Spielberg was controversial for its depiction of violence. The novel remains one of the most widely read works of African-American literature.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Letters to God",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Celie's abuse. The stepfather. The children. The marriage."
+      },
+      {
+        "number": 2,
+        "title": "Shug Avery",
+        "pageStart": 81,
+        "pageEnd": 200,
+        "summary": "Shug arrives. The love. The pants. The sister's letters."
+      },
+      {
+        "number": 3,
+        "title": "Freedom",
+        "pageStart": 201,
+        "pageEnd": 295,
+        "summary": "Celie's independence. Mr. ______'s transformation. The reunion. God is a she."
+      }
+    ]
   },
   {
     "id": "book-sapiens",
@@ -5592,7 +6332,7 @@
     "subtype": "Book",
     "name": "Sapiens (2014)",
     "teaser": "Yuval Noah Harari's nonfiction history of humankind — from the Cognitive Revolution (70,000 years ago) to the present. Originally published in Hebrew, it became an international bestseller with 23+ million copies sold. Harari argues that what made Homo sapiens dominant was our ability to believe in fictions: money, nations, laws, gods.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062316110-L.jpg",
     "byline": "Yuval Noah Harari",
     "exploreAction": {
       "verb": "Read",
@@ -5607,7 +6347,38 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 464
+    "pageCount": 464,
+    "synopsis": "Harari's non-fiction bestseller traces the history of Homo sapiens from the Cognitive Revolution (70,000 years ago) through the Agricultural Revolution, the Scientific Revolution, and into the present. Harari's central argument is that humans dominate the world not because of individual intelligence but because of our ability to create and believe in shared fictions — money, nations, religions, human rights. The book became a global phenomenon, selling over 20 million copies, and was praised by Barack Obama, Bill Gates, and Mark Zuckerberg. Critics have noted that Harari oversimplifies complex topics and draws on controversial sources, but the book's accessibility and ambition made it one of the most influential non-fiction works of the 2010s.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Cognitive Revolution",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Language. Myths. The power of fiction. Homo sapiens vs. Neanderthals."
+      },
+      {
+        "number": 2,
+        "title": "The Agricultural Revolution",
+        "pageStart": 81,
+        "pageEnd": 200,
+        "summary": "Wheat. Domestication. The trap. The hierarchy. The empires."
+      },
+      {
+        "number": 3,
+        "title": "The Unification of Humankind",
+        "pageStart": 201,
+        "pageEnd": 320,
+        "summary": "Money. Religion. Empire. The global order."
+      },
+      {
+        "number": 4,
+        "title": "The Scientific Revolution",
+        "pageStart": 321,
+        "pageEnd": 464,
+        "summary": "Science. Capitalism. The future. 'What will we do with all this power?'"
+      }
+    ]
   },
   {
     "id": "book-a-brief-history-of-time",
@@ -5615,7 +6386,7 @@
     "subtype": "Book",
     "name": "A Brief History of Time (1988)",
     "teaser": "Stephen Hawking's book about cosmology — from the Big Bang to black holes — written for general readers. It stayed on the Sunday Times bestseller list for 237 weeks. Hawking wrote it while almost completely paralyzed by ALS, dictating through a speech synthesizer. The book has sold over 25 million copies though many admit they never finished it.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780553380163-L.jpg",
     "byline": "Stephen Hawking",
     "exploreAction": {
       "verb": "Read",
@@ -5630,7 +6401,38 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 256
+    "pageCount": 256,
+    "synopsis": "Hawking's non-fiction book explains the origins and fate of the universe for a general audience, covering the Big Bang, black holes, the nature of time, and the search for a unified theory of physics. Hawking, who was diagnosed with ALS at 21 and was largely paralyzed by the time the book was published, wrote with clarity and wit about topics that most physicists struggle to explain simply. The book spent 237 weeks on the Sunday Times bestseller list and sold over 25 million copies, making it one of the most successful popular science books ever published. Hawking's central achievement is making abstract physics feel personal: he connects the universe's largest questions to the human desire to understand.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Our Picture of the Universe",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "Aristotle. Newton. Einstein. The expanding universe."
+      },
+      {
+        "number": 2,
+        "title": "The Big Bang",
+        "pageStart": 41,
+        "pageEnd": 100,
+        "summary": "The singularity. The expansion. The arrow of time."
+      },
+      {
+        "number": 3,
+        "title": "Black Holes",
+        "pageStart": 101,
+        "pageEnd": 160,
+        "summary": "The collapse. The event horizon. Hawking radiation."
+      },
+      {
+        "number": 4,
+        "title": "The Theory of Everything",
+        "pageStart": 161,
+        "pageEnd": 256,
+        "summary": "Quantum gravity. The unification. 'Why does the universe bother to exist?'"
+      }
+    ]
   },
   {
     "id": "book-demon-copperhead",
@@ -5638,7 +6440,7 @@
     "subtype": "Book",
     "name": "Demon Copperhead (2022)",
     "teaser": "Barbara Kingsolver's novel reimagining David Copperfield in modern Appalachia — a boy born to a teenage mother in a single-wide trailer in Lee County, Virginia. Won the Pulitzer and the Women's Prize. The novel is a direct response to the opioid crisis and the failure of institutions meant to protect children. Demon's voice is the novel's engine: wry, unbroken, irresistible.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780063251922-L.jpg",
     "byline": "Barbara Kingsolver",
     "exploreAction": {
       "verb": "Read",
@@ -5655,7 +6457,31 @@
       "Appalachia"
     ],
     "tier": 2,
-    "pageCount": 560
+    "pageCount": 560,
+    "synopsis": "Kingsolver's Pulitzer-winning novel retells David Copperfield in the Appalachian Mountains of Virginia, following a boy named Demon (born Demon Copperhead) through the foster care system, poverty, addiction, and the opioid crisis. The novel begins with Demon's birth to a single mother who dies of an overdose, and traces his childhood through a series of foster homes, his education, and his struggle to survive in a world that has abandoned the rural poor. Kingsolver wrote the novel in response to the opioid epidemic, which has devastated Appalachian communities. The novel won the Pulitzer Prize for Fiction in 2023.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Demon's Childhood",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "The birth. The mother's death. The foster homes. The poverty."
+      },
+      {
+        "number": 2,
+        "title": "The Education",
+        "pageStart": 121,
+        "pageEnd": 340,
+        "summary": "School. The friends. The addiction. The opioids."
+      },
+      {
+        "number": 3,
+        "title": "The Reckoning",
+        "pageStart": 341,
+        "pageEnd": 560,
+        "summary": "The crisis. The recovery. The mountains. 'He was a child, and this was a story.'"
+      }
+    ]
   },
   {
     "id": "book-the-secret-history",
@@ -5663,7 +6489,7 @@
     "subtype": "Book",
     "name": "The Secret History (1992)",
     "teaser": "Donna Tartt's debut novel about a group of elite Classics students at a Vermont college who murder one of their own. The novel tells you who dies and who kills him on the first page — the suspense is why. Tartt wrote it over eight years at Bennington College. The novel launched the 'dark academia' aesthetic and has sold millions.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140167771-L.jpg",
     "byline": "Donna Tartt",
     "exploreAction": {
       "verb": "Read",
@@ -5678,7 +6504,31 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 640
+    "pageCount": 559,
+    "synopsis": "Tartt's debut novel follows Richard Papen, a poor California boy who transfers to a prestigious Vermont college and falls in with a group of classics students led by the charismatic professor Julian Morrow. The group — five wealthy, beautiful, intellectually brilliant students — studies ancient Greek under Julian's seductive mentorship. When the group kills a farmer in a Dionysian ritual gone wrong, they cover up the murder. The novel is narrated by Richard in retrospect, looking back on the events that destroyed his friends and himself. Tartt's central question — can beauty and intellect justify evil? — is delivered through a novel that reads like a thriller but works as a moral philosophy. The novel was a massive bestseller and is considered one of the defining campus novels.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Hampden",
+        "pageStart": 1,
+        "pageEnd": 150,
+        "summary": "Richard arrives. The group. Julian. The first murder."
+      },
+      {
+        "number": 2,
+        "title": "The Cover-Up",
+        "pageStart": 151,
+        "pageEnd": 350,
+        "summary": "Bunny. The money. The lies. The second murder."
+      },
+      {
+        "number": 3,
+        "title": "The Unraveling",
+        "pageStart": 351,
+        "pageEnd": 559,
+        "summary": "Bunny's death. The guilt. The confession. The aftermath."
+      }
+    ]
   },
   {
     "id": "book-parable-of-the-sower",
@@ -5686,7 +6536,7 @@
     "subtype": "Book",
     "name": "Parable of the Sower (1993)",
     "teaser": "Octavia Butler's dystopian novel set in the 2020s — a world of climate collapse, corporate towns, and a populist president who promises to 'Make America Great Again.' The protagonist Lauren Olamina founds a religion called Earthseed whose first verse is 'God is Change.' Butler predicted our present with eerie accuracy from 1993. She died in 2006 at 58.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781538732182-L.jpg",
     "byline": "Octavia Butler",
     "exploreAction": {
       "verb": "Read",
@@ -5701,7 +6551,31 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 352
+    "pageCount": 345,
+    "synopsis": "Butler's dystopian novel follows Lauren Olamina, a fifteen-year-old Black woman living in a gated community in 2024 California, where climate change, economic collapse, and social disorder have turned the suburbs into a war zone. When the community is attacked and destroyed, Lauren escapes north, leading a group of refugees. She carries with her a new religion — Earthseed — which she has been writing since childhood, based on the belief that God is change. The novel is both a survival story and a philosophical text: Butler created a religion that is genuinely compelling, and the novel's depiction of climate-driven migration feels eerily prescient. Butler wrote the novel in 1993; its 2024 setting is now the present.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Walled Community",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Lauren's world. The wall. The fire. The escape."
+      },
+      {
+        "number": 2,
+        "title": "The Road",
+        "pageStart": 81,
+        "pageEnd": 220,
+        "summary": "The journey north. The group forms. Earthseed. The religion."
+      },
+      {
+        "number": 3,
+        "title": "Acorn",
+        "pageStart": 221,
+        "pageEnd": 345,
+        "summary": "The community. The settlement. The founding. 'God is Change.'"
+      }
+    ]
   },
   {
     "id": "book-the-sympathizer",
@@ -5709,7 +6583,7 @@
     "subtype": "Book",
     "name": "The Sympathizer (2015)",
     "teaser": "Viet Thanh Nguyen's debut novel won the Pulitzer. It's a confession written by a half-French, half-Vietnamese communist spy who infiltrates the South Vietnamese army and flees to Los Angeles after the fall of Saigon. The novel is one long sentence of guilt, irony, and savage critique of both American intervention and Vietnamese communism.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781616955229-L.jpg",
     "byline": "Viet Thanh Nguyen",
     "exploreAction": {
       "verb": "Read",
@@ -5724,7 +6598,31 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 416
+    "pageCount": 371,
+    "synopsis": "Nguyen's Pulitzer-winning novel follows a half-French, half-Vietnamese communist spy who serves as an advisor to a South Vietnamese general during the fall of Saigon. After the war, the spy escapes to Los Angeles, where he works as a consultant on a Hollywood film about the Vietnam War (clearly based on Apocalypse Now) while secretly reporting to the communist government. The novel is narrated by the spy in a voice that is simultaneously sardonic, self-loathing, and deeply human. Nguyen's central insight — that the Vietnam War can only be understood from both sides — is delivered through a novel that is both a thriller and a meditation on identity. The novel won the Pulitzer Prize for Fiction in 2016.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Fall",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Saigon. The evacuation. The spy. The flight to America."
+      },
+      {
+        "number": 2,
+        "title": "Los Angeles",
+        "pageStart": 81,
+        "pageEnd": 250,
+        "summary": "The Hollywood film. The communist mission. The double life."
+      },
+      {
+        "number": 3,
+        "title": "The Return",
+        "pageStart": 251,
+        "pageEnd": 371,
+        "summary": "Vietnam. The camp. The confession. 'We are all mythologies.'"
+      }
+    ]
   },
   {
     "id": "book-klara-and-the-sun",
@@ -5732,7 +6630,7 @@
     "subtype": "Book",
     "name": "Klara and the Sun (2021)",
     "teaser": "Kazuo Ishiguro's first novel after winning the Nobel Prize. It's narrated by Klara, an Artificial Friend — a solar-powered robot companion for children — who observes the world with luminous naivety. The novel is about love, sacrifice, and what happens when technology offers to replace what we've lost. Ishiguro said he wrote the book because he wanted to explore what it means to love without jealousy.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593318171-L.jpg",
     "byline": "Kazuo Ishiguro",
     "exploreAction": {
       "verb": "Read",
@@ -5747,7 +6645,31 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 320
+    "pageCount": 303,
+    "synopsis": "Ishiguro's novel follows Klara, an artificial friend (AF) — a solar-powered robot designed to be a child's companion — who is purchased by Josie, a sick fourteen-year-old girl. Klara observes the world from the store window, then from Josie's bedroom, with a combination of curiosity, devotion, and mechanical precision. The novel explores what it means to love, to be conscious, and to be human, through the eyes of a being who is neither. Ishiguro's prose is characteristically restrained: Klara's voice is simple and precise, but her observations reveal depths of emotion that she herself doesn't fully understand. The novel was shortlisted for the 2021 Booker Prize.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Store",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "Klara's world. The other AFs. The sun. Josie."
+      },
+      {
+        "number": 2,
+        "title": "The House",
+        "pageStart": 61,
+        "pageEnd": 180,
+        "summary": "Klara and Josie. The mother's plan. The love. The sun."
+      },
+      {
+        "number": 3,
+        "title": "The End",
+        "pageStart": 181,
+        "pageEnd": 303,
+        "summary": "Josie's illness. Klara's sacrifice. The junkyard. 'The Sun.'"
+      }
+    ]
   },
   {
     "id": "book-the-goldfinch",
@@ -5755,7 +6677,7 @@
     "subtype": "Book",
     "name": "The Goldfinch (2013)",
     "teaser": "Donna Tartt's novel about a boy who survives a terrorist bombing at the Metropolitan Museum of Art and steals a 17th-century painting — Carel Fabritius's 'The Goldfinch.' The novel won the Pulitzer. It's 771 pages of grief, art theft, antique furniture restoration, and a friendship with a Ukrainian boy named Boris who may be the most alive character in contemporary fiction.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316055437-L.jpg",
     "byline": "Donna Tartt",
     "exploreAction": {
       "verb": "Read",
@@ -5771,7 +6693,31 @@
       "Art"
     ],
     "tier": 2,
-    "pageCount": 784
+    "pageCount": 771,
+    "synopsis": "Tartt's Pulitzer-winning novel follows Theo Decker, a thirteen-year-old boy who survives a bombing at the Metropolitan Museum of Art that kills his mother. In the chaos after the explosion, Theo steals a small Dutch Golden Age painting — The Goldfinch by Carel Fabritius — that becomes his secret companion for the next decade. The novel follows Theo through his unhappy adolescence with a wealthy family in New York, a stint in Las Vegas with his deadbeat father, and his adult life in the antiques business. The painting is both a connection to his mother and a source of danger. Tartt spent eleven years writing the novel, and it became a massive bestseller despite mixed critical reviews. The novel won the Pulitzer Prize for Fiction in 2014.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Bombing",
+        "pageStart": 1,
+        "pageEnd": 150,
+        "summary": "The museum. The explosion. The painting. The death."
+      },
+      {
+        "number": 2,
+        "title": "New York",
+        "pageStart": 151,
+        "pageEnd": 400,
+        "summary": "The Barbours. The antiques. Boris. Las Vegas."
+      },
+      {
+        "number": 3,
+        "title": "The Reckoning",
+        "pageStart": 401,
+        "pageEnd": 771,
+        "summary": "The theft. The drugs. The painting's return. 'Caring too much for objects.'"
+      }
+    ]
   },
   {
     "id": "book-slaughterhouse-five",
@@ -5779,7 +6725,7 @@
     "subtype": "Book",
     "name": "Slaughterhouse-Five (1969)",
     "teaser": "Kurt Vonnegut's anti-war novel based on his experience as a POW during the firebombing of Dresden — he was one of the few American soldiers to witness it, sheltered in an underground meat locker. The novel's structure — time-hopping, alien abduction — was Vonnegut's way of writing about trauma that couldn't be narrated linearly. He wrote it 23 years after the bombing.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385334204-L.jpg",
     "byline": "Kurt Vonnegut",
     "exploreAction": {
       "verb": "Read",
@@ -5795,7 +6741,31 @@
       "WWII"
     ],
     "tier": 2,
-    "pageCount": 288
+    "pageCount": 275,
+    "synopsis": "Vonnegut's novel follows Billy Pilgrim, a man who becomes 'unstuck in time' and experiences his life out of order — from his death in 1976 to his birth and back. Billy survives the firebombing of Dresden in 1945 (which Vonnegut himself survived as a POW), and the novel alternates between his war experiences, his postwar life as an optometrist, and his abduction by aliens from Tralfamadore. Vonnegut's central technique is repetition: the phrase 'So it goes' appears after every death, creating a flat affect that mirrors the trauma of war. The novel is simultaneously a war novel, a science fiction novel, and a philosophical text about fate and free will. The phrase 'So it goes' entered English as a response to inevitable tragedy.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Billy Pilgrim",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Billy unstuck in time. The war. Dresden. Tralfamadore."
+      },
+      {
+        "number": 2,
+        "title": "The Firebombing",
+        "pageStart": 81,
+        "pageEnd": 180,
+        "summary": "Dresden. The slaughterhouse. The fire. The aftermath."
+      },
+      {
+        "number": 3,
+        "title": "The End",
+        "pageStart": 181,
+        "pageEnd": 275,
+        "summary": "The assassination. The letter. 'If you're ever in Cody, Wyoming.' So it goes."
+      }
+    ]
   },
   {
     "id": "book-americanah",
@@ -5803,7 +6773,7 @@
     "subtype": "Book",
     "name": "Americanah (2013)",
     "teaser": "Chimamanda Ngozi Adichie's novel about Ifemelu and Obinze, Nigerian teenagers in love who emigrate separately — she to America, he to London. Ifemelu starts a blog about race in America called 'Raceteenth.' The novel is about love, hair, race as a construct, and the decision to go home. Adichie said she wrote it because she was tired of reading American books where race was invisible.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781616283780-L.jpg",
     "byline": "Chimamanda Ngozi Adichie",
     "exploreAction": {
       "verb": "Read",
@@ -5820,7 +6790,31 @@
       "Immigration"
     ],
     "tier": 2,
-    "pageCount": 496
+    "pageCount": 477,
+    "synopsis": "Adichie's novel follows Ifemelu, a young Nigerian woman who emigrates to America for university, and Obinze, her boyfriend who stays behind in Nigeria. The novel alternates between Ifemelu's life in America — where she discovers what it means to be 'Black' for the first time, writes a popular blog about race, and navigates relationships with American men — and Obinze's life in Nigeria, where he becomes an undocumented immigrant in England before returning to Lagos. The novel is a study in displacement: Adichie writes about the immigrant experience with precision and humor, particularly the way race is understood differently in America, England, and Nigeria. The novel won the National Book Critics Circle Award and was named one of the best novels of the 2010s by multiple outlets.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Lagos",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Ifemelu and Obinze. The university. The departure."
+      },
+      {
+        "number": 2,
+        "title": "America",
+        "pageStart": 81,
+        "pageEnd": 300,
+        "summary": "Race. The blog. The relationships. The discovery of Blackness."
+      },
+      {
+        "number": 3,
+        "title": "Nigeria",
+        "pageStart": 301,
+        "pageEnd": 477,
+        "summary": "Obinze's return. Ifemelu's return. The reunion. The choice."
+      }
+    ]
   },
   {
     "id": "book-the-road",
@@ -5828,7 +6822,7 @@
     "subtype": "Book",
     "name": "The Road (2006)",
     "teaser": "Cormac McCarthy's post-apocalyptic novel about a father and son walking through a dead America. The world has burned — nothing grows, no birds sing, and the only survivors are 'the good guys' and the cannibals. McCarthy wrote it for his own young son. Won the Pulitzer. The novel strips language to its bones: no chapter numbers, no quotation marks, barely any proper nouns.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780307387899-L.jpg",
     "byline": "Cormac McCarthy",
     "exploreAction": {
       "verb": "Read",
@@ -5844,7 +6838,31 @@
       "Literary"
     ],
     "tier": 2,
-    "pageCount": 304
+    "pageCount": 287,
+    "synopsis": "McCarthy's Pulitzer-winning novel follows a father and his young son walking south through a post-apocalyptic America, pushing a shopping cart of supplies and carrying a pistol with two bullets (one for each of them, if necessary). The world has been destroyed by an unspecified catastrophe — ash covers everything, forests are dead, and the few remaining humans have turned to cannibalism. The father's mission is to keep his son alive and 'carry the fire' — a metaphor for goodness, humanity, and hope. McCarthy's prose is stripped of punctuation and ornament: the novel reads like a scripture or a myth. The novel won the Pulitzer Prize in 2007 and was adapted into a 2009 film starring Viggo Mortensen.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Journey",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "The road south. The cart. The fire. The danger."
+      },
+      {
+        "number": 2,
+        "title": "The Coast",
+        "pageStart": 101,
+        "pageEnd": 200,
+        "summary": "The ocean. The bunker. The cellar. The hope."
+      },
+      {
+        "number": 3,
+        "title": "The End",
+        "pageStart": 201,
+        "pageEnd": 287,
+        "summary": "The father's death. The good people. The boy. 'Carrying the fire.'"
+      }
+    ]
   },
   {
     "id": "book-erasure",
@@ -5852,7 +6870,7 @@
     "subtype": "Book",
     "name": "Erasure (2001)",
     "teaser": "Percival Everett's novel about a Black novelist who, enraged by the success of stereotypical 'ghetto fiction,' writes a parody of it under a pseudonym — which becomes a smash hit that the literary establishment takes seriously.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781640095717-L.jpg",
     "byline": "Percival Everett",
     "exploreAction": {
       "verb": "Read",
@@ -5867,7 +6885,31 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 288
+    "pageCount": 261,
+    "synopsis": "Everett's novel follows Thelonious 'Monk' Ellison, a Black novelist who writes experimental fiction that no one reads. When he discovers that a novel by a rival author — a stereotypical 'hood' novel — is winning awards and making money, Monk writes his own parody under a pseudonym: a cartoonish, dialect-heavy novel called 'My Pafology.' The parody becomes a bestseller and wins the National Book Award, forcing Monk to confront his own feelings about race, literature, and authenticity. Everett's novel is a satire of the publishing industry's expectations of Black writers and a meditation on what it means to be Black in America. The novel was adapted into the 2023 film American Fiction, which won the Academy Award for Best Adapted Screenplay.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Monk",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "The rejection letters. The parody. The pseudonym. The publication."
+      },
+      {
+        "number": 2,
+        "title": "My Pafology",
+        "pageStart": 61,
+        "pageEnd": 160,
+        "summary": "The novel-within-a-novel. The success. The award. The irony."
+      },
+      {
+        "number": 3,
+        "title": "The Reckoning",
+        "pageStart": 161,
+        "pageEnd": 261,
+        "summary": "The truth. The family. The question of authenticity. 'Erasure.'"
+      }
+    ]
   },
   {
     "id": "book-my-brilliant-friend",
@@ -5875,7 +6917,7 @@
     "subtype": "Book",
     "name": "My Brilliant Friend (2011)",
     "teaser": "Elena Ferrante's first Neapolitan Novel — about Lila and Elena, two girls growing up in a poor Naples neighborhood in the 1950s. Lila is brilliant and dangerous; Elena is the diligent one who gets out. Their friendship is the central love story. The identity of the author — 'Elena Ferrante' is a pseudonym — remains unknown, though a journalist claimed to unmask her in 2016.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781609450786-L.jpg",
     "byline": "Elena Ferrante",
     "exploreAction": {
       "verb": "Read",
@@ -5890,7 +6932,31 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 336
+    "pageCount": 332,
+    "synopsis": "Ferrante's novel follows the friendship between Elena Greco and Lila Cerullo, two girls growing up in a poor Naples neighborhood in the 1950s. The novel is narrated by the elderly Elena, who has been asked to record the story of her friendship with Lila, who has disappeared. The two girls are both brilliant, but their paths diverge: Elena escapes through education, becoming a published author, while Lila stays in the neighborhood, trapped by poverty, marriage, and violence. The novel is the first in Ferrante's four-book Neapolitan Quartet, and it traces the women's friendship across six decades of Italian history. Ferrante's identity remains unknown — she publishes under a pseudonym and has never appeared in public. The novel was translated from Italian by Ann Goldstein.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Neighborhood",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Elena and Lila. The doll. The school. The neighborhood."
+      },
+      {
+        "number": 2,
+        "title": "The Divergence",
+        "pageStart": 81,
+        "pageEnd": 200,
+        "summary": "Elena's education. Lila's marriage. The difference."
+      },
+      {
+        "number": 3,
+        "title": "The Story",
+        "pageStart": 201,
+        "pageEnd": 332,
+        "summary": "The recording. The disappearance. The friendship. 'A Brilliant Friend.'"
+      }
+    ]
   },
   {
     "id": "book-station-eleven",
@@ -5898,7 +6964,7 @@
     "subtype": "Book",
     "name": "Station Eleven (2014)",
     "teaser": "Emily St. John Mandel's novel about a pandemic that collapses civilization — written years before COVID. A traveling Shakespeare troupe performs for survivor settlements 20 years after a Georgian flu killed 99% of humanity. The novel jumps between the pre-pandemic world and the post, connected by a graphic novel called 'Station Eleven' drawn by the actor Arthur Leander's first wife.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385353304-L.jpg",
     "byline": "Emily St. John Mandel",
     "exploreAction": {
       "verb": "Read",
@@ -5913,7 +6979,31 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 336
+    "pageCount": 333,
+    "synopsis": "Mandel's novel follows the actors and musicians of the Traveling Symphony, a troupe that performs Shakespeare in the settlements of post-apocalyptic North America, twenty years after a devastating flu pandemic killed 99% of the world's population. The novel moves between the present (the Symphony's journey) and the past (the lives of the characters before the pandemic), converging on a single event that connects them all. Mandel's central insight — that art is what makes life worth living, even after civilization collapses — is delivered through a novel that is simultaneously a thriller, a love story, and a meditation on memory. The novel won the Arthur C. Clarke Award and was adapted into a Hulu series in 2019.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Symphony",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "The troupe. The road. The settlements. The Prophet."
+      },
+      {
+        "number": 2,
+        "title": "Before",
+        "pageStart": 101,
+        "pageEnd": 250,
+        "summary": "The airport. The last flight. The collapse. The loss."
+      },
+      {
+        "number": 3,
+        "title": "The Convergence",
+        "pageStart": 251,
+        "pageEnd": 333,
+        "summary": "The connection. The confrontation. The art. 'Survival is insufficient.'"
+      }
+    ]
   },
   {
     "id": "book-the-odyssey",
@@ -5921,7 +7011,7 @@
     "subtype": "Book",
     "name": "The Odyssey (c. 8th century BCE)",
     "teaser": "The ancient Greek epic attributed to Homer — Odysseus's 10-year journey home from the Trojan War. Penelope fends off 108 suitors; Odysseus blinds the Cyclops, resists the Sirens, and descends into the underworld. Every road-trip story, every 'getting home' narrative, descends from this poem. It was composed to be sung, not read.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140268867-L.jpg",
     "byline": "Homer",
     "exploreAction": {
       "verb": "Read",
@@ -5937,7 +7027,31 @@
       "Epic"
     ],
     "tier": 1,
-    "pageCount": 560
+    "pageCount": 541,
+    "synopsis": "Homer's Odyssey follows Odysseus, the king of Ithaca, on his ten-year journey home after the Trojan War. The poem opens with Odysseus's son Telemachus searching for his father, then switches to Odysseus's adventures: the Cyclops, the sorceress Circe, the land of the dead, the Sirens, Scylla and Charybdis, and the island of Calypso. Meanwhile, back in Ithaca, Penelope fends off over a hundred suitors who want to marry her. The poem ends with Odysseus's return in disguise, his slaughter of the suitors, and his reunion with Penelope. The Odyssey is the foundation of Western narrative: every quest story, every road movie, every hero's journey owes something to Homer. The poem is also a study in the power of storytelling itself — Odysseus tells his own story to the Phaeacians, and his narration saves him.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Books I–IV — Telemachus",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The suitors. Telemachus's journey. The false Odysseus. The quest begins."
+      },
+      {
+        "number": 2,
+        "title": "Books V–XII — The Wanderings",
+        "pageStart": 81,
+        "pageEnd": 300,
+        "summary": "Calypso. The Cyclops. Circe. The underworld. The Sirens. Scylla."
+      },
+      {
+        "number": 3,
+        "title": "Books XIII–XXIV — The Return",
+        "pageStart": 301,
+        "pageEnd": 541,
+        "summary": "Ithaca. The bow. The slaughter. The reunion. 'Tell me, O Muse.'"
+      }
+    ]
   },
   {
     "id": "book-i-know-why-the-caged-bird-sings",
@@ -5945,7 +7059,7 @@
     "subtype": "Book",
     "name": "I Know Why the Caged Bird Sings (1969)",
     "teaser": "Maya Angelou's first memoir — covering her childhood from age 3 to 17 in Stamps, Arkansas. She was raped at 7 by her mother's boyfriend; after she testified and he was killed, she stopped speaking for five years, believing her voice had killed him. The memoir launched her career and was the first nonfiction bestseller by a Black woman.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780812981117-L.jpg",
     "byline": "Maya Angelou",
     "exploreAction": {
       "verb": "Read",
@@ -5960,7 +7074,31 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 288
+    "pageCount": 281,
+    "synopsis": "Angelou's autobiography follows her childhood and adolescence in Stamps, Arkansas, where she and her brother Bailey are raised by their grandmother after their parents abandon them. The book covers Angelou's experiences of racism in the segregated South, her rape at age eight (by her mother's boyfriend), her years of selective muteness, and her eventual discovery of literature and voice. The title comes from Paul Laurence Dunbar's poem 'Sympathy': 'I know why the caged bird sings, ah me, / When his wing is bruised and his bosom sore.' The book is the first of seven autobiographies by Angelou, and it established her as one of America's most important memoirists. The book was nominated for a National Book Award in 1970.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Stamps",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The grandmother. The store. The racism. The community."
+      },
+      {
+        "number": 2,
+        "title": "The Trauma",
+        "pageStart": 81,
+        "pageEnd": 180,
+        "summary": "The rape. The muteness. The healing. The books."
+      },
+      {
+        "number": 3,
+        "title": "The Voice",
+        "pageStart": 181,
+        "pageEnd": 281,
+        "summary": "The dance. The graduation. The voice. 'I Know Why the Caged Bird Sings.'"
+      }
+    ]
   },
   {
     "id": "book-the-hitchhikers-guide-to-the-galaxy",
@@ -5968,7 +7106,7 @@
     "subtype": "Book",
     "name": "The Hitchhiker's Guide to the Galaxy (1979)",
     "teaser": "Douglas Adams's comic science fiction novel that started as a BBC radio series. Arthur Dent is saved from Earth's destruction by his friend Ford Prefect — an alien researcher for the titular guidebook. The answer to life, the universe, and everything is 42. Adams wrote the first draft drunk in a field in Innsbruck. The novel has sold 14+ million copies.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345391803-L.jpg",
     "byline": "Douglas Adams",
     "exploreAction": {
       "verb": "Read",
@@ -5983,7 +7121,31 @@
       "20th Century"
     ],
     "tier": 1,
-    "pageCount": 224
+    "pageCount": 216,
+    "synopsis": "Adams's comic science fiction novel follows Arthur Dent, an ordinary Englishman who discovers that his friend Ford Prefect is actually an alien researcher for the Hitchhiker's Guide to the Galaxy. When Earth is demolished to make way for a hyperspace bypass, Arthur and Ford escape on a passing Vogon ship and begin a series of absurd adventures across the galaxy. The novel originated as a BBC radio series in 1978 and was expanded into a series of novels, a TV series, a film, and a video game. Adams's humor is simultaneously silly and philosophical: the answer to 'the Ultimate Question of Life, the Universe, and Everything' is 42, but nobody knows what the question is. The novel's appeal lies in its ability to make the absurd feel logical and the logical feel absurd.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Earth",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "The pub. The demolition. The escape. Ford Prefect."
+      },
+      {
+        "number": 2,
+        "title": "The Galaxy",
+        "pageStart": 41,
+        "pageEnd": 140,
+        "summary": "The Vogons. The Heart of Gold. Zaphod. The Guide."
+      },
+      {
+        "number": 3,
+        "title": "Magrathea",
+        "pageStart": 141,
+        "pageEnd": 216,
+        "summary": "The planet builders. The computer. 42. The question. 'Don't Panic.'"
+      }
+    ]
   },
   {
     "id": "book-half-of-a-yellow-sun",
@@ -5991,7 +7153,7 @@
     "subtype": "Book",
     "name": "Half of a Yellow Sun (2006)",
     "teaser": "Chimamanda Ngozi Adichie's novel about the Biafran War (1967-70), told through three characters: Ugwu, a houseboy; Olanna, a wealthy woman; and Richard, a British writer. Adichie grew up in the house where the Biafran leader once lived; her grandfathers fought on opposite sides. The novel won the Women's Prize and was voted the best book to have won the award.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781400044160-L.jpg",
     "byline": "Chimamanda Ngozi Adichie",
     "exploreAction": {
       "verb": "Read",
@@ -6006,7 +7168,31 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 560
+    "pageCount": 433,
+    "synopsis": "Adichie's novel is set during the Nigerian Civil War (1967–70), when the Igbo-speaking eastern region declared independence as the Republic of Biafra. The novel follows three characters: Ugwu, a houseboy who works for a university professor; Olanna, the professor's mistress, a beautiful woman from a wealthy family; and Richard, an Englishman who falls in love with Olanna's twin sister Kainene. The novel traces the war's impact on each character — the hunger, the displacement, the moral compromises — and the way the conflict destroyed a generation. Adichie named the novel after the Biafran flag, which showed half a yellow sun. The novel won the Orange Prize for Fiction in 2007.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Before the War",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "The university. Olanna and Odenigbo. Ugwu. Richard and Kainene."
+      },
+      {
+        "number": 2,
+        "title": "The War",
+        "pageStart": 121,
+        "pageEnd": 300,
+        "summary": "The secession. The bombing. The refugees. The hunger."
+      },
+      {
+        "number": 3,
+        "title": "The Aftermath",
+        "pageStart": 301,
+        "pageEnd": 433,
+        "summary": "The fall of Biafra. The deaths. The flag. 'Half of a yellow sun.'"
+      }
+    ]
   },
   {
     "id": "book-the-virgin-suicides",
@@ -6014,7 +7200,7 @@
     "subtype": "Book",
     "name": "The Virgin Suicides (1993)",
     "teaser": "Jeffrey Eugenides's debut novel about the five Lisbon sisters who kill themselves over the course of a year in 1970s suburban Michigan. The novel is narrated by the neighborhood boys, now middle-aged, still obsessed and clueless. Eugenides wrote it in a single summer while working as a secretary.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780312427658-L.jpg",
     "byline": "Jeffrey Eugenides",
     "exploreAction": {
       "verb": "Read",
@@ -6030,7 +7216,31 @@
       "Suburbia"
     ],
     "tier": 2,
-    "pageCount": 272
+    "pageCount": 243,
+    "synopsis": "Eugenides's debut novel follows five sisters — the Lisbon girls — who all commit suicide over the course of a single year in a suburban Detroit neighborhood in the 1970s. The novel is narrated by a group of neighborhood boys who are obsessed with the girls, piecing together their lives from yearbooks, police reports, and memory. The Lisbon sisters are locked in their house by their strict Catholic parents, and their increasing isolation drives them toward death. Eugenides's prose is both nostalgic and analytical: the boys reconstruct the girls' lives with the precision of detectives and the longing of青春期. The novel was adapted into a 1999 film by Sofia Coppola.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Girls",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "The Lisbon girls. The neighborhood boys. The obsession."
+      },
+      {
+        "number": 2,
+        "title": "The Lockdown",
+        "pageStart": 61,
+        "pageEnd": 150,
+        "summary": "The parents. The house. The isolation. The first death."
+      },
+      {
+        "number": 3,
+        "title": "The End",
+        "pageStart": 151,
+        "pageEnd": 243,
+        "summary": "The remaining sisters. The final night. The mystery. 'We couldn't stop looking.'"
+      }
+    ]
   },
   {
     "id": "book-crying-in-h-mart",
@@ -6038,7 +7248,7 @@
     "subtype": "Book",
     "name": "Crying in H Mart (2021)",
     "teaser": "Michelle Zauner's memoir about losing her Korean mother to cancer and finding her identity in Korean food. Zauner is better known as the musician Japanese Breakfast. The book became a #1 New York Times bestseller. H Mart is an Asian supermarket chain — the title comes from the experience of crying in the food court because every item reminds you of your dead mother.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780525537823-L.jpg",
     "byline": "Michelle Zauner",
     "exploreAction": {
       "verb": "Read",
@@ -6053,7 +7263,31 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 256
+    "pageCount": 256,
+    "synopsis": "Zauner's memoir follows her childhood in Eugene, Oregon, where she grew up as the daughter of a Korean immigrant mother and an American father. The title comes from H Mart, a Korean grocery chain, where Zauner's mother took her to buy Korean food — a ritual that became a source of connection and identity. The memoir centers on Zauner's mother's death from cancer and Zauner's struggle to process grief while reconnecting with her Korean heritage. Zauner, the frontwoman of the indie rock band Japanese Breakfast, wrote the memoir as a way to understand her mother and herself. The book became a bestseller and was named one of the best memoirs of 2021.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Korea",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "The mother. The food. The culture. The childhood."
+      },
+      {
+        "number": 2,
+        "title": "The Illness",
+        "pageStart": 61,
+        "pageEnd": 160,
+        "summary": "The diagnosis. The treatment. The food. The grief."
+      },
+      {
+        "number": 3,
+        "title": "The After",
+        "pageStart": 161,
+        "pageEnd": 256,
+        "summary": "The death. The Korean trip. The cooking. The memory. 'Crying in H Mart.'"
+      }
+    ]
   },
   {
     "id": "book-the-power",
