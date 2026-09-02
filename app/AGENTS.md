@@ -1333,6 +1333,32 @@ app/src/main/java/com/curio/app/
   when content in the SAME position has the SAME content on both ends —
   matching the card's bounds alone isn't enough if pills/titles swap
   inside it.
+- **v315 — book notes bottom sheet + instant reveal + smooth book morph.**
+  (User: the book-notes dialog is too slim, add the cover, fix the
+  scrollable synopsis, shrink the chapter boxes, use a bottom sheet with
+  all chapters switchable, reveal takes a sec despite prior visits, morph
+  is laggy on books with synopsis/chapters.) (1) **Instant reveal** —
+  `resolved` is SEEDED from `TopicJsonLoader.cached(cat.id)` synchronously
+  in `remember(topicName, cat.id)` (strict → saved-name match), so a
+  warmed lane renders its quick fact + metadata on the FIRST frame; the
+  async Room/JSON chain still runs to enrich + `rememberTopic` persist,
+  and `init()` is skipped when `TopicRepository.isInitialized()`.
+  (2) **Smooth book morph** — the whole `BookInfoSection` is gated on a
+  `bookUiReady` flag (fires ~380ms after entry), so the poster Coil decode
+  + chapter `LazyRow` compose only AFTER the shared-element spring settles
+  and never stall its frames. (3) **Book notes bottom sheet** —
+  `RevealDetailDialog` is DELETED; `BookNotesSheet` (ModalBottomSheet,
+  curioDialogContainerColor, 28dp top corners, max width
+  `CurioContentMaxWidth`) replaces it for BOTH synopsis and chapters: a
+  header row with the book cover (`BookCoverPoster` — same URL + fallback
+  as `BookCoverFetch.coverUrlFor`, so the cache key matches the Settings
+  bulk fetch) + title/byline + close pill; SYNOPSIS mode shows the full
+  text; CHAPTERS mode shows EVERY chapter in a `LazyRow` chip row (active
+  chapter accent-filled, `animateScrollToItem` to the opened one) and
+  tapping a chip switches the reader in-place (`selectedChapter` screen
+  state, sheet instance persists). (4) **Page fixes** — the synopsis card's
+  fixed-height inner `verticalScroll` box is gone (full text, card grows,
+  poster top-aligned); chapter chips shrank 156→118dp (title 1 line).
 - **v142 — Manage Categories full-bleed bottom; Pet Designer floating
   pill bar + fade open; first-run "Pick a lane" wired to the Spin picker.**
   (1) **Manage Categories full-bleed** (per user, confirmed): the NavHost

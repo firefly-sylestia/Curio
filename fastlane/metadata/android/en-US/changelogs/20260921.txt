@@ -1,3 +1,7 @@
+ADD: Book notes on Topic Reveal — the slim chapter/synopsis dialog is now a full bottom sheet with the book cover, all chapters in a chip row, and in-sheet chapter switching (tap any chip to jump straight to that chapter).
+FIX: Topic Reveal — a book's synopsis now reads in full on the page (no more tiny internal scroll box), and the chapter cards are much shorter (they were taller than their 2-line previews).
+FIX: Topic Reveal — already-seen topics now show their quick fact and metadata instantly from the warm cache, no more second-long blank flash.
+FIX: Topic Reveal — the card morph stays smooth on books with synopsis + chapters (the heavy book content now appears right after the morph settles instead of fighting its frames).
 ADD: Settings — a new "Book covers" row fetches every book cover one by one with a live counter (12 / 301…); posters are cached on-device so they show instantly and offline.
 ADD: Topic Browser — search no longer shows the full category chip bar; categories live in one place, a collapsed-by-default panel with a tiny search box inside and checkbox multi-select.
 ADD: Topic Browser — active category filters show as chips you can remove with one tap, and filtering (text AND selected categories) works while searching too.
