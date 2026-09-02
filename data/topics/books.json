@@ -32696,5 +32696,775 @@
       "classic"
     ],
     "tier": 2
+  },
+  {
+    "id": "book-norwegian-wood",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Norwegian Wood",
+    "teaser": "A nostalgic story of loss and sexuality set in 1960s Tokyo.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780375704024-L.jpg",
+    "byline": "Haruki Murakami",
+    "synopsis": "Norwegian Wood, published in 1987, follows Toru Watanabe, a college student in Tokyo who is drawn to two very different women: Naoko, the beautiful girlfriend of his best friend who committed suicide, and Midori, a lively and free-spirited girl. The novel explores love, loss, and the transition to adulthood.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Opening",
+        "pageStart": 1,
+        "pageEnd": 74,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Development",
+        "pageStart": 75,
+        "pageEnd": 148,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Climax",
+        "pageStart": 149,
+        "pageEnd": 222,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Resolution",
+        "pageStart": 223,
+        "pageEnd": 296,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 296,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Norwegian Wood",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Norwegian Wood."
+    },
+    "tags": [
+      "japanese",
+      "romance",
+      "contemporary",
+      "coming of age",
+      "classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-shogun",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Shogun",
+    "teaser": "An English pilot becomes entangled in Japanese politics during the civil wars of 1600.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780440178002-L.jpg",
+    "byline": "James Clavell",
+    "synopsis": "Shogun, published in 1975, follows John Blackthorne, an English navigator whose ship is shipwrecked in Japan in 1600. He becomes involved in the political machinations of the warlord Toranaga. The novel explores the collision of Western and Japanese cultures.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Opening",
+        "pageStart": 1,
+        "pageEnd": 288,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Development",
+        "pageStart": 289,
+        "pageEnd": 576,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Climax",
+        "pageStart": 577,
+        "pageEnd": 864,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Resolution",
+        "pageStart": 865,
+        "pageEnd": 1152,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 1152,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Shogun",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Shogun."
+    },
+    "tags": [
+      "japanese",
+      "historical",
+      "political",
+      "cultural",
+      "adventure"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-lies-of-locke-lamora",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "The Lies of Locke Lamora",
+    "teaser": "A con artist in a fantasy city must use all his wits to survive when a mysterious killer targets his crew.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780553588941-L.jpg",
+    "byline": "Scott Lynch",
+    "synopsis": "The Lies of Locke Lamora, published in 2006, follows Locke Lamora, an orphan who becomes the leader of the Gentlemen Bastards, a group of con artists in the city of Camorr. When a mysterious figure called the Grey King begins killing, Locke must use all his skills to survive.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Opening",
+        "pageStart": 1,
+        "pageEnd": 124,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Development",
+        "pageStart": 125,
+        "pageEnd": 249,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Climax",
+        "pageStart": 250,
+        "pageEnd": 374,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Resolution",
+        "pageStart": 375,
+        "pageEnd": 499,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 499,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Lies of Locke Lamora",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Lies of Locke Lamora."
+    },
+    "tags": [
+      "fantasy",
+      "heist",
+      "con artist",
+      "urban",
+      "humor"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-jonathan-strange-&-mr-norrell",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "Jonathan Strange & Mr Norrell",
+    "teaser": "Two magicians revive English magic in an alternate nineteenth-century England.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780765356154-L.jpg",
+    "byline": "Susanna Clarke",
+    "synopsis": "Jonathan Strange & Mr Norrell, published in 2004, is set in an alternate England where magic once existed but has been lost. Two magicians, the reclusive Mr Norrell and the charming Jonathan Strange, revive English magic and become involved in the Napoleonic Wars. The novel is written in the style of a nineteenth-century novel.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Opening",
+        "pageStart": 1,
+        "pageEnd": 251,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Development",
+        "pageStart": 252,
+        "pageEnd": 503,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Climax",
+        "pageStart": 504,
+        "pageEnd": 754,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Resolution",
+        "pageStart": 755,
+        "pageEnd": 1006,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 1006,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Jonathan Strange & Mr Norrell",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Jonathan Strange & Mr Norrell."
+    },
+    "tags": [
+      "fantasy",
+      "british",
+      "alternate history",
+      "magic",
+      "classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-goblin-emperor",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "The Goblin Emperor",
+    "teaser": "A gentle young man unexpectedly becomes emperor of a vast elven empire.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780765330185-L.jpg",
+    "byline": "Katherine Addison",
+    "synopsis": "The Goblin Emperor, published in 2014, follows Maia Drazhar, the half-goblin son of the emperor, who unexpectedly becomes emperor after his father and brothers are killed. Maia must navigate court politics and learn to rule while staying true to his compassionate nature.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Opening",
+        "pageStart": 1,
+        "pageEnd": 111,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Development",
+        "pageStart": 112,
+        "pageEnd": 223,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Climax",
+        "pageStart": 224,
+        "pageEnd": 334,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Resolution",
+        "pageStart": 335,
+        "pageEnd": 446,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 446,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Goblin Emperor",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Goblin Emperor."
+    },
+    "tags": [
+      "fantasy",
+      "court politics",
+      "compassion",
+      "goblin",
+      "emperor"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-song-of-achilles",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Song of Achilles",
+    "teaser": "A retelling of the Iliad through the love story of Achilles and Patroclus.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062060624-L.jpg",
+    "byline": "Madeline Miller",
+    "synopsis": "The Song of Achilles, published in 2011, tells the story of the Trojan War through the eyes of Patroclus, an exiled prince who becomes the companion and lover of Achilles. The novel traces their relationship from childhood through the war and Achilles's death.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Opening",
+        "pageStart": 1,
+        "pageEnd": 94,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Development",
+        "pageStart": 95,
+        "pageEnd": 189,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Climax",
+        "pageStart": 190,
+        "pageEnd": 283,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Resolution",
+        "pageStart": 284,
+        "pageEnd": 378,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 378,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Song of Achilles",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Song of Achilles."
+    },
+    "tags": [
+      "greek",
+      "mythology",
+      "romance",
+      "lgbtq",
+      "retelling"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-nightingale",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Nightingale",
+    "teaser": "Two sisters in Nazi-occupied France face impossible choices during World War II.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781250080400-L.jpg",
+    "byline": "Kristin Hannah",
+    "synopsis": "The Nightingale, published in 2015, follows Vianne and Isabelle Rossignol, sisters in France during World War II. Vianne protects her daughter while hiding a Jewish child; Isabelle joins the Resistance and helps downed airmen escape across the Pyrenees. The novel explores the bravery of women during war.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Opening",
+        "pageStart": 1,
+        "pageEnd": 110,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Development",
+        "pageStart": 111,
+        "pageEnd": 220,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Climax",
+        "pageStart": 221,
+        "pageEnd": 330,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Resolution",
+        "pageStart": 331,
+        "pageEnd": 440,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 440,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Nightingale",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Nightingale."
+    },
+    "tags": [
+      "french",
+      "world war ii",
+      "historical",
+      "resistance",
+      "sisters"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-where-the-crawdads-sing",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Where the Crawdads Sing",
+    "teaser": "A girl raised in the marshes of North Carolina becomes a suspect in a murder.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780735219090-L.jpg",
+    "byline": "Delia Owens",
+    "synopsis": "Where the Crawdads Sing, published in 2018, follows Kya Clark, abandoned by her family and raised alone in the marshes of North Carolina. She becomes a renowned naturalist and falls in love with two men. When one is found dead, Kya becomes the prime suspect.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Opening",
+        "pageStart": 1,
+        "pageEnd": 96,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Development",
+        "pageStart": 97,
+        "pageEnd": 192,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Climax",
+        "pageStart": 193,
+        "pageEnd": 288,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Resolution",
+        "pageStart": 289,
+        "pageEnd": 384,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 384,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Where the Crawdads Sing",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Where the Crawdads Sing."
+    },
+    "tags": [
+      "american",
+      "mystery",
+      "nature",
+      "coming of age",
+      "contemporary"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-lovely-bones",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Lovely Bones",
+    "teaser": "A murdered girl watches her family from heaven as they try to heal.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316769488-L.jpg",
+    "byline": "Alice Sebold",
+    "synopsis": "The Lovely Bones, published in 2002, is narrated by Susie Salmon, a fourteen-year-old girl who is raped and murdered by her neighbor. From heaven, Susie watches her family grieve and her killer continue his life. The novel explores grief, healing, and the afterlife.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Opening",
+        "pageStart": 1,
+        "pageEnd": 82,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Development",
+        "pageStart": 83,
+        "pageEnd": 164,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Climax",
+        "pageStart": 165,
+        "pageEnd": 246,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Resolution",
+        "pageStart": 247,
+        "pageEnd": 328,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 328,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Lovely Bones",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Lovely Bones."
+    },
+    "tags": [
+      "american",
+      "grief",
+      "afterlife",
+      "family",
+      "mystery"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-lincoln-in-the-bardo",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Lincoln in the Bardo",
+    "teaser": "A ghost story set in the cemetery where Abraham Lincoln mourns his son.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780812998382-L.jpg",
+    "byline": "George Saunders",
+    "synopsis": "Lincoln in the Bardo, published in 2017, is set in a cemetery where Abraham Lincoln visits the body of his eleven-year-old son Willie. The novel is told through a chorus of ghosts who refuse to accept they are dead. The novel won the Booker Prize.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Opening",
+        "pageStart": 1,
+        "pageEnd": 85,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Development",
+        "pageStart": 86,
+        "pageEnd": 171,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Climax",
+        "pageStart": 172,
+        "pageEnd": 257,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Resolution",
+        "pageStart": 258,
+        "pageEnd": 343,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 343,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Lincoln in the Bardo",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Lincoln in the Bardo."
+    },
+    "tags": [
+      "american",
+      "ghost story",
+      "historical",
+      "booker prize",
+      "experimental"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-testaments",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Testaments",
+    "teaser": "The sequel to The Handmaid's Tale, told by three female narrators.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385543781-L.jpg",
+    "byline": "Margaret Atwood",
+    "synopsis": "The Testaments, published in 2019, is set fifteen years after The Handmaid's Tale. Three narrators tell the story: Aunt Lydia, who reveals how she became part of the regime; Agnes, a young woman raised in Gilead; and Daisy, a teenager in Canada who discovers her true identity. The novel won the Booker Prize.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Opening",
+        "pageStart": 1,
+        "pageEnd": 104,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Development",
+        "pageStart": 105,
+        "pageEnd": 209,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Climax",
+        "pageStart": 210,
+        "pageEnd": 314,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Resolution",
+        "pageStart": 315,
+        "pageEnd": 419,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 419,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Testaments",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Testaments."
+    },
+    "tags": [
+      "canadian",
+      "dystopian",
+      "feminist",
+      "sequel",
+      "booker prize"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-death-of-a-salesman",
+    "categoryId": "BOOKS",
+    "subtype": "Drama",
+    "name": "Death of a Salesman",
+    "teaser": "A salesman confronts the failure of the American Dream.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780142437650-L.jpg",
+    "byline": "Arthur Miller",
+    "synopsis": "Death of a Salesman, first performed in 1949, follows Willy Lerman, a traveling salesman who has spent his life chasing the American Dream. As his mind fractures, his wife Linda and sons Biff and Happy must confront the truth about their family.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Opening",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Development",
+        "pageStart": 31,
+        "pageEnd": 60,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Climax",
+        "pageStart": 61,
+        "pageEnd": 90,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Resolution",
+        "pageStart": 91,
+        "pageEnd": 120,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 120,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Death of a Salesman",
+      "durationMinutes": 24,
+      "instruction": "Read the opening of Death of a Salesman."
+    },
+    "tags": [
+      "american",
+      "drama",
+      "miller",
+      "tragedy",
+      "american dream"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-a-streetcar-named-desire",
+    "categoryId": "BOOKS",
+    "subtype": "Drama",
+    "name": "A Streetcar Named Desire",
+    "teaser": "A fragile Southern belle comes to live with her sister and her brutish husband.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780451180186-L.jpg",
+    "byline": "Tennessee Williams",
+    "synopsis": "A Streetcar Named Desire, first performed in 1947, follows Blanche DuBois, who moves in with her sister Stella and brother-in-law Stanley Kowalski in New Orleans. Blanche's fragile mental state and Stanley's aggression lead to a devastating climax.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Opening",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Development",
+        "pageStart": 31,
+        "pageEnd": 60,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Climax",
+        "pageStart": 61,
+        "pageEnd": 90,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Resolution",
+        "pageStart": 91,
+        "pageEnd": 120,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 120,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Streetcar Named Desire",
+      "durationMinutes": 24,
+      "instruction": "Read the opening of A Streetcar Named Desire."
+    },
+    "tags": [
+      "american",
+      "drama",
+      "williams",
+      "southern gothic",
+      "tragedy"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-angels-in-america",
+    "categoryId": "BOOKS",
+    "subtype": "Drama",
+    "name": "Angels in America",
+    "teaser": "A sweeping two-part play about AIDS, politics, and the meaning of America in the 1980s.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781559362344-L.jpg",
+    "byline": "Tony Kushner",
+    "synopsis": "Angels in America, first performed in 1991, is a two-part play that follows several characters dealing with AIDS in 1980s New York. The play explores politics, religion, sexuality, and the meaning of America. It won the Pulitzer Prize for Drama.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Opening",
+        "pageStart": 1,
+        "pageEnd": 75,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Development",
+        "pageStart": 76,
+        "pageEnd": 150,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Climax",
+        "pageStart": 151,
+        "pageEnd": 225,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Resolution",
+        "pageStart": 226,
+        "pageEnd": 300,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 300,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Angels in America",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Angels in America."
+    },
+    "tags": [
+      "american",
+      "drama",
+      "lgbtq",
+      "aids",
+      "pulitzer"
+    ],
+    "tier": 2
   }
 ]
