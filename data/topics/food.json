@@ -1,1637 +1,1637 @@
 [
- {
-  "id": "dish-pizza-margherita",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Pizza Margherita (1889)",
-  "teaser": "Named for Queen Margherita of Savoy — the tomato, mozzarella and basil are the Italian flag in edible form, and the pizza's origin story is probably marketing, but the pie is real.",
-  "imageUrl": "",
-  "byline": "Naples, Italy",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Pizza Margherita (1889) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Pizza Margherita isn't just food — it's history. the tomato, mozzarella and basil are the Italian flag in edible form, and the pizza's origin story is probably marketing, but the pie is real. Search for its origins and watch how it shaped a culture."
-  },
-  "tags": [
-   "Italian",
-   "Pizza",
-   "Classic",
-   "1880s"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-sushi",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Sushi",
-  "teaser": "Originally a fermentation method — fish preserved in rice for months — the modern nigiri (raw fish on rice) is a 19th-century street food from Tokyo.",
-  "imageUrl": "",
-  "byline": "Japan",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Sushi",
-   "durationMinutes": 30,
-   "instruction": "Sushi carries centuries of tradition — it started as a preservation method — fish fermented in rice for months — before becoming Japan's most famous art form. Read its history and watch how it's celebrated today."
-  },
-  "tags": [
-   "Japanese",
-   "Seafood",
-   "Classic"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-ramen",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Ramen (1910)",
-  "teaser": "The noodle soup is Chinese in origin but Japan perfected it — the 'tonkotsu' broth is simmered for 18+ hours, and a ramen shop's broth is its secret recipe.",
-  "imageUrl": "",
-  "byline": "Japan",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Ramen (1910) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "The hidden story of Ramen: the Chinese noodle soup was reinvented by Japan into a cultural obsession. Watch a food documentary to see the human side of this dish."
-  },
-  "tags": [
-   "Japanese",
-   "Noodles",
-   "Comfort",
-   "1910s"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-tacos-al-pastor",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Tacos al Pastor (1960)",
-  "teaser": "Lebanese immigrants brought shawarma to Mexico — the pork version, marinated in achiote and roasted on a vertical spit, is the fusion dish that became Mexico's national street food.",
-  "imageUrl": "",
-  "byline": "Mexico City",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Tacos al Pastor (1960) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "The hidden story of Tacos al Pastor: Lebanese immigrants brought shawarma to Mexico. Watch a food documentary to see the human side of this dish."
-  },
-  "tags": [
-   "Mexican",
-   "Street Food",
-   "Pork",
-   "1960s"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-pad-thai",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Pad Thai (1938)",
-  "teaser": "The 'national dish' was invented in the 1930s as part of a nationalist campaign — the stir-fried rice noodles were a government PR project that became a global classic.",
-  "imageUrl": "",
-  "byline": "Thailand",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Pad Thai (1938) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Pad Thai carries centuries of tradition — it was invented as part of a government campaign. Read its history and watch how it's celebrated today."
-  },
-  "tags": [
-   "Thai",
-   "Noodles",
-   "Street Food",
-   "1930s"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-croissant",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Croissant (1839)",
-  "teaser": "The crescent is Austrian in origin (the kipferl) — the 'Austrian bakery' myth about Vienna is false, but the laminated dough is a French triumph of technique.",
-  "imageUrl": "",
-  "byline": "France",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Croissant (1839) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Croissant has a surprising past — the crescent shape may have originated in Austria. Explore its history and watch how it spread across the world."
-  },
-  "tags": [
-   "French",
-   "Pastry",
-   "Breakfast",
-   "1830s"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-french-fries",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "French Fries",
-  "teaser": "The 'French' fry is Belgian — historians date the fried potato to the Meuse valley, and the double-fry method (blanch, rest, fry) is the difference between good and great.",
-  "imageUrl": "",
-  "byline": "Belgium",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "French Fries",
-   "durationMinutes": 30,
-   "instruction": "Why is French Fries so beloved? the 'French' fry is actually Belgian. Watch a cultural deep-dive to understand its significance."
-  },
-  "tags": [
-   "Belgian",
-   "Street Food",
-   "Potato"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-pasta-carbonara",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Pasta Carbonara",
-  "teaser": "The Roman classic has no cream — egg, pecorino, guanciale, pepper — and the 'carbonara' name may come from coal miners (carbonai) who made it with their campfire provisions.",
-  "imageUrl": "",
-  "byline": "Rome, Italy",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Pasta Carbonara",
-   "durationMinutes": 30,
-   "instruction": "Pasta Carbonara has a surprising past — the Roman classic has no cream. Explore its history and watch how it spread across the world."
-  },
-  "tags": [
-   "Italian",
-   "Pasta",
-   "Classic"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-risotto",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Risotto",
-  "teaser": "The Milanese rice dish is a lesson in patience — the broth is added slowly, and the 'all'onda' (wavy) texture is the sign of a master.",
-  "imageUrl": "",
-  "byline": "Milan, Italy",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Risotto",
-   "durationMinutes": 30,
-   "instruction": "Why is Risotto so beloved? the broth is added slowly, and the 'all'onda' (wavy) texture is the sign of a master. Watch a cultural deep-dive to understand its significance."
-  },
-  "tags": [
-   "Italian",
-   "Rice",
-   "Comfort"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-paella",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Paella",
-  "teaser": "The Valencian rice dish was a farmhouse meal — the 'socarrat' (crispy bottom) is the sign of authenticity, and the dish is named for the pan, not the ingredients.",
-  "imageUrl": "",
-  "byline": "Valencia, Spain",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Paella",
-   "durationMinutes": 30,
-   "instruction": "Paella isn't just food — it's history. the 'socarrat' (crispy bottom) is the sign of authenticity, and the dish is named for the pan, not the ingredients. Search for its origins and watch how it shaped a culture."
-  },
-  "tags": [
-   "Spanish",
-   "Rice",
-   "Classic"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-pho",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Pho (1900)",
-  "teaser": "The Vietnamese noodle soup is a 20th-century invention — French beef scraps met Chinese noodle culture, and the broth's 12-hour simmer is the soul.",
-  "imageUrl": "",
-  "byline": "Vietnam",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Pho (1900) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Learn the story behind Pho — French beef scraps met Chinese noodle culture, and the broth's 12-hour simmer is the soul. Watch a short documentary or food history video to see how it evolved from its origins."
-  },
-  "tags": [
-   "Vietnamese",
-   "Soup",
-   "Comfort",
-   "1900s"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-biryani",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Biryani",
-  "teaser": "The layered rice dish of the Mughal courts — the 'dum' method (sealing the pot) is the technique, and every region of India has its own biryani identity.",
-  "imageUrl": "",
-  "byline": "India",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Biryani",
-   "durationMinutes": 30,
-   "instruction": "Discover why Biryani matters to its culture — the 'dum' method (sealing the pot) is the technique, and every region of India has its own biryani identity. Search for its history and watch how different regions make it their own."
-  },
-  "tags": [
-   "Indian",
-   "Rice",
-   "Festive"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-butter-chicken",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Butter Chicken (1950)",
-  "teaser": "Invented by accident — leftover tandoori chicken was simmered in a tomato-butter sauce by a Delhi restaurant in the 1950s, and the dish conquered the world.",
-  "imageUrl": "",
-  "byline": "Delhi, India",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Butter Chicken (1950) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "The hidden story of Butter Chicken: leftover tandoori chicken was simmered in a tomato-butter sauce by a Delhi restaurant in the 1950s, and the dish conquered the world. Watch a food documentary to see the human side of this dish."
-  },
-  "tags": [
-   "Indian",
-   "Curry",
-   "Comfort",
-   "1950s"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-dim-sum",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Dim Sum",
-  "teaser": "The Cantonese 'touch the heart' — small dishes served with tea, originally from teahouses on the Silk Road — and the pushcart tradition is the social ritual.",
-  "imageUrl": "",
-  "byline": "Guangdong, China",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Dim Sum",
-   "durationMinutes": 30,
-   "instruction": "Dim Sum has a surprising past — small dishes served with tea, originally from teahouses on the Silk Road. Explore its history and watch how it spread across the world."
-  },
-  "tags": [
-   "Chinese",
-   "Dumplings",
-   "Cantonese"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-peking-duck",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Peking Duck (1330)",
-  "teaser": "The imperial duck — the skin is the star, carved tableside, and the dish's history goes back to the Yuan dynasty. The air-drying of the skin is the technique.",
-  "imageUrl": "",
-  "byline": "Beijing, China",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Peking Duck (1330) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Peking Duck isn't just food — it's history. the skin is the star, carved tableside, and the dish's history goes back to the Yuan dynasty. The air-drying of the skin is the technique. Search for its origins and watch how it shaped a culture."
-  },
-  "tags": [
-   "Chinese",
-   "Duck",
-   "Classic",
-   "1330s"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-hot-pot",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Hot Pot",
-  "teaser": "The communal boiling pot — the 'spicy' Sichuan broth and 'clear' broth divide is the table politics, and the hot pot is the social meal of China.",
-  "imageUrl": "",
-  "byline": "China",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Hot Pot",
-   "durationMinutes": 30,
-   "instruction": "The hidden story of Hot Pot: the 'spicy' Sichuan broth and 'clear' broth divide is the table politics, and the hot pot is the social meal of China. Watch a food documentary to see the human side of this dish."
-  },
-  "tags": [
-   "Chinese",
-   "Communal",
-   "Comfort"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-mapo-tofu",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Mapo Tofu",
-  "teaser": "The 'pockmarked grandmother's tofu' — the dish is named for its creator, and the 'ma la' (numbing-spicy) combination is the Sichuan signature.",
-  "imageUrl": "",
-  "byline": "Sichuan, China",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Mapo Tofu",
-   "durationMinutes": 30,
-   "instruction": "Learn the story behind Mapo Tofu — the dish is named for its creator, and the 'ma la' (numbing-spicy) combination is the Sichuan signature. Watch a short documentary or food history video to see how it evolved from its origins."
-  },
-  "tags": [
-   "Chinese",
-   "Sichuan",
-   "Tofu"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-kimchi",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Kimchi",
-  "teaser": "The Korean staple with 200+ varieties — the fermentation is the preservation science, and the 'kimchi' is Korea's national identity in a jar.",
-  "imageUrl": "",
-  "byline": "Korea",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Kimchi",
-   "durationMinutes": 30,
-   "instruction": "Kimchi has a surprising past — the fermentation is the preservation science, and the 'kimchi' is Korea's national identity in a jar. Explore its history and watch how it spread across the world."
-  },
-  "tags": [
-   "Korean",
-   "Fermented",
-   "Staple"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-bibimbap",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Bibimbap",
-  "teaser": "The 'mixed rice' bowl — the five colors of the vegetables represent the five elements, and the stone bowl version's crispy bottom is the bonus.",
-  "imageUrl": "",
-  "byline": "Korea",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Bibimbap",
-   "durationMinutes": 30,
-   "instruction": "The hidden story of Bibimbap: the five colors of the vegetables represent the five elements, and the stone bowl version's crispy bottom is the bonus. Watch a food documentary to see the human side of this dish."
-  },
-  "tags": [
-   "Korean",
-   "Rice",
-   "Bowl"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-bulgogi",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Bulgogi",
-  "teaser": "The 'fire meat' — the soy-pear marinade is the technique, and the pear's enzymes are the tenderizer. The dish is Korea's most exported flavor.",
-  "imageUrl": "",
-  "byline": "Korea",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Bulgogi",
-   "durationMinutes": 30,
-   "instruction": "Bulgogi carries centuries of tradition — the soy-pear marinade is the technique, and the pear's enzymes are the tenderizer. The dish is Korea's most exported flavor. Read its history and watch how it's celebrated today."
-  },
-  "tags": [
-   "Korean",
-   "BBQ",
-   "Beef"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-sashimi",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Sashimi",
-  "teaser": "The sliced raw fish — the 'cut' is the craft, and the fish's freshness is the entire dish. The sashimi chef trains for years on the knife.",
-  "imageUrl": "",
-  "byline": "Japan",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Sashimi",
-   "durationMinutes": 30,
-   "instruction": "Discover why Sashimi matters to its culture — the 'cut' is the craft, and the fish's freshness is the entire dish. The sashimi chef trains for years on the knife. Search for its history and watch how different regions make it their own."
-  },
-  "tags": [
-   "Japanese",
-   "Seafood",
-   "Raw"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-tempura",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Tempura",
-  "teaser": "The 'batter-fried' dish came from Portuguese missionaries in the 16th century — the cold-batter technique and the 'kakiage' style are the craft.",
-  "imageUrl": "",
-  "byline": "Japan",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Tempura",
-   "durationMinutes": 30,
-   "instruction": "The hidden story of Tempura: the cold-batter technique and the 'kakiage' style are the craft. Watch a food documentary to see the human side of this dish."
-  },
-  "tags": [
-   "Japanese",
-   "Fried",
-   "Seafood"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-miso-soup",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Miso Soup",
-  "teaser": "The daily soup of Japan — the dashi (fish stock) and miso (fermented soybean paste) are the two ingredients, and the soup is the breakfast of the nation.",
-  "imageUrl": "",
-  "byline": "Japan",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Miso Soup",
-   "durationMinutes": 30,
-   "instruction": "Miso Soup isn't just food — it's history. the dashi (fish stock) and miso (fermented soybean paste) are the two ingredients, and the soup is the breakfast of the nation. Search for its origins and watch how it shaped a culture."
-  },
-  "tags": [
-   "Japanese",
-   "Soup",
-   "Staple"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-katsu-curry",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Katsu Curry",
-  "teaser": "The British navy brought curry to Japan — the panko-breaded pork cutlet on rice with curry sauce is the comfort food of a nation.",
-  "imageUrl": "",
-  "byline": "Japan",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Katsu Curry",
-   "durationMinutes": 30,
-   "instruction": "Learn the story behind Katsu Curry — the panko-breaded pork cutlet on rice with curry sauce is the comfort food of a nation. Watch a short documentary or food history video to see how it evolved from its origins."
-  },
-  "tags": [
-   "Japanese",
-   "Curry",
-   "Comfort"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-okonomiyaki",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Okonomiyaki",
-  "teaser": "The 'as-you-like-it' griddle pancake — the cabbage base and the tabletop grill make it a social dish, and the Osaka version is the standard.",
-  "imageUrl": "",
-  "byline": "Japan",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Okonomiyaki",
-   "durationMinutes": 30,
-   "instruction": "The real story of Okonomiyaki: the cabbage base and the tabletop grill make it a social dish, and the Osaka version is the standard. Read about its origins and watch a food historian explain why it became iconic."
-  },
-  "tags": [
-   "Japanese",
-   "Pancake",
-   "Street Food"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-takoyaki",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Takoyaki (1935)",
-  "teaser": "The octopus balls were invented in Osaka in the 1930s — the special pan and the batter's dance are the craft, and the dish is the city's soul.",
-  "imageUrl": "",
-  "byline": "Osaka, Japan",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Takoyaki (1935) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Takoyaki carries centuries of tradition — the special pan and the batter's dance are the craft, and the dish is the city's soul. Read its history and watch how it's celebrated today."
-  },
-  "tags": [
-   "Japanese",
-   "Street Food",
-   "Octopus",
-   "1930s"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-yakitori",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Yakitori",
-  "teaser": "The grilled chicken skewers — every part of the bird is used, and the 'tare' (sauce) glaze is the signature. The skewer is the Japanese bar food.",
-  "imageUrl": "",
-  "byline": "Japan",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Yakitori",
-   "durationMinutes": 30,
-   "instruction": "Yakitori isn't just food — it's history. every part of the bird is used, and the 'tare' (sauce) glaze is the signature. The skewer is the Japanese bar food. Search for its origins and watch how it shaped a culture."
-  },
-  "tags": [
-   "Japanese",
-   "Grill",
-   "Chicken"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-onigiri",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Onigiri",
-  "teaser": "The rice ball — a portable meal older than sushi, and the nori (seaweed) wrapper is a modern addition. The 'triangle' shape is the signature.",
-  "imageUrl": "",
-  "byline": "Japan",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Onigiri",
-   "durationMinutes": 30,
-   "instruction": "Onigiri isn't just food — it's history. a portable meal older than sushi, and the nori (seaweed) wrapper is a modern addition. The 'triangle' shape is the signature. Search for its origins and watch how it shaped a culture."
-  },
-  "tags": [
-   "Japanese",
-   "Rice",
-   "Snack"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-curry-rice",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Curry Rice",
-  "teaser": "The Japanese curry is a roux-based dish adapted from British navy curry — the 'curry rice' is the most popular home-cooked meal in Japan.",
-  "imageUrl": "",
-  "byline": "Japan",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Curry Rice",
-   "durationMinutes": 30,
-   "instruction": "Discover why Curry Rice matters to its culture — the 'curry rice' is the most popular home-cooked meal in Japan. Search for its history and watch how different regions make it their own."
-  },
-  "tags": [
-   "Japanese",
-   "Curry",
-   "Staple"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-wagyu",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Wagyu",
-  "teaser": "The 'Japanese cow' — the marbling (intramuscular fat) is the point, and the A5 grade is the highest. The beef's 'melt' is the experience.",
-  "imageUrl": "",
-  "byline": "Japan",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Wagyu",
-   "durationMinutes": 30,
-   "instruction": "Why is Wagyu so beloved? the marbling (intramuscular fat) is the point, and the A5 grade is the highest. The beef's 'melt' is the experience. Watch a cultural deep-dive to understand its significance."
-  },
-  "tags": [
-   "Japanese",
-   "Beef",
-   "Luxury"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-poutine",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Poutine (1950)",
-  "teaser": "The fries, curds and gravy dish was born in rural Quebec in the 1950s — the cheese curds must squeak, and the 'poutine' has become Canada's national dish.",
-  "imageUrl": "",
-  "byline": "Quebec, Canada",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Poutine (1950) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Why is Poutine so beloved? the cheese curds must squeak, and the 'poutine' has become Canada's national dish. Watch a cultural deep-dive to understand its significance."
-  },
-  "tags": [
-   "Canadian",
-   "Comfort",
-   "Street Food",
-   "1950s"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-fish-and-chips",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Fish and Chips (1860)",
-  "teaser": "The British national dish — the fried fish in beer batter and the chips, wrapped in paper — has fed the working class since the 1860s.",
-  "imageUrl": "",
-  "byline": "England",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Fish and Chips (1860) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Fish and Chips isn't just food — it's history. the fried fish in beer batter and the chips, wrapped in paper. Search for its origins and watch how it shaped a culture."
-  },
-  "tags": [
-   "British",
-   "Fried",
-   "Classic",
-   "1860s"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-sunday-roast",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Sunday Roast",
-  "teaser": "The Sunday roast — beef, Yorkshire pudding, roast potatoes, gravy — is the British family ritual, and the 'Yorkshire pudding' was originally a cheap filler.",
-  "imageUrl": "",
-  "byline": "England",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Sunday Roast",
-   "durationMinutes": 30,
-   "instruction": "Discover why Sunday Roast matters to its culture — beef, Yorkshire pudding, roast potatoes, gravy. Search for its history and watch how different regions make it their own."
-  },
-  "tags": [
-   "British",
-   "Roast",
-   "Sunday"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-full-english-breakfast",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Full English Breakfast",
-  "teaser": "The fry-up — eggs, bacon, sausage, beans, toast — is the hangover cure of a nation, and the 'full English' is a 19th-century invention from the Victorian boarding house.",
-  "imageUrl": "",
-  "byline": "England",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Full English Breakfast",
-   "durationMinutes": 30,
-   "instruction": "Full English Breakfast isn't just food — it's history. eggs, bacon, sausage, beans, toast. Search for its origins and watch how it shaped a culture."
-  },
-  "tags": [
-   "British",
-   "Breakfast",
-   "Hearty"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-shepherd-s-pie",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Shepherd's Pie",
-  "teaser": "The minced lamb dish with mashed potato topping — the 'shepherd' is the lamb, and the 'cottage pie' (beef) is its cousin.",
-  "imageUrl": "",
-  "byline": "England",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Shepherd's Pie",
-   "durationMinutes": 30,
-   "instruction": "Learn the story behind Shepherd's Pie — the 'shepherd' is the lamb, and the 'cottage pie' (beef) is its cousin. Watch a short documentary or food history video to see how it evolved from its origins."
-  },
-  "tags": [
-   "British",
-   "Comfort",
-   "Mince"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-cornish-pasty",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Cornish Pasty",
-  "teaser": "The miner's lunch — the crimped edge was the handle, thrown away after eating to avoid touching the arsenic-contaminated meat. The 'Oggy oggy oggy' chant is Cornish.",
-  "imageUrl": "",
-  "byline": "Cornwall, England",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Cornish Pasty",
-   "durationMinutes": 30,
-   "instruction": "Discover why Cornish Pasty matters to its culture — the crimped edge was the handle, thrown away after eating to avoid touching the arsenic-contaminated meat. The 'Oggy oggy oggy' chant is Cornish. Search for its history and watch how different regions make it their own."
-  },
-  "tags": [
-   "British",
-   "Pie",
-   "Handheld"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-haggis",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Haggis",
-  "teaser": "The sheep's pluck (heart, liver, lungs) with oats in a stomach casing — the 'great chieftain o' the puddin-race' is Burns' Supper's centerpiece.",
-  "imageUrl": "",
-  "byline": "Scotland",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Haggis",
-   "durationMinutes": 30,
-   "instruction": "Haggis isn't just food — it's history. the 'great chieftain o' the puddin-race' is Burns' Supper's centerpiece. Search for its origins and watch how it shaped a culture."
-  },
-  "tags": [
-   "Scottish",
-   "Offal",
-   "Traditional"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-scotch-egg",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Scotch Egg",
-  "teaser": "The boiled egg wrapped in sausage and breadcrumbs — the 'Scotch' name's origin is debated (possibly 'scorched'), and the dish is a picnic classic.",
-  "imageUrl": "",
-  "byline": "England",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Scotch Egg",
-   "durationMinutes": 30,
-   "instruction": "Scotch Egg carries centuries of tradition — the 'Scotch' name's origin is debated (possibly 'scorched'), and the dish is a picnic classic. Read its history and watch how it's celebrated today."
-  },
-  "tags": [
-   "British",
-   "Egg",
-   "Snack"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-chicken-tikka-masala",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Chicken Tikka Masala (1960)",
-  "teaser": "The 'British national dish' — the origin story has a Glaswegian chef adding tomato soup to a dry chicken tikka, and the dish is the greatest fusion in British food.",
-  "imageUrl": "",
-  "byline": "Glasgow, Scotland",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Chicken Tikka Masala (1960) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Chicken Tikka Masala carries centuries of tradition — the origin story has a Glaswegian chef adding tomato soup to a dry chicken tikka, and the dish is the greatest fusion in British food. Read its history and watch how it's celebrated today."
-  },
-  "tags": [
-   "British Indian",
-   "Curry",
-   "Fusion",
-   "1960s"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-naan",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Naan",
-  "teaser": "The tandoor-baked flatbread — the 'naan' is the bread of the Mughal courts, and the tandoor oven's heat is the blister.",
-  "imageUrl": "",
-  "byline": "India",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Naan",
-   "durationMinutes": 30,
-   "instruction": "Learn the story behind Naan — the 'naan' is the bread of the Mughal courts, and the tandoor oven's heat is the blister. Watch a short documentary or food history video to see how it evolved from its origins."
-  },
-  "tags": [
-   "Indian",
-   "Bread",
-   "Tandoor"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-samosa",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Samosa",
-  "teaser": "The triangular fried pastry — the 'sambosa' came from Central Asia via the Mughals, and the potato-pea filling is the Indian standard.",
-  "imageUrl": "",
-  "byline": "India",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Samosa",
-   "durationMinutes": 30,
-   "instruction": "Samosa carries centuries of tradition — the 'sambosa' came from Central Asia via the Mughals, and the potato-pea filling is the Indian standard. Read its history and watch how it's celebrated today."
-  },
-  "tags": [
-   "Indian",
-   "Snack",
-   "Fried"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-dosa",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Dosa",
-  "teaser": "The fermented rice-lentil crepe — the 'crisp' is the fermentation, and the masala dosa with potato filling is the classic.",
-  "imageUrl": "",
-  "byline": "South India",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Dosa",
-   "durationMinutes": 30,
-   "instruction": "Discover why Dosa matters to its culture — the 'crisp' is the fermentation, and the masala dosa with potato filling is the classic. Search for its history and watch how different regions make it their own."
-  },
-  "tags": [
-   "Indian",
-   "Pancake",
-   "South Indian"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-biryani-hyderabadi",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Biryani (Hyderabadi) (1857)",
-  "teaser": "The Nizam's biryani — the saffron and the dum seal, and the 'kacchi' style (raw meat layered with rice) is the aristocratic method.",
-  "imageUrl": "",
-  "byline": "Hyderabad, India",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Biryani (Hyderabadi) (1857) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Discover why Biryani matters to its culture — the saffron and the dum seal, and the 'kacchi' style (raw meat layered with rice) is the aristocratic method. Search for its history and watch how different regions make it their own."
-  },
-  "tags": [
-   "Indian",
-   "Rice",
-   "Festive",
-   "1850s"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-kebab",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Kebab",
-  "teaser": "The skewered meat of the Ottoman world — the 'shish' and 'doner' are the two great families, and the kebab is the Middle East's most exported food.",
-  "imageUrl": "",
-  "byline": "Middle East",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Kebab",
-   "durationMinutes": 30,
-   "instruction": "Why is Kebab so beloved? the 'shish' and 'doner' are the two great families, and the kebab is the Middle East's most exported food. Watch a cultural deep-dive to understand its significance."
-  },
-  "tags": [
-   "Middle Eastern",
-   "Grill",
-   "Meat"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-shawarma",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Shawarma",
-  "teaser": "The vertical-spit roasted meat — the 'doner' and 'gyro' are cousins, and the shawarma's marinade and the fresh pita are the ritual.",
-  "imageUrl": "",
-  "byline": "Levant",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Shawarma",
-   "durationMinutes": 30,
-   "instruction": "The real story of Shawarma: the 'doner' and 'gyro' are cousins, and the shawarma's marinade and the fresh pita are the ritual. Read about its origins and watch a food historian explain why it became iconic."
-  },
-  "tags": [
-   "Middle Eastern",
-   "Street Food",
-   "Meat"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-falafel",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Falafel",
-  "teaser": "The fried chickpea ball — invented in Egypt (as ta'amiya), and the dish is one of the world's great vegan foods, eaten in pita with salad and tahini.",
-  "imageUrl": "",
-  "byline": "Egypt",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Falafel",
-   "durationMinutes": 30,
-   "instruction": "Falafel carries centuries of tradition — invented in Egypt (as ta'amiya), and the dish is one of the world's great vegan foods, eaten in pita with salad and tahini. Read its history and watch how it's celebrated today."
-  },
-  "tags": [
-   "Middle Eastern",
-   "Fried",
-   "Vegan"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-hummus",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Hummus",
-  "teaser": "The chickpea-tahini dip — the oldest recipes date to medieval Cairo, and the 'hummus wars' over its origin are a Middle East tradition in themselves.",
-  "imageUrl": "",
-  "byline": "Levant",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Hummus",
-   "durationMinutes": 30,
-   "instruction": "Why is Hummus so beloved? the oldest recipes date to medieval Cairo, and the 'hummus wars' over its origin are a Middle East tradition in themselves. Watch a cultural deep-dive to understand its significance."
-  },
-  "tags": [
-   "Middle Eastern",
-   "Dip",
-   "Staple"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-baklava",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Baklava",
-  "teaser": "The layered filo pastry with nuts and honey — the Ottoman courts perfected it, and the 'phyllo' sheets are the craft. Every country claims it.",
-  "imageUrl": "",
-  "byline": "Ottoman",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Baklava",
-   "durationMinutes": 30,
-   "instruction": "Learn the story behind Baklava — the Ottoman courts perfected it, and the 'phyllo' sheets are the craft. Every country claims it. Watch a short documentary or food history video to see how it evolved from its origins."
-  },
-  "tags": [
-   "Middle Eastern",
-   "Pastry",
-   "Sweet"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-kunafa",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Kunafa",
-  "teaser": "The shredded-phyllo cheese dessert soaked in syrup — the 'knafeh' is the dessert of Ramadan, and the cheese pull is the moment.",
-  "imageUrl": "",
-  "byline": "Levant",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Kunafa",
-   "durationMinutes": 30,
-   "instruction": "The real story of Kunafa: the 'knafeh' is the dessert of Ramadan, and the cheese pull is the moment. Read about its origins and watch a food historian explain why it became iconic."
-  },
-  "tags": [
-   "Middle Eastern",
-   "Dessert",
-   "Sweet"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-arepas",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Arepas",
-  "teaser": "The corn cakes of Venezuela and Colombia — the 'arepa' is pre-Columbian, and the filled versions are the national sandwich.",
-  "imageUrl": "",
-  "byline": "Venezuela/Colombia",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Arepas",
-   "durationMinutes": 30,
-   "instruction": "Learn the story behind Arepas — the 'arepa' is pre-Columbian, and the filled versions are the national sandwich. Watch a short documentary or food history video to see how it evolved from its origins."
-  },
-  "tags": [
-   "Latin American",
-   "Corn",
-   "Staple"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-ceviche",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Ceviche",
-  "teaser": "The raw fish 'cooked' in citrus — the 'leche de tigre' (tiger's milk) marinade is the craft, and the dish is Peru's national treasure.",
-  "imageUrl": "",
-  "byline": "Peru",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Ceviche",
-   "durationMinutes": 30,
-   "instruction": "Discover why Ceviche matters to its culture — the 'leche de tigre' (tiger's milk) marinade is the craft, and the dish is Peru's national treasure. Search for its history and watch how different regions make it their own."
-  },
-  "tags": [
-   "Peruvian",
-   "Seafood",
-   "Fresh"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-empanadas",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Empanadas",
-  "teaser": "The filled pastry — from Spanish 'empanar' (to bread), and every Latin country has its version, from the Argentine baked empanada to the Colombian fried.",
-  "imageUrl": "",
-  "byline": "Spain/Latin America",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Empanadas",
-   "durationMinutes": 30,
-   "instruction": "Empanadas isn't just food — it's history. from Spanish 'empanar' (to bread), and every Latin country has its version, from the Argentine baked empanada to the Colombian fried. Search for its origins and watch how it shaped a culture."
-  },
-  "tags": [
-   "Latin American",
-   "Pastry",
-   "Street Food"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-feijoada",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Feijoada",
-  "teaser": "The black bean and pork stew — the 'feijoada completa' with sides is Brazil's national dish, and the Saturday feijoada is the social ritual.",
-  "imageUrl": "",
-  "byline": "Brazil",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Feijoada",
-   "durationMinutes": 30,
-   "instruction": "Why is Feijoada so beloved? the 'feijoada completa' with sides is Brazil's national dish, and the Saturday feijoada is the social ritual. Watch a cultural deep-dive to understand its significance."
-  },
-  "tags": [
-   "Brazilian",
-   "Stew",
-   "Black Beans"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-churros",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Churros",
-  "teaser": "The fried dough sticks with sugar and chocolate — the 'churro' origin is debated (possibly Chinese youtiao via the Portuguese), and the churros con chocolate is the Spanish breakfast.",
-  "imageUrl": "",
-  "byline": "Spain",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Churros",
-   "durationMinutes": 30,
-   "instruction": "The hidden story of Churros: the 'churro' origin is debated (possibly Chinese youtiao via the Portuguese), and the churros con chocolate is the Spanish breakfast. Watch a food documentary to see the human side of this dish."
-  },
-  "tags": [
-   "Spanish",
-   "Dessert",
-   "Street Food"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-gazpacho",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Gazpacho",
-  "teaser": "The cold tomato soup of Andalusia — the 'gazpacho' is a summer survival dish, and the 'salmorejo' (thicker, with bread) is the cousin.",
-  "imageUrl": "",
-  "byline": "Andalusia, Spain",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Gazpacho",
-   "durationMinutes": 30,
-   "instruction": "Gazpacho carries centuries of tradition — the 'gazpacho' is a summer survival dish, and the 'salmorejo' (thicker, with bread) is the cousin. Read its history and watch how it's celebrated today."
-  },
-  "tags": [
-   "Spanish",
-   "Cold Soup",
-   "Summer"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-tiramisu",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Tiramisu (1960)",
-  "teaser": "The 'pick-me-up' dessert was invented in the 1960s in the Veneto — the mascarpone and espresso layers are the craft, and the dish's origin story is a local dispute.",
-  "imageUrl": "",
-  "byline": "Treviso, Italy",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Tiramisu (1960) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Learn the story behind Tiramisu — the mascarpone and espresso layers are the craft, and the dish's origin story is a local dispute. Watch a short documentary or food history video to see how it evolved from its origins."
-  },
-  "tags": [
-   "Italian",
-   "Dessert",
-   "Coffee",
-   "1960s"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-cheesecake",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Cheesecake",
-  "teaser": "The cheesecake is ancient — the Greeks served it at weddings 4,000 years ago, and the New York style (dense, cream cheese) is the modern standard.",
-  "imageUrl": "",
-  "byline": "Ancient Greece",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Cheesecake",
-   "durationMinutes": 30,
-   "instruction": "The hidden story of Cheesecake: the Greeks served it at weddings 4,000 years ago, and the New York style (dense, cream cheese) is the modern standard. Watch a food documentary to see the human side of this dish."
-  },
-  "tags": [
-   "Dessert",
-   "Cheese",
-   "Classic"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-ice-cream",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Ice Cream",
-  "teaser": "The frozen dessert was invented in Tang-dynasty China — milk mixed with ice was the technique, and the 'gelato' and 'sorbet' families descend from it.",
-  "imageUrl": "",
-  "byline": "China",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Ice Cream",
-   "durationMinutes": 30,
-   "instruction": "Ice Cream isn't just food — it's history. milk mixed with ice was the technique, and the 'gelato' and 'sorbet' families descend from it. Search for its origins and watch how it shaped a culture."
-  },
-  "tags": [
-   "Dessert",
-   "Frozen",
-   "Classic"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-chocolate",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Chocolate (3000)",
-  "teaser": "The cacao drink of the Maya and Aztecs was bitter and spiced — the 'chocolate' was a beverage for 3,000 years before the candy bar was invented in 1847.",
-  "imageUrl": "",
-  "byline": "Mesoamerica",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Chocolate (3000) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "The hidden story of Chocolate: the 'chocolate' was a beverage for 3,000 years before the candy bar was invented in 1847. Watch a food documentary to see the human side of this dish."
-  },
-  "tags": [
-   "Dessert",
-   "Cacao",
-   "Classic",
-   "3000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-bread-sourdough",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Bread (Sourdough)",
-  "teaser": "The fermented bread — the first leavened bread was likely an Egyptian accident, and the wild-yeast culture is the 'starter' that bakers keep alive for decades.",
-  "imageUrl": "",
-  "byline": "Ancient Egypt",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Bread (Sourdough)",
-   "durationMinutes": 30,
-   "instruction": "The real story of Bread: the first leavened bread was likely an Egyptian accident, and the wild-yeast culture is the 'starter' that bakers keep alive for decades. Read about its origins and watch a food historian explain why it became iconic."
-  },
-  "tags": [
-   "Bread",
-   "Fermented",
-   "Staple"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-bagel",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Bagel",
-  "teaser": "The boiled-then-baked bread ring — the 'bagel' came to New York with Jewish immigrants, and the boil is what gives it the chewy crust.",
-  "imageUrl": "",
-  "byline": "Poland",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Bagel",
-   "durationMinutes": 30,
-   "instruction": "Bagel isn't just food — it's history. the 'bagel' came to New York with Jewish immigrants, and the boil is what gives it the chewy crust. Search for its origins and watch how it shaped a culture."
-  },
-  "tags": [
-   "Bread",
-   "Jewish",
-   "Classic"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-pretzel",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Pretzel",
-  "teaser": "The knotted bread — the 'brezel' is German, and the lye bath (not baking soda) gives the dark crust. The knot's three holes symbolize the Trinity in the legend.",
-  "imageUrl": "",
-  "byline": "Germany",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Pretzel",
-   "durationMinutes": 30,
-   "instruction": "Why is Pretzel so beloved? the 'brezel' is German, and the lye bath (not baking soda) gives the dark crust. The knot's three holes symbolize the Trinity in the legend. Watch a cultural deep-dive to understand its significance."
-  },
-  "tags": [
-   "Bread",
-   "Baked",
-   "Snack"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-macaron",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Macaron",
-  "teaser": "The meringue-almond sandwich cookie — the 'macaron' is Ladurée's invention, and the 'foot' (the ruffled base) is the sign of a master.",
-  "imageUrl": "",
-  "byline": "France",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Macaron",
-   "durationMinutes": 30,
-   "instruction": "The real story of Macaron: the 'macaron' is Ladurée's invention, and the 'foot' (the ruffled base) is the sign of a master. Read about its origins and watch a food historian explain why it became iconic."
-  },
-  "tags": [
-   "French",
-   "Pastry",
-   "Dessert"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-pancakes",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Pancakes",
-  "teaser": "The griddle cake exists in every culture — from the French crêpe to the Japanese dorayaki, and the 'fluffy American stack' is the modern standard.",
-  "imageUrl": "",
-  "byline": "Global",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Pancakes",
-   "durationMinutes": 30,
-   "instruction": "Pancakes isn't just food — it's history. from the French crêpe to the Japanese dorayaki, and the 'fluffy American stack' is the modern standard. Search for its origins and watch how it shaped a culture."
-  },
-  "tags": [
-   "Breakfast",
-   "Griddle",
-   "Classic"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-hamburger",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Hamburger (1900)",
-  "teaser": "The ground-beef patty in a bun — the origin is disputed (Hamburg, Germany; or 1900 Connecticut), and the burger became the symbol of American food.",
-  "imageUrl": "",
-  "byline": "USA",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Hamburger (1900) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Learn the story behind Hamburger — the origin is disputed (Hamburg, Germany; or 1900 Connecticut), and the burger became the symbol of American food. Watch a short documentary or food history video to see how it evolved from its origins."
-  },
-  "tags": [
-   "American",
-   "Fast Food",
-   "Icon",
-   "1900s"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-hot-dog",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Hot Dog",
-  "teaser": "The sausage in a bun — the 'frankfurter' is German, the bun is American, and the 'hot dog' name was a 1901 cartoonist's joke.",
-  "imageUrl": "",
-  "byline": "USA",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Hot Dog",
-   "durationMinutes": 30,
-   "instruction": "Why is Hot Dog so beloved? the 'frankfurter' is German, the bun is American, and the 'hot dog' name was a 1901 cartoonist's joke. Watch a cultural deep-dive to understand its significance."
-  },
-  "tags": [
-   "American",
-   "Street Food",
-   "Icon"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-fried-chicken",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Fried Chicken",
-  "teaser": "The buttermilk-soaked, seasoned, fried chicken of the American South — the 'brine' is the moisture, and the dish's roots include West African frying techniques.",
-  "imageUrl": "",
-  "byline": "American South",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Fried Chicken",
-   "durationMinutes": 30,
-   "instruction": "Learn the story behind Fried Chicken — the 'brine' is the moisture, and the dish's roots include West African frying techniques. Watch a short documentary or food history video to see how it evolved from its origins."
-  },
-  "tags": [
-   "Southern",
-   "Fried",
-   "Comfort"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-buffalo-wings",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Buffalo Wings (1964)",
-  "teaser": "Invented at the Anchor Bar in Buffalo in 1964 — the Frank's hot sauce and butter mix, and the celery and blue cheese are the ritual.",
-  "imageUrl": "",
-  "byline": "Buffalo, NY",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Buffalo Wings (1964) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Discover why Buffalo Wings matters to its culture — the Frank's hot sauce and butter mix, and the celery and blue cheese are the ritual. Search for its history and watch how different regions make it their own."
-  },
-  "tags": [
-   "American",
-   "Wings",
-   "Bar Food",
-   "1960s"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-mac-and-cheese",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Mac and Cheese",
-  "teaser": "The baked pasta and cheese — Thomas Jefferson brought the 'macaroni pie' to America, and the boxed version became the comfort food of a nation.",
-  "imageUrl": "",
-  "byline": "USA",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Mac and Cheese",
-   "durationMinutes": 30,
-   "instruction": "The hidden story of Mac and Cheese: Thomas Jefferson brought the 'macaroni pie' to America, and the boxed version became the comfort food of a nation. Watch a food documentary to see the human side of this dish."
-  },
-  "tags": [
-   "American",
-   "Pasta",
-   "Comfort"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-chili",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Chili",
-  "teaser": "The Texas chili is 'a bowl of red' — no beans in the classic version, and the 'chili cook-off' is a Texas institution.",
-  "imageUrl": "",
-  "byline": "Texas",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Chili",
-   "durationMinutes": 30,
-   "instruction": "Why is Chili so beloved? no beans in the classic version, and the 'chili cook-off' is a Texas institution. Watch a cultural deep-dive to understand its significance."
-  },
-  "tags": [
-   "American",
-   "Stew",
-   "Spicy"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-gumbo",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Gumbo",
-  "teaser": "The Louisiana stew with a roux base — the 'file' powder (sassafras) is the thickener, and the dish is a blend of French, African, Spanish and Choctaw cooking.",
-  "imageUrl": "",
-  "byline": "Louisiana",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Gumbo",
-   "durationMinutes": 30,
-   "instruction": "Gumbo isn't just food — it's history. the 'file' powder (sassafras) is the thickener, and the dish is a blend of French, African, Spanish and Choctaw cooking. Search for its origins and watch how it shaped a culture."
-  },
-  "tags": [
-   "Cajun",
-   "Stew",
-   "Creole"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-jambalaya",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Jambalaya",
-  "teaser": "The Creole rice dish with sausage, chicken and shrimp — the 'jambalaya' is Louisiana's answer to paella, and the 'holy trinity' (onion, celery, pepper) is the base.",
-  "imageUrl": "",
-  "byline": "Louisiana",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Jambalaya",
-   "durationMinutes": 30,
-   "instruction": "Why is Jambalaya so beloved? the 'jambalaya' is Louisiana's answer to paella, and the 'holy trinity' (onion, celery, pepper) is the base. Watch a cultural deep-dive to understand its significance."
-  },
-  "tags": [
-   "Cajun",
-   "Rice",
-   "Creole"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-tacos",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Tacos",
-  "teaser": "The folded tortilla with filling — the 'taco' predates the Spanish, and the taco stand is the street food of Mexico City.",
-  "imageUrl": "",
-  "byline": "Mexico",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Tacos",
-   "durationMinutes": 30,
-   "instruction": "Discover why Tacos matters to its culture — the 'taco' predates the Spanish, and the taco stand is the street food of Mexico City. Search for its history and watch how different regions make it their own."
-  },
-  "tags": [
-   "Mexican",
-   "Street Food",
-   "Icon"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-burrito",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Burrito",
-  "teaser": "The wrapped tortilla — the 'burrito' (little donkey) name's origin is a legend, and the mission-style burrito is a San Francisco invention.",
-  "imageUrl": "",
-  "byline": "Mexico",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Burrito",
-   "durationMinutes": 30,
-   "instruction": "Burrito isn't just food — it's history. the 'burrito' (little donkey) name's origin is a legend, and the mission-style burrito is a San Francisco invention. Search for its origins and watch how it shaped a culture."
-  },
-  "tags": [
-   "Mexican",
-   "Wrap",
-   "Street Food"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-guacamole",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Guacamole",
-  "teaser": "The mashed avocado dip — the 'ahuacamolli' is Aztec in origin, and the lime and salt are the technique.",
-  "imageUrl": "",
-  "byline": "Mexico",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Guacamole",
-   "durationMinutes": 30,
-   "instruction": "Guacamole has a surprising past — the 'ahuacamolli' is Aztec in origin, and the lime and salt are the technique. Explore its history and watch how it spread across the world."
-  },
-  "tags": [
-   "Mexican",
-   "Dip",
-   "Avocado"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-mole",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Mole",
-  "teaser": "The complex sauce with 20+ ingredients including chocolate — the 'mole poblano' is Mexico's most famous sauce, and the 'día de muertos' mole is the ritual.",
-  "imageUrl": "",
-  "byline": "Mexico",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Mole",
-   "durationMinutes": 30,
-   "instruction": "Discover why Mole matters to its culture — the 'mole poblano' is Mexico's most famous sauce, and the 'día de muertos' mole is the ritual. Search for its history and watch how different regions make it their own."
-  },
-  "tags": [
-   "Mexican",
-   "Sauce",
-   "Complex"
-  ],
-  "tier": 1
- },
- {
-  "id": "dish-chiles-en-nogada",
-  "categoryId": "FOOD",
-  "subtype": "Dish",
-  "name": "Chiles en Nogada (1821)",
-  "teaser": "The stuffed poblano with walnut sauce and pomegranate — created for Mexico's independence in 1821, and the dish's colors are the flag.",
-  "imageUrl": "",
-  "byline": "Puebla, Mexico",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Chiles en Nogada (1821) end-to-end",
-   "durationMinutes": 30,
-   "instruction": "Chiles en Nogada isn't just food — it's history. created for Mexico's independence in 1821, and the dish's colors are the flag. Search for its origins and watch how it shaped a culture."
-  },
-  "tags": [
-   "Mexican",
-   "Festive",
-   "Historic",
-   "1820s"
-  ],
-  "tier": 1
- }
+  {
+    "id": "dish-pizza-margherita",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Pizza Margherita (1889)",
+    "teaser": "Named for Queen Margherita of Savoy — the tomato, mozzarella and basil are the Italian flag in edible form, and the pizza's origin story is probably marketing, but the pie is real.",
+    "imageUrl": "",
+    "byline": "Naples, Italy",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pizza Margherita (1889) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Pizza Margherita isn't just food — it's history. the tomato, mozzarella and basil are the Italian flag in edible form, and the pizza's origin story is probably marketing, but the pie is real. Search for its origins and watch how it shaped a culture."
+    },
+    "tags": [
+      "Italian",
+      "Pizza",
+      "Classic",
+      "1880s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-sushi",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Sushi",
+    "teaser": "Originally a fermentation method — fish preserved in rice for months — the modern nigiri (raw fish on rice) is a 19th-century street food from Tokyo.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sushi",
+      "durationMinutes": 30,
+      "instruction": "Sushi carries centuries of tradition — it started as a preservation method — fish fermented in rice for months — before becoming Japan's most famous art form. Read its history and watch how it's celebrated today."
+    },
+    "tags": [
+      "Japanese",
+      "Seafood",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-ramen",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Ramen (1910)",
+    "teaser": "The noodle soup is Chinese in origin but Japan perfected it — the 'tonkotsu' broth is simmered for 18+ hours, and a ramen shop's broth is its secret recipe.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Ramen (1910) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "The hidden story of Ramen: the Chinese noodle soup was reinvented by Japan into a cultural obsession. Watch a food documentary to see the human side of this dish."
+    },
+    "tags": [
+      "Japanese",
+      "Noodles",
+      "Comfort",
+      "1910s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-tacos-al-pastor",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Tacos al Pastor (1960)",
+    "teaser": "Lebanese immigrants brought shawarma to Mexico — the pork version, marinated in achiote and roasted on a vertical spit, is the fusion dish that became Mexico's national street food.",
+    "imageUrl": "",
+    "byline": "Mexico City",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tacos al Pastor (1960) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "The hidden story of Tacos al Pastor: Lebanese immigrants brought shawarma to Mexico. Watch a food documentary to see the human side of this dish."
+    },
+    "tags": [
+      "Mexican",
+      "Street Food",
+      "Pork",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-pad-thai",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Pad Thai (1938)",
+    "teaser": "The 'national dish' was invented in the 1930s as part of a nationalist campaign — the stir-fried rice noodles were a government PR project that became a global classic.",
+    "imageUrl": "",
+    "byline": "Thailand",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pad Thai (1938) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Pad Thai carries centuries of tradition — it was invented as part of a government campaign. Read its history and watch how it's celebrated today."
+    },
+    "tags": [
+      "Thai",
+      "Noodles",
+      "Street Food",
+      "1930s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-croissant",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Croissant (1839)",
+    "teaser": "The crescent is Austrian in origin (the kipferl) — the 'Austrian bakery' myth about Vienna is false, but the laminated dough is a French triumph of technique.",
+    "imageUrl": "",
+    "byline": "France",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Croissant (1839) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Croissant has a surprising past — the crescent shape may have originated in Austria. Explore its history and watch how it spread across the world."
+    },
+    "tags": [
+      "French",
+      "Pastry",
+      "Breakfast",
+      "1830s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-french-fries",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "French Fries",
+    "teaser": "The 'French' fry is Belgian — historians date the fried potato to the Meuse valley, and the double-fry method (blanch, rest, fry) is the difference between good and great.",
+    "imageUrl": "",
+    "byline": "Belgium",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "French Fries",
+      "durationMinutes": 30,
+      "instruction": "Why is French Fries so beloved? the 'French' fry is actually Belgian. Watch a cultural deep-dive to understand its significance."
+    },
+    "tags": [
+      "Belgian",
+      "Street Food",
+      "Potato"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-pasta-carbonara",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Pasta Carbonara",
+    "teaser": "The Roman classic has no cream — egg, pecorino, guanciale, pepper — and the 'carbonara' name may come from coal miners (carbonai) who made it with their campfire provisions.",
+    "imageUrl": "",
+    "byline": "Rome, Italy",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pasta Carbonara",
+      "durationMinutes": 30,
+      "instruction": "Pasta Carbonara has a surprising past — the Roman classic has no cream. Explore its history and watch how it spread across the world."
+    },
+    "tags": [
+      "Italian",
+      "Pasta",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-risotto",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Risotto",
+    "teaser": "The Milanese rice dish is a lesson in patience — the broth is added slowly, and the 'all'onda' (wavy) texture is the sign of a master.",
+    "imageUrl": "",
+    "byline": "Milan, Italy",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Risotto",
+      "durationMinutes": 30,
+      "instruction": "Why is Risotto so beloved? the broth is added slowly, and the 'all'onda' (wavy) texture is the sign of a master. Watch a cultural deep-dive to understand its significance."
+    },
+    "tags": [
+      "Italian",
+      "Rice",
+      "Comfort"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-paella",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Paella",
+    "teaser": "The Valencian rice dish was a farmhouse meal — the 'socarrat' (crispy bottom) is the sign of authenticity, and the dish is named for the pan, not the ingredients.",
+    "imageUrl": "",
+    "byline": "Valencia, Spain",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Paella",
+      "durationMinutes": 30,
+      "instruction": "Paella isn't just food — it's history. the 'socarrat' (crispy bottom) is the sign of authenticity, and the dish is named for the pan, not the ingredients. Search for its origins and watch how it shaped a culture."
+    },
+    "tags": [
+      "Spanish",
+      "Rice",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-pho",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Pho (1900)",
+    "teaser": "The Vietnamese noodle soup is a 20th-century invention — French beef scraps met Chinese noodle culture, and the broth's 12-hour simmer is the soul.",
+    "imageUrl": "",
+    "byline": "Vietnam",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pho (1900) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Learn the story behind Pho — French beef scraps met Chinese noodle culture, and the broth's 12-hour simmer is the soul. Watch a short documentary or food history video to see how it evolved from its origins."
+    },
+    "tags": [
+      "Vietnamese",
+      "Soup",
+      "Comfort",
+      "1900s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-biryani",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Biryani",
+    "teaser": "The layered rice dish of the Mughal courts — the 'dum' method (sealing the pot) is the technique, and every region of India has its own biryani identity.",
+    "imageUrl": "",
+    "byline": "India",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Biryani",
+      "durationMinutes": 30,
+      "instruction": "Discover why Biryani matters to its culture — the 'dum' method (sealing the pot) is the technique, and every region of India has its own biryani identity. Search for its history and watch how different regions make it their own."
+    },
+    "tags": [
+      "Indian",
+      "Rice",
+      "Festive"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-butter-chicken",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Butter Chicken (1950)",
+    "teaser": "Invented by accident — leftover tandoori chicken was simmered in a tomato-butter sauce by a Delhi restaurant in the 1950s, and the dish conquered the world.",
+    "imageUrl": "",
+    "byline": "Delhi, India",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Butter Chicken (1950) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "The hidden story of Butter Chicken: leftover tandoori chicken was simmered in a tomato-butter sauce by a Delhi restaurant in the 1950s, and the dish conquered the world. Watch a food documentary to see the human side of this dish."
+    },
+    "tags": [
+      "Indian",
+      "Curry",
+      "Comfort",
+      "1950s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-dim-sum",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Dim Sum",
+    "teaser": "The Cantonese 'touch the heart' — small dishes served with tea, originally from teahouses on the Silk Road — and the pushcart tradition is the social ritual.",
+    "imageUrl": "",
+    "byline": "Guangdong, China",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Dim Sum",
+      "durationMinutes": 30,
+      "instruction": "Dim Sum has a surprising past — small dishes served with tea, originally from teahouses on the Silk Road. Explore its history and watch how it spread across the world."
+    },
+    "tags": [
+      "Chinese",
+      "Dumplings",
+      "Cantonese"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-peking-duck",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Peking Duck (1330)",
+    "teaser": "The imperial duck — the skin is the star, carved tableside, and the dish's history goes back to the Yuan dynasty. The air-drying of the skin is the technique.",
+    "imageUrl": "",
+    "byline": "Beijing, China",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Peking Duck (1330) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Peking Duck isn't just food — it's history. the skin is the star, carved tableside, and the dish's history goes back to the Yuan dynasty. The air-drying of the skin is the technique. Search for its origins and watch how it shaped a culture."
+    },
+    "tags": [
+      "Chinese",
+      "Duck",
+      "Classic",
+      "1330s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-hot-pot",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Hot Pot",
+    "teaser": "The communal boiling pot — the 'spicy' Sichuan broth and 'clear' broth divide is the table politics, and the hot pot is the social meal of China.",
+    "imageUrl": "",
+    "byline": "China",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hot Pot",
+      "durationMinutes": 30,
+      "instruction": "The hidden story of Hot Pot: the 'spicy' Sichuan broth and 'clear' broth divide is the table politics, and the hot pot is the social meal of China. Watch a food documentary to see the human side of this dish."
+    },
+    "tags": [
+      "Chinese",
+      "Communal",
+      "Comfort"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-mapo-tofu",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Mapo Tofu",
+    "teaser": "The 'pockmarked grandmother's tofu' — the dish is named for its creator, and the 'ma la' (numbing-spicy) combination is the Sichuan signature.",
+    "imageUrl": "",
+    "byline": "Sichuan, China",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Mapo Tofu",
+      "durationMinutes": 30,
+      "instruction": "Learn the story behind Mapo Tofu — the dish is named for its creator, and the 'ma la' (numbing-spicy) combination is the Sichuan signature. Watch a short documentary or food history video to see how it evolved from its origins."
+    },
+    "tags": [
+      "Chinese",
+      "Sichuan",
+      "Tofu"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-kimchi",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Kimchi",
+    "teaser": "The Korean staple with 200+ varieties — the fermentation is the preservation science, and the 'kimchi' is Korea's national identity in a jar.",
+    "imageUrl": "",
+    "byline": "Korea",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kimchi",
+      "durationMinutes": 30,
+      "instruction": "Kimchi has a surprising past — the fermentation is the preservation science, and the 'kimchi' is Korea's national identity in a jar. Explore its history and watch how it spread across the world."
+    },
+    "tags": [
+      "Korean",
+      "Fermented",
+      "Staple"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-bibimbap",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Bibimbap",
+    "teaser": "The 'mixed rice' bowl — the five colors of the vegetables represent the five elements, and the stone bowl version's crispy bottom is the bonus.",
+    "imageUrl": "",
+    "byline": "Korea",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bibimbap",
+      "durationMinutes": 30,
+      "instruction": "The hidden story of Bibimbap: the five colors of the vegetables represent the five elements, and the stone bowl version's crispy bottom is the bonus. Watch a food documentary to see the human side of this dish."
+    },
+    "tags": [
+      "Korean",
+      "Rice",
+      "Bowl"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-bulgogi",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Bulgogi",
+    "teaser": "The 'fire meat' — the soy-pear marinade is the technique, and the pear's enzymes are the tenderizer. The dish is Korea's most exported flavor.",
+    "imageUrl": "",
+    "byline": "Korea",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bulgogi",
+      "durationMinutes": 30,
+      "instruction": "Bulgogi carries centuries of tradition — the soy-pear marinade is the technique, and the pear's enzymes are the tenderizer. The dish is Korea's most exported flavor. Read its history and watch how it's celebrated today."
+    },
+    "tags": [
+      "Korean",
+      "BBQ",
+      "Beef"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-sashimi",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Sashimi",
+    "teaser": "The sliced raw fish — the 'cut' is the craft, and the fish's freshness is the entire dish. The sashimi chef trains for years on the knife.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sashimi",
+      "durationMinutes": 30,
+      "instruction": "Discover why Sashimi matters to its culture — the 'cut' is the craft, and the fish's freshness is the entire dish. The sashimi chef trains for years on the knife. Search for its history and watch how different regions make it their own."
+    },
+    "tags": [
+      "Japanese",
+      "Seafood",
+      "Raw"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-tempura",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Tempura",
+    "teaser": "The 'batter-fried' dish came from Portuguese missionaries in the 16th century — the cold-batter technique and the 'kakiage' style are the craft.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tempura",
+      "durationMinutes": 30,
+      "instruction": "The hidden story of Tempura: the cold-batter technique and the 'kakiage' style are the craft. Watch a food documentary to see the human side of this dish."
+    },
+    "tags": [
+      "Japanese",
+      "Fried",
+      "Seafood"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-miso-soup",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Miso Soup",
+    "teaser": "The daily soup of Japan — the dashi (fish stock) and miso (fermented soybean paste) are the two ingredients, and the soup is the breakfast of the nation.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Miso Soup",
+      "durationMinutes": 30,
+      "instruction": "Miso Soup isn't just food — it's history. the dashi (fish stock) and miso (fermented soybean paste) are the two ingredients, and the soup is the breakfast of the nation. Search for its origins and watch how it shaped a culture."
+    },
+    "tags": [
+      "Japanese",
+      "Soup",
+      "Staple"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-katsu-curry",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Katsu Curry",
+    "teaser": "The British navy brought curry to Japan — the panko-breaded pork cutlet on rice with curry sauce is the comfort food of a nation.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Katsu Curry",
+      "durationMinutes": 30,
+      "instruction": "Learn the story behind Katsu Curry — the panko-breaded pork cutlet on rice with curry sauce is the comfort food of a nation. Watch a short documentary or food history video to see how it evolved from its origins."
+    },
+    "tags": [
+      "Japanese",
+      "Curry",
+      "Comfort"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-okonomiyaki",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Okonomiyaki",
+    "teaser": "The 'as-you-like-it' griddle pancake — the cabbage base and the tabletop grill make it a social dish, and the Osaka version is the standard.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Okonomiyaki",
+      "durationMinutes": 30,
+      "instruction": "The real story of Okonomiyaki: the cabbage base and the tabletop grill make it a social dish, and the Osaka version is the standard. Read about its origins and watch a food historian explain why it became iconic."
+    },
+    "tags": [
+      "Japanese",
+      "Pancake",
+      "Street Food"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-takoyaki",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Takoyaki (1935)",
+    "teaser": "The octopus balls were invented in Osaka in the 1930s — the special pan and the batter's dance are the craft, and the dish is the city's soul.",
+    "imageUrl": "",
+    "byline": "Osaka, Japan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Takoyaki (1935) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Takoyaki carries centuries of tradition — the special pan and the batter's dance are the craft, and the dish is the city's soul. Read its history and watch how it's celebrated today."
+    },
+    "tags": [
+      "Japanese",
+      "Street Food",
+      "Octopus",
+      "1930s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-yakitori",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Yakitori",
+    "teaser": "The grilled chicken skewers — every part of the bird is used, and the 'tare' (sauce) glaze is the signature. The skewer is the Japanese bar food.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Yakitori",
+      "durationMinutes": 30,
+      "instruction": "Yakitori isn't just food — it's history. every part of the bird is used, and the 'tare' (sauce) glaze is the signature. The skewer is the Japanese bar food. Search for its origins and watch how it shaped a culture."
+    },
+    "tags": [
+      "Japanese",
+      "Grill",
+      "Chicken"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-onigiri",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Onigiri",
+    "teaser": "The rice ball — a portable meal older than sushi, and the nori (seaweed) wrapper is a modern addition. The 'triangle' shape is the signature.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Onigiri",
+      "durationMinutes": 30,
+      "instruction": "Onigiri isn't just food — it's history. a portable meal older than sushi, and the nori (seaweed) wrapper is a modern addition. The 'triangle' shape is the signature. Search for its origins and watch how it shaped a culture."
+    },
+    "tags": [
+      "Japanese",
+      "Rice",
+      "Snack"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-curry-rice",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Curry Rice",
+    "teaser": "The Japanese curry is a roux-based dish adapted from British navy curry — the 'curry rice' is the most popular home-cooked meal in Japan.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Curry Rice",
+      "durationMinutes": 30,
+      "instruction": "Discover why Curry Rice matters to its culture — the 'curry rice' is the most popular home-cooked meal in Japan. Search for its history and watch how different regions make it their own."
+    },
+    "tags": [
+      "Japanese",
+      "Curry",
+      "Staple"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-wagyu",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Wagyu",
+    "teaser": "The 'Japanese cow' — the marbling (intramuscular fat) is the point, and the A5 grade is the highest. The beef's 'melt' is the experience.",
+    "imageUrl": "",
+    "byline": "Japan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Wagyu",
+      "durationMinutes": 30,
+      "instruction": "Why is Wagyu so beloved? the marbling (intramuscular fat) is the point, and the A5 grade is the highest. The beef's 'melt' is the experience. Watch a cultural deep-dive to understand its significance."
+    },
+    "tags": [
+      "Japanese",
+      "Beef",
+      "Luxury"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-poutine",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Poutine (1950)",
+    "teaser": "The fries, curds and gravy dish was born in rural Quebec in the 1950s — the cheese curds must squeak, and the 'poutine' has become Canada's national dish.",
+    "imageUrl": "",
+    "byline": "Quebec, Canada",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Poutine (1950) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Why is Poutine so beloved? the cheese curds must squeak, and the 'poutine' has become Canada's national dish. Watch a cultural deep-dive to understand its significance."
+    },
+    "tags": [
+      "Canadian",
+      "Comfort",
+      "Street Food",
+      "1950s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-fish-and-chips",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Fish and Chips (1860)",
+    "teaser": "The British national dish — the fried fish in beer batter and the chips, wrapped in paper — has fed the working class since the 1860s.",
+    "imageUrl": "",
+    "byline": "England",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Fish and Chips (1860) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Fish and Chips isn't just food — it's history. the fried fish in beer batter and the chips, wrapped in paper. Search for its origins and watch how it shaped a culture."
+    },
+    "tags": [
+      "British",
+      "Fried",
+      "Classic",
+      "1860s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-sunday-roast",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Sunday Roast",
+    "teaser": "The Sunday roast — beef, Yorkshire pudding, roast potatoes, gravy — is the British family ritual, and the 'Yorkshire pudding' was originally a cheap filler.",
+    "imageUrl": "",
+    "byline": "England",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sunday Roast",
+      "durationMinutes": 30,
+      "instruction": "Discover why Sunday Roast matters to its culture — beef, Yorkshire pudding, roast potatoes, gravy. Search for its history and watch how different regions make it their own."
+    },
+    "tags": [
+      "British",
+      "Roast",
+      "Sunday"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-full-english-breakfast",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Full English Breakfast",
+    "teaser": "The fry-up — eggs, bacon, sausage, beans, toast — is the hangover cure of a nation, and the 'full English' is a 19th-century invention from the Victorian boarding house.",
+    "imageUrl": "",
+    "byline": "England",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Full English Breakfast",
+      "durationMinutes": 30,
+      "instruction": "Full English Breakfast isn't just food — it's history. eggs, bacon, sausage, beans, toast. Search for its origins and watch how it shaped a culture."
+    },
+    "tags": [
+      "British",
+      "Breakfast",
+      "Hearty"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-shepherd-s-pie",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Shepherd's Pie",
+    "teaser": "The minced lamb dish with mashed potato topping — the 'shepherd' is the lamb, and the 'cottage pie' (beef) is its cousin.",
+    "imageUrl": "",
+    "byline": "England",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Shepherd's Pie",
+      "durationMinutes": 30,
+      "instruction": "Learn the story behind Shepherd's Pie — the 'shepherd' is the lamb, and the 'cottage pie' (beef) is its cousin. Watch a short documentary or food history video to see how it evolved from its origins."
+    },
+    "tags": [
+      "British",
+      "Comfort",
+      "Mince"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-cornish-pasty",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Cornish Pasty",
+    "teaser": "The miner's lunch — the crimped edge was the handle, thrown away after eating to avoid touching the arsenic-contaminated meat. The 'Oggy oggy oggy' chant is Cornish.",
+    "imageUrl": "",
+    "byline": "Cornwall, England",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Cornish Pasty",
+      "durationMinutes": 30,
+      "instruction": "Discover why Cornish Pasty matters to its culture — the crimped edge was the handle, thrown away after eating to avoid touching the arsenic-contaminated meat. The 'Oggy oggy oggy' chant is Cornish. Search for its history and watch how different regions make it their own."
+    },
+    "tags": [
+      "British",
+      "Pie",
+      "Handheld"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-haggis",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Haggis",
+    "teaser": "The sheep's pluck (heart, liver, lungs) with oats in a stomach casing — the 'great chieftain o' the puddin-race' is Burns' Supper's centerpiece.",
+    "imageUrl": "",
+    "byline": "Scotland",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Haggis",
+      "durationMinutes": 30,
+      "instruction": "Haggis isn't just food — it's history. the 'great chieftain o' the puddin-race' is Burns' Supper's centerpiece. Search for its origins and watch how it shaped a culture."
+    },
+    "tags": [
+      "Scottish",
+      "Offal",
+      "Traditional"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-scotch-egg",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Scotch Egg",
+    "teaser": "The boiled egg wrapped in sausage and breadcrumbs — the 'Scotch' name's origin is debated (possibly 'scorched'), and the dish is a picnic classic.",
+    "imageUrl": "",
+    "byline": "England",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Scotch Egg",
+      "durationMinutes": 30,
+      "instruction": "Scotch Egg carries centuries of tradition — the 'Scotch' name's origin is debated (possibly 'scorched'), and the dish is a picnic classic. Read its history and watch how it's celebrated today."
+    },
+    "tags": [
+      "British",
+      "Egg",
+      "Snack"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-chicken-tikka-masala",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Chicken Tikka Masala (1960)",
+    "teaser": "The 'British national dish' — the origin story has a Glaswegian chef adding tomato soup to a dry chicken tikka, and the dish is the greatest fusion in British food.",
+    "imageUrl": "",
+    "byline": "Glasgow, Scotland",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Chicken Tikka Masala (1960) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Chicken Tikka Masala carries centuries of tradition — the origin story has a Glaswegian chef adding tomato soup to a dry chicken tikka, and the dish is the greatest fusion in British food. Read its history and watch how it's celebrated today."
+    },
+    "tags": [
+      "British Indian",
+      "Curry",
+      "Fusion",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-naan",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Naan",
+    "teaser": "The tandoor-baked flatbread — the 'naan' is the bread of the Mughal courts, and the tandoor oven's heat is the blister.",
+    "imageUrl": "",
+    "byline": "India",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Naan",
+      "durationMinutes": 30,
+      "instruction": "Learn the story behind Naan — the 'naan' is the bread of the Mughal courts, and the tandoor oven's heat is the blister. Watch a short documentary or food history video to see how it evolved from its origins."
+    },
+    "tags": [
+      "Indian",
+      "Bread",
+      "Tandoor"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-samosa",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Samosa",
+    "teaser": "The triangular fried pastry — the 'sambosa' came from Central Asia via the Mughals, and the potato-pea filling is the Indian standard.",
+    "imageUrl": "",
+    "byline": "India",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Samosa",
+      "durationMinutes": 30,
+      "instruction": "Samosa carries centuries of tradition — the 'sambosa' came from Central Asia via the Mughals, and the potato-pea filling is the Indian standard. Read its history and watch how it's celebrated today."
+    },
+    "tags": [
+      "Indian",
+      "Snack",
+      "Fried"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-dosa",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Dosa",
+    "teaser": "The fermented rice-lentil crepe — the 'crisp' is the fermentation, and the masala dosa with potato filling is the classic.",
+    "imageUrl": "",
+    "byline": "South India",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Dosa",
+      "durationMinutes": 30,
+      "instruction": "Discover why Dosa matters to its culture — the 'crisp' is the fermentation, and the masala dosa with potato filling is the classic. Search for its history and watch how different regions make it their own."
+    },
+    "tags": [
+      "Indian",
+      "Pancake",
+      "South Indian"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-biryani-hyderabadi",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Biryani (Hyderabadi) (1857)",
+    "teaser": "The Nizam's biryani — the saffron and the dum seal, and the 'kacchi' style (raw meat layered with rice) is the aristocratic method.",
+    "imageUrl": "",
+    "byline": "Hyderabad, India",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Biryani (Hyderabadi) (1857) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Discover why Biryani matters to its culture — the saffron and the dum seal, and the 'kacchi' style (raw meat layered with rice) is the aristocratic method. Search for its history and watch how different regions make it their own."
+    },
+    "tags": [
+      "Indian",
+      "Rice",
+      "Festive",
+      "1850s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-kebab",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Kebab",
+    "teaser": "The skewered meat of the Ottoman world — the 'shish' and 'doner' are the two great families, and the kebab is the Middle East's most exported food.",
+    "imageUrl": "",
+    "byline": "Middle East",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kebab",
+      "durationMinutes": 30,
+      "instruction": "Why is Kebab so beloved? the 'shish' and 'doner' are the two great families, and the kebab is the Middle East's most exported food. Watch a cultural deep-dive to understand its significance."
+    },
+    "tags": [
+      "Middle Eastern",
+      "Grill",
+      "Meat"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-shawarma",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Shawarma",
+    "teaser": "The vertical-spit roasted meat — the 'doner' and 'gyro' are cousins, and the shawarma's marinade and the fresh pita are the ritual.",
+    "imageUrl": "",
+    "byline": "Levant",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Shawarma",
+      "durationMinutes": 30,
+      "instruction": "The real story of Shawarma: the 'doner' and 'gyro' are cousins, and the shawarma's marinade and the fresh pita are the ritual. Read about its origins and watch a food historian explain why it became iconic."
+    },
+    "tags": [
+      "Middle Eastern",
+      "Street Food",
+      "Meat"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-falafel",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Falafel",
+    "teaser": "The fried chickpea ball — invented in Egypt (as ta'amiya), and the dish is one of the world's great vegan foods, eaten in pita with salad and tahini.",
+    "imageUrl": "",
+    "byline": "Egypt",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Falafel",
+      "durationMinutes": 30,
+      "instruction": "Falafel carries centuries of tradition — invented in Egypt (as ta'amiya), and the dish is one of the world's great vegan foods, eaten in pita with salad and tahini. Read its history and watch how it's celebrated today."
+    },
+    "tags": [
+      "Middle Eastern",
+      "Fried",
+      "Vegan"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-hummus",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Hummus",
+    "teaser": "The chickpea-tahini dip — the oldest recipes date to medieval Cairo, and the 'hummus wars' over its origin are a Middle East tradition in themselves.",
+    "imageUrl": "",
+    "byline": "Levant",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hummus",
+      "durationMinutes": 30,
+      "instruction": "Why is Hummus so beloved? the oldest recipes date to medieval Cairo, and the 'hummus wars' over its origin are a Middle East tradition in themselves. Watch a cultural deep-dive to understand its significance."
+    },
+    "tags": [
+      "Middle Eastern",
+      "Dip",
+      "Staple"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-baklava",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Baklava",
+    "teaser": "The layered filo pastry with nuts and honey — the Ottoman courts perfected it, and the 'phyllo' sheets are the craft. Every country claims it.",
+    "imageUrl": "",
+    "byline": "Ottoman",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Baklava",
+      "durationMinutes": 30,
+      "instruction": "Learn the story behind Baklava — the Ottoman courts perfected it, and the 'phyllo' sheets are the craft. Every country claims it. Watch a short documentary or food history video to see how it evolved from its origins."
+    },
+    "tags": [
+      "Middle Eastern",
+      "Pastry",
+      "Sweet"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-kunafa",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Kunafa",
+    "teaser": "The shredded-phyllo cheese dessert soaked in syrup — the 'knafeh' is the dessert of Ramadan, and the cheese pull is the moment.",
+    "imageUrl": "",
+    "byline": "Levant",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kunafa",
+      "durationMinutes": 30,
+      "instruction": "The real story of Kunafa: the 'knafeh' is the dessert of Ramadan, and the cheese pull is the moment. Read about its origins and watch a food historian explain why it became iconic."
+    },
+    "tags": [
+      "Middle Eastern",
+      "Dessert",
+      "Sweet"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-arepas",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Arepas",
+    "teaser": "The corn cakes of Venezuela and Colombia — the 'arepa' is pre-Columbian, and the filled versions are the national sandwich.",
+    "imageUrl": "",
+    "byline": "Venezuela/Colombia",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Arepas",
+      "durationMinutes": 30,
+      "instruction": "Learn the story behind Arepas — the 'arepa' is pre-Columbian, and the filled versions are the national sandwich. Watch a short documentary or food history video to see how it evolved from its origins."
+    },
+    "tags": [
+      "Latin American",
+      "Corn",
+      "Staple"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-ceviche",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Ceviche",
+    "teaser": "The raw fish 'cooked' in citrus — the 'leche de tigre' (tiger's milk) marinade is the craft, and the dish is Peru's national treasure.",
+    "imageUrl": "",
+    "byline": "Peru",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Ceviche",
+      "durationMinutes": 30,
+      "instruction": "Discover why Ceviche matters to its culture — the 'leche de tigre' (tiger's milk) marinade is the craft, and the dish is Peru's national treasure. Search for its history and watch how different regions make it their own."
+    },
+    "tags": [
+      "Peruvian",
+      "Seafood",
+      "Fresh"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-empanadas",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Empanadas",
+    "teaser": "The filled pastry — from Spanish 'empanar' (to bread), and every Latin country has its version, from the Argentine baked empanada to the Colombian fried.",
+    "imageUrl": "",
+    "byline": "Spain/Latin America",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Empanadas",
+      "durationMinutes": 30,
+      "instruction": "Empanadas isn't just food — it's history. from Spanish 'empanar' (to bread), and every Latin country has its version, from the Argentine baked empanada to the Colombian fried. Search for its origins and watch how it shaped a culture."
+    },
+    "tags": [
+      "Latin American",
+      "Pastry",
+      "Street Food"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-feijoada",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Feijoada",
+    "teaser": "The black bean and pork stew — the 'feijoada completa' with sides is Brazil's national dish, and the Saturday feijoada is the social ritual.",
+    "imageUrl": "",
+    "byline": "Brazil",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Feijoada",
+      "durationMinutes": 30,
+      "instruction": "Why is Feijoada so beloved? the 'feijoada completa' with sides is Brazil's national dish, and the Saturday feijoada is the social ritual. Watch a cultural deep-dive to understand its significance."
+    },
+    "tags": [
+      "Brazilian",
+      "Stew",
+      "Black Beans"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-churros",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Churros",
+    "teaser": "The fried dough sticks with sugar and chocolate — the 'churro' origin is debated (possibly Chinese youtiao via the Portuguese), and the churros con chocolate is the Spanish breakfast.",
+    "imageUrl": "",
+    "byline": "Spain",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Churros",
+      "durationMinutes": 30,
+      "instruction": "The hidden story of Churros: the 'churro' origin is debated (possibly Chinese youtiao via the Portuguese), and the churros con chocolate is the Spanish breakfast. Watch a food documentary to see the human side of this dish."
+    },
+    "tags": [
+      "Spanish",
+      "Dessert",
+      "Street Food"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-gazpacho",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Gazpacho",
+    "teaser": "The cold tomato soup of Andalusia — the 'gazpacho' is a summer survival dish, and the 'salmorejo' (thicker, with bread) is the cousin.",
+    "imageUrl": "",
+    "byline": "Andalusia, Spain",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Gazpacho",
+      "durationMinutes": 30,
+      "instruction": "Gazpacho carries centuries of tradition — the 'gazpacho' is a summer survival dish, and the 'salmorejo' (thicker, with bread) is the cousin. Read its history and watch how it's celebrated today."
+    },
+    "tags": [
+      "Spanish",
+      "Cold Soup",
+      "Summer"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-tiramisu",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Tiramisu (1960)",
+    "teaser": "The 'pick-me-up' dessert was invented in the 1960s in the Veneto — the mascarpone and espresso layers are the craft, and the dish's origin story is a local dispute.",
+    "imageUrl": "",
+    "byline": "Treviso, Italy",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tiramisu (1960) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Learn the story behind Tiramisu — the mascarpone and espresso layers are the craft, and the dish's origin story is a local dispute. Watch a short documentary or food history video to see how it evolved from its origins."
+    },
+    "tags": [
+      "Italian",
+      "Dessert",
+      "Coffee",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-cheesecake",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Cheesecake",
+    "teaser": "The cheesecake is ancient — the Greeks served it at weddings 4,000 years ago, and the New York style (dense, cream cheese) is the modern standard.",
+    "imageUrl": "",
+    "byline": "Ancient Greece",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Cheesecake",
+      "durationMinutes": 30,
+      "instruction": "The hidden story of Cheesecake: the Greeks served it at weddings 4,000 years ago, and the New York style (dense, cream cheese) is the modern standard. Watch a food documentary to see the human side of this dish."
+    },
+    "tags": [
+      "Dessert",
+      "Cheese",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-ice-cream",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Ice Cream",
+    "teaser": "The frozen dessert was invented in Tang-dynasty China — milk mixed with ice was the technique, and the 'gelato' and 'sorbet' families descend from it.",
+    "imageUrl": "",
+    "byline": "China",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Ice Cream",
+      "durationMinutes": 30,
+      "instruction": "Ice Cream isn't just food — it's history. milk mixed with ice was the technique, and the 'gelato' and 'sorbet' families descend from it. Search for its origins and watch how it shaped a culture."
+    },
+    "tags": [
+      "Dessert",
+      "Frozen",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-chocolate",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Chocolate (3000)",
+    "teaser": "The cacao drink of the Maya and Aztecs was bitter and spiced — the 'chocolate' was a beverage for 3,000 years before the candy bar was invented in 1847.",
+    "imageUrl": "",
+    "byline": "Mesoamerica",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Chocolate (3000) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "The hidden story of Chocolate: the 'chocolate' was a beverage for 3,000 years before the candy bar was invented in 1847. Watch a food documentary to see the human side of this dish."
+    },
+    "tags": [
+      "Dessert",
+      "Cacao",
+      "Classic",
+      "3000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-bread-sourdough",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Bread (Sourdough)",
+    "teaser": "The fermented bread — the first leavened bread was likely an Egyptian accident, and the wild-yeast culture is the 'starter' that bakers keep alive for decades.",
+    "imageUrl": "",
+    "byline": "Ancient Egypt",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bread (Sourdough)",
+      "durationMinutes": 30,
+      "instruction": "The real story of Bread: the first leavened bread was likely an Egyptian accident, and the wild-yeast culture is the 'starter' that bakers keep alive for decades. Read about its origins and watch a food historian explain why it became iconic."
+    },
+    "tags": [
+      "Bread",
+      "Fermented",
+      "Staple"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-bagel",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Bagel",
+    "teaser": "The boiled-then-baked bread ring — the 'bagel' came to New York with Jewish immigrants, and the boil is what gives it the chewy crust.",
+    "imageUrl": "",
+    "byline": "Poland",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bagel",
+      "durationMinutes": 30,
+      "instruction": "Bagel isn't just food — it's history. the 'bagel' came to New York with Jewish immigrants, and the boil is what gives it the chewy crust. Search for its origins and watch how it shaped a culture."
+    },
+    "tags": [
+      "Bread",
+      "Jewish",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-pretzel",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Pretzel",
+    "teaser": "The knotted bread — the 'brezel' is German, and the lye bath (not baking soda) gives the dark crust. The knot's three holes symbolize the Trinity in the legend.",
+    "imageUrl": "",
+    "byline": "Germany",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pretzel",
+      "durationMinutes": 30,
+      "instruction": "Why is Pretzel so beloved? the 'brezel' is German, and the lye bath (not baking soda) gives the dark crust. The knot's three holes symbolize the Trinity in the legend. Watch a cultural deep-dive to understand its significance."
+    },
+    "tags": [
+      "Bread",
+      "Baked",
+      "Snack"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-macaron",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Macaron",
+    "teaser": "The meringue-almond sandwich cookie — the 'macaron' is Ladurée's invention, and the 'foot' (the ruffled base) is the sign of a master.",
+    "imageUrl": "",
+    "byline": "France",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Macaron",
+      "durationMinutes": 30,
+      "instruction": "The real story of Macaron: the 'macaron' is Ladurée's invention, and the 'foot' (the ruffled base) is the sign of a master. Read about its origins and watch a food historian explain why it became iconic."
+    },
+    "tags": [
+      "French",
+      "Pastry",
+      "Dessert"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-pancakes",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Pancakes",
+    "teaser": "The griddle cake exists in every culture — from the French crêpe to the Japanese dorayaki, and the 'fluffy American stack' is the modern standard.",
+    "imageUrl": "",
+    "byline": "Global",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pancakes",
+      "durationMinutes": 30,
+      "instruction": "Pancakes isn't just food — it's history. from the French crêpe to the Japanese dorayaki, and the 'fluffy American stack' is the modern standard. Search for its origins and watch how it shaped a culture."
+    },
+    "tags": [
+      "Breakfast",
+      "Griddle",
+      "Classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-hamburger",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Hamburger (1900)",
+    "teaser": "The ground-beef patty in a bun — the origin is disputed (Hamburg, Germany; or 1900 Connecticut), and the burger became the symbol of American food.",
+    "imageUrl": "",
+    "byline": "USA",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hamburger (1900) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Learn the story behind Hamburger — the origin is disputed (Hamburg, Germany; or 1900 Connecticut), and the burger became the symbol of American food. Watch a short documentary or food history video to see how it evolved from its origins."
+    },
+    "tags": [
+      "American",
+      "Fast Food",
+      "Icon",
+      "1900s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-hot-dog",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Hot Dog",
+    "teaser": "The sausage in a bun — the 'frankfurter' is German, the bun is American, and the 'hot dog' name was a 1901 cartoonist's joke.",
+    "imageUrl": "",
+    "byline": "USA",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hot Dog",
+      "durationMinutes": 30,
+      "instruction": "Why is Hot Dog so beloved? the 'frankfurter' is German, the bun is American, and the 'hot dog' name was a 1901 cartoonist's joke. Watch a cultural deep-dive to understand its significance."
+    },
+    "tags": [
+      "American",
+      "Street Food",
+      "Icon"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-fried-chicken",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Fried Chicken",
+    "teaser": "The buttermilk-soaked, seasoned, fried chicken of the American South — the 'brine' is the moisture, and the dish's roots include West African frying techniques.",
+    "imageUrl": "",
+    "byline": "American South",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Fried Chicken",
+      "durationMinutes": 30,
+      "instruction": "Learn the story behind Fried Chicken — the 'brine' is the moisture, and the dish's roots include West African frying techniques. Watch a short documentary or food history video to see how it evolved from its origins."
+    },
+    "tags": [
+      "Southern",
+      "Fried",
+      "Comfort"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-buffalo-wings",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Buffalo Wings (1964)",
+    "teaser": "Invented at the Anchor Bar in Buffalo in 1964 — the Frank's hot sauce and butter mix, and the celery and blue cheese are the ritual.",
+    "imageUrl": "",
+    "byline": "Buffalo, NY",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Buffalo Wings (1964) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Discover why Buffalo Wings matters to its culture — the Frank's hot sauce and butter mix, and the celery and blue cheese are the ritual. Search for its history and watch how different regions make it their own."
+    },
+    "tags": [
+      "American",
+      "Wings",
+      "Bar Food",
+      "1960s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-mac-and-cheese",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Mac and Cheese",
+    "teaser": "The baked pasta and cheese — Thomas Jefferson brought the 'macaroni pie' to America, and the boxed version became the comfort food of a nation.",
+    "imageUrl": "",
+    "byline": "USA",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Mac and Cheese",
+      "durationMinutes": 30,
+      "instruction": "The hidden story of Mac and Cheese: Thomas Jefferson brought the 'macaroni pie' to America, and the boxed version became the comfort food of a nation. Watch a food documentary to see the human side of this dish."
+    },
+    "tags": [
+      "American",
+      "Pasta",
+      "Comfort"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-chili",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Chili",
+    "teaser": "The Texas chili is 'a bowl of red' — no beans in the classic version, and the 'chili cook-off' is a Texas institution.",
+    "imageUrl": "",
+    "byline": "Texas",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Chili",
+      "durationMinutes": 30,
+      "instruction": "Why is Chili so beloved? no beans in the classic version, and the 'chili cook-off' is a Texas institution. Watch a cultural deep-dive to understand its significance."
+    },
+    "tags": [
+      "American",
+      "Stew",
+      "Spicy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-gumbo",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Gumbo",
+    "teaser": "The Louisiana stew with a roux base — the 'file' powder (sassafras) is the thickener, and the dish is a blend of French, African, Spanish and Choctaw cooking.",
+    "imageUrl": "",
+    "byline": "Louisiana",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Gumbo",
+      "durationMinutes": 30,
+      "instruction": "Gumbo isn't just food — it's history. the 'file' powder (sassafras) is the thickener, and the dish is a blend of French, African, Spanish and Choctaw cooking. Search for its origins and watch how it shaped a culture."
+    },
+    "tags": [
+      "Cajun",
+      "Stew",
+      "Creole"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-jambalaya",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Jambalaya",
+    "teaser": "The Creole rice dish with sausage, chicken and shrimp — the 'jambalaya' is Louisiana's answer to paella, and the 'holy trinity' (onion, celery, pepper) is the base.",
+    "imageUrl": "",
+    "byline": "Louisiana",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Jambalaya",
+      "durationMinutes": 30,
+      "instruction": "Why is Jambalaya so beloved? the 'jambalaya' is Louisiana's answer to paella, and the 'holy trinity' (onion, celery, pepper) is the base. Watch a cultural deep-dive to understand its significance."
+    },
+    "tags": [
+      "Cajun",
+      "Rice",
+      "Creole"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-tacos",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Tacos",
+    "teaser": "The folded tortilla with filling — the 'taco' predates the Spanish, and the taco stand is the street food of Mexico City.",
+    "imageUrl": "",
+    "byline": "Mexico",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tacos",
+      "durationMinutes": 30,
+      "instruction": "Discover why Tacos matters to its culture — the 'taco' predates the Spanish, and the taco stand is the street food of Mexico City. Search for its history and watch how different regions make it their own."
+    },
+    "tags": [
+      "Mexican",
+      "Street Food",
+      "Icon"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-burrito",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Burrito",
+    "teaser": "The wrapped tortilla — the 'burrito' (little donkey) name's origin is a legend, and the mission-style burrito is a San Francisco invention.",
+    "imageUrl": "",
+    "byline": "Mexico",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Burrito",
+      "durationMinutes": 30,
+      "instruction": "Burrito isn't just food — it's history. the 'burrito' (little donkey) name's origin is a legend, and the mission-style burrito is a San Francisco invention. Search for its origins and watch how it shaped a culture."
+    },
+    "tags": [
+      "Mexican",
+      "Wrap",
+      "Street Food"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-guacamole",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Guacamole",
+    "teaser": "The word comes from Nahuatl 'āhuacamōlli' — avocado sauce. The Aztecs mashed avocados with tomatoes and chili peppers, but modern guacamole's lime-and-salt technique evolved after the Spanish introduced citrus to Mexico in the 16th century.",
+    "imageUrl": "",
+    "byline": "Mexico",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Guacamole",
+      "durationMinutes": 30,
+      "instruction": "Guacamole has a surprising past — the 'ahuacamolli' is Aztec in origin, and the lime and salt are the technique. Explore its history and watch how it spread across the world."
+    },
+    "tags": [
+      "Mexican",
+      "Dip",
+      "Avocado"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-mole",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Mole",
+    "teaser": "The complex sauce with 20+ ingredients including chocolate — the 'mole poblano' is Mexico's most famous sauce, and the 'día de muertos' mole is the ritual.",
+    "imageUrl": "",
+    "byline": "Mexico",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Mole",
+      "durationMinutes": 30,
+      "instruction": "Discover why Mole matters to its culture — the 'mole poblano' is Mexico's most famous sauce, and the 'día de muertos' mole is the ritual. Search for its history and watch how different regions make it their own."
+    },
+    "tags": [
+      "Mexican",
+      "Sauce",
+      "Complex"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "dish-chiles-en-nogada",
+    "categoryId": "FOOD",
+    "subtype": "Dish",
+    "name": "Chiles en Nogada (1821)",
+    "teaser": "The stuffed poblano with walnut sauce and pomegranate — created for Mexico's independence in 1821, and the dish's colors are the flag.",
+    "imageUrl": "",
+    "byline": "Puebla, Mexico",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Chiles en Nogada (1821) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Chiles en Nogada isn't just food — it's history. created for Mexico's independence in 1821, and the dish's colors are the flag. Search for its origins and watch how it shaped a culture."
+    },
+    "tags": [
+      "Mexican",
+      "Festive",
+      "Historic",
+      "1820s"
+    ],
+    "tier": 1
+  }
 ]

@@ -937,7 +937,7 @@
     "categoryId": "TECHNOLOGIES",
     "subtype": "Software",
     "name": "Open Source Software",
-    "teaser": "Open-source software is code that anyone can see, use, and improve - and it.",
+    "teaser": "Open-source software is code that anyone can see, use, modify, and distribute freely. The movement began with Richard Stallman's GNU Project in 1983 and the Linux kernel in 1991, and today powers 96% of the world's top servers through Linux, Android, and countless other projects.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
@@ -4836,7 +4836,7 @@
     "categoryId": "TECHNOLOGIES",
     "subtype": "Privacy",
     "name": "Encrypted Messaging",
-    "teaser": "Encrypted messaging made private conversation the default for over a billion people, and the technology behind it.",
+    "teaser": "Encrypted messaging made private conversation the default for over a billion people. Signal's protocol — used by WhatsApp, iMessage, and others — ensures only sender and receiver can read messages, making mass surveillance mathematically impossible in modern chat apps.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
@@ -14716,7 +14716,7 @@
     "categoryId": "TECHNOLOGIES",
     "subtype": "Hardware",
     "name": "Hardware Failures",
-    "teaser": "Hardware failures are the reality that all electronics eventually break, and understanding them.",
+    "teaser": "Hardware failures are the inevitable reality that all electronics eventually break. Understanding failure modes — from electromigration in chips to capacitor aging in power supplies — is critical for building reliable systems and explains why data centers maintain constant redundancy.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
@@ -14925,7 +14925,7 @@
     "categoryId": "TECHNOLOGIES",
     "subtype": "Operating Systems",
     "name": "Linux Distributions",
-    "teaser": "Linux is the free operating system kernel that.",
+    "teaser": "Linux is the free operating system kernel that powers everything from smartphones to supercomputers. distributions like Ubuntu, Fedora, and Arch package it with user interfaces and tools, creating accessible operating systems that run 96% of the world's top servers and all of Android.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
@@ -18706,7 +18706,7 @@
     "categoryId": "TECHNOLOGIES",
     "subtype": "Everyday Tech",
     "name": "Elevators",
-    "teaser": "The elevator is the machine that built vertical cities, and its history.",
+    "teaser": "The elevator is the machine that built vertical cities. Elisha Otis's 1852 safety brake made tall buildings practical, and modern elevators use regenerative drives, AI traffic management, and destination-dispatch systems that move millions of people daily in skyscrapers worldwide.",
     "imageUrl": "",
     "tier": 1,
     "tags": [
