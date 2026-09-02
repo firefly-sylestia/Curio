@@ -445,7 +445,10 @@ private fun NewPickerPage(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                NewSectionLabel("Your mixes", withRow = false)
+                NewSectionLabel(
+                    if (mixes.isEmpty()) "Your mixes" else "Your mixes · ${mixes.size}",
+                    withRow = false
+                )
                 if (mixes.isNotEmpty()) {
                     Surface(
                         onClick = { onNewMix() },
@@ -469,11 +472,13 @@ private fun NewPickerPage(
             }
         }
         if (mixes.isEmpty()) {
+            // Empty state is a CTA (previously bare text — with zero mixes
+            // there was no visible way to create one on this page).
             item(key = "mixes-empty") {
-                Text(
-                    "No mixes yet — tap New to build one.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.9f),
+                NewSecondaryOutline(
+                    label = "Build your first mix",
+                    glyph = CurioIcons.Add,
+                    onClick = onNewMix,
                     modifier = Modifier.padding(bottom = 6.dp)
                 )
             }
@@ -495,8 +500,9 @@ private fun NewPickerPage(
                                 NewMixCard(
                                     mix = mix,
                                     categories = categories,
+                                    active = mix.laneIds.toSet() == deckIds.toSet(),
                                     onApply = { onApplyMix(mix) },
-                                    onMore = { onEditMix(mix) },
+                                    onEdit = { onEditMix(mix) },
                                     onDelete = { onDeleteMix(mix) },
                                     modifier = Modifier.weight(1f)
                                 )
@@ -890,84 +896,148 @@ private fun NewSectionLabel(label: String, hint: String? = null, withRow: Boolea
 }
 
 /**
- * One named mix CARD (grid cell) — a compact "mix stamp": a leading lane
- * plate, the mix name + lane teaser, and a row of tiny lane composition
- * dots (the mix's lanes previewed as mini tinted plates). Tapping the card
- * spins the mix; long-press or the 3-dot opens Edit / Delete (M3 popup,
- * never pushes the row). Uniform 112dp cells so the 2-col grid reads alike.
+ * One named mix CARD (grid cell) — a refined "mix stamp":
+ *  - a LEAD-LANE cover plate tinted in the mix's first lane's color, so
+ *    every mix has a color identity (no more identical grey plates);
+ *  - the ExtraBold name + one-line teaser, with an "Active" label (in the
+ *    lead lane's accent) on the mix currently applied to the Spin deck;
+ *  - the lane-composition dots AND EXPLICIT Edit / Delete icon buttons —
+ *    visible 30dp targets instead of the hidden 3-dot menu (options should
+ *    be seen, not discovered by accident).
+ * Tapping the card spins the mix. Uniform 114dp cells so the 2-col grid
+ * reads alike.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NewMixCard(
     mix: NamedMix,
     categories: List<CurioCategory>,
+    active: Boolean = false,
     onApply: () -> Unit,
-    onMore: () -> Unit,
+    onEdit: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var menuOpen by remember { mutableStateOf(false) }
     val shape = RoundedCornerShape(20.dp)
     val lanes = mix.laneIds.mapNotNull { id -> categories.firstOrNull { it.id == id } }
     val lead = lanes.firstOrNull()
+    val leadAccent = lead?.themedAccent()
     Surface(
         shape = shape,
         color = newPickerIdleFill(),
         shadowElevation = 0.dp,
         modifier = modifier
-            .height(112.dp)
-            .combinedClickable(
-                onClick = onApply,
-                onLongClick = { menuOpen = true }
-            )
+            .height(114.dp)
+            .combinedClickable(onClick = onApply)
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                // Active mix — a quiet ring in the lead lane's own color
+                // (never the pale outlineVariant, so no dark-mode white ring).
+                .then(
+                    if (active && leadAccent != null)
+                        Modifier.border(1.5.dp, leadAccent.copy(alpha = 0.55f), shape)
+                    else Modifier
+                )
         ) {
-            // ── Header: lane plate + name + 3-dot ─────────────────────
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(38.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surfaceContainerHighest),
-                    contentAlignment = Alignment.Center
+                // ── Header: tinted lane cover + name (+ Active label) ──
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    CurioIcon(
-                        name = lead?.iconGlyph ?: CurioIcons.Tune,
-                        contentDescription = null,
-                        size = 20.dp,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(
+                                if (leadAccent != null) leadAccent.copy(alpha = 0.16f)
+                                else MaterialTheme.colorScheme.surfaceContainerHighest
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CurioIcon(
+                            name = lead?.iconGlyph ?: CurioIcons.Tune,
+                            contentDescription = null,
+                            size = 22.dp,
+                            tint = leadAccent ?: MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Spacer(Modifier.width(9.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = mix.name,
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (active && leadAccent != null) {
+                                Text(
+                                    "Active",
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                    color = leadAccent,
+                                    maxLines = 1
+                                )
+                                Spacer(Modifier.width(5.dp))
+                            }
+                            Text(
+                                text = mixTeaser(mix.laneIds, categories),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
                 }
-                Spacer(Modifier.width(9.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = mix.name,
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = mixTeaser(mix.laneIds, categories),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                Spacer(Modifier.width(4.dp))
-                // 3-dot → Edit / Delete (M3 popup, never pushes the row).
-                Box {
+                // ── Footer: lane dots (capped so the explicit action
+                // buttons always fit the narrowest 2-col cell) + Edit/Delete ──
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // 4-lane mixes show all four dots; beyond that, 3 dots + the
+                    // "+N" chip keeps the row inside the card's inner width.
+                    val dots = if (lanes.size > 4) lanes.take(3) else lanes
+                    dots.forEach { cat ->
+                        val ink = cat.categoryInk()
+                        Box(
+                            modifier = Modifier
+                                .size(16.dp)
+                                .clip(CircleShape)
+                                .background(ink.copy(alpha = 0.16f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CurioIcon(
+                                name = cat.iconGlyph,
+                                contentDescription = null,
+                                size = 8.dp,
+                                tint = ink
+                            )
+                        }
+                    }
+                    if (lanes.size > 4) {
+                        Text(
+                            text = "+${lanes.size - 3}",
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 2.dp)
+                        )
+                    }
+                    Spacer(Modifier.weight(1f))
                     Surface(
-                        onClick = { menuOpen = true },
+                        onClick = onEdit,
                         shape = RoundedCornerShape(50),
                         color = MaterialTheme.colorScheme.surfaceContainerHighest
                     ) {
@@ -976,59 +1046,31 @@ private fun NewMixCard(
                             contentAlignment = Alignment.Center
                         ) {
                             CurioIcon(
-                                name = CurioIcons.MoreVert,
-                                contentDescription = "Mix options",
-                                size = 16.dp,
+                                name = CurioIcons.Edit,
+                                contentDescription = "Edit mix",
+                                size = 14.dp,
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
-                    androidx.compose.material3.DropdownMenu(
-                        expanded = menuOpen,
-                        onDismissRequest = { menuOpen = false }
+                    Spacer(Modifier.width(4.dp))
+                    Surface(
+                        onClick = onDelete,
+                        shape = RoundedCornerShape(50),
+                        color = MaterialTheme.colorScheme.error.copy(alpha = 0.10f)
                     ) {
-                        androidx.compose.material3.DropdownMenuItem(
-                            text = { Text("Edit", color = MaterialTheme.colorScheme.onSurface) },
-                            onClick = { menuOpen = false; onMore() }
-                        )
-                        androidx.compose.material3.DropdownMenuItem(
-                            text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
-                            onClick = { menuOpen = false; onDelete() }
-                        )
+                        Box(
+                            modifier = Modifier.size(28.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Delete,
+                                contentDescription = "Delete mix",
+                                size = 14.dp,
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
                     }
-                }
-            }
-            // ── Footer: lane composition dots (v3xx — the inline Spin pill
-            // is GONE; the whole card is the spin target) ────────────────
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                lanes.take(4).forEach { cat ->
-                    val ink = cat.categoryInk()
-                    Box(
-                        modifier = Modifier
-                            .size(18.dp)
-                            .clip(CircleShape)
-                            .background(ink.copy(alpha = 0.16f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CurioIcon(
-                            name = cat.iconGlyph,
-                            contentDescription = null,
-                            size = 10.dp,
-                            tint = ink
-                        )
-                    }
-                }
-                if (lanes.size > 4) {
-                    Text(
-                        text = "+${lanes.size - 4}",
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 2.dp)
-                    )
                 }
             }
         }

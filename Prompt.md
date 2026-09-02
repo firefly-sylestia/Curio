@@ -117,3 +117,25 @@ borders, remove it; and in new picker the pinned ones doesn't show tap and hold 
   `Stroke(`/`borderTint`); `catAccent`/`CircleShape`/`CurioIcons.Check` still used
   elsewhere; diff reviewed hunk-by-hunk; no compile/build run (CI validates).
 - Docs: changelog 20260921 + app/AGENTS.md v3xx11 + this log.
+
+### Follow-up (this turn): Your-mixes refinement (shipped) + full analysis file (local only)
+
+User: "the your mixes options can be much more refined, and then do a full app analysis for
+features etc, create an analysis file — don't push the file, just the refinement of the your
+mixes; in the file add feature refinements, redesigns, UI/UX (what user sees and taps)
+improvements, and new features; do a full analysis and research about it."
+
+**Shipped (pushed `5e0321de`'s follow-up):** `NewMixCard` refined — lead-lane tinted cover
+plates (colour identity per mix), "Active" ring + label for the mix matching the current deck
+(`deckIds` re-supplied to the call site), explicit 28dp Edit/Delete icon buttons replacing the
+hidden 3-dot dropdown (lane dots capped to fit the narrowest 2-col cell: ≤4 lanes → 4 dots,
+>4 → 3 dots + "+N"), card height 114dp, header shows "Your mixes · N", empty state is now a
+"Build your first mix" CTA. Long-press menu removed (card tap = spin only).
+
+**Local-only (`ANALYSIS.md`, NOT committed/pushed per user):** full-app analysis — feature
+inventory by surface, verified strengths, UX/UI refinement table per surface (picker, spin,
+home, cabinet, capture, pet/quests, settings/experiments, global), flagship redesigns
+(Cabinet 2.0 collections, per-lane Curio Journey, Daily Curio ritual, share templates,
+Browse 2.0), prioritised new-feature table (P0/P1/P2 + effort), design-system rules, metrics,
+sequencing, and research grounding (Spotify playlists/Blend, Duolingo streaks, Pocket/Blinkist
+progress, Material/HIG destructive-action and touch-target standards).

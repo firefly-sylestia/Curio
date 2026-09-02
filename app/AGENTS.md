@@ -356,6 +356,22 @@ app/src/main/java/com/curio/app/
     the effective list so removing a default suggestion actually removes
     it (was a no-op against an empty user list); mix save/delete already
     recomposed via `savedMixesState`.
+- **v3xx12 — Your-mixes cards refined (colour identity + explicit actions).** User:
+  "the your mixes options can be much more refined". `NewMixCard` upgrades:
+  (1) **Lead-lane cover** — the 42dp plate is tinted with the mix's first lane's
+  `themedAccent()` (16% wash + accent glyph), so every mix has a colour identity
+  instead of identical grey plates. (2) **Active indicator** — the mix whose
+  `laneIds` equal the current deck (`deckIds` at the call site) gets a 1.5dp ring
+  in the lead accent (never outlineVariant — no dark-mode white ring) + an
+  "Active" label on the teaser line. (3) **Explicit Edit/Delete buttons** — the
+  hidden 3-dot dropdown is GONE; footer now has a 28dp Edit (neutral) + Delete
+  (error-tint) pair, with the lane dots capped (≤4 lanes: all four 16dp dots,
+  >4: three dots + "+N") so the row fits the narrowest 2-col cell (~136dp inner
+  on a 360dp phone). Card tap = spin only (no long-press menu). Height 114dp (was
+  112) + 12dp air. (4) **Section polish** — header shows "Your mixes · N"; empty
+  state is now a "Build your first mix" CTA (`NewSecondaryOutline`) instead of
+  bare text (with zero mixes there was previously no visible way to create one
+  on page 2).
 - **v3xx11 — picker polish: tick removed, option-pill overlay fixed, dark white-dot gone.**
   User: "remove the tick when selecting … in dark mode the category options still have
   white borders … in new picker the pinned ones doesn't show tap and hold actions".
