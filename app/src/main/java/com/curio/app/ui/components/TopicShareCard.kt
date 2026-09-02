@@ -376,7 +376,11 @@ class EditBoundsCallbacks(
  *  height tab feel dead until the drag crossed a full extra line. Rounding
  *  makes each half-line of travel change the visible count. */
 private fun lines(base: Int, frac: Float, max: Int = 28): Int =
-    (base * frac).roundToInt().coerceIn(1, max)
+    // v318b — CEIL (was round): rounding meant the height slider felt dead
+    // over long stretches (a 12-line fact needed +8% before the line count
+    // flipped). Now ANY slider movement changes the line count, so the box
+    // visibly grows/shrinks with every tick.
+    kotlin.math.ceil(base * frac).toInt().coerceIn(1, max)
 
 @Composable
 fun TopicShareCard(
@@ -6017,10 +6021,13 @@ fun TopicShareSheet(
                         SizeSliderColumn("Title width", move.titleWidthFrac, { move = move.copy(titleWidthFrac = it) }, 0.3f..1f, steps = 69, modifier = Modifier.weight(1f))
                         SizeSliderColumn("Fact width", move.factWidthFrac, { move = move.copy(factWidthFrac = it) }, 0.3f..1f, steps = 69, modifier = Modifier.weight(1f))
                     }
-                    // Row 3: Height sliders — same explicit labels + readout
+                    // Row 3: Height sliders — same explicit labels + readout.
+                    // v318b — chunkier ~8% steps (was 42 micro-steps) so each
+                    // tick flips the fact's line count and the box visibly
+                    // grows/shrinks instead of feeling dead.
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-                        SizeSliderColumn("Title height", move.titleHeightFrac, { move = move.copy(titleHeightFrac = it) }, 0.35f..2.5f, steps = 42, modifier = Modifier.weight(1f))
-                        SizeSliderColumn("Fact height", move.factHeightFrac, { move = move.copy(factHeightFrac = it) }, 0.35f..2.5f, steps = 42, modifier = Modifier.weight(1f))
+                        SizeSliderColumn("Title height", move.titleHeightFrac, { move = move.copy(titleHeightFrac = it) }, 0.35f..2.5f, steps = 26, modifier = Modifier.weight(1f))
+                        SizeSliderColumn("Fact height", move.factHeightFrac, { move = move.copy(factHeightFrac = it) }, 0.35f..2.5f, steps = 26, modifier = Modifier.weight(1f))
                     }
                     // Row 4: Done + Reset icon chips
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {

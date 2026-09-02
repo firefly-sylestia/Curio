@@ -1,3 +1,7 @@
+FIX: Share card editor — the quick-fact Height and Width sliders now actually resize the box: every tick visibly grows or shrinks it (no more dead-feeling drags or the box hopping around).
+ADD: Topic Browser — the floating arrow scrolls smoothly to the top, and flipping a page jumps back to the top too; the "Also in" pills now SWITCH to that category in one tap instead of stacking another filter.
+FIX: Spin — the Categories pill shows your mix's actual NAME when you apply a saved mix (no more generic "Mixed").
+FIX: Tap-and-hold menus app-wide — the old dialog-style panels (and the Edit/Delete dropdown) are now one small pill with circle icon buttons that pops in with a springy morph animation — no text, no dialog.
 FIX: Category mix & filters — the mix cards swap the washed-out colors and tiny dots for real category icons in full accent chips; Cabinet counts + Continue-exploring show the active accent; the Surprise tile/button become Mix while building a multi-lane mix, with a floating Cancel pill.
 ADD: Category picker stays where you left it — the Curio / Knowledge / Mix tab and each tab's scroll position now survive closing the sheet and restarting the app.
 ADD: Cabinet + Topic Browser — the category filter panel now lists categories in a two-column grid, so dozens of lanes are half the scroll.

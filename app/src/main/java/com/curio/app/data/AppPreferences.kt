@@ -173,6 +173,7 @@ object AppPreferences {
     // - KEY_PICKER_MIXES_SEEDED — the starter mixes were written once, so
     //   deleting every mix doesn't resurrect them.
     private const val KEY_NAMED_MIXES = "named_mixes"               // JSON array of NamedMix
+    private const val KEY_LAST_MIX_NAME = "last_mix_name"          // String? — the applied deck's mix name
     private const val KEY_CLASSIC_PICKER = "classic_picker"         // bool — old glass-pill picker
     private const val KEY_PICKER_MIXES_SEEDED = "picker_mixes_seeded" // bool — starter mixes written once
     // v3xx — picker page default + curated suggestions (add/remove):
@@ -768,6 +769,15 @@ object AppPreferences {
         private set
 
     /**
+     * v318b — the NAME of the last APPLIED named mix (null when the deck is
+     * a single lane, a surprise, or an unnamed multi-lane selection). The
+     * Spin page's category pill shows this name instead of a generic
+     * "Mixed · N". Seeded from prefs in [initThemeMode].
+     */
+    var lastMixNameState by mutableStateOf<String?>(null)
+        private set
+
+    /**
      * v3xx — which picker page opens first in the sheet's pager.
      * 0 = classic picker (default), 1 = new picker. Seeded from prefs in
      * [initThemeMode].
@@ -907,6 +917,7 @@ object AppPreferences {
         savedMixesState = getSavedMixes(context)
         classicPickerEnabledState = isClassicPickerEnabled(context)
         pickerMixesSeededState = isPickerMixesSeeded(context)
+        lastMixNameState = getLastMixName(context)
         pickerDefaultPageState = getPickerDefaultPage(context)
         pickerPage0ModeState = getPickerPage0Mode(context)
         pickerSuggestionsState = getPickerSuggestions(context)
@@ -2269,6 +2280,15 @@ object AppPreferences {
     fun setPickerDefaultPage(context: Context, page: Int) {
         prefs(context).edit().putInt(KEY_PICKER_DEFAULT_PAGE, page).apply()
         pickerDefaultPageState = page
+    }
+
+    /** The last APPLIED named mix's name, or null for single/surprise decks. */
+    fun getLastMixName(context: Context): String? =
+        prefs(context).getString(KEY_LAST_MIX_NAME, null)
+
+    fun setLastMixName(context: Context, name: String?) {
+        prefs(context).edit().putString(KEY_LAST_MIX_NAME, name).apply()
+        lastMixNameState = name
     }
 
     /** The user's curated suggestion ids (empty = use [defaultSuggestions]). */

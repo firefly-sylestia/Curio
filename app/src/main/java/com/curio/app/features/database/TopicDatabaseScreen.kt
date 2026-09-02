@@ -632,6 +632,15 @@ fun TopicDatabaseScreen(navController: NavController) {
             listState.scrollToItem(0)
         }
     }
+    // v318b — flipping to another PAGE via the floating page nav also
+    // auto-scrolls back to the top (each page's row set starts fresh).
+    LaunchedEffect(currentPage) {
+        if (hasRows && listState.firstVisibleItemIndex > 0) {
+            savedScrollIndex = 0
+            savedScrollOffset = 0
+            listState.scrollToItem(0)
+        }
+    }
 
     // ── A–Z fast-scroller (v26) — the scroll knob's letter rail: the active
     //    letter is derived from the topic row at the top of the list, and
@@ -756,14 +765,13 @@ fun TopicDatabaseScreen(navController: NavController) {
                         }.sortedByDescending { it.second }
                         if (others.isNotEmpty()) {
                             item(key = "search-suggestions") {
-                                // v314 — multi-select: tapping a pill toggles that
-                                // lane in the active set (adds it when absent).
+                                // v318b — tapping an "Also in" pill SWITCHES the
+                                // filter to that single lane (replacing the
+                                // selection); no more silent add-to-set surprise.
                                 SearchSuggestionRow(
                                     hits = others,
                                     onSelect = { id ->
-                                        commitCats { current ->
-                                            if (id in current) current - id else current + id
-                                        }
+                                        commitCats { setOf(id) }
                                     }
                                 )
                             }
@@ -870,7 +878,9 @@ fun TopicDatabaseScreen(navController: NavController) {
                 onClick = {
                     savedScrollIndex = 0
                     savedScrollOffset = 0
-                    alphabetScope.launch { listState.scrollToItem(0) }
+                    // v318b — smooth auto-scroll to the top (was an instant
+                    // jump, which felt abrupt on a long list).
+                    alphabetScope.launch { listState.animateScrollToItem(0) }
                 },
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primary,
@@ -1424,9 +1434,11 @@ private fun DatabaseCategoryTopBar(
 
 /**
  * v313 — "Also in: Films · 4" suggestion pills, shown ABOVE the search
- * results when lanes are selected and other lanes also match the query.
- * v314 — multi-select: tapping a pill TOGGLES that lane in the active set
- * (adds it when absent), so results from other categories are one tap away.
+ * results when lanes are selected (or searching from All) and other lanes
+ * also match the query.
+ * v318b — tapping a pill SWITCHES the filter to that single lane (replacing
+ * the selection entirely), so one tap jumps to the other category instead of
+ * silently stacking another filter.
  */
 @Composable
 private fun SearchSuggestionRow(

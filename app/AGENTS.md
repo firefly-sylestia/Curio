@@ -1419,6 +1419,34 @@ app/src/main/java/com/curio/app/
   own `rememberLazyGridState` persisted debounced per-tab
   (`KEY_PICKER_PAGE0_TAB_SCROLL_<tab>`), replacing the single page-0
   scroll key (`getPickerPage0Scroll`/`setPickerPage0Scroll` deleted).
+- **v319 — share-fact sliders + DB auto-scroll/Also-in switch + mix-name
+  pill + morphing hold pills.** (1) **Share-card editor** — the quick-fact
+  box's HEIGHT slider felt dead because `lines()` ROUNDED the line count
+  (a 12-line fact needed +8% before anything visibly changed, then the
+  grid re-flowed "up and down"); it now CEILs so every tick changes the
+  line count, and the height sliders step chunkier (steps 42 → 26,
+  ~8%/tick) so each notch visibly grows/shrinks the fact box; WIDTH keeps
+  its continuous `fillMaxWidth(frac)` per style (Paper's FrostPane
+  narrows via the v229c `.then(modifier)` chain).
+  (2) **Topic Browser** — the floating back-to-top arrow now
+  `animateScrollToItem(0)` (smooth auto-scroll instead of an instant
+  jump), flipping a PAGE via the liquid-glass page nav also auto-scrolls
+  to the top; tapping an "Also in" pill now SWITCHES the filter to that
+  single lane (`commitCats { setOf(id) }`) instead of stacking it into
+  the multi-select set. (3) **Spin page** — the deck category pill shows
+  the APPLIED named mix's NAME (was always "Mixed · N"): applied mixes
+  stamp `AppPreferences.lastMixNameState` (`KEY_LAST_MIX_NAME`, cleared
+  on surprise/unnamed/single picks), and the pill reads
+  `deckPillLabel(name, count, cat)` across the header + both bottom-bar
+  buttons. (4) **Tap-and-hold options** — the dialog-style centered
+  panels are GONE everywhere: `HoldActionsPill` (shared, internal) is a
+  small rounded capsule that MORPHS in (spring `Animatable` scale
+  0.6→1 + fade) holding only CIRCULAR ICON buttons (no text):
+  Pin/Spin/Remove (`CategoryOptionPill` rewrite), mix Edit/Delete
+  (`MixOptionPill` rewrite), and the Browse page's old Edit/Delete
+  DROPDOWN + `BrowseOptionPill` dialog are replaced with the same pill
+  (mix rows hoist a `mixHoldTarget` to the screen for the full-screen
+  scrim).
 - **v317 — merged book-notes sheet (Synopsis | Chapters tabs, expands to
   top) + "Also in" from All + share-card editor overhaul + cover fetch
   under Experiments.** (User: synopsis should show only 5 lines on the

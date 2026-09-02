@@ -29,7 +29,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,6 +58,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -305,7 +311,11 @@ fun NewCategoryPickerSheet(
                             val cats = mix.laneIds.mapNotNull { id ->
                                 categories.firstOrNull { it.id == id }
                             }
-                            if (cats.isNotEmpty()) onCategoriesMixed(cats)
+                            if (cats.isNotEmpty()) {
+                                // v318b — a named mix stamps the Spin pill.
+                                AppPreferences.setLastMixName(context, mix.name)
+                                onCategoriesMixed(cats)
+                            }
                         },
                         onMixOption = { mixOptionTarget = it },
                         onNewMix = { editMix = null; showEditor = true },
@@ -338,6 +348,8 @@ fun NewCategoryPickerSheet(
                         if (mixing) {
                             page0MixApply?.invoke()
                         } else {
+                            // v318b — a surprise/unnamed deck clears the name.
+                            AppPreferences.setLastMixName(context, null)
                             val mix = surpriseMiniMix(categories)
                             if (mix.isNotEmpty()) onCategoriesMixed(mix)
                         }
@@ -416,7 +428,11 @@ fun NewCategoryPickerSheet(
                 AppPreferences.addOrReplaceMix(context, mix)
                 showEditor = false
                 val cats = mix.laneIds.mapNotNull { id -> categories.firstOrNull { it.id == id } }
-                if (cats.isNotEmpty()) onCategoriesMixed(cats)
+                if (cats.isNotEmpty()) {
+                    // v318b — a saved/edited mix stamps the Spin pill.
+                    AppPreferences.setLastMixName(context, mix.name)
+                    onCategoriesMixed(cats)
+                }
             }
         )
     }
@@ -763,7 +779,11 @@ private fun ClassicPickerPage(
         if (mode == PickerMode.MIX && multiSelectMode && selectedSlugs.isNotEmpty()) {
             val cats = selectedSlugs.mapNotNull { CurioCategories.byRouteSlug(it) }
             onMixStatus(cats.size) {
-                if (cats.isNotEmpty()) onCategoriesMixed(cats)
+                if (cats.isNotEmpty()) {
+                    // v318b — an UNNAMED multi-lane selection clears the name.
+                    AppPreferences.setLastMixName(context, null)
+                    onCategoriesMixed(cats)
+                }
             }
         } else {
             onMixStatus(0, null)
@@ -909,6 +929,9 @@ private fun ClassicPickerPage(
                     modifier = Modifier.weight(1f),
                     onClick = {
                         if (selectedSlugs.isEmpty()) return@NewPrimaryCapsule
+                        // v318b — an unnamed multi-lane selection clears any
+                        // previously applied mix's name from the Spin pill.
+                        AppPreferences.setLastMixName(context, null)
                         val cats = selectedSlugs.mapNotNull { CurioCategories.byRouteSlug(it) }
                         if (cats.isNotEmpty()) onCategoriesMixed(cats)
                     }
@@ -1348,10 +1371,83 @@ internal fun NewPinnedPill(
         }
     }
 }/**
- * The tap-and-hold option pill — a centered overlay. Actions are optional:
- * Pin/Unpin + Spin for pinned lanes / Browse tiles, or a dedicated Remove
- * action for Continue-exploring lanes. Replaces the old direct-pin-on-
- * long-press behavior.
+ * v318b — tap-and-hold actions are NO LONGER a dialog: a small floating
+ * capsule MORPHS in (spring pop + fade) at the center, holding only
+ * circular ICON buttons (no text). Tapping the scrim dismisses it.
+ * internal — shared with the Browse screen's tap-and-hold overlays.
+ */
+@Composable
+internal fun HoldActionsPill(
+    actions: List<HoldAction>,
+    onDismiss: () -> Unit
+) {
+    val scale = remember { Animatable(0.6f) }
+    val alpha = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        // Beautiful morph-in: springy pop + fade, one frame after the
+        // overlay appears.
+        scale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
+        alpha.animateTo(1f, tween(140))
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.28f))
+            .combinedClickable(onClick = onDismiss)
+    ) {
+        Surface(
+            shape = RoundedCornerShape(50),
+            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+            shadowElevation = 8.dp,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .graphicsLayer {
+                    scaleX = scale.value
+                    scaleY = scale.value
+                    alpha = alpha.value
+                }
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                actions.forEach { action ->
+                    Surface(
+                        onClick = action.onClick,
+                        shape = CircleShape,
+                        color = action.background,
+                        modifier = Modifier.size(44.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            CurioIcon(
+                                name = action.glyph,
+                                contentDescription = action.description,
+                                size = 19.dp,
+                                tint = action.contentColor
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** One circular icon action inside [HoldActionsPill]. */
+internal class HoldAction(
+    val glyph: String,
+    val description: String,
+    val background: Color,
+    val contentColor: Color,
+    val onClick: () -> Unit
+)
+
+/**
+ * The tap-and-hold option pill for a category — the OLD dialog-style
+ * centered panel is gone; the same actions now live in the morphing
+ * [HoldActionsPill] as circular icon buttons. Replaces the old
+ * direct-pin-on-long-press behavior.
  */
 @Composable
 private fun CategoryOptionPill(
@@ -1363,119 +1459,48 @@ private fun CategoryOptionPill(
 ) {
     val context = LocalContext.current
     val isPinned = remember { category.id in AppPreferences.getPinnedCategories(context) }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.35f))
-            .combinedClickable(onClick = onDismiss)
-    ) {
-        Surface(
-            shape = RoundedCornerShape(22.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerHighest,
-            shadowElevation = 6.dp,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(horizontal = 40.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Text(
-                    if (category.id == CategoryId.WILDCARD) "Surprise mix" else category.displayName,
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface
+    val actions = buildList {
+        if (onPinToggle != null) {
+            add(
+                HoldAction(
+                    CurioIcons.PushPin,
+                    if (isPinned) "Unpin" else "Pin",
+                    MaterialTheme.colorScheme.secondaryContainer,
+                    MaterialTheme.colorScheme.onSecondaryContainer,
+                    onPinToggle
                 )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (onPinToggle != null) {
-                        Surface(
-                            onClick = onPinToggle,
-                            shape = RoundedCornerShape(50),
-                            color = MaterialTheme.colorScheme.secondaryContainer
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                CurioIcon(
-                                    name = CurioIcons.PushPin,
-                                    contentDescription = null,
-                                    size = 16.dp,
-                                    tint = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                                Text(
-                                    if (isPinned) "Unpin" else "Pin",
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                            }
-                        }
-                    }
-                    if (onSpin != null && category.isReady) {
-                        Surface(
-                            onClick = onSpin,
-                            shape = RoundedCornerShape(50),
-                            color = MaterialTheme.colorScheme.primary
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                CurioIcon(
-                                    name = CurioIcons.Casino,
-                                    contentDescription = null,
-                                    size = 16.dp,
-                                    tint = MaterialTheme.colorScheme.onPrimary
-                                )
-                                Text(
-                                    "Spin",
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onPrimary
-                                )
-                            }
-                        }
-                    }
-                    if (onRemove != null) {
-                        Surface(
-                            onClick = onRemove,
-                            shape = RoundedCornerShape(50),
-                            color = MaterialTheme.colorScheme.errorContainer
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                CurioIcon(
-                                    name = CurioIcons.Close,
-                                    contentDescription = null,
-                                    size = 16.dp,
-                                    tint = MaterialTheme.colorScheme.onErrorContainer
-                                )
-                                Text(
-                                    "Remove",
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onErrorContainer
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+            )
+        }
+        if (onSpin != null && category.isReady) {
+            add(
+                HoldAction(
+                    CurioIcons.PlayArrow,
+                    "Spin ${category.displayName}",
+                    MaterialTheme.colorScheme.primary,
+                    MaterialTheme.colorScheme.onPrimary,
+                    onSpin
+                )
+            )
+        }
+        if (onRemove != null) {
+            add(
+                HoldAction(
+                    CurioIcons.Delete,
+                    "Remove from Continue exploring",
+                    MaterialTheme.colorScheme.errorContainer,
+                    MaterialTheme.colorScheme.onErrorContainer,
+                    onRemove
+                )
+            )
         }
     }
+    if (actions.isEmpty()) return
+    HoldActionsPill(actions = actions, onDismiss = onDismiss)
 }
 
 /**
- * Tap-and-hold option pill for a saved mix — Edit + Delete (v3xx13).
- * Centered overlay mirroring [CategoryOptionPill]: actions stay hidden
- * until the card is held, so the mixes grid shows no buttons at rest.
+ * v318b — tap-and-hold on a saved mix opens the same morphing pill: Edit +
+ * Delete as circular icon buttons (no text, no dialog).
  */
 @Composable
 private fun MixOptionPill(
@@ -1484,86 +1509,25 @@ private fun MixOptionPill(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.35f))
-            .combinedClickable(onClick = onDismiss)
-    ) {
-        Surface(
-            shape = RoundedCornerShape(22.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerHighest,
-            shadowElevation = 6.dp,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(horizontal = 40.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Surface(
-                        onClick = onEdit,
-                        shape = RoundedCornerShape(50),
-                        color = MaterialTheme.colorScheme.secondaryContainer
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            CurioIcon(
-                                name = CurioIcons.Edit,
-                                contentDescription = null,
-                                size = 16.dp,
-                                tint = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-                            Text(
-                                "Edit",
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-                        }
-                    }
-                    Surface(
-                        onClick = onDelete,
-                        shape = RoundedCornerShape(50),
-                        color = MaterialTheme.colorScheme.errorContainer
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            CurioIcon(
-                                name = CurioIcons.Delete,
-                                contentDescription = null,
-                                size = 16.dp,
-                                tint = MaterialTheme.colorScheme.onErrorContainer
-                            )
-                            Text(
-                                "Delete",
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onErrorContainer
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
+    HoldActionsPill(
+        actions = listOf(
+            HoldAction(
+                CurioIcons.Edit,
+                "Edit $name",
+                MaterialTheme.colorScheme.secondaryContainer,
+                MaterialTheme.colorScheme.onSecondaryContainer,
+                onEdit
+            ),
+            HoldAction(
+                CurioIcons.Delete,
+                "Delete $name",
+                MaterialTheme.colorScheme.errorContainer,
+                MaterialTheme.colorScheme.onErrorContainer,
+                onDelete
+            )
+        ),
+        onDismiss = onDismiss
+    )
 }
 
 /** An "+ Add" tile for the continue-exploring grid. */

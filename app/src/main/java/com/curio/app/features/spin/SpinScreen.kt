@@ -713,6 +713,9 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     // logic keys (landed topic, filters, reveal guard, last-used prefs)
     // keep operating on the real category set.
     val isMixedDeck = remember(activeCatIds) { activeCatIds.distinct().size > 1 }
+    // v318b — the last APPLIED named mix's name (null for singles/surprises):
+    // the deck pills show it instead of a generic "Mixed · N".
+    val mixName = AppPreferences.lastMixNameState
     // v27k — total topics in the current deck. The mixed labels show the pool
     // size ("Mixed · 1,024"), not the lane count — the number that actually
     // tells you how big the mix is. Wildcard resolves to the full canonical
@@ -1226,7 +1229,13 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                         ) {
                             CurioIcon(name = deckCat.iconGlyph, tint = deckCat.categoryInk(), size = 18.dp)
                             Text(
-                                if (isMixedDeck) "Mixed · $mixedTopicCount" else deckCat.displayName,
+                                // v318b — an applied NAMED mix stamps the pill
+                                // with its name; unnamed mixes stay "Mixed · N".
+                                when {
+                                    isMixedDeck && mixName != null -> mixName
+                                    isMixedDeck -> "Mixed · $mixedTopicCount"
+                                    else -> deckCat.displayName
+                                },
                                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                                 color = deckCat.categoryInk()
                             )
@@ -1371,6 +1380,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         BottomCta(
             cat = deckCat,
             mixedCount = if (isMixedDeck) mixedTopicCount else 1,
+            mixName = mixName,
             // v183 — the badge is null (plain "Filter") until filters are
             // actually SELECTED: the old code passed the always-non-zero
             // filteredPool.size, so `hasFilters` was always true and the
@@ -1424,6 +1434,8 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             // picker" (AppPreferences.classicPickerEnabledState).
             val pickCategory: (CurioCategory) -> Unit = { c ->
                 activeCatIds = listOf(c.id)
+                // v318b — a single-lane deck has no mix name.
+                AppPreferences.setLastMixName(context, null)
                 AppPreferences.setLastSpinCategories(context, listOf(c.id))
                 showCategoryPicker = false
             }
@@ -4076,10 +4088,21 @@ private fun OpeningPulseDot(tint: Color = Color.White) {
 // Bottom bar — Categories · Filter (solid control buttons)
 // ═══════════════════════════════════════════════════════════════════════════
 
+/** v318b — the deck pill's label: the applied NAMED mix name when the
+ *  deck is a multi-lane mix with a name, otherwise "Mixed · N" / the lane
+ *  name (shared by the header pill and both bottom-bar buttons). */
+private fun deckPillLabel(mixName: String?, mixedCount: Int, cat: CurioCategory): String = when {
+    mixedCount > 1 && mixName != null -> mixName
+    mixedCount > 1 -> "Mixed · $mixedCount"
+    else -> cat.displayName
+}
+
 @Composable
 private fun BottomCta(
     cat: CurioCategory,
     mixedCount: Int = 1,
+    // v318b — the last applied named mix's name (null = unnamed/single).
+    mixName: String? = null,
     // v183 — null when NO filter chips are selected (the pill reads plain
     // "Filter"); the matching-topic count when filters are active. The old
     // non-null `filteredPool.size` was always > 0, so the badge showed
@@ -4116,7 +4139,7 @@ private fun BottomCta(
                     .padding(horizontal = 12.dp, vertical = 10.dp)
             ) {
                 VerticalDeckButton(
-                    label = if (mixedCount > 1) "Mixed · $mixedCount" else cat.displayName,
+                    label = deckPillLabel(mixName, mixedCount, cat),
                     icon = cat.iconGlyph,
                     cat = cat,
                     selected = true,
@@ -4150,10 +4173,10 @@ private fun BottomCta(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     DeckControlButton(
-                        // A multi-select deck names itself "Mixed · N" so the
-                        // mix is obvious at a glance instead of the first
-                        // category's name.
-                        label = if (mixedCount > 1) "Mixed · $mixedCount" else cat.displayName,
+                        // A multi-select deck names itself "Mixed · N" (or the
+                        // applied named mix's own name) so the mix is obvious
+                        // at a glance instead of the first category's name.
+                        label = deckPillLabel(mixName, mixedCount, cat),
                         icon = cat.iconGlyph,
                         cat = cat,
                         selected = true,
