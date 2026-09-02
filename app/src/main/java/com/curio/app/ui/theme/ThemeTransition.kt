@@ -1,7 +1,12 @@
 package com.curio.app.ui.theme
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.PixelCopy
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -41,6 +46,7 @@ import com.curio.app.data.AppPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.math.hypot
 
 // ============================================================================
@@ -84,18 +90,28 @@ class CurioThemeTransitionState {
 
     /**
      * Freeze the current frame and arm a reveal expanding from [center].
-     * Ignores a start while an animation is already in flight. Tries the
-     * hardware [GraphicsLayer] capture first (works with liquid-glass
-     * RenderEffect blurs), then falls back to [View.drawToBitmap]. If both
-     * fail or come back blank we bail out silently so the theme switch
-     * still happens — the animation is pure polish and must never block it.
+     * Ignores a start while an animation is already in flight. Captures the
+     * REAL window frame first via [PixelCopy] (works with liquid-glass
+     * RenderEffect blurs), then the hardware [GraphicsLayer], then falls
+     * back to [View.drawToBitmap]. If all fail or come back blank we bail
+     * out silently so the theme switch still happens — the animation is
+     * pure polish and must never block it.
      *
      * Suspending because [GraphicsLayer.toImageBitmap] may need to await a
      * frame; callers run it in a coroutine.
      */
     suspend fun startTransition(center: Offset): Boolean {
         if (isAnimating) return false
-        val bitmap = captureLayer?.let { captureLayerFrame(it) }
+        // v3xx — REAL-FRAME capture first: PixelCopy reads the pixels the
+        // user actually sees (liquid-glass blur included) straight from the
+        // window surface, without re-running the Compose draw chain. The
+        // GraphicsLayer fallback below re-invokes the whole app draw (nested
+        // layer records over the kyant backdrop layer), which read back blank
+        // in liquid-glass mode on some devices — so the reveal silently
+        // skipped. Falls through to the view fallback, then bails to the
+        // instant flip.
+        val bitmap = windowFrame(captureView)
+            ?: captureLayer?.let { captureLayerFrame(it) }
             ?: captureView?.let { captureViewFrame(it) }
             ?: return false
         if (bitmap.isBlank()) return false
@@ -132,6 +148,54 @@ class CurioThemeTransitionState {
         return try {
             val bmp = view.drawToBitmap()
             if (bmp.isBlank()) null else bmp
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
+     * LIVE-FRAME capture via [PixelCopy]: a snapshot of the window's current
+     * surface — the exact pixels on screen, liquid-glass blur included —
+     * taken by the hardware compositor instead of re-running the Compose
+     * draw chain. This is the PREFERRED snapshot source for the frozen
+     * reveal frame; the GraphicsLayer / View paths below exist as fallbacks
+     * (API < 26 or a failed copy). A failed or blank copy is rejected so the
+     * caller falls back instead of freezing a see-through frame.
+     */
+    private suspend fun windowFrame(view: View?): Bitmap? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return null
+        val activity = view?.context as? Activity
+            ?: view?.rootView?.context as? Activity
+            ?: return null
+        val window = activity.window ?: return null
+        val decor = window.decorView
+        val width = decor.width
+        val height = decor.height
+        if (width <= 0 || height <= 0) return null
+        return try {
+            val dest = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            val frame = suspendCancellableCoroutine<Bitmap?> { cont ->
+                // The callback always fires (PixelCopy has no cancellation
+                // API), so the continuation can never leak.
+                PixelCopy.request(
+                    window,
+                    dest,
+                    { status ->
+                        val result =
+                            if (status == PixelCopy.SUCCESS && !dest.isBlank()) dest else null
+                        if (!cont.isCancelled) {
+                            runCatching { cont.resume(result) }
+                        } else {
+                            // Cancelled mid-copy: the continuation resumes
+                            // with CancellationException on its own — just
+                            // don't leak the allocation.
+                            dest.recycle()
+                        }
+                    },
+                    Handler(Looper.getMainLooper())
+                )
+            }
+            if (frame != null) frame else dest.recycle().let { null }
         } catch (e: Exception) {
             null
         }

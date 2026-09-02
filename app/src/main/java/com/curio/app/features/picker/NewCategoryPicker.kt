@@ -491,7 +491,6 @@ private fun NewPickerPage(
                                 NewMixCard(
                                     mix = mix,
                                     categories = categories,
-                                    active = mix.laneIds.toSet() == deckIds.toSet(),
                                     onApply = { onApplyMix(mix) },
                                     onMore = { onEditMix(mix) },
                                     onDelete = { onDeleteMix(mix) },
@@ -888,17 +887,16 @@ private fun NewSectionLabel(label: String, hint: String? = null, withRow: Boolea
 
 /**
  * One named mix CARD (grid cell) — a compact "mix stamp": a leading lane
- * plate, the mix name + lane teaser, a row of tiny lane composition dots
- * (the mix's lanes previewed as mini tinted plates) and an inline Spin pill.
- * 3-dot → Edit / Delete (M3 popup, never pushes the row). [active] marks the
- * mix currently applied. Uniform 112dp cells so the 2-col grid reads alike.
+ * plate, the mix name + lane teaser, and a row of tiny lane composition
+ * dots (the mix's lanes previewed as mini tinted plates). Tapping the card
+ * spins the mix; long-press or the 3-dot opens Edit / Delete (M3 popup,
+ * never pushes the row). Uniform 112dp cells so the 2-col grid reads alike.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NewMixCard(
     mix: NamedMix,
     categories: List<CurioCategory>,
-    active: Boolean,
     onApply: () -> Unit,
     onMore: () -> Unit,
     onDelete: () -> Unit,
@@ -996,54 +994,36 @@ private fun NewMixCard(
                     }
                 }
             }
-            // ── Footer: lane composition dots + inline Spin pill ─────
+            // ── Footer: lane composition dots (v3xx — the inline Spin pill
+            // is GONE; the whole card is the spin target) ────────────────
             Row(
                 modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    lanes.take(4).forEach { cat ->
-                        val ink = cat.categoryInk()
-                        Box(
-                            modifier = Modifier
-                                .size(18.dp)
-                                .clip(CircleShape)
-                                .background(ink.copy(alpha = 0.16f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CurioIcon(
-                                name = cat.iconGlyph,
-                                contentDescription = null,
-                                size = 10.dp,
-                                tint = ink
-                            )
-                        }
-                    }
-                    if (lanes.size > 4) {
-                        Text(
-                            text = "+${lanes.size - 4}",
-                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(start = 2.dp)
+                lanes.take(4).forEach { cat ->
+                    val ink = cat.categoryInk()
+                    Box(
+                        modifier = Modifier
+                            .size(18.dp)
+                            .clip(CircleShape)
+                            .background(ink.copy(alpha = 0.16f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CurioIcon(
+                            name = cat.iconGlyph,
+                            contentDescription = null,
+                            size = 10.dp,
+                            tint = ink
                         )
                     }
                 }
-                Spacer(Modifier.weight(1f))
-                Surface(
-                    onClick = onApply,
-                    shape = RoundedCornerShape(50),
-                    color = if (active) MaterialTheme.colorScheme.secondaryContainer
-                            else MaterialTheme.colorScheme.surfaceContainerHighest
-                ) {
+                if (lanes.size > 4) {
                     Text(
-                        if (active) "Spinning" else "Spin",
+                        text = "+${lanes.size - 4}",
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                        color = if (active) MaterialTheme.colorScheme.onSecondaryContainer
-                                else MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 2.dp)
                     )
                 }
             }
@@ -1076,6 +1056,10 @@ fun NewPickerTile(
     // content. Idle = the cream-lift neutral (light mode stays creamy).
     val catAccent = category.themedAccent()
     val catInk = category.onAccent()
+    // v3xx — DARK mode draws NO tile border: outlineVariant is a pale cream
+    // that reads as a whitish ring on the near-black tiles (user call).
+    // Selection still reads through the solid tint fill + check.
+    val dark = isCurioDarkTheme()
     val fill = if (selected) catAccent else newPickerIdleFill()
     val iconTint = if (selected) catInk else MaterialTheme.colorScheme.onSurfaceVariant
     val labelColor = if (selected) catInk else MaterialTheme.colorScheme.onSurface
@@ -1100,7 +1084,7 @@ fun NewPickerTile(
                 .fillMaxSize()
                 // Selection ring rides the accent's own ink.
                 .border(
-                    width = if (selected) 1.5.dp else if (pinned) 1.5.dp else 0.dp,
+                    width = if (!dark && (selected || pinned)) 1.5.dp else 0.dp,
                     color = if (selected) catInk.copy(alpha = 0.5f)
                             else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
                     shape = shape
@@ -1381,7 +1365,9 @@ private fun AddSuggestionTile(onClick: () -> Unit, modifier: Modifier = Modifier
             modifier = Modifier
                 .fillMaxSize()
                 .border(
-                    width = 1.5.dp,
+                    // v3xx — light-mode only: in dark the pale cream
+                    // outlineVariant reads as a whitish ring (user call).
+                    width = if (!isCurioDarkTheme()) 1.5.dp else 0.dp,
                     color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f),
                     shape = shape
                 ),

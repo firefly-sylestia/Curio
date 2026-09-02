@@ -55,3 +55,34 @@ Delivered a code-verified UX audit (dead code, dead tap, pager default-page trap
 
 Verification: brace/paren/bracket balance OK on all 9 touched files; scope check (openLightbox + call site both in SaveCaptureScreen); imageUris types confirmed `List<String>` (null-guards compile); seam read after SpinScreen range deletion; no compile/build run (forbidden — CI validates on push). Deletions done as verified line-range removals (not sed insertion).
 - [x] Commit & push (lightbox + dead-code cleanup).
+
+### Follow-up (this turn): liquid-glass theme reveal + mix-card pill + dark-mode borders
+
+User: "in liquid glass toggle on, switching between theme doesn't play that transition animation; also in the new picker your mixes remove the spin and spinning pill; in dark mode remove that weird white border around category options, in both page 1 and 2."
+
+- **Theme reveal with Liquid glass ON** — root cause: `startTransition`'s first capture path
+  (`captureLayer.record { drawContent() }` → `GraphicsLayer.toImageBitmap`) re-invokes the
+  whole Compose draw chain every frame, nested inside the kyant `layerBackdrop` record pass;
+  over the glass backdrop the readback came back blank on some devices → `isBlank()` guard →
+  instant flip (no animation). Fix: NEW `windowFrame()` via `PixelCopy.request(window, bitmap,
+  listener, mainHandler)` runs FIRST (API 26+ gate; gated on O, glass runs on 31+) — it copies
+  the actual hardware-composited window pixels (glass blur preserved) without replaying Compose
+  draw. Fallbacks unchanged (layer → view → instant). Verified against AOSP
+  `AndroidGraphicsLayer.android.kt` snapshot dispatch (V28 hardware path) and the kyant
+  1.0.6 `LayerBackdropModifier.kt` record semantics from the repo's KMP mirror.
+- **Your mixes Spin/Spinning pill removed** — `NewMixCard` footer drops the inline Spin pill
+  (both "Spin" idle and "Spinning" active states); tapping the card remains the spin target;
+  the now-unused `active` param removed from the signature and the call site (its
+  `mix.laneIds == deckIds` expression dropped; `deckIds` still used elsewhere).
+- **Dark-mode white borders** — dark scheme `outlineVariant` = cream `EDE7DC` @10%, so the
+  1.5dp rings read as whitish edges; `NewPickerTile` (pinned/selected ring) and
+  `AddSuggestionTile` (+ Add tile) now draw borders in LIGHT mode only (`!isCurioDarkTheme()`
+  gate). Selection still reads via the solid category-tint fill + check (classic style intact).
+- Docs: changelog 20260921 updated (mix-stamp bullet amended + 2 new FIX bullets); app/AGENTS.md
+  v3xx10 entry added.
+
+Verification: git diff reviewed hunk-by-hunk (picker + transition); brace balance sanity via
+naive counter is unreliable on these files (nested `"${...}"` strings fool it — baseline reads
+"unbalanced" too), so correctness was verified by diff review instead; imports verified
+(`PixelCopy`, `Build`, `Handler`, `Looper`, `Activity`, `suspendCancellableCoroutine`,
+`runCatching` is stdlib); no compile/build run (forbidden — CI validates on push).

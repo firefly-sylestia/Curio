@@ -1,4 +1,6 @@
-ADD: Your-mixes cards redesigned as compact "mix stamps" — a leading lane icon, the mix name + lane list, tiny tinted lane-composition dots previewing the mix, and an inline Spin pill (no more tall empty slabs).
+ADD: Your-mixes cards redesigned as compact "mix stamps" — a leading lane icon, the mix name + lane list and tiny tinted lane-composition dots previewing the mix; tapping a card spins it (the separate inline Spin pill is dropped).
+FIX: Theme switching keeps its circular reveal when Liquid glass is ON — the frozen frame is now captured from the actual rendered window (PixelCopy) instead of re-rendering the Compose scene, which read back blank over the glass backdrop on some devices and skipped the animation.
+FIX: The pale whitish ring borders around category tiles are gone in dark mode — the outline strokes now draw in light mode only (picker pages 1 and 2).
 ADD: The "hold for options" hint text is gone from the Pinned section and the pinned rows — holding still works.
 FIX: Tapping an attached image on the save page (Reel Notes, Field Notes, Journal, Open Notebook) now opens it full-screen with pinch-to-zoom — the image thumbs used to do nothing when tapped.
 ADD: Category picker page 1 is rebuilt as a Curio / Knowledge / Mix mode picker — the Science / Entertainment preset chips are gone, and the page starts CLEAN every time: tap a lane to open it, and tap-and-hold is the only way into mixing, so holding now selects exactly ONE lane (the old page silently pre-ticked your previous deck's lanes — the "it auto-selects 2" bug).

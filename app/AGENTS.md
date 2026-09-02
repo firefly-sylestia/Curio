@@ -356,6 +356,25 @@ app/src/main/java/com/curio/app/
     the effective list so removing a default suggestion actually removes
     it (was a no-op against an empty user list); mix save/delete already
     recomposed via `savedMixesState`.
+- **v3xx10 — theme reveal in liquid-glass mode + mix-card Spin pill + dark-mode borders.**
+  User: "in liquid glass toggle on, switching between theme doesn't play that transition
+  animation; also in the new picker your mixes remove the spin and spinning pill; in dark
+  mode remove that weird white border around category options, in both page 1 and 2".
+  (1) **Theme reveal now plays with Liquid glass ON** — `CurioThemeTransitionState.startTransition`
+  captures the REAL window frame FIRST via `PixelCopy` (`windowFrame()` in
+  `ui/theme/ThemeTransition.kt`, API 26+): it reads the hardware-composited pixels
+  (glass blur included) instead of re-running the Compose draw chain. The old first path
+  (`captureLayer.record { drawContent() }` → `GraphicsLayer.toImageBitmap`) re-invoked the
+  whole app draw every frame, NESTED inside the kyant `layerBackdrop` record pass; over the
+  glass backdrop it read back blank on some devices and the reveal silently skipped to the
+  instant flip (the v269 blank guard). Fallback chain unchanged: PixelCopy → layer → view →
+  instant. (2) **Your-mixes Spin/Spinning pill removed** — `NewMixCard` drops the inline
+  pill; the whole card is the spin target (tap applies the mix); the now-unused `active`
+  param and its call-site expression removed. (3) **Dark-mode tile borders dropped** —
+  `outlineVariant` in the dark scheme is a pale cream (`EDE7DC` @10%) and the 1.5dp rings
+  read as whitish edges on the near-black tiles; `NewPickerTile` (idle/pinned/selected ring)
+  and `AddSuggestionTile` now draw their border in LIGHT mode only (selection still reads
+  via the solid category-tint fill + check — classic tint style untouched).
 - **v3xx9 — capture image thumbs open the Lightbox + dead-picker cleanup.**
   Audit follow-up ("fix 1 and 2"): (1) **Dead image tap fixed** —
   `ImageThumb` taps in ReelNotes / Marginalia / FieldNotes (hosted by
