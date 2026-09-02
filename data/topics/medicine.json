@@ -17,7 +17,8 @@
       "targetName": "How germ theory changed medicine",
       "durationMinutes": 8,
       "instruction": "Learn how Pasteur's swan-neck flask experiment disproved spontaneous generation, then explain why handwashing took decades to become standard practice."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-antibiotics",
@@ -37,7 +38,8 @@
       "targetName": "The story of penicillin and antibiotic resistance",
       "durationMinutes": 8,
       "instruction": "Learn how Fleming discovered penicillin and how mass production saved soldiers in WWII, then explain why antibiotic resistance is called a 'silent pandemic.'"
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-vaccination",
@@ -57,7 +59,8 @@
       "targetName": "How vaccines work",
       "durationMinutes": 8,
       "instruction": "Learn the difference between live attenuated, inactivated, subunit, and mRNA vaccines, then explain how herd immunity protects unvaccinated people."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-dna",
@@ -77,7 +80,8 @@
       "targetName": "The discovery of DNA's structure",
       "durationMinutes": 10,
       "instruction": "Learn about Rosalind Franklin's Photo 51 and how it revealed the helical structure, then explain why the story of DNA's discovery is also a story about scientific credit."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-anaesthesia",
@@ -97,7 +101,8 @@
       "targetName": "The ether demonstration of 1846",
       "durationMinutes": 8,
       "instruction": "Learn about the 'Ether Dome' demonstration, then explain how general, regional, and local anaesthesia work differently in the body."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-x-ray",
@@ -117,7 +122,8 @@
       "targetName": "How X-rays changed medicine",
       "durationMinutes": 7,
       "instruction": "Learn about Röntgen's discovery and the first X-ray image, then explain how modern CT scans build on the same principle."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-blood-types",
@@ -137,7 +143,8 @@
       "targetName": "The ABO blood group system",
       "durationMinutes": 7,
       "instruction": "Learn why blood types matter for transfusions and organ donation, then explain why type O-negative is called the 'universal donor.'"
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-stethoscope",
@@ -157,7 +164,8 @@
       "targetName": "How the stethoscope transformed diagnosis",
       "durationMinutes": 6,
       "instruction": "Learn about Laennec's invention and how auscultation (listening to body sounds) works, then explain why the stethoscope remains essential despite modern imaging."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-insulin",
@@ -177,7 +185,8 @@
       "targetName": "The discovery of insulin",
       "durationMinutes": 8,
       "instruction": "Learn how Banting and Best isolated insulin, then explain why insulin's price controversy matters for millions of diabetics worldwide."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-pen-cycle",
@@ -197,7 +206,8 @@
       "targetName": "How Lister pioneered antiseptic surgery",
       "durationMinutes": 7,
       "instruction": "Learn about Lister's carbolic acid spray technique, then explain why surgical mortality dropped from 45% to 15% after antisepsis was adopted."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-immune-system",
@@ -217,7 +227,8 @@
       "targetName": "Innate vs adaptive immunity",
       "durationMinutes": 8,
       "instruction": "Learn the difference between innate immunity (fast, nonspecific) and adaptive immunity (slow, specific, with memory), then explain why you get chickenpox only once."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-cardiovascular",
@@ -237,7 +248,8 @@
       "targetName": "How the heart and blood vessels work",
       "durationMinutes": 8,
       "instruction": "Learn about the cardiac cycle (systole and diastole), then explain how blood pressure is measured and what the numbers mean."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-nervous-system",
@@ -257,7 +269,8 @@
       "targetName": "How neurons communicate",
       "durationMinutes": 8,
       "instruction": "Learn about action potentials, neurotransmitters, and synapses, then explain how a thought becomes a movement."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-gut-microbiome",
@@ -277,7 +290,8 @@
       "targetName": "How gut bacteria affect health",
       "durationMinutes": 8,
       "instruction": "Learn about the gut-brain axis and how microbiome diversity affects immunity, then find one dietary change that improves microbiome health."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-bone-structure",
@@ -297,7 +311,8 @@
       "targetName": "How bones heal and remodel",
       "durationMinutes": 7,
       "instruction": "Learn about the bone remodeling cycle, then explain why osteoporosis is called a 'silent disease' and who's most at risk."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-kidney-function",
@@ -317,7 +332,8 @@
       "targetName": "How kidneys filter blood",
       "durationMinutes": 7,
       "instruction": "Learn about nephrons (the kidney's filtering units), then explain why kidney disease is often called a 'silent killer.'"
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-cancer-basics",
@@ -337,7 +353,8 @@
       "targetName": "How cancer develops",
       "durationMinutes": 8,
       "instruction": "Learn about oncogenes, tumor suppressors, and metastasis, then explain why cancer becomes more common with age."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-diabetes",
@@ -357,7 +374,8 @@
       "targetName": "Type 1 vs Type 2 diabetes",
       "durationMinutes": 8,
       "instruction": "Learn the difference between Type 1 (autoimmune) and Type 2 (metabolic), then find one lifestyle factor that reduces Type 2 risk."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-heart-disease",
@@ -377,7 +395,8 @@
       "targetName": "How cardiovascular disease develops",
       "durationMinutes": 8,
       "instruction": "Learn about atherosclerosis (plaque buildup), then find three modifiable risk factors and one that's genetic."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-alzheimers",
@@ -397,7 +416,8 @@
       "targetName": "How Alzheimer's destroys the brain",
       "durationMinutes": 8,
       "instruction": "Learn about amyloid-beta plaques and tau protein, then explain why early diagnosis is so important and why drug development has been so difficult."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-malaria",
@@ -417,7 +437,8 @@
       "targetName": "How malaria parasites evade the immune system",
       "durationMinutes": 8,
       "instruction": "Learn about Plasmodium falciparum's life cycle, then explain why sickle cell trait provides malaria resistance."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-antibiotic-resistance",
@@ -437,7 +458,8 @@
       "targetName": "How antibiotic resistance develops",
       "durationMinutes": 7,
       "instruction": "Learn about natural selection in bacteria, then find one action individuals can take to slow resistance."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-autoimmune",
@@ -457,7 +479,8 @@
       "targetName": "Why the immune system turns on itself",
       "durationMinutes": 8,
       "instruction": "Learn about molecular mimicry and loss of self-tolerance, then find one autoimmune condition and its most common symptoms."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-mental-health",
@@ -477,7 +500,8 @@
       "targetName": "What depression actually is",
       "durationMinutes": 7,
       "instruction": "Learn about the serotonin hypothesis and its limitations, then explain why depression treatment often combines medication with therapy."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-antivirals",
@@ -497,7 +521,8 @@
       "targetName": "How antiviral drugs work",
       "durationMinutes": 7,
       "instruction": "Learn how antivirals target viral replication (entry inhibitors, polymerase inhibitors, protease inhibitors), then find one antiviral that changed public health."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-chemotherapy",
@@ -517,7 +542,8 @@
       "targetName": "How chemotherapy works and its side effects",
       "durationMinutes": 8,
       "instruction": "Learn why chemotherapy targets fast-dividing cells, then explain why newer targeted therapies cause fewer side effects."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-organ-transplant",
@@ -537,7 +563,8 @@
       "targetName": "How organ transplants work",
       "durationMinutes": 8,
       "instruction": "Learn about tissue matching, immunosuppression, and organ donation systems, then explain why xenotransplantation (animal-to-human) is being pursued."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-mri",
@@ -557,7 +584,8 @@
       "targetName": "How MRI works",
       "durationMinutes": 8,
       "instruction": "Learn about hydrogen atoms in magnetic fields and radiofrequency pulses, then explain why MRI is better than CT for soft tissue imaging."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-ct-scan",
@@ -577,7 +605,8 @@
       "targetName": "How CT scans create 3D images",
       "durationMinutes": 7,
       "instruction": "Learn about the Radon transform and how CT reconstruction works, then explain why CT is preferred for trauma and MRI for neurological conditions."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-physical-therapy",
@@ -597,7 +626,8 @@
       "targetName": "How physical therapy works",
       "durationMinutes": 6,
       "instruction": "Learn about therapeutic exercise principles (progressive overload, specificity), then find one condition where physical therapy is first-line treatment."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-clinical-trials",
@@ -617,7 +647,8 @@
       "targetName": "How clinical trials work",
       "durationMinutes": 8,
       "instruction": "Learn the four phases of clinical trials and why randomized controlled trials are the gold standard, then find one drug that failed Phase III trials."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-who",
@@ -637,7 +668,8 @@
       "targetName": "What WHO does and how it's funded",
       "durationMinutes": 7,
       "instruction": "Learn about WHO's core functions and funding structure, then evaluate its COVID-19 response."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-hippocratic-oath",
@@ -657,7 +689,8 @@
       "targetName": "The Hippocratic Oath and medical ethics",
       "durationMinutes": 8,
       "instruction": "Read both the original Hippocratic Oath and a modern version (Declaration of Geneva), then compare their priorities."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-public-health",
@@ -677,7 +710,8 @@
       "targetName": "The greatest public health achievements",
       "durationMinutes": 8,
       "instruction": "Learn about the CDC's 'Ten Great Public Health Achievements,' then find one public health intervention that's underfunded today."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-evidence-based",
@@ -697,7 +731,8 @@
       "targetName": "How evidence-based medicine works",
       "durationMinutes": 7,
       "instruction": "Learn about systematic reviews and meta-analyses, then explain why EBM sometimes conflicts with clinical experience."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-precision-medicine",
@@ -717,7 +752,8 @@
       "targetName": "How precision medicine personalizes treatment",
       "durationMinutes": 8,
       "instruction": "Learn about pharmacogenomics (how genes affect drug response), then find one example where genetic testing changes treatment decisions."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-telemedicine",
@@ -737,7 +773,8 @@
       "targetName": "The rise of telemedicine",
       "durationMinutes": 6,
       "instruction": "Learn about the advantages and limitations of telemedicine, then find one telehealth service that's improving access in underserved areas."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-surgeon-general",
@@ -757,7 +794,8 @@
       "targetName": "How the tobacco report changed public health",
       "durationMinutes": 8,
       "instruction": "Learn about the 1964 Surgeon General's report and the tobacco industry's response, then explain why it's a model for evidence-based policy."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-florence-nightingale",
@@ -777,7 +815,8 @@
       "targetName": "How Nightingale used statistics to save lives",
       "durationMinutes": 8,
       "instruction": "Learn about Nightingale's Coxcomb diagrams and her Crimean War statistics, then explain why she's considered the founder of modern nursing."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-jonas-salk",
@@ -797,7 +836,8 @@
       "targetName": "Salk vs Sabin: the polio vaccine debate",
       "durationMinutes": 8,
       "instruction": "Learn about Salk's killed vaccine vs Sabin's oral vaccine, then explain why most countries now use Salk's approach."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-pasteur",
@@ -817,7 +857,8 @@
       "targetName": "Pasteur's contributions to medicine",
       "durationMinutes": 8,
       "instruction": "Learn about the swan-neck flask experiment, pasteurization, and the rabies vaccine, then explain why Pasteur is considered the father of microbiology."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-william-osler",
@@ -837,7 +878,8 @@
       "targetName": "How Osler modernized medical education",
       "durationMinutes": 7,
       "instruction": "Learn about Osler's clinical teaching methods, then explain why he insisted that 'the best teaching is that taught by the patient.'"
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-covid-19",
@@ -857,7 +899,8 @@
       "targetName": "How mRNA vaccines were developed so fast",
       "durationMinutes": 8,
       "instruction": "Learn about the mRNA technology platform that enabled rapid vaccine development, then explain why mRNA vaccines represent a paradigm shift in immunology."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-radiation-therapy",
@@ -877,7 +920,8 @@
       "targetName": "How radiation therapy targets cancer",
       "durationMinutes": 7,
       "instruction": "Learn the difference between external beam radiation and brachytherapy, then explain why fractionated dosing (small doses over weeks) is more effective than one big dose."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-prosthetics",
@@ -897,7 +941,8 @@
       "targetName": "The future of prosthetics",
       "durationMinutes": 7,
       "instruction": "Learn about myoelectric prosthetics and osseointegration, then find one breakthrough in bionic limbs that's changing lives."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-palliative-care",
@@ -917,7 +962,8 @@
       "targetName": "What palliative care actually does",
       "durationMinutes": 6,
       "instruction": "Learn the difference between palliative care and hospice, then explain why palliative care is increasingly offered alongside curative treatment."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-genetic-testing",
@@ -937,7 +983,8 @@
       "targetName": "The promises and pitfalls of genetic testing",
       "durationMinutes": 8,
       "instruction": "Learn about BRCA testing for breast cancer risk, then debate whether genetic information should be shared with insurance companies."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-scrub-in",
@@ -957,7 +1004,8 @@
       "targetName": "Why surgical sterility matters",
       "durationMinutes": 6,
       "instruction": "Learn the principles of surgical asepsis, then explain how a single breach in technique can cause a surgical site infection."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-microbiome-medicine",
@@ -977,7 +1025,8 @@
       "targetName": "How FMT works",
       "durationMinutes": 7,
       "instruction": "Learn about C. difficile infection and how FMT restores healthy gut bacteria, then explain why the FDA treats FMT as a drug."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-immunotherapy",
@@ -997,7 +1046,8 @@
       "targetName": "How immunotherapy works against cancer",
       "durationMinutes": 8,
       "instruction": "Learn about PD-1/PD-L1 checkpoint inhibitors and CAR-T cell therapy, then explain why immunotherapy can cause autoimmune side effects."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-bmj",
@@ -1017,7 +1067,8 @@
       "targetName": "How medical knowledge is published",
       "durationMinutes": 7,
       "instruction": "Learn about peer review, preprints, and the replication crisis in medical research, then find one landmark paper that changed medical practice."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-reproductive-health",
@@ -1037,7 +1088,8 @@
       "targetName": "The hormonal cycle of reproduction",
       "durationMinutes": 8,
       "instruction": "Learn about the hypothalamic-pituitary-ovarian axis, then explain how hormonal contraceptives work by disrupting this cycle."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-stem-cells",
@@ -1057,7 +1109,8 @@
       "targetName": "Types of stem cells and their potential",
       "durationMinutes": 8,
       "instruction": "Learn the difference between embryonic and adult stem cells, then find one clinical trial using stem cells and its current status."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-epidemiology",
@@ -1077,7 +1130,8 @@
       "targetName": "How epidemiology works",
       "durationMinutes": 7,
       "instruction": "Learn about cohort studies, case-control studies, and relative risk, then find one epidemiological study that changed public health policy."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-tropical-medicine",
@@ -1097,7 +1151,8 @@
       "targetName": "The neglected tropical diseases",
       "durationMinutes": 8,
       "instruction": "Learn about the WHO's list of neglected tropical diseases, then explain why they persist despite being treatable."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-brain-plasticity",
@@ -1117,7 +1172,8 @@
       "targetName": "How the brain changes itself",
       "durationMinutes": 8,
       "instruction": "Learn about London taxi driver studies and stroke rehabilitation, then explain why neuroplasticity declines with age."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-chrono-pharmacology",
@@ -1137,7 +1193,8 @@
       "targetName": "How timing affects drug effectiveness",
       "durationMinutes": 7,
       "instruction": "Learn about circadian rhythms and drug metabolism, then find one medication where timing significantly affects its efficacy."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-pandemic-preparedness",
@@ -1157,7 +1214,8 @@
       "targetName": "How countries prepare for pandemics",
       "durationMinutes": 8,
       "instruction": "Learn about strategic national stockpiles and disease surveillance networks, then find one lesson from COVID that's being applied to future preparedness."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-smallpox-eradication",
@@ -1177,7 +1235,8 @@
       "targetName": "How smallpox was eradicated",
       "durationMinutes": 8,
       "instruction": "Learn about the ring vaccination strategy that finally eradicated smallpox, then find one lesson from that campaign being applied to polio eradication today."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-mrna-vaccines",
@@ -1197,7 +1256,8 @@
       "targetName": "How mRNA vaccines work",
       "durationMinutes": 8,
       "instruction": "Learn about lipid nanoparticle delivery of mRNA, then find one disease beyond COVID where mRNA vaccines are now in clinical trials."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-crispr",
@@ -1217,7 +1277,8 @@
       "targetName": "CRISPR gene editing explained",
       "durationMinutes": 8,
       "instruction": "Learn how CRISPR-Cas9 works as a bacterial immune defence, then find one ethical debate about using it on human embryos."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-human-genome-project",
@@ -1237,7 +1298,8 @@
       "targetName": "The Human Genome Project and its impact",
       "durationMinutes": 8,
       "instruction": "Learn what the Human Genome Project discovered, then find one medical breakthrough that was only possible because of it."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-circulation-harvey",
@@ -1278,7 +1340,8 @@
       "targetName": "From willow bark to aspirin",
       "durationMinutes": 7,
       "instruction": "Learn about the 4,000-year journey from willow bark to acetylsalicylic acid, then find one surprising modern use for aspirin beyond pain relief."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-lymphatic-system",
@@ -1298,7 +1361,8 @@
       "targetName": "The lymphatic system",
       "durationMinutes": 7,
       "instruction": "Learn how lymph nodes filter pathogens, then find one condition caused by a blocked lymphatic system."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-endocrine-system",
@@ -1318,7 +1382,8 @@
       "targetName": "How the endocrine system works",
       "durationMinutes": 7,
       "instruction": "Learn about the hypothalamus–pituitary axis, then find one disease caused by hormone imbalance that most people have heard of."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-liver",
@@ -1338,7 +1403,8 @@
       "targetName": "Liver functions and regeneration",
       "durationMinutes": 7,
       "instruction": "Learn about liver regeneration, then find one lifestyle factor that damages the liver faster than it can repair itself."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-respiratory-system",
@@ -1358,7 +1424,8 @@
       "targetName": "How gas exchange works in the lungs",
       "durationMinutes": 6,
       "instruction": "Learn how oxygen crosses the alveolar membrane, then find one lung disease that destroys alveoli and explain how it limits breathing."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-skin",
@@ -1378,7 +1445,8 @@
       "targetName": "The skin as an immune organ",
       "durationMinutes": 6,
       "instruction": "Learn about Langerhans cells in the skin, then find one way the skin microbiome protects against infection."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-eye-vision",
@@ -1398,7 +1466,8 @@
       "targetName": "How the eye processes light",
       "durationMinutes": 7,
       "instruction": "Learn about rod and cone cells, then find one reason colour-blind people see the world differently than you think."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-ear-hearing",
@@ -1418,7 +1487,8 @@
       "targetName": "How the ear converts sound to signal",
       "durationMinutes": 7,
       "instruction": "Learn about cochlear hair cells, then find one everyday noise level that can permanently damage them."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-pain-science",
@@ -1438,7 +1508,8 @@
       "targetName": "How pain is created in the brain",
       "durationMinutes": 7,
       "instruction": "Learn about the gate control theory of pain, then find one example where expectation changed how much pain someone felt."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-migraine",
@@ -1458,7 +1529,8 @@
       "targetName": "What a migraine actually is",
       "durationMinutes": 7,
       "instruction": "Learn about cortical spreading depression, then find one new class of migraine drugs that targets the CGRP pathway."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-influenza",
@@ -1478,7 +1550,8 @@
       "targetName": "How influenza evades immunity",
       "durationMinutes": 7,
       "instruction": "Learn about antigenic drift and shift, then find one reason the 1918 flu was so deadly compared to seasonal flu."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-tuberculosis",
@@ -1498,7 +1571,8 @@
       "targetName": "Why TB is so hard to beat",
       "durationMinutes": 7,
       "instruction": "Learn about granuloma formation, then find one reason antibiotic-resistant TB is a growing global threat."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-hiv-aids",
@@ -1518,7 +1592,8 @@
       "targetName": "How HIV evades the immune system",
       "durationMinutes": 8,
       "instruction": "Learn about HIV's reverse transcriptase and high mutation rate, then find one case where someone appears naturally resistant to HIV."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-cholera",
@@ -1664,7 +1739,8 @@
       "targetName": "How the Black Death changed medicine",
       "durationMinutes": 8,
       "instruction": "Learn about the quarantine concept's origin in Ragusa (1377), then find one lasting change the Black Death caused in European medicine."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-bloodletting",
@@ -1684,7 +1760,8 @@
       "targetName": "Why bloodletting lasted so long",
       "durationMinutes": 7,
       "instruction": "Learn about Galen's humoral theory, then find one controlled trial that proved bloodletting does more harm than good."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-medical-leeches",
@@ -1704,7 +1781,8 @@
       "targetName": "How leeches and maggots are used in modern medicine",
       "durationMinutes": 6,
       "instruction": "Learn about Hirudo medicinalis in microsurgery, then find one condition where maggot debridement therapy outperforms surgery."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-blood-transfusion",
@@ -1724,7 +1802,8 @@
       "targetName": "Blood types and transfusion",
       "durationMinutes": 7,
       "instruction": "Learn about blood type compatibility, then find one reason Type O-negative blood is called the universal donor."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-organ-donation",
@@ -1744,7 +1823,8 @@
       "targetName": "How organ transplantation works",
       "durationMinutes": 7,
       "instruction": "Learn about tissue matching and immunosuppression, then find one experimental approach to growing transplantable organs in the lab."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-ivf",
@@ -1764,7 +1844,8 @@
       "targetName": "How IVF works",
       "durationMinutes": 7,
       "instruction": "Learn about the IVF cycle, then find one reason IVF success rates vary by age."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-contraceptive-pill",
@@ -1784,7 +1865,8 @@
       "targetName": "How the pill prevents pregnancy",
       "durationMinutes": 7,
       "instruction": "Learn about how synthetic hormones suppress ovulation, then find one social change that researchers attribute to the pill's introduction."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-gene-therapy",
@@ -1804,7 +1886,8 @@
       "targetName": "Gene therapy's long road to success",
       "durationMinutes": 8,
       "instruction": "Learn about the Jesse Gelsinger tragedy (1999) and how it set gene therapy back a decade, then find one condition gene therapy can now treat."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-sleep-medicine",
@@ -1824,7 +1907,8 @@
       "targetName": "Why sleep matters for health",
       "durationMinutes": 7,
       "instruction": "Learn about the glymphatic system, then find one sleep habit that measurably improves cognitive performance."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "medicine-emergency-medicine",
@@ -1844,7 +1928,8 @@
       "targetName": "The golden hour in trauma care",
       "durationMinutes": 7,
       "instruction": "Learn about the ATLS (Advanced Trauma Life Support) protocol, then find one innovation that shortened emergency response times."
-    }
+    },
+    "byline": ""
   },
   {
     "name": "Penicillin Discovery (1928)",
@@ -1858,8 +1943,13 @@
     ],
     "id": "med-penicillin-discovery-1928",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Penicillin Discovery (1928) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Penicillin Discovery (1928) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1874,8 +1964,13 @@
     ],
     "id": "med-crispr-gene-editing-2012",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "CRISPR Gene Editing (2012) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of CRISPR Gene Editing (2012) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1890,8 +1985,13 @@
     ],
     "id": "med-vaccination-jenner-1796",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Vaccination (Jenner, 1796) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Vaccination (Jenner, 1796) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1906,8 +2006,13 @@
     ],
     "id": "med-dna-double-helix-1953",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "DNA Double Helix (1953) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of DNA Double Helix (1953) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1922,8 +2027,13 @@
     ],
     "id": "med-the-human-genome-project-2003",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Human Genome Project (2003) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Human Genome Project (2003) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1938,8 +2048,13 @@
     ],
     "id": "med-antiseptic-surgery-lister-1867",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Antiseptic Surgery (Lister, 1867) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Antiseptic Surgery (Lister, 1867) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1954,8 +2069,13 @@
     ],
     "id": "med-anesthesia-morton-1846",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Anesthesia (Morton, 1846) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Anesthesia (Morton, 1846) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1970,8 +2090,13 @@
     ],
     "id": "med-the-placebo-effect",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Placebo Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Placebo Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1986,8 +2111,13 @@
     ],
     "id": "med-germ-theory-pasteur-1860s",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Germ Theory (Pasteur, 1860s) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Germ Theory (Pasteur, 1860s) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2002,8 +2132,13 @@
     ],
     "id": "med-organ-transplantation-1954",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Organ Transplantation (1954) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Organ Transplantation (1954) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2018,8 +2153,13 @@
     ],
     "id": "med-the-discovery-of-insulin-1921",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Discovery of Insulin (1921) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Discovery of Insulin (1921) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2034,8 +2174,13 @@
     ],
     "id": "med-x-ray-discovery-röntgen-1895",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "X-Ray Discovery (Röntgen, 1895) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of X-Ray Discovery (Röntgen, 1895) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2050,8 +2195,13 @@
     ],
     "id": "med-the-hippocratic-oath-400-bce",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Hippocratic Oath (400 BCE) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Hippocratic Oath (400 BCE) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2066,8 +2216,13 @@
     ],
     "id": "med-mri-imaging-1977",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "MRI Imaging (1977) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of MRI Imaging (1977) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2082,8 +2237,13 @@
     ],
     "id": "med-the-discovery-of-vitamin-c-1932",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Discovery of Vitamin C (1932) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Discovery of Vitamin C (1932) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2098,8 +2258,13 @@
     ],
     "id": "med-stem-cell-research-1998",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Stem Cell Research (1998) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Stem Cell Research (1998) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2114,8 +2279,13 @@
     ],
     "id": "med-the-discovery-of-blood-types-1901",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Discovery of Blood Types (1901) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Discovery of Blood Types (1901) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2130,8 +2300,13 @@
     ],
     "id": "med-microbiology-leeuwenhoek-1670s",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Microbiology (Leeuwenhoek, 1670s) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Microbiology (Leeuwenhoek, 1670s) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2146,8 +2321,13 @@
     ],
     "id": "med-epidemiology-snow-1854",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Epidemiology (Snow, 1854) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Epidemiology (Snow, 1854) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2162,8 +2342,13 @@
     ],
     "id": "med-antibiotics-resistance-2010s",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Antibiotics Resistance (2010s) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Antibiotics Resistance (2010s) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2178,8 +2363,13 @@
     ],
     "id": "med-the-discovery-of-h-pylori-1982",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Discovery of H. pylori (1982) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Discovery of H. pylori (1982) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2194,8 +2384,13 @@
     ],
     "id": "med-deep-brain-stimulation-1997",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Deep Brain Stimulation (1997) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Deep Brain Stimulation (1997) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2210,8 +2405,13 @@
     ],
     "id": "med-the-discovery-of-platelets-1882",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Discovery of Platelets (1882) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Discovery of Platelets (1882) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2226,8 +2426,13 @@
     ],
     "id": "med-magnetic-resonance-spectroscopy",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Magnetic Resonance Spectroscopy end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Magnetic Resonance Spectroscopy — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2242,8 +2447,13 @@
     ],
     "id": "med-the-discovery-of-platelet-rich-plasma-prp",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Discovery of Platelet-Rich Plasma (PRP) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Discovery of Platelet-Rich Plasma (PRP) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2258,8 +2468,13 @@
     ],
     "id": "med-immunotherapy-for-cancer-2011",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Immunotherapy for Cancer (2011) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Immunotherapy for Cancer (2011) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2274,8 +2489,13 @@
     ],
     "id": "med-the-discovery-of-radioactivity-becquerel-1896",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Discovery of Radioactivity (Becquerel, 1896) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Discovery of Radioactivity (Becquerel, 1896) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2290,8 +2510,13 @@
     ],
     "id": "med-ct-scanning-1971",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "CT Scanning (1971) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of CT Scanning (1971) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2306,8 +2531,13 @@
     ],
     "id": "med-the-discovery-of-prostaglandins-1960s",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Discovery of Prostaglandins (1960s) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Discovery of Prostaglandins (1960s) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2322,8 +2552,13 @@
     ],
     "id": "med-telemedicine-1960s-2020s",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Telemedicine (1960s-2020s) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Telemedicine (1960s-2020s) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2338,398 +2573,468 @@
     ],
     "id": "med-the-discovery-of-helicobacter-pylori-1982",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Discovery of Helicobacter pylori (1982) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Discovery of Helicobacter pylori (1982) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
     "id": "medicine-mrna-vaccines-1",
     "name": "mRNA Vaccines",
     "category": "MEDICINE",
-    "teaser": "The technology behind COVID-19 vaccines, using messenger RNA to instruct cells to make spike proteins. Pioneered by Katalin Karikó and Drew Weissman, who won the 2023 Nobel Prize. BioNTech and Moderna developed theirs in just 11 months."
+    "teaser": "The technology behind COVID-19 vaccines, using messenger RNA to instruct cells to make spike proteins. Pioneered by Katalin Karikó and Drew Weissman, who won the 2023 Nobel Prize. BioNTech and Moderna developed theirs in just 11 months.",
+    "byline": ""
   },
   {
     "id": "medicine-crispr-gene-editing",
     "name": "CRISPR Gene Editing",
     "category": "MEDICINE",
-    "teaser": "A revolutionary tool that allows scientists to cut and edit DNA with precision. Derived from bacterial immune systems, CRISPR-Cas9 was developed by Jennifer Doudna and Emmanuelle Charpentier. It earned the 2020 Nobel Prize in Chemistry."
+    "teaser": "A revolutionary tool that allows scientists to cut and edit DNA with precision. Derived from bacterial immune systems, CRISPR-Cas9 was developed by Jennifer Doudna and Emmanuelle Charpentier. It earned the 2020 Nobel Prize in Chemistry.",
+    "byline": ""
   },
   {
     "id": "medicine-immunotherapy-1",
     "name": "Immunotherapy",
     "category": "MEDICINE",
-    "teaser": "A cancer treatment that harnesses the body's own immune system to fight tumors. CAR-T cell therapy reprograms a patient's T-cells to attack cancer. Checkpoint inhibitors like Keytruda have transformed melanoma survival rates."
+    "teaser": "A cancer treatment that harnesses the body's own immune system to fight tumors. CAR-T cell therapy reprograms a patient's T-cells to attack cancer. Checkpoint inhibitors like Keytruda have transformed melanoma survival rates.",
+    "byline": ""
   },
   {
     "id": "medicine-microbiome-medicine-1",
     "name": "Microbiome Medicine",
     "category": "MEDICINE",
-    "teaser": "The study of trillions of bacteria living in the human gut and their role in health. The gut contains 100 trillion microorganisms weighing about 2kg. Microbiome transplants have cured Clostridioides difficile infections with 90% success."
+    "teaser": "The study of trillions of bacteria living in the human gut and their role in health. The gut contains 100 trillion microorganisms weighing about 2kg. Microbiome transplants have cured Clostridioides difficile infections with 90% success.",
+    "byline": ""
   },
   {
     "id": "medicine-telemedicine-1",
     "name": "Telemedicine",
     "category": "MEDICINE",
-    "teaser": "Remote diagnosis and treatment of patients using telecommunications technology. Usage surged 3,800% during COVID-19. Medicare claims for telehealth visits rose from 840,000 in 2019 to 52.7 million in 2020."
+    "teaser": "Remote diagnosis and treatment of patients using telecommunications technology. Usage surged 3,800% during COVID-19. Medicare claims for telehealth visits rose from 840,000 in 2019 to 52.7 million in 2020.",
+    "byline": ""
   },
   {
     "id": "medicine-antibiotic-resistance-1",
     "name": "Antibiotic Resistance",
     "category": "MEDICINE",
-    "teaser": "The growing ability of bacteria to survive drugs designed to kill them. The WHO estimates antimicrobial resistance will cause 10 million deaths annually by 2050. MRSA evolved resistance to methicillin within just two years of its introduction in 1960."
+    "teaser": "The growing ability of bacteria to survive drugs designed to kill them. The WHO estimates antimicrobial resistance will cause 10 million deaths annually by 2050. MRSA evolved resistance to methicillin within just two years of its introduction in 1960.",
+    "byline": ""
   },
   {
     "id": "medicine-precision-medicine-1",
     "name": "Precision Medicine",
     "category": "MEDICINE",
-    "teaser": "Tailoring medical treatment to individual genetic profiles rather than one-size-fits-all approaches. The Human Genome Project, completed in 2003 at a cost of $2.7 billion, made this possible. Tumor profiling now guides cancer therapy selection."
+    "teaser": "Tailoring medical treatment to individual genetic profiles rather than one-size-fits-all approaches. The Human Genome Project, completed in 2003 at a cost of $2.7 billion, made this possible. Tumor profiling now guides cancer therapy selection.",
+    "byline": ""
   },
   {
     "id": "medicine-neuroplasticity",
     "name": "Neuroplasticity",
     "category": "MEDICINE",
-    "teaser": "The brain's ability to reorganize itself by forming new neural connections throughout life. London taxi drivers develop enlarged hippocampi from navigating complex streets. Stroke patients can recover lost functions through targeted rehabilitation."
+    "teaser": "The brain's ability to reorganize itself by forming new neural connections throughout life. London taxi drivers develop enlarged hippocampi from navigating complex streets. Stroke patients can recover lost functions through targeted rehabilitation.",
+    "byline": ""
   },
   {
     "id": "medicine-placebo-effect",
     "name": "Placebo Effect",
     "category": "MEDICINE",
-    "teaser": "A measurable improvement in health from an inactive treatment simply because the patient believes it will work. Placebo surgeries for knee osteoarthritis performed as well as real operations in a 2002 study. Expectation triggers real dopamine release."
+    "teaser": "A measurable improvement in health from an inactive treatment simply because the patient believes it will work. Placebo surgeries for knee osteoarthritis performed as well as real operations in a 2002 study. Expectation triggers real dopamine release.",
+    "byline": ""
   },
   {
     "id": "medicine-stem-cell-therapy",
     "name": "Stem Cell Therapy",
     "category": "MEDICINE",
-    "teaser": "Using undifferentiated cells that can develop into any cell type to repair damaged tissues. Induced pluripotent stem cells, created by Shinya Yamanaka in 2006, avoid ethical concerns of embryonic stem cells. Clinical trials treat macular degeneration and spinal cord injuries."
+    "teaser": "Using undifferentiated cells that can develop into any cell type to repair damaged tissues. Induced pluripotent stem cells, created by Shinya Yamanaka in 2006, avoid ethical concerns of embryonic stem cells. Clinical trials treat macular degeneration and spinal cord injuries.",
+    "byline": ""
   },
   {
     "id": "medicine-prosthetics-innovation",
     "name": "Prosthetics Innovation",
     "category": "MEDICINE",
-    "teaser": "Modern artificial limbs with mind-controlled joints and sensory feedback. The LUKE arm, funded by DARPA, allows amputees to feel pressure and temperature. Bionic eyes like the Argus II restore partial vision to retinal disease patients."
+    "teaser": "Modern artificial limbs with mind-controlled joints and sensory feedback. The LUKE arm, funded by DARPA, allows amputees to feel pressure and temperature. Bionic eyes like the Argus II restore partial vision to retinal disease patients.",
+    "byline": ""
   },
   {
     "id": "medicine-mrna-cancer-vaccines",
     "name": "mRNA Cancer Vaccines",
     "category": "MEDICINE",
-    "teaser": "Personalized vaccines created by sequencing a patient's tumor and designing mRNA to train immune cells against unique mutations. BioNTech's individualized neoantigen therapy showed promising results in pancreatic cancer trials in 2023."
+    "teaser": "Personalized vaccines created by sequencing a patient's tumor and designing mRNA to train immune cells against unique mutations. BioNTech's individualized neoantigen therapy showed promising results in pancreatic cancer trials in 2023.",
+    "byline": ""
   },
   {
     "id": "medicine-ai-diagnostics",
     "name": "AI Diagnostics",
     "category": "MEDICINE",
-    "teaser": "Machine learning algorithms that detect diseases from medical images. Google's DeepMind AI diagnosed diabetic retinopathy with 97% accuracy. AI outperformed radiologists in breast cancer screening by reducing false positives by 5.7% in a 2020 study."
+    "teaser": "Machine learning algorithms that detect diseases from medical images. Google's DeepMind AI diagnosed diabetic retinopathy with 97% accuracy. AI outperformed radiologists in breast cancer screening by reducing false positives by 5.7% in a 2020 study.",
+    "byline": ""
   },
   {
     "id": "medicine-organoids",
     "name": "Organoids",
     "category": "MEDICINE",
-    "teaser": "Miniature, simplified versions of organs grown from stem cells in laboratories. Brain organoids can develop basic neural circuits. They enable drug testing without human subjects and have modeled Zika virus effects on developing brains."
+    "teaser": "Miniature, simplified versions of organs grown from stem cells in laboratories. Brain organoids can develop basic neural circuits. They enable drug testing without human subjects and have modeled Zika virus effects on developing brains.",
+    "byline": ""
   },
   {
     "id": "medicine-epigenetics",
     "name": "Epigenetics",
     "category": "MEDICINE",
-    "teaser": "Heritable changes in gene expression without altering the DNA sequence itself. Stress, diet, and toxins can modify gene expression through methylation and histone modification. Holocaust survivors' trauma signatures were found in their grandchildren's DNA."
+    "teaser": "Heritable changes in gene expression without altering the DNA sequence itself. Stress, diet, and toxins can modify gene expression through methylation and histone modification. Holocaust survivors' trauma signatures were found in their grandchildren's DNA.",
+    "byline": ""
   },
   {
     "id": "medicine-bioprinting",
     "name": "Bioprinting",
     "category": "MEDICINE",
-    "teaser": "3D printing living tissue layer by layer using bioinks loaded with cells. Researchers have printed functional liver tissue, skin grafts, and vascular networks. The ultimate goal is printing transplantable organs to eliminate donor waiting lists."
+    "teaser": "3D printing living tissue layer by layer using bioinks loaded with cells. Researchers have printed functional liver tissue, skin grafts, and vascular networks. The ultimate goal is printing transplantable organs to eliminate donor waiting lists.",
+    "byline": ""
   },
   {
     "id": "medicine-fecal-microbiota-transplant",
     "name": "Fecal Microbiota Transplant",
     "category": "MEDICINE",
-    "teaser": "Transferring stool from healthy donors to restore gut bacteria balance. Cures recurrent Clostridioides difficile infection in 90% of cases. The first clinical trial used in the 1950s by Dr. Ben Eiseman at the VA Hospital in Denver."
+    "teaser": "Transferring stool from healthy donors to restore gut bacteria balance. Cures recurrent Clostridioides difficile infection in 90% of cases. The first clinical trial used in the 1950s by Dr. Ben Eiseman at the VA Hospital in Denver.",
+    "byline": ""
   },
   {
     "id": "medicine-gene-therapy-1",
     "name": "Gene Therapy",
     "category": "MEDICINE",
-    "teaser": "Introducing, altering, or replacing genes within a patient's cells to treat disease. Luxturna, approved in 2017, treats inherited blindness with a single injection. Zolgensma, costing $2.1 million, treats spinal muscular atrophy in infants."
+    "teaser": "Introducing, altering, or replacing genes within a patient's cells to treat disease. Luxturna, approved in 2017, treats inherited blindness with a single injection. Zolgensma, costing $2.1 million, treats spinal muscular atrophy in infants.",
+    "byline": ""
   },
   {
     "id": "medicine-liquid-biopsy",
     "name": "Liquid Biopsy",
     "category": "MEDICINE",
-    "teaser": "A simple blood test that detects circulating tumor DNA to find cancer early. It can identify mutations from multiple tumor types simultaneously. Guardant Health's test detects stage I-IV cancers across 50+ tumor types from a single blood draw."
+    "teaser": "A simple blood test that detects circulating tumor DNA to find cancer early. It can identify mutations from multiple tumor types simultaneously. Guardant Health's test detects stage I-IV cancers across 50+ tumor types from a single blood draw.",
+    "byline": ""
   },
   {
     "id": "medicine-wearable-health-tech",
     "name": "Wearable Health Tech",
     "category": "MEDICINE",
-    "teaser": "Smart devices that continuously monitor vital signs like heart rate, blood oxygen, and sleep patterns. The Apple Watch detected irregular heart rhythms in 34% of users in the Apple Heart Study. CGMs now help millions manage diabetes in real time."
+    "teaser": "Smart devices that continuously monitor vital signs like heart rate, blood oxygen, and sleep patterns. The Apple Watch detected irregular heart rhythms in 34% of users in the Apple Heart Study. CGMs now help millions manage diabetes in real time.",
+    "byline": ""
   },
   {
     "id": "medicine-3d-printed-organs",
     "name": "3D Printed Organs",
     "category": "MEDICINE",
-    "teaser": "Bioprinting technology that creates living tissue structures layer by layer. Organovo has printed functional liver tissue for drug testing. The first 3D bioprinted human ear, made from patient cells, was implanted in 2022 by 3DBio Therapeutics."
+    "teaser": "Bioprinting technology that creates living tissue structures layer by layer. Organovo has printed functional liver tissue for drug testing. The first 3D bioprinted human ear, made from patient cells, was implanted in 2022 by 3DBio Therapeutics.",
+    "byline": ""
   },
   {
     "id": "medicine-nanomedicine",
     "name": "Nanomedicine",
     "category": "MEDICINE",
-    "teaser": "Using nanoparticles smaller than 100 nanometers to deliver drugs directly to diseased cells. Lipid nanoparticles carry mRNA vaccines past cell membranes. Nanoparticle-based chemotherapy reduces side effects by targeting only tumor tissue."
+    "teaser": "Using nanoparticles smaller than 100 nanometers to deliver drugs directly to diseased cells. Lipid nanoparticles carry mRNA vaccines past cell membranes. Nanoparticle-based chemotherapy reduces side effects by targeting only tumor tissue.",
+    "byline": ""
   },
   {
     "id": "medicine-psychedelic-assisted-therapy",
     "name": "Psychedelic-Assisted Therapy",
     "category": "MEDICINE",
-    "teaser": "Using controlled doses of psilocybin, MDMA, or ketamine alongside psychotherapy. FDA granted breakthrough therapy designation to psilocybin for depression in 2018. MDMA-assisted therapy reduced PTSD symptoms by 67% in Phase 3 trials."
+    "teaser": "Using controlled doses of psilocybin, MDMA, or ketamine alongside psychotherapy. FDA granted breakthrough therapy designation to psilocybin for depression in 2018. MDMA-assisted therapy reduced PTSD symptoms by 67% in Phase 3 trials.",
+    "byline": ""
   },
   {
     "id": "medicine-telestroke-networks",
     "name": "Telestroke Networks",
     "category": "MEDICINE",
-    "teaser": "Video-linked neurologists who diagnose and treat stroke patients in remote hospitals. tPA clot-busting medication must be given within 4.5 hours. Telestroke has expanded access to stroke specialists, cutting treatment times by 30 minutes on average."
+    "teaser": "Video-linked neurologists who diagnose and treat stroke patients in remote hospitals. tPA clot-busting medication must be given within 4.5 hours. Telestroke has expanded access to stroke specialists, cutting treatment times by 30 minutes on average.",
+    "byline": ""
   },
   {
     "id": "medicine-car-t-cell-therapy",
     "name": "CAR-T Cell Therapy",
     "category": "MEDICINE",
-    "teaser": "Engineering a patient's own T-cells to recognize and attack cancer by adding a chimeric antigen receptor. Kymriah, approved in 2017, achieved 83% remission in pediatric leukemia patients. A single infusion can cost $475,000."
+    "teaser": "Engineering a patient's own T-cells to recognize and attack cancer by adding a chimeric antigen receptor. Kymriah, approved in 2017, achieved 83% remission in pediatric leukemia patients. A single infusion can cost $475,000.",
+    "byline": ""
   },
   {
     "id": "medicine-oncolytic-viruses",
     "name": "Oncolytic Viruses",
     "category": "MEDICINE",
-    "teaser": "Engineered or natural viruses that selectively infect and destroy cancer cells while sparing healthy tissue. T-VEC, approved in 2015, treats advanced melanoma. Researchers discovered the 1904 case of a leukemia patient whose cancer regressed after influenza infection."
+    "teaser": "Engineered or natural viruses that selectively infect and destroy cancer cells while sparing healthy tissue. T-VEC, approved in 2015, treats advanced melanoma. Researchers discovered the 1904 case of a leukemia patient whose cancer regressed after influenza infection.",
+    "byline": ""
   },
   {
     "id": "medicine-regenerative-medicine",
     "name": "Regenerative Medicine",
     "category": "MEDICINE",
-    "teaser": "The field focused on repairing or replacing damaged tissues and organs. Skin grafts from a patient's own cells are now routine. Atala's lab grew a bladder from a patient's cells and implanted it in 2006 — the first lab-grown organ."
+    "teaser": "The field focused on repairing or replacing damaged tissues and organs. Skin grafts from a patient's own cells are now routine. Atala's lab grew a bladder from a patient's cells and implanted it in 2006 — the first lab-grown organ.",
+    "byline": ""
   },
   {
     "id": "medicine-companion-diagnostics",
     "name": "Companion Diagnostics",
     "category": "MEDICINE",
-    "teaser": "Medical tests that identify which patients will benefit from a specific drug. HER2 testing is required before prescribing Herceptin for breast cancer. These tests are mandatory for 25% of new oncology drug approvals."
+    "teaser": "Medical tests that identify which patients will benefit from a specific drug. HER2 testing is required before prescribing Herceptin for breast cancer. These tests are mandatory for 25% of new oncology drug approvals.",
+    "byline": ""
   },
   {
     "id": "medicine-digital-therapeutics",
     "name": "Digital Therapeutics",
     "category": "MEDICINE",
-    "teaser": "Software-based interventions that deliver evidence-based treatments. Pear Therapeutics' reSET treats substance abuse through cognitive behavioral therapy on smartphones. The FDA cleared the first prescription digital therapeutic in 2017."
+    "teaser": "Software-based interventions that deliver evidence-based treatments. Pear Therapeutics' reSET treats substance abuse through cognitive behavioral therapy on smartphones. The FDA cleared the first prescription digital therapeutic in 2017.",
+    "byline": ""
   },
   {
     "id": "medicine-hematopoietic-stem-cells",
     "name": "Hematopoietic Stem Cells",
     "category": "MEDICINE",
-    "teaser": "Blood-forming cells found in bone marrow that regenerate all blood cell types. Bone marrow transplants treat leukemia and lymphoma. Donor matching requires HLA typing — a sibling has a 25% chance of being a perfect match."
+    "teaser": "Blood-forming cells found in bone marrow that regenerate all blood cell types. Bone marrow transplants treat leukemia and lymphoma. Donor matching requires HLA typing — a sibling has a 25% chance of being a perfect match.",
+    "byline": ""
   },
   {
     "id": "medicine-pharmacogenomics",
     "name": "Pharmacogenomics",
     "category": "MEDICINE",
-    "teaser": "How genes affect a person's response to drugs. CYP450 enzyme variants determine whether patients metabolize medications quickly or slowly. A single CYP2D6 test can predict response to 25% of all prescribed drugs."
+    "teaser": "How genes affect a person's response to drugs. CYP450 enzyme variants determine whether patients metabolize medications quickly or slowly. A single CYP2D6 test can predict response to 25% of all prescribed drugs.",
+    "byline": ""
   },
   {
     "id": "medicine-antibody-drug-conjugates",
     "name": "Antibody-Drug Conjugates",
     "category": "MEDICINE",
-    "teaser": "Targeted cancer therapies that link a chemotherapy drug to a monoclonal antibody, delivering toxic payloads directly to tumor cells. Adcetris, approved in 2011, reduced Hodgkin lymphoma deaths by 75%. They're sometimes called 'guided missiles' of cancer therapy."
+    "teaser": "Targeted cancer therapies that link a chemotherapy drug to a monoclonal antibody, delivering toxic payloads directly to tumor cells. Adcetris, approved in 2011, reduced Hodgkin lymphoma deaths by 75%. They're sometimes called 'guided missiles' of cancer therapy.",
+    "byline": ""
   },
   {
     "id": "medicine-islet-cell-transplantation",
     "name": "Islet Cell Transplantation",
     "category": "MEDICINE",
-    "teaser": "Transplanting insulin-producing beta cells from donor pancreases to treat Type 1 diabetes. The Edmonton Protocol, developed in 2000, achieved insulin independence in 80% of recipients at one year. Donor scarcity remains the main limitation."
+    "teaser": "Transplanting insulin-producing beta cells from donor pancreases to treat Type 1 diabetes. The Edmonton Protocol, developed in 2000, achieved insulin independence in 80% of recipients at one year. Donor scarcity remains the main limitation.",
+    "byline": ""
   },
   {
     "id": "medicine-hypothermia-therapy",
     "name": "Hypothermia Therapy",
     "category": "MEDICINE",
-    "teaser": "Deliberately lowering body temperature to 32-34°C after cardiac arrest or brain injury. Cooling reduces metabolic demand and protects neurons. Hospitalized cardiac arrest survival rates improved from 26% to 56% with therapeutic hypothermia."
+    "teaser": "Deliberately lowering body temperature to 32-34°C after cardiac arrest or brain injury. Cooling reduces metabolic demand and protects neurons. Hospitalized cardiac arrest survival rates improved from 26% to 56% with therapeutic hypothermia.",
+    "byline": ""
   },
   {
     "id": "medicine-phage-therapy",
     "name": "Phage Therapy",
     "category": "MEDICINE",
-    "teaser": "Using bacteriophages — viruses that infect bacteria — to treat antibiotic-resistant infections. Pioneered in Georgia in 1920, it fell out of favor in the West after antibiotics emerged. A 2019 case cured a UCSD patient's multi-drug resistant Pseudomonas infection."
+    "teaser": "Using bacteriophages — viruses that infect bacteria — to treat antibiotic-resistant infections. Pioneered in Georgia in 1920, it fell out of favor in the West after antibiotics emerged. A 2019 case cured a UCSD patient's multi-drug resistant Pseudomonas infection.",
+    "byline": ""
   },
   {
     "id": "medicine-gene-drive-technology",
     "name": "Gene Drive Technology",
     "category": "MEDICINE",
-    "teaser": "A genetic engineering approach that forces a trait through a population faster than normal inheritance. CRISPR-based gene drives could eliminate malaria-carrying mosquitoes. A trial in Burkina Faso released modified sterile male mosquitoes in 2019."
+    "teaser": "A genetic engineering approach that forces a trait through a population faster than normal inheritance. CRISPR-based gene drives could eliminate malaria-carrying mosquitoes. A trial in Burkina Faso released modified sterile male mosquitoes in 2019.",
+    "byline": ""
   },
   {
     "id": "medicine-deep-brain-stimulation",
     "name": "Deep Brain Stimulation",
     "category": "MEDICINE",
-    "teaser": "Implanting electrodes in specific brain regions to treat movement disorders. Approved for Parkinson's disease in 1997, it reduces tremor by 60-90%. Experimental applications treat depression, OCD, and addiction. Targets include the subthalamic nucleus and globus pallidus."
+    "teaser": "Implanting electrodes in specific brain regions to treat movement disorders. Approved for Parkinson's disease in 1997, it reduces tremor by 60-90%. Experimental applications treat depression, OCD, and addiction. Targets include the subthalamic nucleus and globus pallidus.",
+    "byline": ""
   },
   {
     "id": "medicine-artificial-blood",
     "name": "Artificial Blood",
     "category": "MEDICINE",
-    "teaser": "Synthetic blood substitutes designed to carry oxygen when donated blood is unavailable. Hemopure, made from bovine hemoglobin, is approved in South Africa. Several US trials failed due to side effects, but research continues for battlefield and emergency use."
+    "teaser": "Synthetic blood substitutes designed to carry oxygen when donated blood is unavailable. Hemopure, made from bovine hemoglobin, is approved in South Africa. Several US trials failed due to side effects, but research continues for battlefield and emergency use.",
+    "byline": ""
   },
   {
     "id": "medicine-tissue-engineering",
     "name": "Tissue Engineering",
     "category": "MEDICINE",
-    "teaser": "Combining cells, scaffolds, and growth factors to build replacement tissues. Integra, a skin substitute, has treated burns since 1985. Researchers engineered a replacement ear using a 3D-printed scaffold seeded with cartilage cells from a patient's rib."
+    "teaser": "Combining cells, scaffolds, and growth factors to build replacement tissues. Integra, a skin substitute, has treated burns since 1985. Researchers engineered a replacement ear using a 3D-printed scaffold seeded with cartilage cells from a patient's rib.",
+    "byline": ""
   },
   {
     "id": "medicine-point-of-care-testing",
     "name": "Point-of-Care Testing",
     "category": "MEDICINE",
-    "teaser": "Diagnostic tests performed at or near the site of patient care rather than in a laboratory. Glucose meters, pregnancy tests, and rapid COVID tests are examples. Abbott's ID NOW molecular test delivers results in under 15 minutes at the bedside."
+    "teaser": "Diagnostic tests performed at or near the site of patient care rather than in a laboratory. Glucose meters, pregnancy tests, and rapid COVID tests are examples. Abbott's ID NOW molecular test delivers results in under 15 minutes at the bedside.",
+    "byline": ""
   },
   {
     "id": "medicine-optogenetics",
     "name": "Optogenetics",
     "category": "MEDICINE",
-    "teaser": "Using light to control neurons that have been genetically modified to express light-sensitive proteins. It allows researchers to turn specific brain circuits on and off with millisecond precision. Karl Deisseroth at Stanford pioneered the technique in 2005."
+    "teaser": "Using light to control neurons that have been genetically modified to express light-sensitive proteins. It allows researchers to turn specific brain circuits on and off with millisecond precision. Karl Deisseroth at Stanford pioneered the technique in 2005.",
+    "byline": ""
   },
   {
     "id": "medicine-mitochondrial-replacement-therapy",
     "name": "Mitochondrial Replacement Therapy",
     "category": "MEDICINE",
-    "teaser": "Replacing defective mitochondrial DNA by transferring nuclear DNA from the mother's egg into a donor egg. The first baby born with this technique, in Mexico in 2016, had a mother at risk for Leigh syndrome. The UK legalized it in 2015."
+    "teaser": "Replacing defective mitochondrial DNA by transferring nuclear DNA from the mother's egg into a donor egg. The first baby born with this technique, in Mexico in 2016, had a mother at risk for Leigh syndrome. The UK legalized it in 2015.",
+    "byline": ""
   },
   {
     "id": "medicine-molecular-glues",
     "name": "Molecular Glues",
     "category": "MEDICINE",
-    "teaser": "Small molecules that create new protein-protein interactions, redirecting cellular machinery to destroy disease-causing proteins. Thalidomide, once infamous for birth defects, was discovered to work this way in multiple myeloma. It's now a template for new cancer drugs."
+    "teaser": "Small molecules that create new protein-protein interactions, redirecting cellular machinery to destroy disease-causing proteins. Thalidomide, once infamous for birth defects, was discovered to work this way in multiple myeloma. It's now a template for new cancer drugs.",
+    "byline": ""
   },
   {
     "id": "medicine-wound-healing-science",
     "name": "Wound Healing Science",
     "category": "MEDICINE",
-    "teaser": "The four-stage process of hemostasis, inflammation, proliferation, and remodeling that repairs tissue. Electroceutical bandages using electrical fields accelerate wound closure by 50%.负压 wound therapy, discovered by Morykwas in 1997, uses vacuum to promote granulation."
+    "teaser": "The four-stage process of hemostasis, inflammation, proliferation, and remodeling that repairs tissue. Electroceutical bandages using electrical fields accelerate wound closure by 50%.负压 wound therapy, discovered by Morykwas in 1997, uses vacuum to promote granulation.",
+    "byline": ""
   },
   {
     "id": "medicine-ferroptosis",
     "name": "Ferroptosis",
     "category": "MEDICINE",
-    "teaser": "A recently discovered form of regulated cell death driven by iron-dependent lipid peroxidation. It differs from apoptosis and necrosis. Scientists are exploring ferroptosis as a way to kill cancer cells that resist traditional chemotherapy."
+    "teaser": "A recently discovered form of regulated cell death driven by iron-dependent lipid peroxidation. It differs from apoptosis and necrosis. Scientists are exploring ferroptosis as a way to kill cancer cells that resist traditional chemotherapy.",
+    "byline": ""
   },
   {
     "id": "medicine-checkpoint-inhibitors",
     "name": "Checkpoint Inhibitors",
     "category": "MEDICINE",
-    "teaser": "Cancer drugs that remove the 'brakes' on immune cells so they can attack tumors. Keytruda, approved in 2014, treats melanoma, lung cancer, and bladder cancer. James Allison and Tasuku Honjo won the 2018 Nobel for discovering PD-1 and CTLA-4 checkpoints."
+    "teaser": "Cancer drugs that remove the 'brakes' on immune cells so they can attack tumors. Keytruda, approved in 2014, treats melanoma, lung cancer, and bladder cancer. James Allison and Tasuku Honjo won the 2018 Nobel for discovering PD-1 and CTLA-4 checkpoints.",
+    "byline": ""
   },
   {
     "id": "medicine-crispr-diagnostics",
     "name": "CRISPR Diagnostics",
     "category": "MEDICINE",
-    "teaser": "Using CRISPR gene-editing technology for rapid disease detection. SHERLOCK and DETECTR systems can identify viral RNA in under an hour. They were adapted for COVID-19 testing and can detect Zika, Dengue, and HPV from a single drop of blood."
+    "teaser": "Using CRISPR gene-editing technology for rapid disease detection. SHERLOCK and DETECTR systems can identify viral RNA in under an hour. They were adapted for COVID-19 testing and can detect Zika, Dengue, and HPV from a single drop of blood.",
+    "byline": ""
   },
   {
     "id": "medicine-wearable-insulin-pumps",
     "name": "Wearable Insulin Pumps",
     "category": "MEDICINE",
-    "teaser": "Miniature devices that continuously deliver insulin to diabetes patients. The Medtronic 780G automates insulin dosing every five minutes based on glucose readings. Closed-loop systems combine CGMs with pumps to create an artificial pancreas."
+    "teaser": "Miniature devices that continuously deliver insulin to diabetes patients. The Medtronic 780G automates insulin dosing every five minutes based on glucose readings. Closed-loop systems combine CGMs with pumps to create an artificial pancreas.",
+    "byline": ""
   },
   {
     "id": "medicine-xenotransplantation",
     "name": "Xenotransplantation",
     "category": "MEDICINE",
-    "teaser": "Transplanting organs from animals into humans. In January 2022, a genetically modified pig heart was transplanted into David Bennett, who survived two months. porcine kidneys have functioned in brain-dead human recipients for over a month."
+    "teaser": "Transplanting organs from animals into humans. In January 2022, a genetically modified pig heart was transplanted into David Bennett, who survived two months. porcine kidneys have functioned in brain-dead human recipients for over a month.",
+    "byline": ""
   },
   {
     "id": "medicine-fecal-microbiota-pills",
     "name": "Fecal Microbiota Pills",
     "category": "MEDICINE",
-    "teaser": "Encapsulated stool samples that restore gut bacteria without a full transplant. Rebyota, approved in 2022, treats recurrent C. difficile. The first pills, called SER-109, were approved in 2023 and showed 70% efficacy in clinical trials."
+    "teaser": "Encapsulated stool samples that restore gut bacteria without a full transplant. Rebyota, approved in 2022, treats recurrent C. difficile. The first pills, called SER-109, were approved in 2023 and showed 70% efficacy in clinical trials.",
+    "byline": ""
   },
   {
     "id": "medicine-genetic-testing-prenatal",
     "name": "Genetic Testing Prenatal",
     "category": "MEDICINE",
-    "teaser": "Non-invasive prenatal testing analyzing fetal DNA in maternal blood. NIPT can detect Down syndrome with 99% accuracy from a blood draw at 10 weeks. Over 5 million tests have been performed since Panorama launched in 2012."
+    "teaser": "Non-invasive prenatal testing analyzing fetal DNA in maternal blood. NIPT can detect Down syndrome with 99% accuracy from a blood draw at 10 weeks. Over 5 million tests have been performed since Panorama launched in 2012.",
+    "byline": ""
   },
   {
     "id": "medicine-medical-tricorder",
     "name": "Medical Tricorder",
     "category": "MEDICINE",
-    "teaser": "Handheld diagnostic devices inspired by Star Trek that are becoming real. The Scanadu Scout measured vital signs from a forehead touch. The FDA cleared the first medical tricorder-like device — the AliveCor KardiaMobile — for ECG readings in 2015."
+    "teaser": "Handheld diagnostic devices inspired by Star Trek that are becoming real. The Scanadu Scout measured vital signs from a forehead touch. The FDA cleared the first medical tricorder-like device — the AliveCor KardiaMobile — for ECG readings in 2015.",
+    "byline": ""
   },
   {
     "id": "medicine-quantum-medicine",
     "name": "Quantum Medicine",
     "category": "MEDICINE",
-    "teaser": "Using quantum mechanics principles for medical diagnostics and treatment. Quantum sensors can detect magnetic fields from neural activity without surgery. Nitrogen-vacancy centers in diamonds are being developed for ultra-sensitive biomagnetic imaging."
+    "teaser": "Using quantum mechanics principles for medical diagnostics and treatment. Quantum sensors can detect magnetic fields from neural activity without surgery. Nitrogen-vacancy centers in diamonds are being developed for ultra-sensitive biomagnetic imaging.",
+    "byline": ""
   },
   {
     "id": "medicine-tumor-treating-fields",
     "name": "Tumor Treating Fields",
     "category": "MEDICINE",
-    "teaser": "Alternating electrical fields that disrupt cancer cell division. Optune, approved in 2011 for glioblastoma, uses transducer arrays worn on the scalp. When combined with chemotherapy, it improved median survival from 16 to 21 months."
+    "teaser": "Alternating electrical fields that disrupt cancer cell division. Optune, approved in 2011 for glioblastoma, uses transducer arrays worn on the scalp. When combined with chemotherapy, it improved median survival from 16 to 21 months.",
+    "byline": ""
   },
   {
     "id": "medicine-microbiome-transplants",
     "name": "Microbiome Transplants",
     "category": "MEDICINE",
-    "teaser": "Fecal microbiota transplantation replaces unhealthy gut bacteria with healthy ones. C. difficile treatment success rates reached 90% in the first randomized trial in 2013. Researchers are now exploring transplants for obesity, autism, and autoimmune diseases."
+    "teaser": "Fecal microbiota transplantation replaces unhealthy gut bacteria with healthy ones. C. difficile treatment success rates reached 90% in the first randomized trial in 2013. Researchers are now exploring transplants for obesity, autism, and autoimmune diseases.",
+    "byline": ""
   },
   {
     "id": "medicine-robotic-surgery",
     "name": "Robotic Surgery",
     "category": "MEDICINE",
-    "teaser": "Minimally invasive procedures performed by surgeons controlling robotic arms. The da Vinci system, used in over 10 million procedures, provides 3D magnification and wristed instruments with seven degrees of freedom. Recovery times are 50% faster than open surgery."
+    "teaser": "Minimally invasive procedures performed by surgeons controlling robotic arms. The da Vinci system, used in over 10 million procedures, provides 3D magnification and wristed instruments with seven degrees of freedom. Recovery times are 50% faster than open surgery.",
+    "byline": ""
   },
   {
     "id": "medicine-mrna-therapeutics",
     "name": "mRNA Therapeutics",
     "category": "MEDICINE",
-    "teaser": "Using messenger RNA to instruct cells to produce therapeutic proteins. Moderna's flu vaccine candidate showed 40% better efficacy than traditional shots in 2023 trials. mRNA therapies for heart disease, autoimmune disorders, and rare genetic diseases are in development."
+    "teaser": "Using messenger RNA to instruct cells to produce therapeutic proteins. Moderna's flu vaccine candidate showed 40% better efficacy than traditional shots in 2023 trials. mRNA therapies for heart disease, autoimmune disorders, and rare genetic diseases are in development.",
+    "byline": ""
   },
   {
     "id": "medicine-artificial-pancreas",
     "name": "Artificial Pancreas",
     "category": "MEDICINE",
-    "teaser": "Closed-loop insulin delivery systems that automatically adjust dosing based on continuous glucose monitoring. The Medtronic 670G, approved in 2016, was the first hybrid closed-loop system. Users spend 70% more time in target glucose range."
+    "teaser": "Closed-loop insulin delivery systems that automatically adjust dosing based on continuous glucose monitoring. The Medtronic 670G, approved in 2016, was the first hybrid closed-loop system. Users spend 70% more time in target glucose range.",
+    "byline": ""
   },
   {
     "id": "medicine-nanobots-in-medicine",
     "name": "Nanobots in Medicine",
     "category": "MEDICINE",
-    "teaser": "Robots at the nanoscale designed for targeted drug delivery and surgery. Rice University's nanobots can drill through cancer cells using molecular motors. MIT researchers built DNA nanobots that can seek out and destroy tumors in animal models."
+    "teaser": "Robots at the nanoscale designed for targeted drug delivery and surgery. Rice University's nanobots can drill through cancer cells using molecular motors. MIT researchers built DNA nanobots that can seek out and destroy tumors in animal models.",
+    "byline": ""
   },
   {
     "id": "medicine-stem-cell-eyesight",
     "name": "Stem Cell Eyesight",
     "category": "MEDICINE",
-    "teaser": "Using retinal pigment epithelium cells derived from stem cells to treat macular degeneration. The first patient, a Japanese woman, received the therapy in 2014. Clinical trials in the UK showed improved vision in patients with wet age-related macular degeneration."
+    "teaser": "Using retinal pigment epithelium cells derived from stem cells to treat macular degeneration. The first patient, a Japanese woman, received the therapy in 2014. Clinical trials in the UK showed improved vision in patients with wet age-related macular degeneration.",
+    "byline": ""
   },
   {
     "id": "medicine-circadian-medicine",
     "name": "Circadian Medicine",
     "category": "MEDICINE",
-    "teaser": "Timing drug delivery to match the body's internal clock for maximum effectiveness. Chronotherapy for blood pressure medication reduces cardiovascular events by 33% compared to morning dosing. The Nobel Prize in 2017 recognized circadian rhythm research."
+    "teaser": "Timing drug delivery to match the body's internal clock for maximum effectiveness. Chronotherapy for blood pressure medication reduces cardiovascular events by 33% compared to morning dosing. The Nobel Prize in 2017 recognized circadian rhythm research.",
+    "byline": ""
   },
   {
     "id": "medicine-bioelectric-medicine",
     "name": "Bioelectric Medicine",
     "category": "MEDICINE",
-    "teaser": "Using electrical signals to control organ function without drugs. Vagus nerve stimulation treats epilepsy and depression. SetPoint Medical's device reduces inflammation by stimulating the vagus nerve, offering potential treatments for rheumatoid arthritis."
+    "teaser": "Using electrical signals to control organ function without drugs. Vagus nerve stimulation treats epilepsy and depression. SetPoint Medical's device reduces inflammation by stimulating the vagus nerve, offering potential treatments for rheumatoid arthritis.",
+    "byline": ""
   },
   {
     "id": "medicine-antibiotic-stewardship",
     "name": "Antibiotic Stewardship",
     "category": "MEDICINE",
-    "teaser": "Programs that optimize antibiotic use to combat resistance. Hospital stewardship programs reduce antibiotic use by 30-40% while maintaining outcomes. The WHO declared antibiotic resistance one of the top 10 global public health threats."
+    "teaser": "Programs that optimize antibiotic use to combat resistance. Hospital stewardship programs reduce antibiotic use by 30-40% while maintaining outcomes. The WHO declared antibiotic resistance one of the top 10 global public health threats.",
+    "byline": ""
   },
   {
     "id": "medicine-implantable-brain-chips",
     "name": "Implantable Brain Chips",
     "category": "MEDICINE",
-    "teaser": "Neural interfaces that connect the brain to computers. Neuralink's first human implant in January 2024 allowed a paralyzed patient to control a computer cursor with thought. BrainGate's earlier system enabled typing at 90 characters per minute."
+    "teaser": "Neural interfaces that connect the brain to computers. Neuralink's first human implant in January 2024 allowed a paralyzed patient to control a computer cursor with thought. BrainGate's earlier system enabled typing at 90 characters per minute.",
+    "byline": ""
   },
   {
     "id": "medicine-glucose-monitoring-implants",
     "name": "Glucose Monitoring Implants",
     "category": "MEDICINE",
-    "teaser": "Tiny sensors inserted under the skin that continuously measure blood sugar. The FreeStyle Libre, inserted with a needle in 1 second, provides readings for 14 days. Dexcom G7, approved in 2023, is the most accurate CGM with a mean absolute relative difference of 8.2%."
+    "teaser": "Tiny sensors inserted under the skin that continuously measure blood sugar. The FreeStyle Libre, inserted with a needle in 1 second, provides readings for 14 days. Dexcom G7, approved in 2023, is the most accurate CGM with a mean absolute relative difference of 8.2%.",
+    "byline": ""
   }
 ]

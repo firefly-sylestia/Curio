@@ -17,7 +17,8 @@
       "targetName": "The logic of supply and demand",
       "durationMinutes": 8,
       "instruction": "Read a clear explanation of how supply and demand curves interact to set prices, then find one real-world example where a supply shock changed prices overnight."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-invisible-hand",
@@ -37,7 +38,8 @@
       "targetName": "Adam Smith's original passage on the invisible hand",
       "durationMinutes": 10,
       "instruction": "Find Smith's actual words in The Wealth of Nations (Book IV, Chapter II) and note how modern economists interpret — and misinterpret — the metaphor."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-opportunity-cost",
@@ -57,7 +59,8 @@
       "targetName": "The concept of opportunity cost",
       "durationMinutes": 6,
       "instruction": "Think of three decisions you made this week. For each, identify the opportunity cost — what you gave up — and consider whether the trade was worth it."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-comparative-advantage",
@@ -77,7 +80,8 @@
       "targetName": "David Ricardo's comparative advantage argument",
       "durationMinutes": 10,
       "instruction": "Read a clear exposition of Ricardo's England-Portugal cloth-wine example, then explain why the principle still holds even when one country is more efficient at everything."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-gdp",
@@ -97,7 +101,8 @@
       "targetName": "How GDP is calculated and what it misses",
       "durationMinutes": 7,
       "instruction": "Learn the three methods of calculating GDP (production, income, expenditure), then name two important things GDP fails to measure."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-inflation",
@@ -117,7 +122,8 @@
       "targetName": "What causes inflation and why it matters",
       "durationMinutes": 7,
       "instruction": "Learn the difference between demand-pull and cost-push inflation, then look up the current inflation rate in your country and what's driving it."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-interest-rate",
@@ -137,7 +143,8 @@
       "targetName": "How interest rates shape the economy",
       "durationMinutes": 8,
       "instruction": "Understand how the Federal Reserve's federal funds rate ripples through mortgages, savings accounts, and business investment, then check today's rate."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-commodity",
@@ -157,7 +164,8 @@
       "targetName": "How commodity markets work",
       "durationMinutes": 8,
       "instruction": "Learn the difference between spot and futures markets for commodities, then check the current price of crude oil and what's moving it."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-trade-deficit",
@@ -177,7 +185,8 @@
       "targetName": "Trade deficits: problem or feature?",
       "durationMinutes": 7,
       "instruction": "Learn why the US has run persistent trade deficits for decades without economic collapse, and why the deficit number alone doesn't tell the full story."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-fiscal-policy",
@@ -197,7 +206,8 @@
       "targetName": "How fiscal policy works",
       "durationMinutes": 8,
       "instruction": "Compare Keynesian and austerity approaches to fiscal policy, then look at one real-world example where fiscal stimulus succeeded or failed."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-monetary-policy",
@@ -217,7 +227,8 @@
       "targetName": "How central banks use monetary policy",
       "durationMinutes": 8,
       "instruction": "Learn the three main tools of monetary policy (open market operations, discount rate, reserve requirements), then explain why inflation targeting became the dominant framework."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-quantitative-easing",
@@ -237,7 +248,8 @@
       "targetName": "How QE works and its consequences",
       "durationMinutes": 10,
       "instruction": "Understand how the Fed's QE programs after 2008 and 2020 expanded the balance sheet, then discuss whether QE primarily helped asset owners or the broader economy."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-keynes",
@@ -257,7 +269,8 @@
       "targetName": "Keynes's core argument in The General Theory",
       "durationMinutes": 12,
       "instruction": "Read a summary of Keynes's central insight — that aggregate demand drives employment, not just supply — and consider why governments still debate his ideas 90 years later."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-smith",
@@ -277,7 +290,8 @@
       "targetName": "The opening chapter of The Wealth of Nations",
       "durationMinutes": 15,
       "instruction": "Read Smith's famous pin factory example about division of labor, then note how modern assembly lines and software development embody the same principle."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-milton-friedman",
@@ -297,7 +311,8 @@
       "targetName": "Friedman's monetarist argument",
       "durationMinutes": 10,
       "instruction": "Understand Friedman's claim that controlling the money supply is the key to controlling inflation, then compare his view with Keynesian fiscal stimulus."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-piketty",
@@ -317,7 +332,8 @@
       "targetName": "Piketty's core inequality argument",
       "durationMinutes": 12,
       "instruction": "Learn Piketty's famous r > g formula (returns on capital exceed economic growth), then consider what policies could counteract wealth concentration."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-game-theory",
@@ -337,7 +353,8 @@
       "targetName": "The basics of game theory",
       "durationMinutes": 10,
       "instruction": "Learn the prisoner's dilemma and Nash equilibrium, then find a real-world example where strategic interdependence shaped an economic outcome."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-behavioral-economics",
@@ -357,7 +374,8 @@
       "targetName": "Key findings in behavioral economics",
       "durationMinutes": 8,
       "instruction": "Learn about loss aversion, anchoring, and the endowment effect, then notice one of these biases in your own recent spending decisions."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-externalities",
@@ -377,7 +395,8 @@
       "targetName": "Positive and negative externalities",
       "durationMinutes": 7,
       "instruction": "Understand how pollution is a negative externality and education is a positive one, then explain why carbon taxes try to 'internalize' the externality."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-gini-coefficient",
@@ -397,7 +416,8 @@
       "targetName": "Understanding the Gini coefficient",
       "durationMinutes": 6,
       "instruction": "Learn how the Gini coefficient is calculated from the Lorenz curve, then compare the Gini values of three countries with very different economic systems."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-sunk-cost-fallacy",
@@ -417,7 +437,8 @@
       "targetName": "The sunk cost fallacy in everyday life",
       "durationMinutes": 5,
       "instruction": "Identify a time you kept investing in something just because you'd already invested, then explain why a rational decision-maker would ignore sunk costs."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-price-discrimination",
@@ -437,7 +458,8 @@
       "targetName": "First, second, and third-degree price discrimination",
       "durationMinutes": 7,
       "instruction": "Learn the three degrees of price discrimination and find one real example of each in your daily life."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-capitalism",
@@ -457,7 +479,8 @@
       "targetName": "Capitalism and its variants",
       "durationMinutes": 8,
       "instruction": "Compare laissez-faire capitalism, social democracy, and state capitalism, then identify which model best describes the country you live in."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-socialism",
@@ -477,7 +500,8 @@
       "targetName": "Socialism: theory vs practice",
       "durationMinutes": 8,
       "instruction": "Learn the difference between democratic socialism and authoritarian socialism, then examine one country where socialist policies coexist with market economies."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-central-bank",
@@ -497,7 +521,8 @@
       "targetName": "What central banks actually do",
       "durationMinutes": 7,
       "instruction": "Learn the mandate of the Federal Reserve (dual mandate: maximum employment and stable prices), then compare it with the ECB's single mandate of price stability."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-globalization",
@@ -517,7 +542,8 @@
       "targetName": "The waves of globalization",
       "durationMinutes": 8,
       "instruction": "Trace the three waves of globalization (1870–1914, 1945–1980, 1990–present), then identify which benefits and costs you personally experience from global trade."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-command-economy",
@@ -537,7 +563,8 @@
       "targetName": "Why command economies fail",
       "durationMinutes": 8,
       "instruction": "Learn the 'calculation problem' — why central planners can't efficiently allocate resources without market prices — and find one historical example of its consequences."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-mercantilism",
@@ -557,7 +584,8 @@
       "targetName": "Mercantilism and the age of empires",
       "durationMinutes": 8,
       "instruction": "Understand how mercantilist policies drove European colonialism, then explain why Adam Smith argued against mercantilism in favor of free trade."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-labor-theory-of-value",
@@ -577,7 +605,8 @@
       "targetName": "From Ricardo to Marx: the labor theory of value",
       "durationMinutes": 10,
       "instruction": "Learn how the labor theory of value evolved from classical economics to Marx's critique of capitalism, then explain why marginalism eventually displaced it."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-marginal-utility",
@@ -597,7 +626,8 @@
       "targetName": "The law of diminishing marginal utility",
       "durationMinutes": 6,
       "instruction": "Understand why the fifth slice of pizza brings less joy than the first, and how this principle explains pricing strategies like 'buy two, get one free.'"
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-elasticity",
@@ -617,7 +647,8 @@
       "targetName": "Price elasticity of demand",
       "durationMinutes": 7,
       "instruction": "Learn how elasticity is calculated and why it matters for pricing, then compare the elasticity of gasoline versus restaurant meals."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-monopoly",
@@ -637,7 +668,8 @@
       "targetName": "How monopolies form and why they're regulated",
       "durationMinutes": 8,
       "instruction": "Learn the sources of monopoly power (economies of scale, network effects, patents, regulation), then find one modern monopoly or near-monopoly and its impact on consumers."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-oligopoly",
@@ -657,7 +689,8 @@
       "targetName": "Oligopoly and strategic interdependence",
       "durationMinutes": 7,
       "instruction": "Learn how oligopolies differ from perfect competition and monopoly, then identify an oligopoly you interact with regularly and how it affects your choices."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-perfect-competition",
@@ -677,7 +710,8 @@
       "targetName": "The assumptions and implications of perfect competition",
       "durationMinutes": 7,
       "instruction": "Learn the four conditions for perfect competition (many buyers/sellers, identical products, free entry/exit, perfect information), then explain why no real market meets all four."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-creative-destruction",
@@ -697,7 +731,8 @@
       "targetName": "Schumpeter's creative destruction",
       "durationMinutes": 8,
       "instruction": "Understand how innovation destroys existing industries while creating new ones, then name three industries that were 'creatively destroyed' in your lifetime."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-great-depression",
@@ -717,7 +752,8 @@
       "targetName": "What caused the Great Depression",
       "durationMinutes": 12,
       "instruction": "Learn the chain of events from the 1929 crash to the banking panics, then explain how Friedman argued the Fed's failure to act made the depression worse."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-2008-financial-crisis",
@@ -737,7 +773,8 @@
       "targetName": "The Big Short (2015) or a documentary on the crisis",
       "durationMinutes": 30,
       "instruction": "Watch the opening hour of The Big Short or a documentary, then explain how mortgage-backed securities turned housing defaults into a global financial meltdown."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-stagflation",
@@ -757,7 +794,8 @@
       "targetName": "Stagflation in the 1970s",
       "durationMinutes": 8,
       "instruction": "Learn how the 1973 and 1979 oil shocks triggered stagflation, then explain why this combination of problems was so difficult for traditional economic policy to address."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-hyperinflation",
@@ -777,7 +815,8 @@
       "targetName": "Cases of hyperinflation in history",
       "durationMinutes": 8,
       "instruction": "Read about the Weimar Republic's hyperinflation (1923) or Zimbabwe's (2008), then explain what governments did to eventually restore monetary stability."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-european-union",
@@ -797,7 +836,8 @@
       "targetName": "How the EU single market works",
       "durationMinutes": 10,
       "instruction": "Learn the four freedoms of the EU single market (goods, services, capital, people), then consider how Brexit tested whether a country can leave a deeply integrated market."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-bretton-woods",
@@ -817,7 +857,8 @@
       "targetName": "The Bretton Woods system and its legacy",
       "durationMinutes": 10,
       "instruction": "Learn how the Bretton Woods agreement created the IMF and World Bank, then explain what happened when Nixon ended dollar-gold convertibility in 1971."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-demographic-dividend",
@@ -837,7 +878,8 @@
       "targetName": "How demographics drive economic growth",
       "durationMinutes": 8,
       "instruction": "Learn how Japan, South Korea, and China each experienced a demographic dividend, then consider what happens when that window closes."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-dutch-disease",
@@ -857,7 +899,8 @@
       "targetName": "The resource curse and Dutch Disease",
       "durationMinutes": 8,
       "instruction": "Learn how a natural resource boom can paradoxically harm an economy, then find a modern example of a country suffering from Dutch Disease."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-middle-income-trap",
@@ -877,7 +920,8 @@
       "targetName": "Why some countries escape the middle-income trap",
       "durationMinutes": 8,
       "instruction": "Compare South Korea's escape (innovation, education) with Argentina's stagnation, then identify what policies distinguish countries that break through from those that don't."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-tragedy-of-the-commons",
@@ -897,7 +941,8 @@
       "targetName": "The tragedy of the commons and solutions",
       "durationMinutes": 7,
       "instruction": "Understand Garrett Hardin's argument, then explore three solutions (privatization, regulation, community management) with real-world examples of each."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-asymmetric-information",
@@ -917,7 +962,8 @@
       "targetName": "Akerlof's market for lemons",
       "durationMinutes": 8,
       "instruction": "Read about George Akerlof's 'Market for Lemons' paper, then find a modern example where asymmetric information creates market problems (healthcare, used cars, or online shopping)."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-transaction-costs",
@@ -937,7 +983,8 @@
       "targetName": "Coase and the nature of the firm",
       "durationMinutes": 8,
       "instruction": "Understand why Coase believed firms exist to minimize transaction costs, then explain why some activities happen inside firms while others happen in markets."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-public-goods",
@@ -957,7 +1004,8 @@
       "targetName": "Why markets underprovide public goods",
       "durationMinutes": 7,
       "instruction": "Learn the two properties of public goods (non-excludable and non-rivalrous), then explain why private companies rarely build lighthouses."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-arsenal-of-democracy",
@@ -977,7 +1025,8 @@
       "targetName": "WWII economic mobilization",
       "durationMinutes": 10,
       "instruction": "Learn how the US economy shifted from civilian to military production between 1941 and 1943, then consider what this tells us about the limits of peacetime industrial policy."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-planned-obsolescence",
@@ -997,7 +1046,8 @@
       "targetName": "The history and ethics of planned obsolescence",
       "durationMinutes": 7,
       "instruction": "Read about the Phoebus cartel (lightbulb manufacturers), then identify a modern product where planned obsolescence is suspected and its economic consequences."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-basic-income",
@@ -1017,7 +1067,8 @@
       "targetName": "The case for and against UBI",
       "durationMinutes": 10,
       "instruction": "Learn about UBI experiments in Finland, Kenya, and Stockton, then weigh the evidence on whether guaranteed income reduces poverty without killing work incentives."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-renminbi",
@@ -1037,7 +1088,8 @@
       "targetName": "China's economic transformation",
       "durationMinutes": 10,
       "instruction": "Learn how Deng Xiaoping's reforms in 1978 unleashed China's growth, then consider whether the country's state-capitalist model can sustain growth as it ages."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-debt-to-gdp",
@@ -1057,7 +1109,8 @@
       "targetName": "How to interpret sovereign debt levels",
       "durationMinutes": 7,
       "instruction": "Compare the debt-to-GDP ratios of Japan, the US, and Greece, then explain why similar ratios can mean very different things depending on who borrows and in what currency."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-venture-capital",
@@ -1077,7 +1130,8 @@
       "targetName": "How venture capital works",
       "durationMinutes": 8,
       "instruction": "Learn the VC funding stages (seed, Series A/B/C) and the power law distribution of returns, then explain why VCs push for exponential growth rather than steady profits."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-hedge-funds",
@@ -1097,7 +1151,8 @@
       "targetName": "What hedge funds do and why they matter",
       "durationMinutes": 8,
       "instruction": "Learn the difference between hedge funds and mutual funds, then find a famous hedge fund strategy (long/short, macro, arbitrage) and one notable success or failure."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-crypto-economics",
@@ -1117,7 +1172,8 @@
       "targetName": "The economic design of Bitcoin",
       "durationMinutes": 10,
       "instruction": "Learn how Bitcoin's fixed supply (21 million), halving schedule, and proof-of-work create digital scarcity, then debate whether this makes it money, gold, or speculation."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-scarcity",
@@ -1137,7 +1193,8 @@
       "targetName": "Why scarcity is the root of economics",
       "durationMinutes": 5,
       "instruction": "Understand how scarcity forces trade-offs at every level — personal, corporate, national — then consider whether technology could ever eliminate scarcity."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-efficiency",
@@ -1157,7 +1214,8 @@
       "targetName": "Pareto efficiency and its limits",
       "durationMinutes": 7,
       "instruction": "Learn the Pareto criterion, then explain why a perfectly efficient outcome can still be deeply unequal — and why economists debate whether efficiency or equity should come first."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-sole-proprietorship",
@@ -1177,7 +1235,8 @@
       "targetName": "How sole proprietorships work",
       "durationMinutes": 5,
       "instruction": "Understand the advantages (simplicity, control) and disadvantages (unlimited liability, difficulty raising capital) of sole proprietorships compared to LLCs or corporations."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-monopsony",
@@ -1197,7 +1256,8 @@
       "targetName": "Monopsony power in labor markets",
       "durationMinutes": 7,
       "instruction": "Learn how a dominant employer in a small town can suppress wages below competitive levels, then find evidence of monopsony in modern labor markets."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-golden-age",
@@ -1217,7 +1277,8 @@
       "targetName": "What made the postwar boom possible",
       "durationMinutes": 10,
       "instruction": "Learn the conditions that enabled the Golden Age (Bretton Woods, Marshall Plan, strong unions, Keynesian policy), then debate whether those conditions can be recreated."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-thatcher-reagan",
@@ -1237,7 +1298,8 @@
       "targetName": "Reaganomics and Thatcherism",
       "durationMinutes": 10,
       "instruction": "Learn the core policies of the neoliberal turn (tax cuts, deregulation, privatization), then evaluate what it delivered — and what it cost."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-brics",
@@ -1257,7 +1319,8 @@
       "targetName": "BRICS and the shift in global economic power",
       "durationMinutes": 8,
       "instruction": "Learn why BRICS nations want alternatives to the dollar-dominated financial system, then assess whether the bloc can translate economic size into geopolitical influence."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-philippine-economy",
@@ -1277,7 +1340,8 @@
       "targetName": "How the 1997 crisis unfolded",
       "durationMinutes": 10,
       "instruction": "Trace the contagion from Thailand's baht to Indonesia, Korea, and beyond, then evaluate whether the IMF's austerity prescriptions helped or hurt."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-future-of-work",
@@ -1297,7 +1361,8 @@
       "targetName": "How technology is reshaping labor markets",
       "durationMinutes": 8,
       "instruction": "Learn about the gig economy, AI displacement, and remote work trends, then consider which jobs are most vulnerable and which are most resilient to automation."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-shareholder-primacy",
@@ -1317,7 +1382,8 @@
       "targetName": "The rise and fall of shareholder primacy",
       "durationMinutes": 8,
       "instruction": "Read Friedman's 1970 argument that corporate social responsibility is 'fundamentally subversive,' then explain why 181 CEOs reversed course in 2019."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-economic-growth",
@@ -1337,7 +1403,8 @@
       "targetName": "Solow growth model vs endogenous growth",
       "durationMinutes": 10,
       "instruction": "Learn why Solow's model predicts convergence that never happens, then explain how Romer's endogenous growth theory makes ideas the engine of prosperity."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-economic-freedom",
@@ -1357,7 +1424,8 @@
       "targetName": "Measuring economic freedom",
       "durationMinutes": 7,
       "instruction": "Learn how economic freedom indices are constructed (property rights, trade openness, regulatory burden), then examine whether high economic freedom always correlates with prosperity."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-de-industrialization",
@@ -1377,7 +1445,8 @@
       "targetName": "The causes and consequences of deindustrialization",
       "durationMinutes": 8,
       "instruction": "Learn how automation and offshoring together eliminated manufacturing jobs in developed nations, then consider what policies could help displaced workers."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-negative-interest-rates",
@@ -1397,7 +1466,8 @@
       "targetName": "Negative interest rates: the experiment",
       "durationMinutes": 8,
       "instruction": "Learn which central banks used negative rates and why, then discuss whether they stimulated lending or just punished savers."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-modern-monetary-theory",
@@ -1417,7 +1487,8 @@
       "targetName": "The core claims of MMT",
       "durationMinutes": 10,
       "instruction": "Learn MMT's key insight (sovereign currency issuers face real resource constraints, not financial ones), then compare its predictions with what happened during COVID-era spending."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-privatization",
@@ -1437,7 +1508,8 @@
       "targetName": "The wave of privatizations in the 1980s–90s",
       "durationMinutes": 8,
       "instruction": "Compare successful privatizations (UK telecommunications) with failed ones (Russian energy sector), then identify what conditions make privatization work or fail."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-sanctions",
@@ -1457,7 +1529,8 @@
       "targetName": "Do sanctions actually work?",
       "durationMinutes": 8,
       "instruction": "Study the track record of sanctions (Cuba, Iran, Russia), then debate whether they achieve political goals or primarily inflict humanitarian suffering."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-creative-economy",
@@ -1477,7 +1550,8 @@
       "targetName": "How the creative economy works",
       "durationMinutes": 8,
       "instruction": "Learn why creative industries have unusual economics (high fixed costs, near-zero marginal costs, winner-take-all markets), then identify a creative industry trend reshaping your world."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-philippine-economy-history",
@@ -1497,7 +1571,8 @@
       "targetName": "The Philippine economic trajectory",
       "durationMinutes": 10,
       "instruction": "Learn how the Philippines went from postwar prosperity to relative decline, then examine how overseas remittances became a lifeline for the economy."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-regressive-tax",
@@ -1517,7 +1592,8 @@
       "targetName": "Understanding tax progressivity",
       "durationMinutes": 7,
       "instruction": "Learn the difference between progressive, proportional, and regressive taxes, then find which type dominates your country's tax system and its effect on inequality."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-exchange-rate",
@@ -1537,7 +1613,8 @@
       "targetName": "How exchange rates are determined",
       "durationMinutes": 8,
       "instruction": "Learn the difference between floating and fixed exchange rates, then check today's USD/EUR rate and what's driving it."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-stock-market",
@@ -1557,7 +1634,8 @@
       "targetName": "How stock markets work",
       "durationMinutes": 8,
       "instruction": "Learn the basics of stock exchanges, P/E ratios, and market indices, then check the S&P 500's year-to-date performance and what's driving it."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-bubble",
@@ -1577,7 +1655,8 @@
       "targetName": "The anatomy of a bubble",
       "durationMinutes": 8,
       "instruction": "Learn the five stages of a bubble (displacement, boom, euphoria, profit-taking, panic), then compare the dot-com bubble with the 2008 housing bubble."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-paradox-of-thrift",
@@ -1597,7 +1676,8 @@
       "targetName": "Why saving too much can harm the economy",
       "durationMinutes": 6,
       "instruction": "Understand the paradox of thrift through a simple example, then explain why it matters during recessions when consumer confidence collapses."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-fisher-equation",
@@ -1617,7 +1697,8 @@
       "targetName": "The Fisher equation and its implications",
       "durationMinutes": 7,
       "instruction": "Learn the Fisher equation, then explain why the Fed raises rates when inflation rises — and why savers aren't actually better off when nominal rates track inflation."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-creative-capitalism",
@@ -1637,7 +1718,8 @@
       "targetName": "Stakeholder vs shareholder capitalism",
       "durationMinutes": 8,
       "instruction": "Learn the stakeholder theory proposed by R. Edward Freeman, then evaluate whether companies can genuinely serve multiple stakeholders or if trade-offs make it impossible."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-philippine-remittances",
@@ -1657,7 +1739,8 @@
       "targetName": "How remittances shape developing economies",
       "durationMinutes": 7,
       "instruction": "Learn the scale and impact of global remittances, then examine whether remittance-dependent economies become trapped in a cycle of labor export."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-dao",
@@ -1677,7 +1760,8 @@
       "targetName": "How DAOs work and what they govern",
       "durationMinutes": 8,
       "instruction": "Learn how DAOs use smart contracts and token voting to make collective decisions, then examine one successful DAO and one that failed spectacularly."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-philippine-migrant-workers",
@@ -1697,7 +1781,8 @@
       "targetName": "The economics of labor export",
       "durationMinutes": 8,
       "instruction": "Learn how the Philippine government institutionalized labor migration, then discuss the social costs of a policy that treats human capital as the country's main export."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-absolute-advantage",
@@ -1717,7 +1802,8 @@
       "targetName": "Absolute vs comparative advantage",
       "durationMinutes": 6,
       "instruction": "Learn the difference between absolute advantage (who produces more) and comparative advantage (who sacrifices less), then explain why comparative advantage matters more for trade."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-deflation",
@@ -1737,7 +1823,8 @@
       "targetName": "Why deflation is dangerous",
       "durationMinutes": 7,
       "instruction": "Learn the deflationary spiral (falling prices → delayed spending → lower output → more unemployment → more deflation), then examine Japan's lost decades as a case study."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-neoliberalism",
@@ -1757,7 +1844,8 @@
       "targetName": "The rise and critique of neoliberalism",
       "durationMinutes": 10,
       "instruction": "Learn the core tenets of neoliberalism (Washington Consensus), then evaluate its track record: what it delivered and what it failed to deliver."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-gig-economy",
@@ -1777,7 +1865,8 @@
       "targetName": "The economics of gig work",
       "durationMinutes": 7,
       "instruction": "Learn how gig platforms use algorithms to manage workers, then debate whether gig workers are independent entrepreneurs or misclassified employees."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-fiscal-multiplier",
@@ -1797,7 +1886,8 @@
       "targetName": "What determines the size of the fiscal multiplier",
       "durationMinutes": 8,
       "instruction": "Learn why multipliers vary (higher in recessions, lower at full employment), then find an estimate of the multiplier for infrastructure spending vs tax cuts."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-fiat-currency",
@@ -1817,7 +1907,8 @@
       "targetName": "How fiat money differs from commodity money",
       "durationMinutes": 6,
       "instruction": "Learn the difference between fiat money (government decree) and commodity money (gold-backed), then explain why the world abandoned the gold standard."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-creative-economy-philippines",
@@ -1837,7 +1928,8 @@
       "targetName": "How the BPO industry transformed the Philippines",
       "durationMinutes": 8,
       "instruction": "Learn how English proficiency and time zone alignment gave the Philippines a BPO advantage, then examine the social costs of night-shift service work."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-economic-indicator",
@@ -1857,7 +1949,8 @@
       "targetName": "Which indicators predict recessions",
       "durationMinutes": 7,
       "instruction": "Learn about the yield curve inversion, PMI, and initial jobless claims as recession predictors, then check the current state of two leading indicators."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-philippine-currency-history",
@@ -1877,7 +1970,8 @@
       "targetName": "The history of Philippine currency",
       "durationMinutes": 8,
       "instruction": "Trace the peso from Spanish colonial times through American influence to modern floating exchange rates, then explain how currency crises reflect deeper economic vulnerabilities."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "economics-philippine-poverty",
@@ -1897,7 +1991,8 @@
       "targetName": "How poverty traps work and how to break them",
       "durationMinutes": 8,
       "instruction": "Learn about the mechanisms that trap people in poverty (credit constraints, health shocks, educational gaps), then examine one successful anti-poverty program and why it worked."
-    }
+    },
+    "byline": ""
   },
   {
     "name": "The Invisible Hand (Smith, 1776)",
@@ -1911,8 +2006,13 @@
     ],
     "id": "econ-the-invisible-hand-smith-1776",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Invisible Hand (Smith, 1776) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Invisible Hand (Smith, 1776) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1927,8 +2027,13 @@
     ],
     "id": "econ-keynesian-economics-1936",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Keynesian Economics (1936) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Keynesian Economics (1936) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1943,8 +2048,13 @@
     ],
     "id": "econ-gdp-as-a-measure-1934",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "GDP as a Measure (1934) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of GDP as a Measure (1934) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1959,8 +2069,13 @@
     ],
     "id": "econ-the-tragedy-of-the-commons-1968",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Tragedy of the Commons (1968) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Tragedy of the Commons (1968) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1975,8 +2090,13 @@
     ],
     "id": "econ-game-theory-in-economics",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Game Theory in Economics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Game Theory in Economics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1991,8 +2111,13 @@
     ],
     "id": "econ-the-federal-reserve-1913",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Federal Reserve (1913) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Federal Reserve (1913) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2007,8 +2132,13 @@
     ],
     "id": "econ-behavioral-economics-kahneman-2002",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Behavioral Economics (Kahneman, 2002) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Behavioral Economics (Kahneman, 2002) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2023,8 +2153,13 @@
     ],
     "id": "econ-the-laffer-curve-1974",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Laffer Curve (1974) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Laffer Curve (1974) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2039,8 +2174,13 @@
     ],
     "id": "econ-supply-and-demand-ricardo-1817",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Supply and Demand (Ricardo, 1817) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Supply and Demand (Ricardo, 1817) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2055,8 +2195,13 @@
     ],
     "id": "econ-the-gold-standard-1870s-1971",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Gold Standard (1870s-1971) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Gold Standard (1870s-1971) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2071,8 +2216,13 @@
     ],
     "id": "econ-monetarism-friedman-1960s",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Monetarism (Friedman, 1960s) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Monetarism (Friedman, 1960s) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2087,8 +2237,13 @@
     ],
     "id": "econ-the-great-depression-1929-39",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Great Depression (1929-39) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Great Depression (1929-39) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2103,8 +2258,13 @@
     ],
     "id": "econ-elasticity-of-demand",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Elasticity of Demand end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Elasticity of Demand — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2119,8 +2279,13 @@
     ],
     "id": "econ-opportunity-cost-ricardo-1817",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Opportunity Cost (Ricardo, 1817) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Opportunity Cost (Ricardo, 1817) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2135,8 +2300,13 @@
     ],
     "id": "econ-the-efficiency-wage-theory",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Efficiency Wage Theory end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Efficiency Wage Theory — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2151,8 +2321,13 @@
     ],
     "id": "econ-quantitative-easing-2008",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Quantitative Easing (2008) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Quantitative Easing (2008) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2167,8 +2342,13 @@
     ],
     "id": "econ-the-dutch-tulip-mania-1637",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Dutch Tulip Mania (1637) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Dutch Tulip Mania (1637) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2183,8 +2363,13 @@
     ],
     "id": "econ-comparative-advantage-ricardo-1817",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Comparative Advantage (Ricardo, 1817) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Comparative Advantage (Ricardo, 1817) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2199,8 +2384,13 @@
     ],
     "id": "econ-the-veblen-good",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Veblen Good end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Veblen Good — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2215,8 +2405,13 @@
     ],
     "id": "econ-the-phillips-curve-1958",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Phillips Curve (1958) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Phillips Curve (1958) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2231,8 +2426,13 @@
     ],
     "id": "econ-the-gini-coefficient",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Gini Coefficient end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Gini Coefficient — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2247,8 +2447,13 @@
     ],
     "id": "econ-the-invisible-hand-vs-visible-hand",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Invisible Hand vs Visible Hand end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Invisible Hand vs Visible Hand — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2263,8 +2468,13 @@
     ],
     "id": "econ-the-paradox-of-thrift-keynes-1936",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Paradox of Thrift (Keynes, 1936) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Paradox of Thrift (Keynes, 1936) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2279,8 +2489,13 @@
     ],
     "id": "econ-schumpeters-creative-destruction-1942",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Schumpeter's Creative Destruction (1942) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Schumpeter's Creative Destruction (1942) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2295,8 +2510,13 @@
     ],
     "id": "econ-the-circular-flow-of-income",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Circular Flow of Income end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Circular Flow of Income — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2311,8 +2531,13 @@
     ],
     "id": "econ-utility-maximization",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Utility Maximization end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Utility Maximization — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2327,8 +2552,13 @@
     ],
     "id": "econ-the-coase-theorem-1960",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Coase Theorem (1960) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Coase Theorem (1960) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2343,8 +2573,13 @@
     ],
     "id": "econ-the-kuznets-curve",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Kuznets Curve end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Kuznets Curve — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2359,308 +2594,363 @@
     ],
     "id": "econ-the-solow-growth-model-1956",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Solow Growth Model (1956) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Solow Growth Model (1956) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
     "id": "economics-gig-economy-1",
     "name": "Gig Economy",
     "category": "ECONOMICS",
-    "teaser": "A labor market characterized by short-term, flexible jobs rather than permanent positions. Uber, DoorDash, and Fiverr exemplify the model. 36% of US workers participate in gig work. It offers flexibility but often lacks benefits and job security."
+    "teaser": "A labor market characterized by short-term, flexible jobs rather than permanent positions. Uber, DoorDash, and Fiverr exemplify the model. 36% of US workers participate in gig work. It offers flexibility but often lacks benefits and job security.",
+    "byline": ""
   },
   {
     "id": "economics-universal-basic-income",
     "name": "Universal Basic Income",
     "category": "ECONOMICS",
-    "teaser": "A government program providing all citizens with a regular unconditional cash payment. Finland's 2017-2018 trial with 2,000 unemployed people found recipients were happier and healthier with no reduction in employment. Alaska's Permanent Fund has paid dividends since 1982."
+    "teaser": "A government program providing all citizens with a regular unconditional cash payment. Finland's 2017-2018 trial with 2,000 unemployed people found recipients were happier and healthier with no reduction in employment. Alaska's Permanent Fund has paid dividends since 1982.",
+    "byline": ""
   },
   {
     "id": "economics-modern-monetary-theory-1",
     "name": "Modern Monetary Theory",
     "category": "ECONOMICS",
-    "teaser": "An economic theory suggesting governments that issue their own currency cannot run out of money and should spend to achieve full employment. Critics warn of inflation risks. It gained attention during COVID-19 when governments spent trillions without apparent consequence."
+    "teaser": "An economic theory suggesting governments that issue their own currency cannot run out of money and should spend to achieve full employment. Critics warn of inflation risks. It gained attention during COVID-19 when governments spent trillions without apparent consequence.",
+    "byline": ""
   },
   {
     "id": "economics-behavioral-economics-1",
     "name": "Behavioral Economics",
     "category": "ECONOMICS",
-    "teaser": "The field combining psychology and economics to understand why people make irrational financial decisions. Richard Thaler won the 2017 Nobel Prize for this work. Nudges like automatic enrollment in retirement savings increased participation from 49% to 86%."
+    "teaser": "The field combining psychology and economics to understand why people make irrational financial decisions. Richard Thaler won the 2017 Nobel Prize for this work. Nudges like automatic enrollment in retirement savings increased participation from 49% to 86%.",
+    "byline": ""
   },
   {
     "id": "economics-shadow-banking",
     "name": "Shadow Banking",
     "category": "ECONOMICS",
-    "teaser": "Non-bank financial intermediaries that provide services similar to banks but operate outside regular banking regulations. The shadow banking system reached $63 trillion globally in 2019. It played a major role in the 2008 financial crisis through mortgage-backed securities."
+    "teaser": "Non-bank financial intermediaries that provide services similar to banks but operate outside regular banking regulations. The shadow banking system reached $63 trillion globally in 2019. It played a major role in the 2008 financial crisis through mortgage-backed securities.",
+    "byline": ""
   },
   {
     "id": "economics-dutch-disease-1",
     "name": "Dutch Disease",
     "category": "ECONOMICS",
-    "teaser": "An economic phenomenon where a country's natural resource boom leads to currency appreciation that hurts other export sectors. The Netherlands experienced it after finding natural gas in 1959. Nigeria's oil boom devastated its agricultural sector in the 1970s."
+    "teaser": "An economic phenomenon where a country's natural resource boom leads to currency appreciation that hurts other export sectors. The Netherlands experienced it after finding natural gas in 1959. Nigeria's oil boom devastated its agricultural sector in the 1970s.",
+    "byline": ""
   },
   {
     "id": "economics-gini-coefficient-1",
     "name": "Gini Coefficient",
     "category": "ECONOMICS",
-    "teaser": "A measure of income inequality ranging from 0 (perfect equality) to 1 (perfect inequality). South Africa has the highest at 0.63 while Scandinavian countries average 0.25. The US Gini coefficient rose from 0.39 in 1967 to 0.49 in 2021."
+    "teaser": "A measure of income inequality ranging from 0 (perfect equality) to 1 (perfect inequality). South Africa has the highest at 0.63 while Scandinavian countries average 0.25. The US Gini coefficient rose from 0.39 in 1967 to 0.49 in 2021.",
+    "byline": ""
   },
   {
     "id": "economics-trickle-down-economics",
     "name": "Trickle-Down Economics",
     "category": "ECONOMICS",
-    "teaser": "The theory that tax cuts for corporations and the wealthy stimulate economic growth benefiting everyone. Empirical evidence is mixed — the 2017 Tax Cuts and Jobs Act reduced corporate tax from 35% to 21% but primarily boosted stock buybacks over wages."
+    "teaser": "The theory that tax cuts for corporations and the wealthy stimulate economic growth benefiting everyone. Empirical evidence is mixed — the 2017 Tax Cuts and Jobs Act reduced corporate tax from 35% to 21% but primarily boosted stock buybacks over wages.",
+    "byline": ""
   },
   {
     "id": "economics-pareto-efficiency",
     "name": "Pareto Efficiency",
     "category": "ECONOMICS",
-    "teaser": "An economic state where no one can be made better off without making someone worse off. Vilfredo Pareto observed that 80% of Italy's land was owned by 20% of the population in 1896. The 80/20 rule appears throughout economics and business."
+    "teaser": "An economic state where no one can be made better off without making someone worse off. Vilfredo Pareto observed that 80% of Italy's land was owned by 20% of the population in 1896. The 80/20 rule appears throughout economics and business.",
+    "byline": ""
   },
   {
     "id": "economics-stagflation-1",
     "name": "Stagflation",
     "category": "ECONOMICS",
-    "teaser": "A toxic combination of stagnant economic growth, high unemployment, and rising inflation. The US experienced it from 1973-1982, triggered by oil shocks. Paul Volcker, Federal Reserve chair, ended it by raising interest rates to 20% in 1981."
+    "teaser": "A toxic combination of stagnant economic growth, high unemployment, and rising inflation. The US experienced it from 1973-1982, triggered by oil shocks. Paul Volcker, Federal Reserve chair, ended it by raising interest rates to 20% in 1981.",
+    "byline": ""
   },
   {
     "id": "economics-externalities-1",
     "name": "Externalities",
     "category": "ECONOMICS",
-    "teaser": "Costs or benefits of an economic activity that affect third parties not involved in the transaction. Pollution is a negative externality — factories impose health costs on communities. Carbon taxes attempt to internalize climate change costs."
+    "teaser": "Costs or benefits of an economic activity that affect third parties not involved in the transaction. Pollution is a negative externality — factories impose health costs on communities. Carbon taxes attempt to internalize climate change costs.",
+    "byline": ""
   },
   {
     "id": "economics-creative-destruction-1",
     "name": "Creative Destruction",
     "category": "ECONOMICS",
-    "teaser": "Joseph Schumpeter's 1942 concept describing how innovation constantly replaces old industries. The automobile destroyed horse-drawn carriages, streaming killed Blockbuster, and smartphones eliminated cameras and GPS devices. It drives long-term economic progress."
+    "teaser": "Joseph Schumpeter's 1942 concept describing how innovation constantly replaces old industries. The automobile destroyed horse-drawn carriages, streaming killed Blockbuster, and smartphones eliminated cameras and GPS devices. It drives long-term economic progress.",
+    "byline": ""
   },
   {
     "id": "economics-veblen-goods",
     "name": "Veblen Goods",
     "category": "ECONOMICS",
-    "teaser": "Luxury products for which demand increases as the price rises because they signal status. Hermès Birkin bags and Rolls-Royce cars follow this pattern. Thorstein Veblen coined 'conspicuous consumption' in 1899 to describe status-seeking spending."
+    "teaser": "Luxury products for which demand increases as the price rises because they signal status. Hermès Birkin bags and Rolls-Royce cars follow this pattern. Thorstein Veblen coined 'conspicuous consumption' in 1899 to describe status-seeking spending.",
+    "byline": ""
   },
   {
     "id": "economics-fiscal-cliff",
     "name": "Fiscal Cliff",
     "category": "ECONOMICS",
-    "teaser": "A situation where automatic tax increases and spending cuts occur simultaneously, potentially causing economic contraction. The US faced one in 2012-2013 when Bush-era tax cuts expired alongside sequestration. Congress eventually passed a partial compromise."
+    "teaser": "A situation where automatic tax increases and spending cuts occur simultaneously, potentially causing economic contraction. The US faced one in 2012-2013 when Bush-era tax cuts expired alongside sequestration. Congress eventually passed a partial compromise.",
+    "byline": ""
   },
   {
     "id": "economics-k-shaped-recovery",
     "name": "K-Shaped Recovery",
     "category": "ECONOMICS",
-    "teaser": "An economic recovery where different segments of society recover at different rates, diverging over time. After COVID-19, tech companies and stock owners boomed while service workers struggled. The top 10% of earners saw wealth increase 25% during the pandemic."
+    "teaser": "An economic recovery where different segments of society recover at different rates, diverging over time. After COVID-19, tech companies and stock owners boomed while service workers struggled. The top 10% of earners saw wealth increase 25% during the pandemic.",
+    "byline": ""
   },
   {
     "id": "economics-supply-chain-economics",
     "name": "Supply Chain Economics",
     "category": "ECONOMICS",
-    "teaser": "The network of organizations involved in producing and distributing goods. COVID-19 exposed vulnerabilities — a single semiconductor shortage affected auto, electronics, and appliance industries. The cost of shipping a container from China to the US rose 10x in 2021."
+    "teaser": "The network of organizations involved in producing and distributing goods. COVID-19 exposed vulnerabilities — a single semiconductor shortage affected auto, electronics, and appliance industries. The cost of shipping a container from China to the US rose 10x in 2021.",
+    "byline": ""
   },
   {
     "id": "economics-carbon-pricing",
     "name": "Carbon Pricing",
     "category": "ECONOMICS",
-    "teaser": "Placing a direct cost on carbon emissions to incentivize reduction. The EU Emissions Trading System covers 40% of EU emissions. British Columbia's carbon tax, introduced in 2008, reduced emissions by 5-15% while maintaining economic growth."
+    "teaser": "Placing a direct cost on carbon emissions to incentivize reduction. The EU Emissions Trading System covers 40% of EU emissions. British Columbia's carbon tax, introduced in 2008, reduced emissions by 5-15% while maintaining economic growth.",
+    "byline": ""
   },
   {
     "id": "economics-crypto-economics-1",
     "name": "Crypto Economics",
     "category": "ECONOMICS",
-    "teaser": "The study of how blockchain networks use incentives and tokens to coordinate behavior without central authority. Bitcoin's proof-of-work consumes about 150 TWh annually. Ethereum's 2022 switch to proof-of-stake reduced energy consumption by 99.95%."
+    "teaser": "The study of how blockchain networks use incentives and tokens to coordinate behavior without central authority. Bitcoin's proof-of-work consumes about 150 TWh annually. Ethereum's 2022 switch to proof-of-stake reduced energy consumption by 99.95%.",
+    "byline": ""
   },
   {
     "id": "economics-inclusive-growth",
     "name": "Inclusive Growth",
     "category": "ECONOMICS",
-    "teaser": "Economic expansion that creates opportunities for all segments of society rather than concentrating wealth. The World Bank estimates that the poorest 40% must grow 2% faster than the average to reduce inequality. Costa Rica achieved this with strong social investment."
+    "teaser": "Economic expansion that creates opportunities for all segments of society rather than concentrating wealth. The World Bank estimates that the poorest 40% must grow 2% faster than the average to reduce inequality. Costa Rica achieved this with strong social investment.",
+    "byline": ""
   },
   {
     "id": "economics-debt-to-gdp-ratio",
     "name": "Debt-to-GDP Ratio",
     "category": "ECONOMICS",
-    "teaser": "A country's total debt relative to its economic output, indicating its ability to repay. Japan's ratio exceeds 260% — the highest in the world — yet it avoids crisis because most debt is held domestically. The US ratio reached 123% in 2023."
+    "teaser": "A country's total debt relative to its economic output, indicating its ability to repay. Japan's ratio exceeds 260% — the highest in the world — yet it avoids crisis because most debt is held domestically. The US ratio reached 123% in 2023.",
+    "byline": ""
   },
   {
     "id": "economics-petty-cash-float",
     "name": "Petty Cash Float",
     "category": "ECONOMICS",
-    "teaser": "A small amount of currency kept on hand for minor expenses. A typical office maintains $100-$300 in petty cash for supplies, postage, and incidentals. Companies reconcile petty cash monthly, requiring receipts for every disbursement."
+    "teaser": "A small amount of currency kept on hand for minor expenses. A typical office maintains $100-$300 in petty cash for supplies, postage, and incidentals. Companies reconcile petty cash monthly, requiring receipts for every disbursement.",
+    "byline": ""
   },
   {
     "id": "economics-revenue-recognition",
     "name": "Revenue Recognition",
     "category": "ECONOMICS",
-    "teaser": "Accounting principles determining when a company records income. ASC 606 requires recognizing revenue when performance obligations are met. Amazon recognizes cloud revenue monthly but retail revenue at delivery — a key difference in how earnings appear."
+    "teaser": "Accounting principles determining when a company records income. ASC 606 requires recognizing revenue when performance obligations are met. Amazon recognizes cloud revenue monthly but retail revenue at delivery — a key difference in how earnings appear.",
+    "byline": ""
   },
   {
     "id": "economics-goodwill-in-accounting",
     "name": "Goodwill in Accounting",
     "category": "ECONOMICS",
-    "teaser": "The premium paid for an acquiring company above its net asset value. When Microsoft bought LinkedIn for $26.2 billion in 2016, most of the premium was recorded as goodwill. If goodwill becomes impaired, companies must write down its value, hitting profits."
+    "teaser": "The premium paid for an acquiring company above its net asset value. When Microsoft bought LinkedIn for $26.2 billion in 2016, most of the premium was recorded as goodwill. If goodwill becomes impaired, companies must write down its value, hitting profits.",
+    "byline": ""
   },
   {
     "id": "economics-monopsony-1",
     "name": "Monopsony",
     "category": "ECONOMICS",
-    "teaser": "A market with only one buyer, giving it outsized power over sellers. Amazon dominates book purchasing, affecting publisher prices. Labor monopsony occurs when a single employer controls a local job market, depressing wages below competitive levels."
+    "teaser": "A market with only one buyer, giving it outsized power over sellers. Amazon dominates book purchasing, affecting publisher prices. Labor monopsony occurs when a single employer controls a local job market, depressing wages below competitive levels.",
+    "byline": ""
   },
   {
     "id": "economics-velocity-of-money",
     "name": "Velocity of Money",
     "category": "ECONOMICS",
-    "teaser": "The rate at which money changes hands in an economy. When velocity drops, it signals economic weakness even if money supply grows. US velocity fell from 2.0 in 1999 to 1.1 in 2023, explaining why massive money printing didn't cause immediate inflation."
+    "teaser": "The rate at which money changes hands in an economy. When velocity drops, it signals economic weakness even if money supply grows. US velocity fell from 2.0 in 1999 to 1.1 in 2023, explaining why massive money printing didn't cause immediate inflation.",
+    "byline": ""
   },
   {
     "id": "economics-hedge-funds-1",
     "name": "Hedge Funds",
     "category": "ECONOMICS",
-    "teaser": "Pooled investment funds that employ advanced strategies to earn active returns. Bridgewater Associates, founded by Ray Dalio, manages $150 billion. The 2021 GameStop saga showed how retail investors could challenge hedge fund short positions."
+    "teaser": "Pooled investment funds that employ advanced strategies to earn active returns. Bridgewater Associates, founded by Ray Dalio, manages $150 billion. The 2021 GameStop saga showed how retail investors could challenge hedge fund short positions.",
+    "byline": ""
   },
   {
     "id": "economics-moral-hazard",
     "name": "Moral Hazard",
     "category": "ECONOMICS",
-    "teaser": "When someone takes greater risks because they know someone else bears the cost. Bank bailouts encourage reckless lending — 'too big to fail.' AIG's 2008 bailout cost $182 billion partly because its London division took excessive risks."
+    "teaser": "When someone takes greater risks because they know someone else bears the cost. Bank bailouts encourage reckless lending — 'too big to fail.' AIG's 2008 bailout cost $182 billion partly because its London division took excessive risks.",
+    "byline": ""
   },
   {
     "id": "economics-crony-capitalism",
     "name": "Crony Capitalism",
     "category": "ECONOMICS",
-    "teaser": "An economic system where business success depends on close relationships between government and business rather than competition. Russia's oligarchs acquired state assets at below-market prices in the 1990s privatizations. The term gained prominence during Asia's 1997 financial crisis."
+    "teaser": "An economic system where business success depends on close relationships between government and business rather than competition. Russia's oligarchs acquired state assets at below-market prices in the 1990s privatizations. The term gained prominence during Asia's 1997 financial crisis.",
+    "byline": ""
   },
   {
     "id": "economics-dynamic-pricing",
     "name": "Dynamic Pricing",
     "category": "ECONOMICS",
-    "teaser": "Adjusting prices in real time based on demand, supply, and customer data. Uber's surge pricing doubles or triples fares during peak hours. Airlines have used yield management since the 1980s, charging different prices for the same seat."
+    "teaser": "Adjusting prices in real time based on demand, supply, and customer data. Uber's surge pricing doubles or triples fares during peak hours. Airlines have used yield management since the 1980s, charging different prices for the same seat.",
+    "byline": ""
   },
   {
     "id": "economics-platform-economics",
     "name": "Platform Economics",
     "category": "ECONOMICS",
-    "teaser": "Two-sided markets where a platform connects buyers and sellers, creating network effects. Uber, Airbnb, and Amazon marketplace earn by facilitating transactions rather than producing goods. Each new user makes the platform more valuable to all others."
+    "teaser": "Two-sided markets where a platform connects buyers and sellers, creating network effects. Uber, Airbnb, and Amazon marketplace earn by facilitating transactions rather than producing goods. Each new user makes the platform more valuable to all others.",
+    "byline": ""
   },
   {
     "id": "economics-zipf-s-law",
     "name": "Zipf's Law",
     "category": "ECONOMICS",
-    "teaser": "The empirical observation that the second most frequent item occurs about half as often as the most frequent, the third about a third as much, and so on. It applies to city populations, word frequencies, and income distributions. It emerges from preferential attachment."
+    "teaser": "The empirical observation that the second most frequent item occurs about half as often as the most frequent, the third about a third as much, and so on. It applies to city populations, word frequencies, and income distributions. It emerges from preferential attachment.",
+    "byline": ""
   },
   {
     "id": "economics-black-swan-theory",
     "name": "Black Swan Theory",
     "category": "ECONOMICS",
-    "teaser": "Nassim Taleb's concept describing rare, unpredictable events with massive consequences. The 2008 financial crisis, COVID-19, and 9/11 are black swans. They're retrospectively predictable but ante-diagnostically impossible, and their impact is amplified by global interconnection."
+    "teaser": "Nassim Taleb's concept describing rare, unpredictable events with massive consequences. The 2008 financial crisis, COVID-19, and 9/11 are black swans. They're retrospectively predictable but ante-diagnostically impossible, and their impact is amplified by global interconnection.",
+    "byline": ""
   },
   {
     "id": "economics-tragedy-of-the-commons-1",
     "name": "Tragedy of the Commons",
     "category": "ECONOMICS",
-    "teaser": "Garrett Hardin's 1968 concept describing how shared resources are depleted when individuals act in self-interest. Overfishing, air pollution, and antibiotic overuse follow this pattern. Elinor Ostrom won the 2009 Nobel for showing communities can self-govern commons."
+    "teaser": "Garrett Hardin's 1968 concept describing how shared resources are depleted when individuals act in self-interest. Overfishing, air pollution, and antibiotic overuse follow this pattern. Elinor Ostrom won the 2009 Nobel for showing communities can self-govern commons.",
+    "byline": ""
   },
   {
     "id": "economics-comparative-advantage-1",
     "name": "Comparative Advantage",
     "category": "ECONOMICS",
-    "teaser": "David Ricardo's principle that countries benefit from trade by specializing in goods they produce at lowest opportunity cost. Even if one country is better at producing everything, both countries gain by specializing. It's the theoretical foundation for free trade."
+    "teaser": "David Ricardo's principle that countries benefit from trade by specializing in goods they produce at lowest opportunity cost. Even if one country is better at producing everything, both countries gain by specializing. It's the theoretical foundation for free trade.",
+    "byline": ""
   },
   {
     "id": "economics-laffer-curve",
     "name": "Laffer Curve",
     "category": "ECONOMICS",
-    "teaser": "The theory that there's an optimal tax rate that maximizes revenue — above which higher rates reduce revenue by discouraging activity. Art Laffer sketched it on a napkin in 1974. Reagan used it to justify tax cuts, though economists debate the optimal rate."
+    "teaser": "The theory that there's an optimal tax rate that maximizes revenue — above which higher rates reduce revenue by discouraging activity. Art Laffer sketched it on a napkin in 1974. Reagan used it to justify tax cuts, though economists debate the optimal rate.",
+    "byline": ""
   },
   {
     "id": "economics-efficient-market-hypothesis",
     "name": "Efficient Market Hypothesis",
     "category": "ECONOMICS",
-    "teaser": "Eugene Fama's theory that asset prices fully reflect all available information, making it impossible to consistently 'beat the market.' The hypothesis comes in weak, semi-strong, and strong forms. Buffett's long-term returns are cited as evidence against it."
+    "teaser": "Eugene Fama's theory that asset prices fully reflect all available information, making it impossible to consistently 'beat the market.' The hypothesis comes in weak, semi-strong, and strong forms. Buffett's long-term returns are cited as evidence against it.",
+    "byline": ""
   },
   {
     "id": "economics-keynesian-economics",
     "name": "Keynesian Economics",
     "category": "ECONOMICS",
-    "teaser": "John Maynard Keynes's theory that government spending should increase during recessions to offset decreased private demand. His 1936 'General Theory' revolutionized macroeconomics. The $2.2 trillion CARES Act in 2020 was a Keynesian response to COVID-19."
+    "teaser": "John Maynard Keynes's theory that government spending should increase during recessions to offset decreased private demand. His 1936 'General Theory' revolutionized macroeconomics. The $2.2 trillion CARES Act in 2020 was a Keynesian response to COVID-19.",
+    "byline": ""
   },
   {
     "id": "economics-austrian-economics",
     "name": "Austrian Economics",
     "category": "ECONOMICS",
-    "teaser": "A school emphasizing free markets, minimal government, and the role of entrepreneurship. Founded by Carl Menger in 1871, it opposed Keynesian stimulus. Austrian economists predicted the 2008 housing bubble but their opposition to central banking remains controversial."
+    "teaser": "A school emphasizing free markets, minimal government, and the role of entrepreneurship. Founded by Carl Menger in 1871, it opposed Keynesian stimulus. Austrian economists predicted the 2008 housing bubble but their opposition to central banking remains controversial.",
+    "byline": ""
   },
   {
     "id": "economics-feminist-economics",
     "name": "Feminist Economics",
     "category": "ECONOMICS",
-    "teaser": "The field examining how gender roles and power dynamics affect economic outcomes. Women perform $10.9 trillion in unpaid care work globally. The gender pay gap persists at 16% globally, with intersectional disparities for women of color."
+    "teaser": "The field examining how gender roles and power dynamics affect economic outcomes. Women perform $10.9 trillion in unpaid care work globally. The gender pay gap persists at 16% globally, with intersectional disparities for women of color.",
+    "byline": ""
   },
   {
     "id": "economics-degrowth",
     "name": "Degrowth",
     "category": "ECONOMICS",
-    "teaser": "An economic theory arguing that infinite growth on a finite planet is unsustainable and societies should prioritize well-being over GDP. France's 2022 ban on short-haul flights and Bhutan's Gross National Happiness index reflect degrowth principles."
+    "teaser": "An economic theory arguing that infinite growth on a finite planet is unsustainable and societies should prioritize well-being over GDP. France's 2022 ban on short-haul flights and Bhutan's Gross National Happiness index reflect degrowth principles.",
+    "byline": ""
   },
   {
     "id": "economics-attention-economy",
     "name": "Attention Economy",
     "category": "ECONOMICS",
-    "teaser": "Herbert Simon's insight that human attention is a scarce resource in information-rich environments. Google and Meta earn by capturing and selling attention to advertisers. The average person encounters 6,000-10,000 ads daily, each competing for a few seconds."
+    "teaser": "Herbert Simon's insight that human attention is a scarce resource in information-rich environments. Google and Meta earn by capturing and selling attention to advertisers. The average person encounters 6,000-10,000 ads daily, each competing for a few seconds.",
+    "byline": ""
   },
   {
     "id": "economics-colonial-economics",
     "name": "Colonial Economics",
     "category": "ECONOMICS",
-    "teaser": "Economic systems imposed during European colonialism that extracted resources from colonies. Belgium's exploitation of Congo's rubber reduced its population by half. Colonial-era trade patterns persist — former colonies still export raw materials to former colonizers."
+    "teaser": "Economic systems imposed during European colonialism that extracted resources from colonies. Belgium's exploitation of Congo's rubber reduced its population by half. Colonial-era trade patterns persist — former colonies still export raw materials to former colonizers.",
+    "byline": ""
   },
   {
     "id": "economics-positive-economics",
     "name": "Positive Economics",
     "category": "ECONOMICS",
-    "teaser": "Economic analysis based on facts and cause-effect relationships, separate from value judgments. 'Raising minimum wage increases unemployment' is a positive statement testable with data. It contrasts with normative economics, which involves value-based recommendations."
+    "teaser": "Economic analysis based on facts and cause-effect relationships, separate from value judgments. 'Raising minimum wage increases unemployment' is a positive statement testable with data. It contrasts with normative economics, which involves value-based recommendations.",
+    "byline": ""
   },
   {
     "id": "economics-economic-indicators",
     "name": "Economic Indicators",
     "category": "ECONOMICS",
-    "teaser": "Statistics like GDP, unemployment rate, and CPI that signal economic health. The Conference Board's Leading Economic Index predicts recessions 6-9 months ahead. The yield curve inversion has predicted every recession since 1955 with only one false signal."
+    "teaser": "Statistics like GDP, unemployment rate, and CPI that signal economic health. The Conference Board's Leading Economic Index predicts recessions 6-9 months ahead. The yield curve inversion has predicted every recession since 1955 with only one false signal.",
+    "byline": ""
   },
   {
     "id": "economics-financial-literacy",
     "name": "Financial Literacy",
     "category": "ECONOMICS",
-    "teaser": "Knowledge of financial concepts like compound interest, inflation, and diversification. Only 57% of American adults are financially literate according to the FINRA Foundation. Financial education programs show modest but real improvements in savings behavior."
+    "teaser": "Knowledge of financial concepts like compound interest, inflation, and diversification. Only 57% of American adults are financially literate according to the FINRA Foundation. Financial education programs show modest but real improvements in savings behavior.",
+    "byline": ""
   },
   {
     "id": "economics-public-goods-1",
     "name": "Public Goods",
     "category": "ECONOMICS",
-    "teaser": "Goods that are non-excludable and non-rivalrous — everyone benefits regardless of payment. National defense, streetlights, and clean air are public goods. Free-rider problems make private markets underprovide them, justifying government provision through taxation."
+    "teaser": "Goods that are non-excludable and non-rivalrous — everyone benefits regardless of payment. National defense, streetlights, and clean air are public goods. Free-rider problems make private markets underprovide them, justifying government provision through taxation.",
+    "byline": ""
   },
   {
     "id": "economics-information-asymmetry",
     "name": "Information Asymmetry",
     "category": "ECONOMICS",
-    "teaser": "When one party in a transaction has more information than the other. Used car sellers know more than buyers — George Akerlof's 'Market for Lemons' (1970) showed this can collapse markets. Insurance companies' advantage over applicants drives medical underwriting."
+    "teaser": "When one party in a transaction has more information than the other. Used car sellers know more than buyers — George Akerlof's 'Market for Lemons' (1970) showed this can collapse markets. Insurance companies' advantage over applicants drives medical underwriting.",
+    "byline": ""
   },
   {
     "id": "economics-sweat-equity",
     "name": "Sweat Equity",
     "category": "ECONOMICS",
-    "teaser": "Non-monetary investment of time and effort into a business or project. Startup founders accept lower salaries hoping equity will appreciate. In real estate, home improvements that increase value without cash investment are sweat equity. Mark Zuckerberg turned down $1 billion for Facebook."
+    "teaser": "Non-monetary investment of time and effort into a business or project. Startup founders accept lower salaries hoping equity will appreciate. In real estate, home improvements that increase value without cash investment are sweat equity. Mark Zuckerberg turned down $1 billion for Facebook.",
+    "byline": ""
   },
   {
     "id": "economics-external-debt",
     "name": "External Debt",
     "category": "ECONOMICS",
-    "teaser": "Money a country owes to foreign creditors. Sri Lanka's 2022 default on $51 billion in external debt triggered economic collapse. Greece's debt crisis in 2010 exceeded 130% of GDP, requiring three bailout programs totaling €289 billion."
+    "teaser": "Money a country owes to foreign creditors. Sri Lanka's 2022 default on $51 billion in external debt triggered economic collapse. Greece's debt crisis in 2010 exceeded 130% of GDP, requiring three bailout programs totaling €289 billion.",
+    "byline": ""
   },
   {
     "id": "economics-cost-benefit-analysis",
     "name": "Cost-Benefit Analysis",
     "category": "ECONOMICS",
-    "teaser": "A systematic approach to evaluating decisions by comparing total costs against total benefits. The US EPA estimates the Clean Air Act benefits at $2 trillion annually against $65 billion in compliance costs — a 30:1 return. It's required for major federal regulations."
+    "teaser": "A systematic approach to evaluating decisions by comparing total costs against total benefits. The US EPA estimates the Clean Air Act benefits at $2 trillion annually against $65 billion in compliance costs — a 30:1 return. It's required for major federal regulations.",
+    "byline": ""
   }
 ]

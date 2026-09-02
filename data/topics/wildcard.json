@@ -17,7 +17,8 @@
       "Megalithic",
       "British"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-quirigua",
@@ -37,7 +38,8 @@
       "Mayan",
       "Pre-Columbian"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "wildcard-bio-luminescent-bays",
@@ -57,7 +59,8 @@
       "Caribbean",
       "Natural"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-murmuration",
@@ -77,7 +80,8 @@
       "British",
       "Winter"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-capoeira",
@@ -97,7 +101,8 @@
       "Brazilian",
       "Ritual"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-parkour",
@@ -117,7 +122,8 @@
       "French",
       "Urban"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-origami",
@@ -137,7 +143,8 @@
       "Japanese",
       "Paper"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-bonsai",
@@ -157,7 +164,8 @@
       "Japanese",
       "Aesthetic"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "wildcard-origami-crane-1000",
@@ -177,7 +185,8 @@
       "Japanese",
       "Memorial"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "wildcard-aquascaping-iwagumi",
@@ -197,7 +206,8 @@
       "Japanese",
       "Aquatic"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "wildcard-day-of-the-dead",
@@ -217,7 +227,8 @@
       "Mexican",
       "Indigenous-Christian"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-burning-man",
@@ -237,7 +248,8 @@
       "American",
       "Art"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "wildcard-tea-ceremony",
@@ -257,7 +269,8 @@
       "Japanese",
       "Zen"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-zen-rocks",
@@ -277,7 +290,8 @@
       "Japanese",
       "Zen"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-bossa-nova",
@@ -297,7 +311,8 @@
       "Brazilian",
       "Jazz"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-gamelan",
@@ -317,7 +332,8 @@
       "Indonesian",
       "Percussion"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "wildcard-qawwali",
@@ -337,7 +353,8 @@
       "Sufi",
       "Pakistani-Indian"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-tuvan-throat",
@@ -357,7 +374,8 @@
       "Tuvan",
       "Vocal"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-icelandic-eleanor",
@@ -377,7 +395,8 @@
       "Nordic",
       "Winter"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-icelandic-hot-springs",
@@ -397,7 +416,8 @@
       "Icelandic",
       "Health"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-yoga-ashtanga",
@@ -417,7 +437,8 @@
       "Indian",
       "Body"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-vipassana-10-day",
@@ -437,7 +458,8 @@
       "Vipassana",
       "Meditation"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "wildcard-icelandic-bjorn-isleif",
@@ -457,7 +479,8 @@
       "Icelandic",
       "Viking-tradition"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "wildcard-ultramarathon",
@@ -477,7 +500,8 @@
       "American",
       "Endurance"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "wildcard-volcanic-iceland-iceland-erupt",
@@ -497,7 +521,8 @@
       "Icelandic",
       "Active"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-y2k-panic",
@@ -517,7 +542,8 @@
       "Tech",
       "1990s"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "wildcard-voyager-golden-record",
@@ -537,7 +563,8 @@
       "American",
       "Space"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-johannes-kepler-mysterium",
@@ -557,7 +584,8 @@
       "Science",
       "1590s"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "wildcard-hidden-figures",
@@ -577,7 +605,8 @@
       "Space",
       "American"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-vinland",
@@ -597,7 +626,8 @@
       "Norse",
       "Indigenous"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-ikebana-190",
@@ -617,7 +647,8 @@
       "Japanese",
       "Art"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-wabi-sabi-191",
@@ -637,7 +668,8 @@
       "Japanese",
       "Aesthetic"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-lagom-192",
@@ -657,7 +689,8 @@
       "Swedish",
       "Culture"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-sisu-193",
@@ -677,7 +710,8 @@
       "Finnish",
       "Culture"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-konmari-method-115",
@@ -697,7 +731,8 @@
       "Practice",
       "2010s"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-bullet-journal-116",
@@ -717,7 +752,8 @@
       "Productivity",
       "Practice"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-slow-movement-117",
@@ -737,7 +773,8 @@
       "Philosophy",
       "Modern"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-tiny-house-movement-118",
@@ -757,7 +794,8 @@
       "Housing",
       "Modern"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-voynich-manuscript-119",
@@ -777,7 +815,8 @@
       "Cryptography",
       "Medieval"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-nazca-lines-120",
@@ -797,7 +836,8 @@
       "Peru",
       "Ancient"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-terracotta-army-121",
@@ -817,7 +857,8 @@
       "China",
       "Ancient"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-angkor-wat-122",
@@ -837,7 +878,8 @@
       "Cambodia",
       "Khmer"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-easter-island-moai-123",
@@ -857,7 +899,8 @@
       "Rapa Nui",
       "Megalithic"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-chichén-itzá-124",
@@ -877,7 +920,8 @@
       "Maya",
       "Mesoamerica"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-northern-lights-129",
@@ -897,7 +941,8 @@
       "Geophysics",
       "Nature"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-victoria-falls-130",
@@ -917,7 +962,8 @@
       "Africa",
       "Geology"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-great-barrier-reef-131",
@@ -937,7 +983,8 @@
       "Australia",
       "Marine"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-sahara-desert-132",
@@ -957,7 +1004,8 @@
       "Africa",
       "Climate"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-yosemite-national-park-133",
@@ -977,7 +1025,8 @@
       "USA",
       "Geology"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-galápagos-islands-134",
@@ -997,7 +1046,8 @@
       "Ecuador",
       "Evolution"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-svalbard-global-seed-135",
@@ -1017,7 +1067,8 @@
       "Norway",
       "Conservation"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-large-hadron-collider-136",
@@ -1037,7 +1088,8 @@
       "CERN",
       "Science"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-james-webb-space-137",
@@ -1057,7 +1109,8 @@
       "Space",
       "Science"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-voyager-1-spacecraft-138",
@@ -1077,7 +1130,8 @@
       "Exploration",
       "Science"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-dead-sea-scrolls-139",
@@ -1097,7 +1151,8 @@
       "Ancient",
       "Religion"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-bayeux-tapestry-140",
@@ -1117,7 +1172,8 @@
       "Art",
       "History"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-magna-carta-141",
@@ -1137,7 +1193,8 @@
       "Law",
       "Medieval"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-constitution-142",
@@ -1157,7 +1214,8 @@
       "Law",
       "USA"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-turing-test-143",
@@ -1177,7 +1235,8 @@
       "Philosophy",
       "Science"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-placebo-effect-145",
@@ -1197,7 +1256,8 @@
       "Medicine",
       "Psychology"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-lucid-dreaming-146",
@@ -1217,7 +1277,8 @@
       "Sleep",
       "Science"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-uncanny-valley-147",
@@ -1237,7 +1298,8 @@
       "Psychology",
       "Design"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-fibonacci-sequence-148",
@@ -1257,7 +1319,8 @@
       "Nature",
       "History"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-library-of-alexandria-149",
@@ -1277,7 +1340,8 @@
       "Ancient",
       "Books"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-bermuda-triangle-151",
@@ -1297,7 +1361,8 @@
       "Aviation",
       "Ocean"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-tunguska-event-152",
@@ -1317,7 +1382,8 @@
       "Astronomy",
       "Mystery"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-taos-hum-153",
@@ -1337,7 +1403,8 @@
       "Science",
       "Sound"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-lost-colony-of-154",
@@ -1357,7 +1424,8 @@
       "History",
       "Colonial"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-oak-island-money-155",
@@ -1377,7 +1445,8 @@
       "Treasure",
       "Canada"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-zodiac-killer-156",
@@ -1397,7 +1466,8 @@
       "Crime",
       "USA"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-somerton-man-157",
@@ -1417,7 +1487,8 @@
       "Australia",
       "Forensics"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-lead-masks-case-158",
@@ -1437,7 +1508,8 @@
       "Brazil",
       "Unsolved"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-polyglots-159",
@@ -1457,7 +1529,8 @@
       "Psychology",
       "Practice"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-prodigies-160",
@@ -1477,7 +1550,8 @@
       "Talent",
       "Science"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-paris-catacombs-161",
@@ -1497,7 +1571,8 @@
       "France",
       "Architecture"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-island-of-the-162",
@@ -1517,7 +1592,8 @@
       "Urban Legend",
       "Art"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-winchester-mystery-house-163",
@@ -1537,7 +1613,8 @@
       "USA",
       "Urban Legend"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-centralia-pennsylvania-164",
@@ -1557,7 +1634,8 @@
       "Fire",
       "Geology"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-hashima-island-165",
@@ -1577,7 +1655,8 @@
       "History",
       "Industrial"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-svalbard-166",
@@ -1597,7 +1676,8 @@
       "Norway",
       "Geography"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-door-to-hell-167",
@@ -1617,7 +1697,8 @@
       "Geology",
       "Energy"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-lake-natron-tanzania-168",
@@ -1637,7 +1718,8 @@
       "Geology",
       "Nature"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-waitomo-glowworm-caves-169",
@@ -1657,7 +1739,8 @@
       "Biology",
       "Caves"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-pamukkale-turkey-170",
@@ -1677,7 +1760,8 @@
       "Geology",
       "Ancient"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-wave-arizona-171",
@@ -1697,7 +1781,8 @@
       "Geology",
       "Hiking"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-bryce-canyon-172",
@@ -1717,7 +1802,8 @@
       "Geology",
       "Nature"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-tea-ceremony-173",
@@ -1737,7 +1823,8 @@
       "Ritual",
       "Philosophy"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-kintsugi-174",
@@ -1757,7 +1844,8 @@
       "Craft",
       "Philosophy"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-hygge-175",
@@ -1777,7 +1865,8 @@
       "Lifestyle",
       "Culture"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-friluftsliv-176",
@@ -1797,7 +1886,8 @@
       "Outdoors",
       "Culture"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-pomodoro-technique-177",
@@ -1817,7 +1907,8 @@
       "Practice",
       "Modern"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-getting-things-done-178",
@@ -1837,7 +1928,8 @@
       "Practice",
       "Modern"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-minimalism-movement-179",
@@ -1857,7 +1949,8 @@
       "Philosophy",
       "Modern"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-van-life-movement-180",
@@ -1877,7 +1970,8 @@
       "Travel",
       "Modern"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-machu-picchu-182",
@@ -1897,7 +1991,8 @@
       "Inca",
       "Archaeology"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-petra-183",
@@ -1917,7 +2012,8 @@
       "Nabataean",
       "Archaeology"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-great-pyramid-of-184",
@@ -1937,7 +2033,8 @@
       "Ancient",
       "Architecture"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-mont-saint-michel-187",
@@ -1957,7 +2054,8 @@
       "Medieval",
       "Architecture"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-grand-canyon-190",
@@ -1977,7 +2075,8 @@
       "Geology",
       "Nature"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-mount-everest-191",
@@ -1997,7 +2096,8 @@
       "Mountains",
       "Exploration"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-amazon-rainforest-192",
@@ -2017,7 +2117,8 @@
       "Rainforest",
       "Ecology"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-dead-sea-193",
@@ -2037,7 +2138,8 @@
       "Geography",
       "Geology"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-yellowstone-194",
@@ -2057,7 +2159,8 @@
       "Geology",
       "Nature"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-icelands-geothermal-springs-195",
@@ -2077,7 +2180,8 @@
       "Geology",
       "Nature"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-international-space-station-196",
@@ -2097,7 +2201,8 @@
       "Science",
       "Engineering"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-hubble-telescope-197",
@@ -2117,7 +2222,8 @@
       "Astronomy",
       "Science"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-curiosity-mars-rover-198",
@@ -2137,7 +2243,8 @@
       "Space",
       "Science"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-apollo-11-moon-landing-199",
@@ -2157,7 +2264,8 @@
       "History",
       "Exploration"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-rosetta-stone-200",
@@ -2177,7 +2285,8 @@
       "Ancient",
       "Language"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-gutenberg-bible-201",
@@ -2197,7 +2306,8 @@
       "Printing",
       "Books"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-declaration-of-independence-202",
@@ -2217,7 +2327,8 @@
       "USA",
       "Politics"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-universal-declaration-of-203",
@@ -2237,7 +2348,8 @@
       "Human Rights",
       "Politics"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-schrödingers-cat-204",
@@ -2257,7 +2369,8 @@
       "Quantum",
       "Philosophy"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-mandela-effect-205",
@@ -2277,7 +2390,8 @@
       "Memory",
       "Culture"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-synesthesia-206",
@@ -2297,7 +2411,8 @@
       "Perception",
       "Psychology"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-overview-effect-207",
@@ -2317,7 +2432,8 @@
       "Psychology",
       "Philosophy"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-golden-ratio-208",
@@ -2337,7 +2453,8 @@
       "Art",
       "History"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-pi-day-209",
@@ -2357,7 +2474,8 @@
       "Culture",
       "Science"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-hanging-gardens-of-210",
@@ -2377,7 +2495,8 @@
       "Archaeology",
       "Legend"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-el-dorado-211",
@@ -2397,7 +2516,8 @@
       "Legend",
       "History"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-crop-circles-212",
@@ -2417,7 +2537,8 @@
       "Hoax",
       "Culture"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-wow-signal-213",
@@ -2437,7 +2558,8 @@
       "SETI",
       "Mystery"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-dancing-plague-of-214",
@@ -2457,7 +2579,8 @@
       "Medicine",
       "Mystery"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-mary-celeste-215",
@@ -2477,7 +2600,8 @@
       "Sea",
       "History"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-dyatlov-pass-incident-216",
@@ -2497,7 +2621,8 @@
       "Russia",
       "Forensics"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-db-cooper-217",
@@ -2517,7 +2642,8 @@
       "Crime",
       "USA"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-tamam-shud-case-218",
@@ -2537,7 +2663,8 @@
       "Australia",
       "Cipher"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-isdal-woman-219",
@@ -2557,7 +2684,8 @@
       "Norway",
       "Forensics"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-synesthetes-221",
@@ -2577,7 +2705,8 @@
       "Perception",
       "Psychology"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-sedlec-ossuary-222",
@@ -2597,7 +2726,8 @@
       "Art",
       "History"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-aokigahara-forest-223",
@@ -2617,7 +2747,8 @@
       "Forest",
       "Mystery"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-pripyat-chernobyl-224",
@@ -2637,7 +2768,8 @@
       "History",
       "Disaster"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-socotra-island-225",
@@ -2657,7 +2789,8 @@
       "Island",
       "Botany"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-tristan-da-cunha-226",
@@ -2677,7 +2810,8 @@
       "Geography",
       "History"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-eye-of-the-227",
@@ -2697,7 +2831,8 @@
       "Geology",
       "Space"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-the-great-blue-hole-228",
@@ -2717,7 +2852,8 @@
       "Geology",
       "Diving"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-salar-de-uyuni-229",
@@ -2737,7 +2873,8 @@
       "Geology",
       "Nature"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-zhangjiajie-national-forest-230",
@@ -2757,7 +2894,8 @@
       "Geology",
       "Nature"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wild-monument-valley-232",
@@ -2777,7 +2915,8 @@
       "Geology",
       "Cinema"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-aurora-australis",
@@ -2797,7 +2936,8 @@
       "Natural",
       "Southern Hemisphere"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-catatumbo-lightning",
@@ -2817,7 +2957,8 @@
       "Weather",
       "Venezuela"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-milky-way-core",
@@ -2837,7 +2978,8 @@
       "Galaxy",
       "Night Sky"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-solar-eclipse-totality",
@@ -2857,7 +2999,8 @@
       "Eclipse",
       "Rare Event"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-blood-moon",
@@ -2877,7 +3020,8 @@
       "Eclipse",
       "Moon"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-supernova-1987a",
@@ -2897,7 +3041,8 @@
       "Supernova",
       "Cosmic"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-hale-bopp",
@@ -2917,7 +3062,8 @@
       "Comet",
       "Night Sky"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-perseid-meteors",
@@ -2937,7 +3083,8 @@
       "Meteors",
       "Night Sky"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-tsunami-boxing-day",
@@ -2957,7 +3104,8 @@
       "Ocean",
       "Disaster"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-krakatoa-1883",
@@ -2977,7 +3125,8 @@
       "Volcano",
       "History"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-mount-st-helens",
@@ -2997,7 +3146,8 @@
       "Volcano",
       "USA"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-big-bend-stars",
@@ -3017,7 +3167,8 @@
       "USA",
       "Dark Sky"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-glacial-erratics",
@@ -3037,7 +3188,8 @@
       "Ice Age",
       "Natural"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-giant-crystals-naica",
@@ -3057,7 +3209,8 @@
       "Crystals",
       "Mexico"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "wildcard-iceberg-calving",
@@ -3077,7 +3230,8 @@
       "Ice",
       "Ocean"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-glacial-blue-ice",
@@ -3097,7 +3251,8 @@
       "Antarctica",
       "Ice"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-fire-rainbow",
@@ -3117,7 +3272,8 @@
       "Weather",
       "Sky"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-sundog",
@@ -3137,7 +3293,8 @@
       "Weather",
       "Sky"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-glory-optical",
@@ -3157,7 +3314,8 @@
       "Optics",
       "Sky"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-brocken-spectre",
@@ -3177,7 +3335,8 @@
       "Optics",
       "Mountains"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-shakuhachi",
@@ -3197,7 +3356,8 @@
       "Japan",
       "Zen"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-gamelan-tuning",
@@ -3217,7 +3377,8 @@
       "Indonesia",
       "Orchestra"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-overtones-throat",
@@ -3237,7 +3398,8 @@
       "Voice",
       "Physics"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-fugue",
@@ -3257,7 +3419,8 @@
       "Bach",
       "Form"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-call-and-response",
@@ -3277,7 +3440,8 @@
       "Tradition",
       "Community"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-lomography",
@@ -3297,7 +3461,8 @@
       "Photography",
       "Art"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-hypnagogia-art",
@@ -3317,7 +3482,8 @@
       "Art",
       "Surrealism"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-ekphrasis",
@@ -3337,7 +3503,8 @@
       "Poetry",
       "Art"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-flaneur",
@@ -3357,7 +3524,8 @@
       "City",
       "Walking"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-shou-sugi-ban",
@@ -3377,7 +3545,8 @@
       "Japan",
       "Wood"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-kanzashi",
@@ -3397,7 +3566,8 @@
       "Japan",
       "Fabric"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-paper-quilling",
@@ -3417,7 +3587,8 @@
       "Paper",
       "Art"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-ebru",
@@ -3437,7 +3608,8 @@
       "Turkey",
       "Paper"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-ikats",
@@ -3457,7 +3629,8 @@
       "Textile",
       "Weaving"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-loom-basket",
@@ -3477,7 +3650,8 @@
       "Ancient",
       "Weaving"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-felting",
@@ -3497,7 +3671,8 @@
       "Wool",
       "Ancient"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-kintsugi-now",
@@ -3517,7 +3692,8 @@
       "Japan",
       "Repair"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-visible-mending",
@@ -3537,7 +3713,8 @@
       "Sustainability",
       "Fabric"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-foraging",
@@ -3557,7 +3734,8 @@
       "Food",
       "Nature"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-pickling",
@@ -3577,7 +3755,8 @@
       "Food",
       "Preservation"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-curing-meat",
@@ -3597,7 +3776,8 @@
       "Food",
       "Meat"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-cheese-aging",
@@ -3617,7 +3797,8 @@
       "Food",
       "Cheese"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-lobster-molt",
@@ -3637,7 +3818,8 @@
       "Lobster",
       "Growth"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-cicada-17-year",
@@ -3657,7 +3839,8 @@
       "Cicadas",
       "Cycles"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-leaf-nosed-bat",
@@ -3677,7 +3860,8 @@
       "Bats",
       "Sound"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-electric-eel",
@@ -3697,7 +3881,8 @@
       "Electricity",
       "Amazon"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-king-cobra",
@@ -3717,7 +3902,8 @@
       "Snake",
       "Venom"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-whooping-crane",
@@ -3737,7 +3923,8 @@
       "Conservation",
       "Birds"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-condor-revival",
@@ -3757,7 +3944,8 @@
       "Conservation",
       "Birds"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-prairie-restoration",
@@ -3777,7 +3965,8 @@
       "Restoration",
       "Ecology"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-mangrove-forests",
@@ -3797,7 +3986,8 @@
       "Coast",
       "Ecosystem"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-kelp-forests",
@@ -3817,7 +4007,8 @@
       "Ocean",
       "Forest"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-sargasso-sea",
@@ -3837,7 +4028,8 @@
       "Ocean",
       "Seaweed"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-tidal-bore",
@@ -3857,7 +4049,8 @@
       "Ocean",
       "Waves"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-hydraulic-jump",
@@ -3877,7 +4070,8 @@
       "Water",
       "Physics"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-spiral-sinkholes",
@@ -3897,7 +4091,8 @@
       "Geology",
       "Risk"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-blue-holes",
@@ -3917,7 +4112,8 @@
       "Ocean",
       "Caves"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-river-turning",
@@ -3937,7 +4133,8 @@
       "River",
       "Geology"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-drainage-basin",
@@ -3957,7 +4154,8 @@
       "Water",
       "Geography"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-cave-formation",
@@ -3977,7 +4175,8 @@
       "Caves",
       "Geology"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-wabi-sabi-now",
@@ -3997,7 +4196,8 @@
       "Japan",
       "Aesthetics"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-jo-ha-kyu",
@@ -4017,7 +4217,8 @@
       "Japan",
       "Rhythm"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-ma-spacing",
@@ -4037,7 +4238,8 @@
       "Japan",
       "Design"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-kaizen",
@@ -4057,7 +4259,8 @@
       "Japan",
       "Improvement"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-gemba",
@@ -4077,7 +4280,8 @@
       "Japan",
       "Work"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-ikigai",
@@ -4097,7 +4301,8 @@
       "Japan",
       "Purpose"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-dolce-far-niente",
@@ -4117,7 +4322,8 @@
       "Italy",
       "Rest"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-saudade",
@@ -4137,7 +4343,8 @@
       "Portugal",
       "Feeling"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-hiraeth",
@@ -4157,7 +4364,8 @@
       "Wales",
       "Feeling"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-asmr",
@@ -4177,7 +4385,8 @@
       "Sound",
       "Relaxation"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-retrocognition",
@@ -4197,7 +4406,8 @@
       "Brain",
       "Memory"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-jamais-vu",
@@ -4217,7 +4427,8 @@
       "Brain",
       "Perception"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-ineffability",
@@ -4237,7 +4448,8 @@
       "Philosophy",
       "Experience"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-liminality",
@@ -4257,7 +4469,8 @@
       "Space",
       "Feeling"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-mono-no-aware",
@@ -4277,7 +4490,8 @@
       "Japan",
       "Feeling"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-akanbe-now",
@@ -4297,7 +4511,8 @@
       "Japan",
       "Aesthetics"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-otaku-culture",
@@ -4317,7 +4532,8 @@
       "Japan",
       "Fandom"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-cosplay",
@@ -4337,7 +4553,8 @@
       "Craft",
       "Fandom"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-ragbrai",
@@ -4357,7 +4574,8 @@
       "USA",
       "Cycling"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-royal-roads",
@@ -4377,7 +4595,8 @@
       "Inca",
       "Roads"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-appian-way",
@@ -4397,7 +4616,8 @@
       "Rome",
       "Roads"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-camel-trains",
@@ -4417,7 +4637,8 @@
       "Trade",
       "Silk Road"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-trans-saharan",
@@ -4437,7 +4658,8 @@
       "Trade",
       "Africa"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-spice-routes",
@@ -4457,7 +4679,8 @@
       "Trade",
       "Spices"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-kelp-highway",
@@ -4477,7 +4700,8 @@
       "Archaeology",
       "Migration"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-bronze-collapse",
@@ -4497,7 +4721,8 @@
       "Collapse",
       "Ancient"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-dark-ages-myth",
@@ -4517,7 +4742,8 @@
       "Middle Ages",
       "Myth"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-charlemagne",
@@ -4537,7 +4763,8 @@
       "Learning",
       "Medieval"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-naming-places",
@@ -4557,7 +4784,8 @@
       "Language",
       "History"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-currency-history",
@@ -4577,7 +4805,8 @@
       "Money",
       "Economy"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-paper-origins",
@@ -4597,7 +4826,8 @@
       "Invention",
       "Knowledge"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-numeral-systems",
@@ -4617,7 +4847,8 @@
       "Math",
       "Zero"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-timezones-rail",
@@ -4637,7 +4868,8 @@
       "Time",
       "Railways"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-leap-second",
@@ -4657,7 +4889,8 @@
       "Time",
       "Science"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-year-zero",
@@ -4677,7 +4910,8 @@
       "History",
       "Calendar"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-calendar-reform",
@@ -4697,7 +4931,8 @@
       "Calendar",
       "Time"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-railway-time",
@@ -4717,7 +4952,8 @@
       "Railways",
       "Time"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-ocean-currents",
@@ -4737,7 +4973,8 @@
       "Ocean",
       "Climate"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-weather-balloons",
@@ -4757,7 +4994,8 @@
       "Weather",
       "Science"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-aurora-science",
@@ -4777,7 +5015,8 @@
       "Aurora",
       "Physics"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-trees-talk",
@@ -4797,7 +5036,8 @@
       "Trees",
       "Communication"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-diplomacy-gifts",
@@ -4817,7 +5057,8 @@
       "Pandas",
       "Diplomacy"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-bees-dancing-language",
@@ -4837,7 +5078,8 @@
       "Bees",
       "Communication"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-swarm-intelligence",
@@ -4857,7 +5099,8 @@
       "Nature",
       "Algorithms"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-migration-arctic-tern",
@@ -4877,7 +5120,8 @@
       "Migration",
       "Birds"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-papercrane-senba",
@@ -4897,7 +5141,8 @@
       "Japan",
       "Peace"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-tarot-history",
@@ -4917,7 +5162,8 @@
       "Tarot",
       "Cards"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-chess-history",
@@ -4937,7 +5183,8 @@
       "Chess",
       "Games"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-go-game",
@@ -4957,7 +5204,8 @@
       "Go",
       "Games"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-abacus",
@@ -4977,7 +5225,8 @@
       "Math",
       "Tools"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-knitting-history",
@@ -4997,7 +5246,8 @@
       "Craft",
       "Textile"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-embroidery-memory",
@@ -5017,7 +5267,8 @@
       "Craft",
       "History"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-carving-totem",
@@ -5037,7 +5288,8 @@
       "Indigenous",
       "Craft"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-sand-mandalas",
@@ -5057,7 +5309,8 @@
       "Tibet",
       "Ritual"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-geisha-misconceptions",
@@ -5077,7 +5330,8 @@
       "Japan",
       "Art"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-samurai-bushido",
@@ -5097,7 +5351,8 @@
       "Japan",
       "Warriors"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-viking-longships",
@@ -5117,7 +5372,8 @@
       "Vikings",
       "Ships"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-persian-qanat",
@@ -5137,7 +5393,8 @@
       "Water",
       "Engineering"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-ufo-phenomenon",
@@ -5157,7 +5414,8 @@
       "Mystery",
       "Sky"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-54-phenomena",
@@ -5177,7 +5435,8 @@
       "Mystery",
       "Lightning"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-plastic-ocean",
@@ -5197,7 +5456,8 @@
       "Ocean",
       "Plastic"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-light-pollution",
@@ -5217,7 +5477,8 @@
       "Night Sky",
       "Environment"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-dark-sky-reserves",
@@ -5237,7 +5498,8 @@
       "Night Sky",
       "Conservation"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-tide-pools",
@@ -5257,7 +5519,8 @@
       "Ocean",
       "Life"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-glacier-ice-cores",
@@ -5277,7 +5540,8 @@
       "Ice",
       "Climate"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-permafrost",
@@ -5297,7 +5561,8 @@
       "Arctic",
       "Climate"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-forest-canopy",
@@ -5317,7 +5582,8 @@
       "Rainforest",
       "Life"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-fingals-cave",
@@ -5337,7 +5603,8 @@
       "Scotland",
       "Geology"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-ayers-rock-uluru",
@@ -5357,7 +5624,8 @@
       "Australia",
       "Sacred"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-kata-tjuta",
@@ -5377,7 +5645,8 @@
       "Australia",
       "Desert"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-james-bond-island-koh-tap",
@@ -5397,7 +5666,8 @@
       "Thailand",
       "Floating Village"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-venice-canals",
@@ -5417,7 +5687,8 @@
       "Italy",
       "Canals"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-cliffs-moher",
@@ -5437,7 +5708,8 @@
       "Ireland",
       "Coast"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-dunhuang-caves",
@@ -5457,7 +5729,8 @@
       "China",
       "Silk Road"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-meteora-monasteries",
@@ -5477,7 +5750,8 @@
       "Greece",
       "Monasteries"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-plitvice-lakes",
@@ -5497,7 +5771,8 @@
       "Croatia",
       "Lakes"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-danakil-depression",
@@ -5517,7 +5792,8 @@
       "Ethiopia",
       "Extreme"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "wildcard-wulingyuan-pillars",
@@ -5537,7 +5813,8 @@
       "China",
       "Landscape"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-halong-bay",
@@ -5557,7 +5834,8 @@
       "Vietnam",
       "Karst"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-jeju-island",
@@ -5577,7 +5855,8 @@
       "South Korea",
       "Volcanic"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-salar-uyuni-stars",
@@ -5597,7 +5876,8 @@
       "Bolivia",
       "Salt Flat"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-horseshoe-bend",
@@ -5617,7 +5897,8 @@
       "USA",
       "River"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-mesa-arch",
@@ -5637,7 +5918,8 @@
       "USA",
       "Arch"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-crater-lake",
@@ -5657,7 +5939,8 @@
       "USA",
       "Lake"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-mono-lake-tufa",
@@ -5677,7 +5960,8 @@
       "USA",
       "Lake"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-cenote-ik-kil",
@@ -5697,7 +5981,8 @@
       "Mexico",
       "Cave"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-dead-sea-float",
@@ -5717,7 +6002,8 @@
       "Jordan",
       "Salt Lake"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-great-salt-lake",
@@ -5737,7 +6023,8 @@
       "USA",
       "Salt Lake"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-cleaning-station",
@@ -5757,7 +6044,8 @@
       "Reef",
       "Mutualism"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-snowflake-obsidian",
@@ -5777,7 +6065,8 @@
       "Volcanic",
       "Minerals"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-aurora-borealis-sound",
@@ -5797,7 +6086,8 @@
       "Aurora",
       "Sound"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-tea-ceremony-chanoyu",
@@ -5817,7 +6107,8 @@
       "Japan",
       "Tea"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-hanami",
@@ -5837,7 +6128,8 @@
       "Japan",
       "Spring"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-holi",
@@ -5857,7 +6149,8 @@
       "India",
       "Festival"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-songkran",
@@ -5877,7 +6170,8 @@
       "Thailand",
       "Festival"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-obon",
@@ -5897,7 +6191,8 @@
       "Japan",
       "Ancestors"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-diwali",
@@ -5917,7 +6212,8 @@
       "India",
       "Festival"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-day-of-the-dead-altars",
@@ -5937,7 +6233,8 @@
       "Mexico",
       "Festival"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-napoleon-complex",
@@ -5957,7 +6254,8 @@
       "Psychology",
       "Myth"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-baader-meinhof",
@@ -5977,7 +6275,8 @@
       "Psychology",
       "Perception"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-stroop-effect",
@@ -5997,7 +6296,8 @@
       "Psychology",
       "Brain"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-dunning-kruger",
@@ -6017,7 +6317,8 @@
       "Psychology",
       "Cognition"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-hawthorne-effect",
@@ -6037,7 +6338,8 @@
       "Psychology",
       "Work"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-ikea-effect",
@@ -6057,7 +6359,8 @@
       "Psychology",
       "Behavior"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-zeigarnik-effect",
@@ -6077,7 +6380,8 @@
       "Psychology",
       "Memory"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-bystander-effect",
@@ -6097,7 +6401,8 @@
       "Psychology",
       "Society"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-sunk-cost",
@@ -6117,7 +6422,8 @@
       "Economics",
       "Psychology"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-gamblers-fallacy",
@@ -6137,7 +6443,8 @@
       "Probability",
       "Psychology"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-birthday-paradox",
@@ -6157,7 +6464,8 @@
       "Math",
       "Probability"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-monty-hall",
@@ -6177,7 +6485,8 @@
       "Math",
       "Probability"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-fermi-paradox-sleep",
@@ -6197,7 +6506,8 @@
       "Space",
       "Big Question"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-simulation-hypothesis",
@@ -6217,7 +6527,8 @@
       "Philosophy",
       "Future"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-schrodinger-thought",
@@ -6237,7 +6548,8 @@
       "Quantum",
       "Physics"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-observation-effect",
@@ -6257,7 +6569,8 @@
       "Quantum",
       "Physics"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-zeno-paradox",
@@ -6277,7 +6590,8 @@
       "Math",
       "Philosophy"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-achilles-tortoise",
@@ -6297,7 +6611,8 @@
       "Math",
       "Paradox"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-trolley-problem",
@@ -6317,7 +6632,8 @@
       "Ethics",
       "Philosophy"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-veil-ignorance",
@@ -6337,7 +6653,8 @@
       "Ethics",
       "Philosophy"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-hanlons-razor",
@@ -6357,7 +6674,8 @@
       "Philosophy",
       "Wisdom"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-occams-razor",
@@ -6377,7 +6695,8 @@
       "Science",
       "Philosophy"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-svalbard-sun",
@@ -6397,7 +6716,8 @@
       "Arctic",
       "Sun"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-trolltunga",
@@ -6417,7 +6737,8 @@
       "Norway",
       "Cliff"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-prealpina-lakes",
@@ -6437,7 +6758,8 @@
       "Italy",
       "Lake"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-marble-caves",
@@ -6457,7 +6779,8 @@
       "Chile",
       "Caves"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-hang-son-doong",
@@ -6477,7 +6800,8 @@
       "Vietnam",
       "Cave"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-tsingy",
@@ -6497,7 +6821,8 @@
       "Madagascar",
       "Limestone"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "wildcard-pamukkale-travertines",
@@ -6517,7 +6842,8 @@
       "Turkey",
       "Hot Springs"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-capadocia",
@@ -6537,7 +6863,8 @@
       "Turkey",
       "Rock"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-lalibela",
@@ -6557,7 +6884,8 @@
       "Ethiopia",
       "Churches"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-great-zimbabwe",
@@ -6577,7 +6905,8 @@
       "Zimbabwe",
       "Ruins"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-timbuktu-manuscripts",
@@ -6597,7 +6926,8 @@
       "Mali",
       "History"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-petra-treasury",
@@ -6617,7 +6947,8 @@
       "Jordan",
       "Carved"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-bagan",
@@ -6637,7 +6968,8 @@
       "Myanmar",
       "Temples"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-himeji-castle",
@@ -6657,7 +6989,8 @@
       "Japan",
       "Castle"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-konark-sun-temple",
@@ -6677,7 +7010,8 @@
       "India",
       "Temple"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-caves-ellora",
@@ -6697,7 +7031,8 @@
       "India",
       "Carved"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-dazu-rock",
@@ -6717,7 +7052,8 @@
       "China",
       "Carved"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-taktsang-monastery",
@@ -6737,7 +7073,8 @@
       "Bhutan",
       "Monastery"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-cliffs-band-i-amir",
@@ -6757,7 +7094,8 @@
       "Afghanistan",
       "Lakes"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "wildcard-canyon-chedi",
@@ -6777,7 +7115,8 @@
       "England",
       "Gorge"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-cliffs-bungle-bungle",
@@ -6797,7 +7136,8 @@
       "Australia",
       "Sandstone"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-socotra-archipelago",
@@ -6817,7 +7157,8 @@
       "Yemen",
       "Endemic"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "wildcard-faroe-cliffs",
@@ -6837,7 +7178,8 @@
       "Faroe Islands",
       "Islands"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-lofoten",
@@ -6857,7 +7199,8 @@
       "Norway",
       "Islands"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-ubuntu",
@@ -6877,7 +7220,8 @@
       "Africa",
       "Philosophy"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-omotenashi",
@@ -6897,7 +7241,8 @@
       "Japan",
       "Hospitality"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-fika",
@@ -6917,7 +7262,8 @@
       "Sweden",
       "Coffee"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-siesta",
@@ -6937,7 +7283,8 @@
       "Spain",
       "Rest"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-sixty-seconds-hug",
@@ -6957,7 +7304,8 @@
       "Science",
       "Connection"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-common-table",
@@ -6977,7 +7325,8 @@
       "Food",
       "Connection"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-midnight-sun-marathon",
@@ -6997,7 +7346,8 @@
       "Norway",
       "Marathon"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-burning-man-principles",
@@ -7017,7 +7367,8 @@
       "USA",
       "Community"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-couchsurfing-ethos",
@@ -7037,7 +7388,8 @@
       "Travel",
       "Trust"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-letter-writing",
@@ -7057,7 +7409,8 @@
       "Writing",
       "Connection"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-postcrossing",
@@ -7077,7 +7430,8 @@
       "Post",
       "Connection"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-time-capsule",
@@ -7097,7 +7451,8 @@
       "History",
       "Future"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-voyager-record",
@@ -7117,7 +7472,8 @@
       "Space",
       "Message"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-stone-soup",
@@ -7137,7 +7493,8 @@
       "Story",
       "Cooperation"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-gift-economy",
@@ -7157,7 +7514,8 @@
       "Economy",
       "Community"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-culture-jamming",
@@ -7177,7 +7535,8 @@
       "Art",
       "Media"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-slow-living",
@@ -7197,7 +7556,8 @@
       "Lifestyle",
       "Mindfulness"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-hygge-science",
@@ -7217,7 +7577,8 @@
       "Denmark",
       "Cozy"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-shinrin-yoku",
@@ -7237,7 +7598,8 @@
       "Japan",
       "Nature"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-cold-exposure",
@@ -7257,7 +7619,8 @@
       "Wellness",
       "Science"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-earthing",
@@ -7277,7 +7640,8 @@
       "Wellness",
       "Nature"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-digital-detox",
@@ -7297,7 +7661,8 @@
       "Technology",
       "Wellness"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-attention-restoration",
@@ -7317,7 +7682,8 @@
       "Psychology",
       "Nature"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-sehnsucht",
@@ -7337,7 +7703,8 @@
       "Language",
       "Feeling"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-humpback-bubble",
@@ -7357,7 +7724,8 @@
       "Whales",
       "Hunting"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-biomimicry",
@@ -7377,7 +7745,8 @@
       "Design",
       "Nature"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-mycelium",
@@ -7397,7 +7766,8 @@
       "Fungi",
       "Forest"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-lichen-symbiosis",
@@ -7417,7 +7787,8 @@
       "Symbiosis",
       "Survival"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-plankton-bloom",
@@ -7437,7 +7808,8 @@
       "Ocean",
       "Life"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-bioluminescence-why",
@@ -7457,7 +7829,8 @@
       "Light",
       "Evolution"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-firefly-sync",
@@ -7477,7 +7850,8 @@
       "Fireflies",
       "Light"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-frozen-bubbles",
@@ -7497,7 +7871,8 @@
       "Ice",
       "Science"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-ice-lily",
@@ -7517,7 +7892,8 @@
       "Ice",
       "Winter"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-sea-ice-pancakes",
@@ -7537,7 +7913,8 @@
       "Ice",
       "Ocean"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-fulgurite",
@@ -7557,7 +7934,8 @@
       "Lightning",
       "Geology"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-fire-whirl",
@@ -7577,7 +7955,8 @@
       "Fire",
       "Weather"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-brinicle",
@@ -7597,7 +7976,8 @@
       "Ice",
       "Ocean"
     ],
-    "tier": 3
+    "tier": 3,
+    "byline": ""
   },
   {
     "id": "wildcard-desert-bloom",
@@ -7617,7 +7997,8 @@
       "Desert",
       "Flowers"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-fog-capture",
@@ -7637,7 +8018,8 @@
       "Water",
       "Design"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-dune-music",
@@ -7657,7 +8039,8 @@
       "Desert",
       "Sound"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-red-rain",
@@ -7677,7 +8060,8 @@
       "Mystery",
       "Weather"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-fish-rain",
@@ -7697,7 +8081,8 @@
       "Weather",
       "Mystery"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-ice-storm-glass",
@@ -7717,7 +8102,8 @@
       "Weather",
       "Ice"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-morning-glory-cloud",
@@ -7737,7 +8123,8 @@
       "Cloud",
       "Australia"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-asperitas",
@@ -7757,7 +8144,8 @@
       "Cloud",
       "Sky"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-ice-crystal-halo",
@@ -7777,7 +8165,8 @@
       "Ice",
       "Sky"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-rainbow-cloud",
@@ -7797,7 +8186,8 @@
       "Cloud",
       "Light"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-sun-pillar",
@@ -7817,7 +8207,8 @@
       "Ice",
       "Light"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-volcanic-lightning",
@@ -7837,7 +8228,8 @@
       "Volcano",
       "Lightning"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-roman-concrete",
@@ -7857,7 +8249,8 @@
       "Engineering",
       "Rome"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-damascus-steel",
@@ -7877,7 +8270,8 @@
       "Metal",
       "Craft"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-chinese-seismoscope",
@@ -7897,7 +8291,8 @@
       "Invention",
       "China"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-baghdad-battery",
@@ -7917,7 +8312,8 @@
       "Mystery",
       "Ancient"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-pharos-lighthouse",
@@ -7937,7 +8333,8 @@
       "Wonders",
       "Lighthouse"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-colossus-rhodes",
@@ -7957,7 +8354,8 @@
       "Wonders",
       "Statue"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-terracotta-builders",
@@ -7977,7 +8375,8 @@
       "China",
       "Archaeology"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-ozymandias-ramses",
@@ -7997,7 +8396,8 @@
       "Poetry",
       "Egypt"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-library-ninemile",
@@ -8017,7 +8417,8 @@
       "Library",
       "Mesopotamia"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-doggerland",
@@ -8037,7 +8438,8 @@
       "Archaeology",
       "Drowned"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-megafauna-extinction",
@@ -8057,7 +8459,8 @@
       "Extinction",
       "Ice Age"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-la-brea",
@@ -8077,7 +8480,8 @@
       "Fossils",
       "USA"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-hero-engine",
@@ -8097,7 +8501,8 @@
       "Invention",
       "Steam"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-bayt-al-hikma",
@@ -8117,7 +8522,8 @@
       "Knowledge",
       "Baghdad"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-dial-of-ahaz",
@@ -8137,7 +8543,8 @@
       "Time",
       "Invention"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-longitude-problem",
@@ -8157,7 +8564,8 @@
       "Navigation",
       "Clock"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-flinders-map",
@@ -8177,7 +8585,8 @@
       "Exploration",
       "Australia"
     ],
-    "tier": 2
+    "tier": 2,
+    "byline": ""
   },
   {
     "id": "wildcard-greenwich-time",
@@ -8197,7 +8606,8 @@
       "Time",
       "Navigation"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "id": "wildcard-caves-lascaux",
@@ -8217,7 +8627,8 @@
       "Art",
       "Prehistoric"
     ],
-    "tier": 1
+    "tier": 1,
+    "byline": ""
   },
   {
     "name": "The Wow Signal (1977)",
@@ -8231,8 +8642,14 @@
     ],
     "id": "wildcard-the-wow-signal-1977",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Wow Signal (1977) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Wow Signal (1977) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Dyatlov Pass Incident (1959)",
@@ -8246,8 +8663,14 @@
     ],
     "id": "wildcard-the-dyatlov-pass-incident-1959",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Dyatlov Pass Incident (1959) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Dyatlov Pass Incident (1959) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Somerton Man (1948)",
@@ -8261,8 +8684,14 @@
     ],
     "id": "wildcard-the-somerton-man-1948",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Somerton Man (1948) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Somerton Man (1948) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Lead Masks Case (1966)",
@@ -8275,8 +8704,14 @@
     ],
     "id": "wildcard-the-lead-masks-case-1966",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Lead Masks Case (1966) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Lead Masks Case (1966) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Mary Celeste (1872)",
@@ -8290,8 +8725,14 @@
     ],
     "id": "wildcard-the-mary-celeste-1872",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Mary Celeste (1872) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Mary Celeste (1872) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "D.B. Cooper (1971)",
@@ -8305,8 +8746,14 @@
     ],
     "id": "wildcard-db-cooper-1971",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "D.B. Cooper (1971) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of D.B. Cooper (1971) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Zodiac Killer (1968-69)",
@@ -8320,8 +8767,14 @@
     ],
     "id": "wildcard-the-zodiac-killer-1968-69",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Zodiac Killer (1968-69) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Zodiac Killer (1968-69) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Oak Island Money Pit (1795)",
@@ -8335,8 +8788,14 @@
     ],
     "id": "wildcard-oak-island-money-pit-1795",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Oak Island Money Pit (1795) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Oak Island Money Pit (1795) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Isdal Woman (1970)",
@@ -8350,8 +8809,14 @@
     ],
     "id": "wildcard-the-isdal-woman-1970",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Isdal Woman (1970) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Isdal Woman (1970) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Dunning-Kruger Effect",
@@ -8365,8 +8830,14 @@
     ],
     "id": "wildcard-the-dunning-kruger-effect",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Dunning-Kruger Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Dunning-Kruger Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Baader-Meinhof Phenomenon",
@@ -8380,8 +8851,14 @@
     ],
     "id": "wildcard-the-baader-meinhof-phenomenon",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Baader-Meinhof Phenomenon end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Baader-Meinhof Phenomenon — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Ship of Theseus",
@@ -8395,8 +8872,14 @@
     ],
     "id": "wildcard-the-ship-of-theseus",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Ship of Theseus end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Ship of Theseus — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Pascal's Wager",
@@ -8410,8 +8893,14 @@
     ],
     "id": "wildcard-pascals-wager",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Pascal's Wager end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Pascal's Wager — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Chinese Room Argument",
@@ -8425,8 +8914,14 @@
     ],
     "id": "wildcard-the-chinese-room-argument",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Chinese Room Argument end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Chinese Room Argument — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Veil of Tears",
@@ -8440,8 +8935,14 @@
     ],
     "id": "wildcard-the-veil-of-tears",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Veil of Tears end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Veil of Tears — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Quantum Entanglement",
@@ -8455,8 +8956,14 @@
     ],
     "id": "wildcard-quantum-entanglement",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Quantum Entanglement end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Quantum Entanglement — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Butterfly Effect",
@@ -8470,8 +8977,14 @@
     ],
     "id": "wildcard-the-butterfly-effect",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Butterfly Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Butterfly Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Mpemba Effect",
@@ -8485,8 +8998,14 @@
     ],
     "id": "wildcard-the-mpemba-effect",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Mpemba Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Mpemba Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Goldilocks Zone",
@@ -8500,8 +9019,14 @@
     ],
     "id": "wildcard-the-goldilocks-zone",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Goldilocks Zone end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Goldilocks Zone — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Cosmological Constant Problem",
@@ -8515,8 +9040,14 @@
     ],
     "id": "wildcard-the-cosmological-constant-problem",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Cosmological Constant Problem end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Cosmological Constant Problem — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Grandfather Paradox",
@@ -8530,8 +9061,14 @@
     ],
     "id": "wildcard-the-grandfather-paradox",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Grandfather Paradox end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Grandfather Paradox — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Olbers' Paradox",
@@ -8545,8 +9082,14 @@
     ],
     "id": "wildcard-olbers-paradox",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Olbers' Paradox end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Olbers' Paradox — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Svalbard Global Seed Vault",
@@ -8560,8 +9103,14 @@
     ],
     "id": "wildcard-svalbard-global-seed-vault",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Svalbard Global Seed Vault end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Svalbard Global Seed Vault — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Pripyat, Chernobyl",
@@ -8575,8 +9124,14 @@
     ],
     "id": "wildcard-pripyat-chernobyl",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Pripyat, Chernobyl end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Pripyat, Chernobyl — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Danakil Depression",
@@ -8590,8 +9145,14 @@
     ],
     "id": "wildcard-the-danakil-depression",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Danakil Depression end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Danakil Depression — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Centralia, Pennsylvania",
@@ -8605,8 +9166,14 @@
     ],
     "id": "wildcard-centralia-pennsylvania",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Centralia, Pennsylvania end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Centralia, Pennsylvania — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Hashima Island (Gunkanjima)",
@@ -8620,8 +9187,14 @@
     ],
     "id": "wildcard-hashima-island-gunkanjima",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Hashima Island (Gunkanjima) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Hashima Island (Gunkanjima) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Door to Hell, Turkmenistan",
@@ -8635,8 +9208,14 @@
     ],
     "id": "wildcard-the-door-to-hell-turkmenistan",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Door to Hell, Turkmenistan end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Door to Hell, Turkmenistan — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Lake Natron, Tanzania",
@@ -8650,8 +9229,14 @@
     ],
     "id": "wildcard-lake-natron-tanzania",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Lake Natron, Tanzania end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Lake Natron, Tanzania — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Antikythera Mechanism",
@@ -8665,8 +9250,14 @@
     ],
     "id": "wildcard-the-antikythera-mechanism",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Antikythera Mechanism end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Antikythera Mechanism — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Roman Concrete (Opus Caementicium)",
@@ -8680,8 +9271,14 @@
     ],
     "id": "wildcard-roman-concrete-opus-caementicium",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Roman Concrete (Opus Caementicium) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Roman Concrete (Opus Caementicium) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The House of Wisdom (Baghdad)",
@@ -8695,8 +9292,14 @@
     ],
     "id": "wildcard-the-house-of-wisdom-baghdad",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The House of Wisdom (Baghdad) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The House of Wisdom (Baghdad) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Phoenician Alphabet",
@@ -8710,8 +9313,14 @@
     ],
     "id": "wildcard-the-phoenician-alphabet",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Phoenician Alphabet end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Phoenician Alphabet — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Red Rain of Kerala (2001)",
@@ -8725,8 +9334,14 @@
     ],
     "id": "wildcard-the-red-rain-of-kerala-2001",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Red Rain of Kerala (2001) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Red Rain of Kerala (2001) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Hessdalen Lights",
@@ -8740,8 +9355,14 @@
     ],
     "id": "wildcard-the-hessdalen-lights",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Hessdalen Lights end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Hessdalen Lights — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Green Flash",
@@ -8755,8 +9376,14 @@
     ],
     "id": "wildcard-the-green-flash",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Green Flash end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Green Flash — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Brinicle (Ice Finger of Death)",
@@ -8770,8 +9397,14 @@
     ],
     "id": "wildcard-brinicle-ice-finger-of-death",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Brinicle (Ice Finger of Death) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Brinicle (Ice Finger of Death) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Via Negativa",
@@ -8785,8 +9418,14 @@
     ],
     "id": "wildcard-the-via-negativa",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Via Negativa end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Via Negativa — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Lost Colony of Roanoke (1590)",
@@ -8800,8 +9439,14 @@
     ],
     "id": "wildcard-the-lost-colony-of-roanoke-1590",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Lost Colony of Roanoke (1590) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Lost Colony of Roanoke (1590) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Flannan Isles Mystery (1900)",
@@ -8815,8 +9460,14 @@
     ],
     "id": "wildcard-the-flannan-isles-mystery-1900",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Flannan Isles Mystery (1900) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Flannan Isles Mystery (1900) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Hinterkaifeck Murders (1922)",
@@ -8830,8 +9481,14 @@
     ],
     "id": "wildcard-the-hinterkaifeck-murders-1922",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Hinterkaifeck Murders (1922) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Hinterkaifeck Murders (1922) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Disappearance of Frederick Valentich (1978)",
@@ -8845,8 +9502,14 @@
     ],
     "id": "wildcard-the-disappearance-of-frederick-valentich-1978",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Disappearance of Frederick Valentich (1978) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Disappearance of Frederick Valentich (1978) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Bloop (1997)",
@@ -8860,8 +9523,14 @@
     ],
     "id": "wildcard-the-bloop-1997",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Bloop (1997) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Bloop (1997) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Circleville Letters (1976-83)",
@@ -8875,8 +9544,14 @@
     ],
     "id": "wildcard-the-circleville-letters-1976-83",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Circleville Letters (1976-83) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Circleville Letters (1976-83) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Anchoring Effect",
@@ -8890,8 +9565,14 @@
     ],
     "id": "wildcard-the-anchoring-effect",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Anchoring Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Anchoring Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Peak-End Rule",
@@ -8905,8 +9586,14 @@
     ],
     "id": "wildcard-the-peak-end-rule",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Peak-End Rule end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Peak-End Rule — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Spotlight Effect",
@@ -8920,8 +9607,14 @@
     ],
     "id": "wildcard-the-spotlight-effect",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Spotlight Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Spotlight Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Phantom Vibration Syndrome",
@@ -8935,8 +9628,14 @@
     ],
     "id": "wildcard-the-phantom-vibration-syndrome",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Phantom Vibration Syndrome end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Phantom Vibration Syndrome — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Verbatim Effect",
@@ -8950,8 +9649,14 @@
     ],
     "id": "wildcard-the-verbatim-effect",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Verbatim Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Verbatim Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Theoogle Effect",
@@ -8965,8 +9670,14 @@
     ],
     "id": "wildcard-theoogle-effect",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Theoogle Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Theoogle Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Focusing Illusion",
@@ -8980,8 +9691,14 @@
     ],
     "id": "wildcard-the-focusing-illusion",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Focusing Illusion end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Focusing Illusion — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Thanatos Effect",
@@ -8995,8 +9712,14 @@
     ],
     "id": "wildcard-the-thanatos-effect",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Thanatos Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Thanatos Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Brain in a Vat",
@@ -9010,8 +9733,14 @@
     ],
     "id": "wildcard-the-brain-in-a-vat",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Brain in a Vat end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Brain in a Vat — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Utility Monster",
@@ -9025,8 +9754,14 @@
     ],
     "id": "wildcard-the-utility-monster",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Utility Monster end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Utility Monster — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Mary's Room (The Knowledge Argument)",
@@ -9040,8 +9775,14 @@
     ],
     "id": "wildcard-marys-room-the-knowledge-argument",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Mary's Room (The Knowledge Argument) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Mary's Room (The Knowledge Argument) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Experience Machine",
@@ -9055,8 +9796,14 @@
     ],
     "id": "wildcard-the-experience-machine",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Experience Machine end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Experience Machine — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Mere Addition Paradox",
@@ -9070,8 +9817,14 @@
     ],
     "id": "wildcard-the-mere-addition-paradox",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Mere Addition Paradox end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Mere Addition Paradox — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Sorites Paradox (Heap Paradox)",
@@ -9085,8 +9838,14 @@
     ],
     "id": "wildcard-the-sorites-paradox-heap-paradox",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Sorites Paradox (Heap Paradox) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Sorites Paradox (Heap Paradox) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Infinite Monkey Theorem",
@@ -9100,8 +9859,14 @@
     ],
     "id": "wildcard-the-infinite-monkey-theorem",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Infinite Monkey Theorem end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Infinite Monkey Theorem — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Coriolis Effect",
@@ -9115,8 +9880,14 @@
     ],
     "id": "wildcard-the-coriolis-effect",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Coriolis Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Coriolis Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Neutron Star Density",
@@ -9130,8 +9901,14 @@
     ],
     "id": "wildcard-neutron-star-density",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Neutron Star Density end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Neutron Star Density — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Bacterial Count",
@@ -9145,8 +9922,14 @@
     ],
     "id": "wildcard-the-bacterial-count",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Bacterial Count end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Bacterial Count — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Time Dilation Proven",
@@ -9160,8 +9943,14 @@
     ],
     "id": "wildcard-time-dilation-proven",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Time Dilation Proven end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Time Dilation Proven — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Observable Universe Size",
@@ -9175,8 +9964,14 @@
     ],
     "id": "wildcard-the-observable-universe-size",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Observable Universe Size end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Observable Universe Size — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Quantum Tunneling",
@@ -9190,8 +9985,14 @@
     ],
     "id": "wildcard-quantum-tunneling",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Quantum Tunneling end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Quantum Tunneling — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Absolute Zero Can't Be Reached",
@@ -9205,8 +10006,14 @@
     ],
     "id": "wildcard-absolute-zero-cant-be-reached",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Absolute Zero Can't Be Reached end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Absolute Zero Can't Be Reached — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Ittoqqortoormiit, Greenland",
@@ -9220,8 +10027,14 @@
     ],
     "id": "wildcard-ittoqqortoormiit-greenland",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Ittoqqortoormiit, Greenland end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Ittoqqortoormiit, Greenland — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Deception Island, Antarctica",
@@ -9235,8 +10048,14 @@
     ],
     "id": "wildcard-deception-island-antarctica",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Deception Island, Antarctica end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Deception Island, Antarctica — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Kolmanskop, Namibia",
@@ -9250,8 +10069,14 @@
     ],
     "id": "wildcard-kolmanskop-namibia",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Kolmanskop, Namibia end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Kolmanskop, Namibia — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Gates of Hell, Darvaza",
@@ -9265,8 +10090,14 @@
     ],
     "id": "wildcard-the-gates-of-hell-darvaza",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Gates of Hell, Darvaza end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Gates of Hell, Darvaza — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Oymyakon, Russia",
@@ -9280,8 +10111,14 @@
     ],
     "id": "wildcard-oymyakon-russia",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Oymyakon, Russia end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Oymyakon, Russia — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Darvaza Gas Crater",
@@ -9295,8 +10132,14 @@
     ],
     "id": "wildcard-the-darvaza-gas-crater",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Darvaza Gas Crater end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Darvaza Gas Crater — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Place de la Bourse, Bordeaux (Water Mirror)",
@@ -9310,8 +10153,14 @@
     ],
     "id": "wildcard-place-de-la-bourse-bordeaux-water-mirror",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Place de la Bourse, Bordeaux (Water Mirror) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Place de la Bourse, Bordeaux (Water Mirror) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Dendera Light",
@@ -9325,8 +10174,14 @@
     ],
     "id": "wildcard-the-dendera-light",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Dendera Light end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Dendera Light — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Phaistos Disc",
@@ -9340,8 +10195,14 @@
     ],
     "id": "wildcard-the-phaistos-disc",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Phaistos Disc end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Phaistos Disc — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Nazca Lines Purpose",
@@ -9355,8 +10216,14 @@
     ],
     "id": "wildcard-the-nazca-lines-purpose",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Nazca Lines Purpose end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Nazca Lines Purpose — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Lycurgus Cup",
@@ -9370,8 +10237,14 @@
     ],
     "id": "wildcard-the-lycurgus-cup",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Lycurgus Cup end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Lycurgus Cup — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Greek Fire",
@@ -9385,8 +10258,14 @@
     ],
     "id": "wildcard-the-greek-fire",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Greek Fire end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Greek Fire — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Baghdad Scrolls",
@@ -9400,8 +10279,14 @@
     ],
     "id": "wildcard-the-baghdad-scrolls",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Baghdad Scrolls end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Baghdad Scrolls — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "L'esprit de l'escalier (Staircase Wit)",
@@ -9415,8 +10300,14 @@
     ],
     "id": "wildcard-lesprit-de-lescalier-staircase-wit",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "L'esprit de l'escalier (Staircase Wit) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of L'esprit de l'escalier (Staircase Wit) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Paradox of Choice",
@@ -9430,8 +10321,14 @@
     ],
     "id": "wildcard-the-paradox-of-choice",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Paradox of Choice end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Paradox of Choice — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Hedonic Treadmill",
@@ -9445,8 +10342,14 @@
     ],
     "id": "wildcard-the-hedonic-treadmill",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Hedonic Treadmill end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Hedonic Treadmill — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Framing Effect",
@@ -9460,8 +10363,14 @@
     ],
     "id": "wildcard-the-framing-effect",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Framing Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Framing Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Hum",
@@ -9475,8 +10384,14 @@
     ],
     "id": "wildcard-the-hum",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Hum end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Hum — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Circumhorizontal Arc (Fire Rainbow)",
@@ -9490,8 +10405,14 @@
     ],
     "id": "wildcard-circumhorizontal-arc-fire-rainbow",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Circumhorizontal Arc (Fire Rainbow) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Circumhorizontal Arc (Fire Rainbow) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Brocken Spectre",
@@ -9505,8 +10426,14 @@
     ],
     "id": "wildcard-the-brocken-spectre",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Brocken Spectre end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Brocken Spectre — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Black Clouds of Insects",
@@ -9520,8 +10447,14 @@
     ],
     "id": "wildcard-black-clouds-of-insects",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Black Clouds of Insects end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Black Clouds of Insects — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "Penitentes",
@@ -9535,8 +10468,14 @@
     ],
     "id": "wildcard-penitentes",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Penitentes end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Penitentes — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Infinite Regress Problem",
@@ -9550,8 +10489,14 @@
     ],
     "id": "wildcard-the-infinite-regress-problem",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Infinite Regress Problem end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Infinite Regress Problem — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Problem of Evil",
@@ -9565,8 +10510,14 @@
     ],
     "id": "wildcard-the-problem-of-evil",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Problem of Evil end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Problem of Evil — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Pragmatic Maxim",
@@ -9580,8 +10531,14 @@
     ],
     "id": "wildcard-the-pragmatic-maxim",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Pragmatic Maxim end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Pragmatic Maxim — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Ring of Gyges",
@@ -9595,8 +10552,14 @@
     ],
     "id": "wildcard-the-ring-of-gyges",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Ring of Gyges end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Ring of Gyges — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Ship of Theseus (Paradox of Identity)",
@@ -9610,8 +10573,14 @@
     ],
     "id": "wildcard-the-ship-of-theseus-paradox-of-identity",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Ship of Theseus (Paradox of Identity) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Ship of Theseus (Paradox of Identity) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Veil of Tears (Maya)",
@@ -9625,8 +10594,14 @@
     ],
     "id": "wildcard-the-veil-of-tears-maya",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Veil of Tears (Maya) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Veil of Tears (Maya) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Great Molasses Flood (1919)",
@@ -9640,8 +10615,14 @@
     ],
     "id": "wildcard-the-great-molasses-flood-1919",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Great Molasses Flood (1919) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Great Molasses Flood (1919) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Emu War (1932)",
@@ -9655,8 +10636,14 @@
     ],
     "id": "wildcard-the-emu-war-1932",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Emu War (1932) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Emu War (1932) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Night Witches (1942-45)",
@@ -9670,8 +10657,14 @@
     ],
     "id": "wildcard-the-night-witches-1942-45",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Night Witches (1942-45) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Night Witches (1942-45) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Year Without a Summer (1816)",
@@ -9685,8 +10678,14 @@
     ],
     "id": "wildcard-the-year-without-a-summer-1816",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Year Without a Summer (1816) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Year Without a Summer (1816) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Library of Congress Scare (2004)",
@@ -9700,8 +10699,14 @@
     ],
     "id": "wildcard-the-library-of-congress-scare-2004",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Library of Congress Scare (2004) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Library of Congress Scare (2004) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Great Emu Migration (1934)",
@@ -9715,8 +10720,14 @@
     ],
     "id": "wildcard-the-great-emu-migration-1934",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Great Emu Migration (1934) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Great Emu Migration (1934) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Euthanasia Coaster (2013)",
@@ -9730,8 +10741,14 @@
     ],
     "id": "wildcard-the-euthanasia-coaster-2013",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Euthanasia Coaster (2013) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Euthanasia Coaster (2013) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Paradox of the Heap (Sorites)",
@@ -9745,8 +10762,14 @@
     ],
     "id": "wildcard-the-paradox-of-the-heap-sorites",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Paradox of the Heap (Sorites) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Paradox of the Heap (Sorites) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Observer Effect (Quantum)",
@@ -9760,8 +10783,14 @@
     ],
     "id": "wildcard-the-observer-effect-quantum",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Observer Effect (Quantum) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Observer Effect (Quantum) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Infinite Hotel (Hilbert's Hotel)",
@@ -9775,8 +10804,14 @@
     ],
     "id": "wildcard-the-infinite-hotel-hilberts-hotel",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Infinite Hotel (Hilbert's Hotel) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Infinite Hotel (Hilbert's Hotel) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Banach-Tarski Paradox",
@@ -9790,8 +10825,14 @@
     ],
     "id": "wildcard-the-banach-tarski-paradox",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Banach-Tarski Paradox end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Banach-Tarski Paradox — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Coffee Ring Effect",
@@ -9805,8 +10846,14 @@
     ],
     "id": "wildcard-the-coffee-ring-effect",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Coffee Ring Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Coffee Ring Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Unreasonable Effectiveness of Mathematics",
@@ -9820,8 +10867,14 @@
     ],
     "id": "wildcard-the-unreasonable-effectiveness-of-mathematics",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Unreasonable Effectiveness of Mathematics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Unreasonable Effectiveness of Mathematics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   },
   {
     "name": "The Fermi Paradox (Extended)",
@@ -9835,7 +10888,13 @@
     ],
     "id": "wildcard-the-fermi-paradox-extended",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard"
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Fermi Paradox (Extended) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Fermi Paradox (Extended) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
+    "byline": ""
   }
 ]

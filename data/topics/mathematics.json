@@ -17,7 +17,8 @@
       "targetName": "Proofs of the Pythagorean theorem",
       "durationMinutes": 8,
       "instruction": "Learn at least two proofs (algebraic and geometric), then find one real-world application beyond textbook triangles."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-pi",
@@ -37,7 +38,8 @@
       "targetName": "Why pi appears everywhere",
       "durationMinutes": 7,
       "instruction": "Learn about pi's appearance in geometry, probability (Buffon's needle), and Euler's identity, then calculate pi using the Monte Carlo method."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-euler-identity",
@@ -57,7 +59,8 @@
       "targetName": "Why Euler's identity is beautiful",
       "durationMinutes": 8,
       "instruction": "Learn how Euler's formula (e^(ix) = cos x + i sin x) leads to the identity, then explain why mathematicians call it the most elegant equation ever written."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-zero",
@@ -77,7 +80,8 @@
       "targetName": "How zero was invented and why it mattered",
       "durationMinutes": 8,
       "instruction": "Learn about Brahmagupta's rules for zero, then explain why the Roman numeral system couldn't represent zero."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-infinity",
@@ -97,7 +101,8 @@
       "targetName": "Cantor's different sizes of infinity",
       "durationMinutes": 10,
       "instruction": "Learn about countable vs uncountable infinity and the diagonal argument, then explain why there are more real numbers than natural numbers."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-prime-numbers",
@@ -117,7 +122,8 @@
       "targetName": "The importance of prime numbers",
       "durationMinutes": 8,
       "instruction": "Learn about the fundamental theorem of arithmetic, then explain why primes are essential for RSA encryption."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-fibonacci",
@@ -137,7 +143,8 @@
       "targetName": "Where Fibonacci appears in nature",
       "durationMinutes": 7,
       "instruction": "Find Fibonacci numbers in pinecone spirals, sunflower heads, and nautilus shells, then explain the connection to the golden ratio."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-golden-ratio",
@@ -157,7 +164,8 @@
       "targetName": "The golden ratio in mathematics and nature",
       "durationMinutes": 8,
       "instruction": "Learn about φ's connection to the Fibonacci sequence and pentagon geometry, then find one example of the golden ratio in art or architecture."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-calculus",
@@ -177,7 +185,8 @@
       "targetName": "The fundamental theorem of calculus",
       "durationMinutes": 10,
       "instruction": "Learn how differentiation and integration are inverse operations, then find one real-world application of calculus (physics, economics, or biology)."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-probability",
@@ -197,7 +206,8 @@
       "targetName": "Bayes' theorem and its applications",
       "durationMinutes": 8,
       "instruction": "Learn Bayes' theorem, then apply it to the classic medical testing problem (99% accurate test, 1% prevalence — what's the probability you actually have the disease?)."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-fundamental-theorem",
@@ -217,7 +227,8 @@
       "targetName": "Why unique factorization matters",
       "durationMinutes": 7,
       "instruction": "Learn the fundamental theorem of arithmetic, then explain why unique factorization fails in some number systems (like Z[√-5])."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-euler-characteristic",
@@ -237,7 +248,8 @@
       "targetName": "Euler's formula for polyhedra",
       "durationMinutes": 7,
       "instruction": "Verify V - E + F = 2 for a cube, tetrahedron, and dodecahedron, then explain why it led to the Euler characteristic in topology."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-godel-incompleteness",
@@ -257,7 +269,8 @@
       "targetName": "What Gödel's theorems mean",
       "durationMinutes": 10,
       "instruction": "Learn the two incompleteness theorems in plain language, then explain why they shattered Hilbert's program for a complete foundation of mathematics."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-four-color-theorem",
@@ -277,7 +290,8 @@
       "targetName": "The controversial computer proof",
       "durationMinutes": 8,
       "instruction": "Learn about Appel and Haken's 1976 computer-assisted proof, then debate whether a proof that requires a computer is really a proof."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-pigeonhole-principle",
@@ -297,7 +311,8 @@
       "targetName": "Surprising applications of the pigeonhole principle",
       "durationMinutes": 7,
       "instruction": "Learn the principle, then find three surprising applications (same birthday in a room, same number of hairs, matching socks)."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-chaos-theory",
@@ -317,7 +332,8 @@
       "targetName": "The butterfly effect and strange attractors",
       "durationMinutes": 8,
       "instruction": "Learn about Lorenz's weather model and sensitive dependence on initial conditions, then explain why long-term weather prediction is fundamentally limited."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-topology",
@@ -337,7 +353,8 @@
       "targetName": "What makes topology different from geometry",
       "durationMinutes": 7,
       "instruction": "Learn about topological invariants (Euler characteristic, genus), then explain why a donut and a coffee mug are topologically equivalent."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-graph-theory",
@@ -357,7 +374,8 @@
       "targetName": "The bridges of Königsberg problem",
       "durationMinutes": 7,
       "instruction": "Learn about Euler's 1736 solution to the Königsberg bridge problem, then find one modern application of graph theory."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-group-theory",
@@ -377,7 +395,8 @@
       "targetName": "How groups capture symmetry",
       "durationMinutes": 8,
       "instruction": "Learn the four group axioms (closure, associativity, identity, inverse), then find one example of group theory in physics or chemistry."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-fractal-geometry",
@@ -397,7 +416,8 @@
       "targetName": "How fractals are generated",
       "durationMinutes": 8,
       "instruction": "Learn about the Mandelbrot set (z → z² + c), then find one natural fractal (fern, coastline, cloud) and explain why it looks similar at every scale."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-np-complete",
@@ -417,7 +437,8 @@
       "targetName": "What P vs NP means in plain language",
       "durationMinutes": 10,
       "instruction": "Learn the difference between P (easy to solve) and NP (easy to verify), then explain why P = NP would break modern encryption."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-riemann-hypothesis",
@@ -437,7 +458,8 @@
       "targetName": "The Riemann zeta function and prime distribution",
       "durationMinutes": 10,
       "instruction": "Learn what the Riemann zeta function is and why its zeros matter for prime numbers, then explain why a $1 million prize awaits its proof."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-collatz-conjecture",
@@ -457,7 +479,8 @@
       "targetName": "Try the Collatz conjecture yourself",
       "durationMinutes": 5,
       "instruction": "Trace the Collatz sequence starting from 27 (it takes 111 steps to reach 1), then explain why this 'simple' problem has resisted proof for 80 years."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-prime-number-theorem",
@@ -477,7 +500,8 @@
       "targetName": "How primes are distributed",
       "durationMinutes": 8,
       "instruction": "Learn the prime number theorem, then use it to estimate how many primes exist below 1,000,000."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-bayes-theorem",
@@ -497,7 +521,8 @@
       "targetName": "Applying Bayes' theorem",
       "durationMinutes": 8,
       "instruction": "Solve the classic problem: a disease affects 1 in 1000 people; a test is 99% accurate. If you test positive, what's the actual probability you have the disease?"
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-complexity-theory",
@@ -517,7 +542,8 @@
       "targetName": "Big O notation and problem difficulty",
       "durationMinutes": 8,
       "instruction": "Learn about O(1), O(log n), O(n), O(n²), and O(2ⁿ), then classify the time complexity of three everyday algorithms."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-euler-product",
@@ -537,7 +563,8 @@
       "targetName": "How Euler connected primes to infinite series",
       "durationMinutes": 8,
       "instruction": "Learn about the Basel problem (Σ1/n² = π²/6) and Euler's product formula, then explain why connecting primes to analysis was revolutionary."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-algebraic-geometry",
@@ -557,7 +584,8 @@
       "targetName": "How algebra and geometry merge",
       "durationMinutes": 8,
       "instruction": "Learn about algebraic curves (circle: x² + y² = r²) and how they connect to number theory, then find one application of algebraic geometry in physics."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-fourier-transform",
@@ -577,7 +605,8 @@
       "targetName": "How the Fourier transform decomposes signals",
       "durationMinutes": 8,
       "instruction": "Learn about frequency decomposition and the FFT algorithm, then find one everyday technology that depends on the Fourier transform."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-euclidean-geometry",
@@ -597,7 +626,8 @@
       "targetName": "Euclid's five postulates",
       "durationMinutes": 7,
       "instruction": "Learn the five postulates, then explain why the fifth (parallel postulate) led to the discovery of hyperbolic and elliptic geometry."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-number-systems",
@@ -617,7 +647,8 @@
       "targetName": "How the number system evolved",
       "durationMinutes": 8,
       "instruction": "Trace the expansion from natural numbers to complex numbers, then explain why each extension was resisted and what problem it solved."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-imaginary-numbers",
@@ -637,7 +668,8 @@
       "targetName": "Why imaginary numbers aren't imaginary",
       "durationMinutes": 7,
       "instruction": "Learn about the complex plane and how imaginary numbers represent rotation, then find one application of complex numbers in physics or engineering."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-statistics",
@@ -657,7 +689,8 @@
       "targetName": "How statistics can mislead",
       "durationMinutes": 7,
       "instruction": "Learn about Simpson's paradox, p-hacking, and the misuse of correlation, then find one example of statistics being used to deceive."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-fermat-last-theorem",
@@ -677,7 +710,8 @@
       "targetName": "The 358-year journey to prove Fermat",
       "durationMinutes": 10,
       "instruction": "Learn about Wiles's proof using elliptic curves and modular forms, then explain why Fermat's margin note (too narrow to contain his proof) was probably wrong."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-trigonometry",
@@ -697,7 +731,8 @@
       "targetName": "The unit circle and trig functions",
       "durationMinutes": 7,
       "instruction": "Learn sine, cosine, and tangent from the unit circle, then find one real-world application of trigonometry beyond triangles."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-logarithm",
@@ -717,7 +752,8 @@
       "targetName": "Why logarithmic scales exist",
       "durationMinutes": 7,
       "instruction": "Learn about the Richter scale, decibels, and pH scale, then explain why logarithmic scales are used for quantities that span many orders of magnitude."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-linear-algebra",
@@ -737,7 +773,8 @@
       "targetName": "Why linear algebra is everywhere",
       "durationMinutes": 8,
       "instruction": "Learn about eigenvectors and eigenvalues, then find one application of linear algebra in machine learning or computer graphics."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-combinatorics",
@@ -757,7 +794,8 @@
       "targetName": "Permutations, combinations, and the birthday problem",
       "durationMinutes": 7,
       "instruction": "Learn the difference between permutations and combinations, then solve the birthday problem (how many people for a 50% chance of a shared birthday?)."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-paradox",
@@ -777,7 +815,8 @@
       "targetName": "Three famous mathematical paradoxes",
       "durationMinutes": 8,
       "instruction": "Learn the Monty Hall problem, Zeno's paradox of Achilles and the tortoise, and the Banach-Tarski paradox, then explain why each one feels wrong."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-monty-hall",
@@ -797,7 +836,8 @@
       "targetName": "Why switching wins",
       "durationMinutes": 6,
       "instruction": "Solve the Monty Hall problem three ways (intuition, conditional probability, simulation), then explain why even mathematicians initially got it wrong."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-dimensional-analysis",
@@ -817,7 +857,8 @@
       "targetName": "Using dimensional analysis to check equations",
       "durationMinutes": 6,
       "instruction": "Learn how to check an equation by dimensional analysis, then use it to derive the period of a pendulum without solving any differential equation."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-mathematical-induction",
@@ -837,7 +878,8 @@
       "targetName": "How induction proofs work",
       "durationMinutes": 7,
       "instruction": "Learn the structure of an induction proof (base case + inductive step), then prove that 1 + 2 + ... + n = n(n+1)/2."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-complexity-nature",
@@ -857,7 +899,8 @@
       "targetName": "Mathematical patterns in nature",
       "durationMinutes": 7,
       "instruction": "Find five mathematical patterns in nature (spirals, branching, tessellation, fractals, symmetry), then explain whether nature 'knows' math."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-cryptography",
@@ -877,7 +920,8 @@
       "targetName": "How RSA encryption works",
       "durationMinutes": 10,
       "instruction": "Learn the RSA algorithm (key generation, encryption, decryption), then explain why quantum computing threatens current encryption."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-measure-theory",
@@ -897,7 +941,8 @@
       "targetName": "Why measure theory matters for probability",
       "durationMinutes": 8,
       "instruction": "Learn about the Lebesgue integral and why it's better than the Riemann integral, then explain why measure theory is the foundation of modern probability."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-fibonacci-in-nature",
@@ -917,7 +962,8 @@
       "targetName": "Why nature uses Fibonacci spirals",
       "durationMinutes": 7,
       "instruction": "Learn about phyllotaxis (leaf arrangement), then find three examples of Fibonacci spirals in the natural world."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-fundamental-theorem-calculus",
@@ -937,7 +983,8 @@
       "targetName": "How differentiation and integration connect",
       "durationMinutes": 8,
       "instruction": "Learn both parts of the fundamental theorem, then find one application where integrating a rate gives you a total."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-set-theory",
@@ -957,7 +1004,8 @@
       "targetName": "The basics of set theory",
       "durationMinutes": 7,
       "instruction": "Learn about sets, subsets, power sets, and cardinality, then explain why the set of all sets leads to Russell's paradox."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-russell-paradox",
@@ -977,7 +1025,8 @@
       "targetName": "The barber paradox and its implications",
       "durationMinutes": 7,
       "instruction": "Learn the barber paradox version of Russell's paradox, then explain how ZFC set theory resolved the contradiction."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-manifold",
@@ -997,7 +1046,8 @@
       "targetName": "What a manifold is and why it matters",
       "durationMinutes": 8,
       "instruction": "Learn how manifolds generalize curves and surfaces to higher dimensions, then explain why Einstein needed manifolds for general relativity."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-cantor-diagonal",
@@ -1017,7 +1067,8 @@
       "targetName": "The diagonal argument step by step",
       "durationMinutes": 8,
       "instruction": "Work through Cantor's diagonal argument, then explain why it proves the reals are 'more infinite' than the naturals."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-binary",
@@ -1037,7 +1088,8 @@
       "targetName": "How binary works",
       "durationMinutes": 6,
       "instruction": "Learn how to count in binary and convert between binary and decimal, then explain why computers use binary instead of decimal."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-continued-fractions",
@@ -1057,7 +1109,8 @@
       "targetName": "How continued fractions approximate numbers",
       "durationMinutes": 7,
       "instruction": "Compute the continued fraction for √2, then explain why continued fractions give the best rational approximations to irrational numbers."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-math-anxiety",
@@ -1077,7 +1130,8 @@
       "targetName": "Why math anxiety happens and how to overcome it",
       "durationMinutes": 7,
       "instruction": "Learn about the neuroscience of math anxiety, then find one evidence-based strategy for reducing it."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-infinity-hotel",
@@ -1097,7 +1151,8 @@
       "targetName": "How Hilbert's Hotel works",
       "durationMinutes": 6,
       "instruction": "Solve three Hilbert's Hotel puzzles (one new guest, infinitely many new guests, infinitely many buses of infinitely many guests), then explain why infinite sets behave differently from finite ones."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-mandelbrot-set",
@@ -1117,7 +1172,8 @@
       "targetName": "How the Mandelbrot set is generated",
       "durationMinutes": 8,
       "instruction": "Learn the iteration rule and how coloring works, then find an online Mandelbrot explorer and zoom into the boundary."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-golden-angle",
@@ -1137,7 +1193,8 @@
       "targetName": "Why plants use the golden angle",
       "durationMinutes": 6,
       "instruction": "Learn about phyllotaxis and how the golden angle minimizes overlap, then find three plants that demonstrate this pattern."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-zero-sum",
@@ -1157,7 +1214,8 @@
       "targetName": "Why zero-sum thinking is wrong most of the time",
       "durationMinutes": 6,
       "instruction": "Learn about Nash equilibrium in zero-sum games, then find one situation where people mistakenly apply zero-sum thinking to a positive-sum situation."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-fibonacci-recursion",
@@ -1177,7 +1235,8 @@
       "targetName": "How recursion works",
       "durationMinutes": 7,
       "instruction": "Implement Fibonacci recursively, then explain why memoization (caching results) makes it efficient."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-mersenne-primes",
@@ -1197,7 +1256,8 @@
       "targetName": "The hunt for large prime numbers",
       "durationMinutes": 7,
       "instruction": "Learn about the Lucas-Lehmer test for Mersenne primes, then check how many digits the largest known prime has."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-twin-prime",
@@ -1217,7 +1277,8 @@
       "targetName": "The status of twin prime research",
       "durationMinutes": 7,
       "instruction": "Learn about Zhang's 2013 breakthrough and the Polymath project's improvements, then explain why the full conjecture remains open."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-wallis-product",
@@ -1237,7 +1298,8 @@
       "targetName": "How Wallis discovered his product for pi",
       "durationMinutes": 8,
       "instruction": "Learn about Wallis's derivation using integrals, then compute the first 10 terms of the product to see it converge to π/2."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-eulers-number",
@@ -1257,7 +1319,8 @@
       "targetName": "The significance of e",
       "durationMinutes": 7,
       "instruction": "Learn about compound interest approaching e, then find one natural phenomenon described by exponential growth using e."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-basel-problem",
@@ -1277,7 +1340,8 @@
       "targetName": "Euler's Basel solution",
       "durationMinutes": 8,
       "instruction": "Learn about Euler's proof using sine function factorisation, then compute the first 10 terms to see convergence toward pi^2/6."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-ramanujan",
@@ -1318,7 +1382,8 @@
       "targetName": "Fermat's Little Theorem",
       "durationMinutes": 7,
       "instruction": "Learn about Fermat's Little Theorem with a worked example, then find one way it's used in RSA encryption."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-chinese-remainder",
@@ -1338,7 +1403,8 @@
       "targetName": "The Chinese Remainder Theorem",
       "durationMinutes": 7,
       "instruction": "Learn about Sun Zi's original soldier-counting problem, then find one modern application in computer science."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-non-euclidean",
@@ -1358,7 +1424,8 @@
       "targetName": "What happens without Euclid's parallel postulate",
       "durationMinutes": 8,
       "instruction": "Learn the difference between hyperbolic, spherical, and Euclidean geometry, then find one example of each in the real world."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-banach-tarski",
@@ -1378,7 +1445,8 @@
       "targetName": "The Banach-Tarski Paradox",
       "durationMinutes": 7,
       "instruction": "Learn about the role of the Axiom of Choice in the paradox, then explain why the pieces can't be measured."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-axiom-of-choice",
@@ -1398,7 +1466,8 @@
       "targetName": "The Axiom of Choice debate",
       "durationMinutes": 8,
       "instruction": "Learn what the Axiom of Choice actually states, then find one theorem that requires it and one that doesn't."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-knot-theory",
@@ -1418,7 +1487,8 @@
       "targetName": "Knot theory basics",
       "durationMinutes": 7,
       "instruction": "Learn about the Jones polynomial, then find one biological process that involves knotting or unknotting DNA."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-ramsey-theory",
@@ -1438,7 +1508,8 @@
       "targetName": "Why complete disorder is impossible",
       "durationMinutes": 7,
       "instruction": "Learn about the party problem (six people), then find one application of Ramsey theory in computer science."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-modular-arithmetic",
@@ -1458,7 +1529,8 @@
       "targetName": "Modular arithmetic in daily life",
       "durationMinutes": 6,
       "instruction": "Learn about clock arithmetic, then find one example where modular arithmetic is essential to computer security."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-perfect-numbers",
@@ -1478,7 +1550,8 @@
       "targetName": "Perfect numbers and their rarity",
       "durationMinutes": 7,
       "instruction": "Learn about the Euclid-Euler theorem for even perfect numbers, then find one conjecture about odd perfect numbers."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-riemann-zeta",
@@ -1498,7 +1571,8 @@
       "targetName": "The zeta function and primes",
       "durationMinutes": 8,
       "instruction": "Learn about the Euler product formula linking zeta to primes, then find one consequence if the Riemann Hypothesis is proven."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-hilbert-problems",
@@ -1518,7 +1592,8 @@
       "targetName": "Hilbert's 23 problems",
       "durationMinutes": 8,
       "instruction": "Learn which of Hilbert's problems remain unsolved, then find one whose solution changed mathematics."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-poincare-conjecture",
@@ -1538,7 +1613,8 @@
       "targetName": "Perelman's proof",
       "durationMinutes": 8,
       "instruction": "Learn about Perelman's Ricci flow proof, then find one reason he turned down the Millennium Prize."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-fermi-estimates",
@@ -1558,7 +1634,8 @@
       "targetName": "Fermi estimation",
       "durationMinutes": 6,
       "instruction": "Learn Fermi estimation technique, then try one yourself: how many piano tuners are in your city?"
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-benfords-law",
@@ -1578,7 +1655,8 @@
       "targetName": "Benford's Law",
       "durationMinutes": 7,
       "instruction": "Learn why Benford's Law works for naturally occurring data, then find one example where forensic accountants used it to detect fraud."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-birthday-paradox",
@@ -1598,7 +1676,8 @@
       "targetName": "Why 23 people suffice",
       "durationMinutes": 6,
       "instruction": "Learn about the combinatorial calculation behind the birthday problem, then find one real-world application in hash collisions."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-simpsons-paradox",
@@ -1618,7 +1697,8 @@
       "targetName": "How aggregated data can lie",
       "durationMinutes": 7,
       "instruction": "Learn about the kidney stone treatment paradox, then find one example of Simpson's Paradox in public health data."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-central-limit-theorem",
@@ -1638,7 +1718,8 @@
       "targetName": "Why averages form bell curves",
       "durationMinutes": 8,
       "instruction": "Learn about the CLT's implications for polling and measurement, then find one distribution where the CLT fails to converge."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-markov-chains",
@@ -1658,7 +1739,8 @@
       "targetName": "Markov chains explained",
       "durationMinutes": 7,
       "instruction": "Learn about the weather example (sunny/cloudy states), then find one way Markov chains are used in natural language processing."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-game-theory",
@@ -1678,7 +1760,8 @@
       "targetName": "Game theory basics",
       "durationMinutes": 7,
       "instruction": "Learn about zero-sum vs non-zero-sum games, then find one way the Prisoner's Dilemma models real-world conflicts."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-nash-equilibrium",
@@ -1719,7 +1802,8 @@
       "targetName": "The hardest route-planning problem",
       "durationMinutes": 8,
       "instruction": "Learn about the P vs NP connection to TSP, then find one heuristic that gets close to optimal in practice."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-big-o",
@@ -1739,7 +1823,8 @@
       "targetName": "Big O notation",
       "durationMinutes": 7,
       "instruction": "Learn the difference between O(1), O(log n), O(n), and O(n squared), then find one sorting algorithm for each complexity class."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-zenos-paradoxes",
@@ -1759,7 +1844,8 @@
       "targetName": "Zeno's Dichotomy Paradox",
       "durationMinutes": 7,
       "instruction": "Learn all four of Zeno's paradoxes, then find one that was fully resolved by calculus."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-quadratic-formula",
@@ -1779,7 +1865,8 @@
       "targetName": "The quadratic formula and its history",
       "durationMinutes": 6,
       "instruction": "Learn the quadratic formula and its derivation, then find one historical civilisation that solved quadratics without our notation."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "mathematics-harmonic-series",
@@ -1799,7 +1886,8 @@
       "targetName": "The diverging harmonic series",
       "durationMinutes": 7,
       "instruction": "Learn about Nicole Oresme's 14th-century proof, then compare the harmonic series to the convergent p-series (1/n squared)."
-    }
+    },
+    "byline": ""
   },
   {
     "name": "Fermat's Last Theorem (1637-1995)",
@@ -1813,8 +1901,13 @@
     ],
     "id": "math-fermats-last-theorem-1637-1995",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Fermat's Last Theorem (1637-1995) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Fermat's Last Theorem (1637-1995) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1829,8 +1922,13 @@
     ],
     "id": "math-the-riemann-hypothesis-1859",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Riemann Hypothesis (1859) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Riemann Hypothesis (1859) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1845,8 +1943,13 @@
     ],
     "id": "math-gödels-incompleteness-theorems-1931",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Gödel's Incompleteness Theorems (1931) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Gödel's Incompleteness Theorems (1931) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1861,8 +1964,13 @@
     ],
     "id": "math-the-four-color-theorem-1976",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Four Color Theorem (1976) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Four Color Theorem (1976) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1877,8 +1985,13 @@
     ],
     "id": "math-eulers-identity-e^ipi-+-1-=-0",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Euler's Identity (e^iπ + 1 = 0) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Euler's Identity (e^iπ + 1 = 0) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1893,8 +2006,13 @@
     ],
     "id": "math-the-banach-tarski-paradox-1924",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Banach-Tarski Paradox (1924) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Banach-Tarski Paradox (1924) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1909,8 +2027,13 @@
     ],
     "id": "math-the-monty-hall-problem-1975",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Monty Hall Problem (1975) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Monty Hall Problem (1975) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1925,8 +2048,13 @@
     ],
     "id": "math-the-golden-ratio-phi--1618",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Golden Ratio (φ ≈ 1.618) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Golden Ratio (φ ≈ 1.618) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1941,8 +2069,13 @@
     ],
     "id": "math-pi-day-march-14",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Pi Day (March 14) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Pi Day (March 14) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1957,8 +2090,13 @@
     ],
     "id": "math-the-infinite-hotel-hilberts-hotel",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Infinite Hotel (Hilbert's Hotel) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Infinite Hotel (Hilbert's Hotel) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1973,8 +2111,13 @@
     ],
     "id": "math-the-poincaré-conjecture-1904-2003",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Poincaré Conjecture (1904-2003) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Poincaré Conjecture (1904-2003) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1989,8 +2132,13 @@
     ],
     "id": "math-the-catalan-conjecture-1844-2002",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Catalan Conjecture (1844-2002) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Catalan Conjecture (1844-2002) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2005,8 +2153,13 @@
     ],
     "id": "math-chaos-theory-lorenz-1963",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Chaos Theory (Lorenz, 1963) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Chaos Theory (Lorenz, 1963) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2021,8 +2174,13 @@
     ],
     "id": "math-fractals-mandelbrot-1975",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Fractals (Mandelbrot, 1975) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Fractals (Mandelbrot, 1975) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2037,8 +2195,13 @@
     ],
     "id": "math-game-theory-nash-1950",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Game Theory (Nash, 1950) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Game Theory (Nash, 1950) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2053,8 +2216,13 @@
     ],
     "id": "math-the-basel-problem-euler-1735",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Basel Problem (Euler, 1735) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Basel Problem (Euler, 1735) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2069,8 +2237,13 @@
     ],
     "id": "math-the-gaussian-distribution-bell-curve",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Gaussian Distribution (Bell Curve) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Gaussian Distribution (Bell Curve) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2085,8 +2258,13 @@
     ],
     "id": "math-the-monster-group-1973",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Monster Group (1973) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Monster Group (1973) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2101,8 +2279,13 @@
     ],
     "id": "math-the-abc-conjecture-1985",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The ABC Conjecture (1985) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The ABC Conjecture (1985) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2117,8 +2300,13 @@
     ],
     "id": "math-the-erdős-number",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Erdős Number end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Erdős Number — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2133,8 +2321,13 @@
     ],
     "id": "math-galois-theory-1830",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Galois Theory (1830) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Galois Theory (1830) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2149,8 +2342,13 @@
     ],
     "id": "math-the-isoperimetric-inequality",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Isoperimetric Inequality end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Isoperimetric Inequality — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2165,8 +2363,13 @@
     ],
     "id": "math-the-epsilon-delta-definition-of-limits",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Epsilon-Delta Definition of Limits end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Epsilon-Delta Definition of Limits — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2181,8 +2384,13 @@
     ],
     "id": "math-the-halting-problem-turing-1936",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Halting Problem (Turing, 1936) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Halting Problem (Turing, 1936) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2197,8 +2405,13 @@
     ],
     "id": "math-the-existence-of-transcendental-numbers-1882",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Existence of Transcendental Numbers (1882) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Existence of Transcendental Numbers (1882) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2213,8 +2426,13 @@
     ],
     "id": "math-the-logistic-map-population-dynamics",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Logistic Map (Population Dynamics) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Logistic Map (Population Dynamics) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2229,8 +2447,13 @@
     ],
     "id": "math-the-cantor-set-1883",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Cantor Set (1883) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Cantor Set (1883) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2245,8 +2468,13 @@
     ],
     "id": "math-the-existence-of-non-measurable-sets-vitali-1905",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Existence of Non-Measurable Sets (Vitali, 1905) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Existence of Non-Measurable Sets (Vitali, 1905) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2261,8 +2489,13 @@
     ],
     "id": "math-the-cantor-diagonal-argument-1891",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Cantor Diagonal Argument (1891) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Cantor Diagonal Argument (1891) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2277,8 +2510,13 @@
     ],
     "id": "math-the-law-of-large-numbers",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Law of Large Numbers end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Law of Large Numbers — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2293,8 +2531,13 @@
     ],
     "id": "math-the-pythagorean-theorem-proof-by-rearrangement",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Pythagorean Theorem (Proof by Rearrangement) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Pythagorean Theorem (Proof by Rearrangement) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2309,8 +2552,13 @@
     ],
     "id": "math-the-lebesgue-integral-1901",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Lebesgue Integral (1901) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Lebesgue Integral (1901) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2325,8 +2573,13 @@
     ],
     "id": "math-the-ramsey-number-r33-=-6",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Ramsey Number R(3,3) = 6 end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Ramsey Number R(3,3) = 6 — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2341,8 +2594,13 @@
     ],
     "id": "math-the-seven-bridges-of-königsberg-1736",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Seven Bridges of Königsberg (1736) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Seven Bridges of Königsberg (1736) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2357,8 +2615,13 @@
     ],
     "id": "math-the-fundamental-theorem-of-algebra",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Fundamental Theorem of Algebra end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Fundamental Theorem of Algebra — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2373,8 +2636,13 @@
     ],
     "id": "math-the-linearity-of-expectation",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Linearity of Expectation end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Linearity of Expectation — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2389,8 +2657,13 @@
     ],
     "id": "math-the-stone-weierstrass-theorem-1893",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Stone-Weierstrass Theorem (1893) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Stone-Weierstrass Theorem (1893) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2405,8 +2678,13 @@
     ],
     "id": "math-the-hairy-ball-theorem",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Hairy Ball Theorem end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Hairy Ball Theorem — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2421,8 +2699,13 @@
     ],
     "id": "math-the-borsuk-ulam-theorem-1933",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Borsuk-Ulam Theorem (1933) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Borsuk-Ulam Theorem (1933) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   }
 ]

@@ -1646,8 +1646,13 @@
     ],
     "id": "food-bánh-mì-1950s",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bánh Mì (1950s) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Bánh Mì (1950s) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1662,8 +1667,13 @@
     ],
     "id": "food-jerk-chicken-jamaica",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Jerk Chicken (Jamaica) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Jerk Chicken (Jamaica) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1678,8 +1688,13 @@
     ],
     "id": "food-sfiha-lebanon",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sfiha (Lebanon) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sfiha (Lebanon) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1694,8 +1709,13 @@
     ],
     "id": "food-arepa-venezuela/colombia",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Arepa (Venezuela/Colombia) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Arepa (Venezuela/Colombia) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1710,8 +1730,13 @@
     ],
     "id": "food-baozi-china",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Baozi (China) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Baozi (China) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1726,8 +1751,13 @@
     ],
     "id": "food-churros-spain",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Churros (Spain) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Churros (Spain) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1742,8 +1772,13 @@
     ],
     "id": "food-falafel-egypt/israel",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Falafel (Egypt/Israel) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Falafel (Egypt/Israel) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1758,8 +1793,13 @@
     ],
     "id": "food-dosa-south-india",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Dosa (South India) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Dosa (South India) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1774,8 +1814,13 @@
     ],
     "id": "food-elote-mexico",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Elote (Mexico) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Elote (Mexico) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1790,8 +1835,13 @@
     ],
     "id": "food-pho-vietnam",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pho (Vietnam) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Pho (Vietnam) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1806,8 +1856,13 @@
     ],
     "id": "food-bibimbap-korea",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bibimbap (Korea) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Bibimbap (Korea) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1822,8 +1877,13 @@
     ],
     "id": "food-tom-yum-goong-thailand",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tom Yum Goong (Thailand) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tom Yum Goong (Thailand) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1838,8 +1898,13 @@
     ],
     "id": "food-dim-sum-china",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Dim Sum (China) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Dim Sum (China) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1854,8 +1919,13 @@
     ],
     "id": "food-biryani-india",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Biryani (India) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Biryani (India) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1870,8 +1940,13 @@
     ],
     "id": "food-laksa-malaysia/singapore",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Laksa (Malaysia/Singapore) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Laksa (Malaysia/Singapore) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1886,8 +1961,13 @@
     ],
     "id": "food-jollof-rice-west-africa",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Jollof Rice (West Africa) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Jollof Rice (West Africa) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1902,8 +1982,13 @@
     ],
     "id": "food-kimchi-korea",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kimchi (Korea) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Kimchi (Korea) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1918,8 +2003,13 @@
     ],
     "id": "food-miso-ramen-japan",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Miso Ramen (Japan) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Miso Ramen (Japan) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1934,8 +2024,13 @@
     ],
     "id": "food-nasi-goreng-indonesia",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Nasi Goreng (Indonesia) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Nasi Goreng (Indonesia) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1950,8 +2045,13 @@
     ],
     "id": "food-tiramisu-1960s",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tiramisu (1960s) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tiramisu (1960s) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1966,8 +2066,13 @@
     ],
     "id": "food-mochi-japan",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Mochi (Japan) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Mochi (Japan) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1982,8 +2087,13 @@
     ],
     "id": "food-baklava-ottoman-empire",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Baklava (Ottoman Empire) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Baklava (Ottoman Empire) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1998,8 +2108,13 @@
     ],
     "id": "food-churros-con-chocolate-spain",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Churros con Chocolate (Spain) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Churros con Chocolate (Spain) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2014,8 +2129,13 @@
     ],
     "id": "food-kulfi-india",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kulfi (India) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Kulfi (India) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2030,8 +2150,13 @@
     ],
     "id": "food-cannoli-sicily",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Cannoli (Sicily) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Cannoli (Sicily) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2046,8 +2171,13 @@
     ],
     "id": "food-the-maillard-reaction-1912",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Maillard Reaction (1912) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Maillard Reaction (1912) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2062,8 +2192,13 @@
     ],
     "id": "food-gluten-development",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Gluten Development end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Gluten Development — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2078,8 +2213,13 @@
     ],
     "id": "food-emulsification",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Emulsification end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Emulsification — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2094,8 +2234,13 @@
     ],
     "id": "food-fermentation-science",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Fermentation Science end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Fermentation Science — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2110,8 +2255,13 @@
     ],
     "id": "food-umami-1908",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Umami (1908) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Umami (1908) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2126,8 +2276,13 @@
     ],
     "id": "food-carryover-cooking",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Carryover Cooking end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Carryover Cooking — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2142,8 +2297,13 @@
     ],
     "id": "food-kombucha-china-220-bce",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kombucha (China, 220 BCE) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Kombucha (China, 220 BCE) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2158,8 +2318,13 @@
     ],
     "id": "food-tempeh-indonesia",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tempeh (Indonesia) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tempeh (Indonesia) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2174,8 +2339,13 @@
     ],
     "id": "food-sourdough-ancient-egypt",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sourdough (Ancient Egypt) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sourdough (Ancient Egypt) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2190,8 +2360,13 @@
     ],
     "id": "food-miso-japan-700-ce",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Miso (Japan, 700 CE) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Miso (Japan, 700 CE) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2206,8 +2381,13 @@
     ],
     "id": "food-kefir-caucasus",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kefir (Caucasus) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Kefir (Caucasus) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2222,8 +2402,13 @@
     ],
     "id": "food-injera-ethiopia",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Injera (Ethiopia) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Injera (Ethiopia) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2238,8 +2423,13 @@
     ],
     "id": "food-the-columbian-exchange-1492",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Columbian Exchange (1492) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Columbian Exchange (1492) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2254,8 +2444,13 @@
     ],
     "id": "food-the-spice-trade",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Spice Trade end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Spice Trade — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2270,8 +2465,13 @@
     ],
     "id": "food-the-invention-of-pizza-naples-1889",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Invention of Pizza (Naples, 1889) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Invention of Pizza (Naples, 1889) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2286,8 +2486,13 @@
     ],
     "id": "food-the-history-of-chocolate-3000-bce",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The History of Chocolate (3000 BCE) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The History of Chocolate (3000 BCE) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2302,8 +2507,13 @@
     ],
     "id": "food-the-history-of-salt",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The History of Salt end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The History of Salt — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2318,8 +2528,13 @@
     ],
     "id": "food-the-history-of-coffee-ethiopia-850-ce",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The History of Coffee (Ethiopia, 850 CE) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The History of Coffee (Ethiopia, 850 CE) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2334,8 +2549,13 @@
     ],
     "id": "food-parmigiano-reggiano-italy",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Parmigiano-Reggiano (Italy) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Parmigiano-Reggiano (Italy) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2350,8 +2570,13 @@
     ],
     "id": "food-stilton-england",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Stilton (England) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Stilton (England) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2366,8 +2591,13 @@
     ],
     "id": "food-gruyère-switzerland",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Gruyère (Switzerland) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Gruyère (Switzerland) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2382,8 +2612,13 @@
     ],
     "id": "food-comté-france",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Comté (France) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Comté (France) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2398,8 +2633,13 @@
     ],
     "id": "food-feta-greece",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Feta (Greece) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Feta (Greece) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2414,8 +2654,13 @@
     ],
     "id": "food-brie-de-meaux-france",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Brie de Meaux (France) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Brie de Meaux (France) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2430,8 +2675,13 @@
     ],
     "id": "food-matcha-japan",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Matcha (Japan) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Matcha (Japan) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2446,8 +2696,13 @@
     ],
     "id": "food-mezcal-mexico",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Mezcal (Mexico) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Mezcal (Mexico) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2462,8 +2717,13 @@
     ],
     "id": "food-kombucha-fermented-tea",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Kombucha (Fermented Tea) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Kombucha (Fermented Tea) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2478,8 +2738,13 @@
     ],
     "id": "food-turkish-coffee",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Turkish Coffee end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Turkish Coffee — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2494,8 +2759,13 @@
     ],
     "id": "food-pisco-sour-peru/chile",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pisco Sour (Peru/Chile) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Pisco Sour (Peru/Chile) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2510,8 +2780,13 @@
     ],
     "id": "food-fermented-shark-iceland",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Fermented Shark (Iceland) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Fermented Shark (Iceland) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2526,8 +2801,13 @@
     ],
     "id": "food-cuy-peru",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Cuy (Peru) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Cuy (Peru) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2542,8 +2822,13 @@
     ],
     "id": "food-escamoles-mexico",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Escamoles (Mexico) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Escamoles (Mexico) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2558,8 +2843,13 @@
     ],
     "id": "food-century-egg-china",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Century Egg (China) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Century Egg (China) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2574,8 +2864,13 @@
     ],
     "id": "food-durian-southeast-asia",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Durian (Southeast Asia) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Durian (Southeast Asia) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2590,8 +2885,13 @@
     ],
     "id": "food-surströmming-sweden",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Surströmming (Sweden) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Surströmming (Sweden) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2606,8 +2906,13 @@
     ],
     "id": "food-balut-philippines",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Balut (Philippines) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Balut (Philippines) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2622,8 +2927,13 @@
     ],
     "id": "food-casu-marzu-sardinia",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Casu Marzu (Sardinia) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Casu Marzu (Sardinia) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2638,8 +2948,13 @@
     ],
     "id": "food-sourdough-bread",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sourdough Bread end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sourdough Bread — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2654,8 +2969,13 @@
     ],
     "id": "food-babka-poland/ukraine",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Babka (Poland/Ukraine) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Babka (Poland/Ukraine) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2670,8 +2990,13 @@
     ],
     "id": "food-croissant-france-1839",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Croissant (France, 1839) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Croissant (France, 1839) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2686,8 +3011,13 @@
     ],
     "id": "food-focaccia-italy",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Focaccia (Italy) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Focaccia (Italy) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2702,8 +3032,13 @@
     ],
     "id": "food-rogan-josh-kashmir",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Rogan Josh (Kashmir) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Rogan Josh (Kashmir) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2718,8 +3053,13 @@
     ],
     "id": "food-biryani-hyderabad",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Biryani (Hyderabad) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Biryani (Hyderabad) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2734,8 +3074,13 @@
     ],
     "id": "food-chole-bhature-delhi",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Chole Bhature (Delhi) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Chole Bhature (Delhi) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2750,8 +3095,13 @@
     ],
     "id": "food-omakase-sushi",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Omakase Sushi end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Omakase Sushi — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2766,8 +3116,13 @@
     ],
     "id": "food-wagyu-beef-japan",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Wagyu Beef (Japan) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Wagyu Beef (Japan) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2782,8 +3137,13 @@
     ],
     "id": "food-tonkotsu-ramen-japan",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tonkotsu Ramen (Japan) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tonkotsu Ramen (Japan) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2798,8 +3158,13 @@
     ],
     "id": "food-yakitori-japan",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Yakitori (Japan) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Yakitori (Japan) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2814,8 +3179,13 @@
     ],
     "id": "food-hummus-levant",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hummus (Levant) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Hummus (Levant) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2830,8 +3200,13 @@
     ],
     "id": "food-shakshuka-north-africa",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Shakshuka (North Africa) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Shakshuka (North Africa) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2846,8 +3221,13 @@
     ],
     "id": "food-baba-ghanoush-lebanon",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Baba Ghanoush (Lebanon) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Baba Ghanoush (Lebanon) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2862,8 +3242,13 @@
     ],
     "id": "food-feijoada-brazil",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Feijoada (Brazil) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Feijoada (Brazil) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2878,8 +3263,13 @@
     ],
     "id": "food-pão-de-queijo-brazil",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Pão de Queijo (Brazil) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Pão de Queijo (Brazil) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2894,8 +3284,13 @@
     ],
     "id": "food-korean-fried-chicken",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Korean Fried Chicken end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Korean Fried Chicken — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2910,8 +3305,13 @@
     ],
     "id": "food-tteokbokki-korea",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tteokbokki (Korea) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tteokbokki (Korea) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2926,8 +3326,13 @@
     ],
     "id": "food-sundubu-jjigae-korea",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sundubu Jjigae (Korea) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sundubu Jjigae (Korea) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   }
 ]

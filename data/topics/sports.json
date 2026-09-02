@@ -1682,8 +1682,13 @@
     ],
     "id": "sport-the-1950-world-cup-final",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 1950 World Cup Final end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The 1950 World Cup Final — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1698,8 +1703,13 @@
     ],
     "id": "sport-the-istanbul-final-2005",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Istanbul Final (2005) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Istanbul Final (2005) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1714,8 +1724,13 @@
     ],
     "id": "sport-the-2022-world-cup-final-1",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 2022 World Cup Final end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The 2022 World Cup Final — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1730,8 +1745,13 @@
     ],
     "id": "sport-wilt-chamberlains-100-point-game-1962",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Wilt Chamberlains 100-Point Game (1962) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Wilt Chamberlains 100-Point Game (1962) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1746,8 +1766,13 @@
     ],
     "id": "sport-lebrons-block-2016",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "LeBrons Block (2016) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of LeBrons Block (2016) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1762,8 +1787,13 @@
     ],
     "id": "sport-the-dream-team-1992",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Dream Team (1992) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Dream Team (1992) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1778,8 +1808,13 @@
     ],
     "id": "sport-federer-vs-nadal-2008-wimbledon-final",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Federer vs Nadal 2008 Wimbledon Final end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Federer vs Nadal 2008 Wimbledon Final — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1794,8 +1829,13 @@
     ],
     "id": "sport-serena-williams-23-grand-slams",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Serena Williams 23 Grand Slams end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Serena Williams 23 Grand Slams — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1810,8 +1850,13 @@
     ],
     "id": "sport-nadals-14-french-open-titles",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Nadals 14 French Open Titles end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Nadals 14 French Open Titles — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1826,8 +1871,13 @@
     ],
     "id": "sport-ben-stokes-headingley-ashes-2019",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ben Stokes Headingley Ashes (2019) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Ben Stokes Headingley Ashes (2019) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1842,8 +1892,13 @@
     ],
     "id": "sport-brian-lara-400-not-out-2004",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Brian Lara 400 Not Out (2004) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Brian Lara 400 Not Out (2004) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1858,8 +1913,13 @@
     ],
     "id": "sport-senna-vs-prost-1989-93",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Senna vs Prost (1989-93) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Senna vs Prost (1989-93) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1874,8 +1934,13 @@
     ],
     "id": "sport-the-2021-abu-dhabi-controversy",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 2021 Abu Dhabi Controversy end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The 2021 Abu Dhabi Controversy — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1890,8 +1955,13 @@
     ],
     "id": "sport-rally-group-b-1982-86",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Rally Group B (1982-86) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Rally Group B (1982-86) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1906,8 +1976,13 @@
     ],
     "id": "sport-the-isle-of-man-tt-1907-",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Isle of Man TT (1907-) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Isle of Man TT (1907-) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1922,8 +1997,13 @@
     ],
     "id": "sport-cheese-rolling-england",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Cheese Rolling (England) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Cheese Rolling (England) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1938,8 +2018,13 @@
     ],
     "id": "sport-finnish-wife-carrying-finland",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Finnish Wife Carrying (Finland) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Finnish Wife Carrying (Finland) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1954,8 +2039,13 @@
     ],
     "id": "sport-chess-boxing-germany",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Chess Boxing (Germany) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Chess Boxing (Germany) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1970,8 +2060,13 @@
     ],
     "id": "sport-buzkashi-central-asia",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Buzkashi (Central Asia) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Buzkashi (Central Asia) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1986,8 +2081,13 @@
     ],
     "id": "sport-quidditch-muggle",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Quidditch (Muggle) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Quidditch (Muggle) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2002,8 +2102,13 @@
     ],
     "id": "sport-ali-vs-foreman-rumble-in-the-jungle-1974",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ali vs Foreman Rumble in the Jungle (1974) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Ali vs Foreman Rumble in the Jungle (1974) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2018,8 +2123,13 @@
     ],
     "id": "sport-tysons-91-second-knockout-1988",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Tysons 91-Second Knockout (1988) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tysons 91-Second Knockout (1988) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2034,8 +2144,13 @@
     ],
     "id": "sport-mayweathers-50-0-2017",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Mayweathers 50-0 (2017) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Mayweathers 50-0 (2017) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2050,8 +2165,13 @@
     ],
     "id": "sport-pacquiaos-eight-weight-classes",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Pacquiaos Eight Weight Classes end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Pacquiaos Eight Weight Classes — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2066,8 +2186,13 @@
     ],
     "id": "sport-tom-bradys-28-3-comeback-2017",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Tom Bradys 28-3 Comeback (2017) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tom Bradys 28-3 Comeback (2017) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2082,8 +2207,13 @@
     ],
     "id": "sport-the-2016-cubs-world-series",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 2016 Cubs World Series end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The 2016 Cubs World Series — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2098,8 +2228,13 @@
     ],
     "id": "sport-hillarys-everest-summit-1953",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Hillarys Everest Summit (1953) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Hillarys Everest Summit (1953) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2114,8 +2249,13 @@
     ],
     "id": "sport-the-iditarod-1973-",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Iditarod (1973-) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Iditarod (1973-) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2130,8 +2270,13 @@
     ],
     "id": "sport-marathon-des-sables",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Marathon des Sables end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Marathon des Sables — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2146,8 +2291,13 @@
     ],
     "id": "sport-armstrongs-downfall-2012",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Armstrongs Downfall (2012) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Armstrongs Downfall (2012) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2162,8 +2312,13 @@
     ],
     "id": "sport-gretzkys-2857-points",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Gretzkys 2,857 Points end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Gretzkys 2,857 Points — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2178,8 +2333,13 @@
     ],
     "id": "sport-the-1972-summit-series",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 1972 Summit Series end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The 1972 Summit Series — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2194,8 +2354,13 @@
     ],
     "id": "sport-orrs-flying-goal-1970",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Orrs Flying Goal (1970) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Orrs Flying Goal (1970) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2210,8 +2375,13 @@
     ],
     "id": "sport-tigers-tiger-slam-2000-01",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Tigers Tiger Slam (2000-01) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tigers Tiger Slam (2000-01) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2226,8 +2396,13 @@
     ],
     "id": "sport-nicklaus-18-majors",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Nicklaus 18 Majors end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Nicklaus 18 Majors — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2242,8 +2417,13 @@
     ],
     "id": "sport-the-1995-rugby-world-cup-final",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The 1995 Rugby World Cup Final end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The 1995 Rugby World Cup Final — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2258,8 +2438,13 @@
     ],
     "id": "sport-the-haka-new-zealand",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Haka (New Zealand) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Haka (New Zealand) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2274,158 +2459,188 @@
     ],
     "id": "sport-kelly-slaters-11-world-titles-1992-2011",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Kelly Slaters 11 World Titles (1992-2011) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Kelly Slaters 11 World Titles (1992-2011) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
     "id": "sports-fighting-sports",
     "name": "Fighting Sports",
     "category": "SPORTS",
-    "teaser": "Combat disciplines ranging from boxing to MMA, judo to taekwondo. The UFC, founded in 1993, grew MMA from a niche spectacle into a $1.5 billion industry. Bruce Lee's philosophy of 'no way as way' influenced modern mixed martial arts training."
+    "teaser": "Combat disciplines ranging from boxing to MMA, judo to taekwondo. The UFC, founded in 1993, grew MMA from a niche spectacle into a $1.5 billion industry. Bruce Lee's philosophy of 'no way as way' influenced modern mixed martial arts training.",
+    "byline": ""
   },
   {
     "id": "sports-water-sports",
     "name": "Water Sports",
     "category": "SPORTS",
-    "teaser": "Activities on or in water from swimming to surfing to rowing. Surfing was Polynesian royalty's exclusive sport for centuries before becoming mainstream. The 2020 Olympics added surfing, skateboarding, and sport climbing to attract younger viewers."
+    "teaser": "Activities on or in water from swimming to surfing to rowing. Surfing was Polynesian royalty's exclusive sport for centuries before becoming mainstream. The 2020 Olympics added surfing, skateboarding, and sport climbing to attract younger viewers.",
+    "byline": ""
   },
   {
     "id": "sports-mind-sports",
     "name": "Mind Sports",
     "category": "SPORTS",
-    "teaser": "Competitive activities emphasizing mental skill — chess, Go, bridge, esports. Garry Kasparov's 1997 loss to Deep Blue was a landmark for AI. Chess viewership surged 300% during Netflix's 'The Queen's Gambit' in 2020."
+    "teaser": "Competitive activities emphasizing mental skill — chess, Go, bridge, esports. Garry Kasparov's 1997 loss to Deep Blue was a landmark for AI. Chess viewership surged 300% during Netflix's 'The Queen's Gambit' in 2020.",
+    "byline": ""
   },
   {
     "id": "sports-extreme-sports",
     "name": "Extreme Sports",
     "category": "SPORTS",
-    "teaser": "High-risk activities like BASE jumping, wingsuit flying, and big wave surfing. Kelly Slater's 20-foot wave in 2022 pushed surfing's limits. Felix Baumgartner's 2012 space jump from 39km reached Mach 1.25 in freefall."
+    "teaser": "High-risk activities like BASE jumping, wingsuit flying, and big wave surfing. Kelly Slater's 20-foot wave in 2022 pushed surfing's limits. Felix Baumgartner's 2012 space jump from 39km reached Mach 1.25 in freefall.",
+    "byline": ""
   },
   {
     "id": "sports-fantasy-sports",
     "name": "Fantasy Sports",
     "category": "SPORTS",
-    "teaser": "Virtual competitions where participants build teams from real players and score points based on statistics. Fantasy football alone generates $14 billion annually in entry fees. Over 45 million Americans play fantasy sports."
+    "teaser": "Virtual competitions where participants build teams from real players and score points based on statistics. Fantasy football alone generates $14 billion annually in entry fees. Over 45 million Americans play fantasy sports.",
+    "byline": ""
   },
   {
     "id": "sports-olympic-history",
     "name": "Olympic History",
     "category": "SPORTS",
-    "teaser": "The ancient Games ran from 776 BCE to 393 CE in Olympia, Greece. The modern Olympics, revived by Pierre de Coubertin in 1896, now feature 10,500 athletes across 33 sports. The 2024 Paris Games will be the first to achieve gender parity."
+    "teaser": "The ancient Games ran from 776 BCE to 393 CE in Olympia, Greece. The modern Olympics, revived by Pierre de Coubertin in 1896, now feature 10,500 athletes across 33 sports. The 2024 Paris Games will be the first to achieve gender parity.",
+    "byline": ""
   },
   {
     "id": "sports-sports-medicine",
     "name": "Sports Medicine",
     "category": "SPORTS",
-    "teaser": "The field treating and preventing sports injuries. ACL reconstruction surgery has a 90% success rate. Cryotherapy, compression therapy, and progressive loading protocols have reduced athlete recovery times by 40% over the past two decades."
+    "teaser": "The field treating and preventing sports injuries. ACL reconstruction surgery has a 90% success rate. Cryotherapy, compression therapy, and progressive loading protocols have reduced athlete recovery times by 40% over the past two decades.",
+    "byline": ""
   },
   {
     "id": "sports-records-and-milestones",
     "name": "Records and Milestones",
     "category": "SPORTS",
-    "teaser": "Unbreakable or nearly unbreakable sports records. Usain Bolt's 9.58-second 100m may stand for decades. Wilt Chamberlain's 100-point basketball game in 1962 remains the highest single-game scoring record in NBA history."
+    "teaser": "Unbreakable or nearly unbreakable sports records. Usain Bolt's 9.58-second 100m may stand for decades. Wilt Chamberlain's 100-point basketball game in 1962 remains the highest single-game scoring record in NBA history.",
+    "byline": ""
   },
   {
     "id": "sports-team-sports-dynamics",
     "name": "Team Sports Dynamics",
     "category": "SPORTS",
-    "teaser": "How teams form, perform, and evolve. The 'hot hand' fallacy — that streaks in basketball are real — was long debunked but a 2015 study found slight evidence for it. Team chemistry is difficult to quantify but consistently predicts success."
+    "teaser": "How teams form, perform, and evolve. The 'hot hand' fallacy — that streaks in basketball are real — was long debunked but a 2015 study found slight evidence for it. Team chemistry is difficult to quantify but consistently predicts success.",
+    "byline": ""
   },
   {
     "id": "sports-motor-sports",
     "name": "Motor Sports",
     "category": "SPORTS",
-    "teaser": "Racing disciplines from Formula 1 to NASCAR to rally. F1 cars generate 1,500 horsepower and reach 370km/h. The Monaco Grand Prix has been run since 1929. Ayrton Senna's 1984 Monaco lap in the rain is considered the greatest single lap in racing history."
+    "teaser": "Racing disciplines from Formula 1 to NASCAR to rally. F1 cars generate 1,500 horsepower and reach 370km/h. The Monaco Grand Prix has been run since 1929. Ayrton Senna's 1984 Monaco lap in the rain is considered the greatest single lap in racing history.",
+    "byline": ""
   },
   {
     "id": "sports-historical-athletes",
     "name": "Historical Athletes",
     "category": "SPORTS",
-    "teaser": "Athletes who transcended their sport. Jesse Owens won four gold medals at the 1936 Berlin Olympics, defying Hitler's Aryan supremacy ideology. Muhammad Ali's refusal to serve in Vietnam in 1967 cost him his title but cemented his legacy beyond boxing."
+    "teaser": "Athletes who transcended their sport. Jesse Owens won four gold medals at the 1936 Berlin Olympics, defying Hitler's Aryan supremacy ideology. Muhammad Ali's refusal to serve in Vietnam in 1967 cost him his title but cemented his legacy beyond boxing.",
+    "byline": ""
   },
   {
     "id": "sports-ball-sports",
     "name": "Ball Sports",
     "category": "SPORTS",
-    "teaser": "Any sport involving a ball — soccer, basketball, cricket, tennis, golf. Soccer's FIFA World Cup 2022 final between Argentina and France was watched by 1.5 billion people. The Cricket World Cup 2023 final drew 1.2 billion viewers in India alone."
+    "teaser": "Any sport involving a ball — soccer, basketball, cricket, tennis, golf. Soccer's FIFA World Cup 2022 final between Argentina and France was watched by 1.5 billion people. The Cricket World Cup 2023 final drew 1.2 billion viewers in India alone.",
+    "byline": ""
   },
   {
     "id": "sports-combat-sports-training",
     "name": "Combat Sports Training",
     "category": "SPORTS",
-    "teaser": "The methodology behind fighting disciplines. Muay Thai fighters in Thailand begin training at age 7. Boxing's 'heavy bag' training develops power while 'speed bag' work builds hand-eye coordination. MMA fighters typically cross-train in 3-4 disciplines."
+    "teaser": "The methodology behind fighting disciplines. Muay Thai fighters in Thailand begin training at age 7. Boxing's 'heavy bag' training develops power while 'speed bag' work builds hand-eye coordination. MMA fighters typically cross-train in 3-4 disciplines.",
+    "byline": ""
   },
   {
     "id": "sports-winter-sports",
     "name": "Winter Sports",
     "category": "SPORTS",
-    "teaser": "Activities on snow and ice from skiing to curling. Skiing originated 8,000 years ago in Scandinavia. Bobsled was invented in the Swiss Alps in the 1860s. The Winter Olympics have been held since 1924 and now feature 15 sports."
+    "teaser": "Activities on snow and ice from skiing to curling. Skiing originated 8,000 years ago in Scandinavia. Bobsled was invented in the Swiss Alps in the 1860s. The Winter Olympics have been held since 1924 and now feature 15 sports.",
+    "byline": ""
   },
   {
     "id": "sports-racket-sports",
     "name": "Racket Sports",
     "category": "SPORTS",
-    "teaser": "Tennis, badminton, squash, table tennis, and pickleball. Badminton's shuttlecock can reach 493km/h — the fastest racket sport speed. Pickleball grew 85% in 2022, becoming America's fastest-growing sport. Wimbledon's grass court is perennial rye."
+    "teaser": "Tennis, badminton, squash, table tennis, and pickleball. Badminton's shuttlecock can reach 493km/h — the fastest racket sport speed. Pickleball grew 85% in 2022, becoming America's fastest-growing sport. Wimbledon's grass court is perennial rye.",
+    "byline": ""
   },
   {
     "id": "sports-track-and-field",
     "name": "Track and Field",
     "category": "SPORTS",
-    "teaser": "Athletics events from sprinting to throwing to jumping. The decathlon combines 10 events over two days. Usain Bolt's 9.58 100m record at the 2009 Berlin World Championships is considered one of sport's most untouchable records."
+    "teaser": "Athletics events from sprinting to throwing to jumping. The decathlon combines 10 events over two days. Usain Bolt's 9.58 100m record at the 2009 Berlin World Championships is considered one of sport's most untouchable records.",
+    "byline": ""
   },
   {
     "id": "sports-sports-governance",
     "name": "Sports Governance",
     "category": "SPORTS",
-    "teaser": "Organizations that regulate and manage sports. FIFA, founded in 1904, has 211 member nations — more than the UN. The IOC's Olympic Charter defines Olympism's philosophy. Doping scandals have tested sports governance repeatedly since Ben Johnson's 1988 disqualification."
+    "teaser": "Organizations that regulate and manage sports. FIFA, founded in 1904, has 211 member nations — more than the UN. The IOC's Olympic Charter defines Olympism's philosophy. Doping scandals have tested sports governance repeatedly since Ben Johnson's 1988 disqualification.",
+    "byline": ""
   },
   {
     "id": "sports-youth-development",
     "name": "Youth Development",
     "category": "SPORTS",
-    "teaser": "Systems for identifying and nurturing young athletes. La Masia, Barcelona's academy, produced Messi, Xavi, and Iniesta. The US college sports system feeds professional leagues. Early sport specialization vs multi-sport participation is actively debated."
+    "teaser": "Systems for identifying and nurturing young athletes. La Masia, Barcelona's academy, produced Messi, Xavi, and Iniesta. The US college sports system feeds professional leagues. Early sport specialization vs multi-sport participation is actively debated.",
+    "byline": ""
   },
   {
     "id": "sports-referee-and-officiating",
     "name": "Referee and Officiating",
     "category": "SPORTS",
-    "teaser": "The evolving role of officials in sports. VAR (Video Assistant Referee) in soccer was introduced at the 2018 World Cup. Hawk-Eye line-calling in tennis uses seven cameras to track ball position within 3.6mm. Officiating errors remain a source of controversy."
+    "teaser": "The evolving role of officials in sports. VAR (Video Assistant Referee) in soccer was introduced at the 2018 World Cup. Hawk-Eye line-calling in tennis uses seven cameras to track ball position within 3.6mm. Officiating errors remain a source of controversy.",
+    "byline": ""
   },
   {
     "id": "sports-training-science",
     "name": "Training Science",
     "category": "SPORTS",
-    "teaser": "Evidence-based approaches to athletic performance. Periodization — cycling training intensity — was developed by Soviet scientists in the 1960s. High-altitude training increases red blood cell count. VO2 max testing measures aerobic fitness ceiling."
+    "teaser": "Evidence-based approaches to athletic performance. Periodization — cycling training intensity — was developed by Soviet scientists in the 1960s. High-altitude training increases red blood cell count. VO2 max testing measures aerobic fitness ceiling.",
+    "byline": ""
   },
   {
     "id": "sports-esports-competitive",
     "name": "Esports Competitive",
     "category": "SPORTS",
-    "teaser": "Organized competitive video gaming. League of Legends World Championship 2023 drew 6.4 million concurrent viewers. The average pro gamer practices 10-12 hours daily. Esports scholarships are offered by 200+ US colleges."
+    "teaser": "Organized competitive video gaming. League of Legends World Championship 2023 drew 6.4 million concurrent viewers. The average pro gamer practices 10-12 hours daily. Esports scholarships are offered by 200+ US colleges.",
+    "byline": ""
   },
   {
     "id": "sports-sports-technology",
     "name": "Sports Technology",
     "category": "SPORTS",
-    "teaser": "Innovations improving performance and officiating. Carbon fiber running shoes with embedded plates improved marathon times by 4% — World Athletics regulated them in 2020. Hawkeye, instant replay, and GPS tracking have transformed how sports are played and officied."
+    "teaser": "Innovations improving performance and officiating. Carbon fiber running shoes with embedded plates improved marathon times by 4% — World Athletics regulated them in 2020. Hawkeye, instant replay, and GPS tracking have transformed how sports are played and officied.",
+    "byline": ""
   },
   {
     "id": "sports-cycling-endurance",
     "name": "Cycling Endurance",
     "category": "SPORTS",
-    "teaser": "Road cycling races like the Tour de France cover 3,500km over 23 stages. Lance Armstrong's seven titles were stripped for doping. Eddy Merckx holds the record with five Tour victories. The sport averages 40km/h over three weeks of racing."
+    "teaser": "Road cycling races like the Tour de France cover 3,500km over 23 stages. Lance Armstrong's seven titles were stripped for doping. Eddy Merckx holds the record with five Tour victories. The sport averages 40km/h over three weeks of racing.",
+    "byline": ""
   },
   {
     "id": "sports-professional-wrestling",
     "name": "Professional Wrestling",
     "category": "SPORTS",
-    "teaser": "Scripted athletic entertainment combining acrobatics, storytelling, and improvisation. WWE, the largest promotion, runs 500+ events annually. The Undertaker's WrestleMania streak of 21-0 lasted from 1991 to 2014. Japanese puroresu emphasizes stiff, realistic strikes."
+    "teaser": "Scripted athletic entertainment combining acrobatics, storytelling, and improvisation. WWE, the largest promotion, runs 500+ events annually. The Undertaker's WrestleMania streak of 21-0 lasted from 1991 to 2014. Japanese puroresu emphasizes stiff, realistic strikes.",
+    "byline": ""
   },
   {
     "id": "sports-traditional-sports",
     "name": "Traditional Sports",
     "category": "SPORTS",
-    "teaser": "Indigenous and cultural games worldwide. Kabaddi, popular in South Asia, requires a 'raider' to tag opponents while holding their breath. Mesoamerican ballgame, played since 1400 BCE, sometimes ended in human sacrifice. Capoeira blends martial arts with dance."
+    "teaser": "Indigenous and cultural games worldwide. Kabaddi, popular in South Asia, requires a 'raider' to tag opponents while holding their breath. Mesoamerican ballgame, played since 1400 BCE, sometimes ended in human sacrifice. Capoeira blends martial arts with dance.",
+    "byline": ""
   }
 ]

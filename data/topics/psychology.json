@@ -17,7 +17,8 @@
       "targetName": "How cognitive dissonance works",
       "durationMinutes": 7,
       "instruction": "Learn about Festinger's classic experiment (paid $1 vs $20 to lie), then find one example of cognitive dissonance in your own life."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-maslow-hierarchy",
@@ -37,7 +38,8 @@
       "targetName": "Maslow's hierarchy and its criticisms",
       "durationMinutes": 7,
       "instruction": "Learn Maslow's five levels, then find one counterexample (artists creating while hungry) and explain the criticism."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-classical-conditioning",
@@ -57,7 +59,8 @@
       "targetName": "Pavlov's experiment and its applications",
       "durationMinutes": 7,
       "instruction": "Learn the components of classical conditioning (UCS, UCR, CS, CR), then find one everyday example of classical conditioning."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-operant-conditioning",
@@ -77,7 +80,8 @@
       "targetName": "How rewards and punishments shape behavior",
       "durationMinutes": 8,
       "instruction": "Learn about positive/negative reinforcement and punishment, then find one example of variable ratio reinforcement (the most addictive schedule)."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-attachment-theory",
@@ -97,7 +101,8 @@
       "targetName": "The four attachment styles",
       "durationMinutes": 8,
       "instruction": "Learn about secure, anxious-preoccupied, dismissive-avoidant, and fearful-avoidant attachment, then consider which style resonates with your own patterns."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-stanford-prison",
@@ -117,7 +122,8 @@
       "targetName": "What the Stanford Prison Experiment revealed",
       "durationMinutes": 8,
       "instruction": "Learn about Zimbardo's experiment and its ethical criticisms, then explain what it reveals about situational power."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-milgram-obedience",
@@ -137,7 +143,8 @@
       "targetName": "Why people obey authority",
       "durationMinutes": 8,
       "instruction": "Learn about Milgram's experimental setup and results, then explain the 'agentic state' theory for why people obey even against their conscience."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-anchoring-bias",
@@ -157,7 +164,8 @@
       "targetName": "How anchoring distorts judgment",
       "durationMinutes": 6,
       "instruction": "Learn about Tversky and Kahneman's wheel-of-fortune experiment, then find one example of anchoring in everyday pricing."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-confirmation-bias",
@@ -177,7 +185,8 @@
       "targetName": "How confirmation bias works",
       "durationMinutes": 6,
       "instruction": "Learn about the Wason selection task and how it demonstrates confirmation bias, then find one area of your life where you might be biased."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-availability-heuristic",
@@ -197,7 +206,8 @@
       "targetName": "Why we overweight vivid events",
       "durationMinutes": 6,
       "instruction": "Learn about Tversky and Kahneman's availability heuristic, then find three risks that feel more dangerous than statistics suggest."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-dunning-kruger",
@@ -217,7 +227,8 @@
       "targetName": "The Dunning-Kruger effect and its limits",
       "durationMinutes": 7,
       "instruction": "Learn about the original study and the statistical criticisms, then find one domain where you might be overconfident."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-learned-helplessness",
@@ -237,7 +248,8 @@
       "targetName": "How learned helplessness develops",
       "durationMinutes": 7,
       "instruction": "Learn about Seligman's original experiment and its human applications, then explain how learned helplessness relates to depression."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-bystander-effect",
@@ -257,7 +269,8 @@
       "targetName": "Why people don't help in groups",
       "durationMinutes": 7,
       "instruction": "Learn about diffusion of responsibility and social influence, then find one way to overcome the bystander effect in an emergency."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-halo-effect",
@@ -277,7 +290,8 @@
       "targetName": "How the halo effect distorts judgment",
       "durationMinutes": 6,
       "instruction": "Learn about Thorndike's original study, then find three contexts where the halo effect influences decisions (hiring, elections, courtroom)."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-ego-depletion",
@@ -297,7 +311,8 @@
       "targetName": "The ego depletion debate",
       "durationMinutes": 7,
       "instruction": "Learn about the cookie-and-puzzle experiment, then explain why the replication crisis has challenged ego depletion."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-placebo-effect",
@@ -317,7 +332,8 @@
       "targetName": "How the placebo effect works",
       "durationMinutes": 7,
       "instruction": "Learn about endorphin release during placebo analgesia, then explain why placebos work even when people know they're placebos (open-label placebos)."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-self-fulfilling-prophecy",
@@ -337,7 +353,8 @@
       "targetName": "The Rosenthal effect in classrooms",
       "durationMinutes": 7,
       "instruction": "Learn about Rosenthal and Jacobson's Pygmalion study, then find one example of self-fulfilling prophecy in your own experience."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-sunk-cost",
@@ -357,7 +374,8 @@
       "targetName": "Why we can't let go of past investments",
       "durationMinutes": 6,
       "instruction": "Learn about the Concorde fallacy and the military version (cost overrun justification), then find one sunk cost decision you made recently."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-fundamental-attribution-error",
@@ -377,7 +395,8 @@
       "targetName": "Why we judge others more harshly than ourselves",
       "durationMinutes": 6,
       "instruction": "Learn about the actor-observer asymmetry, then find one recent situation where you fell into this error."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-stockdale-paradox",
@@ -397,7 +416,8 @@
       "targetName": "How Stockdale survived captivity",
       "durationMinutes": 7,
       "instruction": "Learn about Stockdale's philosophy (confront the most brutal facts + retain faith), then explain why the optimists in his camp died first."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-ikigai",
@@ -417,7 +437,8 @@
       "targetName": "Finding your ikigai",
       "durationMinutes": 6,
       "instruction": "Map the four circles (love, skill, need, pay) for your own life, then find one area where two circles overlap and one where all four do."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-flow-state",
@@ -437,7 +458,8 @@
       "targetName": "How to enter flow state",
       "durationMinutes": 7,
       "instruction": "Learn Csikszentmihalyi's conditions for flow (clear goals, immediate feedback, challenge-skill balance), then identify one activity that regularly puts you in flow."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-growth-mindset",
@@ -457,7 +479,8 @@
       "targetName": "Growth vs fixed mindset",
       "durationMinutes": 7,
       "instruction": "Learn about Dweck's praise experiment (children praised for intelligence vs effort), then consider which mindset you tend toward."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-self-determination-theory",
@@ -477,7 +500,8 @@
       "targetName": "The three pillars of intrinsic motivation",
       "durationMinutes": 7,
       "instruction": "Learn about autonomy, competence, and relatedness, then find one workplace or school that violates all three and one that supports them."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-positive-psychology",
@@ -497,7 +521,8 @@
       "targetName": "The PERMA model of well-being",
       "durationMinutes": 7,
       "instruction": "Learn about Seligman's PERMA (Positive Emotion, Engagement, Relationships, Meaning, Accomplishment), then rate yourself on each dimension."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-serial-position-effect",
@@ -517,7 +542,8 @@
       "targetName": "Primacy and recency effects",
       "durationMinutes": 6,
       "instruction": "Learn about the serial position curve, then find one practical application (speech structure, product placement, study techniques)."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-cognitive-load",
@@ -537,7 +563,8 @@
       "targetName": "How to manage cognitive load",
       "durationMinutes": 6,
       "instruction": "Learn about intrinsic, extraneous, and germane cognitive load, then find one example of good vs poor cognitive load management in design."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-schizophrenia",
@@ -557,7 +584,8 @@
       "targetName": "What schizophrenia actually is",
       "durationMinutes": 8,
       "instruction": "Learn the difference between positive symptoms (hallucinations, delusions) and negative symptoms (flat affect, withdrawal), then explain why early intervention improves outcomes."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-trauma-ptsd",
@@ -577,7 +605,8 @@
       "targetName": "How PTSD changes the brain",
       "durationMinutes": 8,
       "instruction": "Learn about amygdala hyperactivation and hippocampal shrinkage in PTSD, then explain why EMDR and prolonged exposure therapy work."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-memory-reconstruction",
@@ -597,7 +626,8 @@
       "targetName": "How memories are reconstructed",
       "durationMinutes": 7,
       "instruction": "Learn about Loftus's misinformation effect and the lost in the mall experiment, then explain why this matters for the justice system."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-stroop-effect",
@@ -617,7 +647,8 @@
       "targetName": "Try the Stroop test yourself",
       "durationMinutes": 5,
       "instruction": "Find an online Stroop test, try it, and time yourself on congruent vs incongruent trials. Then explain why the interference happens."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-sleep-memory",
@@ -637,7 +668,8 @@
       "targetName": "How sleep strengthens memories",
       "durationMinutes": 7,
       "instruction": "Learn about sleep spindles and slow-wave sleep's role in memory, then find one study technique that leverages sleep for learning."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-embodied-cognition",
@@ -657,7 +689,8 @@
       "targetName": "How the body influences thought",
       "durationMinutes": 7,
       "instruction": "Learn about Williams and Bargh's warm-cup experiment, then find one example of embodied cognition in daily life."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-conformity",
@@ -677,7 +710,8 @@
       "targetName": "Why people conform to groups",
       "durationMinutes": 7,
       "instruction": "Learn about Asch's line judgment experiment, then explain the difference between normative and informational social influence."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-emotional-intelligence",
@@ -697,7 +731,8 @@
       "targetName": "The four components of EI",
       "durationMinutes": 7,
       "instruction": "Learn about self-awareness, self-regulation, social awareness, and relationship management, then rate yourself honestly on each."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-paradox-of-choice",
@@ -717,7 +752,8 @@
       "targetName": "Why more choice means less happiness",
       "durationMinutes": 6,
       "instruction": "Learn about the jam experiment (more jams = fewer purchases), then find one area of your life where too many options cause paralysis."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-optimism-bias",
@@ -737,7 +773,8 @@
       "targetName": "Why we're unrealistically optimistic",
       "durationMinutes": 6,
       "instruction": "Learn about Sharot's research on the optimism bias, then find one domain where your optimism might be leading you astray."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-planning-fallacy",
@@ -757,7 +794,8 @@
       "targetName": "Why projects always take longer than expected",
       "durationMinutes": 6,
       "instruction": "Learn about Kahneman's inside/outside view distinction, then find one personal project where you fell victim to the planning fallacy."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-reactance",
@@ -777,7 +815,8 @@
       "targetName": "How reactance drives behavior",
       "durationMinutes": 6,
       "instruction": "Learn about Brehm's reactance theory, then find one example where restricting access made something more desirable."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-schemas",
@@ -797,7 +836,8 @@
       "targetName": "How schemas shape perception",
       "durationMinutes": 7,
       "instruction": "Learn about Piaget's schemas (assimilation and accommodation), then find one schema that might be causing you to misinterpret something."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-dark-triad",
@@ -817,7 +857,8 @@
       "targetName": "The three dark personality traits",
       "durationMinutes": 8,
       "instruction": "Learn the distinguishing features of each Dark Triad trait, then debate whether these traits are always harmful or sometimes adaptive."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-cognitive-bias-tarjetas",
@@ -837,7 +878,8 @@
       "targetName": "How survivorship bias distorts decisions",
       "durationMinutes": 6,
       "instruction": "Learn about the WWII bomber armor story (Abraham Wald), then find one example of survivorship bias in business or self-help advice."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-sunk-cost-psychology",
@@ -857,7 +899,8 @@
       "targetName": "How loss aversion shapes decisions",
       "durationMinutes": 7,
       "instruction": "Learn about Kahneman and Tversky's prospect theory, then find one example of loss aversion in your own financial decisions."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-sleep-deprivation",
@@ -877,7 +920,8 @@
       "targetName": "How sleep deprivation affects the brain",
       "durationMinutes": 7,
       "instruction": "Learn about the cognitive effects of sleep deprivation (attention, working memory, emotional regulation), then find one strategy for improving sleep quality."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-emotional-contagion",
@@ -897,7 +941,8 @@
       "targetName": "How emotions spread between people",
       "durationMinutes": 6,
       "instruction": "Learn about Facebook's emotional contagion study, then find one relationship where you notice emotional contagion happening."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-implicit-association",
@@ -917,7 +962,8 @@
       "targetName": "Take the Implicit Association Test",
       "durationMinutes": 10,
       "instruction": "Take Harvard's IAT (implicit.harvard.edu), then discuss what the results reveal about unconscious bias and whether the test is reliable."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-self-compassion",
@@ -937,7 +983,8 @@
       "targetName": "The three components of self-compassion",
       "durationMinutes": 6,
       "instruction": "Learn about self-kindness, common humanity, and mindfulness, then try a self-compassion exercise after your next mistake."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-misinformation-effect",
@@ -957,7 +1004,8 @@
       "targetName": "How misinformation distorts memory",
       "durationMinutes": 7,
       "instruction": "Learn about Loftus's car accident experiments (how 'smashed' vs 'hit' changes speed estimates), then explain why this matters for eyewitness testimony."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-procrastination",
@@ -977,7 +1025,8 @@
       "targetName": "The psychology of procrastination",
       "durationMinutes": 7,
       "instruction": "Learn about temporal discounting and the amygdala-prefrontal cortex conflict, then find one strategy that works for your procrastination pattern."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-decision-fatigue",
@@ -997,7 +1046,8 @@
       "targetName": "How decision fatigue affects performance",
       "durationMinutes": 6,
       "instruction": "Learn about the parole study and Steve Jobs's uniform strategy, then find one way to reduce decision fatigue in your daily life."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-oxytocin",
@@ -1017,7 +1067,8 @@
       "targetName": "The complex role of oxytocin",
       "durationMinutes": 7,
       "instruction": "Learn about oxytocin's role in pair bonding and trust, then explain why de Dreu's research shows it also increases ethnocentrism."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-mental-models",
@@ -1037,7 +1088,8 @@
       "targetName": "Key mental models for better thinking",
       "durationMinutes": 8,
       "instruction": "Learn three mental models (first principles, inversion, second-order thinking), then apply one to a current decision you're facing."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-gestalt-psychology",
@@ -1057,7 +1109,8 @@
       "targetName": "Gestalt principles of visual perception",
       "durationMinutes": 7,
       "instruction": "Learn the Gestalt principles (proximity, similarity, closure, continuity), then find three examples of Gestalt design in apps or websites you use."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-habit-loop",
@@ -1077,7 +1130,8 @@
       "targetName": "How to change habits using the loop",
       "durationMinutes": 7,
       "instruction": "Identify the cue, routine, and reward of one of your habits, then design a replacement routine that satisfies the same reward."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-fear-conditioning",
@@ -1097,7 +1151,8 @@
       "targetName": "How fears are learned and unlearned",
       "durationMinutes": 7,
       "instruction": "Learn about fear conditioning and extinction, then explain why exposure therapy works for phobias."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-social-comparison",
@@ -1117,7 +1172,8 @@
       "targetName": "How social comparison affects well-being",
       "durationMinutes": 6,
       "instruction": "Learn about upward vs downward social comparison, then find one way social media triggers comparison in your life."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-money-happiness",
@@ -1137,7 +1193,8 @@
       "targetName": "What research says about money and happiness",
       "durationMinutes": 7,
       "instruction": "Learn about the Kahneman plateau finding and Killingsworth's counter-research, then find one way to spend money that increases well-being."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-priming",
@@ -1157,7 +1214,8 @@
       "targetName": "How priming shapes behavior",
       "durationMinutes": 7,
       "instruction": "Learn about Bargh's elderly walking study and the replication controversies, then find one example of priming in advertising."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-crowd-psychology",
@@ -1177,7 +1235,8 @@
       "targetName": "The wisdom and madness of crowds",
       "durationMinutes": 7,
       "instruction": "Compare Le Bon's crowd theory with Surowiecki's 'Wisdom of Crowds,' then find one example of collective intelligence and one of collective irrationality."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-occams-razor-psychology",
@@ -1197,7 +1256,8 @@
       "targetName": "How parsimony guides psychological explanation",
       "durationMinutes": 6,
       "instruction": "Learn about parsimony in clinical diagnosis, then find one situation where the simplest explanation is probably wrong."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-neuroplasticity-psychology",
@@ -1217,7 +1277,8 @@
       "targetName": "How experience reshapes the brain",
       "durationMinutes": 7,
       "instruction": "Learn about meditation and brain structure changes, then find one habit that could reshape your brain for the better."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-impostor-syndrome",
@@ -1237,7 +1298,8 @@
       "targetName": "Impostor syndrome",
       "durationMinutes": 7,
       "instruction": "Learn about the five types of impostor syndrome, then find one high-profile person who has spoken about experiencing it."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-hedonic-adaptation",
@@ -1257,7 +1319,8 @@
       "targetName": "The hedonic treadmill",
       "durationMinutes": 7,
       "instruction": "Learn about Brickman's lottery winner study, then find one strategy that genuinely counteracts hedonic adaptation."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-peak-end-rule",
@@ -1277,7 +1340,8 @@
       "targetName": "How we remember experiences",
       "durationMinutes": 6,
       "instruction": "Learn about Kahneman's cold-water experiment, then find one way the peak-end rule shapes design decisions in products or services."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-mere-exposure",
@@ -1297,7 +1361,8 @@
       "targetName": "Why familiarity breeds liking",
       "durationMinutes": 6,
       "instruction": "Learn about Zajonc's 1968 study, then find one way marketers use mere exposure without your conscious awareness."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-spotlight-effect",
@@ -1317,7 +1382,8 @@
       "targetName": "The spotlight effect",
       "durationMinutes": 6,
       "instruction": "Learn about Gilovich's T-shirt experiment, then find one real consequence of overestimating how much people are watching you."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-negativity-bias",
@@ -1337,7 +1403,8 @@
       "targetName": "Why bad is stronger than good",
       "durationMinutes": 7,
       "instruction": "Learn about Baumeister's 'bad is stronger than good' meta-analysis, then find one way negativity bias shapes news media."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-reciprocity-norm",
@@ -1357,7 +1424,8 @@
       "targetName": "The reciprocity principle",
       "durationMinutes": 6,
       "instruction": "Learn about Cialdini's reciprocity experiments, then find one example of reciprocity being used in negotiation or sales."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-social-loafing",
@@ -1377,7 +1445,8 @@
       "targetName": "Why groups reduce individual effort",
       "durationMinutes": 6,
       "instruction": "Learn about Ringelmann's experiment, then find one way to reduce social loafing in a team setting."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-groupthink",
@@ -1397,7 +1466,8 @@
       "targetName": "How groupthink derails decision-making",
       "durationMinutes": 7,
       "instruction": "Learn about the Bay of Pigs and the Challenger disaster as groupthink cases, then find one safeguard against it."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-in-group-favoritism",
@@ -1417,7 +1487,8 @@
       "targetName": "Minimal group bias",
       "durationMinutes": 7,
       "instruction": "Learn about Tajfel's minimal group paradigm, then find one way in-group favoritism manifests in real-world institutions."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-barnum-effect",
@@ -1437,7 +1508,8 @@
       "targetName": "Why horoscopes feel personal",
       "durationMinutes": 6,
       "instruction": "Learn about Forer's 1949 experiment, then find one other context where the Barnum effect influences judgement."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-cbt",
@@ -1457,7 +1529,8 @@
       "targetName": "How CBT works",
       "durationMinutes": 7,
       "instruction": "Learn about the cognitive distortion list, then find one common distortion that most people recognise in their own thinking."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-zeigarnik",
@@ -1477,7 +1550,8 @@
       "targetName": "Why unfinished tasks stick in memory",
       "durationMinutes": 6,
       "instruction": "Learn about Zeigarnik's waiter observation, then find one way the Zeigarnik effect is used in storytelling or marketing."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-method-of-loci",
@@ -1497,7 +1571,8 @@
       "targetName": "Building a memory palace",
       "durationMinutes": 7,
       "instruction": "Learn the method of loci, then try memorising five grocery items by placing them in rooms of your home."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-flashbulb-memories",
@@ -1517,7 +1592,8 @@
       "targetName": "Why vivid memories can still be wrong",
       "durationMinutes": 7,
       "instruction": "Learn about Talarico and Rubin's 9/11 flashbulb memory study, then find one reason emotional intensity creates the illusion of accuracy."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-change-blindness",
@@ -1537,7 +1613,8 @@
       "targetName": "Why we miss big changes",
       "durationMinutes": 6,
       "instruction": "Learn about the door study, then find one implication of change blindness for eyewitness testimony reliability."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-synesthesia",
@@ -1557,7 +1634,8 @@
       "targetName": "What synesthesia reveals about the brain",
       "durationMinutes": 7,
       "instruction": "Learn about grapheme-colour synesthesia, then find one theory explaining why it develops."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-mirror-neurons",
@@ -1577,7 +1655,8 @@
       "targetName": "Mirror neurons and empathy",
       "durationMinutes": 7,
       "instruction": "Learn about Rizzolatti's mirror neuron discovery, then find one debate about whether mirror neurons truly explain human empathy."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-dopamine-reward",
@@ -1597,7 +1676,8 @@
       "targetName": "Dopamine's real role",
       "durationMinutes": 7,
       "instruction": "Learn about the wanting vs liking distinction, then find one modern app or game design pattern that manipulates dopamine loops."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-default-mode-network",
@@ -1617,7 +1697,8 @@
       "targetName": "The brain's idle network",
       "durationMinutes": 7,
       "instruction": "Learn about the DMN's role in creativity, then find one practice that strengthens mind-wandering capacity."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-nature-wellbeing",
@@ -1637,7 +1718,8 @@
       "targetName": "How nature affects mental health",
       "durationMinutes": 6,
       "instruction": "Learn about shinrin-yoku research, then find one minimum dose of nature exposure that measurably improves mood."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-loneliness",
@@ -1657,7 +1739,8 @@
       "targetName": "Why loneliness is dangerous",
       "durationMinutes": 7,
       "instruction": "Learn about Cacioppo's loneliness research, then find one difference between being alone and being lonely."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-overjustification",
@@ -1677,7 +1760,8 @@
       "targetName": "When rewards backfire",
       "durationMinutes": 6,
       "instruction": "Learn about Lepper's marker study, then find one real-world example of overjustification in schools or workplaces."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-status-quo-bias",
@@ -1697,7 +1781,8 @@
       "targetName": "Why we resist change",
       "durationMinutes": 6,
       "instruction": "Learn about organ donation defaults across countries, then find one example of status quo bias in your own life."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-endowment-effect",
@@ -1717,7 +1802,8 @@
       "targetName": "Why ownership inflates value",
       "durationMinutes": 6,
       "instruction": "Learn about Kahneman's mug experiment, then find one business strategy that exploits the endowment effect."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-framing-effect",
@@ -1737,7 +1823,8 @@
       "targetName": "How framing changes decisions",
       "durationMinutes": 6,
       "instruction": "Learn about Tversky and Kahneman's disease problem, then find one example of framing in political communication."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-hindsight-bias",
@@ -1757,7 +1844,8 @@
       "targetName": "Why we think we predicted the outcome",
       "durationMinutes": 6,
       "instruction": "Learn about Fischhoff's 1975 study, then find one way hindsight bias affects legal judgements."
-    }
+    },
+    "byline": ""
   },
   {
     "id": "psychology-forgetting-curve",
@@ -1777,7 +1865,8 @@
       "targetName": "Spaced repetition and memory",
       "durationMinutes": 7,
       "instruction": "Learn about Ebbinghaus's forgetting curve, then find one spaced-repetition app or technique that uses this science."
-    }
+    },
+    "byline": ""
   },
   {
     "name": "The Stanford Prison Experiment (1971)",
@@ -1791,8 +1880,13 @@
     ],
     "id": "psych-the-stanford-prison-experiment-1971",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Stanford Prison Experiment (1971) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Stanford Prison Experiment (1971) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1807,8 +1901,13 @@
     ],
     "id": "psych-milgram-obedience-study-1961",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Milgram Obedience Study (1961) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Milgram Obedience Study (1961) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1823,8 +1922,13 @@
     ],
     "id": "psych-the-cognitive-bias-codex",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Cognitive Bias Codex end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Cognitive Bias Codex — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1839,8 +1943,13 @@
     ],
     "id": "psych-learned-helplessness-seligman-1967",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Learned Helplessness (Seligman, 1967) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Learned Helplessness (Seligman, 1967) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1855,8 +1964,13 @@
     ],
     "id": "psych-maslows-hierarchy-of-needs-1943",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Maslow's Hierarchy of Needs (1943) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Maslow's Hierarchy of Needs (1943) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1871,8 +1985,13 @@
     ],
     "id": "psych-the-marshmallow-test-1972",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Marshmallow Test (1972) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Marshmallow Test (1972) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1887,8 +2006,13 @@
     ],
     "id": "psych-classical-conditioning-pavlov-1890s",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Classical Conditioning (Pavlov, 1890s) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Classical Conditioning (Pavlov, 1890s) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1903,8 +2027,13 @@
     ],
     "id": "psych-the-big-five-personality-traits",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Big Five Personality Traits end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Big Five Personality Traits — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1919,8 +2048,13 @@
     ],
     "id": "psych-attachment-theory-bowlby-1958",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Attachment Theory (Bowlby, 1958) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Attachment Theory (Bowlby, 1958) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1935,8 +2069,13 @@
     ],
     "id": "psych-the-dunning-kruger-effect-1999",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Dunning-Kruger Effect (1999) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Dunning-Kruger Effect (1999) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1951,8 +2090,13 @@
     ],
     "id": "psych-cognitive-dissonance-festinger-1957",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Cognitive Dissonance (Festinger, 1957) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Cognitive Dissonance (Festinger, 1957) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1967,8 +2111,13 @@
     ],
     "id": "psych-the-stanford-marshmallow-experiment-follow-up",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Stanford Marshmallow Experiment (Follow-up) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Stanford Marshmallow Experiment (Follow-up) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1983,8 +2132,13 @@
     ],
     "id": "psych-the-bystander-effect-latané-1968",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Bystander Effect (Latané, 1968) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Bystander Effect (Latané, 1968) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1999,8 +2153,13 @@
     ],
     "id": "psych-positive-psychology-seligman-1998",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Positive Psychology (Seligman, 1998) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Positive Psychology (Seligman, 1998) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2015,8 +2174,13 @@
     ],
     "id": "psych-the-stanford-prison-experiment-critique",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Stanford Prison Experiment Critique end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Stanford Prison Experiment Critique — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2031,8 +2195,13 @@
     ],
     "id": "psych-the-replication-crisis-2010s",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Replication Crisis (2010s) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Replication Crisis (2010s) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2047,8 +2216,13 @@
     ],
     "id": "psych-flow-state-csikszentmihalyi-1990",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Flow State (Csikszentmihalyi, 1990) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Flow State (Csikszentmihalyi, 1990) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2063,8 +2237,13 @@
     ],
     "id": "psych-the-zeigarnik-effect-1927",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Zeigarnik Effect (1927) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Zeigarnik Effect (1927) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2079,8 +2258,13 @@
     ],
     "id": "psych-the-availability-heuristic",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Availability Heuristic end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Availability Heuristic — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2095,8 +2279,13 @@
     ],
     "id": "psych-self-determination-theory-deci-1985",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Self-Determination Theory (Deci, 1985) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Self-Determination Theory (Deci, 1985) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2111,8 +2300,13 @@
     ],
     "id": "psych-the-framing-effect-tversky-1981",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Framing Effect (Tversky, 1981) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Framing Effect (Tversky, 1981) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2127,8 +2321,13 @@
     ],
     "id": "psych-the-paradox-of-choice-schwartz-2004",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Paradox of Choice (Schwartz, 2004) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Paradox of Choice (Schwartz, 2004) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2143,8 +2342,13 @@
     ],
     "id": "psych-the-hedonic-treadmill",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Hedonic Treadmill end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Hedonic Treadmill — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2159,8 +2363,13 @@
     ],
     "id": "psych-social-proof-cialdini-1984",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Social Proof (Cialdini, 1984) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Social Proof (Cialdini, 1984) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2175,8 +2384,13 @@
     ],
     "id": "psych-anchoring-effect-tversky-1974",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Anchoring Effect (Tversky, 1974) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Anchoring Effect (Tversky, 1974) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2191,308 +2405,363 @@
     ],
     "id": "psych-the-stroop-effect-1935",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "The Stroop Effect (1935) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Stroop Effect (1935) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
     "id": "psychology-cognitive-load-theory",
     "name": "Cognitive Load Theory",
     "category": "PSYCHOLOGY",
-    "teaser": "The concept that working memory can hold only about four chunks of information at once. Developed by John Sweller in 1988, it shapes how instructional materials are designed. Splitting complex tasks into smaller steps dramatically improves learning outcomes."
+    "teaser": "The concept that working memory can hold only about four chunks of information at once. Developed by John Sweller in 1988, it shapes how instructional materials are designed. Splitting complex tasks into smaller steps dramatically improves learning outcomes.",
+    "byline": ""
   },
   {
     "id": "psychology-emotional-intelligence-1",
     "name": "Emotional Intelligence",
     "category": "PSYCHOLOGY",
-    "teaser": "The ability to recognize, understand, and manage one's own emotions and those of others. Daniel Goleman popularized the concept in his 1995 bestselling book. Studies show EQ accounts for 58% of job performance across all types of jobs."
+    "teaser": "The ability to recognize, understand, and manage one's own emotions and those of others. Daniel Goleman popularized the concept in his 1995 bestselling book. Studies show EQ accounts for 58% of job performance across all types of jobs.",
+    "byline": ""
   },
   {
     "id": "psychology-maslow-s-hierarchy-of-needs",
     "name": "Maslow's Hierarchy of Needs",
     "category": "PSYCHOLOGY",
-    "teaser": "A motivational theory arranging human needs in a pyramid from basic survival to self-actualization. Abraham Maslow proposed it in 1943. The five levels — physiological, safety, love, esteem, and self-fulfillment — remain widely taught despite criticism."
+    "teaser": "A motivational theory arranging human needs in a pyramid from basic survival to self-actualization. Abraham Maslow proposed it in 1943. The five levels — physiological, safety, love, esteem, and self-fulfillment — remain widely taught despite criticism.",
+    "byline": ""
   },
   {
     "id": "psychology-attachment-theory-1",
     "name": "Attachment Theory",
     "category": "PSYCHOLOGY",
-    "teaser": "John Bowlby's framework explaining how early bonds with caregivers shape adult relationships. Secure, anxious, avoidant, and disorganized are the four main styles. The Strange Situation experiment by Mary Ainsworth identified these patterns in 1978."
+    "teaser": "John Bowlby's framework explaining how early bonds with caregivers shape adult relationships. Secure, anxious, avoidant, and disorganized are the four main styles. The Strange Situation experiment by Mary Ainsworth identified these patterns in 1978.",
+    "byline": ""
   },
   {
     "id": "psychology-milgram-experiment",
     "name": "Milgram Experiment",
     "category": "PSYCHOLOGY",
-    "teaser": "Stanley Milgram's 1961 study showing ordinary people would administer apparently lethal shocks when instructed by authority. 65% of participants delivered the maximum 450-volt shock. It revealed the terrifying power of obedience over moral judgment."
+    "teaser": "Stanley Milgram's 1961 study showing ordinary people would administer apparently lethal shocks when instructed by authority. 65% of participants delivered the maximum 450-volt shock. It revealed the terrifying power of obedience over moral judgment.",
+    "byline": ""
   },
   {
     "id": "psychology-stanford-prison-experiment",
     "name": "Stanford Prison Experiment",
     "category": "PSYCHOLOGY",
-    "teaser": "Philip Zimbardo's 1971 study where college students assigned as guards quickly became abusive toward student prisoners. The experiment was stopped after just six days. It demonstrated how roles and power dynamics can transform behavior rapidly."
+    "teaser": "Philip Zimbardo's 1971 study where college students assigned as guards quickly became abusive toward student prisoners. The experiment was stopped after just six days. It demonstrated how roles and power dynamics can transform behavior rapidly.",
+    "byline": ""
   },
   {
     "id": "psychology-stroop-effect-1",
     "name": "Stroop Effect",
     "category": "PSYCHOLOGY",
-    "teaser": "The delay in reaction time when the color of a word doesn't match the word itself — like the word 'blue' printed in red ink. John Ridley Stroop published this in 1935. It demonstrates the conflict between automatic reading and conscious color identification."
+    "teaser": "The delay in reaction time when the color of a word doesn't match the word itself — like the word 'blue' printed in red ink. John Ridley Stroop published this in 1935. It demonstrates the conflict between automatic reading and conscious color identification.",
+    "byline": ""
   },
   {
     "id": "psychology-flow-state-1",
     "name": "Flow State",
     "category": "PSYCHOLOGY",
-    "teaser": "Mihaly Csikszentmihalyi's concept of complete immersion in an activity where time seems to disappear. Optimal flow occurs when challenge level matches skill level. Artists, athletes, and musicians describe it as their peak performance state."
+    "teaser": "Mihaly Csikszentmihalyi's concept of complete immersion in an activity where time seems to disappear. Optimal flow occurs when challenge level matches skill level. Artists, athletes, and musicians describe it as their peak performance state.",
+    "byline": ""
   },
   {
     "id": "psychology-bystander-effect-1",
     "name": "Bystander Effect",
     "category": "PSYCHOLOGY",
-    "teaser": "The phenomenon where people are less likely to help in emergencies when others are present. Kitty Genovese's 1964 murder in New York sparked this research. Diffusion of responsibility and social influence both contribute to the effect."
+    "teaser": "The phenomenon where people are less likely to help in emergencies when others are present. Kitty Genovese's 1964 murder in New York sparked this research. Diffusion of responsibility and social influence both contribute to the effect.",
+    "byline": ""
   },
   {
     "id": "psychology-cognitive-dissonance-1",
     "name": "Cognitive Dissonance",
     "category": "PSYCHOLOGY",
-    "teaser": "Leon Festinger's 1957 theory explaining the discomfort of holding contradictory beliefs. People resolve it by changing beliefs, justifying behaviors, or avoiding conflicting information. Smokers who know smoking causes cancer may minimize the risks to reduce dissonance."
+    "teaser": "Leon Festinger's 1957 theory explaining the discomfort of holding contradictory beliefs. People resolve it by changing beliefs, justifying behaviors, or avoiding conflicting information. Smokers who know smoking causes cancer may minimize the risks to reduce dissonance.",
+    "byline": ""
   },
   {
     "id": "psychology-confirmation-bias-1",
     "name": "Confirmation Bias",
     "category": "PSYCHOLOGY",
-    "teaser": "The tendency to search for and favor information that confirms existing beliefs while ignoring contradictory evidence. It affects everything from political opinions to medical diagnoses. Studies show even trained scientists exhibit it when reviewing research."
+    "teaser": "The tendency to search for and favor information that confirms existing beliefs while ignoring contradictory evidence. It affects everything from political opinions to medical diagnoses. Studies show even trained scientists exhibit it when reviewing research.",
+    "byline": ""
   },
   {
     "id": "psychology-peak-end-rule-1",
     "name": "Peak-End Rule",
     "category": "PSYCHOLOGY",
-    "teaser": "Daniel Kahneman's finding that people judge experiences based on the most intense point and the ending, not the average. A colonoscopy study showed patients remembered longer procedures with mild endings as less painful than shorter ones with harsh endings."
+    "teaser": "Daniel Kahneman's finding that people judge experiences based on the most intense point and the ending, not the average. A colonoscopy study showed patients remembered longer procedures with mild endings as less painful than shorter ones with harsh endings.",
+    "byline": ""
   },
   {
     "id": "psychology-dunbar-s-number",
     "name": "Dunbar's Number",
     "category": "PSYCHOLOGY",
-    "teaser": "Robin Dunbar's proposed cognitive limit of about 150 stable relationships that the human brain can maintain. Archaeological evidence shows ancient villages averaged 150 people. Companies like Gore-Tex keep factory sizes under 150 for this reason."
+    "teaser": "Robin Dunbar's proposed cognitive limit of about 150 stable relationships that the human brain can maintain. Archaeological evidence shows ancient villages averaged 150 people. Companies like Gore-Tex keep factory sizes under 150 for this reason.",
+    "byline": ""
   },
   {
     "id": "psychology-self-determination-theory-1",
     "name": "Self-Determination Theory",
     "category": "PSYCHOLOGY",
-    "teaser": "Edward Deci and Richard Ryan's theory that intrinsic motivation requires autonomy, competence, and relatedness. Intrinsic motivation produces better outcomes than extrinsic rewards for creative tasks. Overjustification effect occurs when external rewards undermine enjoyment."
+    "teaser": "Edward Deci and Richard Ryan's theory that intrinsic motivation requires autonomy, competence, and relatedness. Intrinsic motivation produces better outcomes than extrinsic rewards for creative tasks. Overjustification effect occurs when external rewards undermine enjoyment.",
+    "byline": ""
   },
   {
     "id": "psychology-growth-mindset-1",
     "name": "Growth Mindset",
     "category": "PSYCHOLOGY",
-    "teaser": "Carol Dweck's theory that believing abilities can be developed through effort leads to greater achievement than a fixed mindset. Praising effort over talent improves student performance. Microsoft adopted it company-wide under Satya Nadella's leadership."
+    "teaser": "Carol Dweck's theory that believing abilities can be developed through effort leads to greater achievement than a fixed mindset. Praising effort over talent improves student performance. Microsoft adopted it company-wide under Satya Nadella's leadership.",
+    "byline": ""
   },
   {
     "id": "psychology-stereotype-threat",
     "name": "Stereotype Threat",
     "category": "PSYCHOLOGY",
-    "teaser": "Cl Steele's finding that awareness of negative stereotypes about one's group impairs performance. Black students performed worse on tests when reminded of racial stereotypes.消除ing stereotypes improved SAT scores by 60 points in landmark 1995 studies."
+    "teaser": "Cl Steele's finding that awareness of negative stereotypes about one's group impairs performance. Black students performed worse on tests when reminded of racial stereotypes.消除ing stereotypes improved SAT scores by 60 points in landmark 1995 studies.",
+    "byline": ""
   },
   {
     "id": "psychology-spacing-effect",
     "name": "Spacing Effect",
     "category": "PSYCHOLOGY",
-    "teaser": "The phenomenon that learning is more effective when study sessions are spaced out over time rather than crammed. Hermann Ebbinghaus first demonstrated it in 1885. Spaced repetition systems like Anki leverage this to dramatically improve long-term retention."
+    "teaser": "The phenomenon that learning is more effective when study sessions are spaced out over time rather than crammed. Hermann Ebbinghaus first demonstrated it in 1885. Spaced repetition systems like Anki leverage this to dramatically improve long-term retention.",
+    "byline": ""
   },
   {
     "id": "psychology-illusion-of-control",
     "name": "Illusion of Control",
     "category": "PSYCHOLOGY",
-    "teaser": "Ellen Langer's 1975 concept describing people's tendency to overestimate their influence over outcomes. Lottery players choose their own numbers despite random draws. In workplaces, managers may overestimate their control over team performance."
+    "teaser": "Ellen Langer's 1975 concept describing people's tendency to overestimate their influence over outcomes. Lottery players choose their own numbers despite random draws. In workplaces, managers may overestimate their control over team performance.",
+    "byline": ""
   },
   {
     "id": "psychology-anchoring-bias-1",
     "name": "Anchoring Bias",
     "category": "PSYCHOLOGY",
-    "teaser": "The tendency to rely too heavily on the first piece of information encountered. Negotiations starting with higher opening prices produce higher final outcomes. Real estate appraisals are influenced by the listing price even when it's clearly arbitrary."
+    "teaser": "The tendency to rely too heavily on the first piece of information encountered. Negotiations starting with higher opening prices produce higher final outcomes. Real estate appraisals are influenced by the listing price even when it's clearly arbitrary.",
+    "byline": ""
   },
   {
     "id": "psychology-halo-effect-1",
     "name": "Halo Effect",
     "category": "PSYCHOLOGY",
-    "teaser": "The tendency for a positive impression in one area to positively influence judgment in other areas. Attractive people are rated as more intelligent and competent. In workplaces, employees rated highly on one criterion get inflated ratings on unrelated ones."
+    "teaser": "The tendency for a positive impression in one area to positively influence judgment in other areas. Attractive people are rated as more intelligent and competent. In workplaces, employees rated highly on one criterion get inflated ratings on unrelated ones.",
+    "byline": ""
   },
   {
     "id": "psychology-dopamine-and-reward",
     "name": "Dopamine and Reward",
     "category": "PSYCHOLOGY",
-    "teaser": "Dopamine drives motivation and pleasure by predicting rewards rather than delivering them. Variable reward schedules, like slot machines and social media notifications, create the strongest dopamine responses. This explains addictive patterns in technology use."
+    "teaser": "Dopamine drives motivation and pleasure by predicting rewards rather than delivering them. Variable reward schedules, like slot machines and social media notifications, create the strongest dopamine responses. This explains addictive patterns in technology use.",
+    "byline": ""
   },
   {
     "id": "psychology-learned-helplessness-1",
     "name": "Learned Helplessness",
     "category": "PSYCHOLOGY",
-    "teaser": "Martin Seligman's 1967 finding that animals exposed to uncontrollable stress eventually stop trying to escape, even when escape becomes possible. It models human depression. Teaching people that they have control over outcomes is the key treatment."
+    "teaser": "Martin Seligman's 1967 finding that animals exposed to uncontrollable stress eventually stop trying to escape, even when escape becomes possible. It models human depression. Teaching people that they have control over outcomes is the key treatment.",
+    "byline": ""
   },
   {
     "id": "psychology-social-facilitation",
     "name": "Social Facilitation",
     "category": "PSYCHOLOGY",
-    "teaser": "Robert Zajonc's 1965 theory that the presence of others increases arousal, enhancing performance on easy tasks but impairing performance on difficult ones. Athletes may perform better in crowds but musicians struggle with complex passages during competitions."
+    "teaser": "Robert Zajonc's 1965 theory that the presence of others increases arousal, enhancing performance on easy tasks but impairing performance on difficult ones. Athletes may perform better in crowds but musicians struggle with complex passages during competitions.",
+    "byline": ""
   },
   {
     "id": "psychology-zeigarnik-effect",
     "name": "Zeigarnik Effect",
     "category": "PSYCHOLOGY",
-    "teaser": "Bluma Zeigarnik's 1927 discovery that people remember incomplete tasks better than completed ones. Waiters remember unpaid orders better than paid ones. It explains why cliffhangers in TV shows keep you thinking about the story."
+    "teaser": "Bluma Zeigarnik's 1927 discovery that people remember incomplete tasks better than completed ones. Waiters remember unpaid orders better than paid ones. It explains why cliffhangers in TV shows keep you thinking about the story.",
+    "byline": ""
   },
   {
     "id": "psychology-framing-effect-1",
     "name": "Framing Effect",
     "category": "PSYCHOLOGY",
-    "teaser": "The tendency to react differently to the same information depending on how it's presented. People prefer a treatment with 90% survival rate over one with 10% mortality rate, even though they're identical. Daniel Kahneman and Amos Tversky pioneered this research."
+    "teaser": "The tendency to react differently to the same information depending on how it's presented. People prefer a treatment with 90% survival rate over one with 10% mortality rate, even though they're identical. Daniel Kahneman and Amos Tversky pioneered this research.",
+    "byline": ""
   },
   {
     "id": "psychology-status-quo-bias-1",
     "name": "Status Quo Bias",
     "category": "PSYCHOLOGY",
-    "teaser": "The preference for the current state of affairs over change, even when change is objectively better. People stick with default insurance plans, current phone contracts, and existing jobs more than rational analysis would predict. It's related to loss aversion."
+    "teaser": "The preference for the current state of affairs over change, even when change is objectively better. People stick with default insurance plans, current phone contracts, and existing jobs more than rational analysis would predict. It's related to loss aversion.",
+    "byline": ""
   },
   {
     "id": "psychology-decoy-effect",
     "name": "Decoy Effect",
     "category": "PSYCHOLOGY",
-    "teaser": "When adding a third, inferior option makes one of the original options seem more attractive. Economist Dan Ariely showed that adding a 'super premium' popcorn size boosted medium purchases by 50%. It's used heavily in pricing strategies."
+    "teaser": "When adding a third, inferior option makes one of the original options seem more attractive. Economist Dan Ariely showed that adding a 'super premium' popcorn size boosted medium purchases by 50%. It's used heavily in pricing strategies.",
+    "byline": ""
   },
   {
     "id": "psychology-sunk-cost-fallacy",
     "name": "Sunk Cost Fallacy",
     "category": "PSYCHOLOGY",
-    "teaser": "Continuing an investment of time, money, or effort because of what has already been spent rather than future value. Moviegoers who paid full price endure bad films more than those who got discounted tickets. Netflix binge-watching follows the same pattern."
+    "teaser": "Continuing an investment of time, money, or effort because of what has already been spent rather than future value. Moviegoers who paid full price endure bad films more than those who got discounted tickets. Netflix binge-watching follows the same pattern.",
+    "byline": ""
   },
   {
     "id": "psychology-negativity-bias-1",
     "name": "Negativity Bias",
     "category": "PSYCHOLOGY",
-    "teaser": "The psychological tendency for negative events to have a greater impact than positive ones. A single criticism carries more weight than five compliments. Evolutionarily, ignoring a predator was more costly than ignoring food — so our brains weigh threats more heavily."
+    "teaser": "The psychological tendency for negative events to have a greater impact than positive ones. A single criticism carries more weight than five compliments. Evolutionarily, ignoring a predator was more costly than ignoring food — so our brains weigh threats more heavily.",
+    "byline": ""
   },
   {
     "id": "psychology-serial-position-effect-1",
     "name": "Serial Position Effect",
     "category": "PSYCHOLOGY",
-    "teaser": "The tendency to recall the first and last items in a series better than middle ones. Primacy and recency effects explain why opening and closing statements in court are most memorable. Presentations benefit from putting key points first and last."
+    "teaser": "The tendency to recall the first and last items in a series better than middle ones. Primacy and recency effects explain why opening and closing statements in court are most memorable. Presentations benefit from putting key points first and last.",
+    "byline": ""
   },
   {
     "id": "psychology-illusory-correlation",
     "name": "Illusory Correlation",
     "category": "PSYCHOLOGY",
-    "teaser": "Perceiving a relationship between two variables when none exists. People remember instances that confirm the stereotype of a correlation and forget those that don't. Superstitious rituals before games feel correlated with winning because losses are forgotten."
+    "teaser": "Perceiving a relationship between two variables when none exists. People remember instances that confirm the stereotype of a correlation and forget those that don't. Superstitious rituals before games feel correlated with winning because losses are forgotten.",
+    "byline": ""
   },
   {
     "id": "psychology-goal-gradient-effect",
     "name": "Goal-Gradient Effect",
     "category": "PSYCHOLOGY",
-    "teaser": "The tendency to increase effort as a goal approaches. Coffee shop loyalty cards with 10 stamps see more visits in the last few slots. Marathon runners speed up in the final miles even when exhausted. Loyalty programs exploit this with progress bars."
+    "teaser": "The tendency to increase effort as a goal approaches. Coffee shop loyalty cards with 10 stamps see more visits in the last few slots. Marathon runners speed up in the final miles even when exhausted. Loyalty programs exploit this with progress bars.",
+    "byline": ""
   },
   {
     "id": "psychology-default-effect",
     "name": "Default Effect",
     "category": "PSYCHOLOGY",
-    "teaser": "People tend to stick with pre-selected options even when alternatives are available. Countries with opt-out organ donation have 80-90% consent rates versus 15% in opt-in countries. Changing defaults for retirement savings increased enrollment from 49% to 86%."
+    "teaser": "People tend to stick with pre-selected options even when alternatives are available. Countries with opt-out organ donation have 80-90% consent rates versus 15% in opt-in countries. Changing defaults for retirement savings increased enrollment from 49% to 86%.",
+    "byline": ""
   },
   {
     "id": "psychology-naive-realism",
     "name": "Naive Realism",
     "category": "PSYCHOLOGY",
-    "teaser": "The belief that we see the world objectively and accurately, and that anyone who disagrees must be uninformed, irrational, or biased. It explains why political and religious disagreements feel so intractable — each side is certain the other is wrong."
+    "teaser": "The belief that we see the world objectively and accurately, and that anyone who disagrees must be uninformed, irrational, or biased. It explains why political and religious disagreements feel so intractable — each side is certain the other is wrong.",
+    "byline": ""
   },
   {
     "id": "psychology-magical-thinking",
     "name": "Magical Thinking",
     "category": "PSYCHOLOGY",
-    "teaser": "The belief that unrelated events are causally connected through supernatural forces. Athletes wearing lucky socks, parents blaming themselves for their child's illness, and superstitions before exams all reflect this. It's especially common during periods of stress."
+    "teaser": "The belief that unrelated events are causally connected through supernatural forces. Athletes wearing lucky socks, parents blaming themselves for their child's illness, and superstitions before exams all reflect this. It's especially common during periods of stress.",
+    "byline": ""
   },
   {
     "id": "psychology-catharsis-hypothesis",
     "name": "Catharsis Hypothesis",
     "category": "PSYCHOLOGY",
-    "teaser": "The popular belief that expressing anger (punching pillows, venting) reduces aggression. Research by Brad Bushman showed it actually increases aggression by rehearsing angry thoughts. Exercise, by contrast, genuinely reduces anger through physiological changes."
+    "teaser": "The popular belief that expressing anger (punching pillows, venting) reduces aggression. Research by Brad Bushman showed it actually increases aggression by rehearsing angry thoughts. Exercise, by contrast, genuinely reduces anger through physiological changes.",
+    "byline": ""
   },
   {
     "id": "psychology-mere-exposure-effect",
     "name": "Mere Exposure Effect",
     "category": "PSYCHOLOGY",
-    "teaser": "Robert Zajonc's 1968 finding that people develop preferences for things simply because they're familiar with them. Songs heard more often on the radio become more liked. Political candidates with more name recognition win more votes regardless of quality."
+    "teaser": "Robert Zajonc's 1968 finding that people develop preferences for things simply because they're familiar with them. Songs heard more often on the radio become more liked. Political candidates with more name recognition win more votes regardless of quality.",
+    "byline": ""
   },
   {
     "id": "psychology-sleeper-effect",
     "name": "Sleeper Effect",
     "category": "PSYCHOLOGY",
-    "teaser": "A persuasion phenomenon where messages from low-credibility sources become more convincing over time as people remember the message but forget the source. A rumor dismissed as unreliable today may be accepted as true weeks later without the original caveat."
+    "teaser": "A persuasion phenomenon where messages from low-credibility sources become more convincing over time as people remember the message but forget the source. A rumor dismissed as unreliable today may be accepted as true weeks later without the original caveat.",
+    "byline": ""
   },
   {
     "id": "psychology-goal-setting-theory",
     "name": "Goal Setting Theory",
     "category": "PSYCHOLOGY",
-    "teaser": "Edwin Locke and Gary Latham's research showing that specific, challenging goals produce higher performance than easy or vague goals. Specific goals lead to 90% more effort than 'do your best' instructions. SMART goals operationalize this theory."
+    "teaser": "Edwin Locke and Gary Latham's research showing that specific, challenging goals produce higher performance than easy or vague goals. Specific goals lead to 90% more effort than 'do your best' instructions. SMART goals operationalize this theory.",
+    "byline": ""
   },
   {
     "id": "psychology-emotional-contagion-1",
     "name": "Emotional Contagion",
     "category": "PSYCHOLOGY",
-    "teaser": "The phenomenon where emotions spread from person to person through unconscious mimicry and feedback. Smiling strangers make you happier. Facebook's 2014 emotional contagion study manipulated feeds of 689,003 users without consent, causing controversy."
+    "teaser": "The phenomenon where emotions spread from person to person through unconscious mimicry and feedback. Smiling strangers make you happier. Facebook's 2014 emotional contagion study manipulated feeds of 689,003 users without consent, causing controversy.",
+    "byline": ""
   },
   {
     "id": "psychology-selection-bias",
     "name": "Selection Bias",
     "category": "PSYCHOLOGY",
-    "teaser": "The systematic distortion in research results when the sample isn't representative. Early telephone surveys overrepresented wealthy households. The 1936 Literary Digest poll predicted Landon would beat Roosevelt based on magazine subscriber data — off by 19 percentage points."
+    "teaser": "The systematic distortion in research results when the sample isn't representative. Early telephone surveys overrepresented wealthy households. The 1936 Literary Digest poll predicted Landon would beat Roosevelt based on magazine subscriber data — off by 19 percentage points.",
+    "byline": ""
   },
   {
     "id": "psychology-bandwagon-effect",
     "name": "Bandwagon Effect",
     "category": "PSYCHOLOGY",
-    "teaser": "The tendency to adopt behaviors or beliefs because many other people do. Social media amplifies this — viral content gets more views partly because viewership signals quality. Stock market bubbles form when investors pile into rising assets."
+    "teaser": "The tendency to adopt behaviors or beliefs because many other people do. Social media amplifies this — viral content gets more views partly because viewership signals quality. Stock market bubbles form when investors pile into rising assets.",
+    "byline": ""
   },
   {
     "id": "psychology-shifting-baseline-syndrome",
     "name": "Shifting Baseline Syndrome",
     "category": "PSYCHOLOGY",
-    "teaser": "The gradual acceptance of degraded environmental conditions as the new normal. Each generation of fishermen considers their baseline stocks as 'normal,' missing long-term declines. Daniel Pauly coined the term in 1995 to explain fisheries collapse."
+    "teaser": "The gradual acceptance of degraded environmental conditions as the new normal. Each generation of fishermen considers their baseline stocks as 'normal,' missing long-term declines. Daniel Pauly coined the term in 1995 to explain fisheries collapse.",
+    "byline": ""
   },
   {
     "id": "psychology-habit-loop-1",
     "name": "Habit Loop",
     "category": "PSYCHOLOGY",
-    "teaser": "Charles Duhigg's three-part neurological pattern — cue, routine, reward — that drives automatic behaviors. The cue triggers the routine, and the reward reinforces it. Changing habits requires keeping the cue and reward while inserting a new routine."
+    "teaser": "Charles Duhigg's three-part neurological pattern — cue, routine, reward — that drives automatic behaviors. The cue triggers the routine, and the reward reinforces it. Changing habits requires keeping the cue and reward while inserting a new routine.",
+    "byline": ""
   },
   {
     "id": "psychology-self-serving-bias",
     "name": "Self-Serving Bias",
     "category": "PSYCHOLOGY",
-    "teaser": "The tendency to attribute successes to internal factors (skill, effort) and failures to external factors (bad luck, unfair conditions). Students credit grades to studying but blame test difficulty for poor performance. It protects self-esteem but hinders learning."
+    "teaser": "The tendency to attribute successes to internal factors (skill, effort) and failures to external factors (bad luck, unfair conditions). Students credit grades to studying but blame test difficulty for poor performance. It protects self-esteem but hinders learning.",
+    "byline": ""
   },
   {
     "id": "psychology-impact-bias",
     "name": "Impact Bias",
     "category": "PSYCHOLOGY",
-    "teaser": "The tendency to overestimate how long emotional reactions to future events will last. People predict devastating breakups and thrilling job offers will affect them for years, but affective forecasting studies show most reactions fade within weeks."
+    "teaser": "The tendency to overestimate how long emotional reactions to future events will last. People predict devastating breakups and thrilling job offers will affect them for years, but affective forecasting studies show most reactions fade within weeks.",
+    "byline": ""
   },
   {
     "id": "psychology-decision-fatigue-1",
     "name": "Decision Fatigue",
     "category": "PSYCHOLOGY",
-    "teaser": "The deteriorating quality of decisions after a long session of choices. Judges granted parole 65% of the time at the start of the day but nearly 0% before lunch. Steve Jobs wore the same clothes daily to reduce trivial decisions."
+    "teaser": "The deteriorating quality of decisions after a long session of choices. Judges granted parole 65% of the time at the start of the day but nearly 0% before lunch. Steve Jobs wore the same clothes daily to reduce trivial decisions.",
+    "byline": ""
   },
   {
     "id": "psychology-pratfall-effect",
     "name": "Pratfall Effect",
     "category": "PSYCHOLOGY",
-    "teaser": "Elliot Aronson's 1966 finding that competent people become more likable after making a blunder. A near-perfect candidate who spills coffee is rated more favorably than one who doesn't. It humanizes high achievers and reduces the threat they pose."
+    "teaser": "Elliot Aronson's 1966 finding that competent people become more likable after making a blunder. A near-perfect candidate who spills coffee is rated more favorably than one who doesn't. It humanizes high achievers and reduces the threat they pose.",
+    "byline": ""
   },
   {
     "id": "psychology-positive-illusions",
     "name": "Positive Illusions",
     "category": "PSYCHOLOGY",
-    "teaser": "The tendency to maintain unrealistically positive views of oneself, one's abilities, and one's future. 80% of drivers rate themselves above average. While sometimes maladaptive, moderate self-enhancement correlates with better mental health and resilience."
+    "teaser": "The tendency to maintain unrealistically positive views of oneself, one's abilities, and one's future. 80% of drivers rate themselves above average. While sometimes maladaptive, moderate self-enhancement correlates with better mental health and resilience.",
+    "byline": ""
   },
   {
     "id": "psychology-cyberball-paradigm",
     "name": "Cyberball Paradigm",
     "category": "PSYCHOLOGY",
-    "teaser": "A virtual ball-tossing game used to study social exclusion. Brain scans show the dorsal anterior cingulate cortex activates during exclusion — the same region that processes physical pain. Being left out literally hurts the brain the same way a broken bone does."
+    "teaser": "A virtual ball-tossing game used to study social exclusion. Brain scans show the dorsal anterior cingulate cortex activates during exclusion — the same region that processes physical pain. Being left out literally hurts the brain the same way a broken bone does.",
+    "byline": ""
   }
 ]

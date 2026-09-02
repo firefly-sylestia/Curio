@@ -1441,8 +1441,13 @@
     ],
     "id": "game-galaga-1981",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Galaga (1981) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Galaga (1981) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1457,8 +1462,13 @@
     ],
     "id": "game-asteroids-1979",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Asteroids (1979) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Asteroids (1979) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1473,8 +1483,13 @@
     ],
     "id": "game-frogger-1981",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Frogger (1981) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Frogger (1981) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1489,8 +1504,13 @@
     ],
     "id": "game-defender-1981",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Defender (1981) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Defender (1981) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1505,8 +1525,13 @@
     ],
     "id": "game-centipede-1981",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Centipede (1981) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Centipede (1981) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1521,8 +1546,13 @@
     ],
     "id": "game-joust-1982",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Joust (1982) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Joust (1982) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1537,8 +1567,13 @@
     ],
     "id": "game-sonic-the-hedgehog-2-1992",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Sonic the Hedgehog 2 (1992) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sonic the Hedgehog 2 (1992) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1553,8 +1588,13 @@
     ],
     "id": "game-super-metroid-1994",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Super Metroid (1994) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Super Metroid (1994) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1569,8 +1609,13 @@
     ],
     "id": "game-mega-man-x-1993",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Mega Man X (1993) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Mega Man X (1993) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1585,8 +1630,13 @@
     ],
     "id": "game-castlevania-symphony-of-the-night-1997",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Castlevania: Symphony of the Night (1997) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Castlevania: Symphony of the Night (1997) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1601,8 +1651,13 @@
     ],
     "id": "game-star-fox-1993",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Star Fox (1993) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Star Fox (1993) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1617,8 +1672,13 @@
     ],
     "id": "game-earthbound-1994",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "EarthBound (1994) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of EarthBound (1994) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1633,8 +1693,13 @@
     ],
     "id": "game-secret-of-mana-1993",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Secret of Mana (1993) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Secret of Mana (1993) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1649,8 +1714,13 @@
     ],
     "id": "game-streets-of-rage-2-1992",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Streets of Rage 2 (1992) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Streets of Rage 2 (1992) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1665,8 +1735,13 @@
     ],
     "id": "game-donkey-kong-country-1994",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Donkey Kong Country (1994) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Donkey Kong Country (1994) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1681,8 +1756,13 @@
     ],
     "id": "game-phantasy-star-iv-1993",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Phantasy Star IV (1993) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Phantasy Star IV (1993) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1697,8 +1777,13 @@
     ],
     "id": "game-final-fantasy-ix-2000",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Final Fantasy IX (2000) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Final Fantasy IX (2000) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1713,8 +1798,13 @@
     ],
     "id": "game-shadow-of-the-colossus-2005",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Shadow of the Colossus (2005) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Shadow of the Colossus (2005) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1729,8 +1819,13 @@
     ],
     "id": "game-okami-2006",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Okami (2006) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Okami (2006) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1745,8 +1840,13 @@
     ],
     "id": "game-ico-2001",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "ICO (2001) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of ICO (2001) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1761,8 +1861,13 @@
     ],
     "id": "game-katamari-damacy-2004",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Katamari Damacy (2004) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Katamari Damacy (2004) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1777,8 +1882,13 @@
     ],
     "id": "game-gta-san-andreas-2004",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "GTA: San Andreas (2004) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of GTA: San Andreas (2004) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1793,8 +1903,13 @@
     ],
     "id": "game-devil-may-cry-2001",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Devil May Cry (2001) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Devil May Cry (2001) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1809,8 +1924,13 @@
     ],
     "id": "game-prince-of-persia-the-sands-of-time-2003",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Prince of Persia: The Sands of Time (2003) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Prince of Persia: The Sands of Time (2003) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1825,8 +1945,13 @@
     ],
     "id": "game-kingdom-hearts-2002",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Kingdom Hearts (2002) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Kingdom Hearts (2002) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1841,8 +1966,13 @@
     ],
     "id": "game-ratchet-&-clank-2002",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ratchet & Clank (2002) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Ratchet & Clank (2002) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1857,8 +1987,13 @@
     ],
     "id": "game-braid-2008",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Braid (2008) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Braid (2008) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1873,8 +2008,13 @@
     ],
     "id": "game-fez-2012",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Fez (2012) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Fez (2012) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1889,8 +2029,13 @@
     ],
     "id": "game-inside-2016",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Inside (2016) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Inside (2016) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1905,8 +2050,13 @@
     ],
     "id": "game-limbo-2010",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Limbo (2010) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Limbo (2010) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1921,8 +2071,13 @@
     ],
     "id": "game-shovel-knight-2014",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Shovel Knight (2014) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Shovel Knight (2014) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1937,8 +2092,13 @@
     ],
     "id": "game-dead-cells-2018",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Dead Cells (2018) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Dead Cells (2018) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1953,8 +2113,13 @@
     ],
     "id": "game-return-of-the-obra-dinn-2018",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Return of the Obra Dinn (2018) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Return of the Obra Dinn (2018) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1969,8 +2134,13 @@
     ],
     "id": "game-inscryption-2021",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Inscryption (2021) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Inscryption (2021) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -1985,8 +2155,13 @@
     ],
     "id": "game-tunic-2022",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Tunic (2022) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tunic (2022) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2001,8 +2176,13 @@
     ],
     "id": "game-vampire-survivors-2022",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Vampire Survivors (2022) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Vampire Survivors (2022) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2017,8 +2197,13 @@
     ],
     "id": "game-slay-the-spire-2019",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Slay the Spire (2019) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Slay the Spire (2019) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2033,8 +2218,13 @@
     ],
     "id": "game-cuphead-2017",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Cuphead (2017) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Cuphead (2017) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2049,8 +2239,13 @@
     ],
     "id": "game-outer-wilds-2019",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Outer Wilds (2019) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Outer Wilds (2019) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2065,8 +2260,13 @@
     ],
     "id": "game-noita-2020",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Noita (2020) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Noita (2020) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2081,8 +2281,13 @@
     ],
     "id": "game-risk-of-rain-2-2020",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Risk of Rain 2 (2020) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Risk of Rain 2 (2020) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2097,8 +2302,13 @@
     ],
     "id": "game-hollow-knight-silksong-tba",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Hollow Knight: Silksong (TBA) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Hollow Knight: Silksong (TBA) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2113,8 +2323,13 @@
     ],
     "id": "game-balatro-2024",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Balatro (2024) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Balatro (2024) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2129,8 +2344,13 @@
     ],
     "id": "game-baba-is-you-2019",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Baba Is You (2019) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Baba Is You (2019) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2145,8 +2365,13 @@
     ],
     "id": "game-wilmots-warehouse-2019",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Wilmot's Warehouse (2019) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Wilmot's Warehouse (2019) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2161,8 +2386,13 @@
     ],
     "id": "game-dujanah-2017",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Dujanah (2017) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Dujanah (2017) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2177,8 +2407,13 @@
     ],
     "id": "game-hyper-light-drifter-2016",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Hyper Light Drifter (2016) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Hyper Light Drifter (2016) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2193,8 +2428,13 @@
     ],
     "id": "game-night-in-the-woods-2017",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Night in the Woods (2017) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Night in the Woods (2017) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2209,8 +2449,13 @@
     ],
     "id": "game-what-remains-of-edith-finch-2017",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "What Remains of Edith Finch (2017) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of What Remains of Edith Finch (2017) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2225,8 +2470,13 @@
     ],
     "id": "game-oxenfree-2016",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Oxenfree (2016) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Oxenfree (2016) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2241,8 +2491,13 @@
     ],
     "id": "game-the-beginners-guide-2015",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Beginner's Guide (2015) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Beginner's Guide (2015) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2257,8 +2512,13 @@
     ],
     "id": "game-mundaun-2021",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Mundaun (2021) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Mundaun (2021) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2273,8 +2533,13 @@
     ],
     "id": "game-the-witness-2016",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Witness (2016) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of The Witness (2016) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2289,8 +2554,13 @@
     ],
     "id": "game-her-story-2015",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Her Story (2015) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Her Story (2015) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2305,8 +2575,13 @@
     ],
     "id": "game-dorfromantik-2022",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Dorfromantik (2022) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Dorfromantik (2022) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2321,8 +2596,13 @@
     ],
     "id": "game-a-short-hike-2019",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "A Short Hike (2019) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of A Short Hike (2019) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2337,8 +2617,13 @@
     ],
     "id": "game-monument-valley-2014",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Monument Valley (2014) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Monument Valley (2014) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2353,8 +2638,13 @@
     ],
     "id": "game-reigns-2016",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Reigns (2016) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Reigns (2016) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2369,8 +2659,13 @@
     ],
     "id": "game-altos-odyssey-2018",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Alto's Odyssey (2018) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Alto's Odyssey (2018) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2385,8 +2680,13 @@
     ],
     "id": "game-god-of-war-ragnarök-2022",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "God of War Ragnarök (2022) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of God of War Ragnarök (2022) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2401,8 +2701,13 @@
     ],
     "id": "game-astro-bot-2024",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Astro Bot (2024) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Astro Bot (2024) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2417,8 +2722,13 @@
     ],
     "id": "game-metroid-dread-2021",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Metroid Dread (2021) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Metroid Dread (2021) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2433,8 +2743,13 @@
     ],
     "id": "game-rocket-league-2015",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Rocket League (2015) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Rocket League (2015) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2449,8 +2764,13 @@
     ],
     "id": "game-apex-legends-2019",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Apex Legends (2019) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Apex Legends (2019) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2465,8 +2785,13 @@
     ],
     "id": "game-valorant-2020",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Valorant (2020) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Valorant (2020) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2481,8 +2806,13 @@
     ],
     "id": "game-overwatch-2016",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Overwatch (2016) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Overwatch (2016) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2497,8 +2827,13 @@
     ],
     "id": "game-fall-guys-2020",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Fall Guys (2020) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Fall Guys (2020) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2513,8 +2848,13 @@
     ],
     "id": "game-factorio-2016",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Factorio (2016) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Factorio (2016) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2529,8 +2869,13 @@
     ],
     "id": "game-rimworld-2018",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "RimWorld (2018) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of RimWorld (2018) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2545,8 +2890,13 @@
     ],
     "id": "game-dwarf-fortress-2006",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Dwarf Fortress (2006) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Dwarf Fortress (2006) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2561,8 +2911,13 @@
     ],
     "id": "game-satisfactory-2022",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Satisfactory (2022) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Satisfactory (2022) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2577,8 +2932,13 @@
     ],
     "id": "game-oxygen-not-included-2017",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Oxygen Not Included (2017) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Oxygen Not Included (2017) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2593,8 +2953,13 @@
     ],
     "id": "game-two-point-hospital-2018",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Two Point Hospital (2018) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Two Point Hospital (2018) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2609,8 +2974,13 @@
     ],
     "id": "game-firewatch-2016",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Firewatch (2016) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Firewatch (2016) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2625,8 +2995,13 @@
     ],
     "id": "game-gone-home-2013",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Gone Home (2013) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Gone Home (2013) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2641,8 +3016,13 @@
     ],
     "id": "game-kentucky-route-zero-2013",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Kentucky Route Zero (2013) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Kentucky Route Zero (2013) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2657,8 +3037,13 @@
     ],
     "id": "game-vagrant-story-2000",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Vagrant Story (2000) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Vagrant Story (2000) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2673,8 +3058,13 @@
     ],
     "id": "game-panzer-dragoon-saga-1998",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Panzer Dragoon Saga (1998) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Panzer Dragoon Saga (1998) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2689,8 +3079,13 @@
     ],
     "id": "game-skies-of-arcadia-2000",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Skies of Arcadia (2000) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Skies of Arcadia (2000) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2705,8 +3100,13 @@
     ],
     "id": "game-myst-1993",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Myst (1993) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Myst (1993) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2721,8 +3121,13 @@
     ],
     "id": "game-planescape-torment-1999",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Planescape: Torment (1999) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Planescape: Torment (1999) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2737,8 +3142,13 @@
     ],
     "id": "game-genshin-impact-2020",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Genshin Impact (2020) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Genshin Impact (2020) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2753,8 +3163,13 @@
     ],
     "id": "game-it-takes-two-2021",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "It Takes Two (2021) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of It Takes Two (2021) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2769,8 +3184,13 @@
     ],
     "id": "game-hi-fi-rush-2023",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Hi-Fi Rush (2023) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Hi-Fi Rush (2023) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2785,8 +3205,13 @@
     ],
     "id": "game-lethal-company-2023",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Lethal Company (2023) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Lethal Company (2023) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2801,8 +3226,13 @@
     ],
     "id": "game-palworld-2024",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Palworld (2024) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Palworld (2024) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2817,8 +3247,13 @@
     ],
     "id": "game-helldivers-2-2024",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Helldivers 2 (2024) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Helldivers 2 (2024) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   },
   {
@@ -2833,8 +3268,13 @@
     ],
     "id": "game-animal-well-2024",
     "imageUrl": "",
-    "exploreAction": "",
-    "tier": "standard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Animal Well (2024) end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Animal Well (2024) — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "tier": 2,
     "byline": ""
   }
 ]
