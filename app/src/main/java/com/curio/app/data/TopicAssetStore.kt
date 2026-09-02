@@ -3,7 +3,6 @@ package com.curio.app.data
 import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
-import com.curio.app.BuildConfig
 import java.io.File
 
 /** Read-only access to the bundled catalog without parsing or materializing it at startup. */
@@ -14,20 +13,11 @@ object TopicAssetStore {
     @Synchronized
     fun open(context: Context): SQLiteDatabase {
         database?.takeIf { it.isOpen }?.let { return it }
-        val app = context.applicationContext
-        val file = File(app.noBackupFilesDir, DATABASE_NAME)
-        val prefs = app.getSharedPreferences("topic_catalog", Context.MODE_PRIVATE)
-        val installedVersion = prefs.getInt("asset_version", -1)
-        if (!file.exists() || installedVersion != BuildConfig.VERSION_CODE) {
-            val temp = File(app.cacheDir, "$DATABASE_NAME.tmp")
+        val file = File(context.applicationContext.noBackupFilesDir, DATABASE_NAME)
+        if (!file.exists()) {
             context.assets.open(DATABASE_NAME).use { input ->
-                temp.outputStream().use { output -> input.copyTo(output) }
+                file.outputStream().use { output -> input.copyTo(output) }
             }
-            check(temp.renameTo(file) || temp.copyTo(file, overwrite = true).let { true }) {
-                "Unable to install $DATABASE_NAME"
-            }
-            temp.delete()
-            prefs.edit().putInt("asset_version", BuildConfig.VERSION_CODE).apply()
         }
         return SQLiteDatabase.openDatabase(file.path, null, SQLiteDatabase.OPEN_READONLY)
             .also { database = it }

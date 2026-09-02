@@ -189,7 +189,7 @@ fun SaveCaptureScreen(
         // fallback. Graceful fallback: a genuinely unknown topic stays null
         // so the save CTA stays disabled instead of silently capturing the
         // wrong topic.
-        val pool = TopicRepository.loadFromRoom(cat.id)
+        val pool = TopicJsonLoader.load(cat.id)
         value = pool.firstOrNull { it.matchesSavedNameStrict(topicName) }
             ?: pool.firstOrNull { it.matchesSavedName(topicName) }
             ?: TopicCatalog.findByName(topicName)

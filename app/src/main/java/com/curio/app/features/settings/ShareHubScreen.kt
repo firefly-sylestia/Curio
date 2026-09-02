@@ -93,7 +93,7 @@ fun ShareHubScreen(navController: NavController) {
 
     // Full catalog index — loaded once, reused by the search below.
     val index by produceState<List<TopicIndexEntry>?>(null) {
-        value = runCatching { TopicRepository.loadIndexFromRoom() }.getOrNull()
+        value = runCatching { TopicJsonLoader.loadIndex() }.getOrNull()
     }
 
     val needle = query.trim().lowercase()

@@ -47,9 +47,20 @@ import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.theme.CurioTheme
+import com.curio.app.data.CategoryId
+import com.curio.app.data.CurioCategories
+import com.curio.app.data.TopicJsonLoader
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
-/** Minimum branding dwell time on warm starts. */
+/** Safety cap on startup catalog warm-up — never strand the splash on a
+ *  slow parse. The splash holds navigation until the canonical lanes are
+ *  cached so counts/loading states never read a half-warm catalog, but a
+ *  pathological parse must not block the app past this. */
+private const val CATALOG_WARM_TIMEOUT_MS = 1_000L
 
 /** How long each loading line stays before the next fades in. */
 private const val LOADING_LINE_SWAP_MS = 400L
@@ -157,10 +168,28 @@ fun SplashScreen(navController: NavHostController) {
                 warmedLanes = (totalLanes * step / rampSteps).coerceAtMost(totalLanes)
             }
         } else {
-            // The repository opens the persistent topics.db and warms the
-            // lightweight compatibility cache from indexed rows. Never parse
-            // catalog JSON on a screen or splash path.
-            com.curio.app.data.TopicRepository.init(context)
+            val warmCatalog = launch(Dispatchers.Default) {
+                // v291 — PARALLEL prewarm: launch ALL lanes at once instead of
+                // sequentially. TopicJsonLoader's parseGate (max 2 concurrent)
+                // throttles real disk I/O, but the coroutine dispatch overhead
+                // per lane is eliminated — cold start is ~2-3x faster.
+                val lanes = CurioCategories.visible
+                    .filter { it.id != CategoryId.WILDCARD }
+                val jobs = lanes.map { category ->
+                    launch(Dispatchers.Default) {
+                        try {
+                            TopicJsonLoader.load(category.id)
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (_: Throwable) { }
+                        warmedLanes++
+                    }
+                }
+                jobs.forEach { it.join() }
+            }
+            delay(250)
+            // Cap the total warm-up at ~1s (Room makes this instant).
+            withTimeoutOrNull(CATALOG_WARM_TIMEOUT_MS) { warmCatalog.join() }
             warmedLanes = totalLanes
         }
         // Check for pending crash from previous session — also route to the

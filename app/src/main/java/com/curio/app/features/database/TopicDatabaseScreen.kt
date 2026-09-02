@@ -279,7 +279,7 @@ fun TopicDatabaseScreen(navController: NavController) {
         AppPreferences.categoryOrderState
     ) {
         value = withContext(Dispatchers.Default) {
-            runCatching { TopicRepository.loadIndexFromRoom() }.getOrNull()
+            runCatching { TopicJsonLoader.loadIndex() }.getOrNull()
         }
     }
     val useIndex = indexEntries != null
@@ -307,7 +307,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                 CatalogState(
                     entries = visibleCategories.mapNotNull { cat ->
                         runCatching {
-                            cat to laneTopics(cat, TopicRepository.loadFromRoom(cat.id))
+                            cat to laneTopics(cat, TopicJsonLoader.load(cat.id))
                         }.getOrNull()
                     },
                     loading = false
