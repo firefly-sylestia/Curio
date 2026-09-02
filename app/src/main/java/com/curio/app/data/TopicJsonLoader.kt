@@ -237,6 +237,14 @@ object TopicJsonLoader {
         }
     }
 
+    /** Reads the bundled asset directly, bypassing Room's fast path. */
+    suspend fun reloadFromAssets(id: CategoryId): List<CurioTopic> = withContext(Dispatchers.IO) {
+        invalidate(id)
+        val topics = gated { parseAsset("$ASSET_DIR/${id.routeSlug}.json", id) }
+        synchronized(cacheWriteLock) { cache[id] = topics }
+        topics
+    }
+
     /**
      * Eagerly loads + caches the ten canonical category JSON files.
      * The derived WILDCARD pool is intentionally excluded: it duplicates

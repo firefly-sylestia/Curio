@@ -17,6 +17,10 @@ interface TopicDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(topics: List<TopicEntity>)
 
+    /** Add newly authored topics without overwriting existing local rows. */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertMissing(topics: List<TopicEntity>)
+
     /** Get all topics for a category, sorted by name. */
     @Query("SELECT * FROM topics WHERE categoryId = :categoryId ORDER BY name ASC")
     suspend fun getByCategory(categoryId: String): List<TopicEntity>
@@ -60,14 +64,14 @@ interface TopicDao {
     """)
     suspend fun searchInCategory(categoryId: String, query: String): List<TopicEntity>
 
-    /** Backfill newly added book content without replacing existing authored values. */
+    /** Backfill newly authored content without replacing existing values. */
     @Query("""
         UPDATE topics
         SET synopsis = CASE WHEN synopsis = '' THEN :synopsis ELSE synopsis END,
             chapters = CASE WHEN chapters = '' THEN :chapters ELSE chapters END
         WHERE id = :id
     """)
-    suspend fun backfillBookContent(id: String, synopsis: String, chapters: String)
+    suspend fun backfillContent(id: String, synopsis: String, chapters: String)
 
     /** Get topic count for a category. */
     @Query("SELECT COUNT(*) FROM topics WHERE categoryId = :categoryId")

@@ -62,11 +62,10 @@ object TopicRepository {
 
             val importedCount = dao.getTotalCount()
             if (importedCount > 0) {
-                // Existing installs already have topic rows from before synopsis/
-                // chapters were added. Backfill only empty fields from the JSON
-                // source so the new Books reveal content becomes visible without
-                // replacing any existing catalog data.
-                backfillBookContent(context, dao)
+                // Existing installs may have stale rows or may be missing topics
+                // added in a later app release. Sync every canonical category from
+                // the bundled JSON without replacing existing local catalog data.
+                syncCatalogFromJson(context, dao)
                 initialized = true
                 // v294 — Pre-warm TopicJsonLoader caches from Room so
                 // counts and topic data are available immediately on
@@ -167,21 +166,31 @@ object TopicRepository {
     }
 
     /**
-     * Copy newly authored Books synopsis/chapter fields into existing Room rows.
-     * Empty-only updates keep this safe for any locally customized catalog data.
+     * Sync the bundled catalog for every canonical category on app update.
+     * Missing topics are inserted, while existing rows only receive newly
+     * authored synopsis/chapter content so local catalog edits are preserved.
      */
-    private suspend fun backfillBookContent(context: Context, dao: TopicDao) {
+    private suspend fun syncCatalogFromJson(context: Context, dao: TopicDao) {
         TopicJsonLoader.install(context)
-        TopicJsonLoader.invalidate(CategoryId.BOOKS)
-        runCatching {
-            TopicJsonLoader.load(CategoryId.BOOKS).forEach { topic ->
-                val entity = TopicEntity.fromCurioTopic(topic)
-                if (entity.synopsis.isNotBlank() || entity.chapters.isNotBlank()) {
-                    dao.backfillBookContent(entity.id, entity.synopsis, entity.chapters)
+        withContext(Dispatchers.IO) {
+            CategoryId.values()
+                .filter { it != CategoryId.WILDCARD }
+                .forEach { category ->
+                    runCatching {
+                        val entities = TopicJsonLoader.reloadFromAssets(category)
+                            .map(TopicEntity::fromCurioTopic)
+                        if (entities.isNotEmpty()) {
+                            dao.insertMissing(entities)
+                            entities.forEach { entity ->
+                                if (entity.synopsis.isNotBlank() || entity.chapters.isNotBlank()) {
+                                    dao.backfillContent(entity.id, entity.synopsis, entity.chapters)
+                                }
+                            }
+                        }
+                    }.onFailure { error ->
+                        Log.w("TopicRepository", "Failed to sync ${category.name}: ${error.message}")
+                    }
                 }
-            }
-        }.onFailure { error ->
-            Log.w("TopicRepository", "Failed to backfill Books content: ${error.message}")
         }
     }
 
