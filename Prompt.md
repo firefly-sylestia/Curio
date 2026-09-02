@@ -1,83 +1,95 @@
 # Prompt.md — current request log
 
-## Request: Fix the 4-part XP-economy critique; re-read the DOX chain (previous commit had a Codebuff footer)
+## Request: Picker polish + share-editor icon-only rework (batch)
 
-User supplied a 4-row critique table:
+User request (condensed):
 
-| Problem | Fix |
-|---|---|
-| XP economy is shallow | Named levels + rewards — unlock new pet outfits, new share-card palettes, custom lane order (give XP a reason) |
-| Daily quests generic | Align quests with the real loop: "Reveal 2 new topics", "Save 1 discovery", "Capture with voice once" — show quest progress on Home |
-| Pet games hidden in profile | Pet reacts on Home (nudges when quests complete) + quick "Play" bubble |
-| No pet customisation payoff | Outfit shop funded by streak/quests (pure cosmetics, no IAP pressure) |
+> In the Spin category picker there are now 2 mix buttons — remove the top one.
+> Your-mixes cards can be shorter (empty space) and don't need the "scientist ·
+> films" text since the icons already show it. The morphing hold-pills open in
+> the middle — they should pop in where I tapped-and-held. Back from the Browse
+> category still doesn't re-open the picker. Give Browse/Mixes/Pins different
+> colors, opaque when active, a bit bigger.
+> Share hub editing: icons and circular pills ONLY — font-size gets its own
+> icon + size dropdown, box-size a box icon + one small overlay. Change the
+> Customise button to open the editing (like tap-and-hold) instead of the
+> overlay. Style button → row to switch design. Aspect → toggle between the 2
+> (3:4 the default). New font icon + font options + MORE fonts. Fact
+> alignments + another format button + more alignments. Editing logic: nothing
+> gets selected/shown on hold — tapping a thing selects it and its
+> customization circular pills show up. Font change supported by ALL things.
+> Paper: the category chip still drags the bulb icon along — fix; fact width
+> isn't editable in Paper — fix.
 
-Plus: "read dox chain again ur previous commit had codebuff mention" — the
-last several commits carried a `Generated with Codebuff` footer, which the
-root AGENTS.md forbids. Committed clean this time (no footer); noted the
-policy violation to the user.
+## What was done
 
-## Decisions (ask_user)
+### Part A — Category picker (`NewCategoryPicker.kt`, `NewCategoryPickerBrowse.kt`)
+1. **One mix button**: the Classic page's in-page "Mix · N" capsule during
+   multi-select is removed; the shared bottom-row capsule ("Surprise me" ⇄
+   "Mix · N") applies the pending selection; the floating Cancel pill stays
+   (right-aligned).
+2. **Compact mix cards**: `NewMixCard` 122→96dp; the lane-teaser text
+   ("Scientist · Films · +2") is gone — the icon chips carry the composition;
+   card keeps name + Active.
+3. **Hold-pills at the finger**: `HoldActionsPill` gains an `anchor` Offset
+   (screen coords); every long-press surface (pinned pill, mix card,
+   continue-exploring tile, Browse grid, Mixes row, Pins row) reports its own
+   center via `onGloballyPositioned`; the pill pops in just ABOVE the held
+   spot, centered + clamped. Fallback stays centered.
+4. **Browse back re-opens the picker**: `BackHandler` added to
+   `CategoryPickerBrowseScreen` (pops + sets `SpinPickerRequest.pending`),
+   matching the on-screen arrow.
+5. **Per-tab colors + bigger**: `BrowseTab.accent()` (rose/gold/sage via
+   `curioRoseInk/curioGoldInk/curioSageInk`) + `accentInk()`; active tab
+   fills SOLID opaque with its accent, idle keeps the neutral fill with an
+   accent-tinted icon; capsules 46→54dp.
 
-- **Lane order:** GATE the Manage Categories drag-reorder behind the Level-5
-  reward (hiding lanes stays open). Chosen over "keep open, list as milestone".
-- **Outfit shop entry:** Quests + Profile (chosen over Pet-designer-only or
-  Quests-only).
+### Part B — Share-card editor (`TopicShareCard.kt`)
+1. **Per-element formats**: `ShareCardMove` grows `titleFont/Align/Bold/Italic`,
+   `factBold/Italic`, `metaFont/Bold/Italic`, `badgeFont/Bold/Italic`; new
+   `titleStyle`/`metaStyle`/`badgeStyle` wrappers + `factBodyStyle` bold/italic,
+   threaded through all 8 card styles (title / meta / badge render sites) — the
+   font + format tools act on ANY selected element, preview AND export.
+2. **Selection model**: `ShareCardResizeTarget` gains NONE/META/BADGE; on
+   entering edit mode NOTHING is selected/shown; tapping title / fact / meta /
+   badge selects it (coffee outline + ONE move grip); unselected boxes show a
+   faint outline so tap targets are discoverable; the fact typing field stays
+   present (tap → focus → select).
+3. **Icon-only toolbar**: the Customise overlay panel + labeled sliders are
+   REPLACED by a scrollable row of circular icon pills:
+   Design · Aspect · Size · Box · Font · Align · Format · Content · Reset · Done.
+   Each tool opens ONE small panel under the toolbar:
+   - Design → style row (all designs) + Current/Classic for Signature
+   - Aspect → INSTANTLY toggles 3:4 ↔ 9:16 (default is now 3:4 / CLASSIC)
+   - Size → size pills for the SELECTED element (title/fact)
+   - Box → width + height sliders for the selected element
+   - Font → 13 families (`shareFonts`: Serif/Sans/Mono/Elegant/Classic/Old
+     Style/Bookish/Rounded/Handwritten/Condensed/Modern/Grotesk/Bouncy)
+   - Align → Left / Center / Right / Justify
+   - Format → Bold / Italic toggles
+   - Content → source list, custom-fact field, collage photo+caption, vinyl song
+   - Reset / Done
+   The floating button now toggles EDIT MODE (Customise ⇄ Done) instead of a
+   panel; "Hold to edit" hint becomes "Tap a thing on the card to edit it"
+   while editing with nothing selected.
+4. **Paper fixes**: the category chip now moves ALONE (bulb stays anchored
+   top-right) — HeaderRow + Vinyl's badge row; fact width is editable —
+   `moveFact` applies `fillMaxWidth` unconditionally and `FrostPane` drops its
+   redundant outer fill, so the crop genuinely narrows Paper's frost pane.
 
-## What landed (all in `app/`)
-
-1. **Level rewards catalog** — `data/LevelRewards.kt`: Reward(level, id,
-   title, kind, glyph) with kinds OUTFIT / PALETTE / LANE_ORDER. Premium
-   share-card tones (Midnight L2, Forest L8, Lavender L15, Ember L30),
-   outfits (Scarf L3, Coat L10, Crown L20, Galaxy L40), lane order L5.
-   Level card + pet hero footer show "next unlock"; level-up banner lists
-   newly-unlocked rewards.
-2. **Lane-order gate** — ManageCategoriesScreen: drag-reorder + steppers
-   locked until Level 5 with a "Custom order locked" card; hide toggle
-   unaffected.
-3. **Real-loop dailies** — CurioQuests: DailyKind.REVEAL + DailyKind.VOICE;
-   pool entries "Reveal 2 new topics", "Save a discovery", "Capture with
-   voice once" (+ bonus Reveal-4 / Voice-twice); `noteReveal` hook wired in
-   TopicRevealScreen next to CurioPassport.noteReveal; `onSave` bumps VOICE
-   for SoundBite captures.
-4. **Home quest strip** — HomeDailyStrip: the day's 3 core dailies with
-   live progress bars under the quest block; tap → Quests.
-5. **Pet reacts on Home** — CurioPet.pendingQuestNudge (set in
-   noteQuestComplete, consumed once by the Home flower bed) → one-shot
-   "Quest done! +sparkles ✨" bubble; quick PLAY bubble (awake + at home)
-   → notePlay (feeds PLAY daily + persona).
-6. **Outfit shop** — `data/PetOutfits.kt` (4 outfits, 16×16 accessory
-   art), `features/outfits/OutfitShopScreen.kt` (wallet card, outfit cards
-   with sprite previews, Buy/Equip/Locked, next-unlock hint), route
-   `OUTFIT_SHOP` (NavHost + center-pop list). Sparkles wallet in
-   AppPreferences (KEY_SPARKLES + get/add/spend) funded by daily claims
-   (+2), weekly claims (+5), streak milestones (+5). Equipped outfit
-   overlays the sprite's `accessories` detail layer at render time
-   (CurioPetSprite.activeDesign merge; never mutates saved art).
-7. **Entries** — Quests: OutfitShopEntryCard under the hero; Profile:
-   ProfilePetShopRow after the gamification card.
-8. **Share palettes** — 4 premium tones in TopicShareCard; `paletteFor`
-   cycles the player's AVAILABLE tones (base 4 + level unlocks) via
-   `unlockedToneCount(level)`.
+### Docs
+- `app/AGENTS.md` v322 bullet; changelog `20260921.txt` ADD/FIX lines;
+  this Prompt.md.
 
 ## Verification
+- Brace/paren balance verified on all 3 changed files vs HEAD (delta balanced).
+- Toolbar glyphs verified present in `material_symbols_outlined.ttf`
+  (text_increase, crop, title, notes, format_bold, format_italic, auto_awesome,
+  aspect_ratio, edit, refresh, check, photo_library).
+- No Gradle build in this environment (CI validates on push).
 
-- All 16 touched/new files brace/paren-balanced vs HEAD (apostrophes in
-  comments confound naive scanners; compared against HEAD deltas).
-- Icon glyphs verified against the bundled font subset (only existing
-  constants used — `checkroom`/`forest`/`swap_vert`/`lock`/`local_florist`
-  were tofu; replaced with pets/drag_handle/dark_mode).
-- Imports audited per file (LevelRewards/PetOutfits where used); no unused
-  imports added (removed a dead `mood`/`stage` val and an unused
-  `paletteUnlockLevel` helper).
-- Compile-safety rules followed: no state writes during composition
-  (consumeQuestNudge happens in a LaunchedEffect), `size` never shadows
-  DrawScope, imports match referenced types.
-- CI compiles on push; local Gradle is forbidden in this environment.
-
-## Docs
-
-- `fastlane/metadata/android/en-US/changelogs/20260921.txt` — new bullets
-  on top (levels unlock, outfit shop, real-loop dailies, Home pet).
-- `app/AGENTS.md` — v321 bullet (rewards catalog, lane gate, real-loop
-  dailies, Home strip + pet nudge/Play, sparkles + outfit shop).
-- Commit WITHOUT the Codebuff footer this time (root AGENTS.md policy).
+## Next steps / notes
+- The new `ShareCardMove` format fields are session-only (not persisted to
+  prefs) — consistent with the existing factFont/factAlign behavior.
+- CI will confirm compilation; watch for any missed import on the picker /
+  share-card files.

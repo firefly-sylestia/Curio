@@ -60,10 +60,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
@@ -190,6 +194,11 @@ fun NewCategoryPickerSheet(
     var showAddSuggestion by remember { mutableStateOf(false) }
     // Tap-and-hold on a saved mix → Edit/Delete option pill overlay.
     var mixOptionTarget by remember { mutableStateOf<NamedMix?>(null) }
+    // v3xx — where the user held (window coords), so the morphing option
+    // pills pop in AT the held spot instead of dead-center.
+    var optionAnchor by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
+    var removeAnchor by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
+    var mixAnchor by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
 
     // v3xx14 — multi-select on page 0 flips the shared bottom row's primary
     // capsule from "Surprise me" to "Mix · N": the classic page reports its
@@ -317,10 +326,10 @@ fun NewCategoryPickerSheet(
                                 onCategoriesMixed(cats)
                             }
                         },
-                        onMixOption = { mixOptionTarget = it },
+                        onMixOption = { mix, pos -> mixOptionTarget = mix; mixAnchor = pos },
                         onNewMix = { editMix = null; showEditor = true },
-                        onOptionTarget = { optionTarget = it },
-                        onRemoveTarget = { removeTarget = it },
+                        onOptionTarget = { cat, pos -> optionTarget = cat; optionAnchor = pos },
+                        onRemoveTarget = { cat, pos -> removeTarget = cat; removeAnchor = pos },
                         onAddSuggestion = { showAddSuggestion = true }
                     )
                 }
@@ -375,44 +384,47 @@ fun NewCategoryPickerSheet(
         optionTarget?.let { target ->
             CategoryOptionPill(
                 category = target,
-                onDismiss = { optionTarget = null },
+                onDismiss = { optionTarget = null; optionAnchor = null },
                 onPinToggle = {
                     pinnedToggle(target.id)
-                    optionTarget = null
+                    optionTarget = null; optionAnchor = null
                 },
                 onSpin = {
-                    optionTarget = null
+                    optionTarget = null; optionAnchor = null
                     if (target.isReady) onCategorySelected(target)
-                }
+                },
+                anchor = optionAnchor
             )
         }
         removeTarget?.let { target ->
             CategoryOptionPill(
                 category = target,
-                onDismiss = { removeTarget = null },
+                onDismiss = { removeTarget = null; removeAnchor = null },
                 onRemove = {
                     // Removing a curated lane writes the user's suggestion
                     // list live, so the section updates without closing the
                     // picker.
                     AppPreferences.removePickerSuggestion(context, target.id)
-                    removeTarget = null
-                }
+                    removeTarget = null; removeAnchor = null
+                },
+                anchor = removeAnchor
             )
         }
         // Tap-and-hold on a saved mix → Edit/Delete option pill overlay.
         mixOptionTarget?.let { target ->
             MixOptionPill(
                 name = target.name,
-                onDismiss = { mixOptionTarget = null },
+                onDismiss = { mixOptionTarget = null; mixAnchor = null },
                 onEdit = {
-                    mixOptionTarget = null
+                    mixOptionTarget = null; mixAnchor = null
                     editMix = target
                     showEditor = true
                 },
                 onDelete = {
-                    mixOptionTarget = null
+                    mixOptionTarget = null; mixAnchor = null
                     deleteMix = target
-                }
+                },
+                anchor = mixAnchor
             )
         }
     }
@@ -482,10 +494,11 @@ private fun NewPickerPage(
     onPinnedToggle: (CategoryId) -> Unit,
     onSpinLane: (CurioCategory) -> Unit,
     onApplyMix: (NamedMix) -> Unit,
-    onMixOption: (NamedMix) -> Unit,
+    // v3xx — option pills receive the held spot (window coords) too.
+    onMixOption: (NamedMix, androidx.compose.ui.geometry.Offset) -> Unit,
     onNewMix: () -> Unit,
-    onOptionTarget: (CurioCategory) -> Unit,
-    onRemoveTarget: (CurioCategory) -> Unit,
+    onOptionTarget: (CurioCategory, androidx.compose.ui.geometry.Offset) -> Unit,
+    onRemoveTarget: (CurioCategory, androidx.compose.ui.geometry.Offset) -> Unit,
     onAddSuggestion: () -> Unit
 ) {
     val context = LocalContext.current
@@ -521,7 +534,7 @@ private fun NewPickerPage(
                         NewPinnedPill(
                             category = cat,
                             onClick = { onSpinLane(cat) },
-                            onLongClick = { onOptionTarget(cat) }
+                            onLongClick = { pos -> onOptionTarget(cat, pos) }
                         )
                     }
                 }
@@ -567,7 +580,7 @@ private fun NewPickerPage(
                                     categories = categories,
                                     active = mix.laneIds.toSet() == deckIds.toSet(),
                                     onApply = { onApplyMix(mix) },
-                                    onLongClick = { onMixOption(mix) },
+                                    onLongClick = { pos -> onMixOption(mix, pos) },
                                     modifier = Modifier.weight(1f)
                                 )
                             }
@@ -621,7 +634,8 @@ private fun ContinueExploringSection(
     categories: List<CurioCategory>,
     deckIds: List<CategoryId>,
     onSpinLane: (CurioCategory) -> Unit,
-    onRemoveTarget: (CurioCategory) -> Unit,
+    // v3xx — option pill receives the held spot (window coords).
+    onRemoveTarget: (CurioCategory, androidx.compose.ui.geometry.Offset) -> Unit,
     onAdd: () -> Unit
 ) {
     val context = LocalContext.current
@@ -676,7 +690,7 @@ private fun ContinueExploringSection(
                                 // Continue exploring too.
                                 selected = cat.id in deckSet,
                                 onClick = { onSpinLane(cat) },
-                                onLongClick = { onRemoveTarget(cat) },
+                                onLongClick = { pos -> onRemoveTarget(cat, pos) },
                                 modifier = Modifier.weight(1f)
                             )
                         }
@@ -915,30 +929,20 @@ private fun ClassicPickerPage(
         }
 
         if (multiSelectMode && mode == PickerMode.MIX) {
-            // ── Mix row — only visible in multi-select mode ────────────
+            // ── Multi-select row — only the floating Cancel pill. The
+            // primary "Mix · N" capsule is GONE here: the shared bottom
+            // row's capsule already swaps to "Mix · N" while selecting
+            // (and applies the pending selection), so a second mix button
+            // on top was redundant. ────────────────────────────────────
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.End
             ) {
-                NewPrimaryCapsule(
-                    label = if (selectedSlugs.isEmpty()) "Pick lanes" else "Mix · ${selectedSlugs.size}",
-                    glyph = CurioIcons.Check,
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        if (selectedSlugs.isEmpty()) return@NewPrimaryCapsule
-                        // v318b — an unnamed multi-lane selection clears any
-                        // previously applied mix's name from the Spin pill.
-                        AppPreferences.setLastMixName(context, null)
-                        val cats = selectedSlugs.mapNotNull { CurioCategories.byRouteSlug(it) }
-                        if (cats.isNotEmpty()) onCategoriesMixed(cats)
-                    }
-                )
-                // v3xx14 — Cancel as a FLOATING pill (raised capsule) instead
-                // of a flat text button, so it reads as the mix row's escape
-                // hatch beside the primary Mix capsule.
+                // v3xx14 — Cancel as a FLOATING pill (raised capsule) — the
+                // escape hatch for the pending multi-select.
                 Surface(
                     onClick = {
                         multiSelectMode = false
@@ -1081,37 +1085,47 @@ private fun NewMixCard(
     categories: List<CurioCategory>,
     active: Boolean = false,
     onApply: () -> Unit,
-    onLongClick: (() -> Unit)? = null,
+    // v3xx — receives the card's own center (window coords) so the option
+    // pill pops in AT the held spot.
+    onLongClick: ((androidx.compose.ui.geometry.Offset) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val shape = RoundedCornerShape(20.dp)
     val lanes = mix.laneIds.mapNotNull { id -> categories.firstOrNull { it.id == id } }
     val lead = lanes.firstOrNull()
     val leadAccent = lead?.themedAccent()
+    val holdCenter = remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
     Surface(
         shape = shape,
         color = newPickerIdleFill(),
         shadowElevation = 0.dp,
         modifier = modifier
-            .height(122.dp)
-            .combinedClickable(onClick = onApply, onLongClick = onLongClick)
+            .height(96.dp)
+            .onGloballyPositioned { holdCenter.value = it.boundsInRoot().center }
+            .combinedClickable(
+                onClick = onApply,
+                onLongClick = onLongClick?.let { { it(holdCenter.value) } }
+            )
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(7.dp)
             ) {
                 // ── Header: tinted lane cover + name (+ Active label) ──
+                // v3xx — the lane-teaser TEXT is gone: the icon chips in the
+                // footer already spell out the composition, so the card keeps
+                // name + Active only (and the card got shorter).
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(42.dp)
-                            .clip(RoundedCornerShape(14.dp))
+                            .size(38.dp)
+                            .clip(RoundedCornerShape(13.dp))
                             // v3xx14 — the lead-lane cover was washed out at
                             // 16% alpha; blend the accent in properly so the
                             // mix keeps a real color identity.
@@ -1128,7 +1142,7 @@ private fun NewMixCard(
                         CurioIcon(
                             name = lead?.iconGlyph ?: CurioIcons.Tune,
                             contentDescription = null,
-                            size = 22.dp,
+                            size = 20.dp,
                             tint = leadAccent ?: MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -1141,25 +1155,12 @@ private fun NewMixCard(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            if (active && leadAccent != null) {
-                                Text(
-                                    "Active",
-                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                                    color = leadAccent,
-                                    maxLines = 1
-                                )
-                                Spacer(Modifier.width(5.dp))
-                            }
+                        if (active && leadAccent != null) {
                             Text(
-                                text = mixTeaser(mix.laneIds, categories),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                "Active",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                color = leadAccent,
+                                maxLines = 1
                             )
                         }
                     }
@@ -1226,7 +1227,9 @@ fun NewPickerTile(
     comingSoon: Boolean = false,
     labelOverride: String? = null,
     onClick: () -> Unit,
-    onLongClick: (() -> Unit)? = null,
+    // v3xx — the long-press callback receives the tile's own center in
+    // window coords so the option pill can pop in AT the held spot.
+    onLongClick: ((androidx.compose.ui.geometry.Offset) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val shape = RoundedCornerShape(20.dp)
@@ -1238,6 +1241,8 @@ fun NewPickerTile(
     val fill = if (selected) catAccent else newPickerIdleFill()
     val iconTint = if (selected) catInk else MaterialTheme.colorScheme.onSurfaceVariant
     val labelColor = if (selected) catInk else MaterialTheme.colorScheme.onSurface
+    // Where THIS tile sits on screen — read at long-press time.
+    val holdCenter = remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
     Surface(
         shape = shape,
         color = fill,
@@ -1245,12 +1250,13 @@ fun NewPickerTile(
         modifier = modifier
             .fillMaxWidth()
             .height(88.dp)
+            .onGloballyPositioned { holdCenter.value = it.boundsInRoot().center }
             .then(
                 if (comingSoon) Modifier
                 else Modifier.combinedClickable(
                     enabled = true,
                     onClick = onClick,
-                    onLongClick = onLongClick
+                    onLongClick = onLongClick?.let { { it(holdCenter.value) } }
                 )
             )
     ) {
@@ -1340,15 +1346,19 @@ fun NewPickerTile(
 internal fun NewPinnedPill(
     category: CurioCategory,
     onClick: () -> Unit,
-    onLongClick: () -> Unit
+    // v3xx — receives the pill's own center (window coords) so the option
+    // pill pops in AT the held spot.
+    onLongClick: (androidx.compose.ui.geometry.Offset) -> Unit
 ) {
     val shape = RoundedCornerShape(50)
+    val holdCenter = remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
     Surface(
         shape = shape,
         color = newPickerIdleFill(),
         shadowElevation = 0.dp,
         modifier = Modifier
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .onGloballyPositioned { holdCenter.value = it.boundsInRoot().center }
+            .combinedClickable(onClick = onClick, onLongClick = { onLongClick(holdCenter.value) })
     ) {
         // Taller pill: 12dp vertical padding (was 9dp) + larger glyph.
         Row(
@@ -1372,20 +1382,28 @@ internal fun NewPinnedPill(
     }
 }/**
  * v318b — tap-and-hold actions are NO LONGER a dialog: a small floating
- * capsule MORPHS in (spring pop + fade) at the center, holding only
- * circular ICON buttons (no text). Tapping the scrim dismisses it.
+ * capsule MORPHS in (spring pop + fade), holding only circular ICON
+ * buttons (no text). Tapping the scrim dismisses it.
+ * v3xx — the pill no longer opens dead-center: [anchor] is the screen
+ * position (window coords) where the user held, so the pill pops in just
+ * ABOVE that spot, clamped to the screen. Null falls back to centered.
  * internal — shared with the Browse screen's tap-and-hold overlays.
  */
 @Composable
 internal fun HoldActionsPill(
     actions: List<HoldAction>,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    anchor: androidx.compose.ui.geometry.Offset? = null
 ) {
     // Named popScale/popAlpha (NOT scale/alpha): inside the graphicsLayer
     // block below, an outer `val alpha` would shadow the receiver's own
     // alpha property and break compilation ("val cannot be reassigned").
     val popScale = remember { Animatable(0.6f) }
     val popAlpha = remember { Animatable(0f) }
+    // The scrim's size (for the centered fallback) + the pill's own size
+    // (to center it horizontally on the anchor and float it above it).
+    var scrimSize by remember { mutableStateOf(androidx.compose.ui.unit.IntSize.Zero) }
+    var pillSize by remember { mutableStateOf(androidx.compose.ui.unit.IntSize.Zero) }
     LaunchedEffect(Unit) {
         // Beautiful morph-in: springy pop + fade, one frame after the
         // overlay appears.
@@ -1395,6 +1413,7 @@ internal fun HoldActionsPill(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .onSizeChanged { scrimSize = it }
             .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.28f))
             .combinedClickable(onClick = onDismiss)
     ) {
@@ -1403,7 +1422,24 @@ internal fun HoldActionsPill(
             color = MaterialTheme.colorScheme.surfaceContainerHighest,
             shadowElevation = 8.dp,
             modifier = Modifier
-                .align(Alignment.Center)
+                .onSizeChanged { pillSize = it }
+                .offset {
+                    val a = anchor
+                    if (a != null) {
+                        // Center horizontally on the held spot, float ~14dp
+                        // ABOVE the finger, clamped inside the screen.
+                        val x = (a.x - pillSize.width / 2f).roundToInt()
+                            .coerceIn(8, (scrimSize.width - pillSize.width - 8).coerceAtLeast(8))
+                        val y = (a.y - pillSize.height - 14.dp.roundToPx()).roundToInt()
+                            .coerceIn(8, (scrimSize.height - pillSize.height - 8).coerceAtLeast(8))
+                        IntOffset(x, y)
+                    } else {
+                        IntOffset(
+                            (scrimSize.width - pillSize.width) / 2,
+                            (scrimSize.height - pillSize.height) / 2
+                        )
+                    }
+                }
                 .graphicsLayer {
                     scaleX = popScale.value
                     scaleY = popScale.value
@@ -1460,7 +1496,8 @@ private fun CategoryOptionPill(
     onDismiss: () -> Unit,
     onPinToggle: (() -> Unit)? = null,
     onSpin: (() -> Unit)? = null,
-    onRemove: (() -> Unit)? = null
+    onRemove: (() -> Unit)? = null,
+    anchor: androidx.compose.ui.geometry.Offset? = null
 ) {
     val context = LocalContext.current
     val isPinned = remember { category.id in AppPreferences.getPinnedCategories(context) }
@@ -1500,7 +1537,7 @@ private fun CategoryOptionPill(
         }
     }
     if (actions.isEmpty()) return
-    HoldActionsPill(actions = actions, onDismiss = onDismiss)
+    HoldActionsPill(actions = actions, onDismiss = onDismiss, anchor = anchor)
 }
 
 /**
@@ -1512,7 +1549,8 @@ private fun MixOptionPill(
     name: String,
     onDismiss: () -> Unit,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    anchor: androidx.compose.ui.geometry.Offset? = null
 ) {
     HoldActionsPill(
         actions = listOf(
@@ -1531,7 +1569,8 @@ private fun MixOptionPill(
                 onDelete
             )
         ),
-        onDismiss = onDismiss
+        onDismiss = onDismiss,
+        anchor = anchor
     )
 }
 

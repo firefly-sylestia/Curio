@@ -1516,6 +1516,60 @@ app/src/main/java/com/curio/app/
   level/price/owned/equipped states, a Buy/Equip pill, a live sprite
   preview, and a next-unlock hint; equipping overlays the outfit
   everywhere the sprite renders.
+- **v322 — picker polish (one mix button, hold-pills at the finger,
+  per-tab colors, back reopens the picker) + share-editor rework
+  (icon-only circular toolbar, tap-to-select, fonts for every element,
+  3:4 default).** (User: remove the second mix button in the Spin picker;
+  make the mix cards shorter, drop the "scientist · films" text since
+  the icons already say it; morphing hold-pills must pop in AT the
+  tap-and-hold spot instead of dead-center; Back from the Browse screen
+  must re-open the Spin picker; Browse/Mixes/Pins tabs need DIFFERENT
+  colors, opaque active states and a bit more size; the share editor
+  goes icon-only — every tool is a circular pill, font-size has its own
+  icon + dropdown, box-size a crop icon + one small overlay, the
+  Customise button now ENTERS edit mode (like hold) instead of opening
+  a panel, the style button reveals a design row, aspect toggles
+  between the two (3:4 is the default), a new font icon with MORE fonts,
+  fact alignments plus a format button with more alignments; edit mode
+  no longer lights up everything — tap a thing to select it and its
+  circular option pills appear; fonts apply to title/fact/meta/badge;
+  Paper's chip must move WITHOUT the bulb; Paper's fact width must be
+  editable.) (1) **Picker** — the Classic page's in-page "Mix · N"
+  capsule is GONE (the shared bottom row's capsule already applies the
+  pending selection; the floating Cancel pill stays, right-aligned);
+  `NewMixCard` is 96dp (was 122) with the lane-teaser text removed
+  (icon chips carry the composition); `HoldActionsPill` takes an
+  `anchor` Offset — every long-press (pinned pill, mix card, continue-
+  exploring tile, Browse grid, Mixes row, Pins row) reports the held
+  tile's center via `onGloballyPositioned`, and the pill pops in ABOVE
+  that spot, clamped to the screen; Browse gets a `BackHandler` that
+  pops back AND sets `SpinPickerRequest.pending` (system back now
+  re-opens the Spin picker sheet like the arrow does); the three in-page
+  tabs wear their OWN accent (`BrowseTab.accent()` rose/gold/sage, ink
+  on solid fill), the active tab fills SOLID opaque, and capsules grew
+  46→54dp. (2) **Share editor** — `ShareCardMove` grows per-element
+  format fields (`titleFont/Align/Bold/Italic`, `factBold/Italic`,
+  `metaFont/Bold/Italic`, `badgeFont/Bold/Italic`) applied through new
+  `titleStyle`/`metaStyle`/`badgeStyle` wrappers (plus `factBodyStyle`
+  bold/italic) threaded through all 8 card styles — the font/format
+  tools now act on ANY selected element; `ShareCardResizeTarget` gains
+  NONE/META/BADGE and the editor is selection-based: nothing lights up
+  on hold, tapping title/fact/meta/badge selects it (faint outline) and
+  shows its coffee grip; the Customise overlay panel + labeled sliders
+  are replaced by a circular icon toolbar (Design/Aspect/Size/Box/Font/
+  Align/Format/Content/Reset/Done) where each tool opens ONE small
+  panel — Design shows the design row (+ Current/Classic for Signature),
+  Aspect INSTANTLY toggles 3:4 ↔ 9:16 (default is now 3:4/CLASSIC),
+  Size/Box act on the selected element, Font lists 13 families
+  (`shareFonts`), Align adds Justify (Left/Center/Right/Justify),
+  Format toggles Bold/Italic, Content holds the source list + custom
+  fact + collage photo/caption + vinyl song; the floating button
+  toggles edit mode (Customise ⇄ Done). (3) **Paper fixes** — the
+  category chip now moves ALONE (the decorative bulb stays anchored
+  top-right; also applied to Vinyl's badge row), and the fact width is
+  editable: `moveFact` applies `fillMaxWidth` unconditionally and
+  `FrostPane` no longer carries a redundant outer full-width fill, so
+  the crop actually narrows Paper's pane.
 - **v317 — merged book-notes sheet (Synopsis | Chapters tabs, expands to
   top) + "Also in" from All + share-card editor overhaul + cover fetch
   under Experiments.** (User: synopsis should show only 5 lines on the

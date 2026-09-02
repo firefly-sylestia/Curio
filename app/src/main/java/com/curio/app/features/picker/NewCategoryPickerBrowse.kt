@@ -1,5 +1,6 @@
 package com.curio.app.features.picker
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -41,11 +42,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.curio.app.ui.theme.CurioColors
+import com.curio.app.ui.theme.curioGoldInk
+import com.curio.app.ui.theme.curioRoseInk
+import com.curio.app.ui.theme.curioSageInk
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
@@ -107,6 +114,17 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
     var optionTarget by remember { mutableStateOf<CurioCategory?>(null) }
     // v318b — tap-and-hold on a saved mix row opens the morphing icon pill.
     var mixHoldTarget by remember { mutableStateOf<NamedMix?>(null) }
+    // v3xx — where the user held (window coords), so the morphing pills
+    // pop in AT the held spot instead of dead-center.
+    var optionAnchor by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
+    var mixAnchor by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
+
+    // System back behaves like the on-screen back arrow: pop to Spin and
+    // re-open its category picker sheet.
+    BackHandler {
+        navController.popBackStack()
+        com.curio.app.ui.components.SpinPickerRequest.pending = true
+    }
 
     Box(
         modifier = Modifier
@@ -166,7 +184,7 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
                             AppPreferences.setLastSpinCategories(context, listOf(cat.id))
                             navController.navigateToTab(CurioRoutes.SPIN)
                         },
-                        onOptionTarget = { optionTarget = it }
+                        onOptionTarget = { cat, pos -> optionTarget = cat; optionAnchor = pos }
                     )
                     BrowseTab.MIXES -> MixesTabContent(
                         deckIds = deckIds,
@@ -182,7 +200,7 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
                         onEditMix = { editMix = it; showEditor = true },
                         onDeleteMix = { deleteMix = it },
                         onNewMix = { editMix = null; showEditor = true },
-                        onHoldMix = { mixHoldTarget = it }
+                        onHoldMix = { mix, pos -> mixHoldTarget = mix; mixAnchor = pos }
                     )
                     BrowseTab.PINS -> PinsTabContent(
                         context = context,
@@ -190,7 +208,7 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
                             AppPreferences.setLastSpinCategories(context, listOf(cat.id))
                             navController.navigateToTab(CurioRoutes.SPIN)
                         },
-                        onOptionTarget = { optionTarget = it }
+                        onOptionTarget = { cat, pos -> optionTarget = cat; optionAnchor = pos }
                     )
                 }
             }
@@ -211,6 +229,8 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
                     label = t.label,
                     glyph = t.glyph,
                     selected = tab == t,
+                    accent = t.accent(),
+                    accentInk = t.accentInk(),
                     backdrop = contentGlassBackdrop,
                     modifier = Modifier.weight(1f),
                     onClick = { tabName = t.name }
@@ -263,18 +283,19 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
         BrowseOptionPill(
             category = target,
             isPinned = isPinned,
-            onDismiss = { optionTarget = null },
+            onDismiss = { optionTarget = null; optionAnchor = null },
             onPinToggle = {
                 AppPreferences.togglePinnedCategory(context, target.id)
-                optionTarget = null
+                optionTarget = null; optionAnchor = null
             },
             onSpin = {
-                optionTarget = null
+                optionTarget = null; optionAnchor = null
                 if (target.isReady) {
                     AppPreferences.setLastSpinCategories(context, listOf(target.id))
                     navController.navigateToTab(CurioRoutes.SPIN)
                 }
-            }
+            },
+            anchor = optionAnchor
         )
     }
     // v318b — tap-and-hold on a saved mix row: the same morphing icon pill
@@ -288,7 +309,7 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
                     MaterialTheme.colorScheme.secondaryContainer,
                     MaterialTheme.colorScheme.onSecondaryContainer,
                     {
-                        mixHoldTarget = null
+                        mixHoldTarget = null; mixAnchor = null
                         editMix = target
                         showEditor = true
                     }
@@ -299,12 +320,13 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
                     MaterialTheme.colorScheme.errorContainer,
                     MaterialTheme.colorScheme.onErrorContainer,
                     {
-                        mixHoldTarget = null
+                        mixHoldTarget = null; mixAnchor = null
                         deleteMix = target
                     }
                 )
             ),
-            onDismiss = { mixHoldTarget = null }
+            onDismiss = { mixHoldTarget = null; mixAnchor = null },
+            anchor = mixAnchor
         )
     }
 }
@@ -316,12 +338,33 @@ internal enum class BrowseTab(val label: String, val glyph: String, val tagline:
     PINS("Pins", CurioIcons.PushPin, "Faster starts from pinned lanes")
 }
 
+/**
+ * v3xx — each tab gets its OWN accent color (rose / gold / sage) so the
+ * three capsules stop looking identical; the ACTIVE tab fills SOLID with
+ * its accent (never translucent), idle stays the neutral picker fill.
+ */
+@Composable
+internal fun BrowseTab.accent(): Color = when (this) {
+    BrowseTab.BROWSE -> curioRoseInk()
+    BrowseTab.MIXES -> curioGoldInk()
+    BrowseTab.PINS -> curioSageInk()
+}
+
+@Composable
+internal fun BrowseTab.accentInk(): Color = when (this) {
+    // Deep readable ink on the SOLID accent fill (theme-aware).
+    BrowseTab.BROWSE -> if (isCurioDarkTheme()) CurioColors.CoralInk else CurioColors.CreamWhite
+    BrowseTab.MIXES -> if (isCurioDarkTheme()) CurioColors.GoldInk else CurioColors.CreamWhite
+    BrowseTab.PINS -> if (isCurioDarkTheme()) CurioColors.SageInk else CurioColors.CreamWhite
+}
+
 /** Browse — every category in a NEUTRAL grid. Hold → option pill. */
 @Composable
 private fun BrowseTabContent(
     context: android.content.Context,
     onSpinLane: (CurioCategory) -> Unit,
-    onOptionTarget: (CurioCategory) -> Unit
+    // v3xx — option pill receives the held spot (window coords).
+    onOptionTarget: (CurioCategory, androidx.compose.ui.geometry.Offset) -> Unit
 ) {
     val allUnhidden = remember {
         CurioCategories.all.filter { it.id !in AppPreferences.hiddenCategoriesState }
@@ -351,7 +394,7 @@ private fun BrowseTabContent(
                 comingSoon = !cat.isReady,
                 onClick = { if (cat.isReady) onSpinLane(cat) },
                 onLongClick = if (cat.isReady) {
-                    { onOptionTarget(cat) }
+                    { pos -> onOptionTarget(cat, pos) }
                 } else null
             )
         }
@@ -366,7 +409,8 @@ private fun MixesTabContent(
     onEditMix: (NamedMix) -> Unit,
     onDeleteMix: (NamedMix) -> Unit,
     onNewMix: () -> Unit,
-    onHoldMix: (NamedMix) -> Unit
+    // v3xx — option pill receives the held spot (window coords).
+    onHoldMix: (NamedMix, androidx.compose.ui.geometry.Offset) -> Unit
 ) {
     val mixes = AppPreferences.savedMixesState
     val categories = CurioCategories.visible
@@ -401,7 +445,7 @@ private fun MixesTabContent(
                     onApply = { onApplyMix(mix) },
                     onEdit = { onEditMix(mix) },
                     onDelete = { onDeleteMix(mix) },
-                    onHold = { onHoldMix(mix) }
+                    onHold = { pos -> onHoldMix(mix, pos) }
                 )
             }
         }
@@ -413,7 +457,8 @@ private fun MixesTabContent(
 private fun PinsTabContent(
     context: android.content.Context,
     onSpinLane: (CurioCategory) -> Unit,
-    onOptionTarget: (CurioCategory) -> Unit
+    // v3xx — option pill receives the held spot (window coords).
+    onOptionTarget: (CurioCategory, androidx.compose.ui.geometry.Offset) -> Unit
 ) {
     var pinnedCats by remember {
         mutableStateOf(
@@ -437,6 +482,10 @@ private fun PinsTabContent(
         } else {
             items(pinnedCats, key = { it.id }) { cat ->
                 val shape = RoundedCornerShape(18.dp)
+                // Where this row sits on screen — read at long-press time.
+                val holdCenter = androidx.compose.runtime.remember {
+                    mutableStateOf(androidx.compose.ui.geometry.Offset.Zero)
+                }
                 // NEUTRAL pin row — no category accent.
                 Surface(
                     shape = shape,
@@ -445,9 +494,10 @@ private fun PinsTabContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp)
+                        .onGloballyPositioned { holdCenter.value = it.boundsInRoot().center }
                         .combinedClickable(
                             onClick = { onSpinLane(cat) },
-                            onLongClick = { onOptionTarget(cat) }
+                            onLongClick = { onOptionTarget(cat, holdCenter.value) }
                         )
                 ) {
                     Row(
@@ -514,10 +564,15 @@ private fun BrowseMixRow(
     onEdit: () -> Unit,
     onDelete: () -> Unit,
     // v318b — long-press opens the screen-level morphing icon pill (the old
-    // 3-item dropdown here is gone; no text, no dropdown).
-    onHold: () -> Unit
+    // 3-item dropdown here is gone; no text, no dropdown). v3xx — the
+    // callback receives this row's own center (window coords) so the pill
+    // pops in AT the held spot.
+    onHold: (androidx.compose.ui.geometry.Offset) -> Unit
 ) {
     val shape = RoundedCornerShape(18.dp)
+    val holdCenter = androidx.compose.runtime.remember {
+        mutableStateOf(androidx.compose.ui.geometry.Offset.Zero)
+    }
     Surface(
         shape = shape,
         color = newPickerIdleFill(),
@@ -525,7 +580,8 @@ private fun BrowseMixRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 8.dp)
-            .combinedClickable(onClick = onApply, onLongClick = onHold)
+            .onGloballyPositioned { holdCenter.value = it.boundsInRoot().center }
+            .combinedClickable(onClick = onApply, onLongClick = { onHold(holdCenter.value) })
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -607,7 +663,8 @@ internal fun BrowseOptionPill(
     isPinned: Boolean,
     onDismiss: () -> Unit,
     onPinToggle: () -> Unit,
-    onSpin: () -> Unit
+    onSpin: () -> Unit,
+    anchor: androidx.compose.ui.geometry.Offset? = null
 ) {
     val actions = buildList {
         add(
@@ -631,7 +688,7 @@ internal fun BrowseOptionPill(
             )
         }
     }
-    HoldActionsPill(actions = actions, onDismiss = onDismiss)
+    HoldActionsPill(actions = actions, onDismiss = onDismiss, anchor = anchor)
 }
 
 
@@ -649,40 +706,43 @@ private fun NewPickerTabCapsule(
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    backdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null
+    backdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null,
+    // v3xx — per-tab accent (rose/gold/sage); the ACTIVE tab fills SOLID.
+    accent: Color = MaterialTheme.colorScheme.secondary,
+    accentInk: Color = MaterialTheme.colorScheme.onSecondary
 ) {
     val shape = RoundedCornerShape(50)
-    // SOLID fill in both states — no transparency. Idle uses the picker's
-    // cream-lift neutral (light mode reads creamy, not dark tan).
-    val fill = if (selected) MaterialTheme.colorScheme.secondaryContainer
-               else newPickerIdleFill()
+    // SOLID fill in both states — no transparency. Selected = the tab's OWN
+    // accent fill (opaque); idle = the picker's cream-lift neutral with the
+    // icon tinted in the tab's accent so each capsule keeps its identity.
+    val fill = if (selected) accent else newPickerIdleFill()
     Surface(
         onClick = onClick,
         shape = shape,
         color = fill,
-        shadowElevation = 0.dp,
+        shadowElevation = if (selected) 3.dp else 0.dp,
         modifier = modifier
-            .height(46.dp)
+            .height(54.dp)
             .then(if (isLiquidGlassPillsActive()) Modifier.curioGlassEdge(shape) else Modifier)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 12.dp),
+            modifier = Modifier.padding(horizontal = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
             CurioIcon(
                 name = glyph,
                 contentDescription = null,
-                size = 18.dp,
-                tint = if (selected) MaterialTheme.colorScheme.onSecondaryContainer
-                       else MaterialTheme.colorScheme.onSurfaceVariant
+                size = 20.dp,
+                tint = if (selected) accentInk
+                       else accent.copy(alpha = if (isCurioDarkTheme()) 0.9f else 0.85f)
             )
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Bold
                 ),
-                color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer
+                color = if (selected) accentInk
                         else MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(start = 6.dp)
             )
