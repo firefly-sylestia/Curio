@@ -10278,7 +10278,7 @@
     "name": "The Balance System",
     "categoryId": "BIOLOGY",
     "subtype": "Sensory biology",
-    "teaser": "The semicircular canals that keep you upright without you thinking about it.",
+    "teaser": "The vestibular system in the inner ear maintains balance through semicircular canals detecting rotational movement and otolith organs sensing gravity and linear acceleration. Fluid movement in the canals bends hair cells that send signals to the brain. The visual and proprioceptive systems work with the vestibular system to maintain posture and coordination.",
     "byline": "The gyroscope",
     "tags": [
       "ears",
@@ -10298,7 +10298,7 @@
     "name": "How We Hear",
     "categoryId": "BIOLOGY",
     "subtype": "Sensory biology",
-    "teaser": "The snail-shaped cochlea that turns sound waves into electrical signals.",
+    "teaser": "Sound waves enter the ear canal and vibrate the eardrum, which moves three tiny bones in the middle ear. The stapes pushes against the oval window of the cochlea, where 15000 hair cells convert vibrations into electrical signals. The cochlea maps frequencies spatially, with high pitches detected at the base and low pitches at the apex.",
     "byline": "The sound decoder",
     "tags": [
       "ears",
@@ -10318,7 +10318,7 @@
     "name": "The Sense of Smell",
     "categoryId": "BIOLOGY",
     "subtype": "Sensory biology",
-    "teaser": "Why a single scent can trigger a flood of memories.",
+    "teaser": "Humans have about 400 functional olfactory receptor types, far fewer than dogs' 800 but more than previously thought. Olfactory neurons regenerate every 30 to 60 days. Smell is the only sense that bypasses the thalamus, reaching the olfactory cortex and limbic system directly, which is why odors trigger powerful memories and emotions instantly.",
     "byline": "The memory trigger",
     "tags": [
       "smell",
@@ -10338,7 +10338,7 @@
     "name": "Taste and Flavor",
     "categoryId": "BIOLOGY",
     "subtype": "Sensory biology",
-    "teaser": "Five basic tastes plus your nose equals everything you enjoy eating.",
+    "teaser": "Five basic tastes are detected by taste buds: sweet, salty, sour, bitter, and umami. Each taste bud contains 50 to 100 receptor cells with a lifespan of about 10 days. Flavor is mostly smell, as retronasal olfaction contributes 80 percent of what we perceive as taste. The tongue map myth of specific taste zones was debunked decades ago.",
     "byline": "The flavor team",
     "tags": [
       "taste",
@@ -10358,7 +10358,7 @@
     "name": "Your Skin",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The largest organ — a living raincoat that repairs itself constantly.",
+    "teaser": "Skin is the body's largest organ, covering about 2 square meters and containing over 11 miles of blood vessels. It houses 300000 sweat glands, 100000 hair follicles, and millions of nerve endings. The dermis layer contains collagen and elastin fibers. Skin replaces itself entirely every 2 to 4 weeks, shedding about 30000 to 40000 dead cells per hour.",
     "byline": "The body's shield",
     "tags": [
       "skin",
@@ -10378,7 +10378,7 @@
     "name": "Why We Sweat",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The evaporative cooling system that keeps your brain from overheating.",
+    "teaser": "Humans have 2 to 4 million eccrine sweat glands, more than any other primate, producing up to 2 liters of sweat per hour during intense exercise. Evaporation of sweat from the skin surface removes heat at a rate of 580 kilocalories per liter. This cooling mechanism enabled human persistence hunting in hot African savannas during evolution.",
     "byline": "The body's radiator",
     "tags": [
       "skin",
@@ -10398,7 +10398,7 @@
     "name": "Goosebumps",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The useless reflex we inherited from our furry ancestors.",
+    "teaser": "Goosebumps, or piloerection, are caused by tiny arrector pili muscles contracting at the base of hair follicles, making hairs stand upright. In furry ancestors, this trapped air for insulation or made the animal appear larger to threats. In humans with sparse body hair, the response is vestigial but can still occur from cold, fear, or awe.",
     "byline": "The furry leftover",
     "tags": [
       "skin",
@@ -10418,7 +10418,7 @@
     "name": "The Reflex Arc",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "Why you pull your hand from a hot stove before your brain even knows.",
+    "teaser": "A reflex arc bypasses the brain for faster response, involving only sensory neuron, interneuron in the spinal cord, and motor neuron. The knee-jerk reflex completes in 30 milliseconds. Reflexes protect against harmful stimuli like touching a hot stove. The brain learns about the reflex after the fact, which is why you pull away before feeling pain.",
     "byline": "The shortcut",
     "tags": [
       "nerves",
@@ -10438,7 +10438,7 @@
     "name": "The Knee-Jerk Reflex",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The two-neuron circuit your doctor tests with a rubber hammer.",
+    "teaser": "The patellar reflex is a monosynaptic reflex involving just one synapse between sensory and motor neurons. Tapping the patellar tendon stretches the quadriceps muscle, activating stretch receptors that signal motor neurons to contract the muscle. This reflex tests the integrity of spinal nerves L2 through L4 and is a standard neurological examination.",
     "byline": "The doctor's tap",
     "tags": [
       "nerves",
@@ -10458,7 +10458,7 @@
     "name": "The Cerebellum",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The small brain at the back that coordinates every smooth movement.",
+    "teaser": "The cerebellum, containing more neurons than the rest of the brain combined at about 69 billion, coordinates voluntary movements, balance, and motor learning. Damage causes ataxia, affecting coordination and speech. Recent research shows the cerebellum also contributes to attention, language, and emotional processing, far beyond its traditional motor role.",
     "byline": "The coordination coach",
     "tags": [
       "brain",
@@ -10478,7 +10478,7 @@
     "name": "The Basal Ganglia",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The brain's movement switching station, implicated in Parkinson's disease.",
+    "teaser": "The basal ganglia are a group of interconnected structures deep in the brain that control voluntary motor movements, procedural learning, and habit formation. The direct pathway facilitates movement; the indirect pathway inhibits it. Parkinson's disease destroys dopamine-producing neurons in the substantia nigra that feed into the basal ganglia.",
     "byline": "The movement switch",
     "tags": [
       "brain",
@@ -10498,7 +10498,7 @@
     "name": "The Cortex Map",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The folded surface of the brain where sensing and thinking happen.",
+    "teaser": "The motor and sensory cortices are organized as topographic maps of the body called homunculi, where the size of each region reflects the density of nerve connections. The lips and hands occupy disproportionately large cortical areas. Wilder Penfield mapped these cortical representations in the 1930s to 1950s during brain surgeries.",
     "byline": "The brain's surface",
     "tags": [
       "brain",
@@ -10518,7 +10518,7 @@
     "name": "The Corpus Callosum",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The information superhighway connecting your brain's two halves.",
+    "teaser": "The corpus callosum is a thick band of over 200 million nerve fibers connecting the left and right brain hemispheres. It allows interhemispheric communication, sharing sensory information and coordinating motor commands. Split-brain patients, whose corpus callosum was severed to treat epilepsy, revealed that each hemisphere has distinct awareness and capabilities.",
     "byline": "The two-brain bridge",
     "tags": [
       "brain",
@@ -10538,7 +10538,7 @@
     "name": "Left Brain, Right Brain",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The popular myth versus what hemispheric research actually shows.",
+    "teaser": "While popular culture exaggerates brain lateralization, real asymmetries exist. The left hemisphere typically processes language in 95 percent of right-handers. The right hemisphere excels at spatial processing and face recognition. However, both hemispheres collaborate constantly through the corpus callosum, and most cognitive functions involve distributed networks across both.",
     "byline": "The two halves",
     "tags": [
       "brain",
@@ -10558,7 +10558,7 @@
     "name": "The Sleep Cycle",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The 90-minute loop of light, deep, and dream sleep your brain runs all night.",
+    "teaser": "Sleep cycles through four stages every 90 minutes: three stages of non-REM sleep progressing from light to deep, followed by REM sleep with vivid dreaming. Deep sleep predominates in early cycles; REM periods lengthen toward morning. Adults need 7 to 9 hours for complete cycling. Growth hormone is released during deep sleep, and memory consolidation peaks during REM.",
     "byline": "The nightly loop",
     "tags": [
       "sleep",
@@ -10578,7 +10578,7 @@
     "name": "Why We Dream",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The leading theories about the brain's strange nightly cinema.",
+    "teaser": "Dreams may serve multiple functions: processing emotional experiences, consolidating memories, simulating threats, and pruning neural connections. The activation-synthesis theory proposes that dreams are the brain's attempt to make sense of random neural firing during REM sleep. Lucid dreaming, where dreamers become aware they are dreaming, occurs in about 55 percent of people at least once.",
     "byline": "The night movies",
     "tags": [
       "dreams",
@@ -10598,7 +10598,7 @@
     "name": "Lucid Dreaming",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The state where you realize you are dreaming — and can steer the dream.",
+    "teaser": "Lucid dreaming is the awareness that one is dreaming while still in the dream state. Research at MIT and Stanford has verified lucid dreaming through pre-arranged eye movements during REM sleep. About 55 percent of people have experienced it at least once. Techniques like reality testing and wake-back-to-bed can induce lucid dreams. Some use them for nightmare therapy and creative problem-solving.",
     "byline": "The waking dream",
     "tags": [
       "dreams",
@@ -10618,7 +10618,7 @@
     "name": "The Limits of Attention",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "Why multitasking is really rapid task-switching with a cost.",
+    "teaser": "The brain can process about 40 bits of information per second consciously, despite receiving 11 million bits from the senses. This bottleneck is managed by selective attention, which filters relevant from irrelevant information. Inattentional blindness, demonstrated in the invisible gorilla experiment of 1999, shows we miss obvious stimuli when focused elsewhere.",
     "byline": "The spotlight",
     "tags": [
       "attention",
@@ -10638,7 +10638,7 @@
     "name": "Selective Attention",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The invisible gorilla — how your brain edits out the obvious.",
+    "teaser": "Selective attention allows the brain to focus on relevant stimuli while filtering out distractions. The cocktail party effect lets you follow one conversation in a noisy room. Attention operates through two networks: the dorsal network for goal-directed focus and the ventral network for detecting unexpected stimuli. Multitasking reduces performance by up to 40 percent compared to single-tasking.",
     "byline": "The editing eye",
     "tags": [
       "attention",
@@ -10658,7 +10658,7 @@
     "name": "Animal Vision vs Human",
     "categoryId": "BIOLOGY",
     "subtype": "Sensory biology",
-    "teaser": "The visual superpowers — and weaknesses — of bees, eagles, and mantis shrimp.",
+    "teaser": "Mantis shrimp have 16 types of photoreceptor cells compared to humans' three. Eagles can see 4 to 8 times farther than humans. Cats have a tapetum lucidum that reflects light back through the retina, enhancing night vision. Bees see ultraviolet patterns on flowers invisible to us. Each species sees the world through its own unique visual system.",
     "byline": "The visual zoo",
     "tags": [
       "vision",
@@ -10678,7 +10678,7 @@
     "name": "Ultraviolet Vision",
     "categoryId": "BIOLOGY",
     "subtype": "Sensory biology",
-    "teaser": "The hidden color channel visible to bees, birds, and reindeer.",
+    "teaser": "Many birds, reptiles, and insects see ultraviolet wavelengths invisible to humans. Birds use UV patterns on feathers for mate selection and species recognition. Reindeer see UV light, helping them spot predators and lichen in snowy Arctic landscapes. Flowers have UV nectar guides visible to bees but hidden from humans. Some humans who had cataract surgery report seeing UV.",
     "byline": "The invisible spectrum",
     "tags": [
       "vision",
@@ -10698,7 +10698,7 @@
     "name": "Infrared Senses",
     "categoryId": "BIOLOGY",
     "subtype": "Sensory biology",
-    "teaser": "Heat vision in snakes, beetles, and blood-seeking mosquitoes.",
+    "teaser": "Pit vipers detect infrared radiation through pit organs that sense temperature differences of 0.003 degrees Celsius, creating thermal images of warm-blooded prey. Boas and pythons have less sensitive labial pit organs. The vampire bug Triatoma infestans detects infrared from host body heat to locate blood vessels. This sense evolved independently multiple times in reptiles.",
     "byline": "The heat channel",
     "tags": [
       "senses",
@@ -10718,7 +10718,7 @@
     "name": "Magnetoreception",
     "categoryId": "BIOLOGY",
     "subtype": "Sensory biology",
-    "teaser": "The ability to feel Earth's magnetic field, found in birds, turtles, and foxes.",
+    "teaser": "Many animals detect Earth's magnetic field for navigation. Magnetite crystals in bird beaks and bacteria detect magnetic field direction and intensity. Some birds may see magnetic fields through quantum effects in cryptochrome proteins in their retinas. Sea turtles, salmon, and lobsters all use magnetoreception. The exact mechanism in birds remains debated between magnetite and radical-pair models.",
     "byline": "The hidden compass",
     "tags": [
       "senses",
@@ -10738,7 +10738,7 @@
     "name": "Human Echolocation",
     "categoryId": "BIOLOGY",
     "subtype": "Sensory biology",
-    "teaser": "Blind humans who click their tongues and 'see' with sound.",
+    "teaser": "Blind individuals can develop echolocation, clicking their tongues and interpreting echoes to navigate spaces. Research shows echolocators activate their visual cortex to process auditory spatial information, demonstrating remarkable neuroplasticity. Expert echolocators can detect objects at distances up to 50 meters and distinguish between object sizes, shapes, and materials through echo differences.",
     "byline": "The human sonar",
     "tags": [
       "senses",
@@ -10758,7 +10758,7 @@
     "name": "Why Biodiversity Matters",
     "categoryId": "BIOLOGY",
     "subtype": "Ecology",
-    "teaser": "The insurance policy of life that keeps ecosystems and farms resilient.",
+    "teaser": "Biodiversity provides ecosystem services worth an estimated 125 to 145 trillion dollars annually. Greater species diversity increases ecosystem resilience, productivity, and stability. Losing keystone species can cascade through food webs. Currently 1 million species face extinction within decades. Each species lost represents irreplaceable genetic information and potential medical or agricultural discoveries.",
     "byline": "The web's strength",
     "tags": [
       "biodiversity",
@@ -10778,7 +10778,7 @@
     "name": "Invasive Species",
     "categoryId": "BIOLOGY",
     "subtype": "Ecology",
-    "teaser": "Unwanted transplants that crowd out native life and reshape ecosystems.",
+    "teaser": "Invasive species cause an estimated 423 billion dollars in damage globally each year. They outcompete native species for resources, alter habitats, and introduce diseases. The zebra mussel has cost the US over 1 billion dollars since 1989. Island ecosystems are especially vulnerable: invasive rats and cats have contributed to 60 percent of modern bird and mammal extinctions.",
     "byline": "The accidental conquerors",
     "tags": [
       "conservation",
@@ -10798,7 +10798,7 @@
     "name": "The Cane Toad Story",
     "categoryId": "BIOLOGY",
     "subtype": "Ecology",
-    "teaser": "A pest-control experiment in Australia that backfired spectacularly.",
+    "teaser": "In 1935, 102 cane toads were introduced to Australia to control beetle pests in sugar cane. They spread across the continent, now numbering over 200 million, and poisoning native predators with bufotoxin. They failed to control the beetles. This ecological disaster cost billions and demonstrates the unpredictable consequences of introducing non-native species.",
     "byline": "The toxic mistake",
     "tags": [
       "invasive",
@@ -10818,7 +10818,7 @@
     "name": "Rewilding",
     "categoryId": "BIOLOGY",
     "subtype": "Ecology",
-    "teaser": "Bringing back apex predators and letting landscapes heal themselves.",
+    "teaser": "Rewilding restores natural processes and wilderness areas by reintroducing keystone species and removing human barriers. The reintroduction of wolves to Yellowstone in 1995 triggered a trophic cascade that changed river courses. Rewilding Europe aims to restore large carnivores across the continent. Successful rewilding requires large connected habitats and the return of natural disturbance regimes.",
     "byline": "The great comeback",
     "tags": [
       "conservation",
@@ -10838,7 +10838,7 @@
     "name": "The Yellowstone Wolf Effect",
     "categoryId": "BIOLOGY",
     "subtype": "Ecology",
-    "teaser": "How reintroducing 14 wolves changed the course of an entire river.",
+    "teaser": "Reintroducing 31 gray wolves to Yellowstone in 1995 triggered a trophic cascade. Wolves reduced elk overgrazing, allowing willows and aspens to recover along streams. Beaver populations returned, creating ponds. Songbird diversity increased. Riverbanks stabilized, reducing erosion. The wolves fundamentally reshaped the physical landscape, demonstrating how predators structure entire ecosystems.",
     "byline": "The trophic cascade",
     "tags": [
       "conservation",
@@ -10858,7 +10858,7 @@
     "name": "The Pollinator Crisis",
     "categoryId": "BIOLOGY",
     "subtype": "Ecology",
-    "teaser": "Why falling bee and butterfly numbers threaten your dinner plate.",
+    "teaser": "One-third of the world's food crops depend on animal pollinators, valued at 235 to 577 billion dollars annually. Wild bee populations have declined by 25 percent since 1990 due to pesticides, habitat loss, and disease. Monarch butterfly populations have dropped 80 percent since the 1990s. Without pollinators, crops like almonds, apples, and blueberries would fail.",
     "byline": "The silent decline",
     "tags": [
       "pollination",
@@ -10878,7 +10878,7 @@
     "name": "Rainforest Layers",
     "categoryId": "BIOLOGY",
     "subtype": "Ecology",
-    "teaser": "The vertical city of life, from dark forest floor to sunlit canopy.",
+    "teaser": "Tropical rainforests have four distinct vertical layers: the emergent layer reaching 60 meters, the canopy forming a continuous roof at 30 to 45 meters, the understory at 15 meters, and the forest floor receiving only 2 percent of sunlight. Over 50 percent of Earth's species inhabit rainforests, which cover just 6 percent of land surface.",
     "byline": "The green high-rise",
     "tags": [
       "rainforests",
@@ -10898,7 +10898,7 @@
     "name": "Life in the Canopy",
     "categoryId": "BIOLOGY",
     "subtype": "Ecology",
-    "teaser": "The treetop world that holds most of the rainforest's species.",
+    "teaser": "The rainforest canopy, 30 to 45 meters above the ground, is the most biodiverse layer, hosting 50 to 90 percent of all canopy life. Epiphytes, orchids, bromeliads, and ferns grow on branches without touching soil. Tree frogs breed in bromeliad pools. Canopy walkways and research platforms reveal an ecosystem that remained largely unexplored until the 1980s.",
     "byline": "The sky forest",
     "tags": [
       "rainforests",
@@ -10918,7 +10918,7 @@
     "name": "Wetlands",
     "categoryId": "BIOLOGY",
     "subtype": "Ecology",
-    "teaser": "Nature's kidneys — the marshes and swamps that purify water.",
+    "teaser": "Wetlands cover about 6 percent of Earth's land surface but provide ecosystem services worth 47 trillion dollars annually. They filter pollutants, absorb floodwater, recharge groundwater, and store carbon. The Ramsar Convention protects 2400 wetlands of international importance. Over 64 percent of the world's wetlands have been lost since 1900, making them the most threatened ecosystem.",
     "byline": "The natural filter",
     "tags": [
       "wetlands",
@@ -10938,7 +10938,7 @@
     "name": "Mangroves",
     "categoryId": "BIOLOGY",
     "subtype": "Ecology",
-    "teaser": "The salt-tolerant forests that guard coastlines and raise baby fish.",
+    "teaser": "Mangrove forests grow in tropical and subtropical coastal intertidal zones, with specialized roots that tolerate saltwater and oxygen-poor sediment. They protect coastlines from storms, with mangroves reducing wave energy by 66 percent. They store 4 to 5 times more carbon per hectare than terrestrial forests. Over 35 percent of mangrove cover has been lost since 1980.",
     "byline": "The coastal guardians",
     "tags": [
       "oceans",
@@ -10958,7 +10958,7 @@
     "name": "Seagrass Meadows",
     "categoryId": "BIOLOGY",
     "subtype": "Ecology",
-    "teaser": "Underwater flowering plants that feed dugongs and store carbon.",
+    "teaser": "Seagrass meadows cover 300000 square kilometers of ocean floor globally, making them one of the most productive ecosystems on Earth. They stabilize sediment, filter water, and absorb 35 times more CO2 per hectare than tropical rainforests. Seagrass provides nursery habitat for 20 percent of commercial fish species. The meadows are declining at 7 percent per year.",
     "byline": "The ocean prairies",
     "tags": [
       "oceans",
@@ -10978,7 +10978,7 @@
     "name": "Kelp Forests",
     "categoryId": "BIOLOGY",
     "subtype": "Ecology",
-    "teaser": "Underwater forests that grow a foot a day and shelter sea otters.",
+    "teaser": "Kelp forests grow in cold, nutrient-rich coastal waters, with giant kelp reaching 60 meters tall and growing up to 60 centimeters per day. They support over 800 species and produce more biomass per unit area than most terrestrial ecosystems. Kelp absorbs 20 times more CO2 per acre than land forests. Warming oceans are causing widespread kelp forest decline globally.",
     "byline": "The ocean redwoods",
     "tags": [
       "oceans",
@@ -10998,7 +10998,7 @@
     "name": "Coral Reef Biodiversity",
     "categoryId": "BIOLOGY",
     "subtype": "Ecology",
-    "teaser": "The rainforests of the sea, home to a quarter of ocean species.",
+    "teaser": "Coral reefs cover less than 1 percent of the ocean floor but support 25 percent of all marine species. A single reef can contain over 1000 species of fish and hundreds of coral species. The Great Barrier Reef stretches 2300 kilometers and can be seen from space. Reefs provide food, coastal protection, and tourism income worth 36 billion dollars annually.",
     "byline": "The undersea cities",
     "tags": [
       "oceans",
@@ -11018,7 +11018,7 @@
     "name": "The Savanna",
     "categoryId": "BIOLOGY",
     "subtype": "Ecology",
-    "teaser": "The grassland stage for the planet's most famous wildlife migrations.",
+    "teaser": "Savannas cover 20 percent of Earth's land surface, characterized by scattered trees over grassland in tropical and subtropical regions. They support the greatest concentration of large mammals on Earth, including elephants, giraffes, zebras, and wildebeest. Fire is essential to savanna ecology, preventing forest encroachment and maintaining grassland habitats for grazers.",
     "byline": "The open stage",
     "tags": [
       "grasslands",
@@ -11038,7 +11038,7 @@
     "name": "Life on the Tundra",
     "categoryId": "BIOLOGY",
     "subtype": "Ecology",
-    "teaser": "How anything survives the treeless, frozen, nearly nightless Arctic.",
+    "teaser": "The Arctic tundra, covering 8 percent of Earth's land, has temperatures ranging from minus 34 to 3 degrees Celsius, permafrost soil, and a growing season of just 50 to 60 days. Despite extreme conditions, it supports over 1700 plant species, caribou herds, and Arctic foxes. Thawing permafrost could release 1500 billion tonnes of stored carbon.",
     "byline": "The frozen fringe",
     "tags": [
       "tundra",
@@ -11058,7 +11058,7 @@
     "name": "Desert Survival",
     "categoryId": "BIOLOGY",
     "subtype": "Ecology",
-    "teaser": "The water-hoarding, heat-beating tricks of desert life.",
+    "teaser": "Desert organisms have evolved remarkable water-conservation strategies. The thorny devil lizard collects dew on its spines through capillary action. Namib desert beetles harvest fog on their backs. Kangaroo rats never drink water, extracting moisture from seeds. Cacti open stomata only at night, losing 90 percent less water than plants with daytime stomatal opening.",
     "byline": "The dry masters",
     "tags": [
       "deserts",
@@ -11078,7 +11078,7 @@
     "name": "Cactus Engineering",
     "categoryId": "BIOLOGY",
     "subtype": "Ecology",
-    "teaser": "Ribbed stems, shallow roots, and CAM photosynthesis — a plant built for drought.",
+    "teaser": "Cacti are masterpieces of water engineering. The saguaro's pleated stem expands like an accordion to store up to 200 gallons of water. Waxy cuticles prevent evaporation. Shallow lateral roots spread 30 meters to capture brief rains while a deep taproot reaches groundwater. Spines reduce airflow and provide shade, lowering surface temperature by up to 10 degrees Celsius.",
     "byline": "The desert tank",
     "tags": [
       "deserts",
@@ -11098,7 +11098,7 @@
     "name": "The Deep Ocean Twilight",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "The dimly lit midwater zone where glowing predators drift.",
+    "teaser": "The mesopelagic twilight zone from 200 to 1000 meters deep receives less than 1 percent of sunlight. Over 90 percent of deep-sea biomass lives here. Fish have enlarged eyes and bioluminescent organs. The daily vertical migration of organisms from this zone is the largest animal migration on Earth, moving billions of tonnes of biomass each night.",
     "byline": "The blue darkness",
     "tags": [
       "oceans",
@@ -11118,7 +11118,7 @@
     "name": "The Abyssal Plain",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "The vast, cold, crushing floor of the ocean — far from lifeless.",
+    "teaser": "Abyssal plains, covering 50 percent of Earth's surface at depths of 3000 to 6000 meters, are among the flattest and most stable environments on Earth. Despite crushing pressure of 400 to 600 atmospheres, temperatures near 1 to 4 degrees Celsius, and total darkness, they host diverse communities of bacteria, sea cucumbers, and polychaete worms.",
     "byline": "The deep desert",
     "tags": [
       "oceans",
@@ -11138,7 +11138,7 @@
     "name": "Surviving the Deep",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "How fish cope with pressures that would crush a submarine window.",
+    "teaser": "Deep-sea organisms survive extreme pressure through adaptations including unsaturated membrane lipids that maintain flexibility, pressure-resistant enzymes, and absence of gas-filled spaces. Tardigrades can survive pressures 6 times that of the deepest ocean. Deep-sea fish lack swim bladders, using lipid-filled tissues instead for buoyancy.",
     "byline": "The pressure dwellers",
     "tags": [
       "oceans",
@@ -11158,7 +11158,7 @@
     "name": "The Giant Squid",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "The legendary deep-sea giant with eyes the size of dinner plates.",
+    "teaser": "The giant squid, Architeuthis dux, reaching 13 meters long with the largest eyes in the animal kingdom at 27 centimeters diameter, was first filmed alive in its habitat in 2012. They live at depths of 300 to 1000 meters. The colossal squid, Mesonychoteuthis hamiltoni, may be even larger. Both species remain among the least understood large animals on Earth.",
     "byline": "The ocean myth",
     "tags": [
       "cephalopods",
@@ -11178,7 +11178,7 @@
     "name": "The Anglerfish",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "The deep-sea predator that fishes with a glowing lantern.",
+    "teaser": "Deep-sea anglerfish use bioluminescent lures dangling from their heads to attract prey in total darkness. The female grows up to 1 meter while the male, at 2 centimeters, fuses permanently to her body, sharing her bloodstream and eventually degenerating into a sperm-producing organ. This extreme sexual dimorphism ensures reproduction in the sparsely populated deep ocean.",
     "byline": "The light fisher",
     "tags": [
       "oceans",
@@ -11198,7 +11198,7 @@
     "name": "Whale Falls",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "When a dead whale sinks, it seeds a new deep-sea ecosystem for decades.",
+    "teaser": "When whales die and sink to the ocean floor, their carcasses create ecosystems that last 50 to 75 years. Whale falls support over 400 species, including bone-eating Osedax worms that dissolve whale skeletons with acid. These deep-sea oases may serve as stepping stones between hydrothermal vent communities, allowing species dispersal across the ocean floor.",
     "byline": "The deep banquets",
     "tags": [
       "oceans",
@@ -11218,7 +11218,7 @@
     "name": "The Seahorse",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "The fish that swims upright, has a prehensile tail, and where males give birth.",
+    "teaser": "Seahorses are the only animals where males become pregnant, carrying fertilized eggs in a brood pouch for 14 to 28 days. They have no stomach, so they must eat almost constantly, consuming up to 3000 brine shrimp daily. Their prehensile tails grip seagrass in currents. Each seahorse has a unique crown-like structure called a coronet, as distinctive as a human fingerprint.",
     "byline": "The upside-down fish",
     "tags": [
       "oceans",
@@ -11238,7 +11238,7 @@
     "name": "The Pufferfish",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "The slow fish that balloons into an armored ball of spikes.",
+    "teaser": "Pufferfish contain tetrodotoxin, a poison 1200 times more toxic than cyanide, concentrated in their liver, ovaries, and skin. There is no antidote. Despite this, they are considered a delicacy in Japan, where specially licensed chefs prepare fugu. Male pufferfish create elaborate circular sand patterns up to 2 meters wide to attract mates, decorating them with shells.",
     "byline": "The inflatable fortress",
     "tags": [
       "oceans",
@@ -11258,7 +11258,7 @@
     "name": "Octopus Camouflage",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "Millions of pigment cells that let an octopus vanish in 300 milliseconds.",
+    "teaser": "Octopuses can change color, pattern, and skin texture in 200 milliseconds using chromatophores, leucophores, and iridophores. The mimic octopus can impersonate over 15 species including lionfish, flatfish, and sea snakes. Their skin contains photoreceptors that can detect light independently of the eyes, enabling near-instantaneous color matching to surroundings.",
     "byline": "The living chameleon",
     "tags": [
       "cephalopods",
