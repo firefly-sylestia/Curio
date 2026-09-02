@@ -75,6 +75,7 @@ import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.CurioQuests.DailyQuest
 import com.curio.app.data.CurioQuests.QuestChain
+import com.curio.app.data.LevelRewards
 import com.curio.app.data.CurioQuests.QuestStage
 import com.curio.app.data.CurioQuests.WeeklyQuest
 import com.curio.app.data.PromoMode
@@ -255,6 +256,16 @@ val glassBackdrop = rememberLayerBackdrop()
                         )
                     }
                 }
+                // v9.x — the pet outfit shop: spend sparkles (earned here) on
+                // cosmetic outfits. The wallet line doubles as the entry.
+                item("outfit-shop") {
+                    OutfitShopEntryCard(
+                        sparkles = AppPreferences.sparklesState,
+                        onClick = {
+                            navController.navigate(CurioRoutes.OUTFIT_SHOP) { launchSingleTop = true }
+                        }
+                    )
+                }
                 // v8.5 — Daily quests are FIRST under the hero: the page
                 // answers "what can I do today" before anything else
                 // (spec §3 + §4.1). Completing one fires the pet's
@@ -385,8 +396,15 @@ val glassBackdrop = rememberLayerBackdrop()
                                 fontWeight = FontWeight.ExtraBold
                             )
                         )
+                        // v9.x — the level-up names what XP actually bought:
+                        // every reward newly unlocked by crossing the level.
+                        val freshRewards = LevelRewards.newlyUnlocked(newLevel - 1, newLevel)
                         Text(
-                            "Curie grew a little. Keep going!",
+                            text = if (freshRewards.isEmpty()) {
+                                "Curie grew a little. Keep going!"
+                            } else {
+                                "Unlocked: " + freshRewards.joinToString(", ") { it.title }
+                            },
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -511,6 +529,88 @@ private fun LevelCard(level: Int, xp: Int, nextThreshold: Int, progress: Float, 
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+        // v9.x — the next level reward: XP has a payoff. Shown on the classic
+        // card (the pet hero shows the same line in its own footer).
+        val nextReward = LevelRewards.nextReward(level)
+        if (nextReward != null) {
+            Spacer(Modifier.height(8.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                CurioIcon(
+                    name = nextReward.glyph,
+                    contentDescription = null,
+                    tint = curioGoldInk(),
+                    size = 14.dp
+                )
+                Text(
+                    text = "Next unlock at Level ${nextReward.level}: ${nextReward.title}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = curioGoldInk(),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+/** v9.x — the pet outfit shop entry: sparkle wallet + next unlock hint. */
+@Composable
+private fun OutfitShopEntryCard(
+    sparkles: Int,
+    onClick: () -> Unit
+) {
+    val level = CurioQuests.levelForXp(CurioQuests.xpState)
+    CurioSettingsCard {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
+                modifier = Modifier.size(44.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    CurioIcon(
+                        name = CurioIcons.AutoAwesome,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        size = 24.dp
+                    )
+                }
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "Pet outfit shop",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                val nextReward = LevelRewards.nextReward(level)
+                Text(
+                    text = when {
+                        nextReward == null -> "$sparkles sparkles · every reward unlocked"
+                        else -> "$sparkles sparkles · next unlock: ${nextReward.title} at Level ${nextReward.level}"
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            CurioIcon(
+                name = CurioIcons.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 20.dp
+            )
+        }
     }
 }
 

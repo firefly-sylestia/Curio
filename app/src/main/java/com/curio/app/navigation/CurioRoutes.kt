@@ -222,6 +222,8 @@ object CurioRoutes {
     const val FIELDMIND_OBSERVATION = "fieldmind-observation"
     // v8.34 — the Pet designer playground (custom pet look, Settings entry).
     const val PET_DESIGNER = "pet-designer"
+    // v9.x — the pet outfit shop (sparkles-funded cosmetics).
+    const val OUTFIT_SHOP = "outfit-shop"
 
     // ── Route builders ──────────────────────────────────────────────────────
     fun spinWithCategory(slug: String) = "spin/$slug"

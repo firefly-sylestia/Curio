@@ -214,6 +214,12 @@ object AppPreferences {
     private const val KEY_PET_CUSTOM_2 = "pet_custom_2"
     // v9.3 — custom flower bed design (32×18 pixel rows).
     private const val KEY_BED_DESIGN = "bed_design_rows"
+    // v9.x — sparkle currency (earned from daily/weekly claims + streak
+    // milestones) that funds the pet outfit shop.
+    private const val KEY_SPARKLES = "sparkles"
+    // v9.x — owned pet outfits (JSON array of outfit ids) + the equipped one.
+    private const val KEY_OWNED_OUTFITS = "owned_outfits"
+    private const val KEY_EQUIPPED_OUTFIT = "equipped_outfit"
     // Share card edit persistence — per-topic card customisations saved
     // on share/save so they restore next time the same topic is shared.
     private const val KEY_SHARE_CARD_EDITS = "share_card_edits"   // JSON: topicName → edit data
@@ -859,6 +865,13 @@ object AppPreferences {
     /** v9.6 — experimental per-part size and position controls. */
     var petPartTransformsState by mutableStateOf(false)
         private set
+    /** v9.x — sparkle currency (outfit shop funds) + owned/equipped outfits. */
+    var sparklesState by mutableIntStateOf(0)
+        private set
+    var ownedOutfitsState by mutableStateOf<Set<String>>(emptySet())
+        private set
+    var equippedOutfitState by mutableStateOf<String?>(null)
+        private set
 
     fun initThemeMode(context: Context) {
         themeModeState = getThemeMode(context)
@@ -953,6 +966,9 @@ object AppPreferences {
         petDesignState = getPetDesign(context)
         customPetsState = getCustomPets(context)
         bedDesignRowsState = getBedDesignRows(context)
+        sparklesState = getSparkles(context)
+        ownedOutfitsState = getOwnedOutfits(context)
+        equippedOutfitState = getEquippedOutfit(context)
         evoPathState = getEvoPath(context)
         petPartTransformsState = isPetPartTransformsEnabled(context)
         updateCheckerEnabledState = isUpdateCheckerEnabled(context)
@@ -1992,6 +2008,59 @@ object AppPreferences {
             if (delta != 0) acc[catName] = (acc[catName] ?: 0) + delta
         }
         return acc
+    }
+
+    // ── Sparkle currency + pet outfits (v9.x) ───────────────────────────
+    /** The player's sparkle balance (funds the outfit shop). */
+    fun getSparkles(context: Context): Int =
+        prefs(context).getInt(KEY_SPARKLES, 0)
+
+    /** Grants [amount] sparkles (never negative). */
+    fun addSparkles(context: Context, amount: Int) {
+        if (amount <= 0) return
+        val next = (sparklesState + amount).coerceAtLeast(0)
+        prefs(context).edit().putInt(KEY_SPARKLES, next).apply()
+        sparklesState = next
+    }
+
+    /** Spends [amount] sparkles; false when the balance is too low. */
+    fun spendSparkles(context: Context, amount: Int): Boolean {
+        if (amount <= 0) return true
+        if (sparklesState < amount) return false
+        val next = sparklesState - amount
+        prefs(context).edit().putInt(KEY_SPARKLES, next).apply()
+        sparklesState = next
+        return true
+    }
+
+    /** Owned outfit ids (JSON array, defensive read). */
+    fun getOwnedOutfits(context: Context): Set<String> {
+        val raw = prefs(context).getString(KEY_OWNED_OUTFITS, null) ?: return emptySet()
+        return try {
+            val arr = JSONArray(raw)
+            (0 until arr.length()).map { arr.getString(it) }.toSet()
+        } catch (_: Exception) {
+            emptySet()
+        }
+    }
+
+    /** Marks [outfitId] as owned. */
+    fun buyOutfit(context: Context, outfitId: String) {
+        val next = ownedOutfitsState + outfitId
+        val arr = JSONArray()
+        next.forEach { arr.put(it) }
+        prefs(context).edit().putString(KEY_OWNED_OUTFITS, arr.toString()).apply()
+        ownedOutfitsState = next
+    }
+
+    /** The equipped outfit id (null = none). */
+    fun getEquippedOutfit(context: Context): String? =
+        prefs(context).getString(KEY_EQUIPPED_OUTFIT, null)?.takeIf { it.isNotBlank() }
+
+    /** Equips [outfitId] (or null to unequip). */
+    fun setEquippedOutfit(context: Context, outfitId: String?) {
+        prefs(context).edit().putString(KEY_EQUIPPED_OUTFIT, outfitId).apply()
+        equippedOutfitState = outfitId
     }
 
     // ── Manage Categories (v7.94) — hidden set + custom order ──────────

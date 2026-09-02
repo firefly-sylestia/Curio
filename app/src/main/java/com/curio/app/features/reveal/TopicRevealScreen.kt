@@ -359,6 +359,8 @@ fun TopicRevealScreen(
     LaunchedEffect(cat.id, resolved?.id, browseMode) {
         if (resolved != null && !browseMode) {
             CurioPassport.noteReveal(context, cat.id)
+            // v9.x — reveal dailies ("Reveal 2 new topics" etc.) feed here.
+            CurioQuests.noteReveal(context)
             // v8.30 — the pet reacts to the REAL cause: the spin's auto-open
             // says "it opened itself"; any user tap gets a touch reaction
             // ("You picked it!") instead of claiming it auto-opened.

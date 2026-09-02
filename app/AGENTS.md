@@ -1480,6 +1480,42 @@ app/src/main/java/com/curio/app/
   named `alpha`, which shadowed the `graphicsLayer` receiver's `alpha`
   property ("val cannot be reassigned / Float vs Animatable" at
   line 1407) — renamed to `popScale`/`popAlpha`.
+- **v321 — XP economy: level REWARDS (outfits, share palettes, lane
+  order), real-loop dailies, Home quest progress, pet shop.** (1) **Level
+  rewards catalog** (`data/LevelRewards.kt`) — levels now UNLOCK
+  concrete things instead of just names: 4 premium share-card tones
+  (Midnight L2 · Forest L8 · Lavender L15 · Ember L30), 4 pet outfits
+  (Explorer Scarf L3 · Scholar Coat L10 · Curio Crown L20 · Galaxy
+  Drifter L40), and custom lane order (L5). The Quests level card + pet
+  hero footer show "Next unlock at Level N", and the level-up banner
+  lists everything newly unlocked by crossing the level.
+  (2) **Custom lane order is now a REWARD** (user chose gate): the
+  drag-reorder + steppers in Manage Categories stay locked until Level 5
+  with a "Custom order locked" notice (hiding lanes stays open to
+  everyone). (3) **Real-loop daily quests** — the pool now mirrors the
+  app's actual loop: "Reveal 2 new topics" (REVEAL kind, fed by a new
+  `CurioQuests.noteReveal` hook beside `CurioPassport.noteReveal`),
+  "Save a discovery" (retitled), and "Capture with voice once" (VOICE
+  kind, fed by `onSave` when the format is `SoundBite`), plus bonus
+  versions (Reveal 4 / Voice twice). (4) **Quest progress on Home** — a
+  compact `HomeDailyStrip` under the quest block shows the day's three
+  CORE dailies with live progress bars, tap → Quests. (5) **Pet reacts
+  on Home** — a quest claim sets `CurioPet.pendingQuestNudge`
+  (`consumeQuestNudge`), which the Home flower bed consumes to show a
+  one-shot "Quest done! +sparkles ✨" bubble; a quick PLAY bubble
+  (visible when the pet is awake at home) starts a real play moment
+  (`notePlay`, feeding the PLAY daily + persona). (6) **Pet outfit
+  shop** (`data/PetOutfits.kt` + `features/outfits/OutfitShopScreen.kt`,
+  route `OUTFIT_SHOP`, registered in NavHost + center-pop list) —
+  pure-cosmetic accessory layers (16×16 art, merged onto the sprite's
+  `accessories` detail layer at render time — never mutates saved art),
+  funded by SPARKLES: `AppPreferences` sparkle wallet
+  (`KEY_SPARKLES`/`sparklesState` + get/add/spend) earned from daily
+  claims (+2), weekly claims (+5) and new streak milestones (+5). The
+  shop (Quests entry card + Profile row) shows the wallet, per-outfit
+  level/price/owned/equipped states, a Buy/Equip pill, a live sprite
+  preview, and a next-unlock hint; equipping overlays the outfit
+  everywhere the sprite renders.
 - **v317 — merged book-notes sheet (Synopsis | Chapters tabs, expands to
   top) + "Also in" from All + share-card editor overhaul + cover fetch
   under Experiments.** (User: synopsis should show only 5 lines on the

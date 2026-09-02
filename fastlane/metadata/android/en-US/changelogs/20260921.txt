@@ -1,3 +1,7 @@
+ADD: Levels now unlock things — new share-card tones (Midnight, Forest, Lavender, Ember), pet outfits, and custom lane order (at Level 5). Each level-up shows what you just unlocked, and the level card previews the next reward.
+ADD: A pet outfit shop — earn sparkles from daily/weekly quests and streak milestones, then spend them on cosmetic outfits for Curie (from Quests or Profile).
+ADD: Daily quests now match the real loop — "Reveal 2 new topics", "Save a discovery", "Capture with voice once" — with a live quest-progress strip on Home.
+ADD: The pet celebrates on Home — a nudge bubble pops when you finish a quest, and a quick Play button starts a play moment right there.
 ADD: Book covers & ratings hub in Settings — pick a cover source (Open Library or Google Books), fetch every cover into the offline cache, retry only the failed ones, and fetch ratings with no API key; the reveal now shows a ★ rating chip on books. Chapter chips are compact "CH 1 · CH 2…" everywhere. Fetching is OFF by default — flip the toggle in the hub to start downloading, so the app never uses data without you asking.
 FIX: Share card editor — the quick-fact Height and Width sliders now actually resize the box: every tick visibly grows or shrinks it (no more dead-feeling drags or the box hopping around).
 ADD: Topic Browser — the floating arrow scrolls smoothly to the top, and flipping a page jumps back to the top too; the "Also in" pills now SWITCH to that category in one tap instead of stacking another filter.

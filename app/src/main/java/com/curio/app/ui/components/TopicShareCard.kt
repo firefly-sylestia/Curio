@@ -97,6 +97,8 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryFamily
+import com.curio.app.data.CurioQuests
+import com.curio.app.data.LevelRewards
 import com.curio.app.ui.theme.BungeeFontFamily
 import com.curio.app.ui.theme.ChangaOneFontFamily
 import com.curio.app.ui.theme.CurioIcon
@@ -165,9 +167,11 @@ data class ShareCardPalette(
     val inkFaint: Color
 )
 
-// Four curated tones — warm, beautiful, NOT derived from category colors.
+// Curated tones — warm, beautiful, NOT derived from category colors.
 // Each category maps to one of these by index, so every share card
-// looks intentional and visually rich.
+// looks intentional and visually rich. The first FOUR are always
+// available; the premium tones unlock with LEVEL REWARDS (v9.x — see
+// [LevelRewards]), so XP visibly buys new looks.
 private val curatedTones = listOf(
     // Warm Rose — deep muted rose on warm cream
     ShareCardPalette(
@@ -192,12 +196,43 @@ private val curatedTones = listOf(
         bgBase = Color(0xFFF2EFF8), bgLight = Color(0xFFF8F6FC), bgMid = Color(0xFFE2DDEF),
         accent = Color(0xFF6A5A9A), accentDark = Color(0xFF4A3A7A),
         ink = Color(0xFF1C1630), inkFaint = Color(0xFF7A6A90)
+    ),
+    // Midnight (Level 2) — deep navy with a silver-moon accent
+    ShareCardPalette(
+        bgBase = Color(0xFF1E2433), bgLight = Color(0xFF2A3142), bgMid = Color(0xFF171C29),
+        accent = Color(0xFF9FB4D8), accentDark = Color(0xFF6E86B3),
+        ink = Color(0xFFEDF1F8), inkFaint = Color(0xFF9AA6BE)
+    ),
+    // Forest (Level 8) — mossy pine on soft mushroom
+    ShareCardPalette(
+        bgBase = Color(0xFFEDF1E8), bgLight = Color(0xFFF6F8F2), bgMid = Color(0xFFD9E2D0),
+        accent = Color(0xFF4E6E4A), accentDark = Color(0xFF33512F),
+        ink = Color(0xFF1B2418), inkFaint = Color(0xFF64755E)
+    ),
+    // Lavender (Level 15) — lilac on cool grey-cream
+    ShareCardPalette(
+        bgBase = Color(0xFFF3EFF7), bgLight = Color(0xFFFAF7FC), bgMid = Color(0xFFE3DBEF),
+        accent = Color(0xFF8B74B8), accentDark = Color(0xFF664F93),
+        ink = Color(0xFF221B31), inkFaint = Color(0xFF7C6E96)
+    ),
+    // Ember (Level 30) — charcoal with a molten orange accent
+    ShareCardPalette(
+        bgBase = Color(0xFF26211D), bgLight = Color(0xFF332C26), bgMid = Color(0xFF1C1815),
+        accent = Color(0xFFE0853F), accentDark = Color(0xFFB4602A),
+        ink = Color(0xFFFAF1E8), inkFaint = Color(0xFFA08E7E)
     )
 )
 
+/** How many tones the player may use at [level] (base 4 + level unlocks). */
+fun unlockedToneCount(level: Int): Int = 4 + LevelRewards.unlockedPaletteCount(level)
+
 private fun paletteFor(accent: Color): ShareCardPalette {
-    // Cycle through curated tones using the accent hash
-    return curatedTones[Math.abs(accent.hashCode()) % curatedTones.size]
+    // Cycle through the player's AVAILABLE tones using the accent hash.
+    // Premium tones only join the rotation once their level reward lands,
+    // so unlocking one visibly changes the share-card look.
+    val count = unlockedToneCount(CurioQuests.levelForXp(CurioQuests.xpState))
+        .coerceIn(1, curatedTones.size)
+    return curatedTones[Math.abs(accent.hashCode()) % count]
 }
 
 // ─── Family → available styles mapping ─────────────────────────────────

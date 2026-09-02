@@ -43,10 +43,12 @@ import androidx.compose.ui.unit.sp
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
+import com.curio.app.data.LevelRewards
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
+import com.curio.app.ui.theme.curioGoldInk
 
 /**
  * A cozy one-line speech bubble with a soft curved tail pointing at the pet
@@ -283,6 +285,19 @@ fun CurioPetHeroCard(
                     "Next up: ${quest.title} · +${quest.xpReward} XP",
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                     color = accent,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            // v9.x — the next level reward (XP has a payoff; the classic
+            // level card shows the same line).
+            val nextReward = LevelRewards.nextReward(level)
+            if (nextReward != null) {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    "Level ${nextReward.level} unlock: ${nextReward.title}",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = curioGoldInk(),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

@@ -46,6 +46,7 @@ import com.curio.app.data.PetViewAngle
 import com.curio.app.data.MouthStyle
 import com.curio.app.data.PetDesign
 import com.curio.app.data.PetFace
+import com.curio.app.data.PetOutfits
 import com.curio.app.data.PetFaceMoods
 import kotlin.math.PI
 import kotlin.math.ceil
@@ -334,9 +335,27 @@ fun CurioPetSprite(
     // art now only applies when NO custom design exists. Animations, view
     // angles and the sleep (curled) pose all flow from the winning design
     // automatically, so a custom pet behaves like its own new pet.
-    val activeDesign = remember(savedText, design, stage) {
+    val activeDesign = remember(savedText, design, stage, AppPreferences.equippedOutfitState) {
         val base = design ?: savedText?.let { PetDesign.DEFAULT.toParsedOr(it, PetDesign.DEFAULT) }
-        base ?: PetDesign.evolutionDesign(stage, CurioPet.currentEvoPath())
+            ?: PetDesign.evolutionDesign(stage, CurioPet.currentEvoPath())
+        // v9.x — the equipped outfit (if any) overlays the accessories
+        // detail layer so it reads on the default, evolved, AND custom
+        // designs without mutating the saved art. 16×16 art is resized to
+        // the design's grid, then layered over whatever accessories exist.
+        val outfit = PetOutfits.byId(AppPreferences.equippedOutfitState)
+        if (outfit == null) base
+        else {
+            val existing = base.details["accessories"]
+            val resized = PetDesign.resizeGrid(outfit.art, 16, base.gridSize)
+            // Outfit wins on non-dot pixels; the base accessories keep their
+            // own pixels underneath (so custom art isn't destroyed, just
+            // dressed). resized has same length as existing when both exist.
+            val merged = if (existing == null || existing.size != resized.size) resized
+            else existing.zip(resized) { baseRow, outfitRow ->
+                outfitRow.zip(baseRow) { o, b -> if (o == '.') b else o }.joinToString("")
+            }
+            base.withDetailGrid("accessories", merged)
+        }
     }
     // v71 — the design's whole-pet size preset scales the sprite box on top
     // of the caller's spriteSize (which already carries the stage growth),
