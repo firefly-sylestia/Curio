@@ -38,10 +38,16 @@ object BookCoverFetch {
         GOOGLE_BOOKS("Google Books", "Keyless title+author search")
     }
 
-    /** The Open Library title-cover fallback the reveal also uses. */
+    /** Resolves cover URL candidates for a book. */
+    fun coverCandidates(bookName: String, imageUrl: String): List<String> =
+        listOfNotNull(
+            imageUrl.takeIf { it.isNotBlank() },
+            "https://covers.openlibrary.org/b/title/${Uri.encode(bookName)}-M.jpg",
+        )
+
+    /** Single-URL convenience for bulk fetch (uses first candidate). */
     fun coverUrlFor(bookName: String, imageUrl: String): String =
-        imageUrl.takeIf { it.isNotBlank() }
-            ?: "https://covers.openlibrary.org/b/title/${Uri.encode(bookName)}-M.jpg"
+        coverCandidates(bookName, imageUrl).firstOrNull() ?: ""
 
     /**
      * Resolve ONE book's cover URL with the given provider (the topic's OWN
