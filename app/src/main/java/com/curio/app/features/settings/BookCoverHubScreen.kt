@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -66,8 +67,9 @@ fun BookCoverHubScreen(navController: NavController) {
     var total by remember { mutableIntStateOf(0) }
     var failed by remember { mutableIntStateOf(0) }
 
-    val bookCount = remember {
-        runCatching { TopicJsonLoader.load(CategoryId.BOOKS).size }.getOrDefault(0)
+    // TopicJsonLoader.load is suspend — load the count off the main thread.
+    val bookCount by produceState(initialValue = 0) {
+        value = runCatching { TopicJsonLoader.load(CategoryId.BOOKS) }.map { it.size }.getOrDefault(0)
     }
     // Reactive reads — prefs state updates as fetches complete.
     val failedList = AppPreferences.bookCoverFailedState
@@ -274,9 +276,9 @@ fun BookCoverHubScreen(navController: NavController) {
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier.padding(14.dp)
                     ) {
-                        StatCell("$bookCount", "books")
-                        StatCell("${failedList.size}", "failed covers")
-                        StatCell("$ratedCount", "rated")
+                        StatCell("$bookCount", "books", modifier = Modifier.weight(1f))
+                        StatCell("${failedList.size}", "failed covers", modifier = Modifier.weight(1f))
+                        StatCell("$ratedCount", "rated", modifier = Modifier.weight(1f))
                     }
                 }
             }
@@ -440,10 +442,11 @@ fun BookCoverHubScreen(navController: NavController) {
     }
 }
 
-/** Small stat cell for the hub's stats card. */
+/** Small stat cell for the hub's stats card — the caller supplies the
+ *  RowScope weight so the three cells share the card width evenly. */
 @Composable
-private fun StatCell(value: String, label: String) {
-    Column(modifier = Modifier.weight(1f)) {
+private fun StatCell(value: String, label: String, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
         Text(
             value,
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),

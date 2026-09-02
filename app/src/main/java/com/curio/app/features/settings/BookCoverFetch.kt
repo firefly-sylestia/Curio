@@ -3,6 +3,9 @@ package com.curio.app.features.settings
 import android.content.Context
 import android.net.Uri
 import android.os.SystemClock
+import coil.Coil
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.TopicJsonLoader
@@ -106,7 +109,7 @@ object BookCoverFetch {
                 return
             }
         }
-        val loader = com.coil.Coil.imageLoader(context)
+        val loader = Coil.imageLoader(context)
         val total = targets.size
         var done = 0
         var failed = 0
@@ -117,13 +120,13 @@ object BookCoverFetch {
             val url = resolveCoverUrl(context, book.name, book.byline, book.imageUrl, provider)
             val ok = if (url == null) false else runCatching {
                 suspendCancellableCoroutine<Boolean> { cont ->
-                    val request = com.coil.request.ImageRequest.Builder(context)
+                    val request = ImageRequest.Builder(context)
                         .data(url)
                         // Bulk pass: skip the memory cache (300 decoded covers
                         // would bloat heap) — the disk cache is what we're
                         // filling; the reveal re-decodes from it on demand.
-                        .memoryCachePolicy(com.coil.request.CachePolicy.DISABLED)
-                        .diskCachePolicy(com.coil.request.CachePolicy.ENABLED)
+                        .memoryCachePolicy(CachePolicy.DISABLED)
+                        .diskCachePolicy(CachePolicy.ENABLED)
                         .listener(
                             onSuccess = { _, _ -> cont.resume(true) },
                             onError = { _, _ -> cont.resume(false) }

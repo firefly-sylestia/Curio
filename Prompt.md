@@ -10,13 +10,22 @@ User request (verbatim, condensed):
 > failed-fetched-books option — make book-cover fetching a hub of its own.
 > If possible, add rating fetching too without any API — add it.
 
-## Follow-up (v320b): CI fix + fetch OPT-OUT
+## Follow-up (v320b/v320c): CI fixes + fetch OPT-OUT
 
-CI (`:app:compileDebugKotlin`) failed at `NewCategoryPicker.kt:1407` — the
-morph-in pill's `Animatable` was named `alpha`, shadowing the
-`graphicsLayer` receiver's own `alpha` var ("'val' cannot be reassigned /
-Assignment type mismatch Float vs Animatable"). Renamed to
-`popScale`/`popAlpha`.
+- v320b: `NewCategoryPicker.kt:1407` — the morph-in pill's `Animatable`
+  was named `alpha`, shadowing the `graphicsLayer` receiver's `alpha` var
+  ("'val' cannot be reassigned / Float vs Animatable"). Renamed to
+  `popScale`/`popAlpha`.
+- v320c (second CI run): (1) `BookCoverFetch.kt` used the wrong Coil
+  package — this project is Coil 2 (`coil.*`), not `com.coil.*`:
+  restored `coil.Coil`/`coil.request.ImageRequest`/`CachePolicy` imports
+  and dropped the fully-qualified refs (also clears the follow-on
+  "Cannot infer 'it'" listener errors). (2) `BookCoverHubScreen.kt:70`:
+  `TopicJsonLoader.load` is suspend — the book count now loads via
+  `produceState` instead of a plain `remember {}`. (3)
+  `BookCoverHubScreen.kt:446`: `Modifier.weight` needs RowScope —
+  `StatCell` now takes a `modifier` param and the caller passes
+  `Modifier.weight(1f)` inside the stats Row.
 
 Also made book fetching OPT-OUT by default:
 `AppPreferences.bookFetchEnabledState` (`KEY_BOOK_FETCH_ENABLED`, default
