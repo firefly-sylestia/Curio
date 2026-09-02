@@ -1391,6 +1391,177 @@ app/src/main/java/com/curio/app/
   categories selected OR entry's category in the set); single lane keeps
   the wash + subtitle, multi-select uses the neutral wash + "N categories".
   Dead `CabinetStickyChipBar`/`CabinetChipPop`/`FilterChipLite` deleted.
+- **v318 — picker/panel refinement batch (mix accent washout, per-tab
+  persistence, 2-col filter panels):** (1) **Cabinet** — the active-filter
+  chip row is now pixel-identical to the Topic Browser's row: same
+  `labelLarge` typography (the Bold weight was dropped) and the same
+  modifier order (padding → offset → horizontalScroll) so the removable
+  chips read as the same pill family; the Cabinet panel + Topic Database
+  panel both render their checkbox lists as a **TWO-column
+  `LazyVerticalGrid`** (same 260/276dp max-height footprint, roughly half
+  the scroll depth; the Cabinet keeps Legacy as a full-span
+  `GridItemSpan` row). (2) **New picker — mixes**: `NewMixCard` drops the
+  washed-out 16%-alpha lead plate (now a proper `lerp` accent blend) and
+  the tiny 16dp dots (16% alpha) for real **lane ICON chips** (20dp
+  accent tiles, up to 5 + "+N" for huge mixes), and the cell grows from
+  114 → 122dp so the icon row fits; Continue-exploring tiles now wear the
+  **category ACTIVE accent** when their lane is in the current deck.
+  (3) **Classic page (page 1)** — the Wildcard tile relabels
+  "Surprise mix" → "Mix" while multi-selecting (it toggles the lane, no
+  longer surprises), the SHARED bottom row's primary capsule swaps
+  "Surprise me" → "Mix · N" (applying the pending selection; the page
+  reports its count + an apply closure via `onMixStatus`), and the Mix
+  row's flat "Cancel" TextButton is now a FLOATING raised pill
+  (Close glyph + label). (4) **Persistence ("Curio and Knowledge stay
+  persistent too")** — page 0's mode TAB (Curio/Knowledge/Mix) survives
+  sheet closes + app restarts (`KEY_PICKER_PAGE0_MODE` +
+  `pickerPage0ModeState`, seeded in `initThemeMode`); each tab owns its
+  own `rememberLazyGridState` persisted debounced per-tab
+  (`KEY_PICKER_PAGE0_TAB_SCROLL_<tab>`), replacing the single page-0
+  scroll key (`getPickerPage0Scroll`/`setPickerPage0Scroll` deleted).
+- **v319 — share-fact sliders + DB auto-scroll/Also-in switch + mix-name
+  pill + morphing hold pills.** (1) **Share-card editor** — the quick-fact
+  box's HEIGHT slider felt dead because `lines()` ROUNDED the line count
+  (a 12-line fact needed +8% before anything visibly changed, then the
+  grid re-flowed "up and down"); it now CEILs so every tick changes the
+  line count, and the height sliders step chunkier (steps 42 → 26,
+  ~8%/tick) so each notch visibly grows/shrinks the fact box; WIDTH keeps
+  its continuous `fillMaxWidth(frac)` per style (Paper's FrostPane
+  narrows via the v229c `.then(modifier)` chain).
+  (2) **Topic Browser** — the floating back-to-top arrow now
+  `animateScrollToItem(0)` (smooth auto-scroll instead of an instant
+  jump), flipping a PAGE via the liquid-glass page nav also auto-scrolls
+  to the top; tapping an "Also in" pill now SWITCHES the filter to that
+  single lane (`commitCats { setOf(id) }`) instead of stacking it into
+  the multi-select set. (3) **Spin page** — the deck category pill shows
+  the APPLIED named mix's NAME (was always "Mixed · N"): applied mixes
+  stamp `AppPreferences.lastMixNameState` (`KEY_LAST_MIX_NAME`, cleared
+  on surprise/unnamed/single picks), and the pill reads
+  `deckPillLabel(name, count, cat)` across the header + both bottom-bar
+  buttons. (4) **Tap-and-hold options** — the dialog-style centered
+  panels are GONE everywhere: `HoldActionsPill` (shared, internal) is a
+  small rounded capsule that MORPHS in (spring `Animatable` scale
+  0.6→1 + fade) holding only CIRCULAR ICON buttons (no text):
+  Pin/Spin/Remove (`CategoryOptionPill` rewrite), mix Edit/Delete
+  (`MixOptionPill` rewrite), and the Browse page's old Edit/Delete
+  DROPDOWN + `BrowseOptionPill` dialog are replaced with the same pill
+  (mix rows hoist a `mixHoldTarget` to the screen for the full-screen
+  scrim).
+- **v320 — compact CH chips + book covers & ratings HUB.** (1) **Chapter
+  chips** — the reveal page chip, the book-notes sheet header, and the
+  in-sheet chapter pills all read compact `CH N` (was "Ch. N").
+  (2) **Book covers & ratings hub** — the Experiments "Book covers" row
+  now OPENS a dedicated screen (`CurioRoutes.SETTINGS_BOOK_COVER` →
+  `BookCoverHubScreen`, registered in `CurioNavHost`): a provider picker
+  (`BookCoverFetch.BookCoverProvider` — Open Library title covers or a
+  KEYLESS Google Books title+author lookup), a stats card (books / failed
+  covers / rated), actions for "Fetch all covers", "Retry failed (N)"
+  and "Fetch ratings (keyless)", a live progress bar + Cancel, and a
+  failed-books list with per-row Retry. `BookCoverFetch` is now the
+  engine: `resolveCoverUrl` (topic imageUrl first, then the provider),
+  `fetchAll(context, provider, onlyFailed, onProgress)` persists the
+  failed book names (`KEY_BOOK_COVER_FAILED`/`bookCoverFailedState`, so
+  retries survive restarts), and `fetchRatings(context, onProgress)` hits
+  the keyless Google Books JSON endpoint (averageRating from
+  `volumeInfo`) storing a name→rating map (`KEY_BOOK_RATINGS`/
+  `bookRatingsState`). The provider choice persists
+  (`KEY_BOOK_COVER_PROVIDER`). The old inline `BookCoverFetchRow` is
+  gone (replaced by a `CurioSettingsRow` that navigates to the hub).
+  (3) **Reveal ratings** — the synopsis card header and the book-notes
+  sheet header show a compact ★ rating chip when the hub's keyless
+  Google Books rating exists for that book.
+  (4) **Opt-OUT by default (v320b)** — bulk fetching is gated behind
+  `AppPreferences.bookFetchEnabledState` (`KEY_BOOK_FETCH_ENABLED`,
+  default false): nothing downloads and no Google lookup runs until the
+  user flips the toggle at the top of the hub. All hub actions, per-row
+  retries, and the engine entry points respect the gate; the Experiments
+  row subtitle surfaces the OFF state. ALSO fixed a CI compile error in
+  `HoldActionsPill` (`NewCategoryPicker.kt`): the morph-in Animatable was
+  named `alpha`, which shadowed the `graphicsLayer` receiver's `alpha`
+  property ("val cannot be reassigned / Float vs Animatable" at
+  line 1407) — renamed to `popScale`/`popAlpha`.
+- **v321 — XP economy: level REWARDS (outfits, share palettes, lane
+  order), real-loop dailies, Home quest progress, pet shop.** (1) **Level
+  rewards catalog** (`data/LevelRewards.kt`) — levels now UNLOCK
+  concrete things instead of just names: 4 premium share-card tones
+  (Midnight L2 · Forest L8 · Lavender L15 · Ember L30), 4 pet outfits
+  (Explorer Scarf L3 · Scholar Coat L10 · Curio Crown L20 · Galaxy
+  Drifter L40), and custom lane order (L5). The Quests level card + pet
+  hero footer show "Next unlock at Level N", and the level-up banner
+  lists everything newly unlocked by crossing the level.
+  (2) **Custom lane order is now a REWARD** (user chose gate): the
+  drag-reorder + steppers in Manage Categories stay locked until Level 5
+  with a "Custom order locked" notice (hiding lanes stays open to
+  everyone). (3) **Real-loop daily quests** — the pool now mirrors the
+  app's actual loop: "Reveal 2 new topics" (REVEAL kind, fed by a new
+  `CurioQuests.noteReveal` hook beside `CurioPassport.noteReveal`),
+  "Save a discovery" (retitled), and "Capture with voice once" (VOICE
+  kind, fed by `onSave` when the format is `SoundBite`), plus bonus
+  versions (Reveal 4 / Voice twice). (4) **Quest progress on Home** — a
+  compact `HomeDailyStrip` under the quest block shows the day's three
+  CORE dailies with live progress bars, tap → Quests. (5) **Pet reacts
+  on Home** — a quest claim sets `CurioPet.pendingQuestNudge`
+  (`consumeQuestNudge`), which the Home flower bed consumes to show a
+  one-shot "Quest done! +sparkles ✨" bubble; a quick PLAY bubble
+  (visible when the pet is awake at home) starts a real play moment
+  (`notePlay`, feeding the PLAY daily + persona). (6) **Pet outfit
+  shop** (`data/PetOutfits.kt` + `features/outfits/OutfitShopScreen.kt`,
+  route `OUTFIT_SHOP`, registered in NavHost + center-pop list) —
+  pure-cosmetic accessory layers (16×16 art, merged onto the sprite's
+  `accessories` detail layer at render time — never mutates saved art),
+  funded by SPARKLES: `AppPreferences` sparkle wallet
+  (`KEY_SPARKLES`/`sparklesState` + get/add/spend) earned from daily
+  claims (+2), weekly claims (+5) and new streak milestones (+5). The
+  shop (Quests entry card + Profile row) shows the wallet, per-outfit
+  level/price/owned/equipped states, a Buy/Equip pill, a live sprite
+  preview, and a next-unlock hint; equipping overlays the outfit
+  everywhere the sprite renders.
+- **v317 — merged book-notes sheet (Synopsis | Chapters tabs, expands to
+  top) + "Also in" from All + share-card editor overhaul + cover fetch
+  under Experiments.** (User: synopsis should show only 5 lines on the
+  reveal page with the FULL text in the bottom sheet; merge chapters +
+  synopsis into ONE sheet that isn't small and expands to the top; the
+  Topic Browser hides "Also in" when searching from All; share sheet:
+  drop the "Share this topic" header while editing, haptics on the
+  sliders, the Paper quick-fact box must change height as you type and
+  the caret must sit on the real glyphs, T/F/M/B colored handles → ONE
+  coffee move grip with a darker coffee border, the chip grip must ride
+  the ACTUAL pill (it sat at a guessed corner), the bulb icon must move
+  with the chip, rule lines above quick facts must travel with the fact
+  box, title + info must move as one when adjacent; book-cover fetch
+  needs a Cancel and lives in Experiments.) (1) **Reveal** —
+  `BookSynopsisCard` clamps the page preview to `maxLines = 5` (teaser +
+  "Read the full synopsis →"); `BookNotesSheet` is now ONE tall sheet
+  (body `fillMaxHeight(0.92f)`, expand-to-top, inner body scrolls) hosting
+  BOTH sections behind segmented Synopsis | Chapters pills — the tab it
+  opens on mirrors what you tapped, and switching happens in place. The
+  `BookChapterChip` 118dp 2-line preview boxes stay on the page.
+  (2) **Topic Browser** — the "Also in" suggestion row now ALSO renders
+  when searching from ALL (it was gated on a lane being selected): from
+  All it surfaces the lanes the flat results came from (top 6 by hit
+  count). (3) **Share-card editor** — sheet header + style label + dots
+  hide while editing; `SizeSliderColumn` haptics tick per snap step
+  (thumb crossing) + confirm on release (haptics captured in the
+  COMPOSABLE scope, not inside the Slider's plain callbacks); the Paper
+  + Vinyl fact fields report the GLYPH BOX (inner Text, inside the
+  FrostPane/cream padding) so the overlay `BasicTextField` (now
+  `maxLines = 24` + `heightIn(min)` auto-grow) types exactly on the
+  letters with a matching caret; `EditBoundsCallbacks.onFactStyle` lets
+  every style report the TextStyle it actually used so the invisible
+  field wraps/advances identically; the old per-box T/F/M/B letter
+  handles are GONE — one `MoveHandle` (DragHandle icon, `CoffeeChromeDeep`
+  circle + white border) + `CoffeeChrome`/`CoffeeChromeDeep` box borders;
+  the badge grip anchors to the reported PILL bounds (full-width chip
+  rows report the pill Surface, not the row — a full-width rect would
+  zero the drag clamp), and the pill + bulb move as ONE group (moveBadge
+  on the row, onBadge on the pill) so the bulb rides the chip; accent
+  rules above quick facts (Vinyl underline, Editorial hairline, Minimal
+  rule) get `factShift(move)` so they travel with the F drag; meta rows
+  under titles get `titleShift(move)` so title + byline move together.
+  (4) **Settings** — `BookCoverFetchRow` moved from the Safety & support
+  hub into `UserExperimentsScreen` (new "Content tools" section) with a
+  Cancel pill that cancels the in-flight job (cached stays); dead
+  hub special-case branches + ROUTE const deleted.
 - **v142 — Manage Categories full-bleed bottom; Pet Designer floating
   pill bar + fade open; first-run "Pick a lane" wired to the Spin picker.**
   (1) **Manage Categories full-bleed** (per user, confirmed): the NavHost

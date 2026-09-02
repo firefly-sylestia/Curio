@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -116,6 +117,7 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioPassport
 import com.curio.app.data.CurioPet
+import com.curio.app.data.CurioQuests
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.data.CurioCategory
@@ -358,6 +360,8 @@ fun TopicRevealScreen(
     LaunchedEffect(cat.id, resolved?.id, browseMode) {
         if (resolved != null && !browseMode) {
             CurioPassport.noteReveal(context, cat.id)
+            // v9.x — reveal dailies ("Reveal 2 new topics" etc.) feed here.
+            CurioQuests.noteReveal(context)
             // v8.30 — the pet reacts to the REAL cause: the spin's auto-open
             // says "it opened itself"; any user tap gets a touch reaction
             // ("You picked it!") instead of claiming it auto-opened.
@@ -1031,38 +1035,27 @@ fun TopicRevealScreen(
         navController.popBackStack()
     }
 
-    // v315 — the book notes UI is a ModalBottomSheet (the old slim centered
-    // Dialog is gone): the cover + book title head the sheet, the full
-    // synopsis is the body, and the chapter reader lists EVERY chapter in a
-    // chip row at the top so the reader can switch chapters without leaving
-    // the sheet.
+    // v315/v316b — the book notes UI is ONE ModalBottomSheet that hosts BOTH
+    // the synopsis AND the chapter reader (segmented Synopsis | Chapters tabs
+    // inside the sheet), so the sheet is never too small and you can switch
+    // without closing. The tab it opens on mirrors what you tapped: the
+    // synopsis card opens Synopsis, a chapter chip opens Chapters.
     val bookSheetTopic = resolved
-    if (bookSheetTopic != null && bookSheetTopic.categoryId == CategoryId.BOOKS) {
-        if (showSynopsisDialog && bookSheetTopic.synopsis != null) {
-            BookNotesSheet(
-                cat = cat,
-                topic = bookSheetTopic,
-                mode = BookNotesMode.SYNOPSIS,
-                chapter = null,
-                onSelectChapter = {},
-                onDismiss = {
-                    showSynopsisDialog = false
-                    selectedChapter = null
-                }
-            )
-        } else if (selectedChapter != null && !bookSheetTopic.chapters.isNullOrEmpty()) {
-            BookNotesSheet(
-                cat = cat,
-                topic = bookSheetTopic,
-                mode = BookNotesMode.CHAPTERS,
-                chapter = selectedChapter,
-                onSelectChapter = { selectedChapter = it },
-                onDismiss = {
-                    showSynopsisDialog = false
-                    selectedChapter = null
-                }
-            )
-        }
+    if (bookSheetTopic != null && bookSheetTopic.categoryId == CategoryId.BOOKS &&
+        (showSynopsisDialog || selectedChapter != null) &&
+        (!bookSheetTopic.synopsis.isNullOrBlank() || !bookSheetTopic.chapters.isNullOrEmpty())
+    ) {
+        BookNotesSheet(
+            cat = cat,
+            topic = bookSheetTopic,
+            mode = if (showSynopsisDialog) BookNotesMode.SYNOPSIS else BookNotesMode.CHAPTERS,
+            chapter = selectedChapter,
+            onSelectChapter = { selectedChapter = it },
+            onDismiss = {
+                showSynopsisDialog = false
+                selectedChapter = null
+            }
+        )
     }
 
     if (showOverlayPermissionDialog) {
@@ -2298,13 +2291,42 @@ private fun BookSynopsisCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+                // v320 — a keyless-fetched average rating (from the Settings
+                // book hub) rides this header as a compact star chip.
+                val fetchedRating = AppPreferences.bookRatingsState[bookTitle]
+                if (fetchedRating != null && fetchedRating > 0.0) {
+                    if (pageCount != null) Spacer(Modifier.width(8.dp))
+                    Surface(
+                        shape = RoundedCornerShape(50),
+                        color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp),
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Star,
+                                contentDescription = null,
+                                tint = Color(0xFFF6B23B),
+                                size = 12.dp
+                            )
+                            Text(
+                                text = String.format("%.1f", fetchedRating),
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
             }
             
             Spacer(Modifier.height(12.dp))
             
-            // Poster + full synopsis. v315 — no more fixed-height inner scroll
-            // box: the synopsis reads in FULL and the card grows to fit, with
-            // the poster top-aligned beside it.
+            // Poster + a 5-line synopsis PREVIEW. v316b — the page shows only
+            // the opening lines (a teaser, like the chapters' 2-line previews);
+            // tapping the card opens the book-notes sheet, which hosts the
+            // FULL synopsis (and the chapters) in a tall scrollable sheet.
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.Top
@@ -2320,7 +2342,18 @@ private fun BookSynopsisCard(
                     text = synopsis,
                     style = RevealEditorialBody,
                     color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 5,
+                    overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
+                )
+            }
+            if (synopsis.length > 160) {
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = "Read the full synopsis →",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = cat.categoryInk(),
+                    modifier = Modifier.align(Alignment.End)
                 )
             }
         }
@@ -2498,10 +2531,9 @@ private fun BookChapterChip(
             modifier = Modifier.padding(10.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            // Chapter range label (extracted from title)
-            val rangeLabel = chapterRangeLabel(chapter)
+            // Chapter number — v320: compact "CH 3" (was "Ch. 3")
             Text(
-                text = rangeLabel,
+                text = "CH ${chapter.number}",
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold
                 ),
@@ -2611,11 +2643,12 @@ private fun BookCoverPoster(
 }
 
 /**
- * v315 — the book notes ModalBottomSheet (the slim centered dialog is
- * gone): the book cover + title head the sheet; SYNOPSIS shows the full
- * synopsis; CHAPTERS lists EVERY chapter in a chip row at the top — the
- * opened chapter is active and tapping any other chip switches the reader
- * inside the sheet.
+ * v315/v316b — the book notes ModalBottomSheet (the slim centered dialog is
+ * gone): ONE sheet hosts BOTH the synopsis AND the chapter reader. The cover
+ * + title head the sheet; a segmented Synopsis | Chapters tab row switches
+ * between them in place (opened from whichever card you tapped); the sheet
+ * is tall (fills ~92% of the screen) with a scrollable body so neither the
+ * full synopsis nor the chapter reader ever feels cramped.
  */
 @Composable
 private fun BookNotesSheet(
@@ -2627,14 +2660,28 @@ private fun BookNotesSheet(
     onDismiss: () -> Unit
 ) {
     val chapters = topic.chapters.orEmpty()
-    val showChips = mode == BookNotesMode.CHAPTERS && chapters.isNotEmpty()
-    val currentIndex = if (showChips) {
-        chapters.indexOfFirst { it.number == chapter?.number }.coerceAtLeast(0)
-    } else 0
+    val hasSynopsis = !topic.synopsis.isNullOrBlank()
+    val hasChapters = chapters.isNotEmpty()
+    // The reader defaults to the opened chapter (or the first one).
+    val currentChapter = chapter ?: chapters.firstOrNull()
+    // Internal tab — seeded by whichever surface opened the sheet, so both
+    // sections live in the same sheet and you can switch without closing.
+    var tab by remember(mode) { mutableStateOf(mode) }
+    val effectiveTab = when {
+        tab == BookNotesMode.CHAPTERS && !hasChapters -> BookNotesMode.SYNOPSIS
+        tab == BookNotesMode.SYNOPSIS && !hasSynopsis -> BookNotesMode.CHAPTERS
+        else -> tab
+    }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val chipListState = rememberLazyListState(initialFirstVisibleItemIndex = currentIndex)
-    LaunchedEffect(currentIndex) {
-        if (showChips && chapters.size > 1) chipListState.animateScrollToItem(currentIndex)
+    val chipListState = rememberLazyListState(
+        initialFirstVisibleItemIndex = chapters.indexOfFirst { it.number == currentChapter?.number }.coerceAtLeast(0)
+    )
+    LaunchedEffect(currentChapter?.number) {
+        if (hasChapters && chapters.size > 1) {
+            chipListState.animateScrollToItem(
+                chapters.indexOfFirst { it.number == currentChapter?.number }.coerceAtLeast(0)
+            )
+        }
     }
 
     ModalBottomSheet(
@@ -2644,10 +2691,14 @@ private fun BookNotesSheet(
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
+        // v316b — the sheet body fills ~92% of the screen so it expands
+        // toward the top; the inner body scrolls instead of the sheet being
+        // a short pop-up.
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .widthIn(max = CurioContentMaxWidth)
+                .fillMaxHeight(0.92f)
                 .padding(bottom = 20.dp)
         ) {
             // ── Header — cover + book title/author + close ──────────────
@@ -2691,12 +2742,35 @@ private fun BookNotesSheet(
                             overflow = TextOverflow.Ellipsis
                         )
                     }
-                    if (mode == BookNotesMode.CHAPTERS && chapter != null) {
+                    // v320 — the fetched keyless rating rides under the
+                    // author in the sheet header.
+                    val fetchedRating = AppPreferences.bookRatingsState[topic.name]
+                    if (fetchedRating != null && fetchedRating > 0.0) {
+                        Spacer(Modifier.height(3.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Star,
+                                contentDescription = null,
+                                tint = Color(0xFFF6B23B),
+                                size = 13.dp
+                            )
+                            Text(
+                                text = String.format("%.1f", fetchedRating) +
+                                    " · keyless Google Books rating",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    if (effectiveTab == BookNotesMode.CHAPTERS && currentChapter != null) {
                         Spacer(Modifier.height(4.dp))
-                        val pages = if (chapter.pageStart > 0 && chapter.pageEnd > 0)
-                            " · pp. ${chapter.pageStart}–${chapter.pageEnd}" else ""
+                        val pages = if (currentChapter.pageStart > 0 && currentChapter.pageEnd > 0)
+                            " · pp. ${currentChapter.pageStart}–${currentChapter.pageEnd}" else ""
                         Text(
-                            "Ch. ${chapter.number}$pages",
+                            "CH ${currentChapter.number}$pages",
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                             color = cat.categoryInk()
                         )
@@ -2717,94 +2791,174 @@ private fun BookNotesSheet(
                 }
             }
 
-            if (showChips) {
-                Spacer(Modifier.height(16.dp))
-                // ── All chapters — switchable inside the sheet ──────────
-                LazyRow(
-                    state = chipListState,
+            // ── Segmented Synopsis | Chapters switch (v316b) ─────────────
+            if (hasSynopsis && hasChapters) {
+                Spacer(Modifier.height(14.dp))
+                Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(horizontal = 20.dp)
+                    modifier = Modifier.padding(horizontal = 20.dp)
                 ) {
-                    itemsIndexed(chapters) { _, ch ->
-                        val selected = ch.number == chapter?.number
-                        Surface(
-                            onClick = { onSelectChapter(ch) },
-                            shape = RoundedCornerShape(50),
-                            color = if (selected) cat.themedAccent()
-                                    else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
-                            shadowElevation = if (selected) 0.dp else 1.dp
+                    val accent = cat.themedAccent()
+                    // Synopsis tab
+                    Surface(
+                        onClick = { tab = BookNotesMode.SYNOPSIS },
+                        shape = RoundedCornerShape(50),
+                        color = if (effectiveTab == BookNotesMode.SYNOPSIS) accent
+                                else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+                        shadowElevation = if (effectiveTab == BookNotesMode.SYNOPSIS) 0.dp else 1.dp
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
                         ) {
+                            CurioIcon(
+                                CurioIcons.MenuBook, null,
+                                tint = if (effectiveTab == BookNotesMode.SYNOPSIS) cat.onAccent()
+                                       else MaterialTheme.colorScheme.onSurfaceVariant,
+                                size = 15.dp
+                            )
                             Text(
-                                text = "Ch. ${ch.number} · ${ch.title}",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = if (selected) cat.onAccent()
-                                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                                "Synopsis",
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                color = if (effectiveTab == BookNotesMode.SYNOPSIS) cat.onAccent()
+                                        else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                    // Chapters tab
+                    Surface(
+                        onClick = {
+                            tab = BookNotesMode.CHAPTERS
+                            // First visit to the reader: preselect the first chapter.
+                            if (currentChapter == null) chapters.firstOrNull()?.let { onSelectChapter(it) }
+                        },
+                        shape = RoundedCornerShape(50),
+                        color = if (effectiveTab == BookNotesMode.CHAPTERS) accent
+                                else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+                        shadowElevation = if (effectiveTab == BookNotesMode.CHAPTERS) 0.dp else 1.dp
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                        ) {
+                            CurioIcon(
+                                CurioIcons.AutoAwesome, null,
+                                tint = if (effectiveTab == BookNotesMode.CHAPTERS) cat.onAccent()
+                                       else MaterialTheme.colorScheme.onSurfaceVariant,
+                                size = 15.dp
+                            )
+                            Text(
+                                "Chapters · ${chapters.size}",
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                color = if (effectiveTab == BookNotesMode.CHAPTERS) cat.onAccent()
+                                        else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
                 }
-                Spacer(Modifier.height(16.dp))
-            } else {
-                Spacer(Modifier.height(18.dp))
             }
 
-            // ── Body ─────────────────────────────────────────────────────
-            Surface(
-                shape = RoundedCornerShape(20.dp),
-                color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+            // ── Body — the active section fills the rest and scrolls ─────
+            Column(
                 modifier = Modifier
+                    .weight(1f)
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
+                    .verticalScroll(rememberScrollState())
+                    .padding(top = 16.dp, bottom = 4.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(18.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    when (mode) {
-                        BookNotesMode.SYNOPSIS -> {
-                            Text(
-                                "SYNOPSIS",
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.ExtraBold,
-                                    letterSpacing = 1.2.sp
-                                ),
-                                color = cat.categoryInk()
-                            )
-                            Text(
-                                topic.synopsis.orEmpty(),
-                                style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier
-                                    .heightIn(max = 380.dp)
-                                    .verticalScroll(rememberScrollState())
-                            )
-                        }
-                        BookNotesMode.CHAPTERS -> {
-                            val ch = chapter ?: chapters.firstOrNull()
-                            if (ch != null) {
+                when (effectiveTab) {
+                    BookNotesMode.SYNOPSIS -> {
+                        Surface(
+                            shape = RoundedCornerShape(20.dp),
+                            color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(18.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
                                 Text(
-                                    ch.title,
-                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                                    "SYNOPSIS",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.ExtraBold,
+                                        letterSpacing = 1.2.sp
+                                    ),
+                                    color = cat.categoryInk()
+                                )
+                                Text(
+                                    topic.synopsis.orEmpty(),
+                                    style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
-                                if (ch.pageStart > 0 && ch.pageEnd > 0) {
-                                    Text(
-                                        "pp. ${ch.pageStart}–${ch.pageEnd}",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = cat.categoryInk()
-                                    )
+                            }
+                        }
+                    }
+                    BookNotesMode.CHAPTERS -> {
+                        if (hasChapters) {
+                            // Every chapter — switchable inside the sheet.
+                            LazyRow(
+                                state = chipListState,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                contentPadding = PaddingValues(horizontal = 20.dp)
+                            ) {
+                                itemsIndexed(chapters) { _, ch ->
+                                    val selected = ch.number == currentChapter?.number
+                                    Surface(
+                                        onClick = { onSelectChapter(ch) },
+                                        shape = RoundedCornerShape(50),
+                                        color = if (selected) cat.themedAccent()
+                                                else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+                                        shadowElevation = if (selected) 0.dp else 1.dp
+                                    ) {
+                                        Text(
+                                            text = "CH ${ch.number} · ${ch.title}",
+                                            style = MaterialTheme.typography.labelLarge,
+                                            color = if (selected) cat.onAccent()
+                                                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                                        )
+                                    }
                                 }
-                                Text(
-                                    ch.summary.ifBlank { "No summary for this chapter." },
-                                    style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
-                                    color = MaterialTheme.colorScheme.onSurface,
+                            }
+                            Spacer(Modifier.height(12.dp))
+                            val ch = currentChapter
+                            if (ch != null) {
+                                Surface(
+                                    shape = RoundedCornerShape(20.dp),
+                                    color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
                                     modifier = Modifier
-                                        .heightIn(max = 360.dp)
-                                        .verticalScroll(rememberScrollState())
-                                )
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 20.dp)
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(18.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Text(
+                                            ch.title,
+                                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        if (ch.pageStart > 0 && ch.pageEnd > 0) {
+                                            Text(
+                                                "pp. ${ch.pageStart}–${ch.pageEnd}",
+                                                style = MaterialTheme.typography.labelMedium,
+                                                color = cat.categoryInk()
+                                            )
+                                        }
+                                        Text(
+                                            ch.summary.ifBlank { "No summary for this chapter." },
+                                            style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

@@ -199,6 +199,18 @@ object CurioPet {
         return was
     }
 
+    // v9.x — a quest-complete nudge waiting for Home to show it: set by
+    // [noteQuestComplete], consumed once by the Home flower bed so the pet
+    // visibly celebrates when the player comes back to Home after a claim.
+    var pendingQuestNudge by mutableStateOf(false)
+        private set
+
+    fun consumeQuestNudge(): Boolean {
+        val was = pendingQuestNudge
+        pendingQuestNudge = false
+        return was
+    }
+
     /** Called by the screens where the action really happens. */
     fun reactTo(event: Event) {
         lastEvent = event
@@ -2525,6 +2537,8 @@ object CurioPet {
     fun noteQuestComplete(context: Context) {
         prefs(context).edit().putLong(KEY_LAST_QUEST_AT, System.currentTimeMillis()).apply()
         reactTo(Event.QUEST_COMPLETE)
+        // v9.x — Home shows a one-shot celebration nudge.
+        pendingQuestNudge = true
     }
 
     /**

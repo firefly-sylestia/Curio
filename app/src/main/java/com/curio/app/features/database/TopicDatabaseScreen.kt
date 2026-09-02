@@ -15,7 +15,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
@@ -35,6 +34,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -631,6 +632,15 @@ fun TopicDatabaseScreen(navController: NavController) {
             listState.scrollToItem(0)
         }
     }
+    // v318b — flipping to another PAGE via the floating page nav also
+    // auto-scrolls back to the top (each page's row set starts fresh).
+    LaunchedEffect(currentPage) {
+        if (hasRows && listState.firstVisibleItemIndex > 0) {
+            savedScrollIndex = 0
+            savedScrollOffset = 0
+            listState.scrollToItem(0)
+        }
+    }
 
     // ── A–Z fast-scroller (v26) — the scroll knob's letter rail: the active
     //    letter is derived from the topic row at the top of the list, and
@@ -729,26 +739,39 @@ fun TopicDatabaseScreen(navController: NavController) {
                             )
                         }
                     }
-                    // v313 — SEARCH suggestions: pills for other categories
-                    // that also match the query, so results never hide behind
-                    // the stale selected-lane filters. Tap = toggle that lane.
-                    if (needle.isNotEmpty() && effectiveCats.isNotEmpty()) {
-                        val others = catHitCounts
-                            .filterKeys { it !in effectiveCats }
-                            .mapNotNull { (id, n) ->
-                                CurioCategories.all.firstOrNull { it.id == id }?.let { it to n }
-                            }
-                            .sortedByDescending { it.second }
+                    // v313/v314 — SEARCH suggestions: pills for the lanes that
+                    // also match the query. With lanes selected they list the
+                    // OTHER lanes whose results hide behind the filter; from
+                    // ALL (v316b) they show the lanes the flat results came
+                    // from — so results never hide and you can always see /
+                    // jump to which categories matched. Tap = toggle that lane
+                    // into the active set.
+                    if (needle.isNotEmpty()) {
+                        val others = if (effectiveCats.isNotEmpty()) {
+                            catHitCounts
+                                .filterKeys { it !in effectiveCats }
+                                .mapNotNull { (id, n) ->
+                                    CurioCategories.all.firstOrNull { it.id == id }?.let { it to n }
+                                }
+                        } else {
+                            // Searching from All: surface the lanes with the
+                            // most hits (capped so the row stays scannable).
+                            catHitCounts
+                                .mapNotNull { (id, n) ->
+                                    CurioCategories.all.firstOrNull { it.id == id }?.let { it to n }
+                                }
+                                .sortedByDescending { it.second }
+                                .take(6)
+                        }.sortedByDescending { it.second }
                         if (others.isNotEmpty()) {
                             item(key = "search-suggestions") {
-                                // v314 — multi-select: tapping a pill toggles that
-                                // lane in the active set (adds it when absent).
+                                // v318b — tapping an "Also in" pill SWITCHES the
+                                // filter to that single lane (replacing the
+                                // selection); no more silent add-to-set surprise.
                                 SearchSuggestionRow(
                                     hits = others,
                                     onSelect = { id ->
-                                        commitCats { current ->
-                                            if (id in current) current - id else current + id
-                                        }
+                                        commitCats { setOf(id) }
                                     }
                                 )
                             }
@@ -855,7 +878,9 @@ fun TopicDatabaseScreen(navController: NavController) {
                 onClick = {
                     savedScrollIndex = 0
                     savedScrollOffset = 0
-                    alphabetScope.launch { listState.scrollToItem(0) }
+                    // v318b — smooth auto-scroll to the top (was an instant
+                    // jump, which felt abrupt on a long list).
+                    alphabetScope.launch { listState.animateScrollToItem(0) }
                 },
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primary,
@@ -1273,13 +1298,18 @@ private fun BoxScope.DatabaseCategoryPanel(
                     textAlign = TextAlign.Center
                 )
             } else {
-                Column(
+                // v3xx14 — TWO-column checkbox grid (was one long list); the
+                // fixed 276dp max-height keeps the panel the same footprint,
+                // now roughly half the scroll depth.
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .heightIn(max = 276.dp)
-                        .verticalScroll(rememberScrollState())
                 ) {
-                    shown.forEach { cat ->
+                    gridItems(shown) { cat ->
                         CategoryCheckboxRow(
                             cat = cat,
                             count = counts[cat.id] ?: 0,
@@ -1404,9 +1434,11 @@ private fun DatabaseCategoryTopBar(
 
 /**
  * v313 — "Also in: Films · 4" suggestion pills, shown ABOVE the search
- * results when lanes are selected and other lanes also match the query.
- * v314 — multi-select: tapping a pill TOGGLES that lane in the active set
- * (adds it when absent), so results from other categories are one tap away.
+ * results when lanes are selected (or searching from All) and other lanes
+ * also match the query.
+ * v318b — tapping a pill SWITCHES the filter to that single lane (replacing
+ * the selection entirely), so one tap jumps to the other category instead of
+ * silently stacking another filter.
  */
 @Composable
 private fun SearchSuggestionRow(

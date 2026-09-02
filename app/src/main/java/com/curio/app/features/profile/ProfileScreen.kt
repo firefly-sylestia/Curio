@@ -92,6 +92,7 @@ import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioQuests
+import com.curio.app.data.LevelRewards
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.PromoMode
@@ -467,6 +468,17 @@ fun ProfileScreen(navController: NavController) {
                             }
                         )
                     }
+                }
+            }
+            // v9.x — pet outfit shop entry (sparkle wallet + unlock hint).
+            item {
+                Box(Modifier.padding(horizontal = wideContentEdgePadding())) {
+                    ProfilePetShopRow(
+                        sparkles = AppPreferences.sparklesState,
+                        onClick = {
+                            navController.navigate(CurioRoutes.OUTFIT_SHOP) { launchSingleTop = true }
+                        }
+                    )
                 }
             }
             if (categoryCounts.isNotEmpty()) {
@@ -1582,6 +1594,73 @@ private fun ProgressAndAchievementsCard(
             emptyText = currentQuest?.let { "Next: ${it.title}" }
                 ?: "Keep exploring to unlock your first badge."
         )
+    }
+}
+
+/**
+ * v9.x — the pet outfit shop entry: sparkle wallet + the next level unlock
+ * (the shop is where sparkles are spent, so the wallet lives next to it).
+ */
+@Composable
+private fun ProfilePetShopRow(
+    sparkles: Int,
+    onClick: () -> Unit
+) {
+    val level = CurioQuests.levelForXp(CurioQuests.xpState)
+    CurioSettingsCard(shadowElevation = 0.dp) {
+        Surface(
+            onClick = onClick,
+            color = Color.Transparent,
+            shape = RoundedCornerShape(18.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
+                    modifier = Modifier.size(42.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        CurioIcon(
+                            name = CurioIcons.AutoAwesome,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            size = 22.dp
+                        )
+                    }
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Pet outfit shop",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    val nextReward = LevelRewards.nextReward(level)
+                    Text(
+                        text = when {
+                            nextReward == null -> "$sparkles sparkles · every reward unlocked"
+                            else -> "$sparkles sparkles · next unlock: ${nextReward.title} at Level ${nextReward.level}"
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                CurioIcon(
+                    name = CurioIcons.ChevronRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    size = 20.dp
+                )
+            }
+        }
     }
 }
 

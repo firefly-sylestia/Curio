@@ -198,6 +198,7 @@ object CurioRoutes {
     const val SETTINGS_PREFERENCES = "settings/preferences"
     const val SETTINGS_RECORDING = "settings/recording"
     const val SETTINGS_DATA = "settings/data"
+    const val SETTINGS_BOOK_COVER = "settings/book-cover"
     const val EXPERIMENTS = "experiments"
     const val USER_EXPERIMENTS = "user_experiments"
     // v264 — the liquid-glass widget test bed (wallpaper + draggable glass shapes).
@@ -221,6 +222,8 @@ object CurioRoutes {
     const val FIELDMIND_OBSERVATION = "fieldmind-observation"
     // v8.34 — the Pet designer playground (custom pet look, Settings entry).
     const val PET_DESIGNER = "pet-designer"
+    // v9.x — the pet outfit shop (sparkles-funded cosmetics).
+    const val OUTFIT_SHOP = "outfit-shop"
 
     // ── Route builders ──────────────────────────────────────────────────────
     fun spinWithCategory(slug: String) = "spin/$slug"

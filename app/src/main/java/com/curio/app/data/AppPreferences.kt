@@ -173,6 +173,7 @@ object AppPreferences {
     // - KEY_PICKER_MIXES_SEEDED — the starter mixes were written once, so
     //   deleting every mix doesn't resurrect them.
     private const val KEY_NAMED_MIXES = "named_mixes"               // JSON array of NamedMix
+    private const val KEY_LAST_MIX_NAME = "last_mix_name"          // String? — the applied deck's mix name
     private const val KEY_CLASSIC_PICKER = "classic_picker"         // bool — old glass-pill picker
     private const val KEY_PICKER_MIXES_SEEDED = "picker_mixes_seeded" // bool — starter mixes written once
     // v3xx — picker page default + curated suggestions (add/remove):
@@ -183,9 +184,21 @@ object AppPreferences {
     //   falls back to a curated default list.
     private const val KEY_PICKER_DEFAULT_PAGE = "picker_default_page"   // int — 0 classic, 1 new
     private const val KEY_PICKER_SUGGESTIONS = "picker_suggestions"     // JSON array of CategoryId
-    // v3xx13 — per-page scroll persistence for the sheet's classic/new pager.
-    private const val KEY_PICKER_PAGE0_SCROLL = "picker_page0_scroll"   // "index:offset" of page 0
+    // v3xx13 — per-page scroll persistence for the sheet's classic/new pager;
+    // v3xx14 — page 0 is now per-TAB: the Curio/Knowledge/Mix mode survives
+    // restarts, and each tab keeps its own "index:offset" scroll.
+    private const val KEY_PICKER_PAGE0_MODE = "picker_page0_mode"            // PickerMode.name
+    private const val KEY_PICKER_PAGE0_TAB_SCROLL = "picker_page0_tab_scroll_" // suffix = tab name
     private const val KEY_PICKER_PAGE1_SCROLL = "picker_page1_scroll"   // "index:offset" of page 1
+    // v320/v320b — book-cover hub: whether bulk cover + rating fetching is
+    // ENABLED (opt-out by default — OFF until the user turns it on, so no
+    // surprise data usage), which provider the bulk fetch uses, the books
+    // whose covers failed (survive restarts so "Retry failed" works), and
+    // the keyless-fetched average ratings (book name → Google Books rating).
+    private const val KEY_BOOK_FETCH_ENABLED = "book_fetch_enabled"    // bool — opt-out, default false
+    private const val KEY_BOOK_COVER_PROVIDER = "book_cover_provider"  // BookCoverProvider.name
+    private const val KEY_BOOK_COVER_FAILED = "book_cover_failed"     // JSON array of book names
+    private const val KEY_BOOK_RATINGS = "book_ratings"               // JSON object name->avg rating
     // v8.34 — custom pet design (Pet designer playground): the imported
     // design's full text (palette + body/curled grids). Always-on when
     // saved — the pet sprite renders this instead of the default until the
@@ -201,6 +214,12 @@ object AppPreferences {
     private const val KEY_PET_CUSTOM_2 = "pet_custom_2"
     // v9.3 — custom flower bed design (32×18 pixel rows).
     private const val KEY_BED_DESIGN = "bed_design_rows"
+    // v9.x — sparkle currency (earned from daily/weekly claims + streak
+    // milestones) that funds the pet outfit shop.
+    private const val KEY_SPARKLES = "sparkles"
+    // v9.x — owned pet outfits (JSON array of outfit ids) + the equipped one.
+    private const val KEY_OWNED_OUTFITS = "owned_outfits"
+    private const val KEY_EQUIPPED_OUTFIT = "equipped_outfit"
     // Share card edit persistence — per-topic card customisations saved
     // on share/save so they restore next time the same topic is shared.
     private const val KEY_SHARE_CARD_EDITS = "share_card_edits"   // JSON: topicName → edit data
@@ -765,11 +784,44 @@ object AppPreferences {
         private set
 
     /**
+     * v318b — the NAME of the last APPLIED named mix (null when the deck is
+     * a single lane, a surprise, or an unnamed multi-lane selection). The
+     * Spin page's category pill shows this name instead of a generic
+     * "Mixed · N". Seeded from prefs in [initThemeMode].
+     */
+    var lastMixNameState by mutableStateOf<String?>(null)
+        private set
+
+    /**
+     * v320 — the book-cover hub's state: the SELECTED provider (a
+     * BookCoverProvider enum name), the list of book names whose covers
+     * failed the last fetch (survives restarts for "Retry failed"), and the
+     * keyless-fetched Google Books average ratings (book name → rating),
+     * which the reveal shows as star chips on book topics.
+     */
+    var bookFetchEnabledState by mutableStateOf(false)
+        private set
+    var bookCoverProviderState by mutableStateOf("OPEN_LIBRARY")
+        private set
+    var bookCoverFailedState by mutableStateOf<List<String>>(emptyList())
+        private set
+    var bookRatingsState by mutableStateOf<Map<String, Double>>(emptyMap())
+        private set
+
+    /**
      * v3xx — which picker page opens first in the sheet's pager.
      * 0 = classic picker (default), 1 = new picker. Seeded from prefs in
      * [initThemeMode].
      */
     var pickerDefaultPageState by mutableIntStateOf(0)
+        private set
+
+    /**
+     * v3xx14 — page 0's active mode tab (PickerMode.name: CURIO / KNOWLEDGE /
+     * MIX). Persisted so "Curio and Knowledge stay persistent too". Seeded
+     * from prefs in [initThemeMode].
+     */
+    var pickerPage0ModeState by mutableStateOf("MIX")
         private set
 
     /**
@@ -812,6 +864,13 @@ object AppPreferences {
         private set
     /** v9.6 — experimental per-part size and position controls. */
     var petPartTransformsState by mutableStateOf(false)
+        private set
+    /** v9.x — sparkle currency (outfit shop funds) + owned/equipped outfits. */
+    var sparklesState by mutableIntStateOf(0)
+        private set
+    var ownedOutfitsState by mutableStateOf<Set<String>>(emptySet())
+        private set
+    var equippedOutfitState by mutableStateOf<String?>(null)
         private set
 
     fun initThemeMode(context: Context) {
@@ -896,11 +955,20 @@ object AppPreferences {
         savedMixesState = getSavedMixes(context)
         classicPickerEnabledState = isClassicPickerEnabled(context)
         pickerMixesSeededState = isPickerMixesSeeded(context)
+        lastMixNameState = getLastMixName(context)
+        bookFetchEnabledState = isBookFetchEnabled(context)
+        bookCoverProviderState = getBookCoverProvider(context)
+        bookCoverFailedState = getBookCoverFailed(context)
+        bookRatingsState = getBookRatings(context)
         pickerDefaultPageState = getPickerDefaultPage(context)
+        pickerPage0ModeState = getPickerPage0Mode(context)
         pickerSuggestionsState = getPickerSuggestions(context)
         petDesignState = getPetDesign(context)
         customPetsState = getCustomPets(context)
         bedDesignRowsState = getBedDesignRows(context)
+        sparklesState = getSparkles(context)
+        ownedOutfitsState = getOwnedOutfits(context)
+        equippedOutfitState = getEquippedOutfit(context)
         evoPathState = getEvoPath(context)
         petPartTransformsState = isPetPartTransformsEnabled(context)
         updateCheckerEnabledState = isUpdateCheckerEnabled(context)
@@ -1942,6 +2010,59 @@ object AppPreferences {
         return acc
     }
 
+    // ── Sparkle currency + pet outfits (v9.x) ───────────────────────────
+    /** The player's sparkle balance (funds the outfit shop). */
+    fun getSparkles(context: Context): Int =
+        prefs(context).getInt(KEY_SPARKLES, 0)
+
+    /** Grants [amount] sparkles (never negative). */
+    fun addSparkles(context: Context, amount: Int) {
+        if (amount <= 0) return
+        val next = (sparklesState + amount).coerceAtLeast(0)
+        prefs(context).edit().putInt(KEY_SPARKLES, next).apply()
+        sparklesState = next
+    }
+
+    /** Spends [amount] sparkles; false when the balance is too low. */
+    fun spendSparkles(context: Context, amount: Int): Boolean {
+        if (amount <= 0) return true
+        if (sparklesState < amount) return false
+        val next = sparklesState - amount
+        prefs(context).edit().putInt(KEY_SPARKLES, next).apply()
+        sparklesState = next
+        return true
+    }
+
+    /** Owned outfit ids (JSON array, defensive read). */
+    fun getOwnedOutfits(context: Context): Set<String> {
+        val raw = prefs(context).getString(KEY_OWNED_OUTFITS, null) ?: return emptySet()
+        return try {
+            val arr = JSONArray(raw)
+            (0 until arr.length()).map { arr.getString(it) }.toSet()
+        } catch (_: Exception) {
+            emptySet()
+        }
+    }
+
+    /** Marks [outfitId] as owned. */
+    fun buyOutfit(context: Context, outfitId: String) {
+        val next = ownedOutfitsState + outfitId
+        val arr = JSONArray()
+        next.forEach { arr.put(it) }
+        prefs(context).edit().putString(KEY_OWNED_OUTFITS, arr.toString()).apply()
+        ownedOutfitsState = next
+    }
+
+    /** The equipped outfit id (null = none). */
+    fun getEquippedOutfit(context: Context): String? =
+        prefs(context).getString(KEY_EQUIPPED_OUTFIT, null)?.takeIf { it.isNotBlank() }
+
+    /** Equips [outfitId] (or null to unequip). */
+    fun setEquippedOutfit(context: Context, outfitId: String?) {
+        prefs(context).edit().putString(KEY_EQUIPPED_OUTFIT, outfitId).apply()
+        equippedOutfitState = outfitId
+    }
+
     // ── Manage Categories (v7.94) — hidden set + custom order ──────────
     /** Whether [id] is hidden by the user (Manage Categories). */
     fun isCategoryHidden(id: CategoryId): Boolean = id in hiddenCategoriesState
@@ -2259,6 +2380,75 @@ object AppPreferences {
         pickerDefaultPageState = page
     }
 
+    /** The last APPLIED named mix's name, or null for single/surprise decks. */
+    fun getLastMixName(context: Context): String? =
+        prefs(context).getString(KEY_LAST_MIX_NAME, null)
+
+    fun setLastMixName(context: Context, name: String?) {
+        prefs(context).edit().putString(KEY_LAST_MIX_NAME, name).apply()
+        lastMixNameState = name
+    }
+
+    // ── Book-cover hub (v320 / v320b) ────────────────────────────────
+    /**
+     * Whether bulk book-cover + rating fetching is ENABLED. Opt-OUT by
+     * default (false) — the user flips it on in the hub, so the app never
+     * bulk-downloads covers (or hits Google Books) without explicit consent.
+     */
+    fun isBookFetchEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_BOOK_FETCH_ENABLED, false)
+
+    fun setBookFetchEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_BOOK_FETCH_ENABLED, enabled).apply()
+        bookFetchEnabledState = enabled
+    }
+
+    /** The selected cover provider (a BookCoverProvider enum name). */
+    fun getBookCoverProvider(context: Context): String =
+        prefs(context).getString(KEY_BOOK_COVER_PROVIDER, "OPEN_LIBRARY") ?: "OPEN_LIBRARY"
+
+    fun setBookCoverProvider(context: Context, name: String) {
+        prefs(context).edit().putString(KEY_BOOK_COVER_PROVIDER, name).apply()
+        bookCoverProviderState = name
+    }
+
+    /** The book names whose covers failed the last bulk fetch. */
+    fun getBookCoverFailed(context: Context): List<String> {
+        val raw = prefs(context).getString(KEY_BOOK_COVER_FAILED, null) ?: return emptyList()
+        return runCatching {
+            org.json.JSONArray(raw).let { arr ->
+                (0 until arr.length()).mapNotNull { i -> arr.optString(i).takeIf { it.isNotBlank() } }
+            }
+        }.getOrDefault(emptyList())
+    }
+
+    fun setBookCoverFailed(context: Context, names: List<String>) {
+        prefs(context).edit().putString(KEY_BOOK_COVER_FAILED, org.json.JSONArray(names).toString()).apply()
+        bookCoverFailedState = names
+    }
+
+    /** The keyless-fetched average ratings: book name → Google Books average. */
+    fun getBookRatings(context: Context): Map<String, Double> {
+        val raw = prefs(context).getString(KEY_BOOK_RATINGS, null) ?: return emptyMap()
+        return runCatching {
+            val obj = org.json.JSONObject(raw)
+            val out = LinkedHashMap<String, Double>()
+            val keys = obj.keys()
+            while (keys.hasNext()) {
+                val k = keys.next()
+                out[k] = obj.optDouble(k, 0.0)
+            }
+            out
+        }.getOrDefault(emptyMap())
+    }
+
+    fun setBookRating(context: Context, name: String, rating: Double) {
+        val cur = getBookRatings(context).toMutableMap()
+        cur[name] = rating
+        prefs(context).edit().putString(KEY_BOOK_RATINGS, org.json.JSONObject(cur).toString()).apply()
+        bookRatingsState = cur
+    }
+
     /** The user's curated suggestion ids (empty = use [defaultSuggestions]). */
     fun getPickerSuggestions(context: Context): List<CategoryId> {
         val raw = prefs(context).getString(KEY_PICKER_SUGGESTIONS, null) ?: return emptyList()
@@ -2297,8 +2487,8 @@ object AppPreferences {
         setPickerSuggestions(context, cur)
     }
 
-    // ── Picker page scroll persistence (v3xx13) ───────────────────────
-    /** Saved scroll position of one picker pager page. */
+    // ── Picker scroll + mode persistence (v3xx13 / v3xx14) ─────────────
+    /** Saved scroll position of one picker pager page (or mode tab). */
     data class PickerScrollPos(val index: Int = 0, val offset: Int = 0)
 
     private fun encodeScroll(pos: PickerScrollPos): String = "${pos.index}:${pos.offset}"
@@ -2309,12 +2499,21 @@ object AppPreferences {
                 .getOrDefault(PickerScrollPos())
         } ?: PickerScrollPos()
 
-    /** Saved scroll position of page 0 — the classic picker page. */
-    fun getPickerPage0Scroll(context: Context): PickerScrollPos =
-        decodeScroll(prefs(context).getString(KEY_PICKER_PAGE0_SCROLL, null))
+    /** Page 0's persisted mode tab name — "MIX" (default), "CURIO", "KNOWLEDGE". */
+    fun getPickerPage0Mode(context: Context): String =
+        prefs(context).getString(KEY_PICKER_PAGE0_MODE, "MIX") ?: "MIX"
 
-    fun setPickerPage0Scroll(context: Context, pos: PickerScrollPos) {
-        prefs(context).edit().putString(KEY_PICKER_PAGE0_SCROLL, encodeScroll(pos)).apply()
+    fun setPickerPage0Mode(context: Context, mode: String) {
+        prefs(context).edit().putString(KEY_PICKER_PAGE0_MODE, mode).apply()
+        pickerPage0ModeState = mode
+    }
+
+    /** Saved scroll position of one page-0 mode tab (tab = PickerMode.name). */
+    fun getPickerPage0TabScroll(context: Context, tab: String): PickerScrollPos =
+        decodeScroll(prefs(context).getString("$KEY_PICKER_PAGE0_TAB_SCROLL$tab", null))
+
+    fun setPickerPage0TabScroll(context: Context, tab: String, pos: PickerScrollPos) {
+        prefs(context).edit().putString("$KEY_PICKER_PAGE0_TAB_SCROLL$tab", encodeScroll(pos)).apply()
     }
 
     /** Saved scroll position of page 1 — the new picker page. */

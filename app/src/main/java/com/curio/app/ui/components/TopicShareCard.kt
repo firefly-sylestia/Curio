@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.PaddingValues
@@ -96,6 +97,8 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryFamily
+import com.curio.app.data.CurioQuests
+import com.curio.app.data.LevelRewards
 import com.curio.app.ui.theme.BungeeFontFamily
 import com.curio.app.ui.theme.ChangaOneFontFamily
 import com.curio.app.ui.theme.CurioIcon
@@ -164,9 +167,11 @@ data class ShareCardPalette(
     val inkFaint: Color
 )
 
-// Four curated tones — warm, beautiful, NOT derived from category colors.
+// Curated tones — warm, beautiful, NOT derived from category colors.
 // Each category maps to one of these by index, so every share card
-// looks intentional and visually rich.
+// looks intentional and visually rich. The first FOUR are always
+// available; the premium tones unlock with LEVEL REWARDS (v9.x — see
+// [LevelRewards]), so XP visibly buys new looks.
 private val curatedTones = listOf(
     // Warm Rose — deep muted rose on warm cream
     ShareCardPalette(
@@ -191,12 +196,43 @@ private val curatedTones = listOf(
         bgBase = Color(0xFFF2EFF8), bgLight = Color(0xFFF8F6FC), bgMid = Color(0xFFE2DDEF),
         accent = Color(0xFF6A5A9A), accentDark = Color(0xFF4A3A7A),
         ink = Color(0xFF1C1630), inkFaint = Color(0xFF7A6A90)
+    ),
+    // Midnight (Level 2) — deep navy with a silver-moon accent
+    ShareCardPalette(
+        bgBase = Color(0xFF1E2433), bgLight = Color(0xFF2A3142), bgMid = Color(0xFF171C29),
+        accent = Color(0xFF9FB4D8), accentDark = Color(0xFF6E86B3),
+        ink = Color(0xFFEDF1F8), inkFaint = Color(0xFF9AA6BE)
+    ),
+    // Forest (Level 8) — mossy pine on soft mushroom
+    ShareCardPalette(
+        bgBase = Color(0xFFEDF1E8), bgLight = Color(0xFFF6F8F2), bgMid = Color(0xFFD9E2D0),
+        accent = Color(0xFF4E6E4A), accentDark = Color(0xFF33512F),
+        ink = Color(0xFF1B2418), inkFaint = Color(0xFF64755E)
+    ),
+    // Lavender (Level 15) — lilac on cool grey-cream
+    ShareCardPalette(
+        bgBase = Color(0xFFF3EFF7), bgLight = Color(0xFFFAF7FC), bgMid = Color(0xFFE3DBEF),
+        accent = Color(0xFF8B74B8), accentDark = Color(0xFF664F93),
+        ink = Color(0xFF221B31), inkFaint = Color(0xFF7C6E96)
+    ),
+    // Ember (Level 30) — charcoal with a molten orange accent
+    ShareCardPalette(
+        bgBase = Color(0xFF26211D), bgLight = Color(0xFF332C26), bgMid = Color(0xFF1C1815),
+        accent = Color(0xFFE0853F), accentDark = Color(0xFFB4602A),
+        ink = Color(0xFFFAF1E8), inkFaint = Color(0xFFA08E7E)
     )
 )
 
+/** How many tones the player may use at [level] (base 4 + level unlocks). */
+fun unlockedToneCount(level: Int): Int = 4 + LevelRewards.unlockedPaletteCount(level)
+
 private fun paletteFor(accent: Color): ShareCardPalette {
-    // Cycle through curated tones using the accent hash
-    return curatedTones[Math.abs(accent.hashCode()) % curatedTones.size]
+    // Cycle through the player's AVAILABLE tones using the accent hash.
+    // Premium tones only join the rotation once their level reward lands,
+    // so unlocking one visibly changes the share-card look.
+    val count = unlockedToneCount(CurioQuests.levelForXp(CurioQuests.xpState))
+        .coerceIn(1, curatedTones.size)
+    return curatedTones[Math.abs(accent.hashCode()) % count]
 }
 
 // ─── Family → available styles mapping ─────────────────────────────────
@@ -323,6 +359,24 @@ private fun Modifier.moveMeta(m: ShareCardMove): Modifier =
 private fun Modifier.moveBadge(m: ShareCardMove): Modifier =
     if (m.badgeDx != 0f || m.badgeDy != 0f) this.offset(x = m.badgeDx.dp, y = m.badgeDy.dp) else this
 
+/** v316b — editor chrome: ONE uniform move grip + a darker coffee outline
+ *  replace the old per-box letter handles (T/F/M/B) and their tinted
+ *  borders. Coffee reads on the cream/white card surfaces. */
+private val CoffeeChrome = Color(0xFF6D4C41)      // steady brown — unselected boxes
+private val CoffeeChromeDeep = Color(0xFF3E2723)  // darker coffee — selected box / handle
+
+/** Follows ONLY the title drag (dx/dy): an info row (author / year) sitting
+ *  right under the title travels WITH it when the T handle drags — the M
+ *  handle still nudges the row on its own afterwards. */
+private fun Modifier.titleShift(m: ShareCardMove): Modifier =
+    if (m.titleDx != 0f || m.titleDy != 0f) this.offset(x = m.titleDx.dp, y = m.titleDy.dp) else this
+
+/** Follows ONLY the fact drag (dx/dy): the thin rules some styles draw ABOVE
+ *  the quick fact slide along with the box instead of floating where the
+ *  fact used to be. */
+private fun Modifier.factShift(m: ShareCardMove): Modifier =
+    if (m.factDx != 0f || m.factDy != 0f) this.offset(x = m.factDx.dp, y = m.factDy.dp) else this
+
 /** Resolves the fact-text style with the user's format (font + align). The
  *  format is stored on [ShareCardMove] so every style AND the exported image
  *  honor it automatically. */
@@ -343,7 +397,11 @@ class EditBoundsCallbacks(
     val onTitle: (androidx.compose.ui.geometry.Rect) -> Unit = {},
     val onFact: (androidx.compose.ui.geometry.Rect) -> Unit = {},
     val onMeta: (androidx.compose.ui.geometry.Rect) -> Unit = {},
-    val onBadge: (androidx.compose.ui.geometry.Rect) -> Unit = {}
+    val onBadge: (androidx.compose.ui.geometry.Rect) -> Unit = {},
+    // v316b — the ACTUAL TextStyle the card used for its quick fact, so the
+    // invisible typing field above it lays out with identical metrics
+    // (family, size, line height) and the caret never drifts off the text.
+    val onFactStyle: (TextStyle) -> Unit = {}
 )
 
 /** Scales maxLines with the user's height-crop frac so the text box truly
@@ -353,7 +411,11 @@ class EditBoundsCallbacks(
  *  height tab feel dead until the drag crossed a full extra line. Rounding
  *  makes each half-line of travel change the visible count. */
 private fun lines(base: Int, frac: Float, max: Int = 28): Int =
-    (base * frac).roundToInt().coerceIn(1, max)
+    // v318b — CEIL (was round): rounding meant the height slider felt dead
+    // over long stretches (a 12-line fact needed +8% before the line count
+    // flipped). Now ANY slider movement changes the line count, so the box
+    // visibly grows/shrinks with every tick.
+    kotlin.math.ceil(base * frac).toInt().coerceIn(1, max)
 
 @Composable
 fun TopicShareCard(
@@ -438,7 +500,7 @@ private fun PaperCard(
 
         Column(modifier = Modifier.fillMaxSize().padding(28.dp),
             verticalArrangement = Arrangement.SpaceBetween) {
-            HeaderRow(categoryName, categoryGlyph, palette, move)
+            HeaderRow(categoryName, categoryGlyph, palette, move, callbacks)
             MiddleContent(display, factText, aspect, palette, ratingStars, quoteText, qSize, quoteAuthor, byline, year, bodyScale, callbacks, move)
             Footer(sharerName, quoteText, quoteAuthor, palette, move, callbacks)
         }
@@ -533,9 +595,17 @@ private fun VinylCard(
 
         // ── Content layout ──
         Column(modifier = Modifier.fillMaxSize().padding(start = 22.dp, end = 22.dp, top = 16.dp, bottom = 14.dp).zIndex(1f)) {
-            // Category pill + lightbulb icon
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
-                Surface(shape = RoundedCornerShape(12.dp), color = roseDusty, modifier = Modifier.moveBadge(move)) {
+            // Category pill + lightbulb icon — the WHOLE row is the movable
+            // badge group (v316b): the bulb travels WITH the pill when the
+            // chip is dragged, and the row's reported bounds anchor the B
+            // grip to wherever the chip actually sits.
+            // The WHOLE row is the movable badge group (v316b): the bulb
+            // travels WITH the pill when the chip is dragged. Only the PILL
+            // reports bounds — the row spans the full card width, so reporting
+            // it would lock the chip's drag clamp. The grip sits on the pill
+            // wherever it actually is (never a guessed corner).
+            Row(modifier = Modifier.fillMaxWidth().moveBadge(move), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
+                Surface(shape = RoundedCornerShape(12.dp), color = roseDusty, modifier = Modifier.onGloballyPositioned { callbacks.onBadge(it.boundsInWindow()) }) {
                     Row(Modifier.padding(horizontal = 10.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                         CurioIcon(name = categoryGlyph, tint = Color.White, size = 12.dp)
                         Text(categoryName, style = TextStyle(fontFamily = LoraFontFamily, fontSize = 9.sp,
@@ -558,17 +628,18 @@ private fun VinylCard(
                 Text(byline, style = TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
                     fontSize = 13.sp, color = roseDusty
-                ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
             } else if (year != null) {
                 Text(year, style = TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
                     fontSize = 13.sp, color = roseDusty
-                ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
             }
 
-            // Accent underline
+            // Accent underline — v316b: belongs to the quick-fact block below,
+            // so it slides WITH the fact box when the F handle drags.
             Spacer(Modifier.height(4.dp))
-            Canvas(Modifier.size(width = 32.dp, height = 2.dp)) {
+            Canvas(Modifier.size(width = 32.dp, height = 2.dp).factShift(move)) {
                 drawRoundRect(roseDusty, cornerRadius = CornerRadius(1f))
             }
 
@@ -578,16 +649,33 @@ private fun VinylCard(
             val bodySize = when {
                 body.length > 280 -> 9.sp; body.length > 180 -> 10.sp; else -> 10.5.sp
             }
+            // v316b — the EXACT style the fact renders with is reported back to
+            // the inline editor so its typing field matches the caret.
+            val factStyle = factBodyStyle(TextStyle(
+                fontFamily = LoraFontFamily, fontSize = (bodySize.value * bodyScale).sp,
+                lineHeight = (bodySize.value * 1.50f * bodyScale).sp, color = inkDark.copy(alpha = 0.88f),
+                fontStyle = if (quoteText != null) FontStyle.Italic else FontStyle.Normal
+            ), move)
             Surface(
                 shape = RoundedCornerShape(4.dp),
                 color = Color(0xFFFDF0EE).copy(alpha = 0.85f),
-                modifier = Modifier.widthIn(max = 220.dp).moveFact(move).onGloballyPositioned { callbacks.onFact(it.boundsInWindow()) }
+                modifier = Modifier.widthIn(max = 220.dp).moveFact(move)
             ) {
-                Text(body, style = factBodyStyle(TextStyle(
-                    fontFamily = LoraFontFamily, fontSize = (bodySize.value * bodyScale).sp,
-                    lineHeight = (bodySize.value * 1.50f * bodyScale).sp, color = inkDark.copy(alpha = 0.88f),
-                    fontStyle = if (quoteText != null) FontStyle.Italic else FontStyle.Normal
-                ), move), modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp), maxLines = lines(10, move.factHeightFrac), overflow = TextOverflow.Ellipsis)
+                // v316b — the invisible typing field anchors to the GLYPH box,
+                // not the padded cream surface: the box's own 6/4dp padding
+                // sits outside this Text, so boundsInWindow lands exactly on
+                // the letters and the caret never sits inset from them.
+                Box(Modifier.padding(horizontal = 6.dp, vertical = 4.dp)) {
+                    Text(
+                        body, style = factStyle,
+                        maxLines = lines(10, move.factHeightFrac),
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.onGloballyPositioned {
+                            callbacks.onFact(it.boundsInWindow())
+                            callbacks.onFactStyle(factStyle)
+                        }
+                    )
+                }
             }
 
             Spacer(Modifier.height(10.dp))
@@ -817,8 +905,8 @@ private fun CollageCard(
 
         // ── MIDDLE SECTION: category pill + body text + decorative bottom ──
         Column(modifier = Modifier.fillMaxSize().padding(start = 22.dp, end = 22.dp, top = if (aspect == ShareCardAspect.PORTRAIT) 214.dp else 190.dp, bottom = 18.dp).zIndex(1f)) {
-            // Category pill
-            Surface(shape = RoundedCornerShape(14.dp), color = sagePill, modifier = Modifier.moveBadge(move)) {
+            // Category pill — reports real bounds so the B grip rides it.
+            Surface(shape = RoundedCornerShape(14.dp), color = sagePill, modifier = Modifier.moveBadge(move).onGloballyPositioned { callbacks.onBadge(it.boundsInWindow()) }) {
                 Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     CurioIcon(name = categoryGlyph, tint = Color.White, size = 14.dp)
                     Text(categoryName, style = TextStyle(
@@ -834,11 +922,15 @@ private fun CollageCard(
             val bodySize = when {
                 body.length > 280 -> 10.sp; body.length > 180 -> 11.sp; else -> 12.sp
             }
-            Text(body, style = factBodyStyle(TextStyle(
+            val factStyle = factBodyStyle(TextStyle(
                 fontFamily = LoraFontFamily, fontSize = (bodySize.value * bodyScale).sp,
                 lineHeight = (bodySize.value * 1.55f * bodyScale).sp, color = Color.White.copy(alpha = 0.92f),
                 fontStyle = if (quoteText != null) FontStyle.Italic else FontStyle.Normal
-            ), move), maxLines = lines(18, move.factHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned { callbacks.onFact(it.boundsInWindow()) })
+            ), move)
+            Text(body, style = factStyle, maxLines = lines(18, move.factHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned {
+                callbacks.onFact(it.boundsInWindow())
+                callbacks.onFactStyle(factStyle)
+            })
 
             if (ratingStars != null && ratingStars > 0) {
                 Spacer(Modifier.height(6.dp))
@@ -923,7 +1015,7 @@ private fun NeumorphicCard(
         )
 
         Box(Modifier.fillMaxSize().padding(22.dp).zIndex(1f)) {
-            Surface(shape = RoundedCornerShape(50), color = Color.Black.copy(alpha = 0.72f), modifier = Modifier.align(Alignment.TopStart).moveBadge(move)) {
+            Surface(shape = RoundedCornerShape(50), color = Color.Black.copy(alpha = 0.72f), modifier = Modifier.align(Alignment.TopStart).moveBadge(move).onGloballyPositioned { callbacks.onBadge(it.boundsInWindow()) }) {
                 Text(categoryName.uppercase(), style = TextStyle(fontFamily = GeomFontFamily, fontSize = 8.sp,
                     fontWeight = FontWeight.ExtraBold, letterSpacing = 1.4.sp), color = Color.White,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
@@ -942,19 +1034,23 @@ private fun NeumorphicCard(
                     Text(metaParts.joinToString("  /  "), style = TextStyle(
                         fontFamily = GeomFontFamily, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 1.3.sp, color = Color.White.copy(alpha = 0.56f)
-                    ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                    ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
                 }
             }
 
             Column(Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(bottom = 16.dp)) {
                 val bodySize = when { body.length > 350 -> 8.sp; body.length > 260 -> 9.sp; body.length > 180 -> 9.5.sp; else -> 10.5.sp }
-                Text(body, style = factBodyStyle(TextStyle(
+                val factStyle = factBodyStyle(TextStyle(
                     fontFamily = LoraFontFamily,
                     fontStyle = if (quoteText != null) FontStyle.Italic else FontStyle.Normal,
                     fontSize = (bodySize.value * bodyScale).sp, lineHeight = (bodySize.value * 1.40f * bodyScale).sp,
                     color = Color.White.copy(alpha = 0.88f),
                     shadow = Shadow(Color.Black.copy(alpha = 0.62f), Offset(0f, 2f), 5f)
-                ), move), maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 8 else 6, move.factHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned { callbacks.onFact(it.boundsInWindow()) })
+                ), move)
+                Text(body, style = factStyle, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 8 else 6, move.factHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned {
+                    callbacks.onFact(it.boundsInWindow())
+                    callbacks.onFactStyle(factStyle)
+                })
                 if (ratingStars != null && ratingStars > 0) {
                     Spacer(Modifier.height(7.dp))
                     StarRow(ratingStars, palette.copy(accent = Color.White, ink = Color.White, inkFaint = Color.White.copy(alpha = 0.45f)))
@@ -1007,7 +1103,7 @@ private fun EditorialCard(
         // Broadsheet masthead + retro Bungee headline (v... redesign)
         Column(modifier = Modifier.fillMaxSize().padding(start = 26.dp, end = 26.dp, top = 22.dp, bottom = 20.dp)) {
             // Kicker — category in retro Bungee beside an accent slug
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.moveBadge(move)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.moveBadge(move).onGloballyPositioned { callbacks.onBadge(it.boundsInWindow()) }) {
                 Box(Modifier.width(7.dp).height(15.dp).background(accentRule))
                 Text(categoryName.uppercase(), style = TextStyle(
                     fontFamily = BungeeFontFamily, fontSize = 13.sp,
@@ -1036,12 +1132,14 @@ private fun EditorialCard(
                 Text(metaParts.joinToString(" \u2014 "), style = TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
                     fontSize = 12.sp, color = inkDark.copy(alpha = 0.55f)
-                ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
             }
 
             Spacer(Modifier.height(15.dp))
-            // Hairline under the deck
-            Canvas(Modifier.fillMaxWidth().height(1.dp)) {
+            // Hairline under the deck — v316b: this rule belongs to the quick
+            // fact block, so it slides WITH the fact box when the F handle
+            // drags instead of floating where the fact used to be.
+            Canvas(Modifier.fillMaxWidth().height(1.dp).factShift(move)) {
                 drawLine(inkDark.copy(alpha = 0.16f), Offset.Zero, Offset(size.width, 0f))
             }
             Spacer(Modifier.height(12.dp))
@@ -1065,9 +1163,15 @@ private fun EditorialCard(
             if (bodyRest.isEmpty()) {
                 Text(body, style = bodyStyle,
                     maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac), overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.moveFact(move).onGloballyPositioned { callbacks.onFact(it.boundsInWindow()) })
+                    modifier = Modifier.moveFact(move).onGloballyPositioned {
+                        callbacks.onFact(it.boundsInWindow())
+                        callbacks.onFactStyle(bodyStyle)
+                    })
             } else {
-                BoxWithConstraints(Modifier.fillMaxWidth().moveFact(move).onGloballyPositioned { callbacks.onFact(it.boundsInWindow()) }) {
+                BoxWithConstraints(Modifier.fillMaxWidth().moveFact(move).onGloballyPositioned {
+                    callbacks.onFact(it.boundsInWindow())
+                    callbacks.onFactStyle(bodyStyle)
+                }) {
                     val density = androidx.compose.ui.platform.LocalDensity.current
                     val measurer = rememberTextMeasurer()
                     val contentW = with(density) { maxWidth.toPx() }
@@ -1216,7 +1320,7 @@ private fun MinimalCard(
 
         Column(modifier = Modifier.fillMaxSize().padding(start = 30.dp, end = 26.dp, top = 34.dp, bottom = 26.dp)) {
             // Category — tiny uppercase Bungee beside a diamond accent
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp), modifier = Modifier.moveBadge(move)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp), modifier = Modifier.moveBadge(move).onGloballyPositioned { callbacks.onBadge(it.boundsInWindow()) }) {
                 Box(Modifier.size(8.dp).graphicsLayer { rotationZ = 45f }.background(accent))
                 Text(categoryName.uppercase(), style = TextStyle(
                     fontFamily = BungeeFontFamily, fontSize = 10.sp, letterSpacing = 3.sp,
@@ -1237,25 +1341,30 @@ private fun MinimalCard(
                 Text(byline, style = TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
                     fontSize = 12.sp, color = inkDark.copy(alpha = 0.50f)
-                ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
             } else if (year != null) {
                 Spacer(Modifier.height(6.dp))
-                Text(year, style = TextStyle(fontFamily = LoraFontFamily, fontSize = 12.sp, color = inkDark.copy(alpha = 0.40f)), modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                Text(year, style = TextStyle(fontFamily = LoraFontFamily, fontSize = 12.sp, color = inkDark.copy(alpha = 0.40f)), modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
             }
 
             Spacer(Modifier.weight(1f))
 
-            // Thick accent rule above the body block — editorial anchor
-            Box(Modifier.width(56.dp).height(4.dp).background(accent))
+            // Thick accent rule above the body block — v316b: rides the fact
+            // box when the F handle drags (belongs to the quick-fact block).
+            Box(Modifier.width(56.dp).height(4.dp).background(accent).factShift(move))
             Spacer(Modifier.height(16.dp))
 
             // Body — serif, bottom-anchored
             val bodySize = when { body.length > 350 -> 8.5.sp; body.length > 260 -> 9.5.sp; body.length > 180 -> 10.5.sp; else -> 11.5.sp }
-            Text(body, style = factBodyStyle(TextStyle(
+            val factStyle = factBodyStyle(TextStyle(
                 fontFamily = LoraFontFamily, fontSize = (bodySize.value * bodyScale).sp,
                 lineHeight = (bodySize.value * 1.50f * bodyScale).sp, color = inkDark.copy(alpha = 0.78f)
-            ), move), maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac), overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.moveFact(move).onGloballyPositioned { callbacks.onFact(it.boundsInWindow()) })
+            ), move)
+            Text(body, style = factStyle, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac), overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.moveFact(move).onGloballyPositioned {
+                    callbacks.onFact(it.boundsInWindow())
+                    callbacks.onFactStyle(factStyle)
+                })
 
             if (ratingStars != null && ratingStars > 0) {
                 Spacer(Modifier.height(8.dp))
@@ -1369,7 +1478,7 @@ private fun SignatureCard(
         @Composable
         fun CategoryBadge(centered: Boolean = false) {
             Surface(shape = RoundedCornerShape(sig.badgeRadius), color = sig.badgeColor,
-                modifier = if (centered) Modifier.moveBadge(move) else Modifier.moveBadge(move)) {
+                modifier = Modifier.moveBadge(move).onGloballyPositioned { callbacks.onBadge(it.boundsInWindow()) }) {
                 Row(Modifier.padding(horizontal = sig.badgeHPadding, vertical = sig.badgeVPadding),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -1404,7 +1513,7 @@ private fun SignatureCard(
                     fontSize = sig.metaSize, color = sig.metaColor
                 ), maxLines = 1, overflow = TextOverflow.Ellipsis,
                     textAlign = if (centered) TextAlign.Center else TextAlign.Start,
-                    modifier = (if (centered) Modifier.fillMaxWidth() else Modifier).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                    modifier = (if (centered) Modifier.fillMaxWidth() else Modifier).titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
             }
         }
 
@@ -1414,12 +1523,16 @@ private fun SignatureCard(
             // User's format alignment wins; otherwise honor the layout's own
             // alignment (Signature has centered variants).
             val align = move.factAlign ?: if (centered) TextAlign.Center else TextAlign.Start
-            Text(body, style = factBodyStyle(TextStyle(
+            val factStyle = factBodyStyle(TextStyle(
                 fontFamily = LoraFontFamily, fontSize = (bodySize * bodyScale).sp,
                 lineHeight = (bodySize * sig.bodyLineHeight * bodyScale).sp,
                 color = sig.bodyColor
-            ), move).copy(textAlign = align), maxLines = lines(bodyMaxLines, move.factHeightFrac), overflow = TextOverflow.Ellipsis,
-                modifier = (if (centered) Modifier.fillMaxWidth() else Modifier).moveFact(move).onGloballyPositioned { callbacks.onFact(it.boundsInWindow()) })
+            ), move).copy(textAlign = align)
+            Text(body, style = factStyle, maxLines = lines(bodyMaxLines, move.factHeightFrac), overflow = TextOverflow.Ellipsis,
+                modifier = (if (centered) Modifier.fillMaxWidth() else Modifier).moveFact(move).onGloballyPositioned {
+                    callbacks.onFact(it.boundsInWindow())
+                    callbacks.onFactStyle(factStyle)
+                })
         }
 
         // ── Footer (shared) — FIXED: never moves (only the author/year row
@@ -4955,7 +5068,7 @@ private fun CustomCard(
             sig.drawBackground(this, w, h)
         }
         Column(modifier = Modifier.fillMaxSize().padding(sig.padding)) {
-            Surface(shape = RoundedCornerShape(sig.badgeRadius), color = sig.badgeColor, modifier = Modifier.moveBadge(move)) {
+            Surface(shape = RoundedCornerShape(sig.badgeRadius), color = sig.badgeColor, modifier = Modifier.moveBadge(move).onGloballyPositioned { callbacks.onBadge(it.boundsInWindow()) }) {
                 Row(Modifier.padding(horizontal = sig.badgeHPadding, vertical = sig.badgeVPadding),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -4980,7 +5093,7 @@ private fun CustomCard(
                 Text(metaParts.joinToString(sig.metaSeparator), style = TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
                     fontSize = sig.metaSize, color = sig.metaColor
-                ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                ), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
             }
             Spacer(Modifier.weight(1f))
             val bodySize = when {
@@ -4989,11 +5102,15 @@ private fun CustomCard(
                 body.length > 180 -> sig.bodySize - 0.5f
                 else -> sig.bodySize
             }.coerceAtLeast(7f) * bodyScale
-            Text(body, style = factBodyStyle(TextStyle(
+            val factStyle = factBodyStyle(TextStyle(
                 fontFamily = LoraFontFamily, fontSize = bodySize.sp,
                 lineHeight = (bodySize * sig.bodyLineHeight).sp,
                 color = sig.bodyColor
-            ), move), maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 14 else 10, move.factHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned { callbacks.onFact(it.boundsInWindow()) })
+            ), move)
+            Text(body, style = factStyle, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 14 else 10, move.factHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned {
+                callbacks.onFact(it.boundsInWindow())
+                callbacks.onFactStyle(factStyle)
+            })
             if (ratingStars != null && ratingStars > 0) {
                 Spacer(Modifier.height(6.dp))
                 StarRow(ratingStars, palette)
@@ -5010,9 +5127,12 @@ private fun CustomCard(
 }
 
 @Composable
-private fun HeaderRow(categoryName: String, glyph: String, palette: ShareCardPalette, move: ShareCardMove = ShareCardMove()) {
+private fun HeaderRow(categoryName: String, glyph: String, palette: ShareCardPalette, move: ShareCardMove = ShareCardMove(), callbacks: EditBoundsCallbacks = EditBoundsCallbacks()) {
+    // v316b — the whole row (pill + bulb) is the movable badge group so the
+    // bulb travels with the chip; only the PILL reports bounds (the row spans
+    // the full card width — reporting it would lock the drag clamp).
     Row(Modifier.fillMaxWidth().moveBadge(move), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
-        Surface(shape = RoundedCornerShape(14.dp), color = palette.accent.copy(alpha = 0.85f)) {
+        Surface(shape = RoundedCornerShape(14.dp), color = palette.accent.copy(alpha = 0.85f), modifier = Modifier.onGloballyPositioned { callbacks.onBadge(it.boundsInWindow()) }) {
             Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 CurioIcon(name = glyph, tint = Color.White, size = 14.dp)
                 Text(categoryName, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold), color = Color.White)
@@ -5035,11 +5155,16 @@ private fun MiddleContent(
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (quoteText != null) {
             CurioIcon(name = CurioIcons.FormatQuote, tint = palette.ink.copy(alpha = 0.20f), size = 32.dp)
-            Text(quoteText, style = factBodyStyle(MaterialTheme.typography.titleLarge.copy(fontFamily = LoraFontFamily, fontSize = qSize, lineHeight = (qSize.value * 1.28f).sp), move), color = palette.ink, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 8, move.factHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned { callbacks.onFact(it.boundsInWindow()) })
+            val qStyle = factBodyStyle(MaterialTheme.typography.titleLarge.copy(fontFamily = LoraFontFamily, fontSize = qSize, lineHeight = (qSize.value * 1.28f).sp), move)
+            Text(quoteText, style = qStyle, color = palette.ink, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 8, move.factHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned {
+                callbacks.onFact(it.boundsInWindow())
+                callbacks.onFactStyle(qStyle)
+            })
         } else {
             // Title
             Text(display, style = MaterialTheme.typography.headlineLarge.copy(fontFamily = ChangaOneFontFamily, lineHeight = 40.sp), color = palette.ink, maxLines = lines(3, move.titleHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveTitle(move).onGloballyPositioned { callbacks.onTitle(it.boundsInWindow()) })
-            // Metadata line — byline • year (e.g. "GUNS N' ROSES • 1987") — info row: movable, not editable
+            // Metadata line — byline • year (e.g. "GUNS N' ROSES • 1987") — info row: movable, not editable.
+            // v316b — sits right under the title, so it travels with the T drag too.
             val metaParts = mutableListOf<String>()
             if (byline.isNotBlank()) metaParts.add(byline)
             if (year != null) metaParts.add(year)
@@ -5048,17 +5173,30 @@ private fun MiddleContent(
                     metaParts.joinToString(" \u2022 "),
                     style = MaterialTheme.typography.labelSmall.copy(fontFamily = LoraFontFamily, fontWeight = FontWeight.SemiBold),
                     color = palette.ink.copy(alpha = 0.50f), maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) }
+                    modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) }
                 )
             }
             if (ratingStars != null && ratingStars > 0) StarRow(ratingStars, palette)
-            FrostPane(palette, Modifier.moveFact(move).onGloballyPositioned { callbacks.onFact(it.boundsInWindow()) }) {
-                val qfs = if (aspect == ShareCardAspect.CLASSIC) quickFactFontSize34(factText.length) else quickFactFontSize(factText.length)
-                val qfsScaled = (qfs.value * bodyScale).sp
-                Text(factText, style = factBodyStyle(MaterialTheme.typography.bodySmall.copy(
-                    fontFamily = LoraFontFamily, fontSize = qfsScaled,
-                    lineHeight = (qfsScaled.value * 1.4f).sp
-                ), move), color = palette.ink, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 20 else 14, move.factHeightFrac), overflow = TextOverflow.Ellipsis)
+            // v316b — style hoisted so the pane reports it to the editor.
+            val qfs = if (aspect == ShareCardAspect.CLASSIC) quickFactFontSize34(factText.length) else quickFactFontSize(factText.length)
+            val qfsScaled = (qfs.value * bodyScale).sp
+            val frostStyle = factBodyStyle(MaterialTheme.typography.bodySmall.copy(
+                fontFamily = LoraFontFamily, fontSize = qfsScaled,
+                lineHeight = (qfsScaled.value * 1.4f).sp
+            ), move)
+            FrostPane(palette, Modifier.moveFact(move)) {
+                // v316b — the glyph box reports the bounds, NOT the frost pane:
+                // the pane's own 18dp padding would otherwise push the typing
+                // field's caret 18dp off the visible letters.
+                Text(
+                    factText, style = frostStyle, color = palette.ink,
+                    maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 20 else 14, move.factHeightFrac),
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.onGloballyPositioned {
+                        callbacks.onFact(it.boundsInWindow())
+                        callbacks.onFactStyle(frostStyle)
+                    }
+                )
             }
         }
     }
@@ -5292,11 +5430,17 @@ private fun ArrangeableCard(
     val titleRect = androidx.compose.runtime.remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
     val factRect = androidx.compose.runtime.remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
     val metaRect = androidx.compose.runtime.remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
+    val badgeRect = androidx.compose.runtime.remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
+    // v316b — the card reports the ACTUAL style its fact renders with, so the
+    // invisible field above it uses identical metrics (family/size/line).
+    val liveFactStyle = androidx.compose.runtime.remember { mutableStateOf(factFieldStyle) }
     val boundsHub = androidx.compose.runtime.remember {
         EditBoundsCallbacks(
             onTitle = { r -> titleRect.value = r },
             onFact = { r -> factRect.value = r },
-            onMeta = { r -> metaRect.value = r }
+            onMeta = { r -> metaRect.value = r },
+            onBadge = { r -> badgeRect.value = r },
+            onFactStyle = { s -> liveFactStyle.value = s }
         )
     }
     Box(
@@ -5325,9 +5469,12 @@ private fun ArrangeableCard(
                         )
                     }
 
-                // Title — NOT type-editable: the box outlines the card's ACTUAL
-                // title text (reported by the style), so the indicator always
-                // sits exactly where the title renders. No field, no typing.
+                // v316b — unified editor chrome: every box is outlined in the
+                // same darker coffee and carries ONE uniform move grip (no more
+                // colored T / F / M / B letters). Boxes that anchor to real
+                // reported bounds (title / fact / meta / badge) always sit on
+                // the ACTUAL text — the badge grip moves with the chip instead
+                // of sitting at a guessed (22,16) corner.
                 if (!quoteMode) {
                     val t = local(titleRect.value)
                     val tOk = t.width > 0f && t.height > 0f
@@ -5338,12 +5485,9 @@ private fun ArrangeableCard(
                                 .width(t.width.dp)
                                 .height(t.height.dp)
                                 .clickable { onSelectResizeTarget(ShareCardResizeTarget.TITLE) }
-                                .border(1.dp, if (selectedResizeTarget == ShareCardResizeTarget.TITLE) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), RoundedCornerShape(8.dp))
+                                .border(1.dp, if (selectedResizeTarget == ShareCardResizeTarget.TITLE) CoffeeChromeDeep else CoffeeChrome.copy(alpha = 0.45f), RoundedCornerShape(8.dp))
                         )
-                        // Move handle for the title — clamped so the box never
-                        // leaves the card.
                         MoveHandle(
-                            label = "T", accent = MaterialTheme.colorScheme.primary,
                             x = t.left.dp,
                             y = t.top.dp,
                             onDelta = { dx, dy ->
@@ -5355,30 +5499,30 @@ private fun ArrangeableCard(
                     }
                 }
 
-                // Quick-fact — transparent field laid EXACTLY over the card's own
-                // fact text (bounds reported by the style). Typing updates the
-                // card live; the field just captures keystrokes in place.
+                // Quick-fact — transparent field laid EXACTLY over the card's
+                // own fact text (bounds AND style reported by the card, so the
+                // caret sits on the visible glyphs of every font). The field
+                // auto-GROWS as you type (no fixed height), so the box and the
+                // caret keep up with new lines instead of clipping below.
                 val f = local(factRect.value)
                 val fOk = f.width > 0f && f.height > 0f
                 if (fOk) {
                     BasicTextField(
                         value = editFact,
                         onValueChange = onFactChange,
-                        // NO padding + card-matching metrics: the field must sit
-                        // EXACTLY where the visible fact renders, otherwise the
-                        // caret appears 6dp+ off and typing lands on the wrong
-                        // line (the old bodyMedium 14sp/20sp wrapped several
-                        // lines away from the card's own Lora 9–12sp layout).
-                        textStyle = factFieldStyle.copy(color = Color.Transparent),
-                        cursorBrush = SolidColor(MaterialTheme.colorScheme.tertiary),
+                        // Card-reported style (fallback: the sheet's base Lora
+                        // metrics) with the text transparent — the caret + wrap
+                        // use the card's real font, size and line height.
+                        textStyle = liveFactStyle.value.copy(color = Color.Transparent),
+                        cursorBrush = SolidColor(CoffeeChromeDeep),
                         singleLine = false,
-                        maxLines = 12,
+                        maxLines = 24,
                         modifier = Modifier
                             .offset(f.left.dp, f.top.dp)
                             .width(f.width.dp)
-                            .height(f.height.dp)
+                            .heightIn(min = f.height.dp)
                             .onFocusChanged { if (it.isFocused) onSelectResizeTarget(ShareCardResizeTarget.FACT) }
-                            .border(1.dp, if (selectedResizeTarget == ShareCardResizeTarget.FACT) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.tertiary.copy(alpha = 0.35f), RoundedCornerShape(8.dp)),
+                            .border(1.dp, if (selectedResizeTarget == ShareCardResizeTarget.FACT) CoffeeChromeDeep else CoffeeChrome.copy(alpha = 0.45f), RoundedCornerShape(8.dp)),
                         decorationBox = { inner ->
                             Box(Modifier.fillMaxWidth()) {
                                 if (editFact.isBlank()) Text("Edit the quick fact…", style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
@@ -5386,10 +5530,7 @@ private fun ArrangeableCard(
                             }
                         }
                     )
-                    // Move handle for the fact — clamped so the box never
-                    // leaves the card.
                     MoveHandle(
-                        label = "F", accent = MaterialTheme.colorScheme.tertiary,
                         x = f.left.dp,
                         y = f.top.dp,
                         onDelta = { dx, dy ->
@@ -5400,12 +5541,11 @@ private fun ArrangeableCard(
                     )
                 }
 
-                // AUTHOR / YEAR info rows only — M handle
+                // AUTHOR / YEAR info rows — sits at the row's right edge.
                 val m = local(metaRect.value)
                 val mPad = 18f
                 if (m.width > 0f && m.height > 0f) {
                     MoveHandle(
-                        label = "M", accent = MaterialTheme.colorScheme.secondary,
                         x = (m.right + mPad).coerceAtMost(cw - 16f).dp,
                         y = m.bottom.dp.coerceAtMost((ch - 16f).dp),
                         onDelta = { dx, dy ->
@@ -5418,18 +5558,23 @@ private fun ArrangeableCard(
                     )
                 }
 
-                // Badge — B handle: moves the category pill/badge on the card.
-                // Badge sits at top-start (~22dp, ~16dp) in most card styles.
-                MoveHandle(
-                    label = "B", accent = MaterialTheme.colorScheme.tertiaryContainer,
-                    x = (22f + move.badgeDx).coerceIn(0f, cw - 24f).dp,
-                    y = (16f + move.badgeDy).coerceIn(0f, ch - 24f).dp,
-                    onDelta = { dx, dy ->
-                        val nx = (move.badgeDx + dx).coerceIn(-22f, cw - 46f)
-                        val ny = (move.badgeDy + dy).coerceIn(-16f, ch - 40f)
-                        onMove(move.copy(badgeDx = nx, badgeDy = ny))
-                    }
-                )
+                // Badge — anchored to the chip's REPORTED bounds (each style
+                // reports its real category pill), so the grip sits on the chip
+                // wherever it is — never a guessed corner. Hidden until the
+                // style reports a badge (no pill = nothing to move).
+                val b = local(badgeRect.value)
+                val bOk = b.width > 0f && b.height > 0f
+                if (bOk) {
+                    MoveHandle(
+                        x = (b.left - 2f).coerceIn(0f, (cw - 24f).coerceAtLeast(0f)).dp,
+                        y = (b.top - 2f).coerceIn(0f, (ch - 24f).coerceAtLeast(0f)).dp,
+                        onDelta = { dx, dy ->
+                            val nx = (move.badgeDx + dx).coerceIn(-b.left - 2f, cw - b.left - b.width + 2f)
+                            val ny = (move.badgeDy + dy).coerceIn(-b.top - 2f, ch - b.top - b.height + 2f)
+                            onMove(move.copy(badgeDx = nx, badgeDy = ny))
+                        }
+                    )
+                }
             }
         }
     }
@@ -5451,6 +5596,17 @@ private fun SizeSliderColumn(
     steps: Int,
     modifier: Modifier = Modifier
 ) {
+    // v316b — captured in the COMPOSABLE scope (not inside the slider's plain
+    // callback lambdas) so the haptic calls compile, and so we can tick each
+    // time the thumb crosses a snap step while dragging — not just on release.
+    val haptics = LocalHapticFeedback.current
+    val stepsTotal = steps + 1
+    val span = (range.endInclusive - range.start).takeIf { it > 0f } ?: 1f
+    fun stepIndex(v: Float): Int =
+        (((v - range.start) / span) * stepsTotal).roundToInt().coerceIn(0, stepsTotal)
+    // The step the thumb currently sits on, so we only tick on actual
+    // step changes (a held drag over one step doesn't buzz repeatedly).
+    var lastStep by remember { mutableIntStateOf(stepIndex(value)) }
     Column(modifier = modifier) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -5462,7 +5618,20 @@ private fun SizeSliderColumn(
         }
         Slider(
             value = value,
-            onValueChange = onValueChange,
+            onValueChange = { v ->
+                onValueChange(v)
+                val s = stepIndex(v)
+                if (s != lastStep) {
+                    lastStep = s
+                    // Short tick per snap step — the size control feels
+                    // precise because each 1%/step lands with feedback.
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                }
+            },
+            onValueChangeFinished = {
+                // A final confirm tick when the drag ends on a snap.
+                haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+            },
             valueRange = range,
             steps = steps,
             modifier = Modifier.fillMaxWidth()
@@ -5603,15 +5772,22 @@ fun TopicShareSheet(
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = MaterialTheme.colorScheme.surface, dragHandle = { BottomSheetDefaults.DragHandle() }) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 24.dp).verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Share this topic", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold), color = MaterialTheme.colorScheme.onSurface)
+            // v316b — editing owns the whole sheet: the title (and the style
+            // label / dots below) hide while edit mode is on so the card +
+            // controls have plenty of room.
+            if (!editMode) {
+                Text("Share this topic", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold), color = MaterialTheme.colorScheme.onSurface)
+            }
 
             // The card carousel IS the preview — no separate static card
             val pw = 280.dp
             Box {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 if (styles.size > 1) {
-                    // Style label
-                    Text(currentStyle.label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    // Style label — hidden while editing (see the header above).
+                    if (!editMode) {
+                        Text(currentStyle.label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 1.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                     // Swipeable card carousel — the card IS the preview
                     androidx.compose.runtime.LaunchedEffect(pagerState.currentPage) { styleIdx = pagerState.currentPage }
                     androidx.compose.foundation.pager.HorizontalPager(
@@ -5652,13 +5828,15 @@ fun TopicShareSheet(
                             }
                         }
                     }
-                    // Style dots
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        styles.forEachIndexed { i, _ ->
-                            Box(Modifier.size(if (i == pagerState.currentPage) 7.dp else 5.dp).background(
-                                if (i == pagerState.currentPage) MaterialTheme.colorScheme.secondary
-                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.30f), CircleShape
-                            ))
+                    // Style dots — hidden while editing.
+                    if (!editMode) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            styles.forEachIndexed { i, _ ->
+                                Box(Modifier.size(if (i == pagerState.currentPage) 7.dp else 5.dp).background(
+                                    if (i == pagerState.currentPage) MaterialTheme.colorScheme.secondary
+                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.30f), CircleShape
+                                ))
+                            }
                         }
                     }
                 } else {
@@ -5878,10 +6056,13 @@ fun TopicShareSheet(
                         SizeSliderColumn("Title width", move.titleWidthFrac, { move = move.copy(titleWidthFrac = it) }, 0.3f..1f, steps = 69, modifier = Modifier.weight(1f))
                         SizeSliderColumn("Fact width", move.factWidthFrac, { move = move.copy(factWidthFrac = it) }, 0.3f..1f, steps = 69, modifier = Modifier.weight(1f))
                     }
-                    // Row 3: Height sliders — same explicit labels + readout
+                    // Row 3: Height sliders — same explicit labels + readout.
+                    // v318b — chunkier ~8% steps (was 42 micro-steps) so each
+                    // tick flips the fact's line count and the box visibly
+                    // grows/shrinks instead of feeling dead.
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-                        SizeSliderColumn("Title height", move.titleHeightFrac, { move = move.copy(titleHeightFrac = it) }, 0.35f..2.5f, steps = 42, modifier = Modifier.weight(1f))
-                        SizeSliderColumn("Fact height", move.factHeightFrac, { move = move.copy(factHeightFrac = it) }, 0.35f..2.5f, steps = 42, modifier = Modifier.weight(1f))
+                        SizeSliderColumn("Title height", move.titleHeightFrac, { move = move.copy(titleHeightFrac = it) }, 0.35f..2.5f, steps = 26, modifier = Modifier.weight(1f))
+                        SizeSliderColumn("Fact height", move.factHeightFrac, { move = move.copy(factHeightFrac = it) }, 0.35f..2.5f, steps = 26, modifier = Modifier.weight(1f))
                     }
                     // Row 4: Done + Reset icon chips
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
@@ -5970,22 +6151,20 @@ private fun CustomiseLabel(text: String) {
 }
 
 /**
- * A draggable circle the user drags to reposition the title / quick-fact box
- * on the preview card. Each drag delta is converted from px to dp and fed back
- * via onDelta so both the live card and the export move together.
+ * A draggable grip the user drags to reposition a box (title / quick fact /
+ * meta / category badge) on the preview card. v316b — ONE uniform move icon
+ * (a grip) in a darker coffee circle replaces the old per-box T / F / M / B
+ * letter handles and their separate colors. Each drag delta is converted
+ * from px to dp and fed back via onDelta so both the live card and the
+ * export move together.
  */
 @Composable
 private fun BoxScope.MoveHandle(
-    label: String,
     x: Dp, y: Dp,
-    accent: Color,
     onDelta: (dx: Float, dy: Float) -> Unit
 ) {
     val density = androidx.compose.ui.platform.LocalDensity.current
     val latestDelta by rememberUpdatedState(onDelta)
-    // Light accents get dark ink; dark accents get white — the letter on the
-    // handle must always read, regardless of the card's fill underneath.
-    val useDarkInk = accent.luminance() > 0.55f
     Box(
         modifier = Modifier
             .offset(x = x, y = y)
@@ -5993,8 +6172,8 @@ private fun BoxScope.MoveHandle(
             .graphicsLayer {
                 shadowElevation = 3.dp.toPx(); shape = CircleShape; clip = false
             }
-            .background(accent, CircleShape)
-            .border(1.dp, if (useDarkInk) Color.Black.copy(alpha = 0.20f) else Color.White.copy(alpha = 0.45f), CircleShape)
+            .background(CoffeeChromeDeep, CircleShape)
+            .border(1.dp, Color.White.copy(alpha = 0.45f), CircleShape)
             .pointerInput(Unit) {
                 detectDragGestures { _, dragAmount ->
                     val dx = with(density) { dragAmount.x.toDp().value }
@@ -6004,7 +6183,12 @@ private fun BoxScope.MoveHandle(
             },
         contentAlignment = Alignment.Center
     ) {
-        Text(label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold, color = if (useDarkInk) Color(0xFF1B1B1F) else Color.White))
+        CurioIcon(
+            name = CurioIcons.DragHandle,
+            contentDescription = "Move",
+            tint = Color.White,
+            size = 18.dp
+        )
     }
 }
 

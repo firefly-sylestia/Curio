@@ -1,85 +1,83 @@
 # Prompt.md — current request log
 
-## Request: Instant reveal for first-time topics + Cabinet category-picker revamp
+## Request: Fix the 4-part XP-economy critique; re-read the DOX chain (previous commit had a Codebuff footer)
 
-User request (verbatim, condensed):
+User supplied a 4-row critique table:
 
-> Still, in the Topic Reveal, NEW topics are slow loading as well — fix them
-> too, so it doesn't take them ~1 sec to show the info. Also apply the same
-> category picker (the v314 Topic Database panel + multi-select treatment)
-> in the Cabinet screen. (We'll go back to "save your take" next — it's
-> getting a redesign; the topic-browser refinements continue here.)
+| Problem | Fix |
+|---|---|
+| XP economy is shallow | Named levels + rewards — unlock new pet outfits, new share-card palettes, custom lane order (give XP a reason) |
+| Daily quests generic | Align quests with the real loop: "Reveal 2 new topics", "Save 1 discovery", "Capture with voice once" — show quest progress on Home |
+| Pet games hidden in profile | Pet reacts on Home (nudges when quests complete) + quick "Play" bubble |
+| No pet customisation payoff | Outfit shop funded by streak/quests (pure cosmetics, no IAP pressure) |
 
-### Root causes found
+Plus: "read dox chain again ur previous commit had codebuff mention" — the
+last several commits carried a `Generated with Codebuff` footer, which the
+root AGENTS.md forbids. Committed clean this time (no footer); noted the
+policy violation to the user.
 
-1. **Slow first-time reveal.** `TopicRepository.findTopic` fetched the
-   WHOLE lane from Room and scanned + mapped every row in Kotlin on every
-   reveal open. First-frame seeding only consulted the per-lane cache, so a
-   never-opened topic whose lane cache wasn't resident had to wait on that
-   async full-lane fetch — and when Room's copy was stale (topics added to
-   the JSON between app updates without a version bump, so the version-gated
-   sync never ran), `TopicJsonLoader.load()`'s Room fast path served the
-   stale rows and the reveal could never see the new topic at all.
-2. **Cabinet single-select chip bar.** The Cabinet still had the old sticky
-   every-lane chip bar + single `CategoryId` filter, unlike the Topic
-   Database's v314 panel + multi-select.
+## Decisions (ask_user)
 
-### What shipped (this turn)
+- **Lane order:** GATE the Manage Categories drag-reorder behind the Level-5
+  reward (hiding lanes stays open). Chosen over "keep open, list as milestone".
+- **Outfit shop entry:** Quests + Profile (chosen over Pet-designer-only or
+  Quests-only).
 
-**A. Reveal speed (`TopicDao.kt`, `TopicRepository.kt`, `TopicRevealScreen.kt`):**
-- `TopicDao.findByCategoryAndName` — indexed SQL `categoryId = ? AND name =
-  ? [NOCASE] LIMIT 1`; `findTopic` uses it instead of the whole-lane scan.
-- `resolveRevealTopic()` seeds `resolved` on the FIRST frame from the warm
-  lane cache AND the prewarmed merged index (`cachedIndex()`, which
-  survives lane-cache trims and carries wildcard.json originals). Plain
-  function (NOT @Composable — it runs inside `remember {}`).
-- `TopicRepository.refreshLaneFromAssets(context, id)` — parses the
-  bundled JSON directly (bypassing the Room fast-path mask),
-  REPLACE-upserts the whole lane back into Room, returns the fresh pool.
-  The reveal's final fallback uses it for canonical lanes (WILDCARD keeps
-  the shared merged `load()`).
-- Content-incomplete-row hydration is deduped once per topic per process
-  (`hydratedIds`) so the full-lane JSON parse never repeats.
+## What landed (all in `app/`)
 
-**B. Cabinet category picker (`CabinetScreen.kt`):**
-- State: comma-joined enum-name `String` → `Set<CategoryId>` (rotation/tab
-  safe, no Saver), single `commitFilters` mutator, `CategoryIdSaver` gone.
-- The sticky every-lane chip bar is DELETED (`CabinetStickyChipBar`,
-  `CabinetChipPop`, `FilterChipLite` dead code removed); searching alone
-  shows no category chips.
-- Hero Category pill opens `CabinetCategoryPanel` (collapsed by default):
-  its own tiny search box filters the category list, accent-checkbox
-  multi-select with per-lane entry counts, a tertiary Legacy row (always
-  reachable so it can be toggled off), Clear all + Done.
-- `CabinetActiveFilterChips` renders exactly the selected lanes (+ Legacy),
-  each removable with one tap; filtering = text AND (no categories selected
-  OR entry category in set).
-- Single selected lane keeps the page wash + hero subtitle; multi-select
-  uses the neutral wash + "Showing N categories"; no-match empty states
-  split into single-lane (spin CTA) vs generic clear-filters.
-- Constants: `CabinetChipBarHeight` kept for the chips row, new
-  `CabinetFilterPanelHeight` reserved when the panel is open; the grid's
-  glass-capture + content-top reservation now key on `filterUiVisible`.
-- Imports cleaned (removed unused Saver/Brush/LocalDensity/LazyRow/
-  itemsIndexed/LayerBackdrop; added clickable, horizontal/verticalScroll,
-  rememberScrollState, size, Checkbox(Defaults), TextButton, TextAlign,
-  TextOverflow, categorySurface, pastelFillInk).
+1. **Level rewards catalog** — `data/LevelRewards.kt`: Reward(level, id,
+   title, kind, glyph) with kinds OUTFIT / PALETTE / LANE_ORDER. Premium
+   share-card tones (Midnight L2, Forest L8, Lavender L15, Ember L30),
+   outfits (Scarf L3, Coat L10, Crown L20, Galaxy L40), lane order L5.
+   Level card + pet hero footer show "next unlock"; level-up banner lists
+   newly-unlocked rewards.
+2. **Lane-order gate** — ManageCategoriesScreen: drag-reorder + steppers
+   locked until Level 5 with a "Custom order locked" card; hide toggle
+   unaffected.
+3. **Real-loop dailies** — CurioQuests: DailyKind.REVEAL + DailyKind.VOICE;
+   pool entries "Reveal 2 new topics", "Save a discovery", "Capture with
+   voice once" (+ bonus Reveal-4 / Voice-twice); `noteReveal` hook wired in
+   TopicRevealScreen next to CurioPassport.noteReveal; `onSave` bumps VOICE
+   for SoundBite captures.
+4. **Home quest strip** — HomeDailyStrip: the day's 3 core dailies with
+   live progress bars under the quest block; tap → Quests.
+5. **Pet reacts on Home** — CurioPet.pendingQuestNudge (set in
+   noteQuestComplete, consumed once by the Home flower bed) → one-shot
+   "Quest done! +sparkles ✨" bubble; quick PLAY bubble (awake + at home)
+   → notePlay (feeds PLAY daily + persona).
+6. **Outfit shop** — `data/PetOutfits.kt` (4 outfits, 16×16 accessory
+   art), `features/outfits/OutfitShopScreen.kt` (wallet card, outfit cards
+   with sprite previews, Buy/Equip/Locked, next-unlock hint), route
+   `OUTFIT_SHOP` (NavHost + center-pop list). Sparkles wallet in
+   AppPreferences (KEY_SPARKLES + get/add/spend) funded by daily claims
+   (+2), weekly claims (+5), streak milestones (+5). Equipped outfit
+   overlays the sprite's `accessories` detail layer at render time
+   (CurioPetSprite.activeDesign merge; never mutates saved art).
+7. **Entries** — Quests: OutfitShopEntryCard under the hero; Profile:
+   ProfilePetShopRow after the gamification card.
+8. **Share palettes** — 4 premium tones in TopicShareCard; `paletteFor`
+   cycles the player's AVAILABLE tones (base 4 + level unlocks) via
+   `unlockedToneCount(level)`.
 
-### Verification
+## Verification
 
-No Gradle builds allowed in this environment (CI compiles on push).
-Hand-audited: balanced delimiters in all four files (brace/paren/bracket),
-no stale references to removed symbols, imports matched to usage, Material3
-APIs are basic (Checkbox/TextButton/Surface — safe on the Compose BOM),
-lambda-rule compliance (no @Composable calls inside click/remember
-lambdas), SQL valid for Room @Query.
+- All 16 touched/new files brace/paren-balanced vs HEAD (apostrophes in
+  comments confound naive scanners; compared against HEAD deltas).
+- Icon glyphs verified against the bundled font subset (only existing
+  constants used — `checkroom`/`forest`/`swap_vert`/`lock`/`local_florist`
+  were tofu; replaced with pets/drag_handle/dark_mode).
+- Imports audited per file (LevelRewards/PetOutfits where used); no unused
+  imports added (removed a dead `mood`/`stage` val and an unused
+  `paletteUnlockLevel` helper).
+- Compile-safety rules followed: no state writes during composition
+  (consumeQuestNudge happens in a LaunchedEffect), `size` never shadows
+  DrawScope, imports match referenced types.
+- CI compiles on push; local Gradle is forbidden in this environment.
 
-### Follow-ups (next request: "save your take" redesign)
+## Docs
 
-- The Cabinet's category panel could later learn typo-tolerant search like
-  the Topic Database's (currently substring-only) — deferred as out of
-  scope.
-- Wildcard lane fallback still shares `TopicJsonLoader.load()` (merge
-  semantics) — fine, noted.
-- `ANALYSIS.md` at repo root is a pre-existing unrelated untracked file —
-  not committed.
+- `fastlane/metadata/android/en-US/changelogs/20260921.txt` — new bullets
+  on top (levels unlock, outfit shop, real-loop dailies, Home pet).
+- `app/AGENTS.md` — v321 bullet (rewards catalog, lane gate, real-loop
+  dailies, Home strip + pet nudge/Play, sparkles + outfit shop).
+- Commit WITHOUT the Codebuff footer this time (root AGENTS.md policy).

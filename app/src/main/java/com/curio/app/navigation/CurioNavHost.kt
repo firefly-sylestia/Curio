@@ -99,6 +99,7 @@ import com.curio.app.features.profile.ProfileScreen
 import com.curio.app.features.quests.QuestsScreen
 import com.curio.app.features.stats.StatsScreen
 import com.curio.app.features.settings.BackupToolsScreen
+import com.curio.app.features.settings.BookCoverHubScreen
 import com.curio.app.features.settings.ExperimentsScreen
 import com.curio.app.features.settings.UserExperimentsScreen
 import com.curio.app.features.settings.SettingsHubScreen
@@ -111,6 +112,7 @@ import com.curio.app.features.recyclebin.RecycleBinScreen
 import com.curio.app.features.cabinet.CabinetScreen
 import com.curio.app.features.capture.SaveCaptureScreen
 import com.curio.app.features.detail.EntryDetailScreen
+import com.curio.app.features.outfits.OutfitShopScreen
 import com.curio.app.features.petdesigner.PetDesignerScreen
 import com.curio.app.features.picker.CategoryPickerBrowseScreen
 import com.curio.app.features.picker.CategoryPickerScreen
@@ -199,6 +201,7 @@ private val popScreenRoutePrefixes: Set<String> = setOf(
     CurioRoutes.SETTINGS,
     CurioRoutes.EXPERIMENTS,
     CurioRoutes.PET_DESIGNER,
+    CurioRoutes.OUTFIT_SHOP,
     CurioRoutes.TOPIC_HISTORY,
     CurioRoutes.MANAGE_CATEGORIES,
     CurioRoutes.RECENTS_ALL,
@@ -881,6 +884,9 @@ fun CurioNavHost(
             composable(CurioRoutes.SETTINGS_DATA) {
                 BackupToolsScreen(navController = navController)
             }
+            composable(CurioRoutes.SETTINGS_BOOK_COVER) {
+                BookCoverHubScreen(navController = navController)
+            }
             composable(CurioRoutes.SHARE_HUB) {
                 ShareHubScreen(navController = navController)
             }
@@ -931,6 +937,9 @@ fun CurioNavHost(
             }
             composable(CurioRoutes.PET_DESIGNER) {
                 PetDesignerScreen(navController = navController)
+            }
+            composable(CurioRoutes.OUTFIT_SHOP) {
+                OutfitShopScreen(navController = navController)
             }
             composable(route = CurioRoutes.LIGHTBOX) {
                 // The image URI is handed off out-of-band via LightboxTarget

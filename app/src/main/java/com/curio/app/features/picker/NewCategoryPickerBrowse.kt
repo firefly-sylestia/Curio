@@ -103,8 +103,10 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
     var showEditor by remember { mutableStateOf(false) }
     var editMix by remember { mutableStateOf<NamedMix?>(null) }
     var deleteMix by remember { mutableStateOf<NamedMix?>(null) }
-    // Tap-and-hold option pill target.
+    // Tap-and-hold option pill targets.
     var optionTarget by remember { mutableStateOf<CurioCategory?>(null) }
+    // v318b — tap-and-hold on a saved mix row opens the morphing icon pill.
+    var mixHoldTarget by remember { mutableStateOf<NamedMix?>(null) }
 
     Box(
         modifier = Modifier
@@ -179,7 +181,8 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
                         },
                         onEditMix = { editMix = it; showEditor = true },
                         onDeleteMix = { deleteMix = it },
-                        onNewMix = { editMix = null; showEditor = true }
+                        onNewMix = { editMix = null; showEditor = true },
+                        onHoldMix = { mixHoldTarget = it }
                     )
                     BrowseTab.PINS -> PinsTabContent(
                         context = context,
@@ -274,6 +277,36 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
             }
         )
     }
+    // v318b — tap-and-hold on a saved mix row: the same morphing icon pill
+    // (Edit / Delete circles) instead of the old dropdown menu.
+    mixHoldTarget?.let { target ->
+        HoldActionsPill(
+            actions = listOf(
+                HoldAction(
+                    CurioIcons.Edit,
+                    "Edit ${target.name}",
+                    MaterialTheme.colorScheme.secondaryContainer,
+                    MaterialTheme.colorScheme.onSecondaryContainer,
+                    {
+                        mixHoldTarget = null
+                        editMix = target
+                        showEditor = true
+                    }
+                ),
+                HoldAction(
+                    CurioIcons.Delete,
+                    "Delete ${target.name}",
+                    MaterialTheme.colorScheme.errorContainer,
+                    MaterialTheme.colorScheme.onErrorContainer,
+                    {
+                        mixHoldTarget = null
+                        deleteMix = target
+                    }
+                )
+            ),
+            onDismiss = { mixHoldTarget = null }
+        )
+    }
 }
 
 /** The three in-page bottom-nav tabs. */
@@ -332,7 +365,8 @@ private fun MixesTabContent(
     onApplyMix: (NamedMix) -> Unit,
     onEditMix: (NamedMix) -> Unit,
     onDeleteMix: (NamedMix) -> Unit,
-    onNewMix: () -> Unit
+    onNewMix: () -> Unit,
+    onHoldMix: (NamedMix) -> Unit
 ) {
     val mixes = AppPreferences.savedMixesState
     val categories = CurioCategories.visible
@@ -366,7 +400,8 @@ private fun MixesTabContent(
                     active = mix.laneIds.toSet() == deckIds,
                     onApply = { onApplyMix(mix) },
                     onEdit = { onEditMix(mix) },
-                    onDelete = { onDeleteMix(mix) }
+                    onDelete = { onDeleteMix(mix) },
+                    onHold = { onHoldMix(mix) }
                 )
             }
         }
@@ -477,9 +512,11 @@ private fun BrowseMixRow(
     active: Boolean,
     onApply: () -> Unit,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    // v318b — long-press opens the screen-level morphing icon pill (the old
+    // 3-item dropdown here is gone; no text, no dropdown).
+    onHold: () -> Unit
 ) {
-    var menuOpen by remember { mutableStateOf(false) }
     val shape = RoundedCornerShape(18.dp)
     Surface(
         shape = shape,
@@ -488,7 +525,7 @@ private fun BrowseMixRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 8.dp)
-            .combinedClickable(onClick = onApply, onLongClick = { menuOpen = true })
+            .combinedClickable(onClick = onApply, onLongClick = onHold)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -554,120 +591,49 @@ private fun BrowseMixRow(
                     )
                 }
             }
-            // Edit / Delete — behind tap-and-hold only (the row's
-            // onLongClick opens this menu; no visible 3-dot button).
-            Box {
-                androidx.compose.material3.DropdownMenu(
-                    expanded = menuOpen,
-                    onDismissRequest = { menuOpen = false }
-                ) {
-                    androidx.compose.material3.DropdownMenuItem(
-                        text = { Text("Edit", color = MaterialTheme.colorScheme.onSurface) },
-                        onClick = { menuOpen = false; onEdit() }
-                    )
-                    androidx.compose.material3.DropdownMenuItem(
-                        text = { Text("Delete", color = MaterialTheme.colorScheme.error) },
-                        onClick = { menuOpen = false; onDelete() }
-                    )
-                }
-            }
         }
     }
 }
 
+
 /**
- * The tap-and-hold option pill on the Browse page — a centered overlay with
- * Pin/Unpin + Spin. Solid surface (no liquid-glass transparency).
+ * v318b — the Browse tab's tap-and-hold option pill: the OLD dialog-style
+ * centered panel is gone; Pin/Unpin + Spin live in the shared morphing
+ * [HoldActionsPill] as circular icon buttons. No text.
  */
 @Composable
-private fun BrowseOptionPill(
+internal fun BrowseOptionPill(
     category: CurioCategory,
     isPinned: Boolean,
     onDismiss: () -> Unit,
     onPinToggle: () -> Unit,
     onSpin: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.4f))
-            .combinedClickable(onClick = onDismiss)
-    ) {
-        Surface(
-            shape = RoundedCornerShape(22.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerHighest,
-            shadowElevation = 6.dp,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(horizontal = 40.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Text(
-                    if (category.id == CategoryId.WILDCARD) "Surprise mix" else category.displayName,
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface
+    val actions = buildList {
+        add(
+            HoldAction(
+                CurioIcons.PushPin,
+                if (isPinned) "Unpin" else "Pin",
+                MaterialTheme.colorScheme.secondaryContainer,
+                MaterialTheme.colorScheme.onSecondaryContainer,
+                onPinToggle
+            )
+        )
+        if (category.isReady) {
+            add(
+                HoldAction(
+                    CurioIcons.PlayArrow,
+                    "Spin ${category.displayName}",
+                    MaterialTheme.colorScheme.primary,
+                    MaterialTheme.colorScheme.onPrimary,
+                    onSpin
                 )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Surface(
-                        onClick = onPinToggle,
-                        shape = RoundedCornerShape(50),
-                        color = MaterialTheme.colorScheme.secondaryContainer
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            CurioIcon(
-                                name = CurioIcons.PushPin,
-                                contentDescription = null,
-                                size = 16.dp,
-                                tint = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-                            Text(
-                                if (isPinned) "Unpin" else "Pin",
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-                        }
-                    }
-                    if (category.isReady) {
-                        Surface(
-                            onClick = onSpin,
-                            shape = RoundedCornerShape(50),
-                            color = MaterialTheme.colorScheme.primary
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                CurioIcon(
-                                    name = CurioIcons.Casino,
-                                    contentDescription = null,
-                                    size = 16.dp,
-                                    tint = MaterialTheme.colorScheme.onPrimary
-                                )
-                                Text(
-                                    "Spin",
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onPrimary
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+            )
         }
     }
+    HoldActionsPill(actions = actions, onDismiss = onDismiss)
 }
+
 
 /**
  * One SOLID-fill capsule of the in-page bottom nav. v3xx2 — the capsule is

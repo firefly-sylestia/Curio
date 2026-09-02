@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items as gridItems
@@ -30,6 +29,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -45,14 +48,17 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -185,6 +191,12 @@ fun NewCategoryPickerSheet(
     // Tap-and-hold on a saved mix → Edit/Delete option pill overlay.
     var mixOptionTarget by remember { mutableStateOf<NamedMix?>(null) }
 
+    // v3xx14 — multi-select on page 0 flips the shared bottom row's primary
+    // capsule from "Surprise me" to "Mix · N": the classic page reports its
+    // pending selection count + an apply closure; the capsule applies it.
+    var page0MixCount by remember { mutableIntStateOf(0) }
+    var page0MixApply by remember { mutableStateOf<(() -> Unit)?>(null) }
+
     // Pager: page 0 = classic picker, page 1 = new picker. Default from prefs.
     val initialPage = AppPreferences.pickerDefaultPageState.coerceIn(0, 1)
     val pagerState = rememberPagerState(initialPage = initialPage, pageCount = { 2 })
@@ -198,34 +210,19 @@ fun NewCategoryPickerSheet(
         }
     }
 
-    // Per-page scroll persistence (v3xx13): each pager page's scroll state
-    // is hoisted here so flipping between pages keeps the position, and the
-    // index/offset are saved to prefs (debounced) so closing the sheet — or
-    // even restarting the app — returns you to where you were on both pages.
-    // Page 0 holds LazyVerticalGrids (LazyGridState); page 1 is a LazyColumn
-    // (LazyListState) — two different scroll primitives, saved identically.
-    val classicScroll = rememberLazyGridState()
+    // Per-page scroll persistence (v3xx13/v3xx14): each pager page's scroll
+    // state is hoisted here so flipping between pages keeps the position, and
+    // the index/offset are saved to prefs (debounced) so closing the sheet —
+    // or even restarting the app — returns you to where you were.
+    // Page 0 (ClassicPickerPage) keeps its OWN per-mode-tab grid states +
+    // persistence internally (v3xx14 — Curio/Knowledge/Mix each scroll
+    // separately); page 1 is a LazyColumn (LazyListState) saved here.
     val newScroll = rememberLazyListState()
     LaunchedEffect(Unit) {
         // runCatching: the saved index may exceed the item count if the
         // hidden lane set changed since the position was stored.
-        val p0 = AppPreferences.getPickerPage0Scroll(context)
-        runCatching { classicScroll.scrollToItem(p0.index, p0.offset) }
         val p1 = AppPreferences.getPickerPage1Scroll(context)
         runCatching { newScroll.scrollToItem(p1.index, p1.offset) }
-    }
-    LaunchedEffect(classicScroll) {
-        snapshotFlow {
-            classicScroll.firstVisibleItemIndex to classicScroll.firstVisibleItemScrollOffset
-        }
-            .drop(1)
-            .debounce(300)
-            .collect { (index, offset) ->
-                AppPreferences.setPickerPage0Scroll(
-                    context,
-                    AppPreferences.PickerScrollPos(index, offset)
-                )
-            }
     }
     LaunchedEffect(newScroll) {
         snapshotFlow {
@@ -292,9 +289,12 @@ fun NewCategoryPickerSheet(
                     // page cleanly (no nested weight conflict).
                     ClassicPickerPage(
                         washCat = washCat,
-                        scrollState = classicScroll,
                         onCategorySelected = onCategorySelected,
-                        onCategoriesMixed = onCategoriesMixed
+                        onCategoriesMixed = onCategoriesMixed,
+                        onMixStatus = { count, apply ->
+                            page0MixCount = count
+                            page0MixApply = apply
+                        }
                     )
                 } else {
                     NewPickerPage(
@@ -311,7 +311,11 @@ fun NewCategoryPickerSheet(
                             val cats = mix.laneIds.mapNotNull { id ->
                                 categories.firstOrNull { it.id == id }
                             }
-                            if (cats.isNotEmpty()) onCategoriesMixed(cats)
+                            if (cats.isNotEmpty()) {
+                                // v318b — a named mix stamps the Spin pill.
+                                AppPreferences.setLastMixName(context, mix.name)
+                                onCategoriesMixed(cats)
+                            }
                         },
                         onMixOption = { mixOptionTarget = it },
                         onNewMix = { editMix = null; showEditor = true },
@@ -332,13 +336,23 @@ fun NewCategoryPickerSheet(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // v3xx14 — while page 0 is building a mix the primary capsule
+                // becomes "Mix · N" (and applies the pending selection);
+                // otherwise it stays "Surprise me".
+                val mixing = page0MixCount > 0
                 NewPrimaryCapsule(
-                    label = "Surprise me",
-                    glyph = CurioIcons.Shuffle,
+                    label = if (mixing) "Mix · $page0MixCount" else "Surprise me",
+                    glyph = if (mixing) CurioIcons.Check else CurioIcons.Shuffle,
                     modifier = Modifier.weight(1f),
                     onClick = {
-                        val mix = surpriseMiniMix(categories)
-                        if (mix.isNotEmpty()) onCategoriesMixed(mix)
+                        if (mixing) {
+                            page0MixApply?.invoke()
+                        } else {
+                            // v318b — a surprise/unnamed deck clears the name.
+                            AppPreferences.setLastMixName(context, null)
+                            val mix = surpriseMiniMix(categories)
+                            if (mix.isNotEmpty()) onCategoriesMixed(mix)
+                        }
                     }
                 )
                 NewPickerCircle(
@@ -414,7 +428,11 @@ fun NewCategoryPickerSheet(
                 AppPreferences.addOrReplaceMix(context, mix)
                 showEditor = false
                 val cats = mix.laneIds.mapNotNull { id -> categories.firstOrNull { it.id == id } }
-                if (cats.isNotEmpty()) onCategoriesMixed(cats)
+                if (cats.isNotEmpty()) {
+                    // v318b — a saved/edited mix stamps the Spin pill.
+                    AppPreferences.setLastMixName(context, mix.name)
+                    onCategoriesMixed(cats)
+                }
             }
         )
     }
@@ -581,6 +599,7 @@ private fun NewPickerPage(
         item(key = "explore-grid") {
             ContinueExploringSection(
                 categories = categories,
+                deckIds = deckIds,
                 onSpinLane = onSpinLane,
                 onRemoveTarget = onRemoveTarget,
                 onAdd = onAddSuggestion
@@ -600,11 +619,13 @@ private fun NewPickerPage(
 @Composable
 private fun ContinueExploringSection(
     categories: List<CurioCategory>,
+    deckIds: List<CategoryId>,
     onSpinLane: (CurioCategory) -> Unit,
     onRemoveTarget: (CurioCategory) -> Unit,
     onAdd: () -> Unit
 ) {
     val context = LocalContext.current
+    val deckSet = remember(deckIds) { deckIds.toSet() }
     val visibleIds = remember { categories.map { it.id }.toSet() }
     // Most-spun (CurioPassport spin counts), desc, ready + visible only.
     val mostUsed = remember {
@@ -650,6 +671,10 @@ private fun ContinueExploringSection(
                         if (cat != null) {
                             NewPickerTile(
                                 category = cat,
+                                // v3xx14 — lanes already in the current deck
+                                // wear the category's ACTIVE accent in
+                                // Continue exploring too.
+                                selected = cat.id in deckSet,
                                 onClick = { onSpinLane(cat) },
                                 onLongClick = { onRemoveTarget(cat) },
                                 modifier = Modifier.weight(1f)
@@ -679,10 +704,13 @@ private fun ContinueExploringSection(
 @Composable
 private fun ClassicPickerPage(
     washCat: CurioCategory,
-    scrollState: LazyGridState,
     onCategorySelected: (CurioCategory) -> Unit,
-    onCategoriesMixed: (List<CurioCategory>) -> Unit
+    onCategoriesMixed: (List<CurioCategory>) -> Unit,
+    // v3xx14 — reports the pending multi-select (count + an apply closure)
+    // so the SHARED bottom row can swap "Surprise me" for "Mix · N".
+    onMixStatus: (Int, (() -> Unit)?) -> Unit
 ) {
+    val context = LocalContext.current
     val allUnhidden = remember {
         CurioCategories.all.filter { it.id !in AppPreferences.hiddenCategoriesState }
     }
@@ -697,10 +725,69 @@ private fun ClassicPickerPage(
     // (replacing the deck); long-press is the ONLY way into multi-select.
     var multiSelectMode by remember { mutableStateOf(false) }
     var selectedSlugs by remember { mutableStateOf(emptySet<String>()) }
-    var modeName by remember { mutableStateOf(PickerMode.MIX.name) }
+    // v3xx14 — the mode TAB (Curio / Knowledge / Mix) persists across sheet
+    // closes and app restarts (seeded from prefs; saved on every switch).
+    var modeName by rememberSaveable {
+        mutableStateOf(
+            AppPreferences.pickerPage0ModeState.takeIf { it in PickerMode.entries.map { m -> m.name } }
+                ?: PickerMode.MIX.name
+        )
+    }
     val mode = runCatching { PickerMode.valueOf(modeName) }.getOrDefault(PickerMode.MIX)
+    LaunchedEffect(mode) {
+        AppPreferences.setPickerPage0Mode(context, mode.name)
+    }
+    // v3xx14 — ONE grid state per mode tab; each is persisted (debounced)
+    // under its own pref key so every tab returns to where it was.
+    val curioGrid = rememberLazyGridState()
+    val knowledgeGrid = rememberLazyGridState()
+    val mixGrid = rememberLazyGridState()
+    val gridStates = mapOf(
+        PickerMode.CURIO to curioGrid,
+        PickerMode.KNOWLEDGE to knowledgeGrid,
+        PickerMode.MIX to mixGrid
+    )
+    LaunchedEffect(Unit) {
+        // runCatching: a saved index may exceed the item count if the hidden
+        // lane set changed since the position was stored.
+        PickerMode.entries.forEach { m ->
+            val pos = AppPreferences.getPickerPage0TabScroll(context, m.name)
+            runCatching { gridStates.getValue(m).scrollToItem(pos.index, pos.offset) }
+        }
+    }
+    PickerMode.entries.forEach { m ->
+        val gridState = gridStates.getValue(m)
+        LaunchedEffect(gridState) {
+            snapshotFlow {
+                gridState.firstVisibleItemIndex to gridState.firstVisibleItemScrollOffset
+            }
+                .drop(1)
+                .debounce(300)
+                .collect { (index, offset) ->
+                    AppPreferences.setPickerPage0TabScroll(
+                        context, m.name, AppPreferences.PickerScrollPos(index, offset)
+                    )
+                }
+        }
+    }
     val toggleSlug = { slug: String ->
         selectedSlugs = if (slug in selectedSlugs) selectedSlugs - slug else selectedSlugs + slug
+    }
+    // Keep the shared bottom row in sync: while multi-selecting on Mix the
+    // capsule reports the count + an apply closure; otherwise it clears.
+    LaunchedEffect(multiSelectMode, selectedSlugs, mode) {
+        if (mode == PickerMode.MIX && multiSelectMode && selectedSlugs.isNotEmpty()) {
+            val cats = selectedSlugs.mapNotNull { CurioCategories.byRouteSlug(it) }
+            onMixStatus(cats.size) {
+                if (cats.isNotEmpty()) {
+                    // v318b — an UNNAMED multi-lane selection clears the name.
+                    AppPreferences.setLastMixName(context, null)
+                    onCategoriesMixed(cats)
+                }
+            }
+        } else {
+            onMixStatus(0, null)
+        }
     }
     val wide = windowWidthSizeClass().isWide
 
@@ -755,7 +842,7 @@ private fun ClassicPickerPage(
             when (mode) {
                 // ── Mix — full deck, multi-select via hold ────────────
                 PickerMode.MIX -> LazyVerticalGrid(
-                    state = scrollState,
+                    state = gridStates.getValue(PickerMode.MIX),
                     columns = if (wide) GridCells.Adaptive(minSize = 110.dp) else GridCells.Fixed(3),
                     contentPadding = PaddingValues(top = 2.dp, bottom = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -768,6 +855,10 @@ private fun ClassicPickerPage(
                             category = cat,
                             comingSoon = !cat.isReady,
                             selected = multiSelectMode && slug in selectedSlugs,
+                            // v3xx14 — while multi-selecting the Wildcard tile
+                            // relabels itself "Mix" (it no longer surprises; it
+                            // toggles the lane into the pending mix).
+                            labelOverride = if (multiSelectMode && cat.id == CategoryId.WILDCARD) "Mix" else null,
                             onClick = {
                                 if (!cat.isReady) return@NewPickerTile
                                 if (multiSelectMode) toggleSlug(slug)
@@ -783,7 +874,7 @@ private fun ClassicPickerPage(
                 else -> {
                     val groups = if (mode == PickerMode.CURIO) curioModeGroups else knowledgeModeGroups
                     LazyVerticalGrid(
-                        state = scrollState,
+                        state = gridStates.getValue(mode),
                         columns = if (wide) GridCells.Adaptive(minSize = 110.dp) else GridCells.Fixed(3),
                         contentPadding = PaddingValues(top = 2.dp, bottom = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -838,18 +929,43 @@ private fun ClassicPickerPage(
                     modifier = Modifier.weight(1f),
                     onClick = {
                         if (selectedSlugs.isEmpty()) return@NewPrimaryCapsule
+                        // v318b — an unnamed multi-lane selection clears any
+                        // previously applied mix's name from the Spin pill.
+                        AppPreferences.setLastMixName(context, null)
                         val cats = selectedSlugs.mapNotNull { CurioCategories.byRouteSlug(it) }
                         if (cats.isNotEmpty()) onCategoriesMixed(cats)
                     }
                 )
-                TextButton(onClick = {
-                    multiSelectMode = false
-                    selectedSlugs = emptySet()
-                }) {
-                    Text(
-                        "Cancel",
-                        style = MaterialTheme.typography.labelLarge.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    )
+                // v3xx14 — Cancel as a FLOATING pill (raised capsule) instead
+                // of a flat text button, so it reads as the mix row's escape
+                // hatch beside the primary Mix capsule.
+                Surface(
+                    onClick = {
+                        multiSelectMode = false
+                        selectedSlugs = emptySet()
+                    },
+                    shape = RoundedCornerShape(50),
+                    color = newPickerIdleFill(),
+                    shadowElevation = 3.dp
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        CurioIcon(
+                            name = CurioIcons.Close,
+                            contentDescription = null,
+                            size = 16.dp,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            "Cancel",
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -953,8 +1069,10 @@ private fun NewSectionLabel(label: String, hint: String? = null, withRow: Boolea
  *  - the lane-composition dots previewing the mix.
  * Tapping the card spins the mix; tap-and-hold opens the Edit/Delete
  * option pill (v3xx13 — no visible action buttons, no borders on the
- * card; the "Active" label alone marks the playing mix). Uniform 114dp
- * cells so the 2-col grid reads alike.
+ * card; the "Active" label alone marks the playing mix). Uniform 122dp
+ * cells so the 2-col grid reads alike; the footer wears each lane's
+ * category icon in its own accent chip (v3xx14 — no more washed-out
+ * dots / "+N" text).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -975,7 +1093,7 @@ private fun NewMixCard(
         color = newPickerIdleFill(),
         shadowElevation = 0.dp,
         modifier = modifier
-            .height(114.dp)
+            .height(122.dp)
             .combinedClickable(onClick = onApply, onLongClick = onLongClick)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -994,8 +1112,15 @@ private fun NewMixCard(
                         modifier = Modifier
                             .size(42.dp)
                             .clip(RoundedCornerShape(14.dp))
+                            // v3xx14 — the lead-lane cover was washed out at
+                            // 16% alpha; blend the accent in properly so the
+                            // mix keeps a real color identity.
                             .background(
-                                if (leadAccent != null) leadAccent.copy(alpha = 0.16f)
+                                if (leadAccent != null) lerp(
+                                    MaterialTheme.colorScheme.surfaceContainerHighest,
+                                    leadAccent,
+                                    0.42f
+                                )
                                 else MaterialTheme.colorScheme.surfaceContainerHighest
                             ),
                         contentAlignment = Alignment.Center
@@ -1039,35 +1164,36 @@ private fun NewMixCard(
                         }
                     }
                 }
-                // ── Footer: lane-composition dots (v3xx13 — no Edit/Delete
-                // buttons here; those live behind tap-and-hold) ──────────
+                // ── Footer: lane-composition ICONS (v3xx14 — each saved
+                // lane shows its real category icon in an accent chip, up to
+                // 5 + "+N" for huge mixes; no Edit/Delete buttons here —
+                // those live behind tap-and-hold) ───────────────────────
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // 4-lane mixes show all four dots; beyond that, 3 dots + the
-                    // "+N" chip keeps the row inside the card's inner width.
-                    val dots = if (lanes.size > 4) lanes.take(3) else lanes
-                    dots.forEach { cat ->
+                    val shown = if (lanes.size > 6) lanes.take(5) else lanes
+                    shown.forEachIndexed { i, cat ->
                         val ink = cat.categoryInk()
                         Box(
                             modifier = Modifier
-                                .size(16.dp)
-                                .clip(CircleShape)
-                                .background(ink.copy(alpha = 0.16f)),
+                                .size(20.dp)
+                                .clip(RoundedCornerShape(7.dp))
+                                .background(ink.copy(alpha = 0.22f)),
                             contentAlignment = Alignment.Center
                         ) {
                             CurioIcon(
                                 name = cat.iconGlyph,
                                 contentDescription = null,
-                                size = 8.dp,
+                                size = 12.dp,
                                 tint = ink
                             )
                         }
+                        if (i < shown.size - 1) Spacer(Modifier.width(5.dp))
                     }
-                    if (lanes.size > 4) {
+                    if (lanes.size > 6) {
                         Text(
-                            text = "+${lanes.size - 3}",
+                            text = "+${lanes.size - 5}",
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(start = 2.dp)
@@ -1098,6 +1224,7 @@ fun NewPickerTile(
     selected: Boolean = false,
     pinned: Boolean = false,
     comingSoon: Boolean = false,
+    labelOverride: String? = null,
     onClick: () -> Unit,
     onLongClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
@@ -1185,11 +1312,12 @@ fun NewPickerTile(
                     )
                 }
                 Text(
-                    text = when {
-                        comingSoon -> "Coming soon"
-                        isWildcard -> "Surprise mix"
-                        else -> category.displayName
-                    },
+                    text = labelOverride
+                        ?: when {
+                            comingSoon -> "Coming soon"
+                            isWildcard -> "Surprise mix"
+                            else -> category.displayName
+                        },
                     style = MaterialTheme.typography.labelMedium.copy(
                         fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
                     ),
@@ -1243,10 +1371,88 @@ internal fun NewPinnedPill(
         }
     }
 }/**
- * The tap-and-hold option pill — a centered overlay. Actions are optional:
- * Pin/Unpin + Spin for pinned lanes / Browse tiles, or a dedicated Remove
- * action for Continue-exploring lanes. Replaces the old direct-pin-on-
- * long-press behavior.
+ * v318b — tap-and-hold actions are NO LONGER a dialog: a small floating
+ * capsule MORPHS in (spring pop + fade) at the center, holding only
+ * circular ICON buttons (no text). Tapping the scrim dismisses it.
+ * internal — shared with the Browse screen's tap-and-hold overlays.
+ */
+@Composable
+internal fun HoldActionsPill(
+    actions: List<HoldAction>,
+    onDismiss: () -> Unit
+) {
+    // Named popScale/popAlpha (NOT scale/alpha): inside the graphicsLayer
+    // block below, an outer `val alpha` would shadow the receiver's own
+    // alpha property and break compilation ("val cannot be reassigned").
+    val popScale = remember { Animatable(0.6f) }
+    val popAlpha = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        // Beautiful morph-in: springy pop + fade, one frame after the
+        // overlay appears.
+        popScale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow))
+        popAlpha.animateTo(1f, tween(140))
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.28f))
+            .combinedClickable(onClick = onDismiss)
+    ) {
+        Surface(
+            shape = RoundedCornerShape(50),
+            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+            shadowElevation = 8.dp,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .graphicsLayer {
+                    scaleX = popScale.value
+                    scaleY = popScale.value
+                    // `alpha` here is the GraphicsLayerScope var (the local
+                    // is popAlpha, so no shadowing).
+                    alpha = popAlpha.value
+                }
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                actions.forEach { action ->
+                    Surface(
+                        onClick = action.onClick,
+                        shape = CircleShape,
+                        color = action.background,
+                        modifier = Modifier.size(44.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            CurioIcon(
+                                name = action.glyph,
+                                contentDescription = action.description,
+                                size = 19.dp,
+                                tint = action.contentColor
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** One circular icon action inside [HoldActionsPill]. */
+internal class HoldAction(
+    val glyph: String,
+    val description: String,
+    val background: Color,
+    val contentColor: Color,
+    val onClick: () -> Unit
+)
+
+/**
+ * The tap-and-hold option pill for a category — the OLD dialog-style
+ * centered panel is gone; the same actions now live in the morphing
+ * [HoldActionsPill] as circular icon buttons. Replaces the old
+ * direct-pin-on-long-press behavior.
  */
 @Composable
 private fun CategoryOptionPill(
@@ -1258,119 +1464,48 @@ private fun CategoryOptionPill(
 ) {
     val context = LocalContext.current
     val isPinned = remember { category.id in AppPreferences.getPinnedCategories(context) }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.35f))
-            .combinedClickable(onClick = onDismiss)
-    ) {
-        Surface(
-            shape = RoundedCornerShape(22.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerHighest,
-            shadowElevation = 6.dp,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(horizontal = 40.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Text(
-                    if (category.id == CategoryId.WILDCARD) "Surprise mix" else category.displayName,
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface
+    val actions = buildList {
+        if (onPinToggle != null) {
+            add(
+                HoldAction(
+                    CurioIcons.PushPin,
+                    if (isPinned) "Unpin" else "Pin",
+                    MaterialTheme.colorScheme.secondaryContainer,
+                    MaterialTheme.colorScheme.onSecondaryContainer,
+                    onPinToggle
                 )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    if (onPinToggle != null) {
-                        Surface(
-                            onClick = onPinToggle,
-                            shape = RoundedCornerShape(50),
-                            color = MaterialTheme.colorScheme.secondaryContainer
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                CurioIcon(
-                                    name = CurioIcons.PushPin,
-                                    contentDescription = null,
-                                    size = 16.dp,
-                                    tint = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                                Text(
-                                    if (isPinned) "Unpin" else "Pin",
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                            }
-                        }
-                    }
-                    if (onSpin != null && category.isReady) {
-                        Surface(
-                            onClick = onSpin,
-                            shape = RoundedCornerShape(50),
-                            color = MaterialTheme.colorScheme.primary
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                CurioIcon(
-                                    name = CurioIcons.Casino,
-                                    contentDescription = null,
-                                    size = 16.dp,
-                                    tint = MaterialTheme.colorScheme.onPrimary
-                                )
-                                Text(
-                                    "Spin",
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onPrimary
-                                )
-                            }
-                        }
-                    }
-                    if (onRemove != null) {
-                        Surface(
-                            onClick = onRemove,
-                            shape = RoundedCornerShape(50),
-                            color = MaterialTheme.colorScheme.errorContainer
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                CurioIcon(
-                                    name = CurioIcons.Close,
-                                    contentDescription = null,
-                                    size = 16.dp,
-                                    tint = MaterialTheme.colorScheme.onErrorContainer
-                                )
-                                Text(
-                                    "Remove",
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onErrorContainer
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+            )
+        }
+        if (onSpin != null && category.isReady) {
+            add(
+                HoldAction(
+                    CurioIcons.PlayArrow,
+                    "Spin ${category.displayName}",
+                    MaterialTheme.colorScheme.primary,
+                    MaterialTheme.colorScheme.onPrimary,
+                    onSpin
+                )
+            )
+        }
+        if (onRemove != null) {
+            add(
+                HoldAction(
+                    CurioIcons.Delete,
+                    "Remove from Continue exploring",
+                    MaterialTheme.colorScheme.errorContainer,
+                    MaterialTheme.colorScheme.onErrorContainer,
+                    onRemove
+                )
+            )
         }
     }
+    if (actions.isEmpty()) return
+    HoldActionsPill(actions = actions, onDismiss = onDismiss)
 }
 
 /**
- * Tap-and-hold option pill for a saved mix — Edit + Delete (v3xx13).
- * Centered overlay mirroring [CategoryOptionPill]: actions stay hidden
- * until the card is held, so the mixes grid shows no buttons at rest.
+ * v318b — tap-and-hold on a saved mix opens the same morphing pill: Edit +
+ * Delete as circular icon buttons (no text, no dialog).
  */
 @Composable
 private fun MixOptionPill(
@@ -1379,86 +1514,25 @@ private fun MixOptionPill(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.35f))
-            .combinedClickable(onClick = onDismiss)
-    ) {
-        Surface(
-            shape = RoundedCornerShape(22.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerHighest,
-            shadowElevation = 6.dp,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(horizontal = 40.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Surface(
-                        onClick = onEdit,
-                        shape = RoundedCornerShape(50),
-                        color = MaterialTheme.colorScheme.secondaryContainer
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            CurioIcon(
-                                name = CurioIcons.Edit,
-                                contentDescription = null,
-                                size = 16.dp,
-                                tint = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-                            Text(
-                                "Edit",
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-                        }
-                    }
-                    Surface(
-                        onClick = onDelete,
-                        shape = RoundedCornerShape(50),
-                        color = MaterialTheme.colorScheme.errorContainer
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            CurioIcon(
-                                name = CurioIcons.Delete,
-                                contentDescription = null,
-                                size = 16.dp,
-                                tint = MaterialTheme.colorScheme.onErrorContainer
-                            )
-                            Text(
-                                "Delete",
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onErrorContainer
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
+    HoldActionsPill(
+        actions = listOf(
+            HoldAction(
+                CurioIcons.Edit,
+                "Edit $name",
+                MaterialTheme.colorScheme.secondaryContainer,
+                MaterialTheme.colorScheme.onSecondaryContainer,
+                onEdit
+            ),
+            HoldAction(
+                CurioIcons.Delete,
+                "Delete $name",
+                MaterialTheme.colorScheme.errorContainer,
+                MaterialTheme.colorScheme.onErrorContainer,
+                onDelete
+            )
+        ),
+        onDismiss = onDismiss
+    )
 }
 
 /** An "+ Add" tile for the continue-exploring grid. */

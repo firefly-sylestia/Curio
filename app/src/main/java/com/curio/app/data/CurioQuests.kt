@@ -349,7 +349,9 @@ object CurioQuests {
     //    creation (save/reflect). DISCOVERY completes when the passport's
     //    least-engaged lane is explored (spec §6.2).
     // v16 — PLAY: the user played with the pet (any real play moment counts).
-    enum class DailyKind { SPIN, EXPLORE, SAVE, QUOTE, PIN, PROFILE, LIKE, DISCOVERY, PLAY }
+    // v9.x — REVEAL (opened a topic's reveal) and VOICE (saved a voice
+    // capture) align the daily pool with the app's real loop.
+    enum class DailyKind { SPIN, EXPLORE, SAVE, QUOTE, PIN, PROFILE, LIKE, DISCOVERY, PLAY, REVEAL, VOICE }
 
     data class DailyQuest(
         val id: String,
@@ -371,8 +373,12 @@ object CurioQuests {
         //    a full 5-quest day paying ~120+ XP instead of ~45).
         DailyQuest("d-spin-1", "Spin the deck once", 15, DailyKind.SPIN, 1),
         DailyQuest("d-spin-3", "Spin the deck 3 times", 20, DailyKind.SPIN, 3),
+        // v9.x — the daily pool mirrors the app's REAL loop: revealing new
+        // topics, saving discoveries, and capturing with the voice note.
+        DailyQuest("d-reveal-2", "Reveal 2 new topics", 20, DailyKind.REVEAL, 2),
         DailyQuest("d-explore-1", "Explore a topic", 20, DailyKind.EXPLORE, 1),
-        DailyQuest("d-save-1", "Save a capture", 25, DailyKind.SAVE, 1),
+        DailyQuest("d-save-1", "Save a discovery", 25, DailyKind.SAVE, 1),
+        DailyQuest("d-voice-1", "Capture with voice once", 25, DailyKind.VOICE, 1),
         DailyQuest("d-quote-1", "Bookmark a quote", 15, DailyKind.QUOTE, 1),
         DailyQuest("d-pin-1", "Pin a topic for later", 15, DailyKind.PIN, 1),
         DailyQuest("d-profile-1", "Visit your profile", 15, DailyKind.PROFILE, 1),
@@ -386,8 +392,10 @@ object CurioQuests {
         // ── Bonus (v8.27) — bigger payouts, revealed after the core trio is
         //    claimed. Picked deterministically, two per day, never repeated.
         DailyQuest("d-b-spin-5", "Spin the deck 5 times", 30, DailyKind.SPIN, 5, bonus = true),
+        DailyQuest("d-b-reveal-4", "Reveal 4 new topics", 35, DailyKind.REVEAL, 4, bonus = true),
         DailyQuest("d-b-explore-2", "Explore 2 topics", 35, DailyKind.EXPLORE, 2, bonus = true),
-        DailyQuest("d-b-save-2", "Save 2 captures", 40, DailyKind.SAVE, 2, bonus = true),
+        DailyQuest("d-b-save-2", "Save 2 discoveries", 40, DailyKind.SAVE, 2, bonus = true),
+        DailyQuest("d-b-voice-2", "Capture with voice twice", 40, DailyKind.VOICE, 2, bonus = true),
         DailyQuest("d-b-quote-2", "Bookmark 2 quotes", 25, DailyKind.QUOTE, 2, bonus = true),
         DailyQuest("d-b-pin-2", "Pin 2 topics for later", 25, DailyKind.PIN, 2, bonus = true),
         DailyQuest("d-b-like-3", "Like 3 topics", 25, DailyKind.LIKE, 3, bonus = true),
@@ -406,11 +414,13 @@ object CurioQuests {
      */
     fun dailyQuestsFor(epochDay: Long, context: Context? = null): List<DailyQuest> {
         val warmups = DailyPool.filter {
-            !it.bonus && (it.kind == DailyKind.SPIN || it.kind == DailyKind.EXPLORE || it.kind == DailyKind.PROFILE)
+            !it.bonus && (it.kind == DailyKind.SPIN || it.kind == DailyKind.EXPLORE ||
+                it.kind == DailyKind.PROFILE || it.kind == DailyKind.REVEAL)
         }
         val creations = DailyPool.filter {
             !it.bonus && (it.kind == DailyKind.SAVE || it.kind == DailyKind.QUOTE ||
-                it.kind == DailyKind.PIN || it.kind == DailyKind.LIKE || it.kind == DailyKind.PLAY)
+                it.kind == DailyKind.PIN || it.kind == DailyKind.LIKE || it.kind == DailyKind.PLAY ||
+                it.kind == DailyKind.VOICE)
         }
         val discovery = DailyPool.firstOrNull { it.kind == DailyKind.DISCOVERY }
         fun pick(list: List<DailyQuest>): DailyQuest {
@@ -662,10 +672,23 @@ object CurioQuests {
         lifetimeState = lifetimeState.copy(saves = lifetimeState.saves + 1)
         formatsState = formatsState + format.name
         bumpDaily(context, DailyKind.SAVE)
+        // v9.x — a voice-note capture also feeds the "Capture with voice" daily.
+        if (format == CaptureFormat.SoundBite) bumpDaily(context, DailyKind.VOICE)
         // v8.42 — the week's save count (weekly quests).
         bumpWeekly(context, WeeklyKind.SAVE)
         write(context)
         addXp(context, 10)
+    }
+
+    /**
+     * v9.x — a topic reveal opened (TopicRevealScreen, next to
+     * CurioPassport.noteReveal): feeds the "Reveal N new topics" dailies.
+     * No XP of its own — the reveal already pays through the explore path.
+     */
+    fun noteReveal(context: Context) {
+        ensureDaily(context)
+        bumpDaily(context, DailyKind.REVEAL)
+        write(context)
     }
 
     /** A quote was bookmarked (AppPreferences.saveQuote). */
@@ -746,6 +769,8 @@ object CurioQuests {
             // before addXp so a coincidental level-up crossing (from chain
             // XP) can rightfully win over the streak line.
             CurioPet.noteStreakMilestone(context)
+            // v9.x — streak milestones pay sparkles (outfit-shop funding).
+            AppPreferences.addSparkles(context, 5)
         }
         // Route through addXp(0): chain-stage XP granted by this record is
         // folded into level/evolution detection, and everything persists.
@@ -792,6 +817,8 @@ object CurioQuests {
         // (level-up / evolution ceremony) win instead of being swallowed.
         CurioPet.noteQuestComplete(context)
         addXp(context, quest.xpReward)
+        // v9.x — daily claims pay the sparkle currency that funds outfits.
+        AppPreferences.addSparkles(context, 2)
     }
 
     // ── Weekly quests — three rotating week-long goals (v8.42) ─────────
@@ -931,6 +958,8 @@ object CurioQuests {
         // ceremony takes precedence over the quest line.
         CurioPet.noteQuestComplete(context)
         addXp(context, quest.xpReward)
+        // v9.x — weekly claims pay more sparkles (they span seven days).
+        AppPreferences.addSparkles(context, 5)
     }
 
     // ── Chain checks — award each stage's XP once when its target hits ──

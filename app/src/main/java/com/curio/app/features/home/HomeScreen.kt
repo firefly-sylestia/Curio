@@ -1,5 +1,6 @@
 package com.curio.app.features.home
 
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -43,6 +44,7 @@ import androidx.compose.material3.Button
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.OutlinedButton
@@ -298,30 +300,90 @@ fun HomeScreen(navController: NavController) {
             // floats, the pet sometimes dashes back home and does a little
             // jig at its own (vacant) bed. Bounds-only, like every landmark
             // — the bed's layout never changes, it just springs a beat.
-            PetLandmark(
-                id = "bed",
-                kind = PetLandmarks.Kind.PLAY,
-                screen = "home"
-            ) { m ->
-                CurioPetHome(
-                    petInside = !CurioPet.awake || CurioPet.atHome ||
-                        !AppPreferences.floatingPetEnabledState,
-                    sleeping = !CurioPet.awake,
-                    homeSize = 52.dp,
-                    onTap = {
-                        when {
-                            !CurioPet.awake -> CurioPet.wake()
-                            CurioPet.atHome -> CurioPet.comeOut()
-                            else -> Unit // already floating — the bed is vacant
+            // v9.x — the bed also hosts the quest-complete nudge (one-shot
+            // after a claim) and a quick PLAY bubble that starts a real play
+            // moment (feeds the PLAY daily + the pet's play counter).
+            // One-shot after a quest claim: consume the pending marker in a
+            // LaunchedEffect (never during composition — backwards write).
+            var nudgeBubble by remember { mutableStateOf(false) }
+            LaunchedEffect(CurioPet.pendingQuestNudge) {
+                if (CurioPet.consumeQuestNudge()) {
+                    nudgeBubble = true
+                    delay(3200)
+                    nudgeBubble = false
+                }
+            }
+            Box(contentAlignment = Alignment.Center) {
+                PetLandmark(
+                    id = "bed",
+                    kind = PetLandmarks.Kind.PLAY,
+                    screen = "home"
+                ) { m ->
+                    CurioPetHome(
+                        petInside = !CurioPet.awake || CurioPet.atHome ||
+                            !AppPreferences.floatingPetEnabledState,
+                        sleeping = !CurioPet.awake,
+                        homeSize = 52.dp,
+                        onTap = {
+                            when {
+                                !CurioPet.awake -> CurioPet.wake()
+                                CurioPet.atHome -> CurioPet.comeOut()
+                                else -> Unit // already floating — the bed is vacant
+                            }
+                        },
+                        contentDescription = when {
+                            !CurioPet.awake -> "Curie asleep in its flower bed. Tap to wake"
+                            CurioPet.atHome -> "Curie sitting in its flower bed. Tap to come out"
+                            else -> "Curie's flower bed"
+                        },
+                        modifier = m
+                    )
+                }
+                // One-shot quest-complete celebration bubble.
+                if (nudgeBubble && CurioPet.awake) {
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        shadowElevation = 6.dp,
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .offset(y = (-6).dp)
+                    ) {
+                        Text(
+                            text = "Quest done! +sparkles ✨",
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
+                        )
+                    }
+                }
+                // Quick PLAY bubble — visible when the pet is awake and at
+                // home: tap to start a play moment right from Home.
+                if (CurioPet.awake && CurioPet.atHome) {
+                    Surface(
+                        onClick = {
+                            // notePlay feeds the PLAY daily quest + persona
+                            // itself (v16); react=false skips the generic
+                            // line so the quick bubble stays quiet.
+                            CurioPet.notePlay(context, react = false)
+                        },
+                        shape = CircleShape,
+                        color = homeRoseAccent(),
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .offset(x = 6.dp, y = 6.dp)
+                            .size(26.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            CurioIcon(
+                                name = CurioIcons.PlayArrow,
+                                contentDescription = "Play with Curie",
+                                tint = Color.White,
+                                size = 15.dp
+                            )
                         }
-                    },
-                    contentDescription = when {
-                        !CurioPet.awake -> "Curie asleep in its flower bed. Tap to wake"
-                        CurioPet.atHome -> "Curie sitting in its flower bed. Tap to come out"
-                        else -> "Curie's flower bed"
-                    },
-                    modifier = m
-                )
+                    }
+                }
             }
         }
     } else null
@@ -812,6 +874,27 @@ fun HomeScreen(navController: NavController) {
             // v49 — one consistent 12dp section rhythm below the shuffle
             // deck: the old 20dp ends stacked with the 20dp spacer before
             // Saved (40dp of dead space when no session/queue is live).
+            Spacer(Modifier.height(12.dp))
+
+            // ── Today's quests — compact progress strip (v9.x) ─────────
+            // The day's three CORE dailies with live progress bars, so quest
+            // progress lives on Home, not only in the Quests screen. Tap
+            // anywhere to open Quests. Reads reactive state, so bars fill
+            // the instant an action lands.
+            // The strip's centering modifier lives HERE (ColumnScope — the
+            // same widthIn+align the quest block uses), not inside the
+            // composable: Modifier.align only exists on a ColumnScope.
+            HomeDailyStrip(
+                context = context,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .widthIn(max = if (windowWidthSizeClass().isWide) WideContentMaxWidth else Dp.Infinity)
+                    .align(Alignment.CenterHorizontally),
+                onClick = {
+                    navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true }
+                }
+            )
             Spacer(Modifier.height(12.dp))
 
             // ── 2. Currently exploring — live session card ──────────────
@@ -1524,6 +1607,97 @@ private fun TopBarPill(
 // Quest block — the big solid Shuffle CTA that lives between the hero
 // tear and the content below.
 // ═══════════════════════════════════════════════════════════════════════
+
+/**
+ * v9.x — the day's three CORE daily quests with live progress, so quest
+ * progress shows on Home. Tap opens the Quests screen. Bonus quests are
+ * intentionally hidden here (they only unlock after the core trio is
+ * claimed — Quests owns that reveal).
+ */
+@Composable
+private fun HomeDailyStrip(
+    context: Context,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    val quests = CurioQuests.dailyQuestsFor(CurioQuests.todayEpochDay(), context).filterNot { it.bonus }.take(3)
+    val awarded = CurioQuests.dailyAwardedState
+    val progress = CurioQuests.dailyProgressState
+    val doneCount = quests.count { it.id in awarded }
+    val accent = homeRoseAccent()
+    val ink = homeReadableInk(accent)
+    val allDone = doneCount == quests.size
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        color = if (allDone) accent.copy(alpha = 0.16f)
+        else MaterialTheme.colorScheme.surfaceContainerHigh,
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CurioIcon(
+                    name = CurioIcons.EmojiEvents,
+                    contentDescription = null,
+                    tint = ink,
+                    size = 16.dp
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "Today's quests · $doneCount/${quests.size}",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+                if (!allDone) {
+                    Text(
+                        text = "Open",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                        color = ink
+                    )
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+            quests.forEach { quest ->
+                val p = (progress[quest.kind.name] ?: 0).coerceIn(0, quest.target)
+                val done = quest.id in awarded
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 3.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = quest.title,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (done) ink else MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    Text(
+                        text = "$p/${quest.target}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                LinearProgressIndicator(
+                    progress = { p.toFloat() / quest.target.coerceAtLeast(1) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(50)),
+                    color = if (done) accent else ink,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            }
+        }
+    }
+}
 
 @Composable
 private fun QuestShuffleCard(

@@ -156,6 +156,30 @@ fun UserExperimentsScreen(navController: NavController) {
                 }
             }
 
+            // Content tools — non-toggle experiments
+            item { CurioSectionLabel("Content tools") }
+            item {
+                CurioSettingsCard(shadowElevation = 0.dp) {
+                    // v320 — the book-cover fetch is now a HUB of its own
+                    // (provider picker, retry-failed, keyless ratings).
+                    CurioSettingsRow(
+                        CurioIcons.MenuBook,
+                        "Book covers & ratings",
+                        // v320b — opt-out by default: surface the OFF state so
+                        // the row explains why nothing is downloading.
+                        if (!AppPreferences.bookFetchEnabledState) "OFF · open the hub to turn fetching on"
+                        else if (AppPreferences.bookCoverFailedState.isNotEmpty())
+                            "Open the hub · ${AppPreferences.bookCoverFailedState.size} failed covers to retry"
+                        else "Open the hub · fetch & retry covers, get ratings",
+                        onClick = {
+                            navController.navigate(com.curio.app.navigation.CurioRoutes.SETTINGS_BOOK_COVER) {
+                                launchSingleTop = true
+                            }
+                        }
+                    )
+                }
+            }
+
             // Pet & explore
             item { CurioSectionLabel("Pet & explore") }
             item {

@@ -48,6 +48,8 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
+import com.curio.app.data.CurioQuests
+import com.curio.app.data.LevelRewards
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.adaptive.isWide
@@ -125,6 +127,12 @@ val glassBackdrop = rememberLayerBackdrop()
         AppPreferences.setCategoryOrder(context, draft.map { it.id })
     }
 
+    // v9.x — custom lane order is a LEVEL REWARD: the drag-reorder + steppers
+    // stay locked until the player reaches the lane-order milestone, so XP
+    // has a concrete payoff. Hiding lanes stays open to everyone.
+    val reorderLevel = LevelRewards.laneOrderReward?.level ?: 5
+    val reorderUnlocked = CurioQuests.levelForXp(CurioQuests.xpState) >= reorderLevel
+
     // The hero banner runs up BEHIND the status bar (the shared header
     // applies its own status-bar inset for the back pill) — the settings
     // family construction, so the page tears from the very top edge. The
@@ -167,7 +175,48 @@ val glassBackdrop = rememberLayerBackdrop()
                 ),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                                // ── Helper text + Reset order — flat caption under the hero
+                                // v9.x — locked-reorder notice: explains the level gate and
+                // shows how far away it is when the player hasn't unlocked it.
+                if (!reorderUnlocked) {
+                    item("reorder-lock") {
+                        val remaining = reorderLevel - CurioQuests.levelForXp(CurioQuests.xpState)
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 4.dp, vertical = 6.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                CurioIcon(
+                                    name = CurioIcons.DragHandle,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    size = 18.dp
+                                )
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Custom order locked",
+                                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = "Reach Level $reorderLevel to reorder your lanes" +
+                                            " ($remaining level${if (remaining == 1) "" else "s"} to go). Hiding still works.",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ── Helper text + Reset order — flat caption under the hero
                 item("help") {
                     Row(
                         modifier = Modifier
@@ -206,12 +255,15 @@ val glassBackdrop = rememberLayerBackdrop()
                         isFirst = draft.firstOrNull()?.id == category.id,
                         isLast = draft.lastOrNull()?.id == category.id,
                         isDragging = draggingId == category.id,
+                        reorderEnabled = reorderUnlocked,
                         modifier = Modifier.animateItem(),
-                        onMoveUp = { shiftDraft(category.id, -1); persistDraft() },
-                        onMoveDown = { shiftDraft(category.id, +1); persistDraft() },
+                        onMoveUp = { if (reorderUnlocked) { shiftDraft(category.id, -1); persistDraft() } },
+                        onMoveDown = { if (reorderUnlocked) { shiftDraft(category.id, +1); persistDraft() } },
                         onDragStart = {
-                            draggingId = category.id
-                            dragAccum = 0f
+                            if (reorderUnlocked) {
+                                draggingId = category.id
+                                dragAccum = 0f
+                            }
                         },
                         onDragDelta = { dy ->
                             dragAccum += dy
@@ -274,6 +326,7 @@ private fun CategoryRow(
     isFirst: Boolean,
     isLast: Boolean,
     isDragging: Boolean = false,
+    reorderEnabled: Boolean = true,
     modifier: Modifier = Modifier,
     onMoveUp: () -> Unit,
     onMoveDown: () -> Unit,
@@ -308,43 +361,53 @@ private fun CategoryRow(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         // ── Reorder stepper + real drag handle (v26: long-press to drag) ──
+        // v9.x — the whole reorder column is level-gated: locked players see
+        // a dimmed lock icon instead of the handle, so the payoff is visible.
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(2.dp),
             modifier = Modifier
                 .size(width = 40.dp, height = 56.dp)
-                .pointerInput(category.id) {
-                    detectDragGesturesAfterLongPress(
-                        onDragStart = { onDragStart() },
-                        onDrag = { change, amount ->
-                            change.consume()
-                            onDragDelta(amount.y)
-                        },
-                        onDragEnd = { onDragEnd() },
-                        onDragCancel = { onDragCancel() }
-                    )
-                }
+                .then(
+                    if (reorderEnabled) {
+                        Modifier.pointerInput(category.id) {
+                            detectDragGesturesAfterLongPress(
+                                onDragStart = { onDragStart() },
+                                onDrag = { change, amount ->
+                                    change.consume()
+                                    onDragDelta(amount.y)
+                                },
+                                onDragEnd = { onDragEnd() },
+                                onDragCancel = { onDragCancel() }
+                            )
+                        }
+                    } else Modifier
+                )
         ) {
-            ReorderButton(
-                glyph = CurioIcons.KeyboardArrowUp,
-                enabled = !isFirst,
-                onClick = onMoveUp
-            )
+            if (reorderEnabled) {
+                ReorderButton(
+                    glyph = CurioIcons.KeyboardArrowUp,
+                    enabled = !isFirst,
+                    onClick = onMoveUp
+                )
+            }
             CurioIcon(
                 name = CurioIcons.DragHandle,
-                contentDescription = "Drag to reorder",
+                contentDescription = if (reorderEnabled) "Drag to reorder" else "Locked — reach the lane-order level",
                 tint = if (isDragging) {
                     MaterialTheme.colorScheme.primary
                 } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
+                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (reorderEnabled) 1f else 0.45f)
                 },
                 size = 20.dp
             )
-            ReorderButton(
-                glyph = CurioIcons.KeyboardArrowDown,
-                enabled = !isLast,
-                onClick = onMoveDown
-            )
+            if (reorderEnabled) {
+                ReorderButton(
+                    glyph = CurioIcons.KeyboardArrowDown,
+                    enabled = !isLast,
+                    onClick = onMoveDown
+                )
+            }
         }
 
         // ── Category icon chip — tinted rounded square (the drawer's icon
