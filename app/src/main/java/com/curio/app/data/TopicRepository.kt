@@ -172,6 +172,7 @@ object TopicRepository {
      */
     private suspend fun backfillBookContent(context: Context, dao: TopicDao) {
         TopicJsonLoader.install(context)
+        TopicJsonLoader.invalidate(CategoryId.BOOKS)
         runCatching {
             TopicJsonLoader.load(CategoryId.BOOKS).forEach { topic ->
                 val entity = TopicEntity.fromCurioTopic(topic)

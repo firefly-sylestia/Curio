@@ -24,6 +24,7 @@ import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -112,6 +113,7 @@ import com.curio.app.data.CurioPet
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.data.CurioCategory
+import com.curio.app.data.BookChapter
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSession
@@ -240,6 +242,8 @@ fun TopicRevealScreen(
     // duplicate title in another category must not open the wrong topic.
     val context = LocalContext.current
     var resolved by remember(topicName, cat.id) { mutableStateOf<CurioTopic?>(null) }
+    var showSynopsisDialog by rememberSaveable { mutableStateOf(false) }
+    var selectedChapter by remember { mutableStateOf<BookChapter?>(null) }
     LaunchedEffect(topicName, cat.id) {
         // Wait for the guarded one-time import before resolving. Reading the
         // cache during import was the source of intermittent blank reveals.
@@ -809,11 +813,13 @@ fun TopicRevealScreen(
                 if (bookTopic != null && bookTopic.categoryId == CategoryId.BOOKS &&
                     (bookTopic.synopsis != null || !bookTopic.chapters.isNullOrEmpty())) {
                     RevealContentEntrance(delayMillis = 60) {
-                        BookInfoSection(
-                            cat = cat,
-                            topic = bookTopic,
-                            modifier = Modifier.padding(top = if (hasTags) 16.dp else progressFloatGap)
-                        )
+                BookInfoSection(
+                    cat = cat,
+                    topic = bookTopic,
+                    onSynopsisClick = { showSynopsisDialog = true },
+                    onChapterClick = { selectedChapter = it },
+                    modifier = Modifier.padding(top = if (hasTags) 16.dp else progressFloatGap)
+                )
                     }
                 }
 
@@ -945,6 +951,23 @@ fun TopicRevealScreen(
             resolved?.let { ExploreSessionStore.recordUnexplored(context, cat.id, it.name) }
         }
         navController.popBackStack()
+    }
+
+    if (showSynopsisDialog && resolved?.synopsis != null) {
+        AlertDialog(
+            onDismissRequest = { showSynopsisDialog = false },
+            title = { Text("Synopsis") },
+            text = { Text(resolved?.synopsis.orEmpty(), modifier = Modifier.verticalScroll(rememberScrollState())) },
+            confirmButton = { TextButton(onClick = { showSynopsisDialog = false }) { Text("Close") } }
+        )
+    }
+    selectedChapter?.let { chapter ->
+        AlertDialog(
+            onDismissRequest = { selectedChapter = null },
+            title = { Text("Chapter ${chapter.number}: ${chapter.title}") },
+            text = { Text(chapter.summary) },
+            confirmButton = { TextButton(onClick = { selectedChapter = null }) { Text("Close") } }
+        )
     }
 
     if (showOverlayPermissionDialog) {
@@ -2068,7 +2091,7 @@ private fun HeroCard(
     } // HeroCard floating Box
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════���══════════════════
 // Book info section — synopsis overlay + chapter chips (books only)
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -2082,6 +2105,8 @@ private fun HeroCard(
 private fun BookInfoSection(
     cat: com.curio.app.data.CurioCategory,
     topic: CurioTopic,
+    onSynopsisClick: () -> Unit,
+    onChapterClick: (BookChapter) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val synopsis = topic.synopsis
@@ -2100,14 +2125,15 @@ private fun BookInfoSection(
                 cat = cat,
                 synopsis = synopsis,
                 imageUrl = imageUrl,
-                pageCount = topic.pageCount
-            )}
-        
-        // Chapter chips
+                pageCount = topic.pageCount,
+                onClick = onSynopsisClick
+            )
+        }
         if (!chapters.isNullOrEmpty()) {
             BookChapterChips(
                 cat = cat,
-                chapters = chapters
+                chapters = chapters,
+                onChapterClick = onChapterClick
             )
         }
     }
@@ -2122,13 +2148,14 @@ private fun BookSynopsisCard(
     synopsis: String,
     imageUrl: String,
     pageCount: Int?,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
         shape = RoundedCornerShape(24.dp),
         color = cat.categorySurface(MaterialTheme.colorScheme.surface),
         shadowElevation = 3.dp,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth().clickable(onClick = onClick)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Header row with icon
@@ -2214,6 +2241,7 @@ private fun BookSynopsisCard(
 private fun BookChapterChips(
     cat: com.curio.app.data.CurioCategory,
     chapters: List<com.curio.app.data.BookChapter>,
+    onChapterClick: (BookChapter) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -2259,7 +2287,8 @@ private fun BookChapterChips(
                 BookChapterChip(
                     cat = cat,
                     chapter = chapter,
-                    index = index
+                    index = index,
+                    onClick = { onChapterClick(chapter) }
                 )
             }
         }
@@ -2274,13 +2303,17 @@ private fun BookChapterChip(
     cat: com.curio.app.data.CurioCategory,
     chapter: com.curio.app.data.BookChapter,
     index: Int,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
         shadowElevation = 2.dp,
-        modifier = modifier.width(160.dp)
+        modifier = modifier
+            .width(160.dp)
+            .height(156.dp)
+            .clickable(onClick = onClick)
     ) {
         Column(
             modifier = Modifier.padding(12.dp),

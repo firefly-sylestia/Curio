@@ -229,6 +229,14 @@ object TopicJsonLoader {
      */
     fun cached(id: CategoryId): List<CurioTopic>? = cache[id]
 
+    /** Forces a bundled JSON refresh after an app update. */
+    fun invalidate(id: CategoryId) {
+        synchronized(cacheWriteLock) {
+            cacheGeneration += 1L
+            cache.remove(id)
+        }
+    }
+
     /**
      * Eagerly loads + caches the ten canonical category JSON files.
      * The derived WILDCARD pool is intentionally excluded: it duplicates
