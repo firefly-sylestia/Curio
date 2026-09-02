@@ -1,1432 +1,2840 @@
 [
- {
-  "id": "game-pong",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Pong (1972)",
-  "teaser": "Atari's first hit was a rejected idea — Nolan Bushnell copied table tennis after playing a Magnavox demo, and the game's 'failure to add coins' made it the first quarter-eating arcade phenomenon.",
-  "imageUrl": "",
-  "byline": "Atari",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Pong (1972) end-to-end",
-   "durationMinutes": 15,
-   "instruction": "Fun fact: the simplicity is the design. Read about Pong, then watch it on YouTube and notice the physics — the ball's angle is the whole game. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Arcade",
-   "Classic",
-   "Sports",
-   "1970s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-space-invaders",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Space Invaders (1978)",
-  "teaser": "The game that caused a Japanese coin shortage — the aliens speed up as you kill them because the CPU runs faster with fewer sprites, an accident that became the difficulty curve.",
-  "imageUrl": "",
-  "byline": "Taito",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Space Invaders (1978) end-to-end",
-   "durationMinutes": 20,
-   "instruction": "Fun fact: the 'invaders' march is the countdown. Read about Space Invaders, then watch it on YouTube and notice the speed-up — the CPU is the game designer. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Arcade",
-   "Shooter",
-   "Classic",
-   "1970s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-pac-man",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Pac-Man (1980)",
-  "teaser": "The first game with a mascot — the maze was hand-drawn as a single continuous line, and the ghosts' AI (Blinky, Pinky, Inky, Clyde) was designed so each one behaves differently.",
-  "imageUrl": "",
-  "byline": "Namco",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Pac-Man (1980) end-to-end",
-   "durationMinutes": 20,
-   "instruction": "Fun fact: the maze is a single line. Read about Pac-Man, then watch it on YouTube and notice the ghost personalities — each one has a real AI pattern. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Arcade",
-   "Classic",
-   "Maze",
-   "1980s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-donkey-kong",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Donkey Kong (1981)",
-  "teaser": "The game that introduced Mario (then 'Jumpman') — the barrels' physics are the game, and the 'skip screen' trick (the 22nd level kill screen) was a bug that became legend.",
-  "imageUrl": "",
-  "byline": "Nintendo",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Donkey Kong (1981) end-to-end",
-   "durationMinutes": 20,
-   "instruction": "Fun fact: the jump is the whole vocabulary. Read about Donkey Kong, then watch it on YouTube and notice the barrel physics — the timing is the game. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Arcade",
-   "Platformer",
-   "Classic",
-   "1980s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-super-mario-bros",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Super Mario Bros. (1985)",
-  "teaser": "The game that saved the video game industry after the 1983 crash — the level 1-1 was designed as a tutorial that teaches you to play without a single word. Super Mario Bros.",
-  "imageUrl": "",
-  "byline": "Nintendo",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Super Mario Bros. (1985) end-to-end",
-   "durationMinutes": 60,
-   "instruction": "Fun fact: the level is a lesson. Read about Super Mario Bros., then watch it on YouTube and notice the teaching — every hazard is introduced safely first. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Platformer",
-   "Classic",
-   "Adventure",
-   "1980s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-the-legend-of-zelda",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "The Legend of Zelda (1986)",
-  "teaser": "Shigeru Miyamoto designed it as a 'miniature garden' — the game famously has no linear path, and the 'it's dangerous to go alone' line is the most quoted in gaming.",
-  "imageUrl": "",
-  "byline": "Nintendo",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The Legend of Zelda (1986) end-to-end",
-   "durationMinutes": 90,
-   "instruction": "Fun fact: the exploration is the plot. Read about The Legend of Zelda, then watch it on YouTube and notice the openness — you can go anywhere. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Adventure",
-   "Action",
-   "Classic",
-   "1980s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-metroid",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Metroid (1986)",
-  "teaser": "The game that invented the 'Metroidvania' genre — the ending reveals the protagonist is a woman, a twist that was hidden until you finished the game.",
-  "imageUrl": "",
-  "byline": "Nintendo",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Metroid (1986) end-to-end",
-   "durationMinutes": 90,
-   "instruction": "Fun fact: the reveal is the reward. Read about Metroid, then watch it on YouTube and notice the locked doors — the backtracking is the design. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Action",
-   "Sci-Fi",
-   "Exploration",
-   "1980s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-final-fantasy-vii",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Final Fantasy VII (1997)",
-  "teaser": "The JRPG that made the genre global — the game's famous death scene is the moment the genre grew up, and the game's budget was so large it nearly bankrupted Square.",
-  "imageUrl": "",
-  "byline": "Square",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Final Fantasy VII (1997) end-to-end",
-   "durationMinutes": 240,
-   "instruction": "Fun fact: the story is the combat. Read about Final Fantasy VII, then watch it on YouTube and notice the scale — the game is a film in 1997 terms. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "RPG",
-   "Fantasy",
-   "Story",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-chrono-trigger",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Chrono Trigger (1995)",
-  "teaser": "Developed by the 'Dream Team' (Final Fantasy, Dragon Quest and Dragon Ball creators) — the game has 13 endings and no random encounters, a radical choice in 1995.",
-  "imageUrl": "",
-  "byline": "Square",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Chrono Trigger (1995) end-to-end",
-   "durationMinutes": 180,
-   "instruction": "Fun fact: the time travel is the structure. Read about Chrono Trigger, then watch it on YouTube and notice the pacing — no random battles, no filler. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "RPG",
-   "Time Travel",
-   "Story",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-sonic-the-hedgehog",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Sonic the Hedgehog (1991)",
-  "teaser": "Built to counter Mario — Sonic's speed was the answer to Mario's jump, and the first level's loop-the-loop was the first time a console game felt fast.",
-  "imageUrl": "",
-  "byline": "Sega",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Sonic the Hedgehog (1991) end-to-end",
-   "durationMinutes": 60,
-   "instruction": "Fun fact: the speed is the character. Read about Sonic the Hedgehog, then watch it on YouTube and notice the speed — the level is a rollercoaster. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Platformer",
-   "Action",
-   "Classic",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-street-fighter-ii",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Street Fighter II (1991)",
-  "teaser": "The fighting game that created the genre — every character had a unique move set, and the 'hadouken' became the most famous input in gaming history.",
-  "imageUrl": "",
-  "byline": "Capcom",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Street Fighter II (1991) end-to-end",
-   "durationMinutes": 60,
-   "instruction": "Fun fact: the roster is the game. Read about Street Fighter II, then watch it on YouTube and learn the special moves — the quarter-circle is the grammar. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Fighting",
-   "Arcade",
-   "Classic",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-mortal-kombat",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Mortal Kombat (1992)",
-  "teaser": "The game that caused the ESRB rating system — the digitized actors and fatalities were so violent that the US government held hearings on video game violence.",
-  "imageUrl": "",
-  "byline": "Midway",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Mortal Kombat (1992) end-to-end",
-   "durationMinutes": 45,
-   "instruction": "Fun fact: the controversy IS the marketing. Read about Mortal Kombat, then watch it on YouTube and notice the digitized realism — real actors, real motion. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Fighting",
-   "Arcade",
-   "Classic",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-doom",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Doom (1993)",
-  "teaser": "The game that defined the FPS — the engine was written in a week, and the game's shareware model (free first episode) made it the most-installed game of its era.",
-  "imageUrl": "",
-  "byline": "id Software",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Doom (1993) end-to-end",
-   "durationMinutes": 90,
-   "instruction": "Fun fact: the shareware was the marketing. Read about Doom, then watch it on YouTube and notice the level design — the geometry is the combat. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "FPS",
-   "Horror",
-   "Classic",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-quake",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Quake (1996)",
-  "teaser": "The first fully 3D FPS — the game's engine was so advanced it was licensed for decades, and the 'rocket jump' was an accident that became a skill.",
-  "imageUrl": "",
-  "byline": "id Software",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Quake (1996) end-to-end",
-   "durationMinutes": 90,
-   "instruction": "Fun fact: the rocket jump is the speedrun. Read about Quake, then watch it on YouTube and notice the 3D — the verticality is new. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "FPS",
-   "Sci-Fi",
-   "Classic",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-half-life",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Half-Life (1998)",
-  "teaser": "The game that invented the scripted FPS — the entire story happens in real time with no cutscenes, and the opening tram ride is a tutorial disguised as a commute.",
-  "imageUrl": "",
-  "byline": "Valve",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Half-Life (1998) end-to-end",
-   "durationMinutes": 120,
-   "instruction": "Fun fact: the story is the environment. Read about Half-Life, then watch it on YouTube and notice the scripted events — no cutscenes, all in-world. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "FPS",
-   "Sci-Fi",
-   "Story",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-portal",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Portal (2007)",
-  "teaser": "Built from a student project (Narbacular Drop) — the game's 'companion cube' and GLaDOS are the most quoted AI in gaming, and the ending song was written by the writer's band.",
-  "imageUrl": "",
-  "byline": "Valve",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Portal (2007) end-to-end",
-   "durationMinutes": 90,
-   "instruction": "Fun fact: the puzzle is the character. Read about Portal, then watch it on YouTube and notice the teaching — each test is a lesson. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Puzzle",
-   "First Person",
-   "Comedy",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-counter-strike",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Counter-Strike (2000)",
-  "teaser": "Born as a Half-Life mod — the game's economic system (buy rounds) became the template for tactical shooters, and its one-life-per-round tension defined esports.",
-  "imageUrl": "",
-  "byline": "Valve",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Counter-Strike (2000) end-to-end",
-   "durationMinutes": 120,
-   "instruction": "Fun fact: the tension is the design. Read about Counter-Strike, then watch it on YouTube and notice the economy — the buy system is the strategy. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "FPS",
-   "Multiplayer",
-   "Tactical",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-team-fortress-2",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Team Fortress 2 (2007)",
-  "teaser": "The class-based shooter with nine distinct characters — the game's 'Meet the Team' videos became the standard for game marketing, and the hats became a meme economy.",
-  "imageUrl": "",
-  "byline": "Valve",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Team Fortress 2 (2007) end-to-end",
-   "durationMinutes": 120,
-   "instruction": "Fun fact: the personality is the balance. Read about Team Fortress 2, then watch it on YouTube and notice the difference — the classes are the game. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "FPS",
-   "Multiplayer",
-   "Comedy",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-minecraft",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Minecraft (2011)",
-  "teaser": "The best-selling game of all time — built from a 'cave game' prototype in a week, and the game's 'crafting table' UI was designed in a single night.",
-  "imageUrl": "",
-  "byline": "Mojang",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Minecraft (2011) end-to-end",
-   "durationMinutes": 180,
-   "instruction": "Fun fact: the block is the entire vocabulary. Read about Minecraft, then watch it on YouTube and notice the survival loop — dig, build, survive. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Sandbox",
-   "Survival",
-   "Creative",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-tetris",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Tetris (1984)",
-  "teaser": "Built on a Soviet computer by a mathematician — the game's 'tetromino' shapes are the plot, and the 'Tetris effect' (seeing blocks in your sleep) is a real psychological phenomenon.",
-  "imageUrl": "",
-  "byline": "Alexey Pajitnov",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Tetris (1984) end-to-end",
-   "durationMinutes": 45,
-   "instruction": "Fun fact: the geometry is the game. Read about Tetris, then watch it on YouTube and notice the piece selection — the randomness is the challenge. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Puzzle",
-   "Classic",
-   "Arcade",
-   "1980s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-pokemon-red-and-blue",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Pokémon Red and Blue (1996)",
-  "teaser": "The monster-catching RPG that became a global phenomenon — the 'MissingNo' glitch became a legend, and the game's social element (trading) was the original multiplayer.",
-  "imageUrl": "",
-  "byline": "Game Freak",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Pokémon Red and Blue (1996) end-to-end",
-   "durationMinutes": 240,
-   "instruction": "Fun fact: the trading is the multiplayer. Read about Pokémon Red and Blue, then watch it on YouTube and notice the design — the 'catch' is the hook. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "RPG",
-   "Monster",
-   "Classic",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-goldeneye-007",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "GoldenEye 007 (1997)",
-  "teaser": "The movie tie-in that became a legend — the four-player split-screen was a late addition that defined the console FPS, and the game's 'Oddjob' controversy was the first balance debate.",
-  "imageUrl": "",
-  "byline": "Rare",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "GoldenEye 007 (1997) end-to-end",
-   "durationMinutes": 120,
-   "instruction": "Fun fact: the multiplayer was an afterthought. Read about GoldenEye 007, then watch it on YouTube and notice the level design — the mission is the stealth. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "FPS",
-   "Spy",
-   "Classic",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-super-mario-64",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Super Mario 64 (1996)",
-  "teaser": "The game that taught the industry how to do 3D — the camera system was invented from scratch, and the first level's opening was a crash course in 3D movement.",
-  "imageUrl": "",
-  "byline": "Nintendo",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Super Mario 64 (1996) end-to-end",
-   "durationMinutes": 120,
-   "instruction": "Fun fact: the 3D is the learning. Read about Super Mario 64, then watch it on YouTube and notice the camera — the controls are the design. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Platformer",
-   "3D",
-   "Classic",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-the-legend-of-zelda-ocarina-of-time",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "The Legend of Zelda: Ocarina of Time (1998)",
-  "teaser": "Considered by many the greatest game ever made — the time-travel structure (young/old Link) was a technical breakthrough, and the game's 'Z-targeting' lock-on became the 3D action standard.",
-  "imageUrl": "",
-  "byline": "Nintendo",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The Legend of Zelda: Ocarina of Time (1998) end-to-end",
-   "durationMinutes": 240,
-   "instruction": "Fun fact: the time travel is the structure. Read about The Legend of Zelda: Ocarina of Time, then watch it on YouTube and notice the lock-on — the combat is the design. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Adventure",
-   "Action",
-   "3D",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-resident-evil",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Resident Evil (1996)",
-  "teaser": "The game that invented survival horror — the 'tank controls' were a design accident, and the game's famous 'zombie dog' jump scare was a programming bug that was kept.",
-  "imageUrl": "",
-  "byline": "Capcom",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Resident Evil (1996) end-to-end",
-   "durationMinutes": 120,
-   "instruction": "Fun fact: the horror is the economy. Read about Resident Evil, then watch it on YouTube and notice the resource management — the ammo IS the tension. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Survival Horror",
-   "Action",
-   "Classic",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-silent-hill",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Silent Hill (1999)",
-  "teaser": "The horror game that replaced monsters with psychology — the fog was a technical limitation that became the atmosphere, and the game's 'otherworld' is a descent into the protagonist's mind.",
-  "imageUrl": "",
-  "byline": "Konami",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Silent Hill (1999) end-to-end",
-   "durationMinutes": 120,
-   "instruction": "Fun fact: the horror is the psychology. Read about Silent Hill, then watch it on YouTube and notice the fog — the limitation is the design. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Survival Horror",
-   "Psychological",
-   "Classic",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-metal-gear-solid",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Metal Gear Solid (1998)",
-  "teaser": "The game that made stealth a genre — the 'Psycho Mantis' boss fight (which reads your memory card) is the most famous fourth-wall break in gaming.",
-  "imageUrl": "",
-  "byline": "Konami",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Metal Gear Solid (1998) end-to-end",
-   "durationMinutes": 150,
-   "instruction": "Fun fact: the boss fights are the philosophy. Read about Metal Gear Solid, then watch it on YouTube and notice the stealth — the radar is the game. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Stealth",
-   "Action",
-   "Story",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-halo-combat-evolved",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Halo: Combat Evolved (2001)",
-  "teaser": "The game that made the Xbox — the two-weapon limit and regenerating shields became the FPS standard, and the 'flood' reveal is one of gaming's best twists.",
-  "imageUrl": "",
-  "byline": "Bungie",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Halo: Combat Evolved (2001) end-to-end",
-   "durationMinutes": 180,
-   "instruction": "Fun fact: the 'ring' is the level. Read about Halo: Combat Evolved, then watch it on YouTube and notice the shield — the health design is the game. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "FPS",
-   "Sci-Fi",
-   "Action",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-grand-theft-auto-iii",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Grand Theft Auto III (2001)",
-  "teaser": "The game that made open worlds mainstream — the 'sandbox' design was a technical gamble, and the radio stations became the game's real soul.",
-  "imageUrl": "",
-  "byline": "Rockstar",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Grand Theft Auto III (2001) end-to-end",
-   "durationMinutes": 240,
-   "instruction": "Fun fact: the radio is the character. Read about Grand Theft Auto III, then watch it on YouTube and notice the freedom — the city IS the game. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Open World",
-   "Action",
-   "Crime",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-grand-theft-auto-v",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Grand Theft Auto V (2013)",
-  "teaser": "The most expensive game ever made at $265M — the three-protagonist structure was the design answer to GTA IV's linearity, and the game's heist missions are the set pieces.",
-  "imageUrl": "",
-  "byline": "Rockstar",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Grand Theft Auto V (2013) end-to-end",
-   "durationMinutes": 300,
-   "instruction": "Fun fact: the three characters are the game's three genres. Read about Grand Theft Auto V, then watch it on YouTube and notice the planning — the structure is the design. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Open World",
-   "Action",
-   "Crime",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-the-elder-scrolls-v-skyrim",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "The Elder Scrolls V: Skyrim (2011)",
-  "teaser": "The game that 'you can play forever' — the 'arrow to the knee' guard line became a global meme, and the game's mod support made it a decade-long phenomenon.",
-  "imageUrl": "",
-  "byline": "Bethesda",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The Elder Scrolls V: Skyrim (2011) end-to-end",
-   "durationMinutes": 300,
-   "instruction": "Fun fact: the mods are the longevity. Read about The Elder Scrolls V: Skyrim, then watch it on YouTube and notice the freedom — the world is the game. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "RPG",
-   "Open World",
-   "Fantasy",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-fallout-new-vegas",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Fallout: New Vegas (2010)",
-  "teaser": "The RPG with the most branching stories in the genre — every faction is morally gray, and the game's 'Hardcore mode' was the design answer to immersion.",
-  "imageUrl": "",
-  "byline": "Obsidian",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Fallout: New Vegas (2010) end-to-end",
-   "durationMinutes": 300,
-   "instruction": "Fun fact: the writing is the combat. Read about Fallout: New Vegas, then watch it on YouTube and notice the factions — every choice has a cost. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "RPG",
-   "Post-Apocalyptic",
-   "Open World",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-mass-effect-2",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Mass Effect 2 (2010)",
-  "teaser": "The game where your choices determine who lives and dies — the 'suicide mission' finale is the most famous consequence system in gaming, and the game's characters are its real draw.",
-  "imageUrl": "",
-  "byline": "BioWare",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Mass Effect 2 (2010) end-to-end",
-   "durationMinutes": 240,
-   "instruction": "Fun fact: the ending is the consequence. Read about Mass Effect 2, then watch it on YouTube — the loyalty is the mechanic. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "RPG",
-   "Sci-Fi",
-   "Story",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-the-witcher-3-wild-hunt",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "The Witcher 3: Wild Hunt (2015)",
-  "teaser": "The RPG that redefined side quests — every contract has a moral choice, and the 'Bloody Baron' quest is considered the best-written quest in gaming.",
-  "imageUrl": "",
-  "byline": "CD Projekt Red",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The Witcher 3: Wild Hunt (2015) end-to-end",
-   "durationMinutes": 360,
-   "instruction": "Fun fact: the side quests are the story. Read about The Witcher 3: Wild Hunt, then watch it on YouTube and notice the choices — every answer has a cost. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "RPG",
-   "Fantasy",
-   "Open World",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-dark-souls",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Dark Souls (2011)",
-  "teaser": "The game that made difficulty a design philosophy — the 'Souls-like' genre was born here, and the game's lore is hidden in item descriptions instead of cutscenes.",
-  "imageUrl": "",
-  "byline": "FromSoftware",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Dark Souls (2011) end-to-end",
-   "durationMinutes": 300,
-   "instruction": "Fun fact: the lore is the exploration. Read about Dark Souls, then watch it on YouTube and notice the level design — the shortcut is the reward. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Action RPG",
-   "Dark Fantasy",
-   "Challenging",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-bloodborne",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Bloodborne (2015)",
-  "teaser": "The faster, more aggressive sibling of Dark Souls — the 'regain' mechanic (heal by attacking) changed the combat philosophy, and the game's Lovecraftian horror is its real setting.",
-  "imageUrl": "",
-  "byline": "FromSoftware",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Bloodborne (2015) end-to-end",
-   "durationMinutes": 300,
-   "instruction": "Fun fact: the horror is the genre. Read about Bloodborne, then watch it on YouTube and notice the regain — the aggression is the design. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Action RPG",
-   "Gothic",
-   "Challenging",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-elden-ring",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Elden Ring (2022)",
-  "teaser": "The open-world Souls game with lore written by George R.R. Martin — it sold 20M+ copies and won Game of the Year, and the 'open world' is the first in the genre that respects discovery.",
-  "imageUrl": "",
-  "byline": "FromSoftware",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Elden Ring (2022) end-to-end",
-   "durationMinutes": 360,
-   "instruction": "Fun fact: the open world is the dungeon. Read about Elden Ring, then watch it on YouTube and notice the discovery — the map rewards curiosity. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Action RPG",
-   "Open World",
-   "Challenging",
-   "2020s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-god-of-war-2018",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "God of War (2018) (2018)",
-  "teaser": "The reboot that turned a rage god into a father — the one-shot camera (no cuts) was a technical feat, and the game's real subject is parenting and legacy.",
-  "imageUrl": "",
-  "byline": "Santa Monica Studio",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "God of War (2018) (2018) end-to-end",
-   "durationMinutes": 240,
-   "instruction": "Fun fact: the axe is the character. Read about God of War (2018), then watch it on YouTube and notice the camera — one continuous shot. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Action",
-   "Adventure",
-   "Mythology",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-the-last-of-us",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "The Last of Us (2013)",
-  "teaser": "The game that made video game stories cinematic — the 'giraffe scene' became the most discussed moment in gaming, and the game's ending is a deliberate moral test.",
-  "imageUrl": "",
-  "byline": "Naughty Dog",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The Last of Us (2013) end-to-end",
-   "durationMinutes": 240,
-   "instruction": "Fun fact: the story is the gameplay. Read about The Last of Us, then watch it on YouTube and notice the opening — the prologue is the thesis. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Action",
-   "Survival",
-   "Story",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-uncharted-2-among-thieves",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Uncharted 2: Among Thieves (2009)",
-  "teaser": "The game that made action set-pieces cinematic — the opening train sequence is considered the best in gaming, and the game's 'impossible' set pieces are the draw.",
-  "imageUrl": "",
-  "byline": "Naughty Dog",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Uncharted 2: Among Thieves (2009) end-to-end",
-   "durationMinutes": 180,
-   "instruction": "Fun fact: the spectacle is the craft. Read about Uncharted 2: Among Thieves, then watch it on YouTube and notice the set-piece design — the action IS the story. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Action",
-   "Adventure",
-   "Platformer",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-red-dead-redemption-2",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Red Dead Redemption 2 (2018)",
-  "teaser": "The most detailed open world ever made — every NPC has a life, and the game's epilogue is a meditation on endings and honor.",
-  "imageUrl": "",
-  "byline": "Rockstar",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Red Dead Redemption 2 (2018) end-to-end",
-   "durationMinutes": 360,
-   "instruction": "Fun fact: the tragedy is the structure. Read about Red Dead Redemption 2, then watch it on YouTube and notice the detail — the world is alive. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Open World",
-   "Western",
-   "Story",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-the-legend-of-zelda-breath-of-the-wild",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "The Legend of Zelda: Breath of the Wild (2017)",
-  "teaser": "The game that reinvented open worlds — you can climb anything, and the game's physics engine is a real simulation. The 'it's dangerous to go alone' tradition continues in the Glider.",
-  "imageUrl": "",
-  "byline": "Nintendo",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "The Legend of Zelda: Breath of the Wild (2017) end-to-end",
-   "durationMinutes": 360,
-   "instruction": "Fun fact: the climb is the answer. Read about The Legend of Zelda: Breath of the Wild, then watch it on YouTube and notice the freedom — the physics IS the game. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Open World",
-   "Adventure",
-   "Action",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-super-mario-odyssey",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Super Mario Odyssey (2017)",
-  "teaser": "The 3D Mario that added a companion — Cappy (the hat) is the game's mechanic and character, and the game's 'New Donk City' is the most playful level in the series.",
-  "imageUrl": "",
-  "byline": "Nintendo",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Super Mario Odyssey (2017) end-to-end",
-   "durationMinutes": 240,
-   "instruction": "Fun fact: the power-up is the character. Read about Super Mario Odyssey, then watch it on YouTube and notice the hat — the capture mechanic is the design. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Platformer",
-   "3D",
-   "Adventure",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-celeste",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Celeste (2018)",
-  "teaser": "The platformer about anxiety disguised as a mountain climb — the game's 'assist mode' was a design statement, and the story of Madeline's climb is the game's real content.",
-  "imageUrl": "",
-  "byline": "Maddy Makes Games",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Celeste (2018) end-to-end",
-   "durationMinutes": 180,
-   "instruction": "Fun fact: the difficulty is the therapy. Read about Celeste, then watch it on YouTube and notice the theme — the mountain is the metaphor. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Platformer",
-   "Indie",
-   "Story",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-hollow-knight",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Hollow Knight (2017)",
-  "teaser": "The indie Metroidvania that defined the genre's modern era — the hand-drawn world is a single connected map, and the game's lore is buried in the world itself.",
-  "imageUrl": "",
-  "byline": "Team Cherry",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Hollow Knight (2017) end-to-end",
-   "durationMinutes": 300,
-   "instruction": "Fun fact: the world is the story. Read about Hollow Knight, then watch it on YouTube and notice the map — the exploration is the game. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Metroidvania",
-   "Indie",
-   "Action",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-undertale",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Undertale (2015)",
-  "teaser": "The RPG where you can finish without killing anyone — the 'mercy' mechanic is the game's thesis, and the game's music was composed on a laptop by one person.",
-  "imageUrl": "",
-  "byline": "Toby Fox",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Undertale (2015) end-to-end",
-   "durationMinutes": 120,
-   "instruction": "Fun fact: the violence is the choice. Read about Undertale, then watch it on YouTube and notice the mercy — the pacifist path is the design. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "RPG",
-   "Indie",
-   "Comedy",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-hades",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Hades (2020)",
-  "teaser": "The roguelike where death is the story — the 'escape attempts' are the narrative, and the game's characters remember your failures.",
-  "imageUrl": "",
-  "byline": "Supergiant Games",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Hades (2020) end-to-end",
-   "durationMinutes": 240,
-   "instruction": "Fun fact: the roguelike IS the narrative. Read about Hades, then watch it on YouTube and notice the story — the deaths are the content. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Roguelike",
-   "Action",
-   "Story",
-   "2020s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-stardew-valley",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Stardew Valley (2016)",
-  "teaser": "Built by one person over four years — the farming sim is a love letter to Harvest Moon, and the game's real content is the community of Pelican Town.",
-  "imageUrl": "",
-  "byline": "ConcernedApe",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Stardew Valley (2016) end-to-end",
-   "durationMinutes": 300,
-   "instruction": "Fun fact: the farming is the rhythm. Read about Stardew Valley, then watch it on YouTube and notice the community — the town is the game. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Simulation",
-   "Farming",
-   "Indie",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-animal-crossing-new-horizons",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Animal Crossing: New Horizons (2020)",
-  "teaser": "The game that defined the pandemic lockdown — the real-time clock and island economy made it a cultural phenomenon, and the game's design philosophy is 'no pressure, ever'.",
-  "imageUrl": "",
-  "byline": "Nintendo",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Animal Crossing: New Horizons (2020) end-to-end",
-   "durationMinutes": 300,
-   "instruction": "Fun fact: the gentleness is the design. Read about Animal Crossing: New Horizons, then watch it on YouTube and notice the real-time — the clock is the game. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Simulation",
-   "Life",
-   "Relaxing",
-   "2020s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-among-us",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Among Us (2018)",
-  "teaser": "The social deduction game that exploded during lockdown — the game's 'emergency meeting' format became a genre, and the game's simple graphics are the point.",
-  "imageUrl": "",
-  "byline": "Innersloth",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Among Us (2018) end-to-end",
-   "durationMinutes": 60,
-   "instruction": "Fun fact: the simplicity is the design. Read about Among Us, then watch it on YouTube and notice the social gameplay — the deduction is the game. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Multiplayer",
-   "Social Deduction",
-   "Party",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-fortnite",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Fortnite (2017)",
-  "teaser": "The battle royale that became a cultural platform — the building mechanic is the differentiator, and the game's live events (concerts, crossovers) made it a metaverse.",
-  "imageUrl": "",
-  "byline": "Epic Games",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Fortnite (2017) end-to-end",
-   "durationMinutes": 180,
-   "instruction": "Fun fact: the live events are the culture. Read about Fortnite, then watch it on YouTube and notice the building — the mechanic is the game. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Battle Royale",
-   "Multiplayer",
-   "Shooter",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-league-of-legends",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "League of Legends (2009)",
-  "teaser": "The game that made esports mainstream — the 'MOBA' genre was defined by it, and the game's champion roster (160+) is the deepest character design in gaming.",
-  "imageUrl": "",
-  "byline": "Riot Games",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "League of Legends (2009) end-to-end",
-   "durationMinutes": 240,
-   "instruction": "Fun fact: the champions are the depth. Read about League of Legends, then watch it on YouTube and notice the roles — the team composition is the strategy. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "MOBA",
-   "Multiplayer",
-   "Strategy",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-world-of-warcraft",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "World of Warcraft (2004)",
-  "teaser": "The MMO that made online worlds mainstream — the game's 'dance' and 'leeroy jenkins' moments became internet history, and the game's community is its real content.",
-  "imageUrl": "",
-  "byline": "Blizzard",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "World of Warcraft (2004) end-to-end",
-   "durationMinutes": 360,
-   "instruction": "Fun fact: the scale is the design. Read about World of Warcraft, then watch it on YouTube and notice the world — the community is the game. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "MMORPG",
-   "Fantasy",
-   "Multiplayer",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-starcraft",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "StarCraft (1998)",
-  "teaser": "The RTS that defined competitive gaming — the game's balance (Protoss/Zerg/Terran) is still studied, and the game made South Korean esports a national sport.",
-  "imageUrl": "",
-  "byline": "Blizzard",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "StarCraft (1998) end-to-end",
-   "durationMinutes": 240,
-   "instruction": "Fun fact: the balance is the esport. Read about StarCraft, then watch it on YouTube and notice the factions — the asymmetry is the design. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "RTS",
-   "Sci-Fi",
-   "Strategy",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-civilization-vi",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Civilization VI (2016)",
-  "teaser": "The 'one more turn' game — the tech tree and district system are the design, and the game's real content is the history it teaches.",
-  "imageUrl": "",
-  "byline": "Firaxis",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Civilization VI (2016) end-to-end",
-   "durationMinutes": 360,
-   "instruction": "Fun fact: the history is the content. Read about Civilization VI, then watch it on YouTube and notice the districts — the placement is the strategy. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Strategy",
-   "4X",
-   "Historical",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-age-of-empires-ii",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Age of Empires II (1999)",
-  "teaser": "The RTS that is still played competitively 25 years later — the game's 'wololo' (conversion) meme is internet history, and the game's campaigns are history lessons.",
-  "imageUrl": "",
-  "byline": "Ensemble Studios",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Age of Empires II (1999) end-to-end",
-   "durationMinutes": 240,
-   "instruction": "Fun fact: the history is the content. Read about Age of Empires II, then watch it on YouTube — it's the tutorial. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "RTS",
-   "Strategy",
-   "Historical",
-   "1990s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-diablo-ii",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Diablo II (2000)",
-  "teaser": "The game that invented the loot ARPG genre — the 'item hunt' is the game, and the game's rune system created an economy still alive today.",
-  "imageUrl": "",
-  "byline": "Blizzard",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Diablo II (2000) end-to-end",
-   "durationMinutes": 360,
-   "instruction": "Fun fact: the item hunt is the depth. Read about Diablo II, then watch it on YouTube and notice the loot — the drops are the game. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Action RPG",
-   "Loot",
-   "Dark Fantasy",
-   "2000s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-journey",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Journey (2012)",
-  "teaser": "The art game that made games 'art' — the anonymous co-op (you meet strangers without names) is the design, and the game's emotional ending is a thesis on connection.",
-  "imageUrl": "",
-  "byline": "thatgamecompany",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Journey (2012) end-to-end",
-   "durationMinutes": 90,
-   "instruction": "Fun fact: the anonymity is the design. Read about Journey, then watch it on YouTube — the companion is the game. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Adventure",
-   "Art",
-   "Multiplayer",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-disco-elysium",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Disco Elysium (2019)",
-  "teaser": "The RPG with no combat — the 'skills' are voices in your head, and the game's political dialogues are the actual gameplay.",
-  "imageUrl": "",
-  "byline": "ZA/UM",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Disco Elysium (2019) end-to-end",
-   "durationMinutes": 300,
-   "instruction": "Fun fact: the dialogue is the combat. Read about Disco Elysium, then watch it on YouTube and notice the skills — the internal voices are the game. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "RPG",
-   "Mystery",
-   "Narrative",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-baldur-s-gate-3",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Baldur's Gate 3 (2023)",
-  "teaser": "The CRPG that won Game of the Year 2023 — the game's reactivity (every choice matters) is the design, and the game's companion romances became cultural moments.",
-  "imageUrl": "",
-  "byline": "Larian Studios",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Baldur's Gate 3 (2023) end-to-end",
-   "durationMinutes": 360,
-   "instruction": "Fun fact: the freedom is the design. Read about Baldur's Gate 3, then watch it on YouTube and notice the choices — the dice are the tension. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "RPG",
-   "Fantasy",
-   "Strategy",
-   "2020s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-cyberpunk-2077",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Cyberpunk 2077 (2020)",
-  "teaser": "The game that launched broken and was fixed into a masterpiece — the 2.0 update and Phantom Liberty DLC redeemed it, and the game's world design is the best realized cyberpunk in games.",
-  "imageUrl": "",
-  "byline": "CD Projekt Red",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Cyberpunk 2077 (2020) end-to-end",
-   "durationMinutes": 360,
-   "instruction": "Fun fact: the redemption is the story. Read about Cyberpunk 2077, then watch it on YouTube and notice the world — the city is the character. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "RPG",
-   "Sci-Fi",
-   "Open World",
-   "2020s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-persona-5",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Persona 5 (2016)",
-  "teaser": "The stylish JRPG about rebellious teens — the 'phantom thieves' frame is the design, and the game's calendar system (days matter) is the tension.",
-  "imageUrl": "",
-  "byline": "Atlus",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Persona 5 (2016) end-to-end",
-   "durationMinutes": 360,
-   "instruction": "Fun fact: the style is the substance. Read about Persona 5, then watch it on YouTube and notice the calendar — the time is the resource. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "RPG",
-   "Social",
-   "Stylish",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-sekiro-shadows-die-twice",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Sekiro: Shadows Die Twice (2019)",
-  "teaser": "The FromSoftware game that replaced rolls with parries — the 'posture' system is the design, and the game won Game of the Year 2019.",
-  "imageUrl": "",
-  "byline": "FromSoftware",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Sekiro: Shadows Die Twice (2019) end-to-end",
-   "durationMinutes": 300,
-   "instruction": "Fun fact: the duel is the design. Read about Sekiro: Shadows Die Twice, then watch it on YouTube and notice the posture — the parry is the game. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Action",
-   "Samurai",
-   "Challenging",
-   "2010s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-doom-eternal",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Doom Eternal (2020)",
-  "teaser": "The FPS where you're the demon — the 'glory kill' and resource loop (you must kill to heal) is the design, and the game's combat is a puzzle.",
-  "imageUrl": "",
-  "byline": "id Software",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Doom Eternal (2020) end-to-end",
-   "durationMinutes": 180,
-   "instruction": "Fun fact: the aggression is the design. Read about Doom Eternal, then watch it on YouTube and notice the loop — the kills are the resources. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "FPS",
-   "Action",
-   "Fast",
-   "2020s"
-  ],
-  "tier": 1
- },
- {
-  "id": "game-papers-please",
-  "categoryId": "GAMES",
-  "subtype": "Game",
-  "name": "Papers, Please (2013)",
-  "teaser": "The border guard simulation — the 'glory to Arstotzka' bureaucracy is the game, and the moral choices are the real content.",
-  "imageUrl": "",
-  "byline": "Lucas Pope",
-  "exploreAction": {
-   "verb": "Watch",
-   "targetName": "Papers, Please (2013) end-to-end",
-   "durationMinutes": 120,
-   "instruction": "Fun fact: the morality is the tension. Read about Papers, Please, then watch it on YouTube and notice the rules — the bureaucracy is the game. If it looks fun, you can try a similar game."
-  },
-  "tags": [
-   "Simulation",
-   "Moral",
-   "Indie",
-   "2010s"
-  ],
-  "tier": 1
- }
+  {
+    "id": "game-pong",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Pong (1972)",
+    "teaser": "Atari's first hit was a rejected idea — Nolan Bushnell copied table tennis after playing a Magnavox demo, and the game's 'failure to add coins' made it the first quarter-eating arcade phenomenon.",
+    "imageUrl": "",
+    "byline": "Atari",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Pong (1972) end-to-end",
+      "durationMinutes": 15,
+      "instruction": "Fun fact: the simplicity is the design. Read about Pong, then watch it on YouTube and notice the physics — the ball's angle is the whole game. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Arcade",
+      "Classic",
+      "Sports",
+      "1970s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-space-invaders",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Space Invaders (1978)",
+    "teaser": "The game that caused a Japanese coin shortage — the aliens speed up as you kill them because the CPU runs faster with fewer sprites, an accident that became the difficulty curve.",
+    "imageUrl": "",
+    "byline": "Taito",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Space Invaders (1978) end-to-end",
+      "durationMinutes": 20,
+      "instruction": "Fun fact: the 'invaders' march is the countdown. Read about Space Invaders, then watch it on YouTube and notice the speed-up — the CPU is the game designer. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Arcade",
+      "Shooter",
+      "Classic",
+      "1970s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-pac-man",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Pac-Man (1980)",
+    "teaser": "The first game with a mascot — the maze was hand-drawn as a single continuous line, and the ghosts' AI (Blinky, Pinky, Inky, Clyde) was designed so each one behaves differently.",
+    "imageUrl": "",
+    "byline": "Namco",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Pac-Man (1980) end-to-end",
+      "durationMinutes": 20,
+      "instruction": "Fun fact: the maze is a single line. Read about Pac-Man, then watch it on YouTube and notice the ghost personalities — each one has a real AI pattern. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Arcade",
+      "Classic",
+      "Maze",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-donkey-kong",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Donkey Kong (1981)",
+    "teaser": "The game that introduced Mario (then 'Jumpman') — the barrels' physics are the game, and the 'skip screen' trick (the 22nd level kill screen) was a bug that became legend.",
+    "imageUrl": "",
+    "byline": "Nintendo",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Donkey Kong (1981) end-to-end",
+      "durationMinutes": 20,
+      "instruction": "Fun fact: the jump is the whole vocabulary. Read about Donkey Kong, then watch it on YouTube and notice the barrel physics — the timing is the game. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Arcade",
+      "Platformer",
+      "Classic",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-super-mario-bros",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Super Mario Bros. (1985)",
+    "teaser": "The game that saved the video game industry after the 1983 crash — the level 1-1 was designed as a tutorial that teaches you to play without a single word. Super Mario Bros.",
+    "imageUrl": "",
+    "byline": "Nintendo",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Super Mario Bros. (1985) end-to-end",
+      "durationMinutes": 60,
+      "instruction": "Fun fact: the level is a lesson. Read about Super Mario Bros., then watch it on YouTube and notice the teaching — every hazard is introduced safely first. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Platformer",
+      "Classic",
+      "Adventure",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-the-legend-of-zelda",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "The Legend of Zelda (1986)",
+    "teaser": "Shigeru Miyamoto designed it as a 'miniature garden' — the game famously has no linear path, and the 'it's dangerous to go alone' line is the most quoted in gaming.",
+    "imageUrl": "",
+    "byline": "Nintendo",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Legend of Zelda (1986) end-to-end",
+      "durationMinutes": 90,
+      "instruction": "Fun fact: the exploration is the plot. Read about The Legend of Zelda, then watch it on YouTube and notice the openness — you can go anywhere. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Adventure",
+      "Action",
+      "Classic",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-metroid",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Metroid (1986)",
+    "teaser": "The game that invented the 'Metroidvania' genre — the ending reveals the protagonist is a woman, a twist that was hidden until you finished the game.",
+    "imageUrl": "",
+    "byline": "Nintendo",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Metroid (1986) end-to-end",
+      "durationMinutes": 90,
+      "instruction": "Fun fact: the reveal is the reward. Read about Metroid, then watch it on YouTube and notice the locked doors — the backtracking is the design. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Action",
+      "Sci-Fi",
+      "Exploration",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-final-fantasy-vii",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Final Fantasy VII (1997)",
+    "teaser": "The JRPG that made the genre global — the game's famous death scene is the moment the genre grew up, and the game's budget was so large it nearly bankrupted Square.",
+    "imageUrl": "",
+    "byline": "Square",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Final Fantasy VII (1997) end-to-end",
+      "durationMinutes": 240,
+      "instruction": "Fun fact: the story is the combat. Read about Final Fantasy VII, then watch it on YouTube and notice the scale — the game is a film in 1997 terms. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "RPG",
+      "Fantasy",
+      "Story",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-chrono-trigger",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Chrono Trigger (1995)",
+    "teaser": "Developed by the 'Dream Team' (Final Fantasy, Dragon Quest and Dragon Ball creators) — the game has 13 endings and no random encounters, a radical choice in 1995.",
+    "imageUrl": "",
+    "byline": "Square",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Chrono Trigger (1995) end-to-end",
+      "durationMinutes": 180,
+      "instruction": "Fun fact: the time travel is the structure. Read about Chrono Trigger, then watch it on YouTube and notice the pacing — no random battles, no filler. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "RPG",
+      "Time Travel",
+      "Story",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-sonic-the-hedgehog",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Sonic the Hedgehog (1991)",
+    "teaser": "Built to counter Mario — Sonic's speed was the answer to Mario's jump, and the first level's loop-the-loop was the first time a console game felt fast.",
+    "imageUrl": "",
+    "byline": "Sega",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Sonic the Hedgehog (1991) end-to-end",
+      "durationMinutes": 60,
+      "instruction": "Fun fact: the speed is the character. Read about Sonic the Hedgehog, then watch it on YouTube and notice the speed — the level is a rollercoaster. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Platformer",
+      "Action",
+      "Classic",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-street-fighter-ii",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Street Fighter II (1991)",
+    "teaser": "The fighting game that created the genre — every character had a unique move set, and the 'hadouken' became the most famous input in gaming history.",
+    "imageUrl": "",
+    "byline": "Capcom",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Street Fighter II (1991) end-to-end",
+      "durationMinutes": 60,
+      "instruction": "Fun fact: the roster is the game. Read about Street Fighter II, then watch it on YouTube and learn the special moves — the quarter-circle is the grammar. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Fighting",
+      "Arcade",
+      "Classic",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-mortal-kombat",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Mortal Kombat (1992)",
+    "teaser": "The game that caused the ESRB rating system — the digitized actors and fatalities were so violent that the US government held hearings on video game violence.",
+    "imageUrl": "",
+    "byline": "Midway",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Mortal Kombat (1992) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Fun fact: the controversy IS the marketing. Read about Mortal Kombat, then watch it on YouTube and notice the digitized realism — real actors, real motion. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Fighting",
+      "Arcade",
+      "Classic",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-doom",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Doom (1993)",
+    "teaser": "The game that defined the FPS — the engine was written in a week, and the game's shareware model (free first episode) made it the most-installed game of its era.",
+    "imageUrl": "",
+    "byline": "id Software",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Doom (1993) end-to-end",
+      "durationMinutes": 90,
+      "instruction": "Fun fact: the shareware was the marketing. Read about Doom, then watch it on YouTube and notice the level design — the geometry is the combat. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "FPS",
+      "Horror",
+      "Classic",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-quake",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Quake (1996)",
+    "teaser": "The first fully 3D FPS — the game's engine was so advanced it was licensed for decades, and the 'rocket jump' was an accident that became a skill.",
+    "imageUrl": "",
+    "byline": "id Software",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Quake (1996) end-to-end",
+      "durationMinutes": 90,
+      "instruction": "Fun fact: the rocket jump is the speedrun. Read about Quake, then watch it on YouTube and notice the 3D — the verticality is new. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "FPS",
+      "Sci-Fi",
+      "Classic",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-half-life",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Half-Life (1998)",
+    "teaser": "The game that invented the scripted FPS — the entire story happens in real time with no cutscenes, and the opening tram ride is a tutorial disguised as a commute.",
+    "imageUrl": "",
+    "byline": "Valve",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Half-Life (1998) end-to-end",
+      "durationMinutes": 120,
+      "instruction": "Fun fact: the story is the environment. Read about Half-Life, then watch it on YouTube and notice the scripted events — no cutscenes, all in-world. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "FPS",
+      "Sci-Fi",
+      "Story",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-portal",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Portal (2007)",
+    "teaser": "Built from a student project (Narbacular Drop) — the game's 'companion cube' and GLaDOS are the most quoted AI in gaming, and the ending song was written by the writer's band.",
+    "imageUrl": "",
+    "byline": "Valve",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Portal (2007) end-to-end",
+      "durationMinutes": 90,
+      "instruction": "Fun fact: the puzzle is the character. Read about Portal, then watch it on YouTube and notice the teaching — each test is a lesson. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Puzzle",
+      "First Person",
+      "Comedy",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-counter-strike",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Counter-Strike (2000)",
+    "teaser": "Born as a Half-Life mod — the game's economic system (buy rounds) became the template for tactical shooters, and its one-life-per-round tension defined esports.",
+    "imageUrl": "",
+    "byline": "Valve",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Counter-Strike (2000) end-to-end",
+      "durationMinutes": 120,
+      "instruction": "Fun fact: the tension is the design. Read about Counter-Strike, then watch it on YouTube and notice the economy — the buy system is the strategy. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "FPS",
+      "Multiplayer",
+      "Tactical",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-team-fortress-2",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Team Fortress 2 (2007)",
+    "teaser": "The class-based shooter with nine distinct characters — the game's 'Meet the Team' videos became the standard for game marketing, and the hats became a meme economy.",
+    "imageUrl": "",
+    "byline": "Valve",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Team Fortress 2 (2007) end-to-end",
+      "durationMinutes": 120,
+      "instruction": "Fun fact: the personality is the balance. Read about Team Fortress 2, then watch it on YouTube and notice the difference — the classes are the game. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "FPS",
+      "Multiplayer",
+      "Comedy",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-minecraft",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Minecraft (2011)",
+    "teaser": "The best-selling game of all time — built from a 'cave game' prototype in a week, and the game's 'crafting table' UI was designed in a single night.",
+    "imageUrl": "",
+    "byline": "Mojang",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Minecraft (2011) end-to-end",
+      "durationMinutes": 180,
+      "instruction": "Fun fact: the block is the entire vocabulary. Read about Minecraft, then watch it on YouTube and notice the survival loop — dig, build, survive. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Sandbox",
+      "Survival",
+      "Creative",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-tetris",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Tetris (1984)",
+    "teaser": "Built on a Soviet computer by a mathematician — the game's 'tetromino' shapes are the plot, and the 'Tetris effect' (seeing blocks in your sleep) is a real psychological phenomenon.",
+    "imageUrl": "",
+    "byline": "Alexey Pajitnov",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Tetris (1984) end-to-end",
+      "durationMinutes": 45,
+      "instruction": "Fun fact: the geometry is the game. Read about Tetris, then watch it on YouTube and notice the piece selection — the randomness is the challenge. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Puzzle",
+      "Classic",
+      "Arcade",
+      "1980s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-pokemon-red-and-blue",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Pokémon Red and Blue (1996)",
+    "teaser": "The monster-catching RPG that became a global phenomenon — the 'MissingNo' glitch became a legend, and the game's social element (trading) was the original multiplayer.",
+    "imageUrl": "",
+    "byline": "Game Freak",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Pokémon Red and Blue (1996) end-to-end",
+      "durationMinutes": 240,
+      "instruction": "Fun fact: the trading is the multiplayer. Read about Pokémon Red and Blue, then watch it on YouTube and notice the design — the 'catch' is the hook. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "RPG",
+      "Monster",
+      "Classic",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-goldeneye-007",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "GoldenEye 007 (1997)",
+    "teaser": "The movie tie-in that became a legend — the four-player split-screen was a late addition that defined the console FPS, and the game's 'Oddjob' controversy was the first balance debate.",
+    "imageUrl": "",
+    "byline": "Rare",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "GoldenEye 007 (1997) end-to-end",
+      "durationMinutes": 120,
+      "instruction": "Fun fact: the multiplayer was an afterthought. Read about GoldenEye 007, then watch it on YouTube and notice the level design — the mission is the stealth. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "FPS",
+      "Spy",
+      "Classic",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-super-mario-64",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Super Mario 64 (1996)",
+    "teaser": "The game that taught the industry how to do 3D — the camera system was invented from scratch, and the first level's opening was a crash course in 3D movement.",
+    "imageUrl": "",
+    "byline": "Nintendo",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Super Mario 64 (1996) end-to-end",
+      "durationMinutes": 120,
+      "instruction": "Fun fact: the 3D is the learning. Read about Super Mario 64, then watch it on YouTube and notice the camera — the controls are the design. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Platformer",
+      "3D",
+      "Classic",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-the-legend-of-zelda-ocarina-of-time",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "The Legend of Zelda: Ocarina of Time (1998)",
+    "teaser": "Considered by many the greatest game ever made — the time-travel structure (young/old Link) was a technical breakthrough, and the game's 'Z-targeting' lock-on became the 3D action standard.",
+    "imageUrl": "",
+    "byline": "Nintendo",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Legend of Zelda: Ocarina of Time (1998) end-to-end",
+      "durationMinutes": 240,
+      "instruction": "Fun fact: the time travel is the structure. Read about The Legend of Zelda: Ocarina of Time, then watch it on YouTube and notice the lock-on — the combat is the design. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Adventure",
+      "Action",
+      "3D",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-resident-evil",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Resident Evil (1996)",
+    "teaser": "The game that invented survival horror — the 'tank controls' were a design accident, and the game's famous 'zombie dog' jump scare was a programming bug that was kept.",
+    "imageUrl": "",
+    "byline": "Capcom",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Resident Evil (1996) end-to-end",
+      "durationMinutes": 120,
+      "instruction": "Fun fact: the horror is the economy. Read about Resident Evil, then watch it on YouTube and notice the resource management — the ammo IS the tension. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Survival Horror",
+      "Action",
+      "Classic",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-silent-hill",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Silent Hill (1999)",
+    "teaser": "The horror game that replaced monsters with psychology — the fog was a technical limitation that became the atmosphere, and the game's 'otherworld' is a descent into the protagonist's mind.",
+    "imageUrl": "",
+    "byline": "Konami",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Silent Hill (1999) end-to-end",
+      "durationMinutes": 120,
+      "instruction": "Fun fact: the horror is the psychology. Read about Silent Hill, then watch it on YouTube and notice the fog — the limitation is the design. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Survival Horror",
+      "Psychological",
+      "Classic",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-metal-gear-solid",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Metal Gear Solid (1998)",
+    "teaser": "The game that made stealth a genre — the 'Psycho Mantis' boss fight (which reads your memory card) is the most famous fourth-wall break in gaming.",
+    "imageUrl": "",
+    "byline": "Konami",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Metal Gear Solid (1998) end-to-end",
+      "durationMinutes": 150,
+      "instruction": "Fun fact: the boss fights are the philosophy. Read about Metal Gear Solid, then watch it on YouTube and notice the stealth — the radar is the game. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Stealth",
+      "Action",
+      "Story",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-halo-combat-evolved",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Halo: Combat Evolved (2001)",
+    "teaser": "The game that made the Xbox — the two-weapon limit and regenerating shields became the FPS standard, and the 'flood' reveal is one of gaming's best twists.",
+    "imageUrl": "",
+    "byline": "Bungie",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Halo: Combat Evolved (2001) end-to-end",
+      "durationMinutes": 180,
+      "instruction": "Fun fact: the 'ring' is the level. Read about Halo: Combat Evolved, then watch it on YouTube and notice the shield — the health design is the game. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "FPS",
+      "Sci-Fi",
+      "Action",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-grand-theft-auto-iii",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Grand Theft Auto III (2001)",
+    "teaser": "The game that made open worlds mainstream — the 'sandbox' design was a technical gamble, and the radio stations became the game's real soul.",
+    "imageUrl": "",
+    "byline": "Rockstar",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Grand Theft Auto III (2001) end-to-end",
+      "durationMinutes": 240,
+      "instruction": "Fun fact: the radio is the character. Read about Grand Theft Auto III, then watch it on YouTube and notice the freedom — the city IS the game. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Open World",
+      "Action",
+      "Crime",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-grand-theft-auto-v",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Grand Theft Auto V (2013)",
+    "teaser": "The most expensive game ever made at $265M — the three-protagonist structure was the design answer to GTA IV's linearity, and the game's heist missions are the set pieces.",
+    "imageUrl": "",
+    "byline": "Rockstar",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Grand Theft Auto V (2013) end-to-end",
+      "durationMinutes": 300,
+      "instruction": "Fun fact: the three characters are the game's three genres. Read about Grand Theft Auto V, then watch it on YouTube and notice the planning — the structure is the design. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Open World",
+      "Action",
+      "Crime",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-the-elder-scrolls-v-skyrim",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "The Elder Scrolls V: Skyrim (2011)",
+    "teaser": "The game that 'you can play forever' — the 'arrow to the knee' guard line became a global meme, and the game's mod support made it a decade-long phenomenon.",
+    "imageUrl": "",
+    "byline": "Bethesda",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Elder Scrolls V: Skyrim (2011) end-to-end",
+      "durationMinutes": 300,
+      "instruction": "Fun fact: the mods are the longevity. Read about The Elder Scrolls V: Skyrim, then watch it on YouTube and notice the freedom — the world is the game. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "RPG",
+      "Open World",
+      "Fantasy",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-fallout-new-vegas",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Fallout: New Vegas (2010)",
+    "teaser": "The RPG with the most branching stories in the genre — every faction is morally gray, and the game's 'Hardcore mode' was the design answer to immersion.",
+    "imageUrl": "",
+    "byline": "Obsidian",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Fallout: New Vegas (2010) end-to-end",
+      "durationMinutes": 300,
+      "instruction": "Fun fact: the writing is the combat. Read about Fallout: New Vegas, then watch it on YouTube and notice the factions — every choice has a cost. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "RPG",
+      "Post-Apocalyptic",
+      "Open World",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-mass-effect-2",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Mass Effect 2 (2010)",
+    "teaser": "The game where your choices determine who lives and dies — the 'suicide mission' finale is the most famous consequence system in gaming, and the game's characters are its real draw.",
+    "imageUrl": "",
+    "byline": "BioWare",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Mass Effect 2 (2010) end-to-end",
+      "durationMinutes": 240,
+      "instruction": "Fun fact: the ending is the consequence. Read about Mass Effect 2, then watch it on YouTube — the loyalty is the mechanic. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "RPG",
+      "Sci-Fi",
+      "Story",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-the-witcher-3-wild-hunt",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "The Witcher 3: Wild Hunt (2015)",
+    "teaser": "The RPG that redefined side quests — every contract has a moral choice, and the 'Bloody Baron' quest is considered the best-written quest in gaming.",
+    "imageUrl": "",
+    "byline": "CD Projekt Red",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Witcher 3: Wild Hunt (2015) end-to-end",
+      "durationMinutes": 360,
+      "instruction": "Fun fact: the side quests are the story. Read about The Witcher 3: Wild Hunt, then watch it on YouTube and notice the choices — every answer has a cost. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "RPG",
+      "Fantasy",
+      "Open World",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-dark-souls",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Dark Souls (2011)",
+    "teaser": "The game that made difficulty a design philosophy — the 'Souls-like' genre was born here, and the game's lore is hidden in item descriptions instead of cutscenes.",
+    "imageUrl": "",
+    "byline": "FromSoftware",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Dark Souls (2011) end-to-end",
+      "durationMinutes": 300,
+      "instruction": "Fun fact: the lore is the exploration. Read about Dark Souls, then watch it on YouTube and notice the level design — the shortcut is the reward. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Action RPG",
+      "Dark Fantasy",
+      "Challenging",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-bloodborne",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Bloodborne (2015)",
+    "teaser": "The faster, more aggressive sibling of Dark Souls — the 'regain' mechanic (heal by attacking) changed the combat philosophy, and the game's Lovecraftian horror is its real setting.",
+    "imageUrl": "",
+    "byline": "FromSoftware",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Bloodborne (2015) end-to-end",
+      "durationMinutes": 300,
+      "instruction": "Fun fact: the horror is the genre. Read about Bloodborne, then watch it on YouTube and notice the regain — the aggression is the design. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Action RPG",
+      "Gothic",
+      "Challenging",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-elden-ring",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Elden Ring (2022)",
+    "teaser": "The open-world Souls game with lore written by George R.R. Martin — it sold 20M+ copies and won Game of the Year, and the 'open world' is the first in the genre that respects discovery.",
+    "imageUrl": "",
+    "byline": "FromSoftware",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Elden Ring (2022) end-to-end",
+      "durationMinutes": 360,
+      "instruction": "Fun fact: the open world is the dungeon. Read about Elden Ring, then watch it on YouTube and notice the discovery — the map rewards curiosity. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Action RPG",
+      "Open World",
+      "Challenging",
+      "2020s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-god-of-war-2018",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "God of War (2018) (2018)",
+    "teaser": "The reboot that turned a rage god into a father — the one-shot camera (no cuts) was a technical feat, and the game's real subject is parenting and legacy.",
+    "imageUrl": "",
+    "byline": "Santa Monica Studio",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "God of War (2018) (2018) end-to-end",
+      "durationMinutes": 240,
+      "instruction": "Fun fact: the axe is the character. Read about God of War (2018), then watch it on YouTube and notice the camera — one continuous shot. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Action",
+      "Adventure",
+      "Mythology",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-the-last-of-us",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "The Last of Us (2013)",
+    "teaser": "The game that made video game stories cinematic — the 'giraffe scene' became the most discussed moment in gaming, and the game's ending is a deliberate moral test.",
+    "imageUrl": "",
+    "byline": "Naughty Dog",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Last of Us (2013) end-to-end",
+      "durationMinutes": 240,
+      "instruction": "Fun fact: the story is the gameplay. Read about The Last of Us, then watch it on YouTube and notice the opening — the prologue is the thesis. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Action",
+      "Survival",
+      "Story",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-uncharted-2-among-thieves",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Uncharted 2: Among Thieves (2009)",
+    "teaser": "The game that made action set-pieces cinematic — the opening train sequence is considered the best in gaming, and the game's 'impossible' set pieces are the draw.",
+    "imageUrl": "",
+    "byline": "Naughty Dog",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Uncharted 2: Among Thieves (2009) end-to-end",
+      "durationMinutes": 180,
+      "instruction": "Fun fact: the spectacle is the craft. Read about Uncharted 2: Among Thieves, then watch it on YouTube and notice the set-piece design — the action IS the story. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Action",
+      "Adventure",
+      "Platformer",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-red-dead-redemption-2",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Red Dead Redemption 2 (2018)",
+    "teaser": "The most detailed open world ever made — every NPC has a life, and the game's epilogue is a meditation on endings and honor.",
+    "imageUrl": "",
+    "byline": "Rockstar",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Red Dead Redemption 2 (2018) end-to-end",
+      "durationMinutes": 360,
+      "instruction": "Fun fact: the tragedy is the structure. Read about Red Dead Redemption 2, then watch it on YouTube and notice the detail — the world is alive. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Open World",
+      "Western",
+      "Story",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-the-legend-of-zelda-breath-of-the-wild",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "The Legend of Zelda: Breath of the Wild (2017)",
+    "teaser": "The game that reinvented open worlds — you can climb anything, and the game's physics engine is a real simulation. The 'it's dangerous to go alone' tradition continues in the Glider.",
+    "imageUrl": "",
+    "byline": "Nintendo",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "The Legend of Zelda: Breath of the Wild (2017) end-to-end",
+      "durationMinutes": 360,
+      "instruction": "Fun fact: the climb is the answer. Read about The Legend of Zelda: Breath of the Wild, then watch it on YouTube and notice the freedom — the physics IS the game. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Open World",
+      "Adventure",
+      "Action",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-super-mario-odyssey",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Super Mario Odyssey (2017)",
+    "teaser": "The 3D Mario that added a companion — Cappy (the hat) is the game's mechanic and character, and the game's 'New Donk City' is the most playful level in the series.",
+    "imageUrl": "",
+    "byline": "Nintendo",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Super Mario Odyssey (2017) end-to-end",
+      "durationMinutes": 240,
+      "instruction": "Fun fact: the power-up is the character. Read about Super Mario Odyssey, then watch it on YouTube and notice the hat — the capture mechanic is the design. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Platformer",
+      "3D",
+      "Adventure",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-celeste",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Celeste (2018)",
+    "teaser": "The platformer about anxiety disguised as a mountain climb — the game's 'assist mode' was a design statement, and the story of Madeline's climb is the game's real content.",
+    "imageUrl": "",
+    "byline": "Maddy Makes Games",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Celeste (2018) end-to-end",
+      "durationMinutes": 180,
+      "instruction": "Fun fact: the difficulty is the therapy. Read about Celeste, then watch it on YouTube and notice the theme — the mountain is the metaphor. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Platformer",
+      "Indie",
+      "Story",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-hollow-knight",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Hollow Knight (2017)",
+    "teaser": "The indie Metroidvania that defined the genre's modern era — the hand-drawn world is a single connected map, and the game's lore is buried in the world itself.",
+    "imageUrl": "",
+    "byline": "Team Cherry",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Hollow Knight (2017) end-to-end",
+      "durationMinutes": 300,
+      "instruction": "Fun fact: the world is the story. Read about Hollow Knight, then watch it on YouTube and notice the map — the exploration is the game. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Metroidvania",
+      "Indie",
+      "Action",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-undertale",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Undertale (2015)",
+    "teaser": "The RPG where you can finish without killing anyone — the 'mercy' mechanic is the game's thesis, and the game's music was composed on a laptop by one person.",
+    "imageUrl": "",
+    "byline": "Toby Fox",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Undertale (2015) end-to-end",
+      "durationMinutes": 120,
+      "instruction": "Fun fact: the violence is the choice. Read about Undertale, then watch it on YouTube and notice the mercy — the pacifist path is the design. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "RPG",
+      "Indie",
+      "Comedy",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-hades",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Hades (2020)",
+    "teaser": "The roguelike where death is the story — the 'escape attempts' are the narrative, and the game's characters remember your failures.",
+    "imageUrl": "",
+    "byline": "Supergiant Games",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Hades (2020) end-to-end",
+      "durationMinutes": 240,
+      "instruction": "Fun fact: the roguelike IS the narrative. Read about Hades, then watch it on YouTube and notice the story — the deaths are the content. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Roguelike",
+      "Action",
+      "Story",
+      "2020s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-stardew-valley",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Stardew Valley (2016)",
+    "teaser": "Built by one person over four years — the farming sim is a love letter to Harvest Moon, and the game's real content is the community of Pelican Town.",
+    "imageUrl": "",
+    "byline": "ConcernedApe",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Stardew Valley (2016) end-to-end",
+      "durationMinutes": 300,
+      "instruction": "Fun fact: the farming is the rhythm. Read about Stardew Valley, then watch it on YouTube and notice the community — the town is the game. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Simulation",
+      "Farming",
+      "Indie",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-animal-crossing-new-horizons",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Animal Crossing: New Horizons (2020)",
+    "teaser": "The game that defined the pandemic lockdown — the real-time clock and island economy made it a cultural phenomenon, and the game's design philosophy is 'no pressure, ever'.",
+    "imageUrl": "",
+    "byline": "Nintendo",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Animal Crossing: New Horizons (2020) end-to-end",
+      "durationMinutes": 300,
+      "instruction": "Fun fact: the gentleness is the design. Read about Animal Crossing: New Horizons, then watch it on YouTube and notice the real-time — the clock is the game. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Simulation",
+      "Life",
+      "Relaxing",
+      "2020s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-among-us",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Among Us (2018)",
+    "teaser": "The social deduction game that exploded during lockdown — the game's 'emergency meeting' format became a genre, and the game's simple graphics are the point.",
+    "imageUrl": "",
+    "byline": "Innersloth",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Among Us (2018) end-to-end",
+      "durationMinutes": 60,
+      "instruction": "Fun fact: the simplicity is the design. Read about Among Us, then watch it on YouTube and notice the social gameplay — the deduction is the game. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Multiplayer",
+      "Social Deduction",
+      "Party",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-fortnite",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Fortnite (2017)",
+    "teaser": "The battle royale that became a cultural platform — the building mechanic is the differentiator, and the game's live events (concerts, crossovers) made it a metaverse.",
+    "imageUrl": "",
+    "byline": "Epic Games",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Fortnite (2017) end-to-end",
+      "durationMinutes": 180,
+      "instruction": "Fun fact: the live events are the culture. Read about Fortnite, then watch it on YouTube and notice the building — the mechanic is the game. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Battle Royale",
+      "Multiplayer",
+      "Shooter",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-league-of-legends",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "League of Legends (2009)",
+    "teaser": "The game that made esports mainstream — the 'MOBA' genre was defined by it, and the game's champion roster (160+) is the deepest character design in gaming.",
+    "imageUrl": "",
+    "byline": "Riot Games",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "League of Legends (2009) end-to-end",
+      "durationMinutes": 240,
+      "instruction": "Fun fact: the champions are the depth. Read about League of Legends, then watch it on YouTube and notice the roles — the team composition is the strategy. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "MOBA",
+      "Multiplayer",
+      "Strategy",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-world-of-warcraft",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "World of Warcraft (2004)",
+    "teaser": "The MMO that made online worlds mainstream — the game's 'dance' and 'leeroy jenkins' moments became internet history, and the game's community is its real content.",
+    "imageUrl": "",
+    "byline": "Blizzard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "World of Warcraft (2004) end-to-end",
+      "durationMinutes": 360,
+      "instruction": "Fun fact: the scale is the design. Read about World of Warcraft, then watch it on YouTube and notice the world — the community is the game. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "MMORPG",
+      "Fantasy",
+      "Multiplayer",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-starcraft",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "StarCraft (1998)",
+    "teaser": "The RTS that defined competitive gaming — the game's balance (Protoss/Zerg/Terran) is still studied, and the game made South Korean esports a national sport.",
+    "imageUrl": "",
+    "byline": "Blizzard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "StarCraft (1998) end-to-end",
+      "durationMinutes": 240,
+      "instruction": "Fun fact: the balance is the esport. Read about StarCraft, then watch it on YouTube and notice the factions — the asymmetry is the design. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "RTS",
+      "Sci-Fi",
+      "Strategy",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-civilization-vi",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Civilization VI (2016)",
+    "teaser": "The 'one more turn' game — the tech tree and district system are the design, and the game's real content is the history it teaches.",
+    "imageUrl": "",
+    "byline": "Firaxis",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Civilization VI (2016) end-to-end",
+      "durationMinutes": 360,
+      "instruction": "Fun fact: the history is the content. Read about Civilization VI, then watch it on YouTube and notice the districts — the placement is the strategy. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Strategy",
+      "4X",
+      "Historical",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-age-of-empires-ii",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Age of Empires II (1999)",
+    "teaser": "The RTS that is still played competitively 25 years later — the game's 'wololo' (conversion) meme is internet history, and the game's campaigns are history lessons.",
+    "imageUrl": "",
+    "byline": "Ensemble Studios",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Age of Empires II (1999) end-to-end",
+      "durationMinutes": 240,
+      "instruction": "Fun fact: the history is the content. Read about Age of Empires II, then watch it on YouTube — it's the tutorial. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "RTS",
+      "Strategy",
+      "Historical",
+      "1990s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-diablo-ii",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Diablo II (2000)",
+    "teaser": "The game that invented the loot ARPG genre — the 'item hunt' is the game, and the game's rune system created an economy still alive today.",
+    "imageUrl": "",
+    "byline": "Blizzard",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Diablo II (2000) end-to-end",
+      "durationMinutes": 360,
+      "instruction": "Fun fact: the item hunt is the depth. Read about Diablo II, then watch it on YouTube and notice the loot — the drops are the game. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Action RPG",
+      "Loot",
+      "Dark Fantasy",
+      "2000s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-journey",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Journey (2012)",
+    "teaser": "The art game that made games 'art' — the anonymous co-op (you meet strangers without names) is the design, and the game's emotional ending is a thesis on connection.",
+    "imageUrl": "",
+    "byline": "thatgamecompany",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Journey (2012) end-to-end",
+      "durationMinutes": 90,
+      "instruction": "Fun fact: the anonymity is the design. Read about Journey, then watch it on YouTube — the companion is the game. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Adventure",
+      "Art",
+      "Multiplayer",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-disco-elysium",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Disco Elysium (2019)",
+    "teaser": "The RPG with no combat — the 'skills' are voices in your head, and the game's political dialogues are the actual gameplay.",
+    "imageUrl": "",
+    "byline": "ZA/UM",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Disco Elysium (2019) end-to-end",
+      "durationMinutes": 300,
+      "instruction": "Fun fact: the dialogue is the combat. Read about Disco Elysium, then watch it on YouTube and notice the skills — the internal voices are the game. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "RPG",
+      "Mystery",
+      "Narrative",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-baldur-s-gate-3",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Baldur's Gate 3 (2023)",
+    "teaser": "The CRPG that won Game of the Year 2023 — the game's reactivity (every choice matters) is the design, and the game's companion romances became cultural moments.",
+    "imageUrl": "",
+    "byline": "Larian Studios",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Baldur's Gate 3 (2023) end-to-end",
+      "durationMinutes": 360,
+      "instruction": "Fun fact: the freedom is the design. Read about Baldur's Gate 3, then watch it on YouTube and notice the choices — the dice are the tension. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "RPG",
+      "Fantasy",
+      "Strategy",
+      "2020s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-cyberpunk-2077",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Cyberpunk 2077 (2020)",
+    "teaser": "The game that launched broken and was fixed into a masterpiece — the 2.0 update and Phantom Liberty DLC redeemed it, and the game's world design is the best realized cyberpunk in games.",
+    "imageUrl": "",
+    "byline": "CD Projekt Red",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Cyberpunk 2077 (2020) end-to-end",
+      "durationMinutes": 360,
+      "instruction": "Fun fact: the redemption is the story. Read about Cyberpunk 2077, then watch it on YouTube and notice the world — the city is the character. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "RPG",
+      "Sci-Fi",
+      "Open World",
+      "2020s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-persona-5",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Persona 5 (2016)",
+    "teaser": "The stylish JRPG about rebellious teens — the 'phantom thieves' frame is the design, and the game's calendar system (days matter) is the tension.",
+    "imageUrl": "",
+    "byline": "Atlus",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Persona 5 (2016) end-to-end",
+      "durationMinutes": 360,
+      "instruction": "Fun fact: the style is the substance. Read about Persona 5, then watch it on YouTube and notice the calendar — the time is the resource. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "RPG",
+      "Social",
+      "Stylish",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-sekiro-shadows-die-twice",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Sekiro: Shadows Die Twice (2019)",
+    "teaser": "The FromSoftware game that replaced rolls with parries — the 'posture' system is the design, and the game won Game of the Year 2019.",
+    "imageUrl": "",
+    "byline": "FromSoftware",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Sekiro: Shadows Die Twice (2019) end-to-end",
+      "durationMinutes": 300,
+      "instruction": "Fun fact: the duel is the design. Read about Sekiro: Shadows Die Twice, then watch it on YouTube and notice the posture — the parry is the game. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Action",
+      "Samurai",
+      "Challenging",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-doom-eternal",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Doom Eternal (2020)",
+    "teaser": "The FPS where you're the demon — the 'glory kill' and resource loop (you must kill to heal) is the design, and the game's combat is a puzzle.",
+    "imageUrl": "",
+    "byline": "id Software",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Doom Eternal (2020) end-to-end",
+      "durationMinutes": 180,
+      "instruction": "Fun fact: the aggression is the design. Read about Doom Eternal, then watch it on YouTube and notice the loop — the kills are the resources. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "FPS",
+      "Action",
+      "Fast",
+      "2020s"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "game-papers-please",
+    "categoryId": "GAMES",
+    "subtype": "Game",
+    "name": "Papers, Please (2013)",
+    "teaser": "The border guard simulation — the 'glory to Arstotzka' bureaucracy is the game, and the moral choices are the real content.",
+    "imageUrl": "",
+    "byline": "Lucas Pope",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Papers, Please (2013) end-to-end",
+      "durationMinutes": 120,
+      "instruction": "Fun fact: the morality is the tension. Read about Papers, Please, then watch it on YouTube and notice the rules — the bureaucracy is the game. If it looks fun, you can try a similar game."
+    },
+    "tags": [
+      "Simulation",
+      "Moral",
+      "Indie",
+      "2010s"
+    ],
+    "tier": 1
+  },
+  {
+    "name": "Galaga (1981)",
+    "teaser": "Namco's fixed shooter refined the Space Invaders formula with formation-diving aliens and a dual-fighter mode. Its 'Challenging Stage' bonus rounds became iconic, and the game's precise hit detection made it a tournament staple for decades.",
+    "categoryId": "GAMES",
+    "subtype": "arcade",
+    "tags": [
+      "arcade",
+      "retro",
+      "shooter"
+    ],
+    "id": "game-galaga-1981",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Asteroids (1979)",
+    "teaser": "Atari's vector-based physics game had you destroying rocks that split into smaller pieces. Its wrap-around screen and thrust-based movement created a unique spatial challenge. The game's minimalist design influenced countless indie developers.",
+    "categoryId": "GAMES",
+    "subtype": "arcade",
+    "tags": [
+      "arcade",
+      "retro",
+      "physics"
+    ],
+    "id": "game-asteroids-1979",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Frogger (1981)",
+    "teaser": "Guide a frog across a busy road and a rushing river. Konami's simple premise created frantic gameplay — every lane demanded different timing. The game's concept was so universal it spawned dozens of clones and remains instantly recognizable.",
+    "categoryId": "GAMES",
+    "subtype": "arcade",
+    "tags": [
+      "arcade",
+      "retro",
+      "puzzle"
+    ],
+    "id": "game-frogger-1981",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Defender (1981)",
+    "teaser": "Eugene Jarvis's frantic horizontal scroller introduced the concept of rescuing hostages while fighting aliens. Its complex controls (two joysticks, five buttons) made it intimidating, but masterful play felt like conducting an orchestra of destruction.",
+    "categoryId": "GAMES",
+    "subtype": "arcade",
+    "tags": [
+      "arcade",
+      "retro",
+      "shooter"
+    ],
+    "id": "game-defender-1981",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Centipede (1981)",
+    "teaser": "Atari's insect-themed shooter used a trackball for precision aiming against a descending centipede. Designed by Ed Logg and Dona Bailey, it was one of the first arcade games with significant female player appeal due to its organic visuals.",
+    "categoryId": "GAMES",
+    "subtype": "arcade",
+    "tags": [
+      "arcade",
+      "retro",
+      "shooter"
+    ],
+    "id": "game-centipede-1981",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Joust (1982)",
+    "teaser": "Williams Electronics put you on an ostrich fighting buzzards in mid-air lances. Its two-player cooperative mode and physics-based platforming created emergent gameplay that felt alive. The game's jousting tournaments became legendary in arcades.",
+    "categoryId": "GAMES",
+    "subtype": "arcade",
+    "tags": [
+      "arcade",
+      "retro",
+      "platformer"
+    ],
+    "id": "game-joust-1982",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Sonic the Hedgehog 2 (1992)",
+    "teaser": "The sequel that made Sonic a phenomenon — introducing Tails, the Chemical Plant Zone, and Super Sonic. Its speed was unmatched on Genesis, and the multiplayer versus mode created playground rivalries that defined a generation.",
+    "categoryId": "GAMES",
+    "subtype": "platformer",
+    "tags": [
+      "platformer",
+      "retro",
+      "sega"
+    ],
+    "id": "game-sonic-the-hedgehog-2-1992",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Super Metroid (1994)",
+    "teaser": "Nintendo's atmospheric masterpiece perfected the Metroidvania formula — interconnected world, gradual power-ups, and zero hand-holding. Its environmental storytelling influenced decades of indie games, from Hollow Knight to Ori.",
+    "categoryId": "GAMES",
+    "subtype": "metroidvania",
+    "tags": [
+      "metroidvania",
+      "retro",
+      "nintendo"
+    ],
+    "id": "game-super-metroid-1994",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Mega Man X (1993)",
+    "teaser": "Capcom's SNES debut gave Mega Man wall-jumping, dashing, and the ability to acquire enemy weapons. Its opening stage taught mechanics without tutorials — a masterclass in game design that still influences developers.",
+    "categoryId": "GAMES",
+    "subtype": "platformer",
+    "tags": [
+      "platformer",
+      "retro",
+      "capcom"
+    ],
+    "id": "game-mega-man-x-1993",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Castlevania: Symphony of the Night (1997)",
+    "teaser": "Koji Igarashi transformed Castlevania from linear platformer to open-world RPG. Alucard's castle was filled with secrets, equipment, and反转 — including the famous 'reverse castle' that doubled the game's length.",
+    "categoryId": "GAMES",
+    "subtype": "metroidvania",
+    "tags": [
+      "metroidvania",
+      "retro",
+      "konami"
+    ],
+    "id": "game-castlevania-symphony-of-the-night-1997",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Star Fox (1993)",
+    "teaser": "Nintendo's SNES showcase used the Super FX chip for 3D polygonal graphics. Its on-rails space combat and branching paths made each playthrough different. The game proved 3D gaming was possible on 16-bit hardware.",
+    "categoryId": "GAMES",
+    "subtype": "shooter",
+    "tags": [
+      "shooter",
+      "retro",
+      "nintendo"
+    ],
+    "id": "game-star-fox-1993",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "EarthBound (1994)",
+    "teaser": "A bizarre JRPG set in modern-day America where kids fight aliens with baseball bats and pizza. Its humor, heart, and unconventional setting made it a cult classic. The final boss — a cosmic horror entity — remains one of gaming's most disturbing moments.",
+    "categoryId": "GAMES",
+    "subtype": "rpg",
+    "tags": [
+      "rpg",
+      "retro",
+      "nintendo"
+    ],
+    "id": "game-earthbound-1994",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Secret of Mana (1993)",
+    "teaser": "Square's action RPG pioneered real-time combat and cooperative multiplayer in JRPGs. Its ring menu system, elemental magic, and the Flammie dragon ride created a magical adventure that still feels unique.",
+    "categoryId": "GAMES",
+    "subtype": "rpg",
+    "tags": [
+      "rpg",
+      "retro",
+      "square"
+    ],
+    "id": "game-secret-of-mana-1993",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Streets of Rage 2 (1992)",
+    "teaser": "Sega's beat-em-up perfected the genre with four distinct characters, combo systems, and Yuzo Koshiro's legendary electronic soundtrack. Its fluid combat and stage design set the standard that beat-em-ups still aspire to.",
+    "categoryId": "GAMES",
+    "subtype": "beat-em-up",
+    "tags": [
+      "beat-em-up",
+      "retro",
+      "sega"
+    ],
+    "id": "game-streets-of-rage-2-1992",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Donkey Kong Country (1994)",
+    "teaser": "Rare's pre-rendered 3D graphics on SNES stunned the world. Its mine cart levels, underwater sections, and hidden rooms created a platformer that looked and played like nothing before. The soundtrack by David Wise is still celebrated.",
+    "categoryId": "GAMES",
+    "subtype": "platformer",
+    "tags": [
+      "platformer",
+      "retro",
+      "nintendo"
+    ],
+    "id": "game-donkey-kong-country-1994",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Phantasy Star IV (1993)",
+    "teaser": "Sega's sci-fi JRPG wrapped up the Phantasy Star saga with anime-style cutscenes, macro systems for combo attacks, and a post-apocalyptic Algol solar system. It was Sega's answer to Final Fantasy and remains a cult classic.",
+    "categoryId": "GAMES",
+    "subtype": "rpg",
+    "tags": [
+      "rpg",
+      "retro",
+      "sega"
+    ],
+    "id": "game-phantasy-star-iv-1993",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Final Fantasy IX (2000)",
+    "teaser": "A love letter to classic Final Fantasy — Vivi's existential crisis, Steiner's redemption, and the return to high fantasy after FFVIII's modern setting. Its 'Trance' system and Chocobo Hot & Cold minigame made it a beloved swan song for PS1.",
+    "categoryId": "GAMES",
+    "subtype": "rpg",
+    "tags": [
+      "rpg",
+      "final-fantasy",
+      "square"
+    ],
+    "id": "game-final-fantasy-ix-2000",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Shadow of the Colossus (2005)",
+    "teaser": "Fumito Ueda's masterpiece had you killing 16 colossi to save a dead girl. Each boss was a puzzle — climbing fur, finding weak points, and feeling guilt as the world grew emptier. Its emotional weight redefined what games could make you feel.",
+    "categoryId": "GAMES",
+    "subtype": "action-adventure",
+    "tags": [
+      "action-adventure",
+      "ps2",
+      "team-ico"
+    ],
+    "id": "game-shadow-of-the-colossus-2005",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Okami (2006)",
+    "teaser": "Clover Studio's cel-shaded masterpiece put you as the sun goddess Amaterasu in wolf form. Its 'Celestial Brush' mechanic — painting the world to restore nature — created a game that felt like playing a living ukiyo-e painting.",
+    "categoryId": "GAMES",
+    "subtype": "action-adventure",
+    "tags": [
+      "action-adventure",
+      "ps2",
+      "capcom"
+    ],
+    "id": "game-okami-2006",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "ICO (2001)",
+    "teaser": "Fumito Ueda's debut paired a horned boy with a fragile princess in a crumbling castle. Its hand-holding mechanic — literally holding Yorda's hand — created more emotional attachment than any dialogue could. A precursor to Shadow of the Colossus.",
+    "categoryId": "GAMES",
+    "subtype": "puzzle-adventure",
+    "tags": [
+      "puzzle-adventure",
+      "ps2",
+      "team-ico"
+    ],
+    "id": "game-ico-2001",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Katamari Damacy (2004)",
+    "teaser": "Namco's absurd puzzle game had you rolling a ball that picked up everything — thumbtacks, cats, buildings, continents. Its irreverent humor, J-pop soundtrack, and 'just one more roll' addiction made it a cult phenomenon.",
+    "categoryId": "GAMES",
+    "subtype": "puzzle",
+    "tags": [
+      "puzzle",
+      "ps2",
+      "namco"
+    ],
+    "id": "game-katamari-damacy-2004",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "GTA: San Andreas (2004)",
+    "teaser": "Rockstar's open-world epic spanned three cities, countryside, and desert — with RPG elements like gym workouts, haircuts, and food affecting your character. Its scale and ambition redefined what open-world games could be.",
+    "categoryId": "GAMES",
+    "subtype": "open-world",
+    "tags": [
+      "open-world",
+      "ps2",
+      "rockstar"
+    ],
+    "id": "game-gta-san-andreas-2004",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Devil May Cry (2001)",
+    "teaser": "Capcom's action game invented the 'character action' genre — stylish combos, juggling enemies, and the 'style meter' that rewarded creativity. Dante's cheeky attitude and the game's fluid combat created a new standard for action games.",
+    "categoryId": "GAMES",
+    "subtype": "action",
+    "tags": [
+      "action",
+      "ps2",
+      "capcom"
+    ],
+    "id": "game-devil-may-cry-2001",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Prince of Persia: The Sands of Time (2003)",
+    "teaser": "Ubisoft's reboot introduced time-rewind mechanics and parkour fluidity. The dagger of time let you undo deaths, and the Prince's acrobatic moveset made traversal feel like a dance. It influenced Assassin's Creed directly.",
+    "categoryId": "GAMES",
+    "subtype": "action-adventure",
+    "tags": [
+      "action-adventure",
+      "ps2",
+      "ubisoft"
+    ],
+    "id": "game-prince-of-persia-the-sands-of-time-2003",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Kingdom Hearts (2002)",
+    "teaser": "Square and Disney's insane crossover — Sora, Donald, and Goofy fighting Heartless across Disney worlds. Its JRPG combat, emotional story, and 'Keyblade' weapon became a cultural phenomenon despite its absurd premise.",
+    "categoryId": "GAMES",
+    "subtype": "rpg",
+    "tags": [
+      "rpg",
+      "ps2",
+      "square-enix"
+    ],
+    "id": "game-kingdom-hearts-2002",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Ratchet & Clank (2002)",
+    "teaser": "Insomniac's platformer-shooter hybrid let you collect an arsenal of ridiculous weapons — the Sheepinator, the RYNO, the Flamethrower. Its upgrade system, bolt collection, and humor made it Sony's answer to Mario.",
+    "categoryId": "GAMES",
+    "subtype": "platformer",
+    "tags": [
+      "platformer",
+      "ps2",
+      "insomniac"
+    ],
+    "id": "game-ratchet-&-clank-2002",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Braid (2008)",
+    "teaser": "Jonathan Blow's puzzle-platformer used time manipulation to explore themes of regret and obsession. Its final twist — recontextualizing the entire game as one man's pursuit of a princess — made it one of gaming's first 'art games.'",
+    "categoryId": "GAMES",
+    "subtype": "puzzle-platformer",
+    "tags": [
+      "indie",
+      "puzzle",
+      "xbla"
+    ],
+    "id": "game-braid-2008",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Fez (2012)",
+    "teaser": "Phil Fish's 2D platformer existed in a 3D world — rotating the perspective revealed new paths. Its polyhedron puzzles, cryptic codes, and monochrome aesthetic created a meditative experience about perception and dimension.",
+    "categoryId": "GAMES",
+    "subtype": "puzzle-platformer",
+    "tags": [
+      "indie",
+      "puzzle",
+      "xbla"
+    ],
+    "id": "game-fez-2012",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Inside (2016)",
+    "teaser": "Playdead's wordless sequel to Limbo followed a boy infiltrating a dystopian facility. Its physics puzzles, eerie atmosphere, and horrifying final transformation made it one of the most disturbing games ever made — with zero dialogue.",
+    "categoryId": "GAMES",
+    "subtype": "puzzle-platformer",
+    "tags": [
+      "indie",
+      "puzzle",
+      "atmospheric"
+    ],
+    "id": "game-inside-2016",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Limbo (2010)",
+    "teaser": "Playdead's debut put you as a boy searching for his sister in a nightmare world. Its silhouette art style, deadly traps, and spider encounters created tension without a single word. It pioneered the 'arthouse platformer' genre.",
+    "categoryId": "GAMES",
+    "subtype": "puzzle-platformer",
+    "tags": [
+      "indie",
+      "puzzle",
+      "atmospheric"
+    ],
+    "id": "game-limbo-2010",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Shovel Knight (2014)",
+    "teaser": "Yacht Club Games' love letter to NES classics — Mega Man, DuckTales, Castlevania. Its tight controls, hidden secrets, and cheerful presentation proved retro-style games could be more than nostalgia — they could be masterpieces.",
+    "categoryId": "GAMES",
+    "subtype": "platformer",
+    "tags": [
+      "indie",
+      "retro",
+      "platformer"
+    ],
+    "id": "game-shovel-knight-2014",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Dead Cells (2018)",
+    "teaser": "Motion Twin's roguelike-Metroidvania hybrid had permadeath, procedurally generated levels, and fluid combat. Each run felt different, and the 'just one more try' loop made it one of the most addictive games of the decade.",
+    "categoryId": "GAMES",
+    "subtype": "roguelike",
+    "tags": [
+      "indie",
+      "roguelike",
+      "metroidvania"
+    ],
+    "id": "game-dead-cells-2018",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Return of the Obra Dinn (2018)",
+    "teaser": "Lucas Pope's insurance investigator sim had you identifying 60 dead sailors on a ghost ship. Using a magical pocket watch to view moments of death, you deduced fates through logic alone — no hints, no hand-holding.",
+    "categoryId": "GAMES",
+    "subtype": "puzzle",
+    "tags": [
+      "indie",
+      "puzzle",
+      "mystery"
+    ],
+    "id": "game-return-of-the-obra-dinn-2018",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Inscryption (2021)",
+    "teaser": "Daniel Mullins' deckbuilder started as a card game in a cabin, then became a meta-horror puzzle spanning multiple game genres. Its fourth-wall-breaking narrative and escalating weirdness made it one of gaming's most surprising experiences.",
+    "categoryId": "GAMES",
+    "subtype": "card-game",
+    "tags": [
+      "indie",
+      "card-game",
+      "horror"
+    ],
+    "id": "game-inscryption-2021",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Tunic (2022)",
+    "teaser": "An isometric action-adventure where you play as a fox exploring a mysterious land. Its manual — found page by page — taught mechanics through illustrations. The game hid a complex language, secret puzzles, and a deeper reality beneath its cute surface.",
+    "categoryId": "GAMES",
+    "subtype": "action-adventure",
+    "tags": [
+      "indie",
+      "puzzle",
+      "zelda-like"
+    ],
+    "id": "game-tunic-2022",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Vampire Survivors (2022)",
+    "teaser": "A $3 game that became a phenomenon — auto-attacking hordes of monsters while collecting power-ups. Its 'one more run' addiction, build variety, and €2.99 price tag proved games don't need graphics to be incredible.",
+    "categoryId": "GAMES",
+    "subtype": "roguelike",
+    "tags": [
+      "indie",
+      "roguelike",
+      "bullet-heaven"
+    ],
+    "id": "game-vampire-survivors-2022",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Slay the Spire (2019)",
+    "teaser": "MegaCrit's roguelike deckbuilder combined card game strategy with procedural runs. Each character's unique deck, relics, and path choices created infinite replayability. It invented the 'deckbuilder roguelike' genre that dozens of games now imitate.",
+    "categoryId": "GAMES",
+    "subtype": "card-game",
+    "tags": [
+      "indie",
+      "card-game",
+      "roguelike"
+    ],
+    "id": "game-slay-the-spire-2019",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Cuphead (2017)",
+    "teaser": "Studio MDHR's run-and-gun was animated frame-by-frame in 1930s cartoon style. Its brutal difficulty, hand-drawn bosses, and jazz soundtrack made it as beautiful as it was punishing — every death felt like losing to a Disney villain.",
+    "categoryId": "GAMES",
+    "subtype": "run-and-gun",
+    "tags": [
+      "indie",
+      "run-and-gun",
+      "difficulty"
+    ],
+    "id": "game-cuphead-2017",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Outer Wilds (2019)",
+    "teaser": "Mobius Digital's space exploration game trapped you in a 22-minute time loop. Every secret unlocked knowledge, not power — you could reach the ending from the first minute if you knew where to look. Its solar system was a puzzle box of orbital mechanics.",
+    "categoryId": "GAMES",
+    "subtype": "exploration",
+    "tags": [
+      "indie",
+      "exploration",
+      "time-loop"
+    ],
+    "id": "game-outer-wilds-2019",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Noita (2020)",
+    "teaser": "Nolla Games' roguelike simulated every pixel — fire spread, water flowed, acid dissolved. Its physics-based magic system let you combine spells in thousands of ways, creating emergent chaos that made every run unique.",
+    "categoryId": "GAMES",
+    "subtype": "roguelike",
+    "tags": [
+      "indie",
+      "roguelike",
+      "physics"
+    ],
+    "id": "game-noita-2020",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Risk of Rain 2 (2020)",
+    "teaser": "Hopoo Games' roguelike sequel went 3D — surviving an alien planet with stacking items that created absurd power curves. By hour three, you were either a god or dead. Its co-op mode and item synergies made every run legendary.",
+    "categoryId": "GAMES",
+    "subtype": "roguelike",
+    "tags": [
+      "indie",
+      "roguelike",
+      "co-op"
+    ],
+    "id": "game-risk-of-rain-2-2020",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Hollow Knight: Silksong (TBA)",
+    "teaser": "Team Cherry's long-awaited sequel puts you as Hornet — the princess of Hallownest — in a new kingdom of Silk and Song. Its preemptive hype made it one of the most anticipated indie games ever, with fans waiting years for release.",
+    "categoryId": "GAMES",
+    "subtype": "metroidvania",
+    "tags": [
+      "indie",
+      "metroidvania",
+      "anticipated"
+    ],
+    "id": "game-hollow-knight-silksong-tba",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Balatro (2024)",
+    "teaser": "LocalThunk's roguelike deckbuilder turned poker into a strategy game. Jokers modified your hand — times two, plus fifteen, retrigger — creating absurd scores. Its simplicity hid infinite depth, and it became the highest-rated game of 2024.",
+    "categoryId": "GAMES",
+    "subtype": "card-game",
+    "tags": [
+      "indie",
+      "card-game",
+      "roguelike"
+    ],
+    "id": "game-balatro-2024",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Baba Is You (2019)",
+    "teaser": "Hempuli's puzzle game let you push WORDS that formed rules — 'Baba Is You' could become 'Wall Is You' or 'Flag Is Win.' Its logic-bending puzzles created over 200 levels of brain-melting creativity.",
+    "categoryId": "GAMES",
+    "subtype": "puzzle",
+    "tags": [
+      "indie",
+      "puzzle",
+      "logic"
+    ],
+    "id": "game-baba-is-you-2019",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Wilmot's Warehouse (2019)",
+    "teaser": "You organize a warehouse of abstract shapes — triangles, squiggles, colored blobs — then retrieve them on demand. Its zen-like gameplay became a meditation on categorization, memory, and how we make meaning from chaos.",
+    "categoryId": "GAMES",
+    "subtype": "puzzle",
+    "tags": [
+      "indie",
+      "puzzle",
+      "zen"
+    ],
+    "id": "game-wilmots-warehouse-2019",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Dujanah (2017)",
+    "teaser": "Jack King-Spooner's hand-drawn action game about a girl in a desert town fighting a corrupt system. Its mixed-media art — pencil, clay, paint — and political themes made it one of gaming's most visually unique experiences.",
+    "categoryId": "GAMES",
+    "subtype": "action",
+    "tags": [
+      "indie",
+      "action",
+      "art-game"
+    ],
+    "id": "game-dujanah-2017",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Hyper Light Drifter (2016)",
+    "teaser": "Heart Machine's action RPG used no dialogue — only environmental storytelling and a haunting synth soundtrack. Its pixel art, dash-based combat, and mysterious world created a game that felt like a playable dream.",
+    "categoryId": "GAMES",
+    "subtype": "action-rpg",
+    "tags": [
+      "indie",
+      "action-rpg",
+      "pixel-art"
+    ],
+    "id": "game-hyper-light-drifter-2016",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Night in the Woods (2017)",
+    "teaser": "Infinite Fall's narrative adventure followed Mae Borowski returning to her dying hometown. Its themes of depression, economic anxiety, and small-town decay resonated deeply — plus you could play bass in a band.",
+    "categoryId": "GAMES",
+    "subtype": "narrative",
+    "tags": [
+      "indie",
+      "narrative",
+      "coming-of-age"
+    ],
+    "id": "game-night-in-the-woods-2017",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "What Remains of Edith Finch (2017)",
+    "teaser": "Giant Sparrow's 'story anthology' walked you through a cursed family's deaths — each told through a unique gameplay vignette. From eating kings to drowning in a bathtub, every death was a miniature game about memory.",
+    "categoryId": "GAMES",
+    "subtype": "narrative",
+    "tags": [
+      "indie",
+      "narrative",
+      "walking-simulator"
+    ],
+    "id": "game-what-remains-of-edith-finch-2017",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Oxenfree (2016)",
+    "teaser": "Night School Studio's supernatural thriller used a walkie-talkie conversation system — you chose dialogue in real-time, interrupting yourself. Its ghost story, teen drama, and time-loop ending made it one of indie gaming's best narratives.",
+    "categoryId": "GAMES",
+    "subtype": "narrative",
+    "tags": [
+      "indie",
+      "narrative",
+      "horror"
+    ],
+    "id": "game-oxenfree-2016",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Beginner's Guide (2015)",
+    "teaser": "Davey Wreden's follow-up to The Stanley Parable was a tour through a friend's unfinished games — with commentary about creativity, mental health, and the relationship between artist and audience. It broke the fourth wall in ways no game had before.",
+    "categoryId": "GAMES",
+    "subtype": "narrative",
+    "tags": [
+      "indie",
+      "narrative",
+      "meta"
+    ],
+    "id": "game-the-beginners-guide-2015",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Mundaun (2021)",
+    "teaser": "Michel Ziegler's hand-drawn horror game set in the Swiss Alps had you attending your grandfather's funeral and uncovering a dark pact. Its pencil-sketch visuals, Swiss dialect, and folk horror created genuine dread.",
+    "categoryId": "GAMES",
+    "subtype": "horror",
+    "tags": [
+      "indie",
+      "horror",
+      "folk-horror"
+    ],
+    "id": "game-mundaun-2021",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "The Witness (2016)",
+    "teaser": "Jonathan Blow's puzzle game filled an island with line-drawing puzzles that taught you its language through play. By the end, you were solving puzzles using shadows, reflections, and the environment itself — no text, no tutorials.",
+    "categoryId": "GAMES",
+    "subtype": "puzzle",
+    "tags": [
+      "indie",
+      "puzzle",
+      "philosophical"
+    ],
+    "id": "game-the-witness-2016",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Her Story (2015)",
+    "teaser": "Sam Barlow's FMV game had you searching a police database of interview clips with a woman accused of murder. You typed keywords to find clips, piece together the story, and discover the truth — all through real actress Viva Seifert's performance.",
+    "categoryId": "GAMES",
+    "subtype": "mystery",
+    "tags": [
+      "indie",
+      "mystery",
+      "fmv"
+    ],
+    "id": "game-her-story-2015",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Dorfromantik (2022)",
+    "teaser": "A peaceful tile-placement game where you build a growing landscape by connecting villages, forests, and rivers. No enemies, no timers — just the meditative pleasure of creating a perfect little world. It sold 2 million copies in early access.",
+    "categoryId": "GAMES",
+    "subtype": "puzzle",
+    "tags": [
+      "indie",
+      "puzzle",
+      "chill"
+    ],
+    "id": "game-dorfromantik-2022",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "A Short Hike (2019)",
+    "teaser": "Adamgryu's bird-themed adventure had you climbing a mountain to get cell service. Its 2-hour length, charming characters, and open-ended exploration made it the coziest game of 2019. You could fish, collect shells, and race crabs.",
+    "categoryId": "GAMES",
+    "subtype": "adventure",
+    "tags": [
+      "indie",
+      "adventure",
+      "cozy"
+    ],
+    "id": "game-a-short-hike-2019",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Monument Valley (2014)",
+    "teaser": "ustwo games' impossible architecture puzzle used Escher-like perspectives — walk up a wall that becomes a floor, turn a bridge that connects nothing to everything. Its 10 levels were a meditation on perception and beauty.",
+    "categoryId": "GAMES",
+    "subtype": "puzzle",
+    "tags": [
+      "mobile",
+      "puzzle",
+      "art-game"
+    ],
+    "id": "game-monument-valley-2014",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Reigns (2016)",
+    "teaser": "Nerial's card-based kingdom simulator had you swiping left or right on advisor suggestions — balancing church, people, army, and treasury. Each decision had consequences you couldn't see, and your reign usually ended badly.",
+    "categoryId": "GAMES",
+    "subtype": "strategy",
+    "tags": [
+      "mobile",
+      "strategy",
+      "card-game"
+    ],
+    "id": "game-reigns-2016",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Alto's Odyssey (2018)",
+    "teaser": "Snowman's endless runner put you sandboarding through deserts, canyons, and temples. Its one-touch trick system, day-night cycle, and meditative soundtrack made it mobile gaming's most beautiful experience.",
+    "categoryId": "GAMES",
+    "subtype": "endless-runner",
+    "tags": [
+      "mobile",
+      "endless-runner",
+      "chill"
+    ],
+    "id": "game-altos-odyssey-2018",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "God of War Ragnarök (2022)",
+    "teaser": "Santa Monica Studio's Norse sequel balanced Kratos's rage with fatherhood. Its nine realms, axe-and-blades combat, and emotional story about breaking cycles of violence made it one of PS5's defining games.",
+    "categoryId": "GAMES",
+    "subtype": "action-adventure",
+    "tags": [
+      "action-adventure",
+      "ps5",
+      "sony"
+    ],
+    "id": "game-god-of-war-ragnarök-2022",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Astro Bot (2024)",
+    "teaser": "Team ASOBI's PS5 showcase turned the DualSense controller into a gameplay tool — haptic feedback let you feel rain, wind, and explosions. Its 80 levels were packed with PlayStation references and pure joy.",
+    "categoryId": "GAMES",
+    "subtype": "platformer",
+    "tags": [
+      "platformer",
+      "ps5",
+      "sony"
+    ],
+    "id": "game-astro-bot-2024",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Metroid Dread (2021)",
+    "teaser": "MercurySteam's return to 2D Metroid introduced the EMMI — invincible robots that stalked you through zones. Its counter system, speed booster puzzles, and faster-than-ever combat made it the best-selling Metroid ever.",
+    "categoryId": "GAMES",
+    "subtype": "metroidvania",
+    "tags": [
+      "metroidvania",
+      "switch",
+      "nintendo"
+    ],
+    "id": "game-metroid-dread-2021",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Rocket League (2015)",
+    "teaser": "Psyonix turned football into rocket-powered car soccer. Its physics-based gameplay created a skill ceiling so high that professional matches feel like ballet. Free-to-play in 2020, it became one of gaming's biggest esports.",
+    "categoryId": "GAMES",
+    "subtype": "sports",
+    "tags": [
+      "multiplayer",
+      "sports",
+      "esports"
+    ],
+    "id": "game-rocket-league-2015",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Apex Legends (2019)",
+    "teaser": "Respawn's battle royale introduced legends with unique abilities — Pathfinder's grapple, Wraith's portal, Octane's stim. Its ping system revolutionized team communication, and its movement mechanics made it the most fluid battle royale.",
+    "categoryId": "GAMES",
+    "subtype": "battle-royale",
+    "tags": [
+      "multiplayer",
+      "battle-royale",
+      "fps"
+    ],
+    "id": "game-apex-legends-2019",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Valorant (2020)",
+    "teaser": "Riot's tactical shooter combined CS:GO's gunplay with Overwatch-style abilities. Its agent roster, map design, and competitive ranked system made it esports' fastest-growing game — attracting CS players and creating new stars.",
+    "categoryId": "GAMES",
+    "subtype": "fps",
+    "tags": [
+      "multiplayer",
+      "fps",
+      "esports"
+    ],
+    "id": "game-valorant-2020",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Overwatch (2016)",
+    "teaser": "Blizzard's team shooter introduced 21 unique heroes at launch — each with distinct abilities, personalities, and lore. Its vibrant art style, diverse cast, and objective-based gameplay made it gaming's most inclusive competitive game.",
+    "categoryId": "GAMES",
+    "subtype": "fps",
+    "tags": [
+      "multiplayer",
+      "fps",
+      "team-based"
+    ],
+    "id": "game-overwatch-2016",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Fall Guys (2020)",
+    "teaser": "Mediatonic's battle royale turned game shows into competition — racing, diving, and falling through obstacle courses. Its bean-shaped characters, colorful chaos, and family-friendly appeal made it a pandemic phenomenon.",
+    "categoryId": "GAMES",
+    "subtype": "party",
+    "tags": [
+      "multiplayer",
+      "party",
+      "battle-royale"
+    ],
+    "id": "game-fall-guys-2020",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Factorio (2016)",
+    "teaser": "Wube Software's factory-building game had you automating production on an alien planet. Its 'one more conveyor belt' loop, complex logistics, and infinite scalability created a game that players spend thousands of hours optimizing.",
+    "categoryId": "GAMES",
+    "subtype": "simulation",
+    "tags": [
+      "simulation",
+      "strategy",
+      "automation"
+    ],
+    "id": "game-factorio-2016",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "RimWorld (2018)",
+    "teaser": "Ludeon Studios' colony sim generated stories through AI-driven events — raids, mood breaks, relationships. Its storyteller system adjusted difficulty dynamically, creating emergent narratives that felt hand-crafted.",
+    "categoryId": "GAMES",
+    "subtype": "simulation",
+    "tags": [
+      "simulation",
+      "strategy",
+      "roguelike"
+    ],
+    "id": "game-rimworld-2018",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Dwarf Fortress (2006)",
+    "teaser": "Bay 12 Games' legendary simulation generated entire worlds — geology, history, individual dwarf personalities. Its ASCII graphics hid the most complex simulation ever made, where a tantrum could cascade into fortress-wide catastrophe.",
+    "categoryId": "GAMES",
+    "subtype": "simulation",
+    "tags": [
+      "simulation",
+      "strategy",
+      "roguelike"
+    ],
+    "id": "game-dwarf-fortress-2006",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Satisfactory (2022)",
+    "teaser": "Coffee Stain Studios' first-person factory builder put you on an alien planet building mega-structures. Its scale — conveyor belts spanning kilometers, factories visible from orbit — made factory-building feel epic.",
+    "categoryId": "GAMES",
+    "subtype": "simulation",
+    "tags": [
+      "simulation",
+      "strategy",
+      "automation"
+    ],
+    "id": "game-satisfactory-2022",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Oxygen Not Included (2017)",
+    "teaser": "Klei Entertainment's space colony sim managed dupes (duplicants) surviving underground. Its gas physics, liquid dynamics, and temperature systems created complex emergent challenges — from chlorine pockets to heat death.",
+    "categoryId": "GAMES",
+    "subtype": "simulation",
+    "tags": [
+      "simulation",
+      "strategy",
+      "management"
+    ],
+    "id": "game-oxygen-not-included-2017",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Two Point Hospital (2018)",
+    "teaser": "Bullfrog alumni's spiritual successor to Theme Hospital had you curing diseases like 'Light-headedness' (patients with lightbulb heads) and 'Chrono-Headache.' Its humor, management depth, and British wit made it a perfect spiritual successor.",
+    "categoryId": "GAMES",
+    "subtype": "simulation",
+    "tags": [
+      "simulation",
+      "management",
+      "humor"
+    ],
+    "id": "game-two-point-hospital-2018",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Firewatch (2016)",
+    "teaser": "Campo Santo's debut put you as a fire lookout in Wyoming, communicating only by radio with Delilah. Its isolation, growing paranoia, and the mystery in the woods created tension through words alone — no combat, just conversation.",
+    "categoryId": "GAMES",
+    "subtype": "narrative",
+    "tags": [
+      "indie",
+      "narrative",
+      "walking-simulator"
+    ],
+    "id": "game-firewatch-2016",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Gone Home (2013)",
+    "teaser": "The Fullbright Company's debut had you exploring an empty house, piecing together your sister's life through objects and notes. Its revelation about your sister's relationship was gaming's first major LGBTQ+ story.",
+    "categoryId": "GAMES",
+    "subtype": "narrative",
+    "tags": [
+      "indie",
+      "narrative",
+      "lgbtq"
+    ],
+    "id": "game-gone-home-2013",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Kentucky Route Zero (2013)",
+    "teaser": "Cardboard Computer's magical realist adventure followed a trucker delivering furniture through Kentucky's underground highways. Its theater-like staging, surreal encounters, and economic commentary created one of gaming's most literary experiences.",
+    "categoryId": "GAMES",
+    "subtype": "narrative",
+    "tags": [
+      "indie",
+      "narrative",
+      "magical-realism"
+    ],
+    "id": "game-kentucky-route-zero-2013",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Vagrant Story (2000)",
+    "teaser": "Square's tactical action RPG set in a single city — no overworld, no random encounters. Its real-time weapon crafting, chain-combo system, and political intrigue made it Yasumi Matsuno's most underappreciated masterpiece.",
+    "categoryId": "GAMES",
+    "subtype": "rpg",
+    "tags": [
+      "rpg",
+      "ps1",
+      "square"
+    ],
+    "id": "game-vagrant-story-2000",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Panzer Dragoon Saga (1998)",
+    "teaser": "Team Andromeda's RPG — only 200,000 copies made — turned the Panzer Dragoon series into a turn-based epic. Its dragon-riding combat, ancient ruins, and melancholy story made it the Saturn's crown jewel.",
+    "categoryId": "GAMES",
+    "subtype": "rpg",
+    "tags": [
+      "rpg",
+      "saturn",
+      "sega"
+    ],
+    "id": "game-panzer-dragoon-saga-1998",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Skies of Arcadia (2000)",
+    "teaser": "Sega's airship RPG had you exploring a world of floating islands, sky pirates, and ancient ruins. Its discovery system rewarded exploration with items and bounties, and Vyse's optimistic adventure captured the spirit of classic JRPGs.",
+    "categoryId": "GAMES",
+    "subtype": "rpg",
+    "tags": [
+      "rpg",
+      "dreamcast",
+      "sega"
+    ],
+    "id": "game-skies-of-arcadia-2000",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Myst (1993)",
+    "teaser": "Cyan's puzzle adventure sold 6 million copies — more than any PC game until The Sims. Its islands, journals, and linking books created a world you explored at your own pace. No enemies, no timer — just you and the puzzles.",
+    "categoryId": "GAMES",
+    "subtype": "puzzle-adventure",
+    "tags": [
+      "puzzle-adventure",
+      "pc",
+      "pioneer"
+    ],
+    "id": "game-myst-1993",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Planescape: Torment (1999)",
+    "teaser": "Black Isle's RPG asked 'What can change the nature of a man?' Its writing — 800,000 words of dialogue — made it gaming's most philosophical game. The Nameless One's journey through the Planes was literature disguised as a game.",
+    "categoryId": "GAMES",
+    "subtype": "rpg",
+    "tags": [
+      "rpg",
+      "pc",
+      "black-isle"
+    ],
+    "id": "game-planescape-torment-1999",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Genshin Impact (2020)",
+    "teaser": "miHoYo's free-to-play open-world RPG combined Zelda-like exploration with gacha character collection. Its anime art style, elemental combat system, and constant updates made it one of the highest-grossing games ever.",
+    "categoryId": "GAMES",
+    "subtype": "action-rpg",
+    "tags": [
+      "action-rpg",
+      "free-to-play",
+      "open-world"
+    ],
+    "id": "game-genshin-impact-2020",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "It Takes Two (2021)",
+    "teaser": "Hazelight's co-op adventure turned a divorcing couple into dolls who must cooperate to survive. Every level introduced new mechanics — plane piloting, time manipulation, branching paths — making it the best co-op game in years.",
+    "categoryId": "GAMES",
+    "subtype": "co-op",
+    "tags": [
+      "co-op",
+      "narrative",
+      "game-of-the-year"
+    ],
+    "id": "game-it-takes-two-2021",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Hi-Fi Rush (2023)",
+    "teaser": "Tango Gameworks' rhythm-action game synced combat to the beat — every attack, parry, and combo landed on the music. Its cel-shaded art, punk rock soundtrack, and joyful energy made it 2023's most surprising delight.",
+    "categoryId": "GAMES",
+    "subtype": "action",
+    "tags": [
+      "action",
+      "rhythm",
+      "shadow-drop"
+    ],
+    "id": "game-hi-fi-rush-2023",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Lethal Company (2023)",
+    "teaser": "Zeekerss' co-op horror had you scavenging abandoned moons for scrap while monsters hunted you. Its early-access chaos, proximity voice chat, and AI company boss created emergent comedy-horror that dominated streaming.",
+    "categoryId": "GAMES",
+    "subtype": "horror",
+    "tags": [
+      "horror",
+      "co-op",
+      "early-access"
+    ],
+    "id": "game-lethal-company-2023",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Palworld (2024)",
+    "teaser": "Pocketpair's 'Pokemon with guns' survival game sold 25 million copies in a month. Its creature collection, base building, and factory automation created a genre hybrid that dominated early 2024 despite plagiarism controversies.",
+    "categoryId": "GAMES",
+    "subtype": "survival",
+    "tags": [
+      "survival",
+      "open-world",
+      "controversial"
+    ],
+    "id": "game-palworld-2024",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Helldivers 2 (2024)",
+    "teaser": "Arrowhead's top-down shooter parodied militarism while delivering frantic co-op gameplay. Its 'Managed Democracy' satire, friendly-fire chaos, and Galactic War metagame made it 2024's biggest multiplayer hit.",
+    "categoryId": "GAMES",
+    "subtype": "shooter",
+    "tags": [
+      "shooter",
+      "co-op",
+      "satire"
+    ],
+    "id": "game-helldivers-2-2024",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  },
+  {
+    "name": "Animal Well (2024)",
+    "teaser": "Shared Memory's Metroidvania hid layers of puzzles within puzzles — eggs, secrets within secrets, ARG-like ciphers. Its firefly companion, cryptic symbols, and community-driven discovery made it 2024's most mysterious game.",
+    "categoryId": "GAMES",
+    "subtype": "metroidvania",
+    "tags": [
+      "indie",
+      "metroidvania",
+      "puzzle"
+    ],
+    "id": "game-animal-well-2024",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard",
+    "byline": ""
+  }
 ]
