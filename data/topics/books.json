@@ -7295,7 +7295,7 @@
     "subtype": "Book",
     "name": "The Power (2016)",
     "teaser": "Nina Alderman's novel about a world where women suddenly develop the ability to emit electric shocks from their hands — upending every power structure. The novel is framed as a manuscript written 5,000 years in the future by a male historian in a matriarchal world. Won the Women's Prize. It reads like a thriller and thinks like a philosophical treatise.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316548700-L.jpg",
     "byline": "Naomi Alderman",
     "exploreAction": {
       "verb": "Read",
@@ -7310,7 +7310,46 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 400
+    "pageCount": 400,
+    "synopsis": "Naomi Alderman's speculative novel imagines a world where women suddenly develop the ability to generate electrical jolts from their bodies through an organ called the 'skein.' The story follows four main characters: Allie, a teenager from Mississippi who becomes the face of a new matriarchal religion; Roxy, the daughter of a London crime boss; Margot, a politician and mother navigating the shifting power dynamics; and Tunde, a Nigerian journalist documenting the changes. Framed as a historical document written by a male author centuries later, the novel traces how the emergence of physical power among women upends patriarchal societies worldwide—leading to new forms of religion, political upheaval, and ultimately, the same patterns of abuse and domination that have always characterized unchecked power. Alderman, mentored by Margaret Atwood, won the Baileys Women's Prize for Fiction in 2017. The novel's central question—whether power corrupts regardless of who holds it—resonates with increasing urgency in an era of #MeToo and shifting gender dynamics.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Shape of Power",
+        "pageRange": "1-28",
+        "summary": "Introduction to the world where women develop electrical power; Allie escapes abuse."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Storm",
+        "pageRange": "29-58",
+        "summary": "Tunde documents the power's emergence; Margot navigates political fallout."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The New World",
+        "pageRange": "59-95",
+        "summary": "Religious and political transformations accelerate; Roxy's criminal empire grows."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Mother Religion",
+        "pageRange": "96-130",
+        "summary": "Allie becomes Mother Eve; the balance of global power shifts dramatically."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Reckoning",
+        "pageRange": "131-170",
+        "summary": "Consequences of the new order emerge; Tunde's role as journalist becomes precarious."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Epilogue",
+        "pageRange": "171-195",
+        "summary": "Framing device reveals the historical distance of the narrative; the cycle of power is laid bare."
+      }
+    ]
   },
   {
     "id": "book-homegoing",
@@ -7318,7 +7357,7 @@
     "subtype": "Book",
     "name": "Homegoing (2016)",
     "teaser": "Yaa Gyasi's debut novel spanning 300 years — from the Gold Coast (Ghana) to modern America. Each chapter is a new generation descended from two half-sisters: one married to a British slave trader, one sold into slavery. Gyasi wrote it at 25 after a research trip to Ghana. The novel does in 300 pages what most family sagas do in 800.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781101947135-L.jpg",
     "byline": "Yaa Gyasi",
     "exploreAction": {
       "verb": "Read",
@@ -7333,7 +7372,70 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 320
+    "pageCount": 320,
+    "synopsis": "Yaa Gyasi's debut novel traces two branches of a single family across seven generations, beginning in eighteenth-century Ghana. Effia, married off to a British colonial officer, lives in comfort while her half-sister Esi is imprisoned in the dungeons of Cape Coast Castle, awaiting the slave ships. The novel alternates between these two bloodlines: Effia's descendants remain in Ghana, navigating colonialism, tribal conflict, and the gold and cocoa trades, while Esi's descendants are carried across the Atlantic into slavery and its aftermath in America—from the plantations of Mississippi to the coal mines of Alabama to the jazz clubs of Harlem. Each chapter is a self-contained story, yet together they form an epic tapestry of the African diaspora, revealing how the slave trade tore families apart and how its effects reverberate through centuries. Gyasi won the National Book Critics Circle Award for this debut, which was written during a research trip to Ghana and draws on her own family history.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Effia",
+        "pageRange": "1-30",
+        "summary": "Effia grows up in the Gold Coast and is married to a British colonizer."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Esi",
+        "pageRange": "31-55",
+        "summary": "Esi is captured and imprisoned in Cape Coast Castle before being shipped to America."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Quey",
+        "pageRange": "56-80",
+        "summary": "Effia's son navigates between British and Fante worlds."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Abena",
+        "pageRange": "81-100",
+        "summary": "The family confronts the Ashanti-Fante wars."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Ness",
+        "pageRange": "101-125",
+        "summary": "Esi's descendants endure slavery in America."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Hettie",
+        "pageRange": "126-150",
+        "summary": "The family moves through the Jim Crow South."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Marcus",
+        "pageRange": "151-175",
+        "summary": "A modern descendant searches for his roots."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "Marjorie",
+        "pageRange": "176-200",
+        "summary": "The two branches of the family begin to converge."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "Esi II",
+        "pageRange": "201-220",
+        "summary": "The family reckons with its divided history."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "Homegoing",
+        "pageRange": "221-240",
+        "summary": "The descendants return to Ghana, completing the circle."
+      }
+    ]
   },
   {
     "id": "book-the-vanishing-half",
@@ -7341,7 +7443,7 @@
     "subtype": "Book",
     "name": "The Vanishing Half (2020)",
     "teaser": "Brit Bennett's novel about identical twin sisters from a small Black town in Louisiana — one lives as a Black woman, the other passes for white. Their daughters' lives intersect years later. The novel explores race as performance, identity as choice, and what we owe to where we came from. It was an instant #1 bestseller and HBO adapted it.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780525536291-L.jpg",
     "byline": "Brit Bennett",
     "exploreAction": {
       "verb": "Read",
@@ -7356,7 +7458,58 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 352
+    "pageCount": 352,
+    "synopsis": "Brit Bennett's novel follows the lives of twin sisters Stella and Desiree Vignes, who grow up in Mallard, Louisiana—a town founded by a freed slave and populated entirely by light-skinned Black people. At sixteen, the twins run away to New Orleans, but their paths diverge sharply: Stella discovers she can pass as white and eventually marries a wealthy white man, hiding her identity entirely, while Desiree returns to Mallard and marries the darkest man she can find, as if to spite the world she left behind. The novel moves between 1968 and the present day, tracking not only the twins but their daughters—Desiree's dark-skinned daughter Jude, who passes her own threshold of beauty, and Stella's white daughter Kennedy, who knows nothing of her Black heritage. When Jude and Kennedy meet by chance in Los Angeles, the collision of their hidden histories forces a reckoning with identity, race, and the impossible bargains made in a world that refuses to see people as they are.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Town",
+        "pageRange": "1-25",
+        "summary": "Mallard, Louisiana and the Vignes twins' upbringing."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Escape",
+        "pageRange": "26-50",
+        "summary": "Stella and Desiree flee to New Orleans; their paths diverge."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Stella",
+        "pageRange": "51-80",
+        "summary": "Stella builds a new white identity in Los Angeles."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Desiree",
+        "pageRange": "81-110",
+        "summary": "Desiree returns to Mallard and marries Samuel West."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Jude",
+        "pageRange": "111-145",
+        "summary": "Jude navigates colorism and finds success in track and field."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Kennedy",
+        "pageRange": "146-175",
+        "summary": "Kennedy discovers her mother's secret and her own identity."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Meeting",
+        "pageRange": "176-205",
+        "summary": "Jude and Kennedy meet in Los Angeles; the hidden connections emerge."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "Reckoning",
+        "pageRange": "206-230",
+        "summary": "The sisters' choices ripple through both families; identity is redefined."
+      }
+    ]
   },
   {
     "id": "book-giovannis-room",
@@ -7364,7 +7517,7 @@
     "subtype": "Book",
     "name": "Giovanni's Room (1956)",
     "teaser": "James Baldwin's novel about an American man in Paris torn between his girlfriend and an Italian bartender named Giovanni. Baldwin's publisher told him to burn the manuscript — it would ruin his career as a 'Negro' writer. He published anyway. The novel's narrator, David, is white, which was deliberate: Baldwin didn't want the novel dismissed as merely a 'Black' or 'gay' story.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345806567-L.jpg",
     "byline": "James Baldwin",
     "exploreAction": {
       "verb": "Read",
@@ -7379,7 +7532,46 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 192
+    "pageCount": 192,
+    "synopsis": "James Baldwin's second novel tells the story of David, an American living in Paris in the 1950s, who is torn between his attraction to men and his engagement to an American woman named Hella. When Hella leaves for Spain to decide whether to marry him, David begins an affair with Giovanni, an Italian bartender in Saint-Germain-des-Prés. Their passionate relationship takes place almost entirely within Giovanni's cramped room, which becomes both a sanctuary and a trap. David, unable to accept his desire, ultimately abandons Giovanni and returns to Hella, but Giovanni is arrested for a murder he commits in desperation. The novel is a meditation on sexual identity, shame, and the destructive consequences of denying one's truth. Baldwin wrote it while living in Switzerland, determined to depict homosexual experience without apology or clinical detachment. Published when Baldwin was just thirty-two, the novel was initially rejected by several American publishers who feared its subject matter, but it became a foundational text of both queer literature and the American canon.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Bar",
+        "pageRange": "1-20",
+        "summary": "David reflects on his past as he awaits Giovanni's execution."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Hella",
+        "pageRange": "21-45",
+        "summary": "David and Hella's relationship and her departure for Spain."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Giovanni",
+        "pageRange": "46-70",
+        "summary": "David meets Giovanni and their affair begins."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Room",
+        "pageRange": "71-95",
+        "summary": "The relationship deepens in Giovanni's cramped quarters."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Fracture",
+        "pageRange": "96-120",
+        "summary": "David's inability to accept himself drives the relationship apart."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Reckoning",
+        "pageRange": "121-140",
+        "summary": "Giovanni's arrest and David's confrontation with his own cowardice."
+      }
+    ]
   },
   {
     "id": "book-normal-people",
@@ -7387,7 +7579,7 @@
     "subtype": "Book",
     "name": "Normal People (2018)",
     "teaser": "Sally Rooney's novel about Marianne and Connell — he's the popular son of a cleaner, she's the weird rich girl. They pretend not to know each other at school, then meet again at Trinity College. The novel is about class, intimacy, and the words they can't say. The BBC adaptation broke viewing records.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781984822178-L.jpg",
     "byline": "Sally Rooney",
     "exploreAction": {
       "verb": "Read",
@@ -7404,7 +7596,46 @@
       "Romance"
     ],
     "tier": 2,
-    "pageCount": 288
+    "pageCount": 288,
+    "synopsis": "Sally Rooney's second novel traces the relationship between Connell Waldron and Marianne Sheridan from their final months of secondary school in Sligo, Ireland, through their years at Trinity College Dublin. Connell is popular, athletic, and well-liked; Marianne is wealthy, abrasive, and socially ostracized. Their secret sexual relationship in Sligo—driven by Connell's shame about being seen with her—ends badly when he brings another girl to the school dance instead of her. At Trinity, the dynamic reverses: Marianne thrives socially while Connell feels alienated and poor. They drift in and out of each other's lives across four years, each relationship marked by intense intimacy and the inability to communicate what they mean to one another. Rooney writes without quotation marks and with forensic precision about class, power, mental health, and the way two people can be exactly right for each other and still fail to make it work. The novel won the Costa Novel Award and the Women's Prize for Fiction, and was adapted into a critically acclaimed BBC/Hulu series.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Sligo",
+        "pageRange": "1-35",
+        "summary": "Connell and Marianne's secret relationship in secondary school."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Dance",
+        "pageRange": "36-60",
+        "summary": "Connell's betrayal at the school dance; the relationship fractures."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Trinity",
+        "pageRange": "61-95",
+        "summary": "The power dynamic reverses at university."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Reunion",
+        "pageRange": "96-130",
+        "summary": "They reconnect; the cycle of intimacy and distance continues."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "New York",
+        "pageRange": "131-165",
+        "summary": "Connell's move to New York; the relationship faces its greatest test."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The End",
+        "pageRange": "166-185",
+        "summary": "A conclusion that is both an ending and an opening."
+      }
+    ]
   },
   {
     "id": "book-the-fire-next-time",
@@ -7412,7 +7643,7 @@
     "subtype": "Book",
     "name": "The Fire Next Time (1963)",
     "teaser": "James Baldwin's book-length essay in the form of two letters — one to his 14-year-old nephew, one from 'a region of my mind.' Published in The New Yorker, it became an instant classic. Baldwin writes that 'God gave Noah the rainbow sign, No more water, the fire next time!' — the title is a warning. The essay is a diagnosis of American racism from the inside, written with love and fury.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780679734529-L.jpg",
     "byline": "James Baldwin",
     "exploreAction": {
       "verb": "Read",
@@ -7427,7 +7658,28 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 144
+    "pageCount": 144,
+    "synopsis": "James Baldwin's most celebrated nonfiction work consists of two essays that examine race in America with searing clarity. The first, 'My Dungeon Shook: A Letter to My Nephew,' is written on the hundredth anniversary of the Emancipation Proclamation and addresses Baldwin's fifteen-year-old nephew James, urging him to understand the weight of history and the trap of self-hatred that racism constructs. The second, 'Down at the Cross: Letter from a Region of My Mind,' is a longer essay that traces Baldwin's own journey from a少年 preacher in Harlem to a writer grappling with the meaning of race, religion, and identity. He describes his encounter with the Nation of Islam, his crisis of faith, and his understanding of why Black Americans are angry—and why that anger, if not met with genuine change, will consume the nation. Baldwin's central argument is that white Americans must confront their own history and their own complicity in racial injustice, and that love—difficult, unsentimental love—is the only way forward. The title comes from a slave song: 'God gave Noah the rainbow sign, No more water, the fire next time.'",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "My Dungeon Shook",
+        "pageRange": "1-18",
+        "summary": "A letter to Baldwin's nephew on the centennial of emancipation."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Down at the Cross",
+        "pageRange": "19-105",
+        "summary": "Baldwin's personal journey through religion, identity, and the race problem in America."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Fire Next Time",
+        "pageRange": "106-120",
+        "summary": "Baldwin's encounter with Elijah Muhammad and the Nation of Islam."
+      }
+    ]
   },
   {
     "id": "book-dubliners",
@@ -7435,7 +7687,7 @@
     "subtype": "Book",
     "name": "Dubliners (1914)",
     "teaser": "James Joyce's collection of 15 short stories about Dublin in the early 20th century. Each story is a portrait of paralysis — the characters can't escape their city, their jobs, their memories. Joyce spent 10 years fighting publishers over the word 'bloody.' The collection ends with 'The Dead,' widely considered the greatest short story in English.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780486280592-L.jpg",
     "byline": "James Joyce",
     "exploreAction": {
       "verb": "Read",
@@ -7450,7 +7702,100 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 224
+    "pageCount": 224,
+    "synopsis": "James Joyce's first published work is a collection of fifteen short stories depicting ordinary life in Dublin at the turn of the twentieth century. Each story explores a moment of epiphany—or failure of epiphany—in the lives of Dublin's middle class. From 'The Sisters,' in which a boy confronts the death of a priest, to 'Eveline,' in which a young woman decides not to flee her oppressive life, to 'The Dead,' the collection's masterful final story in which Gabriel Conroy realizes the depth of his wife's love for another man, Joyce creates a portrait of paralysis—moral, spiritual, and political—that he saw as characteristic of Ireland under British rule. The stories move from childhood ('The Sisters,' 'An Encounter,' 'Araby') through adolescence ('Eveline,' 'After the Race,' 'Two Gallants,' 'The Boarding House') to maturity ('A Little Cloud,' 'Counterparts,' 'Clay,' 'A Painful Case') and finally to public life ('Ivy Day in the Committee Room,' 'A Mother,' 'Grace') before culminating in the transcendent 'The Dead.' Joyce originally wanted the stories published in a different order, but his publisher overruled him. The collection is considered one of the greatest short story collections in the English language.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Sisters",
+        "pageRange": "1-8",
+        "summary": "A boy confronts the death of a priest who was his mentor."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "An Encounter",
+        "pageRange": "9-16",
+        "summary": "Two schoolboys skip school and have a disturbing encounter."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Araby",
+        "pageRange": "17-24",
+        "summary": "A boy's romantic quest to an bazaar ends in disillusionment."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Eveline",
+        "pageRange": "25-31",
+        "summary": "A young woman weighs escape from Dublin against duty to her family."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "After the Race",
+        "pageRange": "32-38",
+        "summary": "Four young men after a yacht race; Dublin nightlife."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Two Gallants",
+        "pageRange": "39-46",
+        "summary": "Two young men scheme to exploit a maid."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Boarding House",
+        "pageRange": "47-55",
+        "summary": "A mother engineers a marriage for her daughter."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "A Little Cloud",
+        "pageRange": "56-66",
+        "summary": "A timid clerk confronts his failed literary ambitions."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "Counterparts",
+        "pageRange": "67-75",
+        "summary": "A clerk drinks away his frustrations and abuses his son."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "Clay",
+        "pageRange": "76-83",
+        "summary": "A single woman's quiet evening reveals her loneliness."
+      },
+      {
+        "chapterNumber": 11,
+        "title": "A Painful Case",
+        "pageRange": "84-95",
+        "summary": "A man's affair ends in tragedy and self-reckoning."
+      },
+      {
+        "chapterNumber": 12,
+        "title": "Ivy Day in the Committee Room",
+        "pageRange": "96-108",
+        "summary": "Political canvassers debate Irish nationalism."
+      },
+      {
+        "chapterNumber": 13,
+        "title": "A Mother",
+        "pageRange": "109-117",
+        "summary": "A mother's ambition for her daughter's singing career is humiliated."
+      },
+      {
+        "chapterNumber": 14,
+        "title": "Grace",
+        "pageRange": "118-135",
+        "summary": "A fallen man is led to a retreat; a sermon on grace."
+      },
+      {
+        "chapterNumber": 15,
+        "title": "The Dead",
+        "pageRange": "136-175",
+        "summary": "Gabriel Conroy's epiphany about love and mortality at a dinner party."
+      }
+    ]
   },
   {
     "id": "book-the-passion-according-to-gh",
@@ -7458,7 +7803,7 @@
     "subtype": "Book",
     "name": "The Passion According to G.H. (1964)",
     "teaser": "Clarice Lispector's novel about a wealthy woman in Rio de Janeiro who enters her maid's room and crushes a cockroach — and from that act, has a mystical crisis that dissolves her entire sense of self. The novel is less a story than an extended meditation. Lispector described it as 'the best book I wrote, and I don't understand it.'.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780811227933-L.jpg",
     "byline": "Clarice Lispector",
     "exploreAction": {
       "verb": "Read",
@@ -7473,7 +7818,40 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 192
+    "pageCount": 192,
+    "synopsis": "Clarice Lispector's experimental novel takes the form of a first-person monologue by G.H., a wealthy Rio de Janeiro sculptress, who recounts the spiritual crisis triggered when she enters her maid's empty room and encounters a cockroach. In a moment of revulsion, she slams the door on the insect, crushing it, and then—horrified by what she has done—becomes obsessed with the dying creature, ultimately kissing its white insides. This visceral encounter becomes the catalyst for a profound existential journey as G.H. strips away layer after layer of social identity, memory, and assumption to confront what she calls 'the thing itself'—the raw, pre-linguistic reality beneath all human meaning-making. The novel is structured as a meditation that moves backward through G.H.'s life, her relationships, her art, and her self-conceptions, each memory dismantled as she approaches the zero point of consciousness. Written during a period of personal crisis for Lispector, the book is widely regarded as one of the masterpieces of twentieth-century Latin American literature and a landmark of philosophical fiction.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Encounter",
+        "pageRange": "1-25",
+        "summary": "G.H. enters the maid's room and encounters the cockroach."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Crisis",
+        "pageRange": "26-55",
+        "summary": "The aftermath of the encounter; G.H.'s existential unraveling begins."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Memory",
+        "pageRange": "56-85",
+        "summary": "G.H. moves backward through her life, dismantling assumptions."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Thing Itself",
+        "pageRange": "86-110",
+        "summary": "The approach to raw, pre-linguistic reality."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Creation",
+        "pageRange": "111-130",
+        "summary": "G.H.'s confrontation with the void and the possibility of beginning again."
+      }
+    ]
   },
   {
     "id": "book-season-of-migration-to-the-north",
@@ -7481,7 +7859,7 @@
     "subtype": "Book",
     "name": "Season of Migration to the North (1966)",
     "teaser": "Tayeb Salih's novel about a Sudanese man who returns from studying in England to find a stranger, Mustafa Sa'eed, has settled in his village. Mustafa Sa'eed's story is Conrad's 'Heart of Darkness' reversed — the 'savage' goes to Europe and conquers it through seduction. The Arab Literary Academy named it the greatest Arabic novel of the 20th century.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781590171707-L.jpg",
     "byline": "Tayeb Salih",
     "exploreAction": {
       "verb": "Read",
@@ -7496,7 +7874,40 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 176
+    "pageCount": 176,
+    "synopsis": "Tayeb Salih's novel opens with the unnamed narrator returning to his small village along the Nile in Sudan after seven years studying in England. He discovers that a stranger, Mustafa Sa'eed, has settled in the village and married a local woman. As the narrator gradually learns Mustafa's secret history—that he was a brilliant Sudanese student in London who seduced and killed English women in a deliberate act of colonial revenge—the novel becomes a meditation on the violence of empire, the corruption of the colonized, and the impossibility of returning home unchanged. When Mustafa disappears into the Nile during the seasonal flood, the narrator inherits his burden, drawn into a psychological reckoning with Mustafa's legacy and his own complicity. The novel reverses Joseph Conrad's journey—here the darkness is not in Africa but in London—and has been called the most important Arabic novel of the twentieth century. Banned in several Arab countries for its frank treatment of sex and colonial critique, it won the novel prize of the contest organized by the Lebanese journal Al-Mu'arrikh in 1968 and was voted the most important Arabic novel of the twentieth century by the Arab Literary Club in 2001.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Return",
+        "pageRange": "1-30",
+        "summary": "The narrator returns to Wad Hamid and meets Mustafa Sa'eed."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Story of Mustafa",
+        "pageRange": "31-65",
+        "summary": "Mustafa's history in London unfolds through fragmentary revelations."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "London",
+        "pageRange": "66-100",
+        "summary": "The seductions and murders; the psychological toll of colonial encounter."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Flood",
+        "pageRange": "101-130",
+        "summary": "Mustafa's disappearance into the Nile; the narrator's crisis."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Trial",
+        "pageRange": "131-155",
+        "summary": "The narrator's confrontation with Mustafa's legacy and his own identity."
+      }
+    ]
   },
   {
     "id": "book-a-visit-from-the-goon-squad",
@@ -7504,7 +7915,7 @@
     "subtype": "Book",
     "name": "A Visit from the Goon Squad (2010)",
     "teaser": "Jennifer Egan's novel told in 13 interlinked stories, including one chapter written entirely as a PowerPoint presentation. It spans from the 1970s punk scene to a near-future New York, following Bennie Salazar, a record executive, and Sasha, his kleptomaniac assistant. Won the Pulitzer. Time is the 'goon squad' — it takes everything eventually.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780307463654-L.jpg",
     "byline": "Jennifer Egan",
     "exploreAction": {
       "verb": "Read",
@@ -7521,7 +7932,76 @@
       "Music"
     ],
     "tier": 2,
-    "pageCount": 288
+    "pageCount": 288,
+    "synopsis": "Jennifer Egan's Pulitzer Prize-winning novel is structured as a linked collection of stories that move across decades and continents, connected by the music industry and a cast of recurring characters. At its center are Bennie Salazar, a washed-up record executive, and his assistant Sasha, a kleptomaniac. The novel traces their lives backward and forward through time—from the punk rock scene of 1970s San Francisco to the corporate music world of the 1990s to a post-apocalyptic future where the music industry has collapsed entirely. Egan's genius lies in her ability to make time itself a character: the 'goon squad' of the title is time, which acts on everyone with democratic cruelty. The book's most celebrated chapter is told entirely in PowerPoint slides, tracking the life of a teenager named Alice from age twelve to thirty-nine. Part social novel, part experimental fiction, part love letter to rock and roll, the book won both the Pulitzer Prize for Fiction and the National Book Critics Circle Award.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Found",
+        "pageRange": "1-22",
+        "summary": "Sasha's kleptomania and her relationship with Bennie."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Gold Standard",
+        "pageRange": "23-42",
+        "summary": "Bennie's early days in the music industry."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "A to B",
+        "pageRange": "43-58",
+        "summary": "A road trip reveals the past."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Ask Me If I Care",
+        "pageRange": "59-75",
+        "summary": "The punk scene and its aftermath."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Spinners",
+        "pageRange": "76-90",
+        "summary": "Characters navigate the shifting music landscape."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "X's and O's",
+        "pageRange": "91-105",
+        "summary": "Bennie's corporate compromises."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Selling the General",
+        "pageRange": "106-118",
+        "summary": "Political consulting and personal reckoning."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "Great Rock and Roll Pauses",
+        "pageRange": "119-128",
+        "summary": "Told in PowerPoint slides; a teenager's life in montage."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "Out of Body",
+        "pageRange": "129-142",
+        "summary": "Sasha abroad; the past catches up."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "Pure Language",
+        "pageRange": "143-160",
+        "summary": "The future of music and connection."
+      },
+      {
+        "chapterNumber": 11,
+        "title": "Fortification",
+        "pageRange": "161-175",
+        "summary": "Resolution and the endurance of human connection."
+      }
+    ]
   },
   {
     "id": "book-pachinko-novel",
@@ -7529,7 +8009,7 @@
     "subtype": "Book",
     "name": "Pachinko (2017)",
     "teaser": "Min Jin Lee's multi-generational novel about a Korean family in Japan from 1910 to the 1980s. Koreans in Japan — Zainichi — were treated as permanent foreigners even after generations. The novel was rejected by every major publisher before becoming a National Book Award finalist. The title refers to pachinko parlors — one of the few businesses Zainichi Koreans could own.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781455563937-L.jpg",
     "byline": "Min Jin Lee",
     "exploreAction": {
       "verb": "Read",
@@ -7545,7 +8025,52 @@
       "Contemporary"
     ],
     "tier": 2,
-    "pageCount": 496
+    "pageCount": 496,
+    "synopsis": "Min Jin Lee's epic multi-generational novel follows a Korean family across four generations, beginning in 1910 with Sunja, the beloved daughter of a poor fisherman on the island of Yeongdo. When Sunja becomes pregnant by a wealthy married man, her salvation arrives in the form of a kind minister, Baek Isak, who offers to marry her and take her to Japan. There, in the zainichi Korean community of Osaka, the family faces relentless discrimination—Koreans in Japan are treated as second-class citizens, denied citizenship, and pushed to the margins of society. Sunja's sons and grandsons navigate between Korean identity and Japanese society, each generation dealing with poverty, prejudice, and the temptation of easy money through pachinko parlors—the Japanese pinball gambling halls that give the novel its title. Lee spent nearly thirty years researching and writing the book, drawing on interviews with zainichi Koreans and her own family history. The novel was a finalist for the National Book Award, was named a Best Book of the Year by over twenty publications, and was adapted into an acclaimed Apple TV+ series. It is a profound meditation on exile, identity, and the quiet resilience of ordinary people caught in the machinery of history.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Island",
+        "pageRange": "1-55",
+        "summary": "Sunja's childhood on Yeongdo; her encounter with Hansu and her pregnancy."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Journey",
+        "pageRange": "56-110",
+        "summary": "The voyage to Japan; Isak's kindness; life in Osaka's Korean quarter."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Restaurant",
+        "pageRange": "111-170",
+        "summary": "Building a life in Japan; discrimination and the struggle for dignity."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Nozomi",
+        "pageRange": "171-230",
+        "summary": "The next generation; Solomon's ambition and the weight of the past."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Past is Never Dead",
+        "pageRange": "231-290",
+        "summary": "Hansu's shadow; the family reckons with its history."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Pachinko",
+        "pageRange": "291-350",
+        "summary": "The gambling industry and its moral costs; the family's future."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Epilogue",
+        "pageRange": "351-380",
+        "summary": "Sunja's quiet triumph; the endurance of family across generations."
+      }
+    ]
   },
   {
     "id": "book-the-canterbury-tales",
@@ -7553,7 +8078,7 @@
     "subtype": "Book",
     "name": "The Canterbury Tales (c. 1400)",
     "teaser": "Geoffrey Chaucer's collection of 24 stories told by pilgrims traveling to Canterbury Cathedral. Each pilgrim tells a tale — knight, miller, wife of Bath, pardoner — in their own voice. Chaucer wrote in Middle English when that was revolutionary: French and Latin were the languages of literature. He died before finishing it; the tales we have are a fragment. The Canterbury Tales (c. 1400).",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140449136-L.jpg",
     "byline": "Geoffrey Chaucer",
     "exploreAction": {
       "verb": "Read",
@@ -7569,7 +8094,70 @@
       "English"
     ],
     "tier": 1,
-    "pageCount": 608
+    "pageCount": 608,
+    "synopsis": "Geoffrey Chaucer's unfinished masterpiece is a collection of stories told by a group of thirty pilgrims traveling from the Tabard Inn in Southwark to the Shrine of Saint Thomas Becket at Canterbury Cathedral. The Host, Harry Bailey, proposes a storytelling competition: each pilgrim will tell two tales on the way and two on the return, and the best storyteller will receive a free meal. The tales range from bawdy fabliaux (the Miller's tale of cuckoldry) to saintly legends (the Second Nun's tale of Saint Cecilia) to chivalric romance (the Knight's tale of two knights in love with the same woman), and together they create an encyclopedic portrait of fourteenth-century English society. The General Prologue, one of the most famous passages in English literature, introduces the pilgrims with sharp social observation—the Knight is noble and brave, the Pardoner is a fraud, the Wife of Bath has married five husbands. Chaucer's genius lies in his ability to give each pilgrim a distinctive voice and in the way the frame story connects the individual tales into a larger conversation about class, gender, morality, and the nature of storytelling itself. Written in Middle English, the work is a cornerstone of English literature and a window into a vanished world.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "General Prologue",
+        "pageRange": "1-40",
+        "summary": "Introduction to the thirty pilgrims at the Tabard Inn."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Knight's Tale",
+        "pageRange": "41-75",
+        "summary": "Two knights compete for the love of the same woman."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Miller's Tale",
+        "pageRange": "76-100",
+        "summary": "A bawdy comedy of cuckoldry in an Oxford lodging house."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Wife of Bath's Tale",
+        "pageRange": "101-130",
+        "summary": "A woman argues for female sovereignty in love and marriage."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Pardoner's Tale",
+        "pageRange": "131-150",
+        "summary": "A corrupt preacher tells a tale of greed and death."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Nun's Priest's Tale",
+        "pageRange": "151-165",
+        "summary": "A mock-heroic beast fable about a rooster and a fox."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Shipman's Tale",
+        "pageRange": "166-178",
+        "summary": "A merchant is cuckolded by his wife and a monk."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "The Franklin's Tale",
+        "pageRange": "179-195",
+        "summary": "A tale of mutual respect and the keeping of promises."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "The Prioress's Tale",
+        "pageRange": "196-205",
+        "summary": "A saintly tale with anti-Semitic overtones."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "Chaucer's Retraction",
+        "pageRange": "206-212",
+        "summary": "Chaucer's final words and apology for his work."
+      }
+    ]
   },
   {
     "id": "book-austerlitz",
@@ -7577,7 +8165,7 @@
     "subtype": "Book",
     "name": "Austerlitz (2001)",
     "teaser": "W.G. Sebald's final novel about a man who arrives in England on a Kindertransport at age 4 and doesn't learn his real name or origin until he's retired. The novel is narrated as a series of conversations, accompanied by uncaptioned photographs — they feel like evidence but prove nothing. Sebald died in a car crash weeks after finishing it.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780156011594-L.jpg",
     "byline": "W.G. Sebald",
     "exploreAction": {
       "verb": "Read",
@@ -7592,7 +8180,46 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 304
+    "pageCount": 304,
+    "synopsis": "W.G. Sebald's final novel tells the story of Jacques Austerlitz, a British architectural historian who has spent his life suppressing the traumatic memories of his childhood. Raised by a Welsh minister and his wife after arriving on a Kindertransport from Prague at the age of five, Austerlitz knows almost nothing of his origins. When a chance encounter in a train station triggers a flood of images, he begins a long, labyrinthine journey into his past—tracing his mother's fate in the Theresienstadt concentration camp, his father's disappearance, and the destruction of the Jewish community of Prague. The novel unfolds as a single, unbroken sentence of over four hundred pages, moving between Austerlitz's research, his memories, and the narrator's own observations. Sebald, who died in a car accident just months after the novel's publication, uses his characteristic blend of fiction, photography, history, and autobiography to create a work that is both a Holocaust novel and a meditation on the nature of memory itself. Austerlitz won the National Book Critics Circle Award and is widely regarded as Sebald's masterpiece.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Antwerp",
+        "pageRange": "1-50",
+        "summary": "The narrator meets Austerlitz at a Belgian railway station."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "London",
+        "pageRange": "51-110",
+        "summary": "Austerlitz's life as an architectural historian; the first cracks in his memory."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Prague",
+        "pageRange": "111-175",
+        "summary": "The journey to Prague; the discovery of his mother's fate."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Theresienstadt",
+        "pageRange": "176-240",
+        "summary": "Research into the concentration camp; the accumulation of evidence."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Aftermath",
+        "pageRange": "241-310",
+        "summary": "Austerlitz confronts the full weight of his lost childhood."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Luxembourg",
+        "pageRange": "311-350",
+        "summary": "The final reckoning with memory and history."
+      }
+    ]
   },
   {
     "id": "book-a-wizard-of-earthsea",
@@ -7600,7 +8227,7 @@
     "subtype": "Book",
     "name": "A Wizard of Earthsea (1968)",
     "teaser": "Ursula K. Le Guin's fantasy novel about a boy named Ged who goes to a wizard school and releases a shadow monster in an act of pride. He spends the rest of the novel being hunted by his own darkness. Le Guin wrote it as a response to the lack of non-white heroes in fantasy — all the characters in Earthsea are brown-skinned. It was published decades before Harry Potter and says more about the danger of magical power in 200 pages than Rowling does in 7 books.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780547773742-L.jpg",
     "byline": "Ursula K. Le Guin",
     "exploreAction": {
       "verb": "Read",
@@ -7616,7 +8243,70 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 183
+    "pageCount": 183,
+    "synopsis": "Ursula K. Le Guin's classic fantasy novel introduces Ged, a goatherd on the island of Gont who discovers he has a powerful gift for magic. Sent to the wizard school on Roke Island, Ged is talented but prideful—when a rival provokes him, he casts a spell he cannot control and releases a shadow creature that attacks him. As Ged grows in power and becomes a wizard, the shadow pursues him, and he eventually realizes that it is a part of himself that he must confront rather than flee. The novel draws on Taoist philosophy, Jungian psychology, and Celtic myth to create a fantasy world that is as much about inner growth as outer adventure. Earthsea is an archipelago where balance is the central magical principle, and Ged's journey is ultimately about learning humility and accepting the darkness within himself. The book won the National Book Award, has been translated into over thirty languages, and is widely considered one of the greatest fantasy novels ever written. Le Guin wrote five more Earthsea novels, but this standalone first volume remains the most beloved.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Place of the Tombs of Atuan",
+        "pageRange": "1-20",
+        "summary": "Ged's childhood on Gont and his discovery of magical talent."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Shadow",
+        "pageRange": "21-42",
+        "summary": "Ged's prideful spell summons a shadow that attacks him."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The School of Wizardry",
+        "pageRange": "43-65",
+        "summary": "Ged's training on Roke Island and his rivalry with Jasper."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Master of Roke",
+        "pageRange": "66-80",
+        "summary": "Ged's recovery and his growing reputation as a wizard."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Tombs of Atuan",
+        "pageRange": "81-100",
+        "summary": "Ged enters the forbidden tombs and frees the lost girl Tenar."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Dragon of Pendor",
+        "pageRange": "101-115",
+        "summary": "Ged bargains with a dragon to save a village."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Opened Seal",
+        "pageRange": "116-130",
+        "summary": "The shadow returns; Ged sets out to face it."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "The Words of Naming",
+        "pageRange": "131-145",
+        "summary": "The final confrontation with the shadow."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "The Tale of the Shadow",
+        "pageRange": "146-160",
+        "summary": "Ged names the shadow and is made whole."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "The Ending",
+        "pageRange": "161-180",
+        "summary": "Ged's journey home; the nature of balance restored."
+      }
+    ]
   },
   {
     "id": "book-the-bluest-eye",
@@ -7624,7 +8314,7 @@
     "subtype": "Book",
     "name": "The Bluest Eye (1970)",
     "teaser": "Toni Morrison's debut novel about Pecola Breedlove, a Black girl who prays for blue eyes, believing they will make her beautiful and loved. The novel is told in fragments — from multiple perspectives, across years — because Pecola's trauma can't be narrated in a straight line. Morrison wrote it while working as an editor at Random House, getting up at 4 AM to write before her children woke.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780060931490-L.jpg",
     "byline": "Toni Morrison",
     "exploreAction": {
       "verb": "Read",
@@ -7641,7 +8331,58 @@
       "Race"
     ],
     "tier": 2,
-    "pageCount": 224
+    "pageCount": 224,
+    "synopsis": "Toni Morrison's debut novel tells the story of Pecola Breedlove, a young Black girl in 1940s Ohio who prays for blue eyes, believing that whiteness is the only path to beauty and love. The novel alternates between Pecola's devastating story and the narrative of Claudia MacTeer, who recounts the events as an adult looking back on her childhood. Pecola lives in a world of poverty, abuse, and racism that has convinced her she is ugly; when her father, Cholly, rapes and impregnates her, the trauma shatters her mind. She is left talking to an imaginary friend—the only person who tells her she is beautiful. Morrison frames Pecola's destruction within a larger critique of American beauty standards and the way white cultural ideals are internalized by Black communities. The novel opens with passages from Dick and Jane primers—the idealized white family—first printed normally, then without punctuation, then in a chaotic jumble, mirroring the disintegration of Pecola's world. Morrison wrote the novel in a writers' group with Angela Yale, and it was initially poorly received; it has since become recognized as one of the most important American novels of the twentieth century.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Autumn",
+        "pageRange": "1-15",
+        "summary": "Claudia introduces herself and her family; Pecola arrives."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Dick and Jane",
+        "pageRange": "16-20",
+        "summary": "The primer text breaks down, foreshadowing Pecola's destruction."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Pauline Breedlove",
+        "pageRange": "21-40",
+        "summary": "Pecola's mother's story; her internalization of white beauty standards."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Cholly Breedlove",
+        "pageRange": "41-55",
+        "summary": "Pecola's father's traumatic past and his alcoholism."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Soaphead Church",
+        "pageRange": "56-68",
+        "summary": "A sinister letter-writer gives Pecola false hope."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Breedlove Apartment",
+        "pageRange": "69-80",
+        "summary": "The family's poverty and self-hatred in detail."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Final Year",
+        "pageRange": "81-100",
+        "summary": "Pecola's descent into madness after the rape."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "Spring",
+        "pageRange": "101-115",
+        "summary": "Claudia's adult reflection; the community's complicity."
+      }
+    ]
   },
   {
     "id": "book-braiding-sweetgrass",
@@ -7649,7 +8390,7 @@
     "subtype": "Book",
     "name": "Braiding Sweetgrass (2013)",
     "teaser": "Robin Wall Kimmerer's book about indigenous wisdom and botany. Kimmerer is a Potawatomi botanist and professor who bridges western science and Native knowledge. Each chapter weaves together ecology, storytelling, and memoir. The title comes from the Potawatomi story of Skywoman, who brought plants to earth. The book was a slow-burn bestseller that became a phenomenon years after publication.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781571313355-L.jpg",
     "byline": "Robin Wall Kimmerer",
     "exploreAction": {
       "verb": "Read",
@@ -7664,7 +8405,70 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 416
+    "pageCount": 416,
+    "synopsis": "Robin Wall Kimmerer's collection of essays weaves together Indigenous wisdom, scientific knowledge, and personal memoir to argue for a reciprocal relationship between humans and the natural world. Kimmerer, a botanist and member of the Citizen Potawatomi Nation, draws on her upbringing on the land and her training in Western science to articulate a worldview in which plants and animals are not resources to be exploited but teachers and gifts to be honored. Essays range from the sweetgrass harvest in her native New York to the salmon runs of the Pacific Northwest, from the Three Sisters (corn, beans, and squash) to the gift economy of moss. Kimmerer's central argument is that the Haudenosaunee concept of 'the Honorable Harvest'—take only what you need, use everything you take, never take the first or the last—offers a model for sustainability that Western science is only beginning to understand. The book became a surprise bestseller years after its initial publication, resonating with readers seeking alternatives to extractive capitalism and environmental degradation. It is both a love letter to the natural world and a practical guide to living with gratitude.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Skywoman Falling",
+        "pageRange": "1-18",
+        "summary": "The Haudenosaunee creation story as a model for reciprocal living."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Council of Pecans",
+        "pageRange": "19-32",
+        "summary": "How trees share resources and what humans can learn."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Gift of Strawberries",
+        "pageRange": "33-48",
+        "summary": "The intersection of Indigenous and scientific ways of knowing."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "An Allegory of Maize",
+        "pageRange": "49-62",
+        "summary": "The Three Sisters and Indigenous agriculture."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Meeting the Grasses",
+        "pageRange": "63-78",
+        "summary": "Sweetgrass and the art of botanical listening."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Honorable Harvest",
+        "pageRange": "79-95",
+        "summary": "Principles for taking only what you need."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Putting Down Roots",
+        "pageRange": "96-112",
+        "summary": "Regeneration and the possibility of healing the land."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "The Salmon Star",
+        "pageRange": "113-128",
+        "summary": "The salmon runs and the web of ecological reciprocity."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "In the Footsteps of Nanabozho",
+        "pageRange": "129-145",
+        "summary": "Walking the land with an Indigenous consciousness."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "Defeating Windigo",
+        "pageRange": "146-165",
+        "summary": "The Windigo as a metaphor for greed and extractive capitalism."
+      }
+    ]
   },
   {
     "id": "book-on-earth-were-briefly-gorgeous",
@@ -7672,7 +8476,7 @@
     "subtype": "Book",
     "name": "On Earth We're Briefly Gorgeous (2019)",
     "teaser": "Ocean Vuong's debut novel written as a letter from a Vietnamese-American son to his illiterate mother. Vuong is a poet, and the novel reads like a long poem — every sentence is chiseled. It moves between the Vietnam War, a nail salon in Hartford, and a first love with a white boy in tobacco fields. The novel is autobiographical in spirit but Vuong insists it's fiction.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780525536291-L.jpg",
     "byline": "Ocean Vuong",
     "exploreAction": {
       "verb": "Read",
@@ -7687,7 +8491,46 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 256
+    "pageCount": 256,
+    "synopsis": "Ocean Vuong's debut novel takes the form of a letter from a Vietnamese American son named Little Dog to his illiterate mother, weaving together autobiography, fiction, and poetry to tell the story of a family shaped by war, displacement, and survival. Little Dog grows up in Hartford, Connecticut, the son of a young Vietnamese immigrant mother and a white American father who is largely absent. The novel traces his childhood—poverty, his mother's volatility, his grandmother's stories of Vietnam—and his adolescence, when he falls in love with a white farm boy named Trevor. The relationship is tender and destructive; Trevor introduces Little Dog to heroin, and their bond is shadowed by the violence of Trevor's home life. Vuong writes in lyrical, compressed prose that moves between Vietnam and America, past and present, the body and the landscape. The novel is structured around the Eastern narrative form of kishōtenketsu (introduction, development, twist, reconciliation) rather than Western conflict-resolution, and it asks how we tell stories about lives that have been shaped by forces beyond our control. Vuong, who won the Pulitzer Prize for Poetry for 'Time Is a Mother,' wrote the novel as a way to reach his mother, who could not read the poems he had published.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Letter One",
+        "pageRange": "1-35",
+        "summary": "Little Dog begins his letter; the family's arrival in America."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Letter Two",
+        "pageRange": "36-70",
+        "summary": "Childhood in Hartford; his mother's violence and love."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Letter Three",
+        "pageRange": "71-105",
+        "summary": "His grandmother's stories of Vietnam and the war."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Letter Four",
+        "pageRange": "106-140",
+        "summary": "Adolescence; the relationship with Trevor."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Letter Five",
+        "pageRange": "141-170",
+        "summary": "Heroin, loss, and the question of what survives."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Letter Six",
+        "pageRange": "171-200",
+        "summary": "The novel's final meditation on love and impermanence."
+      }
+    ]
   },
   {
     "id": "book-if-beale-street-could-talk",
@@ -7695,7 +8538,7 @@
     "subtype": "Book",
     "name": "If Beale Street Could Talk (1974)",
     "teaser": "James Baldwin's novel about a young Black couple in 1970s Harlem — Tish and Fonny. Fonny is in prison for a rape he didn't commit, and Tish is pregnant with his child. The novel is narrated by Tish, whose voice is steady and fierce. Baldwin wrote it as a love story, not a protest novel — but love under racism is protest. Adapted into an Oscar-winning film in 2018.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780679732761-L.jpg",
     "byline": "James Baldwin",
     "exploreAction": {
       "verb": "Read",
@@ -7710,7 +8553,52 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 208
+    "pageCount": 208,
+    "synopsis": "James Baldwin's novel tells the story of Tish and Fonny, a young Black couple in Harlem whose love is destroyed when Fonny is falsely accused of rape and sent to prison. Tish, who is nineteen and pregnant, narrates the story with fierce tenderness as she and her family—her mother Sharon, her sister Ernestine, and her father Joseph—fight to prove Fonny's innocence and keep the family together. The novel moves between Tish's present-tense narration and flashbacks to the couple's romance, creating a portrait of love under siege. Sharon travels to Puerto Rico to confront the real rapist and pressure his mistress to recant; the family pools money for a lawyer; Tish carries Fonny's child in a world that wants to destroy them both. Baldwin wrote the novel in direct response to the false accusations against the Central Park Five and the broader pattern of Black men being criminalized in America. The title comes from the blues standard 'Beale Street Blues' by W.C. Handy—the street in Memphis that was the heart of Black musical culture. Baldwin's prose is at its most lyrical here, and the novel was adapted into a critically acclaimed Barry Jenkins film in 2018.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "We Held a Long Conversation",
+        "pageRange": "1-20",
+        "summary": "Tish and Fonny's love story begins; their plan for the future."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Accusation",
+        "pageRange": "21-40",
+        "summary": "Fonny is arrested; the family rallies."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Sharon's Journey",
+        "pageRange": "41-60",
+        "summary": "Tish's mother travels to Puerto Rico to find the truth."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Lawyer",
+        "pageRange": "61-78",
+        "summary": "The family's fight for justice; the legal system's indifference."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Past",
+        "pageRange": "79-95",
+        "summary": "Flashbacks to Tish and Fonny's courtship in Harlem."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Present",
+        "pageRange": "96-115",
+        "summary": "Tish's pregnancy; the family's endurance."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "If Beale Street Could Talk",
+        "pageRange": "116-130",
+        "summary": "The novel's final pages; love persists despite everything."
+      }
+    ]
   },
   {
     "id": "book-the-vaster-wilds",
@@ -7718,7 +8606,7 @@
     "subtype": "Book",
     "name": "The Vaster Wilds (2023)",
     "teaser": "Lauren Groff's novel about a servant girl who escapes a 17th-century colonial settlement in Virginia during a famine and runs into the wilderness with nothing but her wits. The novel is a survival story and a spiritual crisis told in prose that feels like scripture. Groff wrote it in a fever during the pandemic.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593722541-L.jpg",
     "byline": "Lauren Groff",
     "exploreAction": {
       "verb": "Read",
@@ -7734,7 +8622,46 @@
       "Historical"
     ],
     "tier": 2,
-    "pageCount": 416
+    "pageCount": 416,
+    "synopsis": "Lauren Groff's novel follows a young woman named Lamentations who escapes from the Jamestown colony in 1630 and flees into the American wilderness. The colony is starving, its inhabitants reduced to eating leather and boiled shoe soles; Lamentations, a former indentured servant with a violent past, decides that death in the forest is preferable to death inside the palisade. As she moves deeper into the unfamiliar landscape, she encounters both the beauty and danger of the natural world—wild animals, strange plants, and the remnants of indigenous settlements. The novel is structured as a sustained meditation on freedom, faith, and the violence at the heart of the colonial project. Groff writes in dense, incantatory prose that draws on biblical rhythms and early modern English, creating a voice that is both historical and deeply personal. Lamentations carries with her the memory of the Crucifixion, which she has read and re-read until it has become a source of both terror and solace. The novel asks what it means to be free in a world that is already inhabited, and whether escape from civilization is possible when you carry civilization's traumas inside you.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Escape",
+        "pageRange": "1-30",
+        "summary": "Lamentations flees the starving Jamestown colony."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Forest",
+        "pageRange": "31-65",
+        "summary": "Her first days alone in the wilderness; encounters with animals and weather."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Ruins",
+        "pageRange": "66-100",
+        "summary": "She discovers abandoned indigenous settlements."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Word",
+        "pageRange": "101-135",
+        "summary": "Memories of the Bible and her violent past surface."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Body",
+        "pageRange": "136-170",
+        "summary": "Physical survival; hunger, cold, and the question of meaning."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Conclusion",
+        "pageRange": "171-195",
+        "summary": "Lamentations's reckoning with freedom and belonging."
+      }
+    ]
   },
   {
     "id": "book-the-alchemist",
@@ -7742,7 +8669,7 @@
     "subtype": "Book",
     "name": "The Alchemist (1988)",
     "teaser": "Paulo Coelho's allegorical novel about Santiago, a Spanish shepherd who dreams of treasure at the pyramids. The novel was a slow seller at first — Coelho's first publisher dropped him — but has now sold over 65 million copies in 80+ languages. It's one of the best-selling books in history and the most translated book by a living author.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062511409-L.jpg",
     "byline": "Paulo Coelho",
     "exploreAction": {
       "verb": "Read",
@@ -7757,7 +8684,58 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 208
+    "pageCount": 208,
+    "synopsis": "Paulo Coelho's allegorical novel follows Santiago, an Andalusian shepherd boy who dreams of finding treasure at the Egyptian pyramids. A mysterious king named Melchizedek tells him about 'Personal Legend'—the idea that each person has a destiny they must pursue—and Santiago sets out across North Africa. Along the way, he works for a crystal merchant, joins a caravan crossing the Sahara, falls in love with a desert woman named Fatima, and meets an Englishman studying alchemy. The central figure is the alchemist himself, who teaches Santiago to listen to his heart and to read the 'Language of the World'—the signs and omens that connect all things. The novel's central message is captured in its most famous line: 'When you want something, all the universe conspires in helping you to achieve it.' Written in two weeks by Coelho, who had experienced his own journey of self-discovery, the book became one of the best-selling novels in history, translated into over eighty languages. It is a simple story that carries a profound message about following one's dreams and finding treasure in unexpected places.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Shepherd",
+        "pageRange": "1-15",
+        "summary": "Santiago's life as a shepherd and his recurring dream."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The King",
+        "pageRange": "16-28",
+        "summary": "Melchizedek tells Santiago about Personal Legend."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Crystal Merchant",
+        "pageRange": "29-42",
+        "summary": "Santiago works in Tangier and learns about risk."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Caravan",
+        "pageRange": "43-55",
+        "summary": "Crossing the Sahara; the Englishman and alchemy."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Oasis",
+        "pageRange": "56-68",
+        "summary": "Santiago reaches the oasis and meets Fatima."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Alchemist",
+        "pageRange": "69-82",
+        "summary": "The alchemist teaches Santiago to listen to the desert."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Pyramids",
+        "pageRange": "83-95",
+        "summary": "Santiago reaches the pyramids and discovers the true treasure."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "Return",
+        "pageRange": "96-105",
+        "summary": "The circle closes; the treasure was always at home."
+      }
+    ]
   },
   {
     "id": "book-the-midnight-library",
@@ -7765,7 +8743,7 @@
     "subtype": "Book",
     "name": "The Midnight Library (2020)",
     "teaser": "Matt Haig's novel about Nora Seed, who tries to kill herself and finds herself in a library between life and death — each book contains a different version of her life she could have lived. The novel is about regret and the paths not taken. Haig wrote it after his own mental health crisis and it became a global bestseller.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780525559474-L.jpg",
     "byline": "Matt Haig",
     "exploreAction": {
       "verb": "Read",
@@ -7780,7 +8758,58 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 304
+    "pageCount": 304,
+    "synopsis": "Matt Haig's novel tells the story of Nora Seed, a thirty-five-year-old woman who finds herself filled with regret and decides to end her life. Instead of dying, she arrives in the Midnight Library—a vast library between life and death where every book contains a different version of the life she could have lived. The librarian, Mrs. Elm, shows her the possibilities: in one life Nora became a rock star, in another she stayed married, in another she became an Olympic swimmer. Nora begins trying on different lives, searching for the one where she would be truly happy. But as she moves through the Library, she discovers that every life has its own regrets, its own losses, and its own versions of the same fundamental problems. The novel explores the nature of happiness, the burden of regret, and the question of what makes a life worth living. Haig, who has spoken openly about his own struggles with depression, writes with warmth and psychological insight about the gap between the life we have and the life we imagine we could have had.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Regrets",
+        "pageRange": "1-20",
+        "summary": "Nora's life of accumulated regrets; her decision to end things."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Library",
+        "pageRange": "21-38",
+        "summary": "Nora discovers the Midnight Library and Mrs. Elm."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Rock Star",
+        "pageRange": "39-55",
+        "summary": "Nora tries the life where she stayed in her band."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Marriage",
+        "pageRange": "56-72",
+        "summary": "Nora tries the life where she married Dan."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Scientist",
+        "pageRange": "73-88",
+        "summary": "Nora tries the life where she pursued glaciology."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Mother",
+        "pageRange": "89-105",
+        "summary": "Nora tries the life where she had a child."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Return",
+        "pageRange": "106-125",
+        "summary": "Nora realizes every life has pain; the choice to live."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "The End",
+        "pageRange": "126-138",
+        "summary": "Nora's final choice and the meaning of the Library."
+      }
+    ]
   },
   {
     "id": "book-kindred",
@@ -7788,7 +8817,7 @@
     "subtype": "Book",
     "name": "Kindred (1979)",
     "teaser": "Octavia Butler's novel about Dana, a Black woman in 1976 Los Angeles who is suddenly transported to a Maryland plantation in 1815. She is pulled back in time whenever her white ancestor Rufus is in mortal danger — she must keep him alive long enough to father her ancestor. Butler called it 'grim fantasy' — there's no explanation for the time travel, just the unflinching reality of slavery.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781538732182-L.jpg",
     "byline": "Octavia Butler",
     "exploreAction": {
       "verb": "Read",
@@ -7803,7 +8832,46 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 288
+    "pageCount": 288,
+    "synopsis": "Octavia Butler's genre-defying novel tells the story of Dana, a young Black woman living in 1976 Los Angeles, who is repeatedly pulled back in time to antebellum Maryland. Each time she is transported, she saves the life of Rufus, a white slaveholder's son who is also her ancestor—as long as Rufus lives, Dana is drawn back; when his life is in danger, she must protect him to ensure her own existence. The novel traces Dana's multiple trips to the plantation, where she experiences the brutal reality of slavery firsthand: whippings, rape, the constant threat of sale, and the impossible moral compromises required to survive. Her white husband Kevin occasionally accompanies her, and the novel explores how even a loving interracial relationship is warped by the power dynamics of the antebellum South. Butler, who won both the Hugo and Nebula Awards, wrote Kindred as a way to make the emotional reality of slavery tangible to modern readers. The novel's time-travel premise is never explained—it simply happens—and this refusal to rationalize makes the experience more visceral. Butler lost her arm in a childhood accident, and Dana loses hers at the novel's end, a detail that connects the author's body to her fiction.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The River",
+        "pageRange": "1-25",
+        "summary": "Dana's first involuntary trip to the past; she saves Rufus."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Fire",
+        "pageRange": "26-50",
+        "summary": "Dana returns to the plantation; Kevin accompanies her."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Fight",
+        "pageRange": "51-75",
+        "summary": "Dana and Kevin are separated; she navigates slavery alone."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Stone",
+        "pageRange": "76-100",
+        "summary": "The escalating danger; Rufus's growing power and corruption."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Trap",
+        "pageRange": "101-125",
+        "summary": "Dana's increasingly desperate trips; the toll on her body."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Return",
+        "pageRange": "126-145",
+        "summary": "The final trip; Dana's sacrifice and the cost of survival."
+      }
+    ]
   },
   {
     "id": "book-yellowface",
@@ -7811,7 +8879,7 @@
     "subtype": "Book",
     "name": "Yellowface (2023)",
     "teaser": "R.F. Kuang's novel about June Hayward, a white writer who steals her dead Chinese-American friend's manuscript and publishes it as her own — complete with an ethnically ambiguous author photo. What follows is a satire of the publishing industry, cancel culture, and literary appropriation. The novel went viral on BookTok and became a bestseller.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780063251618-L.jpg",
     "byline": "R.F. Kuang",
     "exploreAction": {
       "verb": "Read",
@@ -7827,7 +8895,46 @@
       "Publishing"
     ],
     "tier": 2,
-    "pageCount": 336
+    "pageCount": 336,
+    "synopsis": "R.F. Kuang's satirical novel follows June Hayward, a struggling white author who witnesses the accidental death of her friend Athena Liu, a celebrated Chinese American literary star. When June discovers Athena's unpublished manuscript about Chinese laborers during World War I, she steals it, edits it, and publishes it under the pseudonym 'Juniper Song'—deliberately choosing a name that sounds ethnically ambiguous. The novel traces June's growing success and her increasingly desperate attempts to maintain the deception as critics, readers, and Athena's family begin asking questions. Kuang uses June's unreliable first-person narration to skewer the publishing industry, cultural appropriation, diversity politics, and the way literary value is manufactured. June is simultaneously self-aware and deluded, acknowledging her fraud while convincing herself she deserves the success. The novel became a bestseller and sparked widespread debate about authenticity, ownership, and the performance of identity in the literary world. Kuang, author of The Poppy War trilogy, wrote Yellowface as a direct response to the publishing industry's treatment of Asian American writers.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Accident",
+        "pageRange": "1-25",
+        "summary": "Athena's death and June's opportunistic decision."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Theft",
+        "pageRange": "26-50",
+        "summary": "June steals and edits the manuscript."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Publication",
+        "pageRange": "51-75",
+        "summary": "The book is published; early success and growing anxiety."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Backlash",
+        "pageRange": "76-100",
+        "summary": "Online criticism and the first questions about June's identity."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Defense",
+        "pageRange": "101-125",
+        "summary": "June's increasingly frantic attempts to maintain the deception."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Reckoning",
+        "pageRange": "126-150",
+        "summary": "The truth unravels; June's final justifications."
+      }
+    ]
   },
   {
     "id": "book-the-sellout",
@@ -7835,7 +8942,7 @@
     "subtype": "Book",
     "name": "The Sellout (2015)",
     "teaser": "Paul Beatty's novel about a Black man who reinstates slavery and segregation in his Los Angeles neighborhood — as satire — and ends up in the Supreme Court. Won the Booker Prize (the first American to win it). Every sentence is a joke that's serious. Beatty's narrator is an urban farmer who grows satsumas and watermelons and calls himself a 'sellout' for loving the neighborhood no one else cares about.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780812982558-L.jpg",
     "byline": "Paul Beatty",
     "exploreAction": {
       "verb": "Read",
@@ -7850,7 +8957,46 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 304
+    "pageCount": 304,
+    "synopsis": "Paul Beatty's satirical novel follows Bonbon, a Black farmer in the fictional town of Dickens, California, who tries to reverse the effects of forced integration by reinstating segregation and slavery. The novel opens with Bonbon before the Supreme Court, defending his right to own a slave—his farmhand Hominy, a descendant of the real-life Little Rascals, who has chosen servitude. Bonbon's project is part genuine attempt to restore a community that has been literally erased from the map (Dickens has been removed from the state's records) and part absurdist provocation that exposes the contradictions of post-racial America. Beatty uses Bonbon's outrageous scheme to skewer every aspect of race relations—from diversity training to the N-word to the liberal white gaze to the psychic toll of being Black in a society that pretends racism doesn't exist. The novel won the National Book Critics Circle Award and the Booker Prize, becoming the first American novel to win the latter since Thomas Pynchon's Mason & Dixon in 1997. Beatty's prose is dazzlingly dense, packing jokes, allusions, and cultural commentary into every sentence.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Trial",
+        "pageRange": "1-30",
+        "summary": "Bonbon before the Supreme Court; the framing device."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Dickens",
+        "pageRange": "31-60",
+        "summary": "The town of Dickens and its erasure from the map."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Hominy",
+        "pageRange": "61-85",
+        "summary": "Bonbon's relationship with Hominy and the reinstatement of slavery."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Segregation",
+        "pageRange": "86-110",
+        "summary": "Bonbon's school segregation experiment."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Community",
+        "pageRange": "111-135",
+        "summary": "The town's reaction and the broader implications."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Verdict",
+        "pageRange": "136-160",
+        "summary": "The Supreme Court's ruling and its absurdist logic."
+      }
+    ]
   },
   {
     "id": "book-their-eyes-were-watching-god",
@@ -7858,7 +9004,7 @@
     "subtype": "Book",
     "name": "Their Eyes Were Watching God (1937)",
     "teaser": "Zora Neale Hurston's novel about Janie Crawford's journey through three marriages to selfhood in rural Florida. Out of print for decades, rescued in 1975 by Alice Walker, who put a gravestone on Hurston's unmarked grave. The novel is written in lyrical third person and Black Southern dialect — the two registers are the novel's music.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780060931452-L.jpg",
     "byline": "Zora Neale Hurston",
     "exploreAction": {
       "verb": "Read",
@@ -7873,7 +9019,58 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 256
+    "pageCount": 256,
+    "synopsis": "Zora Neale Hurston's masterpiece tells the story of Janie Crawford, a Black woman in early twentieth-century Florida who spends her life searching for love, independence, and a voice of her own. Married off as a teenager to the ambitious Logan Killicks, Janie is unhappy until she meets the charming Joe Starks, who becomes mayor of the all-Black town of Eatonville and makes Janie his trophy wife. Under Joe's controlling hand, Janie's voice is suppressed; when Joe dies, she falls in love with the irresponsible but passionate Tea Cake, and for the first time experiences genuine love and equality. Their relationship is destroyed by Hurricane and its aftermath—Tea Cake is bitten by a rabid dog and goes mad, and Janie is forced to shoot him in self-defense. Tried and acquitted, Janie returns to Eatonville, having lived a full life. Hurston, a key figure of the Harlem Renaissance and a trained anthropologist, wrote the novel in seven weeks while living in Haiti. It was initially ignored and then rediscovered by Alice Walker in the 1970s, who found Hurston's unmarked grave and placed a marker on it. The novel is now considered one of the essential works of the American canon.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Pear Tree",
+        "pageRange": "1-12",
+        "summary": "Young Janie's vision of love under the pear tree."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Logan",
+        "pageRange": "13-28",
+        "summary": "Janie's first marriage to Logan Killicks; her unhappiness."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Joe Starks",
+        "pageRange": "29-50",
+        "summary": "Janie meets Joe and they move to Eatonville."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Mayor's Wife",
+        "pageRange": "51-75",
+        "summary": "Life in Eatonville under Joe's control; Janie's silenced voice."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Tea Cake",
+        "pageRange": "76-100",
+        "summary": "Janie meets Tea Cake; they move to the Everglades."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Hurricane",
+        "pageRange": "101-120",
+        "summary": "The great flood and its aftermath."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Trial",
+        "pageRange": "121-135",
+        "summary": "Janie is tried for Tea Cake's murder; she is acquitted."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "Return",
+        "pageRange": "136-148",
+        "summary": "Janie returns to Eatonville; she has found her voice."
+      }
+    ]
   },
   {
     "id": "book-les-miserables",
@@ -7881,7 +9078,7 @@
     "subtype": "Novel",
     "name": "Les Misérables",
     "teaser": "Victor Hugo's 1862 epic of a former convict, a bishop's mercy, and a police inspector's obsession — the great novel of grace versus law, set against the barricades of 1832 Paris.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780451419439-L.jpg",
     "byline": "Victor Hugo",
     "exploreAction": {
       "verb": "Read",
@@ -7897,7 +9094,46 @@
     "tier": 1,
     "pageCount": 1463,
     "altPageCount": 1232,
-    "altPageLabel": "Penguin"
+    "altPageLabel": "Penguin",
+    "synopsis": "Victor Hugo's epic novel spans three decades in the life of Jean Valjean, a former convict who breaks parole and reinvents himself as a respectable citizen under the alias Monsieur Madeleine. Pursued relentlessly by the dogged Inspector Javert, who believes a criminal can never change, Valjean rescues the orphaned Cosette from the brutal Thénardiers and raises her as his own. The novel moves from the poverty of early nineteenth-century France through the June Rebellion of 1832, where a group of idealistic young revolutionaries—led by the charismatic Enjolras—erect barricades in the streets of Paris and are massacred by government troops. Hugo uses this historical canvas to explore justice, mercy, love, and the social conditions that produce both crime and revolution. The novel's most famous scenes—Valjean's redemption, Javert's suicide, the barricades, Marius and Cosette's love—have become some of the most recognizable in world literature. At over 1,400 pages, Les Misérables is one of the longest novels ever written, but its emotional power has made it the most adapted novel in history, spawning dozens of stage and screen versions, including the world-famous musical.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Fantine",
+        "pageRange": "1-120",
+        "summary": "Valjean's release and transformation; Fantine's tragic decline."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Cosette",
+        "pageRange": "121-250",
+        "summary": "Valjean rescues Cosette from the Thénardiers."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Marius",
+        "pageRange": "251-400",
+        "summary": "Marius's youth, his love for Cosette, and the revolutionary movement."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Saint Denis",
+        "pageRange": "401-600",
+        "summary": "The June Rebellion; the barricades and their aftermath."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Jean Valjean",
+        "pageRange": "601-750",
+        "summary": "Valjean's final sacrifice and Javert's crisis of faith."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Epilogue",
+        "pageRange": "751-800",
+        "summary": "The fates of the characters; redemption and loss."
+      }
+    ]
   },
   {
     "id": "book-count-of-monte-cristo",
@@ -7905,7 +9141,7 @@
     "subtype": "Novel",
     "name": "The Count of Monte Cristo",
     "teaser": "Alexandre Dumas's 1844 masterpiece of wrongful imprisonment and long, patient revenge — Edmond Dantès escapes the Château d'If and returns as the mysterious Count to dismantle his betrayers.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140449242-L.jpg",
     "byline": "Alexandre Dumas",
     "exploreAction": {
       "verb": "Read",
@@ -7921,7 +9157,52 @@
     "tier": 1,
     "pageCount": 1276,
     "altPageCount": 1462,
-    "altPageLabel": "Modern Library"
+    "altPageLabel": "Modern Library",
+    "synopsis": "Alexandre Dumas's adventure novel tells the story of Edmond Dantès, a young sailor from Marseille who is falsely accused of treason by three men: Fernand Mondego (who loves Dantès's fiancée Mercédès), Danglars (who covets Dantès's promotion), and Villefort (a prosecutor who fears the letter Dantès carries will expose his father's Bonapartist connections). Dantès is imprisoned in the Château d'If for fourteen years, where he meets the Abbé Faria, a brilliant polymath who educates him in languages, science, philosophy, and strategy. When Faria dies, Dantès escapes, finds Faria's hidden treasure on the island of Monte Cristo, and reinvents himself as the mysterious Count of Monte Cristo. He then spends years meticulously destroying each of his enemies through an elaborate scheme of psychological manipulation, financial ruin, and social humiliation. The novel, serialized in 1844, became one of the most popular and widely read novels in history. Dumas drew on real historical events—the July Monarchy, the Spanish trips of the 1830s—and on his own experience of racism as a man of mixed African and French descent.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Betrayal",
+        "pageRange": "1-50",
+        "summary": "Dantès's arrest and imprisonment; the conspiracy unfolds."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Abbé",
+        "pageRange": "51-110",
+        "summary": "Dantès meets Faria; fourteen years of education and hope."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Treasure",
+        "pageRange": "111-160",
+        "summary": "Dantès escapes and finds the treasure of Monte Cristo."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Count",
+        "pageRange": "161-230",
+        "summary": "Dantès arrives in Paris as the Count of Monte Cristo."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Revenge",
+        "pageRange": "231-350",
+        "summary": "The systematic destruction of Danglars, Fernand, and Villefort."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Reckoning",
+        "pageRange": "351-420",
+        "summary": "Dantès confronts the moral cost of his revenge."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Justice",
+        "pageRange": "421-480",
+        "summary": "The fall of each enemy; Dantès's final reckoning."
+      }
+    ]
   },
   {
     "id": "book-candide",
@@ -7929,7 +9210,7 @@
     "subtype": "Satire",
     "name": "Candide",
     "teaser": "Voltaire's 1759 razor of a novella — a young optimist dragged through war, shipwreck, Inquisition, and Eldorado, learning that this is not the best of all possible worlds. The cure for Pangloss is still in print.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140441000-L.jpg",
     "byline": "Voltaire",
     "exploreAction": {
       "verb": "Read",
@@ -7943,7 +9224,52 @@
       "Philosophy"
     ],
     "tier": 1,
-    "pageCount": 144
+    "pageCount": 144,
+    "synopsis": "Voltaire's satirical novella follows Candide, a naive young man raised in the Westphalian castle of Baron Thunder-ten-tronckh, where he is tutored by the philosopher Pangloss, who insists that 'this is the best of all possible worlds.' Candide falls in love with the Baron's beautiful daughter Cunégonde, but when he is caught kissing her, he is kicked out of the castle. What follows is a picaresque journey across the globe—from the Portuguese Inquisition to the Dutch colonies to the wilderness of South America to the court of the Ottoman Sultan—in which Candide encounters war, earthquake, slavery, disease, and every conceivable form of human suffering. Pangloss survives each catastrophe still insisting on the optimist philosophy, while Candide gradually comes to reject it. The novel's famous conclusion—'we must cultivate our garden'—has been interpreted as everything from a call to practical action to a retreat from the world's horrors. Written in 1759, Candide is one of the most influential works of the Enlightenment, a devastating critique of Leibnizian optimism, religious hypocrisy, and the arrogance of philosophers who theorize about suffering without experiencing it.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Castle",
+        "pageRange": "1-8",
+        "summary": "Candide's idyllic upbringing and expulsion from the castle."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Inquisition",
+        "pageRange": "9-16",
+        "summary": "Candide and Pangloss are tried by the Inquisition."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Journey",
+        "pageRange": "17-28",
+        "summary": "Candide travels through war-torn Europe."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Eldorado",
+        "pageRange": "29-38",
+        "summary": "Candide discovers the utopian city but leaves."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "South America",
+        "pageRange": "39-50",
+        "summary": "Candide searches for Cunégonde in the New World."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Return",
+        "pageRange": "51-62",
+        "summary": "Candide returns to Europe; the final confrontation with Pangloss."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Garden",
+        "pageRange": "63-72",
+        "summary": "Candide's conclusion: 'We must cultivate our garden.'"
+      }
+    ]
   },
   {
     "id": "book-scarlet-letter",
@@ -7951,7 +9277,7 @@
     "subtype": "Novel",
     "name": "The Scarlet Letter",
     "teaser": "Nathaniel Hawthorne's 1850 novel of Puritan Boston — Hester Prynne stands on the scaffold with her infant and her embroidered 'A,' while her secret co-sinner watches from the crowd. America's first great psychological novel.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780142437261-L.jpg",
     "byline": "Nathaniel Hawthorne",
     "exploreAction": {
       "verb": "Read",
@@ -7965,7 +9291,154 @@
       "Symbolism"
     ],
     "tier": 1,
-    "pageCount": 256
+    "pageCount": 256,
+    "synopsis": "Nathaniel Hawthorne's novel is set in Puritan Boston in the 1640s and tells the story of Hester Prynne, a young woman who has committed adultery and is forced to wear a scarlet letter 'A' on her chest as public punishment. She refuses to name the father of her daughter Pearl, and the mystery of his identity drives the novel's tension. The father is revealed to be Arthur Dimmesdale, the town's beloved minister, who is tormented by his guilt and grows physically weaker as he conceals his sin. Hester's husband, Roger Chillingworth, arrives in Boston and takes on the role of the town's physician while secretly working to destroy Dimmesdale. The novel explores themes of sin, guilt, legalism, and redemption through its rich symbolism—the scarlet letter itself transforms from a mark of shame to a badge of identity as Hester integrates it into her life. Hawthorne, who was haunted by the legacy of his ancestor John Hathorne (a judge in the Salem witch trials), wrote the novel as a meditation on the moral complexity of Puritanism and the American experience of guilt. The book is widely regarded as one of the first great American novels.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Prison-Door",
+        "pageRange": "1-8",
+        "summary": "The Puritan settlement and the appearance of Hester at the prison door."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Market-Place",
+        "pageRange": "9-18",
+        "summary": "Hester stands on the scaffold with Pearl; the scarlet letter is revealed."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Recognition",
+        "pageRange": "19-28",
+        "summary": "Chillingworth recognizes Hester; the council debates her punishment."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Interview",
+        "pageRange": "29-38",
+        "summary": "Hester and Chillingworth confront each other in prison."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Hester at Her Needle",
+        "pageRange": "39-48",
+        "summary": "Hester's solitary life and her needlework."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Pearl",
+        "pageRange": "49-60",
+        "summary": "The mysterious nature of Hester's daughter."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Governor's Hall",
+        "pageRange": "61-72",
+        "summary": "Hester fights to keep Pearl; Dimmesdale intervenes."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "The Elf-Child and the Minister",
+        "pageRange": "73-82",
+        "summary": "Dimmesdale's strange bond with Pearl."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "The Leech",
+        "pageRange": "83-94",
+        "summary": "Chillingworth becomes Dimmesdale's physician and torturer."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "The Leech and His Patient",
+        "pageRange": "95-105",
+        "summary": "Dimmesdale's guilt deepens; Chillingworth's revenge intensifies."
+      },
+      {
+        "chapterNumber": 11,
+        "title": "The Interior of a Heart",
+        "pageRange": "106-114",
+        "summary": "Dimmesdale's confession to himself."
+      },
+      {
+        "chapterNumber": 12,
+        "title": "The Minister's Vigil",
+        "pageRange": "115-125",
+        "summary": "Dimmesdale stands on the scaffold at night."
+      },
+      {
+        "chapterNumber": 13,
+        "title": "Another View of Hester",
+        "pageRange": "126-134",
+        "summary": "Hester's transformation; her charitable works."
+      },
+      {
+        "chapterNumber": 14,
+        "title": "Hester and the Physician",
+        "pageRange": "135-142",
+        "summary": "Hester confronts Chillingworth's evil."
+      },
+      {
+        "chapterNumber": 15,
+        "title": "Hester and Pearl",
+        "pageRange": "143-150",
+        "summary": "Mother and daughter in the forest."
+      },
+      {
+        "chapterNumber": 16,
+        "title": "A Forest Walk",
+        "pageRange": "151-160",
+        "summary": "Hester and Dimmesdale meet in the forest; she proposes they flee."
+      },
+      {
+        "chapterNumber": 17,
+        "title": "The Pastor and His Parishioner",
+        "pageRange": "161-172",
+        "summary": "Dimmesdale and Hester's intimate conversation."
+      },
+      {
+        "chapterNumber": 18,
+        "title": "A Flood of Sunshine",
+        "pageRange": "173-180",
+        "summary": "The letter falls away; Hester's brief freedom."
+      },
+      {
+        "chapterNumber": 19,
+        "title": "The Child at the Brook-Side",
+        "pageRange": "181-188",
+        "summary": "Pearl refuses to come to Dimmesdale."
+      },
+      {
+        "chapterNumber": 20,
+        "title": "The Traveller",
+        "pageRange": "189-196",
+        "summary": "Chillingworth follows Hester into the forest."
+      },
+      {
+        "chapterNumber": 21,
+        "title": "The New England Holiday",
+        "pageRange": "197-206",
+        "summary": "Election Day; the town celebrates."
+      },
+      {
+        "chapterNumber": 22,
+        "title": "The Procession",
+        "pageRange": "207-218",
+        "summary": "Dimmesdale's Election Day sermon."
+      },
+      {
+        "chapterNumber": 23,
+        "title": "The Revelation of the Scarlet Letter",
+        "pageRange": "219-230",
+        "summary": "Dimmesdale confesses on the scaffold; his death."
+      },
+      {
+        "chapterNumber": 24,
+        "title": "Conclusion",
+        "pageRange": "231-240",
+        "summary": "The fates of the remaining characters."
+      }
+    ]
   },
   {
     "id": "book-huckleberry-finn",
@@ -7973,7 +9446,7 @@
     "subtype": "Novel",
     "name": "Adventures of Huckleberry Finn",
     "teaser": "Mark Twain's 1884 masterpiece — a boy and an escaped man float the Mississippi on a raft, and Huck must decide whether his conscience or his society is right. Hemingway called it the source of all American literature.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780486280615-L.jpg",
     "byline": "Mark Twain",
     "exploreAction": {
       "verb": "Read",
@@ -7987,7 +9460,100 @@
       "Mississippi"
     ],
     "tier": 1,
-    "pageCount": 304
+    "pageCount": 304,
+    "synopsis": "Mark Twain's novel, set in the antebellum South, follows Huck Finn, a fourteen-year-old boy who fakes his own death to escape his abusive father and drifts down the Mississippi River on a raft with Jim, an escaped slave. Their journey takes them through a series of satirical encounters with con men, feuding families, and the institutions of Southern society—each episode exposing the hypocrisy, violence, and moral bankruptcy of a slaveholding culture. The novel's central tension is Huck's internal struggle: he has been raised to believe that helping a slave escape is a sin worthy of hell, and yet every experience on the river confirms that Jim is a fully human being who deserves his freedom. The most famous scene—when Huck tears up the letter he has written to turn Jim in, saying 'All right, then, I'll go to hell'—is one of the defining moments in American literature. Twain wrote the novel over seven years, publishing it in 1884 in the UK and 1885 in the US, and it was immediately controversial for its language and its depiction of race. Ernest Hemingway declared that 'all modern American literature comes from one book by Mark Twain called Huckleberry Finn.'",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Chapter 1",
+        "pageRange": "1-10",
+        "summary": "Huck's life with Pap; his plan to escape."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Chapter 2",
+        "pageRange": "11-22",
+        "summary": "Huck fakes his death; the ambush and rescue of Jim."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Chapter 3",
+        "pageRange": "23-32",
+        "summary": "The raft journey begins; the conflict between civilization and freedom."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Chapter 4",
+        "pageRange": "33-42",
+        "summary": "The Grangerford family and their feud."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Chapter 5",
+        "pageRange": "43-52",
+        "summary": "The Duke and the King; the con men join the raft."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Chapter 6",
+        "pageRange": "53-62",
+        "summary": "The con men's schemes; Huck's moral crisis."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Chapter 7",
+        "pageRange": "63-72",
+        "summary": "Huck's letter; the decision to help Jim."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "Chapter 8",
+        "pageRange": "73-82",
+        "summary": "Jim and Huck's bond deepens; the steamboat incident."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "Chapter 9",
+        "pageRange": "83-90",
+        "summary": "The wrecked steamboat; the slave hunters."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "Chapter 10",
+        "pageRange": "91-100",
+        "summary": "The King and Duke's fraud; Huck's growing conscience."
+      },
+      {
+        "chapterNumber": 11,
+        "title": "Chapter 11",
+        "pageRange": "101-110",
+        "summary": "The Wilks sisters; Huck's final decision."
+      },
+      {
+        "chapterNumber": 12,
+        "title": "Chapter 12",
+        "pageRange": "111-118",
+        "summary": "The con men are exposed; Jim is captured."
+      },
+      {
+        "chapterNumber": 13,
+        "title": "Chapter 13",
+        "pageRange": "119-126",
+        "summary": "Huck and Tom rescue Jim; Tom is wounded."
+      },
+      {
+        "chapterNumber": 14,
+        "title": "Chapter 14",
+        "pageRange": "127-134",
+        "summary": "The aftermath; Jim's freedom is secured."
+      },
+      {
+        "chapterNumber": 15,
+        "title": "Chapter 15",
+        "pageRange": "135-140",
+        "summary": "The ending; Huck's decision to light out for the Territory."
+      }
+    ]
   },
   {
     "id": "book-little-women",
@@ -7995,7 +9561,7 @@
     "subtype": "Novel",
     "name": "Little Women",
     "teaser": "Louisa May Alcott's 1868 novel of the four March sisters in Civil War New England — Meg, Jo, Beth, and Amy growing up through poverty, illness, ambition, and love. It made Jo March the model of the writer-girl.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140390438-L.jpg",
     "byline": "Louisa May Alcott",
     "exploreAction": {
       "verb": "Read",
@@ -8009,7 +9575,292 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 608
+    "pageCount": 608,
+    "synopsis": "Louisa May Alcott's classic novel follows the four March sisters—Meg, Jo, Beth, and Amy—as they grow from childhood to womanhood in Concord, Massachusetts during and after the Civil War. Their father is away serving as a chaplain in the Union Army, and the girls are guided by their wise and loving mother, Marmee. Each sister embodies a different temperament: Meg is beautiful and conventional, Jo is wild and literary, Beth is gentle and musical, and Amy is artistic and ambitious. The novel traces their individual journeys—Meg's marriage to John Brooke, Jo's struggle to become a writer, Beth's death from scarlet fever, Amy's trip to Europe and her marriage to the neighbor boy Laurie. Written in semi-autobiographical form (Alcott based Jo on herself), the novel is both a celebration of family love and a realistic portrayal of the economic pressures facing women in nineteenth-century America. Alcott wrote the novel at her publisher's request for a girls' story, and it became one of the most beloved American novels ever written, spawning countless adaptations including Greta Gerwig's 2019 film.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Playing Pilgrims",
+        "pageRange": "1-10",
+        "summary": "The March sisters introduce themselves and their Christmas wishes."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "A Merry Christmas",
+        "pageRange": "11-20",
+        "summary": "Christmas morning; the girls give their breakfast away."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Laurence Boy",
+        "pageRange": "21-30",
+        "summary": "Jo meets Laurie at a party."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Burdens",
+        "pageRange": "31-40",
+        "summary": "The sisters struggle with their own shortcomings."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Being Neighborly",
+        "pageRange": "41-50",
+        "summary": "Jo and Laurie's friendship deepens."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Beth Finds the Palace Beautiful",
+        "pageRange": "51-60",
+        "summary": "Beth discovers her love of music at the Laurence house."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Amy's Valley of Humiliation",
+        "pageRange": "61-70",
+        "summary": "Amy's art ambitions and her punishment at school."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "Jo Meets Apollyon",
+        "pageRange": "71-80",
+        "summary": "Jo's temper is tested; the sisters clash."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "Meg Goes to Vanity Fair",
+        "pageRange": "81-90",
+        "summary": "Meg's brief taste of high society."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "The P.C. and P.O.",
+        "pageRange": "91-100",
+        "summary": "The sisters' secret club and their letters."
+      },
+      {
+        "chapterNumber": 11,
+        "title": "The Test",
+        "pageRange": "101-110",
+        "summary": "Each sister faces a personal test of character."
+      },
+      {
+        "chapterNumber": 12,
+        "title": "Camp Laurence",
+        "pageRange": "111-120",
+        "summary": "A summer picnic and the blossoming of romances."
+      },
+      {
+        "chapterNumber": 13,
+        "title": "Castles in the Air",
+        "pageRange": "121-130",
+        "summary": "The sisters dream of their futures."
+      },
+      {
+        "chapterNumber": 14,
+        "title": "Secrets",
+        "pageRange": "131-140",
+        "summary": "Jo's secret writing; Meg's engagement."
+      },
+      {
+        "chapterNumber": 15,
+        "title": "A Telegram",
+        "pageRange": "141-148",
+        "summary": "Mr. March falls ill; Marmee goes to Washington."
+      },
+      {
+        "chapterNumber": 16,
+        "title": "In the Basket",
+        "pageRange": "149-158",
+        "summary": "The girls送 their burdens to the poor."
+      },
+      {
+        "chapterNumber": 17,
+        "title": "Little Feytlings",
+        "pageRange": "159-168",
+        "summary": "Amy's art class and her growing ambition."
+      },
+      {
+        "chapterNumber": 18,
+        "title": "The Thespians",
+        "pageRange": "169-178",
+        "summary": "The girls put on a play."
+      },
+      {
+        "chapterNumber": 19,
+        "title": "An Awful Decision",
+        "pageRange": "179-188",
+        "summary": "Jo rejects Laurie's proposal."
+      },
+      {
+        "chapterNumber": 20,
+        "title": "Confidential",
+        "pageRange": "189-198",
+        "summary": "The sisters confide in each other."
+      },
+      {
+        "chapterNumber": 21,
+        "title": "Laurie Makes mischief, and Jo Takes a Vacation",
+        "pageRange": "199-208",
+        "summary": "Laurie's prank; Jo goes to New York."
+      },
+      {
+        "chapterNumber": 22,
+        "title": "Festive Diversions",
+        "pageRange": "209-218",
+        "summary": "Christmas celebrations and social gatherings."
+      },
+      {
+        "chapterNumber": 23,
+        "title": "Aunt March Settles the Question",
+        "pageRange": "219-228",
+        "summary": "Aunt March disapproves of Jo's independence."
+      },
+      {
+        "chapterNumber": 24,
+        "title": "The Great Temptation",
+        "pageRange": "229-238",
+        "summary": "Jo faces the temptation to sell out her values."
+      },
+      {
+        "chapterNumber": 25,
+        "title": "The Wedding",
+        "pageRange": "239-248",
+        "summary": "Meg's wedding to John Brooke."
+      },
+      {
+        "chapterNumber": 26,
+        "title": "Artistic Attempts",
+        "pageRange": "249-258",
+        "summary": "Amy's artistic experiments."
+      },
+      {
+        "chapterNumber": 27,
+        "title": "Lessons",
+        "pageRange": "259-268",
+        "summary": "The sisters learn from their mistakes."
+      },
+      {
+        "chapterNumber": 28,
+        "title": "Domestic Experiences",
+        "pageRange": "269-278",
+        "summary": "Meg's domestic life; Jo's writing career."
+      },
+      {
+        "chapterNumber": 29,
+        "title": "Calls",
+        "pageRange": "279-288",
+        "summary": "Social calls and their revelations."
+      },
+      {
+        "chapterNumber": 30,
+        "title": "Consequences",
+        "pageRange": "289-298",
+        "summary": "The consequences of choices made."
+      },
+      {
+        "chapterNumber": 31,
+        "title": "Our Foreign Correspondent",
+        "pageRange": "299-308",
+        "summary": "Amy's letters from Europe."
+      },
+      {
+        "chapterNumber": 32,
+        "title": "Tender Troubles",
+        "pageRange": "309-318",
+        "summary": "Jo's struggles with growing up."
+      },
+      {
+        "chapterNumber": 33,
+        "title": "Jo's Journal",
+        "pageRange": "319-328",
+        "summary": "Jo reflects on her life and writing."
+      },
+      {
+        "chapterNumber": 34,
+        "title": "A Friend",
+        "pageRange": "329-338",
+        "summary": "A new friend enters the Marches' lives."
+      },
+      {
+        "chapterNumber": 35,
+        "title": "On the Shelf",
+        "pageRange": "339-348",
+        "summary": "Beth's illness worsens."
+      },
+      {
+        "chapterNumber": 36,
+        "title": "Beth's Secret",
+        "pageRange": "349-358",
+        "summary": "Beth reveals her declining health."
+      },
+      {
+        "chapterNumber": 37,
+        "title": "New Impressions",
+        "pageRange": "359-368",
+        "summary": "Amy's growth in Europe."
+      },
+      {
+        "chapterNumber": 38,
+        "title": "On the Mountain",
+        "pageRange": "369-378",
+        "summary": "Amy and Laurie reconcile in the Alps."
+      },
+      {
+        "chapterNumber": 39,
+        "title": "The Alarm",
+        "pageRange": "379-388",
+        "summary": "Jo receives urgent news from home."
+      },
+      {
+        "chapterNumber": 40,
+        "title": "The Valley of the Shadow",
+        "pageRange": "389-398",
+        "summary": "Beth's death; the family's grief."
+      },
+      {
+        "chapterNumber": 41,
+        "title": "Learning to Forget",
+        "pageRange": "399-408",
+        "summary": "The aftermath of Beth's death."
+      },
+      {
+        "chapterNumber": 42,
+        "title": "All Alone",
+        "pageRange": "409-418",
+        "summary": "Jo's loneliness and her writing."
+      },
+      {
+        "chapterNumber": 43,
+        "title": "Surprises",
+        "pageRange": "419-428",
+        "summary": "Unexpected good news for the family."
+      },
+      {
+        "chapterNumber": 44,
+        "title": "My Lord Bumblebee",
+        "pageRange": "429-438",
+        "summary": "A surprise visitor."
+      },
+      {
+        "chapterNumber": 45,
+        "title": "A Happy Birthday",
+        "pageRange": "439-446",
+        "summary": "A celebration that marks new beginnings."
+      },
+      {
+        "chapterNumber": 46,
+        "title": "Under the Umbrella",
+        "pageRange": "447-454",
+        "summary": "Jo and Professor Bhaer's courtship."
+      },
+      {
+        "chapterNumber": 47,
+        "title": "Harvest Time",
+        "pageRange": "455-462",
+        "summary": "The conclusion: marriage, family, and the fulfillment of dreams."
+      }
+    ]
   },
   {
     "id": "book-middlesex",
@@ -8017,7 +9868,7 @@
     "subtype": "Novel",
     "name": "Middlemarch",
     "teaser": "George Eliot's 1872 novel of provincial life — Dorothea Brooke's high ideals, Tertius Lydgate's research, and the whole town of Middlemarch gossiping, marrying, and reforming. Virginia Woolf called it one of the few English novels for grown-ups.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439518-L.jpg",
     "byline": "George Eliot",
     "exploreAction": {
       "verb": "Read",
@@ -8031,7 +9882,76 @@
       "Provincial"
     ],
     "tier": 1,
-    "pageCount": 880
+    "pageCount": 880,
+    "synopsis": "George Eliot's novel, subtitled 'A Study of Provincial Life,' is set in the fictional Midlands town of Middlemarch between 1829 and 1832 and follows the intertwined lives of its residents. The central figure is Dorothea Brooke, a passionate and idealistic young woman who marries the dried-up scholar Casaubon, hoping to help him with his scholarly work—only to discover that he is jealous, petty, and emotionally dead. Lydgate, an ambitious young doctor, arrives in Middlemarch with plans to revolutionize medicine, but his marriage to the shallow Rosamond Vincy drains his ambitions and finances. The novel weaves together these main stories with a vast cast of characters—Fred Vincy, Mary Garth, Bulstrode, Caleb Garth, Will Ladislaw—creating a portrait of a community in the process of change. Eliot's great subject is the tension between individual aspiration and social constraint, and her central insight is that no life is lived in isolation—every choice reverberates through the community. The novel is widely regarded as one of the greatest novels in the English language, and Virginia Woolf called it 'one of the few English novels written for grown-up people.'",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Miss Brooke",
+        "pageRange": "1-30",
+        "summary": "Dorothea's idealism and her decision to marry Casaubon."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Old and Young",
+        "pageRange": "31-60",
+        "summary": "Casaubon's jealousy; Lydgate arrives in Middlemarch."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Doctor",
+        "pageRange": "61-90",
+        "summary": "Lydgate's ambitions and his encounter with Rosamond."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Three Love Problems",
+        "pageRange": "91-120",
+        "summary": "The entanglements of love and marriage deepen."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Inward Revolutions",
+        "pageRange": "121-150",
+        "summary": "Dorothea's disillusionment; Lydgate's compromises."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Old and Young Again",
+        "pageRange": "151-180",
+        "summary": "The next generation's struggles."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "A Crisis",
+        "pageRange": "181-210",
+        "summary": "Casaubon's death; the consequences for Dorothea."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "Sunlight",
+        "pageRange": "211-240",
+        "summary": "Dorothea's freedom; the possibility of happiness."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "The Middlemarchers",
+        "pageRange": "241-270",
+        "summary": "The community's response to change."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "Old and Young Forever",
+        "pageRange": "271-300",
+        "summary": "The resolution of the major storylines."
+      },
+      {
+        "chapterNumber": 11,
+        "title": "The Finale",
+        "pageRange": "301-330",
+        "summary": "The fates of all the characters; the meaning of a life well-lived."
+      }
+    ]
   },
   {
     "id": "book-bleak-house",
@@ -8039,7 +9959,7 @@
     "subtype": "Novel",
     "name": "Bleak House",
     "teaser": "Charles Dickens's 1853 attack on the Court of Chancery — the endless lawsuit Jarndyce and Jarndyce eats generations alive while fog and dust settle over London. A detective story, a love story, and a legal horror show.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140434491-L.jpg",
     "byline": "Charles Dickens",
     "exploreAction": {
       "verb": "Read",
@@ -8053,7 +9973,94 @@
       "Classic"
     ],
     "tier": 2,
-    "pageCount": 880
+    "pageCount": 880,
+    "synopsis": "Charles Dickens's longest novel is a vast, sprawling masterpiece that uses the interminable court case of Jarndyce and Jarndyce as a lens to examine Victorian England. The case, which has dragged on for generations, consumes the lives of everyone it touches—Richard Carstone, a young man who pins his hopes on the lawsuit and is destroyed by it; Ada Clare, his cousin and beloved; and the mysterious beneficiary, Esther Summerson, who narrates half the novel in her modest, warm voice. The other half is narrated by Dickens himself in a panoramic, satirical style that moves from the fog-shrouded London of the Lord Chancellor's court to the mud-soaked Chesney Wold estate of the Dedlocks, one of England's oldest families. Lady Dedlock, beautiful and bored, hides a terrible secret—a past love affair that produced an illegitimate daughter (Esther)—and when the truth is revealed, it destroys her. Dickens uses the novel to attack the legal system, the class structure, the treatment of the poor, and the environmental devastation of industrial London. The novel's opening paragraphs, describing the fog that envelops London, are among the most famous in English literature.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "In Chancery",
+        "pageRange": "1-15",
+        "summary": "The fog over London; the Jarndyce case introduced."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "In Fashion",
+        "pageRange": "16-30",
+        "summary": "High society and Lady Dedlock's boredom."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "A Progress",
+        "pageRange": "31-45",
+        "summary": "Esther Summerson's childhood; her meeting with Mr. Jarndyce."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Telescopic Philanthropy",
+        "pageRange": "46-60",
+        "summary": "The jelly-making philanthropist Mrs. Jellyby."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Smallweed Family",
+        "pageRange": "61-75",
+        "summary": "The grotesque Smallweeds and their connection to the case."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Dedlock Estate",
+        "pageRange": "76-90",
+        "summary": "Chesney Wold and the Dedlock family."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Lady Dedlock Mystery",
+        "pageRange": "91-110",
+        "summary": "Lady Dedlock's secret past begins to unravel."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "Tom-All-Alone's",
+        "pageRange": "111-130",
+        "summary": "The slum that breeds disease and crime."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "Inspector Bucket",
+        "pageRange": "131-150",
+        "summary": "The detective pursues the mystery."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "Esther's Narrative",
+        "pageRange": "151-180",
+        "summary": "Esther's illness and recovery; her relationship with Allan Woodcourt."
+      },
+      {
+        "chapterNumber": 11,
+        "title": "The Jo Scene",
+        "pageRange": "181-195",
+        "summary": "The crossing sweeper Jo and his tragic fate."
+      },
+      {
+        "chapterNumber": 12,
+        "title": "The Revelation",
+        "pageRange": "196-215",
+        "summary": "Lady Dedlock's secret is exposed."
+      },
+      {
+        "chapterNumber": 13,
+        "title": "The End of Jarndyce",
+        "pageRange": "216-235",
+        "summary": "The case ends; all the money is consumed by costs."
+      },
+      {
+        "chapterNumber": 14,
+        "title": "Conclusion",
+        "pageRange": "236-255",
+        "summary": "The fates of Esther, Allan, and the remaining characters."
+      }
+    ]
   },
   {
     "id": "book-vanity-fair",
@@ -8061,7 +10068,7 @@
     "subtype": "Novel",
     "name": "Vanity Fair",
     "teaser": "Thackeray's 1848 'novel without a hero' — Becky Sharp claws her way up society with wit and no conscience while Amelia Sedley waits, loyal and dim. The great comic novel of social climbing.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140434484-L.jpg",
     "byline": "William Makepeace Thackeray",
     "exploreAction": {
       "verb": "Read",
@@ -8075,7 +10082,70 @@
       "Classic"
     ],
     "tier": 2,
-    "pageCount": 880
+    "pageCount": 880,
+    "synopsis": "William Makepeace Thackeray's novel, subtitled 'A Novel Without a Hero,' follows two contrasting women from their schooldays at Miss Pinkerton's academy through the Napoleonic Wars and beyond. Becky Sharp, the brilliant, manipulative daughter of an artist and a French opera dancer, uses her wit and charm to claw her way up society, marrying the foolish Rawdon Crawley and conducting a dangerous flirtation with the powerful Marquis of Steyne. Amelia Sedley, sweet, passive, and devoted, marries the vain soldier George Osborne and spends the rest of the novel waiting for a love that is largely unworthy of her. Thackeray's satire is directed not at his heroines but at the society that rewards Becky's ruthlessness and punishes Amelia's virtue. The novel moves from drawing rooms to battlefields (the Battle of Waterloo is rendered in vivid detail) to the gambling dens of London, creating a panoramic portrait of a society obsessed with wealth, status, and appearance. Thackeray himself illustrated the novel, and his famous title-page drawing—of a puppet show with the words 'Vanity Fair'—has become one of the most recognizable images in English literature.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Chiswick Mall",
+        "pageRange": "1-18",
+        "summary": "Becky and Amelia at school; their friendship begins."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Crawley Family",
+        "pageRange": "19-38",
+        "summary": "Becky enters the Crawley household; her scheming begins."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Courtship",
+        "pageRange": "39-58",
+        "summary": "Becky and Rawdon's secret marriage; Amelia and George."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "London Society",
+        "pageRange": "59-78",
+        "summary": "Becky's infiltration of high society."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Napoleonic Wars",
+        "pageRange": "79-98",
+        "summary": "The officers go to war; Waterloo and its aftermath."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "After the War",
+        "pageRange": "99-118",
+        "summary": "Amelia's widowhood; Becky's rise."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Steyne Affair",
+        "pageRange": "119-138",
+        "summary": "Becky's flirtation with the Marquis; Rawdon's discovery."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "Downfall",
+        "pageRange": "139-158",
+        "summary": "Becky's fall from grace; her exile."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "The Reunion",
+        "pageRange": "159-178",
+        "summary": "The characters reconverge; old debts are settled."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "Conclusion",
+        "pageRange": "179-195",
+        "summary": "Thackeray's final address to the reader."
+      }
+    ]
   },
   {
     "id": "book-dracula",
@@ -8083,7 +10153,7 @@
     "subtype": "Novel",
     "name": "Dracula",
     "teaser": "Bram Stoker's 1897 epistolary horror novel assembled the vampire legend — diary entries, telegrams, and phonograph records tracking the Count from Transylvania to London, and the band that hunts him back to his castle.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439846-L.jpg",
     "byline": "Bram Stoker",
     "exploreAction": {
       "verb": "Read",
@@ -8097,7 +10167,58 @@
       "Epistolary"
     ],
     "tier": 1,
-    "pageCount": 418
+    "pageCount": 418,
+    "synopsis": "Bram Stoker's epistolary novel, composed of journal entries, letters, and newspaper clippings, tells the story of Count Dracula's attempted invasion of England. When Jonathan Harker, a young solicitor, visits Dracula's castle in Transylvania to finalize a real estate purchase, he discovers that his host is a centuries-old vampire who feeds on blood and can transform into a bat or a wolf. Dracula escapes to England, where he begins preying on Harker's fiancée Mina and her friend Lucy Westenra. A group of heroes—led by the Dutch professor Abraham Van Helsing—races to understand the nature of the threat and destroy Dracula before he can establish an unending reign of the undead. The novel is structured as a race against time, with the heroes using modern technology (typewriters, phonographs, blood transfusions) against an ancient evil. Stoker, who was the business manager of the Lyceum Theatre, spent seven years researching vampire folklore before writing the novel, which was published in 1897. It did not immediately achieve the fame it now holds—it was outsold by its competitor, Florence Marryat's The Blood of the Vampire—but it has since become the defining vampire narrative in Western culture.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Jonathan Harker's Journal",
+        "pageRange": "1-35",
+        "summary": "Harker's journey to Transylvania and his imprisonment in the castle."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Arrival",
+        "pageRange": "36-55",
+        "summary": "Dracula arrives in England; the terror begins."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Lucy's Decline",
+        "pageRange": "56-80",
+        "summary": "Lucy Westenra's mysterious illness; Van Helsing's diagnosis."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Chase",
+        "pageRange": "81-105",
+        "summary": "The heroes pursue Dracula across London."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Stake",
+        "pageRange": "106-125",
+        "summary": "Lucy's destruction; the hunt intensifies."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Mina in Danger",
+        "pageRange": "126-150",
+        "summary": "Dracula targets Mina; the group races to find his lairs."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Final Hunt",
+        "pageRange": "151-175",
+        "summary": "The chase to Transylvania; Dracula's destruction."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "Epilogue",
+        "pageRange": "176-185",
+        "summary": "The aftermath; the heroes' lives after Dracula."
+      }
+    ]
   },
   {
     "id": "book-jekyll-and-hyde",
@@ -8105,7 +10226,7 @@
     "subtype": "Novella",
     "name": "Strange Case of Dr Jekyll and Mr Hyde",
     "teaser": "Robert Louis Stevenson's 1886 novella of the door, the will, and the doctor who drinks to become his own worst self. A hundred pages that gave the English language its name for the double life.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439761-L.jpg",
     "byline": "Robert Louis Stevenson",
     "exploreAction": {
       "verb": "Read",
@@ -8119,7 +10240,70 @@
       "Novella"
     ],
     "tier": 1,
-    "pageCount": 144
+    "pageCount": 144,
+    "synopsis": "Robert Louis Stevenson's novella tells the story of Gabriel John Utterson, a London lawyer who investigates the strange relationship between his old friend Dr. Henry Jekyll and the evil Edward Hyde. Utterson first hears of Hyde when Jekyll leaves him a will bequeathing everything to Hyde in the event of Jekyll's disappearance. When a witness sees Hyde trample a young girl in the street, Utterson becomes determined to confront the man. As the investigation deepens, Utterson discovers that Hyde is not merely Jekyll's beneficiary but his alter ego—created by a potion that separates Jekyll's good and evil natures. The novella is narrated through multiple perspectives—Utterson's investigation, Lanyon's journal, and Jekyll's own confession—creating a mystery structure that builds to the revelation that Jekyll has been losing control of the transformation, and Hyde has become dominant. Written in just a few days after a feverish dream, the novella was an immediate sensation when published in 1886 and has been adapted countless times. It is both a gothic thriller and a profound meditation on the duality of human nature.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Story of the Door",
+        "pageRange": "1-10",
+        "summary": "Utterson and Enfield discuss the mysterious Hyde."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Search for Mr. Hyde",
+        "pageRange": "11-20",
+        "summary": "Utterson tracks down Hyde and confronts him."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Dr. Jekyll Was Quite at Ease",
+        "pageRange": "21-28",
+        "summary": "Jekyll reassures Utterson; the relationship deepens."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Incident at the Window",
+        "pageRange": "29-36",
+        "summary": "Utterson sees Jekyll and Hyde together; the mystery grows."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Incident of the Letter",
+        "pageRange": "37-44",
+        "summary": "Jekyll writes to Utterson; Hyde disappears."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Remarkable Incident of Dr. Lanyon",
+        "pageRange": "45-52",
+        "summary": "Lanyon's death and his sealed confession."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Incident at the Window",
+        "pageRange": "53-60",
+        "summary": "Utterson sees Hyde at Jekyll's window."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "The Last Night",
+        "pageRange": "61-70",
+        "summary": "Poole and Utterson break into the lab; Hyde is found dead."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "Dr. Lanyon's Narrative",
+        "pageRange": "71-80",
+        "summary": "Lanyon's account of witnessing the transformation."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "Henry Jekyll's Full Statement",
+        "pageRange": "81-95",
+        "summary": "Jekyll's confession explains the experiment and its failure."
+      }
+    ]
   },
   {
     "id": "book-alice-in-wonderland",
@@ -8127,7 +10311,7 @@
     "subtype": "Fantasy",
     "name": "Alice's Adventures in Wonderland",
     "teaser": "Lewis Carroll's 1865 dream-novel of a girl who falls down a rabbit hole into a world of logic turned upside down — the Cheshire Cat, the Mad Hatter, the Queen of Hearts. Nonsense with a system.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439761-L.jpg",
     "byline": "Lewis Carroll",
     "exploreAction": {
       "verb": "Read",
@@ -8141,7 +10325,82 @@
       "Nonsense"
     ],
     "tier": 1,
-    "pageCount": 192
+    "pageCount": 192,
+    "synopsis": "Lewis Carroll's fantasy novel follows Alice, a young girl who falls down a rabbit hole into a bizarre underground world populated by talking animals, playing cards, and eccentric characters. She encounters the White Rabbit, drinks potions and eats cakes that change her size, plays croquet with flamingos and hedgehogs at the Queen of Hearts' court, and attends a mad tea party with the Hatter, the March Hare, and the Dormouse. The novel is structured as a series of episodes, each more absurd than the last, with Alice struggling to maintain her identity and logic in a world that operates on dream logic. Carroll, the pen name of Charles Lutwidge Dodgson, a mathematics lecturer at Oxford, wrote the story for Alice Liddell, the young daughter of a colleague, during a boat trip in 1862. The book was an immediate success and has never been out of print. Carroll's wordplay, logical paradoxes, and social satire have made it one of the most analyzed and quoted works in English literature, and its influence on fantasy, linguistics, and popular culture is immeasurable.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Down the Rabbit-Hole",
+        "pageRange": "1-10",
+        "summary": "Alice follows the White Rabbit and falls into Wonderland."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Pool of Tears",
+        "pageRange": "11-20",
+        "summary": "Alice grows and shrinks; she meets various creatures."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "A Caucus-Race and a Long Tale",
+        "pageRange": "21-30",
+        "summary": "The Dodo organizes a race; Alice meets the Mouse."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Rabbit Sends in a Little Bill",
+        "pageRange": "31-38",
+        "summary": "Alice grows enormous in the White Rabbit's house."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Advice from a Caterpillar",
+        "pageRange": "39-48",
+        "summary": "The Caterpillar questions Alice about who she is."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Pig and Pepper",
+        "pageRange": "49-56",
+        "summary": "Alice meets the Duchess and the Cheshire Cat."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "A Mad Tea-Party",
+        "pageRange": "57-66",
+        "summary": "The Hatter, the March Hare, and the Dormouse."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "The Queen's Croquet-Ground",
+        "pageRange": "67-76",
+        "summary": "Alice plays croquet with the Queen of Hearts."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "The Mock Turtle's Story",
+        "pageRange": "77-86",
+        "summary": "The Mock Turtle and the Gryphon tell their tale."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "Lobster Quadrille",
+        "pageRange": "87-94",
+        "summary": "The Mock Turtle dances; Alice is summoned to trial."
+      },
+      {
+        "chapterNumber": 11,
+        "title": "Who Stole the Tarts?",
+        "pageRange": "95-104",
+        "summary": "The trial of the Knave of Hearts."
+      },
+      {
+        "chapterNumber": 12,
+        "title": "Alice's Evidence",
+        "pageRange": "105-115",
+        "summary": "Alice testifies; the trial collapses; she wakes up."
+      }
+    ]
   },
   {
     "id": "book-wizard-of-oz",
@@ -8149,7 +10408,7 @@
     "subtype": "Fantasy",
     "name": "The Wonderful Wizard of Oz",
     "teaser": "L. Frank Baum's 1900 American fairy tale — Dorothy, Toto, and the cyclone into a land of Munchkins, scarecrows, and emerald cities. Far stranger and more political than the movie everyone remembers.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780486268675-L.jpg",
     "byline": "L. Frank Baum",
     "exploreAction": {
       "verb": "Read",
@@ -8163,7 +10422,154 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 272
+    "pageCount": 272,
+    "synopsis": "L. Frank Baum's children's novel follows Dorothy Gale, a young girl from Kansas who is swept away by a tornado to the Land of Oz, a magical country inhabited by Munchkins, Winkies, flying monkeys, and a powerful Wizard. To find her way home, Dorothy must follow the Yellow Brick Road to the Emerald City and ask the Wizard for help. Along the way, she befriends the Scarecrow (who wants a brain), the Tin Woodman (who wants a heart), and the Cowardly Lion (who wants courage). The Wizard, revealed to be an ordinary man behind a curtain, sends them to defeat the Wicked Witch of the West, and their journey becomes a quest of self-discovery: each discovers that what they were seeking was within them all along. Baum wrote the novel in 1900 as an American fairy tale, consciously departing from European traditions. The book was an immediate bestseller and spawned thirteen sequels, a beloved 1939 film adaptation, and countless cultural references.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Cyclone",
+        "pageRange": "1-8",
+        "summary": "Dorothy's house is swept away by the tornado."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Council with the Munchkins",
+        "pageRange": "9-16",
+        "summary": "Dorothy arrives in Oz; she meets Glinda."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "How Dorothy Saved the Scarecrow",
+        "pageRange": "17-24",
+        "summary": "Dorothy rescues the Scarecrow from his pole."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Through the Forest",
+        "pageRange": "25-32",
+        "summary": "The journey begins; encounters with dangers."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Rescue of the Tin Woodman",
+        "pageRange": "33-40",
+        "summary": "Dorothy oil-jams the rusty Woodman."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Cowardly Lion",
+        "pageRange": "41-48",
+        "summary": "The Lion joins the group; they reach the Emerald City."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Emerald City",
+        "pageRange": "49-56",
+        "summary": "The group meets the Wizard; each is given a task."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "The Deadly Poppy Field",
+        "pageRange": "57-64",
+        "summary": "The group falls asleep in the poppy field; the Lion is saved."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "The Queen of the Field Mice",
+        "pageRange": "65-72",
+        "summary": "The mice rescue the group from the poppies."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "The Guardian of the Gate",
+        "pageRange": "73-80",
+        "summary": "The group enters the Emerald City; the Wizard's demands."
+      },
+      {
+        "chapterNumber": 11,
+        "title": "The Wonderful Wizard of Oz",
+        "pageRange": "81-88",
+        "summary": "The group confronts the Wizard; the truth is revealed."
+      },
+      {
+        "chapterNumber": 12,
+        "title": "The Escape from the Mice",
+        "pageRange": "89-96",
+        "summary": "The Queen of the Field Mice helps them escape."
+      },
+      {
+        "chapterNumber": 13,
+        "title": "The Winged Monkeys",
+        "pageRange": "97-104",
+        "summary": "The Winged Monkeys carry Dorothy to the Wicked Witch."
+      },
+      {
+        "chapterNumber": 14,
+        "title": "The Wicked Witch of the West",
+        "pageRange": "105-112",
+        "summary": "Dorothy is captured; the Witch's plans."
+      },
+      {
+        "chapterNumber": 15,
+        "title": "The Discovery of Oz",
+        "pageRange": "113-120",
+        "summary": "Dorothy melts the Witch; the Wizard's departure."
+      },
+      {
+        "chapterNumber": 16,
+        "title": "The Magic Art of the Great Humbug",
+        "pageRange": "121-128",
+        "summary": "The Wizard gives gifts to the Scarecrow, Tin Woodman, and Lion."
+      },
+      {
+        "chapterNumber": 17,
+        "title": "How the Balloon Was Launched",
+        "pageRange": "129-136",
+        "summary": "The Wizard tries to take Dorothy home; he floats away."
+      },
+      {
+        "chapterNumber": 18,
+        "title": "Away to the South",
+        "pageRange": "137-144",
+        "summary": "Dorothy seeks the Wicked Witch of the South."
+      },
+      {
+        "chapterNumber": 19,
+        "title": "Attacked by the Fighting Trees",
+        "pageRange": "145-152",
+        "summary": "The group faces new dangers on the journey."
+      },
+      {
+        "chapterNumber": 20,
+        "title": "The Dainty China Country",
+        "pageRange": "153-160",
+        "summary": "The group passes through the China Country."
+      },
+      {
+        "chapterNumber": 21,
+        "title": "The Lion Becomes the King of Beasts",
+        "pageRange": "161-168",
+        "summary": "The Lion defeats the Kalidahs."
+      },
+      {
+        "chapterNumber": 22,
+        "title": "The Country of the Quadlings",
+        "pageRange": "169-176",
+        "summary": "The group enters the Quadling Country."
+      },
+      {
+        "chapterNumber": 23,
+        "title": "Glinda the Good Witch",
+        "pageRange": "177-184",
+        "summary": "Glinda reveals the secret of the silver shoes."
+      },
+      {
+        "chapterNumber": 24,
+        "title": "Home Again",
+        "pageRange": "185-192",
+        "summary": "Dorothy returns to Kansas; the power was always hers."
+      }
+    ]
   },
   {
     "id": "book-anne-of-green-gables",
@@ -8171,7 +10577,7 @@
     "subtype": "Novel",
     "name": "Anne of Green Gables",
     "teaser": "L. M. Montgomery's 1908 novel of the red-haired orphan who talks too much and dreams too big on Prince Edward Island. Marilla and Matthew wanted a boy; they got Anne Shirley, and so did the world.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141329574-L.jpg",
     "byline": "L. M. Montgomery",
     "exploreAction": {
       "verb": "Read",
@@ -8185,7 +10591,208 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 352
+    "pageCount": 352,
+    "synopsis": "Lucy Maud Montgomery's novel follows Anne Shirley, a spunky, imaginative orphan girl who is mistakenly sent to Matthew and Marilla Cuthbert's farm on Prince Edward Island. The elderly siblings had intended to adopt a boy to help with the farm, but Anne's charm and energy win them over. The novel traces Anne's first years in Avonlea—her adventures with her best friend Diana Barry, her rivalry with the handsome Gilbert Blythe (who insults her red hair on the first day of school), her academic triumphs at Queen's Academy, and her growing role in the community. Anne is a force of nature: she talks constantly, imagines vividly, and makes mistakes spectacularly. Her warmth and honesty transform everyone around her, including the stiff Marilla, who learns to love. Montgomery based Anne on a real orphan girl she heard about as a child, and the novel's setting—Green Gables, the farm on Prince Edward Island—is now a major tourist destination. Published in 1908, the novel has never been out of print and has spawned countless adaptations, including the beloved Netflix series 'Anne with an E.'",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Mrs. Rachel Lynde Is Surprised",
+        "pageRange": "1-8",
+        "summary": "Mrs. Lynde learns of the Cuthberts' adoption plan."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Matthew Cuthbert Is Surprised",
+        "pageRange": "9-16",
+        "summary": "Matthew meets Anne at the station; her talkativeness."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Marilla Cuthbert Is Surprised",
+        "pageRange": "17-24",
+        "summary": "Marilla's initial rejection; Anne's plea to stay."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Green Gables",
+        "pageRange": "25-32",
+        "summary": "Anne discovers the beauty of her new home."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Anne's History",
+        "pageRange": "33-40",
+        "summary": "Anne tells her story of foster homes and orphanages."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Marilla Makes Up Her Mind",
+        "pageRange": "41-48",
+        "summary": "Marilla decides to keep Anne; the conditions."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Anne Says Her Prayers",
+        "pageRange": "49-56",
+        "summary": "Anne's unconventional prayer life."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "Anne's Beginnings",
+        "pageRange": "57-64",
+        "summary": "Anne's first day of school; her introduction to Diana."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "Anne's Confession",
+        "pageRange": "65-72",
+        "summary": "Anne confesses to breaking a slate over Gilbert's head."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "A Rival in School",
+        "pageRange": "73-80",
+        "summary": "Gilbert becomes Anne's academic rival."
+      },
+      {
+        "chapterNumber": 11,
+        "title": "Anne's Impressions of Sunday School",
+        "pageRange": "81-88",
+        "summary": "Anne's experiences at church and Sunday school."
+      },
+      {
+        "chapterNumber": 12,
+        "title": "A Solemn Vow and Promise",
+        "pageRange": "89-96",
+        "summary": "Anne and Diana's vow of friendship."
+      },
+      {
+        "chapterNumber": 13,
+        "title": "The Delights of Anticipation",
+        "pageRange": "97-104",
+        "summary": "Anne's excitement about the picnic."
+      },
+      {
+        "chapterNumber": 14,
+        "title": "Anne's Confession",
+        "pageRange": "105-112",
+        "summary": "Anne's school recitation goes wrong."
+      },
+      {
+        "chapterNumber": 15,
+        "title": "A Tempest in the School Teapot",
+        "pageRange": "113-120",
+        "summary": "The incident with the amethyst brooch."
+      },
+      {
+        "chapterNumber": 16,
+        "title": "Diana Is Invited to Tea with Tragic Results",
+        "pageRange": "121-128",
+        "summary": "Anne serves Diana currant wine instead of raspberry cordial."
+      },
+      {
+        "chapterNumber": 17,
+        "title": "A New Departure in Flavorings",
+        "pageRange": "129-136",
+        "summary": "Anne's experiments with cooking go awry."
+      },
+      {
+        "chapterNumber": 18,
+        "title": "An Invitation Sent by Mistake",
+        "pageRange": "137-144",
+        "summary": "Anne sends an invitation to the wrong person."
+      },
+      {
+        "chapterNumber": 19,
+        "title": "An Adventure on the Tory Road",
+        "pageRange": "145-152",
+        "summary": "Anne and Matthew's adventure in town."
+      },
+      {
+        "chapterNumber": 20,
+        "title": "A New Department",
+        "pageRange": "153-160",
+        "summary": "Anne joins the church choir."
+      },
+      {
+        "chapterNumber": 21,
+        "title": "Anne Is Invited Out to Tea",
+        "pageRange": "161-168",
+        "summary": "Anne visits Mrs. Blewett and other neighbors."
+      },
+      {
+        "chapterNumber": 22,
+        "title": "The Amusements of Diana",
+        "pageRange": "169-176",
+        "summary": "Anne and Diana's adventures together."
+      },
+      {
+        "chapterNumber": 23,
+        "title": "Anne's Misadventures",
+        "pageRange": "177-184",
+        "summary": "Anne gets lost in the woods; Matthew finds her."
+      },
+      {
+        "chapterNumber": 24,
+        "title": "An Avonlea Schoolroom",
+        "pageRange": "185-192",
+        "summary": "Mr. Phillips's teaching methods and the school's dynamics."
+      },
+      {
+        "chapterNumber": 25,
+        "title": "Matthew Insists on Puffed Sleeves",
+        "pageRange": "193-200",
+        "summary": "Matthew secretly buys Anne a dress with puffed sleeves."
+      },
+      {
+        "chapterNumber": 26,
+        "title": "The Story Club Is Formed",
+        "pageRange": "201-208",
+        "summary": "Anne and her friends form a story-writing club."
+      },
+      {
+        "chapterNumber": 27,
+        "title": "Vanity and Vexation",
+        "pageRange": "209-216",
+        "summary": "Anne's vanity about her hair leads to disaster."
+      },
+      {
+        "chapterNumber": 28,
+        "title": "An Unfortunate Lily Maid",
+        "pageRange": "217-224",
+        "summary": "Anne floats down the river and gets stuck on a log."
+      },
+      {
+        "chapterNumber": 29,
+        "title": "An Epoch in Anne's Life",
+        "pageRange": "225-232",
+        "summary": "Anne's first experience with adult emotions."
+      },
+      {
+        "chapterNumber": 30,
+        "title": "The Full Cup Is Tipped",
+        "pageRange": "233-240",
+        "summary": "Anne's crisis when Matthew's heart fails."
+      },
+      {
+        "chapterNumber": 31,
+        "title": "Where the Paths Diverge",
+        "pageRange": "241-248",
+        "summary": "Anne and Gilbert's rivalry shifts; the scholarship."
+      },
+      {
+        "chapterNumber": 32,
+        "title": "The Path of Duty",
+        "pageRange": "249-256",
+        "summary": "Anne chooses to stay at Green Gables."
+      },
+      {
+        "chapterNumber": 33,
+        "title": "The End of the Affair",
+        "pageRange": "257-264",
+        "summary": "The conclusion: Anne and Gilbert reconcile; the future opens."
+      }
+    ]
   },
   {
     "id": "book-secret-garden",
@@ -8193,7 +10800,7 @@
     "subtype": "Novel",
     "name": "The Secret Garden",
     "teaser": "Frances Hodgson Burnett's 1911 novel — sour Mary Lennox, orphaned in India, comes to Yorkshire and finds a locked garden and a sickly cousin. The garden heals them all, one buried bulb at a time.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141329567-L.jpg",
     "byline": "Frances Hodgson Burnett",
     "exploreAction": {
       "verb": "Read",
@@ -8207,7 +10814,130 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 336
+    "pageCount": 336,
+    "synopsis": "Frances Hodgson Burnett's children's novel follows Mary Lennox, a spoiled and unloved ten-year-old girl who is sent to live with her uncle, Archibald Craven, in a vast manor house on the Yorkshire moors after her parents die in India. Mary discovers that the manor contains a secret garden that has been locked up for ten years, since Archibald's wife died in it. With the help of a friendly robin, Mary finds the key and begins to restore the garden to life. She also discovers her sickly cousin Colin, who has been kept in a dark room by his father, convinced he is dying. Together, Mary, Colin, and a local boy named Dickon—who has a magical way with animals—bring the garden back from death and, in doing so, heal themselves. The novel is a parable about the restorative power of nature and the human spirit's capacity for renewal. Burnett, who had experienced her own losses and recoveries, wrote the novel in 1911, and it has become one of the most beloved children's books ever written, spawning countless adaptations.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "There Is No One Left",
+        "pageRange": "1-8",
+        "summary": "Mary's life in India; the cholera epidemic that kills her parents."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Mistress Mary Quite Contrary",
+        "pageRange": "9-16",
+        "summary": "Mary arrives at Misselthwaite Manor; her first impressions."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Through the Door",
+        "pageRange": "17-24",
+        "summary": "Mary explores the manor; she hears crying."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Martha",
+        "pageRange": "25-32",
+        "summary": "Martha Sowerby, the housemaid, befriends Mary."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Robin",
+        "pageRange": "33-40",
+        "summary": "Mary discovers the robin that leads her to the garden."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "There Was No One Left to Talk To",
+        "pageRange": "41-48",
+        "summary": "Mary explores the moors and meets Dickon."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Key of the Garden",
+        "pageRange": "49-56",
+        "summary": "Mary finds the key to the secret garden."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "The Robin Who Showed the Way",
+        "pageRange": "57-64",
+        "summary": "The robin leads Mary to the garden door."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "The Strangest House Anyone Ever Lived In",
+        "pageRange": "65-72",
+        "summary": "Mary explores the manor's mysterious rooms."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "The Dickon",
+        "pageRange": "73-80",
+        "summary": "Dickon's first visit to the garden."
+      },
+      {
+        "chapterNumber": 11,
+        "title": "The Cupboard",
+        "pageRange": "81-88",
+        "summary": "Mary discovers Colin in a hidden room."
+      },
+      {
+        "chapterNumber": 12,
+        "title": "A Young Rajah",
+        "pageRange": "89-96",
+        "summary": "Colin's demands and his growing friendship with Mary."
+      },
+      {
+        "chapterNumber": 13,
+        "title": "I Am Colin",
+        "pageRange": "97-104",
+        "summary": "Colin reveals his identity; Mary visits him."
+      },
+      {
+        "chapterNumber": 14,
+        "title": "The Little Prophet",
+        "pageRange": "105-112",
+        "summary": "Mary becomes the garden's champion."
+      },
+      {
+        "chapterNumber": 15,
+        "title": "Nest Building",
+        "pageRange": "113-120",
+        "summary": "Mary and Dickon bring life back to the garden."
+      },
+      {
+        "chapterNumber": 16,
+        "title": "Colin Says His Say",
+        "pageRange": "121-128",
+        "summary": "Colin begins to believe he can get well."
+      },
+      {
+        "chapterNumber": 17,
+        "title": "A Tornado",
+        "pageRange": "129-136",
+        "summary": "The storm that brings the secret out."
+      },
+      {
+        "chapterNumber": 18,
+        "title": "I Meant to Do No Harm",
+        "pageRange": "137-144",
+        "summary": "Archibald Craven returns; the garden is revealed."
+      },
+      {
+        "chapterNumber": 19,
+        "title": "Springtime",
+        "pageRange": "145-152",
+        "summary": "The garden in full bloom; Colin walks."
+      },
+      {
+        "chapterNumber": 20,
+        "title": "I Shall Live Forever",
+        "pageRange": "153-160",
+        "summary": "The healing is complete; the family is restored."
+      }
+    ]
   },
   {
     "id": "book-peter-pan",
@@ -8215,7 +10945,7 @@
     "subtype": "Fantasy",
     "name": "Peter and Wendy",
     "teaser": "J. M. Barrie's 1911 novel of the boy who never grows up — the Darling nursery, the second star to the right, and the pirate captain who fears the crocodile and the clock it swallowed.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141329581-L.jpg",
     "byline": "J. M. Barrie",
     "exploreAction": {
       "verb": "Read",
@@ -8229,7 +10959,112 @@
       "Children"
     ],
     "tier": 2,
-    "pageCount": 208
+    "pageCount": 208,
+    "synopsis": "J.M. Barrie's novel tells the story of Peter Pan, the boy who wouldn't grow up, and his adventures with the Darling children—Wendy, John, and Michael—in the magical world of Neverland. When Peter flies into the Darling nursery one night and loses his shadow, Wendy helps him recover it, and the three children follow Peter to Neverland, where they encounter pirates (led by Captain Hook), the Lost Boys, the fairy Tinker Bell, and the mermaids. Wendy becomes the boys' mother figure, telling them stories and keeping them in order, while Peter leads them in adventures against Hook. The novel's central tension is between the eternal childhood of Neverland and the inevitable passage of time that the Darling children must eventually accept. Barrie, a Scottish playwright, originally wrote the story for the Llewelyn Davies boys, whom he had befriended, and it was first performed as a play in 1904 before being novelized in 1911. The novel has become one of the most adapted stories in English literature.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Peter Breaks Through",
+        "pageRange": "1-12",
+        "summary": "Peter enters the Darling nursery and loses his shadow."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Shadow",
+        "pageRange": "13-22",
+        "summary": "Wendy sews Peter's shadow back on."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Come Away, Come Away",
+        "pageRange": "23-32",
+        "summary": "The children fly to Neverland."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Flight",
+        "pageRange": "33-42",
+        "summary": "The journey to Neverland; the second star to the right."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Island Come True",
+        "pageRange": "43-54",
+        "summary": "Neverland is introduced; all its inhabitants."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Little House",
+        "pageRange": "55-64",
+        "summary": "The Underground Home; Wendy becomes mother."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Home Under the Ground",
+        "pageRange": "65-74",
+        "summary": "Life in the underground home; the Lost Boys."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "The Mermaids' Lagoon",
+        "pageRange": "75-84",
+        "summary": "The children encounter mermaids; Hook plots revenge."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "The Never Bird",
+        "pageRange": "85-92",
+        "summary": "Peter's encounter with the Never Bird."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "The Happy Home",
+        "pageRange": "93-102",
+        "summary": "Wendy tells stories; the family life they create."
+      },
+      {
+        "chapterNumber": 11,
+        "title": "Wendy's Story",
+        "pageRange": "103-112",
+        "summary": "Wendy tells the story of the Darlings."
+      },
+      {
+        "chapterNumber": 12,
+        "title": "The Children Are Carried Off",
+        "pageRange": "113-122",
+        "summary": "Hook kidnaps the children; Wendy is captured."
+      },
+      {
+        "chapterNumber": 13,
+        "title": "Do You Believe in Fairies?",
+        "pageRange": "123-132",
+        "summary": "Tinker Bell's near-death; Peter's rally."
+      },
+      {
+        "chapterNumber": 14,
+        "title": "The Pirate Ship",
+        "pageRange": "133-144",
+        "summary": "The battle with the pirates; Hook's defeat."
+      },
+      {
+        "chapterNumber": 15,
+        "title": "Hook or Me This Time",
+        "pageRange": "145-154",
+        "summary": "Peter vs. Hook; the crocodile."
+      },
+      {
+        "chapterNumber": 16,
+        "title": "The Return Home",
+        "pageRange": "155-164",
+        "summary": "The children fly home; Mrs. Darling remembers."
+      },
+      {
+        "chapterNumber": 17,
+        "title": "When Wendy Grew Up",
+        "pageRange": "165-175",
+        "summary": "Wendy grows up; Peter returns for her daughter."
+      }
+    ]
   },
   {
     "id": "book-treasure-island",
@@ -8237,7 +11072,7 @@
     "subtype": "Novel",
     "name": "Treasure Island",
     "teaser": "Robert Louis Stevenson's 1883 adventure novel that set the template for pirate fiction — Jim Hawkins, Long John Silver, and the map of an island where X marks the spot. One-legged villains have never recovered.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141329727-L.jpg",
     "byline": "Robert Louis Stevenson",
     "exploreAction": {
       "verb": "Read",
@@ -8251,7 +11086,100 @@
       "Pirates"
     ],
     "tier": 1,
-    "pageCount": 304
+    "pageCount": 304,
+    "synopsis": "Robert Louis Stevenson's adventure novel follows Jim Hawkins, a young boy whose family runs the Admiral Benbow inn on the English coast. When a mysterious sailor named Billy Bones dies at the inn, Jim discovers a map in his sea chest showing the location of a buried treasure on a remote island. Jim shows the map to Dr. Livesey and the local squire, and they assemble a ship, the Hispaniola, to sail for the treasure. Among the crew is Long John Silver, a charming, one-legged cook who turns out to be the ringleader of a group of pirates who plan to seize the treasure for themselves. The novel is narrated by Jim, who tells the story with a mixture of boyish excitement and hard-won wisdom. The battle between Jim's group and the pirates plays out across the island, in stockades, on the ship, and in caves, culminating in Silver's betrayal and the ultimate fate of the treasure. Published in 1883, Treasure Island defined the modern pirate adventure and introduced many of the images we now associate with piracy—treasure maps with X marks the spot, parrots on shoulders, the Jolly Roger flag.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Old Sea Dog",
+        "pageRange": "1-8",
+        "summary": "Billy Bones arrives at the Admiral Benbow; the Black Spot."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Black Spot",
+        "pageRange": "9-16",
+        "summary": "Billy Bones dies; Jim finds the map."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Command of the Expedition",
+        "pageRange": "17-24",
+        "summary": "Squire Trelawney hires a crew; Silver joins."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Trip to Bristol",
+        "pageRange": "25-32",
+        "summary": "The voyage begins; Jim meets Silver."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Last of the Old Sea Dog",
+        "pageRange": "33-40",
+        "summary": "The crew sails; tension builds."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Captain's Orders",
+        "pageRange": "41-48",
+        "summary": "Captain Smollett is suspicious of the crew."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Apple Barrel",
+        "pageRange": "49-56",
+        "summary": "Jim overhears Silver's mutiny plan."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "The First Blow",
+        "pageRange": "57-64",
+        "summary": "The pirates attack; the battle begins."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "The Stockade",
+        "pageRange": "65-72",
+        "summary": "Jim's group defends the stockade."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "The Man in the Barrel",
+        "pageRange": "73-80",
+        "summary": "Silver negotiates with Captain Smollett."
+      },
+      {
+        "chapterNumber": 11,
+        "title": "The Treasure Hunt",
+        "pageRange": "81-88",
+        "summary": "The search for the treasure begins."
+      },
+      {
+        "chapterNumber": 12,
+        "title": "The Alarm",
+        "pageRange": "89-96",
+        "summary": "The treasure is gone; the pirates turn on Silver."
+      },
+      {
+        "chapterNumber": 13,
+        "title": "Ben Gunn",
+        "pageRange": "97-104",
+        "summary": "Ben Gunn reveals himself; the truth about the treasure."
+      },
+      {
+        "chapterNumber": 14,
+        "title": "The Last Fight",
+        "pageRange": "105-112",
+        "summary": "The final battle with the pirates."
+      },
+      {
+        "chapterNumber": 15,
+        "title": "And Last",
+        "pageRange": "113-120",
+        "summary": "Silver escapes; the return voyage."
+      }
+    ]
   },
   {
     "id": "book-twenty-thousand-leagues",
@@ -8259,7 +11187,7 @@
     "subtype": "Novel",
     "name": "Twenty Thousand Leagues Under the Seas",
     "teaser": "Jules Verne's 1870 underwater voyage — Professor Aronnax, harpooner Ned Land, and the mysterious Captain Nemo aboard the Nautilus, touring the world's oceans as science, wonder, and vengeance.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140447538-L.jpg",
     "byline": "Jules Verne",
     "exploreAction": {
       "verb": "Read",
@@ -8273,7 +11201,118 @@
       "Adventure"
     ],
     "tier": 1,
-    "pageCount": 480
+    "pageCount": 480,
+    "synopsis": "Jules Verne's science fiction novel follows Professor Pierre Aronnax, his servant Conseil, and the Canadian harpooner Ned Land, who are thrown together when the naval ship they are aboard is attacked by a mysterious sea creature. They discover that the 'creature' is actually the Nautilus, a technologically advanced submarine commanded by the enigmatic Captain Nemo, who has cut himself off from the world above. Over the next ten months, they travel twenty thousand leagues (about 80,000 km) beneath the ocean's surface, encountering giant squid, underwater forests, coral reefs, shipwrecks, and the lost city of Atlantis. Captain Nemo is a complex figure—a genius who has chosen exile, a liberator of the oppressed who has also committed acts of vengeance against the nations that destroyed his family. The novel was published in 1870 and was an immediate bestseller. Verne was meticulous about scientific accuracy, and many of his predictions—submarines, electric propulsion, underwater diving suits—have since become reality. Captain Nemo has become one of the most iconic characters in science fiction.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "A Shifting Reef",
+        "pageRange": "1-12",
+        "summary": "The mysterious sea creature is sighted; the expedition begins."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Pro and Con",
+        "pageRange": "13-24",
+        "summary": "The debate over what the creature is; science vs. speculation."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "I Form My Resolution",
+        "pageRange": "25-34",
+        "summary": "Professor Aronnax joins the expedition; they are attacked."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Ned Land",
+        "pageRange": "35-44",
+        "summary": "The survivors are taken aboard the Nautilus."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "At a Venture",
+        "pageRange": "45-56",
+        "summary": "The tour of the Nautilus; Nemo's rules."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Aquarium",
+        "pageRange": "57-68",
+        "summary": "The underwater world; the great barrier of coral."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "A Few Days on Land",
+        "pageRange": "69-80",
+        "summary": "The crew explores an island; hunting and gathering."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "The Underwater Coal Mines",
+        "pageRange": "81-92",
+        "summary": "The Nautilus resupplies from an underwater coal mine."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "The Giant Sea Spiders",
+        "pageRange": "93-104",
+        "summary": "Underwater hunting; giant octopi and sea spiders."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "The Gulf Stream",
+        "pageRange": "105-116",
+        "summary": "The Nautilus enters the Gulf Stream; a fight with sharks."
+      },
+      {
+        "chapterNumber": 11,
+        "title": "The Sargasso Sea",
+        "pageRange": "117-128",
+        "summary": "The Sargasso Sea and its floating seaweed."
+      },
+      {
+        "chapterNumber": 12,
+        "title": "The Sperm Whales",
+        "pageRange": "129-140",
+        "summary": "A battle between the Nautilus and a school of sperm whales."
+      },
+      {
+        "chapterNumber": 13,
+        "title": "The Ice Cap",
+        "pageRange": "141-152",
+        "summary": "The Nautilus is trapped under the Arctic ice cap."
+      },
+      {
+        "chapterNumber": 14,
+        "title": "The South Pole",
+        "pageRange": "153-164",
+        "summary": "Nemo reaches the South Pole; a flag is planted."
+      },
+      {
+        "chapterNumber": 15,
+        "title": "Accident or Incident?",
+        "pageRange": "165-176",
+        "summary": "A collision with a warship; Nemo's revenge."
+      },
+      {
+        "chapterNumber": 16,
+        "title": "The Cephalopods",
+        "pageRange": "177-188",
+        "summary": "The giant squid attack; a crew member is lost."
+      },
+      {
+        "chapterNumber": 17,
+        "title": "The Gulf of the Gulf Stream",
+        "pageRange": "189-200",
+        "summary": "The Gulf Stream and the final days aboard the Nautilus."
+      },
+      {
+        "chapterNumber": 18,
+        "title": "The Vortex",
+        "pageRange": "201-212",
+        "summary": "The Nautilus is caught in the Maelstrom; the escape."
+      }
+    ]
   },
   {
     "id": "book-notes-from-underground",
@@ -8281,7 +11320,7 @@
     "subtype": "Novella",
     "name": "Notes from Underground",
     "teaser": "Dostoevsky's 1864 novella that opened modern literature — a spiteful, brilliant narrator argues from his basement against reason, progress, and the Crystal Palace. The anti-hero's birth certificate.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140447699-L.jpg",
     "byline": "Fyodor Dostoevsky",
     "exploreAction": {
       "verb": "Read",
@@ -8295,7 +11334,22 @@
       "Novella"
     ],
     "tier": 1,
-    "pageCount": 144
+    "pageCount": 144,
+    "synopsis": "Fyodor Dostoevsky's novella is divided into two parts. The first, 'Underground,' is a bitter, contradictory monologue by an unnamed narrator—a retired civil servant living in St. Petersburg—who rails against rationalism, utopian socialism, and the idea that human beings can be reduced to 'piano keys' or 'organ stops.' The narrator insists on the primacy of human irrationality, free will, and the perverse desire to assert one's own will even at the cost of one's own well-being. The second part, 'Apropos of the Wet Snow,' tells a story from the narrator's past that illustrates his theoretical arguments: he attends a dinner where he is humiliated, follows a prostitute named Liza, sleeps with her, and then—when she comes to him seeking help—drives her away with cruelty and self-loathing. Written in 1864, Notes from Underground is widely regarded as the first existentialist novel and a foundational text of modern literature. The narrator's rejection of the idea that reason can solve human problems has influenced every subsequent existentialist thinker, from Nietzsche to Camus to Sartre.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Underground",
+        "pageRange": "1-45",
+        "summary": "The narrator's monologue against rational self-interest and utopian socialism."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Apropos of the Wet Snow",
+        "pageRange": "46-90",
+        "summary": "The narrator's encounter with Liza; the story of his underground life."
+      }
+    ]
   },
   {
     "id": "book-idiot",
@@ -8303,7 +11357,7 @@
     "subtype": "Novel",
     "name": "The Idiot",
     "teaser": "Dostoevsky's 1869 novel of a 'positively beautiful man' — Prince Myshkin returns to Petersburg and his goodness detonates the society around him, especially in his love for the tormented Nastasya Filippovna.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140449136-L.jpg",
     "byline": "Fyodor Dostoevsky",
     "exploreAction": {
       "verb": "Read",
@@ -8317,7 +11371,70 @@
       "Goodness"
     ],
     "tier": 2,
-    "pageCount": 688
+    "pageCount": 688,
+    "synopsis": "Fyodor Dostoevsky's novel follows Prince Myshkin, a young man who returns to St. Petersburg after four years in a Swiss sanitarium being treated for epilepsy. Myshkin is a pure, Christ-like figure whose radical kindness and honesty throw the corruption and pretension of Russian society into sharp relief. He becomes entangled with two women: the beautiful and tormented Nastasya Filippovna, who has been ruined by a wealthy lecher, and the young and passionate Aglaya Epanchin. The novel explores the nature of goodness, the destructive power of money and desire, and the question of whether a genuinely good person can survive in a corrupt world. Myshkin's goodness is both his strength and his weakness—his inability to judge or reject anyone leads to disaster as those around him exploit his compassion. The novel was based on a real criminal case that Dostoevsky reported on as a journalist, and it reflects his deepening Orthodox Christian faith. While the novel was commercially successful, Dostoevsky was disappointed by its reception, believing it was his best work.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Evening Train",
+        "pageRange": "1-25",
+        "summary": "Myshkin meets Rogozhin on the train; they discuss Nastasya."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The General's House",
+        "pageRange": "26-50",
+        "summary": "Myshkin arrives at the Epanchin household."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Nastasya Filippovna",
+        "pageRange": "51-80",
+        "summary": "Myshkin meets Nastasya; her birthday party."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Aglaya",
+        "pageRange": "81-110",
+        "summary": "Myshkin and Aglaya's courtship; the letter incident."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Perfect Moment",
+        "pageRange": "111-140",
+        "summary": "Myshkin and Nastasya; Rogozhin's jealousy."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Lebedev Affair",
+        "pageRange": "141-170",
+        "summary": "The holiday gathering; Myshkin's seizure."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Enchanted Castle",
+        "pageRange": "171-200",
+        "summary": "Myshkin visits the Epanchin sisters; beauty and evil."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "The Decline",
+        "pageRange": "201-230",
+        "summary": "Myshkin's goodness begins to be perceived as madness."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "A Protracted Wedding",
+        "pageRange": "231-260",
+        "summary": "The wedding attempt; Nastasya's flight with Rogozhin."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "The Final Hours",
+        "pageRange": "261-290",
+        "summary": "Nastasya's murder; Myshkin's breakdown."
+      }
+    ]
   },
   {
     "id": "book-faust",
@@ -8325,7 +11442,7 @@
     "subtype": "Drama",
     "name": "Faust",
     "teaser": "Goethe's lifelong masterpiece, published in parts from 1808 to 1832 — a scholar bets his soul against a moment of true contentment, and the devil's wager tests the meaning of striving itself.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140449129-L.jpg",
     "byline": "Johann Wolfgang von Goethe",
     "exploreAction": {
       "verb": "Read",
@@ -8339,7 +11456,100 @@
       "Philosophy"
     ],
     "tier": 1,
-    "pageCount": 464
+    "pageCount": 464,
+    "synopsis": "Johann Wolfgang von Goethe's verse drama, written over sixty years in two parts, tells the story of Heinrich Faust, a scholar who has exhausted all human knowledge and is frustrated by its limitations. The devil, Mephistopheles, appears and offers Faust a bargain: he will serve Faust in this life if Faust serves him in the next. Faust agrees, and Mephistopheles introduces him to a world of experience—love, power, beauty, knowledge—that Faust has never known. The first part focuses on Faust's love for Gretchen, a young woman whose life is destroyed by her affair with Faust (she kills their illegitimate child and is executed). The second part, written much later, expands to a cosmic scale: Faust becomes a political advisor, wins Helen of Troy as a bride, and ultimately, in old age, envisions a community of free people living on reclaimed land. His final words trigger his redemption, because in that moment he transcends his own desire. Goethe called the work his 'main business' and it is widely regarded as the greatest work of German literature.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Heaven",
+        "pageRange": "1-10",
+        "summary": "The prologue in Heaven; God and Mephistopheles make their wager."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Before the Gate",
+        "pageRange": "11-22",
+        "summary": "Faust wanders in nature; Mephistopheles appears."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Study",
+        "pageRange": "23-38",
+        "summary": "The bargain is struck; Faust signs with blood."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Auerbach's Cellar",
+        "pageRange": "39-50",
+        "summary": "The drinking scene; Mephistopheles performs magic."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Gretchen's Room",
+        "pageRange": "51-70",
+        "summary": "Faust meets Gretchen; their courtship begins."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Kitchen",
+        "pageRange": "71-82",
+        "summary": "Mephistopheles helps Faust win Gretchen."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "A Garden",
+        "pageRange": "83-96",
+        "summary": "Gretchen and Faust's love deepens."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "A Night",
+        "pageRange": "97-108",
+        "summary": "Faust's night visit; the death of Gretchen's mother."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "The Cathedral",
+        "pageRange": "109-118",
+        "summary": "Gretchen's spiritual torment; the Evil Spirit."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "Walpurgis Night",
+        "pageRange": "119-134",
+        "summary": "The witches' sabbath on the Brocken."
+      },
+      {
+        "chapterNumber": 11,
+        "title": "A Walpurgis Night Dream",
+        "pageRange": "135-146",
+        "summary": "Faust's vision of Gretchen in the dream."
+      },
+      {
+        "chapterNumber": 12,
+        "title": "The Dungeon",
+        "pageRange": "147-158",
+        "summary": "Gretchen in prison; Faust's rescue attempt; her execution."
+      },
+      {
+        "chapterNumber": 13,
+        "title": "Part Two",
+        "pageRange": "159-200",
+        "summary": "Faust in the imperial court; the classical Walpurgis Night."
+      },
+      {
+        "chapterNumber": 14,
+        "title": "Helen",
+        "pageRange": "201-250",
+        "summary": "Faust's love for Helen of Troy; the child Euphorion."
+      },
+      {
+        "chapterNumber": 15,
+        "title": "The Final Act",
+        "pageRange": "251-310",
+        "summary": "Old Faust's project; his death and redemption."
+      }
+    ]
   },
   {
     "id": "book-stranger",
@@ -8347,7 +11557,7 @@
     "subtype": "Novel",
     "name": "The Stranger",
     "teaser": "Albert Camus's 1942 novel of Meursault, who kills a man on a sunlit beach and is judged less for the crime than for not crying at his mother's funeral. The defining novel of the absurd.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780679720201-L.jpg",
     "byline": "Albert Camus",
     "exploreAction": {
       "verb": "Read",
@@ -8361,7 +11571,58 @@
       "Nobel"
     ],
     "tier": 1,
-    "pageCount": 144
+    "pageCount": 144,
+    "synopsis": "Albert Camus's novel follows Meursault, an Algerian Frenchman who attends his mother's funeral without showing emotion and then begins an affair with a woman named Marie. When his friend Raymond asks him to help settle a score with an Arab woman, Meursault goes along without much thought. On a beach the following day, in a blinding haze of sunlight, Meursault shoots and kills an Arab man. He is arrested, tried, and condemned—not primarily for the murder, but for his failure to cry at his mother's funeral and his general indifference to social conventions. The trial becomes a morality play in which Meursault is judged not for what he did but for who he is. In prison, awaiting execution, Meursault finally comes to terms with the absurdity of his situation and the indifference of the universe, and in his final moments finds a strange peace. Written in 1942, the novel is the foundational text of existentialist fiction and Camus's most famous work. Camus, who won the Nobel Prize in 1957, always insisted that his philosophy was absurdism rather than existentialism—a distinction that Meursault's life and death embody.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Mother",
+        "pageRange": "1-18",
+        "summary": "Meursault attends his mother's funeral; his emotional numbness."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Marie",
+        "pageRange": "19-34",
+        "summary": "Meursault's affair with Marie; his indifference to social norms."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Raymond",
+        "pageRange": "35-48",
+        "summary": "Meursault helps Raymond; the Arab woman subplot."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Beach",
+        "pageRange": "49-56",
+        "summary": "The shooting on the beach; the blinding sun."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Investigation",
+        "pageRange": "57-72",
+        "summary": "Meursault is interrogated; his honesty bewilders the police."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Trial",
+        "pageRange": "73-100",
+        "summary": "The trial focuses on Meursault's character rather than the crime."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Condemned",
+        "pageRange": "101-112",
+        "summary": "Meursault is sentenced to death; the chaplain's visit."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "The Absurd Man",
+        "pageRange": "113-120",
+        "summary": "Meursault's acceptance of the universe's indifference."
+      }
+    ]
   },
   {
     "id": "book-doctor-zhivago",
@@ -8369,7 +11630,7 @@
     "subtype": "Novel",
     "name": "Doctor Zhivago",
     "teaser": "Pasternak's 1957 novel of the doctor-poet Yuri Zhivago across revolution and war — and his love for Lara, a love that survives history and is destroyed by it. The novel that cost its author the Nobel.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780375760808-L.jpg",
     "byline": "Boris Pasternak",
     "exploreAction": {
       "verb": "Read",
@@ -8383,7 +11644,64 @@
       "Revolution"
     ],
     "tier": 1,
-    "pageCount": 624
+    "pageCount": 624,
+    "synopsis": "Boris Pasternak's novel follows Yuri Zhivago, a physician and poet, through the upheavals of the Russian Revolution and the Civil War. Zhivago is torn between his wife Tonya and his passionate love for Lara, a young woman who has been passed between men and shaped by the violence of the era. The novel moves from the comfortable Moscow of Zhivago's childhood through the chaos of revolution, the privations of war, and the beauty of the Russian countryside, where Zhivago and Lara find temporary refuge. Pasternak uses Zhivago's story to explore the tension between individual love and historical necessity, between the beauty of the old world and the brutality of the new. The novel was banned in the Soviet Union and smuggled abroad, where it was published in 1957 and became an international sensation. Pasternak was awarded the Nobel Prize in Literature in 1958 but was forced to decline it under pressure from the Soviet government. The novel was finally published in Russia in 1988, during perestroika.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Five O'Clock Express",
+        "pageRange": "1-30",
+        "summary": "Zhivago's childhood; the death of his mother."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "A Young Provincial",
+        "pageRange": "31-60",
+        "summary": "Zhivago's medical education and early marriage to Tonya."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The War",
+        "pageRange": "61-100",
+        "summary": "Zhivago serves as a doctor on the Eastern Front."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Revolution",
+        "pageRange": "101-140",
+        "summary": "The chaos of 1917; Zhivago's reaction to the new order."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Lara",
+        "pageRange": "141-180",
+        "summary": "Zhivago meets Lara; their love affair begins."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Varykino",
+        "pageRange": "181-220",
+        "summary": "Zhivago and Lara's winter in the countryside."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Return",
+        "pageRange": "221-260",
+        "summary": "Zhivago returns to Moscow; the consequences of his choices."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "The End",
+        "pageRange": "261-300",
+        "summary": "Zhivago's final years; his death; Lara's fate."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "The Poems",
+        "pageRange": "301-350",
+        "summary": "Zhivago's poems; the epilogue revealing Lara's story."
+      }
+    ]
   },
   {
     "id": "book-and-quiet-flows-the-don",
@@ -8391,7 +11709,7 @@
     "subtype": "Novel",
     "name": "And Quiet Flows the Don",
     "teaser": "Sholokhov's 1928 epic of the Cossack Grigory Melekhov through the First World War, the revolution, and the civil war — a river of a novel about a people and a man torn between loyalties.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140183986-L.jpg",
     "byline": "Mikhail Sholokhov",
     "exploreAction": {
       "verb": "Read",
@@ -8405,7 +11723,46 @@
       "Cossacks"
     ],
     "tier": 2,
-    "pageCount": 1344
+    "pageCount": 1344,
+    "synopsis": "Mikhail Sholokhov's epic novel follows the Melekhov family, Cossack farmers in the Don River region, through the upheavals of World War I and the Russian Revolution. The central figure is Grigory Melekhov, a passionate, independent man who is torn between the Red Army and the White Army, between his Cossack traditions and the promise of a new society. Sholokhov draws on his own experience growing up in the Don region to create a portrait of a community caught between worlds—the old patriarchal order and the new Soviet state, loyalty to the land and the demands of political allegiance. The novel spans six volumes (published between 1928 and 1940) and follows Grigory through love, war, exile, and return. Sholokhov, who began the novel at age twenty-one, won the Nobel Prize in Literature in 1965. The novel is both a realist masterpiece and a political work that was published with Stalin's approval, though its treatment of the Cossacks' suffering has been debated.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Melekhov Household",
+        "pageRange": "1-40",
+        "summary": "The Melekhov family and their life in the Don region."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Grigory",
+        "pageRange": "41-80",
+        "summary": "Grigory's passion and his forbidden love for Aksinya."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The War",
+        "pageRange": "81-130",
+        "summary": "World War I and its impact on the Don Cossacks."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Revolution",
+        "pageRange": "131-180",
+        "summary": "The revolution divides the Cossack community."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Civil War",
+        "pageRange": "181-240",
+        "summary": "Grigory fights on both sides; the destruction of the old world."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Plow",
+        "pageRange": "241-300",
+        "summary": "Grigory returns to the land; the final reckoning."
+      }
+    ]
   },
   {
     "id": "book-one-day-in-the-life",
@@ -8413,7 +11770,7 @@
     "subtype": "Novella",
     "name": "One Day in the Life of Ivan Denisovich",
     "teaser": "Solzhenitsyn's 1962 novella of a single day in a Soviet labor camp — breakfast, work, soup, and survival, from dawn to lights-out. The book that made the gulag visible to the world.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780451528605-L.jpg",
     "byline": "Aleksandr Solzhenitsyn",
     "exploreAction": {
       "verb": "Read",
@@ -8427,7 +11784,52 @@
       "Gulag"
     ],
     "tier": 1,
-    "pageCount": 176
+    "pageCount": 176,
+    "synopsis": "Aleksandr Solzhenitsyn's novella follows Ivan Denisovich Shukhov, a prisoner in a Soviet labor camp, through a single day in January 1953. The narrative moves minute by minute as Shukhov wakes, works, eats, and sleeps, each moment rendered with meticulous attention to the details of camp life—the cold, the food, the tools, the guards, the other prisoners. Shukhov is not a political prisoner or a revolutionary; he was sentenced to ten years for accidentally crossing the border while scouting a position during the war. His survival depends on his ability to find meaning in small things: a warm corner, an extra piece of bread, a well-made tool. The novella is a work of day-in-the-life realism that documents the dehumanization of the Soviet prison system while also affirming the resilience of the human spirit. Solzhenitsyn himself spent eight years in labor camps, and the novella was published in 1962 with Khrushchev's approval as part of the Thaw. It made Solzhenitsyn famous overnight and opened the door to his larger works, The Gulag Archipelago and Cancer Ward.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Morning",
+        "pageRange": "1-12",
+        "summary": "Shukhov wakes in the barracks; the morning routine."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Roll Call",
+        "pageRange": "13-22",
+        "summary": "Morning roll call in the freezing cold."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Work Detail",
+        "pageRange": "23-36",
+        "summary": "The march to the construction site."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Bricklaying",
+        "pageRange": "37-52",
+        "summary": "Shukhov's skill at bricklaying; the day's work."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Dinner",
+        "pageRange": "53-62",
+        "summary": "The meager meal; the politics of food in the camp."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Return",
+        "pageRange": "63-74",
+        "summary": "The march back to camp; evening roll call."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Evening",
+        "pageRange": "75-85",
+        "summary": "Shukhov's evening in the barracks; the day ends."
+      }
+    ]
   },
   {
     "id": "book-cancer-ward",
