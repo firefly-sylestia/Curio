@@ -17511,7 +17511,7 @@
     "subtype": "Novel",
     "name": "Timescape",
     "teaser": "Gregory Benford's 1980 novel of scientists in 1998 sending a message backward through time to 1963 — tachyons, ecology, and the attempt to warn the past. The hard-science novel that won both major awards.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780451457998-L.jpg",
     "byline": "Gregory Benford",
     "exploreAction": {
       "verb": "Read",
@@ -17525,7 +17525,52 @@
       "Nebula"
     ],
     "tier": 2,
-    "pageCount": 448
+    "pageCount": 448,
+    "synopsis": "Gregory Benford's 1980 hard science fiction novel weaves two timelines: in 1998, a team of British and American scientists at the Haughton Crater research station discover that tachyon signals can be sent backward through time, reaching 1963. There, a young physicist named Gordon Bernstein begins receiving faint, cryptic messages that he initially attributes to radio interference. As the 1998 team faces escalating personal crises — a dying colleague, a dissolving marriage, and the political fallout of a world sliding toward ecological collapse — the messages grow more desperate, begging the past to act before it is too late. Benford, himself a physicist, grounds every scene in the procedural reality of实验室 life: the politics of funding, the tedium of instrument calibration, the way breakthroughs emerge from long stretches of nothing. The novel won both the Nebula and Campbell Awards, and remains one of the few time-travel stories that takes the physics seriously. What makes it linger is the emotional weight of messages that arrive too late to matter, and the quiet horror of a future that knows exactly what went wrong.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I — 1998: The Signal",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The Haughton Crater team detects anomalous tachyon signals from the past. Gordon Bernstein in 1963 begins receiving faint interference."
+      },
+      {
+        "number": 2,
+        "title": "Part II — 1963: The Interference",
+        "pageStart": 81,
+        "pageEnd": 160,
+        "summary": "Bernstein struggles to isolate the signal. The 1998 team debates whether to send a warning message back in time."
+      },
+      {
+        "number": 3,
+        "title": "Part III — The Message",
+        "pageStart": 161,
+        "pageEnd": 240,
+        "summary": "Messages are exchanged between timelines. The 1998 world reveals its ecological collapse while Bernstein tries to understand what the signals mean."
+      },
+      {
+        "number": 4,
+        "title": "Part IV — 1962: The Response",
+        "pageStart": 241,
+        "pageEnd": 310,
+        "summary": "Bernstein finally decodes the message. The 1998 team faces personal and political crises as their experiment attracts government attention."
+      },
+      {
+        "number": 5,
+        "title": "Part V — The Cascade",
+        "pageStart": 311,
+        "pageEnd": 380,
+        "summary": "The timelines converge. The 1998 team's warnings arrive, but the consequences of interference become clear."
+      },
+      {
+        "number": 6,
+        "title": "Part VI — 1998: Reckoning",
+        "pageStart": 381,
+        "pageEnd": 448,
+        "summary": "The aftermath of temporal contact. The scientists face the knowledge that their messages may have changed nothing — or everything."
+      }
+    ]
   },
   {
     "id": "book-dune-messiah-herbert",
@@ -17533,7 +17578,7 @@
     "subtype": "Novel",
     "name": "Dune Messiah",
     "teaser": "Herbert's 1969 sequel that refuses to let Paul Atreides enjoy his victory — twelve years into his messianic reign, he sees the trap of prophecy closing around him. The anti-chosen-one novel.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780441172719-L.jpg",
     "byline": "Frank Herbert",
     "exploreAction": {
       "verb": "Read",
@@ -17547,7 +17592,52 @@
       "Messiah"
     ],
     "tier": 2,
-    "pageCount": 256
+    "pageCount": 340,
+    "synopsis": "Frank Herbert's 1969 sequel to Dune finds Paul Atreides, now Emperor of the Known Universe, trapped by the very prescience that elevated him. Twelve years after taking the throne, Paul navigates a web of conspiracies: the Bene Gesserit scheme to control his bloodline, the Tleilaxu offer a Duncan Idaho ghola as bait, and a faction within his own government plots his downfall. Paul sees the Golden Path — humanity's only escape from extinction — but its cost is almost too terrible to bear. The novel is shorter and more claustrophobic than its predecessor, trading Dune's sweeping desert epic for palace intrigue and philosophical dread. Herbert deepens his themes of charismatic leadership as a trap: Paul's prescience doesn't grant him freedom but eliminates it, reducing the most powerful man in the universe to a prisoner of knowledge. The final chapters, where Paul makes a devastating choice, remain among the most chilling in science fiction. Dune Messiah is often underrated because it deliberately denies readers the triumphant sequel they expected, but it is the thematic heart of the entire series.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Conspiracy",
+        "pageStart": 1,
+        "pageEnd": 50,
+        "summary": "Paul Atreides presides over the Imperium. Conspirators from the Bene Gesserit, Tleilaxu, and Spacing Guild plot against him."
+      },
+      {
+        "number": 2,
+        "title": "The Ghola",
+        "pageStart": 51,
+        "pageEnd": 110,
+        "summary": "The Tleilaxu present Duncan Idaho as a ghola. Paul suspects the trap but cannot see past his own prescience."
+      },
+      {
+        "number": 3,
+        "title": "Alia",
+        "pageStart": 111,
+        "pageEnd": 160,
+        "summary": "Paul's sister Alia navigates the political landscape. Chani's infertility becomes a weapon against Paul's dynasty."
+      },
+      {
+        "number": 4,
+        "title": "The Plot",
+        "pageStart": 161,
+        "pageEnd": 220,
+        "summary": "The conspiracy tightens. Scytale, the Face Dancer, reveals the depth of the Tleilaxu plan. Paul sees what is coming but cannot stop it."
+      },
+      {
+        "number": 5,
+        "title": "The Pan and Erebus",
+        "pageStart": 221,
+        "pageEnd": 250,
+        "summary": "The plot culminates in a devastating climax. Paul makes his terrible choice — blind himself rather than be manipulated."
+      },
+      {
+        "number": 6,
+        "title": "The Blind Emperor",
+        "pageStart": 251,
+        "pageEnd": 340,
+        "summary": "Paul walks into the desert, blind but prescient, leaving the empire to Alia's regency. The Golden Path remains unfulfilled."
+      }
+    ]
   },
   {
     "id": "book-hyperion-simmons",
@@ -17555,7 +17645,7 @@
     "subtype": "Novel",
     "name": "Hyperion",
     "teaser": "Simmons's 1989 space epic shaped like The Canterbury Tales — seven pilgrims travel to the Time Tombs, each telling why they must meet the Shrike. A cathedral of science fiction, and the most awarded novel of its decade.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780553283686-L.jpg",
     "byline": "Dan Simmons",
     "exploreAction": {
       "verb": "Read",
@@ -17569,7 +17659,59 @@
       "Hugo"
     ],
     "tier": 2,
-    "pageCount": 512
+    "pageCount": 482,
+    "synopsis": "Dan Simmons's 1989 Hugo Award-winning novel is structured as a Canterbury Tales for the space age: seven pilgrims journey to the Time Tombs on the world of Hyperion, each carrying a story that reveals who they are and why they have come. The Shrike, a terrifying creature of razor blades and time, guards the Tombs, and each pilgrim has a different reason for seeking it — love, revenge, absolution, or purpose. Simmons gives each character a full novella: the priest's tale of a lost colony on a world where communications are impossible, the soldier's love story across centuries, the poet's Faustian bargain with an AI. The novel ends without resolution — all seven stories converge at the Tombs, but the door to the Shrike's domain is left open. Hyperion revitalized space opera by proving that literary structure and genre ambition could coexist. The sheer range of its storytelling — horror, romance, philosophy, war — within a single frame narrative makes it one of the most inventive science fiction novels ever written.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Prologue: Farewell",
+        "pageStart": 1,
+        "pageEnd": 20,
+        "summary": "The seven pilgrims depart for Hyperion on the treeship Yggdrasill. The WorldWeb collapses."
+      },
+      {
+        "number": 2,
+        "title": "The Priest's Tale: 'The Man Who Cried God'",
+        "pageStart": 21,
+        "pageEnd": 120,
+        "summary": "Father Lenar Hoyt tells of Father Paul Duré and the Bikura on Hyperion, a tribe that found cruciform parasites and lost the concept of death."
+      },
+      {
+        "number": 3,
+        "title": "The Soldier's Tale: 'The War Lovers'",
+        "pageStart": 121,
+        "pageEnd": 200,
+        "summary": "Colonel Fedmahn Kassad describes his love affair with the beautiful, deadly Moneta, who appears only in battle."
+      },
+      {
+        "number": 4,
+        "title": "The Poet's Tale: 'Hyperion Cantos'",
+        "pageStart": 201,
+        "pageEnd": 280,
+        "summary": "Martin Silenus, the aging poet, recounts his centuries-long life and his dark pact with the AI TechnoCore."
+      },
+      {
+        "number": 5,
+        "title": "The Scholar's Tale: 'The River Lethe's Taste'",
+        "pageStart": 281,
+        "pageEnd": 360,
+        "summary": "Sol Weintraub tells the heartbreaking story of his daughter Rachel, who aged backward after visiting the Time Tombs."
+      },
+      {
+        "number": 6,
+        "title": "The Detective's Tale: 'The Long Good-Bye'",
+        "pageStart": 361,
+        "pageEnd": 420,
+        "summary": "Brawne Lamia investigates the death of her lover, an AI persona, uncovering a TechnoCore conspiracy."
+      },
+      {
+        "number": 7,
+        "title": "The Consul's Tale: 'Remembering Siri'",
+        "pageStart": 421,
+        "pageEnd": 482,
+        "summary": "The unnamed Consul reveals his family's history and his role in triggering the Time Tombs' opening as an act of revenge."
+      }
+    ]
   },
   {
     "id": "book-dirk-gently",
@@ -17577,7 +17719,7 @@
     "subtype": "Novel",
     "name": "Dirk Gently's Holistic Detective Agency",
     "teaser": "Adams's 1987 novel of the holistic detective who solves crimes by solving the whole universe — time travel, Coleridge, and a sofa on a staircase. The most Dickensian time-travel comedy ever written.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345453747-L.jpg",
     "byline": "Douglas Adams",
     "exploreAction": {
       "verb": "Read",
@@ -17591,7 +17733,52 @@
       "Time Travel"
     ],
     "tier": 2,
-    "pageCount": 288
+    "pageCount": 274,
+    "synopsis": "Douglas Adams's 1987 novel follows the self-described holistic detective Dirk Gently, who believes in the fundamental interconnectedness of all things. His investigation begins with a missing cat and ends up entangled with time travel, an ancient Sumerian god, a professor who may have been dead for three years, and a sofa stuck on a staircase at St. Cedd's College, Cambridge. Adams repurposes characters from his unpublished Doctor Who screenplay — Professor Reg Chronotis, the time-traveling Regius Professor of Chronology, and the electric monk, a device designed to believe things so humans don't have to. The novel's genius is in how seemingly absurd details — a horse materializing in a bathroom, a nuclear power plant run by monks — connect through increasingly improbable but logically rigorous chains. Adams treats the detective genre the way he treated science fiction: as a framework for exploring the absurdity of existence. The book is funnier than The Hitchhiker's Guide but darker, and its central question — whether coincidence is really just connection we haven't noticed yet — is played completely straight beneath the comedy.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Hadalyan Prospect",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "Dirk Gently takes on a case involving a missing cat. Professor Reg Chronotis consults on ancient Sumerian mythology."
+      },
+      {
+        "number": 2,
+        "title": "The Electric Monk",
+        "pageStart": 41,
+        "pageEnd": 80,
+        "summary": "The backstory of the electric monk, a device that believes things on your behalf. Richard MacDuff works on music software."
+      },
+      {
+        "number": 3,
+        "title": "St. Cedd's College",
+        "pageStart": 81,
+        "pageEnd": 130,
+        "summary": "The sofa gets stuck on the staircase. Gordon Way is murdered, then discovers he's dead. Professor Chronotis's secret is revealed."
+      },
+      {
+        "number": 4,
+        "title": "The Time Travel Diaries",
+        "pageStart": 131,
+        "pageEnd": 180,
+        "summary": "Dirk pieces together the connections. Reg Chronotis's time machine, hidden in his study, is the key to everything."
+      },
+      {
+        "number": 5,
+        "title": "The Sumerian God",
+        "pageStart": 181,
+        "pageEnd": 230,
+        "summary": "The ancient Sumerian god Tikhaid arrives. The interconnectedness of the missing cat, the murder, the sofa, and time travel becomes clear."
+      },
+      {
+        "number": 6,
+        "title": "The Holistic Solution",
+        "pageStart": 231,
+        "pageEnd": 274,
+        "summary": "Everything connects. Dirk solves the case by understanding that the universe is, fundamentally, a very odd place."
+      }
+    ]
   },
   {
     "id": "book-long-dark-tea-time",
@@ -17599,7 +17786,7 @@
     "subtype": "Novel",
     "name": "The Long Dark Tea-Time of the Soul",
     "teaser": "Adams's 1988 sequel — Dirk Gently investigates a severed head, a Norse god, and a contract that forbids the end of the world. The funniest novel ever written about Norse mythology and airport check-in.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345464996-L.jpg",
     "byline": "Douglas Adams",
     "exploreAction": {
       "verb": "Read",
@@ -17613,7 +17800,52 @@
       "Norse"
     ],
     "tier": 2,
-    "pageCount": 256
+    "pageCount": 296,
+    "synopsis": "Douglas Adams's 1988 sequel to Dirk Gently's Holistic Detective Agency opens with a Viking god dying in an airport. Dirk Gently, who has been avoiding the case from the first book, finds himself drawn into a mystery involving a Norse god, a young woman named Kate Schechter who can hear the voices of gods, and a mysterious entity that has been draining divine power from the pantheons. Adams sends his characters through a series of increasingly absurd situations: a broken-down airline called Dogbolter's, a Viking longship in a lay-by, and a god who is running out of belief. The novel is darker than its predecessor, dealing with themes of faith, power, and what happens when gods become obsolete. Kate Schechter, who can hear gods the way most people hear phone calls, is one of Adams's best characters — practical, unflappable, and completely unfazed by the supernatural. The title comes from a remark about the universe's own existential crisis, and the novel ends with a question about what happens when the gods stop answering.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Death of a God",
+        "pageStart": 1,
+        "pageEnd": 45,
+        "summary": "A Viking god dies in an airport. Kate Schechter witnesses the event. Dirk Gently is reluctantly drawn into the mystery."
+      },
+      {
+        "number": 2,
+        "title": "Kate's Story",
+        "pageStart": 46,
+        "pageEnd": 95,
+        "summary": "Kate can hear the voices of gods. She navigates a world where the supernatural is annoyingly mundane. The Norse god Thor appears."
+      },
+      {
+        "number": 3,
+        "title": "The Dogbolter Airline",
+        "pageStart": 96,
+        "pageEnd": 145,
+        "summary": "Dirk investigates a failing airline that may be connected to the divine. The Viking longship in a lay-by becomes relevant."
+      },
+      {
+        "number": 4,
+        "title": "The Power Drain",
+        "pageStart": 146,
+        "pageEnd": 195,
+        "summary": "Something is draining the gods of their power. Kate and Dirk converge on the mystery. The nature of belief becomes central."
+      },
+      {
+        "number": 5,
+        "title": "The Entity",
+        "pageStart": 196,
+        "pageEnd": 240,
+        "summary": "The mysterious entity behind the power drain is revealed. Kate must confront something far older than the Norse gods."
+      },
+      {
+        "number": 6,
+        "title": "The Long Dark Tea-Time",
+        "pageStart": 241,
+        "pageEnd": 296,
+        "summary": "The resolution. The interconnectedness of belief, power, and existence is laid bare. Adams's most philosophical ending."
+      }
+    ]
   },
   {
     "id": "book-good-omens-pratchett-gaiman",
@@ -17621,7 +17853,7 @@
     "subtype": "Novel",
     "name": "Good Omens",
     "teaser": "Pratchett and Gaiman's 1990 apocalypse comedy — an angel and a demon, both comfortable on Earth, try to stop Armageddon while the Antichrist grows up in an English village. The most fun the end of the world has ever been.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780060853983-L.jpg",
     "byline": "Terry Pratchett and Neil Gaiman",
     "exploreAction": {
       "verb": "Read",
@@ -17635,7 +17867,52 @@
       "Apocalypse"
     ],
     "tier": 1,
-    "pageCount": 416
+    "pageCount": 288,
+    "synopsis": "Terry Pratchett and Neil Gaiman's 1990 comic novel about the apocalypse that almost was not. The angel Aziraphale and the demon Crowley have lived on Earth for six thousand years and grown rather fond of it — Aziraphale of rare books and fine food, Crowley of fast cars and Muzak. When the Antichrist is born and misplaced by a Satanic nun at a hospital where a baby-swap conspiracy means the chosen one ends up with normal parents in a village called Tadfield, Crowley and Aziraphale team up to find the boy and prevent Armageddon. The novel is written in a style that is pure Pratchett — digressive, footnote-heavy, and deployed with the precision of a Swiss watch — while Gaiman's darker mythological sensibility grounds the comedy. The Four Horsemen of the Apocalypse ride Harleys. The M25 motorway is a sigil of dark power. Newton Pulsifer is a walking technological disaster. Adam Young, the Antichrist, is an eleven-year-old who just wants to play with his friends. The book's argument — that human nature is fundamentally worth preserving, not because we are good but because we are interesting — resonates more with every passing year.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Beginning",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "The birth of the Antichrist and the baby swap. Aziraphale and Crowley realize something has gone wrong with the plan."
+      },
+      {
+        "number": 2,
+        "title": "Eleven Years Later",
+        "pageStart": 31,
+        "pageEnd": 80,
+        "summary": "Adam Young grows up in Tadfield with his dog and his friends. Crowley and Aziraphale search for the Antichrist."
+      },
+      {
+        "number": 3,
+        "title": "The Searching",
+        "pageStart": 81,
+        "pageEnd": 130,
+        "summary": "The angel and demon track down various wrong babies. The Them discover Adam's growing powers. Newton Pulsifer goes to work."
+      },
+      {
+        "number": 4,
+        "title": "The Sword",
+        "pageStart": 131,
+        "pageEnd": 180,
+        "summary": "Witchfinder Sergeant Shadwell and his assistant Newton. Anathema Device arrives in Tadfield. The Apocalypse draws near."
+      },
+      {
+        "number": 5,
+        "title": "The Approaching End",
+        "pageStart": 181,
+        "pageEnd": 230,
+        "summary": "Adam begins to understand what he is. The Horsemen ride. Crowley and Aziraphale race to Tadfield."
+      },
+      {
+        "number": 6,
+        "title": "Armageddon Only Slightly Postponed",
+        "pageStart": 231,
+        "pageEnd": 288,
+        "summary": "The final confrontation at Tadfield. Adam chooses humanity. Crowley and Aziraphale face their own reckoning. The world is saved."
+      }
+    ]
   },
   {
     "id": "book-neverwhere",
@@ -17643,7 +17920,7 @@
     "subtype": "Novel",
     "name": "Neverwhere",
     "teaser": "Gaiman's 1996 novel of Richard Mayhew, who helps a wounded girl and finds himself invisible to London above — and walking the sewers and rooftops of London Below. A dark fairy tale of the city beneath the city.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780380789016-L.jpg",
     "byline": "Neil Gaiman",
     "exploreAction": {
       "verb": "Read",
@@ -17657,7 +17934,59 @@
       "Urban"
     ],
     "tier": 1,
-    "pageCount": 400
+    "pageCount": 315,
+    "synopsis": "Neil Gaiman's 1996 novel follows Richard Mayhew, a London businessman who stops to help a bleeding girl on the street and loses everything — his job, his fiancee, his flat, his entire existence. The girl, Door, is a member of London Below, a shadow city inhabited by the Lost and the Marquis de Carabas, the Angel Islington, and the terrifying faceless assassins known as Croup and Vanderquench. Richard discovers that his act of kindness has made him invisible to the surface world, and he must help Door find her family's murderer before the bounty hunters catch them. London Below is Gaiman's dark fairy-tale London: a world where the homeless are knights, the Underground is a network of ancient tunnels, and the Market runs on anything you can carry. The novel grew from a BBC television series, and Gaiman expanded the TV version's compressed plot into a full mythology. What makes Neverwhere work is that Richard's journey is not heroic — he is ordinary, frightened, and desperately homesick — and yet he keeps going because there is nothing else to do. The book is Gaiman's love letter to London and to the idea that every city contains more than one city.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "London Below",
+        "pageStart": 1,
+        "pageEnd": 35,
+        "summary": "Richard Mayhew helps a bleeding girl on the street and loses his place in the world. He enters London Below."
+      },
+      {
+        "number": 2,
+        "title": "The Marquis de Carabas",
+        "pageStart": 36,
+        "pageEnd": 80,
+        "summary": "Richard meets the Marquis de Carabas, a scheming aristocrat of London Below. Door's family has been murdered."
+      },
+      {
+        "number": 3,
+        "title": "The Angel Islington",
+        "pageStart": 81,
+        "pageEnd": 130,
+        "summary": "The group seeks the Angel Islington for help. The history of London Below is revealed. Croup and Vanderquench pursue them."
+      },
+      {
+        "number": 4,
+        "title": "The Market",
+        "pageStart": 131,
+        "pageEnd": 180,
+        "summary": "The floating market at Speaker's Cavern. Old Bailey, Hunter, and the rules of trade in London Below."
+      },
+      {
+        "number": 5,
+        "title": "The Black Friars",
+        "pageStart": 181,
+        "pageEnd": 230,
+        "summary": "The group navigates the tunnels and learns the truth about the Angel Islington's treachery."
+      },
+      {
+        "number": 6,
+        "title": "Door's Choice",
+        "pageStart": 231,
+        "pageEnd": 270,
+        "summary": "The final confrontation. Richard must choose between London Above and London Below. The truth about Islington is revealed."
+      },
+      {
+        "number": 7,
+        "title": "Going Home",
+        "pageStart": 271,
+        "pageEnd": 315,
+        "summary": "Richard returns to the surface world. He tries to rebuild his life, but something is missing. Not all stories have happy endings."
+      }
+    ]
   },
   {
     "id": "book-metamorphoses-ovid",
@@ -17665,7 +17994,7 @@
     "subtype": "Epic",
     "name": "Metamorphoses",
     "teaser": "Ovid's poem of transformation — Daphne's laurel, Narcissus's pool, and two hundred myths stitched into one river of change. The encyclopedia of classical mythology, told with wit and sorrow.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140447897-L.jpg",
     "byline": "Ovid",
     "exploreAction": {
       "verb": "Read",
@@ -17679,7 +18008,66 @@
       "Poetry"
     ],
     "tier": 1,
-    "pageCount": 768
+    "pageCount": 600,
+    "synopsis": "Ovid's Metamorphoses, composed around 8 CE, is a fifteen-book poem that retells the history of the world from creation to the deification of Julius Caesar through a single lens: transformation. Every story involves something changing shape — a nymph becoming a tree, a king becoming a bull, a woman becoming a spider. Ovid draws on Greek and Roman mythology to create a tapestry that ranges from the chaos of the primordial universe to the political present of Augustus Rome. The poem is not chronological but associative: one transformation leads to another through a chain of associations that Ovid handles with breathtaking virtuosity. Daphne becomes a laurel to escape Apollo; Narcissus falls in love with his own reflection and becomes a flower; Orpheus sings so beautifully that trees uproot themselves to follow him, then loses Eurydice and is torn apart by Maenads. The Metamorphoses became the single most influential source for Western art — every painter from Titian to Dali drew on it — and its central insight, that identity is fluid and the self is always becoming something else, remains as radical now as it was two thousand years ago.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Book I — Creation and the Four Ages",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "The creation of the world, the four ages of man (Gold, Silver, Bronze, Iron), and the flood of Deucalion."
+      },
+      {
+        "number": 2,
+        "title": "Books II–III — The Gods and Mortals",
+        "pageStart": 41,
+        "pageEnd": 110,
+        "summary": "Apollo and Daphne, Jupiter's transformations (Io, Callisto, Europa), Actaeon, Semele, and Pentheus."
+      },
+      {
+        "number": 3,
+        "title": "Books IV–V — Venus and Orpheus",
+        "pageStart": 111,
+        "pageEnd": 190,
+        "summary": "The tale of Pygmalion, Perseus and Andromeda, the Minyades, and Orpheus's descent to the underworld."
+      },
+      {
+        "number": 4,
+        "title": "Books VI–VII — Contest and Transformation",
+        "pageStart": 191,
+        "pageEnd": 270,
+        "summary": "Arachne's contest with Minerva, Philomela and Procne, Midas's golden touch, and Medea's sorcery."
+      },
+      {
+        "number": 5,
+        "title": "Books VIII–IX — Heroes and Monsters",
+        "pageStart": 271,
+        "pageEnd": 350,
+        "summary": "Daedalus and Icarus, Meleager, Achelous and Hercules, and the loves of the gods."
+      },
+      {
+        "number": 6,
+        "title": "Books X–XI — Love and Death",
+        "pageStart": 351,
+        "pageEnd": 430,
+        "summary": "Orpheus's songs, the story of Adonis, Hyacinthus, and the fall of Troy with the tale of Hecuba."
+      },
+      {
+        "number": 7,
+        "title": "Books XII–XIII — The Trojan War",
+        "pageStart": 431,
+        "pageEnd": 510,
+        "summary": "The centauromachy, the death of Achilles, the arms of Achilles, Philoctetes, and the wooden horse."
+      },
+      {
+        "number": 8,
+        "title": "Books XIV–XV — Aeneas and Caesar",
+        "pageStart": 511,
+        "pageEnd": 600,
+        "summary": "Aeneas's wanderings, the descent of Aeneas to the underworld, and the apotheosis of Julius Caesar."
+      }
+    ]
   },
   {
     "id": "book-inferno-dante",
@@ -17687,7 +18075,7 @@
     "subtype": "Poetry",
     "name": "Inferno",
     "teaser": "The first canticle of Dante's Divine Comedy — the descent through the nine circles of Hell, from the uncommitted to the traitors in ice. The most vivid moral landscape ever imagined.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780142437223-L.jpg",
     "byline": "Dante Alighieri",
     "exploreAction": {
       "verb": "Read",
@@ -17701,7 +18089,59 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 432
+    "pageCount": 450,
+    "synopsis": "Dante Alighieri's Inferno, written between 1308 and 1321, is the first part of the Divine Comedy and one of the greatest works of world literature. The poem follows a first-person narrator — Dante himself — who finds himself lost in a dark wood at the age of thirty-five, midway through his life's journey. The Roman poet Virgil appears as a guide, sent by Beatrice, and leads Dante through the nine circles of Hell, each corresponding to a category of sin: lust, gluttony, greed, wrath, heresy, violence, fraud, and treachery. Each circle is populated by historical and mythological figures whom Dante knew or admired or despised, and the precision of the punishments — the lustful are blown by winds, the wrathful are submerged in a river of blood, the treacherous are frozen in ice — reflects a medieval theology that takes sin seriously. What makes the Inferno eternal is not its theology but its humanity: Dante weeps, faints, argues, and feels pity for souls he has been told not to pity. The poem is also a political document, a personal confession, and a literary manifesto — Dante wrote it in Tuscan Italian rather than Latin, effectively inventing the Italian language as a literary medium.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Cantos I–III — The Dark Wood and the Gate of Hell",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "Dante is lost in the dark wood. Virgil appears as guide. They pass through the Gate of Hell and enter Limbo."
+      },
+      {
+        "number": 2,
+        "title": "Cantos IV–V — Limbo and the Lustful",
+        "pageStart": 41,
+        "pageEnd": 80,
+        "summary": "Limbo holds the virtuous pagans. The second circle punishes the lustful: Francesca da Rimini tells her story."
+      },
+      {
+        "number": 3,
+        "title": "Cantos VI–VIII — Gluttony, Greed, and Wrath",
+        "pageStart": 81,
+        "pageEnd": 140,
+        "summary": "Ciacco prophesies Florence's future. The wrathful fight in the river Styx. The City of Dis marks the lower Hell."
+      },
+      {
+        "number": 4,
+        "title": "Cantos IX–XII — Heresy and Violence",
+        "pageStart": 141,
+        "pageEnd": 200,
+        "summary": "The Furies and Medusa guard the gate. Farinata degli Uberti speaks of Florence. The sixth circle burns the heretics."
+      },
+      {
+        "number": 5,
+        "title": "Cantos XIII–XVII — Violence and Fraud",
+        "pageStart": 201,
+        "pageEnd": 280,
+        "summary": "The Wood of Suicides, the sandstorm of the blasphemers, and the descent to the eighth circle — Malebolge."
+      },
+      {
+        "number": 6,
+        "title": "Cantos XVIII–XXX — The Ten Ditches",
+        "pageStart": 281,
+        "pageEnd": 380,
+        "summary": "Flatterers, Simoniacs, Sorcerers, Hypocrites, Thieves, Fraudulent Counselors, Sowers of Discord, and the Falsifiers."
+      },
+      {
+        "number": 7,
+        "title": "Cantos XXXI–XXXIV — The Ninth Circle: Treachery",
+        "pageStart": 381,
+        "pageEnd": 450,
+        "summary": "The Giants guard the pit. Cocytus, the frozen lake of treachery, holds the worst sinners. Satan is at the center of the earth."
+      }
+    ]
   },
   {
     "id": "book-paradise-lost-milton",
@@ -17709,7 +18149,7 @@
     "subtype": "Epic",
     "name": "Paradise Lost",
     "teaser": "Milton's 1667 epic of the fall of man — Satan's rebellion, the war in Heaven, and the expulsion from Eden, written as the poet went blind. The poem that made the devil literature's most magnetic character.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140424355-L.jpg",
     "byline": "John Milton",
     "exploreAction": {
       "verb": "Read",
@@ -17723,7 +18163,66 @@
       "Religion"
     ],
     "tier": 1,
-    "pageCount": 464
+    "pageCount": 453,
+    "synopsis": "John Milton's Paradise Lost, published in 1667, is an epic poem in twelve books that retells the biblical story of the Fall of Man in blank verse. Milton, blind and politically disgraced after the Restoration, dictated the entire poem to amanuenses — and the result is one of the most ambitious works in the English language. Satan, expelled from Heaven after his failed rebellion against God, arrives in the newly created world and encounters Adam and Eve in the Garden of Eden. Through deception and temptation, he engineers their disobedience, and the poem ends with Adam and Eve leaving Paradise, guided by the Archangel Michael, who shows them the future of humanity. Milton's Satan is the poem's most famous creation — charismatic, defiant, self-aware — and the question of whether he is the hero or the villain has animated literary criticism for three centuries. The poem's language is monumental, but Milton is also capable of tenderness — the love scene between Adam and Eve is one of the most beautiful passages in English poetry. The poem's politics are radical: it questions divine authority, celebrates individual conscience, and treats the story of the Fall as a tragedy rather than a morality play.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Book I — The Fall of Satan",
+        "pageStart": 1,
+        "pageEnd": 50,
+        "summary": "Satan awakens in Hell after his defeat. He rallies the fallen angels and plans revenge against God."
+      },
+      {
+        "number": 2,
+        "title": "Book II — The Council in Pandemonium",
+        "pageStart": 51,
+        "pageEnd": 90,
+        "summary": "The fallen angels debate their options in Pandemonium. Satan volunteers to corrupt God's new creation."
+      },
+      {
+        "number": 3,
+        "title": "Books III–IV — Heaven and Eden",
+        "pageStart": 91,
+        "pageEnd": 150,
+        "summary": "God foresees the Fall and declares that humanity will be redeemed. Satan enters Paradise and observes Adam and Eve."
+      },
+      {
+        "number": 4,
+        "title": "Books V–VI — The War in Heaven",
+        "pageStart": 151,
+        "pageEnd": 210,
+        "summary": "Raphael visits Adam to warn him. The story of the war in Heaven, where Satan rebelled and was cast down."
+      },
+      {
+        "number": 5,
+        "title": "Books VII–VIII — Creation",
+        "pageStart": 211,
+        "pageEnd": 260,
+        "summary": "Raphael tells the story of Creation. Adam and Eve discuss free will, obedience, and the nature of knowledge."
+      },
+      {
+        "number": 6,
+        "title": "Books IX–X — The Fall",
+        "pageStart": 261,
+        "pageEnd": 340,
+        "summary": "Satan enters the serpent and tempts Eve. Eve eats the forbidden fruit. Adam eats to share her fate. The world changes."
+      },
+      {
+        "number": 7,
+        "title": "Books XI–XII — The Expulsion",
+        "pageStart": 341,
+        "pageEnd": 420,
+        "summary": "Michael is sent to expel Adam and Eve from Eden. He shows them the future of humanity — from Cain and Abel to the Redemption."
+      },
+      {
+        "number": 8,
+        "title": "Epilogue — The Way Is Prepared",
+        "pageStart": 421,
+        "pageEnd": 453,
+        "summary": "Adam and Eve leave Paradise together. The world outside is unknown but theirs."
+      }
+    ]
   },
   {
     "id": "book-midsummer-nights-dream",
@@ -17731,7 +18230,7 @@
     "subtype": "Drama",
     "name": "A Midsummer Night's Dream",
     "teaser": "Shakespeare's comedy of four lovers, a fairy king and queen, and a weaver transformed — the play where the forest's magic untangles the heart's confusions. The most joyful night in the theatre.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780743477543-L.jpg",
     "byline": "William Shakespeare",
     "exploreAction": {
       "verb": "Read",
@@ -17745,7 +18244,45 @@
       "Comedy"
     ],
     "tier": 1,
-    "pageCount": 176
+    "pageCount": 100,
+    "synopsis": "William Shakespeare's A Midsummer Night's Dream, written around 1595–96, is a comedy about love, illusion, and the porous boundary between waking life and dreaming. Four young Athenians — Hermia, Lysander, Helena, and Demetrius — flee into the forest outside Athens on the eve of Hermia's forced marriage to Demetrius. There they stumble into a dispute between Oberon and Titania, king and queen of the fairies, whose quarrel over a changeling boy has disrupted the natural world. Puck, Oberon's mischievous servant, squeezes a magical flower juice onto the lovers' eyelids while they sleep, causing them to fall in love with whoever they first see upon waking. Meanwhile, a troupe of Athenian tradesmen rehearse a play-within-the-play, Pyramus and Thisbe, in the same forest, providing a comic counterpoint to the fairy mischief. The play ends with all four lovers properly matched and the tradesmen performing their hilariously bad play for the ducal court. Shakespeare's genius is in the tonal balance: the play is simultaneously light and dark, funny and unsettling, a celebration of imagination and a reminder that love is arbitrary. The forest is both playground and dreamscape, and the play's central question — is love real, or just magic? — is never fully answered.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Act I — Athens and the Lovers' Quarrel",
+        "pageStart": 1,
+        "pageEnd": 20,
+        "summary": "Egeus demands Hermia marry Demetrius. She and Lysander flee. Helena tells Demetrius of their escape."
+      },
+      {
+        "number": 2,
+        "title": "Act II — The Forest of the Fairies",
+        "pageStart": 21,
+        "pageEnd": 42,
+        "summary": "Oberon and Titania quarrel. Puck is sent to fetch the love-in-idleness flower. The lovers enter the forest."
+      },
+      {
+        "number": 3,
+        "title": "Act III — The Mischief Deepens",
+        "pageStart": 43,
+        "pageEnd": 66,
+        "summary": "Puck enchants the wrong lovers. Bottom is given a donkey's head. Titania falls in love with him. The tradesmen rehearse."
+      },
+      {
+        "number": 4,
+        "title": "Act IV — The Awakening",
+        "pageStart": 67,
+        "pageEnd": 84,
+        "summary": "Oberon reverses the enchantments. The lovers wake and are reconciled. Theseus overrules Egeus."
+      },
+      {
+        "number": 5,
+        "title": "Act V — The Wedding and the Play",
+        "pageStart": 85,
+        "pageEnd": 100,
+        "summary": "The three couples marry. The tradesmen perform Pyramus and Thisbe. Puck closes the play with his famous epilogue."
+      }
+    ]
   },
   {
     "id": "book-tempest-shakespeare",
@@ -17753,7 +18290,7 @@
     "subtype": "Drama",
     "name": "The Tempest",
     "teaser": "Shakespeare's late romance of the exiled magician Prospero and the island he rules — the storm he raises, the spirits he commands, and the forgiveness he finally chooses. The play about art, power, and letting go.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780743477550-L.jpg",
     "byline": "William Shakespeare",
     "exploreAction": {
       "verb": "Read",
@@ -17767,7 +18304,45 @@
       "Romance"
     ],
     "tier": 1,
-    "pageCount": 176
+    "pageCount": 75,
+    "synopsis": "William Shakespeare's The Tempest, written around 1610–11, is widely considered Shakespeare's farewell to the stage. Prospero, the rightful Duke of Milan, has lived twelve years in exile on a remote island with his daughter Miranda after his brother Antonio usurped his position with the help of the King of Naples. When a ship carrying Antonio, King Alonso, and other courtiers passes nearby, Prospero conjures a tempest that wrecks it, bringing his enemies to the island where he can orchestrate their reckoning. The play operates on multiple levels: as a revenge drama, a romance, a meditation on colonialism, and a reflection on art's power to control and release. Prospero's magic — which Shakespeare never fully explains — is both wondrous and disturbing, especially in his treatment of Caliban, the island's original inhabitant, and Ariel, the spirit he freed from a tree. The play's final speech, where Prospero breaks his staff and drowns his book, has been read as Shakespeare's own retirement from theatre. The Tempest is Shakespeare at his most ambiguous: Prospero can be read as a wise ruler, a tyrant, a colonialist, or an artist, and the play supports all four readings simultaneously.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Act I — The Tempest",
+        "pageStart": 1,
+        "pageEnd": 15,
+        "summary": "Prospero conjures the storm. The ship is wrecked. Ferdinand is separated from the others. Miranda sees the survivors."
+      },
+      {
+        "number": 2,
+        "title": "Act II — The Island's Inhabitants",
+        "pageStart": 16,
+        "pageEnd": 32,
+        "summary": "Alonso grieves his son. Gonzalo tries to cheer him. Ariel torments the courtiers. Caliban meets Stephano and Trinculo."
+      },
+      {
+        "number": 3,
+        "title": "Act III — The Enchanted Feast",
+        "pageStart": 33,
+        "pageEnd": 48,
+        "summary": "Ferdinand and Miranda fall in love. Prospero tests Ferdinand. Ariel performs the harpy masque. The courtiers are scattered."
+      },
+      {
+        "number": 4,
+        "title": "Act IV — The Masque and Caliban's Plot",
+        "pageStart": 49,
+        "pageEnd": 60,
+        "summary": "Prospero approves the match. The masque of Ceres, Juno, and Iris. Caliban, Stephano, and Trinculo plot to kill Prospero."
+      },
+      {
+        "number": 5,
+        "title": "Act V — Reconciliation and Release",
+        "pageStart": 61,
+        "pageEnd": 75,
+        "summary": "Prospero confronts his enemies and chooses forgiveness. Ariel is freed. Caliban is pardoned. Prospero breaks his staff."
+      }
+    ]
   },
   {
     "id": "book-othello-shakespeare",
@@ -17775,7 +18350,7 @@
     "subtype": "Drama",
     "name": "Othello",
     "teaser": "Shakespeare's tragedy of the Moor and his ensign Iago — the handkerchief, the poison of suspicion, and the murder of innocence. The play about race, trust, and the evil of small insinuations.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780743477567-L.jpg",
     "byline": "William Shakespeare",
     "exploreAction": {
       "verb": "Read",
@@ -17789,7 +18364,45 @@
       "Tragedy"
     ],
     "tier": 1,
-    "pageCount": 224
+    "pageCount": 80,
+    "synopsis": "William Shakespeare's Othello, written around 1603, is a tragedy about jealousy, manipulation, and the destruction of trust. Othello, a Moorish general in the Venetian army, has secretly married Desdemona, a young Venetian senator's daughter. His ensign Iago, passed over for promotion, orchestrates a campaign to convince Othello that Desdemona is having an affair with the lieutenant Cassio. Using a stolen handkerchief — a gift from Othello to Desdemona — as false proof, Iago exploits Othello's insecurity about his race, age, and outsider status to drive him to murderous rage. Othello is Shakespeare's most intimate tragedy: the villain operates not through external forces but through the hero's own mind, turning love into suspicion and trust into paranoia. Desdemona's innocence makes the catastrophe unbearable, and Emilia's late revelation of Iago's treachery comes one scene too late. The play's power lies in its claustrophobia — the entire drama takes place in a few rooms, and the audience watches a good man destroy everything he loves because he cannot believe he deserves it. Othello is also Shakespeare's most disturbing exploration of how jealousy feeds on the very love it seeks to protect.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Act I — Venice and the Marriage",
+        "pageStart": 1,
+        "pageEnd": 15,
+        "summary": "Iago and Roderigo alert Brabantio about Desdemona's marriage to Othello. The Duke upholds the marriage and sends Othello to Cyprus."
+      },
+      {
+        "number": 2,
+        "title": "Act II — Cyprus and the Storm",
+        "pageStart": 16,
+        "pageEnd": 30,
+        "summary": "A storm scatters the fleet. Cassio arrives first. Iago plots to get Cassio drunk and disgraced. Othello and Desdemona reunite."
+      },
+      {
+        "number": 3,
+        "title": "Act III — The Temptation Scene",
+        "pageStart": 31,
+        "pageEnd": 50,
+        "summary": "Iago engineers Cassio's disgrace. The pivotal temptation scene where Iago plants doubt in Othello's mind. The handkerchief becomes evidence."
+      },
+      {
+        "number": 4,
+        "title": "Act IV — The Unraveling",
+        "pageStart": 51,
+        "pageEnd": 65,
+        "summary": "Othello's jealousy consumes him. He confronts Desdemona. Iago manipulates everyone. Othello resolves to kill Desdemona."
+      },
+      {
+        "number": 5,
+        "title": "Act V — The Catastrophe",
+        "pageStart": 66,
+        "pageEnd": 80,
+        "summary": "Othello murders Desdemona in her bed. Emilia reveals Iago's treachery. Othello kills himself. The truth is finally known."
+      }
+    ]
   },
   {
     "id": "book-sense-and-sensibility",
@@ -17797,7 +18410,7 @@
     "subtype": "Novel",
     "name": "Sense and Sensibility",
     "teaser": "Austen's 1811 first novel of the Dashwood sisters — Elinor's restraint and Marianne's passion, tested by poverty, love, and the weather of feeling. The novel that balances two ways of being alive.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439518-L.jpg",
     "byline": "Jane Austen",
     "exploreAction": {
       "verb": "Read",
@@ -17811,7 +18424,45 @@
       "Romance"
     ],
     "tier": 1,
-    "pageCount": 352
+    "pageCount": 280,
+    "synopsis": "Jane Austen's Sense and Sensibility, published in 1811, is the story of the Dashwood sisters — Elinor, who represents sense (reason, restraint, propriety), and Marianne, who represents sensibility (passion, impulsiveness, Romantic feeling). When their father dies and their half-brother inherits the family estate, the sisters and their mother are left with almost nothing. Elinor falls in love with Edward Ferrars, a man bound by a secret engagement, while Marianne falls for the charming but unreliable Willoughby. Austen's genius is in showing how both approaches to life — Elinor's reserve and Marianne's abandon — are inadequate on their own. Elinor's restraint costs her happiness; Marianne's impulsiveness nearly costs her life. The novel was Austen's first published work (she had been working on it since 1795) and it established the template that all her novels would follow: a close third-person narration that follows the heroine through a social world where every conversation, every letter, every walk in the country carries weight. The ending, where sense and sensibility learn from each other, is Austen at her most optimistic.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Chapters 1–5 — The Disinheritance",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "Mr. Dashwood dies. John and Fanny Dashwood reduce the women's inheritance. The sisters move to Barton Cottage."
+      },
+      {
+        "number": 2,
+        "title": "Chapters 6–15 — Barton and the New Neighbours",
+        "pageStart": 31,
+        "pageEnd": 80,
+        "summary": "The Dashwoods settle in Devonshire. They meet the Palmers, the Steeles, and the Middleton family. Marianne falls ill."
+      },
+      {
+        "number": 3,
+        "title": "Chapters 16–26 — Willoughby and Edward",
+        "pageStart": 81,
+        "pageEnd": 140,
+        "summary": "Marianne's romance with Willoughby flourishes. Elinor discovers Edward's secret engagement. Colonel Brandon loves Marianne."
+      },
+      {
+        "number": 4,
+        "title": "Chapters 27–35 — London and Disillusionment",
+        "pageStart": 141,
+        "pageEnd": 200,
+        "summary": "The sisters go to London. Willoughby jilts Marianne for a rich heiress. Elinor learns Edward is engaged to Lucy Steele."
+      },
+      {
+        "number": 5,
+        "title": "Chapters 36–50 — Resolution",
+        "pageStart": 201,
+        "pageEnd": 280,
+        "summary": "Edward is freed from his engagement. Willoughby visits Marianne. Both sisters find their partners. Sense and sensibility reconcile."
+      }
+    ]
   },
   {
     "id": "book-northanger-abbey",
@@ -17819,7 +18470,7 @@
     "subtype": "Novel",
     "name": "Northanger Abbey",
     "teaser": "Austen's 1817 novel of Catherine Morland, whose head is full of Gothic novels and who expects the abbey to be haunted — a satire of reading itself, and the funniest of Austen's books.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439570-L.jpg",
     "byline": "Jane Austen",
     "exploreAction": {
       "verb": "Read",
@@ -17833,7 +18484,45 @@
       "Satire"
     ],
     "tier": 2,
-    "pageCount": 288
+    "pageCount": 170,
+    "synopsis": "Jane Austen's Northanger Abbey, published posthumously in 1817, is a comic novel about Catherine Morland, a naive seventeen-year-old who has read too many Gothic novels and mistakes a普通 country house for a scene of dark mystery. Catherine is invited to stay at Northanger Abbey, the home of the Tilney family, and immediately begins suspecting that General Tilney murdered his wife and imprisoned her in one of the abbey's mysterious rooms. The suspicion is, of course, entirely wrong — Mrs. Tilney died of a fever, and the General is merely rude. Austen uses Catherine's Gothic fantasies to satirize the novels that inspired them, but the satire is affectionate rather than cruel. Catherine learns that real life is both less dramatic and more complicated than fiction, and that the true villain is not a murderous patriarch but a charming liar named John Thorpe. The novel's second half pivots to a sharper register: General Tilney turns out to be a different kind of monster, one motivated by money rather than murder. Northanger Abbey is Austen's most playful novel, and its central joke — that reading too many novels gives you a distorted view of reality — is one she clearly did not believe, having written six of them.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Chapters 1–10 — Bath",
+        "pageStart": 1,
+        "pageEnd": 50,
+        "summary": "Catherine Morland goes to Bath. She meets the Tilneys and the Thorpes. Her Gothic imagination runs wild."
+      },
+      {
+        "number": 2,
+        "title": "Chapters 11–18 — The Dance and the Walks",
+        "pageStart": 51,
+        "pageEnd": 90,
+        "summary": "Catherine and Henry Tilney grow closer. John Thorpe embarrasses her. Isabella Thorpe betrays her. The trip to the Abbey is arranged."
+      },
+      {
+        "number": 3,
+        "title": "Chapters 19–25 — Northanger Abbey",
+        "pageStart": 91,
+        "pageEnd": 130,
+        "summary": "Catherine arrives at the Abbey and invents Gothic mysteries. Henry gently teases her. She explores the forbidden rooms."
+      },
+      {
+        "number": 4,
+        "title": "Chapters 26–29 — The Expulsion",
+        "pageStart": 131,
+        "pageEnd": 155,
+        "summary": "General Tilney discovers Catherine has no fortune and expels her rudely. Catherine walks home in tears. Henry follows."
+      },
+      {
+        "number": 5,
+        "title": "Chapters 30–31 — The Resolution",
+        "pageStart": 156,
+        "pageEnd": 170,
+        "summary": "Henry proposes. The General relents. Catherine and Henry marry. The Gothic fantasies are replaced by real happiness."
+      }
+    ]
   },
   {
     "id": "book-mansfield-park",
@@ -17841,7 +18530,7 @@
     "subtype": "Novel",
     "name": "Mansfield Park",
     "teaser": "Austen's 1814 novel of Fanny Price, the poor cousin raised among the Bertrams — quiet, principled, and finally right. Austen's most serious novel, and the one she called the most difficult to write.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439556-L.jpg",
     "byline": "Jane Austen",
     "exploreAction": {
       "verb": "Read",
@@ -17855,7 +18544,45 @@
       "Morality"
     ],
     "tier": 2,
-    "pageCount": 464
+    "pageCount": 320,
+    "synopsis": "Jane Austen's Mansfield Park, published in 1814, is her most controversial and morally complex novel. Fanny Price, a poor relation taken in by her wealthy aunt Sir Thomas Bertram at Mansfield Park, grows up quiet, observant, and physically frail but morally unyielding. When the charming Crawford siblings — Henry and Mary — arrive from London, they disrupt the household: Henry flirts with both Fanny and the engaged Maria Bertram, while Mary courts Fanny's beloved cousin Edmund. The novel's scandalous center is the staging of a theatrical, in which the young people rehearse a play that inflames their passions and leads to adultery, elopement, and disgrace. Austen's treatment of Fanny is deliberately uncomfortable: she is neither witty nor charming, and her moral rigidity can read as priggish. But the novel rewards patience. Fanny's stillness allows Austen to examine a world where everyone else is performing — socially, sexually, morally — and the performance destroys them. Mansfield Park is Austen's darkest novel, and its vision of colonial wealth, sexual politics, and moral courage remains startlingly modern.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Chapters 1–8 — Fanny's Childhood",
+        "pageStart": 1,
+        "pageEnd": 50,
+        "summary": "Fanny Price arrives at Mansfield Park. She is treated as a poor relation. Only Edmund shows her kindness."
+      },
+      {
+        "number": 2,
+        "title": "Chapters 9–18 — The Crawfords Arrive",
+        "pageStart": 51,
+        "pageEnd": 110,
+        "summary": "Henry and Mary Crawford visit. Henry flirts with Maria. Mary courts Edmund. Fanny watches with growing unease."
+      },
+      {
+        "number": 3,
+        "title": "Chapters 19–30 — The Theatrical",
+        "pageStart": 111,
+        "pageEnd": 180,
+        "summary": "The young people rehearse Lovers' Vows. Fanny refuses to participate. Sir Thomas returns and puts a stop to the play."
+      },
+      {
+        "number": 4,
+        "title": "Chapters 31–42 — The Rupture",
+        "pageStart": 181,
+        "pageEnd": 260,
+        "summary": "Henry proposes to Fanny. She refuses. Maria elopes with Henry. The family is shattered. Fanny returns to Mansfield."
+      },
+      {
+        "number": 5,
+        "title": "Chapters 43–48 — Resolution",
+        "pageStart": 261,
+        "pageEnd": 320,
+        "summary": "Maria is disgraced. Mary reveals her selfishness. Edmund proposes to Fanny. The Bertrams begin to heal."
+      }
+    ]
   },
   {
     "id": "book-lady-susan",
@@ -17863,7 +18590,7 @@
     "subtype": "Novella",
     "name": "Lady Susan",
     "teaser": "Austen's early epistolary novella of the brilliant, amoral widow Lady Susan Vernon, who schemes through letters with total self-possession — Austen's wickedest heroine, and the book she never published.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439587-L.jpg",
     "byline": "Jane Austen",
     "exploreAction": {
       "verb": "Read",
@@ -17877,7 +18604,38 @@
       "Comedy"
     ],
     "tier": 2,
-    "pageCount": 128
+    "pageCount": 50,
+    "synopsis": "Jane Austen's Lady Susan, written around 1794 and published posthumously in 1871, is an epistolary novella about one of Austen's most delightful villains: Lady Susan Vernon, a beautiful, manipulative widow who uses her charm and intelligence to seduce her married brother-in-law Reginald De Courcy while simultaneously arranging a disastrous marriage for her daughter Frederica. The entire story is told through letters — Lady Susan's own, written with practiced grace and casual dishonesty, and the bewildered responses of those she is manipulating. Lady Susan is Austen's most magnetic creation: she is witty, unapologetic, and entirely self-serving, and the reader cannot help admiring her even as she ruins everyone around her. The novella is short — barely fifty pages — but it contains more sharp observation per sentence than most novels ten times its length. Austen later recycled the basic plot in Sense and Sensibility, where Willoughby replaces Lady Susan as the charming seducer, but the epistolary form gives Lady Susan a intimacy that the later novel lacks: we see the manipulation from inside the manipulator's mind.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Letters I–V — Arrival at Churchhill",
+        "pageStart": 1,
+        "pageEnd": 10,
+        "summary": "Lady Susan arrives at her brother-in-law's estate. She begins charming Reginald De Courcy. Her daughter Frederica resists her plans."
+      },
+      {
+        "number": 2,
+        "title": "Letters VI–XII — The Seduction",
+        "pageStart": 11,
+        "pageEnd": 25,
+        "summary": "Lady Susan pursues Reginald while arranging Frederica's marriage to the dull Sir James Martin. Mrs. Vernon suspects the truth."
+      },
+      {
+        "number": 3,
+        "title": "Letters XIII–XVIII — The Unraveling",
+        "pageStart": 26,
+        "pageEnd": 38,
+        "summary": "Frederica runs away. Reginald discovers Lady Susan's deception. Sir James proposes to Frederica instead."
+      },
+      {
+        "number": 4,
+        "title": "Letters XIX–XXIV — The Resolution",
+        "pageStart": 39,
+        "pageEnd": 50,
+        "summary": "Lady Susan marries Sir James's father. Frederica marries Reginald. Everyone ends up exactly where they do not want to be."
+      }
+    ]
   },
   {
     "id": "book-juvenilia-novel",
@@ -17885,7 +18643,7 @@
     "subtype": "Novel",
     "name": "The History of Tom Jones, a Foundling",
     "teaser": "Fielding's 1749 comic epic of the foundling Tom Jones, expelled from Paradise Hall and sent on the road to London — a laughing, sprawling novel about appetite, honor, and the education of a good heart.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140436228-L.jpg",
     "byline": "Henry Fielding",
     "exploreAction": {
       "verb": "Read",
@@ -17899,7 +18657,38 @@
       "Classic"
     ],
     "tier": 2,
-    "pageCount": 880
+    "pageCount": 650,
+    "synopsis": "Henry Fielding's Tom Jones, published in 1749, is one of the great comic novels of the eighteenth century and a foundational work of the English novel. Tom is a foundling raised by the benevolent Squire Allworthy alongside his legitimate nephew Blifil, who is everything Tom is not: scheming, hypocritical, and patient. Tom is generous, impulsive, and sexually prolific — he sleeps with Molly Seagrim, Jenny Waters, and Mrs. Waters, among others, while remaining genuinely in love with the beautiful Sophia Western. When Tom is expelled from Paradise Hall on Blifil's false accusations, the novel becomes a picaresque journey through Georgian England, with Tom encountering highwaymen, madmen, aristocrats, prostitutes, and soldiers. Fielding interrupts the action regularly with chapters addressed directly to the reader, discussing the theory of the novel, the nature of character, and the distinction between the grotesque and the beautiful. The plot resolves through a series of revelations about Tom's parentage, the villainy of Blifil, and the forgiveness of Allworthy. Tom Jones is sprawling, bawdy, structurally innovative, and endlessly entertaining — it is the novel that proved the English novel could be both art and fun.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Books I–IV — The Foundling",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "Tom's discovery as a baby. His childhood at Paradise Hall with Sophia, Molly, and Blifil. His expulsion."
+      },
+      {
+        "number": 2,
+        "title": "Books V–VIII — The Road",
+        "pageStart": 121,
+        "pageEnd": 280,
+        "summary": "Tom's adventures on the road. Highwaymen, imprisonment, and his first encounter with Jenny Waters. Sophia's flight."
+      },
+      {
+        "number": 3,
+        "title": "Books IX–XII — London and the World",
+        "pageStart": 281,
+        "pageEnd": 440,
+        "summary": "Tom arrives in London. His affair with Lady Bellaston. Sophia's arrival. The web of intrigue tightens."
+      },
+      {
+        "number": 4,
+        "title": "Books XIII–XVIII — Revelations",
+        "pageStart": 441,
+        "pageEnd": 650,
+        "summary": "Tom's true parentage is revealed. Blifil's villainy exposed. Allworthy forgives Tom. Sophia relents. The comic catastrophe resolves."
+      }
+    ]
   },
   {
     "id": "book-hero-with-a-thousand-faces",
@@ -17907,7 +18696,7 @@
     "subtype": "Nonfiction",
     "name": "The Hero with a Thousand Faces",
     "teaser": "Joseph Campbell's 1949 study of the monomyth — the hero's journey that recurs across every culture's myths and stories. The book that gave Hollywood its story engine and readers a map of meaning.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781577315933-L.jpg",
     "byline": "Joseph Campbell",
     "exploreAction": {
       "verb": "Read",
@@ -17921,7 +18710,38 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 448
+    "pageCount": 416,
+    "synopsis": "Joseph Campbell's The Hero with a Thousand Faces, first published in 1949, is the work that introduced the concept of the monomyth — the idea that all the world's mythological narratives share a single fundamental structure. Campbell draws on Jungian psychology, comparative mythology, and decades of reading to identify a universal pattern: the hero receives a call to adventure, crosses a threshold into an unknown world, faces trials and ordeals, encounters a supreme ordeal, and returns transformed. This pattern appears in the myths of Osiris, Prometheus, the Buddha, Jesus, Krishna, and countless others, as well as in modern stories from Star Wars to The Lion King. Campbell's prose is dense, allusive, and sometimes obscure, but his central insight — that myths are not primitive science but sophisticated psychology, and that they speak to the deepest patterns of human experience — transformed the study of mythology and storytelling. The book's influence extends far beyond academia: George Lucas credited it as the structural template for Star Wars, and it remains essential reading for anyone interested in narrative, psychology, or the shared inheritance of human culture. Its limitations — Campbell's Eurocentrism, his tendency to flatten cultural differences, and his occasional oversimplification of non-Western traditions — have been well-documented, but the book's fundamental question — why do the same stories keep appearing across unconnected cultures? — remains as compelling as ever.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Chapter I — Myth and Dream",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "Campbell introduces the monomyth concept. The relationship between mythology and psychology. The hero's journey as a universal pattern."
+      },
+      {
+        "number": 2,
+        "title": "Chapter II — The Monomyth",
+        "pageStart": 31,
+        "pageEnd": 200,
+        "summary": "The hero's journey in detail: the Call to Adventure, the Threshold, Trials, the Abyss, the Return. Examples from world mythology."
+      },
+      {
+        "number": 3,
+        "title": "Chapter III — The Cosmogonic Cycle",
+        "pageStart": 201,
+        "pageEnd": 300,
+        "summary": "Creation myths and the hero's relationship to the universe. The separation, integration, and return of the hero."
+      },
+      {
+        "number": 4,
+        "title": "Chapter IV — The Producing of Idols",
+        "pageStart": 301,
+        "pageEnd": 380,
+        "summary": "How myths generate symbols and rituals. The relationship between the mythic image and psychological truth."
+      }
+    ]
   },
   {
     "id": "book-the-power-of-myth",
@@ -17929,7 +18749,7 @@
     "subtype": "Nonfiction",
     "name": "The Power of Myth",
     "teaser": "Campbell's 1988 conversations with Bill Moyers, companion to the landmark series — myth, religion, and the stories we live by, from the Star Wars galaxy to the American frontier. The most accessible door into his thought.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780812980295-L.jpg",
     "byline": "Joseph Campbell and Bill Moyers",
     "exploreAction": {
       "verb": "Read",
@@ -17943,7 +18763,52 @@
       "Conversation"
     ],
     "tier": 1,
-    "pageCount": 304
+    "pageCount": 280,
+    "synopsis": "The Power of Myth, published in 1988, is a conversation between Joseph Campbell and journalist Bill Moyers, recorded at Skywalker Ranch and edited from a series of television interviews. Campbell, by then eighty-four, was in the final years of his life, and the book has the quality of a summation: the ideas are distilled to their essence, and the language is simpler and more direct than in Campbell's academic work. The six chapters cover the role of myths in modern life, the journey of the hero, the first stories (creation myths), the trials of the hero, the hero's return, and the relationship between myths and society. Campbell argues that mythology is not a relic of a superstitious past but a living language that describes the deepest patterns of human experience. The conversations range from the rituals of Native American tribes to the symbolism of Star Wars, from the meaning of death to the nature of love. Campbell's final insight — that the function of mythology is to connect the individual to the eternal, and that modern society has lost this connection — is delivered with a warmth and urgency that his earlier academic work sometimes lacked. The Power of Myth was the best-selling book in PBS history and introduced Campbell's ideas to millions of readers who would never have encountered The Hero with a Thousand Faces.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Power of Myth",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "Campbell discusses why myths matter in modern life. The relationship between myth, ritual, and daily experience."
+      },
+      {
+        "number": 2,
+        "title": "The Journey of the Hero",
+        "pageStart": 31,
+        "pageEnd": 80,
+        "summary": "The hero's journey explained through examples from Star Wars, Buddhism, and world mythology."
+      },
+      {
+        "number": 3,
+        "title": "The First Storytellers",
+        "pageStart": 81,
+        "pageEnd": 130,
+        "summary": "Creation myths from around the world. The relationship between myth and nature. The power of storytelling."
+      },
+      {
+        "number": 4,
+        "title": "The Trial of the Hero",
+        "pageStart": 131,
+        "pageEnd": 180,
+        "summary": "The hero's ordeals: death and rebirth, the belly of the whale, the atonement with the father."
+      },
+      {
+        "number": 5,
+        "title": "The Hero's Return",
+        "pageStart": 181,
+        "pageEnd": 230,
+        "summary": "What happens when the hero comes back. The challenge of bringing mythic wisdom into ordinary life."
+      },
+      {
+        "number": 6,
+        "title": "Life, Death, and the Eternal",
+        "pageStart": 231,
+        "pageEnd": 280,
+        "summary": "The relationship between myth and mortality. Campbell's final thoughts on the meaning of life."
+      }
+    ]
   },
   {
     "id": "book-golden-bough",
@@ -17951,7 +18816,7 @@
     "subtype": "Nonfiction",
     "name": "The Golden Bough",
     "teaser": "James Frazer's 1890 encyclopedia of myth, magic, and religion — the ritual of the sacred grove expanded into a world survey of human belief. The book that made comparative religion a science and a story.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780486424583-L.jpg",
     "byline": "James George Frazer",
     "exploreAction": {
       "verb": "Read",
@@ -17965,7 +18830,52 @@
       "Classic"
     ],
     "tier": 2,
-    "pageCount": 880
+    "pageCount": 450,
+    "synopsis": "Sir James George Frazer's The Golden Bough, first published in 1890, is one of the foundational texts of modern anthropology and comparative religion. The book began as an essay on the death of the vegetation deity — the king who must be ritually killed when his powers of growth begin to wane — and expanded over twelve editions into a thirteen-volume encyclopedic study of magic, religion, and myth across cultures. Frazer's central argument is that humanity progressed through three stages of thought: magical (the belief that one can influence nature through sympathetic and contagious magic), religious (the belief in supernatural beings who control nature), and scientific (the discovery of natural laws). The Golden Bough is most famous for its treatment of the dying god — Adonis, Attis, Osiris, and the Fisher King — and for Frazer's demonstration that these seemingly disparate myths share a common structure rooted in agricultural ritual. The book's influence is immeasurable: T.S. Eliot's The Waste Land was conceived under its shadow, and its analysis of the taboo against touching the sacred king informs everything from Freud's Totem and Taboo to modern fantasy literature.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Killing of the God",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "The figure of the dying god and the priest of Nemi."
+      },
+      {
+        "number": 2,
+        "title": "Magic and Religion",
+        "pageStart": 41,
+        "pageEnd": 100,
+        "summary": "Sympathetic and contagious magic. The relationship between magic, religion, and science."
+      },
+      {
+        "number": 3,
+        "title": "The Dying God",
+        "pageStart": 101,
+        "pageEnd": 180,
+        "summary": "Adonis, Attis, Osiris, and the vegetation spirits."
+      },
+      {
+        "number": 4,
+        "title": "Magic and the King",
+        "pageStart": 181,
+        "pageEnd": 250,
+        "summary": "The taboo against touching the sacred king. The transfer of the soul."
+      },
+      {
+        "number": 5,
+        "title": "The Return of the Soul",
+        "pageStart": 251,
+        "pageEnd": 320,
+        "summary": "Beliefs about transmigration of souls. The external soul."
+      },
+      {
+        "number": 6,
+        "title": "Fragments of Folk-Lore",
+        "pageStart": 321,
+        "pageEnd": 400,
+        "summary": "Survivals of ritual practice in European folk custom."
+      }
+    ]
   },
   {
     "id": "book-annotated-sherlock",
@@ -17973,7 +18883,7 @@
     "subtype": "Short Stories",
     "name": "The Memoirs of Sherlock Holmes",
     "teaser": "Conan Doyle's 1894 second collection — The Final Problem, where Holmes and Moriarty fall together at Reichenbach Falls, plus eleven earlier cases. The volume that killed the detective and nearly killed the readership.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140439074-L.jpg",
     "byline": "Arthur Conan Doyle",
     "exploreAction": {
       "verb": "Read",
@@ -17987,7 +18897,87 @@
       "Classic"
     ],
     "tier": 2,
-    "pageCount": 336
+    "pageCount": 260,
+    "synopsis": "Arthur Conan Doyle's The Memoirs of Sherlock Holmes, published in 1894, is a collection of eleven stories that represent the detective at the height of his powers. The volume includes some of the best Holmes stories ever written: Silver Blaze, in which a racehorse disappears; The Greek Interpreter, which reveals Sherlock's brother Mycroft; The Musgrave Ritual; and The Final Problem, in which Holmes confronts Professor Moriarty at the Reichenbach Falls. Doyle was growing tired of Holmes and wanted to kill him off to write more serious fiction, and The Final Problem was his attempt to end the series definitively. The story's success was the opposite: readers wore black armbands, and the backlash was so intense that Doyle eventually resurrected Holmes. The Memoirs showcases the friendship between Holmes and Watson at its most developed, and represents the golden age of Sherlock Holmes.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Silver Blaze",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "A racehorse vanishes and its trainer is found dead."
+      },
+      {
+        "number": 2,
+        "title": "The Cardboard Box",
+        "pageStart": 31,
+        "pageEnd": 55,
+        "summary": "A box containing two ears arrives at a spinster's house."
+      },
+      {
+        "number": 3,
+        "title": "The Yellow Face",
+        "pageStart": 56,
+        "pageEnd": 75,
+        "summary": "A man suspects his wife of hiding something. Holmes is wrong."
+      },
+      {
+        "number": 4,
+        "title": "The Stockbroker's Clerk",
+        "pageStart": 76,
+        "pageEnd": 95,
+        "summary": "A clerk takes a new job and finds himself in danger."
+      },
+      {
+        "number": 5,
+        "title": "The Gloria Scott",
+        "pageStart": 96,
+        "pageEnd": 115,
+        "summary": "Holmes recounts his first case."
+      },
+      {
+        "number": 6,
+        "title": "The Musgrave Ritual",
+        "pageStart": 116,
+        "pageEnd": 140,
+        "summary": "An ancient ritual, a missing butler, and a hidden treasure."
+      },
+      {
+        "number": 7,
+        "title": "The Reigate Squires",
+        "pageStart": 141,
+        "pageEnd": 160,
+        "summary": "Holmes recovers from illness and stumbles into a murder case."
+      },
+      {
+        "number": 8,
+        "title": "The Crooked Man",
+        "pageStart": 161,
+        "pageEnd": 180,
+        "summary": "A colonel is found dead. The Indian Mutiny connection."
+      },
+      {
+        "number": 9,
+        "title": "The Greek Interpreter",
+        "pageStart": 181,
+        "pageEnd": 200,
+        "summary": "Mycroft Holmes appears. A kidnapping leads to a family tragedy."
+      },
+      {
+        "number": 10,
+        "title": "The Naval Treaty",
+        "pageStart": 201,
+        "pageEnd": 230,
+        "summary": "A naval treaty is stolen from the Foreign Office."
+      },
+      {
+        "number": 11,
+        "title": "The Final Problem",
+        "pageStart": 231,
+        "pageEnd": 260,
+        "summary": "Holmes meets Professor Moriarty at the Reichenbach Falls."
+      }
+    ]
   },
   {
     "id": "book-tales-of-othello",
@@ -17995,7 +18985,7 @@
     "subtype": "Collection",
     "name": "Tales from Shakespeare",
     "teaser": "Charles and Mary Lamb's 1807 retellings of the plays in prose — the book that introduced Shakespeare to generations of children and adults who found the plays daunting. The gateway to the canon.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140436440-L.jpg",
     "byline": "Charles and Mary Lamb",
     "exploreAction": {
       "verb": "Read",
@@ -18009,7 +18999,52 @@
       "Classic"
     ],
     "tier": 2,
-    "pageCount": 256
+    "pageCount": 400,
+    "synopsis": "Charles and Mary Lamb's Tales from Shakespeare, first published in 1807, is the most famous children's adaptation of Shakespeare ever written. Charles Lamb wrote the comedies; his sister Mary wrote the tragedies. The result retells twenty of Shakespeare's plays in prose that preserves the essential plot and emotional weight while making them accessible to readers who might never encounter the originals. The Lambs did not simplify Shakespeare so much as translate him: the language is elegant, the characterizations are faithful, and the tragedies lose none of their darkness in the retelling. The book was designed for children but has always served as an introduction to Shakespeare for readers of any age.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Tempest, Midsummer Night's Dream, Merchant of Venice",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "Retellings of three comedies: magic and forgiveness, fairy mischief, and Shylock's pound of flesh."
+      },
+      {
+        "number": 2,
+        "title": "As You Like It, Two Gentlemen, Winter's Tale",
+        "pageStart": 61,
+        "pageEnd": 110,
+        "summary": "Rosalind in Arden. Valentine and Proteus. Leontes's jealousy."
+      },
+      {
+        "number": 3,
+        "title": "Much Ado, Twelfth Night, All's Well",
+        "pageStart": 111,
+        "pageEnd": 160,
+        "summary": "Benedick and Beatrice. Viola and Orsino. Helena and Bertram."
+      },
+      {
+        "number": 4,
+        "title": "Measure for Measure, Comedy of Errors, Pericles, Taming of the Shrew",
+        "pageStart": 161,
+        "pageEnd": 220,
+        "summary": "Angelo's hypocrisy. The twin confusion. Pericles. Katherina."
+      },
+      {
+        "number": 5,
+        "title": "Romeo and Juliet, Hamlet, Othello, King Lear, Macbeth",
+        "pageStart": 221,
+        "pageEnd": 340,
+        "summary": "The great tragedies retold with full emotional power."
+      },
+      {
+        "number": 6,
+        "title": "Cymbeline, King John, Richard II, Henry V, Henry VIII",
+        "pageStart": 341,
+        "pageEnd": 400,
+        "summary": "The histories and late romances."
+      }
+    ]
   },
   {
     "id": "book-plague",
@@ -18017,7 +19052,7 @@
     "subtype": "Novel",
     "name": "The Plague",
     "teaser": "Albert Camus's 1947 allegory of a city shut by a disease and the ordinary people — the doctor, the journalist, the exile — who choose solidarity. It has been reread in every quarantine since.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141185132-L.jpg",
     "byline": "Albert Camus",
     "exploreAction": {
       "verb": "Read",
@@ -18031,7 +19066,45 @@
       "Nobel"
     ],
     "tier": 1,
-    "pageCount": 320
+    "pageCount": 308,
+    "synopsis": "Albert Camus's The Plague, published in 1947, is a novel about a bubonic plague epidemic that strikes the Algerian city of Oran and traps its inhabitants behind sealed walls. The story is narrated by Dr. Bernard Rieux, who fights the disease while grappling with questions of meaning, faith, and duty. Through Rieux and the characters around him — the journalist Rambert who wants to escape, the priest Paneloux who preaches divine punishment, the civil servant Grand who pursues his dream of writing the perfect sentence — Camus examines how people respond when catastrophe strips away the routines that make life bearable. The novel was published two years after the end of World War II and is universally read as an allegory for the German occupation of France. The novel's famous line about how the plague is not punishment or mystery but simply something that happens, and the only proper response is solidarity, is Camus at his most precise. The Plague is Camus's most humane work.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I — The Outbreak",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "The plague arrives in Oran. The authorities seal the city."
+      },
+      {
+        "number": 2,
+        "title": "Part II — The Siege",
+        "pageStart": 61,
+        "pageEnd": 140,
+        "summary": "The city is sealed. Paneloux preaches. Rambert tries to escape."
+      },
+      {
+        "number": 3,
+        "title": "Part III — The Crisis",
+        "pageStart": 141,
+        "pageEnd": 200,
+        "summary": "The epidemic peaks. Paneloux delivers his second sermon."
+      },
+      {
+        "number": 4,
+        "title": "Part IV — The Plague Declines",
+        "pageStart": 201,
+        "pageEnd": 250,
+        "summary": "The plague recedes. Tarrou falls ill."
+      },
+      {
+        "number": 5,
+        "title": "Part V — The Aftermath",
+        "pageStart": 251,
+        "pageEnd": 308,
+        "summary": "The plague is over. Tarrou dies. Rieux reflects."
+      }
+    ]
   },
   {
     "id": "book-metamorphosis",
@@ -18039,7 +19112,7 @@
     "subtype": "Novella",
     "name": "The Metamorphosis",
     "teaser": "Kafka's 1915 novella — one morning Gregor Samsa wakes as an enormous insect, and the story watches his family get on with life around him. The most famous first sentence in modern fiction.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780486290300-L.jpg",
     "byline": "Franz Kafka",
     "exploreAction": {
       "verb": "Read",
@@ -18053,7 +19126,38 @@
       "Novella"
     ],
     "tier": 1,
-    "pageCount": 96
+    "pageCount": 56,
+    "synopsis": "Franz Kafka's The Metamorphosis, published in 1915, is one of the most famous opening lines in literature: a man wakes up transformed into a horrible vermin. The story that follows is deceptively simple. Gregor Samsa, a traveling salesman who supports his entire family, wakes up as a giant insect. His family is horrified, then resentful, then indifferent, and finally relieved when Gregor dies. Kafka wrote the story in a single sitting and told his publisher he wanted the cover to show a big black beetle. The book became famous not for its design but for the terrible, deadpan logic of its premise. Gregor's transformation is never explained, never reversed, and never treated as unusual by the narrative voice. The horror is not the insect itself but what it reveals about the family's dependence on Gregor's labor: once he can no longer work, he becomes a burden, and the family's love proves to be inseparable from its economic arrangement. The Metamorphosis is about alienation, family, and the dehumanizing effects of capitalist labor, and its genius is that it never says so.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Transformation",
+        "pageStart": 1,
+        "pageEnd": 15,
+        "summary": "Gregor wakes as a giant insect. His family is at the door."
+      },
+      {
+        "number": 2,
+        "title": "The Family's Reaction",
+        "pageStart": 16,
+        "pageEnd": 30,
+        "summary": "The family is horrified. Grete begins caring for him reluctantly."
+      },
+      {
+        "number": 3,
+        "title": "The Boarder",
+        "pageStart": 31,
+        "pageEnd": 45,
+        "summary": "The family takes in boarders. Grete demands they get rid of Gregor."
+      },
+      {
+        "number": 4,
+        "title": "The End",
+        "pageStart": 46,
+        "pageEnd": 56,
+        "summary": "Gregor dies. His family feels relief. The future seems bright."
+      }
+    ]
   },
   {
     "id": "book-siddhartha",
@@ -18061,7 +19165,7 @@
     "subtype": "Novel",
     "name": "Siddhartha",
     "teaser": "Hermann Hesse's 1922 novel of a Brahmin's son who leaves asceticism, wealth, and love behind to listen to a river. A spiritual bildungsroman that found millions of readers looking for the same river.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780142437186-L.jpg",
     "byline": "Hermann Hesse",
     "exploreAction": {
       "verb": "Read",
@@ -18075,7 +19179,45 @@
       "Nobel"
     ],
     "tier": 1,
-    "pageCount": 176
+    "pageCount": 100,
+    "synopsis": "Hermann Hesse's Siddhartha, published in 1922, is a novel about the spiritual journey of a man named Siddhartha who lives during the time of the Buddha but does not become his disciple. Siddhartha leaves his Brahmin family to become a wandering ascetic, then abandons asceticism to become a wealthy merchant, then abandons wealth to become a ferryman on a river. The novel follows three stages: the ascetic phase, the sensual phase, and the final phase of learning that wisdom cannot be taught but must be experienced. Hesse wrote Siddhartha after a personal crisis that led him to psychoanalysis and Eastern philosophy. The river that runs through the novel is its central symbol: it is always the same and always changing. Siddhartha's ultimate realization that all things are connected, that time is an illusion, and that unity underlies diversity is expressed through the river's voice. The novel is short, beautifully written, and profoundly peaceful.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Brahmin's Son",
+        "pageStart": 1,
+        "pageEnd": 15,
+        "summary": "Siddhartha and Govinda leave to become Samanas. They seek the Buddha."
+      },
+      {
+        "number": 2,
+        "title": "Gotama the Buddha",
+        "pageStart": 16,
+        "pageEnd": 30,
+        "summary": "Siddhartha meets the Buddha but declines to follow him."
+      },
+      {
+        "number": 3,
+        "title": "The Awakening",
+        "pageStart": 31,
+        "pageEnd": 50,
+        "summary": "Siddhartha enters the sensual world with Kamala and Kamaswami."
+      },
+      {
+        "number": 4,
+        "title": "By the River",
+        "pageStart": 51,
+        "pageEnd": 70,
+        "summary": "Siddhartha is saved by the ferryman Vasudeva. He begins listening to the river."
+      },
+      {
+        "number": 5,
+        "title": "The Ferryman",
+        "pageStart": 71,
+        "pageEnd": 100,
+        "summary": "Siddhartha learns from the river. He achieves wisdom through loss."
+      }
+    ]
   },
   {
     "id": "book-steppenwolf",
@@ -18083,7 +19225,7 @@
     "subtype": "Novel",
     "name": "Steppenwolf",
     "teaser": "Hermann Hesse's 1927 novel of Harry Haller, who feels half-man, half-wolf, and is led through a Magic Theatre where every door plays with his identity. A psychedelic novel before psychedelics.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780142437506-L.jpg",
     "byline": "Hermann Hesse",
     "exploreAction": {
       "verb": "Read",
@@ -18097,7 +19239,38 @@
       "Nobel"
     ],
     "tier": 2,
-    "pageCount": 240
+    "pageCount": 254,
+    "synopsis": "Hermann Hesse's Steppenwolf, published in 1927, is a novel about Harry Haller, a middle-aged intellectual who divides himself into two irreconcilable halves: the human half and the wolf half. Haller wanders through a fictionalized Basel, alternating between self-pity and self-loathing, until he encounters Hermine, who teaches him to dance, love jazz, and embrace the wolf within himself. The novel is divided into Haller's diary, a satirical treatise on the Magic Theatre, and the Theatre itself, a hallucinatory sequence where Haller confronts his multiple selves. The Magic Theatre, with its famous inscription about being for madmen only and the price of admission being your mind, remains one of literature's most vivid images of psychological transformation. Hesse wrote Steppenwolf during deep personal crisis, and the novel's fragmentation of identity reflects his own psychological disintegration. The book's treatment of depression and the desperate search for meaning was decades ahead of its time.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Harry Haller's Records",
+        "pageStart": 1,
+        "pageEnd": 50,
+        "summary": "Haller describes his dual nature. His isolation and depression."
+      },
+      {
+        "number": 2,
+        "title": "Hermine",
+        "pageStart": 51,
+        "pageEnd": 100,
+        "summary": "Haller meets Hermine. She teaches him to dance and to enjoy pleasure."
+      },
+      {
+        "number": 3,
+        "title": "The Magic Theatre",
+        "pageStart": 101,
+        "pageEnd": 150,
+        "summary": "Haller enters the Magic Theatre. He confronts his multiple selves."
+      },
+      {
+        "number": 4,
+        "title": "Harry Haller's Treatise",
+        "pageStart": 151,
+        "pageEnd": 200,
+        "summary": "The satirical treatise on the immortals and the shattering of personality."
+      }
+    ]
   },
   {
     "id": "book-magic-mountain",
@@ -18105,7 +19278,7 @@
     "subtype": "Novel",
     "name": "The Magic Mountain",
     "teaser": "Thomas Mann's 1924 novel of Hans Castorp, who visits a tuberculosis sanatorium for three weeks and stays seven years, absorbing Europe's arguments about time, disease, and death before the war ends everything.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780679764892-L.jpg",
     "byline": "Thomas Mann",
     "exploreAction": {
       "verb": "Read",
@@ -18119,7 +19292,45 @@
       "Time"
     ],
     "tier": 2,
-    "pageCount": 720
+    "pageCount": 700,
+    "synopsis": "Thomas Mann's The Magic Mountain, published in 1924, is a novel about Hans Castorp, a young German engineer who visits his cousin in a Swiss tuberculosis sanatorium and stays for seven years. The sanatorium on the Berghof is a self-contained world where time moves differently. What Castorp intended as a three-week visit becomes a seven-year sojourn, and the illness he came to observe turns out to be his own. Mann wrote the novel as a deliberate long work — over seven hundred pages — and its length is the point: the reader is meant to feel the weight of time and the seductive ease of letting one's life slip away. The sanatorium is a microcosm of European civilization between the wars, and its inhabitants represent competing ideologies. Mann won the Nobel Prize in Literature in 1929.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I — Arrival",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "Hans Castorp arrives at the Berghof for a three-week visit."
+      },
+      {
+        "number": 2,
+        "title": "Part II — Schooldays",
+        "pageStart": 121,
+        "pageEnd": 300,
+        "summary": "Castorp's education in illness, philosophy, and love."
+      },
+      {
+        "number": 3,
+        "title": "Part III — By the Entity of Duty",
+        "pageStart": 301,
+        "pageEnd": 480,
+        "summary": "Joachim's illness and death. The debate between Settembrini and Naphta."
+      },
+      {
+        "number": 4,
+        "title": "Part IV — Snow and the Chauchat Encounter",
+        "pageStart": 481,
+        "pageEnd": 600,
+        "summary": "Castorp's dream of the snow queen. His encounter with Clawdia."
+      },
+      {
+        "number": 5,
+        "title": "Part V — The Thunderbolt",
+        "pageStart": 601,
+        "pageEnd": 700,
+        "summary": "The carnival ball. The duel. Castorp finally leaves the mountain."
+      }
+    ]
   },
   {
     "id": "book-tin-drum",
@@ -18127,7 +19338,7 @@
     "subtype": "Novel",
     "name": "The Tin Drum",
     "teaser": "Günter Grass's 1959 novel of Oskar Matzerath, who decides to stop growing at three and drums his way through Nazi Germany and beyond. A picaresque, grotesque, furious reckoning with the German past.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780151001255-L.jpg",
     "byline": "Günter Grass",
     "exploreAction": {
       "verb": "Read",
@@ -18141,7 +19352,38 @@
       "Grotesque"
     ],
     "tier": 2,
-    "pageCount": 592
+    "pageCount": 592,
+    "synopsis": "Gunter Grass's The Tin Drum, published in 1959, is a novel about Oskar Matzerath, who decides on his third birthday to stop growing. He receives a tin drum and uses it to protest the world around him. Oskar narrates from a mental institution, recounting his childhood in the Free City of Danzig before, during, and after World War II. His mother has affairs with two men — one Polish, one German — and Oskar claims to be unsure of his own paternity. The novel is a grotesque, darkly comic panorama of twentieth-century German history told from the perspective of a child who refuses to grow up. Grass won the Nobel Prize in 1999, largely on the strength of this novel, which established him as the moral conscience of postwar German literature.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I — The Three-Year-Old",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "Oskar's decision to stop growing. His grandmother's stories."
+      },
+      {
+        "number": 2,
+        "title": "Part II — Before the War",
+        "pageStart": 101,
+        "pageEnd": 220,
+        "summary": "Oskar's childhood in Danzig. His mother's death."
+      },
+      {
+        "number": 3,
+        "title": "Part III — The War",
+        "pageStart": 221,
+        "pageEnd": 340,
+        "summary": "The war comes to Danzig. The massacre at the post office."
+      },
+      {
+        "number": 4,
+        "title": "Part IV — After the War",
+        "pageStart": 341,
+        "pageEnd": 480,
+        "summary": "Oskar in West Germany. The jazz band. The trial and the ending."
+      }
+    ]
   },
   {
     "id": "book-perfume",
@@ -18149,7 +19391,7 @@
     "subtype": "Novel",
     "name": "Perfume",
     "teaser": "Patrick Süskind's 1985 novel of Jean-Baptiste Grenouille, born with no scent of his own and gifted with perfect smell — who murders to capture the world's fragrances. A historical novel and a fable of obsession.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140270099-L.jpg",
     "byline": "Patrick Süskind",
     "exploreAction": {
       "verb": "Read",
@@ -18163,7 +19405,52 @@
       "Obsession"
     ],
     "tier": 1,
-    "pageCount": 272
+    "pageCount": 263,
+    "synopsis": "Patrick Suskind's Perfume: The Story of a Murderer, published in 1985, is a novel about Jean-Baptiste Grenouille, born in eighteenth-century Paris with a superhuman sense of smell and no scent of his own. Grenouille is raised in an orphanage, apprenticed to a tanner, and eventually learns perfumery from the aging master Baldini. His obsession with capturing the perfect scent leads him to murder young women, preserving their fragrance through a process of distillation that is as technically detailed as it is horrifying. Suskind's novel is both a thriller and a meditation on the nature of genius: Grenouille is repulsive in every human sense yet his mastery of scent is presented as a form of transcendence. The final scene, where Grenouille is devoured by a mob of adoring followers who mistake his perfume for love, is one of the most disturbing endings in modern fiction. Perfume sold twenty million copies worldwide.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Birth and the Odor of Death",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "Grenouille is born in the fish market of Paris. He discovers his sense of smell."
+      },
+      {
+        "number": 2,
+        "title": "The Apprentice",
+        "pageStart": 31,
+        "pageEnd": 70,
+        "summary": "Grenouille works for Grimal, then is apprenticed to Baldini."
+      },
+      {
+        "number": 3,
+        "title": "The Montages",
+        "pageStart": 71,
+        "pageEnd": 110,
+        "summary": "Grenouille creates his own perfumes. He murders the plum girl."
+      },
+      {
+        "number": 4,
+        "title": "The Enfleurage",
+        "pageStart": 111,
+        "pageEnd": 150,
+        "summary": "Grenouille arrives in Grasse. His systematic murders begin."
+      },
+      {
+        "number": 5,
+        "title": "The Perfect Perfume",
+        "pageStart": 151,
+        "pageEnd": 190,
+        "summary": "Grenouille creates his masterpiece. He is arrested and convicted."
+      },
+      {
+        "number": 6,
+        "title": "The Disappearance",
+        "pageStart": 191,
+        "pageEnd": 210,
+        "summary": "Grenouille uses his perfume on the crowd. They devour him."
+      }
+    ]
   },
   {
     "id": "book-reader",
@@ -18171,7 +19458,7 @@
     "subtype": "Novel",
     "name": "The Reader",
     "teaser": "Bernhard Schlink's 1995 novel of a boy's affair with an older woman who is later revealed as a former camp guard. A German reckoning with guilt, illiteracy, and the generations after the Holocaust.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780375707971-L.jpg",
     "byline": "Bernhard Schlink",
     "exploreAction": {
       "verb": "Read",
@@ -18185,7 +19472,38 @@
       "Holocaust"
     ],
     "tier": 1,
-    "pageCount": 224
+    "pageCount": 175,
+    "synopsis": "Bernhard Schlink's The Reader, published in 1995, is a novel about Michael Berg, a fifteen-year-old who begins an affair with Hanna Schmitz, a thirty-six-year-old woman who works as a tram conductor. Their relationship is conducted largely in bed and in the bath, and Hanna insists that Michael read to her from literature before they make love. When Hanna abruptly disappears, Michael is left confused and heartbroken. Years later, as a law student, he encounters her again in a courtroom: Hanna is on trial for her role as an SS guard at Auschwitz, and the evidence reveals that she is illiterate. Michael realizes that Hanna's entire life has been shaped by shame about her inability to read. The novel is a meditation on German guilt, the relationship between reading and civilization, and the way the past can never be fully atoned for. Schlink wrote it as a legal scholar, and the courtroom scenes have a forensic precision, but the novel's emotional power comes from its insistence that understanding and forgiveness are not the same thing.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I — The Affair",
+        "pageStart": 1,
+        "pageEnd": 50,
+        "summary": "Michael begins his affair with Hanna. The readings. The baths. Her sudden disappearance."
+      },
+      {
+        "number": 2,
+        "title": "Part II — The Trial",
+        "pageStart": 51,
+        "pageEnd": 110,
+        "summary": "Michael encounters Hanna in court. The trial reveals her past as an SS guard. Her secret is exposed."
+      },
+      {
+        "number": 3,
+        "title": "Part III — The Tapes",
+        "pageStart": 111,
+        "pageEnd": 155,
+        "summary": "Michael sends Hanna tapes. She learns to read in prison. The relationship continues through recordings."
+      },
+      {
+        "number": 4,
+        "title": "Part IV — The End",
+        "pageStart": 156,
+        "pageEnd": 175,
+        "summary": "Hanna is released. She hangs herself the day before. Michael inherits her money and reflects."
+      }
+    ]
   },
   {
     "id": "book-unbearable-lightness",
@@ -18193,7 +19511,7 @@
     "subtype": "Novel",
     "name": "The Unbearable Lightness of Being",
     "teaser": "Milan Kundera's 1984 novel of love and politics in Prague — Tomas, Tereza, Sabina, and the Soviet tanks of 1968, with Nietzsche's eternal return weighing every choice. It made 'kitsch' a critical term.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780060935535-L.jpg",
     "byline": "Milan Kundera",
     "exploreAction": {
       "verb": "Read",
@@ -18207,7 +19525,52 @@
       "Politics"
     ],
     "tier": 1,
-    "pageCount": 320
+    "pageCount": 297,
+    "synopsis": "Milan Kundera's The Unbearable Lightness of Being, published in 1984, is a novel about two couples — Tomas and Tereza, Sabina and Franz — living in Prague during the Soviet invasion of Czechoslovakia in 1968. Tomas is a surgeon and a serial womanizer who distinguishes between physical love and erotic friendship; Tereza is his devoted wife who cannot tolerate his infidelities. Sabina is a painter and Tomas's lover, whose life is defined by betrayal and lightness; Franz is her lover, a Swiss academic who cannot understand why she keeps leaving. The novel is structured as a philosophical meditation on Nietzsche's concept of eternal return: if we live only once, our choices are unbearably light (insignificant), but if we live eternally, they are unbearably heavy. Kundera interweaves the love stories with digressions on the nature of kitsch, the meaning of媚媚 (political and personal), and the way history crushes individual lives. The novel is funny, erotic, deeply political, and intellectually brilliant, and it made Kundera the most famous Czech writer since Kafka.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Lightness and Weight",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "The philosophical framework. Tomas and Tereza meet. The concepts of lightness and heaviness."
+      },
+      {
+        "number": 2,
+        "title": "Body and Soul",
+        "pageStart": 31,
+        "pageEnd": 70,
+        "summary": "Tomas's life as a womanizer. Tereza's jealousy. The invasion of Czechoslovakia."
+      },
+      {
+        "number": 3,
+        "title": "Words Not Understood",
+        "pageStart": 71,
+        "pageEnd": 110,
+        "summary": "Sabina and Franz. Their incompatible views of betrayal and commitment. The meaning of媚媚."
+      },
+      {
+        "number": 4,
+        "title": "The Lightness and Heaviness of Love",
+        "pageStart": 111,
+        "pageEnd": 160,
+        "summary": "Tomas and Tereza in the countryside. Their dog Karenin. The weight of love."
+      },
+      {
+        "number": 5,
+        "title": "The Grand March",
+        "pageStart": 161,
+        "pageEnd": 220,
+        "summary": "Franz's march in Cambodia. Sabina's death. Tomas and Tereza's final journey."
+      },
+      {
+        "number": 6,
+        "title": "The Small Lightness of Being",
+        "pageStart": 221,
+        "pageEnd": 297,
+        "summary": "The end. Tomas and Tereza die together in a car crash. Karenin dies. The weight of their lives."
+      }
+    ]
   },
   {
     "id": "book-godot",
@@ -18215,7 +19578,7 @@
     "subtype": "Drama",
     "name": "Waiting for Godot",
     "teaser": "Samuel Beckett's 1953 play in which two men wait by a tree for someone who never arrives, twice. The most famous statement of the modern condition — a tragedy that plays as a comedy.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780802130396-L.jpg",
     "byline": "Samuel Beckett",
     "exploreAction": {
       "verb": "Read",
@@ -18229,7 +19592,24 @@
       "Drama"
     ],
     "tier": 1,
-    "pageCount": 128
+    "pageCount": 75,
+    "synopsis": "Samuel Beckett's Waiting for Godot, published in 1953, is a play in which nothing happens — twice. Two tramps, Vladimir (Didi) and Estragon (Gogo), wait by a tree on a country road for a man named Godot, who never arrives. They talk, argue, play with their hats, consider hanging themselves from the tree, and are visited by a master (Pozzo) and his slave (Lucky), who pass through on their way to a market. A boy arrives at the end of each act to say that Godot will not come today but surely tomorrow. The play is written in a style that is simultaneously comic and devastating: Vladimir and Estragon's banter has the rhythm of a vaudeville routine, but their situation is existential. They are waiting for meaning, for purpose, for something that will justify their existence, and it never comes. Beckett called it a tragicomedy, and the play's refusal to explain itself — Who is Godot? What would happen if he arrived? — has made it one of the most analyzed and debated works of the twentieth century. Waiting for Godot essentially invented the Theatre of the Absurd and remains the most performed play of the postwar era.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Act I",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "Vladimir and Estragon wait by the tree. Pozzo and Lucky pass through. The boy announces Godot will not come."
+      },
+      {
+        "number": 2,
+        "title": "Act II",
+        "pageStart": 41,
+        "pageEnd": 75,
+        "summary": "The next day. The tree has leaves. Pozzo is blind. Lucky is mute. Godot does not come. They wait."
+      }
+    ]
   },
   {
     "id": "book-sun-also-rises",
@@ -18237,7 +19617,7 @@
     "subtype": "Novel",
     "name": "The Sun Also Rises",
     "teaser": "Hemingway's 1926 novel of the lost generation — Jake Barnes, Brett Ashley, and their expatriate circle drinking and fishing and running with the bulls in Pamplona. The style changed American prose forever.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780743297332-L.jpg",
     "byline": "Ernest Hemingway",
     "exploreAction": {
       "verb": "Read",
@@ -18251,7 +19631,38 @@
       "Nobel"
     ],
     "tier": 1,
-    "pageCount": 272
+    "pageCount": 193,
+    "synopsis": "Ernest Hemingway's The Sun Also Rises, published in 1926, is a novel about Jake Barnes, an American journalist in Paris who was castrated in World War I, and his unrequited love for Lady Brett Ashley, an aristocratic Englishwoman who sleeps with everyone except Jake. The novel follows their circle of friends — disillusioned Americans and Britons living in Paris and traveling to Pamplona for the running of the bulls and the bullfights. The characters drink constantly, travel restlessly, and try to fill the void left by the war with sex, alcohol, and spectacle. Hemingway's prose — spare, direct, and built on the rhythm of short declarative sentences — was revolutionary, and The Sun Also Rises established his reputation as the most influential American writer of the twentieth century. The novel's epigraphs — a passage from Ecclesiastes and a Gertrude Stein quotation about being a lost generation — define its themes: disillusionment, the failure of tradition, and the search for authenticity in a world where the old certainties have been destroyed. The bullfighting scenes are among the most vivid in literature, and they function as Hemingway's metaphor for how to live with dignity in a universe that offers no meaning.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Chapters 1–6 — Paris",
+        "pageStart": 1,
+        "pageEnd": 50,
+        "summary": "Jake Barnes narrates his life in Paris. Brett Ashley is introduced. Robert Cohn arrives. The group drinks."
+      },
+      {
+        "number": 2,
+        "title": "Chapters 7–13 — The Journey",
+        "pageStart": 51,
+        "pageEnd": 100,
+        "summary": "The group travels to Pamplona. The fiesta begins. The bullfights. Cohn's jealousy over Brett."
+      },
+      {
+        "number": 3,
+        "title": "Chapters 14–19 — Pamplona",
+        "pageStart": 101,
+        "pageEnd": 150,
+        "summary": "The fiesta reaches its peak. Cohn beats up the bullfighters. Brett runs off with Pedro Romero."
+      },
+      {
+        "number": 4,
+        "title": "Chapters 20 — The End",
+        "pageStart": 151,
+        "pageEnd": 193,
+        "summary": "Jake returns to Paris. Brett summons him. The famous final exchange: 'Oh, Jake, we could have had such a damned good time together.'"
+      }
+    ]
   },
   {
     "id": "book-sound-and-fury",
@@ -18259,7 +19670,7 @@
     "subtype": "Novel",
     "name": "The Sound and the Fury",
     "teaser": "Faulkner's 1929 novel of the Compson family told in four voices — beginning with Benjy's, who cannot tell time. A stream-of-consciousness masterpiece of decline in the American South.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780679732969-L.jpg",
     "byline": "William Faulkner",
     "exploreAction": {
       "verb": "Read",
@@ -18273,7 +19684,38 @@
       "Modernism"
     ],
     "tier": 2,
-    "pageCount": 336
+    "pageCount": 282,
+    "synopsis": "William Faulkner's The Sound and the Fury, published in 1929, is a novel about the decline of the Compsons, a once-great Mississippi family, told through four narrators across four days. The first section, narrated by Benjy Compson in 1928, is a stream-of-consciousness collage of memories, with no chronological order and no indication of which events are present and which are past. The second section, narrated by Quentin Compson on June 2, 1910, the day of his suicide, is a compressed, obsessive meditation on his sister Caddy's sexual purity and his own Southern honor. The third section, narrated by the calculating Jason Compson, is the most conventional but also the most venomous. The fourth section, narrated in third person, follows the Compson family's black servant Dilsey as she holds the disintegrating family together. Faulkner called the novel his most magnificent failure, and the difficulty of the first two sections — Benjy's narration is genuinely incomprehensible on first reading — is part of the point: the novel forces the reader to reconstruct meaning from fragments, just as the Compsons struggle to reconstruct meaning from the wreckage of their family. The Sound and the Fury is Faulkner's most technically ambitious work and one of the great American novels.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "April 7, 1928 — Benjy",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Benjy Compson's stream of consciousness. His memories of Caddy. The present-day funeral. Time is non-linear."
+      },
+      {
+        "number": 2,
+        "title": "June 2, 1910 — Quentin",
+        "pageStart": 81,
+        "pageEnd": 160,
+        "summary": "Quentin's last morning. His obsession with Caddy's honor. His walk through Cambridge. His suicide."
+      },
+      {
+        "number": 3,
+        "title": "April 6, 1928 — Jason",
+        "pageStart": 161,
+        "pageEnd": 230,
+        "summary": "Jason's bitterness. His financial schemes. His abuse of Luster and Benjy. Caddy's daughter's money."
+      },
+      {
+        "number": 4,
+        "title": "April 8, 1928 — Dilsey",
+        "pageStart": 231,
+        "pageEnd": 282,
+        "summary": "Easter Sunday. Dilsey takes the family to church. The Compson household disintegrates. Dilsey's faith endures."
+      }
+    ]
   },
   {
     "id": "book-east-of-eden",
@@ -18281,7 +19723,7 @@
     "subtype": "Novel",
     "name": "East of Eden",
     "teaser": "John Steinbeck's 1952 retelling of the Cain and Abel story in California's Salinas Valley — the Trask brothers, the Hamiltons, and a mother who owns a brothel. Steinbeck called it his big book, the one he was saving up for.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140269499-L.jpg",
     "byline": "John Steinbeck",
     "exploreAction": {
       "verb": "Read",
@@ -18295,7 +19737,38 @@
       "Nobel"
     ],
     "tier": 1,
-    "pageCount": 608
+    "pageCount": 601,
+    "synopsis": "John Steinbeck's East of Eden, published in 1952, is a sprawling family saga set in the Salinas Valley of California, tracing two families — the Trasks and the Hamiltons — from the Civil War to the end of World War I. The novel retells the story of Cain and Abel through multiple generations: Charles and Adam Trask are brothers whose rivalry mirrors the biblical story, and Adam's sons, Cal and Aron, repeat the pattern. Steinbeck called the novel his book, the one he had been writing his whole life, and its ambition is biblical in scale. The novel's central philosophical argument is about the Hebrew word timshel — thou mayest — which Steinbeck interprets as the choice between good and evil: we are not predetermined to be good or evil, but we may choose. This idea gives the novel its moral center and its emotional power. The Hamilton sections are autobiographical, drawn from Steinbeck's grandfather's stories, and they ground the novel's grand themes in the specific, funny, heartbreaking details of immigrant life. East of Eden is Steinbeck's masterpiece — bigger, more generous, and more ambitious than anything else he wrote.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Chapters 1–10 — The Trask Family",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "Charles and Adam Trask grow up. Their father's favoritism. Cathy arrives."
+      },
+      {
+        "number": 2,
+        "title": "Chapters 11–23 — Cathy and the Salinas Valley",
+        "pageStart": 101,
+        "pageEnd": 220,
+        "summary": "Cathy shoots Adam and runs the brothel. The Hamilton family. Samuel Hamilton and Lee."
+      },
+      {
+        "number": 3,
+        "title": "Chapters 24–40 — Cal and Aron",
+        "pageStart": 221,
+        "pageEnd": 380,
+        "summary": "Adam's sons grow up. Cal feels like the evil one. Aron is the good one. The rivalry builds."
+      },
+      {
+        "number": 4,
+        "title": "Chapters 41–54 — The Choice",
+        "pageStart": 381,
+        "pageEnd": 500,
+        "summary": "Cal shows Adam the money. Aron enlists and dies. Lee explains timshel. Adam gives his blessing."
+      }
+    ]
   },
   {
     "id": "book-go-tell-it-on-the-mountain",
@@ -18303,7 +19776,7 @@
     "subtype": "Novel",
     "name": "Go Tell It on the Mountain",
     "teaser": "James Baldwin's 1953 debut novel of a boy's fourteenth birthday in a Harlem storefront church — John Grimes's crisis of faith and family, told in a voice that fused the Bible and blues into literature.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345806536-L.jpg",
     "byline": "James Baldwin",
     "exploreAction": {
       "verb": "Read",
@@ -18317,7 +19790,45 @@
       "Harlem"
     ],
     "tier": 1,
-    "pageCount": 256
+    "pageCount": 256,
+    "synopsis": "James Baldwin's Go Tell It on the Mountain, published in 1953, is a semi-autobiographical novel about John Grimes, a fourteen-year-old boy growing up in 1930s Harlem under the shadow of his stepfather Gabriel, a charismatic Pentecostal preacher. The novel takes place on John's birthday and moves between the present day and the pasts of his parents and grandparents, tracing the family's journey from the rural South to the urban North. Gabriel is a tyrant who beats his children and terrorizes his wife, but Baldwin makes clear that his cruelty is inseparable from his fervent belief in salvation: Gabriel sins and repents, sins and repents, and the cycle of guilt and redemption drives the family's dysfunction. John's crisis is whether to follow his stepfather into the church or to find his own way — and the novel's resolution, in which John experiences a conversion, is deliberately ambiguous: is it genuine grace, or is it submission to Gabriel's will? Baldwin's prose is incantatory, drawing on the rhythms of the King James Bible and the Black church, and the novel's power comes from its insistence that the sacred and the profane are inseparable.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Prayers of the Saints",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "John Grimes on his birthday. The church. His stepfather Gabriel. The family's Harlem world."
+      },
+      {
+        "number": 2,
+        "title": "The First Purchase",
+        "pageStart": 31,
+        "pageEnd": 80,
+        "summary": "John's memories. His grandmother's faith. His mother's past. Gabriel's rise and fall in the South."
+      },
+      {
+        "number": 3,
+        "title": "The Journey of Mary",
+        "pageStart": 81,
+        "pageEnd": 130,
+        "summary": "Florence, Gabriel's sister, and her journey north. Elizabeth's story. John's biological father."
+      },
+      {
+        "number": 4,
+        "title": "Exodus",
+        "pageStart": 131,
+        "pageEnd": 180,
+        "summary": "Gabriel's first wife and his downfall. His arrival in Harlem. The family he builds and the family he destroys."
+      },
+      {
+        "number": 5,
+        "title": "The Threshing Floor",
+        "pageStart": 181,
+        "pageEnd": 220,
+        "summary": "John's night of prayer at the church. His conversion. Gabriel's breakdown. The cycle of grace and damnation."
+      }
+    ]
   },
   {
     "id": "book-autobiography-malcolm-x",
@@ -18325,7 +19836,7 @@
     "subtype": "Memoir",
     "name": "The Autobiography of Malcolm X",
     "teaser": "Malcolm X's 1965 life story, told to Alex Haley — from a Lansing childhood to Boston crime, prison study, the Nation of Islam, Mecca, and a new vision before his assassination. One of the great American testimonies.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345379771-L.jpg",
     "byline": "Malcolm X and Alex Haley",
     "exploreAction": {
       "verb": "Read",
@@ -18339,7 +19850,52 @@
       "Civil Rights"
     ],
     "tier": 1,
-    "pageCount": 480
+    "pageCount": 320,
+    "synopsis": "The Autobiography of Malcolm X, published in 1965, is one of the most influential books of the twentieth century. As told to journalist Alex Haley, it traces Malcolm's life from his childhood in Nebraska and Michigan, through his years as a street hustler and prisoner, to his emergence as the most charismatic spokesperson for the Nation of Islam and his eventual break with the organization. Malcolm's journey from Malcolm Little to Malcolm X to El-Hajj Malik El-Shabazz is a story of transformation: a man who was written off by society remakes himself through discipline, reading, and an uncompromising search for truth. The prison chapters are the book's center: it is in prison that Malcolm discovers the Nation of Islam, begins to read voraciously, and finds the intellectual framework that transforms his anger into purpose. After his pilgrimage to Mecca, Malcolm's views on race evolve dramatically — he comes to believe that racism is not inherent in white people but is a system that can be dismantled. His assassination in 1965, just months after the book's completion, gave it an elegiac power. The Autobiography remains the starting point for understanding the civil rights movement, Black identity, and the ongoing struggle for racial justice in America.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Nightmare",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "Malcolm's childhood. His father's murder. His mother's breakdown. Life in foster care."
+      },
+      {
+        "number": 2,
+        "title": "Laughing Stocks",
+        "pageStart": 31,
+        "pageEnd": 60,
+        "summary": "Malcolm's hustling life in Boston and Harlem. His arrest and imprisonment. The conversion to the Nation of Islam."
+      },
+      {
+        "number": 3,
+        "title": "Saved",
+        "pageStart": 61,
+        "pageEnd": 120,
+        "summary": "Malcolm in prison. His intellectual awakening. His correspondence with Elijah Muhammad."
+      },
+      {
+        "number": 4,
+        "title": "Minister Malcolm X",
+        "pageStart": 121,
+        "pageEnd": 180,
+        "summary": "Malcolm becomes a minister. His rise in the Nation of Islam. His growing fame and conflict with Elijah Muhammad."
+      },
+      {
+        "number": 5,
+        "title": "Out",
+        "pageStart": 181,
+        "pageEnd": 240,
+        "summary": "Malcolm leaves the Nation. His pilgrimage to Mecca. His evolving views on race and Islam."
+      },
+      {
+        "number": 6,
+        "title": "The End",
+        "pageStart": 241,
+        "pageEnd": 320,
+        "summary": "Malcolm's final days. His assassination. The aftermath and his legacy."
+      }
+    ]
   },
   {
     "id": "book-wretched-of-the-earth",
@@ -18347,7 +19903,7 @@
     "subtype": "Nonfiction",
     "name": "The Wretched of the Earth",
     "teaser": "Frantz Fanon's 1961 manifesto on decolonization, written while the Algerian war burned — on violence, the colonial psychology, and the birth of a new humanity. Sartre's preface called it a cry.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780802158833-L.jpg",
     "byline": "Frantz Fanon",
     "exploreAction": {
       "verb": "Read",
@@ -18361,7 +19917,38 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 336
+    "pageCount": 250,
+    "synopsis": "Frantz Fanon's The Wretched of the Earth, published in 1961, is a polemical work of political philosophy and psychology that analyzes the effects of colonialism on the colonized. Written during the Algerian War of Independence, the book argues that colonialism is not merely a political or economic system but a total psychological violence that dehumanizes both the colonizer and the colonized. Fanon's central thesis is that decolonization is inherently violent because the colonized must destroy the colonial world in order to create themselves as human beings. The book is divided into sections on violence, national consciousness, pitfalls of national consciousness, and colonial warfare and mental disorders. Fanon was a psychiatrist who worked in Algeria, and his clinical observations of the psychological damage inflicted by colonialism give the book an empirical grounding that distinguishes it from pure polemic. The Wretched of the Earth was banned in France and became a bible of revolutionary movements worldwide. Its influence extends from the Black Panthers to postcolonial theory to contemporary debates about reparations and systemic racism.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Concerning Violence",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "The role of violence in decolonization. The Manichean world of the colony. The colonized subject."
+      },
+      {
+        "number": 2,
+        "title": "The Pitfalls of National Consciousness",
+        "pageStart": 61,
+        "pageEnd": 130,
+        "summary": "The failure of the national bourgeoisie. Economic dependency. The pitfalls of postcolonial nationalism."
+      },
+      {
+        "number": 3,
+        "title": "The Wretched of the Earth",
+        "pageStart": 131,
+        "pageEnd": 180,
+        "summary": "The lumpenproletariat as the revolutionary force. The role of the peasantry. Spontaneous revolution."
+      },
+      {
+        "number": 4,
+        "title": "Colonial War and Mental Disorders",
+        "pageStart": 181,
+        "pageEnd": 250,
+        "summary": "Fanon's clinical cases. The psychological damage of colonialism and war. The case studies."
+      }
+    ]
   },
   {
     "id": "book-silent-spring",
@@ -18369,7 +19956,7 @@
     "subtype": "Nonfiction",
     "name": "Silent Spring",
     "teaser": "Rachel Carson's 1962 exposé of DDT and the chemical industry's assault on life — a book that began with a fable of a town where the birds fell silent and ended with the birth of environmentalism.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780618253050-L.jpg",
     "byline": "Rachel Carson",
     "exploreAction": {
       "verb": "Read",
@@ -18383,7 +19970,59 @@
       "Science"
     ],
     "tier": 1,
-    "pageCount": 400
+    "pageCount": 277,
+    "synopsis": "Rachel Carson's Silent Spring, published in 1962, is the book that launched the modern environmental movement. Carson, a marine biologist and nature writer, documented the devastating effects of synthetic pesticides — particularly DDT — on wildlife, ecosystems, and human health. The book's central image is a town where no birds sing in spring because the pesticides have killed them, and the silence is a warning of what will happen if the chemical industry is not regulated. The industry fought back viciously: Dow Chemical placed a surveillance team on Carson, the AMA denounced the book, and CBS aired a documentary that was sponsored by a chemical company. But Carson's science was impeccable, and the public response was overwhelming. Silent Spring led directly to the ban on DDT, the creation of the EPA, and the modern regulatory framework for environmental protection. The book is not merely a scientific argument but a moral one: Carson insisted that the right to a clean environment was fundamental, and that the profit motive could not be allowed to override it. Silent Spring is one of the most important books of the twentieth century, and its relevance has only increased as the climate crisis deepens.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "A Fable for Tomorrow",
+        "pageStart": 1,
+        "pageEnd": 15,
+        "summary": "The fable of a town where spring arrives in silence. The devastating effects of pesticides."
+      },
+      {
+        "number": 2,
+        "title": "The Obligation to Endure",
+        "pageStart": 16,
+        "pageEnd": 40,
+        "summary": "The relationship between living organisms and their environment. The poisons in the soil."
+      },
+      {
+        "number": 3,
+        "title": "Elixirs of Death",
+        "pageStart": 41,
+        "pageEnd": 80,
+        "summary": "The history and chemistry of synthetic pesticides. Their persistence in the environment."
+      },
+      {
+        "number": 4,
+        "title": "Surface Waters and the Deep Seas",
+        "pageStart": 81,
+        "pageEnd": 130,
+        "summary": "The contamination of water systems. The effect on marine life and aquatic ecosystems."
+      },
+      {
+        "number": 5,
+        "title": "Soil and the Living Earth",
+        "pageStart": 131,
+        "pageEnd": 160,
+        "summary": "The destruction of soil organisms. The relationship between soil health and human health."
+      },
+      {
+        "number": 6,
+        "title": "Nature's Own Defenses",
+        "pageStart": 161,
+        "pageEnd": 200,
+        "summary": "Natural methods of pest control. Biological alternatives to chemical pesticides."
+      },
+      {
+        "number": 7,
+        "title": "The Other Road",
+        "pageStart": 201,
+        "pageEnd": 277,
+        "summary": "The alternatives to pesticides. Integrated pest management. The vision of a different relationship with nature."
+      }
+    ]
   },
   {
     "id": "book-sand-county-almanac",
@@ -18391,7 +20030,7 @@
     "subtype": "Nonfiction",
     "name": "A Sand County Almanac",
     "teaser": "Aldo Leopold's 1949 almanac of his Wisconsin farm — month by month, from the January thaw to the December pines, ending with the land ethic that founded modern conservation thinking.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780195019209-L.jpg",
     "byline": "Aldo Leopold",
     "exploreAction": {
       "verb": "Read",
@@ -18405,7 +20044,38 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 240
+    "pageCount": 295,
+    "synopsis": "Aldo Leopold's A Sand County Almanac, published posthumously in 1949, is the book that created the modern environmental movement. Leopold, a wildlife manager and professor at the University of Wisconsin, spent twenty years writing and revising essays about the land, and the book is organized around a year in the life of his sand county farm in central Wisconsin. The opening section follows the seasons month by month, observing the natural world with the precision of a scientist and the grace of a poet: the skunk cabbage emerging from the snow, the geese returning in spring, the coots on the marsh, the pheasant in the stubble. The middle section, 'The Quality of Landscape,' describes the land across the Midwest and Southwest. The final section, 'Sketches Here and There,' contains the famous essay 'The Land Ethic,' which argues that humans are not conquerors of the land but members of a biotic community, and that ethics must be extended to include soil, water, plants, and animals. Leopold's idea that a thing is right when it tends to preserve the integrity, stability, and beauty of the biotic community is the foundation of modern environmental ethics. The book sold slowly at first, then became the most influential environmental text ever written.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "A Sand County Almanac",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "The year on the farm. Month-by-month observations of the natural world in Wisconsin."
+      },
+      {
+        "number": 2,
+        "title": "The Quality of Landscape",
+        "pageStart": 101,
+        "pageEnd": 200,
+        "summary": "Essays on the landscapes of Wisconsin, Arizona, Oregon, and elsewhere."
+      },
+      {
+        "number": 3,
+        "title": "Sketches Here and There",
+        "pageStart": 201,
+        "pageEnd": 240,
+        "summary": "The Land Ethic. Thinking Like a Mountain. Marshland Elegy. The Round River."
+      },
+      {
+        "number": 4,
+        "title": "The Land Ethic",
+        "pageStart": 241,
+        "pageEnd": 295,
+        "summary": "Leopold's philosophical essays on conservation, wildlife management, and the ethics of land use."
+      }
+    ]
   },
   {
     "id": "book-guns-germs-steel",
@@ -18413,7 +20083,7 @@
     "subtype": "Nonfiction",
     "name": "Guns, Germs, and Steel",
     "teaser": "Jared Diamond's 1997 Pulitzer winner asking why history unfolded differently across continents — geography and biology rather than racial genius. A sweeping answer to an enormous question.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780393354324-L.jpg",
     "byline": "Jared Diamond",
     "exploreAction": {
       "verb": "Read",
@@ -18427,7 +20097,66 @@
       "Pulitzer"
     ],
     "tier": 1,
-    "pageCount": 496
+    "pageCount": 528,
+    "synopsis": "Jared Diamond's Guns, Germs, and Steel, published in 1997, won the Pulitzer Prize for asking a simple question with an enormous answer: why did European civilizations conquer the rest of the world rather than the other way around? Diamond's answer is geographical, not genetic. The people of Eurasia had access to more domesticable plants and animals, their east-west axis allowed crops and livestock to spread along similar latitudes, and their early development of agriculture led to denser populations, more complex societies, and ultimately the guns, germs, and steel that gave them military advantages. Diamond uses evidence from archaeology, linguistics, epidemiology, and genetics to build his case, and the result is a work of synthesis that changed how millions of people think about the relationship between environment and human destiny. The book is not without its critics, who argue that Diamond underplays human agency and cultural factors, but its central insight — that geography, not race, explains why some societies developed more rapidly than others — remains powerful and important.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "From Eden to Cajamarca",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "The encounter between Pizarro and Atahuallpa. The question: why did Europeans conquer the Americas?"
+      },
+      {
+        "number": 2,
+        "title": "A Natural Experiment of History",
+        "pageStart": 41,
+        "pageEnd": 80,
+        "summary": "The Polynesian islands as a natural experiment. How geography shaped different outcomes."
+      },
+      {
+        "number": 3,
+        "title": "Collision at Cajamarca",
+        "pageStart": 81,
+        "pageEnd": 120,
+        "summary": "The conquest of the Inca Empire. The role of technology, disease, and political organization."
+      },
+      {
+        "number": 4,
+        "title": "Farmer Power",
+        "pageStart": 121,
+        "pageEnd": 200,
+        "summary": "The development of agriculture. The domestication of plants and animals. Why some regions developed farming earlier."
+      },
+      {
+        "number": 5,
+        "title": "The Same Question Again",
+        "pageStart": 201,
+        "pageEnd": 280,
+        "summary": "The spread of farming from its hearths. The role of east-west vs. north-south axes."
+      },
+      {
+        "number": 6,
+        "title": "To Africa's Edge",
+        "pageStart": 281,
+        "pageEnd": 350,
+        "summary": "The spread of food production to Africa. The development of technology and writing."
+      },
+      {
+        "number": 7,
+        "title": "How Africa Became Black",
+        "pageStart": 351,
+        "pageEnd": 400,
+        "summary": "The Bantu expansion. The linguistic and archaeological evidence for the peopling of sub-Saharan Africa."
+      },
+      {
+        "number": 8,
+        "title": "Hemispheres Colliding",
+        "pageStart": 401,
+        "pageEnd": 528,
+        "summary": "The Columbian Exchange. Why the Old World conquered the New. The role of germs, technology, and organization."
+      }
+    ]
   },
   {
     "id": "book-nausea",
@@ -18435,7 +20164,7 @@
     "subtype": "Novel",
     "name": "Nausea",
     "teaser": "Jean-Paul Sartre's 1938 novel in diary form — Roquentin in Bouville feels the world's brute existence rise in his throat. The philosophical novel that announced existentialism.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780679739043-L.jpg",
     "byline": "Jean-Paul Sartre",
     "exploreAction": {
       "verb": "Read",
@@ -18449,7 +20178,31 @@
       "Philosophy"
     ],
     "tier": 1,
-    "pageCount": 192
+    "pageCount": 130,
+    "synopsis": "Jean-Paul Sartre's Nausea, published in 1938, is a novel that invented existentialism as a literary form. The narrator is Antoine Roquentin, a historian living in the fictional town of Bouville, who begins to experience a physical revulsion — a nausea — at the sheer existence of things. A pebble on the beach, a tree root, a glass of beer — each object confronts him with the brute, contingent fact of its existence, stripped of the names and categories we impose on it. The nausea is Sartre's dramatization of a philosophical idea: that existence precedes essence, that things exist before they have any meaning, and that this meaninglessness is the fundamental condition of human life. The novel is structured as a diary, and its power comes from the precision of Roquentin's observations: the texture of the bench in the park, the way light falls on a bottle cap, the sound of a jazz tune on a gramophone. Sartre later developed the philosophical ideas in Being and Nothingness, but Nausea remains the more vivid and moving work. The final scene, where Roquentin hears a jazz tune and imagines writing a novel, is Sartre's suggestion that art may be the only way to create meaning in a meaningless world.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "January",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "Roquentin's diary begins. The first symptoms of nausea. His walk to the park. The root of the chestnut tree."
+      },
+      {
+        "number": 2,
+        "title": "February",
+        "pageStart": 41,
+        "pageEnd": 80,
+        "summary": "The nausea deepens. Roquentin confronts objects and people. The self-portrait in the museum. The medlar tree."
+      },
+      {
+        "number": 3,
+        "title": "March",
+        "pageStart": 81,
+        "pageEnd": 130,
+        "summary": "The encounter with the Self-Taught Man. The cinema. The jazz tune. The possibility of a novel."
+      }
+    ]
   },
   {
     "id": "book-heart-is-a-lonely-hunter",
@@ -18457,7 +20210,7 @@
     "subtype": "Novel",
     "name": "The Heart Is a Lonely Hunter",
     "teaser": "Carson McCullers's 1940 debut novel of a deaf-mute man and the four townspeople — a girl, a doctor, a labor organizer, a café owner — who each pour their loneliness into him. She was 23 when she wrote it.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780618595990-L.jpg",
     "byline": "Carson McCullers",
     "exploreAction": {
       "verb": "Read",
@@ -18471,7 +20224,52 @@
       "Loneliness"
     ],
     "tier": 1,
-    "pageCount": 368
+    "pageCount": 300,
+    "synopsis": "Carson McCullers's The Heart Is a Lonely Hunter, published in 1940, is a novel about a deaf man named John Singer who lives in a small Georgia town during the Great Depression. Singer's roommate, a Greek man named Antonapoulos, is committed to an asylum, and Singer begins spending his evenings at the New York Cafe, where the town's outcasts gather to tell him their troubles: Mick Kelly, a fourteen-year-old who wants to be a musician; Dr. Copeland, a black physician consumed by rage at racial injustice; Jake Blount, a Communist agitator; and Biff Brannon, the cafe owner. Each of them projects onto Singer an understanding and compassion that he does not actually possess — Singer is a good listener, but his deafness means he often does not understand what is being said. The novel's structure — five outcasts circling around a silent center — is its meaning: McCullers shows that loneliness is universal, that the desire to be understood is the deepest human need, and that the people who seem most capable of understanding us are often the least equipped to do so. McCullers wrote it at twenty-three, and it remains one of the finest American novels of the twentieth century.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Silence of Singer",
+        "pageStart": 1,
+        "pageEnd": 50,
+        "summary": "John Singer and Antonapoulos. The deaf community. Singer as the listener to whom everyone confides."
+      },
+      {
+        "number": 2,
+        "title": "Mick Kelly",
+        "pageStart": 51,
+        "pageEnd": 100,
+        "summary": "Mick's dream of music. Her poverty. Her love for Singer. The failure of her ambitions."
+      },
+      {
+        "number": 3,
+        "title": "Dr. Copeland",
+        "pageStart": 101,
+        "pageEnd": 150,
+        "summary": "Dr. Copeland's rage at racial injustice. His estrangement from his family. His love for the classics."
+      },
+      {
+        "number": 4,
+        "title": "Jake Blount",
+        "pageStart": 151,
+        "pageEnd": 180,
+        "summary": "Jake's Communist ideology. His violence. His disillusionment. He leaves town."
+      },
+      {
+        "number": 5,
+        "title": "Biff Brannon",
+        "pageStart": 181,
+        "pageEnd": 220,
+        "summary": "Biff's quiet observations. His marriage and loss. His role as the cafe's silent observer."
+      },
+      {
+        "number": 6,
+        "title": "The End",
+        "pageStart": 221,
+        "pageEnd": 300,
+        "summary": "Antonapoulos dies. Singer kills himself. The remaining characters face the loss of their confidant."
+      }
+    ]
   },
   {
     "id": "book-members-of-the-wedding",
@@ -18479,7 +20277,7 @@
     "subtype": "Novel",
     "name": "The Member of the Wedding",
     "teaser": "Carson McCullers's 1946 novel of Frankie Addams, twelve years old and convinced she will join her brother's wedding and become a 'we.' A perfect portrait of the ache of adolescence.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780618595983-L.jpg",
     "byline": "Carson McCullers",
     "exploreAction": {
       "verb": "Read",
@@ -18493,7 +20291,38 @@
       "Southern"
     ],
     "tier": 2,
-    "pageCount": 192
+    "pageCount": 160,
+    "synopsis": "Carson McCullers's The Member of the Wedding, published in 1946, is a novel about Frankie Addams, a twelve-year-old tomboy in a Georgia town who becomes obsessed with her brother's upcoming wedding. Frankie is at the age where she feels she does not belong to anyone or anything, and she convinces herself that she, too, must join something — and so she announces that she will be the third member of her brother's marriage. The novel is a comedy of adolescent desperation, and McCullers captures the raw, unformed quality of a child on the verge of adulthood with extraordinary precision. Frankie's two companions are John Henry, a six-year-old neighbor, and Berenice, a black cook who works for Frankie's father. Their conversations — about loneliness, identity, and the desire to belong — are among the most tender scenes in American fiction. The wedding arrives and Frankie is not part of it, and the novel ends with her lying in the dark, knowing that she is still alone. McCullers's genius is in making Frankie's loneliness universal: we have all been twelve, and we have all wanted desperately to be included in something bigger than ourselves.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Kitchen",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "Frankie, John Henry, and Berenice in the kitchen. The wedding is announced. Frankie decides she will be a member."
+      },
+      {
+        "number": 2,
+        "title": "The Wedding Plans",
+        "pageStart": 41,
+        "pageEnd": 80,
+        "summary": "Frankie's preparations for the wedding. Her growing sense of not belonging. The city outside."
+      },
+      {
+        "number": 3,
+        "title": "The Midnight Ride",
+        "pageStart": 81,
+        "pageEnd": 120,
+        "summary": "Frankie wanders the town at night. She encounters a soldier. The world is different after dark."
+      },
+      {
+        "number": 4,
+        "title": "The Day of the Wedding",
+        "pageStart": 121,
+        "pageEnd": 160,
+        "summary": "The wedding arrives. Frankie realizes she is not part of it. John Henry dies. Frankie faces the future alone."
+      }
+    ]
   },
   {
     "id": "book-herzog",
@@ -18501,7 +20330,7 @@
     "subtype": "Novel",
     "name": "Herzog",
     "teaser": "Saul Bellow's 1964 novel of Moses Herzog, who copes with his collapsing life by writing unsent letters to everyone — philosophers, presidents, his ex-wife. A comic masterpiece of the thinking man's breakdown.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140189520-L.jpg",
     "byline": "Saul Bellow",
     "exploreAction": {
       "verb": "Read",
@@ -18515,7 +20344,38 @@
       "Comedy"
     ],
     "tier": 2,
-    "pageCount": 416
+    "pageCount": 341,
+    "synopsis": "Saul Bellow's Herzog, published in 1964, won the National Book Award and is widely regarded as one of the great American novels. Moses Herzog, a middle-aged intellectual, is in the middle of a personal collapse: his second wife Madeleine has left him for his best friend, and he is living alone in a cluttered house on Martha's Vineyard, writing letters to famous dead people — Spinoza, Montaigne, Nietzsche, Emerson, Einstein — that he never sends. Herzog is brilliant, sentimental, self-pitying, funny, and hopelessly out of touch with the world around him. His journey from Martha's Vineyard to New York to Chicago and back is a picaresque odyssey through American life in the 1960s, and Bellow uses Herzog's consciousness to explore everything from the history of Western philosophy to the sexual revolution to the nature of Jewish identity. The novel's famous opening — 'If I am out of my mind, it's all right with me, thought Moses Herzog' — sets the tone: Herzog is unreliable, but his unreliability is itself a form of truth. Bellow's prose is muscular, erudite, and deeply humane, and Herzog remains the best novel about the American intellectual in crisis.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Martha's Vineyard",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "Herzog alone on the Vineyard. The letters to the dead. Madeleine's betrayal. His memories."
+      },
+      {
+        "number": 2,
+        "title": "New York",
+        "pageStart": 61,
+        "pageEnd": 140,
+        "summary": "Herzog in New York. His affair with Ramona. His custody battle. His visit to Madeleine and Gersbach."
+      },
+      {
+        "number": 3,
+        "title": "Chicago",
+        "pageStart": 141,
+        "pageEnd": 220,
+        "summary": "Herzog returns to Chicago. The trial. His breakdown. He nearly kills Madeleine."
+      },
+      {
+        "number": 4,
+        "title": "Luzzato's Letter",
+        "pageStart": 221,
+        "pageEnd": 310,
+        "summary": "Herzog recovers. He receives Luzzato's letter about Spinoza. He finds peace in the ordinary."
+      }
+    ]
   },
   {
     "id": "book-confederacy-of-dunces",
@@ -18523,7 +20383,7 @@
     "subtype": "Novel",
     "name": "A Confederacy of Dunces",
     "teaser": "John Kennedy Toole's 1980 Pulitzer winner, published after his suicide — Ignatius J. Reilly, medieval scholar and slob, wages war on modern New Orleans from a hot-dog cart. One of the funniest novels ever written.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140283594-L.jpg",
     "byline": "John Kennedy Toole",
     "exploreAction": {
       "verb": "Read",
@@ -18537,7 +20397,45 @@
       "Pulitzer"
     ],
     "tier": 1,
-    "pageCount": 416
+    "pageCount": 338,
+    "synopsis": "John Kennedy Toole's A Confederacy of Dunces, published posthumously in 1980, is one of the great comic novels of the twentieth century. Ignatius J. Reilly, a fat, unemployed, medieval-obsessed man living with his mother in New Orleans, is the most memorable literary creation since Falstaff. Ignatius rages against the modern world from his bedroom, watching television while eating processed food and railing against the degeneracy of contemporary culture. When his mother crashes the family car, Ignatius is forced to seek employment, and his subsequent adventures — working at a pants factory, in a strip club, as a hot dog vendor, and eventually as a file clerk — are among the funniest sequences in American fiction. Toole killed himself in 1969 at the age of thirty-one, convinced the novel would never be published. His mother carried the manuscript for years until she finally persuaded Walker Percy to read it, and Percy was so delighted that he arranged for its publication. It won the Pulitzer Prize in 1981. The novel is a perfect comic creation: Ignatius is both repulsive and lovable, both deluded and perceptive, and New Orleans has never been captured more vividly.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Chapters 1–4 — The Car Accident",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "Ignatius and his mother. The car accident. Officer Mancuso's pursuit. Ignatius is forced to find work."
+      },
+      {
+        "number": 2,
+        "title": "Chapters 5–8 — The Pants Factory",
+        "pageStart": 61,
+        "pageEnd": 120,
+        "summary": "Ignatius works at Levy Pants. His sabotage of the factory. Jones and the other workers."
+      },
+      {
+        "number": 3,
+        "title": "Chapters 9–12 — Night of Joy",
+        "pageStart": 121,
+        "pageEnd": 180,
+        "summary": "Ignatius works at the strip club. His encounter with the vice squad. The parade disaster."
+      },
+      {
+        "number": 4,
+        "title": "Chapters 13–16 — The Hot Dog Cart",
+        "pageStart": 181,
+        "pageEnd": 240,
+        "summary": "Ignatius sells hot dogs. His fight with the pushcart vendors. The Sanctuary of the Blessed Story."
+      },
+      {
+        "number": 5,
+        "title": "Chapters 17–22 — The End",
+        "pageStart": 241,
+        "pageEnd": 338,
+        "summary": "Ignatius escapes with the sewing patterns. Myrna's bus arrives. The chase through the French Quarter. Ignatius is captured."
+      }
+    ]
   },
   {
     "id": "book-night-circus",
@@ -18545,7 +20443,7 @@
     "subtype": "Novel",
     "name": "The Night Circus",
     "teaser": "Erin Morgenstern's 2011 novel of a circus that appears without warning, open only at night — two young magicians bound in a lifelong duel of creation, played out in black-and-white tents.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780307744432-L.jpg",
     "byline": "Erin Morgenstern",
     "exploreAction": {
       "verb": "Read",
@@ -18559,7 +20457,45 @@
       "Romance"
     ],
     "tier": 1,
-    "pageCount": 528
+    "pageCount": 318,
+    "synopsis": "Erin Morgenstern's The Night Circus, published in 2011, is a novel about a magical competition between two young illusionists, Celia and Marco, who are bound by their mentors to a duel they do not understand. The competition takes place in Le Cirque des Reves, a nocturnal circus that appears without warning and contains impossible wonders: an ice garden, a cloud maze, a tent of bottled memories, a room filled with thousands of clockwork butterflies. Celia and Marco fall in love, and their love begins to unravel the rules of the competition, which demands that one of them must be destroyed. The novel is structured in non-linear time, jumping between the circus's creation, its peak, and its aftermath, and Morgenstern's prose is sensuous and immersive, devoted to the texture of the circus itself: the smell of caramel popcorn, the warmth of the bonfire, the crunch of gravel underfoot. The Night Circus is less a novel about magic than a novel about the experience of magic — the wonder, the mystery, the bittersweet knowledge that everything beautiful must end. It became a bestseller and a publishing phenomenon.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Prologue and Early Days",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "The competition is set. Chandresh and the creation of the circus. Celia and Marco are bound."
+      },
+      {
+        "number": 2,
+        "title": "The Circus Opens",
+        "pageStart": 41,
+        "pageEnd": 100,
+        "summary": "Le Cirque des Reves opens. The wonders of the circus. Celia and Marco begin their duel through creation."
+      },
+      {
+        "number": 3,
+        "title": "The Love Affair",
+        "pageStart": 101,
+        "pageEnd": 170,
+        "summary": "Celia and Marco discover the competition's purpose. They fall in love. They try to end it."
+      },
+      {
+        "number": 4,
+        "title": "The Crisis",
+        "pageStart": 171,
+        "pageEnd": 240,
+        "summary": "The competition demands sacrifice. Widget and Poppet see the future. Isobel tries to protect Marco."
+      },
+      {
+        "number": 5,
+        "title": "The Finale",
+        "pageStart": 241,
+        "pageEnd": 318,
+        "summary": "The circus transforms. Celia and Marco merge with the circus itself. The competition ends."
+      }
+    ]
   },
   {
     "id": "book-seven-husbands-of-evelyn-hugo",
@@ -18567,7 +20503,7 @@
     "subtype": "Novel",
     "name": "The Seven Husbands of Evelyn Hugo",
     "teaser": "Taylor Jenkins Reid's 2017 novel — an aging Hollywood icon finally tells her story to an unknown journalist, and the truth about her seven marriages and the great love she hid for decades.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781501161933-L.jpg",
     "byline": "Taylor Jenkins Reid",
     "exploreAction": {
       "verb": "Read",
@@ -18581,7 +20517,38 @@
       "Romance"
     ],
     "tier": 1,
-    "pageCount": 400
+    "pageCount": 389,
+    "synopsis": "Taylor Jenkins Reid's The Seven Husbands of Evelyn Hugo, published in 2017, is a novel about Evelyn Hugo, a fictional Old Hollywood star who, at seventy-nine, decides to tell the truth about her life. She summons Monique Grant, a young magazine reporter, and for the next five hundred pages, Evelyn narrates her story: her rise from a poor Cuban-American girl in Hell's Kitchen to the most famous actress in the world, her seven marriages (some strategic, some passionate, some heartbreaking), and the great love of her life — a woman named Sarah, with whom she has a secret relationship spanning decades. The novel is structured as a series of interviews, with Evelyn's voice — sharp, glamorous, unapologetic, and deeply intelligent — dominating every page. Reid's achievement is in creating a character who is simultaneously larger-than-life and completely real: Evelyn uses her beauty and her marriages as tools, but her love for Sarah is genuine, and the price she pays for her public persona is devastating. The novel is a meditation on love, identity, and the stories we tell about ourselves, and its final revelation about Monique's connection to Evelyn is a gut-punch that recontextualizes everything.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Interview Begins",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "Monique Grant is summoned. Evelyn Hugo begins her story. Her childhood in Hell's Kitchen."
+      },
+      {
+        "number": 2,
+        "title": "The Seven Husbands",
+        "pageStart": 41,
+        "pageEnd": 160,
+        "summary": "Evelyn's marriages. Each husband serves a purpose. The strategic use of beauty and charm."
+      },
+      {
+        "number": 3,
+        "title": "Sarah",
+        "pageStart": 161,
+        "pageEnd": 280,
+        "summary": "The love affair with Sarah. Their secret life. The cost of hiding in Hollywood."
+      },
+      {
+        "number": 4,
+        "title": "The Truth",
+        "pageStart": 281,
+        "pageEnd": 389,
+        "summary": "Evelyn's final years. The decision to tell the truth. The connection to Monique. The end."
+      }
+    ]
   },
   {
     "id": "book-american-gods",
@@ -18589,7 +20556,7 @@
     "subtype": "Novel",
     "name": "American Gods",
     "teaser": "Neil Gaiman's 2001 novel — Shadow, just out of prison, becomes the bodyguard of the mysterious Mr. Wednesday, who is gathering the old gods of America for a war against the new ones: media, money, technology.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780380789030-L.jpg",
     "byline": "Neil Gaiman",
     "exploreAction": {
       "verb": "Read",
@@ -18603,7 +20570,45 @@
       "Hugo Nebula"
     ],
     "tier": 1,
-    "pageCount": 592
+    "pageCount": 375,
+    "synopsis": "Neil Gaiman's American Gods, published in 2001, is a novel about Shadow Moon, a man just released from prison who discovers that the gods are real — and they are losing a war. Shadow is hired by a man named Mr. Wednesday (who is actually Odin) to serve as his bodyguard and help him recruit the old gods of mythology for a final battle against the new gods of America: Media, Technology, and the Internet. The old gods — Odin, Anansi, Czernobog, the Jinn, Easter — are diminished, living in trailers and running small businesses, their worship forgotten. The new gods are sleek and powerful but empty. Shadow's journey across America — through roadside attractions, forgotten towns, and tourist traps — becomes a meditation on what Americans believe in, and the answer is: everything and nothing. Gaiman won the Hugo and Nebula Awards, and the novel's central question — what happens to gods when people stop believing? — is answered with a devastating twist that redefines everything Shadow thought he knew. American Gods is Gaiman's most ambitious and most American work, a road novel disguised as a fantasy epic.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Shadow's Journey",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "Shadow leaves prison. His wife has died. Mr. Wednesday offers him a job."
+      },
+      {
+        "number": 2,
+        "title": "The Old Gods",
+        "pageStart": 41,
+        "pageEnd": 120,
+        "summary": "Shadow meets the old gods. Their diminished lives. The recruitment begins."
+      },
+      {
+        "number": 3,
+        "title": "The Road",
+        "pageStart": 121,
+        "pageEnd": 220,
+        "summary": "The cross-country journey. Roadside attractions. The Media. The Technology. The growing war."
+      },
+      {
+        "number": 4,
+        "title": "The War",
+        "pageStart": 221,
+        "pageEnd": 300,
+        "summary": "The old gods gather. Shadow's death and resurrection. The revelation of Wednesday's true plan."
+      },
+      {
+        "number": 5,
+        "title": "The Aftermath",
+        "pageStart": 301,
+        "pageEnd": 375,
+        "summary": "Shadow confronts Mr. World. The truth about America and its gods. Shadow's final choice."
+      }
+    ]
   },
   {
     "id": "book-anansi-boys",
