@@ -345,59 +345,6 @@
     ]
   },
   {
-    "id": "book-frankenstein",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "Frankenstein; or, The Modern Prometheus",
-    "teaser": "Mary Shelley's 1818 novel, written at 19 on a bet with Byron and Percy Shelley. The novel invented both science fiction and the recurring motif of creators failing at their own creations.",
-    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439471-L.jpg",
-    "byline": "Mary Shelley",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Volume I (Letters + first 4 chapters)",
-      "durationMinutes": 90,
-      "instruction": "Skip the famous horror scenes. Read the framing structure: a polar explorer named Walton writes letters home. The novel you're reading is one long letter he sends his sister. Walton's ambition — and the monster's revenge — are both inside that frame."
-    },
-    "tags": [
-      "Romantic",
-      "British",
-      "Gothic"
-    ],
-    "tier": 2,
-    "pageCount": 288,
-    "synopsis": "Mary Shelley wrote Frankenstein in 1816 at age 19, on a bet with Byron and Percy Shelley during a rain-soaked summer at Lake Geneva. The novel is framed as a series of letters from the Arctic explorer Robert Walton to his sister, telling the story Victor Frankenstein told him. Victor, a young natural philosopher, assembles a creature from dead body parts and brings it to life, then immediately abandons it in horror. The creature, rejected by everyone it encounters, becomes violent and murders Victor's brother, friend, and bride. Victor chases the creature to the Arctic, where Walton finds him. The novel's central question, 'Did I request thee, Maker, from my clay / To mould me Man?' (Milton's Paradise Lost, epigraph), is about the responsibility of creators to their creations. Shelley never resolves it: Victor is both sympathetic and culpable, the creature both monstrous and articulate. The novel's 1818 text is shorter and more ambiguous than the 1831 revision, which added more fate and destiny. Most scholars prefer the 1818 version.",
-    "chapters": [
-      {
-        "number": 1,
-        "title": "Walton's Letters + Chapters 1–4",
-        "pageStart": 1,
-        "pageEnd": 60,
-        "summary": "Walton in the Arctic. Victor tells his story. The creation. Victor flees."
-      },
-      {
-        "number": 2,
-        "title": "Chapters 5–12",
-        "pageStart": 61,
-        "pageEnd": 150,
-        "summary": "The creature's education. The DeLacey family. The creature demands a mate."
-      },
-      {
-        "number": 3,
-        "title": "Chapters 13–20",
-        "pageStart": 151,
-        "pageEnd": 210,
-        "summary": "Victor creates the female. Destroys it. William is murdered. Justine executed."
-      },
-      {
-        "number": 4,
-        "title": "Chapters 21–24 + Walton's conclusion",
-        "pageStart": 211,
-        "pageEnd": 288,
-        "summary": "The chase across Europe and the Arctic. Victor dies. Walton finds the creature."
-      }
-    ]
-  },
-  {
     "id": "book-great-expectations",
     "categoryId": "BOOKS",
     "subtype": "Novel",
@@ -739,52 +686,6 @@
         "pageStart": 321,
         "pageEnd": 480,
         "summary": "Knightley rebukes Emma. Frank and Jane's secret revealed. Harriet and Knightley. The proposal."
-      }
-    ]
-  },
-  {
-    "id": "book-the-picture-of-dorian-gray",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "The Picture of Dorian Gray",
-    "teaser": "Wilde's 1890 novel — a Faustian aspect-fable whose only real horror is the portrait in the attic and the question who looks at it.",
-    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439570-L.jpg",
-    "byline": "Oscar Wilde",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Picture of Dorian Gray, Chapters 1–5",
-      "durationMinutes": 60,
-      "instruction": "Read the preface before anything else — it's Wilde's manifesto. Then read chapters 1–5. Wilde structures chapters as a series of aphorisms; he said the novel was 'a lesson in the non-moral ideal of beauty.' Read the last chapter carefully — Wilde knew the end was..."
-    },
-    "tags": [
-      "Victorian",
-      "Irish-British",
-      "Novel"
-    ],
-    "tier": 2,
-    "pageCount": 254,
-    "synopsis": "Wilde's 1890 novel (expanded 1891) tells the story of Dorian Gray, a beautiful young man whose portrait ages and decays while he remains eternally young. Lord Henry Wotton introduces Dorian to a philosophy of aesthetic hedonism: 'The only way to get rid of a temptation is to yield to it.' Dorian wishes the painting would age instead of him, and the wish is granted. He pursues pleasure, destroys the actress Sibyl Vane (who kills herself), and commits a murder, all while his portrait absorbs the damage. The novel's preface ('All art is quite useless') was Wilde's manifesto; the novel itself was used as evidence against him at his 1895 trial for gross indecency. The 1890 version was published in Lippincott's Monthly Magazine and was considered more explicitly homoerotic than the 1891 revision. The novel's central question, whether beauty is a form of morality, Wilde leaves deliberately unresolved. Dorian stabs the portrait at the end and is found aged and decayed; the portrait is restored to beauty.",
-    "chapters": [
-      {
-        "number": 1,
-        "title": "Chapters 1–5 — The Wish",
-        "pageStart": 1,
-        "pageEnd": 50,
-        "summary": "Basil paints Dorian. Lord Henry's philosophy. Dorian wishes the painting would age."
-      },
-      {
-        "number": 2,
-        "title": "Chapters 6–13 — The Corruption",
-        "pageStart": 51,
-        "pageEnd": 150,
-        "summary": "Sibyl Vane. Her death. Dorian's secret life. The yellow book."
-      },
-      {
-        "number": 3,
-        "title": "Chapters 14–20 — The End",
-        "pageStart": 151,
-        "pageEnd": 254,
-        "summary": "Basil confronts Dorian. The murder. Alan Campbell. Dorian stabs the portrait."
       }
     ]
   },
@@ -1296,52 +1197,6 @@
         "pageStart": 161,
         "pageEnd": 212,
         "summary": "Kafka. The novel. The myth. Philosophy and the theatre."
-      }
-    ]
-  },
-  {
-    "id": "book-the-left-hand-of-darkness",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "The Left Hand of Darkness",
-    "teaser": "Le Guin's 1969 sci-fi novel of an envoy arriving on Gethen, a planet whose inhabitants cycle through male and female. The novel won both Hugo and Nebula in 1970.",
-    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780441478125-L.jpg",
-    "byline": "Ursula K. Le Guin",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Left Hand of Darkness, opening 30 pages",
-      "durationMinutes": 60,
-      "instruction": "Read the first chapter. The envoy arrives on a planet whose inhabitants change sex. Le Guin refuses allegory — the planet's biology is its own argument. Then read 'The Ones Who Walk Away from Omelas' (short story, ~5 pages). Read both in the same week; you'll start..."
-    },
-    "tags": [
-      "Sci-Fi",
-      "American",
-      "Feminist"
-    ],
-    "tier": 2,
-    "pageCount": 304,
-    "synopsis": "Le Guin's 1969 sci-fi novel follows Genly Ai, an envoy from the Ekumen (a loose federation of human worlds), who arrives on the planet Gethen (Winter) to persuade its nations to join. Gethen's inhabitants are ambisexual, they have no fixed gender. For most of each month they are 'somer' (neuter), and during 'kemmer' (a fertile period) they may become either male or female. The novel follows Genly's attempt to understand a world where gender doesn't exist, and his growing friendship with Estraven, a politician who is exiled and journeys with Genly across the ice. The novel won both the Hugo and Nebula awards in 1970. Le Guin drew on Taoism, Jungian psychology, and the real-life experiences of intersex and transgender people (though she acknowledged the limitations of her 1969 perspective). The novel's title comes from a Gethenian poem: 'Light is the left hand of darkness / and darkness the right hand of light.' The novel's structure alternates between Genly's narrative and Gethenian myths, creating a portrait of a world that is alien and deeply familiar.",
-    "chapters": [
-      {
-        "number": 1,
-        "title": "Arrival in Karhide",
-        "pageStart": 1,
-        "pageEnd": 80,
-        "summary": "Genly Ai arrives. Estraven's warning. The king's court. The first kemmer."
-      },
-      {
-        "number": 2,
-        "title": "Exile and Journey",
-        "pageStart": 81,
-        "pageEnd": 180,
-        "summary": "Estraven's exile. The ice journey. Genly's fear. The star-bubble vision."
-      },
-      {
-        "number": 3,
-        "title": "Across the Ice",
-        "pageStart": 181,
-        "pageEnd": 304,
-        "summary": "The crossing. Gethenian myths. Genly and Estraven's bond. The betrayal. Estraven's death."
       }
     ]
   },
@@ -6275,54 +6130,6 @@
         "pageStart": 381,
         "pageEnd": 607,
         "summary": "The connections. The wind-up bird. Kumiko's return. The end."
-      }
-    ]
-  },
-  {
-    "id": "book-the-color-purple",
-    "categoryId": "BOOKS",
-    "subtype": "Book",
-    "name": "The Color Purple (1982)",
-    "teaser": "Alice Walker's novel told through letters — first Celie's letters to God, then letters between Celie and her sister Nettie. It won the Pulitzer and the National Book Award. The novel spans 40 years of Celie's life in rural Georgia, from abuse to liberation. Walker's use of Black Southern vernacular was revolutionary — Celie's voice grows in complexity as she ages.",
-    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780156028356-L.jpg",
-    "byline": "Alice Walker",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Color Purple, first 40 letters",
-      "durationMinutes": 42,
-      "instruction": "Read the first 40 letters. Celie is 14 and pregnant by her father — she writes to God because she has no one else. The spelling is phonetic: 'I am fourteen years old. I have always been a good girl.' As Celie ages, her voice matures — the letters become longer, more analytical, more powerful. Notice the silence that surrounds female desire: Shug Avery teaches Celie that pleasure is possible. The novel earns its joy."
-    },
-    "tags": [
-      "American",
-      "Fiction",
-      "Epistolary",
-      "20th Century",
-      "Classic"
-    ],
-    "tier": 2,
-    "pageCount": 295,
-    "synopsis": "Walker's epistolary novel follows Celie, a young Black woman in rural Georgia who writes letters to God after being raped by her stepfather and having her children taken from her. The novel traces Celie's life from the early 1900s through the 1940s, as she endures an abusive marriage to Mr. ______, finds love and independence through her relationship with the singer Shug Avery, and eventually reconnects with her sister Nettie (whose letters from Africa provide a parallel narrative). The novel won the Pulitzer Prize for Fiction in 1983, making Walker the first Black woman to win. The 1985 film adaptation by Steven Spielberg was controversial for its depiction of violence. The novel remains one of the most widely read works of African-American literature.",
-    "chapters": [
-      {
-        "number": 1,
-        "title": "Letters to God",
-        "pageStart": 1,
-        "pageEnd": 80,
-        "summary": "Celie's abuse. The stepfather. The children. The marriage."
-      },
-      {
-        "number": 2,
-        "title": "Shug Avery",
-        "pageStart": 81,
-        "pageEnd": 200,
-        "summary": "Shug arrives. The love. The pants. The sister's letters."
-      },
-      {
-        "number": 3,
-        "title": "Freedom",
-        "pageStart": 201,
-        "pageEnd": 295,
-        "summary": "Celie's independence. Mr. ______'s transformation. The reunion. God is a she."
       }
     ]
   },
@@ -14937,73 +14744,6 @@
         "title": "The Conclusion",
         "pageRange": "176-205",
         "summary": "The end of the strike; Margaret and Thornton's reconciliation."
-      }
-    ]
-  },
-  {
-    "id": "book-ariel",
-    "categoryId": "BOOKS",
-    "subtype": "Poetry",
-    "name": "Ariel",
-    "teaser": "Plath's 1965 collection, assembled after her death — Lady Lazarus, Daddy, and the poems that made her a myth. A book of fury, transformation, and language pushed to its breaking point.",
-    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780060837020-L.jpg",
-    "byline": "Sylvia Plath",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Lady Lazarus and Daddy",
-      "durationMinutes": 45,
-      "instruction": "Read Lady Lazarus and Daddy aloud. Notice how Plath's rhymes and repetitions build unbearable pressure. Write what the poems do with anger — how does the speaker transform herself on the page, and what does the myth-making cost?"
-    },
-    "tags": [
-      "American",
-      "Poetry",
-      "Confessional"
-    ],
-    "tier": 1,
-    "pageCount": 208,
-    "synopsis": "Sylvia Plath's posthumous collection of poems, published in 1965, is one of the most important works of twentieth-century poetry. Written in the extraordinary period between October 1962 and February 1963,when Plath wrote nearly a poem a day while suffering from depression, insomnia, and the breakdown of her marriage to Ted Hughes,Ariel includes some of the most celebrated poems in the English language: 'Lady Lazarus,' 'Daddy,' 'Edge,' 'Fever 103°,' 'Ariel,' and 'Tulips.' Plath's voice in these poems is simultaneously confessional and mythic: she transforms personal pain into universal art, using imagery that is at once precise and hallucinatory. The collection moves from fury ('Daddy, daddy, you bastard, I'm through') to acceptance ('I am pure Negro'), and its unflinching confrontation with death, madness, and the female body has influenced generations of poets. Plath's husband Ted Hughes edited the collection after her suicide in February 1963, and the question of what she would have wanted in the final order has been debated ever since.",
-    "chapters": [
-      {
-        "chapterNumber": 1,
-        "title": "Morning Song",
-        "pageRange": "1-5",
-        "summary": "The birth of Plath's daughter Frieda."
-      },
-      {
-        "chapterNumber": 2,
-        "title": "The Colossus",
-        "pageRange": "6-10",
-        "summary": "The mythic father figure."
-      },
-      {
-        "chapterNumber": 3,
-        "title": "Lady Lazarus",
-        "pageRange": "11-15",
-        "summary": "The performance of dying and resurrection."
-      },
-      {
-        "chapterNumber": 4,
-        "title": "Daddy",
-        "pageRange": "16-20",
-        "summary": "The exorcism of the father."
-      },
-      {
-        "chapterNumber": 5,
-        "title": "Ariel",
-        "pageRange": "21-25",
-        "summary": "The horse ride at dawn; the dissolution of self."
-      },
-      {
-        "chapterNumber": 6,
-        "title": "Tulips",
-        "pageRange": "26-30",
-        "summary": "The hospital; the desire for nothingness."
-      },
-      {
-        "chapterNumber": 7,
-        "title": "Edge",
-        "pageRange": "31-33",
-        "summary": "The final poem; the perfected death."
       }
     ]
   },
@@ -27118,50 +26858,6 @@
     ]
   },
   {
-    "id": "book-brave-new-world",
-    "categoryId": "BOOKS",
-    "subtype": "Science Fiction",
-    "name": "Brave New World",
-    "teaser": "Aldous Huxley's Brave New World, published in 1932, is a dystopian novel about a future society where humans are bred in...",
-    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780060850524-L.jpg",
-    "byline": "Aldous Huxley",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Brave New World",
-      "durationMinutes": 60,
-      "instruction": "Read Brave New World and reflect."
-    },
-    "tags": [
-      "Science Fiction"
-    ],
-    "tier": 2,
-    "pageCount": 288,
-    "synopsis": "Aldous Huxley's Brave New World, published in 1932, is a dystopian novel about a future society where humans are bred in laboratories, conditioned for their predetermined roles, and kept docile with a drug called soma. The novel follows Bernard Marx, an outsider who questions the system, and John the Savage, who has been raised on a reservation outside the World State. Huxley's vision of a society where pleasure and consumption replace freedom and truth is more relevant now than when it was written.",
-    "chapters": [
-      {
-        "number": 1,
-        "title": "Chapters 1-6: The World State",
-        "pageStart": 1,
-        "pageEnd": 60,
-        "summary": "The Central London Hatchery. The caste system. Bernard's discontent."
-      },
-      {
-        "number": 2,
-        "title": "Chapters 7-12: The Reservation",
-        "pageStart": 61,
-        "pageEnd": 120,
-        "summary": "John the Savage. The collision of worlds. Lenina."
-      },
-      {
-        "number": 3,
-        "title": "Chapters 13-18: The End",
-        "pageStart": 121,
-        "pageEnd": 180,
-        "summary": "John and the World State. The soma. The final confrontation."
-      }
-    ]
-  },
-  {
     "id": "book-the-hitchhikers-guide-to-the-galaxy",
     "categoryId": "BOOKS",
     "subtype": "Science Fiction",
@@ -27447,57 +27143,6 @@
     ]
   },
   {
-    "id": "book-the-handmaids-tale",
-    "categoryId": "BOOKS",
-    "subtype": "Science Fiction",
-    "name": "The Handmaid's Tale",
-    "teaser": "Margaret Atwood's The Handmaid's Tale, published in 1985, is a dystopian novel about a theocratic society where women ar...",
-    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385490818-L.jpg",
-    "byline": "Margaret Atwood",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Handmaid's Tale",
-      "durationMinutes": 60,
-      "instruction": "Read The Handmaid's Tale and reflect."
-    },
-    "tags": [
-      "Science Fiction"
-    ],
-    "tier": 2,
-    "pageCount": 311,
-    "synopsis": "Margaret Atwood's The Handmaid's Tale, published in 1985, is a dystopian novel about a theocratic society where women are stripped of their rights and fertility is controlled by the state. Offred is a Handmaid, forced to bear children for the ruling class, and her story is told in fragmented回忆 as she navigates a world where every word and gesture is monitored. The Handmaid's Tale is both a chilling prophecy and a meditation on the fragility of women's rights.",
-    "chapters": [
-      {
-        "number": 1,
-        "title": "Chapter 1: Night",
-        "pageStart": 1,
-        "pageEnd": 20,
-        "summary": "Offred in the present. The Red Center. The memories."
-      },
-      {
-        "number": 2,
-        "title": "Chapters 2-8: The Ceremony",
-        "pageStart": 21,
-        "pageEnd": 60,
-        "summary": "The Commander's house. The ritual. The daily life."
-      },
-      {
-        "number": 3,
-        "title": "Chapters 9-15: The Resistance",
-        "pageStart": 61,
-        "pageEnd": 100,
-        "summary": "The resistance. The Eyes. The danger."
-      },
-      {
-        "number": 4,
-        "title": "Chapters 16-23: The End",
-        "pageStart": 101,
-        "pageEnd": 140,
-        "summary": "The escape. The historical notes. The ambiguity."
-      }
-    ]
-  },
-  {
     "id": "book-anathem",
     "categoryId": "BOOKS",
     "subtype": "Science Fiction",
@@ -27728,50 +27373,6 @@
         "pageStart": 181,
         "pageEnd": 281,
         "summary": "The consequences. Boo Radley's return. The meaning of courage."
-      }
-    ]
-  },
-  {
-    "id": "book-beloved",
-    "categoryId": "BOOKS",
-    "subtype": "Literary Fiction",
-    "name": "Beloved",
-    "teaser": "Toni Morrison's Beloved, published in 1987, is a novel about the legacy of slavery in America. Sethe, a former slave, li...",
-    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781400033416-L.jpg",
-    "byline": "Toni Morrison",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "Beloved",
-      "durationMinutes": 60,
-      "instruction": "Read Beloved and reflect."
-    },
-    "tags": [
-      "Literary Fiction"
-    ],
-    "tier": 2,
-    "pageCount": 324,
-    "synopsis": "Toni Morrison's Beloved, published in 1987, is a novel about the legacy of slavery in America. Sethe, a former slave, lives in Cincinnati with her daughter Denver, when a mysterious young woman named Beloved arrives and begins to disrupt their lives. Morrison's prose is lyrical and haunting, and the novel's structure, which moves between past and present, reflects the way trauma resists linear narrative. Beloved won the Pulitzer Prize and is considered Morrison's masterpiece.",
-    "chapters": [
-      {
-        "number": 1,
-        "title": "Part I: The Haunting",
-        "pageStart": 1,
-        "pageEnd": 60,
-        "summary": "Sethe's house. Beloved arrives. The past returns."
-      },
-      {
-        "number": 2,
-        "title": "Part II: The Past",
-        "pageStart": 61,
-        "pageEnd": 130,
-        "summary": "The story of slavery. The escape. The terrible act."
-      },
-      {
-        "number": 3,
-        "title": "Part III: The Reckoning",
-        "pageStart": 131,
-        "pageEnd": 200,
-        "summary": "The confrontation with the past. The exorcism. The healing."
       }
     ]
   },
@@ -29874,123 +29475,6 @@
       "controversial",
       "consumerism",
       "horror"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "book-the-kite-runner",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "The Kite Runner",
-    "teaser": "Khaled Hosseini's debut novel about friendship, betrayal, and redemption in Afghanistan.",
-    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781594631931-L.jpg",
-    "byline": "Khaled Hosseini",
-    "synopsis": "The Kite Runner, published in 2003, follows Amir, the son of a wealthy Pashtun businessman in Kabul, and Hassan, the son of his father's Hazara servant. Amir and Hassan are inseparable: they fly kites together, read stories together, and share a bond that transcends their class and ethnic differences. But Amir is jealous of his father's affection for Hassan, and when Hassan is raped by a bully named Assef during a kite-fighting tournament, Amir witnesses the assault and does nothing to stop it. Consumed by guilt, Amir frames Hassan for theft and Hassan and his father leave. When the Soviet invasion forces Amir and his father to flee to California, Amir carries his secret with him. Years later, Amir receives a call from an old family friend who tells him that there is a way to be good again. Amir returns to Taliban-controlled Afghanistan and discovers that Hassan was killed but left behind a son, Sohrab, who is being raised by Assef. Amir rescues Sohrab from Assef and brings him to California, beginning a new life with his adopted son. The novel explores the complexities of guilt, redemption, and the relationship between the privileged and the dispossessed in Afghan society.",
-    "chapters": [
-      {
-        "number": 1,
-        "title": "Kabul",
-        "pageStart": 1,
-        "pageEnd": 40,
-        "summary": "Amir and Hassan's childhood friendship in Kabul and the kite-fighting tournament."
-      },
-      {
-        "number": 2,
-        "title": "The Betrayal",
-        "pageStart": 41,
-        "pageEnd": 80,
-        "summary": "Amir witnesses Hassan's assault and does nothing, then frames him."
-      },
-      {
-        "number": 3,
-        "title": "California",
-        "pageStart": 81,
-        "pageEnd": 120,
-        "summary": "Amir and his father flee to California, where Amir grows up carrying his guilt."
-      },
-      {
-        "number": 4,
-        "title": "The Return",
-        "pageStart": 121,
-        "pageEnd": 170,
-        "summary": "Amir returns to Afghanistan to rescue Hassan's son Sohrab from the Taliban."
-      },
-      {
-        "number": 5,
-        "title": "Redemption",
-        "pageStart": 171,
-        "pageEnd": 200,
-        "summary": "Amir rescues Sohrab and brings him to California, finding a measure of peace."
-      }
-    ],
-    "pageCount": 200,
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The kite-fighting tournament",
-      "durationMinutes": 30,
-      "instruction": "Read the kite-fighting tournament scene, the turning point of the novel."
-    },
-    "tags": [
-      "afghan-american",
-      "guilt",
-      "redemption",
-      "friendship",
-      "war"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "book-the-fault-in-our-stars",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "The Fault in Our Stars",
-    "teaser": "John Green's bestselling YA novel about two teenagers with cancer who fall in love.",
-    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780525478812-L.jpg",
-    "byline": "John Green",
-    "synopsis": "The Fault in Our Stars, published in 2012, follows Hazel Grace Lancaster, a sixteen-year-old with thyroid cancer that has spread to her lungs. She uses a portable oxygen tank and spends most of her time watching a TV show called An Imperial Affliction and reading its unfinished final chapter. At a cancer support group, she meets Augustus Waters, a seventeen-year-old in remission from osteosarcoma who lost a leg to the disease. Augustus is confident, witty, and smitten with Hazel. They begin a relationship, sharing their fears and hopes. Augustus takes Hazel to Amsterdam to meet Peter Van Houten, the reclusive author of An Imperial Affliction, hoping to learn how the book ends. Van Houten turns out to be a cruel, drunk recluse who refuses to answer their questions. Devastated by the encounter, they spend the night together at the Anne Frank House. After returning home, Augustus reveals that his cancer has returned and spread throughout his body. He dies eight days later. Hazel learns that Augustus wrote her a eulogy before he died, in which he tells her that her love is his greatest achievement. The novel's title comes from Shakespeare's Julius Caesar, and its themes of love, mortality, and the fear of being forgotten are handled with a combination of humor and sadness that has made it one of the most popular young adult novels of the twenty-first century.",
-    "chapters": [
-      {
-        "number": 1,
-        "title": "The Support Group",
-        "pageStart": 1,
-        "pageEnd": 30,
-        "summary": "Hazel attends the cancer support group and meets Augustus."
-      },
-      {
-        "number": 2,
-        "title": "The Beginning",
-        "pageStart": 31,
-        "pageEnd": 60,
-        "summary": "Hazel and Augustus begin their relationship, sharing books and fears."
-      },
-      {
-        "number": 3,
-        "title": "Amsterdam",
-        "pageStart": 61,
-        "pageEnd": 100,
-        "summary": "They travel to Amsterdam to meet Peter Van Houten and face disappointment."
-      },
-      {
-        "number": 4,
-        "title": "The Return",
-        "pageStart": 101,
-        "pageEnd": 130,
-        "summary": "Augustus's cancer returns and he dies, leaving Hazel with his final words."
-      }
-    ],
-    "pageCount": 130,
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Amsterdam trip",
-      "durationMinutes": 25,
-      "instruction": "Read the Amsterdam chapters, where the characters confront both literature and loss."
-    },
-    "tags": [
-      "american",
-      "young adult",
-      "romance",
-      "cancer",
-      "contemporary"
     ],
     "tier": 1
   },
@@ -32284,5 +31768,933 @@
       "young adult"
     ],
     "tier": 1
+  },
+  {
+    "id": "book-chronicle-of-a-death-foretold",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Chronicle of a Death Foretold",
+    "teaser": "A stunning novella about a murder that everyone knew was coming.",
+    "imageUrl": "",
+    "byline": "Gabriel Garcia Marquez",
+    "synopsis": "Chronicle of a Death Foretold, published in 1981, reconstructs the events leading to the murder of Santiago Nasar in a small Colombian town. The narrator returns to the town twenty-seven years later to piece together what happened. Santiago Nasar is killed by twin brothers Pedro and Pablo Vicario to avenge the honor of their sister Angela. The shocking thing is that the entire town knew the twins were planning to kill Santiago, but no one stopped them.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Morning",
+        "pageStart": 1,
+        "pageEnd": 15,
+        "summary": "Santiago Nasar wakes up on the day he will die."
+      },
+      {
+        "number": 2,
+        "title": "The Vicarios",
+        "pageStart": 16,
+        "pageEnd": 35,
+        "summary": "The twins sharpen their knives and announce their plan."
+      },
+      {
+        "number": 3,
+        "title": "The Warning",
+        "pageStart": 36,
+        "pageEnd": 55,
+        "summary": "The town knows but fails to stop the murder."
+      },
+      {
+        "number": 4,
+        "title": "The Death",
+        "pageStart": 56,
+        "pageEnd": 70,
+        "summary": "The murder takes place in broad daylight."
+      }
+    ],
+    "pageCount": 70,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Chronicle of a Death Foretold",
+      "durationMinutes": 14,
+      "instruction": "Read the opening of Chronicle of a Death Foretold."
+    },
+    "tags": [
+      "colombian",
+      "magical realism",
+      "murder",
+      "classic",
+      "nobel"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-posthumous-memoirs-of-bras-cubas",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Posthumous Memoirs of Bras Cubas",
+    "teaser": "A Brazilian masterpiece narrated by a dead man reflecting on his life.",
+    "imageUrl": "",
+    "byline": "Machado de Assis",
+    "synopsis": "The Posthumous Memoirs of Bras Cubas, published in 1881, is narrated by a dead man who begins his memoirs from beyond the grave. Bras Cubas recounts his childhood, failed love affairs, and political career. The novel is funny, satirical, and deeply melancholic, anticipating many modernist techniques.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Epitaph",
+        "pageStart": 1,
+        "pageEnd": 15,
+        "summary": "Bras Cubas introduces himself from beyond the grave."
+      },
+      {
+        "number": 2,
+        "title": "Childhood",
+        "pageStart": 16,
+        "pageEnd": 35,
+        "summary": "His childhood and first love."
+      },
+      {
+        "number": 3,
+        "title": "Politics",
+        "pageStart": 36,
+        "pageEnd": 55,
+        "summary": "His brief political career and its failure."
+      },
+      {
+        "number": 4,
+        "title": "Quincas Borba",
+        "pageStart": 56,
+        "pageEnd": 75,
+        "summary": "His friendship with the hypochondriac philosopher."
+      }
+    ],
+    "pageCount": 75,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Posthumous Memoirs of Bras Cubas",
+      "durationMinutes": 15,
+      "instruction": "Read the opening of The Posthumous Memoirs of Bras Cubas."
+    },
+    "tags": [
+      "brazilian",
+      "classic",
+      "dead narrator",
+      "satire",
+      "nineteenth century"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-tao-te-ching",
+    "categoryId": "BOOKS",
+    "subtype": "Philosophy",
+    "name": "Tao Te Ching",
+    "teaser": "The foundational text of Taoism on the way and its power.",
+    "imageUrl": "",
+    "byline": "Lao Tzu",
+    "synopsis": "The Tao Te Ching, written around the sixth century BCE, consists of eighty-one short chapters on the Tao (the Way). It emphasizes simplicity, spontaneity, and harmony with nature. Its paradoxical wisdom has been translated into English more than any book except the Bible.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Chapter 1",
+        "pageStart": 1,
+        "pageEnd": 5,
+        "summary": "The Tao that can be spoken is not the true Tao."
+      },
+      {
+        "number": 2,
+        "title": "Chapter 8",
+        "pageStart": 6,
+        "pageEnd": 10,
+        "summary": "The highest good is like water."
+      },
+      {
+        "number": 3,
+        "title": "Chapter 33",
+        "pageStart": 11,
+        "pageEnd": 15,
+        "summary": "Knowing others is intelligence; knowing yourself is wisdom."
+      },
+      {
+        "number": 4,
+        "title": "Chapter 81",
+        "pageStart": 16,
+        "pageEnd": 20,
+        "summary": "Truthful words are not beautiful; beautiful words are not truthful."
+      }
+    ],
+    "pageCount": 20,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tao Te Ching",
+      "durationMinutes": 10,
+      "instruction": "Read the opening of Tao Te Ching."
+    },
+    "tags": [
+      "chinese",
+      "philosophy",
+      "taoism",
+      "spiritual",
+      "classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-a-suitable-boy",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "A Suitable Boy",
+    "teaser": "An epic novel set in post-independence India following a mother's search for a husband for her daughter.",
+    "imageUrl": "",
+    "byline": "Vikram Seth",
+    "synopsis": "A Suitable Boy, published in 1994, follows four families in post-independence India. Mrs. Rupa Mehra searches for a suitable boy for her daughter Lata. At over 1,500 pages, it is one of the longest novels in English.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Matchmaking",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "Mrs. Rupa Mehra begins her search."
+      },
+      {
+        "number": 2,
+        "title": "The Political",
+        "pageStart": 101,
+        "pageEnd": 250,
+        "summary": "The political landscape of post-independence India."
+      },
+      {
+        "number": 3,
+        "title": "Lata's Choice",
+        "pageStart": 251,
+        "pageEnd": 400,
+        "summary": "Lata's romantic entanglements."
+      },
+      {
+        "number": 4,
+        "title": "The Wedding",
+        "pageStart": 401,
+        "pageEnd": 500,
+        "summary": "The resolution of the matchmaking."
+      }
+    ],
+    "pageCount": 500,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Suitable Boy",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of A Suitable Boy."
+    },
+    "tags": [
+      "indian",
+      "epic",
+      "family",
+      "political",
+      "romance"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-one-flew-over-the-cuckoos-nest",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "One Flew Over the Cuckoo's Nest",
+    "teaser": "A rebel patients takes on the oppressive nurse in a mental hospital.",
+    "imageUrl": "",
+    "byline": "Ken Kesey",
+    "synopsis": "One Flew Over the Cuckoo's Nest, published in 1962, follows Randle Patrick McMurphy, a criminal who feigns insanity to avoid a prison sentence. He is sent to a mental hospital where the tyrannical Nurse Ratched controls patients through humiliation and routine. McMurphy's rebellious spirit transforms the ward, but Ratched eventually destroys him through a lobotomy. Narrated by Chief Bromden, the novel explores freedom, sanity, and institutional power.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Ward",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "McMurphy arrives and challenges Nurse Ratched."
+      },
+      {
+        "number": 2,
+        "title": "The Fishing Trip",
+        "pageStart": 41,
+        "pageEnd": 80,
+        "summary": "McMurphy takes the patients on a fishing trip."
+      },
+      {
+        "number": 3,
+        "title": "The Rebellion",
+        "pageStart": 81,
+        "pageEnd": 120,
+        "summary": "McMurphy's rebellion grows and Ratched tightens control."
+      },
+      {
+        "number": 4,
+        "title": "The Lobotomy",
+        "pageStart": 121,
+        "pageEnd": 150,
+        "summary": "McMurphy is destroyed but inspires the Chief."
+      }
+    ],
+    "pageCount": 150,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "One Flew Over the Cuckoo's Nest",
+      "durationMinutes": 30,
+      "instruction": "Read the opening of One Flew Over the Cuckoo's Nest."
+    },
+    "tags": [
+      "american",
+      "counterculture",
+      "psychiatry",
+      "rebellion",
+      "classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-heart-of-darkness",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Heart of Darkness",
+    "teaser": "Conrad's tale of a journey up the Congo River into the heart of Africa.",
+    "imageUrl": "",
+    "byline": "Joseph Conrad",
+    "synopsis": "Heart of Darkness, published in 1899, follows Marlow, a sailor who captains a steamboat up the Congo River to find Kurtz, an ivory trader who has gone mad and established himself as a god among the natives. Marlow's journey is both physical and psychological, as he confronts the darkness at the heart of colonialism and human nature. The novel explores imperialism, madness, and the thin veneer of civilization.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Thames",
+        "pageStart": 1,
+        "pageEnd": 15,
+        "summary": "Marlow begins his story on the Thames."
+      },
+      {
+        "number": 2,
+        "title": "The Company",
+        "pageStart": 16,
+        "pageEnd": 35,
+        "summary": "Marlow's first impressions of the colonial enterprise."
+      },
+      {
+        "number": 3,
+        "title": "The River",
+        "pageStart": 36,
+        "pageEnd": 60,
+        "summary": "The journey up the Congo River."
+      },
+      {
+        "number": 4,
+        "title": "Kurtz",
+        "pageStart": 61,
+        "pageEnd": 80,
+        "summary": "Marlow finds Kurtz and hears his final words."
+      }
+    ],
+    "pageCount": 80,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Heart of Darkness",
+      "durationMinutes": 16,
+      "instruction": "Read the opening of Heart of Darkness."
+    },
+    "tags": [
+      "british",
+      "colonialism",
+      "psychological",
+      "classic",
+      "imperialism"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-crime-and-punishment",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Crime and Punishment",
+    "teaser": "Dostoevsky's masterpiece about a student who commits murder and is consumed by guilt.",
+    "imageUrl": "",
+    "byline": "Fyodor Dostoevsky",
+    "synopsis": "Crime and Punishment, published in 1866, follows Raskolnikov, a destitute former student in St. Petersburg who murders an elderly pawnbroker to test his theory that extraordinary people are above moral law. Consumed by guilt and paranoia, Raskolnikov is pursued by the detective Porfiry Petrovich. His relationship with Sonya, a prostitute who represents spiritual redemption, becomes his lifeline. The novel explores the psychology of guilt, the nature of morality, and the possibility of redemption.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Crime",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "Raskolnikov murders the pawnbroker."
+      },
+      {
+        "number": 2,
+        "title": "The Guilt",
+        "pageStart": 61,
+        "pageEnd": 120,
+        "summary": "Raskolnikov is consumed by guilt and paranoia."
+      },
+      {
+        "number": 3,
+        "title": "Porfiry",
+        "pageStart": 121,
+        "pageEnd": 180,
+        "summary": "The detective closes in on Raskolnikov."
+      },
+      {
+        "number": 4,
+        "title": "Sonya",
+        "pageStart": 181,
+        "pageEnd": 240,
+        "summary": "Raskolnikov finds redemption through Sonya."
+      }
+    ],
+    "pageCount": 240,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Crime and Punishment",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Crime and Punishment."
+    },
+    "tags": [
+      "russian",
+      "psychological",
+      "philosophical",
+      "classic",
+      "guilt"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-adventures-of-huckleberry-finn",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Adventures of Huckleberry Finn",
+    "teaser": "Twain's masterpiece about a boy and a runaway slave traveling down the Mississippi.",
+    "imageUrl": "",
+    "byline": "Mark Twain",
+    "synopsis": "Adventures of Huckleberry Finn, published in 1884, follows Huck Finn as he escapes his abusive father and travels down the Mississippi River on a raft with Jim, a runaway slave. The novel is a picaresque adventure that satirizes Southern society, racism, and religious hypocrisy. Huck's moral development is the novel's central theme: he must decide whether to follow society's rules or his own conscience.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Escape",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "Huck fakes his death and meets Jim."
+      },
+      {
+        "number": 2,
+        "title": "The River",
+        "pageStart": 41,
+        "pageEnd": 100,
+        "summary": "Huck and Jim travel down the Mississippi."
+      },
+      {
+        "number": 3,
+        "title": "The Duke and the King",
+        "pageStart": 101,
+        "pageEnd": 160,
+        "summary": "Two con men join the raft and cause chaos."
+      },
+      {
+        "number": 4,
+        "title": "The End",
+        "pageStart": 161,
+        "pageEnd": 200,
+        "summary": "Huck decides to help Jim escape to freedom."
+      }
+    ],
+    "pageCount": 200,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Adventures of Huckleberry Finn",
+      "durationMinutes": 40,
+      "instruction": "Read the opening of The Adventures of Huckleberry Finn."
+    },
+    "tags": [
+      "american",
+      "classic",
+      "adventure",
+      "satire",
+      "mississippi"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-adventures-of-tom-sawyer",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Adventures of Tom Sawyer",
+    "teaser": "Twain's classic about a boy's adventures in a small Missouri town.",
+    "imageUrl": "",
+    "byline": "Mark Twain",
+    "synopsis": "The Adventures of Tom Sawyer, published in 1876, follows Tom, a mischievous boy in the fictional town of St. Petersburg, Missouri. Tom skips school, attends his own funeral, discovers buried treasure, and witnesses a murder. The novel captures the freedom and imagination of childhood in a small American town.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Painting the Fence",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "Tom tricks other boys into painting the fence for him."
+      },
+      {
+        "number": 2,
+        "title": "The Murder",
+        "pageStart": 31,
+        "pageEnd": 60,
+        "summary": "Tom and Huck witness a murder."
+      },
+      {
+        "number": 3,
+        "title": "Treasure",
+        "pageStart": 61,
+        "pageEnd": 90,
+        "summary": "Tom and Huck hunt for buried treasure."
+      }
+    ],
+    "pageCount": 90,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Adventures of Tom Sawyer",
+      "durationMinutes": 18,
+      "instruction": "Read the opening of The Adventures of Tom Sawyer."
+    },
+    "tags": [
+      "american",
+      "classic",
+      "children",
+      "humor",
+      "missouri"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-gone-with-the-wind",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Gone with the Wind",
+    "teaser": "Mitchell's sweeping Civil War epic about Scarlett O'Hara's survival in the South.",
+    "imageUrl": "",
+    "byline": "Margaret Mitchell",
+    "synopsis": "Gone with the Wind, published in 1936, follows Scarlett O'Hara, a spoiled plantation belle in Georgia, from the eve of the Civil War through Reconstruction. Scarlett marries three times, loves Ashley Wilkes, and is pursued by Rhett Butler. She survives the destruction of the South through sheer determination. The novel won the Pulitzer Prize and became one of the best-selling novels in history.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Tara",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Scarlett's life at Tara and the coming war."
+      },
+      {
+        "number": 2,
+        "title": "Atlanta",
+        "pageStart": 81,
+        "pageEnd": 180,
+        "summary": "The war destroys Atlanta and Scarlett survives."
+      },
+      {
+        "number": 3,
+        "title": "The Reconstruction",
+        "pageStart": 181,
+        "pageEnd": 300,
+        "summary": "Scarlett rebuilds her fortune during Reconstruction."
+      },
+      {
+        "number": 4,
+        "title": "Rhett",
+        "pageStart": 301,
+        "pageEnd": 400,
+        "summary": "Scarlett's marriage to Rhett and its collapse."
+      }
+    ],
+    "pageCount": 400,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Gone with the Wind",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Gone with the Wind."
+    },
+    "tags": [
+      "american",
+      "civil war",
+      "classic",
+      "southern",
+      "pulitzer"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-long-walk-to-freedom",
+    "categoryId": "BOOKS",
+    "subtype": "Memoir",
+    "name": "Long Walk to Freedom",
+    "teaser": "Mandela's autobiography from childhood through presidency of South Africa.",
+    "imageUrl": "",
+    "byline": "Nelson Mandela",
+    "synopsis": "Long Walk to Freedom, published in 1994, covers Mandela's life from his childhood in a Xhosa village through his twenty-seven years in prison to his election as South Africa's first black president. Mandela describes his education, his work with the African National Congress, his trial, and his years on Robben Island. The autobiography is a testament to the power of perseverance and the triumph of justice over oppression.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Village",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "Mandela's childhood in the Transkei."
+      },
+      {
+        "number": 2,
+        "title": "Johannesburg",
+        "pageStart": 61,
+        "pageEnd": 140,
+        "summary": "Mandela's education and entry into politics."
+      },
+      {
+        "number": 3,
+        "title": "Prison",
+        "pageStart": 141,
+        "pageEnd": 300,
+        "summary": "Twenty-seven years in prison and the fight against apartheid."
+      },
+      {
+        "number": 4,
+        "title": "Freedom",
+        "pageStart": 301,
+        "pageEnd": 400,
+        "summary": "Release from prison and the transition to democracy."
+      }
+    ],
+    "pageCount": 400,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Long Walk to Freedom",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Long Walk to Freedom."
+    },
+    "tags": [
+      "south african",
+      "memoir",
+      "apartheid",
+      "politics",
+      "nobel"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-time-machine",
+    "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
+    "name": "The Time Machine",
+    "teaser": "Wells's classic about a traveler who journeys to the year 802,701 AD.",
+    "imageUrl": "",
+    "byline": "H.G. Wells",
+    "synopsis": "The Time Machine, published in 1895, follows an unnamed Time Traveller who builds a machine that carries him to the year 802,701 AD. There he discovers two species: the Eloi, gentle but childlike creatures who live on the surface, and the Morlocks, pale underground creatures who maintain machinery. The Traveller eventually escapes and returns to his own time, but later disappears on another journey. Wells used the novel to explore class division and the consequences of social inequality.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Departure",
+        "pageStart": 1,
+        "pageEnd": 15,
+        "summary": "The Time Traveller demonstrates his machine."
+      },
+      {
+        "number": 2,
+        "title": "The Future",
+        "pageStart": 16,
+        "pageEnd": 35,
+        "summary": "The Traveller arrives in the year 802,701."
+      },
+      {
+        "number": 3,
+        "title": "The Eloi",
+        "pageStart": 36,
+        "pageEnd": 50,
+        "summary": "The Traveller encounters the Eloi and discovers the Morlocks."
+      },
+      {
+        "number": 4,
+        "title": "The Return",
+        "pageStart": 51,
+        "pageEnd": 60,
+        "summary": "The Traveller returns to his own time."
+      }
+    ],
+    "pageCount": 60,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Time Machine",
+      "durationMinutes": 12,
+      "instruction": "Read the opening of The Time Machine."
+    },
+    "tags": [
+      "british",
+      "science fiction",
+      "time travel",
+      "classic",
+      "social commentary"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-2001-a-space-odyssey",
+    "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
+    "name": "2001: A Space Odyssey",
+    "teaser": "Clarke's novel about a mysterious monolith and humanity's journey to Jupiter.",
+    "imageUrl": "",
+    "byline": "Arthur C. Clarke",
+    "synopsis": "2001: A Space Odyssey, published in 1968, was developed alongside Stanley Kubrick's film. The novel follows the discovery of a mysterious monolith on the Moon and the subsequent mission to Jupiter aboard the Discovery One. The ship's AI, HAL 9000, malfunctions and kills most of the crew. Dave Bowman survives and encounters the monolith, which propels him through space and transforms him into the Star Child. The novel explores human evolution, artificial intelligence, and the possibility of extraterrestrial guidance.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Monolith",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "The monolith is discovered on the Moon."
+      },
+      {
+        "number": 2,
+        "title": "Discovery One",
+        "pageStart": 31,
+        "pageEnd": 60,
+        "summary": "The mission to Jupiter and the introduction of HAL."
+      },
+      {
+        "number": 3,
+        "title": "HAL's Malfunction",
+        "pageStart": 61,
+        "pageEnd": 80,
+        "summary": "HAL kills the crew and Dave fights back."
+      },
+      {
+        "number": 4,
+        "title": "The Star Child",
+        "pageStart": 81,
+        "pageEnd": 100,
+        "summary": "Dave encounters the monolith and is transformed."
+      }
+    ],
+    "pageCount": 100,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "2001: A Space Odyssey",
+      "durationMinutes": 20,
+      "instruction": "Read the opening of 2001: A Space Odyssey."
+    },
+    "tags": [
+      "british",
+      "science fiction",
+      "space",
+      "ai",
+      "classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-turtles-all-the-way-down",
+    "categoryId": "BOOKS",
+    "subtype": "Young Adult",
+    "name": "Turtles All the Way Down",
+    "teaser": "A novel about anxiety, obsession, and a mysterious fugitive billionaire.",
+    "imageUrl": "",
+    "byline": "John Green",
+    "synopsis": "Turtles All the Way Down, published in 2017, follows Aza Holmes, a sixteen-year-old girl struggling with severe OCD and anxiety. When a fugitive billionaire named Davis Pickett disappears, Aza and her best friend Daisy investigate, and Aza begins a relationship with Davis's son. The novel is Green's most personal, exploring the experience of living with anxiety from the inside.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Davis Pickett",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "Aza learns about the fugitive billionaire and meets Davis."
+      },
+      {
+        "number": 2,
+        "title": "The Investigation",
+        "pageStart": 31,
+        "pageEnd": 70,
+        "summary": "Aza and Daisy investigate and Aza's anxiety worsens."
+      },
+      {
+        "number": 3,
+        "title": "Davis",
+        "pageStart": 71,
+        "pageEnd": 100,
+        "summary": "Aza and Davis grow closer as Aza struggles."
+      },
+      {
+        "number": 4,
+        "title": "Resolution",
+        "pageStart": 101,
+        "pageEnd": 120,
+        "summary": "Aza finds peace with her condition."
+      }
+    ],
+    "pageCount": 120,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Turtles All the Way Down",
+      "durationMinutes": 24,
+      "instruction": "Read the opening of Turtles All the Way Down."
+    },
+    "tags": [
+      "american",
+      "young adult",
+      "anxiety",
+      "mental health",
+      "romance"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-ill-give-you-the-sun",
+    "categoryId": "BOOKS",
+    "subtype": "Young Adult",
+    "name": "I'll Give You the Sun",
+    "teaser": "A novel about twin artists told from alternating perspectives.",
+    "imageUrl": "",
+    "byline": "Jandy Nelson",
+    "synopsis": "I'll Give You the Sun, published in 2014, alternates between the perspectives of twin siblings Jude and Noah. At thirteen, Noah is an artist who falls in love with a boy. At sixteen, Jude is a surfer who takes up art. The novel reveals the tragedy that separated them and the art that eventually brings them back together.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Noah",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "Noah at thirteen, painting and falling in love."
+      },
+      {
+        "number": 2,
+        "title": "Jude",
+        "pageStart": 61,
+        "pageEnd": 120,
+        "summary": "Jude at sixteen, surfing and taking up art."
+      },
+      {
+        "number": 3,
+        "title": "The Truth",
+        "pageStart": 121,
+        "pageEnd": 160,
+        "summary": "The tragedy that separated the twins."
+      },
+      {
+        "number": 4,
+        "title": "The Reunion",
+        "pageStart": 161,
+        "pageEnd": 180,
+        "summary": "Art brings the twins back together."
+      }
+    ],
+    "pageCount": 180,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "I'll Give You the Sun",
+      "durationMinutes": 36,
+      "instruction": "Read the opening of I'll Give You the Sun."
+    },
+    "tags": [
+      "american",
+      "young adult",
+      "art",
+      "family",
+      "lgbtq"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-thirteen-reasons-why",
+    "categoryId": "BOOKS",
+    "subtype": "Young Adult",
+    "name": "Thirteen Reasons Why",
+    "teaser": "A novel about a girl who leaves thirteen tapes explaining why she killed herself.",
+    "imageUrl": "",
+    "byline": "Jay Asher",
+    "synopsis": "Thirteen Reasons Why, published in 2007, follows Clay Jensen, who receives a box of cassette tapes recorded by Hannah Baker, a classmate who committed suicide. The tapes list thirteen people who contributed to her death. Clay spends a night listening and retracing Hannah's final days. The novel explores bullying, sexual assault, and the impact of our actions on others.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Tapes",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "Clay receives the tapes and begins listening."
+      },
+      {
+        "number": 2,
+        "title": "The List",
+        "pageStart": 31,
+        "pageEnd": 70,
+        "summary": "Each tape reveals a person who wronged Hannah."
+      },
+      {
+        "number": 3,
+        "title": "The Night",
+        "pageStart": 71,
+        "pageEnd": 100,
+        "summary": "Clay follows the tapes through a long night."
+      },
+      {
+        "number": 4,
+        "title": "The End",
+        "pageStart": 101,
+        "pageEnd": 110,
+        "summary": "The final tape and Clay's realization."
+      }
+    ],
+    "pageCount": 110,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Thirteen Reasons Why",
+      "durationMinutes": 22,
+      "instruction": "Read the opening of Thirteen Reasons Why."
+    },
+    "tags": [
+      "american",
+      "young adult",
+      "suicide",
+      "bullying",
+      "contemporary"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-we-have-always-lived-in-the-castle",
+    "categoryId": "BOOKS",
+    "subtype": "Horror",
+    "name": "We Have Always Lived in the Castle",
+    "teaser": "Jackson's eerie tale of two sisters living in isolation after a family tragedy.",
+    "imageUrl": "",
+    "byline": "Shirley Jackson",
+    "synopsis": "We Have Always Lived in the Castle, published in 1962, follows Merricat and Constance Blackwood, sisters living in isolation in their family estate. The rest of their family died from arsenic in the sugar bowl six years earlier. Constance was acquitted of the murders, and Merricat, the younger sister, is deeply protective of her. When their uncle Charles arrives, Merricat resorts to increasingly desperate measures to protect her world. The novel explores paranoia, family dynamics, and the costs of isolation.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The House",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "Merricat describes her world and her rituals."
+      },
+      {
+        "number": 2,
+        "title": "Charles",
+        "pageStart": 31,
+        "pageEnd": 60,
+        "summary": "Uncle Charles arrives and disrupts the sisters' routine."
+      },
+      {
+        "number": 3,
+        "title": "The Fire",
+        "pageStart": 61,
+        "pageEnd": 80,
+        "summary": "Merricat's increasingly desperate acts."
+      },
+      {
+        "number": 4,
+        "title": "The End",
+        "pageStart": 81,
+        "pageEnd": 90,
+        "summary": "The sisters retreat further into their world."
+      }
+    ],
+    "pageCount": 90,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "We Have Always Lived in the Castle",
+      "durationMinutes": 18,
+      "instruction": "Read the opening of We Have Always Lived in the Castle."
+    },
+    "tags": [
+      "american",
+      "horror",
+      "gothic",
+      "psychological",
+      "classic"
+    ],
+    "tier": 2
   }
 ]
