@@ -259,6 +259,19 @@ object AppPreferences {
     fun setLastNotifiedUpdateVersion(context: Context, version: String) =
         prefs(context).edit().putString(KEY_LAST_NOTIFIED_UPDATE, version).apply()
 
+    // ── Topic catalog sync version (v294) ─────────────────────────────
+    // The app version code whose topic catalog was last imported/synced into
+    // Room. The JSON→Room sync runs ONCE per app update (newly authored
+    // topics ship in releases); every other launch serves topics straight
+    // from Room without re-parsing the JSON assets.
+    private const val KEY_LAST_CATALOG_SYNC_VERSION = "last_catalog_sync_version"
+
+    fun getTopicCatalogSyncVersion(context: Context): Int =
+        prefs(context).getInt(KEY_LAST_CATALOG_SYNC_VERSION, 0)
+
+    fun setTopicCatalogSyncVersion(context: Context, version: Int) =
+        prefs(context).edit().putInt(KEY_LAST_CATALOG_SYNC_VERSION, version).apply()
+
     // ── Update-check result cache (v115) ─────────────────────────────
     // The last successful check's release info is SAVED locally so the
     // Updates page shows the release notes instantly on open — no

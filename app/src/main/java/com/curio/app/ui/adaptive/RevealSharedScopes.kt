@@ -27,10 +27,11 @@ const val RevealSharedElementKey = "reveal-hero"
  * spring overshoot or a late settling wobble.
  */
 val RevealBoundsTransform = BoundsTransform { _, _ ->
-    // v8.50 — snappy spring that settles in ~280ms (stiffness 800,
-    // damping 0.92). The previous 420-stiffness spring took 500ms+ to
-    // settle and its long tail blocked quick open→back gestures.
-    spring(dampingRatio = 0.92f, stiffness = 800f)
+    // v0 — critically damped (0.98) spring at stiffness 650: settles in
+    // ~160ms with zero overshoot. The earlier 800/0.92 spring snapped on
+    // the first frame of the big ticket→hero bounds change and its slight
+    // under-damping read as a jittery settle right under the morph.
+    spring(dampingRatio = 0.98f, stiffness = 650f)
 }
 
 /**
