@@ -139,6 +139,14 @@ class MainActivity : ComponentActivity() {
         // now runs to completion regardless (parses are bounded by the
         // loader's gate, so it can't hog the CPU).
         lifecycleScope.launch {
+            // Wait for the one-time Room import / warm-start cache fill before
+            // pre-warming the loader: on warm starts TopicRepository.init() is
+            // instant (Room already holds the catalog) and pre-warming from
+            // the warmed caches means ZERO JSON re-parsing — the old racing
+            // launch could beat init() and re-read every lane's JSON.
+            withContext(kotlinx.coroutines.Dispatchers.IO) {
+                com.curio.app.data.TopicRepository.init(this@MainActivity)
+            }
             withContext(kotlinx.coroutines.NonCancellable) {
                 runCatching { TopicJsonLoader.loadIndex() }
                 runCatching { TopicJsonLoader.preloadAll() }

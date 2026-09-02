@@ -1,9 +1,8 @@
 package com.curio.app.data
 
 import android.content.Context
-import android.database.sqlite.SQLiteDatabase
 import android.util.Log
-import java.io.File
+import com.curio.app.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -48,14 +47,45 @@ object TopicRepository {
         initializationMutex.withLock {
             if (initialized) return
 
-  appContext = context.applicationContext
-  val bundledCount = TopicAssetStore.count(context)
-  if (bundledCount > 0) {
-  initialized = true
-  Log.i("TopicRepository", "Opened bundled topic database with $bundledCount rows")
-  } else {
-  Log.e("TopicRepository", "Bundled topic database is empty; will retry next launch")
-  }
+            appContext = context.applicationContext
+            val db = CurioDatabase.getInstance(context)
+            val dao = db.topicDao()
+            val count = dao.getTotalCount()
+
+            // Populate before marking the repository ready — reading an empty
+            // Room table while the import is still running would make the
+            // splash hand off an empty catalog (the old code set
+            // initialized=true first, letting screens query an empty table).
+            if (count == 0) {
+                populateFromJson(context, dao)
+                // A fresh import writes the FULL catalog from JSON — remember
+                // this version so the upgrade-only sync below doesn't re-parse
+                // every lane again in the same release.
+                AppPreferences.setTopicCatalogSyncVersion(context, BuildConfig.VERSION_CODE)
+            }
+
+            val importedCount = dao.getTotalCount()
+            if (importedCount > 0) {
+                // Re-sync from the JSON assets only when the app was UPDATED
+                // (newly authored topics/content ship in releases), never on
+                // every process restart — the parsed catalog is immutable
+                // between versions, so per-launch syncs would re-parse every
+                // lane of JSON for no reason. Room already holds it.
+                val currentVersion = BuildConfig.VERSION_CODE
+                if (AppPreferences.getTopicCatalogSyncVersion(context) != currentVersion) {
+                    syncCatalogFromJson(context, dao)
+                    AppPreferences.setTopicCatalogSyncVersion(context, currentVersion)
+                }
+                initialized = true
+                // v294 — Pre-warm TopicJsonLoader caches from Room so
+                // counts and topic data are available immediately on
+                // restart (the in-memory caches are empty after process
+                // death). Loader reads then hit the warm cache / Room fast
+                // path instead of re-parsing JSON files.
+                warmLoaderFromRoom(dao)
+            } else {
+                Log.e("TopicRepository", "Topic import completed with zero rows; will retry next launch")
+            }
         }
     }
 
@@ -87,62 +117,6 @@ object TopicRepository {
         } catch (e: Exception) {
             Log.w("TopicRepository", "Failed to warm loader from Room: ${e.message}")
         }
-    }
-
-    /** Rebuild the Room topics table from the bundled SQLite asset. */
-    suspend fun importBundledRoomDatabase(context: Context): Int = withContext(Dispatchers.IO) {
-        initializationMutex.withLock { importBundledRoomDatabaseLocked(context) }
-    }
-
-    private suspend fun importBundledRoomDatabaseLocked(context: Context): Int = withContext(Dispatchers.IO) {
-            val db = CurioDatabase.getInstance(context)
-            val dao = db.topicDao()
-            val assetFile = File(context.cacheDir, "topics-import.db")
-            try {
-                context.assets.open("topics.db").use { input ->
-                    assetFile.outputStream().use { output -> input.copyTo(output) }
-                }
-                SQLiteDatabase.openDatabase(assetFile.path, null, SQLiteDatabase.OPEN_READONLY).use { source ->
-                    source.rawQuery("SELECT * FROM topics", null).use { cursor ->
-                        val imported = mutableListOf<TopicEntity>()
-                        while (cursor.moveToNext()) {
-                            imported += TopicEntity(
-                                id = cursor.getString(cursor.getColumnIndexOrThrow("id")),
-                                categoryId = cursor.getString(cursor.getColumnIndexOrThrow("categoryId")),
-                                subtype = cursor.getString(cursor.getColumnIndexOrThrow("subtype")),
-                                name = cursor.getString(cursor.getColumnIndexOrThrow("name")),
-                                teaser = cursor.getString(cursor.getColumnIndexOrThrow("teaser")),
-                                imageUrl = cursor.getString(cursor.getColumnIndexOrThrow("imageUrl")),
-                                byline = cursor.getString(cursor.getColumnIndexOrThrow("byline")),
-                                tags = cursor.getString(cursor.getColumnIndexOrThrow("tags")),
-                                tier = cursor.getInt(cursor.getColumnIndexOrThrow("tier")),
-                                exploreVerb = cursor.getString(cursor.getColumnIndexOrThrow("exploreVerb")),
-                                exploreTargetName = cursor.getString(cursor.getColumnIndexOrThrow("exploreTargetName")),
-                                exploreDurationMinutes = cursor.getInt(cursor.getColumnIndexOrThrow("exploreDurationMinutes")),
-                                exploreInstruction = cursor.getString(cursor.getColumnIndexOrThrow("exploreInstruction")),
-                                pageCount = cursor.getNullableInt("pageCount"),
-                                episodeCount = cursor.getNullableInt("episodeCount"),
-                                altPageLabel = cursor.getString(cursor.getColumnIndexOrThrow("altPageLabel")),
-                                altPageCount = cursor.getNullableInt("altPageCount"),
-                                synopsis = try { cursor.getString(cursor.getColumnIndexOrThrow("synopsis")) } catch (_: Exception) { "" },
-                                chapters = try { cursor.getString(cursor.getColumnIndexOrThrow("chapters")) } catch (_: Exception) { "" }
-                            )
-                        }
-                        require(imported.isNotEmpty()) { "Bundled topics.db contains no topics" }
-                        dao.deleteAll()
-                        dao.insertAll(imported)
-                        initialized = true
-                        imported.size
-                    }
-                }
-            } finally {
-                assetFile.delete()
-            }
-        }
-
-    private fun android.database.Cursor.getNullableInt(column: String): Int? {
-        val index = getColumnIndexOrThrow(column)
-        return if (isNull(index)) null else getInt(index)
     }
 
     /**
@@ -188,12 +162,6 @@ object TopicRepository {
      * Room was actually populated before marking ready.
      */
     private suspend fun populateFromJson(context: Context, dao: TopicDao) {
-        try {
-            importBundledRoomDatabaseLocked(context)
-            return
-        } catch (error: Exception) {
-            Log.w("TopicRepository", "Bundled Room asset unavailable; falling back to JSON", error)
-        }
         withContext(Dispatchers.IO) {
             // Ensure TopicJsonLoader is installed
             TopicJsonLoader.install(context)
@@ -218,15 +186,10 @@ object TopicRepository {
     }
 
     /** Get all topics for a category (from Room, instant). */
-  suspend fun getTopicsForCategory(
-  context: Context,
-  categoryId: CategoryId,
-  limit: Int = 50,
-  offset: Int = 0,
-  ): List<CurioTopic> = withContext(Dispatchers.IO) {
-  TopicAssetStore.byCategory(context, categoryId.name, limit.coerceIn(1, 100), offset.coerceAtLeast(0))
-  .map { it.toCurioTopic() }
-  }
+    suspend fun getTopicsForCategory(context: Context, categoryId: CategoryId): List<CurioTopic> {
+        val dao = CurioDatabase.getInstance(context).topicDao()
+        return dao.getByCategory(categoryId.name).map { it.toCurioTopic() }
+    }
 
     /** Resolve a topic within its category so duplicate names cannot cross lanes. */
     suspend fun findTopic(context: Context, categoryId: CategoryId, name: String): CurioTopic? {
@@ -235,9 +198,9 @@ object TopicRepository {
             .firstOrNull { it.name == name || it.name.equals(name, ignoreCase = true) }
             ?: return null
 
-        // A bundled topics.db can contain the catalog shell while newer
-        // authored fields live in the JSON assets. Hydrate the visible topic
-        // on demand, persist it, and return the hydrated row immediately.
+        // Room rows can carry stale authored fields (imported before a data
+        // update). Hydrate the visible topic from the JSON assets on demand,
+        // persist the fresh fields, and return the hydrated row immediately.
         if (entity.teaser.isBlank() || entity.synopsis.isBlank() && categoryId == CategoryId.BOOKS) {
             runCatching {
                 TopicJsonLoader.install(context)
