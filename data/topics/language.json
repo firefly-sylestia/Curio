@@ -1955,421 +1955,961 @@
   {
     "id": "language-constructed-languages-1",
     "name": "Constructed Languages",
-    "category": "LANGUAGE",
     "teaser": "Artificial languages created for specific purposes. Esperanto, invented in 1887 by L.L. Zamenhof, has about 2 million speakers. Klingon from Star Trek has 30,000 fluent speakers. Tolkien invented 14 languages for Middle-earth, with Quenya modeled on Finnish.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Constructed Languages end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Constructed Languages — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-language-death-1",
     "name": "Language Death",
-    "category": "LANGUAGE",
     "teaser": "When a language loses its last native speaker. About one language dies every two weeks — of 7,000 languages, half may vanish by 2100. Yuchi in Oklahoma has fewer than 5 speakers, all over 80. The Endangered Languages Project documents at-risk languages.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Language Death end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Language Death — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-pig-latin",
     "name": "Pig Latin",
-    "category": "LANGUAGE",
     "teaser": "A language game where syllables are rearranged — 'hello' becomes 'ello-hay.' It originated in English-speaking countries as a children's code. In Okinawan Pig Latin, the rules differ completely, showing the game adapts to each language's phonology.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Pig Latin end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Pig Latin — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-backslang",
     "name": "Backslang",
-    "category": "LANGUAGE",
     "teaser": "Reversing syllables for coded speech — 'yob' for boy, 'evref' for free. Victorian police used it as cant. British English absorbed many backslang words: 'somethink' for something comes from reversing 'nik-emos' in 19th century thieves' argot.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Backslang end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Backslang — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-palindromes",
     "name": "Palindromes",
-    "category": "LANGUAGE",
     "teaser": "Words, phrases, or sentences that read the same backward and forward. 'A man, a plan, a canal: Panama' is a famous palindrome. The longest known English palindrome is 58,542 characters, a translation of the Epic of Gilgamesh by Mike Keith.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Palindromes end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Palindromes — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-spoonerisms",
     "name": "Spoonerisms",
-    "category": "LANGUAGE",
     "teaser": "Speech errors or jokes where initial sounds are swapped, named after Oxford clergyman W.A. Spooner. 'You have hissed all my mystery lectures' replaces 'You have missed all my history lectures.' The Wizard of Oz' became 'The Whizz of Odd.'",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Spoonerisms end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Spoonerisms — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-dead-languages",
     "name": "Dead Languages",
-    "category": "LANGUAGE",
     "teaser": "Languages with no living native speakers but preserved in texts and liturgy. Latin remains in Vatican City, legal systems, and scientific nomenclature. Sanskrit, Ancient Egyptian, and Sumerian survive in religious and academic contexts despite being centuries dead.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Dead Languages end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Dead Languages — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-abugidas",
     "name": "Abugidas",
-    "category": "LANGUAGE",
     "teaser": "Writing systems where each character represents a consonant-vowel unit, with vowels indicated by diacritics. Devanagari (used for Hindi) and Ge'ez (Ethiopic) are abugidas. Unlike alphabets, vowels are not equal partners but modifications of consonant signs.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Abugidas end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Abugidas — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-toki-pona-1",
     "name": "Toki Pona",
-    "category": "LANGUAGE",
     "teaser": "A minimal constructed language with only 137 words, created by Sonja Lang in 2001. It forces speakers to express complex ideas simply. 'Hospital' becomes 'house of sick people.' It's used for meditation, poetry, and philosophical thought experiments.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Toki Pona end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Toki Pona — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-polysynthetic-languages",
     "name": "Polysynthetic Languages",
-    "category": "LANGUAGE",
     "teaser": "Languages that pack entire sentences into single words through extensive morphology. Mohawk can combine dozens of morphemes into one word. Yupik Eskimo can create words meaning 'when they pretend to be worried about you' as a single unit.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Polysynthetic Languages end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Polysynthetic Languages — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-linguistic-relativity-1",
     "name": "Linguistic Relativity",
-    "category": "LANGUAGE",
     "teaser": "The Sapir-Whorf hypothesis that language shapes thought and perception. The Hopi language has no past or future tense, leading to different time concepts. Russian speakers distinguish light blue (goluboy) and dark blue (siniy) faster than English speakers.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Linguistic Relativity end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Linguistic Relativity — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-cuneiform-1",
     "name": "Cuneiform",
-    "category": "LANGUAGE",
     "teaser": "The earliest known writing system, developed in Sumer around 3400 BCE using wedge-shaped marks on clay tablets. It recorded everything from commerce to Epic of Gilgamesh. Sumerian scribes needed years of training — cuneiform was one of history's first professions.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Cuneiform end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Cuneiform — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-sign-language-1",
     "name": "Sign Language",
-    "category": "LANGUAGE",
     "teaser": "Visual-gestural languages used by deaf communities worldwide. American Sign Language and British Sign Language are completely different — ASL is closer to French Sign Language. Nicaraguan Sign Language spontaneously emerged in the 1980s when deaf children were brought together.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Sign Language end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sign Language — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-hieroglyphics",
     "name": "Hieroglyphics",
-    "category": "LANGUAGE",
     "teaser": "The formal writing system of ancient Egypt using pictorial symbols. Ancient Egyptians called it 'words of the gods.' The Rosetta Stone, discovered in 1799, enabled Jean-François Champollion to crack the code in 1822, unlocking 3,000 years of Egyptian history.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Hieroglyphics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Hieroglyphics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-writing-systems-evolution",
     "name": "Writing Systems Evolution",
-    "category": "LANGUAGE",
     "teaser": "From proto-Sinaitic glyphs around 1800 BCE to modern alphabets. The Phoenician alphabet spread via trade, inspiring Greek (which added vowels), which became Latin and Cyrillic. Hanzi Chinese characters, independently invented around 1200 BCE, are still used today.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Writing Systems Evolution end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Writing Systems Evolution — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-korean-hangul-1",
     "name": "Korean Hangul",
-    "category": "LANGUAGE",
     "teaser": "Considered one of the most scientific writing systems, invented in 1443 by King Sejong the Great. Each letter represents the shape of the tongue and mouth when making the sound. It was deliberately designed so commoners could learn it in days, not years.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Korean Hangul end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Korean Hangul — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-logograms",
     "name": "Logograms",
-    "category": "LANGUAGE",
     "teaser": "Writing systems where each symbol represents a word or morpheme rather than a sound. Chinese characters are the most widely used logograms, with over 50,000 in existence. Egyptian hieroglyphs and Sumerian cuneiform were also logographic, but most evolved toward phonetic writing.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Logograms end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Logograms — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-phonograms",
     "name": "Phonograms",
-    "category": "LANGUAGE",
     "teaser": "Symbols that represent sounds rather than meanings. The English alphabet is a phonogram system where each letter typically represents one or more sounds. A writing system can be purely phonetic (Korean Hangul), mixed (Japanese), or purely logographic (classical Chinese).",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Phonograms end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Phonograms — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-sandhi",
     "name": "Sandhi",
-    "category": "LANGUAGE",
     "teaser": "Phonological changes that occur at word or morpheme boundaries in languages like Sanskrit, Hindi, and Tamil. In Sanskrit, 'tat + eka' becomes 'tadeka.' Hindi vowel sandhi changes 'parā + aho' to 'parāho.' These rules make connected speech flow naturally.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Sandhi end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sandhi — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-evidentiality",
     "name": "Evidentiality",
-    "category": "LANGUAGE",
     "teaser": "A grammatical category that indicates the source of information. In Turkish, '-mış' marks hearsay while '-di' marks direct experience. Quechua distinguishes visual, inferential, and reported evidence. English can express this loosely with 'apparently' or 'I saw that.'",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Evidentiality end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Evidentiality — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-whorfian-effects-in-color",
     "name": "Whorfian Effects in Color",
-    "category": "LANGUAGE",
     "teaser": "Berlin and Kay's 1969 research showed all languages have basic color terms, but the number varies from 2 (Himba) to 11 (Russian). Russian speakers distinguish light blue (goluboy) and dark blue (siniy) faster than English speakers because their language treats them as separate categories.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Whorfian Effects in Color end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Whorfian Effects in Color — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-pirah-language",
     "name": "Pirahã Language",
-    "category": "LANGUAGE",
     "teaser": "An Amazonian language with arguably no recursion, no numbers, no fixed color terms, and no words for quantities beyond 'few' and 'many.' Daniel Everett's 2005 claim that it lacks recursion challenged Noam Chomsky's theory of universal grammar.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Pirahã Language end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Pirahã Language — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-constructed-script-systems",
     "name": "Constructed Script Systems",
-    "category": "LANGUAGE",
     "teaser": "Invented writing systems like Shavian (created in 1960 for English using George Bernard Shaw's bequest), Deseret (a phonetic script for English from 1854), and Blissymbols (a pictographic communication system for the speech-impaired created by Charles K. Bliss).",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Constructed Script Systems end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Constructed Script Systems — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-loanwords",
     "name": "Loanwords",
-    "category": "LANGUAGE",
     "teaser": "Words adopted from one language into another. English has borrowed 'kindergarten' from German, 'sushi' from Japanese, 'ballet' from French, and 'algorithm' from Arabic (from al-Khwarizmi's name). About 30% of English vocabulary comes from French.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Loanwords end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Loanwords — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-wug-test",
     "name": "Wug Test",
-    "category": "LANGUAGE",
     "teaser": "Jean Berko Gleason's 1958 experiment proving children internalize grammatical rules, not just memorized words. Children shown a 'wug' and asked about two of them correctly say 'wugs,' demonstrating productive morphology. It revolutionized child language acquisition research.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Wug Test end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Wug Test — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-creoles-and-pidgins",
     "name": "Creoles and Pidgins",
-    "category": "LANGUAGE",
     "teaser": "Pidgins are simplified trade languages; when children acquire a pidgin as a native language, it becomes a creole with expanded grammar. Haitian Creole blends French with West African languages and has 12 million speakers. Tok Pisin, Papua New Guinea's official language, is an English-based creole.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Creoles and Pidgins end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Creoles and Pidgins — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-language-contact-phenomena",
     "name": "Language Contact Phenomena",
-    "category": "LANGUAGE",
     "teaser": "When languages interact through bilingual speakers, they influence each other. Code-switching alternates between languages mid-sentence. Calques translate phrases literally — 'Itch-kick' is a Calque of 'itch' in some Native American languages. About 200 sign languages evolved independently.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Language Contact Phenomena end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Language Contact Phenomena — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-oldest-known-languages",
     "name": "Oldest Known Languages",
-    "category": "LANGUAGE",
     "teaser": "Sumerian (written, 3400 BCE) and Egyptian (written, 3200 BCE) are the oldest with written records. Spoken, Basque may predate Indo-European arrival in Europe 6,000 years ago. Tamil has a continuous literary tradition spanning 2,300+ years.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Oldest Known Languages end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Oldest Known Languages — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-writing-system-invention",
     "name": "Writing System Invention",
-    "category": "LANGUAGE",
     "teaser": "Writing was independently invented at least five times: Sumerian cuneiform, Egyptian hieroglyphs, Chinese characters, Mayan glyphs, and possibly the Indus script. Each emerged from pictographs representing trade records or religious texts in complex societies.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Writing System Invention end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Writing System Invention — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-script-direction",
     "name": "Script Direction",
-    "category": "LANGUAGE",
     "teaser": "Most scripts are written left-to-right, but Arabic and Hebrew run right-to-left, and traditional Chinese and Japanese ran top-to-bottom. Boustrophedon alternated directions line by line and was used in early Greek. Mongolian uniquely runs top-to-bottom, left-to-right.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Script Direction end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Script Direction — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-language-endangerment-factors",
     "name": "Language Endangerment Factors",
-    "category": "LANGUAGE",
     "teaser": "Urbanization, globalization, and dominant-language education all threaten minority languages. In Australia, only 13 of 250 Aboriginal languages are still being learned by children. Colombia's government declared 65 indigenous languages extinct in 2018 alone.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Language Endangerment Factors end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Language Endangerment Factors — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-gesture-and-language",
     "name": "Gesture and Language",
-    "category": "LANGUAGE",
     "teaser": "Humans are the only species that uses pointing to direct attention — even deaf children who haven't learned sign language spontaneously develop pointing gestures. The relationship between gesture and speech dates back to the origins of language 50,000+ years ago.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Gesture and Language end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Gesture and Language — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-semantic-universals",
     "name": "Semantic Universals",
-    "category": "LANGUAGE",
     "teaser": "All known languages distinguish nouns from verbs, have ways to form questions, and can negate statements. Color terms universally develop in a predictable order: black/white → red → yellow/green → blue → brown → purple/pink/orange. The word 'thing' exists in every documented language.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Semantic Universals end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Semantic Universals — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-linguistic-profiling",
     "name": "Linguistic Profiling",
-    "category": "LANGUAGE",
     "teaser": "Identifying a speaker's race, region, or social class from their voice alone. John Baugh coined the term after documenting housing discrimination against African American English speakers. Resume callbacks decrease 50% when candidates speak with stereotypically Black voices.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Linguistic Profiling end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Linguistic Profiling — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-machine-translation-evolution",
     "name": "Machine Translation Evolution",
-    "category": "LANGUAGE",
     "teaser": "From rule-based systems in the 1950s to statistical methods in 2006 to neural machine translation in 2016. Google Translate uses neural networks trained on 100 billion words across 103 languages. It handles 100 trillion words daily but still struggles with idioms and cultural context.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Machine Translation Evolution end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Machine Translation Evolution — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-bilingual-brain-benefits",
     "name": "Bilingual Brain Benefits",
-    "category": "LANGUAGE",
     "teaser": "Speaking two languages strengthens executive function, delays dementia by 4-5 years, and increases gray matter density. The bilingual advantage in cognitive control appears even in low-education populations. Canadian bilinguals show different brain activation patterns than monolinguals.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Bilingual Brain Benefits end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Bilingual Brain Benefits — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-constructed-script-systems-1",
     "name": "Constructed Script Systems",
-    "category": "LANGUAGE",
     "teaser": "Invented writing systems include Shavian (1960, using Shaw's bequest), Deseret (1854, phonetic English), and Blissymbols (1949, pictographic communication). Korea's Hangul (1443) is unique as a deliberately designed script that accurately represents phonetics.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Constructed Script Systems end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Constructed Script Systems — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-phono-semantic-matching",
     "name": "Phono-Semantic Matching",
-    "category": "LANGUAGE",
     "teaser": "When a borrowed word is adapted to sound like a similar-sounding native word with related meaning. English 'champagne' from French; Hebrew 'telefon' from European languages; Japanese 'karate' from Chinese 'empty hand.' Each language filters foreign words through its own phonology.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Phono-Semantic Matching end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Phono-Semantic Matching — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-prosody-and-meaning",
     "name": "Prosody and Meaning",
-    "category": "LANGUAGE",
     "teaser": "Intonation, stress, and rhythm can completely change sentence meaning. 'She didn't steal the money' has seven different meanings depending on which word is emphasized. Tone languages like Mandarin use pitch to distinguish meaning — 'ma' means mother, hemp, horse, or scold.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Prosody and Meaning end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Prosody and Meaning — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-metaphorical-language",
     "name": "Metaphorical Language",
-    "category": "LANGUAGE",
     "teaser": "Lakoff and Johnson's 'Metaphors We Live By' (1980) showed everyday language is deeply metaphorical: 'attack an argument,' 'waste time,' 'the future is ahead.' These conceptual metaphors structure thought itself, not just expression.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Metaphorical Language end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Metaphorical Language — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-tone-sandhi",
     "name": "Tone Sandhi",
-    "category": "LANGUAGE",
     "teaser": "Automatic tone changes in tonal languages when words are spoken together. In Mandarin, two third tones in a row change the first to a second tone — 'nǐ hǎo' (hello) sounds like 'ní hǎo.' This makes fluent speech significantly different from word-by-word pronunciation.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Tone Sandhi end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tone Sandhi — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-sound-symbolism",
     "name": "Sound Symbolism",
-    "category": "LANGUAGE",
     "teaser": "The non-arbitrary association between sounds and meanings. Most languages use 'i' for small things and 'a' or 'o' for large things. The 'bouba/kiki' effect shows people link rounded shapes to 'bouba' and spiky shapes to 'kiki' across cultures and languages.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Sound Symbolism end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sound Symbolism — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-discourse-markers",
     "name": "Discourse Markers",
-    "category": "LANGUAGE",
     "teaser": "Words like 'well,' 'so,' 'you know,' and 'like' that manage conversation flow rather than adding meaning. They signal turn-taking, emphasis, and stance. Japanese uses 'ne' for agreement-seeking and 'ano' for hesitation. Linguists debate whether they're fillers or essential tools.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Discourse Markers end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Discourse Markers — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-mixed-languages",
     "name": "Mixed Languages",
-    "category": "LANGUAGE",
     "teaser": "Languages that combine elements from two or more languages at both lexical and grammatical levels. Media Lengua replaces Quechua vocabulary with Spanish words while keeping Quechua grammar. Michif mixes Cree verbs with French nouns in a single sentence.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Mixed Languages end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Mixed Languages — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-deixis",
     "name": "Deixis",
-    "category": "LANGUAGE",
     "teaser": "Words whose meaning depends entirely on context — 'this,' 'here,' 'now,' 'I.' They anchor language to the speaker's perspective and moment. Temporal deixis ('yesterday' vs 'tomorrow') and spatial deixis ('this' vs 'that') are universal across languages.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Deixis end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Deixis — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-language-ideologies",
     "name": "Language Ideologies",
-    "category": "LANGUAGE",
     "teaser": "Cultural beliefs about language that shape attitudes and policies. 'Standard language ideology' privileges certain dialects as correct while stigmatizing others. Diglossia describes situations where a formal variety is used for official purposes while a colloquial one is spoken at home.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Language Ideologies end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Language Ideologies — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-alphabet-literacy-rates",
     "name": "Alphabet Literacy Rates",
-    "category": "LANGUAGE",
     "teaser": "Global literacy has risen from 12% in 1800 to 87% today, but 773 million adults still can't read. Functional literacy — the ability to use reading in daily life — is significantly lower. Countries with alphabetic writing systems generally have higher literacy than logographic ones.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Alphabet Literacy Rates end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Alphabet Literacy Rates — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-parallel-texts",
     "name": "Parallel Texts",
-    "category": "LANGUAGE",
     "teaser": "Side-by-side texts in two languages used for translation study and language learning. The Bible was historically a major source of parallel texts. Modern parallel corpora like the Europarl dataset of EU parliament translations power machine translation training.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Parallel Texts end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Parallel Texts — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-writing-and-power",
     "name": "Writing and Power",
-    "category": "LANGUAGE",
     "teaser": "Throughout history, literacy has been a tool of both liberation and control. Slave codes in the American South made it illegal to teach enslaved people to read. UNESCO estimates that literacy could lift 171 million people out of poverty.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Writing and Power end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Writing and Power — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-digital-communication-evolution",
     "name": "Digital Communication Evolution",
-    "category": "LANGUAGE",
     "teaser": "From Morse code (1844) to email (1971) to texting (1992) to emojis (1999). The first SMS 'Merry Christmas' was sent on December 3, 1992. Emojis now convey emotional nuance that plain text lacks — the 😂 face is the most used emoji globally with over 5 billion uses.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Digital Communication Evolution end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Digital Communication Evolution — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-language-revitalization",
     "name": "Language Revitalization",
-    "category": "LANGUAGE",
     "teaser": "Efforts to revive endangered languages through immersion schools, media, and technology. Hebrew was successfully revived from a liturgical language to a native tongue of 9 million. Hawaiian immersion schools have grown enrollment from 0 to 3,000 students since 1984.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Language Revitalization end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Language Revitalization — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-jargon-and-technical-language",
     "name": "Jargon and Technical Language",
-    "category": "LANGUAGE",
     "teaser": "Specialized vocabulary used by professional groups. Medical jargon uses Latin and Greek roots to communicate precisely. 'Situational awareness' in aviation, 'dispersion' in statistics, and 'proprietary' in law each serve specific communicative functions.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Jargon and Technical Language end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Jargon and Technical Language — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-vernacular-architecture-language",
     "name": "Vernacular Architecture Language",
-    "category": "LANGUAGE",
     "teaser": "How the built environment communicates cultural values through design. Japanese houses use sliding screens to create flexible spaces. Middle Eastern courtyard houses provide privacy and climate control. Each architectural tradition encodes social norms.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Vernacular Architecture Language end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Vernacular Architecture Language — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-prosodic-stress-systems",
     "name": "Prosodic Stress Systems",
-    "category": "LANGUAGE",
     "teaser": "Languages differ in how stress patterns work. English has lexical stress ('REcord' vs 'reCORD'). Russian has predictable stress that can fall on any syllable. Japanese uses pitch accent, and French uses phrase-final stress. These differences affect rhythm and melody of speech.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Prosodic Stress Systems end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Prosodic Stress Systems — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-numeral-systems",
     "name": "Numeral Systems",
-    "category": "LANGUAGE",
     "teaser": "Languages count in different bases — English uses base 10, but many languages use base 20 (Mayan, Yoruba). Tzeltal Maya uses base 20 with an offset. Pirahã may have no exact numbers at all. The binary system, base 2, is the foundation of all digital computing.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Numeral Systems end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Numeral Systems — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-speech-act-theory",
     "name": "Speech Act Theory",
-    "category": "LANGUAGE",
     "teaser": "J.L. Austin's 1962 framework showing that language doesn't just describe reality — it performs actions. 'I promise' creates an obligation, 'I pronounce you married' changes social status, and 'I name this ship Queen Mary' inaugurates a vessel. Every utterance does something.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Speech Act Theory end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Speech Act Theory — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-sign-language-linguistics",
     "name": "Sign Language Linguistics",
-    "category": "LANGUAGE",
     "teaser": "Sign languages are fully developed languages with their own grammar, not manual codes of spoken languages. ASL has aspect markers shown through movement repetition, question markers through facial expressions, and classifiers that function like pronouns for spatial reference.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Sign Language Linguistics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sign Language Linguistics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-language-and-emotion",
     "name": "Language and Emotion",
-    "category": "LANGUAGE",
     "teaser": "Some emotions lack direct translations: Portuguese 'saudade' (melancholic longing), Japanese 'amae' (indulgent dependence), German 'Schadenfreude' (pleasure at others' misfortune). Does speaking a language with a word for an emotion make you feel it more precisely?",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Language and Emotion end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Language and Emotion — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-pigmentary-morphemes",
     "name": "Pigmentary Morphemes",
-    "category": "LANGUAGE",
     "teaser": "In some languages, color terms are built from morphemes describing visual properties. In many Australian Aboriginal languages, color terms derive from descriptions of surface properties like shininess or pattern rather than hue alone, challenging universal color term theories.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Pigmentary Morphemes end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Pigmentary Morphemes — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "language-written-japanese-complexity",
     "name": "Written Japanese Complexity",
-    "category": "LANGUAGE",
     "teaser": "Japanese uses three scripts simultaneously: hiragana (46 syllables for native words), katakana (46 syllables for foreign words), and kanji (2,000+ characters for meanings). A single sentence may switch scripts multiple times, making it one of the most complex writing systems.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "LANGUAGE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Written Japanese Complexity end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Written Japanese Complexity — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   }
 ]

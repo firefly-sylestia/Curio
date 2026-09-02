@@ -2606,351 +2606,801 @@
   {
     "id": "economics-gig-economy-1",
     "name": "Gig Economy",
-    "category": "ECONOMICS",
     "teaser": "A labor market characterized by short-term, flexible jobs rather than permanent positions. Uber, DoorDash, and Fiverr exemplify the model. 36% of US workers participate in gig work. It offers flexibility but often lacks benefits and job security.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Gig Economy end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Gig Economy — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-universal-basic-income",
     "name": "Universal Basic Income",
-    "category": "ECONOMICS",
     "teaser": "A government program providing all citizens with a regular unconditional cash payment. Finland's 2017-2018 trial with 2,000 unemployed people found recipients were happier and healthier with no reduction in employment. Alaska's Permanent Fund has paid dividends since 1982.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Universal Basic Income end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Universal Basic Income — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-modern-monetary-theory-1",
     "name": "Modern Monetary Theory",
-    "category": "ECONOMICS",
     "teaser": "An economic theory suggesting governments that issue their own currency cannot run out of money and should spend to achieve full employment. Critics warn of inflation risks. It gained attention during COVID-19 when governments spent trillions without apparent consequence.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Modern Monetary Theory end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Modern Monetary Theory — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-behavioral-economics-1",
     "name": "Behavioral Economics",
-    "category": "ECONOMICS",
     "teaser": "The field combining psychology and economics to understand why people make irrational financial decisions. Richard Thaler won the 2017 Nobel Prize for this work. Nudges like automatic enrollment in retirement savings increased participation from 49% to 86%.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Behavioral Economics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Behavioral Economics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-shadow-banking",
     "name": "Shadow Banking",
-    "category": "ECONOMICS",
     "teaser": "Non-bank financial intermediaries that provide services similar to banks but operate outside regular banking regulations. The shadow banking system reached $63 trillion globally in 2019. It played a major role in the 2008 financial crisis through mortgage-backed securities.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Shadow Banking end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Shadow Banking — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-dutch-disease-1",
     "name": "Dutch Disease",
-    "category": "ECONOMICS",
     "teaser": "An economic phenomenon where a country's natural resource boom leads to currency appreciation that hurts other export sectors. The Netherlands experienced it after finding natural gas in 1959. Nigeria's oil boom devastated its agricultural sector in the 1970s.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Dutch Disease end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Dutch Disease — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-gini-coefficient-1",
     "name": "Gini Coefficient",
-    "category": "ECONOMICS",
     "teaser": "A measure of income inequality ranging from 0 (perfect equality) to 1 (perfect inequality). South Africa has the highest at 0.63 while Scandinavian countries average 0.25. The US Gini coefficient rose from 0.39 in 1967 to 0.49 in 2021.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Gini Coefficient end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Gini Coefficient — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-trickle-down-economics",
     "name": "Trickle-Down Economics",
-    "category": "ECONOMICS",
     "teaser": "The theory that tax cuts for corporations and the wealthy stimulate economic growth benefiting everyone. Empirical evidence is mixed — the 2017 Tax Cuts and Jobs Act reduced corporate tax from 35% to 21% but primarily boosted stock buybacks over wages.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Trickle-Down Economics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Trickle-Down Economics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-pareto-efficiency",
     "name": "Pareto Efficiency",
-    "category": "ECONOMICS",
     "teaser": "An economic state where no one can be made better off without making someone worse off. Vilfredo Pareto observed that 80% of Italy's land was owned by 20% of the population in 1896. The 80/20 rule appears throughout economics and business.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Pareto Efficiency end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Pareto Efficiency — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-stagflation-1",
     "name": "Stagflation",
-    "category": "ECONOMICS",
     "teaser": "A toxic combination of stagnant economic growth, high unemployment, and rising inflation. The US experienced it from 1973-1982, triggered by oil shocks. Paul Volcker, Federal Reserve chair, ended it by raising interest rates to 20% in 1981.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Stagflation end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Stagflation — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-externalities-1",
     "name": "Externalities",
-    "category": "ECONOMICS",
     "teaser": "Costs or benefits of an economic activity that affect third parties not involved in the transaction. Pollution is a negative externality — factories impose health costs on communities. Carbon taxes attempt to internalize climate change costs.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Externalities end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Externalities — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-creative-destruction-1",
     "name": "Creative Destruction",
-    "category": "ECONOMICS",
     "teaser": "Joseph Schumpeter's 1942 concept describing how innovation constantly replaces old industries. The automobile destroyed horse-drawn carriages, streaming killed Blockbuster, and smartphones eliminated cameras and GPS devices. It drives long-term economic progress.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Creative Destruction end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Creative Destruction — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-veblen-goods",
     "name": "Veblen Goods",
-    "category": "ECONOMICS",
     "teaser": "Luxury products for which demand increases as the price rises because they signal status. Hermès Birkin bags and Rolls-Royce cars follow this pattern. Thorstein Veblen coined 'conspicuous consumption' in 1899 to describe status-seeking spending.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Veblen Goods end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Veblen Goods — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-fiscal-cliff",
     "name": "Fiscal Cliff",
-    "category": "ECONOMICS",
     "teaser": "A situation where automatic tax increases and spending cuts occur simultaneously, potentially causing economic contraction. The US faced one in 2012-2013 when Bush-era tax cuts expired alongside sequestration. Congress eventually passed a partial compromise.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Fiscal Cliff end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Fiscal Cliff — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-k-shaped-recovery",
     "name": "K-Shaped Recovery",
-    "category": "ECONOMICS",
     "teaser": "An economic recovery where different segments of society recover at different rates, diverging over time. After COVID-19, tech companies and stock owners boomed while service workers struggled. The top 10% of earners saw wealth increase 25% during the pandemic.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "K-Shaped Recovery end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of K-Shaped Recovery — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-supply-chain-economics",
     "name": "Supply Chain Economics",
-    "category": "ECONOMICS",
     "teaser": "The network of organizations involved in producing and distributing goods. COVID-19 exposed vulnerabilities — a single semiconductor shortage affected auto, electronics, and appliance industries. The cost of shipping a container from China to the US rose 10x in 2021.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Supply Chain Economics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Supply Chain Economics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-carbon-pricing",
     "name": "Carbon Pricing",
-    "category": "ECONOMICS",
     "teaser": "Placing a direct cost on carbon emissions to incentivize reduction. The EU Emissions Trading System covers 40% of EU emissions. British Columbia's carbon tax, introduced in 2008, reduced emissions by 5-15% while maintaining economic growth.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Carbon Pricing end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Carbon Pricing — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-crypto-economics-1",
     "name": "Crypto Economics",
-    "category": "ECONOMICS",
     "teaser": "The study of how blockchain networks use incentives and tokens to coordinate behavior without central authority. Bitcoin's proof-of-work consumes about 150 TWh annually. Ethereum's 2022 switch to proof-of-stake reduced energy consumption by 99.95%.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Crypto Economics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Crypto Economics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-inclusive-growth",
     "name": "Inclusive Growth",
-    "category": "ECONOMICS",
     "teaser": "Economic expansion that creates opportunities for all segments of society rather than concentrating wealth. The World Bank estimates that the poorest 40% must grow 2% faster than the average to reduce inequality. Costa Rica achieved this with strong social investment.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Inclusive Growth end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Inclusive Growth — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-debt-to-gdp-ratio",
     "name": "Debt-to-GDP Ratio",
-    "category": "ECONOMICS",
     "teaser": "A country's total debt relative to its economic output, indicating its ability to repay. Japan's ratio exceeds 260% — the highest in the world — yet it avoids crisis because most debt is held domestically. The US ratio reached 123% in 2023.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Debt-to-GDP Ratio end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Debt-to-GDP Ratio — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-petty-cash-float",
     "name": "Petty Cash Float",
-    "category": "ECONOMICS",
     "teaser": "A small amount of currency kept on hand for minor expenses. A typical office maintains $100-$300 in petty cash for supplies, postage, and incidentals. Companies reconcile petty cash monthly, requiring receipts for every disbursement.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Petty Cash Float end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Petty Cash Float — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-revenue-recognition",
     "name": "Revenue Recognition",
-    "category": "ECONOMICS",
     "teaser": "Accounting principles determining when a company records income. ASC 606 requires recognizing revenue when performance obligations are met. Amazon recognizes cloud revenue monthly but retail revenue at delivery — a key difference in how earnings appear.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Revenue Recognition end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Revenue Recognition — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-goodwill-in-accounting",
     "name": "Goodwill in Accounting",
-    "category": "ECONOMICS",
     "teaser": "The premium paid for an acquiring company above its net asset value. When Microsoft bought LinkedIn for $26.2 billion in 2016, most of the premium was recorded as goodwill. If goodwill becomes impaired, companies must write down its value, hitting profits.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Goodwill in Accounting end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Goodwill in Accounting — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-monopsony-1",
     "name": "Monopsony",
-    "category": "ECONOMICS",
     "teaser": "A market with only one buyer, giving it outsized power over sellers. Amazon dominates book purchasing, affecting publisher prices. Labor monopsony occurs when a single employer controls a local job market, depressing wages below competitive levels.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Monopsony end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Monopsony — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-velocity-of-money",
     "name": "Velocity of Money",
-    "category": "ECONOMICS",
     "teaser": "The rate at which money changes hands in an economy. When velocity drops, it signals economic weakness even if money supply grows. US velocity fell from 2.0 in 1999 to 1.1 in 2023, explaining why massive money printing didn't cause immediate inflation.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Velocity of Money end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Velocity of Money — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-hedge-funds-1",
     "name": "Hedge Funds",
-    "category": "ECONOMICS",
     "teaser": "Pooled investment funds that employ advanced strategies to earn active returns. Bridgewater Associates, founded by Ray Dalio, manages $150 billion. The 2021 GameStop saga showed how retail investors could challenge hedge fund short positions.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Hedge Funds end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Hedge Funds — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-moral-hazard",
     "name": "Moral Hazard",
-    "category": "ECONOMICS",
     "teaser": "When someone takes greater risks because they know someone else bears the cost. Bank bailouts encourage reckless lending — 'too big to fail.' AIG's 2008 bailout cost $182 billion partly because its London division took excessive risks.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Moral Hazard end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Moral Hazard — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-crony-capitalism",
     "name": "Crony Capitalism",
-    "category": "ECONOMICS",
     "teaser": "An economic system where business success depends on close relationships between government and business rather than competition. Russia's oligarchs acquired state assets at below-market prices in the 1990s privatizations. The term gained prominence during Asia's 1997 financial crisis.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Crony Capitalism end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Crony Capitalism — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-dynamic-pricing",
     "name": "Dynamic Pricing",
-    "category": "ECONOMICS",
     "teaser": "Adjusting prices in real time based on demand, supply, and customer data. Uber's surge pricing doubles or triples fares during peak hours. Airlines have used yield management since the 1980s, charging different prices for the same seat.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Dynamic Pricing end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Dynamic Pricing — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-platform-economics",
     "name": "Platform Economics",
-    "category": "ECONOMICS",
     "teaser": "Two-sided markets where a platform connects buyers and sellers, creating network effects. Uber, Airbnb, and Amazon marketplace earn by facilitating transactions rather than producing goods. Each new user makes the platform more valuable to all others.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Platform Economics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Platform Economics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-zipf-s-law",
     "name": "Zipf's Law",
-    "category": "ECONOMICS",
     "teaser": "The empirical observation that the second most frequent item occurs about half as often as the most frequent, the third about a third as much, and so on. It applies to city populations, word frequencies, and income distributions. It emerges from preferential attachment.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Zipf's Law end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Zipf's Law — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-black-swan-theory",
     "name": "Black Swan Theory",
-    "category": "ECONOMICS",
     "teaser": "Nassim Taleb's concept describing rare, unpredictable events with massive consequences. The 2008 financial crisis, COVID-19, and 9/11 are black swans. They're retrospectively predictable but ante-diagnostically impossible, and their impact is amplified by global interconnection.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Black Swan Theory end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Black Swan Theory — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-tragedy-of-the-commons-1",
     "name": "Tragedy of the Commons",
-    "category": "ECONOMICS",
     "teaser": "Garrett Hardin's 1968 concept describing how shared resources are depleted when individuals act in self-interest. Overfishing, air pollution, and antibiotic overuse follow this pattern. Elinor Ostrom won the 2009 Nobel for showing communities can self-govern commons.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Tragedy of the Commons end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tragedy of the Commons — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-comparative-advantage-1",
     "name": "Comparative Advantage",
-    "category": "ECONOMICS",
     "teaser": "David Ricardo's principle that countries benefit from trade by specializing in goods they produce at lowest opportunity cost. Even if one country is better at producing everything, both countries gain by specializing. It's the theoretical foundation for free trade.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Comparative Advantage end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Comparative Advantage — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-laffer-curve",
     "name": "Laffer Curve",
-    "category": "ECONOMICS",
     "teaser": "The theory that there's an optimal tax rate that maximizes revenue — above which higher rates reduce revenue by discouraging activity. Art Laffer sketched it on a napkin in 1974. Reagan used it to justify tax cuts, though economists debate the optimal rate.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Laffer Curve end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Laffer Curve — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-efficient-market-hypothesis",
     "name": "Efficient Market Hypothesis",
-    "category": "ECONOMICS",
     "teaser": "Eugene Fama's theory that asset prices fully reflect all available information, making it impossible to consistently 'beat the market.' The hypothesis comes in weak, semi-strong, and strong forms. Buffett's long-term returns are cited as evidence against it.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Efficient Market Hypothesis end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Efficient Market Hypothesis — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-keynesian-economics",
     "name": "Keynesian Economics",
-    "category": "ECONOMICS",
     "teaser": "John Maynard Keynes's theory that government spending should increase during recessions to offset decreased private demand. His 1936 'General Theory' revolutionized macroeconomics. The $2.2 trillion CARES Act in 2020 was a Keynesian response to COVID-19.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Keynesian Economics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Keynesian Economics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-austrian-economics",
     "name": "Austrian Economics",
-    "category": "ECONOMICS",
     "teaser": "A school emphasizing free markets, minimal government, and the role of entrepreneurship. Founded by Carl Menger in 1871, it opposed Keynesian stimulus. Austrian economists predicted the 2008 housing bubble but their opposition to central banking remains controversial.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Austrian Economics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Austrian Economics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-feminist-economics",
     "name": "Feminist Economics",
-    "category": "ECONOMICS",
     "teaser": "The field examining how gender roles and power dynamics affect economic outcomes. Women perform $10.9 trillion in unpaid care work globally. The gender pay gap persists at 16% globally, with intersectional disparities for women of color.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Feminist Economics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Feminist Economics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-degrowth",
     "name": "Degrowth",
-    "category": "ECONOMICS",
     "teaser": "An economic theory arguing that infinite growth on a finite planet is unsustainable and societies should prioritize well-being over GDP. France's 2022 ban on short-haul flights and Bhutan's Gross National Happiness index reflect degrowth principles.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Degrowth end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Degrowth — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-attention-economy",
     "name": "Attention Economy",
-    "category": "ECONOMICS",
     "teaser": "Herbert Simon's insight that human attention is a scarce resource in information-rich environments. Google and Meta earn by capturing and selling attention to advertisers. The average person encounters 6,000-10,000 ads daily, each competing for a few seconds.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Attention Economy end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Attention Economy — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-colonial-economics",
     "name": "Colonial Economics",
-    "category": "ECONOMICS",
     "teaser": "Economic systems imposed during European colonialism that extracted resources from colonies. Belgium's exploitation of Congo's rubber reduced its population by half. Colonial-era trade patterns persist — former colonies still export raw materials to former colonizers.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Colonial Economics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Colonial Economics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-positive-economics",
     "name": "Positive Economics",
-    "category": "ECONOMICS",
     "teaser": "Economic analysis based on facts and cause-effect relationships, separate from value judgments. 'Raising minimum wage increases unemployment' is a positive statement testable with data. It contrasts with normative economics, which involves value-based recommendations.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Positive Economics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Positive Economics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-economic-indicators",
     "name": "Economic Indicators",
-    "category": "ECONOMICS",
     "teaser": "Statistics like GDP, unemployment rate, and CPI that signal economic health. The Conference Board's Leading Economic Index predicts recessions 6-9 months ahead. The yield curve inversion has predicted every recession since 1955 with only one false signal.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Economic Indicators end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Economic Indicators — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-financial-literacy",
     "name": "Financial Literacy",
-    "category": "ECONOMICS",
     "teaser": "Knowledge of financial concepts like compound interest, inflation, and diversification. Only 57% of American adults are financially literate according to the FINRA Foundation. Financial education programs show modest but real improvements in savings behavior.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Financial Literacy end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Financial Literacy — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-public-goods-1",
     "name": "Public Goods",
-    "category": "ECONOMICS",
     "teaser": "Goods that are non-excludable and non-rivalrous — everyone benefits regardless of payment. National defense, streetlights, and clean air are public goods. Free-rider problems make private markets underprovide them, justifying government provision through taxation.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Public Goods end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Public Goods — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-information-asymmetry",
     "name": "Information Asymmetry",
-    "category": "ECONOMICS",
     "teaser": "When one party in a transaction has more information than the other. Used car sellers know more than buyers — George Akerlof's 'Market for Lemons' (1970) showed this can collapse markets. Insurance companies' advantage over applicants drives medical underwriting.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Information Asymmetry end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Information Asymmetry — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-sweat-equity",
     "name": "Sweat Equity",
-    "category": "ECONOMICS",
     "teaser": "Non-monetary investment of time and effort into a business or project. Startup founders accept lower salaries hoping equity will appreciate. In real estate, home improvements that increase value without cash investment are sweat equity. Mark Zuckerberg turned down $1 billion for Facebook.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Sweat Equity end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sweat Equity — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-external-debt",
     "name": "External Debt",
-    "category": "ECONOMICS",
     "teaser": "Money a country owes to foreign creditors. Sri Lanka's 2022 default on $51 billion in external debt triggered economic collapse. Greece's debt crisis in 2010 exceeded 130% of GDP, requiring three bailout programs totaling €289 billion.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "External Debt end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of External Debt — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "economics-cost-benefit-analysis",
     "name": "Cost-Benefit Analysis",
-    "category": "ECONOMICS",
     "teaser": "A systematic approach to evaluating decisions by comparing total costs against total benefits. The US EPA estimates the Clean Air Act benefits at $2 trillion annually against $65 billion in compliance costs — a 30:1 return. It's required for major federal regulations.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "ECONOMICS",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Cost-Benefit Analysis end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Cost-Benefit Analysis — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   }
 ]

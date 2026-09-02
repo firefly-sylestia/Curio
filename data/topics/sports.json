@@ -2471,176 +2471,401 @@
   {
     "id": "sports-fighting-sports",
     "name": "Fighting Sports",
-    "category": "SPORTS",
     "teaser": "Combat disciplines ranging from boxing to MMA, judo to taekwondo. The UFC, founded in 1993, grew MMA from a niche spectacle into a $1.5 billion industry. Bruce Lee's philosophy of 'no way as way' influenced modern mixed martial arts training.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Fighting Sports end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Fighting Sports — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-water-sports",
     "name": "Water Sports",
-    "category": "SPORTS",
     "teaser": "Activities on or in water from swimming to surfing to rowing. Surfing was Polynesian royalty's exclusive sport for centuries before becoming mainstream. The 2020 Olympics added surfing, skateboarding, and sport climbing to attract younger viewers.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Water Sports end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Water Sports — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-mind-sports",
     "name": "Mind Sports",
-    "category": "SPORTS",
     "teaser": "Competitive activities emphasizing mental skill — chess, Go, bridge, esports. Garry Kasparov's 1997 loss to Deep Blue was a landmark for AI. Chess viewership surged 300% during Netflix's 'The Queen's Gambit' in 2020.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Mind Sports end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Mind Sports — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-extreme-sports",
     "name": "Extreme Sports",
-    "category": "SPORTS",
     "teaser": "High-risk activities like BASE jumping, wingsuit flying, and big wave surfing. Kelly Slater's 20-foot wave in 2022 pushed surfing's limits. Felix Baumgartner's 2012 space jump from 39km reached Mach 1.25 in freefall.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Extreme Sports end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Extreme Sports — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-fantasy-sports",
     "name": "Fantasy Sports",
-    "category": "SPORTS",
     "teaser": "Virtual competitions where participants build teams from real players and score points based on statistics. Fantasy football alone generates $14 billion annually in entry fees. Over 45 million Americans play fantasy sports.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Fantasy Sports end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Fantasy Sports — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-olympic-history",
     "name": "Olympic History",
-    "category": "SPORTS",
     "teaser": "The ancient Games ran from 776 BCE to 393 CE in Olympia, Greece. The modern Olympics, revived by Pierre de Coubertin in 1896, now feature 10,500 athletes across 33 sports. The 2024 Paris Games will be the first to achieve gender parity.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Olympic History end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Olympic History — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-sports-medicine",
     "name": "Sports Medicine",
-    "category": "SPORTS",
     "teaser": "The field treating and preventing sports injuries. ACL reconstruction surgery has a 90% success rate. Cryotherapy, compression therapy, and progressive loading protocols have reduced athlete recovery times by 40% over the past two decades.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Sports Medicine end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sports Medicine — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-records-and-milestones",
     "name": "Records and Milestones",
-    "category": "SPORTS",
     "teaser": "Unbreakable or nearly unbreakable sports records. Usain Bolt's 9.58-second 100m may stand for decades. Wilt Chamberlain's 100-point basketball game in 1962 remains the highest single-game scoring record in NBA history.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Records and Milestones end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Records and Milestones — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-team-sports-dynamics",
     "name": "Team Sports Dynamics",
-    "category": "SPORTS",
     "teaser": "How teams form, perform, and evolve. The 'hot hand' fallacy — that streaks in basketball are real — was long debunked but a 2015 study found slight evidence for it. Team chemistry is difficult to quantify but consistently predicts success.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Team Sports Dynamics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Team Sports Dynamics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-motor-sports",
     "name": "Motor Sports",
-    "category": "SPORTS",
     "teaser": "Racing disciplines from Formula 1 to NASCAR to rally. F1 cars generate 1,500 horsepower and reach 370km/h. The Monaco Grand Prix has been run since 1929. Ayrton Senna's 1984 Monaco lap in the rain is considered the greatest single lap in racing history.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Motor Sports end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Motor Sports — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-historical-athletes",
     "name": "Historical Athletes",
-    "category": "SPORTS",
     "teaser": "Athletes who transcended their sport. Jesse Owens won four gold medals at the 1936 Berlin Olympics, defying Hitler's Aryan supremacy ideology. Muhammad Ali's refusal to serve in Vietnam in 1967 cost him his title but cemented his legacy beyond boxing.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Historical Athletes end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Historical Athletes — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-ball-sports",
     "name": "Ball Sports",
-    "category": "SPORTS",
     "teaser": "Any sport involving a ball — soccer, basketball, cricket, tennis, golf. Soccer's FIFA World Cup 2022 final between Argentina and France was watched by 1.5 billion people. The Cricket World Cup 2023 final drew 1.2 billion viewers in India alone.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Ball Sports end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Ball Sports — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-combat-sports-training",
     "name": "Combat Sports Training",
-    "category": "SPORTS",
     "teaser": "The methodology behind fighting disciplines. Muay Thai fighters in Thailand begin training at age 7. Boxing's 'heavy bag' training develops power while 'speed bag' work builds hand-eye coordination. MMA fighters typically cross-train in 3-4 disciplines.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Combat Sports Training end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Combat Sports Training — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-winter-sports",
     "name": "Winter Sports",
-    "category": "SPORTS",
     "teaser": "Activities on snow and ice from skiing to curling. Skiing originated 8,000 years ago in Scandinavia. Bobsled was invented in the Swiss Alps in the 1860s. The Winter Olympics have been held since 1924 and now feature 15 sports.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Winter Sports end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Winter Sports — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-racket-sports",
     "name": "Racket Sports",
-    "category": "SPORTS",
     "teaser": "Tennis, badminton, squash, table tennis, and pickleball. Badminton's shuttlecock can reach 493km/h — the fastest racket sport speed. Pickleball grew 85% in 2022, becoming America's fastest-growing sport. Wimbledon's grass court is perennial rye.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Racket Sports end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Racket Sports — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-track-and-field",
     "name": "Track and Field",
-    "category": "SPORTS",
     "teaser": "Athletics events from sprinting to throwing to jumping. The decathlon combines 10 events over two days. Usain Bolt's 9.58 100m record at the 2009 Berlin World Championships is considered one of sport's most untouchable records.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Track and Field end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Track and Field — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-sports-governance",
     "name": "Sports Governance",
-    "category": "SPORTS",
     "teaser": "Organizations that regulate and manage sports. FIFA, founded in 1904, has 211 member nations — more than the UN. The IOC's Olympic Charter defines Olympism's philosophy. Doping scandals have tested sports governance repeatedly since Ben Johnson's 1988 disqualification.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Sports Governance end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sports Governance — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-youth-development",
     "name": "Youth Development",
-    "category": "SPORTS",
     "teaser": "Systems for identifying and nurturing young athletes. La Masia, Barcelona's academy, produced Messi, Xavi, and Iniesta. The US college sports system feeds professional leagues. Early sport specialization vs multi-sport participation is actively debated.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Youth Development end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Youth Development — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-referee-and-officiating",
     "name": "Referee and Officiating",
-    "category": "SPORTS",
     "teaser": "The evolving role of officials in sports. VAR (Video Assistant Referee) in soccer was introduced at the 2018 World Cup. Hawk-Eye line-calling in tennis uses seven cameras to track ball position within 3.6mm. Officiating errors remain a source of controversy.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Referee and Officiating end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Referee and Officiating — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-training-science",
     "name": "Training Science",
-    "category": "SPORTS",
     "teaser": "Evidence-based approaches to athletic performance. Periodization — cycling training intensity — was developed by Soviet scientists in the 1960s. High-altitude training increases red blood cell count. VO2 max testing measures aerobic fitness ceiling.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Training Science end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Training Science — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-esports-competitive",
     "name": "Esports Competitive",
-    "category": "SPORTS",
     "teaser": "Organized competitive video gaming. League of Legends World Championship 2023 drew 6.4 million concurrent viewers. The average pro gamer practices 10-12 hours daily. Esports scholarships are offered by 200+ US colleges.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Esports Competitive end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Esports Competitive — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-sports-technology",
     "name": "Sports Technology",
-    "category": "SPORTS",
     "teaser": "Innovations improving performance and officiating. Carbon fiber running shoes with embedded plates improved marathon times by 4% — World Athletics regulated them in 2020. Hawkeye, instant replay, and GPS tracking have transformed how sports are played and officied.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Sports Technology end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sports Technology — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-cycling-endurance",
     "name": "Cycling Endurance",
-    "category": "SPORTS",
     "teaser": "Road cycling races like the Tour de France cover 3,500km over 23 stages. Lance Armstrong's seven titles were stripped for doping. Eddy Merckx holds the record with five Tour victories. The sport averages 40km/h over three weeks of racing.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Cycling Endurance end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Cycling Endurance — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-professional-wrestling",
     "name": "Professional Wrestling",
-    "category": "SPORTS",
     "teaser": "Scripted athletic entertainment combining acrobatics, storytelling, and improvisation. WWE, the largest promotion, runs 500+ events annually. The Undertaker's WrestleMania streak of 21-0 lasted from 1991 to 2014. Japanese puroresu emphasizes stiff, realistic strikes.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Professional Wrestling end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Professional Wrestling — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "sports-traditional-sports",
     "name": "Traditional Sports",
-    "category": "SPORTS",
     "teaser": "Indigenous and cultural games worldwide. Kabaddi, popular in South Asia, requires a 'raider' to tag opponents while holding their breath. Mesoamerican ballgame, played since 1400 BCE, sometimes ended in human sacrifice. Capoeira blends martial arts with dance.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "SPORTS",
+    "exploreAction": {
+      "verb": "Watch",
+      "targetName": "Traditional Sports end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Traditional Sports — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   }
 ]

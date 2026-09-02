@@ -2585,456 +2585,1041 @@
   {
     "id": "medicine-mrna-vaccines-1",
     "name": "mRNA Vaccines",
-    "category": "MEDICINE",
     "teaser": "The technology behind COVID-19 vaccines, using messenger RNA to instruct cells to make spike proteins. Pioneered by Katalin Karikó and Drew Weissman, who won the 2023 Nobel Prize. BioNTech and Moderna developed theirs in just 11 months.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "mRNA Vaccines end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of mRNA Vaccines — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-crispr-gene-editing",
     "name": "CRISPR Gene Editing",
-    "category": "MEDICINE",
     "teaser": "A revolutionary tool that allows scientists to cut and edit DNA with precision. Derived from bacterial immune systems, CRISPR-Cas9 was developed by Jennifer Doudna and Emmanuelle Charpentier. It earned the 2020 Nobel Prize in Chemistry.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "CRISPR Gene Editing end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of CRISPR Gene Editing — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-immunotherapy-1",
     "name": "Immunotherapy",
-    "category": "MEDICINE",
     "teaser": "A cancer treatment that harnesses the body's own immune system to fight tumors. CAR-T cell therapy reprograms a patient's T-cells to attack cancer. Checkpoint inhibitors like Keytruda have transformed melanoma survival rates.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Immunotherapy end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Immunotherapy — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-microbiome-medicine-1",
     "name": "Microbiome Medicine",
-    "category": "MEDICINE",
     "teaser": "The study of trillions of bacteria living in the human gut and their role in health. The gut contains 100 trillion microorganisms weighing about 2kg. Microbiome transplants have cured Clostridioides difficile infections with 90% success.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Microbiome Medicine end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Microbiome Medicine — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-telemedicine-1",
     "name": "Telemedicine",
-    "category": "MEDICINE",
     "teaser": "Remote diagnosis and treatment of patients using telecommunications technology. Usage surged 3,800% during COVID-19. Medicare claims for telehealth visits rose from 840,000 in 2019 to 52.7 million in 2020.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Telemedicine end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Telemedicine — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-antibiotic-resistance-1",
     "name": "Antibiotic Resistance",
-    "category": "MEDICINE",
     "teaser": "The growing ability of bacteria to survive drugs designed to kill them. The WHO estimates antimicrobial resistance will cause 10 million deaths annually by 2050. MRSA evolved resistance to methicillin within just two years of its introduction in 1960.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Antibiotic Resistance end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Antibiotic Resistance — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-precision-medicine-1",
     "name": "Precision Medicine",
-    "category": "MEDICINE",
     "teaser": "Tailoring medical treatment to individual genetic profiles rather than one-size-fits-all approaches. The Human Genome Project, completed in 2003 at a cost of $2.7 billion, made this possible. Tumor profiling now guides cancer therapy selection.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Precision Medicine end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Precision Medicine — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-neuroplasticity",
     "name": "Neuroplasticity",
-    "category": "MEDICINE",
     "teaser": "The brain's ability to reorganize itself by forming new neural connections throughout life. London taxi drivers develop enlarged hippocampi from navigating complex streets. Stroke patients can recover lost functions through targeted rehabilitation.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Neuroplasticity end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Neuroplasticity — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-placebo-effect",
     "name": "Placebo Effect",
-    "category": "MEDICINE",
     "teaser": "A measurable improvement in health from an inactive treatment simply because the patient believes it will work. Placebo surgeries for knee osteoarthritis performed as well as real operations in a 2002 study. Expectation triggers real dopamine release.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Placebo Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Placebo Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-stem-cell-therapy",
     "name": "Stem Cell Therapy",
-    "category": "MEDICINE",
     "teaser": "Using undifferentiated cells that can develop into any cell type to repair damaged tissues. Induced pluripotent stem cells, created by Shinya Yamanaka in 2006, avoid ethical concerns of embryonic stem cells. Clinical trials treat macular degeneration and spinal cord injuries.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Stem Cell Therapy end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Stem Cell Therapy — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-prosthetics-innovation",
     "name": "Prosthetics Innovation",
-    "category": "MEDICINE",
     "teaser": "Modern artificial limbs with mind-controlled joints and sensory feedback. The LUKE arm, funded by DARPA, allows amputees to feel pressure and temperature. Bionic eyes like the Argus II restore partial vision to retinal disease patients.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Prosthetics Innovation end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Prosthetics Innovation — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-mrna-cancer-vaccines",
     "name": "mRNA Cancer Vaccines",
-    "category": "MEDICINE",
     "teaser": "Personalized vaccines created by sequencing a patient's tumor and designing mRNA to train immune cells against unique mutations. BioNTech's individualized neoantigen therapy showed promising results in pancreatic cancer trials in 2023.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "mRNA Cancer Vaccines end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of mRNA Cancer Vaccines — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-ai-diagnostics",
     "name": "AI Diagnostics",
-    "category": "MEDICINE",
     "teaser": "Machine learning algorithms that detect diseases from medical images. Google's DeepMind AI diagnosed diabetic retinopathy with 97% accuracy. AI outperformed radiologists in breast cancer screening by reducing false positives by 5.7% in a 2020 study.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "AI Diagnostics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of AI Diagnostics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-organoids",
     "name": "Organoids",
-    "category": "MEDICINE",
     "teaser": "Miniature, simplified versions of organs grown from stem cells in laboratories. Brain organoids can develop basic neural circuits. They enable drug testing without human subjects and have modeled Zika virus effects on developing brains.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Organoids end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Organoids — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-epigenetics",
     "name": "Epigenetics",
-    "category": "MEDICINE",
     "teaser": "Heritable changes in gene expression without altering the DNA sequence itself. Stress, diet, and toxins can modify gene expression through methylation and histone modification. Holocaust survivors' trauma signatures were found in their grandchildren's DNA.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Epigenetics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Epigenetics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-bioprinting",
     "name": "Bioprinting",
-    "category": "MEDICINE",
     "teaser": "3D printing living tissue layer by layer using bioinks loaded with cells. Researchers have printed functional liver tissue, skin grafts, and vascular networks. The ultimate goal is printing transplantable organs to eliminate donor waiting lists.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Bioprinting end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Bioprinting — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-fecal-microbiota-transplant",
     "name": "Fecal Microbiota Transplant",
-    "category": "MEDICINE",
     "teaser": "Transferring stool from healthy donors to restore gut bacteria balance. Cures recurrent Clostridioides difficile infection in 90% of cases. The first clinical trial used in the 1950s by Dr. Ben Eiseman at the VA Hospital in Denver.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Fecal Microbiota Transplant end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Fecal Microbiota Transplant — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-gene-therapy-1",
     "name": "Gene Therapy",
-    "category": "MEDICINE",
     "teaser": "Introducing, altering, or replacing genes within a patient's cells to treat disease. Luxturna, approved in 2017, treats inherited blindness with a single injection. Zolgensma, costing $2.1 million, treats spinal muscular atrophy in infants.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Gene Therapy end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Gene Therapy — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-liquid-biopsy",
     "name": "Liquid Biopsy",
-    "category": "MEDICINE",
     "teaser": "A simple blood test that detects circulating tumor DNA to find cancer early. It can identify mutations from multiple tumor types simultaneously. Guardant Health's test detects stage I-IV cancers across 50+ tumor types from a single blood draw.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Liquid Biopsy end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Liquid Biopsy — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-wearable-health-tech",
     "name": "Wearable Health Tech",
-    "category": "MEDICINE",
     "teaser": "Smart devices that continuously monitor vital signs like heart rate, blood oxygen, and sleep patterns. The Apple Watch detected irregular heart rhythms in 34% of users in the Apple Heart Study. CGMs now help millions manage diabetes in real time.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Wearable Health Tech end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Wearable Health Tech — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-3d-printed-organs",
     "name": "3D Printed Organs",
-    "category": "MEDICINE",
     "teaser": "Bioprinting technology that creates living tissue structures layer by layer. Organovo has printed functional liver tissue for drug testing. The first 3D bioprinted human ear, made from patient cells, was implanted in 2022 by 3DBio Therapeutics.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "3D Printed Organs end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of 3D Printed Organs — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-nanomedicine",
     "name": "Nanomedicine",
-    "category": "MEDICINE",
     "teaser": "Using nanoparticles smaller than 100 nanometers to deliver drugs directly to diseased cells. Lipid nanoparticles carry mRNA vaccines past cell membranes. Nanoparticle-based chemotherapy reduces side effects by targeting only tumor tissue.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Nanomedicine end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Nanomedicine — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-psychedelic-assisted-therapy",
     "name": "Psychedelic-Assisted Therapy",
-    "category": "MEDICINE",
     "teaser": "Using controlled doses of psilocybin, MDMA, or ketamine alongside psychotherapy. FDA granted breakthrough therapy designation to psilocybin for depression in 2018. MDMA-assisted therapy reduced PTSD symptoms by 67% in Phase 3 trials.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Psychedelic-Assisted Therapy end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Psychedelic-Assisted Therapy — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-telestroke-networks",
     "name": "Telestroke Networks",
-    "category": "MEDICINE",
     "teaser": "Video-linked neurologists who diagnose and treat stroke patients in remote hospitals. tPA clot-busting medication must be given within 4.5 hours. Telestroke has expanded access to stroke specialists, cutting treatment times by 30 minutes on average.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Telestroke Networks end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Telestroke Networks — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-car-t-cell-therapy",
     "name": "CAR-T Cell Therapy",
-    "category": "MEDICINE",
     "teaser": "Engineering a patient's own T-cells to recognize and attack cancer by adding a chimeric antigen receptor. Kymriah, approved in 2017, achieved 83% remission in pediatric leukemia patients. A single infusion can cost $475,000.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "CAR-T Cell Therapy end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of CAR-T Cell Therapy — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-oncolytic-viruses",
     "name": "Oncolytic Viruses",
-    "category": "MEDICINE",
     "teaser": "Engineered or natural viruses that selectively infect and destroy cancer cells while sparing healthy tissue. T-VEC, approved in 2015, treats advanced melanoma. Researchers discovered the 1904 case of a leukemia patient whose cancer regressed after influenza infection.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Oncolytic Viruses end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Oncolytic Viruses — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-regenerative-medicine",
     "name": "Regenerative Medicine",
-    "category": "MEDICINE",
     "teaser": "The field focused on repairing or replacing damaged tissues and organs. Skin grafts from a patient's own cells are now routine. Atala's lab grew a bladder from a patient's cells and implanted it in 2006 — the first lab-grown organ.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Regenerative Medicine end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Regenerative Medicine — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-companion-diagnostics",
     "name": "Companion Diagnostics",
-    "category": "MEDICINE",
     "teaser": "Medical tests that identify which patients will benefit from a specific drug. HER2 testing is required before prescribing Herceptin for breast cancer. These tests are mandatory for 25% of new oncology drug approvals.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Companion Diagnostics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Companion Diagnostics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-digital-therapeutics",
     "name": "Digital Therapeutics",
-    "category": "MEDICINE",
     "teaser": "Software-based interventions that deliver evidence-based treatments. Pear Therapeutics' reSET treats substance abuse through cognitive behavioral therapy on smartphones. The FDA cleared the first prescription digital therapeutic in 2017.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Digital Therapeutics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Digital Therapeutics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-hematopoietic-stem-cells",
     "name": "Hematopoietic Stem Cells",
-    "category": "MEDICINE",
     "teaser": "Blood-forming cells found in bone marrow that regenerate all blood cell types. Bone marrow transplants treat leukemia and lymphoma. Donor matching requires HLA typing — a sibling has a 25% chance of being a perfect match.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Hematopoietic Stem Cells end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Hematopoietic Stem Cells — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-pharmacogenomics",
     "name": "Pharmacogenomics",
-    "category": "MEDICINE",
     "teaser": "How genes affect a person's response to drugs. CYP450 enzyme variants determine whether patients metabolize medications quickly or slowly. A single CYP2D6 test can predict response to 25% of all prescribed drugs.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Pharmacogenomics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Pharmacogenomics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-antibody-drug-conjugates",
     "name": "Antibody-Drug Conjugates",
-    "category": "MEDICINE",
     "teaser": "Targeted cancer therapies that link a chemotherapy drug to a monoclonal antibody, delivering toxic payloads directly to tumor cells. Adcetris, approved in 2011, reduced Hodgkin lymphoma deaths by 75%. They're sometimes called 'guided missiles' of cancer therapy.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Antibody-Drug Conjugates end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Antibody-Drug Conjugates — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-islet-cell-transplantation",
     "name": "Islet Cell Transplantation",
-    "category": "MEDICINE",
     "teaser": "Transplanting insulin-producing beta cells from donor pancreases to treat Type 1 diabetes. The Edmonton Protocol, developed in 2000, achieved insulin independence in 80% of recipients at one year. Donor scarcity remains the main limitation.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Islet Cell Transplantation end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Islet Cell Transplantation — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-hypothermia-therapy",
     "name": "Hypothermia Therapy",
-    "category": "MEDICINE",
     "teaser": "Deliberately lowering body temperature to 32-34°C after cardiac arrest or brain injury. Cooling reduces metabolic demand and protects neurons. Hospitalized cardiac arrest survival rates improved from 26% to 56% with therapeutic hypothermia.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Hypothermia Therapy end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Hypothermia Therapy — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-phage-therapy",
     "name": "Phage Therapy",
-    "category": "MEDICINE",
     "teaser": "Using bacteriophages — viruses that infect bacteria — to treat antibiotic-resistant infections. Pioneered in Georgia in 1920, it fell out of favor in the West after antibiotics emerged. A 2019 case cured a UCSD patient's multi-drug resistant Pseudomonas infection.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Phage Therapy end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Phage Therapy — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-gene-drive-technology",
     "name": "Gene Drive Technology",
-    "category": "MEDICINE",
     "teaser": "A genetic engineering approach that forces a trait through a population faster than normal inheritance. CRISPR-based gene drives could eliminate malaria-carrying mosquitoes. A trial in Burkina Faso released modified sterile male mosquitoes in 2019.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Gene Drive Technology end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Gene Drive Technology — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-deep-brain-stimulation",
     "name": "Deep Brain Stimulation",
-    "category": "MEDICINE",
     "teaser": "Implanting electrodes in specific brain regions to treat movement disorders. Approved for Parkinson's disease in 1997, it reduces tremor by 60-90%. Experimental applications treat depression, OCD, and addiction. Targets include the subthalamic nucleus and globus pallidus.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Deep Brain Stimulation end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Deep Brain Stimulation — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-artificial-blood",
     "name": "Artificial Blood",
-    "category": "MEDICINE",
     "teaser": "Synthetic blood substitutes designed to carry oxygen when donated blood is unavailable. Hemopure, made from bovine hemoglobin, is approved in South Africa. Several US trials failed due to side effects, but research continues for battlefield and emergency use.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Artificial Blood end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Artificial Blood — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-tissue-engineering",
     "name": "Tissue Engineering",
-    "category": "MEDICINE",
     "teaser": "Combining cells, scaffolds, and growth factors to build replacement tissues. Integra, a skin substitute, has treated burns since 1985. Researchers engineered a replacement ear using a 3D-printed scaffold seeded with cartilage cells from a patient's rib.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Tissue Engineering end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tissue Engineering — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-point-of-care-testing",
     "name": "Point-of-Care Testing",
-    "category": "MEDICINE",
     "teaser": "Diagnostic tests performed at or near the site of patient care rather than in a laboratory. Glucose meters, pregnancy tests, and rapid COVID tests are examples. Abbott's ID NOW molecular test delivers results in under 15 minutes at the bedside.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Point-of-Care Testing end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Point-of-Care Testing — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-optogenetics",
     "name": "Optogenetics",
-    "category": "MEDICINE",
     "teaser": "Using light to control neurons that have been genetically modified to express light-sensitive proteins. It allows researchers to turn specific brain circuits on and off with millisecond precision. Karl Deisseroth at Stanford pioneered the technique in 2005.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Optogenetics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Optogenetics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-mitochondrial-replacement-therapy",
     "name": "Mitochondrial Replacement Therapy",
-    "category": "MEDICINE",
     "teaser": "Replacing defective mitochondrial DNA by transferring nuclear DNA from the mother's egg into a donor egg. The first baby born with this technique, in Mexico in 2016, had a mother at risk for Leigh syndrome. The UK legalized it in 2015.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Mitochondrial Replacement Therapy end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Mitochondrial Replacement Therapy — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-molecular-glues",
     "name": "Molecular Glues",
-    "category": "MEDICINE",
     "teaser": "Small molecules that create new protein-protein interactions, redirecting cellular machinery to destroy disease-causing proteins. Thalidomide, once infamous for birth defects, was discovered to work this way in multiple myeloma. It's now a template for new cancer drugs.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Molecular Glues end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Molecular Glues — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-wound-healing-science",
     "name": "Wound Healing Science",
-    "category": "MEDICINE",
     "teaser": "The four-stage process of hemostasis, inflammation, proliferation, and remodeling that repairs tissue. Electroceutical bandages using electrical fields accelerate wound closure by 50%.负压 wound therapy, discovered by Morykwas in 1997, uses vacuum to promote granulation.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Wound Healing Science end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Wound Healing Science — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-ferroptosis",
     "name": "Ferroptosis",
-    "category": "MEDICINE",
     "teaser": "A recently discovered form of regulated cell death driven by iron-dependent lipid peroxidation. It differs from apoptosis and necrosis. Scientists are exploring ferroptosis as a way to kill cancer cells that resist traditional chemotherapy.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Ferroptosis end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Ferroptosis — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-checkpoint-inhibitors",
     "name": "Checkpoint Inhibitors",
-    "category": "MEDICINE",
     "teaser": "Cancer drugs that remove the 'brakes' on immune cells so they can attack tumors. Keytruda, approved in 2014, treats melanoma, lung cancer, and bladder cancer. James Allison and Tasuku Honjo won the 2018 Nobel for discovering PD-1 and CTLA-4 checkpoints.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Checkpoint Inhibitors end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Checkpoint Inhibitors — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-crispr-diagnostics",
     "name": "CRISPR Diagnostics",
-    "category": "MEDICINE",
     "teaser": "Using CRISPR gene-editing technology for rapid disease detection. SHERLOCK and DETECTR systems can identify viral RNA in under an hour. They were adapted for COVID-19 testing and can detect Zika, Dengue, and HPV from a single drop of blood.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "CRISPR Diagnostics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of CRISPR Diagnostics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-wearable-insulin-pumps",
     "name": "Wearable Insulin Pumps",
-    "category": "MEDICINE",
     "teaser": "Miniature devices that continuously deliver insulin to diabetes patients. The Medtronic 780G automates insulin dosing every five minutes based on glucose readings. Closed-loop systems combine CGMs with pumps to create an artificial pancreas.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Wearable Insulin Pumps end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Wearable Insulin Pumps — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-xenotransplantation",
     "name": "Xenotransplantation",
-    "category": "MEDICINE",
     "teaser": "Transplanting organs from animals into humans. In January 2022, a genetically modified pig heart was transplanted into David Bennett, who survived two months. porcine kidneys have functioned in brain-dead human recipients for over a month.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Xenotransplantation end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Xenotransplantation — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-fecal-microbiota-pills",
     "name": "Fecal Microbiota Pills",
-    "category": "MEDICINE",
     "teaser": "Encapsulated stool samples that restore gut bacteria without a full transplant. Rebyota, approved in 2022, treats recurrent C. difficile. The first pills, called SER-109, were approved in 2023 and showed 70% efficacy in clinical trials.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Fecal Microbiota Pills end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Fecal Microbiota Pills — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-genetic-testing-prenatal",
     "name": "Genetic Testing Prenatal",
-    "category": "MEDICINE",
     "teaser": "Non-invasive prenatal testing analyzing fetal DNA in maternal blood. NIPT can detect Down syndrome with 99% accuracy from a blood draw at 10 weeks. Over 5 million tests have been performed since Panorama launched in 2012.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Genetic Testing Prenatal end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Genetic Testing Prenatal — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-medical-tricorder",
     "name": "Medical Tricorder",
-    "category": "MEDICINE",
     "teaser": "Handheld diagnostic devices inspired by Star Trek that are becoming real. The Scanadu Scout measured vital signs from a forehead touch. The FDA cleared the first medical tricorder-like device — the AliveCor KardiaMobile — for ECG readings in 2015.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Medical Tricorder end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Medical Tricorder — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-quantum-medicine",
     "name": "Quantum Medicine",
-    "category": "MEDICINE",
     "teaser": "Using quantum mechanics principles for medical diagnostics and treatment. Quantum sensors can detect magnetic fields from neural activity without surgery. Nitrogen-vacancy centers in diamonds are being developed for ultra-sensitive biomagnetic imaging.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Quantum Medicine end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Quantum Medicine — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-tumor-treating-fields",
     "name": "Tumor Treating Fields",
-    "category": "MEDICINE",
     "teaser": "Alternating electrical fields that disrupt cancer cell division. Optune, approved in 2011 for glioblastoma, uses transducer arrays worn on the scalp. When combined with chemotherapy, it improved median survival from 16 to 21 months.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Tumor Treating Fields end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Tumor Treating Fields — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-microbiome-transplants",
     "name": "Microbiome Transplants",
-    "category": "MEDICINE",
     "teaser": "Fecal microbiota transplantation replaces unhealthy gut bacteria with healthy ones. C. difficile treatment success rates reached 90% in the first randomized trial in 2013. Researchers are now exploring transplants for obesity, autism, and autoimmune diseases.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Microbiome Transplants end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Microbiome Transplants — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-robotic-surgery",
     "name": "Robotic Surgery",
-    "category": "MEDICINE",
     "teaser": "Minimally invasive procedures performed by surgeons controlling robotic arms. The da Vinci system, used in over 10 million procedures, provides 3D magnification and wristed instruments with seven degrees of freedom. Recovery times are 50% faster than open surgery.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Robotic Surgery end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Robotic Surgery — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-mrna-therapeutics",
     "name": "mRNA Therapeutics",
-    "category": "MEDICINE",
     "teaser": "Using messenger RNA to instruct cells to produce therapeutic proteins. Moderna's flu vaccine candidate showed 40% better efficacy than traditional shots in 2023 trials. mRNA therapies for heart disease, autoimmune disorders, and rare genetic diseases are in development.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "mRNA Therapeutics end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of mRNA Therapeutics — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-artificial-pancreas",
     "name": "Artificial Pancreas",
-    "category": "MEDICINE",
     "teaser": "Closed-loop insulin delivery systems that automatically adjust dosing based on continuous glucose monitoring. The Medtronic 670G, approved in 2016, was the first hybrid closed-loop system. Users spend 70% more time in target glucose range.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Artificial Pancreas end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Artificial Pancreas — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-nanobots-in-medicine",
     "name": "Nanobots in Medicine",
-    "category": "MEDICINE",
     "teaser": "Robots at the nanoscale designed for targeted drug delivery and surgery. Rice University's nanobots can drill through cancer cells using molecular motors. MIT researchers built DNA nanobots that can seek out and destroy tumors in animal models.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Nanobots in Medicine end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Nanobots in Medicine — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-stem-cell-eyesight",
     "name": "Stem Cell Eyesight",
-    "category": "MEDICINE",
     "teaser": "Using retinal pigment epithelium cells derived from stem cells to treat macular degeneration. The first patient, a Japanese woman, received the therapy in 2014. Clinical trials in the UK showed improved vision in patients with wet age-related macular degeneration.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Stem Cell Eyesight end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Stem Cell Eyesight — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-circadian-medicine",
     "name": "Circadian Medicine",
-    "category": "MEDICINE",
     "teaser": "Timing drug delivery to match the body's internal clock for maximum effectiveness. Chronotherapy for blood pressure medication reduces cardiovascular events by 33% compared to morning dosing. The Nobel Prize in 2017 recognized circadian rhythm research.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Circadian Medicine end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Circadian Medicine — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-bioelectric-medicine",
     "name": "Bioelectric Medicine",
-    "category": "MEDICINE",
     "teaser": "Using electrical signals to control organ function without drugs. Vagus nerve stimulation treats epilepsy and depression. SetPoint Medical's device reduces inflammation by stimulating the vagus nerve, offering potential treatments for rheumatoid arthritis.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Bioelectric Medicine end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Bioelectric Medicine — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-antibiotic-stewardship",
     "name": "Antibiotic Stewardship",
-    "category": "MEDICINE",
     "teaser": "Programs that optimize antibiotic use to combat resistance. Hospital stewardship programs reduce antibiotic use by 30-40% while maintaining outcomes. The WHO declared antibiotic resistance one of the top 10 global public health threats.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Antibiotic Stewardship end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Antibiotic Stewardship — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-implantable-brain-chips",
     "name": "Implantable Brain Chips",
-    "category": "MEDICINE",
     "teaser": "Neural interfaces that connect the brain to computers. Neuralink's first human implant in January 2024 allowed a paralyzed patient to control a computer cursor with thought. BrainGate's earlier system enabled typing at 90 characters per minute.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Implantable Brain Chips end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Implantable Brain Chips — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "medicine-glucose-monitoring-implants",
     "name": "Glucose Monitoring Implants",
-    "category": "MEDICINE",
     "teaser": "Tiny sensors inserted under the skin that continuously measure blood sugar. The FreeStyle Libre, inserted with a needle in 1 second, provides readings for 14 days. Dexcom G7, approved in 2023, is the most accurate CGM with a mean absolute relative difference of 8.2%.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "MEDICINE",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Glucose Monitoring Implants end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Glucose Monitoring Implants — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   }
 ]

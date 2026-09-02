@@ -2417,351 +2417,801 @@
   {
     "id": "psychology-cognitive-load-theory",
     "name": "Cognitive Load Theory",
-    "category": "PSYCHOLOGY",
     "teaser": "The concept that working memory can hold only about four chunks of information at once. Developed by John Sweller in 1988, it shapes how instructional materials are designed. Splitting complex tasks into smaller steps dramatically improves learning outcomes.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Cognitive Load Theory end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Cognitive Load Theory — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-emotional-intelligence-1",
     "name": "Emotional Intelligence",
-    "category": "PSYCHOLOGY",
     "teaser": "The ability to recognize, understand, and manage one's own emotions and those of others. Daniel Goleman popularized the concept in his 1995 bestselling book. Studies show EQ accounts for 58% of job performance across all types of jobs.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Emotional Intelligence end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Emotional Intelligence — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-maslow-s-hierarchy-of-needs",
     "name": "Maslow's Hierarchy of Needs",
-    "category": "PSYCHOLOGY",
     "teaser": "A motivational theory arranging human needs in a pyramid from basic survival to self-actualization. Abraham Maslow proposed it in 1943. The five levels — physiological, safety, love, esteem, and self-fulfillment — remain widely taught despite criticism.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Maslow's Hierarchy of Needs end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Maslow's Hierarchy of Needs — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-attachment-theory-1",
     "name": "Attachment Theory",
-    "category": "PSYCHOLOGY",
     "teaser": "John Bowlby's framework explaining how early bonds with caregivers shape adult relationships. Secure, anxious, avoidant, and disorganized are the four main styles. The Strange Situation experiment by Mary Ainsworth identified these patterns in 1978.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Attachment Theory end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Attachment Theory — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-milgram-experiment",
     "name": "Milgram Experiment",
-    "category": "PSYCHOLOGY",
     "teaser": "Stanley Milgram's 1961 study showing ordinary people would administer apparently lethal shocks when instructed by authority. 65% of participants delivered the maximum 450-volt shock. It revealed the terrifying power of obedience over moral judgment.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Milgram Experiment end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Milgram Experiment — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-stanford-prison-experiment",
     "name": "Stanford Prison Experiment",
-    "category": "PSYCHOLOGY",
     "teaser": "Philip Zimbardo's 1971 study where college students assigned as guards quickly became abusive toward student prisoners. The experiment was stopped after just six days. It demonstrated how roles and power dynamics can transform behavior rapidly.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Stanford Prison Experiment end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Stanford Prison Experiment — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-stroop-effect-1",
     "name": "Stroop Effect",
-    "category": "PSYCHOLOGY",
     "teaser": "The delay in reaction time when the color of a word doesn't match the word itself — like the word 'blue' printed in red ink. John Ridley Stroop published this in 1935. It demonstrates the conflict between automatic reading and conscious color identification.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Stroop Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Stroop Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-flow-state-1",
     "name": "Flow State",
-    "category": "PSYCHOLOGY",
     "teaser": "Mihaly Csikszentmihalyi's concept of complete immersion in an activity where time seems to disappear. Optimal flow occurs when challenge level matches skill level. Artists, athletes, and musicians describe it as their peak performance state.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Flow State end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Flow State — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-bystander-effect-1",
     "name": "Bystander Effect",
-    "category": "PSYCHOLOGY",
     "teaser": "The phenomenon where people are less likely to help in emergencies when others are present. Kitty Genovese's 1964 murder in New York sparked this research. Diffusion of responsibility and social influence both contribute to the effect.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Bystander Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Bystander Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-cognitive-dissonance-1",
     "name": "Cognitive Dissonance",
-    "category": "PSYCHOLOGY",
     "teaser": "Leon Festinger's 1957 theory explaining the discomfort of holding contradictory beliefs. People resolve it by changing beliefs, justifying behaviors, or avoiding conflicting information. Smokers who know smoking causes cancer may minimize the risks to reduce dissonance.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Cognitive Dissonance end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Cognitive Dissonance — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-confirmation-bias-1",
     "name": "Confirmation Bias",
-    "category": "PSYCHOLOGY",
     "teaser": "The tendency to search for and favor information that confirms existing beliefs while ignoring contradictory evidence. It affects everything from political opinions to medical diagnoses. Studies show even trained scientists exhibit it when reviewing research.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Confirmation Bias end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Confirmation Bias — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-peak-end-rule-1",
     "name": "Peak-End Rule",
-    "category": "PSYCHOLOGY",
     "teaser": "Daniel Kahneman's finding that people judge experiences based on the most intense point and the ending, not the average. A colonoscopy study showed patients remembered longer procedures with mild endings as less painful than shorter ones with harsh endings.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Peak-End Rule end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Peak-End Rule — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-dunbar-s-number",
     "name": "Dunbar's Number",
-    "category": "PSYCHOLOGY",
     "teaser": "Robin Dunbar's proposed cognitive limit of about 150 stable relationships that the human brain can maintain. Archaeological evidence shows ancient villages averaged 150 people. Companies like Gore-Tex keep factory sizes under 150 for this reason.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Dunbar's Number end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Dunbar's Number — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-self-determination-theory-1",
     "name": "Self-Determination Theory",
-    "category": "PSYCHOLOGY",
     "teaser": "Edward Deci and Richard Ryan's theory that intrinsic motivation requires autonomy, competence, and relatedness. Intrinsic motivation produces better outcomes than extrinsic rewards for creative tasks. Overjustification effect occurs when external rewards undermine enjoyment.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Self-Determination Theory end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Self-Determination Theory — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-growth-mindset-1",
     "name": "Growth Mindset",
-    "category": "PSYCHOLOGY",
     "teaser": "Carol Dweck's theory that believing abilities can be developed through effort leads to greater achievement than a fixed mindset. Praising effort over talent improves student performance. Microsoft adopted it company-wide under Satya Nadella's leadership.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Growth Mindset end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Growth Mindset — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-stereotype-threat",
     "name": "Stereotype Threat",
-    "category": "PSYCHOLOGY",
     "teaser": "Cl Steele's finding that awareness of negative stereotypes about one's group impairs performance. Black students performed worse on tests when reminded of racial stereotypes.消除ing stereotypes improved SAT scores by 60 points in landmark 1995 studies.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Stereotype Threat end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Stereotype Threat — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-spacing-effect",
     "name": "Spacing Effect",
-    "category": "PSYCHOLOGY",
     "teaser": "The phenomenon that learning is more effective when study sessions are spaced out over time rather than crammed. Hermann Ebbinghaus first demonstrated it in 1885. Spaced repetition systems like Anki leverage this to dramatically improve long-term retention.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Spacing Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Spacing Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-illusion-of-control",
     "name": "Illusion of Control",
-    "category": "PSYCHOLOGY",
     "teaser": "Ellen Langer's 1975 concept describing people's tendency to overestimate their influence over outcomes. Lottery players choose their own numbers despite random draws. In workplaces, managers may overestimate their control over team performance.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Illusion of Control end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Illusion of Control — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-anchoring-bias-1",
     "name": "Anchoring Bias",
-    "category": "PSYCHOLOGY",
     "teaser": "The tendency to rely too heavily on the first piece of information encountered. Negotiations starting with higher opening prices produce higher final outcomes. Real estate appraisals are influenced by the listing price even when it's clearly arbitrary.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Anchoring Bias end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Anchoring Bias — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-halo-effect-1",
     "name": "Halo Effect",
-    "category": "PSYCHOLOGY",
     "teaser": "The tendency for a positive impression in one area to positively influence judgment in other areas. Attractive people are rated as more intelligent and competent. In workplaces, employees rated highly on one criterion get inflated ratings on unrelated ones.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Halo Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Halo Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-dopamine-and-reward",
     "name": "Dopamine and Reward",
-    "category": "PSYCHOLOGY",
     "teaser": "Dopamine drives motivation and pleasure by predicting rewards rather than delivering them. Variable reward schedules, like slot machines and social media notifications, create the strongest dopamine responses. This explains addictive patterns in technology use.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Dopamine and Reward end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Dopamine and Reward — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-learned-helplessness-1",
     "name": "Learned Helplessness",
-    "category": "PSYCHOLOGY",
     "teaser": "Martin Seligman's 1967 finding that animals exposed to uncontrollable stress eventually stop trying to escape, even when escape becomes possible. It models human depression. Teaching people that they have control over outcomes is the key treatment.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Learned Helplessness end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Learned Helplessness — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-social-facilitation",
     "name": "Social Facilitation",
-    "category": "PSYCHOLOGY",
     "teaser": "Robert Zajonc's 1965 theory that the presence of others increases arousal, enhancing performance on easy tasks but impairing performance on difficult ones. Athletes may perform better in crowds but musicians struggle with complex passages during competitions.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Social Facilitation end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Social Facilitation — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-zeigarnik-effect",
     "name": "Zeigarnik Effect",
-    "category": "PSYCHOLOGY",
     "teaser": "Bluma Zeigarnik's 1927 discovery that people remember incomplete tasks better than completed ones. Waiters remember unpaid orders better than paid ones. It explains why cliffhangers in TV shows keep you thinking about the story.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Zeigarnik Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Zeigarnik Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-framing-effect-1",
     "name": "Framing Effect",
-    "category": "PSYCHOLOGY",
     "teaser": "The tendency to react differently to the same information depending on how it's presented. People prefer a treatment with 90% survival rate over one with 10% mortality rate, even though they're identical. Daniel Kahneman and Amos Tversky pioneered this research.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Framing Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Framing Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-status-quo-bias-1",
     "name": "Status Quo Bias",
-    "category": "PSYCHOLOGY",
     "teaser": "The preference for the current state of affairs over change, even when change is objectively better. People stick with default insurance plans, current phone contracts, and existing jobs more than rational analysis would predict. It's related to loss aversion.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Status Quo Bias end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Status Quo Bias — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-decoy-effect",
     "name": "Decoy Effect",
-    "category": "PSYCHOLOGY",
     "teaser": "When adding a third, inferior option makes one of the original options seem more attractive. Economist Dan Ariely showed that adding a 'super premium' popcorn size boosted medium purchases by 50%. It's used heavily in pricing strategies.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Decoy Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Decoy Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-sunk-cost-fallacy",
     "name": "Sunk Cost Fallacy",
-    "category": "PSYCHOLOGY",
     "teaser": "Continuing an investment of time, money, or effort because of what has already been spent rather than future value. Moviegoers who paid full price endure bad films more than those who got discounted tickets. Netflix binge-watching follows the same pattern.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Sunk Cost Fallacy end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sunk Cost Fallacy — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-negativity-bias-1",
     "name": "Negativity Bias",
-    "category": "PSYCHOLOGY",
     "teaser": "The psychological tendency for negative events to have a greater impact than positive ones. A single criticism carries more weight than five compliments. Evolutionarily, ignoring a predator was more costly than ignoring food — so our brains weigh threats more heavily.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Negativity Bias end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Negativity Bias — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-serial-position-effect-1",
     "name": "Serial Position Effect",
-    "category": "PSYCHOLOGY",
     "teaser": "The tendency to recall the first and last items in a series better than middle ones. Primacy and recency effects explain why opening and closing statements in court are most memorable. Presentations benefit from putting key points first and last.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Serial Position Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Serial Position Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-illusory-correlation",
     "name": "Illusory Correlation",
-    "category": "PSYCHOLOGY",
     "teaser": "Perceiving a relationship between two variables when none exists. People remember instances that confirm the stereotype of a correlation and forget those that don't. Superstitious rituals before games feel correlated with winning because losses are forgotten.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Illusory Correlation end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Illusory Correlation — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-goal-gradient-effect",
     "name": "Goal-Gradient Effect",
-    "category": "PSYCHOLOGY",
     "teaser": "The tendency to increase effort as a goal approaches. Coffee shop loyalty cards with 10 stamps see more visits in the last few slots. Marathon runners speed up in the final miles even when exhausted. Loyalty programs exploit this with progress bars.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Goal-Gradient Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Goal-Gradient Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-default-effect",
     "name": "Default Effect",
-    "category": "PSYCHOLOGY",
     "teaser": "People tend to stick with pre-selected options even when alternatives are available. Countries with opt-out organ donation have 80-90% consent rates versus 15% in opt-in countries. Changing defaults for retirement savings increased enrollment from 49% to 86%.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Default Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Default Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-naive-realism",
     "name": "Naive Realism",
-    "category": "PSYCHOLOGY",
     "teaser": "The belief that we see the world objectively and accurately, and that anyone who disagrees must be uninformed, irrational, or biased. It explains why political and religious disagreements feel so intractable — each side is certain the other is wrong.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Naive Realism end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Naive Realism — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-magical-thinking",
     "name": "Magical Thinking",
-    "category": "PSYCHOLOGY",
     "teaser": "The belief that unrelated events are causally connected through supernatural forces. Athletes wearing lucky socks, parents blaming themselves for their child's illness, and superstitions before exams all reflect this. It's especially common during periods of stress.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Magical Thinking end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Magical Thinking — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-catharsis-hypothesis",
     "name": "Catharsis Hypothesis",
-    "category": "PSYCHOLOGY",
     "teaser": "The popular belief that expressing anger (punching pillows, venting) reduces aggression. Research by Brad Bushman showed it actually increases aggression by rehearsing angry thoughts. Exercise, by contrast, genuinely reduces anger through physiological changes.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Catharsis Hypothesis end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Catharsis Hypothesis — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-mere-exposure-effect",
     "name": "Mere Exposure Effect",
-    "category": "PSYCHOLOGY",
     "teaser": "Robert Zajonc's 1968 finding that people develop preferences for things simply because they're familiar with them. Songs heard more often on the radio become more liked. Political candidates with more name recognition win more votes regardless of quality.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Mere Exposure Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Mere Exposure Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-sleeper-effect",
     "name": "Sleeper Effect",
-    "category": "PSYCHOLOGY",
     "teaser": "A persuasion phenomenon where messages from low-credibility sources become more convincing over time as people remember the message but forget the source. A rumor dismissed as unreliable today may be accepted as true weeks later without the original caveat.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Sleeper Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Sleeper Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-goal-setting-theory",
     "name": "Goal Setting Theory",
-    "category": "PSYCHOLOGY",
     "teaser": "Edwin Locke and Gary Latham's research showing that specific, challenging goals produce higher performance than easy or vague goals. Specific goals lead to 90% more effort than 'do your best' instructions. SMART goals operationalize this theory.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Goal Setting Theory end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Goal Setting Theory — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-emotional-contagion-1",
     "name": "Emotional Contagion",
-    "category": "PSYCHOLOGY",
     "teaser": "The phenomenon where emotions spread from person to person through unconscious mimicry and feedback. Smiling strangers make you happier. Facebook's 2014 emotional contagion study manipulated feeds of 689,003 users without consent, causing controversy.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Emotional Contagion end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Emotional Contagion — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-selection-bias",
     "name": "Selection Bias",
-    "category": "PSYCHOLOGY",
     "teaser": "The systematic distortion in research results when the sample isn't representative. Early telephone surveys overrepresented wealthy households. The 1936 Literary Digest poll predicted Landon would beat Roosevelt based on magazine subscriber data — off by 19 percentage points.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Selection Bias end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Selection Bias — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-bandwagon-effect",
     "name": "Bandwagon Effect",
-    "category": "PSYCHOLOGY",
     "teaser": "The tendency to adopt behaviors or beliefs because many other people do. Social media amplifies this — viral content gets more views partly because viewership signals quality. Stock market bubbles form when investors pile into rising assets.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Bandwagon Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Bandwagon Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-shifting-baseline-syndrome",
     "name": "Shifting Baseline Syndrome",
-    "category": "PSYCHOLOGY",
     "teaser": "The gradual acceptance of degraded environmental conditions as the new normal. Each generation of fishermen considers their baseline stocks as 'normal,' missing long-term declines. Daniel Pauly coined the term in 1995 to explain fisheries collapse.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Shifting Baseline Syndrome end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Shifting Baseline Syndrome — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-habit-loop-1",
     "name": "Habit Loop",
-    "category": "PSYCHOLOGY",
     "teaser": "Charles Duhigg's three-part neurological pattern — cue, routine, reward — that drives automatic behaviors. The cue triggers the routine, and the reward reinforces it. Changing habits requires keeping the cue and reward while inserting a new routine.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Habit Loop end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Habit Loop — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-self-serving-bias",
     "name": "Self-Serving Bias",
-    "category": "PSYCHOLOGY",
     "teaser": "The tendency to attribute successes to internal factors (skill, effort) and failures to external factors (bad luck, unfair conditions). Students credit grades to studying but blame test difficulty for poor performance. It protects self-esteem but hinders learning.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Self-Serving Bias end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Self-Serving Bias — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-impact-bias",
     "name": "Impact Bias",
-    "category": "PSYCHOLOGY",
     "teaser": "The tendency to overestimate how long emotional reactions to future events will last. People predict devastating breakups and thrilling job offers will affect them for years, but affective forecasting studies show most reactions fade within weeks.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Impact Bias end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Impact Bias — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-decision-fatigue-1",
     "name": "Decision Fatigue",
-    "category": "PSYCHOLOGY",
     "teaser": "The deteriorating quality of decisions after a long session of choices. Judges granted parole 65% of the time at the start of the day but nearly 0% before lunch. Steve Jobs wore the same clothes daily to reduce trivial decisions.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Decision Fatigue end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Decision Fatigue — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-pratfall-effect",
     "name": "Pratfall Effect",
-    "category": "PSYCHOLOGY",
     "teaser": "Elliot Aronson's 1966 finding that competent people become more likable after making a blunder. A near-perfect candidate who spills coffee is rated more favorably than one who doesn't. It humanizes high achievers and reduces the threat they pose.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Pratfall Effect end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Pratfall Effect — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-positive-illusions",
     "name": "Positive Illusions",
-    "category": "PSYCHOLOGY",
     "teaser": "The tendency to maintain unrealistically positive views of oneself, one's abilities, and one's future. 80% of drivers rate themselves above average. While sometimes maladaptive, moderate self-enhancement correlates with better mental health and resilience.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Positive Illusions end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Positive Illusions — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   },
   {
     "id": "psychology-cyberball-paradigm",
     "name": "Cyberball Paradigm",
-    "category": "PSYCHOLOGY",
     "teaser": "A virtual ball-tossing game used to study social exclusion. Brain scans show the dorsal anterior cingulate cortex activates during exclusion — the same region that processes physical pain. Being left out literally hurts the brain the same way a broken bone does.",
-    "byline": ""
+    "byline": "",
+    "categoryId": "PSYCHOLOGY",
+    "exploreAction": {
+      "verb": "Explore",
+      "targetName": "Cyberball Paradigm end-to-end",
+      "durationMinutes": 30,
+      "instruction": "Read one thorough overview of Cyberball Paradigm — pay attention to what makes it worth knowing, then try explaining its most surprising detail to someone else in under a minute."
+    },
+    "imageUrl": "",
+    "tags": [],
+    "subtype": "Concept"
   }
 ]
