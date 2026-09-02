@@ -4407,28 +4407,6 @@
     "tier": 1
   },
   {
-    "id": "animated-super-mario-bros-2023",
-    "categoryId": "ANIMATED_MOVIES",
-    "subtype": "Film",
-    "name": "The Super Mario Bros. Movie (2023)",
-    "teaser": "Mario and Luigi's adventure through the Mushroom Kingdom, built with Nintendo's blessing and a star-studded cast led by Chris Pratt. It grossed over $1.3 billion, the biggest video-game adaptation ever.",
-    "imageUrl": "",
-    "byline": "Aaron Horvath & Michael Jelenic",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Super Mario Bros. Movie (2023) end-to-end",
-      "durationMinutes": 92,
-      "instruction": "Watch the opening — the Brooklyn plumbing scene establishes Mario and Luigi's underdog status. Then watch the finale: Mario's power-up transformation and the showdown with Bowser."
-    },
-    "tags": [
-      "Adventure",
-      "Comedy",
-      "2020s",
-      "Illumination"
-    ],
-    "tier": 1
-  },
-  {
     "id": "animated-ice-age-2002",
     "categoryId": "ANIMATED_MOVIES",
     "subtype": "Film",
@@ -4689,28 +4667,6 @@
       "Fantasy",
       "2000s",
       "Blue Sky"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "animated-nimona-2023",
-    "categoryId": "ANIMATED_MOVIES",
-    "subtype": "Film",
-    "name": "Nimona (2023)",
-    "teaser": "A shape-shifting girl teams with a disgraced knight in a techno-medieval world. The film was rescued from Disney's shutdown by Annapurna and became a streaming hit with an Oscar nomination.",
-    "imageUrl": "",
-    "byline": "Nick Bruno & Troy Quane",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Nimona (2023) end-to-end",
-      "durationMinutes": 102,
-      "instruction": "Watch the opening — Nimona's shape-shifting chaos in the city and her ambush of Ballister. Then watch the finale: Nimona's true form revealed and the city's acceptance of its monster."
-    },
-    "tags": [
-      "Action",
-      "Comedy",
-      "2020s",
-      "Annapurna"
     ],
     "tier": 1
   },
@@ -5465,28 +5421,6 @@
     "tier": 1
   },
   {
-    "id": "animated-kubo-two-strings-2016",
-    "categoryId": "ANIMATED_MOVIES",
-    "subtype": "Film",
-    "name": "Kubo and the Two Strings (2016)",
-    "teaser": "A one-eyed boy with a magical shamisen must find his samurai father's armor. Laika's largest and most ambitious stop-motion film to date.",
-    "imageUrl": "",
-    "byline": "Travis Knight",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Kubo and the Two Strings (2016) end-to-end",
-      "durationMinutes": 101,
-      "instruction": "Watch the opening — Kubo's origami storytelling in the village square. Then watch the finale: Kubo's confrontation with the Moon King and his family's memories."
-    },
-    "tags": [
-      "Fantasy",
-      "Adventure",
-      "2010s",
-      "Laika"
-    ],
-    "tier": 1
-  },
-  {
     "id": "animated-nightmare-before-christmas-1993",
     "categoryId": "ANIMATED_MOVIES",
     "subtype": "Film",
@@ -5665,73 +5599,6 @@
     "tier": 1
   },
   {
-    "id": "animated-anomalisa-2015",
-    "categoryId": "ANIMATED_MOVIES",
-    "subtype": "Film",
-    "name": "Anomalisa (2015)",
-    "teaser": "A motivational speaker perceives everyone as identical — until one woman's voice breaks the pattern. The adult stop-motion drama was nominated for the Best Animated Feature Oscar.",
-    "imageUrl": "",
-    "byline": "Charlie Kaufman & Duke Johnson",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Anomalisa (2015) end-to-end",
-      "durationMinutes": 90,
-      "instruction": "Watch the opening — Michael's hotel routine and the 'identical voices' conceit. Then watch the finale: the breakup scene, and Michael's return to his numb life."
-    },
-    "tags": [
-      "Drama",
-      "Romance",
-      "2010s",
-      "Stop-motion",
-      "Adult"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "animated-memoir-of-a-snail-2024",
-    "categoryId": "ANIMATED_MOVIES",
-    "subtype": "Film",
-    "name": "Memoir of a Snail (2024)",
-    "teaser": "A lonely woman's life story, told with the warmth of a snail — the Australian stop-motion film won the Oscar for Best Animated Feature.",
-    "imageUrl": "",
-    "byline": "Adam Elliot",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Memoir of a Snail (2024) end-to-end",
-      "durationMinutes": 95,
-      "instruction": "Watch the opening — Grace's childhood with her twin brother and her beloved snails. Then watch the finale: Grace's reunion with her brother and the acceptance of her life."
-    },
-    "tags": [
-      "Drama",
-      "Stop-motion",
-      "2020s",
-      "Adult"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "animated-marcel-the-shell-2022",
-    "categoryId": "ANIMATED_MOVIES",
-    "subtype": "Film",
-    "name": "Marcel the Shell with Shoes On (2022)",
-    "teaser": "A tiny shell with shoes and one eye lives with his grandmother — documented by a filmmaker. The mockumentary, based on the viral shorts, was nominated for Best Animated Feature.",
-    "imageUrl": "",
-    "byline": "Dean Fleischer-Camp",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Marcel the Shell with Shoes On (2022) end-to-end",
-      "durationMinutes": 90,
-      "instruction": "Watch the opening — the filmmaker's discovery of Marcel in his Airbnb. Then watch the finale: Marcel's reunion with his long-lost family in the documentary."
-    },
-    "tags": [
-      "Comedy",
-      "Drama",
-      "2020s",
-      "Stop-motion"
-    ],
-    "tier": 1
-  },
-  {
     "id": "animated-the-house-2022",
     "categoryId": "ANIMATED_MOVIES",
     "subtype": "Film",
@@ -5750,27 +5617,6 @@
       "Comedy",
       "2020s",
       "Stop-motion"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "animated-flow-2024",
-    "categoryId": "ANIMATED_MOVIES",
-    "subtype": "Film",
-    "name": "Flow (2024)",
-    "teaser": "A cat survives a flood by joining a boat of unlikely animals — a dialogue-free parable. The Latvian film won the Oscar for Best Animated Feature, made almost entirely by one person.",
-    "imageUrl": "",
-    "byline": "Gints Zilbalodis",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Flow (2024) end-to-end",
-      "durationMinutes": 84,
-      "instruction": "Watch the opening — the cat's solitary life before the flood's arrival. Then watch the finale: the animals' shared survival and the whale's return."
-    },
-    "tags": [
-      "Adventure",
-      "Drama",
-      "2020s"
     ],
     "tier": 1
   },
@@ -7708,28 +7554,6 @@
     "tier": 1
   },
   {
-    "id": "animated-lego-movie-2014",
-    "categoryId": "ANIMATED_MOVIES",
-    "subtype": "Film",
-    "name": "The Lego Movie (2014)",
-    "teaser": "An ordinary construction worker is prophesied to save the Lego universe from the evil Lord Business. The film's 'Everything Is Awesome' became an Oscar-nominated anthem.",
-    "imageUrl": "",
-    "byline": "Phil Lord & Christopher Miller",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Lego Movie (2014) end-to-end",
-      "durationMinutes": 100,
-      "instruction": "Watch the opening — Emmet's perfectly ordinary life in Bricksburg. Then watch the finale: the reveal that the Lego world is a boy's basement, and the father-son reconciliation."
-    },
-    "tags": [
-      "Comedy",
-      "Adventure",
-      "2010s",
-      "Warner Bros"
-    ],
-    "tier": 1
-  },
-  {
     "id": "animated-lego-batman-movie-2017",
     "categoryId": "ANIMATED_MOVIES",
     "subtype": "Film",
@@ -9550,72 +9374,6 @@
     "tags": [
       "Family",
       "Holiday",
-      "2000s",
-      "Disney"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "animated-leroy-and-stitch-2006",
-    "categoryId": "ANIMATED_MOVIES",
-    "subtype": "Film",
-    "name": "Leroy & Stitch (2006)",
-    "teaser": "Stitch's creator returns with a powerful new experiment — Leroy. The film served as the finale of the Lilo & Stitch franchise.",
-    "imageUrl": "",
-    "byline": "Tony Craig & Bobs Gannaway",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Leroy & Stitch (2006) end-to-end",
-      "durationMinutes": 73,
-      "instruction": "Watch the opening — the experiments' island life and Jumba's 'one more experiment' Leroy. Then watch the finale: the experiments' defeat of Leroy with the Stitch clones' help."
-    },
-    "tags": [
-      "Comedy",
-      "Sci-Fi",
-      "2000s",
-      "Disney"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "animated-stitch-the-movie-2003",
-    "categoryId": "ANIMATED_MOVIES",
-    "subtype": "Film",
-    "name": "Stitch! The Movie (2003)",
-    "teaser": "Released in August 2003 as a bridge between the original 2002 film and the TV series, this direct-to-video prequel reveals that Stitch is Experiment 626 — and that 625 other genetic experiments created by Dr. Hamsterviel are scattered across Hawaii. The film activates Experiment 221 (Sparky) and introduces Experiment 625, launching the franchise's expansion.",
-    "imageUrl": "",
-    "byline": "Tony Craig & Bobs Gannaway",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Stitch! The Movie (2003) end-to-end",
-      "durationMinutes": 85,
-      "instruction": "Watch the opening — Jumba's confession about the other experiments. Then watch the finale: Stitch's capture of the experiments and his promise to find them all."
-    },
-    "tags": [
-      "Comedy",
-      "Sci-Fi",
-      "2000s",
-      "Disney"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "animated-fox-and-hound-2-2006",
-    "categoryId": "ANIMATED_MOVIES",
-    "subtype": "Film",
-    "name": "The Fox and the Hound 2 (2006)",
-    "teaser": "Copper joins a singing dog group, straining his friendship with Tod. The prequel-sequel added a music angle to the classic.",
-    "imageUrl": "",
-    "byline": "Jim Kammerud",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Fox and the Hound 2 (2006) end-to-end",
-      "durationMinutes": 69,
-      "instruction": "Watch the opening — Copper's desire to join the Singin' Strays. Then watch the finale: Copper's choice of friendship with Tod over the band's fame."
-    },
-    "tags": [
-      "Family",
-      "Musical",
       "2000s",
       "Disney"
     ],
@@ -12875,160 +12633,6 @@
       "Drama",
       "2000s",
       "New Zealand"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "animated-oliver-and-company-1988",
-    "categoryId": "ANIMATED_MOVIES",
-    "subtype": "Film",
-    "name": "Oliver & Company (1988)",
-    "teaser": "Oliver Twist in New York with dogs — a streetwise retelling with songs by Billy Joel and Bette Midler. The film was Disney's first animated feature with celebrity voice casting.",
-    "imageUrl": "",
-    "byline": "George Scribner",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Oliver & Company (1988) end-to-end",
-      "durationMinutes": 74,
-      "instruction": "Watch the opening — Oliver's arrival in the city and his meeting with Dodger's gang. Then watch the finale: the rescue of Jenny and Oliver's adoption."
-    },
-    "tags": [
-      "Musical",
-      "Comedy",
-      "1980s",
-      "Disney"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "animated-fox-and-the-hound-1981",
-    "categoryId": "ANIMATED_MOVIES",
-    "subtype": "Film",
-    "name": "The Fox and the Hound (1981)",
-    "teaser": "A fox cub and a hound pup's friendship tested by their natures. The film's bittersweet 'goodbye' theme made it one of Disney's most emotional features.",
-    "imageUrl": "",
-    "byline": "Ted Berman, Richard Rich & Art Stevens",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Fox and the Hound (1981) end-to-end",
-      "durationMinutes": 83,
-      "instruction": "Watch the opening — the orphaned Tod's adoption by the widow and his meeting with Copper. Then watch the finale: Copper's choice to save Tod from the bear."
-    },
-    "tags": [
-      "Drama",
-      "Adventure",
-      "1980s",
-      "Disney"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "animated-the-rescuers-1977",
-    "categoryId": "ANIMATED_MOVIES",
-    "subtype": "Film",
-    "name": "The Rescuers (1977)",
-    "teaser": "Two mice of the Rescue Aid Society save a kidnapped orphan. The film was Disney's first feature with a contemporary setting since the 40s.",
-    "imageUrl": "",
-    "byline": "Wolfgang Reitherman, John Lounsbery & Art Stevens",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Rescuers (1977) end-to-end",
-      "durationMinutes": 77,
-      "instruction": "Watch the opening — the bottle message's discovery and the rescue society's dispatch. Then watch the finale: Bernard and Bianca's rescue of Penny from Madame Medusa."
-    },
-    "tags": [
-      "Adventure",
-      "Comedy",
-      "1970s",
-      "Disney"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "animated-fun-and-fancy-free-1947",
-    "categoryId": "ANIMATED_MOVIES",
-    "subtype": "Film",
-    "name": "Fun and Fancy Free (1947)",
-    "teaser": "Two stories — a giant named Willie and the Mickey Mouse retelling of Jack and the Beanstalk. The film featured Jiminy Cricket as the host.",
-    "imageUrl": "",
-    "byline": "Jack Kinney, Bill Roberts, Hamilton Luske & William Morgan",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Fun and Fancy Free (1947) end-to-end",
-      "durationMinutes": 73,
-      "instruction": "Watch the opening — the 'Bongo' bear story and Jiminy's introduction. Then watch the finale: Mickey, Donald and Goofy's beanstalk adventure with Willie the Giant."
-    },
-    "tags": [
-      "Family",
-      "Fantasy",
-      "1940s",
-      "Disney"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "animated-many-adventures-pooh-1977",
-    "categoryId": "ANIMATED_MOVIES",
-    "subtype": "Film",
-    "name": "The Many Adventures of Winnie the Pooh (1977)",
-    "teaser": "Three Pooh features stitched into one — the Hundred Acre Wood's gentle adventures. The film was the last package feature Disney released.",
-    "imageUrl": "",
-    "byline": "John Lounsbery & Wolfgang Reitherman",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Many Adventures of Winnie the Pooh (1977) end-to-end",
-      "durationMinutes": 74,
-      "instruction": "Watch the opening — the honey-obsessed Pooh's introduction and the blustery day. Then watch the finale: the 'heffalump' expedition and Pooh's birthday surprise."
-    },
-    "tags": [
-      "Family",
-      "Musical",
-      "1970s",
-      "Disney"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "animated-princess-and-the-frog-2009",
-    "categoryId": "ANIMATED_MOVIES",
-    "subtype": "Film",
-    "name": "The Princess and the Frog (2009)",
-    "teaser": "A waitress in 1920s New Orleans kisses a frog prince — and becomes a frog herself. The film was Disney's return to traditional animation and introduced its first Black princess.",
-    "imageUrl": "",
-    "byline": "Ron Clements & John Musker",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "The Princess and the Frog (2009) end-to-end",
-      "durationMinutes": 97,
-      "instruction": "Watch the opening — Tiana's dream of her restaurant and the prince's arrival in New Orleans. Then watch the finale: Tiana's choice to stay a frog for love and the wedding."
-    },
-    "tags": [
-      "Musical",
-      "Romance",
-      "2000s",
-      "Disney"
-    ],
-    "tier": 1
-  },
-  {
-    "id": "animated-tangled-2010",
-    "categoryId": "ANIMATED_MOVIES",
-    "subtype": "Film",
-    "name": "Tangled (2010)",
-    "teaser": "Rapunzel's tower escape with a charming thief — Disney's 50th animated feature. The film's lantern scene became one of Disney's most beloved moments.",
-    "imageUrl": "",
-    "byline": "Nathan Greno & Byron Howard",
-    "exploreAction": {
-      "verb": "Watch",
-      "targetName": "Tangled (2010) end-to-end",
-      "durationMinutes": 100,
-      "instruction": "Watch the opening — the flower's magic and Rapunzel's life in the tower. Then watch the finale: the lantern release and the kingdom's reunion of its lost princess."
-    },
-    "tags": [
-      "Musical",
-      "Adventure",
-      "2010s",
-      "Disney"
     ],
     "tier": 1
   }
