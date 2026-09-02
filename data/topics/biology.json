@@ -15078,7 +15078,7 @@
     "name": "Cell Signaling",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "The molecular conversations that coordinate your trillion cells.",
+    "teaser": "Cell signaling involves chemical messengers that communicate between cells and within cells. Ligands bind to receptors, triggering intracellular cascades. About 30 percent of human genes encode signaling proteins. Signal amplification allows one molecule to trigger thousands of downstream responses. Dysregulated signaling underlies cancer, diabetes, and autoimmune diseases.",
     "byline": "The cellular chat",
     "tags": [
       "cells",
@@ -15098,7 +15098,7 @@
     "name": "Signal Transduction",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "The relay chains that carry a signal from the membrane to the DNA.",
+    "teaser": "Signal transduction converts extracellular signals into intracellular responses through receptor activation, second messenger cascades, and transcription factor regulation. G-protein coupled receptors, the largest receptor family, mediate responses to hormones, neurotransmitters, and light. One receptor can activate multiple G-proteins, amplifying the signal exponentially.",
     "byline": "The relay race",
     "tags": [
       "cells",
@@ -15118,7 +15118,7 @@
     "name": "The Cytoskeleton",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "The protein scaffold that shapes cells, moves cargo, and pulls them apart.",
+    "teaser": "The cytoskeleton is a dynamic network of microfilaments, intermediate filaments, and microtubules that provides cell structure, enables movement, and organizes organelles. Actin filaments power cell crawling and muscle contraction. Microtubules form the mitotic spindle and cilia. The cytoskeleton is constantly assembled and disassembled, recycling its components in minutes.",
     "byline": "The cell's frame",
     "tags": [
       "cells",
@@ -15138,7 +15138,7 @@
     "name": "The Golgi Apparatus",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "The cell's post office, sorting and addressing proteins for delivery.",
+    "teaser": "The Golgi apparatus modifies, sorts, and packages proteins and lipids for transport to their final destinations. Named after Camillo Golgi who discovered it in 1898, it consists of stacked membrane sacs called cisternae. Proteins spend 20 to 40 minutes transit through the Golgi, receiving sugar modifications at each station.",
     "byline": "The cell post office",
     "tags": [
       "cells",
@@ -15158,7 +15158,7 @@
     "name": "The Endoplasmic Reticulum",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "The folded membrane factory that builds and folds your proteins.",
+    "teaser": "The rough endoplasmic reticulum, studded with ribosomes, synthesizes proteins destined for membranes or secretion. The smooth ER synthesizes lipids and detoxifies drugs. Liver cells have extensive smooth ER for detoxification. The ER network is the largest membrane system in the cell, extending throughout the cytoplasm as interconnected sheets and tubes.",
     "byline": "The protein foundry",
     "tags": [
       "cells",
@@ -15178,7 +15178,7 @@
     "name": "Lysosomes",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "The cell's demolition crews that digest waste and worn-out parts.",
+    "teaser": "Lysosomes are the cell's digestive compartments, containing about 50 hydrolytic enzymes active at pH 5. They break down worn-out organelles, food particles, and engulfed viruses or bacteria. Lysosomal storage diseases result from enzyme deficiencies. Christian de Duve discovered lysosomes in 1955, winning the 1974 Nobel Prize.",
     "byline": "The recycling bins",
     "tags": [
       "cells",
@@ -15198,7 +15198,7 @@
     "name": "Peroxisomes",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "The organelles that detoxify alcohol and neutralize dangerous oxygen.",
+    "teaser": "Peroxisomes are small organelles that break down fatty acids and detoxify harmful substances, producing hydrogen peroxide as a byproduct. They are essential for producing plasmalogens, phospholipids important in brain and heart tissue. Zellweger syndrome, a fatal genetic disorder, results from peroxisome dysfunction. Peroxisomes can multiply by splitting when the cell needs more.",
     "byline": "The detox teams",
     "tags": [
       "cells",
@@ -15218,7 +15218,7 @@
     "name": "The Vacuole",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "The cell's water tank and storage closet — especially giant in plants.",
+    "teaser": "Plant cell vacuoles can occupy up to 90 percent of cell volume, storing water, nutrients, pigments, and waste products. The central vacuole maintains turgor pressure, keeping the plant rigid. Vacuoles in petals store anthocyanin pigments that create flower colors. Tonoplast membranes actively pump ions into vacuoles to regulate osmotic balance.",
     "byline": "The storage room",
     "tags": [
       "cells",
@@ -15238,7 +15238,7 @@
     "name": "The Plant Cell Wall",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "The cellulose fortress outside the plant cell membrane.",
+    "teaser": "The plant cell wall is a rigid structure of cellulose microfibrils, hemicellulose, and pectin that provides support, protection, and shape. Cellulose is the most abundant organic polymer on Earth. Plant cells build their walls outward through enzymatic synthesis at the plasma membrane. The wall can be 0.1 to 10 micrometers thick depending on cell type.",
     "byline": "The plant armor",
     "tags": [
       "cells",
@@ -15258,7 +15258,7 @@
     "name": "Epithelial Tissues",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The sheet-like tissues that line your organs and cover your surfaces.",
+    "teaser": "Epithelial tissues cover all body surfaces and line cavities, forming protective barriers. Simple squamous epithelium in the lungs is just 0.1 micrometers thick for gas exchange. Stratified squamous epithelium in the skin is 500 micrometers thick for protection. Glandular epithelium produces secretions. Epithelial cells regenerate rapidly, replacing themselves every 3 to 5 days in the gut.",
     "byline": "The body's linings",
     "tags": [
       "tissues",
@@ -15278,7 +15278,7 @@
     "name": "Connective Tissues",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The tissue family that holds your body together — from blood to bone.",
+    "teaser": "Connective tissues include bone, cartilage, blood, and loose connective tissue, all sharing a sparse cell population embedded in extracellular matrix. Collagen, the most abundant protein in the body, provides tensile strength. Connective tissue diseases like lupus and rheumatoid arthritis affect millions worldwide. Stem cells in connective tissue can differentiate into multiple cell types.",
     "byline": "The body's glue",
     "tags": [
       "tissues",
@@ -15298,7 +15298,7 @@
     "name": "Cartilage",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The rubbery tissue that cushions joints and shapes your ears and nose.",
+    "teaser": "Cartilage is a flexible connective tissue that cushions joints, supports airways, and shapes the ear and nose. Chondrocytes embedded in a matrix of collagen and proteoglycans produce cartilage but have limited blood supply, making healing slow. The human body has about 250 cartilage surfaces. Cartilage degeneration causes osteoarthritis, affecting over 300 million people globally.",
     "byline": "The shock absorber",
     "tags": [
       "tissues",
@@ -15318,7 +15318,7 @@
     "name": "Tendons and Ligaments",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The cords that connect muscle to bone and bone to bone.",
+    "teaser": "Tendons connect muscle to bone and are composed of dense parallel collagen fibers with tensile strength comparable to steel wire. Ligaments connect bone to bone and are more elastic. The Achilles tendon can withstand forces up to 12 times body weight. Tendons heal slowly due to limited blood supply, taking 6 to 12 weeks to recover from injury.",
     "byline": "The body's ropes",
     "tags": [
       "tissues",
@@ -15338,7 +15338,7 @@
     "name": "Joints",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "From ball-and-socket shoulders to hinge knees — the body's hinges.",
+    "teaser": "The body has over 360 joints classified as fibrous, cartilaginous, or synovial. Synovial joints are the most common and mobile, lined with articular cartilage and lubricated by synovial fluid. The hip and shoulder are ball-and-socket joints allowing multi-axis movement. Cartilage in joints is only 2 to 4 millimeters thick but absorbs 95 percent of impact forces.",
     "byline": "The body's moving parts",
     "tags": [
       "anatomy",
@@ -15358,7 +15358,7 @@
     "name": "The Knee",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The largest joint, balancing stability and flexibility on every step.",
+    "teaser": "The knee is the largest and most complex joint in the body, containing four major ligaments, two menisci, and the patella. The anterior cruciate ligament, or ACL, is commonly torn in sports, affecting about 200000 Americans annually. The menisci distribute load across the joint surface. The knee can bear forces of up to 6 times body weight during activities like stair climbing.",
     "byline": "The body's hinge",
     "tags": [
       "joints",
@@ -15378,7 +15378,7 @@
     "name": "Sweat Glands",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The millions of tiny coolers that regulate your temperature.",
+    "teaser": "Humans have 2 to 4 million eccrine sweat glands distributed across the body, producing up to 2 liters of sweat per hour. Apocrine glands in the armpits and groin produce thicker sweat that bacteria break down, causing body odor. Sweat is hypotonic, containing mostly water with sodium chloride and trace amounts of potassium, calcium, and urea.",
     "byline": "The body coolers",
     "tags": [
       "skin",
@@ -15398,7 +15398,7 @@
     "name": "Hair Growth",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The three-phase cycle behind why hair grows, rests, and falls out.",
+    "teaser": "Human hair grows at an average rate of 1.25 centimeters per month, with each follicle cycling through growth, transition, and resting phases lasting 2 to 8 years. The average head has 100000 to 150000 hairs, with daily loss of 50 to 100 hairs being normal. Melanocytes determine hair color, decreasing with age to produce gray and white hair.",
     "byline": "The hair cycle",
     "tags": [
       "hair",
@@ -15418,7 +15418,7 @@
     "name": "How Nails Grow",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The keratin plates that grow from hidden roots and record your health.",
+    "teaser": "Fingernails grow at about 3.5 millimeters per month, taking 3 to 6 months to replace entirely. Toenails grow at roughly half that rate. The nail plate is dead keratin produced by the nail matrix beneath the cuticle. Changes in nail growth rate, color, or texture can indicate systemic diseases including thyroid disorders, anemia, and fungal infections.",
     "byline": "The keratin plates",
     "tags": [
       "nails",
@@ -15438,7 +15438,7 @@
     "name": "Your Teeth",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The enamel-capped tools that start digestion with every bite.",
+    "teaser": "Humans develop two sets of teeth: 20 primary teeth and 32 permanent teeth. Each tooth contains the hardest substance in the body, enamel, which is 96 percent mineral. Tooth decay affects 2.4 billion people worldwide, making dental caries the most common chronic disease globally. Teeth cannot regenerate once enamel is destroyed.",
     "byline": "The first grinders",
     "tags": [
       "teeth",
@@ -15458,7 +15458,7 @@
     "name": "Saliva",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The enzyme-rich spit that starts digesting the moment food hits your mouth.",
+    "teaser": "Saliva is 99.5 percent water with dissolved enzymes, mucus, electrolytes, and antimicrobial compounds. The salivary glands produce 0.5 to 1.5 liters daily. Salivary amylase begins carbohydrate digestion in the mouth. Lysozyme and lactoferrin fight bacterial infections. Saliva also contains growth factors that speed wound healing in the oral cavity.",
     "byline": "The first step",
     "tags": [
       "digestion",
@@ -15478,7 +15478,7 @@
     "name": "Stomach Acid",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "Hydrochloric acid strong enough to dissolve metal — but not your stomach.",
+    "teaser": "The stomach produces hydrochloric acid at pH 1.5 to 3.5, strong enough to dissolve metal. Parietal cells secrete acid using proton pumps, producing about 2 liters daily. The acid activates pepsinogen into pepsin for protein digestion and kills most ingested bacteria. The stomach lining replaces itself every 3 to 4 days to prevent self-digestion.",
     "byline": "The acid vat",
     "tags": [
       "digestion",
@@ -15498,7 +15498,7 @@
     "name": "The Small Intestine",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The twenty-foot absorbent highway with a surface the size of a tennis court.",
+    "teaser": "The small intestine is about 6 meters long and is where 90 percent of nutrient absorption occurs. Its inner surface is covered in villi and microvilli, increasing the absorptive area to 250 square meters, roughly the size of a tennis court. Pancreatic enzymes and bile from the liver complete digestion here. Food spends 3 to 5 hours in the small intestine.",
     "byline": "The absorption line",
     "tags": [
       "digestion",
@@ -15518,7 +15518,7 @@
     "name": "Feeding Your Microbiome",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "Why fiber is the favorite food of your gut's bacterial residents.",
+    "teaser": "A diverse diet rich in fiber, fermented foods, and polyphenols supports a healthy gut microbiome. Prebiotic foods like garlic, onions, and bananas feed beneficial bacteria. Probiotic foods like yogurt and kimchi introduce live bacteria. The microbiome composition changes within days of dietary shifts, and microbial diversity is associated with better health outcomes.",
     "byline": "The inner garden",
     "tags": [
       "digestion",
@@ -15538,7 +15538,7 @@
     "name": "The Large Intestine",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The water recovery plant that finishes digestion and hosts your microbes.",
+    "teaser": "The large intestine, at 1.5 meters long, absorbs water, electrolytes, and vitamins produced by bacteria. Its microbiome contains trillions of bacteria that ferment undigested fiber into short-chain fatty acids. The colon houses about 100 billion bacteria per gram of content. Constipation affects 20 percent of adults, while diarrhea causes 1.5 million child deaths annually worldwide.",
     "byline": "The final stretch",
     "tags": [
       "digestion",
@@ -15558,7 +15558,7 @@
     "name": "Vitamins",
     "categoryId": "BIOLOGY",
     "subtype": "Nutrition",
-    "teaser": "The organic compounds your body needs in tiny, exact amounts.",
+    "teaser": "Thirteen essential vitamins are divided into fat-soluble, A, D, E, and K, and water-soluble, B complex and C. The body cannot synthesize most vitamins and must obtain them from food. Vitamin deficiencies cause specific diseases: scurvy from lack of C, rickets from lack of D, and beriberi from lack of B1. The recommended daily intake varies by vitamin and individual.",
     "byline": "The vital few",
     "tags": [
       "nutrition",
@@ -15578,7 +15578,7 @@
     "name": "Vitamin D",
     "categoryId": "BIOLOGY",
     "subtype": "Nutrition",
-    "teaser": "The sunlight vitamin your skin manufactures with UV help.",
+    "teaser": "Vitamin D is synthesized in skin exposed to UVB sunlight and is essential for calcium absorption and immune function. About 40 percent of the world's population is deficient. The body produces 10000 to 20000 IU of vitamin D from 15 to 30 minutes of midday sun exposure on bare arms and legs. Food sources include fatty fish, egg yolks, and fortified dairy.",
     "byline": "The sunshine vitamin",
     "tags": [
       "nutrition",
@@ -15598,7 +15598,7 @@
     "name": "Minerals",
     "categoryId": "BIOLOGY",
     "subtype": "Nutrition",
-    "teaser": "Calcium, iron, and zinc — the elements your body mines from food.",
+    "teaser": "Essential minerals include macro minerals like calcium, potassium, and sodium, and trace minerals like iron, zinc, and selenium. Iron deficiency is the most common nutritional deficiency worldwide, affecting over 2 billion people. The body contains about 1 kilogram of calcium, 99 percent in bones and teeth. Mineral absorption depends on dietary factors and individual health status.",
     "byline": "The element needs",
     "tags": [
       "nutrition",
@@ -15618,7 +15618,7 @@
     "name": "Calcium",
     "categoryId": "BIOLOGY",
     "subtype": "Nutrition",
-    "teaser": "The mineral that builds bones and keeps muscles and nerves firing.",
+    "teaser": "The human body contains about 1 kilogram of calcium, 99 percent stored in bones and teeth. Bones are living tissue constantly remodeled by osteoblasts and osteoclasts. Adults need 1000 to 1200 milligrams daily. Calcium absorption requires vitamin D and decreases with age. Dairy products, leafy greens, and fortified foods are primary dietary sources.",
     "byline": "The bone builder",
     "tags": [
       "nutrition",
@@ -15638,7 +15638,7 @@
     "name": "Protein",
     "categoryId": "BIOLOGY",
     "subtype": "Nutrition",
-    "teaser": "The amino acid chains that build muscle, enzymes, and more.",
+    "teaser": "Protein provides 4 calories per gram and is essential for muscle repair, enzyme production, and immune function. The body needs 0.8 grams per kilogram of body weight daily, though athletes need more. Proteins are broken down into amino acids, 9 of which are essential. Complete proteins contain all 9 essential amino acids; plant proteins can be combined for completeness.",
     "byline": "The body's bricks",
     "tags": [
       "nutrition",
@@ -15658,7 +15658,7 @@
     "name": "Carbohydrates",
     "categoryId": "BIOLOGY",
     "subtype": "Nutrition",
-    "teaser": "The body's preferred fuel, from quick sugars to slow-release starches.",
+    "teaser": "Carbohydrates provide 4 calories per gram and are the body's preferred energy source. Complex carbohydrates from whole grains release glucose slowly. Simple sugars from fruit and processed foods spike blood glucose. The brain uses about 120 grams of glucose daily, 20 percent of total body energy. Fiber, a carbohydrate, passes through the digestive tract mostly undigested.",
     "byline": "The fuel tank",
     "tags": [
       "nutrition",
@@ -15678,7 +15678,7 @@
     "name": "Fats",
     "categoryId": "BIOLOGY",
     "subtype": "Nutrition",
-    "teaser": "The energy-dense molecules your brain and cells cannot function without.",
+    "teaser": "Dietary fats provide 9 calories per gram, the most energy-dense macronutrient. They are essential for hormone production, vitamin absorption, and cell membrane structure. Unsaturated fats from olive oil, nuts, and fish reduce heart disease risk. Saturated fats from animal products can raise cholesterol. Trans fats, largely eliminated from food supplies, significantly increase heart disease risk.",
     "byline": "The essential fats",
     "tags": [
       "nutrition",
@@ -15698,7 +15698,7 @@
     "name": "Omega-3 Fatty Acids",
     "categoryId": "BIOLOGY",
     "subtype": "Nutrition",
-    "teaser": "The brain-friendly fats found in fish and flax.",
+    "teaser": "Omega-3 fatty acids, particularly EPA and DHA, are essential for brain function, reducing inflammation, and heart health. The brain is 60 percent fat, with DHA being the most abundant omega-3. Fatty fish contain 1 to 2 grams of omega-3 per serving. Flaxseed and walnuts provide ALA, a plant-based omega-3 that converts to EPA and DHA at only 5 to 10 percent efficiency.",
     "byline": "The brain fats",
     "tags": [
       "nutrition",
@@ -15718,7 +15718,7 @@
     "name": "Dietary Fiber",
     "categoryId": "BIOLOGY",
     "subtype": "Nutrition",
-    "teaser": "The indigestible plant roughage that keeps your whole system humming.",
+    "teaser": "Dietary fiber passes through the digestive tract largely intact, feeding beneficial gut bacteria and promoting bowel regularity. Adults need 25 to 38 grams daily but average only 15. Soluble fiber from oats and beans lowers cholesterol and blood sugar. Insoluble fiber from whole grains prevents constipation. High-fiber diets reduce the risk of colorectal cancer by 10 percent.",
     "byline": "The roughage",
     "tags": [
       "nutrition",
@@ -15738,7 +15738,7 @@
     "name": "Hydration",
     "categoryId": "BIOLOGY",
     "subtype": "Nutrition",
-    "teaser": "Why water is the nutrient you need most and least think about.",
+    "teaser": "The human body is 60 percent water by weight. Adults need about 3.7 liters daily, with about 20 percent coming from food. Dehydration of just 2 percent body weight impairs cognitive function and physical performance. The thirst mechanism lags behind actual fluid needs. Athletes can lose 1 to 2 liters of sweat per hour during intense exercise, requiring active replacement.",
     "byline": "The essential drink",
     "tags": [
       "nutrition",
@@ -15758,7 +15758,7 @@
     "name": "Your Basal Metabolism",
     "categoryId": "BIOLOGY",
     "subtype": "Nutrition",
-    "teaser": "The calorie-burning engine that runs even while you sleep.",
+    "teaser": "Basal metabolic rate, or BMR, accounts for 60 to 75 percent of daily calorie expenditure, powering basic life functions like breathing, circulation, and cell production. BMR is higher in people with more muscle mass, during pregnancy, and in cold environments. BMR declines about 2 percent per decade after age 20. Starvation lowers BMR by up to 40 percent.",
     "byline": "The idling engine",
     "tags": [
       "nutrition",
@@ -15778,7 +15778,7 @@
     "name": "The Glycemic Index",
     "categoryId": "BIOLOGY",
     "subtype": "Nutrition",
-    "teaser": "How quickly different foods spike your blood sugar.",
+    "teaser": "The glycemic index, or GI, ranks carbohydrates on a 0 to 100 scale based on how quickly they raise blood glucose. Pure glucose scores 100. Whole grains typically score 40 to 55, while white bread scores 75. Low-GI foods help manage diabetes and may reduce heart disease risk. The glycemic load combines GI with portion size for a more practical measure.",
     "byline": "The sugar speedometer",
     "tags": [
       "nutrition",
@@ -15798,7 +15798,7 @@
     "name": "What a Calorie Is",
     "categoryId": "BIOLOGY",
     "subtype": "Nutrition",
-    "teaser": "The physics of food energy and why all calories are not equal.",
+    "teaser": "A dietary calorie, or kilocalorie, is the energy needed to raise 1 kilogram of water by 1 degree Celsius. The average adult needs 1500 to 2500 calories daily depending on activity level, age, and sex. Food calories come from carbohydrates at 4 per gram, protein at 4 per gram, and fat at 9 per gram. Alcohol contributes 7 calories per gram.",
     "byline": "The energy unit",
     "tags": [
       "nutrition",
@@ -15818,7 +15818,7 @@
     "name": "Muscle Recovery",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The repair and rebuilding that happens after you exercise.",
+    "teaser": "Muscle recovery after exercise involves inflammation, satellite cell activation, and protein synthesis. The repair process peaks 24 to 48 hours post-exercise, causing delayed onset muscle soreness. Protein intake of 0.25 to 0.4 grams per kilogram accelerates recovery. Sleep is critical, as growth hormone released during deep sleep stimulates muscle repair.",
     "byline": "The rebuild crew",
     "tags": [
       "muscles",
@@ -15838,7 +15838,7 @@
     "name": "What Endurance Training Does",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The heart, lung, and muscle upgrades that come with regular cardio.",
+    "teaser": "Endurance training increases mitochondrial density by up to 50 percent, expands blood volume by 20 to 25 percent, and increases capillary density in muscles. VO2 max, the maximum oxygen uptake, can improve 15 to 30 percent with training. The heart adapts by increasing stroke volume, allowing a trained athlete to pump more blood per beat at rest.",
     "byline": "The fitness upgrades",
     "tags": [
       "exercise",
@@ -15858,7 +15858,7 @@
     "name": "Altitude and the Body",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "How your body builds more blood cells at high altitudes.",
+    "teaser": "Above 2500 meters, reduced atmospheric oxygen triggers physiological adaptations. The body produces more red blood cells through erythropoietin stimulation, increasing oxygen-carrying capacity. Acute mountain sickness affects 25 to 40 percent of people ascending above 3000 meters. Elite athletes train at altitude to gain a competitive advantage through natural blood boosting.",
     "byline": "The mountain response",
     "tags": [
       "blood",
@@ -15878,7 +15878,7 @@
     "name": "How the Body Handles Cold",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "Shivering, vasoconstriction, and brown fat — the heat-saving arsenal.",
+    "teaser": "When core temperature drops below 37 degrees Celsius, the body initiates vasoconstriction, shivering, and behavioral responses. Shivering can increase metabolic heat production by 5 times. After prolonged cold exposure, the body increases brown fat activity for non-shivering thermogenesis. Hypothermia sets in below 35 degrees Celsius, with cardiac arrest occurring at 28 degrees.",
     "byline": "The heat keepers",
     "tags": [
       "temperature",
@@ -15898,7 +15898,7 @@
     "name": "Brown Fat",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The heat-generating fat that burns calories to warm you.",
+    "teaser": "Brown adipose tissue, or brown fat, generates heat through non-shivering thermogenesis using uncoupling protein 1 to dissipate the mitochondrial proton gradient. Adults have about 50 to 100 grams, concentrated around the neck and shoulders. Cold exposure activates brown fat, burning glucose and fat. This discovery has led to research on brown fat activation for obesity treatment.",
     "byline": "The heating fat",
     "tags": [
       "fat",
@@ -15918,7 +15918,7 @@
     "name": "Heat and the Body",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "How heat stress works and why it is dangerous.",
+    "teaser": "Heat stroke occurs when core temperature exceeds 40 degrees Celsius and the body's cooling mechanisms fail. The hypothalamus triggers sweating and vasodilation to dissipate heat. Heat stroke causes organ damage and can be fatal without rapid cooling. The body acclimatizes to heat over 1 to 2 weeks, improving sweating efficiency and plasma volume.",
     "byline": "The heat warning",
     "tags": [
       "temperature",
@@ -15938,7 +15938,7 @@
     "name": "Dehydration",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "What happens to your body when water runs low.",
+    "teaser": "Losing just 1 to 2 percent of body weight as sweat impairs cognitive function, mood, and physical performance. Severe dehydration at 10 to 15 percent can be fatal. The brain shrinks slightly during dehydration, pulling away from the skull and triggering headaches. Urine color is the simplest hydration indicator: pale yellow indicates adequate hydration; dark yellow indicates dehydration.",
     "byline": "The drying out",
     "tags": [
       "water",
@@ -15958,7 +15958,7 @@
     "name": "The Sugar Crash",
     "categoryId": "BIOLOGY",
     "subtype": "Nutrition",
-    "teaser": "Why a candy bar gives you energy, then leaves you sluggish.",
+    "teaser": "Blood sugar crashes occur when rapid glucose spikes from refined carbohydrates trigger excessive insulin release, dropping blood sugar below normal. Symptoms include fatigue, irritability, and intense cravings. The phenomenon typically occurs 2 to 3 hours after eating high-GI foods. Pairing carbohydrates with protein, fat, or fiber slows absorption and prevents the spike-crash cycle.",
     "byline": "The rollercoaster",
     "tags": [
       "nutrition",
@@ -15978,7 +15978,7 @@
     "name": "How Caffeine Works",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The molecule that blocks sleep signals and keeps you alert.",
+    "teaser": "Caffeine blocks adenosine receptors in the brain, preventing the drowsiness-inducing neurotransmitter from binding. It also increases dopamine and adrenaline release. A standard cup of coffee contains 80 to 100 milligrams. Caffeine begins working within 20 minutes, peaks at 1 to 2 hours, and improves alertness, concentration, and physical performance by up to 12 percent.",
     "byline": "The alertness molecule",
     "tags": [
       "caffeine",
@@ -15998,7 +15998,7 @@
     "name": "Caffeine's Half-Life",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "Why your afternoon coffee can still be in your system at midnight.",
+    "teaser": "Caffeine has an average half-life of 5 to 6 hours in healthy adults, meaning half the dose remains in the bloodstream after that time. A coffee consumed at 3 PM still has 50 percent of its caffeine at 8 to 9 PM. Genetics affect metabolism speed dramatically. Caffeine consumed 6 hours before bedtime reduces total sleep by over 1 hour.",
     "byline": "The lingering buzz",
     "tags": [
       "caffeine",
@@ -16018,7 +16018,7 @@
     "name": "Alcohol and the Brain",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The neurotransmitter cocktail behind relaxation, slurred speech, and blackouts.",
+    "teaser": "Alcohol enhances GABA inhibition and reduces glutamate excitation, producing relaxation and impaired judgment. Heavy drinking shrinks brain volume by up to 10 percent. The hippocampus, critical for memory formation, is especially vulnerable. Even moderate drinking can impair REM sleep. Alcohol-related brain damage is partially reversible with 6 to 12 months of abstinence.",
     "byline": "The brain depressant",
     "tags": [
       "alcohol",
@@ -16038,7 +16038,7 @@
     "name": "The Science of Hangovers",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "Dehydration, inflammation, and byproducts — why the morning after hurts.",
+    "teaser": "Hangovers result from dehydration, acetaldehyde accumulation, electrolyte imbalance, and inflammatory immune responses. Alcohol increases urination by inhibiting antidiuretic hormone, losing up to 1 liter of fluid per hour. Acetaldehyde, a toxic alcohol metabolite, causes nausea and headache. Genetics determine alcohol dehydrogenase enzyme efficiency, explaining wide variation in hangover severity.",
     "byline": "The morning after",
     "tags": [
       "alcohol",
@@ -16058,7 +16058,7 @@
     "name": "Nicotine's Grip",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The molecule that hijacks dopamine and hooks smokers in days.",
+    "teaser": "Nicotine reaches the brain within 10 seconds of inhalation, triggering dopamine release in the reward pathway. It is as addictive as heroin or cocaine, with a 32 percent chance of addiction among those who try it. Nicotine replacement therapy doubles quit rates. Withdrawal symptoms peak at 2 to 3 days and include irritability, anxiety, and intense cravings.",
     "byline": "The addiction molecule",
     "tags": [
       "addiction",
@@ -16078,7 +16078,7 @@
     "name": "Dopamine and Reward",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The 'wanting' chemical that drives motivation — and addiction.",
+    "teaser": "Dopamine is a neurotransmitter that signals reward prediction rather than pleasure itself. It spikes when anticipating a reward, not when receiving it. The brain's dopamine system evolved to motivate food-seeking and social behavior. Drugs, social media, and gambling hijack this system, creating artificial dopamine surges that drive compulsive behavior.",
     "byline": "The motivation molecule",
     "tags": [
       "brain",
@@ -16098,7 +16098,7 @@
     "name": "Dopamine Loops",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "Why notifications, snacks, and games are engineered to keep your brain hooked.",
+    "teaser": "Dopamine loops form when the brain associates cues with rewarding behaviors, creating anticipatory dopamine release that drives repetition. Variable reward schedules, like those in slot machines and social media feeds, produce the strongest dopamine responses. Over time, tolerance develops, requiring more stimulation for the same dopamine hit, a hallmark of addiction.",
     "byline": "The attention economy",
     "tags": [
       "brain",
@@ -16118,7 +16118,7 @@
     "name": "The Science of Willpower",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "Why self-control depletes — and how to design around it.",
+    "teaser": "Willpower relies on the prefrontal cortex and is a limited cognitive resource that depletes with use, a phenomenon called ego depletion. Glucose levels correlate with self-control capacity. Regular exercise, adequate sleep, and mindfulness practice strengthen prefrontal cortex function. Making choices in advance, like meal planning, reduces the need for moment-to-moment willpower.",
     "byline": "The self-control tank",
     "tags": [
       "brain",
@@ -16138,7 +16138,7 @@
     "name": "The Habit Loop",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "Cue, routine, reward — the brain's autopilot that runs your day.",
+    "teaser": "The habit loop consists of cue, routine, and reward, as described by Charles Duhigg. Habits are stored in the basal ganglia, freeing the prefrontal cortex for other tasks. To change a habit, keep the cue and reward but change the routine. It takes an average of 66 days to form a new habit, though this varies from 18 to 254 days depending on complexity.",
     "byline": "The autopilot",
     "tags": [
       "brain",
@@ -16158,7 +16158,7 @@
     "name": "The Learning Styles Myth",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "Why 'visual learner' labels are not backed by science.",
+    "teaser": "The idea that people learn best through a preferred style, visual, auditory, or kinesthetic, is a persistent myth unsupported by scientific evidence. Research shows that while people have preferences, matching instruction to supposed learning styles does not improve outcomes. Multimodal instruction combining visual, auditory, and hands-on elements benefits all learners.",
     "byline": "The myth check",
     "tags": [
       "learning",
@@ -16178,7 +16178,7 @@
     "name": "Spaced Repetition",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The study technique backed by a century of memory science.",
+    "teaser": "Spaced repetition is a learning technique that reviews information at increasing intervals, exploiting the spacing effect first described by Hermann Ebbinghaus in 1885. Reviewing at optimal intervals just before forgetting can improve long-term retention by 200 percent compared to massed practice. Digital apps like Anki use algorithms to schedule reviews at the ideal moment.",
     "byline": "The forgetting curve",
     "tags": [
       "memory",
@@ -16198,7 +16198,7 @@
     "name": "The Testing Effect",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "Why quizzing yourself beats rereading every time.",
+    "teaser": "The testing effect shows that retrieving information from memory strengthens it more than re-reading or re-studying. Quizzing yourself after learning produces 50 percent better long-term retention than additional study time. This phenomenon, documented by Roediger and Karpicke in 2006, has revolutionized educational practice, making active recall a core study strategy.",
     "byline": "The retrieval boost",
     "tags": [
       "memory",
@@ -16218,7 +16218,7 @@
     "name": "Interleaved Practice",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The study strategy that mixes topics and looks harder but works better.",
+    "teaser": "Interleaved practice mixes different topics or problem types during study sessions, rather than focusing on one type at a time. Despite feeling harder, interleaving produces 43 percent better test performance than blocked practice. The effort of switching between problem types strengthens discrimination and flexible thinking, important for real-world application of knowledge.",
     "byline": "The mixed practice",
     "tags": [
       "learning",
@@ -16238,7 +16238,7 @@
     "name": "Sleep Deprivation",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The cognitive and physical toll of going without enough sleep.",
+    "teaser": "After 17 hours without sleep, cognitive impairment equals a blood alcohol level of 0.05 percent. After 24 hours, impairment equals 0.1 percent, legally drunk in all US states. Sleep deprivation reduces prefrontal cortex activity, impairing judgment, creativity, and emotional regulation. Chronic short sleep, under 6 hours, increases risks of obesity, diabetes, and cardiovascular disease.",
     "byline": "The sleepless cost",
     "tags": [
       "sleep",
@@ -16258,7 +16258,7 @@
     "name": "The Power Nap",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "How short naps restore alertness without grogginess.",
+    "teaser": "A 10 to 20 minute power nap boosts alertness, concentration, and mood without causing grogginess. NASA studies found that a 26 minute nap improved pilot performance by 34 percent and alertness by 54 percent. Naps longer than 30 minutes enter deep sleep and cause sleep inertia, the groggy feeling upon waking. The ideal nap time is early afternoon.",
     "byline": "The quick recharge",
     "tags": [
       "sleep",
@@ -16278,7 +16278,7 @@
     "name": "Microsleep",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The seconds-long lapses where your brain naps with your eyes open.",
+    "teaser": "Microsleeps are brief episodes of sleep lasting 1 to 30 seconds during which the brain goes offline. During microsleeps, the eyes glaze over and the person is unresponsive. They occur frequently after 24 hours of sleep deprivation and are a major cause of drowsy driving accidents. The brain tries to recover sleep debt through these involuntary naps.",
     "byline": "The hidden doze",
     "tags": [
       "sleep",
@@ -16298,7 +16298,7 @@
     "name": "Early Birds and Night Owls",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The genetic chronotypes that set your natural sleep timing.",
+    "teaser": "Chronotype, the tendency toward morning or evening alertness, is genetically determined by clock genes like PER3 and CRY1. About 25 percent of people are definite morning types, 25 percent evening types, and 50 percent in between. Chronotype shifts with age, with teenagers naturally staying up late and adults shifting earlier. Forcing mismatched schedules impairs performance and health.",
     "byline": "The internal clocks",
     "tags": [
       "sleep",
@@ -16318,7 +16318,7 @@
     "name": "Screens and Sleep",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "Why blue light after dark delays your body's sleep signal.",
+    "teaser": "Blue light from screens suppresses melatonin production by up to 50 percent and delays circadian rhythm by 1.5 hours. A Harvard study found that reading on an iPad before bed delayed sleep onset by 10 minutes, reduced REM sleep, and increased next-morning grogginess. The National Sleep Foundation recommends stopping screen use 30 to 60 minutes before bedtime.",
     "byline": "The light problem",
     "tags": [
       "sleep",
@@ -16338,7 +16338,7 @@
     "name": "The Best Sleep Temperature",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "Why your body cools down to fall asleep — and what that means for your thermostat.",
+    "teaser": "The optimal bedroom temperature for sleep is 15 to 19 degrees Celsius, or 59 to 66 degrees Fahrenheit. The body needs to drop its core temperature by about 1 degree to initiate sleep. Warm baths 1 to 2 hours before bed paradoxically help by causing blood vessel dilation that accelerates heat loss. Overheated rooms fragment sleep and reduce deep sleep stages.",
     "byline": "The cool-down",
     "tags": [
       "sleep",
@@ -16358,7 +16358,7 @@
     "name": "Why We Forget Dreams",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The memory systems that erase most dreams within minutes of waking.",
+    "teaser": "Dreams are encoded in short-term memory circuits that are offline during REM sleep, making consolidation into long-term memory difficult. Within 5 minutes of waking, 50 percent of dream content is forgotten; within 10 minutes, 90 percent. Keeping a dream journal trains the brain to encode dreams. Dreams are most vivid during the final REM cycle just before waking.",
     "byline": "The fading dream",
     "tags": [
       "dreams",
@@ -16378,7 +16378,7 @@
     "name": "Nightmares",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The frightening dreams and why the brain generates them.",
+    "teaser": "Nightmares occur during REM sleep and affect 4 to 10 percent of adults regularly. Post-traumatic nightmares are a hallmark of PTSD, affecting up to 72 percent of sufferers. Nightmare disorder can be treated with imagery rehearsal therapy, which reduces nightmare frequency by 60 percent. Medications like prazosin can suppress trauma-related nightmares.",
     "byline": "The night terrors",
     "tags": [
       "dreams",
@@ -16398,7 +16398,7 @@
     "name": "Learning to Lucid Dream",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "Reality checks and dream journals — the toolkit for conscious dreaming.",
+    "teaser": "Lucid dreaming can be cultivated through reality testing, where you regularly check whether you are dreaming during waking hours. The MILD technique involves setting an intention to remember you are dreaming while falling asleep. About 55 percent of people have experienced at least one lucid dream. The清醒 induction technique from the 1980s increases lucid dream frequency.",
     "byline": "The dream control",
     "tags": [
       "dreams",
@@ -16418,7 +16418,7 @@
     "name": "The Hippo's Double Life",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The land giant that spends its days submerged and its nights grazing.",
+    "teaser": "Hippos spend their days submerged in water to avoid sunburn and overheating, emerging at night to graze on land. They can hold their breath for up to 5 minutes and walk along river bottoms. Despite their herbivorous diet, hippos are among Africa's most dangerous animals, killing an estimated 500 people annually. They can run at 30 kilometers per hour on land.",
     "byline": "The river giant",
     "tags": [
       "hippos",
@@ -16438,7 +16438,7 @@
     "name": "Hippo 'Blood Sweat'",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The red-orange secretion that is sunscreen and antibiotic in one.",
+    "teaser": "Hippos secrete a red-tinged oily fluid from skin glands that functions as natural sunscreen and antibiotic. The secretion, sometimes called blood sweat, contains hipposudoric acid, a reddish pigment that absorbs UV light and inhibits bacterial growth. This fluid protects hippos' sensitive skin from sunburn and infection during their 16 hours daily in water.",
     "byline": "The red mystery",
     "tags": [
       "hippos",
@@ -16458,7 +16458,7 @@
     "name": "Rhino Horns",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The keratin structures that are more fingernail than bone.",
+    "teaser": "Rhino horns are made entirely of keratin, the same protein in human hair and fingernails, with no medicinal value. Despite this, demand from traditional medicine markets has driven poaching to crisis levels. Five rhino species remain, with the northern white rhino functionally extinct. Poaching killed over 1000 rhinos annually in South Africa between 2013 and 2017.",
     "byline": "The horn mystery",
     "tags": [
       "rhinos",
