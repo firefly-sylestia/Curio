@@ -14,6 +14,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
@@ -35,6 +36,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -417,6 +419,34 @@ fun TopicDatabaseScreen(navController: NavController) {
             else -> 3 // matched in other fields
         }
     }
+    // v313 — per-category SEARCH-HIT counts, computed off the UI thread. Used
+    // by the dynamic chip bar (chips show their hit count and zero-hit lanes
+    // hide while searching) and the "Also in" suggestion pills. Empty while
+    // browsing — chips then fall back to full per-lane totals.
+    val indexById = remember(indexedTopics) { indexedTopics.associateBy { it.topic.id } }
+    val catHitCounts by produceState<Map<CategoryId, Int>>(
+        initialValue = emptyMap(),
+        catalog,
+        indexById,
+        needle
+    ) {
+        value = if (needle.isEmpty()) emptyMap()
+        else withContext(Dispatchers.Default) {
+            val out = mutableMapOf<CategoryId, Int>()
+            catalog.forEach { (cat, topics) ->
+                val n = topics.count { t -> indexById[t.id]?.let(matches) == true }
+                if (n > 0) out[cat.id] = n
+            }
+            out
+        }
+    }
+    // v313 — the dynamic chip list: full per-lane totals while browsing;
+    // while searching, only lanes with at least one match (count = hits).
+    val chips: List<Pair<CurioCategory, Int>> = remember(catalog, catHitCounts, needle) {
+        if (needle.isEmpty()) catalog.map { it.first to it.second.size }
+        else catalog.mapNotNull { (cat, _) -> catHitCounts[cat.id]?.let { cat to it } }
+    }
+    val allChipsCount = if (needle.isEmpty()) totalTopics else catHitCounts.values.sum()
     // Filtering and sorting happen on Dispatchers.Default. `remember` only
     // caches work; it still performs the entire sort on the UI thread.
     val rows by produceState<List<DatabaseRow>>(
@@ -433,9 +463,13 @@ fun TopicDatabaseScreen(navController: NavController) {
             // name relevance, and render flat (no category sections). When
             // browsing, keep the per-lane A–Z order with section headers.
             if (needle.isNotEmpty()) {
-                // SEARCH MODE: flat global results sorted by name relevance.
+                // SEARCH MODE: flat results sorted by name relevance.
+                // v313 — the selected category FILTERS search: with a lane
+                // active the results come ONLY from that lane (previously
+                // every category's matches showed up no matter what).
                 val allMatches = mutableListOf<IndexedTopic>()
                 catalog.forEach { (cat, topics) ->
+                    if (effectiveCat != null && effectiveCat != cat.id) return@forEach
                     allMatches += topics.mapNotNull { indexById[it.id] }.filter(matches)
                 }
                 allMatches.sortedWith(titleComparator).map { indexed ->
@@ -645,34 +679,69 @@ fun TopicDatabaseScreen(navController: NavController) {
                             textAlign = TextAlign.Center
                         )
                     }
-                } else if (rows.isEmpty()) {
-                    item("empty") {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(10.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 56.dp)
-                        ) {
-                            CurioIcon(
-                                CurioIcons.SearchOff, null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                size = 44.dp
-                            )
-                            Text(
-                                "No topics match",
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                "Try a different search or pick another category.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                } else {
+                    // v313 — BROWSE a selected lane: the list shows ONE
+                    // category only (no in-list category names), topped by an
+                    // arrow bar that returns to All.
+                    if (needle.isEmpty() && effectiveCat != null) {
+                        item(key = "category-top-bar") {
+                            val curCat = CurioCategories.byId(effectiveCat)
+                            val curCount = catalog
+                                .firstOrNull { it.first.id == effectiveCat }?.second?.size ?: 0
+                            DatabaseCategoryTopBar(
+                                cat = curCat,
+                                count = curCount,
+                                onBackToAll = { selectedCat = null }
                             )
                         }
                     }
-                } else {
-                    items(
+                    // v313 — SEARCH suggestions: pills for other categories
+                    // that also match the query, so results never hide behind
+                    // the stale selected-lane filter. Tap = jump to that lane.
+                    if (needle.isNotEmpty() && effectiveCat != null) {
+                        val others = catHitCounts
+                            .filterKeys { it != effectiveCat }
+                            .mapNotNull { (id, n) ->
+                                CurioCategories.all.firstOrNull { it.id == id }?.let { it to n }
+                            }
+                            .sortedByDescending { it.second }
+                        if (others.isNotEmpty()) {
+                            item(key = "search-suggestions") {
+                                SearchSuggestionRow(
+                                    hits = others,
+                                    onSelect = { selectedCat = it }
+                                )
+                            }
+                        }
+                    }
+                    if (rows.isEmpty()) {
+                        item("empty") {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(10.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 56.dp)
+                            ) {
+                                CurioIcon(
+                                    CurioIcons.SearchOff, null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                                    size = 44.dp
+                                )
+                                Text(
+                                    "No topics match",
+                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    "Try a different search or pick another category.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    } else {
+                        items(
                         paginatedRows,
                         key = { it.key },
                         // v49 — section headers and topic rows reuse their own
@@ -705,6 +774,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                             )
                         }
                     }
+                }
                 }
             }
         }
@@ -800,8 +870,8 @@ fun TopicDatabaseScreen(navController: NavController) {
             DatabaseStickyChipBar(
                 glassBackdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null,
                 listState = listState,
-                catalog = catalog,
-                totalTopics = totalTopics,
+                chips = chips,
+                allCount = allChipsCount,
                 selectedCat = effectiveCat,
                 onSelectAll = { selectedCat = null },
                 onSelectCategory = { selectedCat = it }
@@ -1025,8 +1095,10 @@ private fun BoxScope.DatabaseStickyChipBar(
     // refracting capsule over this LOCAL page capture.
     glassBackdrop: LayerBackdrop? = null,
     listState: LazyListState,
-    catalog: List<Pair<CurioCategory, List<CurioTopic>>>,
-    totalTopics: Int,
+    // v313 — precomputed dynamic chips (search: hit counts, zero-hit lanes
+    // dropped; browse: full per-lane totals) behind [allCount].
+    chips: List<Pair<CurioCategory, Int>>,
+    allCount: Int,
     selectedCat: CategoryId?,
     onSelectAll: () -> Unit,
     onSelectCategory: (CategoryId) -> Unit
@@ -1062,7 +1134,7 @@ private fun BoxScope.DatabaseStickyChipBar(
             ) { popProgress ->
                 DatabaseFilterChip(
                     label = "All",
-                    count = totalTopics,
+                    count = allCount,
                     accent = MaterialTheme.colorScheme.primary,
                     selected = selectedCat == null,
                     onClick = onSelectAll,
@@ -1072,14 +1144,14 @@ private fun BoxScope.DatabaseStickyChipBar(
                 )
             }
         }
-        itemsIndexed(catalog, key = { _, pair -> pair.first.id.name }) { i, (cat, list) ->
+        itemsIndexed(chips, key = { _, pair -> pair.first.id.name }) { i, (cat, chipCount) ->
             DatabaseChipPop(
                 index = i + 1,
                 frostShift = frostShift
             ) { popProgress ->
                 DatabaseFilterChip(
                     label = cat.displayName,
-                    count = list.size,
+                    count = chipCount,
                     accent = cat.themedAccent(),
                     selected = selectedCat == cat.id,
                     onClick = { onSelectCategory(cat.id) },
@@ -1123,6 +1195,107 @@ private fun DatabaseChipPop(
  * alphabetically within that bucket.
  */
 private fun topicYear(topic: CurioTopic): Int? = topic.publicationYear()
+
+/**
+ * v313 — the single-category BROWSE bar, shown at the very top of the list
+ * when a lane is selected (not searching): "← Films · 342 topics". The list
+ * renders ONLY this lane's topics — no in-list category names — and tapping
+ * the bar (arrow left) returns to All.
+ */
+@Composable
+private fun DatabaseCategoryTopBar(
+    cat: CurioCategory,
+    count: Int,
+    onBackToAll: () -> Unit
+) {
+    Surface(
+        onClick = onBackToAll,
+        shape = RoundedCornerShape(50),
+        color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+        shadowElevation = 2.dp,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp)
+        ) {
+            CurioIcon(
+                CurioIcons.ChevronLeft, "View all categories",
+                tint = cat.categoryInk(), size = 18.dp
+            )
+            CurioIcon(
+                cat.iconGlyph, null,
+                tint = cat.categoryInk(), size = 16.dp
+            )
+            Text(
+                text = cat.displayName.uppercase(),
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = "$count topics",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.weight(1f))
+            CurioIcon(
+                CurioIcons.ChevronRight, null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                size = 16.dp
+            )
+        }
+    }
+}
+
+/**
+ * v313 — "Also in: Films · 4" suggestion pills, shown ABOVE the search
+ * results when a lane is selected and other lanes also match the query.
+ * Tapping a pill switches the active filter to that lane (the search stays),
+ * so results from other categories are one tap away instead of hidden.
+ */
+@Composable
+private fun SearchSuggestionRow(
+    hits: List<Pair<CurioCategory, Int>>,
+    onSelect: (CategoryId) -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+    ) {
+        Text(
+            text = "Also in",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        hits.forEach { (cat, count) ->
+            Surface(
+                onClick = { onSelect(cat.id) },
+                shape = RoundedCornerShape(50),
+                color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                ) {
+                    CurioIcon(cat.iconGlyph, null, tint = cat.categoryInk(), size = 13.dp)
+                    Text(
+                        text = "${cat.displayName} · $count",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1
+                    )
+                }
+            }
+        }
+    }
+}
 
 /** Category section header shown while browsing All. */
 @Composable

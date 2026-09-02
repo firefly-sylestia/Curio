@@ -1,3 +1,7 @@
+ADD: Topic Browser — the selected category now FILTERS search results (searching inside a category shows only that category's matches instead of every category's).
+ADD: Topic Browser — dynamic category chips: while searching each chip shows its live match count and categories with no matches hide.
+ADD: Topic Browser — searching inside a category shows "Also in" pills for other categories that match; tap a pill to jump the filter there (the search stays).
+ADD: Topic Browser — browsing a single category now shows ONLY that category's topics, with an arrow bar at the top (e.g. "← Films · 342 topics") that returns to All.
 ADD: Your-mixes cards redesigned as compact "mix stamps" — a leading lane icon, the mix name + lane list and tiny tinted lane-composition dots previewing the mix; tapping a card spins it (the separate inline Spin pill is dropped).
 FIX: Category tiles in the picker are now borderless in BOTH themes — the light-mode rings on category tiles, the "+ Add" tile and the playing mix card's Active ring are all gone.
 ADD: Mix actions (Edit/Delete) now live behind a tap-and-hold on the mix card — Your-mixes cards and the Browse Mixes tab rows show no 3-dot or action buttons at rest.

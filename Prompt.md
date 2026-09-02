@@ -1,44 +1,46 @@
 # Prompt.md — current request log
 
-## Request: Category picker — remove all tile borders, hide mix actions behind tap-and-hold, drop the header "New" pill, persist page + scroll
+## Request: App revamp — step 1: Topic Browser (category-filtered search, dynamic chips, one-category browse)
 
 User direction (verbatim, lightly cleaned):
 
-> "In dark mode, the continue-exploring categories, browser categories and page-1 categories all have that white border — please remove, I don't want any border at all. And in Your mixes don't show any 3-dot or edit icon or delete button, only show when you tap and hold. And also in Your mixes remove that New button as there is one at the bottom already. And make page 1 or 2 remember state persistent, and even the scroll, and the page should stay default when the user switches it just as it is now — intended feature."
+> "We will be revamping the experience of the app for users, like fully from changing UI to functionality etc based on what user wants, starting with [the] topic browser: let user change category and act that category as filters for the search, so it doesn't always stay on and show all categories when one category is selected; show smart suggestion in a small pill if a result has from another category; make the category chips dynamic — the number it shows if it has that search result, and if it doesn't have that, that category should hide; and in the list when changing category not in search the old category gets shown in the list too which is bad — only 1 should be shown with a button like an arrow and then that category at the top only. Finish this, then we will go to the next step."
 
 ### Clarifications asked (ask_user)
 
-1. **Border scope** — user picked **"Remove ALL of them"**: tiles and the "+ Add" tile become borderless in light AND dark; the playing mix card's Active ring goes too (the "Active" label stays).
-2. **Empty-state button** — user picked **"Keep it"**: the zero-mixes "Build your first mix" CTA stays; only the header "New" pill is removed.
+1. **Browse list** (Q1) — user answered via Other: "i am not talking about the category chips but the category names that show in the list, and for that one use one category and top arrow." → the complaint is the in-list category section headers; the desired end state = ONE category shown at a time with a top arrow bar. (All keeps its sections.)
+2. **Suggestions placement** — "Pill row above results" (a row above/at the top of the result list, tap switches the category filter, search stays).
+3. **Dynamic chips scope** — "Search only" (live match counts + hide zero-match lanes while searching; browsing keeps full per-lane totals).
+4. **Pill action** — "Switch to that category" (tapping a suggestion pill makes it the active filter).
 
-### Analysis — what existed before this turn
+### Analysis — what existed before this turn (`features/database/TopicDatabaseScreen.kt`)
 
-- **Borders:** `NewPickerTile` and `AddSuggestionTile` already drew their outline rings LIGHT-mode only (fb4d335c / 5e0321de killed the dark-mode rings; v3xx11 removed the check tick). But the light-mode 1.5dp rings (`outlineVariant` / `catInk`), the "+ Add" ring and `NewMixCard`'s Active ring (`leadAccent @ 55%`) still rendered — user wanted zero borders at all.
-- **Mix actions:** v3xx12 added EXPLICIT Edit/Delete buttons to `NewMixCard` (reversing the hidden 3-dot); the Browse Mixes tab `BrowseMixRow` still showed an always-visible 3-dot (with a long-press DropdownMenu already wired). User wants all actions hidden until tap-and-hold.
-- **"New" pill:** the Your mixes header row had a `Surface` "New" pill next to the label — redundant with the bottom action row's "+" (Create a mix). Empty-state CTA stays.
-- **Page/scroll persistence:** the sheet's default page already persisted (`pickerDefaultPageState` + LaunchedEffect write — the "intended feature" to keep). Scroll positions were NOT persisted anywhere; each page's LazyListState reset on close/reopen, and page flips disposed the off-screen page.
+- **Search ignored the selected category (real bug):** the SEARCH-mode rows builder iterated the whole `catalog` and returned every lane's matches regardless of `effectiveCat` — exactly the "shows all categories when one is selected" complaint.
+- **Chip counts were static full-lane totals:** `DatabaseStickyChipBar` took `catalog` + `totalTopics` and rendered every lane chip with `list.size`.
+- **Browse with a lane selected** already filtered to that lane (no header), but the All view interleaves per-category section headers — the "category names in the list" the user flagged. No top bar existed.
+- No suggestion mechanism existed for cross-category hits while searching.
 
 ### What shipped (this turn)
 
-- **Borders removed in BOTH themes** (`NewCategoryPicker.kt`): `NewPickerTile` drops the selected/pinned ring, `AddSuggestionTile` drops its ring, `NewMixCard` drops the Active ring. Selection reads via the solid category-tint fill, pinned via the pin badge, playing mix via the "Active" label. `import androidx.compose.foundation.border` deleted (only `.border(` site left is none — verified 0 matches in the picker dir).
-- **Mix actions behind tap-and-hold:** `NewMixCard` loses `onEdit`/`onDelete` footer buttons, gains `onLongClick` → new centered `MixOptionPill` overlay (Edit · Delete; mirrors `CategoryOptionPill` styling) driven by a sheet-level `mixOptionTarget` and `NewPickerPage.onMixOption`. `BrowseMixRow` (Browse Mixes tab) drops the always-visible 3-dot trigger — the row's existing long-press DropdownMenu is the only entry point.
-- **Header "New" pill removed:** the Your mixes label row is now just `NewSectionLabel("Your mixes · N")`; the bottom action row's "+" creates mixes; empty-state "Build your first mix" CTA kept per user.
-- **Page + scroll persistence:** `classicScroll` / `newScroll` `LazyListState`s hoisted into `NewCategoryPickerSheet` (page flips keep position), restored on open with `runCatching { scrollToItem(index, offset) }`, saved debounced (300ms `snapshotFlow` + `drop(1)`) to `KEY_PICKER_PAGE0_SCROLL` / `KEY_PICKER_PAGE1_SCROLL` ("index:offset") via new `AppPreferences.PickerScrollPos` get/set helpers. Default-page behavior untouched (intended).
+- **Search respects the lane filter:** the search-mode builder now `return@forEach`s any lane ≠ `effectiveCat` (only that category's matches).
+- **Dynamic chips (search only):** new off-thread `catHitCounts` produceState (`catalog` + hoisted `indexById` + `matches`), deriving `chips` (hit-count lanes only) + `allChipsCount`; `DatabaseStickyChipBar` now takes precomputed `chips`/`allCount` — chips show live hit counts and zero-hit lanes hide while searching; "All" always visible; browse keeps totals.
+- **One category + top arrow bar (browse):** when a lane is selected (not searching), a new `DatabaseCategoryTopBar` ("← Films · 342 topics", the whole pill is a back-to-All button) tops a list that shows only that lane; section headers remain only for All.
+- **"Also in" suggestion pills (search):** new `SearchSuggestionRow` renders above the results (and above the empty state) when searching inside a lane and other lanes match — per-lane pills "Films · 4", tap switches `selectedCat` keeping the query.
+- Fixed a +1 brace imbalance my first edit introduced in the LazyColumn restructure (added the outer-else close; verified 0/0/0 + empty stack).
 
 ### Verification
 
 - Compile/build/lint forbidden in this env (CI validates on push).
-- Braces/parens/brackets balanced for `NewCategoryPicker.kt` and `NewCategoryPickerBrowse.kt` (script check).
-- `.border(` / `MoreVert` / `val dark = isCurioDarkTheme` — 0 matches left in `features/picker/`.
-- `kotlinx.coroutines.flow.debounce/drop` + `snapshotFlow` + `rememberLazyListState` imports verified available (flow already used elsewhere in the module).
-- Changelog (20260921.txt) + DOX pass (app/AGENTS.md v3xx13) updated.
+- Braces/parens/brackets balanced + no unmatched opens (stack check) on `TopicDatabaseScreen.kt` (original was 0/0/0; mine now 0/0/0).
+- `totalTopics =`/`catalog =` no longer passed to the chip bar; `CurioCategories.all`, `CurioIcons.ChevronLeft`, `categorySurface`/`categoryInk` verified to exist.
+- Changelog (20260921.txt) + DOX (app/AGENTS.md v313) updated.
 
 ### Progress
 
-- [x] Ask clarifying questions (border scope + empty-state button).
-- [x] Remove all tile borders (NewPickerTile / AddSuggestionTile / NewMixCard Active ring) in both themes.
-- [x] Mix actions behind tap-and-hold (MixOptionPill in sheet; 3-dot dropped from Browse Mixes tab).
-- [x] Remove header "New" pill; keep empty-state CTA.
-- [x] Persist page default (kept) + per-page scroll positions (new).
+- [x] Ask clarifying questions (browse layout, suggestions, chip dynamics, pill action).
+- [x] Search filtered by the selected category.
+- [x] Dynamic chips with live hit counts + hidden zero-match lanes (search only).
+- [x] Single-category browse with top arrow bar.
+- [x] "Also in" suggestion pill row (search) that switches the filter.
 - [x] Changelog + DOX + docs.
 - [x] Commit & push.

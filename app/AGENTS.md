@@ -404,6 +404,37 @@ app/src/main/java/com/curio/app/
   `drop(1)`) to new `KEY_PICKER_PAGE0_SCROLL` / `KEY_PICKER_PAGE1_SCROLL`
   ("index:offset") behind `AppPreferences.PickerScrollPos`
   get/set helpers — survives closing the picker AND app restarts.
+- **v313 — Topic Browser revamp, pick 1: category-filtered search, dynamic
+  chips, one-category browse.** User: "in topic browser let user change
+  category and act that category as filters for the search, so it doesn't
+  always stay on and show all categories when one category is selected;
+  show smart suggestion in a small pill if a result has from another
+  category; make the category chips dynamic — the number shows if it has
+  that search result and if it doesn't have that the category should
+  hide; in the list when changing category not in search the old category
+  gets shown in the list too — only 1 should be shown with a button like
+  an arrow, and then that category at the top only". Clarified via
+  ask_user: browse list = one category + top arrow bar; suggestions = pill
+  row above results, tap switches the filter; dynamic chips = search-only
+  (browse keeps totals); pill action = switch to that category. (1)
+  **Search respects the lane filter** — the SEARCH-mode rows builder in
+  `features/database/TopicDatabaseScreen.kt` now skips lanes that aren't
+  `effectiveCat` (it used to return EVERY lane's matches regardless of the
+  active chip). (2) **Dynamic chips** — new off-thread `catHitCounts`
+  produceState (over `catalog` + hoisted `indexById` + `matches`) feeds
+  `chips`/`allChipsCount`; the sticky chip bar takes precomputed chips now
+  (was `catalog` passthrough + `totalTopics`); while searching, chips show
+  live hit counts and zero-hit lanes HIDE; browsing keeps full per-lane
+  totals; the "All" chip always shows (count = total matches while
+  searching). (3) **One category + top arrow bar (browse)** — with a lane
+  active (not searching) the list renders ONLY that lane, topped by a new
+  `DatabaseCategoryTopBar` ("← Films · 342 topics", whole pill = back-to-
+  All); section headers only appear while All is selected. (4) **"Also
+  in" suggestion pills (search)** — searching inside a lane adds a
+  `SearchSuggestionRow` of small per-lane pills above the results (and
+  above the empty state when the lane has no matches); tapping a pill
+  switches `selectedCat` to that lane keeping the query. The section-
+  header count rows, empty-state copy and pagination are untouched.
 - **v3xx11 — picker polish: tick removed, option-pill overlay fixed, dark white-dot gone.**
   User: "remove the tick when selecting … in dark mode the category options still have
   white borders … in new picker the pinned ones doesn't show tap and hold actions".
