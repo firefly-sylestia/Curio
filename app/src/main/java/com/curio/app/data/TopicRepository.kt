@@ -237,33 +237,26 @@ object TopicRepository {
     /** Resolve a topic within its category so duplicate names cannot cross lanes. */
     suspend fun findTopic(context: Context, categoryId: CategoryId, name: String): CurioTopic? {
         val dao = CurioDatabase.getInstance(context).topicDao()
-        val entity = dao.getByCategory(categoryId.name)
+        return dao.getByCategory(categoryId.name)
             .firstOrNull { it.name == name || it.name.equals(name, ignoreCase = true) }
-            ?: return null
+            ?.toCurioTopic()
+    }
 
-        // A bundled topics.db can contain the catalog shell while newer
-        // authored fields live in the JSON assets. Hydrate the visible topic
-        // on demand, persist it, and return the hydrated row immediately.
-        if (entity.teaser.isBlank() || entity.synopsis.isBlank() && categoryId == CategoryId.BOOKS) {
-            runCatching {
-                TopicJsonLoader.install(context)
-                val fresh = TopicJsonLoader.reloadFromAssets(categoryId)
-                    .firstOrNull { it.id == entity.id || it.name.equals(entity.name, ignoreCase = true) }
-                if (fresh != null) {
-                    val freshEntity = TopicEntity.fromCurioTopic(fresh)
-                    dao.updateContent(
-                        id = freshEntity.id,
-                        teaser = freshEntity.teaser,
-                        imageUrl = freshEntity.imageUrl,
-                        byline = freshEntity.byline,
-                        tags = freshEntity.tags,
-                        synopsis = freshEntity.synopsis,
-                        chapters = freshEntity.chapters
-                    )
-                }
-            }
+    /** Build the searchable index directly from the persistent Room catalog. */
+    suspend fun loadIndexFromRoom(): List<TopicIndexEntry> = withContext(Dispatchers.Default) {
+        val context = appContext ?: return@withContext emptyList()
+        CurioDatabase.getInstance(context).topicDao().getAll().map { entity ->
+            val topic = entity.toCurioTopic()
+            TopicIndexEntry(
+                topic = topic,
+                year = topic.publicationYear(),
+                nameKey = topic.name.lowercase(),
+                subtypeKey = topic.subtype.lowercase(),
+                bylineKey = topic.byline.lowercase(),
+                teaserKey = topic.teaser.lowercase(),
+                tagKeys = topic.tags.map { it.lowercase() }
+            )
         }
-        return dao.findById(entity.id)?.toCurioTopic() ?: entity.toCurioTopic()
     }
 
     /** Get a random topic for a category. */

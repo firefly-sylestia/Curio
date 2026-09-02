@@ -532,7 +532,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         // routes to the retry hint below (a lane can't be genuinely empty
         // with valid data).
         poolIds.forEach { id ->
-            runCatching { TopicJsonLoader.load(id) }.getOrNull()
+            runCatching { TopicRepository.loadFromRoom(id) }.getOrNull()
                 ?.forEach { t -> if (seen.add(t.id)) merged.add(t) }
         }
         poolLoading = false
