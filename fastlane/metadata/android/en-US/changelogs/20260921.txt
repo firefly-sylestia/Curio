@@ -1,3 +1,7 @@
+ADD: Settings — a new "Book covers" row fetches every book cover one by one with a live counter (12 / 301…); posters are cached on-device so they show instantly and offline.
+ADD: Topic Browser — search no longer shows the full category chip bar; categories live in one place, a collapsed-by-default panel with a tiny search box inside and checkbox multi-select.
+ADD: Topic Browser — active category filters show as chips you can remove with one tap, and filtering (text AND selected categories) works while searching too.
+ADD: Topic Browser — search now matches typos (fuzzy results) and prioritizes the category your query mentions.
 ADD: Satisfying haptics across the app — a confirming buzz when you save, share or land a spin, and light ticks on explore/express-yourself, pinning, opening entries, picks and editor actions.
 FIX: Opening a topic never comes up empty — if a topic isn't in the local database yet it's parsed on demand from the bundled JSON and saved on-device, and every explored topic is remembered locally so it stays loaded and never needs reloading.
 ADD: Book covers (and all fetched images) now download once and are cached on disk — reopening a book later shows its cover instantly, even after an app restart.

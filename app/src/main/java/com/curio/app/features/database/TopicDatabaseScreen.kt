@@ -3,7 +3,6 @@ package com.curio.app.features.database
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -13,8 +12,10 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
@@ -32,16 +33,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -59,10 +61,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -78,8 +76,8 @@ import com.curio.app.data.publicationYear
 import com.curio.app.data.TopicIndexEntry
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.settings.SettingsHeroActionPill
+import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.isLiquidGlassPillsActive
-import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.components.LiquidGlassPageNav
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.kyant.backdrop.backdrops.LayerBackdrop
@@ -117,11 +115,11 @@ import androidx.compose.foundation.layout.heightIn
  *
  * Opened from the Home drawer ("Browse Topics"). Renders every topic across
  * the ten real categories PLUS a dedicated Wildcard lane (wildcard.json's
- * hand-curated curiosities, browsable on their own) with a search bar,
- * per-category filter chips, a small "explored" badge on
- * topics already marked done, and sort controls for A–Z / Z–A / newest /
- * oldest by year. Tapping any topic opens its full Topic Reveal page, exactly like
- * spinning it.
+ * hand-curated curiosities, browsable on their own) with a typo-tolerant
+ * search bar, a category panel (collapsed by default; its own tiny search
+ * box + checkbox multi-select), an active-filters chips row, a small
+ * "explored" badge on topics already marked done, and pagination. Tapping
+ * any topic opens its full Topic Reveal page, exactly like spinning it.
  *
  * Sorting reads each topic's year from its name ("Citizen Kane (1941)"),
  * its explore target ("Vespertine (2001) end-to-end"), its teaser, or a
@@ -135,15 +133,17 @@ import androidx.compose.foundation.layout.heightIn
 
 /**
  * v199 — the Browse-Topics session: the selected category filter and the
- * chip bar's expanded flag survive closing and REOPENING the screen within
- * the app session (a fresh backstack entry resets rememberSaveable, so the
- * v7.97 saveable state only survived in-place round-trips like the Topic
- * Reveal push). Process-scoped — an app restart clears it, matching the
- * user's "persistent until restart".
+ * category panel's open flag survive closing and REOPENING the screen
+ * within the app session (a fresh backstack entry resets rememberSaveable,
+ * so the v7.97 saveable state only survived in-place round-trips like the
+ * Topic Reveal push). Process-scoped — an app restart clears it, matching
+ * the user's "persistent until restart".
  */
 object TopicBrowserSession {
-    var selectedSlug by mutableStateOf<String?>(null)
-    var chipBarOpen by mutableStateOf(false)
+    // v314 — multi-select categories round-trip as comma-joined CategoryId
+    // names, so the selection survives closing and REOPENING the browser.
+    var selectedSlugs: String by mutableStateOf("")
+    var panelOpen by mutableStateOf(false)
     var savedPage by mutableIntStateOf(0)
     var savedScrollIndex by mutableIntStateOf(0)
     var savedScrollOffset by mutableIntStateOf(0)
@@ -159,14 +159,25 @@ fun TopicDatabaseScreen(navController: NavController) {
     // v199 — the category selection also seeds from + syncs to the
     // [TopicBrowserSession] so a fully closed-and-reopened browser restores
     // it (rememberSaveable dies with the backstack entry).
-    var selectedCat by rememberSaveable {
-        mutableStateOf(
-            TopicBrowserSession.selectedSlug
-                ?.let { CurioCategories.byRouteSlug(it)?.id }
-        )
+    // v314 — the filter is MULTI-SELECT now: a Set of CategoryIds, round-tripped
+    // through a comma-joined saveable string (enum names) so it survives rotation,
+    // screen teardown and (via [TopicBrowserSession]) reopen within the session.
+    var selectedCatsKey by rememberSaveable {
+        mutableStateOf(TopicBrowserSession.selectedSlugs)
     }
-    LaunchedEffect(selectedCat) {
-        TopicBrowserSession.selectedSlug = selectedCat?.routeSlug
+    val selectedCats: Set<CategoryId> = remember(selectedCatsKey) {
+        selectedCatsKey.splitToSequence(',')
+            .filter { it.isNotBlank() }
+            .mapNotNull { runCatching { CategoryId.valueOf(it) }.getOrNull() }
+            .toSet()
+    }
+    LaunchedEffect(selectedCats) {
+        TopicBrowserSession.selectedSlugs = selectedCats.joinToString(",") { it.name }
+    }
+    // v314 — the one place that mutates the selection: recompute the persisted
+    // string from the updated set, so [selectedCats] stays the single source.
+    fun commitCats(update: (Set<CategoryId>) -> Set<CategoryId>) {
+        selectedCatsKey = update(selectedCats).joinToString(",") { it.name }
     }
     // v105 — the sort control is removed; the browser keeps its default
     // per-lane A–Z order (see the rows builder).
@@ -180,32 +191,28 @@ fun TopicDatabaseScreen(navController: NavController) {
         searchActive = false
         searchQuery = ""
     }
-    // v30 — the Category pill (second row under the hero pills) toggles the
-    // sticky category chips; they also show while searching. Hidden by
-    // default (matches the Cabinet), so the Category pill is the way in.
-    // v199 — the chip bar's expanded flag rides the session too, so the
-    // browser reopens with the chips in the same state the user left them.
-    var categoryFilterOpen by rememberSaveable {
-        mutableStateOf(TopicBrowserSession.chipBarOpen)
+    // v314 — the Category pill toggles the category PANEL, collapsed by
+    // default (only visible when explicitly opened; the old sticky chip bar
+    // that auto-opened during search is gone, so searching shows NO category
+    // chips — category options live in the panel only).
+    var categoryPanelOpen by rememberSaveable {
+        mutableStateOf(TopicBrowserSession.panelOpen)
     }
-    LaunchedEffect(categoryFilterOpen) {
-        TopicBrowserSession.chipBarOpen = categoryFilterOpen
+    LaunchedEffect(categoryPanelOpen) {
+        TopicBrowserSession.panelOpen = categoryPanelOpen
     }
-    // v30 — the chip-bar reservation only applies while the chips are
-    // visible (the pill or search); collapsed, content starts right below
-    // the (taller) hero.
-    // v301 — when search activates, auto-open the chip bar so
-    // category chips are immediately accessible.
-    LaunchedEffect(searchActive) {
-        if (searchActive) categoryFilterOpen = true
-    }
-    val chipsVisible = categoryFilterOpen || searchActive
+    // Tiny search box INSIDE the panel, filtering the category list itself.
+    var catPanelQuery by rememberSaveable { mutableStateOf("") }
+    // The category UI visible under the hero: the open panel, or the compact
+    // active-filter chips row whenever at least one lane is selected.
+    val filterUiVisible = categoryPanelOpen || selectedCats.isNotEmpty()
     // v36 — the Sort/Search pills live back INSIDE the hero (their top
     // row). v42 — the Category pill moved INSIDE the hero too (beside the
-    // title), so content reserves only the chip bar when the chips are
-    // open — no separate pill row below the banner.
+    // title), so content reserves only the filter UI when it is visible.
     val contentTop = DatabaseHeroTotalHeight +
-        (if (chipsVisible) DatabaseChipBarHeight else 0.dp) + 12.dp
+        (if (categoryPanelOpen) DatabaseFilterPanelHeight
+         else if (selectedCats.isNotEmpty()) DatabaseChipRowHeight
+         else 0.dp) + 12.dp
     val searchFocus = remember { FocusRequester() }
     LaunchedEffect(searchActive) {
         if (searchActive) {
@@ -221,9 +228,9 @@ fun TopicDatabaseScreen(navController: NavController) {
     var savedScrollIndex by rememberSaveable { mutableIntStateOf(TopicBrowserSession.savedScrollIndex) }
     var savedScrollOffset by rememberSaveable { mutableIntStateOf(TopicBrowserSession.savedScrollOffset) }
     val listState = rememberLazyListState()
-    // v245 — LOCAL GLASS CAPTURE for the floating category chip bar: the
-    // scrolling list records into its own layer; the chips (a sibling
-    // overlay) sample it — the crash-safe architecture.
+    // v245 — LOCAL GLASS CAPTURE: the scrolling list records into its own
+    // layer; the hero glass pills (a sibling overlay) sample it — the
+    // crash-safe architecture.
     val chipGlassBackdrop = rememberLayerBackdrop()
     // Reactive done-set — reading the value registers the dependency so the
     // list refreshes when the user marks a topic done (e.g. after returning
@@ -387,14 +394,13 @@ fun TopicDatabaseScreen(navController: NavController) {
             }
         }
     }
-    // v7.97 — the persisted filter can outlive its lane (a category hidden in
-    // Manage Categories drops out of the catalog). Fall back to All instead
-    // of leaving an invisible "no topics" state with no visible chip.
-    // v301 — category filter now works during search too (user can narrow
-    // results by category while searching).
-    val effectiveCat = remember(catalog, selectedCat) {
-        if (selectedCat != null && catalog.none { it.first.id == selectedCat }) null
-        else selectedCat
+    // v7.97 — a persisted filter can outlive its lane (a category hidden in
+    // Manage Categories drops out of the catalog): drop those from the
+    // effective set instead of leaving an invisible "no topics" state.
+    // v301 — category filtering works during search too (results narrow to
+    // the selected lanes).
+    val effectiveCats: Set<CategoryId> = remember(catalog, selectedCats) {
+        selectedCats.filter { id -> catalog.any { it.first.id == id } }.toSet()
     }
 
     // Filtered rows — section headers while browsing All, topic rows always.
@@ -402,13 +408,18 @@ fun TopicDatabaseScreen(navController: NavController) {
     // v8.54 — with a non-default sort active the list flattens to one sorted
     // run (section headers would break a global A–Z / year order).
     val needle = searchQuery.trim().lowercase()
-    val matches: (IndexedTopic) -> Boolean = { indexed ->
-        needle.isEmpty() ||
-            indexed.nameKey.contains(needle) ||
-            indexed.subtypeKey.contains(needle) ||
-            indexed.bylineKey.contains(needle) ||
-            indexed.teaserKey.contains(needle) ||
-            indexed.tagKeys.any { it.contains(needle) }
+    // v314 — typo-tolerant matching: [matchLevel] returns 0 for a plain
+    // substring (strong), 1 for a fuzzy (typo-tolerated) match and null for
+    // no match. Search results also PRIORITIZE any lane whose name the query
+    // mentions (e.g. "films", "science") — that lane's hits rank first.
+    val priorityCats: Set<CategoryId> = remember(needle, visibleCategories) {
+        if (needle.length < 3) emptySet()
+        else visibleCategories.filter { cat ->
+            val dn = cat.displayName.lowercase()
+            dn.contains(needle) ||
+                (needle.length >= 4 && needle.contains(dn)) ||
+                fuzzyContains(dn, needle)
+        }.map { it.id }.toSet()
     }
     // Title-first sort: exact title matches rank highest, then startsWith, then contains
     val titleComparator = compareBy<IndexedTopic> { t ->
@@ -419,10 +430,9 @@ fun TopicDatabaseScreen(navController: NavController) {
             else -> 3 // matched in other fields
         }
     }
-    // v313 — per-category SEARCH-HIT counts, computed off the UI thread. Used
-    // by the dynamic chip bar (chips show their hit count and zero-hit lanes
-    // hide while searching) and the "Also in" suggestion pills. Empty while
-    // browsing — chips then fall back to full per-lane totals.
+    // v313 — per-category SEARCH-HIT counts, computed off the UI thread. Feeds
+    // the category panel's per-lane counts (hits while searching, full totals
+    // while browsing) and the "Also in" suggestion pills.
     val indexById = remember(indexedTopics) { indexedTopics.associateBy { it.topic.id } }
     val catHitCounts by produceState<Map<CategoryId, Int>>(
         initialValue = emptyMap(),
@@ -434,26 +444,27 @@ fun TopicDatabaseScreen(navController: NavController) {
         else withContext(Dispatchers.Default) {
             val out = mutableMapOf<CategoryId, Int>()
             catalog.forEach { (cat, topics) ->
-                val n = topics.count { t -> indexById[t.id]?.let(matches) == true }
+                val n = topics.count { t ->
+                    indexById[t.id]?.let { matchLevel(it, needle) != null } == true
+                }
                 if (n > 0) out[cat.id] = n
             }
             out
         }
     }
-    // v313 — the dynamic chip list: full per-lane totals while browsing;
-    // while searching, only lanes with at least one match (count = hits).
+    // The dynamic chip data (full per-lane totals while browsing; per-lane
+    // hit counts while searching) — feeds the category panel's counts.
     val chips: List<Pair<CurioCategory, Int>> = remember(catalog, catHitCounts, needle) {
         if (needle.isEmpty()) catalog.map { it.first to it.second.size }
         else catalog.mapNotNull { (cat, _) -> catHitCounts[cat.id]?.let { cat to it } }
     }
-    val allChipsCount = if (needle.isEmpty()) totalTopics else catHitCounts.values.sum()
     // Filtering and sorting happen on Dispatchers.Default. `remember` only
     // caches work; it still performs the entire sort on the UI thread.
     val rows by produceState<List<DatabaseRow>>(
         initialValue = emptyList(),
         catalog,
         indexedTopics,
-        effectiveCat,
+        effectiveCats,
         needle,
         doneTopics
     ) {
@@ -463,16 +474,33 @@ fun TopicDatabaseScreen(navController: NavController) {
             // name relevance, and render flat (no category sections). When
             // browsing, keep the per-lane A–Z order with section headers.
             if (needle.isNotEmpty()) {
-                // SEARCH MODE: flat results sorted by name relevance.
-                // v313 — the selected category FILTERS search: with a lane
-                // active the results come ONLY from that lane (previously
-                // every category's matches showed up no matter what).
-                val allMatches = mutableListOf<IndexedTopic>()
+                // SEARCH MODE: flat results sorted by relevance.
+                // v313 — the selected categories FILTER search: results come
+                // ONLY from the selected lanes (or every lane when none are
+                // selected).
+                // v314 — ranking: lanes mentioned by the query first, then
+                // strong (substring) matches before fuzzy (typo) ones, then
+                // the title-first comparator.
+                val allHits = mutableListOf<RankedHit>()
                 catalog.forEach { (cat, topics) ->
-                    if (effectiveCat != null && effectiveCat != cat.id) return@forEach
-                    allMatches += topics.mapNotNull { indexById[it.id] }.filter(matches)
+                    if (effectiveCats.isNotEmpty() && cat.id !in effectiveCats) return@forEach
+                    topics.mapNotNull { indexById[it.id] }.forEach { indexed ->
+                        val level = matchLevel(indexed, needle)
+                        if (level != null) {
+                            allHits += RankedHit(
+                                indexed = indexed,
+                                priority = indexed.category.id in priorityCats,
+                                fuzzy = level == 1
+                            )
+                        }
+                    }
                 }
-                allMatches.sortedWith(titleComparator).map { indexed ->
+                allHits.sortedWith(
+                    compareBy<RankedHit> { !it.priority }
+                        .thenBy { it.fuzzy }
+                        .thenComparator { a, b -> titleComparator.compare(a.indexed, b.indexed) }
+                ).map { hit ->
+                    val indexed = hit.indexed
                     DatabaseRow(
                         key = indexed.topic.id,
                         topic = indexed.topic,
@@ -483,12 +511,15 @@ fun TopicDatabaseScreen(navController: NavController) {
                 // BROWSE MODE: per-lane with section headers.
                 buildList {
                     catalog.forEach { (cat, topics) ->
-                        if (effectiveCat != null && effectiveCat != cat.id) return@forEach
+                        if (effectiveCats.isNotEmpty() && cat.id !in effectiveCats) return@forEach
                         val shown = topics.mapNotNull { indexById[it.id] }
-                            .filter(matches)
+                            .filter { matchLevel(it, needle) != null }
                             .sortedWith(titleComparator)
                         if (shown.isEmpty()) return@forEach
-                        if (effectiveCat == null) {
+                        // v314 — headers whenever browsing All or several lanes
+                        // are selected; a single selected lane stays flat under
+                        // its own top bar.
+                        if (effectiveCats.size != 1) {
                             add(DatabaseRow(key = "sec-${cat.id.name}", section = cat, sectionCount = shown.size))
                         }
                         shown.forEach { indexed ->
@@ -547,7 +578,7 @@ fun TopicDatabaseScreen(navController: NavController) {
     // Preserve the session page on the first composition after navigation, then
     // reset only when the category filter actually changes.
     var categoryInitialized by remember { mutableStateOf(false) }
-    LaunchedEffect(effectiveCat) {
+    LaunchedEffect(effectiveCats) {
         if (categoryInitialized) currentPage = 0
         else categoryInitialized = true
     }
@@ -593,7 +624,7 @@ fun TopicDatabaseScreen(navController: NavController) {
     }
     // v27r — switching the CATEGORY filter (or All) starts from the top,
     // never from a stale position into the new lane.
-    LaunchedEffect(effectiveCat) {
+    LaunchedEffect(effectiveCats) {
         if (hasRows && listState.firstVisibleItemIndex > 0) {
             savedScrollIndex = 0
             savedScrollOffset = 0
@@ -648,9 +679,11 @@ fun TopicDatabaseScreen(navController: NavController) {
         ScreenEntrance {
             LazyColumn(
                 state = listState,
-                // v291 — only capture when chip bar is visible.
+                // v245 — the glass hero pills sample this local capture to
+                // refract the scrolling rows, so record whenever liquid glass
+                // is on (not gated on the filter UI being visible).
                 modifier = Modifier.fillMaxSize()
-                    .then(if (chipsVisible && isLiquidGlassPillsActive())
+                    .then(if (isLiquidGlassPillsActive())
                         Modifier.layerBackdrop(chipGlassBackdrop)
                     else Modifier),
                 contentPadding = PaddingValues(
@@ -683,33 +716,40 @@ fun TopicDatabaseScreen(navController: NavController) {
                     // v313 — BROWSE a selected lane: the list shows ONE
                     // category only (no in-list category names), topped by an
                     // arrow bar that returns to All.
-                    if (needle.isEmpty() && effectiveCat != null) {
+                    if (needle.isEmpty() && effectiveCats.size == 1) {
                         item(key = "category-top-bar") {
-                            val curCat = CurioCategories.byId(effectiveCat)
+                            val curCatId = effectiveCats.first()
+                            val curCat = CurioCategories.byId(curCatId)
                             val curCount = catalog
-                                .firstOrNull { it.first.id == effectiveCat }?.second?.size ?: 0
+                                .firstOrNull { it.first.id == curCatId }?.second?.size ?: 0
                             DatabaseCategoryTopBar(
                                 cat = curCat,
                                 count = curCount,
-                                onBackToAll = { selectedCat = null }
+                                onBackToAll = { commitCats { emptySet() } }
                             )
                         }
                     }
                     // v313 — SEARCH suggestions: pills for other categories
                     // that also match the query, so results never hide behind
-                    // the stale selected-lane filter. Tap = jump to that lane.
-                    if (needle.isNotEmpty() && effectiveCat != null) {
+                    // the stale selected-lane filters. Tap = toggle that lane.
+                    if (needle.isNotEmpty() && effectiveCats.isNotEmpty()) {
                         val others = catHitCounts
-                            .filterKeys { it != effectiveCat }
+                            .filterKeys { it !in effectiveCats }
                             .mapNotNull { (id, n) ->
                                 CurioCategories.all.firstOrNull { it.id == id }?.let { it to n }
                             }
                             .sortedByDescending { it.second }
                         if (others.isNotEmpty()) {
                             item(key = "search-suggestions") {
+                                // v314 — multi-select: tapping a pill toggles that
+                                // lane in the active set (adds it when absent).
                                 SearchSuggestionRow(
                                     hits = others,
-                                    onSelect = { selectedCat = it }
+                                    onSelect = { id ->
+                                        commitCats { current ->
+                                            if (id in current) current - id else current + id
+                                        }
+                                    }
                                 )
                             }
                         }
@@ -839,25 +879,13 @@ fun TopicDatabaseScreen(navController: NavController) {
             }
         }
 
-        // ── Floating category filter bar (v26) — the Cabinet's sticky chip
-        // bar language: rests just below the hero, then lifts, pops
-        // (0.97 → 1.0) and frosts in as the list scrolls, pinning just
-        // below the ragged tear while the topic rows pass underneath it.
-        // v30 — hidden by default; the Category pill (now INSIDE the hero,
-        // beside the title) or search reveal it, matching the Cabinet.
-        // v52b — the category chip bar animates in/out instead of popping
-        // instantly when the Category pill opens or search starts, matching
-        // the Cabinet.
-        // v69 — the bar is positioned with a large .offset(y = barTop), so
-        // expandVertically's height+clip animation hid it until the clip
-        // finished (a delayed pop with no visible motion). A vertical SLIDE
-        // translates the whole bar instead — the chips emerge from under
-        // the torn hero with a real slide + fade.
-        // v105 — smoother: a longer, decelerating slide (LinearOutSlowIn)
-        // with a matched fade so the chips settle gently instead of
-        // snapping down.
+        // ── Category filter UI (v314) — the Category pill inside the hero
+        // toggles the category PANEL (slide + fade under the torn hero), or
+        // the compact active-filter chips row whenever lanes are selected.
+        // Only the active lanes ever render chips now — searching shows no
+        // auto-opened every-lane bar, matching the user's request.
         AnimatedVisibility(
-            visible = chipsVisible,
+            visible = filterUiVisible,
             enter = slideInVertically(
                 initialOffsetY = { -it },
                 animationSpec = tween(380, easing = LinearOutSlowInEasing)
@@ -867,15 +895,33 @@ fun TopicDatabaseScreen(navController: NavController) {
                 animationSpec = tween(300, easing = LinearOutSlowInEasing)
             ) + fadeOut(animationSpec = tween(220))
         ) {
-            DatabaseStickyChipBar(
-                glassBackdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null,
-                listState = listState,
-                chips = chips,
-                allCount = allChipsCount,
-                selectedCat = effectiveCat,
-                onSelectAll = { selectedCat = null },
-                onSelectCategory = { selectedCat = it }
-            )
+            if (categoryPanelOpen) {
+                // v314 — the collapsed-by-default category PANEL: its own tiny
+                // search box (filters the category list) + checkbox multi-select.
+                DatabaseCategoryPanel(
+                    categories = visibleCategories,
+                    counts = chips.associate { it.first.id to it.second },
+                    query = catPanelQuery,
+                    onQueryChange = { catPanelQuery = it },
+                    selected = effectiveCats,
+                    onToggle = { id ->
+                        commitCats { current -> if (id in current) current - id else current + id }
+                    },
+                    onClearAll = {
+                        commitCats { emptySet() }
+                        catPanelQuery = ""
+                    },
+                    onDone = { categoryPanelOpen = false }
+                )
+            } else if (selectedCats.isNotEmpty()) {
+                // v314 — the active-filter chips row: exactly the selected
+                // lanes, each removable with one tap.
+                ActiveFilterChips(
+                    categories = visibleCategories.filter { it.id in effectiveCats },
+                    onRemove = { id -> commitCats { current -> current - id } },
+                    onClearAll = { commitCats { emptySet() } }
+                )
+            }
         }
 
         // ── v294 — FLOATING PAGE NAV: reusable liquid glass component ──
@@ -916,9 +962,13 @@ fun TopicDatabaseScreen(navController: NavController) {
             // title, directly under the Sort/Search pills.
             titleTrailing = { ink ->
                 SettingsHeroActionPill(
-                    onClick = { categoryFilterOpen = !categoryFilterOpen },
+                    onClick = {
+                        if (categoryPanelOpen) catPanelQuery = ""
+                        categoryPanelOpen = !categoryPanelOpen
+                    },
                     glyph = CurioIcons.Tune,
-                    label = "Category · ${selectedCat?.let { CurioCategories.byId(it).displayName } ?: "All"}",
+                    label = if (selectedCats.isEmpty()) "Category · All"
+                            else "Categories · ${selectedCats.size}",
                     ink = ink,
                     // v292h — liquid glass category pill
                     modifier = if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
@@ -927,13 +977,13 @@ fun TopicDatabaseScreen(navController: NavController) {
                             backdrop = chipGlassBackdrop
                         )
                     else Modifier,
-                    // v30 — chevron flips with the chips: ▾ closed, ▴ open.
-                    trailingGlyph = if (categoryFilterOpen)
+                    // v314 — chevron flips with the panel: ▾ closed, ▴ open.
+                    trailingGlyph = if (categoryPanelOpen)
                         CurioIcons.KeyboardArrowUp
                     else CurioIcons.KeyboardArrowDown,
-                    trailingContentDescription = if (categoryFilterOpen) "Hide category chips"
-                        else "Show category chips",
-                    emphasized = categoryFilterOpen
+                    trailingContentDescription = if (categoryPanelOpen) "Hide category options"
+                        else "Show category options",
+                    emphasized = categoryPanelOpen || selectedCats.isNotEmpty()
                 )
             },
             // Passed as a NAMED argument (not trailing-lambda syntax): the
@@ -1000,79 +1050,91 @@ private data class DatabaseRow(
     val done: Boolean = false
 )
 
-/** Small category filter chip with a live count. */
-@Composable
-private fun DatabaseFilterChip(
-    label: String,
-    count: Int,
-    accent: Color = MaterialTheme.colorScheme.primary,
-    selected: Boolean,
-    onClick: () -> Unit,
-    // v26 — the floating chip bar pops each pill on scroll: the label
-    // blooms toward its accent as the pill pops (Cabinet's per-pill pop).
-    popProgress: Float = 0f,
-    // v245 — liquid glass: clear refracting capsule over the local page
-    // capture; ONE theme ink for every label (no per-category colors).
-    glass: Boolean = false,
-    glassBackdrop: LayerBackdrop? = null
-) {
-    val themeInk = if (isCurioDarkTheme()) Color.White else Color.Black
-    val labelColor = when {
-        // v245 — one color only, straight from the theme.
-        glass -> themeInk
-        selected -> pastelFillInk(accent)
-        else -> lerp(
-            MaterialTheme.colorScheme.onSurfaceVariant,
-            accent,
-            popProgress * 0.55f
-        )
-    }
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(50),
-        // v27q — selection reads as a SOLID accent fill with pastel-aware
-        // ink (the old primaryContainer/category-tint fills were translucent
-        // and let the shadow bleed); elevation stays a flat 2dp.
-        color = if (!glass && selected) accent else if (glass) Color.Transparent
-                else MaterialTheme.colorScheme.surfaceContainerLow,
-        shadowElevation = if (glass) 0.dp else 2.dp,
-        modifier = if (glass && glassBackdrop != null)
-            Modifier.liquidGlassCapsule(
-                container = if (selected) accent
-                            else MaterialTheme.colorScheme.surfaceContainerLow,
-                // v292g — Samsung frosted look: forceFrost overrides
-                // the Clear-glass toggle so chips always frost.
-                washAlpha = if (selected) 0.68f else 0.55f,
-                backdrop = glassBackdrop,
-                forceFrost = true
-            ) else Modifier
-    ) {
-        Text(
-            text = if (count > 0) "$label $count" else label,
-            style = MaterialTheme.typography.labelLarge,
-            color = labelColor,
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
-        )
-    }
+/** One search hit with its ranking inputs — lane mention + strong/fuzzy. */
+private data class RankedHit(
+    val indexed: IndexedTopic,
+    val priority: Boolean,
+    val fuzzy: Boolean
+)
+
+/**
+ * v314 — match quality for search: 0 = strong (plain substring on any
+ * search field), 1 = fuzzy (typo-tolerated), null = no match. The strong
+ * pass is the cheap `contains` check; fuzzy runs only when strong fails,
+ * over name/byline/subtype with token-level edit distance.
+ */
+private fun matchLevel(t: IndexedTopic, needle: String): Int? {
+    if (needle.isEmpty()) return 0
+    if (t.nameKey.contains(needle) || t.subtypeKey.contains(needle) ||
+        t.bylineKey.contains(needle) || t.teaserKey.contains(needle) ||
+        t.tagKeys.any { it.contains(needle) }) return 0
+    if (fuzzyTopicMatch(t, needle)) return 1
+    return null
 }
 
-// ── Floating category filter bar ─────────────────────────────────────────
-// The Cabinet's sticky chip bar, adapted for the database's LazyListState:
-// rests just below the hero + Category pill row, then lifts, pops and pins
-// just below the ragged tear as the list scrolls, while the topic rows
-// pass underneath. v31 — the Category pill lives in its own row BELOW the
-// hero (not in a second hero row), so the hero keeps the shared settings
-// height and the header text never moves down.
+/** Typo-tolerant fallback — bounded to sane query lengths so the fuzzy pass
+ *  over the catalog stays cheap (it runs off the UI thread in produceState). */
+private fun fuzzyTopicMatch(t: IndexedTopic, needle: String): Boolean {
+    if (needle.length < 3 || needle.length > 48) return false
+    return fuzzyContains(t.nameKey, needle) ||
+        fuzzyContains(t.bylineKey, needle) ||
+        fuzzyContains(t.subtypeKey, needle)
+}
+
+/** All query tokens must fuzzy-match some word in the field ("hary ptter"
+ *  → harry + potter: transposed/skipped letters still hit). */
+private fun fuzzyContains(hay: String, needle: String): Boolean {
+    val tokens = needle.split(' ').filter { it.isNotBlank() }
+    val words = hay.split(Regex("[^a-z0-9]+")).filter { it.isNotBlank() }
+    if (tokens.size > 1) return tokens.all { tok -> words.any { fuzzyWord(it, tok) } }
+    return words.any { fuzzyWord(it, needle) }
+}
+
+private fun fuzzyWord(word: String, token: String): Boolean {
+    if (word == token) return true
+    if (word.startsWith(token) || token.startsWith(word)) return true
+    // One typo for short tokens, two once the token has a few letters.
+    val tol = when {
+        token.length <= 2 -> 0
+        token.length <= 5 -> 1
+        else -> 2
+    }
+    return editDistance(word, token) <= tol
+}
+
+/** Levenshtein distance with an early bail at 3 (beyond our max tolerance). */
+private fun editDistance(a: String, b: String): Int {
+    if (kotlin.math.abs(a.length - b.length) > 2) return 3
+    val dp = IntArray(b.length + 1) { it }
+    for (i in a.indices) {
+        var prev = dp[0]
+        dp[0] = i + 1
+        for (j in b.indices) {
+            val tmp = dp[j + 1]
+            dp[j + 1] = minOf(
+                dp[j + 1] + 1,
+                dp[j] + 1,
+                prev + if (a[i] == b[j]) 0 else 1
+            )
+            prev = tmp
+        }
+    }
+    return dp[b.length]
+}
+
+// ── Category filter UI ────────────────────────────────────────────────
+// v314 — the old sticky every-lane chip bar is gone. The Category pill in
+// the hero opens a collapsed-by-default PANEL (own tiny search box + checkbox
+// multi-select); once lanes are selected, a compact ACTIVE-FILTER chips row
+// sits under the hero with one-tap removal.
 private val DatabaseHeroTotalHeight = SettingsHeroTotalHeight
-/** Where the chip bar rests below the hero (v42 — the Category pill is
- *  inside the banner now, so the bar sits directly under it). */
+/** Where the category UI (panel or active-filter chips) rests under the hero. */
 private val DatabaseChipBarRestTop = DatabaseHeroTotalHeight + 4.dp
-/** Where the chip bar pins when scrolled — just below the hero. */
-private val DatabaseChipBarPinnedTop = DatabaseHeroTotalHeight + 2.dp
-/** Scroll distance (dp) before the chip bar fully pins (Cabinet pill style). */
-private val DatabaseChipStickyThreshold = 56.dp
-/** The chip bar's layout height — scroll content starts below it. */
-private val DatabaseChipBarHeight = 52.dp
+/** The active-filter chips row's layout height — content starts below it. */
+private val DatabaseChipRowHeight = 52.dp
+/** The category PANEL's layout height — search header + scrollable checkbox
+ *  list (~7-8 lanes visible, then it scrolls). */
+private val DatabaseFilterPanelHeight = 352.dp
 /** Rows scrolled before the floating back-to-top arrow appears (≈ one
  *  full screen — each row is roughly 70dp tall). */
 /** v292g — page size for Topic Database pagination. */
@@ -1083,108 +1145,198 @@ private const val PAGE_SIZE = 100
 private const val BackToTopRowThreshold = 10
 
 /**
- * The floating category filter row — the Cabinet's sticky chip bar,
- * drawn ON TOP of the scroll content. As the list scrolls the row lifts a
- * few dp to pin just below the hero's ragged tear, and every pill pops on
- * its own — scale 0.90 → 1.0, staggered left→right, with the label
- * blooming toward its accent (v26).
+ * v314 — the ACTIVE-FILTER chips row: exactly the selected lanes (no "All"
+ * pill, no every-lane bar while searching), each chip removable with one
+ * tap (the trailing ✕), plus a Clear-all action when any lane is active.
  */
 @Composable
-private fun BoxScope.DatabaseStickyChipBar(
-    // v245 — when Liquid glass is on, every chip renders as a clear
-    // refracting capsule over this LOCAL page capture.
-    glassBackdrop: LayerBackdrop? = null,
-    listState: LazyListState,
-    // v313 — precomputed dynamic chips (search: hit counts, zero-hit lanes
-    // dropped; browse: full per-lane totals) behind [allCount].
-    chips: List<Pair<CurioCategory, Int>>,
-    allCount: Int,
-    selectedCat: CategoryId?,
-    onSelectAll: () -> Unit,
-    onSelectCategory: (CategoryId) -> Unit
+private fun BoxScope.ActiveFilterChips(
+    categories: List<CurioCategory>,
+    onRemove: (CategoryId) -> Unit,
+    onClearAll: () -> Unit
 ) {
-    val thresholdPx = with(LocalDensity.current) { DatabaseChipStickyThreshold.toPx() }
-    val barBottomPx = with(LocalDensity.current) { (DatabaseChipBarRestTop + DatabaseChipBarHeight).toPx() }
-    val progress by remember {
-        derivedStateOf {
-            val first = listState.layoutInfo.visibleItemsInfo.firstOrNull()
-            if (first == null) 0f
-            else ((barBottomPx - first.offset) / thresholdPx).coerceIn(0f, 1f)
-        }
-    }
-    val frostShift = FastOutSlowInEasing.transform(progress)
-    val liftPx = with(LocalDensity.current) { (DatabaseChipBarRestTop - DatabaseChipBarPinnedTop).toPx() }
-
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp),
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .align(Alignment.TopStart)
             .fillMaxWidth()
             .padding(vertical = 6.dp)
             .offset(y = DatabaseChipBarRestTop)
-            .graphicsLayer {
-                translationY = -liftPx * frostShift
-            }
+            .horizontalScroll(rememberScrollState())
     ) {
-        item("all") {
-            DatabaseChipPop(
-                index = 0,
-                frostShift = frostShift
-            ) { popProgress ->
-                DatabaseFilterChip(
-                    label = "All",
-                    count = allCount,
-                    accent = MaterialTheme.colorScheme.primary,
-                    selected = selectedCat == null,
-                    onClick = onSelectAll,
-                    popProgress = popProgress,
-                    glass = glassBackdrop != null,
-                    glassBackdrop = glassBackdrop
-                )
+        categories.forEach { cat ->
+            Surface(
+                onClick = { onRemove(cat.id) },
+                shape = RoundedCornerShape(50),
+                color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
+                shadowElevation = 1.dp
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    CurioIcon(cat.iconGlyph, null, tint = cat.categoryInk(), size = 14.dp)
+                    Text(
+                        cat.displayName,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = cat.categoryInk()
+                    )
+                    CurioIcon(
+                        CurioIcons.Close,
+                        "Remove ${cat.displayName} filter",
+                        tint = cat.categoryInk().copy(alpha = 0.7f),
+                        size = 14.dp
+                    )
+                }
             }
         }
-        itemsIndexed(chips, key = { _, pair -> pair.first.id.name }) { i, (cat, chipCount) ->
-            DatabaseChipPop(
-                index = i + 1,
-                frostShift = frostShift
-            ) { popProgress ->
-                DatabaseFilterChip(
-                    label = cat.displayName,
-                    count = chipCount,
-                    accent = cat.themedAccent(),
-                    selected = selectedCat == cat.id,
-                    onClick = { onSelectCategory(cat.id) },
-                    popProgress = popProgress,
-                    glass = glassBackdrop != null,
-                    glassBackdrop = glassBackdrop
+        if (categories.isNotEmpty()) {
+            TextButton(onClick = onClearAll) {
+                Text(
+                    "Clear all",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
     }
 }
 
-/** Per-pill pop — each chip rests at full size and pops subtly (1.0 → 1.05)
- *  as the bar lifts to pin (v29: the old 0.90 rest scale made the pills
- *  look like they were GROWING on entry — they now start full-size and
- *  only breathe a touch when the bar actually pins). */
+/**
+ * v314 — the category PANEL: opens from the hero Category pill (collapsed
+ * by default), with its own tiny search box that filters the category list
+ * itself, checkbox multi-select backed by a Set<CategoryId>, and Clear all /
+ * Done (Done collapses back to the active-chips row).
+ */
 @Composable
-private fun DatabaseChipPop(
-    index: Int,
-    frostShift: Float,
-    content: @Composable (popProgress: Float) -> Unit
+private fun BoxScope.DatabaseCategoryPanel(
+    categories: List<CurioCategory>,
+    counts: Map<CategoryId, Int>,
+    query: String,
+    onQueryChange: (String) -> Unit,
+    selected: Set<CategoryId>,
+    onToggle: (CategoryId) -> Unit,
+    onClearAll: () -> Unit,
+    onDone: () -> Unit
 ) {
-    val stagger = (index * 0.07f).coerceAtMost(0.85f)
-    val pillProgress = ((frostShift - stagger) / (1f - stagger)).coerceIn(0f, 1f)
-    val eased = FastOutSlowInEasing.transform(pillProgress)
-    val pillScale = androidx.compose.ui.util.lerp(1f, 1.05f, eased)
-    Box(
-        modifier = Modifier.graphicsLayer {
-            scaleX = pillScale
-            scaleY = pillScale
-        }
+    val q = query.trim().lowercase()
+    val shown = if (q.isEmpty()) categories
+                else categories.filter { it.displayName.lowercase().contains(q) }
+
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        tonalElevation = 3.dp,
+        shadowElevation = 4.dp,
+        modifier = Modifier
+            .align(Alignment.TopStart)
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .padding(top = 8.dp)
+            .offset(y = DatabaseChipBarRestTop)
     ) {
-        content(eased)
+        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                CurioSearchField(
+                    query = query,
+                    onQueryChange = onQueryChange,
+                    placeholder = "Filter categories…",
+                    modifier = Modifier.weight(1f)
+                )
+                if (selected.isNotEmpty()) {
+                    TextButton(onClick = onClearAll) {
+                        Text(
+                            "Clear all",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                TextButton(onClick = onDone) {
+                    Text("Done", style = MaterialTheme.typography.labelLarge)
+                }
+            }
+            Spacer(Modifier.height(6.dp))
+            if (shown.isEmpty()) {
+                Text(
+                    "No categories match",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 14.dp),
+                    textAlign = TextAlign.Center
+                )
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 276.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    shown.forEach { cat ->
+                        CategoryCheckboxRow(
+                            cat = cat,
+                            count = counts[cat.id] ?: 0,
+                            checked = cat.id in selected,
+                            onToggle = { onToggle(cat.id) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** One category row inside the panel — accent checkbox + name + count. */
+@Composable
+private fun CategoryCheckboxRow(
+    cat: CurioCategory,
+    count: Int,
+    checked: Boolean,
+    onToggle: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .clickable(onClick = onToggle)
+            .padding(horizontal = 6.dp, vertical = 4.dp)
+    ) {
+        val accent = cat.themedAccent()
+        Checkbox(
+            checked = checked,
+            onCheckedChange = { onToggle() },
+            colors = CheckboxDefaults.colors(
+                checkedColor = accent,
+                uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                checkmarkColor = pastelFillInk(accent)
+            ),
+            modifier = Modifier.size(38.dp)
+        )
+        CurioIcon(cat.iconGlyph, null, tint = cat.categoryInk(), size = 16.dp)
+        Text(
+            cat.displayName,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+        if (count > 0) {
+            Text(
+                "$count",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
@@ -1252,9 +1404,9 @@ private fun DatabaseCategoryTopBar(
 
 /**
  * v313 — "Also in: Films · 4" suggestion pills, shown ABOVE the search
- * results when a lane is selected and other lanes also match the query.
- * Tapping a pill switches the active filter to that lane (the search stays),
- * so results from other categories are one tap away instead of hidden.
+ * results when lanes are selected and other lanes also match the query.
+ * v314 — multi-select: tapping a pill TOGGLES that lane in the active set
+ * (adds it when absent), so results from other categories are one tap away.
  */
 @Composable
 private fun SearchSuggestionRow(

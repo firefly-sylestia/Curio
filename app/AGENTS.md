@@ -87,6 +87,7 @@ app/src/main/java/com/curio/app/
 - The two apps do not share DB names, schemas, or SharedPreferences namespaces — fully isolated.
 - **Topic catalog cache (Room, v294+):** the bundled topic JSON assets import ONCE into Room's `topics` table on first launch; every later launch warms `TopicJsonLoader`'s counts + pools straight from Room (`TopicRepository.init` → `warmLoaderFromRoom`), so all topics are present instantly with ZERO JSON re-parse per restart. The JSON→Room re-sync runs only when the app version code changes (`AppPreferences.getTopicCatalogSyncVersion` marker + `BuildConfig.VERSION_CODE`), so newly authored content lands on app updates without re-reading every lane every launch. The bundled `topics.db` SQLite-asset experiment (`TopicAssetStore`) is REVERTED — `assets/topics.db` does NOT ship; `TopicJsonLoader.load()` still parses the JSON assets as a fallback when Room is empty. **Reveal never blanks:** `TopicRevealScreen` resolves Room first, then parses+caches+persists the lane's JSON on demand when Room misses (wildcard misses fall back to `TopicCatalog.findByNameAcrossAll`), and every resolved topic is upserted into `cached_topics` via `TopicRepository.rememberTopic` — so loaded/explored topics stay durable.
 - **Image fetch caching:** `MainActivity.onCreate` installs a shared Coil `ImageLoader` (Coil 2.7) with an explicit memory cache (22%) + disk cache (`cacheDir/curio_image_cache`, 3%) and `respectCacheHeaders(false)` — book covers and any network image download once and hit disk on later visits/restarts. SvgDecoder registered app-wide.
+- **Book covers — bulk one-by-one fetch (v314):** Settings → Safety & support → "Book covers" row (`features/settings/BookCoverFetch.kt`, `BookCoverFetchRow` — an INLINE action row special-cased off `BookCoverFetch.ROUTE` in the hub's grid/search/two-pane renderers so it can never navigate) tap-fetches every unique cover URL (authored `imageUrl`, else the reveal's exact Open Library `-M.jpg` fallback — same URL = same cache key) sequentially into the shared disk cache, `memoryCachePolicy DISABLED` on the bulk pass, ~150ms politeness gap, live "Fetching 12 / 301…" counter + progress bar, completion "✓ N covers cached · M failed". Reveal posters then render instantly/offline.
 - **Haptics:** satisfying haptics are localized per-screen (`val haptics = LocalHapticFeedback.current` hoisted in composition — never read inside click lambdas). Confirm on completions (save capture, share-card Save/Share, spin landing, quest complete); KeyboardTap on action buttons (Start exploring, Express yourself, opening Cabinet entries); TextHandleMove ticks on toggles (pin, reveal favourite, share-card Reset/Done). The wheel's escalating ratchet lives in SpinScreen.
 
 ### UI
@@ -438,6 +439,39 @@ app/src/main/java/com/curio/app/
   above the empty state when the lane has no matches); tapping a pill
   switches `selectedCat` to that lane keeping the query. The section-
   header count rows, empty-state copy and pagination are untouched.
+- **v314 — Topic Browser: category-panel + multi-select + typo-tolerant
+  search.** User: "when I'm searching it shows 2 category pickers — hide the
+  category chips and only show category options in the panel; revamp the
+  picker: text search mentions a category name → prioritize it; smarter
+  search showing typo results; category panel collapsed by default with its
+  own tiny search box inside; multi-select via checkboxes in a Set;
+  active-filter chips removable with one tap; filter passes if it matches
+  text AND (no categories selected OR its category is in the set)" (JSX
+  reference provided). (1) **Chips during search are GONE** — the
+  `LaunchedEffect(searchActive)` auto-open and the sticky every-lane
+  `DatabaseStickyChipBar`/`DatabaseChipPop`/`DatabaseFilterChip` are
+  deleted; searching shows no category bar. (2) **Category panel** — the
+  hero Category pill toggles a collapsed-by-default `DatabaseCategoryPanel`
+  (own tiny `CurioSearchField` filtering the category list, accent
+  `Checkbox` multi-select rows with per-lane counts, Clear all + Done;
+  `DatabaseFilterPanelHeight = 352.dp` reserved while open). (3) **Active-
+  filter chips row** — `ActiveFilterChips` shows exactly the selected lanes
+  (each chip = one tap to remove, plus Clear all) whenever the selection is
+  non-empty; pill label reads "Categories · N" / "Category · All" and the
+  pill emphasizes while a selection is active. (4) **Multi-select** — the
+  filter is `selectedCats: Set<CategoryId>` round-tripped through a
+  comma-joined `rememberSaveable` string + `TopicBrowserSession.selectedSlugs`
+  (enum names, replaces `selectedSlug`/`chipBarOpen`); filter applies in
+  search AND browse; one selected lane keeps the `DatabaseCategoryTopBar`,
+  several show section headers for just those lanes. (5) **Typo-tolerant
+  matching** — `matchLevel()` returns 0 strong (substring) / 1 fuzzy
+  (tokenized Levenshtein over name/byline/subtype, tolerance 0–2 by token
+  length) / null; `catHitCounts` + rows use it, ranking fuzzy hits below
+  strong ones. (6) **Category-mention priority** — `priorityCats` derives
+  from the query vs each lane's displayName (contains/fuzzy); mentioned
+  lanes' hits sort first in search results. "Also in" pills now TOGGLE a
+  lane in the active set. The glass `layerBackdrop` capture now records
+  whenever liquid glass is on (hero pills refract in every state).
 - **v3xx11 — picker polish: tick removed, option-pill overlay fixed, dark white-dot gone.**
   User: "remove the tick when selecting … in dark mode the category options still have
   white borders … in new picker the pinned ones doesn't show tap and hold actions".
