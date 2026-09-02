@@ -21,9 +21,11 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items as gridItems
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
@@ -196,11 +198,13 @@ fun NewCategoryPickerSheet(
         }
     }
 
-    // Per-page scroll persistence (v3xx13): each pager page's LazyListState
+    // Per-page scroll persistence (v3xx13): each pager page's scroll state
     // is hoisted here so flipping between pages keeps the position, and the
     // index/offset are saved to prefs (debounced) so closing the sheet — or
     // even restarting the app — returns you to where you were on both pages.
-    val classicScroll = rememberLazyListState()
+    // Page 0 holds LazyVerticalGrids (LazyGridState); page 1 is a LazyColumn
+    // (LazyListState) — two different scroll primitives, saved identically.
+    val classicScroll = rememberLazyGridState()
     val newScroll = rememberLazyListState()
     LaunchedEffect(Unit) {
         // runCatching: the saved index may exceed the item count if the
@@ -675,7 +679,7 @@ private fun ContinueExploringSection(
 @Composable
 private fun ClassicPickerPage(
     washCat: CurioCategory,
-    scrollState: LazyListState,
+    scrollState: LazyGridState,
     onCategorySelected: (CurioCategory) -> Unit,
     onCategoriesMixed: (List<CurioCategory>) -> Unit
 ) {

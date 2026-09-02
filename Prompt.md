@@ -44,3 +44,4 @@ User direction (verbatim, lightly cleaned):
 - [x] "Also in" suggestion pill row (search) that switches the filter.
 - [x] Changelog + DOX + docs.
 - [x] Commit & push.
+- [x] CI fix: page-0 scroll state is a `LazyVerticalGrid` → `classicScroll` is now `rememberLazyGridState()` / `ClassicPickerPage.scrollState: LazyGridState` (compile `Argument type mismatch … LazyGridState was expected`); balance re-verified 0/0/0, re-pushed.
