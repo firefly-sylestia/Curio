@@ -46647,5 +46647,996 @@
     "pages": 380,
     "imageUrl": "",
     "teaser": "Van der Kolk's landmark work explores how trauma reshapes the body and brain, compromising sufferers..."
+  },
+  {
+    "name": "The 48 Laws of Power",
+    "byline": "Robert Greene",
+    "tags": [
+      "Nonfiction",
+      "Psychology",
+      "Strategy"
+    ],
+    "synopsis": "Greene's controversial bestseller distills 3,000 years of history into 48 laws of power. Through stories of courtiers, con artists, and kings, he shows how power works in every human interaction. The laws range from 'Never Outshine the Master' to 'Always Say Less Than Necessary.'",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Laws 1-12",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "Laws about positioning, timing, and protecting your reputation"
+      },
+      {
+        "number": 2,
+        "title": "Laws 13-24",
+        "pageStart": 101,
+        "pageEnd": 200,
+        "summary": "Laws about influence, persuasion, and social dynamics"
+      },
+      {
+        "number": 3,
+        "title": "Laws 25-36",
+        "pageStart": 201,
+        "pageEnd": 300,
+        "summary": "Laws about strategy, manipulation, and defense"
+      },
+      {
+        "number": 4,
+        "title": "Laws 37-48",
+        "pageStart": 301,
+        "pageEnd": 480,
+        "summary": "Laws about leadership, legacy, and the ultimate exercise of power"
+      }
+    ],
+    "pages": 480,
+    "imageUrl": "",
+    "teaser": "Greene's controversial bestseller distills 3,000 years of history into 48 laws of power. Through sto..."
+  },
+  {
+    "name": "Influence",
+    "byline": "Robert Cialdini",
+    "tags": [
+      "Nonfiction",
+      "Psychology",
+      "Marketing"
+    ],
+    "synopsis": "Cialdini's groundbreaking work on persuasion reveals the six principles that drive compliance: reciprocity, commitment, social proof, authority, liking, and scarcity. Through research and real-world examples, he shows how these weapons of influence shape our decisions.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Reciprocity",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "The rule of reciprocity and why we feel obligated to return favors"
+      },
+      {
+        "number": 2,
+        "title": "Commitment",
+        "pageStart": 61,
+        "pageEnd": 120,
+        "summary": "How consistency and commitment drive behavior"
+      },
+      {
+        "number": 3,
+        "title": "Social Proof",
+        "pageStart": 121,
+        "pageEnd": 180,
+        "summary": "Why we follow the crowd"
+      },
+      {
+        "number": 4,
+        "title": "Authority",
+        "pageStart": 181,
+        "pageEnd": 240,
+        "summary": "Why we defer to experts and figures of authority"
+      },
+      {
+        "number": 5,
+        "title": "Liking",
+        "pageStart": 241,
+        "pageEnd": 300,
+        "summary": "Why we say yes to people we like"
+      },
+      {
+        "number": 6,
+        "title": "Scarcity",
+        "pageStart": 301,
+        "pageEnd": 352,
+        "summary": "Why limited opportunities increase desire"
+      }
+    ],
+    "pages": 352,
+    "imageUrl": "",
+    "teaser": "Cialdini's groundbreaking work on persuasion reveals the six principles that drive compliance: recip..."
+  },
+  {
+    "name": "The Obstacle Is the Way",
+    "byline": "Ryan Holiday",
+    "tags": [
+      "Nonfiction",
+      "Philosophy",
+      "Self-Help"
+    ],
+    "synopsis": "Holiday applies ancient Stoic philosophy to modern challenges. Through stories of historical figures who turned obstacles into advantages, he shows how the disciplines of perception, action, and will can transform any difficulty into opportunity.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Perception",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "How to see obstacles clearly and objectively"
+      },
+      {
+        "number": 2,
+        "title": "Action",
+        "pageStart": 61,
+        "pageEnd": 120,
+        "summary": "How to act despite uncertainty and fear"
+      },
+      {
+        "number": 3,
+        "title": "Will",
+        "pageStart": 121,
+        "pageEnd": 224,
+        "summary": "How to endure what cannot be changed"
+      }
+    ],
+    "pages": 224,
+    "imageUrl": "",
+    "teaser": "Holiday applies ancient Stoic philosophy to modern challenges. Through stories of historical figures..."
+  },
+  {
+    "name": "Ego Is the Enemy",
+    "byline": "Ryan Holiday",
+    "tags": [
+      "Nonfiction",
+      "Philosophy",
+      "Self-Help"
+    ],
+    "synopsis": "Holiday argues that ego is the greatest obstacle to success. Through historical examples and Stoic wisdom, he shows how ego blinds us to reality, derails our progress, and prevents us from reaching our potential.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Aspire",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "How ego hinders learning and growth"
+      },
+      {
+        "number": 2,
+        "title": "Success",
+        "pageStart": 81,
+        "pageEnd": 160,
+        "summary": "How ego corrupts achievement"
+      },
+      {
+        "number": 3,
+        "title": "Failure",
+        "pageStart": 161,
+        "pageEnd": 240,
+        "summary": "How ego prevents recovery from setbacks"
+      }
+    ],
+    "pages": 240,
+    "imageUrl": "",
+    "teaser": "Holiday argues that ego is the greatest obstacle to success. Through historical examples and Stoic w..."
+  },
+  {
+    "name": "Stillness Is the Key",
+    "byline": "Ryan Holiday",
+    "tags": [
+      "Nonfiction",
+      "Philosophy",
+      "Self-Help"
+    ],
+    "synopsis": "Holiday explores the power of stillness in a world of constant noise. Through stories of history's greatest figures, he shows how stillness, the ability to be present and calm, is the key to wisdom, creativity, and effectiveness.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Mind",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Quiet the mind and find clarity"
+      },
+      {
+        "number": 2,
+        "title": "Spirit",
+        "pageStart": 81,
+        "pageEnd": 160,
+        "summary": "Find purpose and meaning through stillness"
+      },
+      {
+        "number": 3,
+        "title": "Body",
+        "pageStart": 161,
+        "pageEnd": 288,
+        "summary": "Physical stillness and the discipline of rest"
+      }
+    ],
+    "pages": 288,
+    "imageUrl": "",
+    "teaser": "Holiday explores the power of stillness in a world of constant noise. Through stories of history's g..."
+  },
+  {
+    "name": "The War of Art",
+    "byline": "Steven Pressfield",
+    "tags": [
+      "Nonfiction",
+      "Creativity",
+      "Self-Help"
+    ],
+    "synopsis": "Pressfield's manifesto on overcoming resistance and becoming a professional artist. He identifies the internal forces that prevent us from doing our work and offers practical strategies for pushing through. The book is essential reading for anyone in a creative field.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Resistance",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "Defining resistance and recognizing its forms"
+      },
+      {
+        "number": 2,
+        "title": "Combating Resistance",
+        "pageStart": 61,
+        "pageEnd": 120,
+        "summary": "Turning pro and defeating resistance through discipline"
+      },
+      {
+        "number": 3,
+        "title": "Beyond Resistance",
+        "pageStart": 121,
+        "pageEnd": 168,
+        "summary": "The higher realm and the muse"
+      }
+    ],
+    "pages": 168,
+    "imageUrl": "",
+    "teaser": "Pressfield's manifesto on overcoming resistance and becoming a professional artist. He identifies th..."
+  },
+  {
+    "name": "Essentialism",
+    "byline": "Greg McKeown",
+    "tags": [
+      "Nonfiction",
+      "Productivity",
+      "Self-Help"
+    ],
+    "synopsis": "McKeown argues that the way forward is not to do more but to do less, better. Through research and interviews with successful people, he shows how to identify the essential, eliminate the nonessential, and make everything as easy as possible.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Essence",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "What essentialism is and why it matters"
+      },
+      {
+        "number": 2,
+        "title": "Explore",
+        "pageStart": 61,
+        "pageEnd": 120,
+        "summary": "How to discern the trivial from the essential"
+      },
+      {
+        "number": 3,
+        "title": "Eliminate",
+        "pageStart": 121,
+        "pageEnd": 180,
+        "summary": "How to say no and cut the nonessential"
+      },
+      {
+        "number": 4,
+        "title": "Execute",
+        "pageStart": 181,
+        "pageEnd": 272,
+        "summary": "How to build systems that make the essential automatic"
+      }
+    ],
+    "pages": 272,
+    "imageUrl": "",
+    "teaser": "McKeown argues that the way forward is not to do more but to do less, better. Through research and i..."
+  },
+  {
+    "name": "Digital Minimalism",
+    "byline": "Cal Newport",
+    "tags": [
+      "Nonfiction",
+      "Technology",
+      "Self-Help"
+    ],
+    "synopsis": "Newport argues that our relationship with technology is broken. Through research and case studies, he shows how to cultivate a healthier relationship with digital tools by focusing on high-value activities and pruning low-value ones.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "A Movement",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The problem with digital overload and the philosophy of minimalism"
+      },
+      {
+        "number": 2,
+        "title": "The Philosophy",
+        "pageStart": 81,
+        "pageEnd": 160,
+        "summary": "How to identify what matters and prune the rest"
+      },
+      {
+        "number": 3,
+        "title": "The Process",
+        "pageStart": 161,
+        "pageEnd": 304,
+        "summary": "How to execute a digital declutter"
+      }
+    ],
+    "pages": 304,
+    "imageUrl": "",
+    "teaser": "Newport argues that our relationship with technology is broken. Through research and case studies, h..."
+  },
+  {
+    "name": "So Good They Can't Ignore You",
+    "byline": "Cal Newport",
+    "tags": [
+      "Nonfiction",
+      "Career",
+      "Self-Help"
+    ],
+    "synopsis": "Newport challenges the passion hypothesis, arguing that passion is not something you find but something you develop. Through research and interviews, he shows that the key to loving your work is to become so good that you can't be ignored.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Passion Hypothesis",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "Why following your passion is bad advice"
+      },
+      {
+        "number": 2,
+        "title": "The Craftsman Mindset",
+        "pageStart": 61,
+        "pageEnd": 140,
+        "summary": "How to develop rare and valuable skills"
+      },
+      {
+        "number": 3,
+        "title": "The Power of Autonomy",
+        "pageStart": 141,
+        "pageEnd": 220,
+        "summary": "How control and mission create meaning"
+      },
+      {
+        "number": 4,
+        "title": "The Quest for Quality",
+        "pageStart": 221,
+        "pageEnd": 272,
+        "summary": "How continuous improvement leads to passion"
+      }
+    ],
+    "pages": 272,
+    "imageUrl": "",
+    "teaser": "Newport challenges the passion hypothesis, arguing that passion is not something you find but someth..."
+  },
+  {
+    "name": "Tribe of Mentors",
+    "byline": "Tim Ferriss",
+    "tags": [
+      "Nonfiction",
+      "Self-Help",
+      "Business"
+    ],
+    "synopsis": "Ferriss distills the wisdom of over 100 world-class performers across diverse fields. Through short, focused interviews, he shares their daily habits, favorite books, biggest failures, and best advice for life.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Getting Started",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "Mentors share their routines and morning rituals"
+      },
+      {
+        "number": 2,
+        "title": "Work",
+        "pageStart": 101,
+        "pageEnd": 200,
+        "summary": "Career advice, productivity hacks, and failure stories"
+      },
+      {
+        "number": 3,
+        "title": "Life",
+        "pageStart": 201,
+        "pageEnd": 400,
+        "summary": "Philosophy, relationships, and finding purpose"
+      }
+    ],
+    "pages": 400,
+    "imageUrl": "",
+    "teaser": "Ferriss distills the wisdom of over 100 world-class performers across diverse fields. Through short,..."
+  },
+  {
+    "name": "The Elegant Universe",
+    "byline": "Brian Greene",
+    "tags": [
+      "Nonfiction",
+      "Physics",
+      "Science"
+    ],
+    "synopsis": "Greene's bestselling introduction to string theory and the search for a unified theory of everything. He explains complex physics with clarity and enthusiasm, covering general relativity, quantum mechanics, and the cutting-edge theories that attempt to reconcile them.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Tied Up with Strings",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Introduction to string theory and the quest for unification"
+      },
+      {
+        "number": 2,
+        "title": "The Revolution",
+        "pageStart": 81,
+        "pageEnd": 200,
+        "summary": "General relativity, quantum mechanics, and their contradictions"
+      },
+      {
+        "number": 3,
+        "title": "String Theory",
+        "pageStart": 201,
+        "pageEnd": 340,
+        "summary": "The development of string theory and its implications"
+      },
+      {
+        "number": 4,
+        "title": "New Dimensions",
+        "pageStart": 341,
+        "pageEnd": 448,
+        "summary": "Extra dimensions, branes, and the landscape of string theory"
+      }
+    ],
+    "pages": 448,
+    "imageUrl": "",
+    "teaser": "Greene's bestselling introduction to string theory and the search for a unified theory of everything..."
+  },
+  {
+    "name": "The Cosmos",
+    "byline": "Carl Sagan",
+    "tags": [
+      "Nonfiction",
+      "Science",
+      "Astronomy"
+    ],
+    "synopsis": "Sagan's landmark work explores the universe from the atom to the cosmic horizon. Through his characteristic wonder and clarity, he explains the origin of stars, planets, and life itself. The book is a celebration of science and human curiosity.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Shores of the Cosmic Ocean",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "An introduction to the cosmos and the scale of the universe"
+      },
+      {
+        "number": 2,
+        "title": "One Voice in the Cosmic Fugue",
+        "pageStart": 41,
+        "pageEnd": 80,
+        "summary": "The origin of life and the possibility of extraterrestrial life"
+      },
+      {
+        "number": 3,
+        "title": "The Harmony of Worlds",
+        "pageStart": 81,
+        "pageEnd": 120,
+        "summary": "How science replaced superstition and mythology"
+      },
+      {
+        "number": 4,
+        "title": "Infinity and Beyond",
+        "pageStart": 121,
+        "pageEnd": 432,
+        "summary": "Black holes, galaxies, and the ultimate fate of the universe"
+      }
+    ],
+    "pages": 432,
+    "imageUrl": "",
+    "teaser": "Sagan's landmark work explores the universe from the atom to the cosmic horizon. Through his charact..."
+  },
+  {
+    "name": "The Tao of Pooh",
+    "byline": "Benjamin Hoff",
+    "tags": [
+      "Philosophy",
+      "Spirituality",
+      "Humor"
+    ],
+    "synopsis": "Hoff uses the characters of Winnie-the-Pooh to explain the principles of Taoism. Through the simple wisdom of Pooh, Piglet, Eeyore, and Rabbit, he shows how the ancient philosophy of living in harmony with nature applies to modern life.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Tao of Pooh",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "Pooh as the Taoist sage and the art of simplicity"
+      },
+      {
+        "number": 2,
+        "title": "The Te of Piglet",
+        "pageStart": 41,
+        "pageEnd": 80,
+        "summary": "The power of small things and the virtue of humility"
+      },
+      {
+        "number": 3,
+        "title": "The Way of the Tao",
+        "pageStart": 81,
+        "pageEnd": 158,
+        "summary": "Living in harmony with the natural order"
+      }
+    ],
+    "pages": 158,
+    "imageUrl": "",
+    "teaser": "Hoff uses the characters of Winnie-the-Pooh to explain the principles of Taoism. Through the simple ..."
+  },
+  {
+    "name": "The Prophet",
+    "byline": "Kahlil Gibran",
+    "tags": [
+      "Poetry",
+      "Philosophy",
+      "Spirituality"
+    ],
+    "synopsis": "Gibran's poetic masterpiece offers wisdom on love, marriage, children, work, joy, sorrow, and death. Through the voice of a prophet departing from a city, Gibran shares timeless insights about the human condition.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "On Love and Marriage",
+        "pageStart": 1,
+        "pageEnd": 20,
+        "summary": "The nature of love and the meaning of marriage"
+      },
+      {
+        "number": 2,
+        "title": "On Children and Giving",
+        "pageStart": 21,
+        "pageEnd": 40,
+        "summary": "How to raise children and the art of generosity"
+      },
+      {
+        "number": 3,
+        "title": "On Work and Joy",
+        "pageStart": 41,
+        "pageEnd": 60,
+        "summary": "The dignity of work and the nature of happiness"
+      },
+      {
+        "number": 4,
+        "title": "On Sorrow and Death",
+        "pageStart": 61,
+        "pageEnd": 80,
+        "summary": "How to bear sorrow and the meaning of death"
+      },
+      {
+        "number": 5,
+        "title": "The Farewell",
+        "pageStart": 81,
+        "pageEnd": 107,
+        "summary": "The prophet's departure and his final words"
+      }
+    ],
+    "pages": 107,
+    "imageUrl": "",
+    "teaser": "Gibran's poetic masterpiece offers wisdom on love, marriage, children, work, joy, sorrow, and death...."
+  },
+  {
+    "name": "Mere Christianity",
+    "byline": "C.S. Lewis",
+    "tags": [
+      "Nonfiction",
+      "Religion",
+      "Philosophy"
+    ],
+    "synopsis": "Lewis's theological masterwork argues for the rational basis of Christianity. Through clear, accessible prose, he explores morality, the nature of God, and the meaning of Christian belief. The book is essential reading for both believers and skeptics.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Right and Wrong",
+        "pageStart": 1,
+        "pageEnd": 50,
+        "summary": "The moral argument and the existence of a universal moral law"
+      },
+      {
+        "number": 2,
+        "title": "What Christians Believe",
+        "pageStart": 51,
+        "pageEnd": 120,
+        "summary": "The core doctrines of Christianity and their meaning"
+      },
+      {
+        "number": 3,
+        "title": "Christian Behaviour",
+        "pageStart": 121,
+        "pageEnd": 180,
+        "summary": "The practical implications of Christian faith"
+      },
+      {
+        "number": 4,
+        "title": "Beyond Personality",
+        "pageStart": 181,
+        "pageEnd": 252,
+        "summary": "The nature of God and the process of becoming like Christ"
+      }
+    ],
+    "pages": 252,
+    "imageUrl": "",
+    "teaser": "Lewis's theological masterwork argues for the rational basis of Christianity. Through clear, accessi..."
+  },
+  {
+    "name": "The Art of Loving",
+    "byline": "Erich Fromm",
+    "tags": [
+      "Philosophy",
+      "Psychology",
+      "Nonfiction"
+    ],
+    "synopsis": "Fromm's philosophical exploration of love argues that love is not a feeling but a practice. Through analysis of romantic love, parent-child love, self-love, and love of God, he shows that love is an art that requires knowledge and effort.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Is Love an Art?",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "Love as a practice rather than a feeling"
+      },
+      {
+        "number": 2,
+        "title": "The Theory of Love",
+        "pageStart": 31,
+        "pageEnd": 70,
+        "summary": "The elements of love: care, responsibility, respect, and knowledge"
+      },
+      {
+        "number": 3,
+        "title": "Love in Modern Society",
+        "pageStart": 71,
+        "pageEnd": 110,
+        "summary": "How capitalism and consumer culture distort love"
+      },
+      {
+        "number": 4,
+        "title": "The Practice of Love",
+        "pageStart": 111,
+        "pageEnd": 148,
+        "summary": "How to develop the capacity for mature love"
+      }
+    ],
+    "pages": 148,
+    "imageUrl": "",
+    "teaser": "Fromm's philosophical exploration of love argues that love is not a feeling but a practice. Through ..."
+  },
+  {
+    "name": "The Tao Te Ching",
+    "byline": "Lao Tzu",
+    "tags": [
+      "Philosophy",
+      "Spirituality",
+      "Classics"
+    ],
+    "synopsis": "Lao Tzu's ancient Chinese text on the Tao, the way of the universe, is one of the most translated works in history. Through 81 short chapters, he explores the nature of reality, the power of simplicity, and the art of effortless action.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Chapters 1-20",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "The nature of the Tao and the art of yielding"
+      },
+      {
+        "number": 2,
+        "title": "Chapters 21-40",
+        "pageStart": 31,
+        "pageEnd": 60,
+        "summary": "The power of emptiness and the virtue of humility"
+      },
+      {
+        "number": 3,
+        "title": "Chapters 41-60",
+        "pageStart": 61,
+        "pageEnd": 80,
+        "summary": "The practice of wu wei and the governance of the state"
+      },
+      {
+        "number": 4,
+        "title": "Chapters 61-81",
+        "pageStart": 81,
+        "pageEnd": 100,
+        "summary": "The eternal Tao and the art of living"
+      }
+    ],
+    "pages": 100,
+    "imageUrl": "",
+    "teaser": "Lao Tzu's ancient Chinese text on the Tao, the way of the universe, is one of the most translated wo..."
+  },
+  {
+    "name": "Wild",
+    "byline": "Cheryl Strayed",
+    "tags": [
+      "Nonfiction",
+      "Memoir",
+      "Travel"
+    ],
+    "synopsis": "Strayed's memoir chronicles her solo hike along the Pacific Crest Trail after the death of her mother and the dissolution of her marriage. Through humor and raw honesty, she writes about grief, addiction, and the healing power of the natural world.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Trail",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The beginning of the hike and the physical and emotional challenges"
+      },
+      {
+        "number": 2,
+        "title": "The Past",
+        "pageStart": 81,
+        "pageEnd": 200,
+        "summary": "Memories of her mother, her marriage, and her descent into addiction"
+      },
+      {
+        "number": 3,
+        "title": "The Healing",
+        "pageStart": 201,
+        "pageEnd": 336,
+        "summary": "The trail as a place of transformation and the slow process of healing"
+      }
+    ],
+    "pages": 336,
+    "imageUrl": "",
+    "teaser": "Strayed's memoir chronicles her solo hike along the Pacific Crest Trail after the death of her mothe..."
+  },
+  {
+    "name": "Station Eleven",
+    "byline": "Emily St. John Mandel",
+    "tags": [
+      "Fiction",
+      "Science Fiction",
+      "Post-Apocalyptic"
+    ],
+    "synopsis": "Mandel's novel interweaves the lives of people connected to a famous actor who died on stage the night a flu pandemic wiped out civilization. Set before and after the collapse, the novel explores memory, art, and what endures when the world ends.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Before",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "The night of the pandemic and the connections between characters"
+      },
+      {
+        "number": 2,
+        "title": "After",
+        "pageStart": 101,
+        "pageEnd": 200,
+        "summary": "The Traveling Symphony and life in the post-apocalyptic world"
+      },
+      {
+        "number": 3,
+        "title": "The Reckoning",
+        "pageStart": 201,
+        "pageEnd": 336,
+        "summary": "The convergence of storylines and the meaning of survival"
+      }
+    ],
+    "pages": 336,
+    "imageUrl": "",
+    "teaser": "Mandel's novel interweaves the lives of people connected to a famous actor who died on stage the nig..."
+  },
+  {
+    "name": "The Thursday Murder Club",
+    "byline": "Richard Osman",
+    "tags": [
+      "Fiction",
+      "Mystery",
+      "Humor"
+    ],
+    "synopsis": "Osman's cozy mystery follows four retirees in a luxury retirement community who meet weekly to investigate cold cases. When a real murder occurs nearby, they leap into action. The novel is warm, funny, and surprisingly clever.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Club",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The four retirees and their weekly murder club meetings"
+      },
+      {
+        "number": 2,
+        "title": "The Murder",
+        "pageStart": 81,
+        "pageEnd": 180,
+        "summary": "The real murder and the investigation begins"
+      },
+      {
+        "number": 3,
+        "title": "The Truth",
+        "pageStart": 181,
+        "pageEnd": 320,
+        "summary": "The suspects, the clues, and the surprising resolution"
+      }
+    ],
+    "pages": 320,
+    "imageUrl": "",
+    "teaser": "Osman's cozy mystery follows four retirees in a luxury retirement community who meet weekly to inves..."
+  },
+  {
+    "name": "Anxious People",
+    "byline": "Fredrik Backman",
+    "tags": [
+      "Fiction",
+      "Humor",
+      "Contemporary"
+    ],
+    "synopsis": "Backman's novel follows a group of strangers taken hostage during a botched apartment viewing. Through humor and heart, the novel explores the interconnected lives of the captives and the failed bank robber, revealing how anxiety, loneliness, and love connect us all.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Hostage Situation",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The botched robbery and the hostages in the apartment"
+      },
+      {
+        "number": 2,
+        "title": "The Backstories",
+        "pageStart": 81,
+        "pageEnd": 200,
+        "summary": "Each hostage's backstory and the connections between them"
+      },
+      {
+        "number": 3,
+        "title": "The Resolution",
+        "pageStart": 201,
+        "pageEnd": 320,
+        "summary": "The truth about the hostage situation and the meaning of connection"
+      }
+    ],
+    "pages": 320,
+    "imageUrl": "",
+    "teaser": "Backman's novel follows a group of strangers taken hostage during a botched apartment viewing. Throu..."
+  },
+  {
+    "name": "Lessons in Chemistry",
+    "byline": "Bonnie Garmus",
+    "tags": [
+      "Fiction",
+      "Historical Fiction",
+      "Feminist"
+    ],
+    "synopsis": "Garmus's novel follows Elizabeth Zott, a brilliant chemist in the 1960s who becomes the host of a cooking show. Through humor and heart, the novel explores gender discrimination in science, the power of education, and the courage to be yourself in a world that wants you to be someone else.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Lab",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Elizabeth's career in chemistry and the discrimination she faces"
+      },
+      {
+        "number": 2,
+        "title": "The Show",
+        "pageStart": 81,
+        "pageEnd": 200,
+        "summary": "Elizabeth's cooking show and her scientific approach to food"
+      },
+      {
+        "number": 3,
+        "title": "The Movement",
+        "pageStart": 201,
+        "pageEnd": 350,
+        "summary": "Elizabeth's impact on women and the fight for equality"
+      }
+    ],
+    "pages": 350,
+    "imageUrl": "",
+    "teaser": "Garmus's novel follows Elizabeth Zott, a brilliant chemist in the 1960s who becomes the host of a co..."
+  },
+  {
+    "name": "Klara and the Sun",
+    "byline": "Kazuo Ishiguro",
+    "tags": [
+      "Fiction",
+      "Science Fiction",
+      "Literary"
+    ],
+    "synopsis": "Ishiguro's novel follows Klara, an Artificial Friend, as she observes the world from a store window and then in the home of a sick child. Through Klara's innocent perspective, Ishiguro explores love, loneliness, and what it means to be human.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Store",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Klara's life in the store and her observation of customers"
+      },
+      {
+        "number": 2,
+        "title": "The Home",
+        "pageStart": 81,
+        "pageEnd": 180,
+        "summary": "Klara's life with Josie and the family dynamics"
+      },
+      {
+        "number": 3,
+        "title": "The Question",
+        "pageStart": 181,
+        "pageEnd": 303,
+        "summary": "The philosophical questions about love, consciousness, and mortality"
+      }
+    ],
+    "pages": 303,
+    "imageUrl": "",
+    "teaser": "Ishiguro's novel follows Klara, an Artificial Friend, as she observes the world from a store window ..."
+  },
+  {
+    "name": "Less",
+    "byline": "Andrew Sean Greer",
+    "tags": [
+      "Fiction",
+      "Humor",
+      "Literary"
+    ],
+    "synopsis": "Greer's Pulitzer Prize-winning novel follows Arthur Less, a middle-aged novelist traveling the world to avoid his ex-boyfriend's wedding. Through comic misadventures in Germany, Morocco, India, and Japan, Less confronts his fears about aging, love, and relevance.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Travel",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Less's journey begins and his first stop in Berlin"
+      },
+      {
+        "number": 2,
+        "title": "The Encounters",
+        "pageStart": 81,
+        "pageEnd": 160,
+        "summary": "Less's encounters around the world and his growing self-awareness"
+      },
+      {
+        "number": 3,
+        "title": "The Return",
+        "pageStart": 161,
+        "pageEnd": 272,
+        "summary": "Less's return and his unexpected ending"
+      }
+    ],
+    "pages": 272,
+    "imageUrl": "",
+    "teaser": "Greer's Pulitzer Prize-winning novel follows Arthur Less, a middle-aged novelist traveling the world..."
+  },
+  {
+    "name": "The Midnight Mass Murders",
+    "byline": "Anthony Horowitz",
+    "tags": [
+      "Fiction",
+      "Mystery",
+      "British"
+    ],
+    "synopsis": "Horowitz's mystery follows Daniel Hawthorne, a brilliant but difficult detective, and his reluctant sidekick as they investigate a series of murders connected to the literary world. The novel is a love letter to classic British mystery.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Crime",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The first murder and Hawthorne's unusual methods"
+      },
+      {
+        "number": 2,
+        "title": "The Investigation",
+        "pageStart": 81,
+        "pageEnd": 200,
+        "summary": "The suspects, the clues, and the growing danger"
+      },
+      {
+        "number": 3,
+        "title": "The Solution",
+        "pageStart": 201,
+        "pageEnd": 320,
+        "summary": "The unmasking of the killer and the final twist"
+      }
+    ],
+    "pages": 320,
+    "imageUrl": "",
+    "teaser": "Horowitz's mystery follows Daniel Hawthorne, a brilliant but difficult detective, and his reluctant ..."
   }
 ]
