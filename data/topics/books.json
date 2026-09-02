@@ -215,31 +215,73 @@
     "chapters": [
       {
         "number": 1,
-        "title": "Part I, Chapters 1–8",
+        "title": "Chapter 1",
         "pageStart": 1,
-        "pageEnd": 120,
-        "summary": "Quixano becomes Don Quixote. The first sally. The inn as castle. Sancho Panza recruited."
+        "pageEnd": 30,
+        "summary": "Don Quixote's decision to become a knight"
       },
       {
         "number": 2,
-        "title": "Part I, Chapters 9–26",
-        "pageStart": 121,
-        "pageEnd": 380,
-        "summary": "The windmills. The sheep army. The inn of the Monterey. The canon and the curate."
+        "title": "Chapter 2",
+        "pageStart": 31,
+        "pageEnd": 60,
+        "summary": "The first sally and the adventure at the inn"
       },
       {
         "number": 3,
-        "title": "Part I, Chapters 27–52",
-        "pageStart": 381,
-        "pageEnd": 600,
-        "summary": "The adventure of the enchanted boat. Cardenio's story. The girl in distress."
+        "title": "Chapter 3",
+        "pageStart": 61,
+        "pageEnd": 90,
+        "summary": "The windmill adventure and the encounter with the merchants"
       },
       {
         "number": 4,
-        "title": "Part II, Chapters 1–74",
-        "pageStart": 601,
-        "pageEnd": 992,
-        "summary": "Don Quixote and Sancho return. The duke and duchess mock them. Sancho governs. The defeat at Montesinos."
+        "title": "Chapter 4",
+        "pageStart": 91,
+        "pageEnd": 120,
+        "summary": "The battle with the Basque and the liberation of the galley slaves"
+      },
+      {
+        "number": 5,
+        "title": "Chapter 5",
+        "pageStart": 121,
+        "pageEnd": 150,
+        "summary": "The adventure in the Sierra Morena"
+      },
+      {
+        "number": 6,
+        "title": "Chapter 6",
+        "pageStart": 151,
+        "pageEnd": 180,
+        "summary": "The burning of the books and the search for Dulcinea"
+      },
+      {
+        "number": 7,
+        "title": "Chapter 7",
+        "pageStart": 181,
+        "pageEnd": 210,
+        "summary": "The adventure with the fulling mills"
+      },
+      {
+        "number": 8,
+        "title": "Chapter 8",
+        "pageStart": 211,
+        "pageEnd": 240,
+        "summary": "The adventure with the sheep and the sheep-fight"
+      },
+      {
+        "number": 9,
+        "title": "Chapter 9",
+        "pageStart": 241,
+        "pageEnd": 270,
+        "summary": "The adventure with the dead body and the flying wooden horse"
+      },
+      {
+        "number": 10,
+        "title": "Chapter 10",
+        "pageStart": 271,
+        "pageEnd": 300,
+        "summary": "The adventure with the enchanted boat"
       }
     ]
   },
@@ -268,24 +310,73 @@
     "chapters": [
       {
         "number": 1,
-        "title": "Chapters 1–10 — Gateshead and Lowood",
+        "title": "Chapter 1",
         "pageStart": 1,
-        "pageEnd": 140,
-        "summary": "The Red Room. Lowood Institution. Helen Burns dies. Jane becomes a teacher."
+        "pageEnd": 10,
+        "summary": "Jane's childhood at Gateshead and the Red Room"
       },
       {
         "number": 2,
-        "title": "Chapters 11–26 — Thornfield",
-        "pageStart": 141,
-        "pageEnd": 340,
-        "summary": "Jane becomes governess. Rochester courts her. The fire in Rochester's bed. The wedding stopped."
+        "title": "Chapter 2",
+        "pageStart": 11,
+        "pageEnd": 22,
+        "summary": "Jane's time at Lowood and her friendship with Helen"
       },
       {
         "number": 3,
-        "title": "Chapters 27–38 — Moor House and Return",
-        "pageStart": 341,
-        "pageEnd": 532,
-        "summary": "Jane flees. The Rivers take her in. Jane inherits money. She returns to find Thornfield burned."
+        "title": "Chapter 3",
+        "pageStart": 23,
+        "pageEnd": 36,
+        "summary": "Jane becomes governess at Thornfield"
+      },
+      {
+        "number": 4,
+        "title": "Chapter 4",
+        "pageStart": 37,
+        "pageEnd": 50,
+        "summary": "Jane's first meetings with Rochester"
+      },
+      {
+        "number": 5,
+        "title": "Chapter 5",
+        "pageStart": 51,
+        "pageEnd": 66,
+        "summary": "The fire at Thornfield and growing intimacy"
+      },
+      {
+        "number": 6,
+        "title": "Chapter 6",
+        "pageStart": 67,
+        "pageEnd": 82,
+        "summary": "Rochester's guests and Blanche Ingram"
+      },
+      {
+        "number": 7,
+        "title": "Chapter 7",
+        "pageStart": 83,
+        "pageEnd": 100,
+        "summary": "The engagement to Rochester and the interrupted wedding"
+      },
+      {
+        "number": 8,
+        "title": "Chapter 8",
+        "pageStart": 101,
+        "pageEnd": 118,
+        "summary": "Jane's flight from Thornfield and life with the Rivers"
+      },
+      {
+        "number": 9,
+        "title": "Chapter 9",
+        "pageStart": 119,
+        "pageEnd": 136,
+        "summary": "Jane's time as teacher at Morton and St. John's proposal"
+      },
+      {
+        "number": 10,
+        "title": "Chapter 10",
+        "pageStart": 137,
+        "pageEnd": 156,
+        "summary": "Jane's return to Rochester and the final reunion"
       }
     ]
   },
@@ -316,31 +407,101 @@
     "chapters": [
       {
         "number": 1,
-        "title": "Lockwood's Visit (Chapters 1–3)",
+        "title": "Chapter 1",
         "pageStart": 1,
-        "pageEnd": 40,
-        "summary": "Lockwood arrives at Wuthering Heights. Catherine's ghost appears at the window. Nelly begins her story."
+        "pageEnd": 12,
+        "summary": "Lockwood's first visit to Wuthering Heights"
       },
       {
         "number": 2,
-        "title": "Nelly's Narrative — The First Generation (Chapters 4–16)",
-        "pageStart": 41,
-        "pageEnd": 220,
-        "summary": "Heathcliff's arrival. Catherine and Heathcliff's bond. The Lintons. Catherine's choice to marry Edgar."
+        "title": "Chapter 2",
+        "pageStart": 13,
+        "pageEnd": 28,
+        "summary": "Nelly Dean's story begins"
       },
       {
         "number": 3,
-        "title": "Heathcliff's Revenge (Chapters 17–30)",
-        "pageStart": 221,
-        "pageEnd": 360,
-        "summary": "Heathcliff returns. Isabella's marriage. Catherine's death. Heathcliff takes Wuthering Heights."
+        "title": "Chapter 3",
+        "pageStart": 29,
+        "pageEnd": 46,
+        "summary": "The childhood of Heathcliff and Catherine"
       },
       {
         "number": 4,
-        "title": "The Second Generation (Chapters 31–34)",
-        "pageStart": 361,
-        "pageEnd": 416,
-        "summary": "Young Cathy and Linton Heathcliff. The ghosts. Heathcliff's death. Lockwood's final visit."
+        "title": "Chapter 4",
+        "pageStart": 47,
+        "pageEnd": 64,
+        "summary": "Heathcliff's arrival and the growing bond"
+      },
+      {
+        "number": 5,
+        "title": "Chapter 5",
+        "pageStart": 65,
+        "pageEnd": 84,
+        "summary": "Catherine's time at Thrushcross Grange and her betrayal"
+      },
+      {
+        "number": 6,
+        "title": "Chapter 6",
+        "pageStart": 85,
+        "pageEnd": 106,
+        "summary": "Catherine's marriage to Edgar and Heathcliff's departure"
+      },
+      {
+        "number": 7,
+        "title": "Chapter 7",
+        "pageStart": 107,
+        "pageEnd": 130,
+        "summary": "Heathcliff's return and the revenge begins"
+      },
+      {
+        "number": 8,
+        "title": "Chapter 8",
+        "pageStart": 131,
+        "pageEnd": 154,
+        "summary": "Catherine's pregnancy and the tension between the houses"
+      },
+      {
+        "number": 9,
+        "title": "Chapter 9",
+        "pageStart": 155,
+        "pageEnd": 178,
+        "summary": "Catherine's death and Heathcliff's grief"
+      },
+      {
+        "number": 10,
+        "title": "Chapter 10",
+        "pageStart": 179,
+        "pageEnd": 202,
+        "summary": "Heathcliff's rise and the next generation"
+      },
+      {
+        "number": 11,
+        "title": "Chapter 11",
+        "pageStart": 203,
+        "pageEnd": 226,
+        "summary": "Young Cathy and Linton's relationship"
+      },
+      {
+        "number": 12,
+        "title": "Chapter 12",
+        "pageStart": 227,
+        "pageEnd": 250,
+        "summary": "Heathcliff's final scheme and the end of the revenge"
+      },
+      {
+        "number": 13,
+        "title": "Chapter 13",
+        "pageStart": 251,
+        "pageEnd": 274,
+        "summary": "The resolution and the union of the two houses"
+      },
+      {
+        "number": 14,
+        "title": "Chapter 14",
+        "pageStart": 275,
+        "pageEnd": 300,
+        "summary": "Lockwood's final visit and the ending"
       }
     ]
   },
@@ -369,24 +530,73 @@
     "chapters": [
       {
         "number": 1,
-        "title": "Chapters 1–10 — The Marsh Country",
+        "title": "Chapter 1",
         "pageStart": 1,
-        "pageEnd": 110,
-        "summary": "Pip in the graveyard. The convict. Satis House. Estella. Pip becomes a gentleman's companion."
+        "pageEnd": 8,
+        "summary": "Pip's childhood in the marsh country"
       },
       {
         "number": 2,
-        "title": "Chapters 11–30 — London and Expectations",
-        "pageStart": 111,
-        "pageEnd": 340,
-        "summary": "Pip in London. Jaggers the lawyer. Wemmick. Pip's snobbery toward Joe."
+        "title": "Chapter 2",
+        "pageStart": 9,
+        "pageEnd": 18,
+        "summary": "The encounter with Magwitch"
       },
       {
         "number": 3,
-        "title": "Chapters 31–59 — The Truth",
-        "pageStart": 341,
-        "pageEnd": 544,
-        "summary": "Magwitch returns. Pip's expectations collapse. Miss Havisham's fire. The original ending."
+        "title": "Chapter 3",
+        "pageStart": 19,
+        "pageEnd": 30,
+        "summary": "Miss Havisham and Estella"
+      },
+      {
+        "number": 4,
+        "title": "Chapter 4",
+        "pageStart": 31,
+        "pageEnd": 42,
+        "summary": "Pip's life as apprentice to Joe"
+      },
+      {
+        "number": 5,
+        "title": "Chapter 5",
+        "pageStart": 43,
+        "pageEnd": 56,
+        "summary": "The letter from Jaggers and the expectation"
+      },
+      {
+        "number": 6,
+        "title": "Chapter 6",
+        "pageStart": 57,
+        "pageEnd": 72,
+        "summary": "Pip's life in London and his transformation"
+      },
+      {
+        "number": 7,
+        "title": "Chapter 7",
+        "pageStart": 73,
+        "pageEnd": 90,
+        "summary": "Pip's relationship with Estella and his snobbery"
+      },
+      {
+        "number": 8,
+        "title": "Chapter 8",
+        "pageStart": 91,
+        "pageEnd": 110,
+        "summary": "Magwitch's return and the truth about the expectation"
+      },
+      {
+        "number": 9,
+        "title": "Chapter 9",
+        "pageStart": 111,
+        "pageEnd": 132,
+        "summary": "Pip's disgrace and his escape with Magwitch"
+      },
+      {
+        "number": 10,
+        "title": "Chapter 10",
+        "pageStart": 133,
+        "pageEnd": 154,
+        "summary": "The final reckoning and Pip's redemption"
       }
     ]
   },
@@ -415,24 +625,73 @@
     "chapters": [
       {
         "number": 1,
-        "title": "Chapters 1–8 — The Workhouse",
+        "title": "Chapter 1",
         "pageStart": 1,
-        "pageEnd": 100,
-        "summary": "Oliver's birth. The workhouse. 'Please, sir, I want some more.' Oliver escapes to London."
+        "pageEnd": 10,
+        "summary": "Oliver's birth in the workhouse"
       },
       {
         "number": 2,
-        "title": "Chapters 9–20 — Fagin's Gang",
-        "pageStart": 101,
-        "pageEnd": 240,
-        "summary": "Fagin and the Artful Dodger. Oliver's arrest. Mr. Brownlow. The robbery."
+        "title": "Chapter 2",
+        "pageStart": 11,
+        "pageEnd": 22,
+        "summary": "Oliver's escape and the journey to London"
       },
       {
         "number": 3,
-        "title": "Chapters 21–53 — The Underworld",
-        "pageStart": 241,
-        "pageEnd": 512,
-        "summary": "Bill Sikes. Nancy. Monks. The chase. Sikes kills Nancy. Oliver's identity revealed."
+        "title": "Chapter 3",
+        "pageStart": 23,
+        "pageEnd": 36,
+        "summary": "The Artful Dodger and Fagin's den"
+      },
+      {
+        "number": 4,
+        "title": "Chapter 4",
+        "pageStart": 37,
+        "pageEnd": 52,
+        "summary": "Oliver's arrest and the trial"
+      },
+      {
+        "number": 5,
+        "title": "Chapter 5",
+        "pageStart": 53,
+        "pageEnd": 68,
+        "summary": "Oliver's life with Mr. Brownlow"
+      },
+      {
+        "number": 6,
+        "title": "Chapter 6",
+        "pageStart": 69,
+        "pageEnd": 86,
+        "summary": "The kidnap and return to Fagin"
+      },
+      {
+        "number": 7,
+        "title": "Chapter 7",
+        "pageStart": 87,
+        "pageEnd": 106,
+        "summary": "Bill Sikes and the burglary"
+      },
+      {
+        "number": 8,
+        "title": "Chapter 8",
+        "pageStart": 107,
+        "pageEnd": 128,
+        "summary": "The pursuit and Nancy's secret"
+      },
+      {
+        "number": 9,
+        "title": "Chapter 9",
+        "pageStart": 129,
+        "pageEnd": 152,
+        "summary": "Nancy's murder and the final chase"
+      },
+      {
+        "number": 10,
+        "title": "Chapter 10",
+        "pageStart": 153,
+        "pageEnd": 180,
+        "summary": "The unmasking of Monks and the happy ending"
       }
     ]
   },
@@ -769,31 +1028,129 @@
     "chapters": [
       {
         "number": 1,
-        "title": "Episodes 1–3 — Telemachus",
+        "title": "Telemachus",
         "pageStart": 1,
-        "pageEnd": 80,
-        "summary": "Stephen Dedalus. Buck Mulligan. The tower. Stephen's mother's ghost."
+        "pageEnd": 30,
+        "summary": "Stephen Dedalus's morning and his walk along the beach"
       },
       {
         "number": 2,
-        "title": "Episodes 4–8 — The Odyssey",
-        "pageStart": 81,
-        "pageEnd": 350,
-        "summary": "Bloom's day. The funeral. The office. The pharmacy. The bath."
+        "title": "Nestor",
+        "pageStart": 31,
+        "pageEnd": 56,
+        "summary": "Stephen's history lesson and his thoughts about his mother"
       },
       {
         "number": 3,
-        "title": "Episodes 9–15 — Circe and the Nighttown",
-        "pageStart": 351,
-        "pageEnd": 600,
-        "summary": "Oxen of the Sun. Circe. The hallucination episode. Bloom and Stephen."
+        "title": "Proteus",
+        "pageStart": 57,
+        "pageEnd": 84,
+        "summary": "Stephen's walk on the beach and his meditation on change"
       },
       {
         "number": 4,
-        "title": "Episodes 16–18 — Ithaca and Penelope",
-        "pageStart": 601,
-        "pageEnd": 732,
-        "summary": "Bloom and Stephen go home. The catechism episode. Molly's soliloquy. 'Yes.'"
+        "title": "Calypso",
+        "pageStart": 85,
+        "pageEnd": 110,
+        "summary": "Leopold Bloom's morning and his breakfast"
+      },
+      {
+        "number": 5,
+        "title": "Lotus Eaters",
+        "pageStart": 111,
+        "pageEnd": 136,
+        "summary": "Bloom's wanderings through Dublin"
+      },
+      {
+        "number": 6,
+        "title": "Hades",
+        "pageStart": 137,
+        "pageEnd": 166,
+        "summary": "Bloom's journey to Paddy Dignam's funeral"
+      },
+      {
+        "number": 7,
+        "title": "Aeolus",
+        "pageStart": 167,
+        "pageEnd": 194,
+        "summary": "Bloom at the newspaper office and the interview"
+      },
+      {
+        "number": 8,
+        "title": "Lestrygonians",
+        "pageStart": 195,
+        "pageEnd": 222,
+        "summary": "Bloom's lunch and his memories of Molly"
+      },
+      {
+        "number": 9,
+        "title": "Scylla and Charybdis",
+        "pageStart": 223,
+        "pageEnd": 254,
+        "summary": "Stephen's literary argument at the library"
+      },
+      {
+        "number": 10,
+        "title": "Wandering Rocks",
+        "pageStart": 255,
+        "pageEnd": 284,
+        "summary": "A series of vignettes about Dubliners"
+      },
+      {
+        "number": 11,
+        "title": "Sirens",
+        "pageStart": 285,
+        "pageEnd": 318,
+        "summary": "Bloom at the concert and the music of the Sirens"
+      },
+      {
+        "number": 12,
+        "title": "Cyclops",
+        "pageStart": 319,
+        "pageEnd": 356,
+        "summary": "Bloom's encounter with the Citizen and the pub scene"
+      },
+      {
+        "number": 13,
+        "title": "Nausicaa",
+        "pageStart": 357,
+        "pageEnd": 388,
+        "summary": "Bloom watches Gerty MacDowell on the beach"
+      },
+      {
+        "number": 14,
+        "title": "Oxen of the Sun",
+        "pageStart": 389,
+        "pageEnd": 428,
+        "summary": "The evolution of English prose at the maternity hospital"
+      },
+      {
+        "number": 15,
+        "title": "Circe",
+        "pageStart": 429,
+        "pageEnd": 530,
+        "summary": "The hallucinatory night town sequence"
+      },
+      {
+        "number": 16,
+        "title": "Eumaeus",
+        "pageStart": 531,
+        "pageEnd": 564,
+        "summary": "Bloom and Stephen at the cabman's shelter"
+      },
+      {
+        "number": 17,
+        "title": "Ithaca",
+        "pageStart": 565,
+        "pageEnd": 628,
+        "summary": "Bloom and Stephen at 7 Eccles Street"
+      },
+      {
+        "number": 18,
+        "title": "Penelope",
+        "pageStart": 629,
+        "pageEnd": 700,
+        "summary": "Molly Bloom's stream of consciousness soliloquy"
       }
     ]
   },
@@ -27061,31 +27418,66 @@
     "chapters": [
       {
         "number": 1,
-        "title": "Chapter 1: The Introduction",
+        "title": "Chapter 1",
         "pageStart": 1,
         "pageEnd": 20,
-        "summary": "Nick Carraway arrives in West Egg. The parties. The mystery."
+        "summary": "Nick arrives in New York, visits the Buchanans, and meets Jordan"
       },
       {
         "number": 2,
-        "title": "Chapters 2-3: The Party",
+        "title": "Chapter 2",
         "pageStart": 21,
-        "pageEnd": 50,
-        "summary": "Gatsby's parties. The love affair. The green light."
+        "pageEnd": 44,
+        "summary": "The Valley of Ashes, Myrtle Wilson, and Tom's affair"
       },
       {
         "number": 3,
-        "title": "Chapters 4-5: The Past",
-        "pageStart": 51,
-        "pageEnd": 80,
-        "summary": "Gatsby's past. The reunion with Daisy. The dream."
+        "title": "Chapter 3",
+        "pageStart": 45,
+        "pageEnd": 68,
+        "summary": "Gatsby's party and Nick's first meeting with Gatsby"
       },
       {
         "number": 4,
-        "title": "Chapters 6-9: The Fall",
-        "pageStart": 81,
-        "pageEnd": 120,
-        "summary": "The collapse. The death. The funeral. The end of the dream."
+        "title": "Chapter 4",
+        "pageStart": 69,
+        "pageEnd": 88,
+        "summary": "Gatsby's story and his connection to Daisy"
+      },
+      {
+        "number": 5,
+        "title": "Chapter 5",
+        "pageStart": 89,
+        "pageEnd": 106,
+        "summary": "Gatsby and Daisy's reunion at Nick's house"
+      },
+      {
+        "number": 6,
+        "title": "Chapter 6",
+        "pageStart": 107,
+        "pageEnd": 126,
+        "summary": "Gatsby's past and the truth about his origins"
+      },
+      {
+        "number": 7,
+        "title": "Chapter 7",
+        "pageStart": 127,
+        "pageEnd": 148,
+        "summary": "The Plaza Hotel confrontation and Myrtle's death"
+      },
+      {
+        "number": 8,
+        "title": "Chapter 8",
+        "pageStart": 149,
+        "pageEnd": 168,
+        "summary": "Gatsby's vigil and the morning after"
+      },
+      {
+        "number": 9,
+        "title": "Chapter 9",
+        "pageStart": 169,
+        "pageEnd": 180,
+        "summary": "Gatsby's funeral, Nick's farewell, and the final meditation"
       }
     ]
   },
@@ -37599,24 +37991,157 @@
     "chapters": [
       {
         "number": 1,
-        "title": "Volume I",
+        "title": "Chapter 1",
         "pageStart": 1,
-        "pageEnd": 150,
-        "summary": "The arrival of Bingley and Darcy, the Meryton assemblies, and Wickham's lies"
+        "pageEnd": 4,
+        "summary": "Mr. Bennet teases Mrs. Bennet about the new neighbors"
       },
       {
         "number": 2,
-        "title": "Volume II",
-        "pageStart": 151,
-        "pageEnd": 300,
-        "summary": "Darcy's first proposal, his letter, and Elizabeth's visit to Pemberley"
+        "title": "Chapter 2",
+        "pageStart": 5,
+        "pageEnd": 8,
+        "summary": "Mr. Bennet visits Bingley and the family prepares"
       },
       {
         "number": 3,
-        "title": "Volume III",
-        "pageStart": 301,
-        "pageEnd": 432,
-        "summary": "Lydia's elopement, Darcy's rescue, the final proposals, and the double wedding"
+        "title": "Chapter 3",
+        "pageStart": 9,
+        "pageEnd": 14,
+        "summary": "The Meryton assembly and Elizabeth meets Darcy"
+      },
+      {
+        "number": 4,
+        "title": "Chapter 4",
+        "pageStart": 15,
+        "pageEnd": 18,
+        "summary": "Jane and Bingley's growing attachment"
+      },
+      {
+        "number": 5,
+        "title": "Chapter 5",
+        "pageStart": 19,
+        "pageEnd": 22,
+        "summary": "Mrs. Bennet's matchmaking and the gossip"
+      },
+      {
+        "number": 6,
+        "title": "Chapter 6",
+        "pageStart": 23,
+        "pageEnd": 28,
+        "summary": "Elizabeth and Wickham's first meeting"
+      },
+      {
+        "number": 7,
+        "title": "Chapter 7",
+        "pageStart": 29,
+        "pageEnd": 34,
+        "summary": "Netherfield ball preparations and Charlotte's advice"
+      },
+      {
+        "number": 8,
+        "title": "Chapter 8",
+        "pageStart": 35,
+        "pageEnd": 40,
+        "summary": "The Netherfield ball and Elizabeth's first proposal refusal"
+      },
+      {
+        "number": 9,
+        "title": "Chapter 9",
+        "pageStart": 41,
+        "pageEnd": 46,
+        "summary": "The Collins proposal and Elizabeth's refusal"
+      },
+      {
+        "number": 10,
+        "title": "Chapter 10",
+        "pageStart": 47,
+        "pageEnd": 52,
+        "summary": "Charlotte's acceptance of Collins and the aftermath"
+      },
+      {
+        "number": 11,
+        "title": "Chapter 11",
+        "pageStart": 53,
+        "pageEnd": 58,
+        "summary": "Elizabeth's visit to Hunsford and the first proposal"
+      },
+      {
+        "number": 12,
+        "title": "Chapter 12",
+        "pageStart": 59,
+        "pageEnd": 64,
+        "summary": "Darcy's letter and Elizabeth's realization"
+      },
+      {
+        "number": 13,
+        "title": "Chapter 13",
+        "pageStart": 65,
+        "pageEnd": 70,
+        "summary": "Elizabeth's tour with the Gardiners"
+      },
+      {
+        "number": 14,
+        "title": "Chapter 14",
+        "pageStart": 71,
+        "pageEnd": 76,
+        "summary": "The visit to Pemberley and Darcy's altered manner"
+      },
+      {
+        "number": 15,
+        "title": "Chapter 15",
+        "pageStart": 77,
+        "pageEnd": 82,
+        "summary": "Lydia's elopement with Wickham"
+      },
+      {
+        "number": 16,
+        "title": "Chapter 16",
+        "pageStart": 83,
+        "pageEnd": 88,
+        "summary": "Darcy's intervention and the rescue of Lydia"
+      },
+      {
+        "number": 17,
+        "title": "Chapter 17",
+        "pageStart": 89,
+        "pageEnd": 94,
+        "summary": "Bingley's return and Jane's happiness"
+      },
+      {
+        "number": 18,
+        "title": "Chapter 18",
+        "pageStart": 95,
+        "pageEnd": 100,
+        "summary": "Lady Catherine's visit and Darcy's second proposal"
+      },
+      {
+        "number": 19,
+        "title": "Chapter 19",
+        "pageStart": 101,
+        "pageEnd": 106,
+        "summary": "The double wedding and the happy ending"
+      },
+      {
+        "number": 20,
+        "title": "Chapter 20",
+        "pageStart": 107,
+        "pageEnd": 112,
+        "summary": "The aftermath: marriages, geography, and the sisters-in-law"
+      },
+      {
+        "number": 21,
+        "title": "Chapter 21",
+        "pageStart": 113,
+        "pageEnd": 118,
+        "summary": "Further reflections on character and marriage"
+      },
+      {
+        "number": 22,
+        "title": "Chapter 22",
+        "pageStart": 119,
+        "pageEnd": 124,
+        "summary": "The Bennet family's future and final thoughts"
       }
     ]
   },
@@ -40160,31 +40685,955 @@
     "chapters": [
       {
         "number": 1,
-        "title": "The Call to Sea",
+        "title": "Chapter 1: Loomings",
         "pageStart": 1,
-        "pageEnd": 100,
-        "summary": "Ishmael's departure, the Pequod, Ahab's first appearance, and the promise of the voyage"
+        "pageEnd": 8,
+        "summary": "Ishmael introduces himself and his need to go to sea"
       },
       {
         "number": 2,
-        "title": "The Whaling Ship",
-        "pageStart": 101,
-        "pageEnd": 250,
-        "summary": "Life aboard the Pequod, the crew, and the art of whaling"
+        "title": "Chapter 2: The Carpet-Bag",
+        "pageStart": 9,
+        "pageEnd": 14,
+        "summary": "Ishmael arrives in New Bedford and searches for lodging"
       },
       {
         "number": 3,
-        "title": "The Chase",
-        "pageStart": 251,
-        "pageEnd": 400,
-        "summary": "The pursuit of Moby Dick, the encounters with other ships, and the growing obsession"
+        "title": "Chapter 3: The Spouter-Inn",
+        "pageStart": 15,
+        "pageEnd": 22,
+        "summary": "Ishmael meets Queequeg at the Spouter-Inn"
       },
       {
         "number": 4,
-        "title": "The End",
+        "title": "Chapter 4: The Counterpane",
+        "pageStart": 23,
+        "pageEnd": 28,
+        "summary": "Ishmael and Queequeg's morning together"
+      },
+      {
+        "number": 5,
+        "title": "Chapter 5: Breakfast",
+        "pageStart": 29,
+        "pageEnd": 34,
+        "summary": "The breakfast scene and Queequeg's baptism"
+      },
+      {
+        "number": 6,
+        "title": "Chapter 6: The Street",
+        "pageStart": 35,
+        "pageEnd": 40,
+        "summary": "New Bedford's wharves and the whale-ships"
+      },
+      {
+        "number": 7,
+        "title": "Chapter 7: A Chimney",
+        "pageStart": 41,
+        "pageEnd": 46,
+        "summary": "The chimney and the clothes-house"
+      },
+      {
+        "number": 8,
+        "title": "Chapter 8: The Pulpit",
+        "pageStart": 47,
+        "pageEnd": 52,
+        "summary": "Father Mapple's sermon and the story of Jonah"
+      },
+      {
+        "number": 9,
+        "title": "Chapter 9: The Sermon",
+        "pageStart": 53,
+        "pageEnd": 62,
+        "summary": "Father Mapple's sermon on Jonah and obedience"
+      },
+      {
+        "number": 10,
+        "title": "Chapter 10: A Bosom Friend",
+        "pageStart": 63,
+        "pageEnd": 68,
+        "summary": "Ishmael and Queequeg become friends"
+      },
+      {
+        "number": 11,
+        "title": "Chapter 11: Nightgown",
+        "pageStart": 69,
+        "pageEnd": 74,
+        "summary": "The nightgown scene and Queequeg's past"
+      },
+      {
+        "number": 12,
+        "title": "Chapter 12: Biographical",
+        "pageStart": 75,
+        "pageEnd": 80,
+        "summary": "Queequeg's history and his arrival in civilization"
+      },
+      {
+        "number": 13,
+        "title": "Chapter 13: The Wheelbarrow",
+        "pageStart": 81,
+        "pageEnd": 86,
+        "summary": "The wheelbarrow incident and the insult to Queequeg"
+      },
+      {
+        "number": 14,
+        "title": "Chapter 14: Nantucket",
+        "pageStart": 87,
+        "pageEnd": 92,
+        "summary": "The journey to Nantucket and the history of whaling"
+      },
+      {
+        "number": 15,
+        "title": "Chapter 15: Chowder",
+        "pageStart": 93,
+        "pageEnd": 98,
+        "summary": "The chowder scene and the meeting with Captain Peleg"
+      },
+      {
+        "number": 16,
+        "title": "Chapter 16: The Ship",
+        "pageStart": 99,
+        "pageEnd": 106,
+        "summary": "The Pequod is introduced and its crew"
+      },
+      {
+        "number": 17,
+        "title": "Chapter 17: The Ramadan",
+        "pageStart": 107,
+        "pageEnd": 112,
+        "summary": "Queequeg's Ramadan and Ishmael's concern"
+      },
+      {
+        "number": 18,
+        "title": "Chapter 18: His Mark",
+        "pageStart": 113,
+        "pageEnd": 118,
+        "summary": "Queequeg's tattoo and the signing of the papers"
+      },
+      {
+        "number": 19,
+        "title": "Chapter 19: The Prophet",
+        "pageStart": 119,
+        "pageEnd": 124,
+        "summary": "Elijah's warning about Ahab and the Pequod"
+      },
+      {
+        "number": 20,
+        "title": "Chapter 20: All Astir",
+        "pageStart": 125,
+        "pageEnd": 130,
+        "summary": "The Pequod prepares to sail"
+      },
+      {
+        "number": 21,
+        "title": "Chapter 21: Going Aboard",
+        "pageStart": 131,
+        "pageEnd": 136,
+        "summary": "Ishmael and Queequeg board the Pequod"
+      },
+      {
+        "number": 22,
+        "title": "Chapter 22: Merry Christmas",
+        "pageStart": 137,
+        "pageEnd": 142,
+        "summary": "The Pequod sets sail on Christmas morning"
+      },
+      {
+        "number": 23,
+        "title": "Chapter 23: The Lee Shore",
+        "pageStart": 143,
+        "pageEnd": 148,
+        "summary": "Bulkington and the philosophy of the lee shore"
+      },
+      {
+        "number": 24,
+        "title": "Chapter 24: The Advocate",
+        "pageStart": 149,
+        "pageEnd": 156,
+        "summary": "Ishmael defends whaling and the whalers"
+      },
+      {
+        "number": 25,
+        "title": "Chapter 25: Postscript",
+        "pageStart": 157,
+        "pageEnd": 162,
+        "summary": "The whaling industry and its importance"
+      },
+      {
+        "number": 26,
+        "title": "Chapter 26: Knights and Squires",
+        "pageStart": 163,
+        "pageEnd": 168,
+        "summary": "The chief mates and their qualifications"
+      },
+      {
+        "number": 27,
+        "title": "Chapter 27: Knights and Squires",
+        "pageStart": 169,
+        "pageEnd": 176,
+        "summary": "The remaining officers and their backgrounds"
+      },
+      {
+        "number": 28,
+        "title": "Chapter 28: Ahab",
+        "pageStart": 177,
+        "pageEnd": 184,
+        "summary": "Ahab reveals himself to the crew"
+      },
+      {
+        "number": 29,
+        "title": "Chapter 29: Enter Ahab",
+        "pageStart": 185,
+        "pageEnd": 192,
+        "summary": "Ahab's first appearance on deck"
+      },
+      {
+        "number": 30,
+        "title": "Chapter 30: The Pipe",
+        "pageStart": 193,
+        "pageEnd": 198,
+        "summary": "Ahab smokes his pipe and throws it overboard"
+      },
+      {
+        "number": 31,
+        "title": "Chapter 31: Queen Mab",
+        "pageStart": 199,
+        "pageEnd": 204,
+        "summary": "Stubb's dream and the philosophy of whaling"
+      },
+      {
+        "number": 32,
+        "title": "Chapter 32: Cetology",
+        "pageStart": 205,
+        "pageEnd": 216,
+        "summary": "Ishmael's classification of whales"
+      },
+      {
+        "number": 33,
+        "title": "Chapter 33: The Specksnyder",
+        "pageStart": 217,
+        "pageEnd": 222,
+        "summary": "The Specksnyder and Ahab's authority"
+      },
+      {
+        "number": 34,
+        "title": "Chapter 34: The Cabin-Table",
+        "pageStart": 223,
+        "pageEnd": 230,
+        "summary": "The cabin-table and the hierarchy of the Pequod"
+      },
+      {
+        "number": 35,
+        "title": "Chapter 35: The Mast-Head",
+        "pageStart": 231,
+        "pageEnd": 238,
+        "summary": "The mast-head watch and the first sighting"
+      },
+      {
+        "number": 36,
+        "title": "Chapter 36: The First Lowering",
+        "pageStart": 239,
+        "pageEnd": 248,
+        "summary": "The first whale hunt and the boats' chase"
+      },
+      {
+        "number": 37,
+        "title": "Chapter 37: Sunset",
+        "pageStart": 249,
+        "pageEnd": 254,
+        "summary": "Ahab's soliloquy at sunset"
+      },
+      {
+        "number": 38,
+        "title": "Chapter 38: Dusk",
+        "pageStart": 255,
+        "pageEnd": 260,
+        "summary": "The first day's hunt ends in failure"
+      },
+      {
+        "number": 39,
+        "title": "Chapter 39: First Night-Watch",
+        "pageStart": 261,
+        "pageEnd": 266,
+        "summary": "Stubb's night watch and the philosophy of perseverance"
+      },
+      {
+        "number": 40,
+        "title": "Chapter 40: Midnight, Forecastle",
+        "pageStart": 267,
+        "pageEnd": 274,
+        "summary": "The crew's revelry and the songs of the sea"
+      },
+      {
+        "number": 41,
+        "title": "Chapter 41: Moby Dick",
+        "pageStart": 275,
+        "pageEnd": 286,
+        "summary": "Ahab reveals the true purpose of the voyage"
+      },
+      {
+        "number": 42,
+        "title": "Chapter 42: The Whiteness of the Whale",
+        "pageStart": 287,
+        "pageEnd": 298,
+        "summary": "Ishmael's meditation on the whiteness of Moby Dick"
+      },
+      {
+        "number": 43,
+        "title": "Chapter 43: Hark!",
+        "pageStart": 299,
+        "pageEnd": 304,
+        "summary": "The first cry of a whale and the excitement"
+      },
+      {
+        "number": 44,
+        "title": "Chapter 44: The Chart",
+        "pageStart": 305,
+        "pageEnd": 312,
+        "summary": "Ahab's chart and his obsession with the White Whale"
+      },
+      {
+        "number": 45,
+        "title": "Chapter 45: The Affidavit",
+        "pageStart": 313,
+        "pageEnd": 322,
+        "summary": "Ishmael's defense of the story's truth"
+      },
+      {
+        "number": 46,
+        "title": "Chapter 46: Surmises",
+        "pageStart": 323,
+        "pageEnd": 328,
+        "summary": "Starbuck's concern about Ahab's obsession"
+      },
+      {
+        "number": 47,
+        "title": "Chapter 47: The Mat-Maker",
+        "pageStart": 329,
+        "pageEnd": 334,
+        "summary": "The mat-making scene and the prophecy"
+      },
+      {
+        "number": 48,
+        "title": "Chapter 48: The First Lowering",
+        "pageStart": 335,
+        "pageEnd": 342,
+        "summary": "The lowering of the boats and the first whale"
+      },
+      {
+        "number": 49,
+        "title": "Chapter 49: The Hyena",
+        "pageStart": 343,
+        "pageEnd": 348,
+        "summary": "The hyena and the philosophy of perseverance"
+      },
+      {
+        "number": 50,
+        "title": "Chapter 50: Ahab's Boat and Crew",
+        "pageStart": 349,
+        "pageEnd": 354,
+        "summary": "Ahab's boat and his crew's loyalty"
+      },
+      {
+        "number": 51,
+        "title": "Chapter 51: The Spirit-Spout",
+        "pageStart": 355,
+        "pageEnd": 362,
+        "summary": "The Spirit-Spout and the first sighting of Moby Dick"
+      },
+      {
+        "number": 52,
+        "title": "Chapter 52: The Albatross",
+        "pageStart": 363,
+        "pageEnd": 368,
+        "summary": "The albatross and the superstition"
+      },
+      {
+        "number": 53,
+        "title": "Chapter 53: The Gam",
+        "pageStart": 369,
+        "pageEnd": 376,
+        "summary": "The gam with the Samuel Enderby and the story of Moby Dick"
+      },
+      {
+        "number": 54,
+        "title": "Chapter 54: The Town-Ho's Story",
+        "pageStart": 377,
+        "pageEnd": 394,
+        "summary": "The Town-Ho's story of Moby Dick and the mutiny"
+      },
+      {
+        "number": 55,
+        "title": "Chapter 55: Of the Monstrous Pictures of Whales",
+        "pageStart": 395,
+        "pageEnd": 400,
+        "summary": "Ishmael critiques the inaccurate drawings of whales"
+      },
+      {
+        "number": 56,
+        "title": "Chapter 56: Of the Less Erroneous Pictures of Whales",
         "pageStart": 401,
-        "pageEnd": 635,
-        "summary": "The three-day chase, the destruction of the Pequod, and Ishmael's survival"
+        "pageEnd": 406,
+        "summary": "Better drawings of whales and their accuracy"
+      },
+      {
+        "number": 56,
+        "title": "Chapter 57: Of Whales in Paint",
+        "pageStart": 407,
+        "pageEnd": 412,
+        "summary": "Whales in art and the aesthetic of the whale"
+      },
+      {
+        "number": 57,
+        "title": "Chapter 58: Brit",
+        "pageStart": 413,
+        "pageEnd": 418,
+        "summary": "The Sperm Whale's head and its anatomy"
+      },
+      {
+        "number": 58,
+        "title": "Chapter 59: Squid",
+        "pageStart": 419,
+        "pageEnd": 424,
+        "summary": "The squid and the mystery of the deep"
+      },
+      {
+        "number": 59,
+        "title": "Chapter 60: The Line",
+        "pageStart": 425,
+        "pageEnd": 430,
+        "summary": "The whale-line and its dangers"
+      },
+      {
+        "number": 60,
+        "title": "Chapter 61: Stubb Kills a Whale",
+        "pageStart": 431,
+        "pageEnd": 438,
+        "summary": "Stubb's whale hunt and the philosophy of killing"
+      },
+      {
+        "number": 61,
+        "title": "Chapter 62: The Dart",
+        "pageStart": 439,
+        "pageEnd": 444,
+        "summary": "The dart and the technicalities of whaling"
+      },
+      {
+        "number": 62,
+        "title": "Chapter 63: The Crotch",
+        "pageStart": 445,
+        "pageEnd": 450,
+        "summary": "The crotch and the tools of the trade"
+      },
+      {
+        "number": 63,
+        "title": "Chapter 64: Stubb's Supper",
+        "pageStart": 451,
+        "pageEnd": 458,
+        "summary": "Stubb's supper and the whale's head"
+      },
+      {
+        "number": 64,
+        "title": "Chapter 65: The Whale as a Dish",
+        "pageStart": 459,
+        "pageEnd": 464,
+        "summary": "The whale as food and its preparation"
+      },
+      {
+        "number": 65,
+        "title": "Chapter 66: The Shark Massacre",
+        "pageStart": 465,
+        "pageEnd": 470,
+        "summary": "The shark attack on the whale"
+      },
+      {
+        "number": 66,
+        "title": "Chapter 67: Cutting In",
+        "pageStart": 471,
+        "pageEnd": 476,
+        "summary": "The process of cutting in the whale"
+      },
+      {
+        "number": 67,
+        "title": "Chapter 68: The Blanket",
+        "pageStart": 477,
+        "pageEnd": 482,
+        "summary": "The whale's blanket and its purpose"
+      },
+      {
+        "number": 68,
+        "title": "Chapter 69: The Funeral",
+        "pageStart": 483,
+        "pageEnd": 488,
+        "summary": "The whale's funeral and the burial at sea"
+      },
+      {
+        "number": 69,
+        "title": "Chapter 70: The Sperm Whale's Head",
+        "pageStart": 489,
+        "pageEnd": 496,
+        "summary": "The anatomy of the Sperm Whale's head"
+      },
+      {
+        "number": 70,
+        "title": "Chapter 71: The Right Whale's Head",
+        "pageStart": 497,
+        "pageEnd": 502,
+        "summary": "The anatomy of the Right Whale's head"
+      },
+      {
+        "number": 71,
+        "title": "Chapter 72: The Baleen Whale",
+        "pageStart": 503,
+        "pageEnd": 508,
+        "summary": "The baleen whale and its feeding"
+      },
+      {
+        "number": 72,
+        "title": "Chapter 73: The Grand Armada",
+        "pageStart": 509,
+        "pageEnd": 516,
+        "summary": "The grand armada of whales and their nursery"
+      },
+      {
+        "number": 73,
+        "title": "Chapter 74: The Sperm Whale's Tail",
+        "pageStart": 517,
+        "pageEnd": 522,
+        "summary": "The tail of the Sperm Whale and its power"
+      },
+      {
+        "number": 74,
+        "title": "Chapter 75: The Right Whale's Head",
+        "pageStart": 523,
+        "pageEnd": 528,
+        "summary": "The Right Whale's head in detail"
+      },
+      {
+        "number": 75,
+        "title": "Chapter 76: The Battering-Ram",
+        "pageStart": 529,
+        "pageEnd": 534,
+        "summary": "The battering-ram and the whale's skull"
+      },
+      {
+        "number": 76,
+        "title": "Chapter 77: The Great Heidelburgh Tun",
+        "pageStart": 535,
+        "pageEnd": 540,
+        "summary": "The great Heidelburgh Tun and the whale's stomach"
+      },
+      {
+        "number": 77,
+        "title": "Chapter 78: Cistern and Buckets",
+        "pageStart": 541,
+        "pageEnd": 548,
+        "summary": "The cistern and buckets and the whale's oil"
+      },
+      {
+        "number": 78,
+        "title": "Chapter 79: The Prairie",
+        "pageStart": 549,
+        "pageEnd": 554,
+        "summary": "The prairie and the whale's blubber"
+      },
+      {
+        "number": 79,
+        "title": "Chapter 80: The Nut",
+        "pageStart": 555,
+        "pageEnd": 560,
+        "summary": "The nut and the whale's brain"
+      },
+      {
+        "number": 80,
+        "title": "Chapter 81: The Pequod Meets The Virgin",
+        "pageStart": 561,
+        "pageEnd": 570,
+        "summary": "The encounter with the Virgin and the loss of a whale"
+      },
+      {
+        "number": 81,
+        "title": "Chapter 82: The Honor and Glory of Whaling",
+        "pageStart": 571,
+        "pageEnd": 576,
+        "summary": "The honor and glory of whaling"
+      },
+      {
+        "number": 82,
+        "title": "Chapter 83: Jonas Historically Regarded",
+        "pageStart": 577,
+        "pageEnd": 582,
+        "summary": "Jonas and the whale in history"
+      },
+      {
+        "number": 83,
+        "title": "Chapter 84: Pitchpoling",
+        "pageStart": 583,
+        "pageEnd": 588,
+        "summary": "The technique of pitchpoling"
+      },
+      {
+        "number": 84,
+        "title": "Chapter 85: The Fountain",
+        "pageStart": 589,
+        "pageEnd": 594,
+        "summary": "The whale's spout and its nature"
+      },
+      {
+        "number": 85,
+        "title": "Chapter 86: The Tail",
+        "pageStart": 595,
+        "pageEnd": 600,
+        "summary": "The whale's tail and its power"
+      },
+      {
+        "number": 86,
+        "title": "Chapter 87: The Grand Armada",
+        "pageStart": 601,
+        "pageEnd": 608,
+        "summary": "The grand armada and the whale nursery"
+      },
+      {
+        "number": 87,
+        "title": "Chapter 88: Schools and Schools",
+        "pageStart": 609,
+        "pageEnd": 614,
+        "summary": "The schools of whales and their behavior"
+      },
+      {
+        "number": 88,
+        "title": "Chapter 89: The Fishery",
+        "pageStart": 615,
+        "pageEnd": 620,
+        "summary": "The fishery and the techniques of whaling"
+      },
+      {
+        "number": 89,
+        "title": "Chapter 90: Heads or Tails",
+        "pageStart": 621,
+        "pageEnd": 626,
+        "summary": "Heads or tails and the whale's anatomy"
+      },
+      {
+        "number": 90,
+        "title": "Chapter 91: The Pequod Meets The Rose-Bud",
+        "pageStart": 627,
+        "pageEnd": 634,
+        "summary": "The encounter with the Rose-Bud and the ambergris"
+      },
+      {
+        "number": 90,
+        "title": "Chapter 92: Ambergris",
+        "pageStart": 635,
+        "pageEnd": 640,
+        "summary": "Ambergris and its value"
+      },
+      {
+        "number": 91,
+        "title": "Chapter 93: The Castaway",
+        "pageStart": 641,
+        "pageEnd": 648,
+        "summary": "The castaway and Pip's madness"
+      },
+      {
+        "number": 92,
+        "title": "Chapter 94: A Squeeze of the Hand",
+        "pageStart": 649,
+        "pageEnd": 654,
+        "summary": "The squeeze of the hand and the brotherhood of whaling"
+      },
+      {
+        "number": 93,
+        "title": "Chapter 95: The Cassock",
+        "pageStart": 655,
+        "pageEnd": 660,
+        "summary": "The cassock and the whale's skin"
+      },
+      {
+        "number": 94,
+        "title": "Chapter 96: The Try-Works",
+        "pageStart": 661,
+        "pageEnd": 668,
+        "summary": "The try-works and the processing of whale oil"
+      },
+      {
+        "number": 95,
+        "title": "Chapter 97: The Lamp",
+        "pageStart": 669,
+        "pageEnd": 674,
+        "summary": "The lamp and the light of the Pequod"
+      },
+      {
+        "number": 96,
+        "title": "Chapter 98: Stubb and Flask Kill a Right Whale",
+        "pageStart": 675,
+        "pageEnd": 682,
+        "summary": "The killing of the Right Whale"
+      },
+      {
+        "number": 97,
+        "title": "Chapter 99: The Doubloon",
+        "pageStart": 683,
+        "pageEnd": 690,
+        "summary": "The doubloon and Ahab's meditation"
+      },
+      {
+        "number": 98,
+        "title": "Chapter 100: The Pequod Meets The Samuel Enderby",
+        "pageStart": 691,
+        "pageEnd": 700,
+        "summary": "The meeting with the Samuel Enderby and the story of Moby Dick"
+      },
+      {
+        "number": 99,
+        "title": "Chapter 101: The Decanter",
+        "pageStart": 701,
+        "pageEnd": 706,
+        "summary": "The decanter and the whale oil"
+      },
+      {
+        "number": 100,
+        "title": "Chapter 102: A Bower in the Arsacides",
+        "pageStart": 707,
+        "pageEnd": 714,
+        "summary": "The bower in the Arsacides and the whale's skeleton"
+      },
+      {
+        "number": 101,
+        "title": "Chapter 103: Measurement of The Whale's Skeleton",
+        "pageStart": 715,
+        "pageEnd": 720,
+        "summary": "The measurement of the whale's skeleton"
+      },
+      {
+        "number": 102,
+        "title": "Chapter 104: The Fossil Whale",
+        "pageStart": 721,
+        "pageEnd": 726,
+        "summary": "The fossil whale and its history"
+      },
+      {
+        "number": 103,
+        "title": "Chapter 105: Does the Whale's Magnitude Diminish?",
+        "pageStart": 727,
+        "pageEnd": 732,
+        "summary": "The whale's magnitude and whether it diminishes"
+      },
+      {
+        "number": 104,
+        "title": "Chapter 106: Ahab's Leg",
+        "pageStart": 733,
+        "pageEnd": 738,
+        "summary": "Ahab's leg and the injury from Moby Dick"
+      },
+      {
+        "number": 105,
+        "title": "Chapter 107: The Carpenter",
+        "pageStart": 739,
+        "pageEnd": 744,
+        "summary": "The carpenter and his work on the Pequod"
+      },
+      {
+        "number": 106,
+        "title": "Chapter 108: The Deck",
+        "pageStart": 745,
+        "pageEnd": 750,
+        "summary": "The deck and the preparations for the hunt"
+      },
+      {
+        "number": 107,
+        "title": "Chapter 109: Ahab and Starbuck in the Cabin",
+        "pageStart": 751,
+        "pageEnd": 758,
+        "summary": "Ahab and Starbuck's confrontation about the hunt"
+      },
+      {
+        "number": 108,
+        "title": "Chapter 110: Queequeg in His Coffin",
+        "pageStart": 759,
+        "pageEnd": 764,
+        "summary": "Queequeg's illness and his coffin"
+      },
+      {
+        "number": 109,
+        "title": "Chapter 111: The Pacific",
+        "pageStart": 765,
+        "pageEnd": 770,
+        "summary": "The Pacific Ocean and its beauty"
+      },
+      {
+        "number": 110,
+        "title": "Chapter 112: The Blacksmith",
+        "pageStart": 771,
+        "pageEnd": 776,
+        "summary": "The blacksmith and his forge"
+      },
+      {
+        "number": 111,
+        "title": "Chapter 113: The Forge",
+        "pageStart": 777,
+        "pageEnd": 782,
+        "summary": "The forge and the making of the harpoon"
+      },
+      {
+        "number": 112,
+        "title": "Chapter 114: The Gilder",
+        "pageStart": 783,
+        "pageEnd": 788,
+        "summary": "The gilder and the preparation for the hunt"
+      },
+      {
+        "number": 113,
+        "title": "Chapter 115: The Pequod Meets The Bachelor",
+        "pageStart": 789,
+        "pageEnd": 796,
+        "summary": "The encounter with the Bachelor and its warning"
+      },
+      {
+        "number": 114,
+        "title": "Chapter 116: The Dying Cetacean",
+        "pageStart": 797,
+        "pageEnd": 802,
+        "summary": "The dying cetacean and the hunt"
+      },
+      {
+        "number": 115,
+        "title": "Chapter 117: The Whale Watch",
+        "pageStart": 803,
+        "pageEnd": 808,
+        "summary": "The whale watch and the vigil"
+      },
+      {
+        "number": 116,
+        "title": "Chapter 118: The Quadrant",
+        "pageStart": 809,
+        "pageEnd": 814,
+        "summary": "The quadrant and Ahab's frustration"
+      },
+      {
+        "number": 117,
+        "title": "Chapter 119: The Candles",
+        "pageStart": 815,
+        "pageEnd": 822,
+        "summary": "The candles and St. Elmo's fire"
+      },
+      {
+        "number": 118,
+        "title": "Chapter 120: The Deck",
+        "pageStart": 823,
+        "pageEnd": 828,
+        "summary": "The deck and the final preparations"
+      },
+      {
+        "number": 119,
+        "title": "Chapter 121: Midnight",
+        "pageStart": 829,
+        "pageEnd": 834,
+        "summary": "Midnight and the final night before the hunt"
+      },
+      {
+        "number": 120,
+        "title": "Chapter 122: Midnight Aloft",
+        "pageStart": 835,
+        "pageEnd": 840,
+        "summary": "Midnight aloft and the lookout"
+      },
+      {
+        "number": 121,
+        "title": "Chapter 123: The Musket",
+        "pageStart": 841,
+        "pageEnd": 846,
+        "summary": "The musket and Starbuck's final appeal"
+      },
+      {
+        "number": 122,
+        "title": "Chapter 124: The Needle",
+        "pageStart": 847,
+        "pageEnd": 852,
+        "summary": "The needle and the compass"
+      },
+      {
+        "number": 123,
+        "title": "Chapter 125: The Log and Line",
+        "pageStart": 853,
+        "pageEnd": 858,
+        "summary": "The log and line and the ship's speed"
+      },
+      {
+        "number": 124,
+        "title": "Chapter 126: The Life-Buoy",
+        "pageStart": 859,
+        "pageEnd": 864,
+        "summary": "The life-buoy and the coffin"
+      },
+      {
+        "number": 125,
+        "title": "Chapter 127: The Deck",
+        "pageStart": 865,
+        "pageEnd": 870,
+        "summary": "The deck and the final sighting"
+      },
+      {
+        "number": 126,
+        "title": "Chapter 128: The Pequod Meets The Rachel",
+        "pageStart": 871,
+        "pageEnd": 878,
+        "summary": "The encounter with the Rachel and the lost child"
+      },
+      {
+        "number": 127,
+        "title": "Chapter 129: The Cabin",
+        "pageStart": 879,
+        "pageEnd": 884,
+        "summary": "The cabin and Ahab's final preparations"
+      },
+      {
+        "number": 128,
+        "title": "Chapter 130: The Hat",
+        "pageStart": 885,
+        "pageEnd": 890,
+        "summary": "The hat and Ahab's defiance"
+      },
+      {
+        "number": 129,
+        "title": "Chapter 131: The Pequod Meets The Delight",
+        "pageStart": 891,
+        "pageEnd": 898,
+        "summary": "The encounter with the Delight and its warning"
+      },
+      {
+        "number": 130,
+        "title": "Chapter 132: The Symphony",
+        "pageStart": 899,
+        "pageEnd": 906,
+        "summary": "The symphony and Ahab's moment of doubt"
+      },
+      {
+        "number": 131,
+        "title": "Chapter 133: The Chase - First Day",
+        "pageStart": 907,
+        "pageEnd": 916,
+        "summary": "The first day of the chase"
+      },
+      {
+        "number": 132,
+        "title": "Chapter 134: The Chase - Second Day",
+        "pageStart": 917,
+        "pageEnd": 926,
+        "summary": "The second day of the chase"
+      },
+      {
+        "number": 133,
+        "title": "Chapter 135: The Chase - Third Day",
+        "pageStart": 927,
+        "pageEnd": 940,
+        "summary": "The third day, Ahab's death, and the destruction of the Pequod"
+      },
+      {
+        "number": 134,
+        "title": "Epilogue",
+        "pageStart": 941,
+        "pageEnd": 950,
+        "summary": "Ishmael's survival and the rescue by the Rachel"
       }
     ]
   },
@@ -43338,66 +44787,199 @@
     "chapters": [
       {
         "number": 1,
-        "title": "Letter I-IV",
+        "title": "Letter I",
         "pageStart": 1,
-        "pageEnd": 16,
-        "summary": "Walton's letters to his sister and Victor's arrival"
+        "pageEnd": 4,
+        "summary": "Walton's first letter to his sister describing his expedition"
       },
       {
         "number": 2,
-        "title": "Chapter 1",
-        "pageStart": 17,
-        "pageEnd": 26,
-        "summary": "Victor's childhood and early fascination with natural philosophy"
+        "title": "Letter II",
+        "pageStart": 5,
+        "pageEnd": 8,
+        "summary": "Walton's ambition and Victor's arrival on the ice"
       },
       {
         "number": 3,
-        "title": "Chapter 2-3",
-        "pageStart": 27,
-        "pageEnd": 44,
-        "summary": "Victor at Ingolstadt, his studies, and the creation of the Creature"
+        "title": "Letter III",
+        "pageStart": 9,
+        "pageEnd": 12,
+        "summary": "Walton introduces Victor to his sister"
       },
       {
         "number": 4,
-        "title": "Chapter 4-5",
-        "pageStart": 45,
-        "pageEnd": 62,
-        "summary": "The creation and abandonment of the Creature"
+        "title": "Letter IV",
+        "pageStart": 13,
+        "pageEnd": 16,
+        "summary": "Victor begins his story"
       },
       {
         "number": 5,
-        "title": "Chapter 6-8",
-        "pageStart": 63,
-        "pageEnd": 90,
-        "summary": "The Creature's education and rejection by the De Laceys"
+        "title": "Chapter 1",
+        "pageStart": 17,
+        "pageEnd": 22,
+        "summary": "Victor's childhood and his father's education"
       },
       {
         "number": 6,
-        "title": "Chapter 9-10",
-        "pageStart": 91,
-        "pageEnd": 112,
-        "summary": "William's murder and Justine's execution"
+        "title": "Chapter 2",
+        "pageStart": 23,
+        "pageEnd": 28,
+        "summary": "Victor discovers Agrippa and the alchemists"
       },
       {
         "number": 7,
-        "title": "Chapter 11-16",
-        "pageStart": 113,
-        "pageEnd": 152,
-        "summary": "The Creature's demand for a mate and Victor's refusal"
+        "title": "Chapter 3",
+        "pageStart": 29,
+        "pageEnd": 34,
+        "summary": "Victor leaves for Ingolstadt and his mother's death"
       },
       {
         "number": 8,
-        "title": "Chapter 17-20",
-        "pageStart": 153,
-        "pageEnd": 180,
-        "summary": "Victor creates and destroys the female Creature"
+        "title": "Chapter 4",
+        "pageStart": 35,
+        "pageEnd": 42,
+        "summary": "Victor's studies and his obsession with creating life"
       },
       {
         "number": 9,
-        "title": "Chapter 21-24",
-        "pageStart": 181,
+        "title": "Chapter 5",
+        "pageStart": 43,
+        "pageEnd": 50,
+        "summary": "The creation of the Creature and Victor's horror"
+      },
+      {
+        "number": 10,
+        "title": "Chapter 6",
+        "pageStart": 51,
+        "pageEnd": 58,
+        "summary": "Victor's illness and Henry's arrival"
+      },
+      {
+        "number": 11,
+        "title": "Chapter 7",
+        "pageStart": 59,
+        "pageEnd": 66,
+        "summary": "William's murder and the journey to Geneva"
+      },
+      {
+        "number": 12,
+        "title": "Chapter 8",
+        "pageStart": 67,
+        "pageEnd": 74,
+        "summary": "Justine's trial and execution"
+      },
+      {
+        "number": 13,
+        "title": "Chapter 9",
+        "pageStart": 75,
+        "pageEnd": 82,
+        "summary": "Victor's despair and the trip to Chamounix"
+      },
+      {
+        "number": 14,
+        "title": "Chapter 10",
+        "pageStart": 83,
+        "pageEnd": 90,
+        "summary": "The Creature appears on the glacier and demands a mate"
+      },
+      {
+        "number": 15,
+        "title": "Chapter 11",
+        "pageStart": 91,
+        "pageEnd": 98,
+        "summary": "The Creature tells his story: his first experiences"
+      },
+      {
+        "number": 16,
+        "title": "Chapter 12",
+        "pageStart": 99,
+        "pageEnd": 106,
+        "summary": "The Creature learns language and reads Paradise Lost"
+      },
+      {
+        "number": 17,
+        "title": "Chapter 13",
+        "pageStart": 107,
+        "pageEnd": 114,
+        "summary": "The De Lacey family and the Creature's education"
+      },
+      {
+        "number": 18,
+        "title": "Chapter 14",
+        "pageStart": 115,
+        "pageEnd": 122,
+        "summary": "The Creature's attempt to befriend the De Laceys"
+      },
+      {
+        "number": 19,
+        "title": "Chapter 15",
+        "pageStart": 123,
+        "pageEnd": 130,
+        "summary": "The Creature's rejection and his vow of revenge"
+      },
+      {
+        "number": 20,
+        "title": "Chapter 16",
+        "pageStart": 131,
+        "pageEnd": 138,
+        "summary": "The Creature's demand for a female companion"
+      },
+      {
+        "number": 21,
+        "title": "Chapter 17",
+        "pageStart": 139,
+        "pageEnd": 146,
+        "summary": "Victor begins creating the female Creature"
+      },
+      {
+        "number": 22,
+        "title": "Chapter 18",
+        "pageStart": 147,
+        "pageEnd": 154,
+        "summary": "Victor destroys the female and the Creature's threat"
+      },
+      {
+        "number": 23,
+        "title": "Chapter 19",
+        "pageStart": 155,
+        "pageEnd": 162,
+        "summary": "Victor's voyage and Clerval's rescue"
+      },
+      {
+        "number": 24,
+        "title": "Chapter 20",
+        "pageStart": 163,
+        "pageEnd": 170,
+        "summary": "Victor is arrested for Clerval's murder"
+      },
+      {
+        "number": 25,
+        "title": "Chapter 21",
+        "pageStart": 171,
+        "pageEnd": 178,
+        "summary": "Victor's acquittal and return to Geneva"
+      },
+      {
+        "number": 26,
+        "title": "Chapter 22",
+        "pageStart": 179,
+        "pageEnd": 186,
+        "summary": "Elizabeth's murder on their wedding night"
+      },
+      {
+        "number": 27,
+        "title": "Chapter 23",
+        "pageStart": 187,
+        "pageEnd": 194,
+        "summary": "Victor's pursuit of the Creature"
+      },
+      {
+        "number": 28,
+        "title": "Chapter 24",
+        "pageStart": 195,
         "pageEnd": 200,
-        "summary": "The pursuit, Clerval's death, and the final confrontation"
+        "summary": "The final chase to the Arctic and Victor's death"
       }
     ]
   },
@@ -44471,5 +46053,599 @@
         "summary": "The discovery of John's body and the final line"
       }
     ]
+  },
+  {
+    "name": "Mindset: The New Psychology of Success",
+    "byline": "Carol S. Dweck",
+    "tags": [
+      "Nonfiction",
+      "Psychology",
+      "Self-Help"
+    ],
+    "synopsis": "Stanford psychologist Carol Dweck reveals the power of mindset in shaping success. People with a growth mindset believe abilities can be developed through effort, while those with a fixed mindset believe talent is innate. Dweck shows how mindset affects everything from sports to business to relationships, and provides practical strategies for shifting from fixed to growth. The book is a game-changer for educators, parents, and anyone who wants to unlock their potential.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Mindsets",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "The difference between fixed and growth mindsets"
+      },
+      {
+        "number": 2,
+        "title": "Inside the Mindsets",
+        "pageStart": 61,
+        "pageEnd": 120,
+        "summary": "How mindset affects performance and learning"
+      },
+      {
+        "number": 3,
+        "title": "The Truth About Ability",
+        "pageStart": 121,
+        "pageEnd": 180,
+        "summary": "How mindset shapes effort, challenge, and failure"
+      },
+      {
+        "number": 4,
+        "title": "Changing Mindsets",
+        "pageStart": 181,
+        "pageEnd": 276,
+        "summary": "Strategies for developing a growth mindset"
+      }
+    ],
+    "pages": 276,
+    "imageUrl": "",
+    "teaser": "Stanford psychologist Carol Dweck reveals the power of mindset in shaping success. People with a gro..."
+  },
+  {
+    "name": "Quiet: The Power of Introverts",
+    "byline": "Susan Cain",
+    "tags": [
+      "Nonfiction",
+      "Psychology",
+      "Self-Help"
+    ],
+    "synopsis": "Cain's groundbreaking book challenges the extrovert ideal that dominates American culture. Through research in neuroscience, psychology, and sociology, she shows that introverts are undervalued and that their quiet strengths, from deep thinking to creative innovation, are essential to the world. The book covers everything from classroom design to corporate culture, arguing for a better balance between the need for solitude and the need for connection.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Extrovert Ideal",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "How Western culture became an extrovert culture and why it matters"
+      },
+      {
+        "number": 2,
+        "title": "The Science of Introversion",
+        "pageStart": 81,
+        "pageEnd": 160,
+        "summary": "The biology and psychology of introversion and extroversion"
+      },
+      {
+        "number": 3,
+        "title": "When Talk Helps",
+        "pageStart": 161,
+        "pageEnd": 240,
+        "summary": "When extroversion serves us and when silence does"
+      },
+      {
+        "number": 4,
+        "title": "Rethinking Introversion",
+        "pageStart": 241,
+        "pageEnd": 368,
+        "summary": "How to value introverts in schools, workplaces, and relationships"
+      }
+    ],
+    "pages": 368,
+    "imageUrl": "",
+    "teaser": "Cain's groundbreaking book challenges the extrovert ideal that dominates American culture. Through r..."
+  },
+  {
+    "name": "Flow: The Psychology of Optimal Experience",
+    "byline": "Mihaly Csikszentmihalyi",
+    "tags": [
+      "Nonfiction",
+      "Psychology",
+      "Science"
+    ],
+    "synopsis": "Csikszentmihalyi's landmark work explores the concept of flow, a state of complete absorption in an activity where time seems to disappear. Through extensive research, he shows that flow is the key to happiness and fulfillment. The book examines how flow works in work, play, relationships, and creative pursuits, offering practical advice for cultivating this optimal state of consciousness.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Internal World",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "What flow is and how it differs from ordinary consciousness"
+      },
+      {
+        "number": 2,
+        "title": "The Conditions of Flow",
+        "pageStart": 81,
+        "pageEnd": 160,
+        "summary": "The requirements for flow: clear goals, immediate feedback, and challenge-skill balance"
+      },
+      {
+        "number": 3,
+        "title": "Flow in Life",
+        "pageStart": 161,
+        "pageEnd": 280,
+        "summary": "How flow applies to work, play, relationships, and solitude"
+      }
+    ],
+    "pages": 280,
+    "imageUrl": "",
+    "teaser": "Csikszentmihalyi's landmark work explores the concept of flow, a state of complete absorption in an ..."
+  },
+  {
+    "name": "Sapiens: A Brief History of Humankind",
+    "byline": "Yuval Noah Harari",
+    "tags": [
+      "Nonfiction",
+      "History",
+      "Science"
+    ],
+    "synopsis": "Harari's sweeping narrative covers the entire history of Homo sapiens, from the evolution of our species in Africa to the present day. He argues that what sets humans apart is our ability to create and believe in shared fictions: religions, nations, money, and human rights. Through four major revolutions (cognitive, agricultural, scientific, and technological), Harari shows how these fictions have shaped the world. The book is provocative, ambitious, and deeply thought-provoking.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Cognitive Revolution",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "How Homo sapiens became the dominant species through language and imagination"
+      },
+      {
+        "number": 2,
+        "title": "The Agricultural Revolution",
+        "pageStart": 81,
+        "pageEnd": 160,
+        "summary": "How farming changed everything and made us miserable"
+      },
+      {
+        "number": 3,
+        "title": "The Unification of Humankind",
+        "pageStart": 161,
+        "pageEnd": 240,
+        "summary": "How money, religion, and empires connected humanity"
+      },
+      {
+        "number": 4,
+        "title": "The Scientific Revolution",
+        "pageStart": 241,
+        "pageEnd": 400,
+        "summary": "How science, capitalism, and technology transformed the world"
+      }
+    ],
+    "pages": 400,
+    "imageUrl": "",
+    "teaser": "Harari's sweeping narrative covers the entire history of Homo sapiens, from the evolution of our spe..."
+  },
+  {
+    "name": "Mindset",
+    "byline": "Carol S. Dweck",
+    "tags": [
+      "Nonfiction",
+      "Psychology",
+      "Self-Help"
+    ],
+    "synopsis": "Stanford psychologist Carol Dweck reveals the power of mindset in shaping success. People with a growth mindset believe abilities can be developed through effort, while those with a fixed mindset believe talent is innate. Dweck shows how mindset affects everything from sports to business to relationships.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Mindsets",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "The difference between fixed and growth mindsets"
+      },
+      {
+        "number": 2,
+        "title": "Inside the Mindsets",
+        "pageStart": 61,
+        "pageEnd": 120,
+        "summary": "How mindset affects performance and learning"
+      },
+      {
+        "number": 3,
+        "title": "Changing Mindsets",
+        "pageStart": 121,
+        "pageEnd": 276,
+        "summary": "Strategies for developing a growth mindset"
+      }
+    ],
+    "pages": 276,
+    "imageUrl": "",
+    "teaser": "Stanford psychologist Carol Dweck reveals the power of mindset in shaping success. People with a gro..."
+  },
+  {
+    "name": "Quiet",
+    "byline": "Susan Cain",
+    "tags": [
+      "Nonfiction",
+      "Psychology",
+      "Self-Help"
+    ],
+    "synopsis": "Cain's groundbreaking book challenges the extrovert ideal that dominates American culture. Through research in neuroscience, psychology, and sociology, she shows that introverts are undervalued and that their quiet strengths are essential to the world.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Extrovert Ideal",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "How Western culture became an extrovert culture"
+      },
+      {
+        "number": 2,
+        "title": "The Science",
+        "pageStart": 81,
+        "pageEnd": 160,
+        "summary": "The biology and psychology of introversion"
+      },
+      {
+        "number": 3,
+        "title": "Rethinking Introversion",
+        "pageStart": 161,
+        "pageEnd": 368,
+        "summary": "How to value introverts in schools, workplaces, and relationships"
+      }
+    ],
+    "pages": 368,
+    "imageUrl": "",
+    "teaser": "Cain's groundbreaking book challenges the extrovert ideal that dominates American culture. Through r..."
+  },
+  {
+    "name": "Sapiens",
+    "byline": "Yuval Noah Harari",
+    "tags": [
+      "Nonfiction",
+      "History",
+      "Science"
+    ],
+    "synopsis": "Harari's sweeping narrative covers the entire history of Homo sapiens, from the evolution of our species in Africa to the present day. He argues that what sets humans apart is our ability to create and believe in shared fictions.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Cognitive Revolution",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "How Homo sapiens became the dominant species"
+      },
+      {
+        "number": 2,
+        "title": "The Agricultural Revolution",
+        "pageStart": 81,
+        "pageEnd": 160,
+        "summary": "How farming changed everything"
+      },
+      {
+        "number": 3,
+        "title": "The Unification",
+        "pageStart": 161,
+        "pageEnd": 240,
+        "summary": "How money, religion, and empires connected humanity"
+      },
+      {
+        "number": 4,
+        "title": "The Scientific Revolution",
+        "pageStart": 241,
+        "pageEnd": 400,
+        "summary": "How science and technology transformed the world"
+      }
+    ],
+    "pages": 400,
+    "imageUrl": "",
+    "teaser": "Harari's sweeping narrative covers the entire history of Homo sapiens, from the evolution of our spe..."
+  },
+  {
+    "name": "Emotional Intelligence",
+    "byline": "Daniel Goleman",
+    "tags": [
+      "Nonfiction",
+      "Psychology",
+      "Self-Help"
+    ],
+    "synopsis": "Goleman argues that emotional intelligence, not IQ, is the true predictor of success. Through neuroscience and psychology research, he shows how self-awareness, self-regulation, empathy, and social skills shape our lives. The book explores how emotional brain circuits develop, why emotional hijacking occurs, and how we can train our emotional intelligence.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Emotional Brain",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The neuroscience of emotions and their power"
+      },
+      {
+        "number": 2,
+        "title": "The Nature of Emotional Intelligence",
+        "pageStart": 81,
+        "pageEnd": 160,
+        "summary": "Self-awareness, self-regulation, motivation, empathy, and social skill"
+      },
+      {
+        "number": 3,
+        "title": "Emotional Intelligence in Action",
+        "pageStart": 161,
+        "pageEnd": 352,
+        "summary": "How to apply emotional intelligence in relationships, work, and life"
+      }
+    ],
+    "pages": 352,
+    "imageUrl": "",
+    "teaser": "Goleman argues that emotional intelligence, not IQ, is the true predictor of success. Through neuros..."
+  },
+  {
+    "name": "The Subtle Art of Not Giving a F*ck",
+    "byline": "Mark Manson",
+    "tags": [
+      "Nonfiction",
+      "Self-Help",
+      "Philosophy"
+    ],
+    "synopsis": "Manson's counterintuitive approach to self-help argues that the key to happiness is not positive thinking but choosing what to care about. Through humor and blunt honesty, he explores how our values shape our suffering and how we can choose better problems to solve. The book draws on philosophy, psychology, and personal experience to challenge the cult of positivity.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Don't Try",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "Why the conventional approach to happiness is wrong"
+      },
+      {
+        "number": 2,
+        "title": "Happiness is a Problem",
+        "pageStart": 61,
+        "pageEnd": 120,
+        "summary": "How suffering is the only constant and what to do about it"
+      },
+      {
+        "number": 3,
+        "title": "You Are Already Choosing",
+        "pageStart": 121,
+        "pageEnd": 180,
+        "summary": "How values determine what we give a f*ck about"
+      },
+      {
+        "number": 4,
+        "title": "The Paradox of Choice",
+        "pageStart": 181,
+        "pageEnd": 250,
+        "summary": "How to choose better values and live a meaningful life"
+      }
+    ],
+    "pages": 250,
+    "imageUrl": "",
+    "teaser": "Manson's counterintuitive approach to self-help argues that the key to happiness is not positive thi..."
+  },
+  {
+    "name": "The Four Agreements",
+    "byline": "Don Miguel Ruiz",
+    "tags": [
+      "Nonfiction",
+      "Spirituality",
+      "Philosophy"
+    ],
+    "synopsis": "Ruiz distills ancient Toltec wisdom into four practical agreements: be impeccable with your word, don't take anything personally, don't make assumptions, and always do your best. Through clear, accessible prose, he shows how these agreements can transform our lives by freeing us from self-limiting beliefs and patterns.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The First Agreement",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "Be impeccable with your word"
+      },
+      {
+        "number": 2,
+        "title": "The Second Agreement",
+        "pageStart": 41,
+        "pageEnd": 80,
+        "summary": "Don't take anything personally"
+      },
+      {
+        "number": 3,
+        "title": "The Third Agreement",
+        "pageStart": 81,
+        "pageEnd": 120,
+        "summary": "Don't make assumptions"
+      },
+      {
+        "number": 4,
+        "title": "The Fourth Agreement",
+        "pageStart": 121,
+        "pageEnd": 168,
+        "summary": "Always do your best"
+      }
+    ],
+    "pages": 168,
+    "imageUrl": "",
+    "teaser": "Ruiz distills ancient Toltec wisdom into four practical agreements: be impeccable with your word, do..."
+  },
+  {
+    "name": "Meditations for Women Who Do Too Much",
+    "byline": "Anne Wilson Schaef",
+    "tags": [
+      "Nonfiction",
+      "Self-Help",
+      "Psychology"
+    ],
+    "synopsis": "Schaef's daily meditation book offers 365 reflections for women who struggle with workaholism, perfectionism, and the need to control everything. Through gentle wisdom and practical exercises, she helps women reconnect with their authentic selves and find balance between doing and being.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "January",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "Recognizing the pattern of doing too much"
+      },
+      {
+        "number": 2,
+        "title": "February-April",
+        "pageStart": 61,
+        "pageEnd": 140,
+        "summary": "Understanding the roots of overextension"
+      },
+      {
+        "number": 3,
+        "title": "May-July",
+        "pageStart": 141,
+        "pageEnd": 220,
+        "summary": "Learning to say no and set boundaries"
+      },
+      {
+        "number": 4,
+        "title": "August-October",
+        "pageStart": 221,
+        "pageEnd": 300,
+        "summary": "Rediscovering joy and creativity"
+      },
+      {
+        "number": 5,
+        "title": "November-December",
+        "pageStart": 301,
+        "pageEnd": 365,
+        "summary": "Embracing rest and renewal"
+      }
+    ],
+    "pages": 365,
+    "imageUrl": "",
+    "teaser": "Schaef's daily meditation book offers 365 reflections for women who struggle with workaholism, perfe..."
+  },
+  {
+    "name": "12 Rules for Life",
+    "byline": "Jordan B. Peterson",
+    "tags": [
+      "Nonfiction",
+      "Psychology",
+      "Philosophy"
+    ],
+    "synopsis": "Peterson's bestseller offers 12 practical rules for living a meaningful life. Drawing on mythology, psychology, and personal experience, he addresses everything from standing up straight to treating yourself like someone you are responsible for helping. The book is both philosophical and practical, offering guidance for navigating the challenges of modern life.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Stand Up Straight with Your Shoulders Back",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "The importance of posture and confidence"
+      },
+      {
+        "number": 2,
+        "title": "Treat Yourself Like Someone You Are Responsible for Helping",
+        "pageStart": 31,
+        "pageEnd": 60,
+        "summary": "Self-care as a moral duty"
+      },
+      {
+        "number": 3,
+        "title": "Make Friends with People Who Want the Best for You",
+        "pageStart": 61,
+        "pageEnd": 90,
+        "summary": "The importance of surrounding yourself with positive influences"
+      },
+      {
+        "number": 4,
+        "title": "Compare Yourself to Who You Were Yesterday",
+        "pageStart": 91,
+        "pageEnd": 120,
+        "summary": "Personal growth through incremental improvement"
+      },
+      {
+        "number": 5,
+        "title": "Do Not Let Your Children Do Anything That Makes You Dislike Them",
+        "pageStart": 121,
+        "pageEnd": 150,
+        "summary": "The importance of discipline and boundaries"
+      },
+      {
+        "number": 6,
+        "title": "Set Your House in Perfect Order Before You Criticize the World",
+        "pageStart": 151,
+        "pageEnd": 180,
+        "summary": "Starting with personal responsibility"
+      },
+      {
+        "number": 7,
+        "title": "Pursue What Is Meaningful",
+        "pageStart": 181,
+        "pageEnd": 210,
+        "summary": "The importance of purpose and meaning"
+      },
+      {
+        "number": 8,
+        "title": "Tell the Truth",
+        "pageStart": 211,
+        "pageEnd": 240,
+        "summary": "The power of honesty and authenticity"
+      },
+      {
+        "number": 9,
+        "title": "Assume the Person You Are Listening to Might Know Something You Don't",
+        "pageStart": 241,
+        "pageEnd": 270,
+        "summary": "The art of listening and learning"
+      },
+      {
+        "number": 10,
+        "title": "Be Precise in Your Speech",
+        "pageStart": 271,
+        "pageEnd": 300,
+        "summary": "The importance of clarity and articulation"
+      },
+      {
+        "number": 11,
+        "title": "Do Not Bother Children When They Are Skateboarding",
+        "pageStart": 301,
+        "pageEnd": 330,
+        "summary": "The value of risk-taking and competence"
+      },
+      {
+        "number": 12,
+        "title": "Pet a Cat When You Encounter One on the Street",
+        "pageStart": 331,
+        "pageEnd": 400,
+        "summary": "Finding joy in small moments"
+      }
+    ],
+    "pages": 400,
+    "imageUrl": "",
+    "teaser": "Peterson's bestseller offers 12 practical rules for living a meaningful life. Drawing on mythology, ..."
+  },
+  {
+    "name": "The Body Keeps the Score",
+    "byline": "Bessel van der Kolk",
+    "tags": [
+      "Nonfiction",
+      "Psychology",
+      "Science"
+    ],
+    "synopsis": "Van der Kolk's landmark work explores how trauma reshapes the body and brain, compromising sufferers' capacity for pleasure, engagement, self-control, and trust. Through decades of research and clinical experience, he shows that trauma is not just an event but a physiological response that can be healed. The book covers everything from yoga and EMDR to neurofeedback and theater.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Trauma and the Brain",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "How trauma reshapes the body and brain"
+      },
+      {
+        "number": 2,
+        "title": "Trauma and the Self",
+        "pageStart": 81,
+        "pageEnd": 160,
+        "summary": "The loss of self and the road to recovery"
+      },
+      {
+        "number": 3,
+        "title": "The Paths to Recovery",
+        "pageStart": 161,
+        "pageEnd": 280,
+        "summary": "EMDR, yoga, neurofeedback, and other healing modalities"
+      },
+      {
+        "number": 4,
+        "title": "The Healing Power of Community",
+        "pageStart": 281,
+        "pageEnd": 380,
+        "summary": "How connection and community support recovery"
+      }
+    ],
+    "pages": 380,
+    "imageUrl": "",
+    "teaser": "Van der Kolk's landmark work explores how trauma reshapes the body and brain, compromising sufferers..."
   }
 ]
