@@ -2560,21 +2560,53 @@ private fun BookCoverPoster(
     val coverCandidates = remember(bookTitle, imageUrl) {
         listOfNotNull(
             imageUrl.takeIf { it.isNotBlank() },
-            "https://covers.openlibrary.org/b/title/${Uri.encode(bookTitle)}-M.jpg"
+            "https://covers.openlibrary.org/b/title/${Uri.encode(bookTitle)}-M.jpg",
         )
     }
     var coverIndex by remember(bookTitle, imageUrl) { mutableStateOf(0) }
-    if (coverCandidates.isNotEmpty() && coverIndex < coverCandidates.size) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(coverCandidates[coverIndex])
-                .crossfade(true)
-                .build(),
-            contentDescription = "Book cover",
-            onError = { if (coverIndex < coverCandidates.lastIndex) coverIndex += 1 },
-            modifier = modifier.clip(RoundedCornerShape(8.dp)),
-            contentScale = ContentScale.Crop
+    Box(modifier = modifier.clip(RoundedCornerShape(8.dp))) {
+        if (coverCandidates.isNotEmpty() && coverIndex < coverCandidates.size) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(coverCandidates[coverIndex])
+                    .crossfade(true)
+                    .build(),
+                contentDescription = "Book cover",
+                onError = { if (coverIndex < coverCandidates.lastIndex) coverIndex += 1 },
+                modifier = Modifier.matchParentSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
+        // Gradient placeholder: always renders behind the image, visible when
+        // the image is loading or all candidates failed.
+        val placeholderColors = listOf(
+            CurioColors.Coral,
+            CurioColors.Mauve,
+            CurioColors.Sage,
         )
+        val gradientColors = remember(bookTitle) {
+            val idx = bookTitle.hashCode().let { kotlin.math.abs(it) % placeholderColors.size }
+            listOf(placeholderColors[idx], placeholderColors[(idx + 1) % placeholderColors.size])
+        }
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(
+                    Brush.linearGradient(gradientColors),
+                    RoundedCornerShape(8.dp)
+                )
+        )
+        // Show title initial as a fallback glyph when no image loads
+        if (coverIndex >= coverCandidates.size || coverCandidates.isEmpty()) {
+            Text(
+                text = bookTitle.firstOrNull()?.uppercase() ?: "?",
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White.copy(alpha = 0.85f)
+                ),
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
     }
 }
 

@@ -61,11 +61,16 @@ object BookCoverFetch {
     const val TITLE = "Book covers"
     const val IDLE_SUBTITLE = "Tap to fetch cover images so books show offline"
 
-    /** The URL the reveal would show for this book (authored URL, else the
-     *  same Open Library title-cover fallback the reveal uses). */
+    /** Resolves cover URL candidates for a book. */
+    fun coverCandidates(bookName: String, imageUrl: String): List<String> =
+        listOfNotNull(
+            imageUrl.takeIf { it.isNotBlank() },
+            "https://covers.openlibrary.org/b/title/${Uri.encode(bookName)}-M.jpg",
+        )
+
+    /** Single-URL convenience for bulk fetch (uses first candidate). */
     fun coverUrlFor(bookName: String, imageUrl: String): String =
-        imageUrl.takeIf { it.isNotBlank() }
-            ?: "https://covers.openlibrary.org/b/title/${Uri.encode(bookName)}-M.jpg"
+        coverCandidates(bookName, imageUrl).firstOrNull() ?: ""
 
     /**
      * Fetch every unique book cover into the shared Coil disk cache, one by
