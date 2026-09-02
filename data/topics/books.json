@@ -36028,5 +36028,1947 @@
       "booker nominee"
     ],
     "tier": 1
+  },
+  {
+    "id": "book-the-notebook",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "The Notebook",
+    "teaser": "A man reads a love story to his wife with Alzheimer's.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780446676090-L.jpg",
+    "byline": "Nicholas Sparks",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Notebook",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "american",
+      "romance",
+      "contemporary",
+      "love story",
+      "tearjerker"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-me-before-you",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "Me Before You",
+    "teaser": "A caregiver falls for the paralyzed man she looks after.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781435665193-L.jpg",
+    "byline": "Jojo Moyes",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Me Before You",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "british",
+      "romance",
+      "contemporary",
+      "disability",
+      "heartbreaking"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-beach-read",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "Beach Read",
+    "teaser": "Two rival writers swap genres for the summer.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781984806734-L.jpg",
+    "byline": "Emily Henry",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Beach Read",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "american",
+      "romance",
+      "contemporary",
+      "humor",
+      "writers"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-kiss-quotient",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "The Kiss Quotient",
+    "teaser": "A woman with Asperger's hires a male escort to teach her about intimacy.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780451490803-L.jpg",
+    "byline": "Helen Hoang",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Kiss Quotient",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "american",
+      "romance",
+      "contemporary",
+      "neurodivergent",
+      "diverse"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-people-we-meet-on-vacation",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "People We Meet on Vacation",
+    "teaser": "Two best friends take a vacation that may change their relationship.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781984806758-L.jpg",
+    "byline": "Emily Henry",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "People We Meet on Vacation",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "american",
+      "romance",
+      "contemporary",
+      "friendship",
+      "travel"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-rosie-project",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "The Rosie Project",
+    "teaser": "A genetics professor designs a questionnaire to find a wife.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781476729480-L.jpg",
+    "byline": "Graeme Simsion",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Rosie Project",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "australian",
+      "romance",
+      "contemporary",
+      "humor",
+      "neurodivergent"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-fifty-shades-of-grey",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "Fifty Shades of Grey",
+    "teaser": "A college student enters a dominant-submissive relationship.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781612130293-L.jpg",
+    "byline": "E.L. James",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Fifty Shades of Grey",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "british",
+      "romance",
+      "contemporary",
+      "erotic",
+      "billionaire"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-bridget-joness-diary",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "Bridget Jones's Diary",
+    "teaser": "A British woman chronicles her romantic misadventures.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140280098-L.jpg",
+    "byline": "Helen Fielding",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bridget Jones's Diary",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "british",
+      "romance",
+      "humor",
+      "contemporary",
+      "diary"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-proposal",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "The Proposal",
+    "teaser": "A woman proposes to her boyfriend at a Jumbotron, then he dumps her.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781501195402-L.jpg",
+    "byline": "Jasmine Guillory",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Proposal",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "american",
+      "romance",
+      "contemporary",
+      "humor",
+      "diverse"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-hating-game",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "The Hating Game",
+    "teaser": "Office rivals compete for the same promotion and fall in love.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781501128011-L.jpg",
+    "byline": "Sally Thorne",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Hating Game",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "australian",
+      "romance",
+      "contemporary",
+      "humor",
+      "office romance"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-act-your-age-evelyn-brown",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "Act Your Age, Eve Brown",
+    "teaser": "A clumsy woman becomes a chef at a B&B and wins over the grumpy owner.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780063083110-L.jpg",
+    "byline": "Talia Hibbert",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Act Your Age, Eve Brown",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "british",
+      "romance",
+      "contemporary",
+      "humor",
+      "diverse",
+      "autistic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-get-a-life-chloe-brown",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "Get a Life, Chloe Brown",
+    "teaser": "A chronically ill woman creates a bucket list and falls for a handyman.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062941244-L.jpg",
+    "byline": "Talia Hibbert",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Get a Life, Chloe Brown",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "british",
+      "romance",
+      "contemporary",
+      "humor",
+      "chronic illness"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-wedding-date",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "The Wedding Date",
+    "teaser": "A woman invites a stranger to be her fake date at a wedding.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781538745861-L.jpg",
+    "byline": "Jasmine Guillory",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Wedding Date",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "american",
+      "romance",
+      "contemporary",
+      "humor",
+      "fake dating"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-devoted",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "Devoted",
+    "teaser": "A woman discovers her husband's secret life.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781250253910-L.jpg",
+    "byline": "Rachael Lippincott",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Devoted",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "american",
+      "romance",
+      "contemporary",
+      "secrets",
+      "young adult"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-love-story",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "Love Story",
+    "teaser": "A poor student and a wealthy woman fall in love.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062990105-L.jpg",
+    "byline": "Emily Henry",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Love Story",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "american",
+      "romance",
+      "contemporary",
+      "humor",
+      "publishing"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-you-had-me-at-hola",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "You Had Me at Hola",
+    "teaser": "Two Latinx actors fall for each other on a TV set.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781538715857-L.jpg",
+    "byline": "Alexis Daria",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "You Had Me at Hola",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "american",
+      "romance",
+      "contemporary",
+      "latin",
+      "tv production"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-one-dark-window",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "One Dark Window",
+    "teaser": "A girl with a monster in her head falls for a morally grey man.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781728256399-L.jpg",
+    "byline": "Rachel Gillig",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "One Dark Window",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "fantasy",
+      "romance",
+      "dark",
+      "gothic",
+      "morally grey"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-divine-rivals",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "Divine Rivals",
+    "teaser": "Rival journalists fall in love through anonymous letters.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781250857439-L.jpg",
+    "byline": "Rebecca Ross",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Divine Rivals",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "fantasy",
+      "romance",
+      "epistolary",
+      "war",
+      "enemies to lovers"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-six-crimson-cranes",
+    "categoryId": "BOOKS",
+    "subtype": "Romance",
+    "name": "Six Crimson Cranes",
+    "teaser": "A princess is turned into a crane and must save her brothers.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781250780393-L.jpg",
+    "byline": "Elizabeth Lim",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Six Crimson Cranes",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "fantasy",
+      "romance",
+      "fairy tale",
+      "east asian",
+      "young adult"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-big-little-lies",
+    "categoryId": "BOOKS",
+    "subtype": "Mystery",
+    "name": "Big Little Lies",
+    "teaser": "Three women's lives unravel after a school event turns deadly.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780425274866-L.jpg",
+    "byline": "Liane Moriarty",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Big Little Lies",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "mystery",
+      "australian",
+      "suburban",
+      "women",
+      "humor"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-woman-in-cabin-10",
+    "categoryId": "BOOKS",
+    "subtype": "Mystery",
+    "name": "The Woman in Cabin 10",
+    "teaser": "A journalist witnesses a murder on a luxury cruise.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781250126078-L.jpg",
+    "byline": "Ruth Ware",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Woman in Cabin 10",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "mystery",
+      "thriller",
+      "british",
+      "cruise",
+      "locked room"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-verity",
+    "categoryId": "BOOKS",
+    "subtype": "Mystery",
+    "name": "Verity",
+    "teaser": "A struggling writer finds a disturbing manuscript in her employer's attic.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781538742570-L.jpg",
+    "byline": "Colleen Hoover",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Verity",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "mystery",
+      "thriller",
+      "romance",
+      "dark",
+      "twist"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-windows",
+    "categoryId": "BOOKS",
+    "subtype": "Mystery",
+    "name": "The Windows",
+    "teaser": "A woman watches her neighbors and suspects murder.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062678416-L.jpg",
+    "byline": "A.J. Finn",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Windows",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "mystery",
+      "thriller",
+      "psychological",
+      "agoraphobic",
+      "unreliable narrator"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-7-deaths-of-eve-hardcastle",
+    "categoryId": "BOOKS",
+    "subtype": "Mystery",
+    "name": "The 7 Deaths of Eve Hardcastle",
+    "teaser": "A woman relives the same day to solve a murder.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781250789006-L.jpg",
+    "byline": "Stuart Turton",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The 7 Deaths of Eve Hardcastle",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "mystery",
+      "fantasy",
+      "time loop",
+      "british",
+      "murder mystery"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-maid",
+    "categoryId": "BOOKS",
+    "subtype": "Mystery",
+    "name": "The Maid",
+    "teaser": "A hotel maid discovers a dead guest and becomes the prime suspect.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593356159-L.jpg",
+    "byline": "Nita Prose",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Maid",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "mystery",
+      "canadian",
+      "humor",
+      "neurodivergent",
+      "whodunit"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-sharp-objects",
+    "categoryId": "BOOKS",
+    "subtype": "Mystery",
+    "name": "Sharp Objects",
+    "teaser": "A journalist returns to her hometown to investigate murders.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780307341556-L.jpg",
+    "byline": "Gillian Flynn",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sharp Objects",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "mystery",
+      "thriller",
+      "psychological",
+      "southern gothic",
+      "family"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-silent-companion",
+    "categoryId": "BOOKS",
+    "subtype": "Mystery",
+    "name": "The Silent Companion",
+    "teaser": "A Victorian woman discovers a sinister wooden doppelganger.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062917669-L.jpg",
+    "byline": "Laura Purcell",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Silent Companion",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "mystery",
+      "gothic",
+      "victorian",
+      "horror",
+      "british"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-sunday-philosophy-club",
+    "categoryId": "BOOKS",
+    "subtype": "Mystery",
+    "name": "The Sunday Philosophy Club",
+    "teaser": "A philosopher investigates a death at the theater.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780312282592-L.jpg",
+    "byline": "Alexander McCall Smith",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Sunday Philosophy Club",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "mystery",
+      "british",
+      "edinburgh",
+      "philosophy",
+      "gentle"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-cormorant",
+    "categoryId": "BOOKS",
+    "subtype": "Mystery",
+    "name": "The Cormorant",
+    "teaser": "A government agent investigates a mysterious fisherman.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316255110-L.jpg",
+    "byline": "Chuck Hogan",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Cormorant",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "mystery",
+      "thriller",
+      "supernatural",
+      "horror",
+      "conspiracy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-midnight-in-the-garden-of-good-and-evil",
+    "categoryId": "BOOKS",
+    "subtype": "Mystery",
+    "name": "Midnight in the Garden of Good and Evil",
+    "teaser": "A murder in Savannah's aristocratic society.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780679751526-L.jpg",
+    "byline": "John Berendt",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Midnight in the Garden of Good and Evil",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "mystery",
+      "true crime",
+      "savannah",
+      "nonfiction",
+      "eccentric"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-name-of-the-rose-eco",
+    "categoryId": "BOOKS",
+    "subtype": "Mystery",
+    "name": "The Name of the Rose",
+    "teaser": "A detective investigates murders in a medieval monastery.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780544176560-L.jpg",
+    "byline": "Umberto Eco",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Name of the Rose",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "mystery",
+      "italian",
+      "medieval",
+      "historical",
+      "philosophy"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-plum-pudding-murder",
+    "categoryId": "BOOKS",
+    "subtype": "Mystery",
+    "name": "The Plum Pudding Murder",
+    "teaser": "Miss Marple investigates a Christmas murder.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062073563-L.jpg",
+    "byline": "Agatha Christie",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Plum Pudding Murder",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "mystery",
+      "british",
+      "whodunit",
+      "classic",
+      "cozy mystery"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-44-scotland-road",
+    "categoryId": "BOOKS",
+    "subtype": "Mystery",
+    "name": "44 Scotland Road",
+    "teaser": "A detective investigates the mysterious tenant at 44 Scotland Road.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780425186466-L.jpg",
+    "byline": "Nevada Barr",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "44 Scotland Road",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "mystery",
+      "british",
+      "london",
+      "detective",
+      "psychological"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-7-deaths-of-eve-hardcastle-2",
+    "categoryId": "BOOKS",
+    "subtype": "Mystery",
+    "name": "The Devil and the Dark Water",
+    "teaser": "A murder mystery on a ship bound for Amsterdam in 1634.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781250789013-L.jpg",
+    "byline": "Stuart Turton",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Devil and the Dark Water",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "mystery",
+      "historical",
+      "dutch",
+      "supernatural",
+      "detective"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-boy-in-the-striped-pyjamas",
+    "categoryId": "BOOKS",
+    "subtype": "Historical Fiction",
+    "name": "The Boy in the Striped Pyjamas",
+    "teaser": "A boy befriends a child on the other side of a fence.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385751047-L.jpg",
+    "byline": "John Boyne",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Boy in the Striped Pyjamas",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "historical",
+      "world war ii",
+      "children",
+      "holocaust",
+      "innocence"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-tea-girl-of-hummingbird-lane",
+    "categoryId": "BOOKS",
+    "subtype": "Historical Fiction",
+    "name": "The Tea Girl of Hummingbird Lane",
+    "teaser": "A Chinese orphan discovers her heritage through tea.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781501163463-L.jpg",
+    "byline": "Lisa See",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Tea Girl of Hummingbird Lane",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "historical",
+      "chinese",
+      "tea",
+      "adoption",
+      "cultural"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-vanishing-half-bb",
+    "categoryId": "BOOKS",
+    "subtype": "Historical Fiction",
+    "name": "The Vanishing Half",
+    "teaser": "Twin sisters choose different racial identities in the 1960s.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780525536291-L.jpg",
+    "byline": "Brit Bennett",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Vanishing Half",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "historical",
+      "race",
+      "identity",
+      "twins",
+      "passing"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-color-purple-aw",
+    "categoryId": "BOOKS",
+    "subtype": "Historical Fiction",
+    "name": "The Color Purple",
+    "teaser": "A young black woman's journey to self-discovery in the South.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780156031332-L.jpg",
+    "byline": "Alice Walker",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Color Purple",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "historical",
+      "african american",
+      "feminist",
+      "pulitzer",
+      "classic"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-luminaries-el",
+    "categoryId": "BOOKS",
+    "subtype": "Historical Fiction",
+    "name": "The Luminaries",
+    "teaser": "A gold rush mystery in 19th-century New Zealand.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316074315-L.jpg",
+    "byline": "Eleanor Catton",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Luminaries",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "historical",
+      "new zealand",
+      "mystery",
+      "astrology",
+      "booker prize"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-nickel-boys-cw",
+    "categoryId": "BOOKS",
+    "subtype": "Historical Fiction",
+    "name": "The Nickel Boys",
+    "teaser": "A young black man survives a brutal reform school in Florida.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385350020-L.jpg",
+    "byline": "Colson Whitehead",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Nickel Boys",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "historical",
+      "african american",
+      "pulitzer",
+      "reform school",
+      "civil rights"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-underground-railroad-cw",
+    "categoryId": "BOOKS",
+    "subtype": "Historical Fiction",
+    "name": "The Underground Railroad",
+    "teaser": "A slave escapes via a literal underground railroad.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385350020-L.jpg",
+    "byline": "Colson Whitehead",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Underground Railroad",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "historical",
+      "african american",
+      "pulitzer",
+      "slavery",
+      "magical realism"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-home-makers",
+    "categoryId": "BOOKS",
+    "subtype": "Historical Fiction",
+    "name": "The Home-Makers",
+    "teaser": "A 1950s housewife's life is turned upside down.",
+    "imageUrl": "",
+    "byline": "Dorothy Canfield Fisher",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Home-Makers",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "historical",
+      "feminist",
+      "1950s",
+      "classic",
+      "family"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-midnight-library-reading",
+    "categoryId": "BOOKS",
+    "subtype": "Historical Fiction",
+    "name": "The Book of Longings",
+    "teaser": "A woman in first-century Palestine dares to write and dream.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780525656005-L.jpg",
+    "byline": "Sue Monk Kidd",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Book of Longings",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "historical",
+      "biblical",
+      "feminist",
+      "ancient",
+      "literary fiction"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-buried-giant",
+    "categoryId": "BOOKS",
+    "subtype": "Historical Fiction",
+    "name": "The Buried Giant",
+    "teaser": "An elderly couple journeys through a Britain of mist and memory.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780307456175-L.jpg",
+    "byline": "Kazuo Ishiguro",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Buried Giant",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "fantasy",
+      "british",
+      "nobel",
+      "memory",
+      "old age"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-sworn-virgin",
+    "categoryId": "BOOKS",
+    "subtype": "Historical Fiction",
+    "name": "The Sworn Virgin",
+    "teaser": "A young Albanian woman takes an oath of virginity to escape an arranged marriage.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062316479-L.jpg",
+    "byline": "Kristopher Dukes",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Sworn Virgin",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "historical",
+      "albanian",
+      "feminist",
+      "independence",
+      "mountains"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-the-summer-before-the-war",
+    "categoryId": "BOOKS",
+    "subtype": "Historical Fiction",
+    "name": "The Summer Before the War",
+    "teaser": "A small English town faces the coming of World War I.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780812995985-L.jpg",
+    "byline": "Helen Simonson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Summer Before the War",
+      "durationMinutes": 20,
+      "instruction": "Read about this book."
+    },
+    "tags": [
+      "historical",
+      "world war i",
+      "british",
+      "rural",
+      "romance"
+    ],
+    "tier": 1
+  },
+  {
+    "id": "book-children-of-dune",
+    "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
+    "name": "Children of Dune",
+    "teaser": "The twins of Paul Atreides navigate a decaying empire.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780441172696-L.jpg",
+    "byline": "Frank Herbert",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Children of Dune",
+      "durationMinutes": 20,
+      "instruction": "Read about Children of Dune."
+    },
+    "tags": [
+      "science fiction",
+      "sequel",
+      "politics",
+      "desert"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-dune-god-emperor",
+    "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
+    "name": "Dune God Emperor",
+    "teaser": "Leto II rules as a tyrant for 3500 years.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780441172733-L.jpg",
+    "byline": "Frank Herbert",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Dune God Emperor",
+      "durationMinutes": 20,
+      "instruction": "Read about Dune God Emperor."
+    },
+    "tags": [
+      "science fiction",
+      "sequel",
+      "philosophy",
+      "tyranny"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-lathe-of-heaven",
+    "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
+    "name": "The Lathe of Heaven",
+    "teaser": "A man's dreams reshape reality.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780688210359-L.jpg",
+    "byline": "Ursula K. Le Guin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Lathe of Heaven",
+      "durationMinutes": 20,
+      "instruction": "Read about The Lathe of Heaven."
+    },
+    "tags": [
+      "science fiction",
+      "dreams",
+      "reality",
+      "classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-handmaids-tale",
+    "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
+    "name": "The Handmaids Tale",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385490818-L.jpg",
+    "byline": "Margaret Atwood",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Handmaids Tale",
+      "durationMinutes": 20,
+      "instruction": "Read about The Handmaids Tale."
+    },
+    "tags": [
+      "dystopian",
+      "feminist",
+      "canadian",
+      "political"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-caves-of-steel",
+    "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
+    "name": "The Caves of Steel",
+    "teaser": "A detective and a robot investigate a murder.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780553293357-L.jpg",
+    "byline": "Isaac Asimov",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Caves of Steel",
+      "durationMinutes": 20,
+      "instruction": "Read about The Caves of Steel."
+    },
+    "tags": [
+      "science fiction",
+      "detective",
+      "robots",
+      "ai"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-speaker-for-the-dead",
+    "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
+    "name": "Speaker for the Dead",
+    "teaser": "Ender travels to an alien world.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780812550756-L.jpg",
+    "byline": "Orson Scott Card",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Speaker for the Dead",
+      "durationMinutes": 20,
+      "instruction": "Read about Speaker for the Dead."
+    },
+    "tags": [
+      "science fiction",
+      "sequel",
+      "aliens",
+      "hugo winner"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-fall-of-hyperion",
+    "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
+    "name": "The Fall of Hyperion",
+    "teaser": "The sequel to Hyperion.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780553283693-L.jpg",
+    "byline": "Dan Simmons",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Fall of Hyperion",
+      "durationMinutes": 20,
+      "instruction": "Read about The Fall of Hyperion."
+    },
+    "tags": [
+      "science fiction",
+      "sequel",
+      "space",
+      "war"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-a-scanner-darkly",
+    "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
+    "name": "A Scanner Darkly",
+    "teaser": "An undercover cop loses himself.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345413994-L.jpg",
+    "byline": "Philip K. Dick",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Scanner Darkly",
+      "durationMinutes": 20,
+      "instruction": "Read about A Scanner Darkly."
+    },
+    "tags": [
+      "science fiction",
+      "dystopian",
+      "drug culture",
+      "noir"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-childhoods-end",
+    "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
+    "name": "Childhoods End",
+    "teaser": "Alien overlords transform humanity.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345539441-L.jpg",
+    "byline": "Arthur C. Clarke",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Childhoods End",
+      "durationMinutes": 20,
+      "instruction": "Read about Childhoods End."
+    },
+    "tags": [
+      "science fiction",
+      "aliens",
+      "utopia",
+      "classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-deaths-end",
+    "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
+    "name": "Deaths End",
+    "teaser": "The final book of the trilogy.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780765377102-L.jpg",
+    "byline": "Liu Cixin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Deaths End",
+      "durationMinutes": 20,
+      "instruction": "Read about Deaths End."
+    },
+    "tags": [
+      "chinese",
+      "hugo winner",
+      "hard sci-fi",
+      "cosmic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-artemis",
+    "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
+    "name": "Artemis",
+    "teaser": "A heist on the Moon.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780553447439-L.jpg",
+    "byline": "Andy Weir",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Artemis",
+      "durationMinutes": 20,
+      "instruction": "Read about Artemis."
+    },
+    "tags": [
+      "science fiction",
+      "moon",
+      "heist",
+      "humor"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-giver",
+    "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
+    "name": "The Giver",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780544336261-L.jpg",
+    "byline": "Lois Lowry",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Giver",
+      "durationMinutes": 20,
+      "instruction": "Read about The Giver."
+    },
+    "tags": [
+      "young adult",
+      "dystopian",
+      "classic",
+      "memory"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-maze-runner",
+    "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
+    "name": "The Maze Runner",
+    "teaser": "Teens trapped in a deadly maze.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385737975-L.jpg",
+    "byline": "James Dashner",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Maze Runner",
+      "durationMinutes": 20,
+      "instruction": "Read about The Maze Runner."
+    },
+    "tags": [
+      "young adult",
+      "dystopian",
+      "survival",
+      "thriller"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-red-rising",
+    "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
+    "name": "Red Rising",
+    "teaser": "A slave rises to challenge a tyrannical society on Mars.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345539809-L.jpg",
+    "byline": "Pierce Brown",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Red Rising",
+      "durationMinutes": 20,
+      "instruction": "Read about Red Rising."
+    },
+    "tags": [
+      "science fiction",
+      "mars",
+      "military",
+      "dystopian",
+      "rebellion"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-fifth-season",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "The Fifth Season",
+    "teaser": "A woman searches for her daughter in a world of catastrophic climate change.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316229296-L.jpg",
+    "byline": "N.K. Jemisin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Fifth Season",
+      "durationMinutes": 20,
+      "instruction": "Read about The Fifth Season."
+    },
+    "tags": [
+      "fantasy",
+      "hugo winner",
+      "apocalyptic",
+      "african american",
+      "feminist"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-obelisk-gate",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "The Obelisk Gate",
+    "teaser": "The sequel to The Fifth Season.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316229326-L.jpg",
+    "byline": "N.K. Jemisin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Obelisk Gate",
+      "durationMinutes": 20,
+      "instruction": "Read about The Obelisk Gate."
+    },
+    "tags": [
+      "fantasy",
+      "hugo winner",
+      "sequel",
+      "apocalyptic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-stone-sky",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "The Stone Sky",
+    "teaser": "The final book of the Broken Earth trilogy.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316229333-L.jpg",
+    "byline": "N.K. Jemisin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Stone Sky",
+      "durationMinutes": 20,
+      "instruction": "Read about The Stone Sky."
+    },
+    "tags": [
+      "fantasy",
+      "hugo winner",
+      "sequel",
+      "finale"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-alchemist",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Alchemist",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062315007-L.jpg",
+    "byline": "Paulo Coelho",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Alchemist",
+      "durationMinutes": 20,
+      "instruction": "Read about The Alchemist."
+    },
+    "tags": [
+      "french",
+      "philosophical",
+      "spiritual",
+      "classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-alices-adventures-in-wonderland",
+    "categoryId": "BOOKS",
+    "subtype": "Children",
+    "name": "Alices Adventures in Wonderland",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439761-L.jpg",
+    "byline": "Lewis Carroll",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Alices Adventures in Wonderland",
+      "durationMinutes": 20,
+      "instruction": "Read about Alices Adventures in Wonderland."
+    },
+    "tags": [
+      "children",
+      "fantasy",
+      "british",
+      "classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-frankenstein",
+    "categoryId": "BOOKS",
+    "subtype": "Horror",
+    "name": "Frankenstein",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780486282114-L.jpg",
+    "byline": "Mary Shelley",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Frankenstein",
+      "durationMinutes": 20,
+      "instruction": "Read about Frankenstein."
+    },
+    "tags": [
+      "horror",
+      "gothic",
+      "classic",
+      "science fiction"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-picture-of-dorian-gray",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Picture of Dorian Gray",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439570-L.jpg",
+    "byline": "Oscar Wilde",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Picture of Dorian Gray",
+      "durationMinutes": 20,
+      "instruction": "Read about The Picture of Dorian Gray."
+    },
+    "tags": [
+      "british",
+      "gothic",
+      "classic",
+      "aestheticism"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-kite-runner",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Kite Runner",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781594631931-L.jpg",
+    "byline": "Khaled Hosseini",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Kite Runner",
+      "durationMinutes": 20,
+      "instruction": "Read about The Kite Runner."
+    },
+    "tags": [
+      "afghan",
+      "guilt",
+      "redemption",
+      "friendship"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-road",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Road",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780307387899-L.jpg",
+    "byline": "Cormac McCarthy",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Road",
+      "durationMinutes": 20,
+      "instruction": "Read about The Road."
+    },
+    "tags": [
+      "post-apocalyptic",
+      "american",
+      "pulitzer",
+      "survival"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-midnight-library",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Midnight Library",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780525559474-L.jpg",
+    "byline": "Matt Haig",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Midnight Library",
+      "durationMinutes": 20,
+      "instruction": "Read about The Midnight Library."
+    },
+    "tags": [
+      "philosophy",
+      "contemporary",
+      "regret",
+      "parallel lives"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-beloved",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Beloved",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781400033416-L.jpg",
+    "byline": "Toni Morrison",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Beloved",
+      "durationMinutes": 20,
+      "instruction": "Read about Beloved."
+    },
+    "tags": [
+      "african american",
+      "pulitzer",
+      "slavery",
+      "classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-slaughterhousefive",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Slaughterhouse-Five",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385334204-L.jpg",
+    "byline": "Kurt Vonnegut",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Slaughterhouse-Five",
+      "durationMinutes": 20,
+      "instruction": "Read about Slaughterhouse-Five."
+    },
+    "tags": [
+      "american",
+      "anti-war",
+      "sci-fi",
+      "time travel",
+      "satire"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-left-hand-of-darkness",
+    "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
+    "name": "The Left Hand of Darkness",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780441478125-L.jpg",
+    "byline": "Ursula K. Le Guin",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Left Hand of Darkness",
+      "durationMinutes": 20,
+      "instruction": "Read about The Left Hand of Darkness."
+    },
+    "tags": [
+      "science fiction",
+      "gender",
+      "feminist",
+      "hugo winner"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-are-you-my-mother",
+    "categoryId": "BOOKS",
+    "subtype": "Graphic Novel",
+    "name": "Are You My Mother",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780618989829-L.jpg",
+    "byline": "Alison Bechdel",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Are You My Mother",
+      "durationMinutes": 20,
+      "instruction": "Read about Are You My Mother."
+    },
+    "tags": [
+      "graphic novel",
+      "memoir",
+      "lgbtq",
+      "mother daughter"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-bone",
+    "categoryId": "BOOKS",
+    "subtype": "Graphic Novel",
+    "name": "Bone",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781888963144-L.jpg",
+    "byline": "Jeff Smith",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Bone",
+      "durationMinutes": 20,
+      "instruction": "Read about Bone."
+    },
+    "tags": [
+      "graphic novel",
+      "fantasy",
+      "humor",
+      "adventure"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-fellowship-of-the-ring",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "The Fellowship of the Ring",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780544003415-L.jpg",
+    "byline": "J.R.R. Tolkien",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Fellowship of the Ring",
+      "durationMinutes": 20,
+      "instruction": "Read about The Fellowship of the Ring."
+    },
+    "tags": [
+      "fantasy",
+      "epic",
+      "classic",
+      "adventure"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-two-towers",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "The Two Towers",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780544003422-L.jpg",
+    "byline": "J.R.R. Tolkien",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Two Towers",
+      "durationMinutes": 20,
+      "instruction": "Read about The Two Towers."
+    },
+    "tags": [
+      "fantasy",
+      "epic",
+      "classic",
+      "adventure"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-return-of-the-king",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "The Return of the King",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780544003439-L.jpg",
+    "byline": "J.R.R. Tolkien",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Return of the King",
+      "durationMinutes": 20,
+      "instruction": "Read about The Return of the King."
+    },
+    "tags": [
+      "fantasy",
+      "epic",
+      "classic",
+      "adventure"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-a-court-of-mist-and-fury",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "A Court of Mist and Fury",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781635575576-L.jpg",
+    "byline": "Sarah J. Maas",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Court of Mist and Fury",
+      "durationMinutes": 20,
+      "instruction": "Read about A Court of Mist and Fury."
+    },
+    "tags": [
+      "fantasy",
+      "romance",
+      "faerie",
+      "young adult"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-jonathan-strange-and-mr-norrell",
+    "categoryId": "BOOKS",
+    "subtype": "Fantasy",
+    "name": "Jonathan Strange and Mr Norrell",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780765356154-L.jpg",
+    "byline": "Susanna Clarke",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Jonathan Strange and Mr Norrell",
+      "durationMinutes": 20,
+      "instruction": "Read about Jonathan Strange and Mr Norrell."
+    },
+    "tags": [
+      "fantasy",
+      "british",
+      "alternate history",
+      "magic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-aristotle-and-dante",
+    "categoryId": "BOOKS",
+    "subtype": "Young Adult",
+    "name": "Aristotle and Dante",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781442472181-L.jpg",
+    "byline": "Benjamin Alire Saenz",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Aristotle and Dante",
+      "durationMinutes": 20,
+      "instruction": "Read about Aristotle and Dante."
+    },
+    "tags": [
+      "young adult",
+      "lgbtq",
+      "mexican american",
+      "romance"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-fault-in-our-stars",
+    "categoryId": "BOOKS",
+    "subtype": "Young Adult",
+    "name": "The Fault in Our Stars",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780525478812-L.jpg",
+    "byline": "John Green",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Fault in Our Stars",
+      "durationMinutes": 20,
+      "instruction": "Read about The Fault in Our Stars."
+    },
+    "tags": [
+      "young adult",
+      "romance",
+      "cancer",
+      "contemporary"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-i-give-you-the-sun",
+    "categoryId": "BOOKS",
+    "subtype": "Young Adult",
+    "name": "I Give You the Sun",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385756204-L.jpg",
+    "byline": "Jandy Nelson",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "I Give You the Sun",
+      "durationMinutes": 20,
+      "instruction": "Read about I Give You the Sun."
+    },
+    "tags": [
+      "young adult",
+      "art",
+      "family",
+      "lgbtq"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-flipped",
+    "categoryId": "BOOKS",
+    "subtype": "Young Adult",
+    "name": "Flipped",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780375835162-L.jpg",
+    "byline": "Wendelin Van Draanen",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Flipped",
+      "durationMinutes": 20,
+      "instruction": "Read about Flipped."
+    },
+    "tags": [
+      "young adult",
+      "romance",
+      "humor",
+      "coming of age"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-do-androids-dream-of-electric-sheep",
+    "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
+    "name": "Do Androids Dream of Electric Sheep",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345404473-L.jpg",
+    "byline": "Philip K. Dick",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Do Androids Dream of Electric Sheep",
+      "durationMinutes": 20,
+      "instruction": "Read about Do Androids Dream of Electric Sheep."
+    },
+    "tags": [
+      "science fiction",
+      "classic",
+      "dystopian",
+      "ai"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-brave-new-world",
+    "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
+    "name": "Brave New World",
+    "teaser": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780060850524-L.jpg",
+    "byline": "Aldous Huxley",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Brave New World",
+      "durationMinutes": 20,
+      "instruction": "Read about Brave New World."
+    },
+    "tags": [
+      "dystopian",
+      "science fiction",
+      "classic",
+      "social commentary"
+    ],
+    "tier": 2
   }
 ]
