@@ -1,85 +1,78 @@
 # Prompt.md — current request log
 
-## Request: Instant reveal for first-time topics + Cabinet category-picker revamp
+## Request: Reveal synopsis 5-line teaser + merged book-notes sheet; "Also in" from All; share-card editor overhaul; cover fetch → Experiments with Cancel
 
 User request (verbatim, condensed):
 
-> Still, in the Topic Reveal, NEW topics are slow loading as well — fix them
-> too, so it doesn't take them ~1 sec to show the info. Also apply the same
-> category picker (the v314 Topic Database panel + multi-select treatment)
-> in the Cabinet screen. (We'll go back to "save your take" next — it's
-> getting a redesign; the topic-browser refinements continue here.)
-
-### Root causes found
-
-1. **Slow first-time reveal.** `TopicRepository.findTopic` fetched the
-   WHOLE lane from Room and scanned + mapped every row in Kotlin on every
-   reveal open. First-frame seeding only consulted the per-lane cache, so a
-   never-opened topic whose lane cache wasn't resident had to wait on that
-   async full-lane fetch — and when Room's copy was stale (topics added to
-   the JSON between app updates without a version bump, so the version-gated
-   sync never ran), `TopicJsonLoader.load()`'s Room fast path served the
-   stale rows and the reveal could never see the new topic at all.
-2. **Cabinet single-select chip bar.** The Cabinet still had the old sticky
-   every-lane chip bar + single `CategoryId` filter, unlike the Topic
-   Database's v314 panel + multi-select.
+> Why does the synopsis now show fully in Topic Reveal? Show only 5 lines
+> and the full text in the bottom sheet. Merge chapters and synopsis in the
+> SAME bottom sheet, so the sheet isn't too small and expands to the top.
+> In Topic Browser, when the category is All and I'm searching, it doesn't
+> show the "Also in" pills — it should. In the share sheet (hold to edit):
+> while editing, remove the "Share this topic" header above so we have
+> plenty of space; add haptics to the sliders; in the Paper style, editing
+> the quick fact doesn't change its height — fix it; the cursor / text
+> selection in inline editing still isn't accurate — fix it; change the
+> T / F / M / B letters and their colors to ONE move icon with a darker
+> coffee border; the category-chip move is inaccurate (the B grip shows at
+> the same position even when the chip is lower) — anchor it to the real
+> chip, and the bulb icon should move with it; in styles with lines above
+> the quick fact, those should auto-adjust and move with the fact box; make
+> the title and the info (author etc.) move together when they're
+> adjacent. The book-cover fetching has no cancel option — add one and put
+> it inside Experiments.
 
 ### What shipped (this turn)
 
-**A. Reveal speed (`TopicDao.kt`, `TopicRepository.kt`, `TopicRevealScreen.kt`):**
-- `TopicDao.findByCategoryAndName` — indexed SQL `categoryId = ? AND name =
-  ? [NOCASE] LIMIT 1`; `findTopic` uses it instead of the whole-lane scan.
-- `resolveRevealTopic()` seeds `resolved` on the FIRST frame from the warm
-  lane cache AND the prewarmed merged index (`cachedIndex()`, which
-  survives lane-cache trims and carries wildcard.json originals). Plain
-  function (NOT @Composable — it runs inside `remember {}`).
-- `TopicRepository.refreshLaneFromAssets(context, id)` — parses the
-  bundled JSON directly (bypassing the Room fast-path mask),
-  REPLACE-upserts the whole lane back into Room, returns the fresh pool.
-  The reveal's final fallback uses it for canonical lanes (WILDCARD keeps
-  the shared merged `load()`).
-- Content-incomplete-row hydration is deduped once per topic per process
-  (`hydratedIds`) so the full-lane JSON parse never repeats.
+**A. Topic Reveal — synopsis teaser + ONE merged book-notes sheet
+(`TopicRevealScreen.kt`):**
+- The page's `BookSynopsisCard` now shows a `maxLines = 5` synopsis teaser
+  (poster beside it) + a "Read the full synopsis →" hint when long.
+- `BookNotesSheet` is now ONE tall ModalBottomSheet (body
+  `fillMaxHeight(0.92f)` so it expands toward the top, inner body scrolls)
+  hosting BOTH sections behind segmented Synopsis | Chapters pills. The tab
+  it opens on mirrors what you tapped (synopsis card → Synopsis, chapter
+  chip → Chapters), and you switch in place inside the sheet — never too
+  small, never a slim dialog.
+- Page chapter preview chips stay compact (118dp, 2-line previews).
 
-**B. Cabinet category picker (`CabinetScreen.kt`):**
-- State: comma-joined enum-name `String` → `Set<CategoryId>` (rotation/tab
-  safe, no Saver), single `commitFilters` mutator, `CategoryIdSaver` gone.
-- The sticky every-lane chip bar is DELETED (`CabinetStickyChipBar`,
-  `CabinetChipPop`, `FilterChipLite` dead code removed); searching alone
-  shows no category chips.
-- Hero Category pill opens `CabinetCategoryPanel` (collapsed by default):
-  its own tiny search box filters the category list, accent-checkbox
-  multi-select with per-lane entry counts, a tertiary Legacy row (always
-  reachable so it can be toggled off), Clear all + Done.
-- `CabinetActiveFilterChips` renders exactly the selected lanes (+ Legacy),
-  each removable with one tap; filtering = text AND (no categories selected
-  OR entry category in set).
-- Single selected lane keeps the page wash + hero subtitle; multi-select
-  uses the neutral wash + "Showing N categories"; no-match empty states
-  split into single-lane (spin CTA) vs generic clear-filters.
-- Constants: `CabinetChipBarHeight` kept for the chips row, new
-  `CabinetFilterPanelHeight` reserved when the panel is open; the grid's
-  glass-capture + content-top reservation now key on `filterUiVisible`.
-- Imports cleaned (removed unused Saver/Brush/LocalDensity/LazyRow/
-  itemsIndexed/LayerBackdrop; added clickable, horizontal/verticalScroll,
-  rememberScrollState, size, Checkbox(Defaults), TextButton, TextAlign,
-  TextOverflow, categorySurface, pastelFillInk).
+**B. Topic Browser — "Also in" from All (`TopicDatabaseScreen.kt`):**
+- The search suggestion row was gated on `effectiveCats.isNotEmpty()`; now
+  it also renders when searching from ALL, surfacing the lanes the flat
+  results came from (top 6 by hit count), each pill one tap away.
 
-### Verification
+**C. Share-card editor overhaul (`TopicShareCard.kt`):**
+- Sheet header ("Share this topic") + style label + style dots all hide
+  while editing, giving the card + controls the full sheet.
+- `SizeSliderColumn` now ticks per snap step while dragging + a confirm on
+  release (haptics captured in the composable scope — not inside the
+  Slider's plain callbacks — so it compiles).
+- Quick-fact editing: the invisible `BasicTextField` is now
+  `maxLines = 24` with `heightIn(min = factHeight)` so the box AUTO-GROWS as
+  you type (Paper included), and every style reports the exact glyph box +
+  the exact TextStyle it rendered (`EditBoundsCallbacks.onFactStyle` +
+  glyph-box reporting moved INSIDE FrostPane/cream padding) so the caret
+  sits on the real letters and wraps identically.
+- The per-box T / F / M / B letter handles are GONE — one uniform
+  `MoveHandle` (DragHandle icon, `CoffeeChromeDeep` circle, white ring) and
+  darker coffee box borders (`CoffeeChrome` / `CoffeeChromeDeep`).
+- Badge grip: anchors to the reported PILL bounds (full-width chip rows
+  report the pill Surface, not the row — reporting the row would zero the
+  drag clamp), and the pill + bulb move as ONE group (moveBadge on the
+  row, onBadge on the pill), so the bulb rides the chip.
+- Rules above the quick fact (Vinyl underline, Editorial hairline, Minimal
+  accent rule) get `factShift(move)` so they travel with the F drag;
+  meta/byline rows under titles get `titleShift(move)` so title + info
+  move together when adjacent.
 
-No Gradle builds allowed in this environment (CI compiles on push).
-Hand-audited: balanced delimiters in all four files (brace/paren/bracket),
-no stale references to removed symbols, imports matched to usage, Material3
-APIs are basic (Checkbox/TextButton/Surface — safe on the Compose BOM),
-lambda-rule compliance (no @Composable calls inside click/remember
-lambdas), SQL valid for Room @Query.
+**D. Settings — cover fetch → Experiments + Cancel (`BookCoverFetch.kt`,
+`SettingsHubScreen.kt`, `UserExperimentsScreen.kt`):**
+- `BookCoverFetchRow` moved out of the Safety & support hub into
+  `UserExperimentsScreen` (new "Content tools" section) with a Cancel pill
+  that cancels the in-flight fetch job (whatever was cached stays); dead
+  hub special-case branches and the ROUTE const deleted.
 
-### Follow-ups (next request: "save your take" redesign)
-
-- The Cabinet's category panel could later learn typo-tolerant search like
-  the Topic Database's (currently substring-only) — deferred as out of
-  scope.
-- Wildcard lane fallback still shares `TopicJsonLoader.load()` (merge
-  semantics) — fine, noted.
-- `ANALYSIS.md` at repo root is a pre-existing unrelated untracked file —
-  not committed.
+### Notes
+- Changelog + `app/AGENTS.md` (v317 bullet) updated. CI compiles on push;
+  delimiters/imports/APIs hand-audited across the six files.
+- Next up (user's queue): "save your take" redesign.

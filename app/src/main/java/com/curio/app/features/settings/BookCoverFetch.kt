@@ -55,9 +55,6 @@ import kotlin.coroutines.resume
  */
 object BookCoverFetch {
 
-    /** Local route marker: the Settings hub renders an inline progress row for
-     *  this instead of navigating, so it can never hit the NavHost. */
-    const val ROUTE = "book-cover-fetch"
     const val TITLE = "Book covers"
     const val IDLE_SUBTITLE = "Tap to fetch cover images so books show offline"
 
@@ -114,36 +111,48 @@ object BookCoverFetch {
     }
 }
 
-/** The Settings hub row — tap to start the one-by-one fetch; live counter +
- *  progress bar while it runs. */
+/** The Settings row (rendered in Experiments) — tap to start the one-by-one
+ *  fetch; live counter + progress bar while it runs, and a Cancel pill to
+ *  stop it early (whatever was already cached stays cached). */
 @Composable
 fun BookCoverFetchRow() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    var job by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
     var running by remember { mutableStateOf(false) }
+    var stopped by remember { mutableStateOf(false) }
     var done by remember { mutableIntStateOf(0) }
     var total by remember { mutableIntStateOf(0) }
     var failed by remember { mutableIntStateOf(0) }
 
     val subtitle = when {
         running -> if (total > 0) "Fetching $done / $total…" else "Fetching covers…"
+        stopped -> if (failed > 0) "Stopped · $done cached · $failed failed"
+            else "Stopped · $done covers cached"
         done > 0 -> if (failed > 0) "✓ $done covers cached · $failed failed"
-        else "✓ $done covers cached"
+            else "✓ $done covers cached"
         else -> BookCoverFetch.IDLE_SUBTITLE
     }
 
     Surface(
         onClick = {
             if (running) return@Surface
+            stopped = false
             running = true
             done = 0
             total = 0
             failed = 0
-            scope.launch {
-                BookCoverFetch.fetchAll(context) { d, t, f ->
-                    done = d; total = t; failed = f
+            job = scope.launch {
+                try {
+                    BookCoverFetch.fetchAll(context) { d, t, f ->
+                        done = d; total = t; failed = f
+                    }
+                } catch (_: kotlinx.coroutines.CancellationException) {
+                    stopped = true
+                } finally {
+                    running = false
+                    job = null
                 }
-                running = false
             }
         },
         color = Color.Transparent,
@@ -170,7 +179,22 @@ fun BookCoverFetchRow() {
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                if (!running && done > 0) {
+                if (running) {
+                    // v316b — cancel the in-flight fetch early; whatever was
+                    // already cached stays on disk (tap again to continue).
+                    Surface(
+                        onClick = { job?.cancel() },
+                        shape = RoundedCornerShape(50),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh
+                    ) {
+                        Text(
+                            "Cancel",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                        )
+                    }
+                } else if (done > 0) {
                     Text(
                         "$done cached",
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
@@ -178,6 +202,7 @@ fun BookCoverFetchRow() {
                     )
                 }
             }
+
             if (running && total > 0) {
                 Spacer(Modifier.height(8.dp))
                 LinearProgressIndicator(

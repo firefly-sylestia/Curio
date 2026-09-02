@@ -156,6 +156,14 @@ fun UserExperimentsScreen(navController: NavController) {
                 }
             }
 
+            // Content tools — non-toggle experiments
+            item { CurioSectionLabel("Content tools") }
+            item {
+                CurioSettingsCard(shadowElevation = 0.dp) {
+                    BookCoverFetchRow()
+                }
+            }
+
             // Pet & explore
             item { CurioSectionLabel("Pet & explore") }
             item {

@@ -1391,6 +1391,52 @@ app/src/main/java/com/curio/app/
   categories selected OR entry's category in the set); single lane keeps
   the wash + subtitle, multi-select uses the neutral wash + "N categories".
   Dead `CabinetStickyChipBar`/`CabinetChipPop`/`FilterChipLite` deleted.
+- **v317 — merged book-notes sheet (Synopsis | Chapters tabs, expands to
+  top) + "Also in" from All + share-card editor overhaul + cover fetch
+  under Experiments.** (User: synopsis should show only 5 lines on the
+  reveal page with the FULL text in the bottom sheet; merge chapters +
+  synopsis into ONE sheet that isn't small and expands to the top; the
+  Topic Browser hides "Also in" when searching from All; share sheet:
+  drop the "Share this topic" header while editing, haptics on the
+  sliders, the Paper quick-fact box must change height as you type and
+  the caret must sit on the real glyphs, T/F/M/B colored handles → ONE
+  coffee move grip with a darker coffee border, the chip grip must ride
+  the ACTUAL pill (it sat at a guessed corner), the bulb icon must move
+  with the chip, rule lines above quick facts must travel with the fact
+  box, title + info must move as one when adjacent; book-cover fetch
+  needs a Cancel and lives in Experiments.) (1) **Reveal** —
+  `BookSynopsisCard` clamps the page preview to `maxLines = 5` (teaser +
+  "Read the full synopsis →"); `BookNotesSheet` is now ONE tall sheet
+  (body `fillMaxHeight(0.92f)`, expand-to-top, inner body scrolls) hosting
+  BOTH sections behind segmented Synopsis | Chapters pills — the tab it
+  opens on mirrors what you tapped, and switching happens in place. The
+  `BookChapterChip` 118dp 2-line preview boxes stay on the page.
+  (2) **Topic Browser** — the "Also in" suggestion row now ALSO renders
+  when searching from ALL (it was gated on a lane being selected): from
+  All it surfaces the lanes the flat results came from (top 6 by hit
+  count). (3) **Share-card editor** — sheet header + style label + dots
+  hide while editing; `SizeSliderColumn` haptics tick per snap step
+  (thumb crossing) + confirm on release (haptics captured in the
+  COMPOSABLE scope, not inside the Slider's plain callbacks); the Paper
+  + Vinyl fact fields report the GLYPH BOX (inner Text, inside the
+  FrostPane/cream padding) so the overlay `BasicTextField` (now
+  `maxLines = 24` + `heightIn(min)` auto-grow) types exactly on the
+  letters with a matching caret; `EditBoundsCallbacks.onFactStyle` lets
+  every style report the TextStyle it actually used so the invisible
+  field wraps/advances identically; the old per-box T/F/M/B letter
+  handles are GONE — one `MoveHandle` (DragHandle icon, `CoffeeChromeDeep`
+  circle + white border) + `CoffeeChrome`/`CoffeeChromeDeep` box borders;
+  the badge grip anchors to the reported PILL bounds (full-width chip
+  rows report the pill Surface, not the row — a full-width rect would
+  zero the drag clamp), and the pill + bulb move as ONE group (moveBadge
+  on the row, onBadge on the pill) so the bulb rides the chip; accent
+  rules above quick facts (Vinyl underline, Editorial hairline, Minimal
+  rule) get `factShift(move)` so they travel with the F drag; meta rows
+  under titles get `titleShift(move)` so title + byline move together.
+  (4) **Settings** — `BookCoverFetchRow` moved from the Safety & support
+  hub into `UserExperimentsScreen` (new "Content tools" section) with a
+  Cancel pill that cancels the in-flight job (cached stays); dead
+  hub special-case branches + ROUTE const deleted.
 - **v142 — Manage Categories full-bleed bottom; Pet Designer floating
   pill bar + fade open; first-run "Pick a lane" wired to the Spin picker.**
   (1) **Manage Categories full-bleed** (per user, confirmed): the NavHost

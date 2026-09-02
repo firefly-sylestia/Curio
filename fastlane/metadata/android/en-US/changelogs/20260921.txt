@@ -1,3 +1,8 @@
+FIX: Topic Reveal — the synopsis on the page is now a tidy 5-line teaser; tap it for the full text in one tall sheet that also holds every chapter (Synopsis | Chapters tabs, switch in place).
+FIX: Topic Browser — searching from All now shows "Also in" pills so you can see and jump to which categories matched your search.
+FIX: Share card editor — editing takes over the whole sheet (no title overhead), the sliders tick as you snap through sizes, the quick-fact box grows as you type with the caret exactly on the text, and the old T/F/M/B handles are now one coffee-colored move grip.
+FIX: Share card editor — the category chip grip now sits on the actual pill wherever it is, and dragging it carries the bulb icon along; rules above the quick fact (and title + byline when together) move as one with their box.
+ADD: Settings — the Book covers fetch moved under Experiments with a Cancel button, so you can stop the download early and keep what's cached.
 FIX: Topic Reveal — topics you've never opened now show their info instantly too (indexed lookups + a memory index, no second-long wait), and brand-new topics added to the catalog are picked up and saved on-device.
 ADD: Cabinet — category filters now use the new panel: tap Categories for a collapsible panel with its own search box and checkbox multi-select, and your chosen lanes show as chips you can remove with one tap.
 ADD: Book notes on Topic Reveal — the slim chapter/synopsis dialog is now a full bottom sheet with the book cover, all chapters in a chip row, and in-sheet chapter switching (tap any chip to jump straight to that chapter).

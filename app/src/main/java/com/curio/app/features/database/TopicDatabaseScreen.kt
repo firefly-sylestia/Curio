@@ -729,16 +729,30 @@ fun TopicDatabaseScreen(navController: NavController) {
                             )
                         }
                     }
-                    // v313 — SEARCH suggestions: pills for other categories
-                    // that also match the query, so results never hide behind
-                    // the stale selected-lane filters. Tap = toggle that lane.
-                    if (needle.isNotEmpty() && effectiveCats.isNotEmpty()) {
-                        val others = catHitCounts
-                            .filterKeys { it !in effectiveCats }
-                            .mapNotNull { (id, n) ->
-                                CurioCategories.all.firstOrNull { it.id == id }?.let { it to n }
-                            }
-                            .sortedByDescending { it.second }
+                    // v313/v314 — SEARCH suggestions: pills for the lanes that
+                    // also match the query. With lanes selected they list the
+                    // OTHER lanes whose results hide behind the filter; from
+                    // ALL (v316b) they show the lanes the flat results came
+                    // from — so results never hide and you can always see /
+                    // jump to which categories matched. Tap = toggle that lane
+                    // into the active set.
+                    if (needle.isNotEmpty()) {
+                        val others = if (effectiveCats.isNotEmpty()) {
+                            catHitCounts
+                                .filterKeys { it !in effectiveCats }
+                                .mapNotNull { (id, n) ->
+                                    CurioCategories.all.firstOrNull { it.id == id }?.let { it to n }
+                                }
+                        } else {
+                            // Searching from All: surface the lanes with the
+                            // most hits (capped so the row stays scannable).
+                            catHitCounts
+                                .mapNotNull { (id, n) ->
+                                    CurioCategories.all.firstOrNull { it.id == id }?.let { it to n }
+                                }
+                                .sortedByDescending { it.second }
+                                .take(6)
+                        }.sortedByDescending { it.second }
                         if (others.isNotEmpty()) {
                             item(key = "search-suggestions") {
                                 // v314 — multi-select: tapping a pill toggles that
