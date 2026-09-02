@@ -61,6 +61,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -218,6 +219,8 @@ fun availableStylesForFamily(family: CategoryFamily, topicName: String = ""): Li
 const val QUICK_FACT_ID = "quick_fact"
 const val CUSTOM_FACT_ID = "custom_fact"
 const val NO_FACT_ID = "no_fact"
+
+enum class ShareCardResizeTarget { TITLE, FACT }
 
 private fun quoteFontSize(length: Int): TextUnit = when {
     length > 900 -> 15.sp; length > 650 -> 17.sp; length > 420 -> 19.sp
@@ -5260,6 +5263,8 @@ private fun ArrangeableCard(
     editFact: String,
     onFactChange: (String) -> Unit,
     onToggleEdit: () -> Unit,
+    onSelectResizeTarget: (ShareCardResizeTarget) -> Unit = {},
+    selectedResizeTarget: ShareCardResizeTarget = ShareCardResizeTarget.TITLE,
     move: ShareCardMove = ShareCardMove(),
     onMove: (ShareCardMove) -> Unit = {},
     card: @Composable (EditBoundsCallbacks) -> Unit
@@ -5316,7 +5321,8 @@ private fun ArrangeableCard(
                                 .offset(t.left.dp, t.top.dp)
                                 .width(t.width.dp)
                                 .height(t.height.dp)
-                                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.60f), RoundedCornerShape(8.dp))
+                                .clickable { onSelectResizeTarget(ShareCardResizeTarget.TITLE) }
+                                .border(1.dp, if (selectedResizeTarget == ShareCardResizeTarget.TITLE) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), RoundedCornerShape(8.dp))
                         )
                         // Move handle for the title — clamped so the box never
                         // leaves the card.
@@ -5351,7 +5357,8 @@ private fun ArrangeableCard(
                             .width(f.width.dp)
                             .height(f.height.dp)
                             .padding(6.dp)
-                            .border(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.60f), RoundedCornerShape(8.dp)),
+                            .onFocusChanged { if (it.isFocused) onSelectResizeTarget(ShareCardResizeTarget.FACT) }
+                            .border(1.dp, if (selectedResizeTarget == ShareCardResizeTarget.FACT) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.tertiary.copy(alpha = 0.35f), RoundedCornerShape(8.dp)),
                         decorationBox = { inner ->
                             Box(Modifier.fillMaxWidth()) {
                                 if (editFact.isBlank()) Text("Edit the quick fact…", style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
@@ -5443,6 +5450,7 @@ fun TopicShareSheet(
     // Plain remember: edits are a per-share tweak (not Bundle-saveable) and the
     // modal resets them each time, so they should not survive a rotation.
     var editMode by remember { mutableStateOf(false) }
+    var selectedResizeTarget by remember { mutableStateOf(ShareCardResizeTarget.TITLE) }
     var customizeOpen by remember { mutableStateOf(false) }
     var bodyScale by remember { mutableStateOf(1f) }
     var move by remember { mutableStateOf(ShareCardMove()) }
@@ -5566,6 +5574,8 @@ fun TopicShareSheet(
                                 editFact = editedFact ?: (if (activeId == CUSTOM_FACT_ID) customText else activeSource.text),
                                 onFactChange = { editedFact = it },
                                 onToggleEdit = { editMode = !editMode },
+                                onSelectResizeTarget = { selectedResizeTarget = it },
+                                selectedResizeTarget = selectedResizeTarget,
                                 move = move,
                                 onMove = { move = it }
                             ) { cb ->
@@ -5792,19 +5802,19 @@ fun TopicShareSheet(
                     // Row 2: Width + Height sliders
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Width", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("${if (selectedResizeTarget == ShareCardResizeTarget.TITLE) "Title" else "Fact"} width", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Slider(
-                                value = move.titleWidthFrac,
-                                onValueChange = { move = move.copy(titleWidthFrac = it) },
+                                value = if (selectedResizeTarget == ShareCardResizeTarget.TITLE) move.titleWidthFrac else move.factWidthFrac,
+                                onValueChange = { value -> move = if (selectedResizeTarget == ShareCardResizeTarget.TITLE) move.copy(titleWidthFrac = value) else move.copy(factWidthFrac = value) },
                                 valueRange = 0.3f..1f,
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Height", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("${if (selectedResizeTarget == ShareCardResizeTarget.TITLE) "Title" else "Fact"} height", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Slider(
-                                value = move.titleHeightFrac,
-                                onValueChange = { move = move.copy(titleHeightFrac = it) },
+                                value = if (selectedResizeTarget == ShareCardResizeTarget.TITLE) move.titleHeightFrac else move.factHeightFrac,
+                                onValueChange = { value -> move = if (selectedResizeTarget == ShareCardResizeTarget.TITLE) move.copy(titleHeightFrac = value) else move.copy(factHeightFrac = value) },
                                 valueRange = 0.35f..2.5f,
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -5813,7 +5823,7 @@ fun TopicShareSheet(
                     // Row 3: Done + Reset icon chips
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
                         // Reset — icon chip
-                        Surface(onClick = { editedTitle = null; editedFact = null; bodyScale = 1f; move = ShareCardMove() }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(36.dp)) {
+                        Surface(onClick = { editedTitle = null; editedFact = null; bodyScale = 1f; selectedResizeTarget = ShareCardResizeTarget.TITLE; move = ShareCardMove() }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(36.dp)) {
                             Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 CurioIcon(name = CurioIcons.Refresh, tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
                                 Text("Reset", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
