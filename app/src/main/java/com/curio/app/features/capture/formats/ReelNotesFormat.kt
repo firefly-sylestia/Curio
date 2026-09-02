@@ -50,7 +50,10 @@ fun ReelNotesFormat(
     tint: Color,
     onCanSaveChange: (Boolean) -> Unit,
     onDataChanged: (CaptureData?) -> Unit = {},
-    initialData: CaptureData.ReelNotes? = null
+    initialData: CaptureData.ReelNotes? = null,
+    // The host wires this to the full-screen Lightbox so tapping an attached
+    // image thumb opens it instead of sitting dead (was "Phase 4" TODO).
+    onImageTap: ((String) -> Unit)? = null
 ) {
     val context = LocalContext.current
     // v158 — the dictation mic shows only while the Voice-to-text settings
@@ -241,7 +244,7 @@ fun ReelNotesFormat(
                         accent = accent,
                         tint = tint,
                         imageUri = uri,
-                        onClick = { /* TODO Phase 4: open lightbox */ },
+                        onClick = { onImageTap?.invoke(uri) },
                         onRemove = { imageUris = imageUris.filterIndexed { idx, _ -> idx != i } }
                     )
                 }

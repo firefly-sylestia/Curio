@@ -75,7 +75,7 @@ app/src/main/java/com/curio/app/
 - `namespace = "com.curio.app"` (new package, separate from FieldMind)
 - `applicationId = "com.curio.app"` (new install, separate from FieldMind; users install Curio as a separate app)
 - `minSdk = 26` (Android 8.0+ — all release APKs are labeled with this), `targetSdk = 37`, `compileSdk = 37`
-- `versionName = "1.1.0"` (default; bumped to 1.1.0 in v113 for the cosmic-icon release — the release workflow overrides it with the git tag minus the leading `v`, e.g. tag `v1.2.3` → `1.2.3`), `versionCode = 20260920` (date-based, +1 over the previous 20260919; unchanged by tags)
+- `versionName = "1.1.0"` (default; bumped to 1.1.0 in v113 for the cosmic-icon release — the release workflow overrides it with the git tag minus the leading `v`, e.g. tag `v1.2.3` → `1.2.3`), `versionCode = 20260921` (date-based, +1 over the previous 20260920; unchanged by tags)
 - No product flavors; Curio builds as a single flavorless Android application
 - Debug builds append `.debug` to `applicationId` → `com.curio.app.debug` so both can coexist on one device
 - Bundles `material_symbols_outlined.ttf` + `geom.ttf` + `lora.ttf` (v35 — the Lora editorial serif, OFL, variable wght 400–700, ~212KB) directly in `app/src/main/res/font/`; none depend on another module or source tree
@@ -356,6 +356,24 @@ app/src/main/java/com/curio/app/
     the effective list so removing a default suggestion actually removes
     it (was a no-op against an empty user list); mix save/delete already
     recomposed via `savedMixesState`.
+- **v3xx9 — capture image thumbs open the Lightbox + dead-picker cleanup.**
+  Audit follow-up ("fix 1 and 2"): (1) **Dead image tap fixed** —
+  `ImageThumb` taps in ReelNotes / Marginalia / FieldNotes (hosted by
+  `SaveCaptureScreen` and `OpenNotebookFormat`'s sub-formats) now navigate
+  to the full-screen LIGHTBOX via a new `onImageTap` hook threaded from
+  `SaveCaptureScreen` (`navController.navigate(CurioRoutes.lightbox(url))`
+  with `launchSingleTop`; photo-picker URIs ride `LightboxTarget`
+  byte-for-byte). The three dead/empty onClick lambdas (one a literal
+  "TODO Phase 4") are gone; null-placeholder slots skip. (2) **Dead code
+  deleted:** the unused legacy `CategoryPickerSheet` (~480 lines) in
+  SpinScreen, the unused `PickerPageTab` in CategoryPickerScreen, and
+  the orphaned `getRecentCategories`/`noteRecentCategory` +
+  `KEY_RECENT_CATEGORIES` in AppPreferences (Continue Exploring uses
+  `CurioPassport.allProgress`, not the recent list — the API had zero
+  callers). NOTE: the historical v26/v196 entries describing the legacy
+  Spin `CategoryPickerSheet` describe REMOVED code — the live picker
+  surfaces are the new picker (default) and the classic toggle
+  (`CategoryPickerContent`).
 - **v3xx8 — page-2 mixes cards redesigned + pinned hints removed.** User:
   "remove the hold for options hint for pinned … redesign the your mixes
   cards looks they are bad". (1) The Pinned section label hint ("hold

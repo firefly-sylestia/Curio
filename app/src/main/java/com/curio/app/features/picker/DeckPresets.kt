@@ -93,10 +93,10 @@ val deckPresets = listOf(
 /**
  * Small pill chip for a quick-mix preset.
  *
- * v83 — theme-aware + DYNAMIC colors like [com.curio.app.features.picker.PickerPageTab]:
- * callers pass the selected fill / content inks from their context (banner
- * ink on a tear hero, category accent on the wash). The preset glyph rides
- * the same ink, so the icon color follows the selection state too.
+ * v83 — theme-aware + DYNAMIC colors: callers pass the selected fill /
+ * content inks from their context (banner ink on a tear hero, category
+ * accent on the wash). The preset glyph rides the same ink, so the icon
+ * color follows the selection state too.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -111,7 +111,7 @@ fun PickerPresetChip(
     idleFill: Color? = null
 ) {
     val shape = RoundedCornerShape(50)
-    // v86 — DARK-aware default idle fill (same fix as PickerPageTab): the
+    // v86 — DARK-aware default idle fill (same fix as the tab pills): the
     // old default lifted toward curioPillLift() (WHITE in dark) → near-
     // white idle chips with light-grey text on the black sheet. Dark now
     // stays a dark raised glass; light keeps the cream lift.

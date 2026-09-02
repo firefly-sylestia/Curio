@@ -62,7 +62,10 @@ fun FieldNotesFormat(
     tint: Color,
     onCanSaveChange: (Boolean) -> Unit,
     onDataChanged: (CaptureData?) -> Unit = {},
-    initialData: CaptureData.FieldNotes? = null
+    initialData: CaptureData.FieldNotes? = null,
+    // Host wires this to the Lightbox — the attached photo thumb opens it
+    // on tap (the old onClick was an empty lambda).
+    onImageTap: ((String) -> Unit)? = null
 ) {
     val context = LocalContext.current
     // v158 — the dictation mic shows only while the Voice-to-text settings
@@ -331,7 +334,7 @@ fun FieldNotesFormat(
                         accent = accent,
                         tint = tint,
                         imageUri = uri,
-                        onClick = { },
+                        onClick = { if (uri != null) onImageTap?.invoke(uri) },
                         onRemove = { imageUris = imageUris.filterIndexed { i, _ -> i != index } }
                     )
                 }

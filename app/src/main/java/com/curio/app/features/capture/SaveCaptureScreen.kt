@@ -149,6 +149,12 @@ fun SaveCaptureScreen(
     editEntryId: String? = null
 ) {
     val context = LocalContext.current
+    // v27 — tap an attached image thumb to open the full-screen Lightbox
+    // (photo-picker URIs stay byte-for-byte via LightboxTarget). singleTop
+    // so swift double-taps never stack a copy.
+    val openLightbox: (String) -> Unit = { url ->
+        navController.navigate(CurioRoutes.lightbox(url)) { launchSingleTop = true }
+    }
 
     // Edit mode: load the saved entry so its data can prefill the format.
     // Falls back to a sample entry (not in the DB) so preview boards can be
@@ -900,7 +906,8 @@ fun SaveCaptureScreen(
                             activeIndex = activeIndex,
                             // Reuse the saved entry's id-derived seed so the editor's
                             // watermark pattern matches the saved view exactly.
-                            boardSeed = editEntryId?.hashCode()
+                            boardSeed = editEntryId?.hashCode(),
+                            onImageTap = openLightbox
                         )
                     }
 
@@ -1517,7 +1524,8 @@ private fun FormatBodyForCategory(
     category: CurioCategory,
     sections: SnapshotStateList<CaptureSectionState>,
     activeIndex: Int,
-    boardSeed: Int? = null
+    boardSeed: Int? = null,
+    onImageTap: (String) -> Unit = {}
 ) {
     val current = sections.getOrNull(activeIndex)
     if (current != null) {
@@ -1537,13 +1545,15 @@ private fun FormatBodyForCategory(
                         category.themedAccent(), category.tint,
                         { current.canSave = it },
                         { current.data = it?.withMood(current.mood) },
-                        initialData = current.seed as? CaptureData.ReelNotes
+                        initialData = current.seed as? CaptureData.ReelNotes,
+                        onImageTap = onImageTap
                     )
                     CaptureFormat.Marginalia -> MarginaliaFormat(
                         category.themedAccent(), category.tint,
                         { current.canSave = it },
                         { current.data = it?.withMood(current.mood) },
-                        initialData = current.seed as? CaptureData.Marginalia
+                        initialData = current.seed as? CaptureData.Marginalia,
+                        onImageTap = onImageTap
                     )
                     CaptureFormat.GalleryWall -> GalleryWallFormat(
                         category.themedAccent(), category.tint,
@@ -1556,14 +1566,16 @@ private fun FormatBodyForCategory(
                         category.themedAccent(), category.tint,
                         { current.canSave = it },
                         { current.data = it?.withMood(current.mood) },
-                        initialData = current.seed as? CaptureData.FieldNotes
+                        initialData = current.seed as? CaptureData.FieldNotes,
+                        onImageTap = onImageTap
                     )
                     CaptureFormat.OpenNotebook -> OpenNotebookFormat(
                         category.themedAccent(), category.tint,
                         { current.canSave = it },
                         { current.data = it?.withMood(current.mood) },
                         initialData = current.seed as? CaptureData.OpenNotebook,
-                        boardSeed = boardSeed
+                        boardSeed = boardSeed,
+                        onImageTap = onImageTap
                     )
                 }
             }

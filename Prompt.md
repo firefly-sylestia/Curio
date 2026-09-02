@@ -44,3 +44,14 @@ Verification: compile/build/lint forbidden in this env (CI validates on push). B
 - [x] Changelog (20260921.txt) + DOX pass (app/AGENTS.md v3xx7).
 - [x] Follow-up: pinned hints removed, mixes cards redesigned (v3xx8), changelog update.
 - [x] Commit & push.
+
+### Follow-up (same request): full-app audit → user picked fixes 1 + 2
+
+Delivered a code-verified UX audit (dead code, dead tap, pager default-page trap, Surprise-me no-undo, Continue-exploring data confusion, hidden Experiments, doc drift, duplicate picker/theme systems). User: "fix 1 and 2".
+
+1. **Dead code removed:** legacy never-called `CategoryPickerSheet` (~480 lines) deleted from SpinScreen (verified range-only deletion + balance checks); unused `PickerPageTab` removed from CategoryPickerScreen; orphaned `getRecentCategories` / `noteRecentCategory` / `KEY_RECENT_CATEGORIES` removed from AppPreferences; stale `PickerPageTab` comment refs in DeckPresets updated.
+2. **Dead image tap fixed:** `ImageThumb` in ReelNotes / Marginalia / FieldNotes now open the full-screen Lightbox — new `onImageTap` hook threaded `SaveCaptureScreen → FormatBodyForCategory → formats (+ OpenNotebookFormat sub-formats)` with `launchSingleTop`; photo-picker URIs go through `LightboxTarget` byte-for-byte. The "TODO Phase 4" / empty onClick lambdas are gone (verified 0 remaining; 16 hook wiring points).
+3. Doc drift fixed: AGENTS.md `versionCode` 20260920 → 20260921 (matches the current changelog). v3xx9 DOX entry added.
+
+Verification: brace/paren/bracket balance OK on all 9 touched files; scope check (openLightbox + call site both in SaveCaptureScreen); imageUris types confirmed `List<String>` (null-guards compile); seam read after SpinScreen range deletion; no compile/build run (forbidden — CI validates on push). Deletions done as verified line-range removals (not sed insertion).
+- [x] Commit & push (lightbox + dead-code cleanup).

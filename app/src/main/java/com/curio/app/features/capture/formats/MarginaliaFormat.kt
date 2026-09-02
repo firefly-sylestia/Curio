@@ -66,7 +66,10 @@ fun MarginaliaFormat(
     tint: Color,
     onCanSaveChange: (Boolean) -> Unit,
     onDataChanged: (CaptureData?) -> Unit = {},
-    initialData: CaptureData.Marginalia? = null
+    initialData: CaptureData.Marginalia? = null,
+    // Host wires this to the Lightbox — image thumbs open it on tap (the
+    // old onClick sat dead). Null-safe: placeholder slots (null URI) skip.
+    onImageTap: ((String) -> Unit)? = null
 ) {
     // v158 — the dictation mic shows only while the Voice-to-text settings
     // toggle is on (same experiment gate as the sound bite note box).
@@ -285,7 +288,7 @@ fun MarginaliaFormat(
                             accent = accent,
                             tint = tint,
                             imageUri = uri,
-                            onClick = { /* Phase 4: lightbox */ },
+                            onClick = { if (uri != null) onImageTap?.invoke(uri) },
                             onRemove = {
                                 imageUris = imageUris.filterIndexed { idx, _ -> idx != i }
                             }
