@@ -12478,7 +12478,7 @@
     "name": "Conifers",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The needle-leafed evergreens that own the cold northern forests.",
+    "teaser": "Conifers are cone-bearing seed plants, the most species-rich gymnosperm group with about 630 species. They include pines, spruces, firs, and redwoods. Conifers evolved around 300 million years ago and dominated before flowering plants arose. Most are evergreen, retaining needle-like leaves year-round. Coniferous forests cover about 15 percent of Earth's land surface.",
     "byline": "The winter evergreens",
     "tags": [
       "trees",
@@ -12498,7 +12498,7 @@
     "name": "The Taiga",
     "categoryId": "BIOLOGY",
     "subtype": "Ecology",
-    "teaser": "The vast boreal forest belt that circles the planet's north.",
+    "teaser": "The taiga, or boreal forest, is the world's largest land biome, spanning 17 million square kilometers across North America, Europe, and Asia. It contains about 30 percent of all trees on Earth and stores 272 billion tonnes of carbon. Summers are short but can exceed 30 degrees Celsius, while winters plunge to minus 50 degrees. Permafrost underlies much of the northern taiga.",
     "byline": "The green girdle",
     "tags": [
       "forests",
@@ -12518,7 +12518,7 @@
     "name": "The Temperate Forest",
     "categoryId": "BIOLOGY",
     "subtype": "Ecology",
-    "teaser": "The four-season woodlands with the world's best-known trees.",
+    "teaser": "Temperate forests receive 750 to 1500 millimeters of rain annually and experience distinct seasons. They support deciduous trees like oak, maple, and beech that shed leaves in autumn. A single acre can contain 50 to 100 tree species. These forests were once widespread across North America and Europe but have been reduced to fragments by agriculture and urban development.",
     "byline": "The seasonal woods",
     "tags": [
       "forests",
@@ -12538,7 +12538,7 @@
     "name": "Why Leaves Fall",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The chemical untangling behind autumn's color show and leaf drop.",
+    "teaser": "Deciduous trees shed leaves in autumn through abscission, triggered by shortening day length and declining temperatures. Before falling, trees reabsorb 50 percent of nitrogen and phosphorus from leaves. The spectacular red and orange colors come from anthocyanins produced in autumn and carotenoids that were masked by chlorophyll all summer.",
     "byline": "The autumn curtain",
     "tags": [
       "trees",
@@ -12558,7 +12558,7 @@
     "name": "Plants That Fight Back",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "Chemical warfare, thorns, and warning signals — the plant arsenal.",
+    "teaser": "Plants have evolved sophisticated defense mechanisms. Acacias increase tannin production within minutes of herbivore damage, making leaves toxic. Wild tobacco produces nicotine. Some plants release volatile chemicals that attract predators of herbivores. The mimosa plant folds its leaves when touched, a response involving rapid water movement between cells.",
     "byline": "The green defenses",
     "tags": [
       "plants",
@@ -12578,7 +12578,7 @@
     "name": "The Sensitive Plant",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "A plant that folds its leaves when touched.",
+    "teaser": "Mimosa pudica folds its leaves in 0.08 seconds when touched, a thigmonastic response involving rapid water loss from pulvinus cells at leaf bases. The folding deters herbivores and reduces water loss. The plant can learn to ignore repeated harmless stimuli, habituating after 50 to 60 touches. This is one of the fastest plant movements in nature.",
     "byline": "The shy plant",
     "tags": [
       "plants",
@@ -12598,7 +12598,7 @@
     "name": "Flytrap Hunting",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "How a plant lures, senses, and digests an insect meal.",
+    "teaser": "Venus flytraps catch 5 to 8 insects per plant per year, supplementing nitrogen-poor soil. The trap closes in 100 milliseconds when two trigger hairs fire within 20 seconds, a counting mechanism preventing false alarms. Digestive enzymes take 5 to 12 days to dissolve prey. Only about 3 percent of the plants' nutrition comes from captured insects.",
     "byline": "The green hunter",
     "tags": [
       "plants",
@@ -12618,7 +12618,7 @@
     "name": "Pitcher Plant Soup",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The digestive fluid that dissolves insects inside a leaf-shaped vase.",
+    "teaser": "Pitcher plants attract prey with nectar, color, and scent, then trap them in slippery-walled containers filled with digestive fluid. The tropical pitcher Nepenthes rajah can hold 3 liters of fluid and has trapped rats. Some pitcher plants host specialized communities of insects, spiders, and even a mosquito that breeds in the pitchers while feeding on drowned prey.",
     "byline": "The liquid trap",
     "tags": [
       "plants",
@@ -12638,7 +12638,7 @@
     "name": "Sundews",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "Glittering plants that trap insects with sticky tentacles.",
+    "teaser": "Sundews, genus Drosera, trap insects with glistening mucilage-tipped tentacles on their leaves. When prey touches the sticky droplets, tentacles slowly curl inward over minutes, engulfing the insect. Over 190 species exist on every continent except Antarctica. Charles Darwin studied sundews extensively, writing that they showed plant intelligence rivalling animal behavior.",
     "byline": "The glittering traps",
     "tags": [
       "plants",
@@ -12658,7 +12658,7 @@
     "name": "Butterworts",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The greasy-leaved plants that eat tiny insects with sticky enzymes.",
+    "teaser": "Butterworts, genus Pinguicula, are carnivorous plants that trap gnats and other small insects on their sticky, flypaper-like leaves. The leaves produce mucilage from glands and secrete digestive enzymes to absorb nutrients. There are about 80 species worldwide, many growing in nutrient-poor bogs. Mexican butterworts go dormant in dry seasons, forming non-carnivorous succulent rosettes.",
     "byline": "The sticky leaves",
     "tags": [
       "plants",
@@ -12678,7 +12678,7 @@
     "name": "Epiphytes",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "Plants that live on trees without stealing their sap.",
+    "teaser": "Epiphytes are plants that grow on other plants without parasitizing them, using them for physical support to reach sunlight. About 28000 orchid species and 25000 bromeliad species are epiphytic. In tropical cloud forests, epiphytes can contain more species than the host trees themselves. They obtain water and nutrients from rain, air, and debris trapped around their roots.",
     "byline": "The sky gardens",
     "tags": [
       "plants",
@@ -12698,7 +12698,7 @@
     "name": "Strangler Figs",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "Seeds that sprout in treetops and slowly envelop their host.",
+    "teaser": "Strangler figs begin life as seeds dropped by birds on canopy branches. Their roots grow downward, eventually enveloping and often killing the host tree over 50 to 100 years. A single strangler fig can produce over 100000 fruits annually, feeding hundreds of bird, bat, and mammal species. They are keystone species in tropical forests, fruiting when few other trees do.",
     "byline": "The tree huggers",
     "tags": [
       "plants",
@@ -12718,7 +12718,7 @@
     "name": "The Banyan Tree",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "A single tree that spreads into a grove with pillar-like aerial roots.",
+    "teaser": "The banyan tree, Ficus benghalensis, sends down aerial roots from its branches that grow into secondary trunks, allowing a single tree to spread over hectares. The Great Banyan Tree in Kolkata covers 14500 square meters with over 3600 aerial trunks. The oldest known banyan is over 250 years old. In Hinduism, the banyan represents eternal life and is the national tree of India.",
     "byline": "The walking forest",
     "tags": [
       "trees",
@@ -12738,7 +12738,7 @@
     "name": "Bamboo",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The grass that grows three feet a day and flowers only every few decades.",
+    "teaser": "Bamboo is the fastest-growing plant on Earth, with some species growing 91 centimeters per day. It belongs to the grass family and flowers only once every 65 to 120 years before dying. Bamboo has a tensile strength comparable to steel and is used in construction across Asia. Giant pandas depend on bamboo for 99 percent of their diet, consuming 12 to 38 kilograms daily.",
     "byline": "The fast riser",
     "tags": [
       "plants",
@@ -12758,7 +12758,7 @@
     "name": "The Giant Sequoia",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The most massive trees on Earth, some alive when Rome fell.",
+    "teaser": "Giant sequoias, Sequoiadendron giganteum, are the world's largest trees by volume. The General Sherman Tree in California contains 1487 cubic meters of wood and weighs about 2100 tonnes. These trees can live over 3000 years, growing 60 to 85 meters tall. Their thick, fibrous bark can be over 60 centimeters thick and is resistant to fire, which actually helps their reproduction.",
     "byline": "The ancient giants",
     "tags": [
       "trees",
@@ -12778,7 +12778,7 @@
     "name": "The Oldest Living Things",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "Bristlecone pines and clonal colonies that have outlived empires.",
+    "teaser": "The oldest known living organisms include bristlecone pines over 4850 years old, Greenlandic clonal shrubs over 100000 years old, and Posidonia oceanica seagrass colonies estimated at 100000 years. Pando, a clonal quaking aspen in Utah, spans 43 hectares and may be 80000 years old, making it potentially the oldest living organism on Earth.",
     "byline": "The time survivors",
     "tags": [
       "trees",
@@ -12798,7 +12798,7 @@
     "name": "Pando",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The 80,000-year-old forest that is really one single tree.",
+    "teaser": "Pando, the trembling giant, is a single clonal organism of quaking aspen in Utah connected by a shared root system spanning 43 hectares. With an estimated age of 80000 years, it may be Earth's oldest and heaviest living organism at 6000 tonnes. Each of its 47000 stems is genetically identical. Recent research suggests Pando may be declining due to deer browsing and fire suppression.",
     "byline": "The trembling giant",
     "tags": [
       "trees",
@@ -12818,7 +12818,7 @@
     "name": "Root Systems",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The hidden half of plants — anchors, mines, and tiny rain collectors.",
+    "teaser": "A single rye plant can produce 14 billion root hairs with a combined length of over 10000 kilometers. Roots grow through soil at 1 to 5 centimeters per day. Mycorrhizal partnerships extend root absorption area by 100 to 1000 times. Some desert trees have taproots reaching 60 meters deep. Root networks of connected trees transfer nutrients and warning signals between individuals.",
     "byline": "The underground half",
     "tags": [
       "plants",
@@ -12838,7 +12838,7 @@
     "name": "How Trees Drink",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The physics of pulling water from roots to treetops without a pump.",
+    "teaser": "Trees pull water from roots to leaves through transpiration, creating negative pressure that lifts water 100 meters or more. The cohesion-tension theory explains how water molecules cling to each other through hydrogen bonding while adhering to xylem walls. A large oak can transpire 400 liters of water per day. Water moves through xylem at 1 to 2 meters per hour.",
     "byline": "The invisible straw",
     "tags": [
       "trees",
@@ -12858,7 +12858,7 @@
     "name": "Stomata",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The microscopic pores that let plants breathe — and decide when to close.",
+    "teaser": "Stomata are microscopic pores on leaf surfaces, typically 10 to 80 per square millimeter, that open to admit CO2 for photosynthesis and close to prevent water loss. Guard cells control opening by swelling with water during the day and shrinking at night. CAM plants open stomata only at night, reducing water loss by 90 percent compared to C3 plants.",
     "byline": "The breathing pores",
     "tags": [
       "plants",
@@ -12878,7 +12878,7 @@
     "name": "Why Leaves Are Green",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The pigment mix that makes plants green — and the physics behind it.",
+    "teaser": "Leaves appear green because chlorophyll absorbs red and blue light while reflecting green wavelengths. Chlorophyll a and b together absorb light in the 400 to 500 nanometer and 600 to 700 nanometer ranges. Plants appear green because absorbing all wavelengths would overheat their tissues. Carotenoids and anthocyanins provide additional photoprotection.",
     "byline": "The green reason",
     "tags": [
       "plants",
@@ -12898,7 +12898,7 @@
     "name": "The Hidden Pigments",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "Carotenoids and anthocyanins — the colors hiding inside green leaves.",
+    "teaser": "Leaves contain multiple pigments beyond chlorophyll. Carotenoids produce yellow and orange colors and protect against photo-oxidative damage. Anthocyanins create red and purple hues and may deter herbivores. Xanthophylls dissipate excess light energy as heat. These pigments are present all year but masked by chlorophyll until autumn leaf senescence reveals them.",
     "byline": "The autumn palette",
     "tags": [
       "plants",
@@ -12918,7 +12918,7 @@
     "name": "C4 and CAM Plants",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The photosynthesis upgrades that let plants survive heat and drought.",
+    "teaser": "C4 plants like corn and sugarcane separate initial carbon fixation and the Calvin cycle in different cell types, concentrating CO2 and reducing photorespiration. CAM plants like cacti open stomata at night to fix CO2, storing it as malate for daytime use. Both strategies evolved independently to reduce water loss in hot, dry environments.",
     "byline": "The water savers",
     "tags": [
       "plants",
@@ -12938,7 +12938,7 @@
     "name": "Pitcher Plant Residents",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The frogs and insects that live inside carnivorous pitchers unharmed.",
+    "teaser": "Some pitcher plants host specialized fauna inside their traps without digesting them. The mosquito Wyeomyia smithii breeds only in Sarracenia purpurea pitchers, where larvae feed on drowned prey and bacteria. Certain crab spiders, ants, and midges have evolved tolerance to pitcher fluids. These inquilines form miniature ecosystems within each pitcher.",
     "byline": "The tenants",
     "tags": [
       "plants",
@@ -12958,7 +12958,7 @@
     "name": "Mistletoe",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The semi-parasitic plant that grows from birds and steals water.",
+    "teaser": "Mistletoe is a hemiparasitic plant that attaches to host tree branches, drawing water and nutrients through a modified root called a haustorium. European mistletoe, Viscum album, grows on over 450 host species. It photosynthesizes but supplements nutrition from hosts. Birds spread seeds through droppings. In Norse mythology, mistletoe was sacred to the god Baldr.",
     "byline": "The holiday parasite",
     "tags": [
       "plants",
@@ -12978,7 +12978,7 @@
     "name": "Dodder",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "A vampire vine with no leaves that taps into its host's plumbing.",
+    "teaser": "Dodder, Cuscuta, is a parasitic plant that wraps around hosts and inserts haustoria to extract water, nutrients, and even genetic information. A single dodder plant can connect to multiple hosts simultaneously, transferring RNA between them. It has lost most of its chlorophyll genes through evolution. Dodder can detect host plants by volatile chemical signals, growing toward preferred species.",
     "byline": "The plant vampire",
     "tags": [
       "plants",
@@ -12998,7 +12998,7 @@
     "name": "The Corpse Flower",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The giant flower that smells like rotting meat to attract flies.",
+    "teaser": "Rafflesia arnoldii produces the world's largest individual flower at up to 1 meter diameter and 11 kilograms. Native to Southeast Asian rainforests, it is a parasitic plant with no stems, leaves, or roots. It smells like rotting flesh to attract carrion flies for pollination. The flower blooms for just 3 to 5 days every few years before dying.",
     "byline": "The stinking giant",
     "tags": [
       "plants",
@@ -13018,7 +13018,7 @@
     "name": "Rafflesia",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "A flower the size of a car tire with no stem, leaves, or roots.",
+    "teaser": "Rafflesia is a genus of over 40 parasitic plants that produce the largest individual flowers on Earth. R. arnoldii, discovered in 1818 on Sumatra, reaches 1 meter across. The plant lives entirely within its host vine, Volvocella, visible only when flowering. There is no conservation method since it cannot be cultivated outside its natural habitat.",
     "byline": "The parasitic giant",
     "tags": [
       "plants",
@@ -13038,7 +13038,7 @@
     "name": "The Titan Arum's Bloom",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "Years of waiting for one spectacular, stinking, two-day bloom.",
+    "teaser": "The titan arum, Amorphophallus titanum, produces the world's tallest unbranched inflorescence at up to 3 meters. The bloom generates heat up to 36 degrees Celsius and releases a rotting-flesh odor containing dimethyl trisulfide to attract carrion beetle pollinators. It blooms for just 24 to 48 hours, with flowering intervals of 7 to 10 years in the wild.",
     "byline": "The flower event",
     "tags": [
       "plants",
@@ -13058,7 +13058,7 @@
     "name": "The Coconut's Voyage",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The seed that sails oceans and starts life on a new island.",
+    "teaser": "Coconuts can float across oceans for up to 110 days and 4500 kilometers, remaining viable after landing on distant shores. Their fibrous husk traps air for buoyancy while the hard shell protects the embryo. The oldest radiocarbon-dated coconut is about 4000 years old from Thailand. Coconuts have naturalized on tropical coastlines worldwide through ocean dispersal.",
     "byline": "The floating seed",
     "tags": [
       "plants",
@@ -13078,7 +13078,7 @@
     "name": "The Dandelion's Parachute",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The aerodynamic design behind the seeds that fly for miles.",
+    "teaser": "Each dandelion seed head contains up to 150 seeds, each with a parachute-like pappus that catches even the slightest breeze. Research shows the pappus creates a vortex ring that keeps seeds aloft at remarkably low wind speeds. Seeds can travel over 100 kilometers from the parent plant. Dandelion seeds remain viable in soil for up to 90 years.",
     "byline": "The flying seeds",
     "tags": [
       "plants",
@@ -13098,7 +13098,7 @@
     "name": "Maple Seed Helicopters",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The spinning samaras that autorotate to slow their fall.",
+    "teaser": "Maple seeds, called samaras, spin in autorotation as they fall, extending their descent time to disperse far from the parent tree. The asymmetric wing shape creates a leading-edge vortex, similar to insect flight, that generates lift. Seeds fall at about 1 meter per second and can travel 100 meters or more in a moderate breeze.",
     "byline": "The seed helicopters",
     "tags": [
       "plants",
@@ -13118,7 +13118,7 @@
     "name": "Burdock's Velcro",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The plant that inspired Velcro with its clinging hooks.",
+    "teaser": "Burdock seeds inspired George de Mestral to invent Velcro in 1941 after examining the hooks that made burrs stick to his dog's fur. Each seed head contains hundreds of hooked bracts that catch on fur and clothing. The burdock bur's hook design is so effective that it has been used as the model for numerous commercial fastening systems.",
     "byline": "The original Velcro",
     "tags": [
       "plants",
@@ -13138,7 +13138,7 @@
     "name": "Night-Blooming Flowers",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "Pale flowers that open after dark for the moths and bats that visit.",
+    "teaser": "About 8 percent of pollinated plants bloom at night, opening after dusk and closing by morning. Night flowers are typically white or pale, strongly scented, and produce nectar rich in amino acids to attract nocturnal pollinators. Moonflowers, evening primroses, and night-blooming cereus are among the best-known. Night blooming reduces water loss and competition for daytime pollinators.",
     "byline": "The moon gardens",
     "tags": [
       "plants",
@@ -13158,7 +13158,7 @@
     "name": "Bat Pollination",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The night shift pollinators keeping agave and mangoes fruiting.",
+    "teaser": "About 500 plant species depend on bats for pollination, including agave, baobab, and many cacti. Bat-pollinated flowers open at night, are pale-colored, produce strong musty odors, and offer copious nectar. The lesser long-nosed bat can visit 8000 flowers in a single night. Bat pollination, called chiropterophily, is essential for ecosystems in tropical and subtropical regions.",
     "byline": "The night gardeners",
     "tags": [
       "pollination",
@@ -13178,7 +13178,7 @@
     "name": "Hummingbird Flowers",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "Tube-shaped red flowers evolved to fit a hovering bird's bill.",
+    "teaser": "Hummingbird-pollinated flowers are typically red, tubular, and produce dilute sucrose-rich nectar. The flowers offer no landing platform because hummingbirds hover. Ruby-throated hummingbirds migrate 800 kilometers nonstop across the Gulf of Mexico. Their heart rate reaches 1200 beats per minute during flight. They visit 1000 to 2000 flowers daily to meet energy demands.",
     "byline": "The bird-shaped blossoms",
     "tags": [
       "pollination",
@@ -13198,7 +13198,7 @@
     "name": "Orchid Bee Deception",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "Orchids that mimic female bees so precisely the males try to mate.",
+    "teaser": "Male orchid bees visit orchids to collect fragrant compounds, which they store in specialized hind leg pouches to create perfumes for attracting females. Eulaema bees transport orchid pollinia on their backs between distant plants. The orchid perfume is the only reward offered, as orchids produce no nectar. This fragrance-based mutualism connects scattered forest orchids across kilometers.",
     "byline": "The floral fraudsters",
     "tags": [
       "orchids",
@@ -13218,7 +13218,7 @@
     "name": "The Fig and Its Wasp",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The 70-million-year deal where each fig species needs its own wasp.",
+    "teaser": "Each of the 750 fig species is pollinated by its own specific wasp species, a partnership dating back 80 million years. Female wasps enter figs through a tiny opening, pollinate the flowers, lay eggs in some ovules, and die inside. The fig wasp lifecycle and fig fruit development are synchronized so precisely that disruption of either partner collapses the relationship.",
     "byline": "The ancient contract",
     "tags": [
       "plants",
@@ -13238,7 +13238,7 @@
     "name": "The Yucca Moth Pact",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "A moth that pollinates yucca flowers while laying eggs inside them.",
+    "teaser": "Yucca plants and yucca moths share one of nature's most obligate partnerships. Female moths actively collect pollen and deliberately pollinate yucca flowers, then lay eggs in the ovary where larvae eat some developing seeds. Neither species can reproduce without the other. This mutualism, discovered by C.V. Riley in 1892, has persisted for over 40 million years.",
     "byline": "The guaranteed nest",
     "tags": [
       "plants",
@@ -13258,7 +13258,7 @@
     "name": "Acacia Ant Defenders",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "Trees that rent rooms to ants in exchange for bodyguard service.",
+    "teaser": "Bullhorn acacia trees house aggressive Pseudomyrmex ants in their hollow thorns and provide food through Beltian bodies and extrafloral nectaries. In return, ants attack any herbivore or competing plant that touches their host. When Wagler studied the relationship in 1911, removing ants caused the tree to be stripped by herbivores within days. The partnership has co-evolved for millions of years.",
     "byline": "The thorned landlords",
     "tags": [
       "plants",
@@ -13278,7 +13278,7 @@
     "name": "How Vines Climb",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "Tendrils, twining stems, and sticky pads — the plant climbing toolbox.",
+    "teaser": "Vines use diverse climbing strategies: twining stems wrap around supports, tendrils coil around objects, adhesive pads stick to surfaces, and hooks grab nearby branches. About 13 percent of tropical woody species are vines. Lianas can reach the canopy from the forest floor, with some exceeding 200 meters in length. Vines invest less in structural support than trees.",
     "byline": "The green mountaineers",
     "tags": [
       "plants",
@@ -13298,7 +13298,7 @@
     "name": "Tendrils That Feel",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The touch-triggered curling that lets vines grab hold of anything.",
+    "teaser": "Tendrils exhibit thigmotropism, coiling around supports within minutes of contact. The coiling mechanism involves differential growth on opposite sides of the tendril, driven by the hormone auxin. Tendrils can distinguish between suitable supports and unsuitable ones, aborting contact with surfaces too wide to grip. The entire coiling process completes in 1 to 2 hours.",
     "byline": "The grasping coils",
     "tags": [
       "plants",
@@ -13318,7 +13318,7 @@
     "name": "Leaf Movement",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The sleep movements and touch responses that make plants seem awake.",
+    "teaser": "Leaves perform multiple types of movement. Nyctinasty causes leaves to fold at night, as seen in prayer plants and clover. Heliotropism tracks the sun across the sky, as young sunflowers do. Thigmonasty causes rapid folding when touched, as in Mimosa pudica. These movements are powered by changes in cell turgor pressure, not muscle contraction.",
     "byline": "The moving leaves",
     "tags": [
       "plants",
@@ -13338,7 +13338,7 @@
     "name": "Sunflowers Following the Sun",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "Young sunflowers that track the sun across the sky.",
+    "teaser": "Young sunflowers track the sun from east to west during the day and reset to face east overnight, a heliotropic behavior driven by asymmetric growth hormones. Mature sunflowers permanently face east, which warms their flowers in the morning and increases pollinator visits. Studies show sunflower farmers' fields can generate enough heat to warm surrounding air.",
     "byline": "The sun trackers",
     "tags": [
       "plants",
@@ -13358,7 +13358,7 @@
     "name": "Water Lilies",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "Plants that left the land for the water and float on air-filled leaves.",
+    "teaser": "Water lilies are rooted aquatic plants with floating leaves that can reach 30 centimeters in diameter. The giant water lily Victoria amazonica has leaves up to 3 meters across that can support the weight of a small child. The leaves have a network of air-filled ribs on their undersides providing buoyancy. Water lilies were sacred in ancient Egyptian and Hindu cultures.",
     "byline": "The pond beauties",
     "tags": [
       "plants",
@@ -13378,7 +13378,7 @@
     "name": "The Lotus Effect",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The self-cleaning leaf that inspired stain-resistant fabrics.",
+    "teaser": "The lotus effect describes the superhydrophobic surface of lotus leaves, where water droplets roll off at contact angles exceeding 150 degrees, picking up dirt particles. This self-cleaning mechanism results from microscopic papillae coated with waxy crystals. The effect inspired the development of self-cleaning materials, anti-fog coatings, and superhydrophobic surfaces in nanotechnology.",
     "byline": "The clean leaf",
     "tags": [
       "plants",
@@ -13398,7 +13398,7 @@
     "name": "Why Flytraps Eat Bugs",
     "categoryId": "BIOLOGY",
     "subtype": "Botany",
-    "teaser": "The nutrient-poor bogs that pushed a plant into carnivory.",
+    "teaser": "Venus flytraps evolved carnivory to supplement nitrogen and phosphorus in nutrient-poor Carolina bogs. Despite their dramatic trapping mechanism, most nutrition comes from photosynthesis. The 100-millisecond trap speed, triggered by two touches within 20 seconds, is one of the fastest plant movements. Each trap can fire only 3 to 5 times before dying.",
     "byline": "The hungry bogs",
     "tags": [
       "plants",
@@ -13418,7 +13418,7 @@
     "name": "Peat Bogs",
     "categoryId": "BIOLOGY",
     "subtype": "Ecology",
-    "teaser": "The soggy time capsules storing more carbon than all forests.",
+    "teaser": "Peat bogs store approximately 550 billion tonnes of carbon, about twice as much as all the world's forests combined. Sphagnum moss creates acidic, anaerobic conditions that slow decomposition, preserving plant material for thousands of years. Bog bodies like Tollund Man, dated to 400 BCE, show remarkable preservation. Peatlands cover 3 percent of Earth's land but store 10 percent of its carbon.",
     "byline": "The carbon vaults",
     "tags": [
       "wetlands",
@@ -13438,7 +13438,7 @@
     "name": "Sphagnum Moss",
     "categoryId": "BIOLOGY",
     "subtype": "Ecology",
-    "teaser": "The bog-building moss that holds twenty times its weight in water.",
+    "teaser": "Sphagnum moss can hold 20 times its dry weight in water, creating the waterlogged conditions that form peat bogs. Its cell walls contain polysaccharides that exchange hydrogen ions for dissolved minerals, acidifying water to pH 3 to 4. Vikings used dried sphagnum as wound dressings due to its antiseptic properties. Sphagnum bogs grow at about 1 millimeter per year.",
     "byline": "The water sponge",
     "tags": [
       "mosses",
@@ -13458,7 +13458,7 @@
     "name": "Alligator Ponds",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The gator wallows that carve watering holes and shelter other species.",
+    "teaser": "American alligators create gator holes, depressions that hold water during dry seasons, providing critical refuge for fish, turtles, and other aquatic life. These ponds support entire wetland communities through drought. Gator holes can be up to 3 meters deep and persist for years. Alligators are ecosystem engineers whose pond-building activity increases wetland biodiversity.",
     "byline": "The swamp engineers",
     "tags": [
       "reptiles",
@@ -13478,7 +13478,7 @@
     "name": "Beaver Dams",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The wetland engineers whose dams reshape entire watersheds.",
+    "teaser": "Beavers build dams that create wetlands supporting 80 percent of North American wildlife species. A single beaver pair can fell 200 trees per year and build dams up to 800 meters long. Beaver-created wetlands filter sediment, recharge groundwater, and create habitats for fish, amphibians, and waterfowl. Their dams can persist for decades after beavers abandon them.",
     "byline": "The dam builders",
     "tags": [
       "beavers",
@@ -13498,7 +13498,7 @@
     "name": "Prairie Dog Towns",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "Underground cities that host ferrets, owls, and snakes.",
+    "teaser": "Prairie dog colonies, called towns, can cover hundreds of hectares with complex underground burrow systems featuring separate chambers for sleeping, nesting, and waste. A single town of 500 individuals may have 40 kilometers of tunnels. Black-footed ferrets depend almost entirely on prairie dogs for food and shelter. Prairie dogs are a keystone species whose decline cascades through grassland ecosystems.",
     "byline": "The prairie cities",
     "tags": [
       "rodents",
@@ -13518,7 +13518,7 @@
     "name": "Ant Mound Design",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The ventilation, drainage, and temperature control built into ant hills.",
+    "teaser": "Leafcutter ant colonies construct underground fungus gardens spanning 30 cubic meters with sophisticated ventilation systems. The mounds maintain constant temperature and humidity for fungal cultivation. A single colony of 8 million workers processes 500 kilograms of leaf material per year. The fungus gardens produce nutrient-rich structures called gongylidia that feed the colony.",
     "byline": "The insect architects",
     "tags": [
       "ants",
@@ -13538,7 +13538,7 @@
     "name": "Caddisfly Builders",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "Underwater larvae that build portable homes from pebbles and twigs.",
+    "teaser": "Caddisfly larvae construct protective cases from silk and environmental materials like sand grains, twigs, and shell fragments. Each species uses a distinctive case design. The cases function as camouflage and physical protection. Caddisfly larvae are sensitive to water pollution and serve as biological indicators of stream health. They are used in fly fishing to create realistic artificial lures.",
     "byline": "The underwater masons",
     "tags": [
       "insects",
@@ -13558,7 +13558,7 @@
     "name": "Weaver Bird Nests",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "Birds that knot grass into hanging woven baskets.",
+    "teaser": "Male weaver birds construct intricate enclosed nests from strips of grass, often hundreds per tree, to attract females. A single nest takes 8 to 15 hours to build and requires 500 to 1000 grass strips. Females inspect nests and reject poorly constructed ones. The village weaver can weave knots, loops, and foundations, demonstrating remarkable avian engineering.",
     "byline": "The feathered weavers",
     "tags": [
       "birds",
@@ -13578,7 +13578,7 @@
     "name": "Bowerbird Collecting",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "Male birds that arrange blue trinkets to impress picky females.",
+    "teaser": "Male bowerbirds collect and arrange colorful objects to decorate their bowers, demonstrating aesthetic preferences and cognitive abilities. Satin bowerbirds prefer blue objects exclusively. Some populations have been observed stealing and destroying competitors' decorations. The bower functions as an extended phenotype that females evaluate to assess male genetic quality.",
     "byline": "The art critics",
     "tags": [
       "birds",
@@ -13598,7 +13598,7 @@
     "name": "Orb-Weaver Webs",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The spiraling silk traps engineered for maximum insect capture.",
+    "teaser": "Orb-weaver spiders construct geometric webs using up to seven different types of silk, each with unique properties. The frame threads are strong and non-sticky while capture spirals are coated with adhesive droplets. Spider silk is stronger than steel by weight. Some orb-weavers consume and rebuild their webs daily, recycling the silk proteins.",
     "byline": "The silk engineers",
     "tags": [
       "spiders",
@@ -13618,7 +13618,7 @@
     "name": "Bogong Moth Migration",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "Moths that navigate by stars across the Australian Alps.",
+    "teaser": "Bogong moths migrate up to 1500 kilometers from breeding grounds in northern Australia to the Australian Alps, where they aestivate in cool caves during summer. They navigate using Earth's magnetic field at night. Indigenous Australians traditionally harvested the moths as a rich food source, containing 60 percent fat. The migration has been disrupted by artificial lighting and climate change.",
     "byline": "The stellar navigators",
     "tags": [
       "insects",
@@ -13638,7 +13638,7 @@
     "name": "The Painted Lady",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The butterfly that completes a 9,000-mile multi-generation migration.",
+    "teaser": "The painted lady butterfly, Vanessa cardui, undertakes the longest known insect migration, traveling up to 15000 kilometers from tropical Africa to the Arctic and back over multiple generations. Studies using isotope analysis revealed that some butterflies cross the Sahara Desert and Mediterranean Sea without stopping, covering 4000 kilometers in a single journey.",
     "byline": "The world traveler",
     "tags": [
       "butterflies",
@@ -13658,7 +13658,7 @@
     "name": "Dragonfly Ocean Crossings",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The globe skimmers that migrate across the Indian Ocean.",
+    "teaser": "Globe skimmer dragonflies, Pantala flavescens, migrate across the Indian Ocean, covering over 14000 kilometers in a multigenerational journey. They use monsoon winds to cross between Africa, India, and the Maldives. This species may be the most widespread insect on Earth. The migration is fueled by infrequent rains that breed temporary pools of prey insects.",
     "byline": "The ocean flyers",
     "tags": [
       "insects",
