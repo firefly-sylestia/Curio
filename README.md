@@ -291,7 +291,7 @@ Found a bug? Have an idea? Want to request a topic?
 Live **stars over time** for this repository (updated automatically):
 
 [![Star History Chart](https://api.star-history.com/svg?repos=firefly-sylestia/Curio&type=Date)](https://star-history.com/#firefly-sylestia/Curio&Date)
-
+[(https://www.star-history.com/?repos=firefly-sylestia%2FCurio&type=date&legend=top-left)]
 Live **release downloads** (every release ships a signed APK):
 
 [![Total downloads](https://img.shields.io/github/downloads/firefly-sylestia/Curio/total?label=Total+downloads&logo=github&color=6C47FF)](https://github.com/firefly-sylestia/Curio/releases)
