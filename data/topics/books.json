@@ -9930,5 +9930,100 @@
     ],
     "tier": 1,
     "pageCount": 176
+  },
+  {
+    "id": "book-heaven-mieko-kawakami",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Heaven",
+    "teaser": "Mieko Kawakami's 2009 novel about a 14-year-old boy with a lazy eye who is bullied daily, until a girl named Kojima — the class's other outcast — starts leaving him anonymous notes. Their secret friendship becomes the only place either of them feels human.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781609457457-L.jpg",
+    "byline": "Mieko Kawakami",
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Heaven — the opening chapters and the Whale Park meeting",
+      "durationMinutes": 60,
+      "instruction": "Read the opening — the boy discovers the first note in his pencil case. Then read the Whale Park scene where Kojima reveals herself. Notice how Kawakami builds an entire world out of two outcasts passing paper. The novel's quiet violence works because you're reading it from inside the victim's head."
+    },
+    "tags": [
+      "Japanese",
+      "Literary",
+      "Coming of Age"
+    ],
+    "tier": 1,
+    "pageCount": 176,
+    "synopsis": "Set in a Japanese middle school in 1991, Heaven follows an unnamed 14-year-old boy whose lazy eye — one eye aims in a different direction from the other — makes him a constant target. Classmates call him \"Ronpari\" (one eye on London, one on Paris) and beat him routinely. His home life offers no refuge: a distant mother, an absent father, and the quiet shame of a household that doesn't ask questions.\n\nThe cruelty is specific and methodical. Ninomiya, the class's top student, orchestrates the worst of it; his friend Momose delivers the philosophy behind it — people hurt each other because they can, and there is no deeper reason. The boy absorbs this nihilism until a note appears in his pencil case: \"We should be friends.\" The handwriting is delicate, unsigned.\n\nThe notes lead him to Kojima, a girl his age who is shunned for her dirty clothes, unkempt hair, and the smell the other students mock. She goes by \"Hazmat.\" Her mother left her father for a wealthier man, and Kojima — who loved her father — stopped bathing as a way of holding on to him. She believes her suffering purifies her, a conviction the novel treats with both sympathy and alarm.\n\nTheir friendship exists only in letters, hidden in desks and read in bathrooms. Through them they build a private world — sharing hobbies, small observations, fragments of who they might be if the world weren't hostile. The act of writing becomes the only time either of them speaks honestly.\n\nThe bullying escalates. A sadistic gymnasium game leaves the boy bloodied and cleaning his own mess while Kojima watches in silence. She argues that their refusal to fight back is not cowardice but a form of resistance — a way of refusing to become what the bullies expect. The boy is unconvinced but can't articulate why.\n\nHe is offered surgery to correct his lazy eye — a chance to look normal, to disappear into the crowd. Kojima reacts with anguish, calling it a betrayal of everything their friendship means. Their bond fractures under the weight of this choice. He stops writing. She stops eating.\n\nMonths later, a letter arrives. Meet me at Whale Park — the neglected playground where they first spoke. When they arrive, Ninomiya and his friends are waiting. The bullies demand a public humiliation. In a final act of defiance, Kojima strips naked and confronts them, laughing until they flee in horror. Adults arrive. Kojima is taken away. The boy never sees her again.\n\nIn the aftermath, the boy tells his mother everything — the first time he has spoken the truth. He gets the surgery. Afterward, the world sharpens into something almost unbearable in its beauty. He thinks of Kojima often, carrying the weight of what they shared and what was taken from them.\n\nKawakami wrote the novel after reading Nietzsche's Thus Spoke Zarathustra, and the influence shows: the book is less about bullying than about whether suffering can mean anything at all. Kojima says yes. Momose says no. The boy, caught between them, spends the novel trying to find his own answer. The Murasaki Shikibu Prize committee recognized it in 2010; the English translation by Sam Bett and David Boyd was shortlisted for the International Booker Prize in 2022.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The First Note",
+        "pageStart": 1,
+        "pageEnd": 22,
+        "summary": "The narrator introduces his daily life of bullying — beatings, name-calling, the isolation of having a lazy eye. A mysterious note appears in his pencil case: \"We should be friends.\""
+      },
+      {
+        "number": 2,
+        "title": "Whale Park",
+        "pageStart": 23,
+        "pageEnd": 38,
+        "summary": "The note leads to a meeting at Whale Park, a neglected playground. Kojima — the class's other outcast, mocked as \"Hazmat\" — reveals herself as the writer. Their first real conversation begins."
+      },
+      {
+        "number": 3,
+        "title": "Letters in Hiding",
+        "pageStart": 39,
+        "pageEnd": 56,
+        "summary": "The boy and Kojima begin exchanging letters secretly — hidden in desks, read in bathrooms. Their notes become a lifeline, a private world where they can speak honestly about everything except their pain."
+      },
+      {
+        "number": 4,
+        "title": "Signs and Scissors",
+        "pageStart": 57,
+        "pageEnd": 72,
+        "summary": "Kojima reveals her ritual of cutting objects in the classroom — not destruction but control. She explains her \"signs\": the dirty clothes, the unwashed hair, all ways of preserving her connection to her absent father."
+      },
+      {
+        "number": 5,
+        "title": "Heaven",
+        "pageStart": 73,
+        "pageEnd": 90,
+        "summary": "Summer vacation. Kojima takes the boy to an art museum she calls \"Heaven\" — a painting of two lovers finding peace after suffering. The day is the novel's single moment of freedom. She cries silently on a bench. He offers her his hair to cut."
+      },
+      {
+        "number": 6,
+        "title": "The Return of Violence",
+        "pageStart": 91,
+        "pageEnd": 108,
+        "summary": "School resumes and the bullying intensifies. A gymnasium ordeal — a sadistic \"human soccer\" game — leaves the boy bloodied. Kojima helps him clean up. She argues their refusal to fight back is resistance, not weakness."
+      },
+      {
+        "number": 7,
+        "title": "Momose",
+        "pageStart": 109,
+        "pageEnd": 122,
+        "summary": "Outside school, the boy confronts Momose — Ninomiya's philosophical lieutenant. Momose delivers a chilling worldview: people act only on desire, there is no inherent meaning, the strong dominate the weak. The boy is shaken."
+      },
+      {
+        "number": 8,
+        "title": "The Choice",
+        "pageStart": 123,
+        "pageEnd": 138,
+        "summary": "The boy is offered surgery to correct his lazy eye. Kojima sees it as betrayal — an attempt to escape their shared identity. Their friendship fractures. He stops writing. She stops eating."
+      },
+      {
+        "number": 9,
+        "title": "The Final Letter",
+        "pageStart": 139,
+        "pageEnd": 155,
+        "summary": "After months of silence, Kojima sends one last letter: meet at Whale Park. When they arrive, the bullies are waiting. In a final act of defiance, Kojima strips and confronts them. Adults arrive. She is taken away. The boy never sees her again."
+      },
+      {
+        "number": 10,
+        "title": "Aftermath",
+        "pageStart": 156,
+        "pageEnd": 176,
+        "summary": "The boy tells his mother everything for the first time. He gets the surgery. The world sharpens into beauty. He carries Kojima's memory — what they shared, what was lost — into a life that continues, changed."
+      }
+    ]
   }
 ]
