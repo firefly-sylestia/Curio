@@ -60,6 +60,15 @@ interface TopicDao {
     """)
     suspend fun searchInCategory(categoryId: String, query: String): List<TopicEntity>
 
+    /** Backfill newly added book content without replacing existing authored values. */
+    @Query("""
+        UPDATE topics
+        SET synopsis = CASE WHEN synopsis = '' THEN :synopsis ELSE synopsis END,
+            chapters = CASE WHEN chapters = '' THEN :chapters ELSE chapters END
+        WHERE id = :id
+    """)
+    suspend fun backfillBookContent(id: String, synopsis: String, chapters: String)
+
     /** Get topic count for a category. */
     @Query("SELECT COUNT(*) FROM topics WHERE categoryId = :categoryId")
     suspend fun getCount(categoryId: String): Int

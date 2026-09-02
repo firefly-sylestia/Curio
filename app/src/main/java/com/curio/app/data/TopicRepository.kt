@@ -62,6 +62,11 @@ object TopicRepository {
 
             val importedCount = dao.getTotalCount()
             if (importedCount > 0) {
+                // Existing installs already have topic rows from before synopsis/
+                // chapters were added. Backfill only empty fields from the JSON
+                // source so the new Books reveal content becomes visible without
+                // replacing any existing catalog data.
+                backfillBookContent(context, dao)
                 initialized = true
                 // v294 — Pre-warm TopicJsonLoader caches from Room so
                 // counts and topic data are available immediately on
@@ -159,6 +164,24 @@ object TopicRepository {
     private fun android.database.Cursor.getNullableInt(column: String): Int? {
         val index = getColumnIndexOrThrow(column)
         return if (isNull(index)) null else getInt(index)
+    }
+
+    /**
+     * Copy newly authored Books synopsis/chapter fields into existing Room rows.
+     * Empty-only updates keep this safe for any locally customized catalog data.
+     */
+    private suspend fun backfillBookContent(context: Context, dao: TopicDao) {
+        TopicJsonLoader.install(context)
+        runCatching {
+            TopicJsonLoader.load(CategoryId.BOOKS).forEach { topic ->
+                val entity = TopicEntity.fromCurioTopic(topic)
+                if (entity.synopsis.isNotBlank() || entity.chapters.isNotBlank()) {
+                    dao.backfillBookContent(entity.id, entity.synopsis, entity.chapters)
+                }
+            }
+        }.onFailure { error ->
+            Log.w("TopicRepository", "Failed to backfill Books content: ${error.message}")
+        }
     }
 
     /**
