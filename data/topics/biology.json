@@ -19678,7 +19678,7 @@
     "name": "The Harrier's Hover",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The low, hovering flight of the marsh hawk listening for hidden prey.",
+    "teaser": "Marsh harriers hunt by flying low over reed beds, hovering momentarily before dropping onto prey. Their broad wings allow slow, buoyant flight. Males display elaborate sky-dancing courtship, spiraling upward and tumbling down. They have excellent hearing for locating voles and frogs hidden in dense vegetation.",
     "byline": "The hover hunter",
     "tags": [
       "birds of prey",
@@ -19698,7 +19698,7 @@
     "name": "The Kestrel's Hover",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The wind-facing hover that lets kestrels spot voles below.",
+    "teaser": "Kestrels are the only raptors that can hover in place, using rapid wing beats and tail adjustments to stay stationary while scanning the ground for prey. They can see ultraviolet light, detecting urine trails left by voles that glow under UV. A kestrel hovers at about 10 meters height with wind speeds matching its wing beat frequency.",
     "byline": "The wind hoverer",
     "tags": [
       "falcons",
@@ -19718,7 +19718,7 @@
     "name": "The Osprey's Talons",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The reversible outer toes and spiky foot pads made for fish.",
+    "teaser": "Ospreys have uniquely adapted feet with reversible outer toes and spiny pads called spicules that grip slippery fish. They dive feet-first into water, sometimes submerging completely, catching fish with 70 to 80 percent success rate. Ospreys are found on every continent except Antarctica and always orient fish head-first in flight to reduce wind resistance.",
     "byline": "The fish talons",
     "tags": [
       "birds of prey",
@@ -19738,7 +19738,7 @@
     "name": "The Osprey's Nest Return",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The migratory fish hawk that returns to the same nest for years.",
+    "teaser": "Ospreys return to the same nesting sites year after year, building massive stick nests that can reach 2 meters across and weigh over 100 kilograms after years of additions. They migrate thousands of kilometers between breeding and wintering grounds. Both sexes share incubation duties over 35 to 42 days. Osprey populations have rebounded since DDT was banned in 1972.",
     "byline": "The returning fisher",
     "tags": [
       "birds of prey",
@@ -19758,7 +19758,7 @@
     "name": "The Eagle's Eye",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The vision that can spot a rabbit from two miles away.",
+    "teaser": "Eagles have vision 4 to 8 times sharper than humans, with 2 million retinal photoreceptors per square millimeter compared to 200000 in humans. Their fovea magnifies the central visual field like a telephoto lens. Eagles can spot a rabbit from 3 kilometers away and distinguish individual fish at 50 meters depth while soaring.",
     "byline": "The telescopic eyes",
     "tags": [
       "eagles",
@@ -19778,7 +19778,7 @@
     "name": "The Golden Eagle",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The mountain hunter that takes down animals larger than itself.",
+    "teaser": "Golden eagles can dive at speeds over 320 kilometers per hour and carry prey up to half their body weight. With a wingspan of 2.3 meters, they patrol territories up to 200 square kilometers. In the Kazakh steppe, golden eagles are trained for hunting by berkutchi eagle hunters who have practiced this tradition for over 2000 years.",
     "byline": "The mountain king",
     "tags": [
       "eagles",
@@ -19798,7 +19798,7 @@
     "name": "The Bald Eagle's Comeback",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "From national symbol to endangered to thriving again.",
+    "teaser": "The bald eagle was removed from the US endangered species list in 2007 after a remarkable recovery. From just 417 nesting pairs in 1963, populations have grown to over 316000 individuals. The comeback followed the 1972 DDT ban and Endangered Species Act protections. Eagles were also helped by intentional reintroduction programs across 48 states.",
     "byline": "The comeback symbol",
     "tags": [
       "eagles",
@@ -19818,7 +19818,7 @@
     "name": "The Harpy Eagle",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The rainforest apex predator with talons the size of bear claws.",
+    "teaser": "The harpy eagle, the most powerful raptor, has 13-centimeter talons that exert 110 newtons of force, equal to a lion's bite. Found in tropical rainforests from Mexico to Argentina, they hunt sloths and monkeys in the canopy. A single pair requires up to 80 square kilometers of pristine forest. Deforestation has made them rare throughout their range.",
     "byline": "The canopy tyrant",
     "tags": [
       "eagles",
@@ -19838,7 +19838,7 @@
     "name": "The Eagle Owl",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The largest owl, with ear tufts and a voice that carries for miles.",
+    "teaser": "The Eurasian eagle owl is one of the largest owls at up to 75 centimeters with a 2 meter wingspan. They can take prey up to the size of foxes and hedgehogs. Eagle owls hunt silently using specialized wing feathers that muffle air turbulence. Their deep hooting call carries over 10 kilometers and is the basis of the classic owl sound in films.",
     "byline": "The big owl",
     "tags": [
       "owls",
@@ -19858,7 +19858,7 @@
     "name": "The Barn Owl's Silent Hunt",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The feather fringes and dish-shaped face of the night's best listener.",
+    "teaser": "Barn owls can locate and strike prey in complete darkness using hearing alone, with ears positioned asymmetrically to pinpoint sound in three dimensions. Their wing feathers have serrated leading edges that break up air turbulence, reducing flight noise to below 2 kilohertz. A single barn owl consumes up to 1000 mice annually.",
     "byline": "The silent listener",
     "tags": [
       "owls",
@@ -19878,7 +19878,7 @@
     "name": "The Snowy Owl",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The Arctic owl made famous by a certain wizard.",
+    "teaser": "Snowy owls can see in near-total darkness, with huge eyes containing rod-rich retinas adapted for Arctic winters. Unlike most owls, they hunt during daylight in the 24-hour Arctic summer sun. Snowy owls migrate south in some winters, known as irruption years, when lemming populations crash. They can survive temperatures of minus 50 degrees Celsius.",
     "byline": "The white owl",
     "tags": [
       "owls",
@@ -19898,7 +19898,7 @@
     "name": "The Burrowing Owl",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The owl that lives underground and hunts by day.",
+    "teaser": "Burrowing owls nest underground in abandoned mammal burrows rather than trees. They line their burrows with animal dung, which attracts beetles that the owls then eat. Burrowing owls perform a distinctive head-bobbing display when threatened. They can run across the ground on long legs to catch insects and small rodents.",
     "byline": "The ground owl",
     "tags": [
       "owls",
@@ -19918,7 +19918,7 @@
     "name": "The Great Horned Owl",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The adaptable 'tiger owl' that hunts almost anything.",
+    "teaser": "The great horned owl has the strongest grip of any owl at 300 newtons, capable of killing skunks, hares, and even other raptors. Their ear tufts are not ears but display feathers used for camouflage and intimidation. The actual ear openings are hidden beneath facial disc feathers. Great horned owls are among the earliest nesting birds, beginning in January.",
     "byline": "The tiger owl",
     "tags": [
       "owls",
@@ -19938,7 +19938,7 @@
     "name": "The Screech Owl",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The small owl that disappears into tree bark.",
+    "teaser": "Eastern screech owls are just 20 centimeters tall but hunt prey larger than themselves, including mice, small birds, and snakes. They use tree cavities for nesting and can be attracted by nest boxes. Screech owls play dead when captured, swaying on a branch with half-closed eyes. They occur in two color morphs, gray and red, within the same population.",
     "byline": "The bark ghost",
     "tags": [
       "owls",
@@ -19958,7 +19958,7 @@
     "name": "The Tawny Frogmouth",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The bird that poses as a broken branch.",
+    "teaser": "The tawny frogmouth of Australia resembles an owl but is actually a nightjar relative. When threatened, they freeze in a cryptic pose that makes them look exactly like a broken tree branch. They hunt by sitting motionless on branches and snatching passing insects in their huge gaping mouths. Frogmouths pair for life and share incubation duties.",
     "byline": "The branch impostor",
     "tags": [
       "birds",
@@ -19978,7 +19978,7 @@
     "name": "The Nightjar",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The ground-nesting bird that vanishes against leaf litter.",
+    "teaser": "Nightjars are nocturnal insectivores with enormous mouths fringed with rictal bristles that funnel flying insects during aerial hunts. The European nightjar can catch one moth per minute in flight. Their cryptic plumage makes them virtually invisible on forest floors during the day. Nightjars sometimes lay their eggs directly on bare ground without building a nest.",
     "byline": "The leaf ghost",
     "tags": [
       "birds",
@@ -19998,7 +19998,7 @@
     "name": "The Potoo",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The owl-like bird with eyes that glow and a cry like a ghost.",
+    "teaser": "The potoo of Central and South America is a nocturnal bird with enormous eyes and a massive gape that catches insects in flight. During the day, they perch upright on branches, freezing in a pose that makes them look like a tree stump. Their haunting wail is one of the most eerie sounds in tropical forests. Potoos have special notches in their eyelids that allow them to see predators while sleeping.",
     "byline": "The ghost bird",
     "tags": [
       "birds",
@@ -20018,7 +20018,7 @@
     "name": "The Fruit-Eating Cave Bird",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The only nocturnal fruit-eating bird in the world.",
+    "teaser": "Oilbirds in South American caves use echolocation to navigate in complete darkness, feeding on oil palm fruits. They are one of the few fruit-eating nocturnal birds. Chicks were historically harvested by indigenous people and rendered for oil. The birds navigate caves using clicks at 7 to 20 kilohertz, similar to bats but with a simpler system.",
     "byline": "The cave fruit-eater",
     "tags": [
       "birds",
@@ -20038,7 +20038,7 @@
     "name": "The Toucan's Beak",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The enormous beak that doubles as a radiator.",
+    "teaser": "A toucan's beak, up to 20 centimeters long, weighs just 20 grams thanks to a honeycomb structure of keratin and bone. The beak functions as a radiator, adjusting blood flow to regulate body temperature by up to 5 degrees Celsius. Despite its size, the beak allows precise fruit selection and can reach around branches to access food other birds cannot.",
     "byline": "The bill radiator",
     "tags": [
       "toucans",
@@ -20058,7 +20058,7 @@
     "name": "The Hornbill's Sealed Nest",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The nesting strategy where the female is walled inside a tree cavity.",
+    "teaser": "Female hornbills seal themselves inside tree cavities during nesting, plastering the entrance with mud, droppings, and fruit pulp until only a narrow slit remains. The male feeds her through this slit for 3 to 5 months. After chicks hatch, the female breaks free. This extraordinary nesting strategy protects against predators in tropical forests.",
     "byline": "The sealed nursery",
     "tags": [
       "hornbills",
@@ -20078,7 +20078,7 @@
     "name": "Macaw Clay Licks",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The colorful parrots gathering at riverbanks to eat clay.",
+    "teaser": "Macaws and parrots gather in groups of up to 100 at clay licks on riverbanks across the Amazon, eating clay to neutralize toxins found in unripe fruits and seeds. The sodium in the clay also supplements their mineral-poor fruit diet. These clay lick gatherings provide safety in numbers and are important social bonding opportunities.",
     "byline": "The clay diners",
     "tags": [
       "macaws",
@@ -20098,7 +20098,7 @@
     "name": "The Cockatoo's Crest",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The expressive crest feathers that broadcast mood.",
+    "teaser": "Sulphur-crested cockatoos raise and lower their yellow crests to communicate mood and intent. An upright crest signals alarm or excitement, while a flattened crest indicates aggression. Cockatoos are among the most intelligent birds, capable of tool use and problem-solving. Wild cockatoo populations in Sydney have learned to open trash bins by lifting the lids.",
     "byline": "The crest signals",
     "tags": [
       "cockatoos",
@@ -20118,7 +20118,7 @@
     "name": "The Kea",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The alpine parrot famous for curiosity, intelligence, and mischief.",
+    "teaser": "The kea, a mountain parrot of New Zealand, is the world's only alpine parrot and is famous for its curiosity and intelligence. Keas deconstruct cars, backpacks, and roofs, not from destructiveness but from exploratory problem-solving. Studies show keas can outperform primates in some cognitive tests. Their population of about 5000 is classified as endangered.",
     "byline": "The curious parrot",
     "tags": [
       "parrots",
@@ -20138,7 +20138,7 @@
     "name": "Kea Problem Solving",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The experiments showing keas can use tools and plan ahead.",
+    "teaser": "Keas demonstrate extraordinary problem-solving abilities, including tool use, cooperative theft, and understanding of cause-and-effect. In experiments, keas solve multi-step puzzles faster than 4-year-old children. They have been documented stealing food from tourist backpacks through coordinated teamwork, with one kea distracting while another raids.",
     "byline": "The test birds",
     "tags": [
       "parrots",
@@ -20158,7 +20158,7 @@
     "name": "Why Parrots Talk",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The brain wiring behind parrot mimicry and vocal learning.",
+    "teaser": "Parrots mimic human speech using a unique brain structure with vocal learning pathways similar to humans. They have a thick tongue that shapes sound and two sets of vocal cords. African grey parrots can learn over 1000 words and use them contextually. Parrots may mimic because wild parrots use vocal learning to match their flock's calls.",
     "byline": "The talkers",
     "tags": [
       "parrots",
@@ -20178,7 +20178,7 @@
     "name": "The African Grey",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The parrot species famous for its cognitive abilities and vocabulary.",
+    "teaser": "African grey parrots are considered the most intelligent bird species, capable of using over 800 words in context. Irene Pepperberg's research with Alex the parrot showed they understand concepts like same-different, bigger-smaller, and color labels. African greys can count to six, identify 50 objects, and express preferences and emotions through speech.",
     "byline": "The clever grey",
     "tags": [
       "parrots",
@@ -20198,7 +20198,7 @@
     "name": "Alex the Parrot",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The grey parrot who learned colors, numbers, and concepts.",
+    "teaser": "Alex, an African grey parrot trained by Irene Pepperberg from 1977 to 2007, demonstrated understanding of 50 objects, 6 colors, and concepts of same-different and bigger-smaller. He could identify 50 shapes, count to 6, and say over 100 words. Alex recognized himself in mirrors, suggesting self-awareness. He died in 2007 at age 31, his last words being You be good.",
     "byline": "The record parrot",
     "tags": [
       "parrots",
@@ -20218,7 +20218,7 @@
     "name": "The Kakapo",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The world's only flightless, nocturnal, lek-breeding parrot.",
+    "teaser": "The kakapo, the world's only flightless parrot, weighs up to 4 kilograms and can live over 90 years. Found only in New Zealand, kakapos were nearly extinct by 1995 with just 51 individuals. Males gather at booming bowls, depressions in the ground, to produce deep calls that can travel 5 kilometers. Every kakapo is individually named and tracked.",
     "byline": "The odd parrot",
     "tags": [
       "parrots",
@@ -20238,7 +20238,7 @@
     "name": "Saving the Kakapo",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The intensive program bringing the flightless parrot back from the brink.",
+    "teaser": "New Zealand's kakapo recovery program involves intensive management of the entire species, now about 250 individuals. Every bird is fitted with a transmitter, nests are monitored with infrared cameras, and chicks are supplementary-fed when needed. The program has increased the population from 51 in 1995 to over 250 by 2023, one of conservation's great success stories.",
     "byline": "The last parrots",
     "tags": [
       "parrots",
@@ -20258,7 +20258,7 @@
     "name": "The Milk Bottle Trick",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "How blue tits spread the trick of opening milk bottle caps across Britain.",
+    "teaser": "In 1921, blue tits in Britain discovered how to open milk bottle caps to drink cream. The behavior spread across the country through social learning, taking about 50 years to reach most populations. This cultural transmission was one of the first documented examples of innovation spreading among wild animals. Different populations developed different techniques for opening bottles.",
     "byline": "The cultural spread",
     "tags": [
       "birds",
@@ -20278,7 +20278,7 @@
     "name": "The Great Tit's Feeder Habits",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "How garden feeders changed bird behavior — and beaks.",
+    "teaser": "Great tits in British gardens have developed learned feeding behaviors, including learning to open milk bottle caps through social observation. They are opportunistic feeders that switch between insects and seeds seasonally. Great tits have been shown to innovate new feeding techniques that spread culturally through populations over decades.",
     "byline": "The feeder regulars",
     "tags": [
       "birds",
@@ -20298,7 +20298,7 @@
     "name": "Titmice and Their Caches",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The memory-dependent food caching of tufted titmice.",
+    "teaser": "Chickadees and titmice cache thousands of food items in different locations, remembering each cache site for up to 28 days. Their hippocampus enlarges by 30 percent in autumn when caching is most active, then shrinks in spring. A single chickadee may hide 50000 seeds in a season and recover about 70 percent, using spatial memory and olfactory cues.",
     "byline": "The cachers",
     "tags": [
       "birds",
@@ -20318,7 +20318,7 @@
     "name": "The Upside-Down Nuthatch",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The only songbird that climbs down tree trunks headfirst.",
+    "teaser": "Nuthatches are the only birds that regularly climb down trees headfirst, using their strong feet and stiff tail feathers for support. This unique ability lets them search bark crevices from angles other birds cannot reach. They also wedge nuts into bark crevices and hammer them open with their bills, giving them their name. About 28 species exist worldwide.",
     "byline": "The headfirst climber",
     "tags": [
       "birds",
@@ -20338,7 +20338,7 @@
     "name": "The Treecreeper's Spiral",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The bird that spirals up trunks hunting insects in bark cracks.",
+    "teaser": "Treecreepers spiral up tree trunks searching for insects in bark crevices, using their thin curved bill and stiff tail for support. They start at the base and work upward, then fly down to the next tree and repeat. Their brown mottled plumage provides excellent camouflage against bark. Treecreepers pair for life and share a territory year-round.",
     "byline": "The trunk spiraler",
     "tags": [
       "birds",
@@ -20358,7 +20358,7 @@
     "name": "The Wren",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The tiny brown bird with an enormous voice.",
+    "teaser": "The wren is Europe's most abundant breeding bird, with a population of over 11 million in Britain alone. Despite weighing just 8 to 10 grams, the male wren builds multiple nest sites and sings a song of extraordinary power and complexity for its size. Wrens can produce sounds at up to 800 notes per second. In the US, there are 88 wren species.",
     "byline": "The loud tiny one",
     "tags": [
       "birds",
@@ -20378,7 +20378,7 @@
     "name": "The House Sparrow",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The bird that followed humans around the world.",
+    "teaser": "House sparrows have spread across the globe following human civilization, now found on every continent except Antarctica. Originally native to the Middle East, they were introduced worldwide as pest controllers. Despite their ubiquity, house sparrow populations have declined 68 percent in Britain since 1977, likely due to reduced insect food for chicks.",
     "byline": "The human companion",
     "tags": [
       "sparrows",
@@ -20398,7 +20398,7 @@
     "name": "The Sparrow Decline",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The mystery of the disappearing city sparrow.",
+    "teaser": "House sparrow populations have declined 68 percent in Britain since 1977 and are disappearing from many European cities. Possible causes include reduced insect availability for chicks, loss of nesting sites in modern buildings, and air pollution. The decline is ironic given that sparrows were once considered pests abundant enough to be deliberately introduced to new continents.",
     "byline": "The vanishing neighbor",
     "tags": [
       "sparrows",
@@ -20418,7 +20418,7 @@
     "name": "Swallow Nests",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The mud cup nests of the birds that signal summer.",
+    "teaser": "Barn swallows build cup-shaped nests from mud pellets mixed with grass and lined with feathers, attaching them to beams and rafters. Both parents contribute to nest building, collecting mud in their beaks and making over 1000 trips per nest. A single swallow nest can weigh up to 1 kilogram. Swallows return to the same nests for years, repairing them annually.",
     "byline": "The mud builders",
     "tags": [
       "swallows",
@@ -20438,7 +20438,7 @@
     "name": "The Swallow's Round Trip",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The 6,000-mile migration of the barn swallow.",
+    "teaser": "Barn swallows migrate up to 14000 kilometers between European breeding grounds and southern African wintering areas. They navigate using the Earth's magnetic field, sun position, and star patterns. Swallows can fly at 50 kilometers per hour and catch up to 850 insects per hour during migration. Some individuals complete the round trip annually for over 10 years.",
     "byline": "The summer visitor",
     "tags": [
       "swallows",
@@ -20458,7 +20458,7 @@
     "name": "Cliff Swallow Colonies",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The gourd-shaped mud nests packed into bustling colonies.",
+    "teaser": "Cliff swallows nest in colonies of 100 to 2000 pairs on vertical cliff faces and bridge underpasses. Their gourd-shaped mud nests hang from overhangs, protected from rain and predators. Colonies reduce individual predation risk through many watchful eyes. Cliff swallows migrate 8000 kilometers annually between North and South America.",
     "byline": "The mud cities",
     "tags": [
       "swallows",
@@ -20478,7 +20478,7 @@
     "name": "Hummingbird Aggression",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The tiny birds that fiercely guard flower patches.",
+    "teaser": "Hummingbirds are extremely territorial despite their tiny size, aggressively defending feeding territories against larger birds, squirrels, and even humans. They perch near food sources and chase any intruder with high-speed aerial pursuits. Male ruby-throated hummingbirds fight by locking feet and tumbling to the ground, continuing until one releases.",
     "byline": "The tiny defenders",
     "tags": [
       "hummingbirds",
@@ -20498,7 +20498,7 @@
     "name": "The Hummingbird's Egg",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "An egg the size of a coffee bean — the smallest in the bird world.",
+    "teaser": "Hummingbird eggs are the smallest of any bird, weighing about 0.5 grams and measuring 1.2 centimeters long, similar to coffee beans. The nest is only 3 centimeters across, decorated with lichen and spider silk. Both parents share incubation, and chicks fledge at just 18 to 23 days. A hummingbird can lay 2 to 3 clutches per breeding season.",
     "byline": "The tiny egg",
     "tags": [
       "hummingbirds",
@@ -20518,7 +20518,7 @@
     "name": "Finch Beak Diversity",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "How one ancestor's beaks diversified to crack different seeds.",
+    "teaser": "Darwin's finches demonstrate adaptive radiation through beak diversity, with 13 species evolved from a single ancestor. Beak size and shape are determined by genes including ALX1 and BMP4. Ground finches have thick crushing beaks for seeds, while cactus finches have slender probing beaks for flowers. The HMGA2 gene controls beak size differences between species.",
     "byline": "The beak varieties",
     "tags": [
       "finches",
@@ -20538,7 +20538,7 @@
     "name": "Darwin's Finches Today",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The ongoing beak evolution still measurable in Galapagos finches.",
+    "teaser": "Darwin's finches continue to evolve in real time. Peter and Rosemary Grant's 40-year study on Daphne Major documented natural selection during droughts, when larger-beaked finches survived preferentially. The 2017 arrival of a Big Bird finch, a hybrid with a unique song and beak shape, demonstrated how new species can arise through hybridization in a single generation.",
     "byline": "The living experiment",
     "tags": [
       "finches",
@@ -20558,7 +20558,7 @@
     "name": "The Goldfinch",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The colorful seed-eater with a bouncing flight.",
+    "teaser": "The American goldfinch is the only North American bird that molts its body feathers twice yearly, once in spring and once in fall. Males change from dull olive to brilliant yellow and back. Goldfinches are strict vegetarians, eating only seeds, and are among the latest nesting birds, waiting until July when thistle seeds are available for nesting material and food.",
     "byline": "The seed singer",
     "tags": [
       "finches",
@@ -20578,7 +20578,7 @@
     "name": "The Cardinal",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The red songbird of backyards with a whistle-like song.",
+    "teaser": "Northern cardinals are named for their brilliant red plumage and resemblance to Catholic cardinals' robes. Both sexes sing, unusual among North American songbirds. Males feed females during courtship, a behavior called mate-feeding. Cardinals do not migrate, and their presence at feeders brightens winter landscapes. The species has expanded northward due to climate warming.",
     "byline": "The red singer",
     "tags": [
       "birds",
@@ -20598,7 +20598,7 @@
     "name": "Why Cardinals Are Red",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The carotenoid pigments behind the male's bright red plumage.",
+    "teaser": "Male cardinals get their red color from carotenoid pigments in berries and fruits. Brighter males are healthier, better fed, and more attractive to females. Cardinals can increase or decrease redness by adjusting carotenoid metabolism. Females prefer the reddest males, driving sexual selection for vibrant plumage. Stressed or sick males appear duller and attract fewer mates.",
     "byline": "The red feathers",
     "tags": [
       "cardinals",
@@ -20618,7 +20618,7 @@
     "name": "The Blue Jay",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The loud, clever corvid that imitates hawk calls.",
+    "teaser": "Blue jays are corvids with intelligence rivaling crows and ravens. They cache thousands of acorns annually and can remember cache locations for months. Blue jays mimic red-shouldered hawk calls to scare other birds from feeders. Their raucous calls alert the entire forest to predators. Some blue jays have been documented using bread crusts as fishing bait.",
     "byline": "The backyard trickster",
     "tags": [
       "corvids",
@@ -20638,7 +20638,7 @@
     "name": "The Jay as Forest Planter",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The forgotten acorn caches that grow new oak trees.",
+    "teaser": "Eurasian jays bury up to 5000 acorns each autumn, recovering about 80 percent. The forgotten 20 percent, potentially thousands per jay, grow into oak trees. A single jay can transport acorns up to 4 kilometers from the parent tree, seeding new forests far from existing ones. Jays are responsible for much of oak forest regeneration across Europe.",
     "byline": "The accidental gardener",
     "tags": [
       "corvids",
@@ -20658,7 +20658,7 @@
     "name": "The Magpie's Mirror",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The corvid that recognized itself in a mirror.",
+    "teaser": "Magpies are among the few animals to pass the mirror self-recognition test, demonstrating self-awareness. In a 2008 study, Eurasian magpies recognized their reflections and attempted to remove colored stickers placed on their bodies. This ability was previously thought limited to great apes, dolphins, elephants, and humans.",
     "byline": "The self-aware bird",
     "tags": [
       "corvids",
@@ -20678,7 +20678,7 @@
     "name": "The Magpie's Fortress Nest",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The domed stick fortresses that take weeks to build.",
+    "teaser": "Magpies build domed nests with a false roof over the entrance, concealing the true chamber where eggs are laid. The nest structure may help conceal chicks from predators and competing corvids. Both parents build the nest over 2 to 3 weeks using twigs, mud, and grass. A magpie nest can be over 60 centimeters across and 45 centimeters tall.",
     "byline": "The nest builders",
     "tags": [
       "corvids",
@@ -20698,7 +20698,7 @@
     "name": "The Jackdaw's Devotion",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The corvid known for lifelong pair bonds.",
+    "teaser": "Jackdaws form strong pair bonds, with both partners engaging in allopreening, mutual grooming of head feathers. Males and females sleep side by side, pressing their bodies together. Jackdaws have pale blue-white eyes unique among corvids, possibly evolved for signaling in dark colonies. They nest in cavities in buildings and trees, with colonies of hundreds of pairs.",
     "byline": "The faithful corvid",
     "tags": [
       "corvids",
@@ -20718,7 +20718,7 @@
     "name": "Rook Colonies",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The noisy treetop cities where rooks nest together.",
+    "teaser": "Rooks nest in colonies called rookeries, typically in tall trees near villages, with up to 200 nests per colony. They are cooperative breeders, with non-breeding helpers assisting parents. Rooks use tools in captivity and solve complex puzzles. Their populations have declined in parts of Europe due to agricultural changes, but they remain common in Britain and Eastern Europe.",
     "byline": "The colony birds",
     "tags": [
       "corvids",
@@ -20738,7 +20738,7 @@
     "name": "Rook Problem Solving",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The corvid that solved novel puzzles without training.",
+    "teaser": "Rooks demonstrate sophisticated problem-solving abilities in controlled experiments. They can bend wire into hooks to retrieve food, use stones to raise water levels, and solve multi-step puzzles. These cognitive abilities place rooks among the most intelligent birds, alongside crows and New Caledonian crows, despite having relatively smaller brains.",
     "byline": "The puzzle solver",
     "tags": [
       "corvids",
@@ -20758,7 +20758,7 @@
     "name": "The Corvid Family",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "Crows, ravens, jays, and magpies — the bird family known for smarts.",
+    "teaser": "The corvid family includes crows, ravens, jays, magpies, and rooks, collectively considered the most intelligent bird family. They demonstrate tool use, planning for the future, self-recognition, and social deception. Corvid brain-to-body ratios rival those of great apes. There are about 130 corvid species found on every continent except Antarctica.",
     "byline": "The clever family",
     "tags": [
       "corvids",
@@ -20778,7 +20778,7 @@
     "name": "The Carrion Crow",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The adaptable crow thriving in fields and cities alike.",
+    "teaser": "The carrion crow is one of Britain's most common corvids, recognizable by its entirely black plumage. Crows have been documented using traffic to crack nuts, waiting for cars to run over walnuts on roads, then retrieving the meat when traffic light turns red. They also use sticks as tools and can recognize individual human faces for years.",
     "byline": "The adaptable crow",
     "tags": [
       "crows",
@@ -20798,7 +20798,7 @@
     "name": "The Hooded Crow",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The gray-and-black crow of northern Europe with clever habits.",
+    "teaser": "The hooded crow, with its distinctive gray body and black head, hybridizes with the carrion crow where their ranges overlap in Europe. Hybridization rates vary by region, from 1 to 20 percent. Hooded crows are bold urban birds that have learned to exploit human food sources, including stealing food from outdoor cafes and solving simple locks.",
     "byline": "The hooded one",
     "tags": [
       "crows",
@@ -20818,7 +20818,7 @@
     "name": "Crows at the Beach",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The shellfish-dropping crows that use rocks as tools.",
+    "teaser": "New Caledonian crows on the Pacific island of Marovo Lagoon have been observed using tools to fish for marine invertebrates, a behavior never previously documented in wild crows. They craft hooked tools from twigs to extract grubs from holes in beach rocks. This demonstrates the remarkable cognitive flexibility of corvids in adapting tool use to new environments.",
     "byline": "The shell crackers",
     "tags": [
       "crows",
@@ -20838,7 +20838,7 @@
     "name": "Crows Remember Faces",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The studies showing crows recognize and remember individual people.",
+    "teaser": "Crows can recognize and remember individual human faces for years, distinguishing threatening from friendly people. Studies at the University of Washington showed that crows scold people who trapped them 5 years earlier, while ignoring strangers. Crows communicate danger to other crows, who also learn to avoid threatening individuals.",
     "byline": "The remembering crows",
     "tags": [
       "crows",
@@ -20858,7 +20858,7 @@
     "name": "The Raven's Call",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The deep, varied croaks of the largest songbird.",
+    "teaser": "Ravens have over 30 distinct calls, including deep resonant croaks, clicks, and high-pitched notes. Their vocalizations can be heard from over 16 kilometers away. Ravens are known for their playful behavior, sliding down snowbanks and playing aerial games. They are among the few non-human animals observed using and making tools.",
     "byline": "The deep voices",
     "tags": [
       "ravens",
@@ -20878,7 +20878,7 @@
     "name": "Raven Play",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The sliding, rolling, and toy-tossing play of clever ravens.",
+    "teaser": "Ravens are among the most playful animals, engaging in aerial acrobatics, snow sliding, and object tossing for apparent enjoyment. Young ravens perform play-fights, food-dropping games, and cooperative play that strengthens social bonds. Play continues throughout life. Ravens have been observed dropping objects from heights and catching them repeatedly, a behavior that appears purely recreational.",
     "byline": "The playful giants",
     "tags": [
       "ravens",
@@ -20898,7 +20898,7 @@
     "name": "Ravens and Wolves",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The scavenger-hunter partnership between ravens and wolf packs.",
+    "teaser": "Ravens and wolves have a documented mutualistic relationship in Yellowstone, where ravens follow wolf packs to scavenge carcasses. Ravens also alert wolves to potential prey and may help locate carcasses. Ravens have been observed calling to wolves to open frozen carcasses. This interspecies cooperation benefits both parties.",
     "byline": "The hunting partners",
     "tags": [
       "ravens",
@@ -20918,7 +20918,7 @@
     "name": "Talking Ravens",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The captive ravens that learned to mimic human speech.",
+    "teaser": "Ravens can mimic human speech, environmental sounds, and other animal calls with remarkable accuracy. In captivity, ravens have learned to say phrases like nevermore and hello. Wild ravens mimic other species' alarm calls to manipulate competitors. In Norse mythology, Odin's ravens Huginn and Muninn represented thought and memory, reflecting ravens' reputation for intelligence.",
     "byline": "The talkers",
     "tags": [
       "ravens",
@@ -20938,7 +20938,7 @@
     "name": "The Jackdaw's Pale Eyes",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The nearly white eyes that signal the bird's state of mind.",
+    "teaser": "Jackdaws have pale blue-white irises unique among corvids, possibly evolved as a signal of dominance or intention. Research shows that jackdaws avoid staring into each other's pale eyes, similar to humans avoiding direct eye contact. The pale eyes may help jackdaws signal aggression or submission in dark nesting colonies without physical confrontation.",
     "byline": "The eye signals",
     "tags": [
       "corvids",
@@ -20958,7 +20958,7 @@
     "name": "Do Magpies Steal Shiny Things?",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The truth behind the magpie and shiny objects myth.",
+    "teaser": "The belief that magpies steal shiny objects is largely a myth. Studies show magpies are actually fearful of novel objects, including shiny ones. The myth likely originated from a 16th-century translation of a poem about all birds, not just magpies. Magpies are intelligent enough to recognize themselves in mirrors, but they don't hoard metallic objects.",
     "byline": "The myth check",
     "tags": [
       "magpies",
@@ -20978,7 +20978,7 @@
     "name": "Crow 'Funerals'",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The gatherings of crows around dead crows — what is really happening.",
+    "teaser": "When crows find a dead companion, they gather in large groups and call loudly, a behavior called a funeral. Research shows this isn't mourning but information gathering about potential threats. Crows remember the faces of people present near dead companions and warn other crows about those specific threats for years afterward.",
     "byline": "The gathering mystery",
     "tags": [
       "crows",
@@ -20998,7 +20998,7 @@
     "name": "Crow Winter Roosts",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The enormous evening gatherings of crows in winter.",
+    "teaser": "Crows gather in massive winter roosts that can contain 50000 to 2 million individuals. These roosts provide warmth, predator protection, and social information exchange. Crows fly up to 50 kilometers from feeding areas to communal roost sites at dusk. Urban roosts are particularly large, with roosts in Portland, Oregon, containing over 100000 birds nightly.",
     "byline": "The roost crowds",
     "tags": [
       "crows",
@@ -21018,7 +21018,7 @@
     "name": "The Hummingbird Brain",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The surprisingly large memory centers in a tiny bird brain.",
+    "teaser": "Hummingbirds have proportionally large brains with an enlarged hippocampus for spatial memory, essential for remembering hundreds of flower locations. Their brain-to-body ratio is comparable to some mammals. Hummingbirds can remember the location, timing, and reward quality of individual flowers across territories spanning kilometers.",
     "byline": "The tiny smart brain",
     "tags": [
       "hummingbirds",
@@ -21038,7 +21038,7 @@
     "name": "The Caching Brain",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The enlarged hippocampus of birds that hide thousands of seeds.",
+    "teaser": "Clark's nutcrackers can cache up to 33000 pine seeds in thousands of locations, recovering about 70 percent months later. Their hippocampus is proportionally twice as large as related species that don't cache. Studies show caching birds grow new hippocampal neurons in autumn that die off in spring, seasonally expanding and contracting their memory centers.",
     "byline": "The memory organ",
     "tags": [
       "birds",
@@ -21058,7 +21058,7 @@
     "name": "Seasonal Brain Growth",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "How food-caching tits grow brain regions each autumn.",
+    "teaser": "Some bird species grow new brain neurons seasonally to support spatial memory during critical periods. Black-capped chickadees add new hippocampal neurons each autumn for remembering cache locations, then lose them in spring. This seasonal neurogenesis allows the brain to expand memory capacity when needed and conserve energy when caching is not required.",
     "byline": "The growing brains",
     "tags": [
       "birds",
@@ -21078,7 +21078,7 @@
     "name": "The Chickadee's Alarm Code",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The 'dee' calls that encode the size of a threat.",
+    "teaser": "Chickadees encode information about predator size and danger level in their chick-a-dee calls. More dee notes indicate greater danger, with smaller predators producing more dee calls. Chickadees add up to 15 dee calls for a tiny pygmy owl versus 4 for a larger great horned owl. This graded alarm system allows other species to assess threat levels.",
     "byline": "The coded alarms",
     "tags": [
       "chickadees",
@@ -21098,7 +21098,7 @@
     "name": "The Chickadee's Winter Plan",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The seeds hidden one by one to survive the winter.",
+    "teaser": "Black-capped chickadees cache up to 50000 seeds and insects each autumn, remembering each location for up to 28 days. Their hippocampus enlarges by 30 percent during the caching season to support spatial memory. Chickadees can remember not just locations but also the quality of food cached at each site, recovering high-value items first.",
     "byline": "The winter planner",
     "tags": [
       "chickadees",
@@ -21118,7 +21118,7 @@
     "name": "The Nuthatch's Resin Defense",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The bird that smears tree resin around its nest hole.",
+    "teaser": "Eurasian nuthatches coat their tree cavity nest entrances with sticky resin from pine trees, deterring squirrels and snakes. The resin barrier makes the entrance slippery and unpleasant to cross. Nuthatches carefully apply resin around the cavity entrance using their beaks. This chemical defense allows them to nest in cavities that would otherwise be vulnerable.",
     "byline": "The resin guard",
     "tags": [
       "nuthatches",
@@ -21138,7 +21138,7 @@
     "name": "The Golden-Crowned Kinglet",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The tiny bird that survives nights at minus forty.",
+    "teaser": "The golden-crowned kinglet, weighing just 5 to 6 grams, survives northern winters by huddling in groups and entering controlled hypothermia each night. They can lower their body temperature by up to 10 degrees Celsius to conserve energy during cold nights. Kinglets need to eat insects equal to 10 percent of their body weight daily to survive.",
     "byline": "The tiny survivor",
     "tags": [
       "kinglets",
@@ -21158,7 +21158,7 @@
     "name": "The Kinglet's Night Torpor",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The deliberate cooling that lets a tiny bird survive freezing.",
+    "teaser": "Golden-crowned kinglets enter regulated hypothermia each winter night, lowering body temperature from 40 to 30 degrees Celsius to conserve energy. By morning, they may have lost up to 10 percent of body weight. They recover by shivering and foraging intensely at dawn. This daily torpor strategy allows them to survive temperatures down to minus 40 degrees.",
     "byline": "The nightly chill",
     "tags": [
       "kinglets",
@@ -21178,7 +21178,7 @@
     "name": "The Redpoll's Throat Pouch",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The seed-storing throat pouch of the arctic finch.",
+    "teaser": "Common redpolls have an expandable esophageal pouch that allows them to rapidly gather large quantities of small seeds. They stuff seeds into the pouch while perched, then fly to a safe location to digest them. This behavior allows them to minimize time exposed to predators at food sources. Redpolls can eat 2000 to 4000 seeds daily.",
     "byline": "The pouch carrier",
     "tags": [
       "finches",
@@ -21198,7 +21198,7 @@
     "name": "The Snow Bunting",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The white finch that breeds farther north than any other songbird.",
+    "teaser": "Snow buntings breed in the Arctic tundra, the most northerly of any passerine, and migrate to temperate coasts for winter. They arrive at breeding grounds in late April when snow still covers most of the landscape. Male snow buntings perform a distinctive parachute display flight, floating downward with wings and tail spread wide.",
     "byline": "The arctic finch",
     "tags": [
       "finches",
@@ -21218,7 +21218,7 @@
     "name": "The Ptarmigan's Seasons",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The bird that changes color with the seasons to stay invisible.",
+    "teaser": "Ptarmigan change plumage three times yearly: white in winter for snow camouflage, mottled brown in spring and fall, and gray-brown in summer for rocky terrain. Their feathered feet serve as snowshoes in winter. Rock ptarmigan can survive temperatures of minus 40 degrees and build snow burrows for shelter during storms.",
     "byline": "The changing bird",
     "tags": [
       "birds",
@@ -21238,7 +21238,7 @@
     "name": "Ptarmigan Snowshoes",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The feathered feet that act as snowshoes and insulators.",
+    "teaser": "Ptarmigan have densely feathered feet that distribute weight over snow surfaces, functioning as natural snowshoes. The feathering extends to their toes and reduces heat loss from their feet. In winter, they can walk on soft snow that would sink other birds. They also burrow into snow for overnight shelter, using their body heat to create insulated cavities.",
     "byline": "The feathered feet",
     "tags": [
       "birds",
@@ -21258,7 +21258,7 @@
     "name": "The Pigeon's City Life",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The rock dove that traded cliffs for skyscrapers.",
+    "teaser": "Rock pigeons, descended from wild cliff-dwelling rock doves, have thrived in cities for centuries, nesting on buildings that mimic natural cliff faces. A single pigeon pair can produce up to 10 broods per year. Homing pigeons can navigate over 1800 kilometers back to their roost using magnetic field detection, sun compass, and olfactory maps.",
     "byline": "The city bird",
     "tags": [
       "pigeons",
@@ -21278,7 +21278,7 @@
     "name": "Pigeon Homing",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The centuries-old mystery of how pigeons find home.",
+    "teaser": "Homing pigeons navigate using multiple compass systems: magnetic field detection through iron-containing cells in their beaks, the sun compass, and olfactory maps. They can return from unfamiliar locations over 1800 kilometers away. Pigeons have been used to carry messages for over 3000 years, with the Roman army maintaining pigeon post systems.",
     "byline": "The homing pilots",
     "tags": [
       "pigeons",
@@ -21298,7 +21298,7 @@
     "name": "War Pigeons",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The pigeons that carried messages through wars.",
+    "teaser": "Pigeons served in both World Wars, carrying over 100000 messages in World War I and 90 percent of messages between commanders and the front in World War II. Twenty-seven pigeons received the Dickin Medal for wartime heroism. Cher Ami delivered a crucial message despite being shot through the breast and losing a leg, saving 194 US soldiers.",
     "byline": "The feathered couriers",
     "tags": [
       "pigeons",
@@ -21318,7 +21318,7 @@
     "name": "Cher Ami",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The war pigeon awarded for delivering a message through gunfire.",
+    "teaser": "Cher Ami, a carrier pigeon in World War I, delivered a message saving 194 American soldiers of the Lost Battalion despite being shot through the breast, blinded in one eye, and losing a leg. The message reached headquarters in 25 minutes. Cher Ami received the Dickin Medal in 1919 and is preserved at the Smithsonian Institution.",
     "byline": "The hero pigeon",
     "tags": [
       "pigeons",
@@ -21338,7 +21338,7 @@
     "name": "Crop Milk",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The 'milk' pigeons produce to feed their chicks.",
+    "teaser": "Pigeons, flamingos, and some penguins produce crop milk, a nutritious secretion from the crop lining that feeds their young. Pigeon crop milk is similar in composition to mammalian milk, containing protein, fat, and immune factors. Both male and female pigeons produce crop milk, and it is so nutritious that it rivals cow's milk in protein content.",
     "byline": "The bird milk",
     "tags": [
       "pigeons",
@@ -21358,7 +21358,7 @@
     "name": "Flamingo Crop Milk",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The red 'milk' that colors baby flamingos pink.",
+    "teaser": "Both male and female flamingos produce crop milk, a bright red secretion from the upper digestive tract that feeds their chick for the first two months. The red color comes from canthaxanthin pigments. Flamingos can produce crop milk even when not breeding, and both parents produce it simultaneously. It is the only known example of male crop milk production outside of pigeons.",
     "byline": "The red milk",
     "tags": [
       "flamingos",
@@ -21378,7 +21378,7 @@
     "name": "Penguin Chick Feeding",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The regurgitated meals that fuel penguin chicks.",
+    "teaser": "Emperor penguin parents take turns foraging at sea, with one parent incubating the egg while the other hunts for up to 2 months. They return and regurgitate partially digested fish into the chick's mouth. Chicks lose up to 15 percent of their weight during each parent's absence. The regurgitation process involves the chick reaching into the parent's esophagus.",
     "byline": "The meal delivery",
     "tags": [
       "penguins",
@@ -21398,7 +21398,7 @@
     "name": "The Albatross Chick's Long Wait",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The slowest-growing bird chick, fed for almost a year.",
+    "teaser": "Albatross chicks wait in their nests for 5 to 8 months while both parents take long foraging trips to sea, sometimes traveling thousands of kilometers. The chick is left alone for days to weeks between feedings, surviving on stored fat. By the time chicks fledge, they weigh up to 20 kilograms and are larger than their parents.",
     "byline": "The patient chick",
     "tags": [
       "albatrosses",
@@ -21418,7 +21418,7 @@
     "name": "Penguin Chick Crèches",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The communal nurseries where penguin chicks huddle together.",
+    "teaser": "Emperor penguin chicks form crèches, groups of up to several hundred, for warmth and protection while parents forage. Chicks huddle together when temperatures drop, sharing body heat. If a parent cannot find its own chick in the crèche, it calls with a unique signature sound until the chick responds. Crèches reduce heat loss by up to 50 percent.",
     "byline": "The group nurseries",
     "tags": [
       "penguins",
@@ -21438,7 +21438,7 @@
     "name": "Starling Murmurations",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The swirling sky clouds of thousands of starlings.",
+    "teaser": "Starling murmurations are spectacular aerial displays involving hundreds of thousands to millions of birds moving in synchronized patterns. Each starling follows seven nearest neighbors, creating emergent waves of coordinated movement. The purpose includes predator confusion, heat conservation, and information sharing about feeding locations. Murmurations can cover several square kilometers.",
     "byline": "The sky dance",
     "tags": [
       "starlings",
@@ -21458,7 +21458,7 @@
     "name": "The Physics of Murmuration",
     "categoryId": "BIOLOGY",
     "subtype": "Zoology",
-    "teaser": "The simple rules behind the mesmerizing starling swarms.",
+    "teaser": "Starling murmurations follow simple local rules: each bird maintains distance from its 6 nearest neighbors, matches their speed, and moves toward their average direction. This creates emergent patterns without a leader. The same algorithms govern flocking fish and swarming insects. Small perturbations propagate as waves through the flock at up to 20 meters per second.",
     "byline": "The swarm math",
     "tags": [
       "starlings",
@@ -21478,7 +21478,7 @@
     "name": "Fish Bait Balls",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "The defensive spheres fish form against predators.",
+    "teaser": "When threatened, sardines and anchovies form dense bait balls, spherical schools of thousands of fish that confuse predators through the confusion effect. Individual fish follow a simple rule: swim away from neighbors while maintaining average distance. This creates a dynamic sphere that shifts shape as predators attack. Dolphins, whales, sharks, and seabirds exploit bait balls.",
     "byline": "The silver ball",
     "tags": [
       "oceans",
@@ -21498,7 +21498,7 @@
     "name": "Why Fish School",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "The safety, sensing, and efficiency behind fish schooling.",
+    "teaser": "Fish schools provide protection through the confusion effect, where many moving targets make it difficult for predators to focus on one individual. Schools also improve hydrodynamic efficiency, with fish saving energy by swimming in the vortices created by neighbors. Fish in schools have a 1 in 1000 chance of being eaten, compared to 1 in 10 when alone.",
     "byline": "The synchronized swimmers",
     "tags": [
       "oceans",
@@ -21518,7 +21518,7 @@
     "name": "The Sardine Run",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "The billion-fish migration that draws predators from everywhere.",
+    "teaser": "The annual sardine run along South Africa's east coast involves billions of sardines migrating from the cold Agulhas Current to warmer waters, creating one of the largest marine events on Earth. The sardines travel 7 to 10 kilometers wide in schools 7 kilometers long. Dolphins, sharks, whales, penguins, and gannets feed along the edges for weeks.",
     "byline": "The great silver river",
     "tags": [
       "oceans",
@@ -21538,7 +21538,7 @@
     "name": "Coral Mass Spawning",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "The synchronized annual release of coral eggs and sperm.",
+    "teaser": "Once a year, usually 5 to 7 nights after the full moon in spring, corals across entire reefs simultaneously release eggs and sperm into the water. This mass spawning event is triggered by water temperature, moon phase, and sunset timing. Eggs and sperm form pink slicks on the ocean surface that can stretch for kilometers. The synchronized release overwhelms predators.",
     "byline": "The underwater bloom",
     "tags": [
       "reefs",
@@ -21558,7 +21558,7 @@
     "name": "The Moon and Coral Spawning",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "How corals time their mass spawn to the lunar cycle.",
+    "teaser": "Coral spawning is precisely timed to lunar cycles, with eggs and sperm released 5 to 7 nights after the full moon when tidal currents are weakest. Research shows corals use internal circalunar clocks synchronized by moonlight. The spawning typically occurs just after sunset, with different species releasing within minutes of each other across entire reef systems.",
     "byline": "The lunar calendar",
     "tags": [
       "reefs",
@@ -21578,7 +21578,7 @@
     "name": "Sea Turtle Nesting",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "The night-time crawls to lay eggs on the beach of birth.",
+    "teaser": "Female sea turtles return to their natal beaches to lay eggs, navigating thousands of kilometers using magnetic field imprinting. A single female can lay 100 to 200 eggs per clutch and nest 3 to 7 times per season. Temperature determines sex: warmer sand produces females, cooler sand produces males. Climate change is creating increasingly female-biased populations.",
     "byline": "The beach return",
     "tags": [
       "turtles",
@@ -21598,7 +21598,7 @@
     "name": "The Hatchling Dash",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "The frantic run from nest to sea and its dangers.",
+    "teaser": "Sea turtle hatchlings emerge from their nest at night and use the brightest horizon, historically moonlight on the ocean, to find the sea. Artificial lighting disorients hatchlings, causing them to crawl inland where they perish. The dash to the ocean takes about 15 minutes and exposes hatchlings to numerous predators. Only about 1 in 1000 hatchlings survive to adulthood.",
     "byline": "The tiny dash",
     "tags": [
       "turtles",
@@ -21618,7 +21618,7 @@
     "name": "Squid Jet Propulsion",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "The fastest invertebrates, rocketing backward on jets of water.",
+    "teaser": "Squids move by drawing water into their mantle cavity and expelling it through a siphon, creating jet propulsion. The Humboldt squid can reach 24 kilometers per hour, making it one of the fastest marine invertebrates. Squids adjust the siphon direction to steer and can reverse direction instantly. This mechanism allows rapid escape from predators.",
     "byline": "The rocket mollusks",
     "tags": [
       "cephalopods",
@@ -21638,7 +21638,7 @@
     "name": "Squid Ink",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "The smoke screen, decoy, and chemical cloak of squid ink.",
+    "teaser": "Squids release dark ink clouds when threatened, which serve multiple functions: creating a visual smokescreen, chemically confusing predators, and forming a pseudosquid decoy shape while the real squid jets away. The ink contains melanin and mucus, with the pseudosquid outline lasting several seconds. Giant squid ink was historically used as ink for writing and art.",
     "byline": "The ink cloud",
     "tags": [
       "cephalopods",
@@ -21658,7 +21658,7 @@
     "name": "Octopus Escape Arts",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "The ink, jetting, color shifts, and squeezing of octopus escapes.",
+    "teaser": "Octopuses can squeeze through any opening large enough for their beak, their only hard part. They have been observed escaping sealed aquarium tanks by unscrewing jars from inside, navigating labyrinths, and even escaping through water pipes. Their boneless bodies allow them to compress through spaces as small as 2.5 centimeters in diameter.",
     "byline": "The escape artists",
     "tags": [
       "cephalopods",
@@ -21678,7 +21678,7 @@
     "name": "The Boneless Octopus",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "How a creature with no skeleton passes through gaps the size of a coin.",
+    "teaser": "Octopuses have no skeleton, allowing them to compress through any opening large enough for their hard parrot-like beak. An octopus the size of a basketball can fit through a hole the size of a quarter. Their eight arms contain two-thirds of their neurons and can act independently, tasting, touching, and manipulating objects without central brain input.",
     "byline": "The soft escape",
     "tags": [
       "cephalopods",
@@ -21698,7 +21698,7 @@
     "name": "The Chambered Nautilus",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "The living fossil with a spiral shell of buoyancy chambers.",
+    "teaser": "The chambered nautilus, a living fossil, has barely changed in 500 million years. Its logarithmically spiraled shell, divided into chambers, is used for buoyancy regulation. The nautilus fills empty chambers with gas to float and water to sink. It has up to 90 tentacles, no suckers, and can live over 20 years. Fossil nautiluses include species with shells over 3 meters wide.",
     "byline": "The spiral survivor",
     "tags": [
       "cephalopods",
@@ -21718,7 +21718,7 @@
     "name": "The Nautilus's Lineage",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "The cephalopod that outlived ammonites and looks like its ancestors.",
+    "teaser": "Nautiluses are the last surviving cephalopod with an external shell, a lineage dating back 500 million years. They have 4 gills compared to the 2 found in octopuses and squids. Living species inhabit depths of 100 to 700 meters in the Indo-Pacific. Fossil relatives include ammonites and orthocones that dominated ancient seas for hundreds of millions of years.",
     "byline": "The unchanged design",
     "tags": [
       "cephalopods",
@@ -21738,7 +21738,7 @@
     "name": "Ammonites",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "The coiled shelled cephalopods that dominate fossil collections.",
+    "teaser": "Ammonites were spiral-shelled cephalopods that dominated marine ecosystems for 340 million years before going extinct with the dinosaurs 66 million years ago. They ranged from a few millimeters to 2 meters in diameter. Their fossil shells are found worldwide and index fossils for dating rock layers. Over 10000 species have been described.",
     "byline": "The coiled fossils",
     "tags": [
       "cephalopods",
@@ -21758,7 +21758,7 @@
     "name": "The Ammonite's End",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "How ammonites vanished while nautiluses survived.",
+    "teaser": "Ammonites went extinct 66 million years ago during the mass extinction event triggered by the Chicxulub asteroid impact. They had survived previous mass extinctions but could not recover from the combined effects of ocean acidification, temperature collapse, and food web disruption. Their extinction ended a lineage that had persisted for 340 million years.",
     "byline": "The survivors and the lost",
     "tags": [
       "cephalopods",
@@ -21778,7 +21778,7 @@
     "name": "Trilobites",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "The armored arthropods that ruled ancient seas for 270 million years.",
+    "teaser": "Trilobites are extinct marine arthropods that thrived for 300 million years, from 521 to 252 million years ago. Over 20000 species have been described, ranging from 1 millimeter to 72 centimeters. Their calcified exoskeletons fossilize well, making them one of the most important Paleozoic index fossils. They are related to modern horseshoe crabs and spiders.",
     "byline": "The armored rulers",
     "tags": [
       "fossils",
@@ -21798,7 +21798,7 @@
     "name": "Trilobite Eyes",
     "categoryId": "BIOLOGY",
     "subtype": "Marine biology",
-    "teaser": "The crystal calcite eyes of ancient trilobites.",
+    "teaser": "Trilobites had the first known compound eyes, composed of calcite crystal lenses that are still optically perfect 500 million years later. Some species had up to 15000 lenses per eye. Their eyes evolved independently from all other animal eyes and are the oldest known visual system. The crystal lenses corrected for optical aberrations, an engineering feat not matched until the 18th century.",
     "byline": "The stone eyes",
     "tags": [
       "fossils",
@@ -21818,7 +21818,7 @@
     "name": "Anomalocaris",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The giant shrimp-like apex predator of the Cambrian seas.",
+    "teaser": "Anomalocaris was the apex predator of the Cambrian seas, growing up to 1 meter long with spiny grasping appendages and a circular mouth lined with teeth. Discovered in the Burgess Shale, it was initially reconstructed incorrectly from separate body parts. Anomalocaris represents the earliest known animal with complex eyes and active predatory behavior.",
     "byline": "The Cambrian terror",
     "tags": [
       "fossils",
@@ -21838,7 +21838,7 @@
     "name": "The Cambrian Explosion",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The evolutionary burst that produced most animal body plans.",
+    "teaser": "The Cambrian explosion, beginning about 539 million years ago, saw the rapid emergence of most major animal phyla within 20 to 25 million years. Complex eyes, shells, and predatory appendages evolved almost simultaneously. The explosion may have been triggered by rising oxygen levels, the evolution of vision, or ecological arms races between predators and prey.",
     "byline": "The great burst",
     "tags": [
       "fossils",
@@ -21858,7 +21858,7 @@
     "name": "The Burgess Shale",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The fossil treasure chest preserving soft-bodied Cambrian life.",
+    "teaser": "The Burgess Shale, discovered in 1909 by Charles Walcott in British Columbia, preserves soft-bodied organisms from 508 million years ago in extraordinary detail. It contains over 80000 fossils representing 280 species, including bizarre creatures like Hallucigenia and Opabinia. The fossils revolutionized understanding of early animal evolution.",
     "byline": "The fossil window",
     "tags": [
       "fossils",
@@ -21878,7 +21878,7 @@
     "name": "Opabinia",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The five-eyed Cambrian oddity with a frontal claw.",
+    "teaser": "Opabinia was a 5-centimeter Cambrian animal with five eyes and a forward-facing flexible proboscis, unlike any living creature. Discovered in the Burgess Shale in 1975, it was so unusual that the paleontologist who first described it made the audience laugh. Its unique combination of features made it difficult to classify within any modern animal group.",
     "byline": "The five-eyed one",
     "tags": [
       "fossils",
@@ -21898,7 +21898,7 @@
     "name": "Hallucigenia",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The Cambrian worm once reconstructed upside down and backwards.",
+    "teaser": "Hallucigenia, a 5-millimeter Burgess Shale fossil, was originally reconstructed upside-down with its spines as legs. Correct reanalysis in 1991 showed it was a velvet worm relative. Its 2014 complete description revealed it had teeth and eyes on stalks. Hallucigenia's name reflects the confusion it caused when first discovered.",
     "byline": "The misread fossil",
     "tags": [
       "fossils",
@@ -21918,7 +21918,7 @@
     "name": "Sea Scorpions",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The giant eurypterids that ruled ancient waters.",
+    "teaser": "Eurypterids, or sea scorpions, were the largest arthropods ever, with some species like Jaekelopterus reaching 2.6 meters. They dominated freshwater and marine ecosystems for 200 million years before going extinct 252 million years ago. Unlike modern scorpions, most were aquatic. Their fossil pincers and exoskeletons provide evidence of active predatory lifestyles.",
     "byline": "The water scorpions",
     "tags": [
       "fossils",
@@ -21938,7 +21938,7 @@
     "name": "Dunkleosteus",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The armored fish with scissors for jaws that dominated ancient seas.",
+    "teaser": "Dunkleosteus was the largest armored fish ever, reaching 6 to 10 meters long with massive bony plates forming a self-sharpening beak-like jaw. It could generate a bite force of 4400 newtons. Dunkleosteus was the apex predator of the Devonian seas, 382 to 358 million years ago, preying on sharks, ammonites, and other armored fish.",
     "byline": "The jaw machine",
     "tags": [
       "fossils",
@@ -21958,7 +21958,7 @@
     "name": "The Giant Dragonfly",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "A dragonfly with a two-foot wingspan from the Carboniferous.",
+    "teaser": "Meganeura, the giant dragonfly of the Carboniferous period, had a wingspan of 71 centimeters, the largest insect ever known. It lived 300 million years ago when atmospheric oxygen reached 35 percent, compared to today's 21 percent. The high oxygen allowed insects to grow to enormous sizes. Meganeura preyed on other large insects and small amphibians.",
     "byline": "The giant flyer",
     "tags": [
       "fossils",
@@ -21978,7 +21978,7 @@
     "name": "The High-Oxygen Era",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "How 35% oxygen allowed giant insects to evolve.",
+    "teaser": "During the Carboniferous period 360 to 300 million years ago, atmospheric oxygen reached 35 percent, enabling giant insects and arthropods. Dragonflies grew wingspans of 71 centimeters, millipedes reached 2.6 meters, and scorpions grew to 70 centimeters. This high-oxygen atmosphere was created by vast coal forests that absorbed CO2 and released oxygen.",
     "byline": "The oxygen age",
     "tags": [
       "fossils",
@@ -21998,7 +21998,7 @@
     "name": "Arthropleura",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The eight-foot millipede that crawled through coal forests.",
+    "teaser": "Arthropleura was the largest land arthropod ever, reaching 2.6 meters long and 50 centimeters wide. This giant millipede lived in the Carboniferous coal forests 300 million years ago, when high oxygen levels allowed arthropods to grow to enormous sizes. Its segmented body contained over 30 pairs of legs. Fossils suggest it was herbivorous, feeding on fallen leaves and rotting wood.",
     "byline": "The giant millipede",
     "tags": [
       "fossils",
@@ -22018,7 +22018,7 @@
     "name": "The Giant Ground Sloth",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The bus-sized sloths that roamed the Americas.",
+    "teaser": "Megatherium, the giant ground sloth, stood 6 meters tall and weighed 4 tonnes, the size of an elephant. These herbivores roamed South America until about 10000 years ago. They could rear up on hind legs and tail to reach tree foliage. Complete skeletons show they walked on the sides of their feet with enormous curved claws, possibly used for pulling down branches.",
     "byline": "The giant slowpokes",
     "tags": [
       "fossils",
@@ -22038,7 +22038,7 @@
     "name": "The Woolly Mammoth",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The shaggy elephant of the Ice Age with a freezer full of secrets.",
+    "teaser": "Woolly mammoths, Mammuthus primigenius, survived on Wrangel Island until about 4000 years ago, outlasting their mainland extinction by 4000 years. They had 2 to 4 centimeters of thick underfur beneath long guard hairs. Mammoths coexisted with humans for thousands of years and may have contributed to their own extinction through habitat modification.",
     "byline": "The ice giant",
     "tags": [
       "fossils",
@@ -22058,7 +22058,7 @@
     "name": "Frozen Mammoth Mummies",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The permafrost-preserved mammoths that still have fur and blood.",
+    "teaser": "Several mammoth specimens have been found frozen in Siberian permafrost with intact soft tissue, blood, and DNA. Yuka, discovered in 2010, preserved muscle and fat tissue. In 2019, Russian scientists revived cells from a 28000-year-old mammoth. These frozen specimens provide unprecedented insights into mammoth anatomy, diet, and genetics.",
     "byline": "The frozen archives",
     "tags": [
       "fossils",
@@ -22078,7 +22078,7 @@
     "name": "De-Extinction Science",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The gene-editing efforts aimed at bringing mammoths back.",
+    "teaser": "De-extinction efforts aim to resurrect extinct species using genetic engineering. The woolly mammoth, passenger pigeon, and dodo are top candidates. Colossal Biosciences plans to create cold-adapted elephants from mammoth DNA by 2028. Critics argue resources should focus on protecting endangered species rather than reviving extinct ones. No de-extinction has been achieved yet.",
     "byline": "The resurrection question",
     "tags": [
       "fossils",
@@ -22098,7 +22098,7 @@
     "name": "The Saber-Toothed Cat",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The oversized canine teeth and the jaws built around them.",
+    "teaser": "Smilodon fatalis, the saber-toothed cat, had 28-centimeter canine teeth designed for slashing, not piercing. They weighed 200 kilograms and lived in North and South America until 10000 years ago. Saber teeth were fragile and would have broken during bone contact, suggesting Smilodon targeted soft tissue on large prey like bison and ground sloths.",
     "byline": "The fanged hunter",
     "tags": [
       "fossils",
@@ -22118,7 +22118,7 @@
     "name": "The Dire Wolf",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The Ice Age wolf made famous by fiction and now sequenced.",
+    "teaser": "Dire wolves, Canis dirus, were larger than modern gray wolves at 68 kilograms, with more powerful jaws for crushing bone. They were the most common large predator at the La Brea tar pits, with over 4000 specimens found. Dire wolves went extinct 9500 years ago and were not closely related to gray wolves despite superficial similarity.",
     "byline": "The Ice Age wolf",
     "tags": [
       "fossils",
@@ -22138,7 +22138,7 @@
     "name": "Megatherium",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The elephant-sized ground sloth that may have been an occasional meat-eater.",
+    "teaser": "Megatherium, the giant ground sloth, was the size of an elephant at 6 meters long and 4 tonnes. It could stand upright on its hind legs and tail to reach tree foliage 6 meters high. Fossil footprints in South America suggest these sloths were social animals. They went extinct about 10000 years ago, likely due to a combination of climate change and human hunting.",
     "byline": "The giant sloth",
     "tags": [
       "fossils",
@@ -22158,7 +22158,7 @@
     "name": "The Aurochs",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The wild ancestor of cattle, hunted to extinction in 1627.",
+    "teaser": "The aurochs, Bos primigenius, was the wild ancestor of modern domestic cattle, standing 1.8 meters tall with 80-centimeter horns. The last aurochs died in Poland in 1627. Modern cattle were domesticated from aurochs in the Near East around 10000 years ago. Breeding programs are attempting to recreate aurochs-like cattle from existing breeds through selective breeding.",
     "byline": "The wild ancestor",
     "tags": [
       "fossils",
@@ -22178,7 +22178,7 @@
     "name": "Dodo Bones and Diets",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "What fossil and bone studies reveal about the real dodo.",
+    "teaser": "Analysis of dodo bones reveals the bird ate fruit, seeds, nuts, and possibly shellfish. Their gizzard contained stones for grinding food. Bone chemistry shows dodos ate a varied diet including palm fruits. The dodo's extinction in 1681 was caused by hunting by sailors, predation by introduced pigs and rats, and habitat destruction on Mauritius.",
     "byline": "The real dodo",
     "tags": [
       "fossils",
@@ -22198,7 +22198,7 @@
     "name": "The Great Auk",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The penguin-like bird hunted to extinction for its feathers.",
+    "teaser": "The great auk, Pinguinus impennis, was a flightless seabird that went extinct in 1844 when the last pair was killed in Iceland. Standing 75 centimeters tall, it was the original penguin, before the name was applied to southern hemisphere birds. Auks were hunted for centuries for their feathers, oil, and meat. Complete specimens are extremely rare, with only about 78 surviving worldwide.",
     "byline": "The vanished northern penguin",
     "tags": [
       "fossils",
@@ -22218,7 +22218,7 @@
     "name": "The Passenger Pigeon",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The bird once numbering billions, gone by 1914.",
+    "teaser": "The passenger pigeon, Ectopistes migratorius, was once the most abundant bird in North America, with flocks that darkened the sky for hours. In 1866, a flock in Ontario was estimated at 3.5 billion birds. Uncontrolled hunting and habitat destruction reduced them to a single individual, Martha, who died at the Cincinnati Zoo on September 1, 1914.",
     "byline": "The vanished billions",
     "tags": [
       "fossils",
@@ -22238,7 +22238,7 @@
     "name": "The Thylacine",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The striped marsupial wolf declared extinct in the 1930s.",
+    "teaser": "The thylacine, or Tasmanian tiger, was a carnivorous marsupial that looked remarkably like a dog, a striking example of convergent evolution. The last thylacine died at Hobart Zoo on September 7, 1936. Thylacines had backward-facing pouches like other marsupials but had dog-like jaws with 46 teeth, more than any other land mammal.",
     "byline": "The vanished tiger",
     "tags": [
       "fossils",
@@ -22258,7 +22258,7 @@
     "name": "The Thylacine Sightings",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The decades of reported sightings and why they remain unconfirmed.",
+    "teaser": "Despite being declared extinct in 1936, unverified thylacine sightings continue in Tasmania. Over 1300 reported sightings have been logged since 1936, though none have been confirmed. Camera traps and field surveys have not produced definitive evidence. Some researchers maintain a small possibility that a remnant population survives in remote Tasmanian wilderness.",
     "byline": "The ghost sightings",
     "tags": [
       "fossils",
@@ -22278,7 +22278,7 @@
     "name": "The Moa's Giant Eggs",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The enormous eggs of the giant flightless birds of New Zealand.",
+    "teaser": "The giant moa of New Zealand laid eggs up to 30 centimeters long and weighing about 4 kilograms, the largest eggs of any known bird. Complete moa egg shells with preserved membranes have been found in cave deposits. The eggs were abandoned when Polynesian settlers arrived around 1280 CE, and the species went extinct within 200 years.",
     "byline": "The giant eggs",
     "tags": [
       "fossils",
@@ -22298,7 +22298,7 @@
     "name": "The Elephant Bird",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The Madagascar giant that laid the largest eggs ever.",
+    "teaser": "The elephant bird of Madagascar, Aepyornis maximus, was the heaviest bird ever at up to 730 kilograms and 3 meters tall. Its eggs were the largest of any animal, holding 9 liters of liquid, equivalent to 150 chicken eggs. Elephant birds went extinct around 1000 CE due to human hunting and egg collection. Some claims suggest they survived into the 17th century.",
     "byline": "The island giants",
     "tags": [
       "fossils",
@@ -22318,7 +22318,7 @@
     "name": "The Giant Koala",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The koala relatives that dwarfed today's marsupials.",
+    "teaser": "The giant koala, Phascolarctos stirtoni, was twice the size of modern koalas and lived in Australia until about 50000 years ago. Fossil evidence suggests it was more widespread and occupied diverse habitats. The modern koala, Phascolarctos cinereus, is the only surviving member of the family Phascolarctidae. Climate change and human hunting drove the giant koala to extinction.",
     "byline": "The big koala",
     "tags": [
       "fossils",
@@ -22338,7 +22338,7 @@
     "name": "Procoptodon",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The giant short-faced kangaroo of Ice Age Australia.",
+    "teaser": "Procoptodon goliah was the largest kangaroo ever, standing 3 meters tall and weighing 240 kilograms. Unlike modern kangaroos, it had single-toed feet and long arms that could reach tree foliage. It lived in Australia until about 46000 years ago, disappearing shortly after human arrival. Fossils show it was a browser rather than a grazer like modern kangaroos.",
     "byline": "The giant hopper",
     "tags": [
       "fossils",
@@ -22358,7 +22358,7 @@
     "name": "The Short-Faced Bear",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The towering running bear of the Ice Age Americas.",
+    "teaser": "The short-faced bear, Arctodus simus, was the largest terrestrial carnivore in North America during the Ice Age, standing 3.4 meters tall on hind legs and weighing up to 900 kilograms. It had long limbs suggesting it was a fast runner, covering ground quickly across open grasslands. It went extinct about 11000 years ago, likely due to climate change and competition.",
     "byline": "The running bear",
     "tags": [
       "fossils",
@@ -22378,7 +22378,7 @@
     "name": "The Cave Lion",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The Ice Age big cat that lived alongside humans.",
+    "teaser": "The cave lion, Panthera spelaea, was larger than modern lions at about 250 kilograms, with males lacking manes. Cave paintings in France depict them with spotted coats. They survived until about 13000 years ago. A frozen cave lion cub found in Siberian permafrost in 2017 preserved soft tissue and fur, providing the first direct evidence of their appearance.",
     "byline": "The cave cat",
     "tags": [
       "fossils",
@@ -22398,7 +22398,7 @@
     "name": "Why the Megafauna Vanished",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The debate over climate and humans in the Ice Age extinctions.",
+    "teaser": "The megafauna extinction 50000 to 10000 years ago wiped out over 170 large mammal species worldwide. In North America, 35 genera disappeared. Causes likely included a combination of human overkill, climate change at the end of the last Ice Age, and habitat transformation. Different regions experienced extinction at different times, suggesting multiple contributing factors.",
     "byline": "The great vanishing",
     "tags": [
       "fossils",
@@ -22418,7 +22418,7 @@
     "name": "The Overkill Hypothesis",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The idea that human hunting drove the megafauna extinct.",
+    "teaser": "Paul Martin's overkill hypothesis proposes that human hunters arriving on new continents caused rapid megafauna extinction. In North America, 35 genera disappeared within 2000 years of human arrival. On Madagascar, elephant birds and hippos survived until humans arrived about 1500 years ago. Critics argue that climate change was the primary driver, with hunting as a contributing factor.",
     "byline": "The hunting theory",
     "tags": [
       "fossils",
@@ -22438,7 +22438,7 @@
     "name": "The Ice Age Bestiary",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "Mammoths, sabertooths, giant sloths, and the world they shared.",
+    "teaser": "The Ice Age supported extraordinary megafauna: woolly mammoths, saber-toothed cats, giant ground sloths, cave bears, dire wolves, Irish elk, and woolly rhinoceros. These animals were adapted to cold grasslands called mammoth steppe that once covered 25 percent of Earth's land surface. Most disappeared between 50000 and 10000 years ago.",
     "byline": "The frozen world",
     "tags": [
       "fossils",
@@ -22458,7 +22458,7 @@
     "name": "Cave Art and Ice Age Life",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The painted caves that record the animals humans actually saw.",
+    "teaser": "Paleolithic cave art at Lascaux, Chauvet, and Altamira provides vivid depictions of Ice Age megafauna, including horses, bison, mammoths, and rhinoceros. The paintings, up to 36000 years old, demonstrate that humans observed these animals closely. Bone tools, cave art, and archaeological evidence show deep cultural connections between Ice Age humans and megafauna.",
     "byline": "The painted archives",
     "tags": [
       "fossils",
@@ -22478,7 +22478,7 @@
     "name": "The Steppe Bison",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The Ice Age bison painted on cave walls and frozen in permafrost.",
+    "teaser": "The steppe bison, Bison priscus, was the most widespread large mammal of the Ice Age, ranging from Spain to Alaska. It was larger than modern bison, with wider, more curved horns. Herds migrated across the mammoth steppe following seasonal grass growth. The species gave rise to both modern American and European bison before going extinct around 10000 years ago.",
     "byline": "The painted bison",
     "tags": [
       "fossils",
@@ -22498,7 +22498,7 @@
     "name": "Blue Babe",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The 36,000-year-old mummified bison found in Alaskan permafrost.",
+    "teaser": "Blue Babe is a 36000-year-old mummified steppe bison found in the Alaskan permafrost in 1979, so named for the blue-gray sheen of its hide. Soft tissue, fur, and muscle were preserved in remarkable detail. Analysis revealed the bison died in a mudslide. It is displayed at the University of Alaska Museum and has provided invaluable data on Ice Age animal biology.",
     "byline": "The frozen bison",
     "tags": [
       "fossils",
@@ -22518,7 +22518,7 @@
     "name": "The La Brea Tar Pits",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The asphalt traps that preserved Ice Age predators by the thousands.",
+    "teaser": "The La Brea tar pits in Los Angeles have yielded over 3.5 million fossils from the last Ice Age, including 4000 dire wolves, 2000 saber-toothed cats, and dozens of mammoths and ground sloths. The natural asphalt seeps trapped animals from 50000 to 10000 years ago. The site is the world's richest Ice Age fossil locality and remains actively excavated.",
     "byline": "The sticky archive",
     "tags": [
       "fossils",
@@ -22538,7 +22538,7 @@
     "name": "Pulling Bones From Tar",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The careful science of excavating fossils from sticky asphalt.",
+    "teaser": "Excavating fossils from the La Brea tar pits requires heating the sticky asphalt to extract bones without damage. Paleontologists use hot water, solvents, and careful mechanical tools to remove specimens from the viscous matrix. The process can take weeks per large fossil. Over 100 new species have been identified from La Brea, and excavations continue today.",
     "byline": "The sticky dig",
     "tags": [
       "fossils",
@@ -22558,7 +22558,7 @@
     "name": "The Dire Wolves of La Brea",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The thousands of dire wolf skulls pulled from one tar pit.",
+    "teaser": "Over 4000 dire wolf skeletons have been recovered from the La Brea tar pits, making it the most abundant large predator. Analysis shows dire wolves were more robust than gray wolves, with thicker bones and stronger jaws. DNA analysis reveals dire wolves were not closely related to gray wolves, having diverged over 5 million years ago.",
     "byline": "The trapped pack",
     "tags": [
       "fossils",
@@ -22578,7 +22578,7 @@
     "name": "Fossil Fish Beds",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The mass-death deposits that preserve fish in perfect detail.",
+    "teaser": "Fossil fish beds preserve ancient aquatic ecosystems in extraordinary detail. The Green River Formation in Wyoming contains millions of perfectly preserved fish from 50 million years ago, including complete skeletons, soft tissues, and even stomach contents. These fossils reveal ancient lake ecosystems, food webs, and environmental conditions with remarkable fidelity.",
     "byline": "The fish graveyards",
     "tags": [
       "fossils",
@@ -22598,7 +22598,7 @@
     "name": "The Green River Formation",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The Wyoming lake deposits packed with fish, birds, and bats.",
+    "teaser": "The Green River Formation in Wyoming, Colorado, and Utah preserves 50-million-year-old lake ecosystems containing over 1000000 fossil fish specimens. The annual varves, or sediment layers, provide precise dating. Fossil fish are found alongside insects, plants, birds, and crocodiles. The formation has yielded some of the world's finest fossil specimens since the 1870s.",
     "byline": "The fossil lake",
     "tags": [
       "fossils",
@@ -22618,7 +22618,7 @@
     "name": "The Solnhofen Limestone",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The German quarries that preserved Archaeopteryx in stunning detail.",
+    "teaser": "The Solnhofen limestone in Bavaria, Germany, preserves 150-million-year-old Jurassic lagoons with extraordinary detail. This fine-grained limestone produced Archaeopteryx, the first fossil linking dinosaurs and birds, as well as pterosaurs, jellyfish, and insects. The limestone was used for lithographic printing plates, leading to the discovery of fossils during quarrying.",
     "byline": "The feather archive",
     "tags": [
       "fossils",
@@ -22638,7 +22638,7 @@
     "name": "Insects in Amber",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The golden time capsules that preserve ancient arthropods.",
+    "teaser": "Amber preserves insects with extraordinary fidelity, capturing soft tissues, color, and even behavior frozen in time. Baltic amber from 44 million years ago contains over 1000 species. Myanmar amber, 99 million years old, preserves spiders, feathered dinosaur tails, and flowers. Some amber specimens contain parasites still attached to their hosts, preserving ecological interactions.",
     "byline": "The golden capsules",
     "tags": [
       "fossils",
@@ -22658,7 +22658,7 @@
     "name": "The Amber Mosquito Debate",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The Jurassic Park dream versus the reality of ancient DNA.",
+    "teaser": "A 99-million-year-old mosquito preserved in Myanmar amber contained what appeared to be blood in its abdomen, published in 2013. This raised speculation about extracting dinosaur DNA, similar to the Jurassic Park concept. However, DNA degrades completely within 1 million years, making dinosaur DNA recovery from amber impossible. The blood meal's origin remains unknown.",
     "byline": "The dinosaur DNA question",
     "tags": [
       "fossils",
@@ -22678,7 +22678,7 @@
     "name": "Coprolites",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "Fossilized dung that reveals the diets of ancient animals.",
+    "teaser": "Coprolites, fossilized dung, provide direct evidence of ancient diets and ecosystems. A dinosaur coprolite found in Saskatchewan contained 74 percent plant material and 12 percent bone fragments, revealing herbivorous behavior. Tyrannosaurus coprolites contain crushed bone. A 250-million-year-old coprolite is the oldest known, showing that coprolites preserve information unavailable from bones alone.",
     "byline": "The fossil clues",
     "tags": [
       "fossils",
@@ -22698,7 +22698,7 @@
     "name": "Trace Fossils",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The footprints, burrows, and trails left by ancient animals.",
+    "teaser": "Trace fossils, or ichnofossils, record the behavior of ancient organisms rather than their physical remains. Tracks, burrows, borings, and trails reveal how animals moved, fed, and interacted. Dinosaur trackways show herding behavior, while fossil worm burrows indicate oxygen levels in ancient seas. Trace fossils are often more abundant than body fossils.",
     "byline": "The preserved actions",
     "tags": [
       "fossils",
@@ -22718,7 +22718,7 @@
     "name": "Dinosaur Trackways",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The fossil footprints that reveal how dinosaurs walked and ran.",
+    "teaser": "Dinosaur trackways preserve evidence of behavior that bones cannot. The Paluxy River trackway in Texas shows sauropods walking in parallel, suggesting herd behavior. Dinosaur tracks in Texas include over 120 sauropod footprints stretching 60 meters. Track sites reveal speed estimates, social behavior, and community composition across different time periods.",
     "byline": "The stone steps",
     "tags": [
       "fossils",
@@ -22738,7 +22738,7 @@
     "name": "Paleoart",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The art and science of reconstructing extinct animals.",
+    "teaser": "Paleoart, the reconstruction of prehistoric life through illustration and sculpture, shapes public understanding of extinct animals. Charles Knight's paintings in the early 1900s defined how dinosaurs were imagined for decades. Modern paleoartists like John Sibbick and Julius Csotonyi use the latest scientific findings to create increasingly accurate depictions of extinct ecosystems.",
     "byline": "The reconstruction art",
     "tags": [
       "fossils",
@@ -22758,7 +22758,7 @@
     "name": "How Dinosaur Reconstructions Change",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "Why dinosaurs look different in modern paleoart than in old paintings.",
+    "teaser": "Dinosaur reconstructions have changed dramatically over the past century, reflecting evolving scientific understanding. Early depictions showed lumbering, tail-dragging reptiles. John Ostrom's 1969 Deinonychus study revealed agile, bird-like dinosaurs. Modern reconstructions include feathers, dynamic postures, and behavioral scenes based on fossil evidence.",
     "byline": "The moving picture",
     "tags": [
       "fossils",
@@ -22778,7 +22778,7 @@
     "name": "Feathered Dinosaurs",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The fossils that proved many dinosaurs had feathers.",
+    "teaser": "Over 50 dinosaur species have been found with feathers or feather impressions, transforming understanding of dinosaur appearance. Sinosauropteryx, discovered in 1996, was the first feathered dinosaur confirmed outside of birds. Evidence now shows feathers evolved before flight, likely for insulation or display, and many dinosaurs we imagine as scaly were actually feathered.",
     "byline": "The feathered proof",
     "tags": [
       "fossils",
@@ -22798,7 +22798,7 @@
     "name": "Archaeopteryx",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The famous 'first bird' with teeth, claws, and feathers.",
+    "teaser": "Archaeopteryx, discovered in 1861 in the Solnhofen limestone, was the first fossil linking dinosaurs and birds. About 150 million years old, it had both reptilian features, including teeth and clawed fingers, and avian features like flight feathers. Twelve specimens have been found. The Berlin specimen, discovered in 1877, remains the most complete and famous.",
     "byline": "The feathered link",
     "tags": [
       "fossils",
@@ -22818,7 +22818,7 @@
     "name": "Microraptor",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The four-winged dinosaur that glided through Jurassic forests.",
+    "teaser": "Microraptor gui was a small dinosaur with four wings, two on its arms and two on its legs, that could glide between trees. Discovered in China in 2003, it measured 77 centimeters long and weighed about 1 kilogram. Iridescence in its fossilized feathers suggests a crow-like color pattern. Microraptor represents a transitional stage between ground-dwelling dinosaurs and true birds.",
     "byline": "The four-winged flyer",
     "tags": [
       "fossils",
@@ -22838,7 +22838,7 @@
     "name": "The Real Velociraptor",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "How movies got the raptor wrong — and what the fossil says.",
+    "teaser": "Velociraptor mongoliensis was only the size of a turkey, 2 meters long and 0.5 meters tall, weighed about 15 kilograms, and was fully feathered. The Jurassic Park version is closer to Deinonychus, which was about 3.4 meters long. The famous sickle claw on the second toe was used to pin prey, not to slash. Velociraptor lived 75 million years ago in Mongolia.",
     "byline": "The real raptor",
     "tags": [
       "fossils",
@@ -22858,7 +22858,7 @@
     "name": "Did T. rex Have Feathers?",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The ongoing debate over the king dinosaur's covering.",
+    "teaser": "Tyrannosaurus rex likely had feathers, at least as juveniles. Fossil skin impressions from large adult specimens show mostly scales, suggesting adults lost most feathers as they grew. Fuzzy skin impressions from related tyrannosauroids confirm feathered ancestors. The debate continues about whether large adults retained any filaments, especially on the head and back.",
     "byline": "The feather question",
     "tags": [
       "fossils",
@@ -22878,7 +22878,7 @@
     "name": "The T. rex Bite",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The strongest bite force of any land animal ever.",
+    "teaser": "Tyrannosaurus rex had the strongest bite of any land animal, estimated at 57000 newtons, enough to crush bone. Its teeth were shaped like railroad spikes, up to 30 centimeters long. A 2019 study showed T. rex could bite through bone at 43100 newtons, producing bite forces comparable to large crocodiles. T. rex likely could not chew but swallowed meat and bone in chunks.",
     "byline": "The bone crusher",
     "tags": [
       "fossils",
@@ -22898,7 +22898,7 @@
     "name": "Triceratops Horns",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The horns and frill that may have been for display as much as defense.",
+    "teaser": "Triceratops had three horns: two brow horns up to 1 meter long and a smaller nasal horn. CT scans reveal the horns were covered in keratin sheaths, making them even longer. The frill, up to 2 meters wide, may have functioned in species recognition, temperature regulation, and dominance displays. Triceratops and T. rex occasionally fought, as evidenced by healed bite marks on frills.",
     "byline": "The horned giant",
     "tags": [
       "fossils",
@@ -22918,7 +22918,7 @@
     "name": "The Stegosaurus Plates",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The mystery of the back plates — armor, display, or radiator.",
+    "teaser": "Stegosaurus had 17 alternating bony plates along its back, up to 60 centimeters tall and covered in keratin. The plates contained blood vessels and were used for temperature regulation and display, not defense. Its dangerous weapon was the thagomizer, four tail spikes up to 60 centimeters long that could impale predators. The term thagomizer was coined by Gary Larson in a Far Side cartoon.",
     "byline": "The plated puzzle",
     "tags": [
       "fossils",
@@ -22938,7 +22938,7 @@
     "name": "The Thagomizer",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The tail spikes that gave Stegosaurus a real weapon.",
+    "teaser": "The thagomizer, the four tail spikes at the end of a Stegosaurus tail, could swing with enough force to wound or kill predators. Allosaurus fossils show puncture wounds consistent with thagomizer strikes. The name was coined by Gary Larson in 1982 in a Far Side cartoon, then adopted by paleontologists as an informal anatomical term. Stegosaurus's brain was only walnut-sized.",
     "byline": "The tail spikes",
     "tags": [
       "fossils",
@@ -22958,7 +22958,7 @@
     "name": "The Ankylosaurus",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The tank-like dinosaur with a built-in club.",
+    "teaser": "Ankylosaurus was the ultimate dinosaur tank, covered in bony armor plates called osteoderms with a massive tail club that could shatter bone. The tail club weighed about 60 kilograms and could swing through a 90-degree arc. Ankylosaurus was about 6 to 8 meters long and weighed 8 tonnes. Its armor extended even to its eyelids.",
     "byline": "The armored tank",
     "tags": [
       "fossils",
@@ -22978,7 +22978,7 @@
     "name": "The Sauropod Giants",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The long-necked giants that stretched the limits of land animal size.",
+    "teaser": "Sauropods were the largest land animals ever, with Argentinosaurus reaching 35 meters long and 70 tonnes. Dreadnoughtus, discovered in 2014, weighed 49 tonnes and is the largest land animal for which a substantial portion of the skeleton has been found. Sauropods achieved their enormous size through rapid growth rates, air-sac respiratory systems, and small heads.",
     "byline": "The giants of giants",
     "tags": [
       "fossils",
@@ -22998,7 +22998,7 @@
     "name": "Sauropod Neck Physics",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The hollow bones and air sacs that let necks reach the treetops.",
+    "teaser": "Sauropod necks, like Brachiosaurus at 9 meters long, present engineering challenges. Each cervical vertebra was hollow with air sacs, reducing weight by up to 60 percent. The neck probably could not raise higher than 15 degrees from horizontal. Instead of a vertical giraffe pose, sauropods likely held their necks out in front, sweeping a wide feeding arc without moving their bodies.",
     "byline": "The long neck mechanics",
     "tags": [
       "fossils",
@@ -23018,7 +23018,7 @@
     "name": "Brachiosaurus",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The high-browsing sauropod built like a giraffe on four legs.",
+    "teaser": "Brachiosaurus stood 13 meters tall and weighed about 56 tonnes, one of the tallest dinosaurs. Unlike most sauropods, its front legs were longer than its back legs, giving it an upright posture for reaching high foliage. Brachiosaurus ate about 400 kilograms of vegetation daily. Its fossils have been found in North America and Africa, suggesting a wide distribution.",
     "byline": "The high feeder",
     "tags": [
       "fossils",
@@ -23038,7 +23038,7 @@
     "name": "The Diplodocus Whip Tail",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The whip-cracking tail that may have broken the sound barrier.",
+    "teaser": "Diplodocus had an extremely long tail with 80 vertebrae, the most of any dinosaur. Recent studies suggest the tail could be cracked like a whip at supersonic speeds, producing a loud cracking sound that may have been used for communication or defense. The sound could reach over 200 decibels. The tail was so long that the tip moved faster than the speed of sound.",
     "byline": "The sonic tail",
     "tags": [
       "fossils",
@@ -23058,7 +23058,7 @@
     "name": "The Swimming Spinosaurus",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The semi-aquatic dinosaur with a sail and a paddle tail.",
+    "teaser": "Spinosaurus aegyptiacus was the largest carnivorous dinosaur at 15 to 16 meters, bigger than T. rex. A 2020 study revealed it had a paddle-like tail adapted for swimming, making it the first known semi-aquatic dinosaur. Spinosaurus ate fish primarily, using its crocodile-like snout and conical teeth to catch aquatic prey in North African rivers 100 million years ago.",
     "byline": "The river dinosaur",
     "tags": [
       "fossils",
@@ -23078,7 +23078,7 @@
     "name": "Pterosaurs",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The flying reptiles that ruled the skies before birds.",
+    "teaser": "Pterosaurs were the first vertebrates to achieve powered flight, evolving flight 50 million years before birds. The largest, Quetzalcoatlus, had a 10 to 11 meter wingspan. Pterosaurs had hollow bones, a membrane wing, and a crest. They are not dinosaurs but a separate group of archosaurs. Over 150 species have been described, ranging from sparrow-sized to airplane-sized.",
     "byline": "The winged rulers",
     "tags": [
       "fossils",
@@ -23098,7 +23098,7 @@
     "name": "Quetzalcoatlus",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The giraffe-sized pterosaur that may have been the largest flying animal ever.",
+    "teaser": "Quetzalcoatlus northropi, discovered in Texas in 1971, was the largest flying animal ever, with a wingspan of 10 to 11 meters and height of 5 meters on the ground. It weighed about 200 to 250 kilograms. Quetzalcoatlus lived 68 to 66 million years ago and likely fed by stalking prey on the ground like a giant stork rather than catching prey in flight.",
     "byline": "The giant flyer",
     "tags": [
       "fossils",
@@ -23118,7 +23118,7 @@
     "name": "Pterodactyls vs Pteranodon",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The two famous pterosaurs that are often confused.",
+    "teaser": "Pterodactyls were small Jurassic pterosaurs with teeth, about 1 meter wingspan. Pteranodon was a much larger Cretaceous pterosaur with a 7 meter wingspan, no teeth, and a distinctive backward-pointing crest. The name pterodactyl is popularly used for all pterosaurs, but scientifically refers only to the genus Pterodactylus. Both are often incorrectly called dinosaurs.",
     "byline": "The confused flyers",
     "tags": [
       "fossils",
@@ -23138,7 +23138,7 @@
     "name": "Plesiosaurs",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The long-necked marine reptiles that may have fueled lake monster legends.",
+    "teaser": "Plesiosaurs were marine reptiles with four paddle-like flippers, a broad body, and either a long neck with small head or a short neck with large head. They were not dinosaurs but a separate group of marine reptiles. Plesiosaurs breathed air, gave birth to live young on land, and could not retract their heads into their shells. They dominated Mesozoic seas for 135 million years.",
     "byline": "The sea serpents",
     "tags": [
       "fossils",
@@ -23158,7 +23158,7 @@
     "name": "Plesiosaurs and Lake Monsters",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The fossil that inspired the Loch Ness monster idea.",
+    "teaser": "The Loch Ness Monster legend may draw on plesiosaur imagery, with the long neck and humped back resembling popular plesiosaur reconstructions. However, plesiosaurs went extinct 66 million years ago, 60 million years before Loch Ness formed. No plesiosaur fossils have been found in Scotland, and the cold Loch Ness waters could not support a breeding population of large reptiles.",
     "byline": "The monster theory",
     "tags": [
       "fossils",
@@ -23178,7 +23178,7 @@
     "name": "Ichthyosaurs",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The dolphin-shaped marine reptiles that gave live birth.",
+    "teaser": "Ichthyosaurs were dolphin-shaped marine reptiles that converged on the same body form as modern dolphins, reaching up to 23 meters long. They evolved from land reptiles that returned to the sea 250 million years ago. Ichthyosaurs gave birth to live young in the water, with fossils showing embryos inside mothers. Some species had eyes over 25 centimeters in diameter.",
     "byline": "The sea dolphins",
     "tags": [
       "fossils",
@@ -23198,7 +23198,7 @@
     "name": "Mosasaurus",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The giant sea lizard of the late Cretaceous.",
+    "teaser": "Mosasaurs were giant marine lizards that grew up to 17 meters long and dominated the late Cretaceous seas. They were the apex predators of their time, feeding on fish, sharks, and other marine reptiles. Mosasaurs evolved from small semi-aquatic lizards and went extinct 66 million years ago along with the dinosaurs.",
     "byline": "The sea lizard",
     "tags": [
       "fossils",
@@ -23218,7 +23218,7 @@
     "name": "Mosasaur Feeding",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The second set of jaws that pulled prey down the throat.",
+    "teaser": "Mosasaurs had double-hinged jaws similar to snakes, allowing them to swallow prey much larger than their heads. Their teeth were conical and designed for gripping rather than chewing. Mosasaur coprolites contain shark teeth, bird bones, and crushed ammonite shells. Fossil evidence shows mosasaurs practiced cannibalism, with larger individuals eating smaller ones.",
     "byline": "The double jaws",
     "tags": [
       "fossils",
@@ -23238,7 +23238,7 @@
     "name": "Dinosaur Eggs",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The nests, shells, and embryos that reveal dinosaur parenting.",
+    "teaser": "Dinosaur eggs range from 5 centimeters for small theropods to 60 centimeters for sauropods. Titanosaur eggs, found in Argentina, are the largest at about 22 centimeters in diameter. Eggs were typically laid in clutches and buried in vegetation or sand for incubation. The largest known dinosaur egg clutch, containing 40 eggs, belonged to a titanosaur in India.",
     "byline": "The stone nurseries",
     "tags": [
       "fossils",
@@ -23258,7 +23258,7 @@
     "name": "Dinosaur Nurseries",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The fossil nesting colonies that show parental care.",
+    "teaser": "Maiasaura, whose name means good mother lizard, was the first dinosaur shown to care for its young. A Montana nesting site contained nests spaced one adult body-length apart, with juveniles of different ages in the same colony. Parents brought food to chicks in the nest, evidence of parental care in dinosaurs that changed understanding of their behavior.",
     "byline": "The dino daycares",
     "tags": [
       "fossils",
@@ -23278,7 +23278,7 @@
     "name": "Maiasaura",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The 'good mother lizard' with evidence of parental care.",
+    "teaser": "Maiasaura was a hadrosaur that nested in colonies of up to 10000 nests in Montana, each nest a mound of vegetation up to 2 meters across. Hatchlings remained in the nest for months, growing rapidly while parents brought food. Bone histology shows juveniles grew at rates comparable to birds. This evidence of prolonged parental care revolutionized understanding of dinosaur behavior.",
     "byline": "The good mother",
     "tags": [
       "fossils",
@@ -23298,7 +23298,7 @@
     "name": "Hadrosaur Crests",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The hollow head crests that may have worked as trumpets.",
+    "teaser": "Hadrosaurs, or duck-billed dinosaurs, had elaborate cranial crests containing hollow nasal passages that functioned as resonating chambers. Different species had different crest shapes, producing species-specific calls. Parasaurolophus had a curved tube crest up to 1 meter long. Corythosaurus had a helmet-like crest. These crests likely served communication and species recognition functions.",
     "byline": "The crest trumpets",
     "tags": [
       "fossils",
@@ -23318,7 +23318,7 @@
     "name": "Parasaurolophus",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The trumpet-crested duck-billed dinosaur.",
+    "teaser": "Parasaurolophus had a distinctive curved tubular crest up to 1 meter long, formed from elongated nasal passages. CT scanning has revealed the internal structure, and computer models suggest it produced deep, resonant calls that could travel long distances. The crest may have also served for species recognition and display, with different crest sizes between males and females.",
     "byline": "The trumpeter",
     "tags": [
       "fossils",
@@ -23338,7 +23338,7 @@
     "name": "How Dinosaurs Communicated",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The horns, crests, and calls behind dinosaur social life.",
+    "teaser": "Dinosaurs communicated through vocalizations, visual displays, and physical contact. Hadrosaur crests functioned as resonating chambers. Ceratopsian frills displayed species-specific patterns. Tactile communication is evidenced by parallel trackways. Fossilized vocal organs suggest some dinosaurs could produce low-frequency calls. T. rex may have communicated through infrasound, below human hearing range.",
     "byline": "The dino signals",
     "tags": [
       "fossils",
@@ -23358,7 +23358,7 @@
     "name": "Dinosaur Colors",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The pigment fossils that reveal how dinosaurs were colored.",
+    "teaser": "Fossilized melanosomes, microscopic pigment-containing organelles, reveal the actual colors of some dinosaurs. Sinosauropteryx had reddish-brown and white banding. Microraptor was iridescent blue-black like a crow. Anchiornis had black, white, and reddish-brown patterns. Borealopelta preserved countershading, dark on top and light below, a defensive camouflage pattern.",
     "byline": "The colored past",
     "tags": [
       "fossils",
@@ -23378,7 +23378,7 @@
     "name": "The Color of Feathered Dinosaurs",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "Iridescent feathers and ginger fuzz from fossil pigments.",
+    "teaser": "Research on fossil melanosomes has revealed specific colors in feathered dinosaurs. Microraptor was iridescent blue-black, Sinosauropteryx had a reddish-brown tail with white banding, and Anchiornis had black, white, and rufous wings. These findings demonstrate that feathered dinosaurs were colorful, using plumage for display and camouflage rather than just insulation.",
     "byline": "The pigment clues",
     "tags": [
       "fossils",
@@ -23398,7 +23398,7 @@
     "name": "Dinosaur Ears",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The inner ear fossils that reveal dinosaur hearing and balance.",
+    "teaser": "Dinosaurs had internal ears similar to birds, with a single ear bone, the stapes, rather than the three bones found in mammals. CT scans of hadrosaur skulls reveal well-developed inner ears capable of detecting low-frequency sounds. T. rex had ears positioned at the back of its skull for 360-degree sound detection. Some dinosaurs likely communicated through infrasound.",
     "byline": "The ear bones",
     "tags": [
       "fossils",
@@ -23418,7 +23418,7 @@
     "name": "Warm or Cold Blooded Dinosaurs",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The metabolism debate that changed how we picture dinosaurs.",
+    "teaser": "Whether dinosaurs were warm or cold blooded remains debated. Bone histology shows rapid growth rates more similar to mammals and birds than reptiles. Evidence from bone isotope analysis suggests elevated body temperatures. The current consensus leans toward dinosaurs being mesothermic, with body temperatures between ectotherms and endotherms, possibly becoming more endothermic as they evolved into birds.",
     "byline": "The warm-blooded question",
     "tags": [
       "fossils",
@@ -23438,7 +23438,7 @@
     "name": "Bone Growth Rings",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The tree-ring-like growth lines that age dinosaurs.",
+    "teaser": "Dinosaur bones contain growth rings similar to tree rings that reveal age and growth rates. T. rex reached full size in about 20 years, growing fastest between ages 12 and 18. The largest known T. rex, Scotty, was about 28 to 30 years old. Histology shows some dinosaurs grew faster than modern crocodilians but slower than modern birds.",
     "byline": "The bone clocks",
     "tags": [
       "fossils",
@@ -23458,7 +23458,7 @@
     "name": "Fossil Behavior",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The trackways and bonebeds that record dinosaur actions.",
+    "teaser": "Fossil behavior, or paleoethology, is inferred from trace fossils like trackways, nesting sites, and bone beds. Parallel trackways suggest herding. Locked combat fossils like the fighting dinosaurs show Velociraptor attacking Protoceratops. Gastroliths, stomach stones, indicate some dinosaurs swallowed rocks to aid digestion. Bone beds with thousands of individuals suggest communal living.",
     "byline": "The action records",
     "tags": [
       "fossils",
@@ -23478,7 +23478,7 @@
     "name": "Dinosaur Herds",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The trackways and bonebeds showing dinosaurs moved in groups.",
+    "teaser": "Bone beds containing thousands of individuals suggest some dinosaurs lived in large herds. The Centrosaurus bone bed in Alberta contains over 10000 individuals, suggesting catastrophic herd drowning during a river crossing. Trackways show sauropods walking in parallel, consistent with herding behavior. Herding provided protection from predators and aided in finding food.",
     "byline": "The dino herds",
     "tags": [
       "fossils",
@@ -23498,7 +23498,7 @@
     "name": "How Meat-Eating Dinosaurs Hunted",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The pack hunting and ambush strategies of theropods.",
+    "teaser": "Evidence suggests theropod hunting strategies varied by species. T. rex was likely an ambush predator, using powerful jaws to deliver killing bites. Deinonychus may have hunted cooperatively, using pack tactics. Allosaurus hunted alone but may have scavenged. Fossil evidence includes healed bite marks on prey species and theropods with injuries consistent with hunting.",
     "byline": "The hunters",
     "tags": [
       "fossils",
@@ -23518,7 +23518,7 @@
     "name": "The T. rex Arms Mystery",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The tiny arms and the theories about what they were for.",
+    "teaser": "T. rex had notoriously small arms, only about 1 meter long, with two-fingered hands. Theories for their small size include sexual display, gripping prey, helping T. rex stand up from a resting position, or vestigial remnants from smaller ancestors. Recent studies suggest the arms, while short, were still strong enough to bench press about 200 kilograms.",
     "byline": "The small arms",
     "tags": [
       "fossils",
@@ -23538,7 +23538,7 @@
     "name": "The Wishbone Link",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The furcula shared by theropods and birds.",
+    "teaser": "The furcula, or wishbone, found in theropod dinosaurs as well as modern birds, provides one of the strongest skeletal links between the two groups. The wishbone acts as a spring during flight in birds. Its presence in non-avian theropods like T. rex and Velociraptor confirms that many features we associate with birds evolved in their dinosaur ancestors millions of years before flight.",
     "byline": "The shared bone",
     "tags": [
       "fossils",
@@ -23558,7 +23558,7 @@
     "name": "Caudipteryx and Oviraptor",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The dinosaur cousins of birds that were not quite birds.",
+    "teaser": "Caudipteryx was a small oviraptorosaur with feathers on its arms and tail, clearly too short for flight. It used its feathered arms for display, not flight. Oviraptor, meaning egg thief, was misnamed when its first fossil was found near a nest of eggs, assumed to be stealing them. Later discoveries showed the eggs belonged to Oviraptor itself, which was brooding, not stealing.",
     "byline": "The bird-like dinosaurs",
     "tags": [
       "fossils",
@@ -23578,7 +23578,7 @@
     "name": "The Oviraptor Misname",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The dinosaur once thought to be an egg thief — and proved wrong.",
+    "teaser": "Oviraptor was named egg thief in 1924 when its skeleton was found atop what appeared to be stolen Protoceratops eggs. Decades later, identical eggs were found with embryos identified as Oviraptor, proving it was brooding its own nest, not stealing. The name stuck, creating one of paleontology's most enduring misnomers. Oviraptor was actually a devoted parent.",
     "byline": "The cleared name",
     "tags": [
       "fossils",
@@ -23598,7 +23598,7 @@
     "name": "The Raptor Family",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "Velociraptor, Deinonychus, and the sickle-clawed hunters.",
+    "teaser": "Dromaeosaurids, or raptors, were feathered dinosaurs closely related to birds. The family includes Velociraptor, Deinonychus, Utahraptor, and Microraptor. All had a large retractable sickle claw on the second toe. They ranged from turkey-sized to over 2 meters long. The Jurassic Park raptor is more accurate to Deinonychus than Velociraptor.",
     "byline": "The sickle claws",
     "tags": [
       "fossils",
@@ -23618,7 +23618,7 @@
     "name": "Deinonychus",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The raptor that sparked the dinosaur renaissance.",
+    "teaser": "Deinonychus antirrhopus, discovered by John Ostrom in 1964, revolutionized dinosaur science by demonstrating that dinosaurs were active, warm-blooded animals rather than sluggish reptiles. At 3.4 meters long and 73 kilograms, Deinonychus had a large sickle claw and feathered arms. Its discovery sparked the Dinosaur Renaissance that transformed our understanding of dinosaurs.",
     "byline": "The game changer",
     "tags": [
       "fossils",
@@ -23638,7 +23638,7 @@
     "name": "The Dinosaur Renaissance",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "How the 1960s-70s changed dinosaurs from slow reptiles to active animals.",
+    "teaser": "The Dinosaur Renaissance, beginning in the 1960s with John Ostrom's work on Deinonychus, transformed dinosaurs from sluggish, cold-blooded reptiles into active, warm-blooded animals closely related to birds. Key discoveries included feathered dinosaurs, nesting behavior, and bird-like postures. This scientific revolution changed both scientific understanding and public perception of dinosaurs.",
     "byline": "The revolution",
     "tags": [
       "fossils",
@@ -23658,7 +23658,7 @@
     "name": "The Bone Wars",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The fierce rivalry that rushed American fossil hunting.",
+    "teaser": "The Bone Wars was a fierce rivalry between Edward Drinker Cope and Othniel Charles Marsh in the 1870s to 1890s, during which they discovered over 142 new species of dinosaurs. Their competition involved bribery, sabotage, spying, and deliberately destroying fossils to prevent the rival from finding them. Despite the destructive methods, their discoveries laid the foundation of American paleontology.",
     "byline": "The fossil feud",
     "tags": [
       "fossils",
@@ -23678,7 +23678,7 @@
     "name": "Cope vs Marsh",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The two paleontologists who competed to dig up the American West.",
+    "teaser": "Edward Drinker Cope and Othniel Charles Marsh were the two most important figures in American paleontology, but their bitter rivalry consumed decades and fortunes. Cope discovered 56 new species; Marsh found 86. Their Bone Wars expedition teams smashed fossils and bribed quarry workers. Both went financially ruined. The 142 species they discovered include Diplodocus, Allosaurus, and Triceratops.",
     "byline": "The fossil rivals",
     "tags": [
       "fossils",
@@ -23698,7 +23698,7 @@
     "name": "Roy Chapman Andrews",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The explorer who found dinosaur eggs in the Gobi Desert.",
+    "teaser": "Roy Chapman Andrews led the first American Museum expeditions to the Gobi Desert in the 1920s, discovering the first dinosaur eggs and nests at Flaming Cliffs in Mongolia in 1923. His expeditions found Protoceratops, Oviraptor, and Velociraptor. Andrews inspired the Indiana Jones character and brought dinosaur discovery into popular culture through dramatic newspaper coverage.",
     "byline": "The real-life adventurer",
     "tags": [
       "fossils",
@@ -23718,7 +23718,7 @@
     "name": "Mary Anning",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The fossil hunter who found sea monsters on the English coast.",
+    "teaser": "Mary Anning (1799 to 1847) was a self-taught fossil hunter who discovered the first complete Ichthyosaurus, the first Plesiosaurus, and the first Pterosaur outside Germany. Working the Jurassic Coast cliffs of Dorset, she made discoveries that transformed understanding of prehistoric life. Despite her contributions, she was excluded from the Geological Society of London because she was a woman.",
     "byline": "The fossil pioneer",
     "tags": [
       "fossils",
@@ -23738,7 +23738,7 @@
     "name": "The Women of Early Paleontology",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The overlooked women who shaped fossil science.",
+    "teaser": "Women like Mary Anning, Marion Woodward, Tilly Edinger, and others made crucial contributions to paleontology despite systemic barriers. Anning discovered foundational Jurassic marine reptiles. Edinger pioneered paleoneurology, studying dinosaur brains. Many women's contributions were overlooked or credited to male colleagues. Their work fundamentally shaped modern paleontology.",
     "byline": "The forgotten finders",
     "tags": [
       "fossils",
@@ -23758,7 +23758,7 @@
     "name": "Excavating a Bonebed",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The careful process of digging up mass dinosaur graves.",
+    "teaser": "Excavating a dinosaur bonebed involves mapping the site with grid systems, removing overburden with heavy equipment, jacketing fossils in plaster and burlap for transport, and carefully exposing bones with small tools. A large excavation can take months to years and cost millions of dollars. The 2000 Mammoth Site excavation in Wyoming uncovered over 60 mammoths.",
     "byline": "The bonebed dig",
     "tags": [
       "fossils",
@@ -23778,7 +23778,7 @@
     "name": "Preparing Fossils",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The lab work that frees bones from rock without damaging them.",
+    "teaser": "Fossil preparation involves removing rock matrix from bone using air scribes, dental picks, and chemical consolidants to stabilize fragile specimens. A single large dinosaur skeleton can take 2000 to 5000 hours of preparation. The process requires specialized training and patience. Preparators use microscopes for fine detail work and may spend weeks on a single bone.",
     "byline": "The fossil surgery",
     "tags": [
       "fossils",
@@ -23798,7 +23798,7 @@
     "name": "CT Scanning Fossils",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The medical scanners that let scientists see inside fossil skulls.",
+    "teaser": "CT scanning reveals the internal structure of fossils without destroying them. High-resolution CT has shown dinosaur brain size, inner ear structure, and sinus cavities. A 2006 scan of a T. rex femur revealed medullary bone, a reproductive tissue that proved the specimen was female. CT technology has revolutionized paleontology by making hidden anatomy visible.",
     "byline": "The fossil scans",
     "tags": [
       "fossils",
@@ -23818,7 +23818,7 @@
     "name": "Dinosaur Brains",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The fossil braincases that reveal how big dinosaur brains were.",
+    "teaser": "Dinosaur brain size varies enormously. T. rex had a brain about the size of a gorilla's, relatively small for its body. Troodon had the largest brain-to-body ratio of any dinosaur, suggesting high intelligence. CT scans of hadrosaur skulls reveal brain shape and inner ear structure, providing clues about behavior, senses, and cognitive abilities.",
     "byline": "The fossil minds",
     "tags": [
       "fossils",
@@ -23838,7 +23838,7 @@
     "name": "Dinosaur Senses",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The fossil skulls that reveal dinosaur smell and vision.",
+    "teaser": "CT scanning has revealed details of dinosaur senses. T. rex had forward-facing eyes providing binocular vision and depth perception. Its olfactory bulbs were enormous, suggesting an exceptional sense of smell. Hadrosaurs had complex inner ears tuned to low-frequency communication. Raptors had large optic lobes and forward-facing eyes for precise depth perception during attacks.",
     "byline": "The dino senses",
     "tags": [
       "fossils",
@@ -23858,7 +23858,7 @@
     "name": "Paleogenomics",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "Reading DNA from ancient bones — when it works and when it cannot.",
+    "teaser": "Paleogenomics studies ancient DNA to reconstruct evolutionary relationships and biological characteristics. The field has sequenced genomes of mammoths, neanderthals, and cave bears. Ancient DNA analysis has revised evolutionary trees, revealed interbreeding between human species, and identified genes responsible for Ice Age adaptations like thick fur and cold tolerance.",
     "byline": "The ancient DNA",
     "tags": [
       "fossils",
@@ -23878,7 +23878,7 @@
     "name": "Sequencing the Mammoth",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The genomes read from 700,000-year-old mammoth teeth.",
+    "teaser": "Siberian permafrost has yielded mammoth specimens with recoverable DNA. The woolly mammoth genome was sequenced in 2008, revealing genes for cold adaptation, including hemoglobin variants that release oxygen at low temperatures. In 2019, Russian scientists revived cells from a 28000-year-old mammoth, bringing de-extinction closer to reality.",
     "byline": "The deep genomes",
     "tags": [
       "fossils",
@@ -23898,7 +23898,7 @@
     "name": "The Dodo's DNA",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The genomes that clarified the dodo's family tree.",
+    "teaser": "In 2002, scientists extracted DNA from dodo specimens and confirmed the bird was most closely related to the Rodrigues solitaire, an extinct flightless pigeon from a nearby island. Both species descended from Asian pigeons that colonized Indian Ocean islands. Genetic analysis revealed the dodo diverged from its closest relative about 10 million years ago.",
     "byline": "The pigeon relative",
     "tags": [
       "fossils",
@@ -23918,7 +23918,7 @@
     "name": "The Thylacine's Genome",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The genome sequenced from a museum specimen.",
+    "teaser": "The thylacine genome was fully sequenced in 2011 from preserved specimens, revealing that despite its dog-like appearance, it was genetically more like a bandicoot. The genome showed the thylacine had lost the gene for calcium regulation, which may have contributed to its extinction through juvenile death syndrome. De-extinction efforts using CRISPR are being explored.",
     "byline": "The sequenced ghost",
     "tags": [
       "fossils",
@@ -23938,7 +23938,7 @@
     "name": "The Irish Elk",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The giant deer with the largest antlers ever.",
+    "teaser": "The Irish elk, Megaloceros giganteus, was not Irish nor an elk but a giant deer standing 2.1 meters tall with antlers spanning 3.7 meters, the largest of any deer. It went extinct about 7700 years ago. Despite the antler size, the brain was small, leading to debate about how such structures evolved. Antler size was driven by sexual selection, not ecological necessity.",
     "byline": "The antler giant",
     "tags": [
       "fossils",
@@ -23958,7 +23958,7 @@
     "name": "Sloth Claw Evidence",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The claw marks that suggest giant sloths dug or walked oddly.",
+    "teaser": "Giant ground sloth claws found in coprolites, scratch marks on cave walls, and sediment analysis reveal their behavior. Claws up to 30 centimeters long were used for pulling down branches and possibly for defense. Cave wall scratches suggest sloths could climb, while fossilized claw marks on bones indicate occasional scavenging behavior alongside herbivory.",
     "byline": "The claw clues",
     "tags": [
       "fossils",
@@ -23978,7 +23978,7 @@
     "name": "Glyptodon",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The car-sized armored armadillo of the Ice Age.",
+    "teaser": "Glyptodon was an armadillo relative the size of a small car, weighing up to 2 tonnes with a dome-shaped shell up to 1.5 meters long. The shell was made of thousands of bony osteoderms fused into a solid dome. Glyptodons lived in South America until about 10000 years ago. Some specimens show butchering marks, suggesting humans hunted them.",
     "byline": "The giant armadillo",
     "tags": [
       "fossils",
@@ -23998,7 +23998,7 @@
     "name": "The Giant Beaver",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The beaver the size of a bear that lived in Ice Age lakes.",
+    "teaser": "Castoroides, the giant beaver, was the largest rodent in North American history, reaching 2.5 meters long and weighing up to 200 kilograms, about 8 times larger than modern beavers. Its incisors were up to 15 centimeters long. Castoroides lived in North American wetlands until about 10000 years ago. Unlike modern beavers, it may not have built dams.",
     "byline": "The giant rodent",
     "tags": [
       "fossils",
@@ -24018,7 +24018,7 @@
     "name": "Giant Penguins",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The penguin fossils that stood taller than many people.",
+    "teaser": "The largest known penguin, Kumimanu fordycei, lived 55 to 60 million years ago in New Zealand, reaching 1.77 meters tall and weighing up to 154 kilograms. Ancient penguins were larger than modern species because they evolved before marine mammals filled similar ecological niches. As seals and whales diversified, penguins shrank to their current sizes.",
     "byline": "The giant penguins",
     "tags": [
       "fossils",
@@ -24038,7 +24038,7 @@
     "name": "Terror Birds",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The flightless apex predators that ruled South America.",
+    "teaser": "Terror birds, family Phorusrhacidae, were the largest predatory birds ever, standing up to 3 meters tall with axe-like beaks. They dominated South American ecosystems for 60 million years after the extinction of large predators. Some species could run at 70 kilometers per hour. When the Isthmus of Panama formed, terror birds invaded North America but went extinct 1.8 million years ago.",
     "byline": "The feathered tyrants",
     "tags": [
       "fossils",
@@ -24058,7 +24058,7 @@
     "name": "The Terror Bird Skull",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The hatchet-like skulls built for powerful downward blows.",
+    "teaser": "The terror bird skull was dominated by a massive hooked beak up to 50 centimeters long that could deliver devastating downward blows. The beak tip was reinforced with keratin and could generate enough force to crush the skull of prey. CT scans reveal pneumatic spaces that reduced weight while maintaining strength. The beak was the primary killing weapon, not the vestigial wings.",
     "byline": "The hatchet skull",
     "tags": [
       "fossils",
@@ -24078,7 +24078,7 @@
     "name": "The Elephant Bird vs Ostrich",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The island giant that dwarfed the modern ostrich.",
+    "teaser": "The elephant bird of Madagascar was the heaviest bird ever at 730 kilograms, 6 times heavier than an ostrich. Its eggs were 9 liters, equivalent to 150 chicken eggs. The ostrich is the tallest modern bird at 2.7 meters. The two species evolved independently on different continents, demonstrating convergent evolution in body plan despite enormous size differences.",
     "byline": "The island giant",
     "tags": [
       "fossils",
@@ -24098,7 +24098,7 @@
     "name": "Island Gigantism",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "Why island animals sometimes evolve to giant sizes.",
+    "teaser": "Island gigantism occurs when small animals evolve larger sizes on predator-free islands. The Komodo dragon grew to 3 meters on islands without large mammalian competitors. Giant tortoises on Galapagos and Aldabra evolved to enormous sizes. The island rule predicts gigantism in small species and dwarfism in large species, both driven by reduced competition and predation.",
     "byline": "The island giants",
     "tags": [
       "fossils",
@@ -24118,7 +24118,7 @@
     "name": "Island Dwarfism",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The island effect that shrank elephants to pony size.",
+    "teaser": "Island dwarfism occurs when large animals evolve smaller sizes on islands with limited resources. Dwarf elephants on Mediterranean islands, dwarf mammoths on Wrangel Island, and the hobbit hominin on Flores all demonstrate this pattern. The Flores dwarf human stood just 1.1 meters tall, evolved from Homo erectus ancestors, and survived until about 50000 years ago.",
     "byline": "The tiny giants",
     "tags": [
       "fossils",
@@ -24138,7 +24138,7 @@
     "name": "Dwarf Elephants",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The pony-sized elephants that evolved on Mediterranean islands.",
+    "teaser": "Multiple islands in the Mediterranean harbored dwarf elephant species that evolved from larger ancestors. Palaeoloxodon falconeri on Sicily stood just 1 meter tall, reduced from ancestors over 4 meters. Dwarf elephants evolved through a process of insular dwarfism, where limited food and absence of predators selected for smaller body size over thousands of generations.",
     "byline": "The island ponies",
     "tags": [
       "fossils",
@@ -24158,7 +24158,7 @@
     "name": "The Hobbit Hominin",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The small-bodied human relative found on Flores island.",
+    "teaser": "Homo floresiensis, nicknamed the Hobbit, stood just 1.1 meters tall and lived on the Indonesian island of Flores until about 50000 years ago. Its small brain was comparable to a chimpanzee's, yet it made stone tools and hunted dwarf elephants. The discovery in 2003 challenged assumptions about human evolution, showing that small-brained hominins survived far more recently than believed.",
     "byline": "The little people",
     "tags": [
       "fossils",
@@ -24178,7 +24178,7 @@
     "name": "The Denisovans",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The extinct human cousins known mostly from a pinky bone.",
+    "teaser": "Denisovans are an archaic human group known primarily from DNA extracted from a finger bone found in Denisova Cave, Siberia in 2010. Their genome reveals they interbred with Neanderthals and modern humans. About 3 to 5 percent of Melanesian and Aboriginal Australian DNA comes from Denisovan ancestry. Their physical appearance remains largely unknown.",
     "byline": "The bone cousins",
     "tags": [
       "fossils",
@@ -24198,7 +24198,7 @@
     "name": "Neanderthal DNA in You",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The 2% of Neanderthal heritage most people carry.",
+    "teaser": "Modern humans outside Africa carry 1 to 4 percent Neanderthal DNA, the result of interbreeding between Neanderthals and Homo sapiens about 50000 to 60000 years ago. Neanderthal genes affect skin pigmentation, immune function, hair characteristics, and susceptibility to diseases. Some Neanderthal variants increase risk of COVID-19, type 2 diabetes, and depression.",
     "byline": "The shared genes",
     "tags": [
       "fossils",
@@ -24218,7 +24218,7 @@
     "name": "Neanderthal Art and Burial",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The cave art and burials that reveal Neanderthal minds.",
+    "teaser": "Recent discoveries show Neanderthals created cave art, used pigments, made jewelry from eagle talons, and buried their dead with grave goods. Cave paintings in Spanish caves dated to 64000 years ago predate human arrival in Europe. These findings challenge the notion that symbolic thought was unique to Homo sapiens, suggesting Neanderthals had complex cognitive abilities.",
     "byline": "The cultural cousins",
     "tags": [
       "fossils",
@@ -24238,7 +24238,7 @@
     "name": "Neanderthal Tools",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The stone and glue technology of our closest cousins.",
+    "teaser": "Neanderthals created sophisticated stone tools using the Levallois technique, producing consistent, pre-shaped flakes. They used hafted points with birch bark adhesive, an early example of multi-component technology. Neanderthals controlled fire to harden wooden spears and heated stone to improve flaking quality. Their tool technology rivaled early Homo sapiens innovations.",
     "byline": "The toolmakers",
     "tags": [
       "fossils",
@@ -24258,7 +24258,7 @@
     "name": "When We Started Walking",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The fossil feet and footprints that trace upright walking.",
+    "teaser": "Bipedalism evolved in human ancestors at least 4 million years ago. The Laetoli footprints in Tanzania, 3.6 million years old, show Australopithecus afarensis walking upright through volcanic ash. Early hominins walked on two legs long before developing large brains. Bipedalism freed the hands for tool use and may have evolved in response to changing forest environments.",
     "byline": "The first steps",
     "tags": [
       "fossils",
@@ -24278,7 +24278,7 @@
     "name": "Lucy",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The 3.2-million-year-old skeleton that changed human origins.",
+    "teaser": "Lucy, Australopithecus afarensis, is a 3.2-million-year-old fossil skeleton discovered in Ethiopia in 1974 by Donald Johanson. She stood 1.1 meters tall, weighed about 29 kilograms, and walked upright while retaining some tree-climbing adaptations. Lucy is one of the most complete early hominid skeletons, about 40 percent complete, and demonstrates that bipedalism preceded brain expansion.",
     "byline": "The famous fossil",
     "tags": [
       "fossils",
@@ -24298,7 +24298,7 @@
     "name": "The Laetoli Footprints",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The 3.6-million-year-old footprints of early humans.",
+    "teaser": "The Laetoli footprints in Tanzania, preserved in volcanic ash 3.66 million years ago, are the oldest known evidence of upright walking by hominins. Two or three individuals walked side by side, with one occasionally stepping in another's footprints. The prints show a heel-strike, toe-off walking pattern identical to modern humans, demonstrating that Australopithecus afarensis walked with a fully modern gait.",
     "byline": "The stone steps",
     "tags": [
       "fossils",
@@ -24318,7 +24318,7 @@
     "name": "Out of Africa",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The migration story of modern humans across the world.",
+    "teaser": "Modern humans evolved in Africa around 300000 years ago and began migrating out of Africa about 70000 to 100000 years ago. The Out of Africa theory, supported by genetic and fossil evidence, proposes that Homo sapiens replaced archaic human populations in Europe and Asia. Genetic studies show all non-African humans descend from a single migration event.",
     "byline": "The great journey",
     "tags": [
       "fossils",
@@ -24338,7 +24338,7 @@
     "name": "Mitochondrial Eve",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The common female ancestor traced through maternal DNA.",
+    "teaser": "Mitochondrial Eve is the most recent common ancestor of all living humans through the maternal line, estimated to have lived about 200000 years ago in Africa. All human mitochondria are descended from hers through an unbroken chain of mothers. She was not the only woman alive at the time but the only one whose maternal lineage has survived to the present day.",
     "byline": "The shared mother",
     "tags": [
       "fossils",
@@ -24358,7 +24358,7 @@
     "name": "Y-Chromosome Adam",
     "categoryId": "BIOLOGY",
     "subtype": "Paleontology",
-    "teaser": "The common male ancestor traced through paternal lines.",
+    "teaser": "Y-chromosome Adam is the most recent common ancestor of all living humans through the paternal line, estimated to have lived about 200000 to 300000 years ago in Africa. All living men carry his Y chromosome. Like mitochondrial Eve, he was not the only man alive at the time, just the only one whose Y chromosome lineage has survived uninterrupted to the present.",
     "byline": "The shared father",
     "tags": [
       "fossils",
