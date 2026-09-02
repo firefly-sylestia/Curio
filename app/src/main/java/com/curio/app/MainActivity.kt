@@ -96,6 +96,36 @@ class MainActivity : ComponentActivity() {
         // composition, before the splash coroutine has a chance to run.
         TopicJsonLoader.install(this)
 
+        // Shared Coil ImageLoader with an EXPLICIT memory + disk cache so the
+        // fetched book covers (and any other network image) download ONCE and
+        // are served from disk on every later visit — including app restarts.
+        // respectCacheHeaders(false) stops servers' no-cache headers from
+        // busting the cache every open.
+        // Coil's setImageLoader may only run once per process (it throws if
+        // the singleton was already created — e.g. on Activity recreation), so
+        // guard it: the first call installs our caching loader, and any later
+        // call falls back to the existing singleton (which already has Coil's
+        // own memory + disk caches).
+        runCatching {
+            coil.Coil.setImageLoader(
+                coil.ImageLoader.Builder(this)
+                    .crossfade(true)
+                    .memoryCache {
+                        coil.memory.MemoryCache.Builder(this)
+                            .maxSizePercent(0.22)
+                            .build()
+                    }
+                    .diskCache {
+                        coil.disk.DiskCache.Builder()
+                            .directory(java.io.File(cacheDir, "curio_image_cache"))
+                            .maxSizePercent(0.03)
+                            .build()
+                    }
+                    .components { add(coil.decode.SvgDecoder.Factory()) }
+                    .build()
+            )
+        }
+
         // Initialize Room once per process. The repository mutex also protects
         // cold starts, while this guard prevents a fresh Activity from
         // scheduling another import/read cycle.

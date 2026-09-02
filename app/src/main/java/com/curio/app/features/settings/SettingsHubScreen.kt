@@ -852,16 +852,22 @@ fun SettingsHubScreen(navController: NavController) {
                                 CurioSettingsCard(shadowElevation = 0.dp) {
                                     results.forEachIndexed { index, result ->
                                         if (index > 0) CurioSettingsDivider()
-                                        CurioSettingsRow(result.row.icon, result.row.title, result.row.subtitle) {
-                                            val deep = result.deep
-                                            if (deep != null) {
-                                                // Deep result → hand the exact row
-                                                // key to the sub-section screen so
-                                                // it scrolls to + pulses that row.
-                                                SettingsHighlightTarget.page = deep.page
-                                                SettingsHighlightTarget.rowKey = deep.rowKey
+                                        if (result.row.route == BookCoverFetch.ROUTE) {
+                                            // v314 — inline action row (book-cover
+                                            // fetch), never a navigation.
+                                            BookCoverFetchRow()
+                                        } else {
+                                            CurioSettingsRow(result.row.icon, result.row.title, result.row.subtitle) {
+                                                val deep = result.deep
+                                                if (deep != null) {
+                                                    // Deep result → hand the exact row
+                                                    // key to the sub-section screen so
+                                                    // it scrolls to + pulses that row.
+                                                    SettingsHighlightTarget.page = deep.page
+                                                    SettingsHighlightTarget.rowKey = deep.rowKey
+                                                }
+                                                navController.navigate(result.row.route) { launchSingleTop = true }
                                             }
-                                            navController.navigate(result.row.route) { launchSingleTop = true }
                                         }
                                     }
                                 }
@@ -879,7 +885,11 @@ fun SettingsHubScreen(navController: NavController) {
                                 }
                                 card.rows.forEachIndexed { index, row ->
                                     if (index > 0) CurioSettingsDivider()
-                                    if (row.route == CurioRoutes.SETTINGS_APPEARANCE) {
+                                    if (row.route == BookCoverFetch.ROUTE) {
+                                        // v314 — inline action row (book-cover
+                                        // fetch), never a navigation.
+                                        BookCoverFetchRow()
+                                    } else if (row.route == CurioRoutes.SETTINGS_APPEARANCE) {
                                         // v8.xx — the Appearance row is a pet
                                         // landmark: the pet pokes it, and the
                                         // tour's Settings stop points at it.
@@ -1023,12 +1033,18 @@ private fun SettingsTwoPaneHub(
                                 item { CurioSectionLabel(sectionLabel) }
                                 results.forEach { result ->
                                     item {
-                                        SettingsNavRow(
-                                            icon = result.row.icon,
-                                            title = result.row.title,
-                                            subtitle = result.row.subtitle,
-                                            selected = sectionPageFor(result.row.route)?.name == selectedPageName
-                                        ) { handleRow(result.row, result.deep) }
+                                        if (result.row.route == BookCoverFetch.ROUTE) {
+                                            // v314 — inline action row (book-cover
+                                            // fetch), never a navigation.
+                                            BookCoverFetchRow()
+                                        } else {
+                                            SettingsNavRow(
+                                                icon = result.row.icon,
+                                                title = result.row.title,
+                                                subtitle = result.row.subtitle,
+                                                selected = sectionPageFor(result.row.route)?.name == selectedPageName
+                                            ) { handleRow(result.row, result.deep) }
+                                        }
                                     }
                                 }
                             }
@@ -1039,7 +1055,11 @@ private fun SettingsTwoPaneHub(
                             section.cards.forEach { card ->
                                 card.rows.forEach { row ->
                                     item {
-                                        if (row.route == CurioRoutes.SETTINGS_APPEARANCE) {
+                                        if (row.route == BookCoverFetch.ROUTE) {
+                                            // v314 — inline action row (book-cover
+                                            // fetch), never a navigation.
+                                            BookCoverFetchRow()
+                                        } else if (row.route == CurioRoutes.SETTINGS_APPEARANCE) {
                                             // v8.xx — the Appearance row is a pet
                                             // landmark: the pet pokes it, and the
                                             // tour's Settings stop points at it.
@@ -1240,6 +1260,9 @@ private val SettingsSections = listOf(
                 headerSubtitle = null,
                 rows = listOf(
                     SettingsRowEntry(CurioIcons.Backup, "Backup & restore", "Keep captures and settings safe", CurioRoutes.SETTINGS_DATA),
+                    // v314 — the book-cover fetch is an inline ACTION row (not
+                    // navigation): the row renderers special-case its route.
+                    SettingsRowEntry(CurioIcons.Image, BookCoverFetch.TITLE, BookCoverFetch.IDLE_SUBTITLE, BookCoverFetch.ROUTE),
                     // v26 — recycle bin for soft-deleted captures.
                     SettingsRowEntry(CurioIcons.Delete, "Recycle bin", "Restore recently deleted captures", CurioRoutes.RECYCLE_BIN),
                     // v112 — the dedicated Updates sub-page (its own UI,

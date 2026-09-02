@@ -51,6 +51,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -250,6 +252,8 @@ private data class HomeHeroPair(
 @Composable
 fun HomeScreen(navController: NavController) {
     val context = LocalContext.current
+    // Satisfying haptics: confirm on the big spin CTA, light ticks on picks.
+    val haptics = LocalHapticFeedback.current
     // v30 — Appearance "Hero follows Spin lane": the quest hero AND the Home
     // background take the category last picked on Spin (the Cabinet's
     // language) when the toggle is on; otherwise Home stays on the soft
@@ -1079,10 +1083,14 @@ fun HomeScreen(navController: NavController) {
                             // SPIN screen's own category picker sheet (the same
                             // lane chips + Mix presets the deck uses) instead
                             // of the separate full-screen picker page.
+                            haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
                             SpinPickerRequest.pending = true
                             navController.navigateToTab(CurioRoutes.SPIN)
                         },
-                        onShuffleSurprise = { navController.navigateToTab(CurioRoutes.SPIN) }
+                        onShuffleSurprise = {
+                            haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
+                            navController.navigateToTab(CurioRoutes.SPIN)
+                        }
                     )
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {

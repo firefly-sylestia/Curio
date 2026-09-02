@@ -37,20 +37,25 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.ui.window.Dialog
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -144,6 +149,8 @@ import com.curio.app.ui.adaptive.LocalRevealSharedScope
 import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
 import com.curio.app.ui.adaptive.RevealBoundsTransform
 import com.curio.app.ui.adaptive.RevealSharedElementKey
+import com.curio.app.ui.adaptive.CurioContentMaxWidth
+import com.curio.app.features.settings.BookCoverFetch
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioProgressPill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
@@ -242,18 +249,53 @@ fun TopicRevealScreen(
     // finishing its one-time import. Never use the global catalog here: a
     // duplicate title in another category must not open the wrong topic.
     val context = LocalContext.current
-    var resolved by remember(topicName, cat.id) { mutableStateOf<CurioTopic?>(null) }
+    // Satisfying haptics resolved in composition (never inside the click
+    // lambdas) — firm confirm for saves, light ticks for toggles/actions.
+    val haptics = LocalHapticFeedback.current
+    // v315 — resolve from the ALREADY-WARM in-memory cache on the very first
+    // frame: MainActivity prewarms every lane from Room at app start, and any
+    // topic opened before stays in the loader cache — so an already-seen
+    // topic's quick fact + metadata render immediately instead of after the
+    // async Room/JSON resolution completes. The async pass below still runs
+    // to pick up edits and persist the topic.
+    var resolved by remember(topicName, cat.id) {
+        mutableStateOf(
+            TopicJsonLoader.cached(cat.id)
+                ?.firstOrNull { it.matchesSavedNameStrict(topicName) || it.matchesSavedName(topicName) }
+        )
+    }
     var showSynopsisDialog by rememberSaveable { mutableStateOf(false) }
     var selectedChapter by remember { mutableStateOf<BookChapter?>(null) }
+    // v315 — the book section composes only AFTER the shared-element morph
+    // settles (~380ms), so heavy content (poster Coil decode, chapter LazyRow)
+    // never competes with the card expansion frames — the morph stays smooth
+    // on book topics with synopsis + chapters.
+    var bookUiReady by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { delay(380); bookUiReady = true }
     LaunchedEffect(topicName, cat.id) {
-        // Wait for the guarded one-time import before resolving. Reading the
-        // cache during import was the source of intermittent blank reveals.
-        TopicRepository.init(context)
-        val roomTopic = TopicRepository.findTopic(context, cat.id, topicName)
-        resolved = roomTopic ?: TopicJsonLoader.cached(cat.id)
-            ?.firstOrNull { it.matchesSavedNameStrict(topicName) }
-            ?: TopicJsonLoader.cached(cat.id)
-                ?.firstOrNull { it.matchesSavedName(topicName) }
+        // Init is a no-op once Room is populated; skip the mutex wait entirely
+        // on warm starts so the resolution starts immediately.
+        if (!TopicRepository.isInitialized()) TopicRepository.init(context)
+        resolved = TopicRepository.findTopic(context, cat.id, topicName)
+            ?: runCatching {
+                // Room may be missing this lane (the one-time import can still
+                // be running, or failed for one lane) — parse + cache + persist
+                // the lane's JSON so the reveal NEVER opens blank. For WILDCARD
+                // topics this merges every lane (the wildcard pool isn't stored
+                // under its own Room category).
+                val pool = TopicJsonLoader.load(cat.id)
+                pool.firstOrNull { it.matchesSavedNameStrict(topicName) }
+                    ?: pool.firstOrNull { it.matchesSavedName(topicName) }
+            }.getOrNull()
+            ?: runCatching {
+                // Last resort (saved wildcard curiosities / renamed topics):
+                // exhaustive search across every lane.
+                TopicCatalog.findByNameAcrossAll(topicName)
+            }.getOrNull()
+        // Keep explored topics durable: persist the resolved topic into the
+        // cached_topics table so it survives even a catalog-table wipe and is
+        // never parsed again on later visits.
+        resolved?.let { TopicRepository.rememberTopic(context, it) }
     }
 
     // v29 — clipboard for the auto-copy on explore: the search query lands on
@@ -710,6 +752,7 @@ fun TopicRevealScreen(
             // v36 — theme-aware surface (category tint, every theme).
             Surface(
                 onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     val topic = resolved ?: return@Surface
                     if (AppPreferences.isTopicPinned(context, cat.id, topic.name)) {
                         AppPreferences.unpinTopic(context, cat.id, topic.name)
@@ -809,18 +852,22 @@ fun TopicRevealScreen(
                 }
 
                 // ── 2.55 Book info section (books only) ──────────────────
-                // Shows book poster, synopsis, and chapter chips for BOOKS topics.
+                // Shows book poster, synopsis, and chapter chips for BOOKS
+                // topics. v315 — gated on [bookUiReady] so it composes only
+                // AFTER the shared-element morph settles; the poster Coil
+                // decode + chapter LazyRow otherwise compete with the card
+                // expansion and stall its frames.
                 val bookTopic = resolved
-                if (bookTopic != null && bookTopic.categoryId == CategoryId.BOOKS &&
+                if (bookTopic != null && bookUiReady && bookTopic.categoryId == CategoryId.BOOKS &&
                     (bookTopic.synopsis != null || !bookTopic.chapters.isNullOrEmpty())) {
                     RevealContentEntrance(delayMillis = 60) {
-                BookInfoSection(
-                    cat = cat,
-                    topic = bookTopic,
-                    onSynopsisClick = { showSynopsisDialog = true },
-                    onChapterClick = { selectedChapter = it },
-                    modifier = Modifier.padding(top = if (hasTags) 16.dp else progressFloatGap)
-                )
+                        BookInfoSection(
+                            cat = cat,
+                            topic = bookTopic,
+                            onSynopsisClick = { showSynopsisDialog = true },
+                            onChapterClick = { selectedChapter = it },
+                            modifier = Modifier.padding(top = if (hasTags) 16.dp else progressFloatGap)
+                        )
                     }
                 }
 
@@ -954,24 +1001,38 @@ fun TopicRevealScreen(
         navController.popBackStack()
     }
 
-    if (showSynopsisDialog && resolved?.synopsis != null) {
-        RevealDetailDialog(
-            cat = cat,
-            eyebrow = "BOOK NOTES",
-            title = "Synopsis",
-            body = resolved?.synopsis.orEmpty(),
-            onDismiss = { showSynopsisDialog = false }
-        )
-    }
-    selectedChapter?.let { chapter ->
-        RevealDetailDialog(
-            cat = cat,
-            eyebrow = "CHAPTER ${chapter.number}",
-            title = chapter.title,
-            body = chapter.summary,
-            metadata = if (chapter.pageStart > 0 && chapter.pageEnd > 0) "Pages ${chapter.pageStart}–${chapter.pageEnd}" else null,
-            onDismiss = { selectedChapter = null }
-        )
+    // v315 — the book notes UI is a ModalBottomSheet (the old slim centered
+    // Dialog is gone): the cover + book title head the sheet, the full
+    // synopsis is the body, and the chapter reader lists EVERY chapter in a
+    // chip row at the top so the reader can switch chapters without leaving
+    // the sheet.
+    val bookSheetTopic = resolved
+    if (bookSheetTopic != null && bookSheetTopic.categoryId == CategoryId.BOOKS) {
+        if (showSynopsisDialog && bookSheetTopic.synopsis != null) {
+            BookNotesSheet(
+                cat = cat,
+                topic = bookSheetTopic,
+                mode = BookNotesMode.SYNOPSIS,
+                chapter = null,
+                onSelectChapter = {},
+                onDismiss = {
+                    showSynopsisDialog = false
+                    selectedChapter = null
+                }
+            )
+        } else if (selectedChapter != null && !bookSheetTopic.chapters.isNullOrEmpty()) {
+            BookNotesSheet(
+                cat = cat,
+                topic = bookSheetTopic,
+                mode = BookNotesMode.CHAPTERS,
+                chapter = selectedChapter,
+                onSelectChapter = { selectedChapter = it },
+                onDismiss = {
+                    showSynopsisDialog = false
+                    selectedChapter = null
+                }
+            )
+        }
     }
 
     if (showOverlayPermissionDialog) {
@@ -1594,8 +1655,12 @@ private fun RevealStartButton(
     // the two actions read as a unified row instead of mismatched siblings.
     val startShape = RoundedCornerShape(50)
     val contentInk = cat.themedButtonInk()
+    val haptics = LocalHapticFeedback.current
     Button(
-        onClick = onClick,
+        onClick = {
+            haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
+            onClick()
+        },
         enabled = enabled,
         shape = startShape,
         colors = curioButtonColors(
@@ -1665,8 +1730,12 @@ private fun RevealAlreadyButton(
     } else {
         cat.categoryInk().copy(alpha = 0.40f)
     }
+    val haptics = LocalHapticFeedback.current
     Surface(
-        onClick = onClick,
+        onClick = {
+            haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
+            onClick()
+        },
         enabled = enabled,
         shape = RoundedCornerShape(50),
         // v27n — the disabled fill is OPAQUE too (the 45% alpha let the
@@ -2203,49 +2272,26 @@ private fun BookSynopsisCard(
             
             Spacer(Modifier.height(12.dp))
             
-            // Poster + synopsis layout
+            // Poster + full synopsis. v315 — no more fixed-height inner scroll
+            // box: the synopsis reads in FULL and the card grows to fit, with
+            // the poster top-aligned beside it.
             Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.Top
             ) {
-                // Book poster. Try the authored URL first, then public
-                // Google Books and Open Library covers when a source is stale.
-                val coverCandidates = remember(imageUrl, synopsis) {
-                    listOfNotNull(
-                        imageUrl.takeIf { it.isNotBlank() },
-                        "https://covers.openlibrary.org/b/title/${Uri.encode(bookTitle)}-M.jpg"
-                    )
-                }
-                var coverIndex by remember(imageUrl, synopsis) { mutableStateOf(0) }
-                if (coverCandidates.isNotEmpty() && coverIndex < coverCandidates.size) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(coverCandidates[coverIndex])
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = "Book cover",
-                        onError = { if (coverIndex < coverCandidates.lastIndex) coverIndex += 1 },
-                        modifier = Modifier
-                            .size(width = 80.dp, height = 120.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .shadow(4.dp, RoundedCornerShape(8.dp)),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-                
-                // Synopsis text (scrollable)
-                val scrollState = rememberScrollState()
-                Column(
+                BookCoverPoster(
+                    bookTitle = bookTitle,
+                    imageUrl = imageUrl,
                     modifier = Modifier
-                        .weight(1f)
-                        .height(120.dp)
-                        .verticalScroll(scrollState)
-                ) {
-                    Text(
-                        text = synopsis,
-                        style = RevealEditorialBody,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
+                        .size(width = 80.dp, height = 120.dp)
+                        .shadow(4.dp, RoundedCornerShape(8.dp))
+                )
+                Text(
+                    text = synopsis,
+                    style = RevealEditorialBody,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }
@@ -2413,11 +2459,13 @@ private fun BookChapterChip(
         shadowElevation = 2.dp,
         modifier = modifier
             .width(160.dp)
-            .height(156.dp)
+            // v315 — the old 156dp boxes were taller than their 2-line previews
+            // needed; they now sit just above the preview height (116-118dp).
+            .height(118.dp)
             .clickable(onClick = onClick)
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(10.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             // Chapter range label (extracted from title)
@@ -2430,14 +2478,14 @@ private fun BookChapterChip(
                 color = cat.categoryInk()
             )
             
-            // Chapter title
+            // Chapter title — one line, the preview below carries the detail
             Text(
                 text = chapter.title,
                 style = MaterialTheme.typography.titleSmall.copy(
                     fontWeight = FontWeight.SemiBold
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             
@@ -2464,46 +2512,239 @@ private fun BookChapterChip(
     }
 }
 
+/** What the book-notes bottom sheet shows. */
+private enum class BookNotesMode { SYNOPSIS, CHAPTERS }
+
+/**
+ * The book poster used on the reveal page AND inside the book-notes sheet —
+ * answers the authored URL first, then the same Open Library title-cover
+ * fallback [BookCoverFetch.coverUrlFor] resolves, so the disk-cache key is
+ * shared with the Settings bulk cover fetch.
+ */
 @Composable
-private fun RevealDetailDialog(
+private fun BookCoverPoster(
+    bookTitle: String,
+    imageUrl: String,
+    modifier: Modifier = Modifier
+) {
+    val coverCandidates = remember(bookTitle, imageUrl) {
+        listOfNotNull(
+            imageUrl.takeIf { it.isNotBlank() },
+            "https://covers.openlibrary.org/b/title/${Uri.encode(bookTitle)}-M.jpg"
+        )
+    }
+    var coverIndex by remember(bookTitle, imageUrl) { mutableStateOf(0) }
+    if (coverCandidates.isNotEmpty() && coverIndex < coverCandidates.size) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(coverCandidates[coverIndex])
+                .crossfade(true)
+                .build(),
+            contentDescription = "Book cover",
+            onError = { if (coverIndex < coverCandidates.lastIndex) coverIndex += 1 },
+            modifier = modifier.clip(RoundedCornerShape(8.dp)),
+            contentScale = ContentScale.Crop
+        )
+    }
+}
+
+/**
+ * v315 — the book notes ModalBottomSheet (the slim centered dialog is
+ * gone): the book cover + title head the sheet; SYNOPSIS shows the full
+ * synopsis; CHAPTERS lists EVERY chapter in a chip row at the top — the
+ * opened chapter is active and tapping any other chip switches the reader
+ * inside the sheet.
+ */
+@Composable
+private fun BookNotesSheet(
     cat: com.curio.app.data.CurioCategory,
-    eyebrow: String,
-    title: String,
-    body: String,
-    metadata: String? = null,
+    topic: CurioTopic,
+    mode: BookNotesMode,
+    chapter: BookChapter?,
+    onSelectChapter: (BookChapter) -> Unit,
     onDismiss: () -> Unit
 ) {
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = RoundedCornerShape(28.dp),
-            color = cat.categorySurface(MaterialTheme.colorScheme.surface),
-            tonalElevation = 6.dp,
-            modifier = Modifier.fillMaxWidth()
+    val chapters = topic.chapters.orEmpty()
+    val showChips = mode == BookNotesMode.CHAPTERS && chapters.isNotEmpty()
+    val currentIndex = if (showChips) {
+        chapters.indexOfFirst { it.number == chapter?.number }.coerceAtLeast(0)
+    } else 0
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val chipListState = rememberLazyListState(initialFirstVisibleItemIndex = currentIndex)
+    LaunchedEffect(currentIndex) {
+        if (showChips && chapters.size > 1) chipListState.animateScrollToItem(currentIndex)
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = curioDialogContainerColor(),
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = CurioContentMaxWidth)
+                .padding(bottom = 20.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+            // ── Header — cover + book title/author + close ──────────────
+            Row(
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(eyebrow, style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.4.sp, fontWeight = FontWeight.Bold), color = cat.categoryInk())
-                        Spacer(Modifier.height(5.dp))
-                        Text(title, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onSurface)
+                BookCoverPoster(
+                    bookTitle = topic.name,
+                    imageUrl = topic.imageUrl,
+                    modifier = Modifier
+                        .size(width = 76.dp, height = 114.dp)
+                        .shadow(3.dp, RoundedCornerShape(8.dp))
+                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "BOOK NOTES",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.4.sp
+                        ),
+                        color = cat.categoryInk()
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        topic.name,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    topic.byline.takeIf { it.isNotBlank() }?.let { byline ->
+                        Text(
+                            byline,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
-                    TextButton(onClick = onDismiss) { Text("Done", color = cat.categoryInk()) }
+                    if (mode == BookNotesMode.CHAPTERS && chapter != null) {
+                        Spacer(Modifier.height(4.dp))
+                        val pages = if (chapter.pageStart > 0 && chapter.pageEnd > 0)
+                            " · pp. ${chapter.pageStart}–${chapter.pageEnd}" else ""
+                        Text(
+                            "Ch. ${chapter.number}$pages",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = cat.categoryInk()
+                        )
+                    }
                 }
                 Surface(
-                    shape = RoundedCornerShape(18.dp),
-                    color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
+                    onClick = onDismiss,
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        if (metadata != null) Text(metadata, style = MaterialTheme.typography.labelMedium, color = cat.categoryInk())
-                        Text(
-                            body,
-                            style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 28.sp),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.verticalScroll(rememberScrollState())
-                        )
+                    CurioIcon(
+                        CurioIcons.Close,
+                        "Close book notes",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        size = 20.dp,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+            }
+
+            if (showChips) {
+                Spacer(Modifier.height(16.dp))
+                // ── All chapters — switchable inside the sheet ──────────
+                LazyRow(
+                    state = chipListState,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(horizontal = 20.dp)
+                ) {
+                    itemsIndexed(chapters) { _, ch ->
+                        val selected = ch.number == chapter?.number
+                        Surface(
+                            onClick = { onSelectChapter(ch) },
+                            shape = RoundedCornerShape(50),
+                            color = if (selected) cat.themedAccent()
+                                    else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+                            shadowElevation = if (selected) 0.dp else 1.dp
+                        ) {
+                            Text(
+                                text = "Ch. ${ch.number} · ${ch.title}",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = if (selected) cat.onAccent()
+                                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.height(16.dp))
+            } else {
+                Spacer(Modifier.height(18.dp))
+            }
+
+            // ── Body ─────────────────────────────────────────────────────
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    when (mode) {
+                        BookNotesMode.SYNOPSIS -> {
+                            Text(
+                                "SYNOPSIS",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    letterSpacing = 1.2.sp
+                                ),
+                                color = cat.categoryInk()
+                            )
+                            Text(
+                                topic.synopsis.orEmpty(),
+                                style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier
+                                    .heightIn(max = 380.dp)
+                                    .verticalScroll(rememberScrollState())
+                            )
+                        }
+                        BookNotesMode.CHAPTERS -> {
+                            val ch = chapter ?: chapters.firstOrNull()
+                            if (ch != null) {
+                                Text(
+                                    ch.title,
+                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                if (ch.pageStart > 0 && ch.pageEnd > 0) {
+                                    Text(
+                                        "pp. ${ch.pageStart}–${ch.pageEnd}",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = cat.categoryInk()
+                                    )
+                                }
+                                Text(
+                                    ch.summary.ifBlank { "No summary for this chapter." },
+                                    style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier
+                                        .heightIn(max = 360.dp)
+                                        .verticalScroll(rememberScrollState())
+                                )
+                            }
+                        }
                     }
                 }
             }

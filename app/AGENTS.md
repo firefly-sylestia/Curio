@@ -85,7 +85,10 @@ app/src/main/java/com/curio/app/
 - FieldMind's data lives in FieldMind's separate install at `/data/data/fieldmind.research.app/databases/fieldmind_database`. Curio CANNOT access it directly.
 - FieldMind data can be imported into Curio through the self-contained FieldMind archive importer in `com.curio.app.data.FieldMindLegacyImport`, which accepts V3 `.fieldmind` packages and plain archive JSON.
 - The two apps do not share DB names, schemas, or SharedPreferences namespaces — fully isolated.
-- **Topic catalog cache (Room, v294+):** the bundled topic JSON assets import ONCE into Room's `topics` table on first launch; every later launch warms `TopicJsonLoader`'s counts + pools straight from Room (`TopicRepository.init` → `warmLoaderFromRoom`), so all topics are present instantly with ZERO JSON re-parse per restart. The JSON→Room re-sync runs only when the app version code changes (`AppPreferences.getTopicCatalogSyncVersion` marker + `BuildConfig.VERSION_CODE`), so newly authored content lands on app updates without re-reading every lane every launch. The bundled `topics.db` SQLite-asset experiment (`TopicAssetStore`) is REVERTED — `assets/topics.db` does NOT ship; `TopicJsonLoader.load()` still parses the JSON assets as a fallback when Room is empty.
+- **Topic catalog cache (Room, v294+):** the bundled topic JSON assets import ONCE into Room's `topics` table on first launch; every later launch warms `TopicJsonLoader`'s counts + pools straight from Room (`TopicRepository.init` → `warmLoaderFromRoom`), so all topics are present instantly with ZERO JSON re-parse per restart. The JSON→Room re-sync runs only when the app version code changes (`AppPreferences.getTopicCatalogSyncVersion` marker + `BuildConfig.VERSION_CODE`), so newly authored content lands on app updates without re-reading every lane every launch. The bundled `topics.db` SQLite-asset experiment (`TopicAssetStore`) is REVERTED — `assets/topics.db` does NOT ship; `TopicJsonLoader.load()` still parses the JSON assets as a fallback when Room is empty. **Reveal never blanks:** `TopicRevealScreen` resolves Room first, then parses+caches+persists the lane's JSON on demand when Room misses (wildcard misses fall back to `TopicCatalog.findByNameAcrossAll`), and every resolved topic is upserted into `cached_topics` via `TopicRepository.rememberTopic` — so loaded/explored topics stay durable.
+- **Image fetch caching:** `MainActivity.onCreate` installs a shared Coil `ImageLoader` (Coil 2.7) with an explicit memory cache (22%) + disk cache (`cacheDir/curio_image_cache`, 3%) and `respectCacheHeaders(false)` — book covers and any network image download once and hit disk on later visits/restarts. SvgDecoder registered app-wide.
+- **Book covers — bulk one-by-one fetch (v314):** Settings → Safety & support → "Book covers" row (`features/settings/BookCoverFetch.kt`, `BookCoverFetchRow` — an INLINE action row special-cased off `BookCoverFetch.ROUTE` in the hub's grid/search/two-pane renderers so it can never navigate) tap-fetches every unique cover URL (authored `imageUrl`, else the reveal's exact Open Library `-M.jpg` fallback — same URL = same cache key) sequentially into the shared disk cache, `memoryCachePolicy DISABLED` on the bulk pass, ~150ms politeness gap, live "Fetching 12 / 301…" counter + progress bar, completion "✓ N covers cached · M failed". Reveal posters then render instantly/offline.
+- **Haptics:** satisfying haptics are localized per-screen (`val haptics = LocalHapticFeedback.current` hoisted in composition — never read inside click lambdas). Confirm on completions (save capture, share-card Save/Share, spin landing, quest complete); KeyboardTap on action buttons (Start exploring, Express yourself, opening Cabinet entries); TextHandleMove ticks on toggles (pin, reveal favourite, share-card Reset/Done). The wheel's escalating ratchet lives in SpinScreen.
 
 ### UI
 - **User design preferences (decided, durable):** light mode background/surface is **Soft Cream `#F7F0E4`** (deliberately less-white/creamy, not dark); the **category-tint background wash** is applied on the **Spin page, Topic Reveal, the Save/Capture screen, and the Cabinet (which uses the active filter chip's tint; "All" keeps the plain background)** — so every category-aware screen wears the same color story. The wash is **theme-aware via `CurioCategory.categoryBackgroundWash()`** (in `ui/theme/CategoryInk.kt`): deep accent at 20% over cream in light mode, but the light 300-level twin at ~16% over midnight in dark mode (deep accents look muddy on dark — amber turns brownish, teal grey-green).    Container steps are deepened so cards/sheets stay distinct on the cream surface. See `ui/theme/CurioColors.kt` + `CurioTheme.kt`.
@@ -436,6 +439,39 @@ app/src/main/java/com/curio/app/
   above the empty state when the lane has no matches); tapping a pill
   switches `selectedCat` to that lane keeping the query. The section-
   header count rows, empty-state copy and pagination are untouched.
+- **v314 — Topic Browser: category-panel + multi-select + typo-tolerant
+  search.** User: "when I'm searching it shows 2 category pickers — hide the
+  category chips and only show category options in the panel; revamp the
+  picker: text search mentions a category name → prioritize it; smarter
+  search showing typo results; category panel collapsed by default with its
+  own tiny search box inside; multi-select via checkboxes in a Set;
+  active-filter chips removable with one tap; filter passes if it matches
+  text AND (no categories selected OR its category is in the set)" (JSX
+  reference provided). (1) **Chips during search are GONE** — the
+  `LaunchedEffect(searchActive)` auto-open and the sticky every-lane
+  `DatabaseStickyChipBar`/`DatabaseChipPop`/`DatabaseFilterChip` are
+  deleted; searching shows no category bar. (2) **Category panel** — the
+  hero Category pill toggles a collapsed-by-default `DatabaseCategoryPanel`
+  (own tiny `CurioSearchField` filtering the category list, accent
+  `Checkbox` multi-select rows with per-lane counts, Clear all + Done;
+  `DatabaseFilterPanelHeight = 352.dp` reserved while open). (3) **Active-
+  filter chips row** — `ActiveFilterChips` shows exactly the selected lanes
+  (each chip = one tap to remove, plus Clear all) whenever the selection is
+  non-empty; pill label reads "Categories · N" / "Category · All" and the
+  pill emphasizes while a selection is active. (4) **Multi-select** — the
+  filter is `selectedCats: Set<CategoryId>` round-tripped through a
+  comma-joined `rememberSaveable` string + `TopicBrowserSession.selectedSlugs`
+  (enum names, replaces `selectedSlug`/`chipBarOpen`); filter applies in
+  search AND browse; one selected lane keeps the `DatabaseCategoryTopBar`,
+  several show section headers for just those lanes. (5) **Typo-tolerant
+  matching** — `matchLevel()` returns 0 strong (substring) / 1 fuzzy
+  (tokenized Levenshtein over name/byline/subtype, tolerance 0–2 by token
+  length) / null; `catHitCounts` + rows use it, ranking fuzzy hits below
+  strong ones. (6) **Category-mention priority** — `priorityCats` derives
+  from the query vs each lane's displayName (contains/fuzzy); mentioned
+  lanes' hits sort first in search results. "Also in" pills now TOGGLE a
+  lane in the active set. The glass `layerBackdrop` capture now records
+  whenever liquid glass is on (hero pills refract in every state).
 - **v3xx11 — picker polish: tick removed, option-pill overlay fixed, dark white-dot gone.**
   User: "remove the tick when selecting … in dark mode the category options still have
   white borders … in new picker the pinned ones doesn't show tap and hold actions".
@@ -1297,6 +1333,32 @@ app/src/main/java/com/curio/app/
   when content in the SAME position has the SAME content on both ends —
   matching the card's bounds alone isn't enough if pills/titles swap
   inside it.
+- **v315 — book notes bottom sheet + instant reveal + smooth book morph.**
+  (User: the book-notes dialog is too slim, add the cover, fix the
+  scrollable synopsis, shrink the chapter boxes, use a bottom sheet with
+  all chapters switchable, reveal takes a sec despite prior visits, morph
+  is laggy on books with synopsis/chapters.) (1) **Instant reveal** —
+  `resolved` is SEEDED from `TopicJsonLoader.cached(cat.id)` synchronously
+  in `remember(topicName, cat.id)` (strict → saved-name match), so a
+  warmed lane renders its quick fact + metadata on the FIRST frame; the
+  async Room/JSON chain still runs to enrich + `rememberTopic` persist,
+  and `init()` is skipped when `TopicRepository.isInitialized()`.
+  (2) **Smooth book morph** — the whole `BookInfoSection` is gated on a
+  `bookUiReady` flag (fires ~380ms after entry), so the poster Coil decode
+  + chapter `LazyRow` compose only AFTER the shared-element spring settles
+  and never stall its frames. (3) **Book notes bottom sheet** —
+  `RevealDetailDialog` is DELETED; `BookNotesSheet` (ModalBottomSheet,
+  curioDialogContainerColor, 28dp top corners, max width
+  `CurioContentMaxWidth`) replaces it for BOTH synopsis and chapters: a
+  header row with the book cover (`BookCoverPoster` — same URL + fallback
+  as `BookCoverFetch.coverUrlFor`, so the cache key matches the Settings
+  bulk fetch) + title/byline + close pill; SYNOPSIS mode shows the full
+  text; CHAPTERS mode shows EVERY chapter in a `LazyRow` chip row (active
+  chapter accent-filled, `animateScrollToItem` to the opened one) and
+  tapping a chip switches the reader in-place (`selectedChapter` screen
+  state, sheet instance persists). (4) **Page fixes** — the synopsis card's
+  fixed-height inner `verticalScroll` box is gone (full text, card grows,
+  poster top-aligned); chapter chips shrank 156→118dp (title 1 line).
 - **v142 — Manage Categories full-bleed bottom; Pet Designer floating
   pill bar + fade open; first-run "Pick a lane" wired to the Spin picker.**
   (1) **Manage Categories full-bleed** (per user, confirmed): the NavHost
@@ -5383,6 +5445,17 @@ app/src/main/java/com/curio/app/
   - Parallax tilt cue redrawn: `drawGlassTiltEdgeGlow` strokes a ~110° TOP-RIM light arc that slides with
     tiltX and fades in with tilt magnitude — the old full white circle (visible on any tilted phone) is gone.
 
+- **v228b — share-card edit precision pass** (`ui/components/TopicShareCard.kt`). (1)
+  **4 box-size sliders instead of 2 target-conditional ones**: edit mode now shows Title width /
+  Title height / Fact width / Fact height, each with an explicit label, a live percent readout
+  and snap steps (width 1%, height ~5% — they drive whole-line counts) so the user always knows
+  which dimension is being edited and can hit exact sizes (`SizeSliderColumn`). (2) **Typing caret
+  accuracy**: the transparent quick-fact BasicTextField dropped its 6dp content inset and now
+  types with card-matching Lora metrics (`factFieldStyle` in TopicShareSheet, ~11sp × bodyScale,
+  1.5× leading) so the caret sits exactly on the visible text — the old 14sp/20sp bodyMedium
+  wrapped whole lines away from the card's own 9–12sp layout. (3) **Editorial drop cap = 2 wrap
+  lines**: the measured wrap beside the 2× initial is 2 lines (was 3) and the letter is top-aligned
+  via `LineHeightStyle.Alignment.Top`.
 - **v228 — share-card text formats + Editorial drop cap + info-row moves + title no-edit**
   (`ui/components/TopicShareCard.kt`). (1) **MS Word-style formats**: `ShareCardMove` grew
   `factFont: FontFamily?` + `factAlign: TextAlign?` (and `metaDx/metaDy` for info rows);
@@ -5390,12 +5463,13 @@ app/src/main/java/com/curio/app/
   MiddleContent/quote text) — because `move` already flows into the export lambdas, the fonts &
   alignment bake into the saved PNG with zero extra plumbing. Customise panel gained "Fact font"
   (Serif/Sans/Type/Display/Elegant → null/Sora/SpaceMono/Playfair/DMSerif) and "Fact alignment"
-  (Left/Center/Right) pills under the quick-fact size slider. (2) **Editorial drop cap**: the old
-  alignByBaseline 2-line initial is now a measured 3-line wrap — `rememberTextMeasurer` +
+  (Left/Center/Right) pills under the quick-fact size slider. (2) **Editorial drop cap**: `rememberTextMeasurer` +
   `TextLayoutInput` (BOM 2026.05; the `constraints`+`maxLines` combo parses ONLY as named args via
-  TextLayoutInput, NOT the legacy measure override) finds how much body fits in the first 3 lines
-  beside the 3× initial; that chunk renders beside it, the rest continues full-width below
-  (single-char bodies fall back to plain text). (3) **Info rows movable, never editable**: `moveMeta`
+  TextLayoutInput, NOT the legacy measure override) finds how much body fits in the first 2 lines
+  beside the 2× initial; that chunk renders beside it, the rest continues full-width below
+  (single-char bodies fall back to plain text). `LineHeightStyle.Alignment.Top` pins the letter to
+  the TOP of its 2-line box so it starts level with the first text line (a 2× line height alone
+  would vertically center the glyph). (3) **Info rows movable, never editable**: `moveMeta`
   offsets byline/year/footer/colophon in every style; edit mode gained an "M" MoveHandle (bottom
   right) driving metaDx/metaDy. (4) **Title no longer type-editable**: the title BasicTextField is
   now a move/crop outline box only (T handle + edges remain); the quick-fact field keeps typing;
