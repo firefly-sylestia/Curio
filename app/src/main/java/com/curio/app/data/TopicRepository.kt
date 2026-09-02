@@ -48,30 +48,14 @@ object TopicRepository {
         initializationMutex.withLock {
             if (initialized) return
 
-            appContext = context.applicationContext
-            val db = CurioDatabase.getInstance(context)
-            val dao = db.topicDao()
-            val count = dao.getTotalCount()
-
-            // Populate before marking the repository ready. The previous code
-            // set initialized=true first, allowing the splash/home screen to
-            // query an empty Room table while the import was still running.
-            if (count == 0) {
-                populateFromJson(context, dao)
-            }
-
-            val importedCount = dao.getTotalCount()
-            if (importedCount > 0) {
-                initialized = true
-                // v294 — Pre-warm TopicJsonLoader caches from Room so
-                // counts and topic data are available immediately on
-                // restart (the in-memory caches are empty after process
-                // death). This prevents the flash of "0 topics" and
-                // avoids re-parsing JSON files.
-                warmLoaderFromRoom(dao)
-            } else {
-                Log.e("TopicRepository", "Topic import completed with zero rows; will retry next launch")
-            }
+  appContext = context.applicationContext
+  val bundledCount = TopicAssetStore.count(context)
+  if (bundledCount > 0) {
+  initialized = true
+  Log.i("TopicRepository", "Opened bundled topic database with $bundledCount rows")
+  } else {
+  Log.e("TopicRepository", "Bundled topic database is empty; will retry next launch")
+  }
         }
     }
 
@@ -162,6 +146,35 @@ object TopicRepository {
     }
 
     /**
+     * Sync the bundled catalog for every canonical category on app update.
+     * Missing topics are inserted, while existing rows only receive newly
+     * authored synopsis/chapter content so local catalog edits are preserved.
+     */
+    private suspend fun syncCatalogFromJson(context: Context, dao: TopicDao) {
+        TopicJsonLoader.install(context)
+        withContext(Dispatchers.IO) {
+            CategoryId.values()
+                .filter { it != CategoryId.WILDCARD }
+                .forEach { category ->
+                    runCatching {
+                        val entities = TopicJsonLoader.reloadFromAssets(category)
+                            .map(TopicEntity::fromCurioTopic)
+                        if (entities.isNotEmpty()) {
+                            dao.insertMissing(entities)
+                            entities.forEach { entity ->
+                                if (entity.synopsis.isNotBlank() || entity.chapters.isNotBlank()) {
+                                    dao.backfillContent(entity.id, entity.synopsis, entity.chapters)
+                                }
+                            }
+                        }
+                    }.onFailure { error ->
+                        Log.w("TopicRepository", "Failed to sync ${category.name}: ${error.message}")
+                    }
+                }
+        }
+    }
+
+    /**
      * Populate Room database from JSON assets as a compatibility fallback.
      * Runs once on first launch, then topics are served from Room.
      *
@@ -205,17 +218,46 @@ object TopicRepository {
     }
 
     /** Get all topics for a category (from Room, instant). */
-    suspend fun getTopicsForCategory(context: Context, categoryId: CategoryId): List<CurioTopic> {
-        val dao = CurioDatabase.getInstance(context).topicDao()
-        return dao.getByCategory(categoryId.name).map { it.toCurioTopic() }
-    }
+  suspend fun getTopicsForCategory(
+  context: Context,
+  categoryId: CategoryId,
+  limit: Int = 50,
+  offset: Int = 0,
+  ): List<CurioTopic> = withContext(Dispatchers.IO) {
+  TopicAssetStore.byCategory(context, categoryId.name, limit.coerceIn(1, 100), offset.coerceAtLeast(0))
+  .map { it.toCurioTopic() }
+  }
 
     /** Resolve a topic within its category so duplicate names cannot cross lanes. */
     suspend fun findTopic(context: Context, categoryId: CategoryId, name: String): CurioTopic? {
         val dao = CurioDatabase.getInstance(context).topicDao()
-        return dao.getByCategory(categoryId.name)
+        val entity = dao.getByCategory(categoryId.name)
             .firstOrNull { it.name == name || it.name.equals(name, ignoreCase = true) }
-            ?.toCurioTopic()
+            ?: return null
+
+        // A bundled topics.db can contain the catalog shell while newer
+        // authored fields live in the JSON assets. Hydrate the visible topic
+        // on demand, persist it, and return the hydrated row immediately.
+        if (entity.teaser.isBlank() || entity.synopsis.isBlank() && categoryId == CategoryId.BOOKS) {
+            runCatching {
+                TopicJsonLoader.install(context)
+                val fresh = TopicJsonLoader.reloadFromAssets(categoryId)
+                    .firstOrNull { it.id == entity.id || it.name.equals(entity.name, ignoreCase = true) }
+                if (fresh != null) {
+                    val freshEntity = TopicEntity.fromCurioTopic(fresh)
+                    dao.updateContent(
+                        id = freshEntity.id,
+                        teaser = freshEntity.teaser,
+                        imageUrl = freshEntity.imageUrl,
+                        byline = freshEntity.byline,
+                        tags = freshEntity.tags,
+                        synopsis = freshEntity.synopsis,
+                        chapters = freshEntity.chapters
+                    )
+                }
+            }
+        }
+        return dao.findById(entity.id)?.toCurioTopic() ?: entity.toCurioTopic()
     }
 
     /** Get a random topic for a category. */

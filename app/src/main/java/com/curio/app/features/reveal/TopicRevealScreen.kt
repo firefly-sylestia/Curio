@@ -24,6 +24,7 @@ import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -49,6 +50,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.ui.window.Dialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -112,6 +114,7 @@ import com.curio.app.data.CurioPet
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.data.CurioCategory
+import com.curio.app.data.BookChapter
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreReminderScheduler
 import com.curio.app.data.ExploreSession
@@ -240,6 +243,8 @@ fun TopicRevealScreen(
     // duplicate title in another category must not open the wrong topic.
     val context = LocalContext.current
     var resolved by remember(topicName, cat.id) { mutableStateOf<CurioTopic?>(null) }
+    var showSynopsisDialog by rememberSaveable { mutableStateOf(false) }
+    var selectedChapter by remember { mutableStateOf<BookChapter?>(null) }
     LaunchedEffect(topicName, cat.id) {
         // Wait for the guarded one-time import before resolving. Reading the
         // cache during import was the source of intermittent blank reveals.
@@ -809,11 +814,13 @@ fun TopicRevealScreen(
                 if (bookTopic != null && bookTopic.categoryId == CategoryId.BOOKS &&
                     (bookTopic.synopsis != null || !bookTopic.chapters.isNullOrEmpty())) {
                     RevealContentEntrance(delayMillis = 60) {
-                        BookInfoSection(
-                            cat = cat,
-                            topic = bookTopic,
-                            modifier = Modifier.padding(top = if (hasTags) 16.dp else progressFloatGap)
-                        )
+                BookInfoSection(
+                    cat = cat,
+                    topic = bookTopic,
+                    onSynopsisClick = { showSynopsisDialog = true },
+                    onChapterClick = { selectedChapter = it },
+                    modifier = Modifier.padding(top = if (hasTags) 16.dp else progressFloatGap)
+                )
                     }
                 }
 
@@ -945,6 +952,26 @@ fun TopicRevealScreen(
             resolved?.let { ExploreSessionStore.recordUnexplored(context, cat.id, it.name) }
         }
         navController.popBackStack()
+    }
+
+    if (showSynopsisDialog && resolved?.synopsis != null) {
+        RevealDetailDialog(
+            cat = cat,
+            eyebrow = "BOOK NOTES",
+            title = "Synopsis",
+            body = resolved?.synopsis.orEmpty(),
+            onDismiss = { showSynopsisDialog = false }
+        )
+    }
+    selectedChapter?.let { chapter ->
+        RevealDetailDialog(
+            cat = cat,
+            eyebrow = "CHAPTER ${chapter.number}",
+            title = chapter.title,
+            body = chapter.summary,
+            metadata = if (chapter.pageStart > 0 && chapter.pageEnd > 0) "Pages ${chapter.pageStart}–${chapter.pageEnd}" else null,
+            onDismiss = { selectedChapter = null }
+        )
     }
 
     if (showOverlayPermissionDialog) {
@@ -2068,7 +2095,7 @@ private fun HeroCard(
     } // HeroCard floating Box
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════���══════════════════
 // Book info section — synopsis overlay + chapter chips (books only)
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -2082,6 +2109,8 @@ private fun HeroCard(
 private fun BookInfoSection(
     cat: com.curio.app.data.CurioCategory,
     topic: CurioTopic,
+    onSynopsisClick: () -> Unit,
+    onChapterClick: (BookChapter) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val synopsis = topic.synopsis
@@ -2098,16 +2127,19 @@ private fun BookInfoSection(
         if (synopsis != null) {
             BookSynopsisCard(
                 cat = cat,
-                synopsis = synopsis,
-                imageUrl = imageUrl,
-                pageCount = topic.pageCount
-            )}
-        
-        // Chapter chips
+                    synopsis = synopsis,
+                    imageUrl = imageUrl,
+                    bookTitle = topic.name,
+                    author = topic.byline,
+                    pageCount = topic.pageCount,
+                    onClick = onSynopsisClick
+            )
+        }
         if (!chapters.isNullOrEmpty()) {
             BookChapterChips(
                 cat = cat,
-                chapters = chapters
+                chapters = chapters,
+                onChapterClick = onChapterClick
             )
         }
     }
@@ -2121,14 +2153,17 @@ private fun BookSynopsisCard(
     cat: com.curio.app.data.CurioCategory,
     synopsis: String,
     imageUrl: String,
+    bookTitle: String,
+    author: String,
     pageCount: Int?,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
         shape = RoundedCornerShape(24.dp),
         color = cat.categorySurface(MaterialTheme.colorScheme.surface),
         shadowElevation = 3.dp,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth().clickable(onClick = onClick)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Header row with icon
@@ -2172,14 +2207,23 @@ private fun BookSynopsisCard(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Book poster
-                if (imageUrl.isNotBlank()) {
+                // Book poster. Try the authored URL first, then public
+                // Google Books and Open Library covers when a source is stale.
+                val coverCandidates = remember(imageUrl, synopsis) {
+                    listOfNotNull(
+                        imageUrl.takeIf { it.isNotBlank() },
+                        "https://covers.openlibrary.org/b/title/${Uri.encode(bookTitle)}-M.jpg"
+                    )
+                }
+                var coverIndex by remember(imageUrl, synopsis) { mutableStateOf(0) }
+                if (coverCandidates.isNotEmpty() && coverIndex < coverCandidates.size) {
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
-                            .data(imageUrl)
+                            .data(coverCandidates[coverIndex])
                             .crossfade(true)
                             .build(),
                         contentDescription = "Book cover",
+                        onError = { if (coverIndex < coverCandidates.lastIndex) coverIndex += 1 },
                         modifier = Modifier
                             .size(width = 80.dp, height = 120.dp)
                             .clip(RoundedCornerShape(8.dp))
@@ -2214,6 +2258,7 @@ private fun BookSynopsisCard(
 private fun BookChapterChips(
     cat: com.curio.app.data.CurioCategory,
     chapters: List<com.curio.app.data.BookChapter>,
+    onChapterClick: (BookChapter) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -2259,7 +2304,8 @@ private fun BookChapterChips(
                 BookChapterChip(
                     cat = cat,
                     chapter = chapter,
-                    index = index
+                    index = index,
+                    onClick = { onChapterClick(chapter) }
                 )
             }
         }
@@ -2274,13 +2320,17 @@ private fun BookChapterChip(
     cat: com.curio.app.data.CurioCategory,
     chapter: com.curio.app.data.BookChapter,
     index: Int,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
         shadowElevation = 2.dp,
-        modifier = modifier.width(160.dp)
+        modifier = modifier
+            .width(160.dp)
+            .height(156.dp)
+            .clickable(onClick = onClick)
     ) {
         Column(
             modifier = Modifier.padding(12.dp),
@@ -2324,6 +2374,53 @@ private fun BookChapterChip(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RevealDetailDialog(
+    cat: com.curio.app.data.CurioCategory,
+    eyebrow: String,
+    title: String,
+    body: String,
+    metadata: String? = null,
+    onDismiss: () -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(28.dp),
+            color = cat.categorySurface(MaterialTheme.colorScheme.surface),
+            tonalElevation = 6.dp,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(eyebrow, style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.4.sp, fontWeight = FontWeight.Bold), color = cat.categoryInk())
+                        Spacer(Modifier.height(5.dp))
+                        Text(title, style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.onSurface)
+                    }
+                    TextButton(onClick = onDismiss) { Text("Done", color = cat.categoryInk()) }
+                }
+                Surface(
+                    shape = RoundedCornerShape(18.dp),
+                    color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (metadata != null) Text(metadata, style = MaterialTheme.typography.labelMedium, color = cat.categoryInk())
+                        Text(
+                            body,
+                            style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 28.sp),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.verticalScroll(rememberScrollState())
+                        )
+                    }
+                }
             }
         }
     }

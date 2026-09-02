@@ -229,6 +229,22 @@ object TopicJsonLoader {
      */
     fun cached(id: CategoryId): List<CurioTopic>? = cache[id]
 
+    /** Forces a bundled JSON refresh after an app update. */
+    fun invalidate(id: CategoryId) {
+        synchronized(cacheWriteLock) {
+            cacheGeneration += 1L
+            cache.remove(id)
+        }
+    }
+
+    /** Reads the bundled asset directly, bypassing Room's fast path. */
+    suspend fun reloadFromAssets(id: CategoryId): List<CurioTopic> = withContext(Dispatchers.IO) {
+        invalidate(id)
+        val topics = gated { parseAsset("$ASSET_DIR/${id.routeSlug}.json", id) }
+        synchronized(cacheWriteLock) { cache[id] = topics }
+        topics
+    }
+
     /**
      * Eagerly loads + caches the ten canonical category JSON files.
      * The derived WILDCARD pool is intentionally excluded: it duplicates
@@ -476,10 +492,11 @@ object TopicJsonLoader {
      * double-hyphens or leading/trailing whitespace.
      */
     private fun cleanText(raw: String): String =
-        raw.replace('\u2014', '-')   // em dash → hyphen
-           .replace('\u2013', '-')   // en dash → hyphen
-           .replace(Regex("-{2,}"), "-")
-           .trim()
+        raw.replace(Regex("\\s*[\\u2014\\u2013]\\s*"), ", ")
+           .replace(Regex("\\s{2,}"), " ")
+           .replace(Regex(",\\s*,+"), ",")
+           .replace(Regex("\\s+([,.!?;:])"), "$1")
+           .trim(' ', ',', ';', ':')
 
     private fun parseAsset(path: String, id: CategoryId): List<CurioTopic> {
         val am = assets
