@@ -41,7 +41,7 @@ object TopicCatalog {
      * file on first access. Suspends on first call only.
      */
     suspend fun poolFor(id: CategoryId): List<CurioTopic> =
-        TopicJsonLoader.load(id)
+        TopicRepository.loadFromRoom(id)
 
     /**
      * Returns a random topic from [id]'s pool. For WILDCARD, picks a
@@ -170,7 +170,7 @@ object TopicCatalog {
         daysAgo: Int,
         format: CaptureFormat
     ): CurioEntry? {
-        val topic = TopicJsonLoader.load(categoryId).firstOrNull { it.id == topicId } ?: return null
+        val topic = TopicRepository.loadFromRoom(categoryId).firstOrNull { it.id == topicId } ?: return null
         val now = System.currentTimeMillis()
         val oneDay = 24L * 60 * 60 * 1000
         val capturedAt = now - (daysAgo * oneDay)
