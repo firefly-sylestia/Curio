@@ -86,3 +86,34 @@ naive counter is unreliable on these files (nested `"${...}"` strings fool it �
 "unbalanced" too), so correctness was verified by diff review instead; imports verified
 (`PixelCopy`, `Build`, `Handler`, `Looper`, `Activity`, `suspendCancellableCoroutine`,
 `runCatching` is stdlib); no compile/build run (forbidden — CI validates on push).
+
+CI round-trips: fb4d335c → CI failed (`android.graphics.PixelCopy` — it's `android.view.PixelCopy`);
+8c3177cc fixed the import → CI failed on `cont.resume(result)` needing `onCancellation`
+(requires-param extension in this stdlib); c93cba0c switched to the stable
+`cont.resumeWith(Result.success(result))` member → CI stayed green.
+
+### Follow-up (this turn): remove selection tick, dark white-borders, pinned hold broken
+
+User: "remove the tick when selecting; and in dark mode the category options still have white
+borders, remove it; and in new picker the pinned ones doesn't show tap and hold actions".
+
+- **Selection tick removed** — `NewPickerTile`'s 18dp `catInk` check badge (the
+  `CurioIcons.Check` circle at BottomEnd of every selected tile) deleted. The classic
+  tint fill + ExtraBold label alone carry selection now. This badge was ALSO the
+  "white border" still visible in dark mode: `catInk` on the dark scheme is a bright
+  pastel, so the circle read as a pale dot on the selected tile — removing it clears
+  the last pale element (tile/Add-tile outline borders were already light-only).
+- **Option-pill overlay placement fixed ("pinned doesn't show tap-and-hold")** — root
+  cause: `NewCategoryPickerSheet` emitted `CategoryOptionPill` as COLUMN SIBLINGS after
+  the picker Box inside SpinScreen's ModalBottomSheet. The pill's `.fillMaxSize()`
+  scrim therefore only covered the leftover space BELOW the picker content (≈0 when
+  the sheet filled its max height) — the centered Surface could render entirely off
+  the visible area, so hold on a Pinned pill showed nothing. Both overlays
+  (optionTarget + removeTarget) moved INSIDE the picker Box as its last children, so
+  the scrim + pill now cover the whole picker. The long-press wiring itself was
+  already correct (`NewPinnedPill` onLongClick → `onOptionTarget`;
+  `PinsTabContent` in Browse likewise).
+- Verified: no other stroke/ring renderers in the picker files (no `drawRoundRect`/
+  `Stroke(`/`borderTint`); `catAccent`/`CircleShape`/`CurioIcons.Check` still used
+  elsewhere; diff reviewed hunk-by-hunk; no compile/build run (CI validates).
+- Docs: changelog 20260921 + app/AGENTS.md v3xx11 + this log.

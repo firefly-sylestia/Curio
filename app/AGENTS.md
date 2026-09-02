@@ -356,6 +356,20 @@ app/src/main/java/com/curio/app/
     the effective list so removing a default suggestion actually removes
     it (was a no-op against an empty user list); mix save/delete already
     recomposed via `savedMixesState`.
+- **v3xx11 — picker polish: tick removed, option-pill overlay fixed, dark white-dot gone.**
+  User: "remove the tick when selecting … in dark mode the category options still have
+  white borders … in new picker the pinned ones doesn't show tap and hold actions".
+  (1) **Check tick removed** — `NewPickerTile` no longer draws the 18dp `catInk` check
+  badge on selected tiles; the classic category-tint fill + bold label alone carry
+  selection. In dark mode that pastel circle was exactly the "white dot/border" still
+  visible on selected tiles. (2) **Option-pill overlay placement fixed** — in
+  `NewCategoryPickerSheet` the `CategoryOptionPill` overlays were COLUMN SIBLINGS of
+  the picker content inside the bottom sheet, so their `.fillMaxSize()` scrim only
+  filled the leftover space BELOW the picker (≈0 when the sheet was full-height) and
+  holding a Pinned pill (or any hold → option/remove pill) could show nothing. Both
+  overlays now render INSIDE the picker Box (last children), covering the whole sheet.
+  (3) dark-mode tile borders stay light-only (v3xx10); no other stroke/ring renderers
+  exist in the picker files (verified: no `drawRoundRect`/`Stroke`/`borderTint`).
 - **v3xx10 — theme reveal in liquid-glass mode + mix-card Spin pill + dark-mode borders.**
   User: "in liquid glass toggle on, switching between theme doesn't play that transition
   animation; also in the new picker your mixes remove the spin and spinning pill; in dark

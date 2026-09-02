@@ -298,9 +298,41 @@ fun NewCategoryPickerSheet(
                 )
             }
         }
+
+        // ── Overlays — INSIDE the picker Box so the .fillMaxSize() scrim
+        // covers the whole sheet. As Column siblings the option pill only
+        // filled the leftover space BELOW the picker content and could
+        // render invisible (e.g. hold on a Pinned pill showed nothing). ────
+        optionTarget?.let { target ->
+            CategoryOptionPill(
+                category = target,
+                onDismiss = { optionTarget = null },
+                onPinToggle = {
+                    pinnedToggle(target.id)
+                    optionTarget = null
+                },
+                onSpin = {
+                    optionTarget = null
+                    if (target.isReady) onCategorySelected(target)
+                }
+            )
+        }
+        removeTarget?.let { target ->
+            CategoryOptionPill(
+                category = target,
+                onDismiss = { removeTarget = null },
+                onRemove = {
+                    // Removing a curated lane writes the user's suggestion
+                    // list live, so the section updates without closing the
+                    // picker.
+                    AppPreferences.removePickerSuggestion(context, target.id)
+                    removeTarget = null
+                }
+            )
+        }
     }
 
-    // ── Mix editor + delete confirm + option pill + add-suggestion ────
+    // ── Mix editor + delete confirm + add-suggestion ─────────────────
     if (showEditor) {
         MixEditorSheet(
             washCat = washCat,
@@ -336,34 +368,6 @@ fun NewCategoryPickerSheet(
                     onClick = { deleteMix = null },
                     colors = com.curio.app.ui.theme.curioDialogActionButtonColors()
                 ) { Text("Keep") }
-            }
-        )
-    }
-    // Tap-and-hold option pill.
-    optionTarget?.let { target ->
-        CategoryOptionPill(
-            category = target,
-            onDismiss = { optionTarget = null },
-            onPinToggle = {
-                pinnedToggle(target.id)
-                optionTarget = null
-            },
-            onSpin = {
-                optionTarget = null
-                if (target.isReady) onCategorySelected(target)
-            }
-        )
-    }
-    // Tap-and-hold on a Continue-exploring lane → remove pill.
-    removeTarget?.let { target ->
-        CategoryOptionPill(
-            category = target,
-            onDismiss = { removeTarget = null },
-            onRemove = {
-                // Removing a curated lane writes the user's suggestion list
-                // live, so the section updates without closing the picker.
-                AppPreferences.removePickerSuggestion(context, target.id)
-                removeTarget = null
             }
         )
     }
@@ -1035,9 +1039,11 @@ private fun NewMixCard(
  * A premium-minimal lane tile: flat cream-lift fill, NEUTRAL icon
  * (onSurfaceVariant) when idle. SELECTION wears the classic picker's
  * category-tint style — a SOLID category accent fill with its on-accent
- * ink (icon, label, check) — so picking a lane reads in the category's
- * own color story instead of a flat neutral. Tap-and-hold surfaces the
- * option pill / remove pill (caller's onLongClick).
+ * ink (icon, label) — so picking a lane reads in the category's own
+ * color story instead of a flat neutral. No check tick on the tile (user
+ * call: the tint fill alone carries selection; the tick read as a pale
+ * white dot in dark mode). Tap-and-hold surfaces the option pill / remove
+ * pill (caller's onLongClick).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1163,24 +1169,6 @@ fun NewPickerTile(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-            }
-            if (selected) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(bottom = 6.dp, end = 6.dp)
-                        .size(18.dp)
-                        .clip(CircleShape)
-                        .background(catInk),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CurioIcon(
-                        name = CurioIcons.Check,
-                        contentDescription = "Selected",
-                        size = 12.dp,
-                        tint = catAccent
-                    )
-                }
             }
         }
     }
@@ -1597,9 +1585,9 @@ fun MixEditorSheet(
         // IMMUTABLE Set — every toggle writes a NEW set so the grid and the
         // Save label recompose instantly. The old MutableSet-toggle mutated
         // the remembered set in place and wrote the SAME instance back:
-        // structural equality saw no change, so tile ticks (and the batch
-        // of extra ticks that appeared later) only showed after the editor
-        // was closed and reopened.
+        // structural equality saw no change, so the selected-tile fill (and
+        // a batch of stray selections that appeared later) only updated
+        // after the editor was closed and reopened.
         var selected by remember {
             mutableStateOf<Set<CategoryId>>(
                 editMix?.laneIds?.toSet() ?: emptySet()
