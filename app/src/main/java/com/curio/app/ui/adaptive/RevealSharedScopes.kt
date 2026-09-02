@@ -3,7 +3,7 @@ package com.curio.app.ui.adaptive
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.staticCompositionLocalOf
 
 /**
@@ -27,9 +27,9 @@ const val RevealSharedElementKey = "reveal-hero"
  * spring overshoot or a late settling wobble.
  */
 val RevealBoundsTransform = BoundsTransform { _, _ ->
-    // Keep the handoff short and critically damped. A lower stiffness avoids
-    // the one-frame snap/judder on large portrait-to-landscape bounds changes.
-    spring(dampingRatio = 0.98f, stiffness = 650f)
+    // A fixed-duration ease avoids spring retargeting jitter while the
+    // destination is still measuring its final bounds.
+    tween(durationMillis = 360)
 }
 
 /**

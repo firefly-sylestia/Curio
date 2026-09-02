@@ -149,15 +149,9 @@ fun SplashScreen(navController: NavHostController) {
         // v294 — If Room is already populated, skip JSON warm-up entirely.
         // Topics are served from Room (instant indexed queries).
         if (com.curio.app.data.TopicRepository.isInitialized()) {
-            // v311 — even when Room is already warm, hold the splash for
-            // a minimum time so the branding is visible on warm starts.
-            // Smoothly ramp progress so the bar doesn't jump 0→100%.
-            val rampSteps = 6
-            val rampDelay = 150L
-            for (step in 1..rampSteps) {
-                delay(rampDelay)
-                warmedLanes = (totalLanes * step / rampSteps).coerceAtMost(totalLanes)
-            }
+            // Persistent topics.db is ready; do not add an artificial
+            // branding delay or replay a fake loading sequence on warm starts.
+            warmedLanes = totalLanes
         } else {
             // The repository opens the persistent topics.db and warms the
             // lightweight compatibility cache from indexed rows. Never parse

@@ -53,10 +53,15 @@ object TopicRepository {
             val dao = db.topicDao()
             val bundledCount = TopicAssetStore.count(appContext!!)
             if (bundledCount > 0) {
-                // Populate the compatibility cache once per process from the
-                // persistent on-device DB. This keeps reopen paths indexed and
-                // prevents TopicJsonLoader from reparsing source data.
-                warmLoaderFromRoom(dao)
+                // Do not materialize the entire catalog during startup. The
+                // persistent SQLite asset is already indexed and each screen
+                // queries only the rows it needs; eager warming made every
+                // cold start and reopen pay for the full catalog.
+                TopicJsonLoader.warmCountsFromRoom(
+                    CategoryId.values()
+                        .filter { it != CategoryId.WILDCARD }
+                        .associateWith { category -> dao.getCount(category.name) }
+                )
                 initialized = true
                 Log.i("TopicRepository", "Opened persistent topic database with $bundledCount rows")
             } else {
