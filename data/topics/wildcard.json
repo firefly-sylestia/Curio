@@ -8787,5 +8787,1055 @@
     "imageUrl": "",
     "exploreAction": "",
     "tier": "standard"
+  },
+  {
+    "name": "The Lost Colony of Roanoke (1590)",
+    "teaser": "117 English settlers vanished from Roanoke Island, leaving only the word 'CROATOAN' carved into a post. The colony was England's first attempt at New World settlement, and its disappearance remains America's oldest unsolved mystery — theories range from assimilation with Native Americans to mass migration.",
+    "categoryId": "WILDCARD",
+    "subtype": "mystery",
+    "tags": [
+      "mystery",
+      "history",
+      "colonial"
+    ],
+    "id": "wildcard-the-lost-colony-of-roanoke-1590",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Flannan Isles Mystery (1900)",
+    "teaser": "Three lighthouse keepers vanished from a remote Scottish island. The clock had stopped, oil lamps were lit, and a meal sat uneaten. The final log entry mentioned a severe storm — but weather records showed calm seas. No bodies were ever found.",
+    "categoryId": "WILDCARD",
+    "subtype": "mystery",
+    "tags": [
+      "mystery",
+      "disappearance",
+      "maritime"
+    ],
+    "id": "wildcard-the-flannan-isles-mystery-1900",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Hinterkaifeck Murders (1922)",
+    "teaser": "Six members of a German farmstead were murdered with a mattock. Days before, the farmer reported footprints in the snow leading TO the farm but not away. Someone had been living in the attic. The killer stayed for days afterward, feeding the animals and eating meals.",
+    "categoryId": "WILDCARD",
+    "subtype": "mystery",
+    "tags": [
+      "mystery",
+      "crime",
+      "unsolved"
+    ],
+    "id": "wildcard-the-hinterkaifeck-murders-1922",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Disappearance of Frederick Valentich (1978)",
+    "teaser": "An Australian pilot reported a UFO hovering over his Cessna 182 during a training flight. His final transmission: 'It is not an aircraft.' The plane was never found. The Coast Guard recorded 17 minutes of an unidentified noise after contact was lost.",
+    "categoryId": "WILDCARD",
+    "subtype": "mystery",
+    "tags": [
+      "mystery",
+      "aviation",
+      "ufo"
+    ],
+    "id": "wildcard-the-disappearance-of-frederick-valentich-1978",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Bloop (1997)",
+    "teaser": "An ultra-low-frequency underwater sound detected by NOAA hydrophones 5,000 km apart. It was loud enough to be heard across the Pacific Ocean. Initially attributed to an enormous sea creature, NOAA later linked it to icequake activity — but the sound's intensity still defies explanation.",
+    "categoryId": "WILDCARD",
+    "subtype": "mystery",
+    "tags": [
+      "mystery",
+      "ocean",
+      "sound"
+    ],
+    "id": "wildcard-the-bloop-1997",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Circleville Letters (1976-83)",
+    "teaser": "Anonymous letters flooded a small Ohio town, exposing secrets — affairs, debts, hidden identities. When a school bus driver was shot investigating, her husband was convicted despite claiming innocence. The letters continued even after his imprisonment. The author was never identified.",
+    "categoryId": "WILDCARD",
+    "subtype": "mystery",
+    "tags": [
+      "mystery",
+      "crime",
+      "harassment"
+    ],
+    "id": "wildcard-the-circleville-letters-1976-83",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Anchoring Effect",
+    "teaser": "The first number you hear skews every judgment after it. Daniel Kahneman showed that spinning a wheel of fortune before asking 'What percentage of African nations are in the UN?' produced wildly different estimates based on the random number. First impressions are literally numerical.",
+    "categoryId": "WILDCARD",
+    "subtype": "psychology",
+    "tags": [
+      "psychology",
+      "bias",
+      "judgment"
+    ],
+    "id": "wildcard-the-anchoring-effect",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Peak-End Rule",
+    "teaser": "You judge experiences by their peak intensity and final moment — not the total duration. Colonoscopies rated as less painful when the probe lingered longer at the end (less discomfort). Your brain edits memories in real-time, discarding the middle.",
+    "categoryId": "WILDCARD",
+    "subtype": "psychology",
+    "tags": [
+      "psychology",
+      "memory",
+      "experience"
+    ],
+    "id": "wildcard-the-peak-end-rule",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Spotlight Effect",
+    "teaser": "You think more people notice your mistakes than they actually do. Thomas Gilovich had students wear embarrassing T-shirts to class — they estimated 50% noticed, but only 25% did. We're the main character only in our own movie.",
+    "categoryId": "WILDCARD",
+    "subtype": "psychology",
+    "tags": [
+      "psychology",
+      "social",
+      "self-consciousness"
+    ],
+    "id": "wildcard-the-spotlight-effect",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Phantom Vibration Syndrome",
+    "teaser": "90% of people feel their phone vibrate when it hasn't. Your brain's sensory cortex, trained by thousands of real notifications, generates phantom signals. It's a modern form of the conditioned reflex — Pavlov's dogs with smartphones.",
+    "categoryId": "WILDCARD",
+    "subtype": "psychology",
+    "tags": [
+      "psychology",
+      "technology",
+      "perception"
+    ],
+    "id": "wildcard-the-phantom-vibration-syndrome",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Verbatim Effect",
+    "teaser": "You remember the gist of what someone said but forget the exact words. Your brain compresses language into meaning, discarding the surface. This is why quotes get misattributed — 'Play it again, Sam' was never said in Casablanca.",
+    "categoryId": "WILDCARD",
+    "subtype": "psychology",
+    "tags": [
+      "psychology",
+      "memory",
+      "language"
+    ],
+    "id": "wildcard-the-verbatim-effect",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Theoogle Effect",
+    "teaser": "People who frequently use Google become worse at remembering information — but better at knowing WHERE to find it. Your brain outsources storage to the search engine, treating the internet as an external hard drive. Memory is evolving from recall to retrieval.",
+    "categoryId": "WILDCARD",
+    "subtype": "psychology",
+    "tags": [
+      "psychology",
+      "memory",
+      "technology"
+    ],
+    "id": "wildcard-theoogle-effect",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Focusing Illusion",
+    "teaser": "Whatever you're thinking about seems more important than it is. Daniel Kahneman showed that asking Californians about weather vs income produced different happiness ratings — because the question made weather salient. Happiness isn't about what you have; it's about what you're thinking about.",
+    "categoryId": "WILDCARD",
+    "subtype": "psychology",
+    "tags": [
+      "psychology",
+      "bias",
+      "happiness"
+    ],
+    "id": "wildcard-the-focusing-illusion",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Thanatos Effect",
+    "teaser": "People value items more after learning the previous owner died. eBay listings mentioning deceased owners sell for higher prices. Our association of death with permanence makes us overvalue what the dead left behind.",
+    "categoryId": "WILDCARD",
+    "subtype": "psychology",
+    "tags": [
+      "psychology",
+      "behavior",
+      "value"
+    ],
+    "id": "wildcard-the-thanatos-effect",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Brain in a Vat",
+    "teaser": "What if you're a brain floating in a vat of nutrients, receiving electrical signals that simulate reality? Hilary Putnam's 1981 argument proves you can't KNOW you're not — but also that the word 'vat' has no meaning if you are. Skepticism collapses under its own weight.",
+    "categoryId": "WILDCARD",
+    "subtype": "philosophy",
+    "tags": [
+      "philosophy",
+      "reality",
+      "skepticism"
+    ],
+    "id": "wildcard-the-brain-in-a-vat",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Utility Monster",
+    "teaser": "Robert Nozick imagined a being that gains 1,000x more happiness from each resource than anyone else. Utilitarianism demands we give it everything — even letting others starve. The thought experiment exposes how pure cost-benefit analysis can justify monstrous outcomes.",
+    "categoryId": "WILDCARD",
+    "subtype": "philosophy",
+    "tags": [
+      "philosophy",
+      "ethics",
+      "dystopia"
+    ],
+    "id": "wildcard-the-utility-monster",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Mary's Room (The Knowledge Argument)",
+    "teaser": "A colorblind scientist knows everything about color physics — wavelengths, receptors, neural pathways — but has never SEEN color. When she finally sees red, does she learn something new? Frank Jackson argued yes: qualia (subjective experience) can't be reduced to physical facts.",
+    "categoryId": "WILDCARD",
+    "subtype": "philosophy",
+    "tags": [
+      "philosophy",
+      "consciousness",
+      "qualia"
+    ],
+    "id": "wildcard-marys-room-the-knowledge-argument",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Experience Machine",
+    "teaser": "Robert Nozick offered a machine that gives you any experience you desire — perfect happiness, love, success. Most people refuse. Why? Because we value actually DOING things, not just experiencing them. The thought experiment kills hedonism.",
+    "categoryId": "WILDCARD",
+    "subtype": "philosophy",
+    "tags": [
+      "philosophy",
+      "happiness",
+      "meaning"
+    ],
+    "id": "wildcard-the-experience-machine",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Mere Addition Paradox",
+    "teaser": "Derek Parfit asked: is a world where everyone is slightly worse off but has more people BETTER than a world with fewer, happier people? Population ethics produces impossible trade-offs — making utilitarianism struggle with questions of when to have children.",
+    "categoryId": "WILDCARD",
+    "subtype": "philosophy",
+    "tags": [
+      "philosophy",
+      "ethics",
+      "population"
+    ],
+    "id": "wildcard-the-mere-addition-paradox",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Sorites Paradox (Heap Paradox)",
+    "teaser": "One grain of sand isn't a heap. Two grains aren't. At what point does it BECOME a heap? This 2,500-year-old paradox reveals that many concepts — baldness, old age, poverty — have no sharp boundaries. Language is fuzzier than logic assumes.",
+    "categoryId": "WILDCARD",
+    "subtype": "philosophy",
+    "tags": [
+      "philosophy",
+      "logic",
+      "language"
+    ],
+    "id": "wildcard-the-sorites-paradox-heap-paradox",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Infinite Monkey Theorem",
+    "teaser": "A monkey typing randomly on a keyboard will eventually produce the complete works of Shakespeare — given infinite time. The probability is 10^-(10^6.88) — so small it's effectively zero. But mathematically inevitable. The theorem illustrates how infinity breaks intuition.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "probability",
+      "infinity"
+    ],
+    "id": "wildcard-the-infinite-monkey-theorem",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Coriolis Effect",
+    "teaser": "Earth's rotation makes hurricanes spin counterclockwise in the Northern Hemisphere and clockwise in the Southern. But toilets DON'T flush in different directions — that's a myth. The Coriolis effect only matters at scales of hundreds of kilometers.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "physics",
+      "myth"
+    ],
+    "id": "wildcard-the-coriolis-effect",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Neutron Star Density",
+    "teaser": "A teaspoon of neutron star material weighs 6 billion tons. Matter is so compressed that protons and electrons merge into neutrons. If you could somehow drop a sugar cube of this material onto Earth, it would accelerate through the planet like a bullet through paper.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "astronomy",
+      "extreme"
+    ],
+    "id": "wildcard-neutron-star-density",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Bacterial Count",
+    "teaser": "There are more bacteria in your gut than stars in the Milky Way. Your body hosts 38 trillion microbial cells — roughly 1.3x your human cells. You're not a person with bacteria; you're a colony that thinks it's a person.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "biology",
+      "perspective"
+    ],
+    "id": "wildcard-the-bacterial-count",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Time Dilation Proven",
+    "teaser": "GPS satellites must correct for time running 38 microseconds faster per day than on Earth — both from special relativity (speed) and general relativity (gravity). Without Einstein's corrections, GPS would drift 10 km daily. Relativity isn't theoretical — it's in your phone.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "physics",
+      "practical"
+    ],
+    "id": "wildcard-time-dilation-proven",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Observable Universe Size",
+    "teaser": "The observable universe is 93 billion light-years across — despite being only 13.8 billion years old. Space itself expanded faster than light during inflation, carrying distant regions beyond our horizon. There's more universe than light has had time to reach us.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "astronomy",
+      "cosmology"
+    ],
+    "id": "wildcard-the-observable-universe-size",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Quantum Tunneling",
+    "teaser": "Particles can pass through barriers they shouldn't be able to cross — like a ball rolling through a wall. It's happening right now: the sun shines because hydrogen nuclei tunnel through electromagnetic repulsion to fuse. Without quantum tunneling, stars wouldn't exist.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "quantum",
+      "physics"
+    ],
+    "id": "wildcard-quantum-tunneling",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Absolute Zero Can't Be Reached",
+    "teaser": "The third law of thermodynamics states you can approach absolute zero (-273.15°C) but never reach it. Every cooling method gets exponentially less effective. Scientists have reached 0.000000001 K — one billionth of a degree above zero — but perfection is thermodynamically forbidden.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "physics",
+      "thermodynamics"
+    ],
+    "id": "wildcard-absolute-zero-cant-be-reached",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Ittoqqortoormiit, Greenland",
+    "teaser": "One of the most remote settlements on Earth — population 345, accessible only by helicopter or boat when ice permits. The nearest town is 500 km away. Polar bears outnumber dogs, and the Northern Lights last for months. Internet arrived in 2013.",
+    "categoryId": "WILDCARD",
+    "subtype": "place",
+    "tags": [
+      "geography",
+      "remote",
+      "arctic"
+    ],
+    "id": "wildcard-ittoqqortoormiit-greenland",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Deception Island, Antarctica",
+    "teaser": "An active volcano you can swim inside — its caldera forms a natural harbor where the water is heated by geothermal vents. Whalers once processed hundreds of thousands of whales here. Now it's a research station where scientists bathe in volcanic hot springs at -2°C.",
+    "categoryId": "WILDCARD",
+    "subtype": "place",
+    "tags": [
+      "geography",
+      "extreme",
+      "volcano"
+    ],
+    "id": "wildcard-deception-island-antarctica",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Kolmanskop, Namibia",
+    "teaser": "A German diamond mining town in the Namib Desert, abandoned in 1954 after the diamonds ran out. Sand dunes pour through doorways and fill rooms to the ceiling. The desert is swallowing it whole — a ghost town being buried in real-time.",
+    "categoryId": "WILDCARD",
+    "subtype": "place",
+    "tags": [
+      "history",
+      "abandoned",
+      "desert"
+    ],
+    "id": "wildcard-kolmanskop-namibia",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Gates of Hell, Darvaza",
+    "teaser": "Turkmenistan's burning gas crater is visible from space. Soviet engineers lit it in 1971 to prevent methane poisoning. 53 years later, it still burns. The 70-meter pit glows orange in the Karakum Desert night, and locals call it 'the door to hell.'",
+    "categoryId": "WILDCARD",
+    "subtype": "place",
+    "tags": [
+      "geology",
+      "extreme",
+      "fire"
+    ],
+    "id": "wildcard-the-gates-of-hell-darvaza",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Oymyakon, Russia",
+    "teaser": "The coldest permanently inhabited place on Earth — recorded at -67.7°C in 1933. 500 people live here year-round. Car batteries die if left off, pens stop writing, and eyelashes freeze together. The school only closes below -52°C.",
+    "categoryId": "WILDCARD",
+    "subtype": "place",
+    "tags": [
+      "geography",
+      "extreme",
+      "cold"
+    ],
+    "id": "wildcard-oymyakon-russia",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Darvaza Gas Crater",
+    "teaser": "A 69-meter-wide crater in the Karakum Desert has been burning since 1971. Soviet geologists drilled into a natural gas cavern, it collapsed, and they lit it expecting it to burn out in weeks. It's still burning — 53 years later, visible for miles across the desert at night.",
+    "categoryId": "WILDCARD",
+    "subtype": "place",
+    "tags": [
+      "geology",
+      "extreme",
+      "fire"
+    ],
+    "id": "wildcard-the-darvaza-gas-crater",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Place de la Bourse, Bordeaux (Water Mirror)",
+    "teaser": "The world's largest reflecting pool — a 2cm-deep sheet of water covering 3,450 square meters in front of 18th-century architecture. At high tide, it floods; at low tide, mist machines create fog. It transforms a plaza into a living mirror.",
+    "categoryId": "WILDCARD",
+    "subtype": "place",
+    "tags": [
+      "architecture",
+      "art",
+      "urban"
+    ],
+    "id": "wildcard-place-de-la-bourse-bordeaux-water-mirror",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Dendera Light",
+    "teaser": "A relief in Egypt's Dendera temple shows what some believe is an ancient light bulb — a bulbous object with a serpent inside, connected to a djed pillar 'battery.' Egyptologists say it depicts the creation myth, but the resemblance to a Crookes tube is uncanny.",
+    "categoryId": "WILDCARD",
+    "subtype": "mystery",
+    "tags": [
+      "history",
+      "egypt",
+      "technology"
+    ],
+    "id": "wildcard-the-dendera-light",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Phaistos Disc",
+    "teaser": "A 3,700-year-old clay disc from Crete with 241 symbols stamped in a spiral — using what appears to be movable type, 3,000 years before Gutenberg. Found in 1908, it remains undeciphered. It could be a game, a hymn, or a calendar — we'll likely never know.",
+    "categoryId": "WILDCARD",
+    "subtype": "mystery",
+    "tags": [
+      "history",
+      "code",
+      "ancient"
+    ],
+    "id": "wildcard-the-phaistos-disc",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Nazca Lines Purpose",
+    "teaser": "Over 800 geoglyphs etched into Peru's desert floor — some stretching 370 meters. Built by the Nazca culture between 500 BCE and 500 CE, they're best seen from the air. Theories range from astronomical calendars to ritual walkways to alien landing strips.",
+    "categoryId": "WILDCARD",
+    "subtype": "mystery",
+    "tags": [
+      "history",
+      "archaeology",
+      "peru"
+    ],
+    "id": "wildcard-the-nazca-lines-purpose",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Lycurgus Cup",
+    "teaser": "A 4th-century Roman glass cup that changes color depending on light direction — green in reflected light, red in transmitted light. Scientists discovered it contains gold and silver nanoparticles 1/100th the width of a human hair. The Romans were nanotechnologists.",
+    "categoryId": "WILDCARD",
+    "subtype": "history",
+    "tags": [
+      "history",
+      "science",
+      "nanotechnology"
+    ],
+    "id": "wildcard-the-lycurgus-cup",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Greek Fire",
+    "teaser": "A Byzantine weapon that burned on water and couldn't be extinguished. Used for 700 years, its exact formula was a state secret that died with the fall of Constantinople in 1453. Modern chemists have proposed naphtha + quicklime theories, but nobody has replicated it.",
+    "categoryId": "WILDCARD",
+    "subtype": "history",
+    "tags": [
+      "history",
+      "warfare",
+      "chemistry"
+    ],
+    "id": "wildcard-the-greek-fire",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Baghdad Scrolls",
+    "teaser": "Ancient Iraqi manuscripts preserved in clay jars for 2,000+ years reveal Babylonian astronomy, medicine, and mathematics. Some contain the earliest known homework — student exercises from 2,000 BCE showing children learning multiplication the same way we do.",
+    "categoryId": "WILDCARD",
+    "subtype": "history",
+    "tags": [
+      "history",
+      "education",
+      "ancient"
+    ],
+    "id": "wildcard-the-baghdad-scrolls",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "L'esprit de l'escalier (Staircase Wit)",
+    "teaser": "The perfect comeback that comes to you AFTER the conversation is over — usually while walking down the stairs to leave. Coined by Denis Diderot in 1773, it's the universal experience of arriving too late with the perfect response.",
+    "categoryId": "WILDCARD",
+    "subtype": "culture",
+    "tags": [
+      "language",
+      "humor",
+      "social"
+    ],
+    "id": "wildcard-lesprit-de-lescalier-staircase-wit",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Paradox of Choice",
+    "teaser": "Barry Schwartz showed that more options make us less happy. Shoppers faced with 24 jams bought less than those with 6. Abundant choice creates anxiety, regret, and decision paralysis. The secret to satisfaction isn't more options — it's fewer, better ones.",
+    "categoryId": "WILDCARD",
+    "subtype": "psychology",
+    "tags": [
+      "psychology",
+      "behavior",
+      "consumerism"
+    ],
+    "id": "wildcard-the-paradox-of-choice",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Hedonic Treadmill",
+    "teaser": "After a raise, promotion, or new car, happiness spikes then returns to baseline. Humans adapt to almost everything — good and bad. Lottery winners are no happier after a year. The treadmill explains why 'more' never feels like 'enough.'",
+    "categoryId": "WILDCARD",
+    "subtype": "psychology",
+    "tags": [
+      "psychology",
+      "happiness",
+      "adaptation"
+    ],
+    "id": "wildcard-the-hedonic-treadmill",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Framing Effect",
+    "teaser": "90% survival rate sounds better than 10% mortality rate — even though they're identical. Daniel Kahneman showed that framing outcomes as gains vs losses completely changes decisions. Politicians, marketers, and doctors all exploit this daily.",
+    "categoryId": "WILDCARD",
+    "subtype": "psychology",
+    "tags": [
+      "psychology",
+      "bias",
+      "communication"
+    ],
+    "id": "wildcard-the-framing-effect",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Hum",
+    "teaser": "A persistent low-frequency humming noise heard in Taos, Bristol, and dozens of other locations worldwide. Only 2-4% of people hear it. Brain scans reveal different neural activity in hearers vs non-hearers. Is it machinery, tinnitus, or something we haven't identified?",
+    "categoryId": "WILDCARD",
+    "subtype": "phenomenon",
+    "tags": [
+      "mystery",
+      "sound",
+      "perception"
+    ],
+    "id": "wildcard-the-hum",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Circumhorizontal Arc (Fire Rainbow)",
+    "teaser": "A rare optical phenomenon that creates a horizontal rainbow-like band of color in cirrus clouds. Only visible when the sun is higher than 58° — meaning it never appears above 55° latitude. The vivid spectral colors come from hexagonal ice platelets.",
+    "categoryId": "WILDCARD",
+    "subtype": "phenomenon",
+    "tags": [
+      "nature",
+      "optics",
+      "atmosphere"
+    ],
+    "id": "wildcard-circumhorizontal-arc-fire-rainbow",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Brocken Spectre",
+    "teaser": "Your shadow projected onto clouds below you, surrounded by a glowing halo called a 'glory.' Named after Germany's Brocken mountain where hikers first documented it, it occurs when you stand above fog with the sun behind you — a rare, ghostly self-portrait.",
+    "categoryId": "WILDCARD",
+    "subtype": "phenomenon",
+    "tags": [
+      "nature",
+      "optics",
+      "atmosphere"
+    ],
+    "id": "wildcard-the-brocken-spectre",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Black Clouds of Insects",
+    "teaser": "Locust swarms can cover 1,200 km² — containing 40 billion insects that consume 423 million tons of vegetation daily. A single swarm can cross the Atlantic in the Sahara's atmospheric currents. They've caused more human suffering than any war in history.",
+    "categoryId": "WILDCARD",
+    "subtype": "phenomenon",
+    "tags": [
+      "nature",
+      "extreme",
+      "biology"
+    ],
+    "id": "wildcard-black-clouds-of-insects",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "Penitentes",
+    "teaser": "Blade-like ice formations found at high altitudes that point toward the sun. They form when sunlight sublimates ice without melting it, creating tall, thin blades. Found in the Andes, Himalayas, and even on Mars — NASA's Phoenix lander photographed them.",
+    "categoryId": "WILDCARD",
+    "subtype": "phenomenon",
+    "tags": [
+      "nature",
+      "physics",
+      "extreme"
+    ],
+    "id": "wildcard-penitentes",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Infinite Regress Problem",
+    "teaser": "If everything needs a cause, what caused the cause? And what caused that? Philosophy offers three exits: an uncaused first cause (cosmological argument), a circular chain (coherentism), or an infinite chain (infinitism). None is universally accepted.",
+    "categoryId": "WILDCARD",
+    "subtype": "philosophy",
+    "tags": [
+      "philosophy",
+      "logic",
+      "metaphysics"
+    ],
+    "id": "wildcard-the-infinite-regress-problem",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Problem of Evil",
+    "teaser": "If God is all-powerful and all-good, why does suffering exist? Epicurus posed this 2,300 years ago and it remains philosophy's hardest theological question. Every theodicy — free will, soul-making, mystery — has defenders and devastating counterarguments.",
+    "categoryId": "WILDCARD",
+    "subtype": "philosophy",
+    "tags": [
+      "philosophy",
+      "religion",
+      "ethics"
+    ],
+    "id": "wildcard-the-problem-of-evil",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Pragmatic Maxim",
+    "teaser": "Charles Peirce defined truth as 'what works in practice.' If a belief produces useful outcomes, treat it as true — regardless of metaphysical reality. William James extended this to religion: if faith helps you live better, it's pragmatically true.",
+    "categoryId": "WILDCARD",
+    "subtype": "philosophy",
+    "tags": [
+      "philosophy",
+      "truth",
+      "pragmatism"
+    ],
+    "id": "wildcard-the-pragmatic-maxim",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Ring of Gyges",
+    "teaser": "Plato told of a shepherd who found a ring of invisibility. With it, he seduced the queen, killed the king, and seized power. Would a just person remain just with total impunity? Plato argued yes — true justice is internal, not dependent on consequences.",
+    "categoryId": "WILDCARD",
+    "subtype": "philosophy",
+    "tags": [
+      "philosophy",
+      "ethics",
+      "power"
+    ],
+    "id": "wildcard-the-ring-of-gyges",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Ship of Theseus (Paradox of Identity)",
+    "teaser": "If you replace every plank of a ship one by one, is it the same ship? And if you build a new ship from the old planks, which is the real one? This 2,500-year-old paradox explores identity, change, and what makes something 'itself' — from cells replacing in your body to companies evolving.",
+    "categoryId": "WILDCARD",
+    "subtype": "philosophy",
+    "tags": [
+      "philosophy",
+      "identity",
+      "thought-experiment"
+    ],
+    "id": "wildcard-the-ship-of-theseus-paradox-of-identity",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Veil of Tears (Maya)",
+    "teaser": "In Hindu philosophy, Maya is the illusion that the material world is real. We mistake the veil for the truth — chasing wealth, status, and pleasure while ignoring the eternal self (Atman) behind it. The goal of moksha is to see through the illusion and unite with Brahman.",
+    "categoryId": "WILDCARD",
+    "subtype": "philosophy",
+    "tags": [
+      "philosophy",
+      "hinduism",
+      "consciousness"
+    ],
+    "id": "wildcard-the-veil-of-tears-maya",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Great Molasses Flood (1919)",
+    "teaser": "A massive tank burst in Boston's North End, releasing 2.3 million gallons of molasses at 35 mph. The wave killed 21 people and injured 150. Buildings were knocked off foundations, and the cleanup took weeks. Residents claimed you could smell molasses on hot days for decades.",
+    "categoryId": "WILDCARD",
+    "subtype": "history",
+    "tags": [
+      "history",
+      "disaster",
+      "boston"
+    ],
+    "id": "wildcard-the-great-molasses-flood-1919",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Emu War (1932)",
+    "teaser": "The Australian military declared war on emus — 20,000 birds destroying Western Australian crops. Soldiers with Lewis guns killed only 986 birds before the emus proved too fast and scattered. Major Meredith compared them to Zulu warriors. The emus won.",
+    "categoryId": "WILDCARD",
+    "subtype": "history",
+    "tags": [
+      "history",
+      "australia",
+      "absurd"
+    ],
+    "id": "wildcard-the-emu-war-1932",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Night Witches (1942-45)",
+    "teaser": "An all-female Soviet bomber regiment flew 23,000+ missions in plywood biplanes. The Germans called them 'Nachthexen' because they'd cut engines and glide silently to their targets. They flew more sorties than any other unit and destroyed 17 bridges.",
+    "categoryId": "WILDCARD",
+    "subtype": "history",
+    "tags": [
+      "history",
+      "women",
+      "war"
+    ],
+    "id": "wildcard-the-night-witches-1942-45",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Year Without a Summer (1816)",
+    "teaser": "Mount Tambora's 1815 eruption caused global temperatures to drop 0.4-0.7°C. Snow fell in June, crops failed worldwide, and 200,000 died. Mary Shelley, stuck indoors during the gloomy summer, wrote Frankenstein. Lord Byron wrote 'Darkness.'",
+    "categoryId": "WILDCARD",
+    "subtype": "history",
+    "tags": [
+      "history",
+      "disaster",
+      "literature"
+    ],
+    "id": "wildcard-the-year-without-a-summer-1816",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Library of Congress Scare (2004)",
+    "teaser": "The FBI discovered that a Chinese-American scientist had accessed the Library of Congress's uncatalogued collection — including rare books about biological weapons. It turned out to be legitimate research. But the incident revealed how much dangerous knowledge sits unguarded in public libraries.",
+    "categoryId": "WILDCARD",
+    "subtype": "history",
+    "tags": [
+      "history",
+      "security",
+      "knowledge"
+    ],
+    "id": "wildcard-the-library-of-congress-scare-2004",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Great Emu Migration (1934)",
+    "teaser": "After the Emu War failed, Australia built a 1,139 km fence across Western Australia to keep emus from migrating south. It worked for a while — until the emus learned to find gaps. The fence still stands, a monument to humanity's eternal war with nature.",
+    "categoryId": "WILDCARD",
+    "subtype": "history",
+    "tags": [
+      "history",
+      "australia",
+      "absurd"
+    ],
+    "id": "wildcard-the-great-emu-migration-1934",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Euthanasia Coaster (2013)",
+    "teaser": "A conceptual roller coaster designed to kill riders through prolonged g-force. Seven inversions would progressively reduce blood flow to the brain, causing hypoxia and peaceful death. Designed by Julijonas Urbonas as an art piece exploring assisted dying.",
+    "categoryId": "WILDCARD",
+    "subtype": "curiosity",
+    "tags": [
+      "design",
+      "ethics",
+      "controversy"
+    ],
+    "id": "wildcard-the-euthanasia-coaster-2013",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Paradox of the Heap (Sorites)",
+    "teaser": "If you remove one grain from a heap, it's still a heap. Remove another — still a heap. Keep going until one grain remains. At what point did it stop being a heap? This 2,500-year-old paradox reveals that many concepts have no sharp boundaries.",
+    "categoryId": "WILDCARD",
+    "subtype": "philosophy",
+    "tags": [
+      "philosophy",
+      "logic",
+      "language"
+    ],
+    "id": "wildcard-the-paradox-of-the-heap-sorites",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Observer Effect (Quantum)",
+    "teaser": "In quantum mechanics, observing a particle changes its behavior. The double-slit experiment proves electrons behave as waves when unwatched but as particles when measured. It's not consciousness — it's the act of measurement that collapses the wave function.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "quantum",
+      "physics"
+    ],
+    "id": "wildcard-the-observer-effect-quantum",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Infinite Hotel (Hilbert's Hotel)",
+    "teaser": "A hotel with infinitely many rooms can always accommodate more guests — even if it's full. Move each guest from room N to room N+1, and room 1 is free. It illustrates how infinity breaks arithmetic: ∞+1=∞, and ∞+∞=∞.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "math",
+      "infinity"
+    ],
+    "id": "wildcard-the-infinite-hotel-hilberts-hotel",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Banach-Tarski Paradox",
+    "teaser": "A mathematical proof that you can cut a sphere into 5 pieces and reassemble them into TWO identical spheres. It violates conservation of volume — but only works because infinitely many points exist in a sphere. It's not physically possible, but mathematically valid.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "math",
+      "paradox"
+    ],
+    "id": "wildcard-the-banach-tarski-paradox",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Coffee Ring Effect",
+    "teaser": "When a coffee spill dries, it forms a dark ring because particles migrate to the edge. This happens because the contact line gets pinned and evaporation drives flow outward. Scientists now use this principle to create uniform thin films — the opposite of rings.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "physics",
+      "everyday"
+    ],
+    "id": "wildcard-the-coffee-ring-effect",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Unreasonable Effectiveness of Mathematics",
+    "teaser": "Eugene Wigner noted that math designed for pure abstraction keeps describing the physical world with eerie precision. General relativity's equations predicted black holes decades before they were found. Why does the universe obey mathematical laws?",
+    "categoryId": "WILDCARD",
+    "subtype": "philosophy",
+    "tags": [
+      "philosophy",
+      "math",
+      "science"
+    ],
+    "id": "wildcard-the-unreasonable-effectiveness-of-mathematics",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
+  },
+  {
+    "name": "The Fermi Paradox (Extended)",
+    "teaser": "The universe is 13.8 billion years old with 2 trillion galaxies — where is everybody? The Great Filter theory suggests civilizations destroy themselves before reaching us. If the filter is ahead of us, humanity's survival is the rare exception.",
+    "categoryId": "WILDCARD",
+    "subtype": "science",
+    "tags": [
+      "science",
+      "space",
+      "existential"
+    ],
+    "id": "wildcard-the-fermi-paradox-extended",
+    "imageUrl": "",
+    "exploreAction": "",
+    "tier": "standard"
   }
 ]
