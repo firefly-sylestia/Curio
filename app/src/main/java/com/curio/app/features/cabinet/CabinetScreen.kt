@@ -15,6 +15,10 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -30,21 +34,23 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -54,7 +60,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -64,12 +69,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -101,7 +106,6 @@ import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.isLiquidGlassPillsActive
 import com.curio.app.ui.components.liquidGlassCapsule
-import com.kyant.backdrop.backdrops.LayerBackdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.ui.components.curioDarkGlow
@@ -121,10 +125,12 @@ import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryChipSurface
 import com.curio.app.ui.theme.categoryInk
+import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.headerAccent
 import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.onAccent
+import com.curio.app.ui.theme.pastelFillInk
 import com.curio.app.ui.theme.themedAccent
 
 /**
@@ -142,19 +148,6 @@ import com.curio.app.ui.theme.themedAccent
  */
 private object CabinetSessionToken
 
-/**
- * Saves the active Cabinet filter chip by enum name; "All" (null) stays
- * null through an empty-string sentinel, surviving rotation and navigation
- * within the current app process.
- */
-private val CategoryIdSaver = Saver<CategoryId?, String>(
-    save = { it?.name ?: "" },
-    restore = { name ->
-        name.takeIf { it.isNotEmpty() }
-            ?.let { n -> CategoryId.values().firstOrNull { it.name == n } }
-    }
-)
-
 @Composable
 fun CabinetScreen(navController: NavController) {
     // Satisfying haptics: a light tick when an entry is opened / actioned.
@@ -163,14 +156,27 @@ fun CabinetScreen(navController: NavController) {
     val wide = windowWidthSizeClass().isWide
     // Compact hero on tablets/landscape — 192dp instead of 232dp.
     val compactBannerHeight = if (wide) CabinetHeroBannerHeightCompact else CabinetHeroBannerHeight
-    var selectedFilter by rememberSaveable(CabinetSessionToken, stateSaver = CategoryIdSaver) {
-        mutableStateOf<CategoryId?>(null)
+    // v316 — MULTI-SELECT category filters (a Set of CategoryIds), persisted
+    // as a comma-joined enum-name string so rotation/tab restores keep the
+    // selection. Mirrors the Topic Database's v314 category-panel state.
+    var selectedFilterNames by rememberSaveable(CabinetSessionToken) {
+        mutableStateOf("")
+    }
+    val selectedFilters: Set<CategoryId> = remember(selectedFilterNames) {
+        selectedFilterNames.splitToSequence(',')
+            .filter { it.isNotBlank() }
+            .mapNotNull { runCatching { CategoryId.valueOf(it) }.getOrNull() }
+            .toSet()
     }
     var showLegacyOnly by rememberSaveable(CabinetSessionToken) { mutableStateOf(false) }
+    // v316 — the one place that mutates the category selection.
+    fun commitFilters(update: (Set<CategoryId>) -> Set<CategoryId>) {
+        selectedFilterNames = update(selectedFilters).joinToString(",") { it.name }
+    }
     // Saveable-backed scroll state — the grid keeps its position on rotation.
     val gridState = rememberLazyGridState()
-    // v245 — LOCAL GLASS CAPTURE for the floating category chip bar (the
-    // scrolling grid records; the chips are a sibling overlay).
+    // v245 — LOCAL GLASS CAPTURE for the floating filter UI (the scrolling
+    // grid records; the panel/chips are sibling overlays).
     val chipGlassBackdrop = rememberLayerBackdrop()
 
     // Search + sort — the search button expands into a real filter bar
@@ -185,26 +191,31 @@ fun CabinetScreen(navController: NavController) {
     LaunchedEffect(PendingCabinetFilter.trigger) {
         PendingCabinetFilter.take()?.let { name ->
             runCatching { CategoryId.valueOf(name) }.getOrNull()?.let { catId ->
-                selectedFilter = catId
+                commitFilters { setOf(catId) }
                 showLegacyOnly = false
                 searchActive = false
                 searchQuery = ""
             }
         }
     }
-    // v30 — the category pill (second row under the hero pills) toggles the
-    // sticky category chips; they also show while searching (same chips).
-    var categoryFilterOpen by rememberSaveable { mutableStateOf(false) }
-    // v30 — the chip-bar reservation only applies while the chips are
-    // visible (search or the category pill); collapsed, content starts
-    // right below the hero.
-    val chipsVisible = searchActive || categoryFilterOpen
+    // v316 — the Category pill toggles a collapsed-by-default category PANEL
+    // (its own tiny search box + checkbox multi-select), replacing the old
+    // sticky every-lane chip bar that also auto-showed while searching.
+    var categoryPanelOpen by rememberSaveable { mutableStateOf(false) }
+    // Tiny search box INSIDE the panel, filtering the category list itself.
+    var catPanelQuery by rememberSaveable { mutableStateOf("") }
+    // The category UI visible under the hero: the open panel, or the compact
+    // active-filter chips row whenever at least one lane (or Legacy) is
+    // active. Searching alone shows NO category chips.
+    val filterUiVisible = categoryPanelOpen || selectedFilters.isNotEmpty() || showLegacyOnly
     // v31 — the hero keeps its original height. v42 — the Category pill
     // moved INSIDE the hero (beside the title), so content reserves only
-    // the chip bar when the chips are open — no separate pill row below.
+    // the filter UI when it is visible.
     val heroTotal = compactBannerHeight + CabinetHeroSheetExtent
     val contentTop = heroTotal +
-        (if (chipsVisible) CabinetChipBarHeight else 0.dp) + 12.dp
+        (if (categoryPanelOpen) CabinetFilterPanelHeight
+         else if (filterUiVisible) CabinetChipBarHeight
+         else 0.dp) + 12.dp
     // v105 — the sort control is removed; the Cabinet keeps its default
     // ordering (newest captures first, see [visibleEntries]).
     var selectionMode by rememberSaveable { mutableStateOf(false) }
@@ -236,10 +247,13 @@ fun CabinetScreen(navController: NavController) {
         }
     }
 
-    val visibleEntries = remember(entries, selectedFilter, showLegacyOnly, searchQuery) {
+    val visibleEntries = remember(entries, selectedFilters, showLegacyOnly, searchQuery) {
         val q = searchQuery.trim()
-        var result = if (selectedFilter == null) entries
-            else entries.filter { it.topic.categoryId == selectedFilter }
+        // v316 — filtering: an entry passes when it matches the text query
+        // AND (no categories selected OR its category is in the selected set)
+        // AND the Legacy toggle agrees (the Topic Database's v314 contract).
+        var result = if (selectedFilters.isEmpty()) entries
+            else entries.filter { it.topic.categoryId in selectedFilters }
         // Legacy captures live in their own Cabinet section. The normal
         // Cabinet never mixes restored FieldMind records with native Curio
         // captures; selecting Legacy is the explicit opt-in view.
@@ -259,7 +273,7 @@ fun CabinetScreen(navController: NavController) {
     }
 
     val categorySelectionIds = visibleEntries.map { it.id }.toSet()
-    LaunchedEffect(selectedFilter, showLegacyOnly, searchQuery) {
+    LaunchedEffect(selectedFilters, showLegacyOnly, searchQuery) {
         selectedEntryIds = selectedEntryIds.intersect(categorySelectionIds)
         if (selectedEntryIds.isEmpty()) selectionMode = false
     }
@@ -289,10 +303,10 @@ fun CabinetScreen(navController: NavController) {
     }
 
     // The Cabinet wears the active filter's category wash — the same tinted
-    // background as the filters page — ONLY while a category filter is
-    // active. The "All" page stays on the plain theme background (like Home),
-    // and the search button keeps its neutral look in every state.
-    val filterCat = selectedFilter?.let { CurioCategories.byId(it) }
+    // background as the filters page — ONLY while a SINGLE category filter is
+    // active (multi-select falls back to the neutral shared wash, and "All"
+    // stays on the plain theme background like Home).
+    val filterCat = selectedFilters.singleOrNull()?.let { CurioCategories.byId(it) }
     // Publish the active filter's wash so the Scaffold-level bottom bar can
     // blend with the tinted Cabinet page (mirrors Spin's CurioNavTint
     // handoff — the bar lives outside the NavHost and can't read this
@@ -408,7 +422,7 @@ fun CabinetScreen(navController: NavController) {
                         ctaLabel = "Open settings",
                         onCtaClick = { navController.navigate(CurioRoutes.SETTINGS) { launchSingleTop = true } }
                     )
-                } else if (selectedFilter == null && !showLegacyOnly) {
+                } else if (selectedFilters.isEmpty() && !showLegacyOnly) {
                     CurioEmptyState(
                         glyph = CurioIcons.Inventory2,
                         headline = "Your Cabinet is empty",
@@ -425,24 +439,40 @@ fun CabinetScreen(navController: NavController) {
                         }
                     )
                 } else {
-                    val filterId = selectedFilter ?: CategoryId.WILDCARD
-                    val cat = CurioCategories.byId(filterId)
-                    CurioEmptyState(
-                        glyph = CurioIcons.SearchOff,
-                        headline = "No ${cat.displayName} captures yet",
-                        subtext = "Shuffle for ${cat.displayName} to find your first one.",
-                        tint = cat.categoryInk().copy(alpha = 0.4f),
-                        ctaLabel = "Shuffle for ${cat.displayName}",
-                        onCtaClick = {
-                            // Same tab-switch contract as the "All" empty state
-                            // (and Home's quest cards): anchor to HOME so the
-                            // Shuffle tab replaces Cabinet instead of stacking
-                            // a spin/… entry on top of the Cabinet tab entry.
-                            navController.navigateToTab(
-                                CurioRoutes.spinWithCategory(cat.id.routeSlug)
-                            )
-                        }
-                    )
+                    // Filters are active but nothing matches: a single lane
+                    // gets its own "no X captures yet" + spin CTA; multiple
+                    // lanes / combos get a generic clear-filters state.
+                    val singleCat = selectedFilters.singleOrNull()
+                        ?.let { CurioCategories.byId(it) }
+                    if (singleCat != null) {
+                        CurioEmptyState(
+                            glyph = CurioIcons.SearchOff,
+                            headline = "No ${singleCat.displayName} captures yet",
+                            subtext = "Shuffle for ${singleCat.displayName} to find your first one.",
+                            tint = singleCat.categoryInk().copy(alpha = 0.4f),
+                            ctaLabel = "Shuffle for ${singleCat.displayName}",
+                            onCtaClick = {
+                                // Same tab-switch contract as the "All" empty
+                                // state: anchor to HOME so the Shuffle tab
+                                // replaces Cabinet instead of stacking.
+                                navController.navigateToTab(
+                                    CurioRoutes.spinWithCategory(singleCat.id.routeSlug)
+                                )
+                            }
+                        )
+                    } else {
+                        CurioEmptyState(
+                            glyph = CurioIcons.SearchOff,
+                            headline = "No captures match these filters",
+                            subtext = "Clear some category filters to see your saves again.",
+                            tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
+                            ctaLabel = "Clear filters",
+                            onCtaClick = {
+                                commitFilters { emptySet() }
+                                showLegacyOnly = false
+                            }
+                        )
+                    }
                 }
             }
             }
@@ -478,12 +508,12 @@ fun CabinetScreen(navController: NavController) {
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     // v245 — the grid records into the chip bar's LOCAL glass
                     // capture while keeping its entrance-animated modifier.
-                    // v291 — only capture when chips are visible: the backdrop
-                    // re-records the full grid every frame, which is expensive
-                    // when the chip bar is closed.
+                    // v291 — only capture while the filter UI is visible: the
+                    // backdrop re-records the full grid every frame, which is
+                    // expensive when the panel/chips are hidden.
                     modifier = m
                         .fillMaxSize()
-                        .then(if (chipsVisible && isLiquidGlassPillsActive())
+                        .then(if (filterUiVisible && isLiquidGlassPillsActive())
                             Modifier.layerBackdrop(chipGlassBackdrop)
                         else Modifier)
                 ) {
@@ -552,7 +582,7 @@ fun CabinetScreen(navController: NavController) {
         // with a matched fade so the chips settle gently instead of
         // snapping down.
         AnimatedVisibility(
-            visible = chipsVisible,
+            visible = filterUiVisible,
             enter = slideInVertically(
                 initialOffsetY = { -it },
                 animationSpec = tween(380, easing = LinearOutSlowInEasing)
@@ -562,17 +592,51 @@ fun CabinetScreen(navController: NavController) {
                 animationSpec = tween(300, easing = LinearOutSlowInEasing)
             ) + fadeOut(animationSpec = tween(220))
         ) {
-            CabinetStickyChipBar(
-                glassBackdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null,
-                gridState = gridState,
-                barTop = heroTotal,
-                entries = entries,
-                selectedFilter = selectedFilter,
-                showLegacyOnly = showLegacyOnly,
-                onSelectAll = { selectedFilter = null; showLegacyOnly = false },
-                onSelectCategory = { selectedFilter = it; showLegacyOnly = false },
-                onToggleLegacy = { selectedFilter = null; showLegacyOnly = !showLegacyOnly }
-            )
+            // Per-lane counts for the panel + whether legacy entries exist.
+            val catCounts = remember(entries) {
+                entries.filterNot { it.isLegacy }
+                    .groupingBy { it.topic.categoryId }
+                    .eachCount()
+            }
+            val hasLegacyEntries = entries.any { it.isLegacy }
+            if (categoryPanelOpen) {
+                // v316 — the collapsed-by-default category PANEL: its own tiny
+                // search box (filters the category list) + checkbox multi-select.
+                CabinetCategoryPanel(
+                    categories = CurioCategories.visible,
+                    counts = catCounts,
+                    hasLegacy = hasLegacyEntries || showLegacyOnly,
+                    query = catPanelQuery,
+                    onQueryChange = { catPanelQuery = it },
+                    selected = selectedFilters,
+                    legacySelected = showLegacyOnly,
+                    onToggleCategory = { id ->
+                        commitFilters { current -> if (id in current) current - id else current + id }
+                    },
+                    onToggleLegacy = { showLegacyOnly = !showLegacyOnly },
+                    onClearAll = {
+                        commitFilters { emptySet() }
+                        showLegacyOnly = false
+                        catPanelQuery = ""
+                    },
+                    onDone = { categoryPanelOpen = false },
+                    barTop = heroTotal
+                )
+            } else if (filterUiVisible) {
+                // v316 — the active-filter chips row: exactly the selected
+                // lanes (+ Legacy when on), each removable with one tap.
+                CabinetActiveFilterChips(
+                    categories = CurioCategories.visible.filter { it.id in selectedFilters },
+                    legacySelected = showLegacyOnly,
+                    onRemoveCategory = { id -> commitFilters { current -> current - id } },
+                    onRemoveLegacy = { showLegacyOnly = false },
+                    onClearAll = {
+                        commitFilters { emptySet() }
+                        showLegacyOnly = false
+                    },
+                    barTop = heroTotal
+                )
+            }
         }
 
         // ── Torn rose hero banner — drawn ON TOP of the scroll content; the
@@ -590,7 +654,9 @@ fun CabinetScreen(navController: NavController) {
         val cabinetSubtitle = when {
             selectionMode -> "Long-press cards to select · ${if (showLegacyOnly) "legacy" else "current filter"}"
             showLegacyOnly -> "Restored FieldMind records"
-            else -> selectedFilter?.let { "Showing ${CurioCategories.byId(it).displayName}" } ?: "Your saved captures"
+            selectedFilters.size == 1 -> "Showing ${CurioCategories.byId(selectedFilters.first()).displayName}"
+            selectedFilters.size > 1 -> "Showing ${selectedFilters.size} categories"
+            else -> "Your saved captures"
         }
         CabinetHeroHeader(
             title = cabinetTitle,
@@ -607,12 +673,18 @@ fun CabinetScreen(navController: NavController) {
             // title, directly under the sort/search pills; hidden while
             // selecting (the selection pills own the top row then).
             titleTrailing = if (selectionMode) null else { ink, backdrop ->
+                // v316 — the pill opens the category PANEL; the label reflects
+                // the current multi-select ("All" / count / Legacy).
                 val categoryLabel = when {
                     showLegacyOnly -> "Category · Legacy"
-                    else -> "Category · ${selectedFilter?.let { CurioCategories.byId(it).displayName } ?: "All"}"
+                    selectedFilters.isEmpty() -> "Category · All"
+                    else -> "Categories · ${selectedFilters.size}"
                 }
                 CabinetHeroActionPill(
-                    onClick = { categoryFilterOpen = !categoryFilterOpen },
+                    onClick = {
+                        if (categoryPanelOpen) catPanelQuery = ""
+                        categoryPanelOpen = !categoryPanelOpen
+                    },
                     glyph = CurioIcons.Tune,
                     label = categoryLabel,
                     ink = ink,
@@ -623,12 +695,12 @@ fun CabinetScreen(navController: NavController) {
                             backdrop = chipGlassBackdrop
                         )
                     else Modifier,
-                    // v30 — chevron flips with the chips: ▾ closed, ▴ open.
-                    trailingGlyph = if (categoryFilterOpen) CurioIcons.KeyboardArrowUp
+                    // v316 — chevron flips with the panel: ▾ closed, ▴ open.
+                    trailingGlyph = if (categoryPanelOpen) CurioIcons.KeyboardArrowUp
                         else CurioIcons.KeyboardArrowDown,
-                    trailingContentDescription = if (categoryFilterOpen) "Hide category chips"
-                        else "Show category chips",
-                    emphasized = categoryFilterOpen
+                    trailingContentDescription = if (categoryPanelOpen) "Hide category options"
+                        else "Show category options",
+                    emphasized = categoryPanelOpen || selectedFilters.isNotEmpty() || showLegacyOnly
                 )
             },
             // Passed as a NAMED argument (not trailing-lambda syntax): the
@@ -742,15 +814,16 @@ private val CabinetHeroSheetExtent = 24.dp
 /** Fixed tear seed — the Cabinet tears in its own bold pattern, never re-rolls. */
 private const val CABINET_TEAR_SEED = 0xCAB1E
 
-// ── Sticky filter chip bar ──────────────────────────────────────────────
-// The chip row is a scroll-reactive overlay (like Profile's pinned pills):
-// it rests below the hero, then lifts, pops (0.97 → 1.0) and frosts in as
-// the grid scrolls, pinning just below the ragged tear while the entry
-// cards pass underneath it.
-/** Scroll distance (dp) before the chip bar fully pins (Profile pill style). */
-private val CabinetChipStickyThreshold = 56.dp
-/** The chip bar's layout height — scroll content starts below it. */
+// ── Category filter UI (v316) ─────────────────────────────────────────
+// The old sticky every-lane chip bar is gone (mirroring the Topic Database
+// v314): the Category pill opens a collapsed-by-default PANEL with its own
+// tiny search box + checkbox multi-select, and the ACTIVE lanes render as a
+// compact removable chips row.
+/** The active-filter chips row's layout height — content starts below it. */
 private val CabinetChipBarHeight = 52.dp
+/** The category PANEL's layout height — search header + scrollable checkbox
+ *  list (~7-8 lanes visible, then it scrolls). */
+private val CabinetFilterPanelHeight = 352.dp
 
 /** One mirrored hero watermark pair (the settings/profile collage). */
 private data class CabinetHeroPair(
@@ -1017,189 +1090,292 @@ private fun CabinetHeroHeader(
 }
 
 /**
- * The Cabinet's filter chip row, drawn ON TOP of the scroll content.
- *
- * Scroll-reactive, like Profile's pinned pills: as the grid scrolls, the
- * row lifts a few dp to pin just below the hero's ragged tear, and every
- * pill pops on its own — scale 0.90 → 1.0, staggered left→right, with a
- * COLOR MORPH: each pill's surface blooms toward its category accent and
- * it lifts with a soft shadow as it pops (v7.96) — no card background
- * behind the chips. The entry cards scroll underneath the row.
+ * v316 — the Cabinet's ACTIVE-FILTER chips row (mirrors the Topic Database's
+ * v314 row): exactly the selected lanes (+ Legacy when on), each removable
+ * with ONE tap via its trailing ✕, plus a Clear-all action when anything is
+ * active. No "All" pill and no every-lane bar — searching alone shows no
+ * chips (the old bar that auto-showed while searching is gone).
  */
 @Composable
-private fun BoxScope.CabinetStickyChipBar(
-    // v245 — when Liquid glass is on, chips render as clear refracting
-    // capsules over this LOCAL page capture.
-    glassBackdrop: LayerBackdrop? = null,
-    gridState: LazyGridState,
-    // v31 — the top of the hero + Category pill row (the chip bar now sits
-    // BELOW the pill row, so its rest/pin offsets derive from this).
-    barTop: Dp,
-    entries: List<CurioEntry>,
-    selectedFilter: CategoryId?,
-    showLegacyOnly: Boolean,
-    onSelectAll: () -> Unit,
-    onSelectCategory: (CategoryId) -> Unit,
-    onToggleLegacy: () -> Unit
+private fun BoxScope.CabinetActiveFilterChips(
+    categories: List<CurioCategory>,
+    legacySelected: Boolean,
+    onRemoveCategory: (CategoryId) -> Unit,
+    onRemoveLegacy: () -> Unit,
+    onClearAll: () -> Unit,
+    barTop: Dp
 ) {
-    // Scroll-reactive lift — the chips pop + frost as the first card row
-    // approaches them and pin once it reaches the bar, so the lift is tied
-    // to the cards actually arriving (not raw scroll offset, which would
-    // include the grid's large top content padding). Progress reads the
-    // first visible card row's top edge inside the viewport: it starts at
-    // the content top (~274dp) and falls as the user scrolls.
-    val thresholdPx = with(LocalDensity.current) { CabinetChipStickyThreshold.toPx() }
-    val barBottomPx = with(LocalDensity.current) { (barTop + 4.dp + CabinetChipBarHeight).toPx() }
-    val progress by remember {
-        derivedStateOf {
-            val first = gridState.layoutInfo.visibleItemsInfo.firstOrNull()
-            if (first == null) 0f
-            else ((barBottomPx - first.offset.y) / thresholdPx).coerceIn(0f, 1f)
-        }
-    }
-    val frostShift = FastOutSlowInEasing.transform(progress)
-    // The bar pins 2dp above its rest spot (the rest/pin gap).
-    val liftPx = with(LocalDensity.current) { 2.dp.toPx() }
-
-    // No frosted card behind the chips — each pill pops on its own (v7.89:
-    // per-pill pop-up animation as the bar lifts to pin just below the tear).
-    val hasLegacyEntries = entries.any { it.isLegacy }
-    // Vertical padding keeps the row at the tuned bar height (the old
-    // frosted container supplied it) so the pin/progress constants hold.
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp),
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .align(Alignment.TopStart)
             .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
             .padding(vertical = 6.dp)
             .offset(y = barTop + 4.dp)
-            .graphicsLayer {
-                translationY = -liftPx * frostShift
-            }
     ) {
-        item("all") {
-            CabinetChipPop(
-                index = 0,
-                frostShift = frostShift,
-                restSurface = MaterialTheme.colorScheme.surfaceVariant,
-                popSurface = MaterialTheme.colorScheme.primaryContainer
-            ) { popProgress, surface, elevation ->
-                FilterChipLite(
-                    label = "All",
-                    accent = MaterialTheme.colorScheme.primary,
-                    ink = MaterialTheme.colorScheme.onPrimary,
-                    // Opaque unselected pill — the chip reads as a solid
-                    // surface over the backdrop, not a see-through wash.
-                    chipSurface = surface,
-                    popProgress = popProgress,
-                    selected = selectedFilter == null && !showLegacyOnly,
-                    onClick = onSelectAll,
-                    glass = glassBackdrop != null,
-                    glassBackdrop = glassBackdrop
+        categories.forEach { cat ->
+            Surface(
+                onClick = { onRemoveCategory(cat.id) },
+                shape = RoundedCornerShape(50),
+                color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
+                shadowElevation = 1.dp
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    CurioIcon(cat.iconGlyph, null, tint = cat.categoryInk(), size = 14.dp)
+                    Text(
+                        cat.displayName,
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                        color = cat.categoryInk(),
+                        maxLines = 1
+                    )
+                    CurioIcon(
+                        CurioIcons.Close,
+                        "Remove ${cat.displayName} filter",
+                        tint = cat.categoryInk().copy(alpha = 0.7f),
+                        size = 14.dp
+                    )
+                }
+            }
+        }
+        if (legacySelected) {
+            val legacyAccent = MaterialTheme.colorScheme.tertiary
+            Surface(
+                onClick = onRemoveLegacy,
+                shape = RoundedCornerShape(50),
+                color = legacyAccent,
+                shadowElevation = 1.dp
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        "Legacy",
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onTertiary,
+                        maxLines = 1
+                    )
+                    CurioIcon(
+                        CurioIcons.Close,
+                        "Remove Legacy filter",
+                        tint = MaterialTheme.colorScheme.onTertiary.copy(alpha = 0.75f),
+                        size = 14.dp
+                    )
+                }
+            }
+        }
+        if (categories.isNotEmpty() || legacySelected) {
+            TextButton(onClick = onClearAll) {
+                Text(
+                    "Clear all",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
-        itemsIndexed(CurioCategories.visible, key = { _, cat -> cat.id.name }) { i, cat ->
-            val restSurface = cat.categoryChipSurface(MaterialTheme.colorScheme.surfaceVariant)
-            CabinetChipPop(
-                index = i + 1,
-                frostShift = frostShift,
-                restSurface = restSurface,
-                // The color bloom — the neutral pill morphs toward its
-                // accent as it pops (a 30% pull keeps the capsule tasteful
-                // at full pop).
-                popSurface = lerp(restSurface, cat.themedAccent(), 0.30f)
-            ) { popProgress, surface, elevation ->
-                FilterChipLite(
-                    label = cat.displayName,
-                    accent = cat.themedAccent(),
-                    // v27q — the selected label flips to the on-accent ink so
-                    // it stays readable on the solid accent fill.
-                    ink = cat.onAccent(),
-                    // Opaque category pill — full-strength chip surface so
-                    // the tinted pill reads solid on the backdrop.
-                    chipSurface = surface,
-                    popProgress = popProgress,
-                    selected = selectedFilter == cat.id && !showLegacyOnly,
-                    onClick = { onSelectCategory(cat.id) },
-                    glass = glassBackdrop != null,
-                    glassBackdrop = glassBackdrop
+    }
+}
+
+/**
+ * v316 — the Cabinet's category PANEL (mirrors the Topic Database's v314
+ * panel): opens from the hero Category pill, collapsed by default. Its own
+ * tiny search box filters the category list itself; lanes toggle via accent
+ * checkboxes into the multi-select Set<CategoryId>; Legacy (restored
+ * FieldMind records) toggles separately with a tertiary checkbox; Clear all
+ * + Done (Done collapses back to the active-filter chips row).
+ */
+@Composable
+private fun BoxScope.CabinetCategoryPanel(
+    categories: List<CurioCategory>,
+    counts: Map<CategoryId, Int>,
+    hasLegacy: Boolean,
+    query: String,
+    onQueryChange: (String) -> Unit,
+    selected: Set<CategoryId>,
+    legacySelected: Boolean,
+    onToggleCategory: (CategoryId) -> Unit,
+    onToggleLegacy: () -> Unit,
+    onClearAll: () -> Unit,
+    onDone: () -> Unit,
+    barTop: Dp
+) {
+    val q = query.trim().lowercase()
+    val shown = if (q.isEmpty()) categories
+                else categories.filter { it.displayName.lowercase().contains(q) }
+    // Legacy is not a category, so the panel's search box doesn't hide it:
+    // the row stays reachable (to toggle off) whenever legacy entries exist.
+    val legacyRowVisible = hasLegacy
+
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        tonalElevation = 3.dp,
+        shadowElevation = 4.dp,
+        modifier = Modifier
+            .align(Alignment.TopStart)
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .padding(top = 6.dp)
+            .offset(y = barTop + 4.dp)
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                CurioSearchField(
+                    query = query,
+                    onQueryChange = onQueryChange,
+                    placeholder = "Filter categories…",
+                    modifier = Modifier.weight(1f)
                 )
+                if (selected.isNotEmpty() || legacySelected) {
+                    TextButton(onClick = onClearAll) {
+                        Text(
+                            "Clear all",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                TextButton(onClick = onDone) {
+                    Text("Done", style = MaterialTheme.typography.labelLarge)
+                }
             }
-        }
-        // Legacy sits LAST, after every native category — and only when
-        // there's something to show (or the legacy view is currently
-        // open, so the active chip stays visible/deselectable).
-        if (hasLegacyEntries || showLegacyOnly) {
-            item("legacy") {
-                CabinetChipPop(
-                    index = CurioCategories.visible.size + 1,
-                    frostShift = frostShift,
-                    restSurface = MaterialTheme.colorScheme.surfaceVariant,
-                    popSurface = lerp(
-                        MaterialTheme.colorScheme.surfaceVariant,
-                        MaterialTheme.colorScheme.tertiary,
-                        0.30f
-                    )
-                ) { popProgress, surface, elevation ->
-                    FilterChipLite(
-                        label = "Legacy",
-                        accent = MaterialTheme.colorScheme.tertiary,
-                        ink = MaterialTheme.colorScheme.onTertiary,
-                        chipSurface = surface,
-                        popProgress = popProgress,
-                        selected = showLegacyOnly,
-                        onClick = onToggleLegacy,
-                        glass = glassBackdrop != null,
-                        glassBackdrop = glassBackdrop
-                    )
+            Spacer(Modifier.height(6.dp))
+            if (shown.isEmpty() && !legacyRowVisible) {
+                Text(
+                    "No categories match",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 14.dp)
+                )
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 260.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    shown.forEach { cat ->
+                        CabinetCategoryCheckboxRow(
+                            cat = cat,
+                            count = counts[cat.id] ?: 0,
+                            checked = cat.id in selected,
+                            onToggle = { onToggleCategory(cat.id) }
+                        )
+                    }
+                    if (legacyRowVisible) {
+                        CabinetLegacyCheckboxRow(
+                            checked = legacySelected,
+                            onToggle = onToggleLegacy
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-/** Per-pill pop — each chip scales 0.90 → 1.0 AND morphs its surface from
- *  [restSurface] toward [popSurface] as the bar lifts, staggered per pill so
- *  the row ripples left→right with its own color bloom instead of scaling
- *  as one block. No frosted card behind the row (v7.89). */
+/** One category row inside the Cabinet panel — accent checkbox + name +
+ *  count (the Topic Database panel row's language). */
 @Composable
-private fun CabinetChipPop(
-    index: Int,
-    frostShift: Float,
-    restSurface: Color,
-    popSurface: Color,
-    content: @Composable (popProgress: Float, surface: Color, elevation: Dp) -> Unit
+private fun CabinetCategoryCheckboxRow(
+    cat: CurioCategory,
+    count: Int,
+    checked: Boolean,
+    onToggle: () -> Unit
 ) {
-    // Each pill starts its pop a beat after its left neighbor, so the row
-    // reads as per-pill motion while the whole bar pins. Normalized so the
-    // last pill still reaches full pop at full scroll.
-    val stagger = (index * 0.07f).coerceAtMost(0.85f)
-    val pillProgress = ((frostShift - stagger) / (1f - stagger)).coerceIn(0f, 1f)
-    // v7.x — ease the per-pill pop on the SAME curve as the bar's lift
-    // (FastOutSlowIn): the old linear progress made each pill's scale/color
-    // track the scroll 1:1 while the bar eased, which read as a slightly
-    // mechanical, janky pop. Easing it settles every pill in sync with the
-    // bar's glide.
-    // v29 — pills REST at full size (1.0) and only pop subtly (1.05) while
-    // the bar actually pins: the old 0.90 rest scale made every pill look
-    // like it was GROWING when the Cabinet opened.
-    val eased = FastOutSlowInEasing.transform(pillProgress)
-    val pillScale = androidx.compose.ui.util.lerp(1f, 1.05f, eased)
-    // v7.96 — COLOR MORPH: as each pill pops, its neutral surface blooms
-    // toward its accent [popSurface] and it lifts with a soft shadow — every
-    // chip ripples with its own color as the bar pins, instead of scaling
-    // alone.
-    val morphedSurface = lerp(restSurface, popSurface, eased)
-    val popElevation = 6.dp * eased
-    Box(
-        modifier = Modifier.graphicsLayer {
-            scaleX = pillScale
-            scaleY = pillScale
-        }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .clickable(onClick = onToggle)
+            .padding(horizontal = 6.dp, vertical = 4.dp)
     ) {
-        content(eased, morphedSurface, popElevation)
+        val accent = cat.themedAccent()
+        Checkbox(
+            checked = checked,
+            onCheckedChange = { onToggle() },
+            colors = CheckboxDefaults.colors(
+                checkedColor = accent,
+                uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                checkmarkColor = pastelFillInk(accent)
+            ),
+            modifier = Modifier.size(38.dp)
+        )
+        CurioIcon(cat.iconGlyph, null, tint = cat.categoryInk(), size = 16.dp)
+        Text(
+            cat.displayName,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
+        if (count > 0) {
+            Text(
+                "$count",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/** The Legacy (restored FieldMind) row — tertiary checkbox, no lane count. */
+@Composable
+private fun CabinetLegacyCheckboxRow(
+    checked: Boolean,
+    onToggle: () -> Unit
+) {
+    val accent = MaterialTheme.colorScheme.tertiary
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .clickable(onClick = onToggle)
+            .padding(horizontal = 6.dp, vertical = 4.dp)
+    ) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = { onToggle() },
+            colors = CheckboxDefaults.colors(
+                checkedColor = accent,
+                uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                checkmarkColor = pastelFillInk(accent)
+            ),
+            modifier = Modifier.size(38.dp)
+        )
+        Text(
+            "Legacy",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1
+        )
+        Text(
+            "Restored FieldMind records",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.End,
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 
@@ -1330,81 +1506,3 @@ private fun CabinetHeroActionPill(
     }
 }
 
-@Composable
-private fun FilterChipLite(
-    label: String,
-    accent: Color,
-    ink: Color,
-    chipSurface: Color = MaterialTheme.colorScheme.surfaceVariant,
-    // v27n — the capsule is defined by its fill + elevation shadow, no
-    // outline ring. v7.96 — premium pop: the capsule wears a soft vertical
-    // sheen (top light / slightly deeper base) instead of a flat fill; as
-    // [popProgress] goes 0→1 the unselected label blooms toward [accent]
-    // — the per-pill color pop on top of the scale pop. v27q — selected
-    // pills wear a SOLID accent gradient (the old accent-container tints
-    // were translucent and let the shadow bleed) and elevation stays a flat
-    // 2dp.
-    popProgress: Float = 0f,
-    selected: Boolean,
-    onClick: () -> Unit,
-    // v245 — liquid glass: clear refracting capsule over the local page
-    // capture; ONE theme ink for every label (no per-category colors).
-    glass: Boolean = false,
-    glassBackdrop: LayerBackdrop? = null
-) {
-    val themeInk = if (isCurioDarkTheme()) Color.White else Color.Black
-    val labelColor = when {
-        glass -> themeInk
-        selected -> ink
-        else -> lerp(
-            MaterialTheme.colorScheme.onSurfaceVariant,
-            accent,
-            popProgress * 0.55f
-        )
-    }
-    val fillBrush = if (glass) {
-        Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
-    } else if (selected) {
-        // v27q — SOLID accent gradient — deeper at the base like the
-        // category card fills, so the active pill reads premium.
-        Brush.verticalGradient(listOf(accent, lerp(accent, Color.Black, 0.10f)))
-    } else {
-        // Neutral capsule with a whisper of top light (the rigid-card sheen).
-        Brush.verticalGradient(
-            listOf(lerp(chipSurface, Color.White, 0.06f), chipSurface)
-        )
-    }
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(50),
-        color = Color.Transparent,
-        // v27q — flat 2dp in both states (no selected raise).
-        shadowElevation = if (glass) 0.dp else 2.dp,
-        // v28 — dark mode elevation visibility (glow + hairline).
-        modifier = Modifier
-            .then(
-                if (glass && glassBackdrop != null)
-                    Modifier.liquidGlassCapsule(
-                        container = if (selected) accent
-                                    else MaterialTheme.colorScheme.surfaceContainerLow,
-                        washAlpha = if (selected) 0.68f else 0.55f,
-                        backdrop = glassBackdrop
-                    ) else Modifier
-            )
-            .curioDarkGlow(if (glass) 0.dp else 2.dp, RoundedCornerShape(50))
-    ) {
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(50))
-                .then(if (!glass) Modifier.background(fillBrush) else Modifier)
-                .padding(horizontal = 16.dp, vertical = 9.dp)
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                color = labelColor,
-                maxLines = 1
-            )
-        }
-    }
-}

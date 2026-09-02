@@ -1,3 +1,5 @@
+FIX: Topic Reveal — topics you've never opened now show their info instantly too (indexed lookups + a memory index, no second-long wait), and brand-new topics added to the catalog are picked up and saved on-device.
+ADD: Cabinet — category filters now use the new panel: tap Categories for a collapsible panel with its own search box and checkbox multi-select, and your chosen lanes show as chips you can remove with one tap.
 ADD: Book notes on Topic Reveal — the slim chapter/synopsis dialog is now a full bottom sheet with the book cover, all chapters in a chip row, and in-sheet chapter switching (tap any chip to jump straight to that chapter).
 FIX: Topic Reveal — a book's synopsis now reads in full on the page (no more tiny internal scroll box), and the chapter cards are much shorter (they were taller than their 2-line previews).
 FIX: Topic Reveal — already-seen topics now show their quick fact and metadata instantly from the warm cache, no more second-long blank flash.

@@ -229,6 +229,25 @@ private val RevealEditorialBody: TextStyle = CurioEditorialBody.copy(
     lineHeight = 23.sp
 )
 
+/**
+ * v316 — instant topic resolution for the reveal, purely from memory:
+ * the warm lane cache first, then the prewarmed MERGED INDEX (which also
+ * survives lane-cache memory trims and carries wildcard.json originals).
+ * Synchronous and parse-free — so any topic that has ever been loaded
+ * resolves on the very first composition frame. (Deliberately NOT
+ * @Composable: it runs inside remember {}'s calculation lambda.)
+ */
+private fun resolveRevealTopic(categoryId: CategoryId, topicName: String): CurioTopic? {
+    TopicJsonLoader.cached(categoryId)?.firstOrNull {
+        it.matchesSavedNameStrict(topicName) || it.matchesSavedName(topicName)
+    }?.let { return it }
+    TopicJsonLoader.cachedIndex()?.firstOrNull { entry ->
+        entry.topic.categoryId == categoryId &&
+            (entry.topic.matchesSavedNameStrict(topicName) || entry.topic.matchesSavedName(topicName))
+    }?.let { return it.topic }
+    return null
+}
+
 @Composable
 fun TopicRevealScreen(
     categorySlug: String,
@@ -252,17 +271,16 @@ fun TopicRevealScreen(
     // Satisfying haptics resolved in composition (never inside the click
     // lambdas) — firm confirm for saves, light ticks for toggles/actions.
     val haptics = LocalHapticFeedback.current
-    // v315 — resolve from the ALREADY-WARM in-memory cache on the very first
-    // frame: MainActivity prewarms every lane from Room at app start, and any
-    // topic opened before stays in the loader cache — so an already-seen
-    // topic's quick fact + metadata render immediately instead of after the
-    // async Room/JSON resolution completes. The async pass below still runs
-    // to pick up edits and persist the topic.
+    // v315/v316 — resolve from the ALREADY-WARM in-memory caches on the very
+    // first frame (synchronous, zero parses): MainActivity prewarms every
+    // lane from Room at app start, any topic opened before stays in the
+    // loader cache, and the prewarmed merged index covers even topics whose
+    // lane cache was shed or wildcard.json originals. So ANY topic that has
+    // ever been loaded shows its quick fact + metadata immediately instead
+    // of waiting on async Room/JSON resolution — no 1-second blank flash
+    // for topics opened for the first time either.
     var resolved by remember(topicName, cat.id) {
-        mutableStateOf(
-            TopicJsonLoader.cached(cat.id)
-                ?.firstOrNull { it.matchesSavedNameStrict(topicName) || it.matchesSavedName(topicName) }
-        )
+        mutableStateOf(resolveRevealTopic(cat.id, topicName))
     }
     var showSynopsisDialog by rememberSaveable { mutableStateOf(false) }
     var selectedChapter by remember { mutableStateOf<BookChapter?>(null) }
@@ -277,13 +295,25 @@ fun TopicRevealScreen(
         // on warm starts so the resolution starts immediately.
         if (!TopicRepository.isInitialized()) TopicRepository.init(context)
         resolved = TopicRepository.findTopic(context, cat.id, topicName)
+            // v316 — the merged index may have finished building between the
+            // composition seed and this effect; it answers without any parse.
+            ?: resolveRevealTopic(cat.id, topicName)
             ?: runCatching {
-                // Room may be missing this lane (the one-time import can still
-                // be running, or failed for one lane) — parse + cache + persist
-                // the lane's JSON so the reveal NEVER opens blank. For WILDCARD
-                // topics this merges every lane (the wildcard pool isn't stored
-                // under its own Room category).
-                val pool = TopicJsonLoader.load(cat.id)
+                // Room may be missing this topic: the one-time import can
+                // still be running, or the data gained topics between app
+                // updates (the version-gated sync hasn't re-run) — and a
+                // stale-but-populated Room lane would mask TopicJsonLoader's
+                // fast path. Parse the lane's JSON DIRECTLY (bypassing the
+                // Room mask) and REPLACE-upsert it, so the reveal NEVER
+                // opens blank and the topic is in Room from then on. For
+                // WILDCARD topics this merges every lane + wildcard.json
+                // (the wildcard pool isn't stored under its own Room
+                // category), so it keeps the shared loader path.
+                val pool = if (cat.id == CategoryId.WILDCARD)
+                    TopicJsonLoader.load(cat.id)
+                else
+                    TopicRepository.refreshLaneFromAssets(context, cat.id)
+                        ?: TopicJsonLoader.load(cat.id)
                 pool.firstOrNull { it.matchesSavedNameStrict(topicName) }
                     ?: pool.firstOrNull { it.matchesSavedName(topicName) }
             }.getOrNull()

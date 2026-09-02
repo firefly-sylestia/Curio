@@ -191,17 +191,29 @@ object TopicRepository {
         return dao.getByCategory(categoryId.name).map { it.toCurioTopic() }
     }
 
-    /** Resolve a topic within its category so duplicate names cannot cross lanes. */
+    /** Rows hydrated once per process (a stale row triggers one JSON reload;
+     *  later visits of the same row return instantly). */
+    private val hydratedIds = java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
+
+    /**
+     * Resolve a topic within its category so duplicate names cannot cross
+     * lanes. v316 — an indexed SQL LIMIT 1 lookup replaces the old
+     * full-lane fetch + Kotlin scan (which mapped every row of a 10k-topic
+     * lane on every reveal open).
+     */
     suspend fun findTopic(context: Context, categoryId: CategoryId, name: String): CurioTopic? {
         val dao = CurioDatabase.getInstance(context).topicDao()
-        val entity = dao.getByCategory(categoryId.name)
-            .firstOrNull { it.name == name || it.name.equals(name, ignoreCase = true) }
+        val entity = dao.findByCategoryAndName(categoryId.name, name)
             ?: return null
 
         // Room rows can carry stale authored fields (imported before a data
-        // update). Hydrate the visible topic from the JSON assets on demand,
-        // persist the fresh fields, and return the hydrated row immediately.
-        if (entity.teaser.isBlank() || entity.synopsis.isBlank() && categoryId == CategoryId.BOOKS) {
+        // update). Hydrate the visible topic from the JSON assets on demand
+        // and persist the fresh fields. This only runs ONCE per topic per
+        // process (and only for genuinely content-incomplete rows), so a
+        // full-lane JSON parse never blocks the reveal.
+        val needsHydration = entity.teaser.isBlank() ||
+            (categoryId == CategoryId.BOOKS && entity.synopsis.isBlank())
+        if (needsHydration && hydratedIds.add(entity.id)) {
             runCatching {
                 TopicJsonLoader.install(context)
                 val fresh = TopicJsonLoader.reloadFromAssets(categoryId)
@@ -228,6 +240,30 @@ object TopicRepository {
         val dao = CurioDatabase.getInstance(context).topicDao()
         return dao.getRandom(categoryId.name)?.toCurioTopic()
     }
+
+    /**
+     * v316 — force one lane's Room copy to match the shipped JSON. The
+     * version-gated sync only re-imports on app updates, so topics added to
+     * the JSON between releases can be ABSENT from Room — and because
+     * [TopicJsonLoader.load] serves Room rows on its fast path, the loader
+     * would then never see the new topic either (the reveal's fallback was
+     * silently masked by stale Room rows). Parses the bundled asset
+     * directly (bypassing the Room mask), REPLACE-upserts the whole lane
+     * back into Room, and returns the fresh pool. Null only if the asset
+     * parse itself failed.
+     */
+    suspend fun refreshLaneFromAssets(context: Context, categoryId: CategoryId): List<CurioTopic>? =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                TopicJsonLoader.install(context)
+                val parsed = TopicJsonLoader.reloadFromAssets(categoryId)
+                if (parsed.isNotEmpty()) {
+                    val dao = CurioDatabase.getInstance(context).topicDao()
+                    dao.insertAll(parsed.map { TopicEntity.fromCurioTopic(it) })
+                }
+                parsed
+            }.getOrNull()
+        }
 
     /** Search topics across all categories (title-first priority). */
     suspend fun search(context: Context, query: String, categoryId: CategoryId? = null): List<CurioTopic> {
