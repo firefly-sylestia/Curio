@@ -33466,5 +33466,3745 @@
       "pulitzer"
     ],
     "tier": 2
+  },
+  {
+    "id": "book-a-farewell-to-arms",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "A Farewell to Arms",
+    "teaser": "An American soldier's love affair during World War I.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780743297301-L.jpg",
+    "byline": "Ernest Hemingway",
+    "synopsis": "A Farewell to Arms, published in 1929, follows Frederic Henry, an American ambulance driver in the Italian army during World War I, and his love for Catherine Barkley, a British nurse. When Frederic deserts the army, they flee to Switzerland, but Catherine dies in childbirth.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 83,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 84,
+        "pageEnd": 166,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 167,
+        "pageEnd": 249,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 250,
+        "pageEnd": 332,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 332,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Farewell to Arms",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of A Farewell to Arms."
+    },
+    "tags": [
+      "american",
+      "war",
+      "romance",
+      "classic",
+      "world war i"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-for-whom-the-bell-tolls",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "For Whom the Bell Tolls",
+    "teaser": "An American dynamiter fights with Spanish guerrillas during the Civil War.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780684803326-L.jpg",
+    "byline": "Ernest Hemingway",
+    "synopsis": "For Whom the Bell Tolls, published in 1940, follows Robert Jordan, an American fighting with Spanish guerrillas during the Spanish Civil War. He is ordered to blow up a bridge and falls in love with Maria, a young woman who was raped by fascists.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 121,
+        "pageEnd": 240,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 241,
+        "pageEnd": 360,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 361,
+        "pageEnd": 480,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 480,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "For Whom the Bell Tolls",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of For Whom the Bell Tolls."
+    },
+    "tags": [
+      "american",
+      "spanish civil war",
+      "classic",
+      "war",
+      "adventure"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-tender-is-the-night",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Tender Is the Night",
+    "teaser": "A psychiatrist and his beautiful patient drift through the Riviera in the 1920s.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780743297318-L.jpg",
+    "byline": "F. Scott Fitzgerald",
+    "synopsis": "Tender Is the Night, published in 1934, follows Dick Diver, a brilliant psychiatrist, and his wife Nicole, one of his patients. Their marriage deteriorates as Dick descends into alcoholism on the French Riviera.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 104,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 105,
+        "pageEnd": 208,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 209,
+        "pageEnd": 312,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 313,
+        "pageEnd": 417,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 417,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tender Is the Night",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Tender Is the Night."
+    },
+    "tags": [
+      "american",
+      "1920s",
+      "classic",
+      "expatriate",
+      "psychology"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-this-side-of-paradise",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "This Side of Paradise",
+    "teaser": "Fitzgerald's debut about a young man's search for meaning.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780743297325-L.jpg",
+    "byline": "F. Scott Fitzgerald",
+    "synopsis": "This Side of Paradise, published in 1920, follows Amory Blaine from his Princeton days through his attempt to find a place in post-World War I America. The novel made Fitzgerald famous overnight.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 77,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 78,
+        "pageEnd": 154,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 155,
+        "pageEnd": 231,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 232,
+        "pageEnd": 308,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 308,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "This Side of Paradise",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of This Side of Paradise."
+    },
+    "tags": [
+      "american",
+      "1920s",
+      "classic",
+      "coming of age",
+      "princeton"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-beautiful-and-damned",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Beautiful and Damned",
+    "teaser": "A young couple's glamorous life spirals into dissolution.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780743297332-L.jpg",
+    "byline": "F. Scott Fitzgerald",
+    "synopsis": "The Beautiful and Damned, published in 1922, follows Anthony Patch and Gloria Gilbert, a beautiful young couple whose charm and wealth cannot save them from self-destruction.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 115,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 116,
+        "pageEnd": 230,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 231,
+        "pageEnd": 345,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 346,
+        "pageEnd": 460,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 460,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Beautiful and Damned",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Beautiful and Damned."
+    },
+    "tags": [
+      "american",
+      "1920s",
+      "classic",
+      "jazz age",
+      "dissolution"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-daisy-miller",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Daisy Miller",
+    "teaser": "An American girl's innocent flirtations scandalize European society.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780486290942-L.jpg",
+    "byline": "Henry James",
+    "synopsis": "Daisy Miller, published in 1878, follows a young American woman traveling in Europe whose innocent behavior scandalizes the expatriate community. Winterbourne, an American living in Geneva, is fascinated by her but unable to act.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 17,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 18,
+        "pageEnd": 35,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 36,
+        "pageEnd": 52,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 53,
+        "pageEnd": 70,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 70,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Daisy Miller",
+      "durationMinutes": 14,
+      "instruction": "Read the opening of Daisy Miller."
+    },
+    "tags": [
+      "american",
+      "classic",
+      "expatriate",
+      "innocence",
+      "19th century"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-an-american-tragedy",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "An American Tragedy",
+    "teaser": "A young man's ambition leads to murder in this American naturalist classic.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780486424644-L.jpg",
+    "byline": "Theodore Dreiser",
+    "synopsis": "An American Tragedy, published in 1925, follows Clyde Griffiths, a poor young man who becomes involved with a wealthy girl and murders his pregnant girlfriend. The novel explores the American Dream and its corrupting influence.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 215,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 216,
+        "pageEnd": 430,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 431,
+        "pageEnd": 645,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 646,
+        "pageEnd": 860,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 860,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "An American Tragedy",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of An American Tragedy."
+    },
+    "tags": [
+      "american",
+      "naturalism",
+      "classic",
+      "crime",
+      "ambition"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-main-street",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Main Street",
+    "teaser": "A young woman tries to reform a small Minnesota town and fails.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780451527691-L.jpg",
+    "byline": "Sinclair Lewis",
+    "synopsis": "Main Street, published in 1920, follows Carol Kennicott, a young woman who marries a doctor and moves to Gopher Prairie, Minnesota. She tries to reform the town's cultural life but is defeated by its conservatism.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 113,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 114,
+        "pageEnd": 226,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 227,
+        "pageEnd": 339,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 340,
+        "pageEnd": 452,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 452,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Main Street",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Main Street."
+    },
+    "tags": [
+      "american",
+      "satire",
+      "small town",
+      "classic",
+      "reform"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-babbitt",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Babbitt",
+    "teaser": "A satirical portrait of American middle-class conformity.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780451527707-L.jpg",
+    "byline": "Sinclair Lewis",
+    "synopsis": "Babbitt, published in 1922, follows George F. Babbitt, a middle-class businessman who chafes against the conformity of his society. The novel satirizes American business culture and the pressure to conform.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 101,
+        "pageEnd": 200,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 201,
+        "pageEnd": 300,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 301,
+        "pageEnd": 400,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 400,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Babbitt",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Babbitt."
+    },
+    "tags": [
+      "american",
+      "satire",
+      "middle class",
+      "classic",
+      "conformity"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-native-son",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Native Son",
+    "teaser": "A young black man in Chicago is driven to murder by racism and poverty.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780061120411-L.jpg",
+    "byline": "Richard Wright",
+    "synopsis": "Native Son, published in 1940, follows Bigger Thomas, a young black man in Chicago's South Side who accidentally kills a white woman. The novel explores the effects of systemic racism on the individual.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 116,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 117,
+        "pageEnd": 232,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 233,
+        "pageEnd": 348,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 349,
+        "pageEnd": 465,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 465,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Native Son",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Native Son."
+    },
+    "tags": [
+      "african american",
+      "classic",
+      "racism",
+      "urban",
+      "social protest"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-black-boy",
+    "categoryId": "BOOKS",
+    "subtype": "Memoir",
+    "name": "Black Boy",
+    "teaser": "Wright's memoir of growing up black in the Jim Crow South.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780061120428-L.jpg",
+    "byline": "Richard Wright",
+    "synopsis": "Black Boy, published in 1945, follows Richard Wright from his childhood in Mississippi through his move to Chicago. The memoir documents the violence, poverty, and racism of the Jim Crow South and Wright's journey to becoming a writer.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 76,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 77,
+        "pageEnd": 152,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 153,
+        "pageEnd": 228,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 229,
+        "pageEnd": 304,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 304,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Black Boy",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Black Boy."
+    },
+    "tags": [
+      "african american",
+      "memoir",
+      "racism",
+      "south",
+      "classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-another-country",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Another Country",
+    "teaser": "An exploration of race, sexuality, and love in 1950s New York.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780142437261-L.jpg",
+    "byline": "James Baldwin",
+    "synopsis": "Another Country, published in 1962, follows a group of interracial characters in New York City as they navigate love, sexuality, and race. The novel is unflinching in its exploration of interracial relationships and queer identity.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 145,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 146,
+        "pageEnd": 291,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 292,
+        "pageEnd": 437,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 438,
+        "pageEnd": 583,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 583,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Another Country",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Another Country."
+    },
+    "tags": [
+      "african american",
+      "lgbtq",
+      "interracial",
+      "new york",
+      "classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-go-set-a-watchman",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Go Set a Watchman",
+    "teaser": "Scout returns to Maycomb as an adult and confronts her father's views.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062407658-L.jpg",
+    "byline": "Harper Lee",
+    "synopsis": "Go Set a Watchman, published in 2015, is set twenty years after To Kill a Mockingbird. Jean Louise Finch returns to Maycomb and discovers that her father, Atticus, holds views she finds deeply troubling.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 69,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 70,
+        "pageEnd": 139,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 140,
+        "pageEnd": 208,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 209,
+        "pageEnd": 278,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 278,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Go Set a Watchman",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Go Set a Watchman."
+    },
+    "tags": [
+      "american",
+      "classic",
+      "southern",
+      "sequel",
+      "controversial"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-in-the-time-of-the-butterflies",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "In the Time of the Butterflies",
+    "teaser": "Four sisters resist the Trujillo dictatorship in the Dominican Republic.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781563053050-L.jpg",
+    "byline": "Julia Alvarez",
+    "synopsis": "In the Time of the Butterflies, published in 1994, follows the four Mirabal sisters, who resist the Trujillo dictatorship in the Dominican Republic. Three of the sisters are assassinated, becoming symbols of resistance.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 84,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 85,
+        "pageEnd": 168,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 169,
+        "pageEnd": 252,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 253,
+        "pageEnd": 336,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 336,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "In the Time of the Butterflies",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of In the Time of the Butterflies."
+    },
+    "tags": [
+      "dominican",
+      "political",
+      "historical",
+      "resistance",
+      "feminist"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-how-the-garcia-girls-lost-their-accents",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "How the Garcia Girls Lost Their Accents",
+    "teaser": "Four Dominican sisters navigate identity in the United States.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781563053067-L.jpg",
+    "byline": "Julia Alvarez",
+    "synopsis": "How the Garcia Girls Lost Their Accents, published in 1991, follows four sisters who emigrate from the Dominican Republic to New York. The novel moves backward in time, showing how each generation loses and gains cultural identity.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 64,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 65,
+        "pageEnd": 128,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 129,
+        "pageEnd": 192,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 193,
+        "pageEnd": 256,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 256,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "How the Garcia Girls Lost Their Accents",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of How the Garcia Girls Lost Their Accents."
+    },
+    "tags": [
+      "dominican",
+      "immigration",
+      "identity",
+      "feminist",
+      "family"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-brief-wondrous-life-of-oscar-wao",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Brief Wondrous Life of Oscar Wao",
+    "teaser": "A Dominican nerd's quest for love and the fukú curse on his family.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781594483295-L.jpg",
+    "byline": "Junot Diaz",
+    "synopsis": "The Brief Wondrous Life of Oscar Wao, published in 2007, follows Oscar de Leon, a Dominican-American nerd who longs for love. The novel explores the Trujillo dictatorship and the fukú curse on the de Leon family. Won the Pulitzer Prize.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 88,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 89,
+        "pageEnd": 176,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 177,
+        "pageEnd": 264,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 265,
+        "pageEnd": 352,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 352,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Brief Wondrous Life of Oscar Wao",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Brief Wondrous Life of Oscar Wao."
+    },
+    "tags": [
+      "dominican",
+      "pulitzer",
+      "magical realism",
+      "immigration",
+      "nerd"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-drown",
+    "categoryId": "BOOKS",
+    "subtype": "Short Stories",
+    "name": "Drown",
+    "teaser": "Stories of Dominican-American life and displacement.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781573226073-L.jpg",
+    "byline": "Junot Diaz",
+    "synopsis": "Drown, published in 1996, is a collection of short stories about Dominican-American life. The stories explore displacement, masculinity, and the immigrant experience in New Jersey.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 52,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 53,
+        "pageEnd": 104,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 105,
+        "pageEnd": 156,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 157,
+        "pageEnd": 208,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 208,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Drown",
+      "durationMinutes": 41,
+      "instruction": "Read the opening of Drown."
+    },
+    "tags": [
+      "dominican",
+      "short stories",
+      "immigration",
+      "masculinity",
+      "new jersey"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-house-on-mango-street",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The House on Mango Street",
+    "teaser": "A young Mexican-American girl grows up in Chicago.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780679732983-L.jpg",
+    "byline": "Sandra Cisneros",
+    "synopsis": "The House on Mango Street, published in 1984, follows Esperanza Cordero, a young Latina girl growing up in Chicago. Written in vignettes, the novel explores identity, poverty, and the desire for a better life.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 27,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 28,
+        "pageEnd": 55,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 56,
+        "pageEnd": 82,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 83,
+        "pageEnd": 110,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 110,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The House on Mango Street",
+      "durationMinutes": 22,
+      "instruction": "Read the opening of The House on Mango Street."
+    },
+    "tags": [
+      "mexican american",
+      "chicago",
+      "coming of age",
+      "identity",
+      "feminist"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-color-of-water",
+    "categoryId": "BOOKS",
+    "subtype": "Memoir",
+    "name": "The Color of Water",
+    "teaser": "A biracial man tells the story of his white mother who raised twelve black children.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781594481925-L.jpg",
+    "byline": "James McBride",
+    "synopsis": "The Color of Water, published in 1996, alternates between James McBride's own story and his mother Ruth's. Ruth was a white Jewish woman who married a black man and raised twelve children in Harlem.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 84,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 85,
+        "pageEnd": 168,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 169,
+        "pageEnd": 252,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 253,
+        "pageEnd": 336,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 336,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Color of Water",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Color of Water."
+    },
+    "tags": [
+      "african american",
+      "memoir",
+      "biracial",
+      "family",
+      "identity"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-coldest-winter-ever",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Coldest Winter Ever",
+    "teaser": "A young woman navigates drugs, violence, and survival in Brooklyn.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780743270113-L.jpg",
+    "byline": "Sister Souljah",
+    "synopsis": "The Coldest Winter Ever, published in 1999, follows Winter Santiaga, the daughter of a drug kingpin in Brooklyn. When her father is arrested, Winter must survive on her own in the dangerous world she was raised in.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 104,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 105,
+        "pageEnd": 208,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 209,
+        "pageEnd": 312,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 313,
+        "pageEnd": 416,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 416,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Coldest Winter Ever",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Coldest Winter Ever."
+    },
+    "tags": [
+      "african american",
+      "urban",
+      "contemporary",
+      "survival",
+      "brooklyn"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-push",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Push",
+    "teaser": "A teenager in Harlem overcomes abuse and illiteracy to find her voice.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345407252-L.jpg",
+    "byline": "Sapphire",
+    "synopsis": "Push, published in 1996, follows Precious Jones, a sixteen-year-old girl in Harlem who is illiterate and pregnant by her father. Through a supportive teacher, she begins to learn to read and write.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 42,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 43,
+        "pageEnd": 84,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 85,
+        "pageEnd": 126,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 127,
+        "pageEnd": 168,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 168,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Push",
+      "durationMinutes": 33,
+      "instruction": "Read the opening of Push."
+    },
+    "tags": [
+      "african american",
+      "harlem",
+      "abuse",
+      "education",
+      "resilience"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-just-mercy",
+    "categoryId": "BOOKS",
+    "subtype": "Memoir",
+    "name": "Just Mercy",
+    "teaser": "A lawyer fights for wrongly condemned prisoners on death row.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780812994520-L.jpg",
+    "byline": "Bryan Stevenson",
+    "synopsis": "Just Mercy, published in 2014, follows Bryan Stevenson, a lawyer who founded the Equal Justice Initiative. The book focuses on his defense of Walter McMillian, a man wrongly sentenced to death in Alabama.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 92,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 93,
+        "pageEnd": 184,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 185,
+        "pageEnd": 276,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 277,
+        "pageEnd": 368,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 368,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Just Mercy",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Just Mercy."
+    },
+    "tags": [
+      "memoir",
+      "legal",
+      "criminal justice",
+      "alabama",
+      "social justice"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-between-the-world-and-me",
+    "categoryId": "BOOKS",
+    "subtype": "Memoir",
+    "name": "Between the World and Me",
+    "teaser": "A letter to his son about being black in America.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780812993547-L.jpg",
+    "byline": "Ta-Nehisi Coates",
+    "synopsis": "Between the World and Me, published in 2015, is structured as a letter from Ta-Nehisi Coates to his son. The book explores the reality of being black in America, the history of racial violence, and the fragility of the black body.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 44,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 45,
+        "pageEnd": 88,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 89,
+        "pageEnd": 132,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 133,
+        "pageEnd": 176,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 176,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Between the World and Me",
+      "durationMinutes": 35,
+      "instruction": "Read the opening of Between the World and Me."
+    },
+    "tags": [
+      "african american",
+      "essay",
+      "race",
+      "memoir",
+      "contemporary"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-heavy",
+    "categoryId": "BOOKS",
+    "subtype": "Memoir",
+    "name": "Heavy",
+    "teaser": "A Mississippi writer's memoir of obesity, addiction, and family.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781982135881-L.jpg",
+    "byline": "Kiese Laymon",
+    "synopsis": "Heavy, published in 2018, is a memoir about Kiese Laymon's relationship with his mother, his struggles with obesity and addiction, and the violence he experienced growing up in Mississippi.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 64,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 65,
+        "pageEnd": 128,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 129,
+        "pageEnd": 192,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 193,
+        "pageEnd": 256,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 256,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Heavy",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Heavy."
+    },
+    "tags": [
+      "african american",
+      "memoir",
+      "south",
+      "obesity",
+      "family"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-all-the-light-we-cannot-see",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "All the Light We Cannot See",
+    "teaser": "A blind French girl and a German soldier's paths cross during World War II.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781501173219-L.jpg",
+    "byline": "Anthony Doerr",
+    "synopsis": "All the Light We Cannot See, published in 2014, follows Marie-Laure, a blind French girl, and Werner, a German orphan, whose paths cross during World War II. The novel won the Pulitzer Prize.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 132,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 133,
+        "pageEnd": 265,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 266,
+        "pageEnd": 398,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 399,
+        "pageEnd": 531,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 531,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "All the Light We Cannot See",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of All the Light We Cannot See."
+    },
+    "tags": [
+      "world war ii",
+      "pulitzer",
+      "historical",
+      "french",
+      "german"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-light-between-oceans",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Light Between Oceans",
+    "teaser": "A lighthouse keeper and his wife make a devastating choice after a boat drifts ashore.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781451621235-L.jpg",
+    "byline": "M.L. Stedman",
+    "synopsis": "The Light Between Oceans, published in 2012, follows Tom Sherbourne and his wife Isabel, who live on a remote Australian island. When a boat washes ashore with a dead man and a living baby, they decide to raise the child as their own.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 84,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 85,
+        "pageEnd": 168,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 169,
+        "pageEnd": 252,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 253,
+        "pageEnd": 336,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 336,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Light Between Oceans",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Light Between Oceans."
+    },
+    "tags": [
+      "australian",
+      "historical",
+      "moral",
+      "lighthouse",
+      "grief"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-history-of-love",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The History of Love",
+    "teaser": "Two stories, decades apart, converge around a lost manuscript.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316185493-L.jpg",
+    "byline": "Nicole Krauss",
+    "synopsis": "The History of Love, published in 2005, follows Alma Singer, a fourteen-year-old girl in New York, and Leo Gursky, a Holocaust survivor. Their stories converge around a lost novel called The History of Love.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 65,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 66,
+        "pageEnd": 130,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 131,
+        "pageEnd": 195,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 196,
+        "pageEnd": 260,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 260,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The History of Love",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The History of Love."
+    },
+    "tags": [
+      "american",
+      "literary fiction",
+      "holocaust",
+      "love",
+      "new york"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-museum-of-extraordinary-things",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Museum of Extraordinary Things",
+    "teaser": "A Coney Island freak show and a tragedy connect two young people in 1911 New York.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781451693638-L.jpg",
+    "byline": "Alice Hoffman",
+    "synopsis": "The Museum of Extraordinary Things, published in 2014, follows Coralie Sardie, a girl in her father's freak show, and Eddie Cohen, a photographer. Their paths cross during the Triangle Shirtwaist Factory fire.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 96,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 97,
+        "pageEnd": 192,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 193,
+        "pageEnd": 288,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 289,
+        "pageEnd": 384,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 384,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Museum of Extraordinary Things",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Museum of Extraordinary Things."
+    },
+    "tags": [
+      "american",
+      "historical",
+      "new york",
+      "carnival",
+      "romance"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-dovekeepers",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Dovekeepers",
+    "teaser": "Four women converge at Masada during the Roman siege.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781451693713-L.jpg",
+    "byline": "Alice Hoffman",
+    "synopsis": "The Dovekeepers, published in 2011, follows four women whose paths converge at Masada during the Roman siege in 70 CE. Each woman carries secrets and survival instincts that bring them to the fortress.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 124,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 125,
+        "pageEnd": 249,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 250,
+        "pageEnd": 373,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 374,
+        "pageEnd": 498,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 498,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Dovekeepers",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Dovekeepers."
+    },
+    "tags": [
+      "historical",
+      "israeli",
+      "feminist",
+      "ancient",
+      "war"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-hours",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Hours",
+    "teaser": "Three women across different eras are connected by Mrs Dalloway.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780312241322-L.jpg",
+    "byline": "Michael Cunningham",
+    "synopsis": "The Hours, published in 1998, follows three women: Virginia Woolf writing Mrs Dalloway in 1920s London, Laura Brown reading Mrs Dalloway in 1950s Los Angeles, and Clarissa Vaughan living in 1990s New York. The novel won the Pulitzer Prize.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 57,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 58,
+        "pageEnd": 115,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 116,
+        "pageEnd": 172,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 173,
+        "pageEnd": 230,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 230,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Hours",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Hours."
+    },
+    "tags": [
+      "american",
+      "pulitzer",
+      "mrs dalloway",
+      "lgbtq",
+      "literary fiction"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-cloud-atlas",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Cloud Atlas",
+    "teaser": "Six interconnected stories spanning centuries from the 19th century to a post-apocalyptic future.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780375507250-L.jpg",
+    "byline": "David Mitchell",
+    "synopsis": "Cloud Atlas, published in 2004, consists of six interconnected stories that nest inside each other like Russian dolls. The stories span from the 19th century to a post-apocalyptic future and are linked by themes of power, freedom, and the human spirit.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 132,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 133,
+        "pageEnd": 264,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 265,
+        "pageEnd": 396,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 397,
+        "pageEnd": 528,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 528,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Cloud Atlas",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Cloud Atlas."
+    },
+    "tags": [
+      "british",
+      "science fiction",
+      "literary fiction",
+      "nested",
+      "experimental"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-bone-clocks",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Bone Clocks",
+    "teaser": "A literary novel with a hidden supernatural war running through decades of one woman's life.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780812997606-L.jpg",
+    "byline": "David Mitchell",
+    "synopsis": "The Bone Clocks, published in 2014, follows Holly Sykes from her teenage years in the 1980s through her life as a grandmother in 2043. Hidden within the realistic narrative is a war between immortal beings.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 156,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 157,
+        "pageEnd": 312,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 313,
+        "pageEnd": 468,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 469,
+        "pageEnd": 624,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 624,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Bone Clocks",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Bone Clocks."
+    },
+    "tags": [
+      "british",
+      "fantasy",
+      "literary fiction",
+      "supernatural",
+      "dystopian"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-thousand-autumns-of-jacob-de-zoet",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Thousand Autumns of Jacob de Zoet",
+    "teaser": "A Dutch clerk in 1799 Nagasaki falls for a Japanese midwife.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780812976335-L.jpg",
+    "byline": "David Mitchell",
+    "synopsis": "The Thousand Autumns of Jacob de Zoet, published in 2010, follows Jacob de Zoet, a Dutch clerk at the trading post on Dejima in Nagasaki Harbor. He falls in love with a Japanese midwife in this historical novel.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 121,
+        "pageEnd": 240,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 241,
+        "pageEnd": 360,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 361,
+        "pageEnd": 480,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 480,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Thousand Autumns of Jacob de Zoet",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Thousand Autumns of Jacob de Zoet."
+    },
+    "tags": [
+      "british",
+      "historical",
+      "japanese",
+      "romance",
+      "colonial"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-slade-house",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Slade House",
+    "teaser": "A mysterious house appears every nine years to trap its visitors.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780812983531-L.jpg",
+    "byline": "David Mitchell",
+    "synopsis": "Slade House, published in 2015, follows five visitors who are drawn to a mysterious house that appears in a London alley every nine years. The house is inhabited by twins who feed on the souls of their guests.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 62,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 63,
+        "pageEnd": 124,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 125,
+        "pageEnd": 186,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 187,
+        "pageEnd": 248,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 248,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Slade House",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Slade House."
+    },
+    "tags": [
+      "british",
+      "horror",
+      "supernatural",
+      "ghost story",
+      "short"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-my-year-of-rest-and-relaxation",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "My Year of Rest and Relaxation",
+    "teaser": "A young woman in New York tries to sleep through an entire year.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780525522119-L.jpg",
+    "byline": "Ottessa Moshfegh",
+    "synopsis": "My Year of Rest and Relaxation, published in 2018, follows an unnamed narrator, a beautiful young woman in New York who decides to sleep through an entire year using a cocktail of medications. The novel is set in the months before 9/11.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 76,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 77,
+        "pageEnd": 152,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 153,
+        "pageEnd": 228,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 229,
+        "pageEnd": 304,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 304,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "My Year of Rest and Relaxation",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of My Year of Rest and Relaxation."
+    },
+    "tags": [
+      "american",
+      "contemporary",
+      "humor",
+      "new york",
+      "existentialism"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-homesick-for-another-world",
+    "categoryId": "BOOKS",
+    "subtype": "Short Stories",
+    "name": "Homesick for Another World",
+    "teaser": "Stories of alienation, desire, and the grotesque.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780525522126-L.jpg",
+    "byline": "Ottessa Moshfegh",
+    "synopsis": "Homesick for Another World, published in 2017, is a collection of stories about misfits and outcasts. The characters are lonely, delusional, and desperate, searching for connection in a hostile world.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 76,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 77,
+        "pageEnd": 152,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 153,
+        "pageEnd": 228,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 229,
+        "pageEnd": 304,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 304,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Homesick for Another World",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Homesick for Another World."
+    },
+    "tags": [
+      "american",
+      "short stories",
+      "alienation",
+      "grotesque",
+      "contemporary"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-eileen",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Eileen",
+    "teaser": "A young woman working in a juvenile detention facility becomes obsessed with a new guard.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780525522089-L.jpg",
+    "byline": "Ottessa Moshfegh",
+    "synopsis": "Eileen, published in 2015, follows Eileen Dunlop, a young woman working in a juvenile detention facility in 1964 Massachusetts. She becomes obsessed with a new prison guard named Rebecca. Won the PEN/Hemingway Award.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 68,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 69,
+        "pageEnd": 136,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 137,
+        "pageEnd": 204,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 205,
+        "pageEnd": 272,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 272,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Eileen",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Eileen."
+    },
+    "tags": [
+      "american",
+      "psychological",
+      "prison",
+      "1960s",
+      "debut"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-detransition-baby",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Detransition, Baby",
+    "teaser": "Three women navigate gender, parenthood, and the question of what makes a family.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593133477-L.jpg",
+    "byline": "Torrey Peters",
+    "synopsis": "Detransition, Baby, published in 2021, follows Reese, a trans woman; Amy, a detransitioned man; and Katrina, Amy's pregnant girlfriend. When Amy suggests that Reese and Katrina raise the baby together, the three must confront what family means.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 81,
+        "pageEnd": 160,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 161,
+        "pageEnd": 240,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 241,
+        "pageEnd": 320,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 320,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Detransition, Baby",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Detransition, Baby."
+    },
+    "tags": [
+      "lgbtq",
+      "transgender",
+      "contemporary",
+      "family",
+      "feminist"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-real-life",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Real Life",
+    "teaser": "A black queer student in a predominantly white Midwestern university confronts trauma.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780525538882-L.jpg",
+    "byline": "Brandon Taylor",
+    "synopsis": "Real Life, published in 2020, follows Wallace, a black queer PhD student in a predominantly white university in Wisconsin. Over the course of a weekend, Wallace confronts the violence that has shaped his life. Shortlisted for the Booker Prize.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 68,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 69,
+        "pageEnd": 136,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 137,
+        "pageEnd": 204,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 205,
+        "pageEnd": 272,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 272,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Real Life",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Real Life."
+    },
+    "tags": [
+      "african american",
+      "lgbtq",
+      "literary fiction",
+      "booker nominee",
+      "university"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-filthy-animals",
+    "categoryId": "BOOKS",
+    "subtype": "Short Stories",
+    "name": "Filthy Animals",
+    "teaser": "Stories about desire, violence, and the bodies we inhabit.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780525538899-L.jpg",
+    "byline": "Brandon Taylor",
+    "synopsis": "Filthy Animals, published in 2021, is a collection of linked stories about a group of young people navigating desire and violence. The stories are set in the Midwest and explore race, sexuality, and art.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 61,
+        "pageEnd": 120,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 121,
+        "pageEnd": 180,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 181,
+        "pageEnd": 240,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 240,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Filthy Animals",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Filthy Animals."
+    },
+    "tags": [
+      "african american",
+      "short stories",
+      "lgbtq",
+      "midwest",
+      "desire"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-hamnet",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Hamnet",
+    "teaser": "The story of Shakespeare's family and the death of his son Hamnet.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781476785257-L.jpg",
+    "byline": "Maggie O'Farrell",
+    "synopsis": "Hamnet, published in 2020, imagines the life of Shakespeare's family, focusing on his wife Anne Hathaway and the death of their son Hamnet at age eleven. The novel won the Women's Prize for Fiction.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 81,
+        "pageEnd": 161,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 162,
+        "pageEnd": 242,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 243,
+        "pageEnd": 323,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 323,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hamnet",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Hamnet."
+    },
+    "tags": [
+      "historical",
+      "shakespeare",
+      "grief",
+      "family",
+      "women's prize"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-marriage-portrait",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Marriage Portrait",
+    "teaser": "A young duchess in Renaissance Italy fears for her life.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593321201-L.jpg",
+    "byline": "Maggie O'Farrell",
+    "synopsis": "The Marriage Portrait, published in 2022, follows Lucrezia de' Medici, who is married to the Duke of Ferrara at fifteen. She discovers that her husband may be planning to kill her.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 92,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 93,
+        "pageEnd": 184,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 185,
+        "pageEnd": 276,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 277,
+        "pageEnd": 368,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 368,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Marriage Portrait",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Marriage Portrait."
+    },
+    "tags": [
+      "historical",
+      "italian",
+      "renaissance",
+      "feminist",
+      "thriller"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-vanishing-brit",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Vanishing Brit",
+    "teaser": "Two identical twin sisters choose very different lives in the 1960s.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780525536291-L.jpg",
+    "byline": "Brit Bennett",
+    "synopsis": "The Vanishing Half, published in 2020, follows twin sisters Stella and Desiree Vignes, who grow up in a black community in Louisiana. One sister passes for white, the other returns to the community. The novel explores race, identity, and the lies we tell.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 86,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 87,
+        "pageEnd": 172,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 173,
+        "pageEnd": 258,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 259,
+        "pageEnd": 344,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 344,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Vanishing Brit",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Vanishing Brit."
+    },
+    "tags": [
+      "american",
+      "african american",
+      "race",
+      "identity",
+      "twins"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-mothers",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Mothers",
+    "teaser": "A young woman's secret abortion and its aftermath in a black community.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781524763459-L.jpg",
+    "byline": "Brit Bennett",
+    "synopsis": "The Mothers, published in 2016, follows Nadia Turner, who has an abortion at seventeen after the death of her mother. The novel explores the long-term consequences of that decision on Nadia, her boyfriend, and their community.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 72,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 73,
+        "pageEnd": 144,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 145,
+        "pageEnd": 216,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 217,
+        "pageEnd": 288,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 288,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Mothers",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Mothers."
+    },
+    "tags": [
+      "african american",
+      "contemporary",
+      "grief",
+      "abortion",
+      "community"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-waves",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Waves",
+    "teaser": "Six characters narrate their lives from childhood to old age in stream-of-consciousness.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780156946568-L.jpg",
+    "byline": "Virginia Woolf",
+    "synopsis": "The Waves, published in 1931, is Woolf's most experimental novel. Six characters narrate their lives from childhood to old age in overlapping stream-of-consciousness monologues, interspersed with italicized passages describing the movement of the sun.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 74,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 75,
+        "pageEnd": 148,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 149,
+        "pageEnd": 222,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 223,
+        "pageEnd": 296,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 296,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Waves",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Waves."
+    },
+    "tags": [
+      "british",
+      "modernist",
+      "stream of consciousness",
+      "experimental",
+      "classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-song-of-solomon",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Song of Solomon",
+    "teaser": "A young black man's quest for identity takes him across America.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781400033423-L.jpg",
+    "byline": "Toni Morrison",
+    "synopsis": "Song of Solomon, published in 1977, follows Macon Dead III, who learns to fly. The novel traces his journey from Michigan to the South as he searches for his family's history and his own identity.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 84,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 85,
+        "pageEnd": 168,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 169,
+        "pageEnd": 252,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 253,
+        "pageEnd": 337,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 337,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Song of Solomon",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Song of Solomon."
+    },
+    "tags": [
+      "african american",
+      "magical realism",
+      "identity",
+      "family",
+      "classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-sula",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Sula",
+    "teaser": "Two black women in Ohio chart very different paths through life.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781400033430-L.jpg",
+    "byline": "Toni Morrison",
+    "synopsis": "Sula, published in 1973, follows Nel Wright and Sula Peace, friends growing up in a black community in Ohio. Sula is wild and unconventional; Nel is conventional. Their friendship is tested by betrayal and loss.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 43,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 44,
+        "pageEnd": 87,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 88,
+        "pageEnd": 130,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 131,
+        "pageEnd": 174,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 174,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Sula",
+      "durationMinutes": 34,
+      "instruction": "Read the opening of Sula."
+    },
+    "tags": [
+      "african american",
+      "friendship",
+      "feminist",
+      "classic",
+      "ohio"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-jazz",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Jazz",
+    "teaser": "A love triangle in 1920s Harlem is narrated by an unreliable storyteller.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781400033447-L.jpg",
+    "byline": "Toni Morrison",
+    "synopsis": "Jazz, published in 1992, follows Joe Trace and Violet, a black couple in 1920s Harlem. When Joe begins an affair with a young woman and Violet goes mad, the novel explores the violence of love. The narrator is unreliable and self-aware.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 57,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 58,
+        "pageEnd": 114,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 115,
+        "pageEnd": 171,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 172,
+        "pageEnd": 229,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 229,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Jazz",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Jazz."
+    },
+    "tags": [
+      "african american",
+      "harlem",
+      "1920s",
+      "jazz",
+      "classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-paradise",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Paradise",
+    "teaser": "A community of black citizens drives out women they consider impure.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781400033454-L.jpg",
+    "byline": "Toni Morrison",
+    "synopsis": "Paradise, published in 1997, follows a community of black citizens in Ruby, Oklahoma, who drive out a group of women they consider impure. The novel explores patriarchy, religion, and the search for paradise.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 79,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 80,
+        "pageEnd": 159,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 160,
+        "pageEnd": 238,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 239,
+        "pageEnd": 318,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 318,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Paradise",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Paradise."
+    },
+    "tags": [
+      "african american",
+      "feminist",
+      "religion",
+      "oklahoma",
+      "classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-tar-baby",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Tar Baby",
+    "teaser": "A love affair between a black model and a street hustler in the Caribbean.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781400033461-L.jpg",
+    "byline": "Toni Morrison",
+    "synopsis": "Tar Baby, published 1981, follows Jadine, a black model, and Son, a street hustler, who meet in the Caribbean. Their relationship explores race, class, and identity.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 95,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 96,
+        "pageEnd": 190,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 191,
+        "pageEnd": 285,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 286,
+        "pageEnd": 380,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 380,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Tar Baby",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Tar Baby."
+    },
+    "tags": [
+      "african american",
+      "caribbean",
+      "romance",
+      "class",
+      "identity"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-dreaming-in-cuban",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Dreaming in Cuban",
+    "teaser": "Three generations of a Cuban-American family navigate identity and politics.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345381583-L.jpg",
+    "byline": "Cristina Garcia",
+    "synopsis": "Dreaming in Cuban, published in 1992, follows three generations of the del Pino family, divided between Cuba and Brooklyn. The novel explores exile, identity, and the Cuban-American experience.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 72,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 73,
+        "pageEnd": 144,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 145,
+        "pageEnd": 216,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 217,
+        "pageEnd": 288,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 288,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Dreaming in Cuban",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Dreaming in Cuban."
+    },
+    "tags": [
+      "cuban american",
+      "immigration",
+      "identity",
+      "magic realism",
+      "family"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-joy-luck-club",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Joy Luck Club",
+    "teaser": "Four Chinese-American mothers and their daughters navigate cultural differences.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780142437483-L.jpg",
+    "byline": "Amy Tan",
+    "synopsis": "The Joy Luck Club, published in 1989, alternates between the stories of four Chinese immigrant mothers and their American-born daughters. The novel explores the gap between generations and cultures.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 72,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 73,
+        "pageEnd": 144,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 145,
+        "pageEnd": 216,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 217,
+        "pageEnd": 288,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 288,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Joy Luck Club",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Joy Luck Club."
+    },
+    "tags": [
+      "chinese american",
+      "immigration",
+      "family",
+      "generational",
+      "feminist"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-kitchen-gods-wife",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Kitchen God's Wife",
+    "teaser": "A mother tells her daughter the story of her life in China.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780142437490-L.jpg",
+    "byline": "Amy Tan",
+    "synopsis": "The Kitchen God's Wife, published in 1991, follows Winnie and her daughter Pearl as Winnie reveals the truth about her life in China before coming to America.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 104,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 105,
+        "pageEnd": 208,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 209,
+        "pageEnd": 312,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 313,
+        "pageEnd": 416,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 416,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Kitchen God's Wife",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Kitchen God's Wife."
+    },
+    "tags": [
+      "chinese american",
+      "immigration",
+      "family",
+      "secrets",
+      "generational"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-valley-of-amazement",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Valley of Amazement",
+    "teaser": "A mother and daughter are separated in early twentieth-century China.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062104663-L.jpg",
+    "byline": "Amy Tan",
+    "synopsis": "The Valley of Amazement, published in 2013, follows Violet and Lucia, a mother and daughter separated in early twentieth-century China. The novel spans decades and continents.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 148,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 149,
+        "pageEnd": 296,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 297,
+        "pageEnd": 444,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 445,
+        "pageEnd": 592,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 592,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Valley of Amazement",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Valley of Amazement."
+    },
+    "tags": [
+      "chinese american",
+      "historical",
+      "immigration",
+      "mother daughter",
+      "epic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-crazy-rich-asians",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Crazy Rich Asians",
+    "teaser": "An American-born Chinese woman accompanies her boyfriend to his best friend's wedding in Singapore.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780804139304-L.jpg",
+    "byline": "Kevin Kwan",
+    "synopsis": "Crazy Rich Asians, published in 2013, follows Rachel Chu, who accompanies her boyfriend Nicholas Young to Singapore for a wedding and discovers his family is among the wealthiest in Asia. The novel explores wealth, family, and identity.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 101,
+        "pageEnd": 201,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 202,
+        "pageEnd": 301,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 302,
+        "pageEnd": 402,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 402,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Crazy Rich Asians",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Crazy Rich Asians."
+    },
+    "tags": [
+      "singaporean",
+      "wealth",
+      "family",
+      "romance",
+      "humor"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-memory-police",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Memory Police",
+    "teaser": "On an unnamed island, a mysterious police force erases things from existence.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781101911860-L.jpg",
+    "byline": "Yoko Ogawa",
+    "synopsis": "The Memory Police, published in 1994, is set on an unnamed island where a mysterious police force erases things from existence: roses, birds, photographs. A young novelist watches as the things around her disappear.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 68,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 69,
+        "pageEnd": 137,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 138,
+        "pageEnd": 205,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 206,
+        "pageEnd": 274,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 274,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Memory Police",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Memory Police."
+    },
+    "tags": [
+      "japanese",
+      "dystopian",
+      "surreal",
+      "memory",
+      "literary fiction"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-housekeeper-and-the-professor",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Housekeeper and the Professor",
+    "teaser": "A mathematician's short-term memory resets every eighty minutes.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780312644642-L.jpg",
+    "byline": "Yoko Ogawa",
+    "synopsis": "The Housekeeper and the Professor, published in 2003, follows a housekeeper hired to care for a mathematician whose memory resets every eighty minutes. She teaches him about love and connection.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 45,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 46,
+        "pageEnd": 90,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 91,
+        "pageEnd": 135,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 136,
+        "pageEnd": 180,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 180,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Housekeeper and the Professor",
+      "durationMinutes": 36,
+      "instruction": "Read the opening of The Housekeeper and the Professor."
+    },
+    "tags": [
+      "japanese",
+      "mathematics",
+      "grief",
+      "quiet",
+      "literary fiction"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-breasts-and-eggs",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Breasts and Eggs",
+    "teaser": "Two women confront the expectations placed on their bodies in modern Japan.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781609456382-L.jpg",
+    "byline": "Mieko Kawakami",
+    "synopsis": "Breasts and Eggs, published in 2020, follows two sisters: Natsuko, a writer, and Makiko, a mother who comes to Tokyo for breast augmentation. The novel explores womanhood, fertility, and the pressures placed on women's bodies.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 76,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 77,
+        "pageEnd": 152,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 153,
+        "pageEnd": 228,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 229,
+        "pageEnd": 304,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 304,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Breasts and Eggs",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Breasts and Eggs."
+    },
+    "tags": [
+      "japanese",
+      "feminist",
+      "contemporary",
+      "womanhood",
+      "literary fiction"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-hurricane-season",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Hurricane Season",
+    "teaser": "The murder of a witch exposes the violence and poverty of a Mexican town.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780811229012-L.jpg",
+    "byline": "Fernanda Melchor",
+    "synopsis": "Hurricane Season, published in 2017, follows the discovery of the body of the Witch of AT7 and the stories of the townspeople connected to her death. The novel exposes the violence and poverty of rural Mexico.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 56,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 57,
+        "pageEnd": 112,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 113,
+        "pageEnd": 168,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 169,
+        "pageEnd": 224,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 224,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Hurricane Season",
+      "durationMinutes": 44,
+      "instruction": "Read the opening of Hurricane Season."
+    },
+    "tags": [
+      "mexican",
+      "violence",
+      "poverty",
+      "literary fiction",
+      "translated"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-remainder",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Remainder",
+    "teaser": "Three young people deal with the aftermath of the Pinochet dictatorship.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781910695777-L.jpg",
+    "byline": "Alia Trabucco Zeran",
+    "synopsis": "The Remainder, published in 2018, follows three friends in Santiago, Chile, as they deal with the deaths of their parents and the legacy of the Pinochet dictatorship.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 61,
+        "pageEnd": 120,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 121,
+        "pageEnd": 180,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 181,
+        "pageEnd": 240,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 240,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Remainder",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Remainder."
+    },
+    "tags": [
+      "chilean",
+      "political",
+      "grief",
+      "youth",
+      "dystopian"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-god-of-small-things",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The God of Small Things",
+    "teaser": "Twins in Kerala are destroyed by the love laws.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780812979626-L.jpg",
+    "byline": "Arundhati Roy",
+    "synopsis": "The God of Small Things, published in 1997, follows fraternal twins Estha and Rahel in Kerala, India. Their childhood is destroyed by the love laws that dictate who should be loved and how. Won the Booker Prize.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 85,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 86,
+        "pageEnd": 170,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 171,
+        "pageEnd": 255,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 256,
+        "pageEnd": 340,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 340,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The God of Small Things",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The God of Small Things."
+    },
+    "tags": [
+      "indian",
+      "booker prize",
+      "kerala",
+      "family",
+      "forbidden love"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-a-fine-balance",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "A Fine Balance",
+    "teaser": "Four characters in India struggle to survive political and personal upheaval.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780679761594-L.jpg",
+    "byline": "Rohinton Mistry",
+    "synopsis": "A Fine Balance, published in 1995, follows four characters in India whose lives intersect in 1975. The novel explores poverty, political corruption, and the human will to survive.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 151,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 152,
+        "pageEnd": 302,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 303,
+        "pageEnd": 453,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 454,
+        "pageEnd": 604,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 604,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "A Fine Balance",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of A Fine Balance."
+    },
+    "tags": [
+      "indian",
+      "political",
+      "poverty",
+      "friendship",
+      "classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-julys-people",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "July's People",
+    "teaser": "A white family flees Johannesburg and depends on their black servant.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140189124-L.jpg",
+    "byline": "Nadine Gordimer",
+    "synopsis": "July's People, published in 1981, follows a white liberal family who flees Johannesburg during a black uprising and hides with their former servant in rural Mozambique.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 52,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 53,
+        "pageEnd": 104,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 105,
+        "pageEnd": 156,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 157,
+        "pageEnd": 208,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 208,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "July's People",
+      "durationMinutes": 41,
+      "instruction": "Read the opening of July's People."
+    },
+    "tags": [
+      "south african",
+      "apartheid",
+      "post-apocalyptic",
+      "family",
+      "classic"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-life-&-times-of-michael-k",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Life & Times of Michael K",
+    "teaser": "A simple man becomes homeless during a civil war in South Africa.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140189148-L.jpg",
+    "byline": "J.M. Coetzee",
+    "synopsis": "Life & Times of Michael K, published in 1983, follows Michael K, a man with a harelip who becomes homeless during a civil war. He tries to return to the countryside with his mother's ashes. Won the Booker Prize.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 46,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 47,
+        "pageEnd": 92,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 93,
+        "pageEnd": 138,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 139,
+        "pageEnd": 184,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 184,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Life & Times of Michael K",
+      "durationMinutes": 36,
+      "instruction": "Read the opening of Life & Times of Michael K."
+    },
+    "tags": [
+      "south african",
+      "apartheid",
+      "booker prize",
+      "war",
+      "wandering"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-disgrace",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Disgrace",
+    "teaser": "A disgraced professor retreats to rural South Africa where he confronts violence.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140296402-L.jpg",
+    "byline": "J.M. Coetzee",
+    "synopsis": "Disgrace, published in 1999, follows David Lurie, a professor fired for sexual misconduct, who retreats to his daughter's farm in the Eastern Cape. Won the Booker Prize.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 55,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 56,
+        "pageEnd": 110,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 111,
+        "pageEnd": 165,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 166,
+        "pageEnd": 220,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 220,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Disgrace",
+      "durationMinutes": 44,
+      "instruction": "Read the opening of Disgrace."
+    },
+    "tags": [
+      "south african",
+      "booker prize",
+      "apartheid",
+      "violence",
+      "literary fiction"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-waiting-for-the-barbarians",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Waiting for the Barbarians",
+    "teaser": "An official of a decaying empire waits for an attack that may not come.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780142437094-L.jpg",
+    "byline": "J.M. Coetzee",
+    "synopsis": "Waiting for the Barbarians, published in 1980, follows a magistrate at an unnamed empire's frontier who begins to question the empire's treatment of the barbarian tribes.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 50,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 51,
+        "pageEnd": 100,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 101,
+        "pageEnd": 150,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 151,
+        "pageEnd": 200,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 200,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Waiting for the Barbarians",
+      "durationMinutes": 40,
+      "instruction": "Read the opening of Waiting for the Barbarians."
+    },
+    "tags": [
+      "south african",
+      "political",
+      "empire",
+      "classic",
+      "philosophical"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-the-master-of-petersburg",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "The Master of Petersburg",
+    "teaser": "Dostoevsky returns to St. Petersburg and confronts ghosts.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780679760979-L.jpg",
+    "byline": "J.M. Coetzee",
+    "synopsis": "The Master of Petersburg, published in 1994, follows Dostoevsky returning to St. Petersburg after his stepson's death, where he becomes entangled in political intrigue and hauntings.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 74,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 75,
+        "pageEnd": 148,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 149,
+        "pageEnd": 222,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 223,
+        "pageEnd": 296,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 296,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "The Master of Petersburg",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of The Master of Petersburg."
+    },
+    "tags": [
+      "south african",
+      "russian",
+      "ghost story",
+      "historical",
+      "dostoevsky"
+    ],
+    "tier": 2
+  },
+  {
+    "id": "book-milkman",
+    "categoryId": "BOOKS",
+    "subtype": "Novel",
+    "name": "Milkman",
+    "teaser": "An unnamed woman in an unnamed city navigates surveillance and desire during the Troubles.",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781644450253-L.jpg",
+    "byline": "Anna Burns",
+    "synopsis": "Milkman, published in 2018, follows an unnamed narrator in an unnamed city (Belfast) who is targeted by a powerful man called the milkman. Won the Booker Prize.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I",
+        "pageStart": 1,
+        "pageEnd": 88,
+        "summary": "The story begins."
+      },
+      {
+        "number": 2,
+        "title": "Part II",
+        "pageStart": 89,
+        "pageEnd": 176,
+        "summary": "The narrative deepens."
+      },
+      {
+        "number": 3,
+        "title": "Part III",
+        "pageStart": 177,
+        "pageEnd": 264,
+        "summary": "The central conflict."
+      },
+      {
+        "number": 4,
+        "title": "Part IV",
+        "pageStart": 265,
+        "pageEnd": 352,
+        "summary": "The story concludes."
+      }
+    ],
+    "pageCount": 352,
+    "exploreAction": {
+      "verb": "Read",
+      "targetName": "Milkman",
+      "durationMinutes": 45,
+      "instruction": "Read the opening of Milkman."
+    },
+    "tags": [
+      "irish",
+      "northern ireland",
+      "troubles",
+      "booker prize",
+      "feminist"
+    ],
+    "tier": 2
   }
 ]
