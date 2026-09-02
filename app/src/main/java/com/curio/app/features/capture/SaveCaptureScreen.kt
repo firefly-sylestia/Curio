@@ -77,6 +77,7 @@ import com.curio.app.data.CurioEntry
 import com.curio.app.data.CurioPassport
 import com.curio.app.data.CurioPet
 import com.curio.app.data.CurioQuests
+import com.curio.app.data.TopicRepository
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.StreakTracker

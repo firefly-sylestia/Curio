@@ -77,6 +77,7 @@ import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.publicationYear
 import com.curio.app.data.TopicIndexEntry
 import com.curio.app.data.TopicJsonLoader
+import com.curio.app.data.TopicRepository
 import com.curio.app.features.settings.SettingsHeroActionPill
 import com.curio.app.ui.components.isLiquidGlassPillsActive
 import com.curio.app.ui.theme.isCurioDarkTheme

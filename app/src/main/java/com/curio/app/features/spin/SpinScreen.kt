@@ -128,6 +128,7 @@ import com.curio.app.data.CurioTopic
 import com.curio.app.data.SmartDensityMode
 import com.curio.app.data.StreakTracker
 import com.curio.app.data.TopicJsonLoader
+import com.curio.app.data.TopicRepository
 import com.curio.app.data.titleAndYearQualifier
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToQuestRoute

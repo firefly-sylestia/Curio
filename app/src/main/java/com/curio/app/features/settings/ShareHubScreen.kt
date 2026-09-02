@@ -47,6 +47,7 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
 import com.curio.app.data.TopicIndexEntry
 import com.curio.app.data.TopicJsonLoader
+import com.curio.app.data.TopicRepository
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -306,7 +307,7 @@ fun ShareHubScreen(navController: NavController) {
                 }
             }
 
-            // ── Design grid ─────────────────────────────────────────────
+            // ── Design grid ───────────────────────────────────────���─────
             item(span = { GridItemSpan(maxLineSpan) }) {
                 CurioSectionLabel(
                     if (pickedTopic != null) "Designs — ${pickedTopic.name}" else "Designs — preview with any topic"
