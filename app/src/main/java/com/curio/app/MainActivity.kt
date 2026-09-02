@@ -90,12 +90,6 @@ class MainActivity : ComponentActivity() {
             PendingSpinOpen.capture(intent)
         }
 
-        // Wire the asset manager into the topic loader before any Compose
-        // code runs. Must happen here (not in SplashScreen's LaunchedEffect)
-        // because CurioNavHost routes are resolved synchronously on first
-        // composition, before the splash coroutine has a chance to run.
-        TopicJsonLoader.install(this)
-
         // Initialize Room once per process. The repository mutex also protects
         // cold starts, while this guard prevents a fresh Activity from
         // scheduling another import/read cycle.
@@ -128,22 +122,6 @@ class MainActivity : ComponentActivity() {
         // v29 — load per-topic reading/watching progress before any screen
         // (reveal / Cabinet / detail) reads it.
         TopicProgressStore.seed(this)
-        // v29 — prewarm the topic catalog in the background so the Topic
-        // Database opens with ZERO loading: the merged index (search keys +
-        // years; v174f builds it at runtime from the per-category pools —
-        // the 23MB prebuilt asset no longer ships) is built once here, and
-        // the per-category pools land in the loader cache while the user
-        // does anything else. Both are cached, so screens read them instantly.
-        // v55 — NonCancellable: a rotation (activity destroy) mid-warmup
-        // used to cancel loadIndex and restart the whole parse; the warm-up
-        // now runs to completion regardless (parses are bounded by the
-        // loader's gate, so it can't hog the CPU).
-        lifecycleScope.launch {
-            withContext(kotlinx.coroutines.NonCancellable) {
-                runCatching { TopicJsonLoader.loadIndex() }
-                runCatching { TopicJsonLoader.preloadAll() }
-            }
-        }
         // v53 — update notifier on app start: a toast whenever a check finds
         // a newer release, and a notification ONCE per version (never
         // re-notified for the same tag). Offline/failures are silent.

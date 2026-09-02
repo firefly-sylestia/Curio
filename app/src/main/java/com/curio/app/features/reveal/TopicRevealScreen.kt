@@ -250,10 +250,7 @@ fun TopicRevealScreen(
         // cache during import was the source of intermittent blank reveals.
         TopicRepository.init(context)
         val roomTopic = TopicRepository.findTopic(context, cat.id, topicName)
-        resolved = roomTopic ?: TopicJsonLoader.cached(cat.id)
-            ?.firstOrNull { it.matchesSavedNameStrict(topicName) }
-            ?: TopicJsonLoader.cached(cat.id)
-                ?.firstOrNull { it.matchesSavedName(topicName) }
+        resolved = roomTopic
     }
 
     // v29 — clipboard for the auto-copy on explore: the search query lands on
@@ -2487,7 +2484,7 @@ private fun RevealTagChip(
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════��═════════════════════════════════
 // Teaser card ("One quirky fact to get you curious")
 // ═══════════════════════════════════════════════════════════════════════════
 

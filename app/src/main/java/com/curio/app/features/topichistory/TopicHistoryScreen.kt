@@ -795,7 +795,7 @@ private suspend fun resolveSentimentTopics(
         val categoryId = CategoryId.values().firstOrNull { it.name == categoryName }
         val topics: List<CurioTopic> = when {
             categoryId != null && categoryId != CategoryId.WILDCARD ->
-                runCatching { TopicJsonLoader.load(categoryId) }.getOrDefault(emptyList())
+                TopicJsonLoader.cached(categoryId).orEmpty()
             else -> {
                 // Unknown / wildcard key — scan every already-cached pool.
                 CategoryId.values()

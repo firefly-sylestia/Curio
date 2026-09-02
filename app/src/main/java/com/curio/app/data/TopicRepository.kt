@@ -48,14 +48,20 @@ object TopicRepository {
         initializationMutex.withLock {
             if (initialized) return
 
-  appContext = context.applicationContext
-  val bundledCount = TopicAssetStore.count(context)
-  if (bundledCount > 0) {
-  initialized = true
-  Log.i("TopicRepository", "Opened bundled topic database with $bundledCount rows")
-  } else {
-  Log.e("TopicRepository", "Bundled topic database is empty; will retry next launch")
-  }
+            appContext = context.applicationContext
+            val db = CurioDatabase.getInstance(appContext!!)
+            val dao = db.topicDao()
+            val bundledCount = TopicAssetStore.count(appContext!!)
+            if (bundledCount > 0) {
+                // Populate the compatibility cache once per process from the
+                // persistent on-device DB. This keeps reopen paths indexed and
+                // prevents TopicJsonLoader from reparsing source data.
+                warmLoaderFromRoom(dao)
+                initialized = true
+                Log.i("TopicRepository", "Opened persistent topic database with $bundledCount rows")
+            } else {
+                Log.e("TopicRepository", "Bundled topic database is empty; will retry next launch")
+            }
         }
     }
 
