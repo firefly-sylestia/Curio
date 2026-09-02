@@ -2556,7 +2556,7 @@
     "subtype": "Book",
     "name": "Gone Girl (2012)",
     "teaser": "Gillian Flynn's thriller is famous for its midpoint rug-pull: the novel's second half reveals the 'victim' wife Amy is the architect of her own disappearance. The 'cool girl' passage — Amy's manifesto about performing the woman men want — became the book's most-quoted pages and its feminist thesis in one.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780307588371-L.jpg",
     "byline": "Gillian Flynn",
     "exploreAction": {
       "verb": "Read",
@@ -2570,7 +2570,24 @@
       "2010s"
     ],
     "tier": 2,
-    "pageCount": 432
+    "pageCount": 432,
+    "synopsis": "On the morning of their fifth wedding anniversary, Nick Dunne returns home to find his wife Amy missing and signs of a struggle. As the investigation unfolds and media scrutiny intensifies, Nick becomes the prime suspect. The narrative alternates between Nick's present-day perspective and Amy's diary entries, which recount the couple's courtship and the deterioration of their marriage. The diary portrays Nick as increasingly aggressive and threatening, while Nick's version of events paints Amy as controlling and difficult. As Detectives Boney and Gilpin close in, Nick realizes his wife has been hiding secrets — and that her disappearance is not what it seems. Flynn's novel is a study in unreliable narration: both Nick and Amy are liars, and the reader is left to determine which version of their marriage is closer to the truth. The novel became a cultural phenomenon, selling over 15 million copies worldwide and inspiring David Fincher's 2014 film adaptation starring Ben Affleck and Rosamund Pike.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part One — Boy Loses Girl",
+        "pageStart": 1,
+        "pageEnd": 200,
+        "summary": "Nick's narration of the disappearance. Amy's diary entries of their courtship and marriage. The media circus."
+      },
+      {
+        "number": 2,
+        "title": "Part Two — Boy Meets Girl",
+        "pageStart": 201,
+        "pageEnd": 432,
+        "summary": "Amy's true story. Nick's affair. The trap closes. The unreliable narrators revealed."
+      }
+    ]
   },
   {
     "id": "book-between-the-world-and-154",
@@ -2578,7 +2595,7 @@
     "subtype": "Book",
     "name": "Between the World and Me (2015)",
     "teaser": "Ta-Nehisi Coates's National Book Award winner is a letter to his teenage son about what it means to live in a Black body in America — a direct descendant of James Baldwin's The Fire Next Time, which Coates cites and revises. Its key image: the 'Dreamers' who built and benefit from a system they refuse to see.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780812993547-L.jpg",
     "byline": "Ta-Nehisi Coates",
     "exploreAction": {
       "verb": "Read",
@@ -2592,7 +2609,31 @@
       "Race"
     ],
     "tier": 2,
-    "pageCount": 176
+    "pageCount": 176,
+    "synopsis": "Coates wrote Between the World and Me as a letter to his fifteen-year-old son Samori, explaining what it means to live in a Black body in America. The book is structured in three parts: Coates's youth in Baltimore, where he learned to navigate violence and the streets; his time at Howard University, which he calls 'The Mecca,' where he found community and intellectual belonging; and his visit to the family of Prince Jones, a Howard student killed by a plainclothes police officer. Coates draws on his own experience and on James Baldwin's The Fire Next Time (1963), but unlike Baldwin, Coates offers no spiritual consolation or hope for reconciliation. He argues that white supremacy is not a mistake but a feature of American history, and that the Black body has been systematically destroyed — through slavery, lynching, mass incarceration, and police violence. The book won the 2015 National Book Award for Nonfiction. Toni Morrison praised it as filling 'an intellectual gap in succession to James Baldwin.'",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part One — The Mecca",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "Coates's childhood in Baltimore. The streets. Howard University. Finding community."
+      },
+      {
+        "number": 2,
+        "title": "Part Two — The History",
+        "pageStart": 61,
+        "pageEnd": 120,
+        "summary": "American history through Black bodies. The Civil Rights Movement. Disillusionment."
+      },
+      {
+        "number": 3,
+        "title": "Part Three — Prince Jones",
+        "pageStart": 121,
+        "pageEnd": 176,
+        "summary": "The killing of Prince Jones. The visit to his family. The letter to Samori."
+      }
+    ]
   },
   {
     "id": "book-lincoln-in-the-bardo-155",
@@ -2600,7 +2641,7 @@
     "subtype": "Book",
     "name": "Lincoln in the Bardo (2017)",
     "teaser": "George Saunders's Booker winner is set in a single night — the bardo, the Tibetan Buddhist limbo between death and rebirth — where Abraham Lincoln's son Willie, newly dead, refuses to move on, surrounded by a chorus of ghosts who narrate the novel together. It's built from hundreds of voices and invented historical quotations.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780812995343-L.jpg",
     "byline": "George Saunders",
     "exploreAction": {
       "verb": "Read",
@@ -2614,7 +2655,31 @@
       "Historical"
     ],
     "tier": 2,
-    "pageCount": 368
+    "pageCount": 368,
+    "synopsis": "Saunders's novel takes place during a single night in February 1862, when Abraham Lincoln visits the crypt of his eleven-year-old son Willie, who has died of typhoid fever. The novel is set in the 'bardo' — a Tibetan Buddhist term for the transitional state between death and rebirth — where ghosts mingle, gripe, and struggle over the boy's soul. The ghosts are 'disfigured by desires they failed to act upon while alive' and are threatened by permanent entrapment in liminal space. They don't realize they're dead, calling the cemetery their 'hospital-yard' and their coffins 'sick-boxes.' The novel is composed almost entirely of voices: the ghosts' monologues, historical excerpts from real documents, and Lincoln's own grief. Saunders based the novel on reports that Lincoln visited Willie's crypt 'on several occasions' to hold the body. The novel won the 2017 Man Booker Prize.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Cemetery",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "The ghosts introduce themselves. The bardo explained. Lincoln arrives at the crypt."
+      },
+      {
+        "number": 2,
+        "title": "Willie's Passage",
+        "pageStart": 121,
+        "pageEnd": 280,
+        "summary": "The ghosts debate Willie's fate. Lincoln holds his son. The tug of war between worlds."
+      },
+      {
+        "number": 3,
+        "title": "The Release",
+        "pageStart": 281,
+        "pageEnd": 368,
+        "summary": "Lincoln's final visit. The ghosts' intervention. Willie's departure. The end."
+      }
+    ]
   },
   {
     "id": "book-the-testaments-2019-157",
@@ -2622,7 +2687,7 @@
     "subtype": "Book",
     "name": "The Testaments (2019)",
     "teaser": "Atwood returned to Gilead 34 years after The Handmaid's Tale with this Booker-winning sequel, told in three voices — two young women raised inside the regime and Aunt Lydia, the system's most feared enforcer, revealed as a secret dissident. It won the Booker jointly with Bernardine Evaristo's Girl, Woman, Other.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385543781-L.jpg",
     "byline": "Margaret Atwood",
     "exploreAction": {
       "verb": "Read",
@@ -2636,7 +2701,31 @@
       "Sequel"
     ],
     "tier": 2,
-    "pageCount": 448
+    "pageCount": 432,
+    "synopsis": "Atwood's sequel to The Handmaid's Tale is set fifteen years after the events of the original novel and is narrated by three women: Aunt Lydia, who reveals how she became Gilead's most powerful woman after being imprisoned with other women during the establishment of the Republic; Agnes Jemima, a young woman raised in Gilead as the daughter of a Commander; and Daisy, a young woman living in Canada who discovers her true identity. The novel reveals how the three women's stories converge and how Gilead's downfall is set in motion. Aunt Lydia's sections are presented as a manuscript written in secret — 'The Ardua Hall Holograph' — in which she reveals her full history: a divorced judge who was imprisoned, tortured, and coerced into becoming an Aunt. The novel won the 2019 Man Booker Prize (jointly with Bernardine Evaristo's Girl, Woman, Other).",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Aunt Lydia's Testimony",
+        "pageStart": 1,
+        "pageEnd": 150,
+        "summary": "Lydia's capture. The stadium. Becoming an Aunt. Ardua Hall."
+      },
+      {
+        "number": 2,
+        "title": "Agnes's Story",
+        "pageStart": 151,
+        "pageEnd": 300,
+        "summary": "Agnes's life in Gilead. Her stepmother. The Aunts. Her true parents."
+      },
+      {
+        "number": 3,
+        "title": "Daisy's Story + The Convergence",
+        "pageStart": 301,
+        "pageEnd": 432,
+        "summary": "Daisy in Canada. The mission. The three stories meet. Gilead falls."
+      }
+    ]
   },
   {
     "id": "book-chain-gang-all-stars-2023-160",
@@ -2644,7 +2733,7 @@
     "subtype": "Book",
     "name": "Chain-Gang All-Stars (2023)",
     "teaser": "Adjei-Brenyah's novel imagines a near-future America where convicted prisoners fight gladiatorial battles to the death for televised entertainment — and follows two women superstars, 'Hammer' and 'Melancholia,' who have promised each other a final showdown. It was a National Book Award finalist and a literary satire of the prison-industrial complex.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593317334-L.jpg",
     "byline": "Nana Kwame Adjei-Brenyah",
     "exploreAction": {
       "verb": "Read",
@@ -2658,7 +2747,31 @@
       "Satire"
     ],
     "tier": 2,
-    "pageCount": 384
+    "pageCount": 367,
+    "synopsis": "Adjei-Brenyah's debut novel is set in an imagined America where convicted prisoners can join the CAPE (Criminal Action Penal Entertainment) program — a gladiatorial system where inmates fight to the death on television for their freedom. The story follows Loretta Thurwar and Hamara 'Hurricane Staxxx' Stacker, two of CAPE's most famous combatants and romantic partners, as they fight their way through the program while an abolitionist movement protests outside. The novel critiques the carceral system, capitalist society, and the commodification of human suffering. It was a finalist for the 2023 National Book Award for Fiction. The novel alternates between the fighters' perspective, the activists' perspective, and the corporate boardroom, creating a multi-layered portrait of a society that has turned imprisonment into entertainment.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Chain",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "Loretta and Hurricane Staxxx. The CAPE program. The first fights. The crowd."
+      },
+      {
+        "number": 2,
+        "title": "The Boardroom",
+        "pageStart": 121,
+        "pageEnd": 250,
+        "summary": "The new rule. Thurwar and Staxxx must fight each other. The activist movement."
+      },
+      {
+        "number": 3,
+        "title": "The End of CAPE",
+        "pageStart": 251,
+        "pageEnd": 367,
+        "summary": "The final confrontation. The system's collapse. The aftermath."
+      }
+    ]
   },
   {
     "id": "book-north-woods-2023-162",
@@ -2666,7 +2779,7 @@
     "subtype": "Book",
     "name": "North Woods (2023)",
     "teaser": "Daniel Mason's novel tells the story of one house in a Massachusetts forest over 400 years — through Puritan settlers, an apple farmer, a painter, an escaped enslaved man, and a 21st-century couple — in a different genre for each era. The house is the protagonist; the people are its weather.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593597033-L.jpg",
     "byline": "Daniel Mason",
     "exploreAction": {
       "verb": "Read",
@@ -2680,7 +2793,31 @@
       "Experimental"
     ],
     "tier": 2,
-    "pageCount": 384
+    "pageCount": 320,
+    "synopsis": "Mason's novel follows the inhabitants of a single house in New England over the course of several centuries, from the earliest American colonies to the present day. The house's residents and visitors include Puritan lovers fleeing Massachusetts, twin sisters in the Revolutionary War, a crime reporter in the 1930s, a Victorian botanist, and a pair of mating beetles. The novel is told through an epistolary structure, interspersing prose with letters, poems, journal entries, and case notes. The house itself is the protagonist — its walls absorb the lives of everyone who passes through, and the novel traces how the same rooms become different spaces across centuries. The New York Times Book Review called it 'brilliant,' and it was a finalist for the National Book Critics Circle Award for Fiction in 2023.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Puritan Lovers",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "1638. The first inhabitants. Qomplanee and the mystery. The orchard."
+      },
+      {
+        "number": 2,
+        "title": "The Revolutionary House",
+        "pageStart": 81,
+        "pageEnd": 180,
+        "summary": "Twin sisters. The war. The botanist. The Victorian family."
+      },
+      {
+        "number": 3,
+        "title": "The Modern House",
+        "pageStart": 181,
+        "pageEnd": 320,
+        "summary": "The crime reporter. The beetles. The present day. The house remembers."
+      }
+    ]
   },
   {
     "id": "book-wellness-2023-163",
@@ -2688,7 +2825,7 @@
     "subtype": "Book",
     "name": "Wellness (2023)",
     "teaser": "Nathan Hill's novel — his follow-up to The Nix — follows a married couple, Jack and Elizabeth, whose relationship is examined through the wellness industry, internet placebo effects, and the science of belief. Its chapters are built around the couple's online relationship history, and Hill's research on placebo became the novel's spine.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593538104-L.jpg",
     "byline": "Nathan Hill",
     "exploreAction": {
       "verb": "Read",
@@ -2702,7 +2839,31 @@
       "Marriage"
     ],
     "tier": 2,
-    "pageCount": 608
+    "pageCount": 480,
+    "synopsis": "Hill's novel follows Jake and Elizabeth, a couple who meet in New York in the 1990s and whose relationship unfolds against the backdrop of the wellness industry's rise. Jake, a former college athlete turned corporate wellness consultant, and Elizabeth, a photographer, navigate marriage, parenthood, and the gap between the lives they imagined and the lives they're living. The novel spans decades, moving between their early romance and their middle-aged disillusionment. Hill explores how the pursuit of wellness — both personal and corporate — has become a substitute for genuine connection. The novel is a domestic epic in the tradition of The Corrections and Freedom, examining how two people try to stay together when everything around them is telling them to optimize.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Meeting",
+        "pageStart": 1,
+        "pageEnd": 150,
+        "summary": "Jake and Elizabeth meet. The romance. New York in the 1990s."
+      },
+      {
+        "number": 2,
+        "title": "The Marriage",
+        "pageStart": 151,
+        "pageEnd": 320,
+        "summary": "Parenthood. The wellness industry. The gap between imagined and actual life."
+      },
+      {
+        "number": 3,
+        "title": "The Reckoning",
+        "pageStart": 321,
+        "pageEnd": 480,
+        "summary": "Middle age. The crisis. What remains after the optimization."
+      }
+    ]
   },
   {
     "id": "book-birnam-wood-2023-164",
@@ -2710,7 +2871,7 @@
     "subtype": "Book",
     "name": "Birnam Wood (2023)",
     "teaser": "Eleanor Catton's Booker-winning follow-up to The Luminaries is a thriller about a guerrilla-gardening collective that trespasses onto a billionaire's New Zealand estate — and gets tangled with an eco-terrorist who may be setting traps. The title nods to Macbeth: Birnam Wood comes to Dunsinane, but here the wood is activists.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780374602635-L.jpg",
     "byline": "Eleanor Catton",
     "exploreAction": {
       "verb": "Read",
@@ -2724,7 +2885,31 @@
       "Environmental"
     ],
     "tier": 2,
-    "pageCount": 432
+    "pageCount": 432,
+    "synopsis": "Catton's novel follows Mira Bunting, the founder of Birnam Wood, a guerrilla gardening collective that plants vegetables on unused land. When Mira discovers an abandoned mine in the New Zealand countryside, she sees an opportunity for the collective's most ambitious project. But the mine's reclusive owner, the tech billionaire Robert Lemoine, has his own plans for the site — and for Mira. The novel is a thriller about climate activism, capitalism, and the question of whether good intentions can survive contact with power. Catton won the Booker Prize in 2013 for The Luminaries, and Birnam Wood is her first novel in a decade. The novel alternates between Mira's perspective and Lemoine's, creating a cat-and-mouse dynamic that builds to a violent climax.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Birnam Wood",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "Mira and the collective. The abandoned mine. Lemoine's offer."
+      },
+      {
+        "number": 2,
+        "title": "The Alliance",
+        "pageStart": 121,
+        "pageEnd": 280,
+        "summary": "Mira and Lemoine's partnership. The surveillance. The betrayal."
+      },
+      {
+        "number": 3,
+        "title": "The Collapse",
+        "pageStart": 281,
+        "pageEnd": 432,
+        "summary": "The plan falls apart. Violence. The consequences of good intentions."
+      }
+    ]
   },
   {
     "id": "book-the-wager-2023-165",
@@ -2732,7 +2917,7 @@
     "subtype": "Book",
     "name": "The Wager (2023)",
     "teaser": "David Grann's nonfiction account of the 1742 wreck of the HMS Wager — a British warship that ran aground off Patagonia, whose crew split into mutiny and cannibalism — won the Baillie Gifford Prize and became a bestseller. The survivors' return to England produced two contradictory accounts, and the Admiralty's trial became a national sensation.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385534260-L.jpg",
     "byline": "David Grann",
     "exploreAction": {
       "verb": "Read",
@@ -2746,7 +2931,38 @@
       "History"
     ],
     "tier": 2,
-    "pageCount": 352
+    "pageCount": 368,
+    "synopsis": "Grann's non-fiction narrative tells the story of the HMS Wager, a British warship that wrecked on a desolate coast off Patagonia in 1742. The surviving crew split into factions and made separate journeys home — some by land, some by sea. When they finally returned to England, their contradictory accounts led to one of the greatest naval trials in history. Grann reconstructs the voyage from contemporary logs, letters, and testimony, creating a gripping tale of survival, mutiny, and the problem of truth when everyone has a different story to tell. The book is simultaneously a maritime adventure, a study in group psychology, and a meditation on how history is constructed from competing narratives.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Voyage Out",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The Wager sets sail. The mission. The crew. The journey south."
+      },
+      {
+        "number": 2,
+        "title": "The Wreck",
+        "pageStart": 81,
+        "pageEnd": 180,
+        "summary": "The shipwreck. The coast. The factions form. The survival."
+      },
+      {
+        "number": 3,
+        "title": "The Journeys Home",
+        "pageStart": 181,
+        "pageEnd": 300,
+        "summary": "The land journey. The sea voyage. The return to England."
+      },
+      {
+        "number": 4,
+        "title": "The Trial",
+        "pageStart": 301,
+        "pageEnd": 368,
+        "summary": "The court-martial. Competing narratives. The problem of truth."
+      }
+    ]
   },
   {
     "id": "book-king-a-life-2023-166",
@@ -2754,7 +2970,7 @@
     "subtype": "Book",
     "name": "King A Life (2023)",
     "teaser": "Jonathan Eig's Pulitzer-winning biography of Martin Luther King Jr. was the first in decades to draw on the newly opened archives — including King's own FBI file and recordings of his marital infidelities, which Eig publishes with context rather than scandal. It restores King's radicalism: the Cold War warrior king is largely a later invention.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593237380-L.jpg",
     "byline": "Jonathan Eig",
     "exploreAction": {
       "verb": "Read",
@@ -2768,7 +2984,38 @@
       "Civil Rights"
     ],
     "tier": 2,
-    "pageCount": 880
+    "pageCount": 672,
+    "synopsis": "Eig's biography of Martin Luther King Jr. draws on newly declassified FBI files, unreported interviews, and thousands of pages of personal papers to create the most comprehensive account of King's life. Eig traces King from his childhood in Atlanta through the Montgomery Bus Boycott, the March on Washington, the Selma campaign, and his assassination in Memphis in 1968. The biography reveals King's private struggles — his depression, his affairs, his FBI surveillance — alongside his public triumphs. Eig argues that King's genius was not just moral clarity but strategic brilliance: King understood how to use television, the church, and nonviolent direct action to create political pressure. The book was widely praised for its depth and its willingness to present King as a full human being rather than a saint.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Atlanta",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "King's childhood. Morehouse College. Crozer. Coretta."
+      },
+      {
+        "number": 2,
+        "title": "Montgomery to Birmingham",
+        "pageStart": 121,
+        "pageEnd": 300,
+        "summary": "The Bus Boycott. The SCLC. Birmingham. The jail letter."
+      },
+      {
+        "number": 3,
+        "title": "The March to Memphis",
+        "pageStart": 301,
+        "pageEnd": 500,
+        "summary": "Washington. Selma. Vietnam. The FBI. The Nobel Prize."
+      },
+      {
+        "number": 4,
+        "title": "The Mountaintop",
+        "pageStart": 501,
+        "pageEnd": 672,
+        "summary": "The Poor People's Campaign. Memphis. The assassination. The legacy."
+      }
+    ]
   },
   {
     "id": "book-western-lane-2023-168",
@@ -2776,7 +3023,7 @@
     "subtype": "Book",
     "name": "Western Lane (2023)",
     "teaser": "Chetna Maroo's Booker-shortlisted debut is a slim novel about an 11-year-old Gujarati girl in London who channels her grief for her mother into competitive squash. The book's prose is as spare as its heroine's game — every sentence is a rally, and the squash court becomes a place where the family's silences are played out.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781635575996-L.jpg",
     "byline": "Chetna Maroo",
     "exploreAction": {
       "verb": "Read",
@@ -2790,7 +3037,31 @@
       "Debut"
     ],
     "tier": 2,
-    "pageCount": 176
+    "pageCount": 192,
+    "synopsis": "Maroo's debut novel follows three siblings — Gopal, Khush, and eleven-year-old narrator Chess — whose father is a devoted squash player training them in his sport. After their mother's death, squash becomes the family's language: every emotion is expressed through the rhythm of the ball against the wall. The novel is told from Chess's perspective, capturing the intense, almost meditative world of competitive squash and the way sport can become both refuge and burden. The prose is spare and precise, mirroring the discipline of the game itself. The novel was longlisted for the Booker Prize in 2023.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Training",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "The siblings' daily routine. Father's intensity. The squash court as sanctuary."
+      },
+      {
+        "number": 2,
+        "title": "The Tournament",
+        "pageStart": 61,
+        "pageEnd": 140,
+        "summary": "Competition approaches. The pressure mounts. The game as grief."
+      },
+      {
+        "number": 3,
+        "title": "After",
+        "pageStart": 141,
+        "pageEnd": 192,
+        "summary": "The tournament. The aftermath. What remains when the game stops."
+      }
+    ]
   },
   {
     "id": "book-old-gods-time-2023-169",
@@ -2798,7 +3069,7 @@
     "subtype": "Book",
     "name": "Old God's Time (2023)",
     "teaser": "Sebastian Barry's Booker-shortlisted novel follows Tom Kettle, a retired Irish policeman living a monkish life in a Dublin castle, whose quiet is broken by two detectives who bring up a case from decades past. It's a crime novel that is really a novel about memory, trauma, and the institutional abuses of the Catholic Church in Ireland.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781982185862-L.jpg",
     "byline": "Sebastian Barry",
     "exploreAction": {
       "verb": "Read",
@@ -2812,7 +3083,31 @@
       "Crime"
     ],
     "tier": 2,
-    "pageCount": 304
+    "pageCount": 352,
+    "synopsis": "Barry's novel follows Tom Kettle, a retired police detective living alone in a Dublin apartment, who is visited by two former colleagues about a cold case from decades ago — a double murder that Tom may have investigated, or may have committed. The novel moves between Tom's present and his past, between memory and reality, creating a portrait of a man whose life has been shaped by violence and loss. Barry's prose is lyrical and destabilizing: Tom's reliability as a narrator deteriorates as the novel progresses, and the reader is left to determine what is real and what is imagination. The novel was longlisted for the Booker Prize in 2023.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Visit",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Tom's quiet life interrupted. The two detectives. The cold case."
+      },
+      {
+        "number": 2,
+        "title": "The Past",
+        "pageStart": 81,
+        "pageEnd": 250,
+        "summary": "Tom's police career. The murders. His wife. The violence."
+      },
+      {
+        "number": 3,
+        "title": "The Present",
+        "pageStart": 251,
+        "pageEnd": 352,
+        "summary": "Memory and reality blur. Tom's unreliability. The truth."
+      }
+    ]
   },
   {
     "id": "book-the-guest-2023-170",
@@ -2820,7 +3115,7 @@
     "subtype": "Book",
     "name": "The Guest (2023)",
     "teaser": "Emma Cline's follow-up to The Girls follows Alex, a 22-year-old adrift on Long Island's wealthy summer circuit, who has been told to leave and instead keeps orbiting the people she's crashed with — borrowing, conning, and performing her way through a season. The novel is a study of a woman who is only ever 'the guest.'.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593538111-L.jpg",
     "byline": "Emma Cline",
     "exploreAction": {
       "verb": "Read",
@@ -2834,7 +3129,31 @@
       "Summer"
     ],
     "tier": 2,
-    "pageCount": 272
+    "pageCount": 304,
+    "synopsis": "Cline's novel follows Alex, a young woman who has just left a wealthy man's estate on Long Island after their affair ended badly. She takes a bus to the Hamptons and attaches herself to a social circle she doesn't belong to, attending parties and dinners while hiding the fact that she has nowhere to go. The novel is a study in class, desire, and the performance of social identity. Alex is a chameleon — she can be anyone anyone wants her to be — and the novel follows her as she moves through a world of wealth and privilege, always on the edge of exposure. Cline's prose is precise and cool, creating a narrator who is simultaneously sympathetic and disturbing.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Departure",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Alex leaves the estate. The bus. The Hamptons. The new circle."
+      },
+      {
+        "number": 2,
+        "title": "The Performance",
+        "pageStart": 81,
+        "pageEnd": 220,
+        "summary": "Parties, dinners, lies. Alex becomes someone else. The edge."
+      },
+      {
+        "number": 3,
+        "title": "The Reckoning",
+        "pageStart": 221,
+        "pageEnd": 304,
+        "summary": "The mask slips. The consequences. The guest who never leaves."
+      }
+    ]
   },
   {
     "id": "book-tremor-2023-171",
@@ -2842,7 +3161,7 @@
     "subtype": "Book",
     "name": "Tremor (2023)",
     "teaser": "Teju Cole's novel follows Tunde, a Nigerian-born art professor at Harvard, through a year of lectures, galleries, and travels — interleaved with accounts of empire, violence, and the objects museums keep. Cole writes the novel as a series of scenes and digressions that refuse a single plot, in the tradition of his Open City.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593537251-L.jpg",
     "byline": "Teju Cole",
     "exploreAction": {
       "verb": "Read",
@@ -2856,7 +3175,31 @@
       "Essayistic"
     ],
     "tier": 2,
-    "pageCount": 320
+    "pageCount": 288,
+    "synopsis": "Cole's novel follows Tunde, a Nigerian-American photographer living in New York, who returns to Lagos to care for his aging father. The novel is a meditation on displacement, memory, and the relationship between Africa and its diaspora. Tunde navigates Lagos's chaotic beauty while confronting his own sense of belonging — he is both Nigerian and American, neither fully. Cole's prose is essayistic and digressive, moving between photography, philosophy, and personal history. The novel examines how images shape our understanding of places and people, and how the act of looking is always an act of power.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Lagos",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "Tunde returns. The city. His father. The photographs."
+      },
+      {
+        "number": 2,
+        "title": "New York",
+        "pageStart": 101,
+        "pageEnd": 200,
+        "summary": "The gallery. The diaspora. The images. The distance."
+      },
+      {
+        "number": 3,
+        "title": "The Tremor",
+        "pageStart": 201,
+        "pageEnd": 288,
+        "summary": "The earthquake of belonging. The act of looking. The end."
+      }
+    ]
   },
   {
     "id": "book-everythings-fine-2023-172",
@@ -2864,7 +3207,7 @@
     "subtype": "Book",
     "name": "Everything's Fine (2023)",
     "teaser": "Cecilia Rabess's debut follows Jess, a young Black woman who takes a job at Goldman Sachs and falls for a white co-worker who votes against everything she believes — a 'love across the aisle' romance that was itself controversial before publication, with a publisher's sensitivity read generating headlines. The novel's debate is the point: can intimacy survive politics?.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780063276550-L.jpg",
     "byline": "Cecilia Rabess",
     "exploreAction": {
       "verb": "Read",
@@ -2878,7 +3221,31 @@
       "Debate"
     ],
     "tier": 2,
-    "pageCount": 320
+    "pageCount": 352,
+    "synopsis": "Rabess's debut novel follows Jess, a young Black woman working at a prestigious Manhattan law firm, who is assigned to work with Marcus, a white associate who is charming, ambitious, and subtly racist. The novel explores the microaggressions, code-switching, and emotional labor that define Jess's daily life. When Jess and Marcus are forced to collaborate on a high-profile case, their professional relationship becomes personal, and Jess must decide how much of herself she's willing to sacrifice for success. The novel is both a workplace drama and a sharp critique of diversity performative culture in corporate America.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Firm",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "Jess at the firm. Marcus. The microaggressions. The code-switching."
+      },
+      {
+        "number": 2,
+        "title": "The Case",
+        "pageStart": 101,
+        "pageEnd": 250,
+        "summary": "The collaboration. The relationship. The compromise."
+      },
+      {
+        "number": 3,
+        "title": "The Reckoning",
+        "pageStart": 251,
+        "pageEnd": 352,
+        "summary": "The verdict. The cost. Everything's fine."
+      }
+    ]
   },
   {
     "id": "book-the-new-naturals-2023-173",
@@ -2886,7 +3253,7 @@
     "subtype": "Book",
     "name": "The New Naturals (2023)",
     "teaser": "Gabriel Bump's National Book Award finalist imagines a group of Black Americans who abandon the country to found a utopian community in an abandoned mall — and the novel tracks the dream from its founding euphoria to its unraveling. It's a comedy about utopia, written in the shadow of every failed paradise that came before.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781982188801-L.jpg",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The New Naturals (2023) — the founding and the first dispute",
@@ -2900,7 +3267,31 @@
     ],
     "tier": 2,
     "pageCount": 320,
-    "byline": ""
+    "byline": "",
+    "synopsis": "Bullock's novel follows a group of strangers who retreat to an abandoned island off the coast of Massachusetts to create a new society, free from the anxieties of modern life. The group includes a chef, a therapist, a musician, and a former tech executive, each fleeing something different. The novel explores utopian thinking, community, and the impossibility of escape. As the group's idealistic project begins to fracture under the weight of human nature, the novel asks whether any community can survive the flaws of its members.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Island",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The arrival. The group forms. The rules. The hope."
+      },
+      {
+        "number": 2,
+        "title": "The Community",
+        "pageStart": 81,
+        "pageEnd": 220,
+        "summary": "Daily life. The tensions. The cliques. The cracks."
+      },
+      {
+        "number": 3,
+        "title": "The Fracture",
+        "pageStart": 221,
+        "pageEnd": 320,
+        "summary": "The project fails. The truth about the members. The return."
+      }
+    ]
   },
   {
     "id": "book-pride-and-prejudice-1813-174",
@@ -2908,7 +3299,7 @@
     "subtype": "Book",
     "name": "Pride and Prejudice (1813)",
     "teaser": "Austen's novel — originally titled First Impressions — opens with one of the most famous sentences in English, and its heroine Elizabeth Bennet rejects a marriage proposal from the wealthiest man she's ever met, then falls in love with him over two hundred pages of misunderstanding. The novel invented the enemies-to-lovers plot and has never been out of print.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439518-L.jpg",
     "byline": "Jane Austen",
     "exploreAction": {
       "verb": "Read",
@@ -2924,7 +3315,31 @@
       "Novel"
     ],
     "tier": 1,
-    "pageCount": 279
+    "pageCount": 432,
+    "synopsis": "Austen's most popular novel follows Elizabeth Bennet, the second of five daughters in a genteel but impoverished family, as she navigates the marriage market of Regency England. When the wealthy Mr. Darcy arrives in the neighborhood, he and Elizabeth immediately clash — she finds him proud and disagreeable, he finds her beneath his notice. The novel traces their gradual understanding of each other: Elizabeth learns that Darcy's pride is not arrogance but shyness, and Darcy learns that Elizabeth's prejudice against him was based on incomplete information. Austen wrote the novel in a tone of sustained irony: the opening line — 'It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife' — is both a social observation and a joke. The novel has sold over 20 million copies and inspired countless adaptations.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Volume I — Meryton",
+        "pageStart": 1,
+        "pageEnd": 150,
+        "summary": "The Bennet household. Bingley and Darcy. The assembly. 'Not handsome enough.'"
+      },
+      {
+        "number": 2,
+        "title": "Volume II — Hunsford",
+        "pageStart": 151,
+        "pageEnd": 300,
+        "summary": "The proposal. Elizabeth's refusal. Darcy's letter. The truth emerges."
+      },
+      {
+        "number": 3,
+        "title": "Volume III — Pemberley",
+        "pageStart": 301,
+        "pageEnd": 432,
+        "summary": "Elizabeth visits Pemberley. The elopement. The second proposal. The happy ending."
+      }
+    ]
   },
   {
     "id": "book-crime-and-punishment-1866-175",
@@ -2932,7 +3347,7 @@
     "subtype": "Book",
     "name": "Crime and Punishment (1866)",
     "teaser": "Dostoevsky's novel gives a poor St. Petersburg student a theory — that extraordinary men may break the law — and then makes him test it with an axe. Raskolnikov's murder of a pawnbroker occupies the first part; the other five parts are the punishment, which is not prison but his own unraveling mind.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780143058144-L.jpg",
     "byline": "Fyodor Dostoevsky",
     "exploreAction": {
       "verb": "Read",
@@ -2948,9 +3363,33 @@
       "19th Century"
     ],
     "tier": 2,
-    "pageCount": 672,
+    "pageCount": 527,
     "altPageCount": 608,
-    "altPageLabel": "Penguin"
+    "altPageLabel": "Penguin",
+    "synopsis": "Dostoevsky's novel follows Rodion Raskolnikov, an impoverished former law student in St. Petersburg who murders an unscrupulous pawnbroker, Alyona Ivanovna, and her half-sister Lizaveta, robbing them of their money. Raskolnikov justifies the murder through his theory that 'extraordinary' men have the right to transgress moral law — that Napoleon, for instance, could kill without guilt. But the murder destroys him: he is wracked with paranoia, guilt, and psychological disintegration. The novel tracks his cat-and-mouse game with the detective Porfiry Petrovich, his relationship with Sonya (a prostitute who becomes his moral compass), and his eventual confession. Dostoevsky wrote the novel while owing large sums to creditors, serializing it in The Russian Messenger. The novel's exploration of guilt, free will, and redemption made it one of the most influential works of world literature.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Part I — The Crime",
+        "pageStart": 1,
+        "pageEnd": 130,
+        "summary": "Raskolnikov's theory. The murder. The aftermath. The paranoia."
+      },
+      {
+        "number": 2,
+        "title": "Part II — The Investigation",
+        "pageStart": 131,
+        "pageEnd": 300,
+        "summary": "Porfiry's questions. Sonya. The confession. The suffering."
+      },
+      {
+        "number": 3,
+        "title": "Parts III–VI — The Confession",
+        "pageStart": 301,
+        "pageEnd": 527,
+        "summary": "The trial. Siberia. Sonya's devotion. The redemption."
+      }
+    ]
   },
   {
     "id": "book-heart-of-darkness-1899-176",
@@ -2958,7 +3397,7 @@
     "subtype": "Book",
     "name": "Heart of Darkness (1899)",
     "teaser": "Conrad's novella is a frame within a frame: a sailor on a Thames boat tells the story of Marlow's journey up the Congo to find Kurtz, an ivory agent who has gone native — and it became the most argued-over short novel in English, the source of 'The horror! The horror!' and of the critique that it both exposed and reproduced colonialism.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780486264646-L.jpg",
     "byline": "Joseph Conrad",
     "exploreAction": {
       "verb": "Read",
@@ -2974,7 +3413,31 @@
       "Novella"
     ],
     "tier": 1,
-    "pageCount": 112
+    "pageCount": 116,
+    "synopsis": "Conrad's novella is narrated by Charles Marlow, a sailor who recounts his journey up the Congo River as captain of a Belgian trading company's steamer. Marlow's assignment is to find Kurtz, an ivory trader who has 'gone native' and set himself up as a god among the Congolese people. As Marlow travels upriver, he encounters the brutality of European colonialism and the thin line between civilization and savagery. When he finally finds Kurtz, the man is dying and has descended into madness: 'The horror! The horror!' is his final words. Conrad based the novella on his own experiences in the Congo in 1890, and the work became the foundation of modernist literature. Chinua Achebe's famous 1975 critique accused Conrad of racism for reducing Africa to a backdrop for European psychology; the debate continues today.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Frame Narrative",
+        "pageStart": 1,
+        "pageEnd": 20,
+        "summary": "Marlow on the Thames. The story begins. The journey upriver."
+      },
+      {
+        "number": 2,
+        "title": "The River",
+        "pageStart": 21,
+        "pageEnd": 70,
+        "summary": "The Company. The Central Station. The Inner Station. Kurtz."
+      },
+      {
+        "number": 3,
+        "title": "The Horror",
+        "pageStart": 71,
+        "pageEnd": 116,
+        "summary": "Kurtz's reign. The report. 'The horror! The horror!' The return."
+      }
+    ]
   },
   {
     "id": "book-to-the-lighthouse-1927-177",
@@ -2982,7 +3445,7 @@
     "subtype": "Book",
     "name": "To the Lighthouse (1927)",
     "teaser": "Woolf's novel is one family and one question — will the Ramsays ever sail to the lighthouse? — told in three movements, including 'Time Passes,' the famous middle section where a decade passes in twenty pages while the house decays. The novel is the masterpiece of her stream-of-consciousness method.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780156907392-L.jpg",
     "byline": "Virginia Woolf",
     "exploreAction": {
       "verb": "Read",
@@ -2998,7 +3461,31 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 209
+    "pageCount": 232,
+    "synopsis": "Woolf's novel centres on the Ramsay family and their visits to the Isle of Skye in Scotland between 1910 and 1920. The novel is divided into three sections: 'The Window,' set on a single day before World War I; 'Time Passes,' a ten-page interlude covering the war years in which the house decays and several characters die offstage; and 'The Lighthouse,' in which the surviving Ramsays return to the house and James Ramsay finally makes the journey to the lighthouse his mother promised him years before. The novel has little dialogue and almost no direct action; most of it is written as thoughts and observations. Woolf uses multiple focalisation — the reader sees the same events through different characters' eyes — to explore how subjective experience shapes reality. The novel's central image — the lighthouse seen from the window — becomes a meditation on time, loss, and the permanence of art.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Window",
+        "pageStart": 1,
+        "pageEnd": 140,
+        "summary": "The Ramsays' summer. Mrs Ramsay's promise. The dinner. The relationships."
+      },
+      {
+        "number": 2,
+        "title": "Time Passes",
+        "pageStart": 141,
+        "pageEnd": 160,
+        "summary": "The war. The house decays. Deaths offstage. Time moves."
+      },
+      {
+        "number": 3,
+        "title": "The Lighthouse",
+        "pageStart": 161,
+        "pageEnd": 232,
+        "summary": "The return. James's journey. Lily Briscoe's painting. The end."
+      }
+    ]
   },
   {
     "id": "book-the-grapes-of-wrath-178",
@@ -3006,7 +3493,7 @@
     "subtype": "Book",
     "name": "The Grapes of Wrath (1939)",
     "teaser": "Steinbeck's Pulitzer winner follows the Joad family from the Oklahoma dust bowl to California along Route 66 — and its ending, with Rose of Sharon nursing a starving stranger, scandalized and moved the country in equal measure. It sold 430,000 copies in its first year and was banned in its own state's farm country.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780143039433-L.jpg",
     "byline": "John Steinbeck",
     "exploreAction": {
       "verb": "Read",
@@ -3021,7 +3508,31 @@
       "Pulitzer"
     ],
     "tier": 1,
-    "pageCount": 464
+    "pageCount": 464,
+    "synopsis": "Steinbeck's Pulitzer-winning novel follows the Joad family, tenant farmers driven from their Oklahoma home by drought, economic hardship, and bank foreclosures during the Great Depression. The family — including Ma and Pa Joad, their son Tom (recently paroled from prison), and the former preacher Jim Casy — sets out for California along Route 66, along with thousands of other 'Okies' seeking work, land, and dignity. The novel alternates between the Joads' specific story and intercalary chapters that describe the broader social catastrophe. In California, the family finds not abundance but exploitation: wages are driven down by surplus labor, camps are raided, and hope curdles into rage. The novel's title comes from 'The Battle Hymn of the Republic.' The book won the National Book Award and Pulitzer Prize, and was cited when Steinbeck won the Nobel Prize in 1962.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Departure",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "Tom returns. The farm lost. The family loads the truck. Route 66."
+      },
+      {
+        "number": 2,
+        "title": "The Road",
+        "pageStart": 121,
+        "pageEnd": 280,
+        "summary": "The journey west. Grandpa dies. Jim Casy's philosophy. The camps."
+      },
+      {
+        "number": 3,
+        "title": "California",
+        "pageStart": 281,
+        "pageEnd": 464,
+        "summary": "The promised land. Exploitation. The strike. Casy's death. Tom's promise."
+      }
+    ]
   },
   {
     "id": "book-invisible-man-1952-180",
@@ -3029,7 +3540,7 @@
     "subtype": "Book",
     "name": "Invisible Man (1952)",
     "teaser": "Ellison's only completed novel opens with its narrator underground, 'invisible... simply because people refuse to see me' — and the 1,369 light bulbs he's stolen electricity to light are the novel's central image: he is making himself visible by force. It won the National Book Award in 1953, the first by a Black writer.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780679732761-L.jpg",
     "byline": "Ralph Ellison",
     "exploreAction": {
       "verb": "Read",
@@ -3045,7 +3556,31 @@
       "Identity"
     ],
     "tier": 1,
-    "pageCount": 608
+    "pageCount": 568,
+    "synopsis": "Ellison's only novel published during his lifetime follows an unnamed Black narrator from his childhood in the South through his education at a Negro college, his brief employment as a factory worker, and his involvement with the Brotherhood (a political organization modeled on the Communist Party). The narrator is 'invisible' not because he is literally unseen but because white society refuses to see him as a full human being. The novel traces his disillusionment with every institution that claims to represent him — the college, the factory, the Brotherhood — and his eventual retreat to an underground room in Harlem, where he reflects on his experiences. The novel won the National Book Award in 1953, making Ellison the first African-American writer to win. The Modern Library ranked it 19th on its list of the 100 best English-language novels of the 20th century.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The South",
+        "pageStart": 1,
+        "pageEnd": 130,
+        "summary": "The battle royal. The college. The expulsion. The paint factory."
+      },
+      {
+        "number": 2,
+        "title": "New York",
+        "pageStart": 131,
+        "pageEnd": 350,
+        "summary": "Harlem. The Brotherhood. The speeches. The manipulation."
+      },
+      {
+        "number": 3,
+        "title": "The Underground",
+        "pageStart": 351,
+        "pageEnd": 568,
+        "summary": "The riot. The betrayal. The underground room. 'Invisible.'"
+      }
+    ]
   },
   {
     "id": "book-lord-of-the-flies-181",
@@ -3053,7 +3588,7 @@
     "subtype": "Book",
     "name": "Lord of the Flies (1954)",
     "teaser": "Golding's novel strands a group of British schoolboys on an island and watches civilization evaporate in weeks: the conch shell that orders their meetings loses authority, the signal fire goes out, and the 'beast' they fear turns out to be the darkness in themselves. It was rejected by 21 publishers before becoming a school staple.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780399501487-L.jpg",
     "byline": "William Golding",
     "exploreAction": {
       "verb": "Read",
@@ -3068,7 +3603,31 @@
       "Nobel"
     ],
     "tier": 1,
-    "pageCount": 224
+    "pageCount": 182,
+    "synopsis": "Golding's novel follows a group of British schoolboys stranded on a deserted island after a plane crash during wartime. Ralph, elected leader, tries to maintain order and build a signal fire; Jack, head of the choirboys, becomes obsessed with hunting and power. The boys split into two tribes: Ralph's group, which values civilization and rescue, and Jack's, which values violence and spectacle. The novel traces the descent from order to chaos: the signal fire goes out (a ship passes), Piggy's glasses are stolen, Simon is killed by the frenzied boys, and Piggy is crushed by a boulder. Ralph is hunted across the island until a naval officer arrives, having seen the smoke. The novel's central symbol — the 'Lord of the Flies,' a pig's head on a stake — represents the beast within each boy. Golding wrote the novel as a response to The Coral Island (1858), a Victorian adventure story about boys who prosper on a desert island.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Sound of the Shell",
+        "pageStart": 1,
+        "pageEnd": 30,
+        "summary": "The crash. Ralph and Piggy. The conch. The election."
+      },
+      {
+        "number": 2,
+        "title": "The Rise of Jack",
+        "pageStart": 31,
+        "pageEnd": 90,
+        "summary": "The hunt. The beast. The split. Jack's tribe."
+      },
+      {
+        "number": 3,
+        "title": "The Fall",
+        "pageStart": 91,
+        "pageEnd": 182,
+        "summary": "Simon's death. Piggy's death. The hunt for Ralph. The rescue."
+      }
+    ]
   },
   {
     "id": "book-things-fall-apart-1958-182",
@@ -3076,7 +3635,7 @@
     "subtype": "Book",
     "name": "Things Fall Apart (1958)",
     "teaser": "Achebe wrote Things Fall Apart at 28 as a deliberate answer to Heart of Darkness — the story of an Igbo village told from the inside, in which the title's collapse is both a man's and a culture's. Okonkwo, a wrestler who built his life on repressing everything he fears in his father, is destroyed by the arrival of missionaries and by his own rigidity.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385474542-L.jpg",
     "byline": "Chinua Achebe",
     "exploreAction": {
       "verb": "Read",
@@ -3092,7 +3651,31 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 224
+    "pageCount": 209,
+    "synopsis": "Achebe's debut novel follows Okonkwo, a powerful warrior and leader in the Igbo village of Umuofia in pre-colonial Nigeria. Okonkwo is driven by fear of weakness — his father was lazy and debt-ridden — and he rules his household with an iron hand. The novel traces Okonkwo's rise and fall: his exile from Umuofia after accidentally killing a clansman, his years in exile, and his return to find that the white missionaries and colonial government have transformed Igbo society. The novel's title comes from Yeats's 'The Second Coming': 'Things fall apart; the centre cannot hold.' Achebe wrote the novel in response to European portrayals of Africa (particularly Conrad's Heart of Darkness and Joyce Cary's Mister Johnson), and it became the most widely read African novel in history, translated into over 50 languages.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Umuofia",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "Okonkwo's rise. The wrestling match. The Oracle. The exile."
+      },
+      {
+        "number": 2,
+        "title": "Exile",
+        "pageStart": 61,
+        "pageEnd": 120,
+        "summary": "Seven years in Mbanta. The missionaries. The conversion."
+      },
+      {
+        "number": 3,
+        "title": "The Return",
+        "pageStart": 121,
+        "pageEnd": 209,
+        "summary": "Okonkwo returns. The colonial government. The court. The end."
+      }
+    ]
   },
   {
     "id": "book-catch-22-1961-183",
@@ -3100,7 +3683,7 @@
     "subtype": "Book",
     "name": "Catch-22 (1961)",
     "teaser": "Heller's novel invented the paradox that gave it its name — a soldier who asks to be grounded for madness proves he's sane by asking, so he can't be grounded — and turned the World War II novel into a time-loop comedy of bureaucratic terror. Its nonlinear structure was a scandal in 1961 and a template by 1970.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781451626650-L.jpg",
     "byline": "Joseph Heller",
     "exploreAction": {
       "verb": "Read",
@@ -3115,7 +3698,31 @@
       "War"
     ],
     "tier": 1,
-    "pageCount": 464
+    "pageCount": 453,
+    "synopsis": "Heller's novel follows Captain John Yossarian, a World War II bombardier stationed on the fictional island of Pianosa, who wants to stop flying combat missions — but the military's catch-22 prevents him: if he's crazy, he can stop flying, but if he asks to stop, he must be sane. The novel is structured as a series of circular, non-chronological episodes that gradually reveal the full horror of Yossarian's situation. Heller's central argument — that the military is insane and the individual is rational — is delivered through black comedy, absurd dialogue, and escalating violence. The novel was initially a commercial failure but became a word-of-mouth sensation, selling over 10 million copies. The phrase 'catch-22' entered the English language to describe any paradoxical situation from which there is no escape.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Yossarian's War",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "The missions. The catch. Milo Minderbinder. The hospital."
+      },
+      {
+        "number": 2,
+        "title": "The Spiral",
+        "pageStart": 121,
+        "pageEnd": 300,
+        "summary": "Nately. Snowden. The dead man in Yossarian's tent. The circular time."
+      },
+      {
+        "number": 3,
+        "title": "The End",
+        "pageStart": 301,
+        "pageEnd": 453,
+        "summary": "Snowden's secret. Yossarian's decision. The defection. 'That's some catch.'"
+      }
+    ]
   },
   {
     "id": "book-the-bell-jar-1963-184",
@@ -3123,7 +3730,7 @@
     "subtype": "Book",
     "name": "The Bell Jar (1963)",
     "teaser": "Plath's only novel — published under the pseudonym Victoria Lucas a month before her death — follows Esther Greenwood, a college student in 1950s New York, through her internship at a fashion magazine and her slow descent into breakdown. Its famous fig-tree passage imagines all her possible futures as figs that rot as she hesitates to choose.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780060837020-L.jpg",
     "byline": "Sylvia Plath",
     "exploreAction": {
       "verb": "Read",
@@ -3138,7 +3745,31 @@
       "Confessional"
     ],
     "tier": 1,
-    "pageCount": 288
+    "pageCount": 288,
+    "synopsis": "Plath's only novel follows Esther Greenwood, a brilliant scholarship student from Boston who wins a summer internship at a New York fashion magazine. In New York, Esther is surrounded by glamour and sophistication, but she feels increasingly disconnected — the 'bell jar' of the title descends, distorting her perception of the world. Esther's depression deepens: she can't sleep, can't write, can't decide what to do with her life. The novel traces her deterioration through a series of psychiatrists and treatments, culminating in electroconvulsive therapy (both harmful and, eventually, helpful). Plath drew directly on her own experience: she attempted suicide in 1953 and was treated with shock therapy. The novel was published in 1963 under the pseudonym Victoria Lucas, and Plath killed herself a month later. The bell jar has become a cultural metaphor for depression.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "New York",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The internship. The glamour. The disconnection. The bell jar descends."
+      },
+      {
+        "number": 2,
+        "title": "The Collapse",
+        "pageStart": 81,
+        "pageEnd": 180,
+        "summary": "Boston. The doctors. The pills. The suicide attempt."
+      },
+      {
+        "number": 3,
+        "title": "The Treatment",
+        "pageStart": 181,
+        "pageEnd": 288,
+        "summary": "The asylum. Dr. Nolan. The shock therapy. The bell jar lifts."
+      }
+    ]
   },
   {
     "id": "book-the-gulag-archipelago-1973-187",
@@ -3146,7 +3777,7 @@
     "subtype": "Book",
     "name": "The Gulag Archipelago (1973)",
     "teaser": "Solzhenitsyn's three-volume history of the Soviet prison camp system is subtitled 'An Experiment in Literary Investigation' and is built from the testimony of 227 witnesses — including himself. The opening volume was smuggled to the West and published in 1973; Solzhenitsyn was stripped of his citizenship the following year.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780061253720-L.jpg",
     "byline": "Aleksandr Solzhenitsyn",
     "exploreAction": {
       "verb": "Read",
@@ -3160,7 +3791,31 @@
       "Testimony"
     ],
     "tier": 2,
-    "pageCount": 480
+    "pageCount": 660,
+    "synopsis": "Solzhenitsyn's three-volume non-fiction masterwork is the most comprehensive account of the Soviet forced labor camp system. Drawing on his own eleven years in the camps, the testimony of 227 fellow prisoners, and documentary evidence, Solzhenitsyn reconstructs the history of the Gulag from Lenin's first use of concentration camps through Stalin's expansion and the system's eventual collapse. The book is part memoir, part documentary, part philosophical meditation on suffering and resistance. Solzhenitsyn smuggled the manuscript out of the Soviet Union, and it was published in Paris in 1973. The publication led to his expulsion from the USSR in 1974 and won him the Nobel Prize in Literature in 1970. The book is credited with helping to delegitimize the Soviet system in the eyes of the world.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Volume I — The Prison Industry",
+        "pageStart": 1,
+        "pageEnd": 220,
+        "summary": "Arrest. Interrogation. The camps. The system. The first prisoners."
+      },
+      {
+        "number": 2,
+        "title": "Volume II — The Camps",
+        "pageStart": 221,
+        "pageEnd": 440,
+        "summary": "Daily life. The hierarchy. The informers. The resistance. The hunger."
+      },
+      {
+        "number": 3,
+        "title": "Volume III — The Collapse",
+        "pageStart": 441,
+        "pageEnd": 660,
+        "summary": "Stalin's death. The thaw. Solzhenitsyn's release. The exile. The testament."
+      }
+    ]
   },
   {
     "id": "book-the-handmaids-tale-1985-190",
@@ -3168,7 +3823,7 @@
     "subtype": "Book",
     "name": "The Handmaid's Tale (1985)",
     "teaser": "Atwood wrote Gilead — a theocratic United States where fertile women are assigned as 'handmaids' — by inventing nothing: every practice in the novel has a historical precedent she documented. Its narrator Offred tells her story in fragments to an unknown listener, and the novel's famous final section reveals the whole account as a historical transcript.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385490818-L.jpg",
     "byline": "Margaret Atwood",
     "exploreAction": {
       "verb": "Read",
@@ -3185,7 +3840,31 @@
       "1980s"
     ],
     "tier": 2,
-    "pageCount": 336
+    "pageCount": 311,
+    "synopsis": "Atwood's dystopian novel is set in the near-future Republic of Gilead, a theocratic military dictatorship that has overthrown the US government. Offred — 'Of Fred,' her name indicates she is the property of a Commander named Fred — is a Handmaid, a fertile woman forced to bear children for the ruling class. The novel is narrated by Offred in a present tense that circles around the past: before Gilead, she had a husband, a daughter, a job, a name. Now she has a红色clothing, a communal shopping trip, and once a month, a ceremonial rape. Atwood has said that nothing in the novel was invented — every atrocity has a historical precedent. The novel won the Arthur C. Clarke Award in 1987 and has become a cultural touchstone, particularly after the 2017 Hulu television adaptation.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Parts I–III — The Present",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "Offred's room. The Commander's house. The shopping trip. The memories."
+      },
+      {
+        "number": 2,
+        "title": "Parts IV–VI — The Past",
+        "pageStart": 101,
+        "pageEnd": 200,
+        "summary": "Before Gilead. Luke. The daughter. The escape attempt. The Red Center."
+      },
+      {
+        "number": 3,
+        "title": "Parts VII–XVIII — The Affair",
+        "pageStart": 201,
+        "pageEnd": 311,
+        "summary": "The Commander's visits. The Commander's wife. Nick. The Mayday resistance. The end."
+      }
+    ]
   },
   {
     "id": "book-norwegian-wood-1987-191",
@@ -3193,7 +3872,7 @@
     "subtype": "Book",
     "name": "Norwegian Wood (1987)",
     "teaser": "Murakami's fifth novel was his breakthrough in Japan — selling millions, largely because it was, unusually for him, a realistic story: a love triangle among students in 1960s Tokyo, narrated by Toru Watanabe remembering his friend Kizuki's suicide and his love for Kizuki's girlfriend Naoko. Its first line — 'I was thirty-seven, then' — begins the memory.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780375704024-L.jpg",
     "byline": "Haruki Murakami",
     "exploreAction": {
       "verb": "Read",
@@ -3207,7 +3886,31 @@
       "Romance"
     ],
     "tier": 2,
-    "pageCount": 296
+    "pageCount": 389,
+    "synopsis": "Murakami's most autobiographical novel follows Toru Watanabe, a college student in Tokyo in the late 1960s, as he navigates love, grief, and the gap between youth and adulthood. Two women dominate his life: Naoko, the girlfriend of his best friend Kizuki (who committed suicide at seventeen), and Midori, a lively, unconventional woman who represents life. The novel is a love story, but also a study in depression: Naoko's mental health deteriorates as the novel progresses, and Toru is pulled between her darkness and Midori's light. The title comes from the Beatles song, which Toru hears in a Hamburg airport and is transported back to his youth. The novel was a massive bestseller in Japan (over 4 million copies) and is Murakami's most conventional work — no surrealism, no alternate worlds, just the real grief of being young.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Tokyo 1978",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The airport. 'Norwegian Wood.' The past returns. Kizuki's death."
+      },
+      {
+        "number": 2,
+        "title": "The Women",
+        "pageStart": 81,
+        "pageEnd": 250,
+        "summary": "Naoko. Midori. Reiko. The dorm. The walks. The love triangle."
+      },
+      {
+        "number": 3,
+        "title": "Amagi Pass",
+        "pageStart": 251,
+        "pageEnd": 389,
+        "summary": "Naoko's illness. The asylum. Midori. The loss. 'Where was I?'"
+      }
+    ]
   },
   {
     "id": "book-the-remains-of-the-192",
@@ -3215,7 +3918,7 @@
     "subtype": "Book",
     "name": "The Remains of the Day (1989)",
     "teaser": "Ishiguro's Booker winner is the memoir of Stevens, an aging English butler driving through the countryside and remembering his service at Darlington Hall — and gradually revealing that the 'greatness' he served was collaboration with fascism, and that his one possible love was lost to his own professional discipline. The novel is a tragedy told in the most polite voice in literature.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780679731726-L.jpg",
     "byline": "Kazuo Ishiguro",
     "exploreAction": {
       "verb": "Read",
@@ -3233,7 +3936,31 @@
       "Booker"
     ],
     "tier": 1,
-    "pageCount": 258
+    "pageCount": 258,
+    "synopsis": "Ishiguro's Booker-winning novel follows Stevens, an aging English butler who has devoted his life to serving Lord Darlington at Darlington Hall. Stevens takes a motoring trip through the English countryside in 1956, and as he drives, he reflects on his career — his unwavering loyalty, his repression of emotion, and his failed relationship with Miss Kenton, the former housekeeper who loved him and whom he never acknowledged. The novel's devastating irony is that Stevens's loyalty was misplaced: Lord Darlington was a Nazi sympathizer, and Stevens's dedication to service has cost him everything human. The novel is narrated in Stevens's measured, formal voice — a voice that reveals more than it intends. Ishiguro won the Booker Prize in 1989, and the novel was adapted into a 1993 film starring Anthony Hopkins.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Journey Begins",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "Stevens's new American employer. The motoring trip. The reflections begin."
+      },
+      {
+        "number": 2,
+        "title": "Lord Darlington",
+        "pageStart": 61,
+        "pageEnd": 150,
+        "summary": "The great house. The conferences. Miss Kenton. The loyalty."
+      },
+      {
+        "number": 3,
+        "title": "The End of the Trip",
+        "pageStart": 151,
+        "pageEnd": 258,
+        "summary": "The meeting with Miss Kenton. The truth about Darlington. 'The evening's the best part of the day.'"
+      }
+    ]
   },
   {
     "id": "book-american-psycho-1991-193",
@@ -3241,7 +3968,7 @@
     "subtype": "Book",
     "name": "American Psycho (1991)",
     "teaser": "Bret Easton Ellis's novel about Patrick Bateman, a Wall Street banker who tortures and murders with an accountant's obsession, was condemned before publication — its publisher dropped it, and the controversy made it famous. Its method is the point: the brand-name liturgy of Bateman's world is rendered in the same deadpan as the violence, which is the novel's argument that the two are one system.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780679735779-L.jpg",
     "byline": "Bret Easton Ellis",
     "exploreAction": {
       "verb": "Read",
@@ -3255,7 +3982,31 @@
       "Dark"
     ],
     "tier": 2,
-    "pageCount": 416
+    "pageCount": 399,
+    "synopsis": "Ellis's controversial novel follows Patrick Bateman, a twenty-six-year-old investment banker on Wall Street who is also a serial killer. Bateman narrates in a flat, affectless voice that alternates between meticulous descriptions of designer clothing, restaurant reservations, and business cards, and graphic accounts of torture and murder. The novel satirizes 1980s consumer culture, yuppie narcissism, and the emptiness beneath the surface of wealth. The central question — is Bateman actually committing these murders, or is he fantasizing? — is never definitively answered. The novel was initially rejected by multiple publishers and upon publication was picketed by feminist groups; it was banned in several countries. The 2000 film adaptation starring Christian Bale became a cult classic. Ellis wrote the novel at 27, drawing on his own Wall Street experience.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "January–March",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "The business card. The restaurants. The first murders. The interviews."
+      },
+      {
+        "number": 2,
+        "title": "April–June",
+        "pageStart": 101,
+        "pageEnd": 250,
+        "summary": "Paul Allen. The chainsaw. The spiral. The disguises."
+      },
+      {
+        "number": 3,
+        "title": "July–December",
+        "pageStart": 251,
+        "pageEnd": 399,
+        "summary": "The breakdown. The lawyer. 'I don't exist.' The blankness."
+      }
+    ]
   },
   {
     "id": "book-trainspotting-1993-195",
@@ -3263,7 +4014,7 @@
     "subtype": "Book",
     "name": "Trainspotting (1993)",
     "teaser": "Irvine Welsh's novel about Edinburgh heroin addicts is written in a phonetic Scots dialect so dense it comes with its own reading challenge — and its opening monologue, 'Choose Life,' became one of the most-quoted passages in modern Scottish literature. It's a comedy of despair, narrated from inside the addiction it neither glamorizes nor judges.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780393312836-L.jpg",
     "byline": "Irvine Welsh",
     "exploreAction": {
       "verb": "Read",
@@ -3277,7 +4028,31 @@
       "Addiction"
     ],
     "tier": 2,
-    "pageCount": 352
+    "pageCount": 352,
+    "synopsis": "Welsh's debut novel follows a group of heroin addicts in Edinburgh's Leith district, narrated in their own voices — a polyphony of Scottish dialects, slang, and monologues. The central narrator is Mark Renton, who cycles through heroin addiction, cold turkey, rehab, and relapse. His friends include Spud (gentle and doomed), Sick Boy (philosophical and amoral), Begbie (violent and terrifying), and Tommy (who descends into addiction after a rugby injury). The novel is structured as a series of interconnected stories rather than a linear narrative, and its linguistic energy — the voices are raw, profane, and often hilarious — is its primary achievement. Welsh drew on his own heroin addiction. The 1996 film adaptation by Danny Boyle, starring Ewan McGregor, became a cultural phenomenon.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Summer of Love",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The shooting gallery. The hits. The friends. The language."
+      },
+      {
+        "number": 2,
+        "title": "The Trainspotting",
+        "pageStart": 81,
+        "pageEnd": 200,
+        "summary": "Cold turkey. The rehab. The comedy. The horror."
+      },
+      {
+        "number": 3,
+        "title": "The End of the Line",
+        "pageStart": 201,
+        "pageEnd": 352,
+        "summary": "Tommy's descent. The betrayal. The choice. 'Choose life.'"
+      }
+    ]
   },
   {
     "id": "book-fight-club-1996-196",
@@ -3285,7 +4060,7 @@
     "subtype": "Book",
     "name": "Fight Club (1996)",
     "teaser": "Palahniuk's novel about an insomniac office worker and the soap salesman who gives him a new religion — fight club, then Project Mayhem — became a generation's counterculture text and a film that outlived the book. Its twist, revealed in the final third, is that the narrator and Tyler Durden are the same man: the novel is a first-person account of schizophrenia, and the famous rule is that you don't talk about it.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780393327341-L.jpg",
     "byline": "Chuck Palahniuk",
     "exploreAction": {
       "verb": "Read",
@@ -3299,7 +4074,31 @@
       "Cult"
     ],
     "tier": 2,
-    "pageCount": 208
+    "pageCount": 218,
+    "synopsis": "Palahniuk's novel follows an unnamed narrator — a suffering insomniac who works for a car company — who meets Tyler Durden, a charismatic anarchist who believes that modern life has emasculated men. Together they start 'Fight Club,' an underground boxing ring where men fight each other as a form of therapy. Fight Club evolves into 'Project Mayhem,' a domestic terrorist organization targeting corporations and consumer culture. The novel's famous twist — which I won't reveal — re-reads every chapter before it. Palahniuk wrote the novel as a satire of masculinity, consumer culture, and the self-help industry. The 1999 film adaptation by David Fincher, starring Brad Pitt and Edward Norton, became a cult classic and arguably more famous than the novel. The phrase 'The first rule of Fight Club is: you do not talk about Fight Club' entered popular culture.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Insomnia",
+        "pageStart": 1,
+        "pageEnd": 50,
+        "summary": "The narrator's emptiness. Tyler Durden. The basement. The first fight."
+      },
+      {
+        "number": 2,
+        "title": "Fight Club",
+        "pageStart": 51,
+        "pageEnd": 130,
+        "summary": "The fights spread. Marla Singer. The philosophy. 'You are not your khakis.'"
+      },
+      {
+        "number": 3,
+        "title": "Project Mayhem",
+        "pageStart": 131,
+        "pageEnd": 218,
+        "summary": "The escalation. The space monkeys. The revelation. The end."
+      }
+    ]
   },
   {
     "id": "book-harry-potter-1997-197",
@@ -3307,7 +4106,7 @@
     "subtype": "Book",
     "name": "Harry Potter (1997)",
     "teaser": "Rowling's first novel — rejected by 12 publishers — introduced Harry Potter, the boy who discovers at 11 that he's a wizard and that the parents he thought died in a car crash were murdered by the most feared wizard in history. The series sold over 500 million copies and turned a children's book into a global industry.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780590353427-L.jpg",
     "byline": "J.K. Rowling",
     "exploreAction": {
       "verb": "Read",
@@ -3321,7 +4120,31 @@
       "Middle Grade"
     ],
     "tier": 2,
-    "pageCount": 223
+    "pageCount": 309,
+    "synopsis": "Rowling's debut novel introduces Harry Potter, an orphaned boy living with his cruel aunt and uncle, who discovers on his eleventh birthday that he is a wizard and has been accepted to Hogwarts School of Witchcraft and Wizardry. Harry learns about his parents' murder by the dark wizard Voldemort, who left Harry with a lightning-bolt scar and a connection to the darkest magic. At Hogwarts, Harry befriends Ron Weasley and Hermione Granger, and the three must protect the Philosopher's Stone from Voldemort's supporters. The novel established the seven-book series that would become the best-selling book series in history, with over 500 million copies sold. The series grew darker and more complex as Harry aged, tackling themes of death, prejudice, and the abuse of power. The 2001 film adaptation launched a $7.7 billion film franchise.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Dursleys",
+        "pageStart": 1,
+        "pageEnd": 40,
+        "summary": "Harry under the stairs. The letter. Hagrid arrives. The wizarding world."
+      },
+      {
+        "number": 2,
+        "title": "Hogwarts",
+        "pageStart": 41,
+        "pageEnd": 200,
+        "summary": "The Sorting Hat. Quidditch. Draco Malfoy. The Philosopher's Stone."
+      },
+      {
+        "number": 3,
+        "title": "The Stone",
+        "pageStart": 201,
+        "pageEnd": 309,
+        "summary": "The three-headed dog. The trapdoor. Voldemort's return. The mirror."
+      }
+    ]
   },
   {
     "id": "book-disgrace-1999-198",
@@ -3329,7 +4152,7 @@
     "subtype": "Book",
     "name": "Disgrace (1999)",
     "teaser": "Coetzee's double Booker winner — he won the prize twice, and this was the second — follows David Lurie, a disgraced professor who moves to his daughter's small farm in South Africa, where a violent attack forces him to confront everything he assumed about power, race, and his own body. Its title names its subject: the novel is about what it means to lose standing and keep living.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140296402-L.jpg",
     "byline": "J.M. Coetzee",
     "exploreAction": {
       "verb": "Read",
@@ -3346,7 +4169,31 @@
       "20th Century"
     ],
     "tier": 2,
-    "pageCount": 220
+    "pageCount": 220,
+    "synopsis": "Coetzee's Booker-winning novel follows David Lurie, a fifty-two-year-old professor of Romantic poetry at a Cape Town university, who is dismissed after having an affair with a student. Lurie retreats to his daughter Lucy's smallholding in the Eastern Cape, where they are attacked by three men in an act of racial violence that has roots in South Africa's colonial past. The novel traces Lurie's attempt to understand his own disgrace — both the public scandal and the private shame — in a post-apartheid South Africa where the old power structures have collapsed. Coetzee won the Booker Prize in 1999 and the Nobel Prize in Literature in 2003. The novel is a study in power, race, and the impossibility of innocence in a country built on violence.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Cape Town",
+        "pageStart": 1,
+        "pageEnd": 70,
+        "summary": "Lurie's affair. The dismissal. The disgrace. The drive east."
+      },
+      {
+        "number": 2,
+        "title": "The Farm",
+        "pageStart": 71,
+        "pageEnd": 160,
+        "summary": "Lucy's world. The attack. The aftermath. The vet."
+      },
+      {
+        "number": 3,
+        "title": "The End",
+        "pageStart": 161,
+        "pageEnd": 220,
+        "summary": "Lurie's acceptance. Lucy's choice. The dogs. The opera."
+      }
+    ]
   },
   {
     "id": "book-the-corrections-2001-199",
@@ -3354,7 +4201,7 @@
     "subtype": "Book",
     "name": "The Corrections (2001)",
     "teaser": "Franzen's third novel — a National Book Award winner that made him a celebrity after a public fight with Oprah — follows the Lambert family's final Christmas as the parents age and the three adult children fail at their own lives. The 'corrections' of the title are both the market's and the family's: everyone is being corrected, and no one is being saved.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780312421267-L.jpg",
     "byline": "Jonathan Franzen",
     "exploreAction": {
       "verb": "Read",
@@ -3368,7 +4215,31 @@
       "Family"
     ],
     "tier": 2,
-    "pageCount": 576
+    "pageCount": 568,
+    "synopsis": "Franzen's National Book Award-winning novel follows the Lambert family — patriarch Alfred, a retired railroad executive sliding into dementia; Enid, his wife clinging to middle-class respectability; and their three adult children: Chip (a disgraced academic), Denise (a chef with a secret), and Gary (a depressed banker). The novel traces the family's disintegration over the course of a single year, as Alfred's illness forces the siblings home for one last Christmas. Franzen's central argument — that the American family has been destroyed by consumerism, therapy culture, and the replacement of genuine emotion with therapeutic language — is delivered through a novel of extraordinary psychological depth. The novel won the National Book Award and the James Tait Black Memorial Prize.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Children",
+        "pageStart": 1,
+        "pageEnd": 180,
+        "summary": "Chip in Lithuania. Denise in Philadelphia. Gary in St. Jude."
+      },
+      {
+        "number": 2,
+        "title": "The Parents",
+        "pageStart": 181,
+        "pageEnd": 380,
+        "summary": "Alfred's decline. Enid's dreams. The St. Jude development."
+      },
+      {
+        "number": 3,
+        "title": "The Reunion",
+        "pageStart": 381,
+        "pageEnd": 568,
+        "summary": "Christmas. The collapse. The correction. What remains."
+      }
+    ]
   },
   {
     "id": "book-life-of-pi-2001-200",
@@ -3376,7 +4247,7 @@
     "subtype": "Book",
     "name": "Life of Pi (2001)",
     "teaser": "Yann Martel's Booker winner is the story of Pi Patel, a zookeeper's son shipwrecked in the Pacific with a Bengal tiger named Richard Parker — 227 days on a lifeboat, told with such straight-faced realism that the tiger almost becomes plausible. Its final section offers a second version of the story, and the choice between them is the novel.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780156027328-L.jpg",
     "byline": "Yann Martel",
     "exploreAction": {
       "verb": "Read",
@@ -3390,7 +4261,31 @@
       "Survival"
     ],
     "tier": 2,
-    "pageCount": 336
+    "pageCount": 326,
+    "synopsis": "Martel's Booker-winning novel follows Piscine 'Pi' Patel, the son of a zookeeper in Pondicherry, India, who survives a shipwreck that kills his family. Pi is stranded on a lifeboat in the Pacific Ocean with a Bengal tiger named Richard Parker. The novel follows their 227-day journey, as Pi — a Hindu, Muslim, and Christian — negotiates his faith, his fear, and his relationship with the tiger. The novel is framed as a story told to a writer by the adult Pi, and its final twist — which re-frames everything that came before — has divided readers since publication. Martel said the novel was inspired by a book about a man stranded on a raft in the Pacific, and by his own travels in India. The novel won the Man Booker Prize in 2002 and was adapted into Ang Lee's Oscar-winning 2012 film.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Pondicherry",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The zoo. The three religions. The ship. The family."
+      },
+      {
+        "number": 2,
+        "title": "The Pacific",
+        "pageStart": 81,
+        "pageEnd": 250,
+        "summary": "The lifeboat. Richard Parker. The whale. The island. The survival."
+      },
+      {
+        "number": 3,
+        "title": "The Story",
+        "pageStart": 251,
+        "pageEnd": 326,
+        "summary": "The rescue. The Japanese investigators. The other story. 'Which story do you prefer?'"
+      }
+    ]
   },
   {
     "id": "book-the-kite-runner-2003-201",
@@ -3398,7 +4293,7 @@
     "subtype": "Book",
     "name": "The Kite Runner (2003)",
     "teaser": "Hosseini's debut — the first novel in English by an Afghan author to become a global bestseller — follows Amir, a privileged boy in 1970s Kabul, and Hassan, the Hazara servant's son who is his best friend and his shame. The kite tournament of the title is where Amir fails Hassan, and the novel spends the rest of its length on the debt.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781594631931-L.jpg",
     "byline": "Khaled Hosseini",
     "exploreAction": {
       "verb": "Read",
@@ -3412,7 +4307,31 @@
       "Redemption"
     ],
     "tier": 2,
-    "pageCount": 400
+    "pageCount": 371,
+    "synopsis": "Hosseini's debut novel follows Amir, the son of a wealthy Pashtun businessman in Kabul, and his relationship with Hassan, the son of his father's Hazara servant. In 1975, Amir witnesses Hassan being assaulted by a group of bullies and does nothing to stop it — a cowardice that haunts him for decades. When the Soviet invasion forces Amir and his father to flee to California, Amir carries his guilt across continents. Years later, Amir receives a call from an old friend: 'There is a way to be good again.' He returns to Taliban-controlled Afghanistan to rescue Hassan's orphaned son. The novel is a story of redemption, guilt, and the relationship between Afghanistan's past and present. It became a massive bestseller and was adapted into a 2007 film.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Kabul",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "Amir and Hassan. The kite tournament. The alley. The betrayal."
+      },
+      {
+        "number": 2,
+        "title": "California",
+        "pageStart": 101,
+        "pageEnd": 250,
+        "summary": "The escape. The refugee experience. The guilt. The call."
+      },
+      {
+        "number": 3,
+        "title": "The Return",
+        "pageStart": 251,
+        "pageEnd": 371,
+        "summary": "Taliban Kabul. Sohrab. The rescue. 'For you, a thousand times over.'"
+      }
+    ]
   },
   {
     "id": "book-never-let-me-go-202",
@@ -3420,7 +4339,7 @@
     "subtype": "Book",
     "name": "Never Let Me Go (2005)",
     "teaser": "Ishiguro's sixth novel is narrated by Kathy H., recalling her childhood at Hailsham, an idyllic English boarding school — and slowly revealing that she and her friends are clones, raised to donate organs until they 'complete.' The novel's horror is that nobody in it finds this monstrous, which is the point.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781400078776-L.jpg",
     "byline": "Kazuo Ishiguro",
     "exploreAction": {
       "verb": "Read",
@@ -3436,7 +4355,31 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 304
+    "pageCount": 288,
+    "synopsis": "Ishiguro's novel follows Kathy, Tommy, and Ruth, students at Hailsham, a seemingly idyllic English boarding school in the 1990s. As the novel progresses, hints accumulate that Hailsham is not what it seems: the students are clones, raised to donate their organs when they reach adulthood. The novel is narrated by Kathy, now thirty-one, who looks back on her time at Hailsham and her relationships with Tommy and Ruth. The three navigate love triangles, jealousies, and the gradual realization of their fate. Ishiguro's central technique is restraint: the horror of the students' situation is never dramatized but always present beneath the surface of their ordinary lives. The novel won the Whitbread Book of the Year Award and was shortlisted for the Man Booker Prize. The 2010 film starred Carey Mulligan, Andrew Garfield, and Keira Knightley.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Hailsham",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The school. Miss Emily. The art. The rumors. The truth."
+      },
+      {
+        "number": 2,
+        "title": "The Cottages",
+        "pageStart": 81,
+        "pageEnd": 180,
+        "summary": "The cottage years. Kathy and Tommy. Ruth. The Gallery."
+      },
+      {
+        "number": 3,
+        "title": "The End",
+        "pageStart": 181,
+        "pageEnd": 288,
+        "summary": "The deferral. Miss Emily's confession. Tommy's death. 'Never let me go.'"
+      }
+    ]
   },
   {
     "id": "book-the-brief-wondrous-life-203",
@@ -3444,7 +4387,7 @@
     "subtype": "Book",
     "name": "The Brief Wondrous Life of Oscar Wao (2007)",
     "teaser": "Junot Díaz's Pulitzer winner tells the story of Oscar de León, an overweight Dominican-American sci-fi nerd in New Jersey who wants nothing more than love — narrated by his cynical ex-roommate Yunior, who interrupts the story with footnotes about Dominican history, 'fukú' curses, and the Trujillo dictatorship. It mixes Spanish, sci-fi, and history into a new kind of novel.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781594483295-L.jpg",
     "byline": "Junot Díaz",
     "exploreAction": {
       "verb": "Read",
@@ -3461,7 +4404,31 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 352
+    "pageCount": 352,
+    "synopsis": "Díaz's Pulitzer-winning novel follows Oscar de León, an overweight Dominican-American nerd from New Jersey who dreams of becoming the Dominican Tolkien. The novel is narrated by Yunior, Oscar's college roommate and ex-boyfriend of his sister Lola, and moves between Oscar's story, Lola's story, and the family's history in the Dominican Republic under Trujillo. Díaz's prose mixes English, Spanish, and nerd culture references in a dense, energetic style that mirrors the immigrant experience of living between languages. The novel's central metaphor is the 'fukú' — a curse that has haunted the de León family since Trujillo's rise to power. The novel won the Pulitzer Prize for Fiction in 2008 and the National Book Critics Circle Award.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Oscar",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "Oscar's life in Paterson. The girls. The nerddom. The fukú."
+      },
+      {
+        "number": 2,
+        "title": "Lola",
+        "pageStart": 101,
+        "pageEnd": 200,
+        "summary": "Lola's rebellion. The hair. The escape. The return."
+      },
+      {
+        "number": 3,
+        "title": "The De Leóns",
+        "pageStart": 201,
+        "pageEnd": 352,
+        "summary": "The Dominican past. Trujillo. Abelard. The curse. Oscar's end. 'The.fukú.giveth taketh away.'"
+      }
+    ]
   },
   {
     "id": "book-the-help-2009-204",
@@ -3469,7 +4436,7 @@
     "subtype": "Book",
     "name": "The Help (2009)",
     "teaser": "Stockett's debut — set in Jackson, Mississippi, in 1962 — is narrated by three voices: Skeeter, a young white woman who wants to be a writer, and two Black maids, Aibileen and Minny, who agree to tell their stories for her book. It sold 10 million copies and became a film, and its central controversy — a white author writing Black maids' voices.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780425232200-L.jpg",
     "byline": "Kathryn Stockett",
     "exploreAction": {
       "verb": "Read",
@@ -3483,7 +4450,31 @@
       "Civil Rights"
     ],
     "tier": 2,
-    "pageCount": 480
+    "pageCount": 544,
+    "synopsis": "Stockett's debut novel is set in Jackson, Mississippi in 1962, and follows three women: Aibileen Clark, a Black maid raising her seventeenth white child; Minny Jackson, a Black maid known for her cooking and her mouth; and Eugenia 'Skeeter' Phelan, a young white woman who wants to be a writer. When Skeeter proposes writing a book from the perspective of the Black maids about their experiences working for white families, Aibileen and Minny agree — at enormous personal risk. The novel explores the complex relationships between Black domestic workers and their white employers in the Jim Crow South. Stockett, who grew up in Mississippi with a Black maid named Demetrie, drew on her own childhood. The novel spent over 100 weeks on the New York Times bestseller list and was adapted into a 2011 film starring Viola Davis, Octavia Spencer, and Emma Stone.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Aibileen",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "Aibileen and Mae Mobley. The bridge. The book proposal. The risk."
+      },
+      {
+        "number": 2,
+        "title": "Minny",
+        "pageStart": 121,
+        "pageEnd": 300,
+        "summary": "Minny's secret. The pie. Hilly. The bathroom bill. The interviews."
+      },
+      {
+        "number": 3,
+        "title": "Skeeter",
+        "pageStart": 301,
+        "pageEnd": 544,
+        "summary": "The publishing. The danger. The reveal. The book. The change."
+      }
+    ]
   },
   {
     "id": "book-swamplandia-2011-205",
@@ -3491,7 +4482,7 @@
     "subtype": "Book",
     "name": "Swamplandia (2011)",
     "teaser": "Karen Russell's Pulitzer-finalist debut is narrated by Ava Bigtree, 12, whose family runs Swamplandia!, a failing alligator-wrestling theme park in the Florida Everglades. When her mother dies, the family scatters, and Ava sets off alone into the swamp to find the 'underworld' — a journey that is both a literal trip and a childhood ending.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780307744913-L.jpg",
     "byline": "Karen Russell",
     "exploreAction": {
       "verb": "Read",
@@ -3505,7 +4496,31 @@
       "Magic Realism"
     ],
     "tier": 2,
-    "pageCount": 336
+    "pageCount": 320,
+    "synopsis": "Russell's debut novel follows thirteen-year-old Ava Bigtree, who lives with her family in the Florida Everglades, where they run a theme park called Swamplandia! — featuring alligator wrestling and swamp tours. When Ava's mother dies and her father retreats into depression, the family fractures: her brother enters a performance with the rival park 'World of Darkness,' her sister begins a relationship with a ghost, and Ava is left to save the park by performing in a beauty pageant. The novel is a coming-of-age story told in a voice that is both precocious and genuine. Russell was a Pulitzer Prize finalist for the novel.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Swamplandia!",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "The park. The family. The mother's death. The alligators."
+      },
+      {
+        "number": 2,
+        "title": "The Big Tree",
+        "pageStart": 81,
+        "pageEnd": 200,
+        "summary": "The island. The ghost. The rivals. The beauty pageant."
+      },
+      {
+        "number": 3,
+        "title": "The Swamp",
+        "pageStart": 201,
+        "pageEnd": 320,
+        "summary": "Ava's journey. The Bird Man. The truth. The park."
+      }
+    ]
   },
   {
     "id": "book-all-the-light-we-207",
@@ -3513,7 +4528,7 @@
     "subtype": "Book",
     "name": "All the Light We Cannot See (2014)",
     "teaser": "Doerr's Pulitzer winner alternates between Marie-Laure, a blind French girl who flees Paris with a diamond hidden in her model of the city, and Werner, a German boy who becomes a radio operator for the Nazis. Their paths converge in the walled city of Saint-Malo in 1944, and the novel's title names its method: light as physics, light as hope, light as what we cannot see.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781501173219-L.jpg",
     "byline": "Anthony Doerr",
     "exploreAction": {
       "verb": "Read",
@@ -3527,7 +4542,31 @@
       "Pulitzer"
     ],
     "tier": 2,
-    "pageCount": 544
+    "pageCount": 531,
+    "synopsis": "Doerr's Pulitzer-winning novel follows two characters during World War II: Marie-Laure, a blind French girl who flees Paris with her father to the walled city of Saint-Malo, carrying a potentially cursed diamond; and Werner, a German orphan with a talent for radio who is recruited by the Nazis. The novel alternates between their stories, moving back and forth in time between the war years and the characters' later lives. Doerr spent ten years writing the novel, and its prose is meticulous and sensory — particularly the scenes of Marie-Laure navigating the world through sound and touch. The novel won the Pulitzer Prize in 2015, the Andrew Carnegie Medal for Excellence, and the Prix André Malraux.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Marie-Laure",
+        "pageStart": 1,
+        "pageEnd": 160,
+        "summary": "Paris. The blindness. The museum. The flight to Saint-Malo. The Sea of Flames."
+      },
+      {
+        "number": 2,
+        "title": "Werner",
+        "pageStart": 161,
+        "pageEnd": 320,
+        "summary": "Zollverein. The radio. The orphanage. The training. The war."
+      },
+      {
+        "number": 3,
+        "title": "Saint-Malo",
+        "pageStart": 321,
+        "pageEnd": 531,
+        "summary": "The siege. The jewel. The meeting. The radio. The light."
+      }
+    ]
   },
   {
     "id": "book-the-underground-railroad-2016-208",
@@ -3535,7 +4574,7 @@
     "subtype": "Book",
     "name": "The Underground Railroad (2016)",
     "teaser": "Colson Whitehead's Pulitzer and National Book Award winner takes the Underground Railroad literally: Cora, an enslaved woman in Georgia, escapes on an actual underground train, and each state she passes through is a different version of American racism — a plantation idyll, a white-supremacist laboratory, a surveillance state. The novel won both major American fiction prizes in the same year.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385542364-L.jpg",
     "byline": "Colson Whitehead",
     "exploreAction": {
       "verb": "Read",
@@ -3552,7 +4591,31 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 336
+    "pageCount": 306,
+    "synopsis": "Whitehead's Pulitzer-winning novel follows Cora, an enslaved woman who escapes from a Georgia plantation via the Underground Railroad — which, in Whitehead's alternate history, is a literal railroad with tunnels and stations beneath the Southern soil. The novel follows Cora's journey north through different states, each of which represents a different phase of American racial history: South Carolina's paternalism, North Carolina's genocide, Indiana's precarious freedom. Whitehead uses the fantasy of the literal railroad to make visible the real underground networks that helped enslaved people escape. The novel won the Pulitzer Prize, the National Book Award, and the Arthur C. Clarke Award. Barack Obama named it one of his favorite books.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Plantation",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "Ridgeway. Cora's grandmother. The escape. The first station."
+      },
+      {
+        "number": 2,
+        "title": "The Railroad",
+        "pageStart": 61,
+        "pageEnd": 200,
+        "summary": "South Carolina. North Carolina. The festivals. The violence. The freedom."
+      },
+      {
+        "number": 3,
+        "title": "The North",
+        "pageStart": 201,
+        "pageEnd": 306,
+        "summary": "Indiana. Valentine. The community. Ridgeway's pursuit. The end."
+      }
+    ]
   },
   {
     "id": "book-sing-unburied-sing-2017-209",
@@ -3560,7 +4623,7 @@
     "subtype": "Book",
     "name": "Sing Unburied Sing (2017)",
     "teaser": "Jesmyn Ward's National Book Award winner follows 13-year-old Jojo on a road trip across Mississippi with his mother, who is chasing her white boyfriend, and his younger sister — a journey haunted by the ghost of a murdered boy who has unfinished business with Jojo's family. It's a ghost story about the living, and about who gets to appear in the story of the South.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781501126345-L.jpg",
     "byline": "Jesmyn Ward",
     "exploreAction": {
       "verb": "Read",
@@ -3574,7 +4637,31 @@
       "Ghosts"
     ],
     "tier": 2,
-    "pageCount": 304
+    "pageCount": 289,
+    "synopsis": "Ward's novel follows thirteen-year-old Jojo, a mixed-race boy in Mississippi who is raising his baby sister Leonie while his mother is addicted to drugs and his father is in prison. When Jojo's father is released from Parchman Farm (the Mississippi State Penitentiary), Leonie drives the family to pick him up, accompanied by a friend and a ghost. The novel moves between Jojo's perspective, Leonie's perspective, and the ghost of Richie, a boy who died at Parchman in the 1940s. Ward draws on her own family history — her brother was killed in a hit-and-run in 2000 — to create a novel about the haunting of the American South by its racial past. The novel won the National Book Award for Fiction.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Jojo's Birthday",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Jojo's thirteenth birthday. Pop's stories. The drive. Richie's ghost."
+      },
+      {
+        "number": 2,
+        "title": "The Road",
+        "pageStart": 81,
+        "pageEnd": 200,
+        "summary": "Leonie's addiction. The pick-up. Parchman. The ghosts."
+      },
+      {
+        "number": 3,
+        "title": "Home",
+        "pageStart": 201,
+        "pageEnd": 289,
+        "summary": "The return. The violence. The unburied. 'Sing unburied sing.'"
+      }
+    ]
   },
   {
     "id": "book-circe-2018-210",
@@ -3582,7 +4669,7 @@
     "subtype": "Book",
     "name": "Circe (2018)",
     "teaser": "Madeline Miller's retelling of Greek myth gives the witch Circe — a minor figure in the Odyssey — a full novel of her own, narrated in first person from her exile on the island of Aea. Its opening line — 'When I was born, the name for what I was did not exist' — announces its project: making a woman who was a plot device into a protagonist.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316556347-L.jpg",
     "byline": "Madeline Miller",
     "exploreAction": {
       "verb": "Read",
@@ -3596,7 +4683,31 @@
       "Retelling"
     ],
     "tier": 2,
-    "pageCount": 400
+    "pageCount": 393,
+    "synopsis": "Miller's novel retells the story of Circe, the witch from the Odyssey, from her own perspective. Born the daughter of the sun god Helios and the nymph Perse, Circe is scorned by her divine family for her mortal voice and her lack of power. When she discovers she has the gift of witchcraft — transforming her enemies into monsters — she is banished to the island of Aiaia, where she lives alone for centuries, encountering Daedalus, Icarus, the Minotaur, and Odysseus. Miller's Circe is not a villain but a woman finding her power in a world controlled by gods. The novel won the Women's Prize for Fiction in 2019 and was a massive bestseller. Miller's previous novel, The Song of Achilles, also retold Greek mythology from a marginalized perspective.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Gods",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Circe's birth. The mockery. The gift. The transformation. The banishment."
+      },
+      {
+        "number": 2,
+        "title": "Aiaia",
+        "pageStart": 81,
+        "pageEnd": 200,
+        "summary": "The island. Daedalus. The Minotaur. The herbs. The solitude."
+      },
+      {
+        "number": 3,
+        "title": "The Mortal World",
+        "pageStart": 201,
+        "pageEnd": 393,
+        "summary": "Odysseus. Telegonus. The witch's power. The choosing of mortality. The end."
+      }
+    ]
   },
   {
     "id": "book-piranesi-2020-211",
@@ -3604,7 +4715,7 @@
     "subtype": "Book",
     "name": "Piranesi (2020)",
     "teaser": "Susanna Clarke's follow-up to Jonathan Strange & Mr Norrell is set entirely inside the House — an infinite labyrinth of halls filled with statues, where Piranesi, the narrator, lives in blissful routine, keeping a journal and worshipping the tides. The reader slowly realizes what Piranesi doesn't: that he is a prisoner, and that his world is not what it seems. It won the Women's Prize and was shortlisted for the Booker.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9781635575996-L.jpg",
     "byline": "Susanna Clarke",
     "exploreAction": {
       "verb": "Read",
@@ -3620,7 +4731,31 @@
       "21st Century"
     ],
     "tier": 2,
-    "pageCount": 272
+    "pageCount": 272,
+    "synopsis": "Clarke's novel follows a man living alone in a vast, impossible House — a labyrinth of infinite halls filled with marble statues and ocean tides. The man, who calls himself Piranesi after the artist, keeps a journal of his explorations, cataloguing the statues, the tides, and the dead that wash ashore. He believes there are only three people alive: himself, a man called 'The Other' who visits periodically, and God. As Piranesi's journal entries continue, he begins to remember a life outside the House — and to realize that The Other may not be who he claims. The novel is a mystery, a myth, and a meditation on knowledge, wonder, and the nature of reality. Clarke's first novel, Jonathan Strange & Mr Norrell, was a massive bestseller; Piranesi won the Women's Prize for Fiction in 2021.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Journal",
+        "pageStart": 1,
+        "pageEnd": 80,
+        "summary": "Piranesi's House. The statues. The tides. The Other. The journal."
+      },
+      {
+        "number": 2,
+        "title": "The Search",
+        "pageStart": 81,
+        "pageEnd": 180,
+        "summary": "The clues. The statues. The 16th column. The truth about the House."
+      },
+      {
+        "number": 3,
+        "title": "The Return",
+        "pageStart": 181,
+        "pageEnd": 272,
+        "summary": "The Other's betrayal. The escape. The memory. The end. The beauty."
+      }
+    ]
   },
   {
     "id": "book-sea-of-tranquility-2022-212",
@@ -3628,7 +4763,7 @@
     "subtype": "Book",
     "name": "Sea of Tranquility (2022)",
     "teaser": "Emily St. John Mandel's novel — a follow-up to Station Eleven — tracks one moment across centuries: a violinist in 1912, a wealthy exile in a moon colony, a writer during a pandemic, and a time traveler investigating an anomaly. The novel's twist is that its various centuries are a simulation, which makes its central question — what is real enough to mourn? — sharper than it first appears.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593321256-L.jpg",
     "byline": "Emily St. John Mandel",
     "exploreAction": {
       "verb": "Read",
@@ -3642,7 +4777,31 @@
       "Literary"
     ],
     "tier": 2,
-    "pageCount": 256
+    "pageCount": 272,
+    "synopsis": "Mandel's novel spans three centuries: 1912 Vancouver Island, 1990 New York, 2020 Manhattan, and 2203 lunar colony. The novel follows a time traveler who is investigating an anomaly — a glitch in the simulation that runs reality — and the characters whose lives intersect with the anomaly across different eras. Mandel, who wrote Station Eleven (about a pandemic), creates a world where reality may be a simulation and the glitch manifests as a strange sound and a feeling of displacement. The novel is a meditation on time, memory, and the question of whether our lives are real or constructed. Mandel's prose is spare and elegant, moving between centuries with the ease of someone walking between rooms.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Vancouver Island, 1912",
+        "pageStart": 1,
+        "pageEnd": 60,
+        "summary": "Edwin St. Andrew. The clearing. The sound. The anomaly."
+      },
+      {
+        "number": 2,
+        "title": "New York, 1990–2020",
+        "pageStart": 61,
+        "pageEnd": 160,
+        "summary": "Maren. The podcast. The pandemic. The simulation."
+      },
+      {
+        "number": 3,
+        "title": "The Moon, 2203",
+        "pageStart": 161,
+        "pageEnd": 272,
+        "summary": "The time traveler. The investigation. The glitch. The end."
+      }
+    ]
   },
   {
     "id": "book-tomorrow-and-tomorrow-2022-213",
@@ -3650,7 +4809,7 @@
     "subtype": "Book",
     "name": "Tomorrow and Tomorrow (2022)",
     "teaser": "Gabrielle Zevin's novel follows Sam and Sadie, childhood friends who become game designers — and whose collaboration, friendship, and unspoken love play out across three decades and several invented video games. The title, from Macbeth's 'tomorrow and tomorrow and tomorrow,' names its theme: time, and what we make with it.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780593321256-L.jpg",
     "byline": "Gabrielle Zevin",
     "exploreAction": {
       "verb": "Read",
@@ -3664,7 +4823,31 @@
       "Games"
     ],
     "tier": 2,
-    "pageCount": 416
+    "pageCount": 416,
+    "synopsis": "Zevin's novel follows Sam and Sadie, two friends who meet as children in a hospital (Sam's sister is dying) and reconnect in college to form a video game company. Their partnership produces a hit game and makes them famous — but their relationship is complicated by creative differences, romantic jealousy, and Sam's chronic pain from a childhood accident. The novel spans thirty years, from the 1990s to the 2020s, and traces the evolution of video games as an art form alongside the evolution of Sam and Sadie's relationship. Zevin wrote the novel as a love story about friendship rather than romance, and the title — from Waiting for Godot — captures the novel's central theme: the infinite possibility of tomorrow.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "The Meeting",
+        "pageStart": 1,
+        "pageEnd": 100,
+        "summary": "The hospital. The game. Cambridge. The reunion."
+      },
+      {
+        "number": 2,
+        "title": "Marble",
+        "pageStart": 101,
+        "pageEnd": 280,
+        "summary": "The company. The success. The strain."
+      },
+      {
+        "number": 3,
+        "title": "Tomorrow",
+        "pageStart": 281,
+        "pageEnd": 416,
+        "summary": "The games. The illness. The art. The friendship."
+      }
+    ]
   },
   {
     "id": "book-the-fraud-2023-214",
@@ -3672,7 +4855,7 @@
     "subtype": "Book",
     "name": "The Fraud (2023)",
     "teaser": "Zadie Smith's historical novel is set in 1873 London and centers on the Tichborne Trial — the case of a butcher claiming to be a missing heir — told through Eliza Touchet, housekeeper to a minor novelist, who watches the trial consume Victorian England. It's Smith's first historical novel, and it's about how stories, lies, and England itself are all fictions.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780525521594-L.jpg",
     "byline": "Zadie Smith",
     "exploreAction": {
       "verb": "Read",
@@ -3686,7 +4869,31 @@
       "Literary"
     ],
     "tier": 2,
-    "pageCount": 480
+    "pageCount": 464,
+    "synopsis": "Smith's novel is based on the real Tichborne trial of the 1860s, in which a man claimed to be the long-lost heir to a baronetcy. Smith's narrator is Eliza Touchet, a Scottish housekeeper who lives with the novelist William Ainslie and becomes obsessed with the trial. The novel moves between Eliza's life in Ainslie's household, the courtroom drama, and the lives of the real people involved — including Andrew Bogle, a formerly enslaved Jamaican man who testifies in the trial. Smith uses the trial to explore questions of identity, authenticity, and the nature of truth. The novel was longlisted for the Booker Prize in 2023.",
+    "chapters": [
+      {
+        "number": 1,
+        "title": "Eliza",
+        "pageStart": 1,
+        "pageEnd": 120,
+        "summary": "The household. Ainslie. The trial begins. The claimant."
+      },
+      {
+        "number": 2,
+        "title": "The Trial",
+        "pageStart": 121,
+        "pageEnd": 320,
+        "summary": "The courtroom. Bogle's testimony. The evidence. The lies."
+      },
+      {
+        "number": 3,
+        "title": "The Verdict",
+        "pageStart": 321,
+        "pageEnd": 464,
+        "summary": "The verdict. Eliza's investigation. The truth. The fraud."
+      }
+    ]
   },
   {
     "id": "book-the-bee-sting-2023-215",
