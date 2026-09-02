@@ -9278,7 +9278,7 @@
     "name": "Stem Cells",
     "categoryId": "BIOLOGY",
     "subtype": "Medicine",
-    "teaser": "The blank cells that can become any tissue — and the medicine they enable.",
+    "teaser": "Stem cells are undifferentiated cells that can develop into specialized cell types. Embryonic stem cells are pluripotent, capable of becoming any cell type. Adult stem cells are more limited. Induced pluripotent stem cells, created by Shinya Yamanaka in 2006, reprogram adult cells back to embryonic-like states. Yamanaka won the 2012 Nobel Prize for this discovery.",
     "byline": "The shape-shifters",
     "tags": [
       "cells",
@@ -9298,7 +9298,7 @@
     "name": "The Science of Sleep Medicine",
     "categoryId": "BIOLOGY",
     "subtype": "Medicine",
-    "teaser": "What sleep studies reveal about the body's nightly repair shift.",
+    "teaser": "Sleep medicine studies the mechanisms and disorders of sleep. REM sleep, discovered in 1953 by Aserinsky and Kleitmann, involves rapid eye movements and vivid dreaming. Sleep cycles through stages every 90 minutes. Disorders like sleep apnea affect 22 million Americans and increase risks of heart disease, stroke, and diabetes if untreated.",
     "byline": "The night clinic",
     "tags": [
       "sleep",
@@ -9318,7 +9318,7 @@
     "name": "The Pain Pathway",
     "categoryId": "BIOLOGY",
     "subtype": "Medicine",
-    "teaser": "How a stubbed toe becomes a sharp 'ouch' in your brain in milliseconds.",
+    "teaser": "Pain signals travel through specialized nerve fibers called nociceptors to the spinal cord and brain. A-delta fibers transmit sharp acute pain at 12 meters per second; C-fibers carry slow burning pain at 1 meter per second. The brain interprets pain signals in the somatosensory cortex, emotional centers, and prefrontal cortex simultaneously.",
     "byline": "The alarm system",
     "tags": [
       "pain",
@@ -9338,7 +9338,7 @@
     "name": "Phagocytosis",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "White blood cells that literally eat invaders for a living.",
+    "teaser": "Phagocytosis is the process by which immune cells engulf and destroy pathogens. Macrophages can consume up to 100 bacteria before dying. Neutrophils, the most abundant white blood cells, are first responders that sacrifice themselves forming pus. Discovered by Elie Metchnikoff in 1882, phagocytosis is a cornerstone of innate immunity.",
     "byline": "The cell eaters",
     "tags": [
       "immune",
@@ -9358,7 +9358,7 @@
     "name": "The Cell Membrane",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "The busy border crossing that decides what enters and leaves a cell.",
+    "teaser": "The cell membrane is a phospholipid bilayer approximately 7 nanometers thick, studded with proteins that control transport, signaling, and cell recognition. The fluid mosaic model, proposed by Singer and Nicolson in 1972, describes how lipids and proteins move laterally. Cholesterol regulates membrane fluidity while glycocalyx sugar chains enable cell-to-cell recognition.",
     "byline": "The gatekeeper",
     "tags": [
       "cells",
@@ -9378,7 +9378,7 @@
     "name": "Osmosis",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "Why a raisin in water plumps up and a grape in salt water shrivels.",
+    "teaser": "Osmosis is the movement of water across a semipermeable membrane from low to high solute concentration. Red blood cells burst in pure water and shrink in concentrated salt. Osmotic pressure maintains turgor in plant cells, keeping stems rigid. Kidneys use osmosis to concentrate urine while conserving water, processing 180 liters of blood daily.",
     "byline": "The water balance",
     "tags": [
       "cells",
@@ -9398,7 +9398,7 @@
     "name": "The Mitochondrion",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "The cell's power plant, complete with its own DNA and ancient bacterial past.",
+    "teaser": "Mitochondria are double-membraned organelles that generate over 90 percent of cellular ATP through oxidative phosphorylation. A single liver cell contains up to 2000 mitochondria. They carry their own circular DNA inherited exclusively from the mother. Mitochondrial diseases affect approximately 1 in 5000 people, causing muscle weakness, neurological problems, and metabolic disorders.",
     "byline": "The tiny generator",
     "tags": [
       "cells",
@@ -9418,7 +9418,7 @@
     "name": "The Endosymbiotic Theory",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "The day a big cell swallowed a bacterium — and got a permanent roommate.",
+    "teaser": "Lynn Margulis proposed in 1967 that mitochondria and chloroplasts evolved from free-living bacteria engulfed by ancestral eukaryotic cells. Both organelles have their own DNA, double membranes, and replicate independently. Mitochondrial DNA resembles that of Rickettsia bacteria. This theory, initially rejected by 15 journals, is now a cornerstone of cell biology.",
     "byline": "The ancient merger",
     "tags": [
       "cells",
@@ -9438,7 +9438,7 @@
     "name": "Protein Folding",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "How a chain of amino acids folds into the exact 3D shape that does the job.",
+    "teaser": "Proteins fold into specific three-dimensional shapes determined by their amino acid sequence. The Levinthal paradox notes that a 100-residue protein could theoretically fold in 10 to the 47th power years by random search, yet folds in milliseconds. Misfolded proteins cause diseases including Alzheimer's, Parkinson's, and cystic fibrosis. AlphaFold by DeepMind predicted 200 million protein structures in 2022.",
     "byline": "Origami of life",
     "tags": [
       "proteins",
@@ -9458,7 +9458,7 @@
     "name": "Enzymes",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "Biological machines that speed up chemistry a billionfold.",
+    "teaser": "Enzymes are biological catalysts that speed up reactions by factors of millions, lowering activation energy. A single carbonic anhydrase molecule converts 36 million CO2 molecules per hour. Enzymes are highly specific: lactase breaks down only lactose. Temperature and pH affect activity, with most human enzymes working optimally at 37 degrees Celsius and pH 7.4.",
     "byline": "The molecular workers",
     "tags": [
       "enzymes",
@@ -9478,7 +9478,7 @@
     "name": "DNA Replication",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "The unzipping, copying, proofreading machine behind every cell division.",
+    "teaser": "DNA replication is semiconservative, with each new molecule containing one original and one new strand. Helicase unwinds the double helix, DNA polymerase adds complementary nucleotides at 1000 per second, and ligase seals gaps. Proofreading achieves an error rate of just one in 10 billion. The entire human genome of 3.2 billion base pairs replicates in about 8 hours.",
     "byline": "The copy machine",
     "tags": [
       "dna",
@@ -9498,7 +9498,7 @@
     "name": "From Gene to Protein",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "How the cell reads DNA, writes RNA, and builds proteins in two elegant steps.",
+    "teaser": "The central dogma describes information flow from DNA to RNA to protein. Transcription copies a gene into messenger RNA in the nucleus. The ribosome translates mRNA into a polypeptide chain using transfer RNA adapters. Alternative splicing allows one gene to produce multiple proteins. Humans have about 20000 genes but over 100000 different proteins.",
     "byline": "The central dogma",
     "tags": [
       "dna",
@@ -9518,7 +9518,7 @@
     "name": "The Ribosome",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "The molecular factory where every protein in every living thing is made.",
+    "teaser": "Ribosomes translate genetic code into proteins, reading mRNA three nucleotides at a time. Each ribosome consists of two subunits made of ribosomal RNA and proteins. A human cell contains about 10 million ribosomes, each producing roughly 20 proteins per minute. The 2009 Nobel Prize recognized ribosome structure research that revealed antibiotic targets.",
     "byline": "The protein factory",
     "tags": [
       "cells",
@@ -9538,7 +9538,7 @@
     "name": "Mitosis",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "The cell's careful way of splitting into two identical copies.",
+    "teaser": "Mitosis produces two identical daughter cells from one parent cell through five phases: prophase, prometaphase, metaphase, anaphase, and telophase. The mitotic spindle, made of microtubules, separates duplicated chromosomes with extraordinary precision. A human cell completes mitosis in about 1 to 2 hours. Errors in mitosis can lead to cancer or cell death.",
     "byline": "The exact copy",
     "tags": [
       "cells",
@@ -9558,7 +9558,7 @@
     "name": "Meiosis",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "The division that shuffles genes and creates unique sperm and eggs.",
+    "teaser": "Meiosis produces four genetically unique gametes from one parent cell through two divisions. Crossing over during prophase I shuffles genes between chromosome pairs, creating new combinations. Independent assortment produces over 8 million possible chromosome combinations from just 23 pairs. A single human can theoretically produce over 70 trillion genetically unique gametes.",
     "byline": "The genetic shuffle",
     "tags": [
       "cells",
@@ -9578,7 +9578,7 @@
     "name": "Apoptosis",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "The tidy, programmed cell death that sculpts your body and cleans house.",
+    "teaser": "Apoptosis is programmed cell death, essential for development and tissue maintenance. The body eliminates about 50 to 70 billion cells daily through apoptosis. Caspase enzymes dismantle the cell from within while phosphatidylserine signals on the cell surface attract phagocytes. Cancer cells evade apoptosis, allowing uncontrolled growth. The 2002 Nobel Prize recognized apoptosis gene discoveries in C. elegans.",
     "byline": "The graceful exit",
     "tags": [
       "cells",
@@ -9598,7 +9598,7 @@
     "name": "Fermentation",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "How yeast and muscle cells make energy without oxygen.",
+    "teaser": "Fermentation generates ATP without oxygen by regenerating NAD plus from NADH. Alcoholic fermentation by yeast produces ethanol and CO2, used in bread, beer, and wine. Lactic acid fermentation by bacteria creates yogurt, kimchi, and sauerkraut. Human muscle cells ferment during intense exercise, producing lactic acid that causes fatigue and burning sensations.",
     "byline": "The oxygen-free power",
     "tags": [
       "energy",
@@ -9618,7 +9618,7 @@
     "name": "ATP",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "The rechargeable battery molecule that powers every living process.",
+    "teaser": "Adenosine triphosphate, ATP, is the universal energy currency of cells. The human body contains only about 250 grams of ATP at any moment but recycles its entire weight, roughly 40 to 75 kilograms daily. Each ATP molecule provides energy by breaking its third phosphate bond. ATP powers muscle contraction, nerve impulses, protein synthesis, and active transport.",
     "byline": "Energy currency",
     "tags": [
       "energy",
@@ -9638,7 +9638,7 @@
     "name": "Cellular Respiration",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "The three-stage power plant that extracts energy from every bite you eat.",
+    "teaser": "Cellular respiration extracts energy from glucose to produce ATP. Glycolysis in the cytoplasm yields 2 ATP. The Krebs cycle in the mitochondrial matrix generates 2 ATP and electron carriers. The electron transport chain on the inner membrane produces 34 ATP through oxidative phosphorylation. One glucose molecule yields approximately 38 ATP molecules in total.",
     "byline": "The grand furnace",
     "tags": [
       "energy",
@@ -9658,7 +9658,7 @@
     "name": "Glycolysis",
     "categoryId": "BIOLOGY",
     "subtype": "Cell biology",
-    "teaser": "The ten-step sugar-splitting ancient pathway shared by all life.",
+    "teaser": "Glycolysis is the ancient metabolic pathway that breaks one glucose molecule into two pyruvate molecules, yielding a net gain of 2 ATP and 2 NADH. This 10-step enzyme-catalyzed pathway occurs in the cytoplasm and requires no oxygen. Glycolysis is evolutionarily ancient, occurring in virtually all living organisms, suggesting it evolved before atmospheric oxygen.",
     "byline": "The ancient pathway",
     "tags": [
       "energy",
@@ -9678,7 +9678,7 @@
     "name": "Blood Types",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The sugar markers on red blood cells that decide who can donate to whom.",
+    "teaser": "Blood types are determined by antigens on red blood cell surfaces. The ABO system has four types: A, B, AB, and O, determined by the presence or absence of A and B antigens. Type O negative is the universal donor. Type AB positive is the universal recipient. Approximately 40 percent of the world's population has type O blood.",
     "byline": "The compatibility code",
     "tags": [
       "blood",
@@ -9698,7 +9698,7 @@
     "name": "The Rh Factor",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The second blood code that can turn pregnancy into a medical puzzle.",
+    "teaser": "The Rh factor, discovered in 1940, is a protein on red blood cells present in about 85 percent of people. Rh incompatibility between an Rh-negative mother and Rh-positive fetus can cause hemolytic disease of the newborn. Before RhoGAM treatment was developed in 1968, this condition killed or disabled thousands of infants annually.",
     "byline": "The plus and minus",
     "tags": [
       "blood",
@@ -9718,7 +9718,7 @@
     "name": "Hemoglobin",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The iron-loaded protein that paints blood red and ferries oxygen.",
+    "teaser": "Hemoglobin is the oxygen-carrying protein in red blood cells, with each molecule containing four iron atoms that each bind one oxygen molecule. A single red blood cell contains about 270 million hemoglobin molecules. Hemoglobin also transports CO2 back to the lungs. Sickle cell disease results from a single amino acid substitution that causes hemoglobin to polymerize.",
     "byline": "The oxygen taxi",
     "tags": [
       "blood",
@@ -9738,7 +9738,7 @@
     "name": "The Lymphatic System",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The body's second circulation that fights infection and drains swelling.",
+    "teaser": "The lymphatic system is a network of vessels, nodes, and organs that maintains fluid balance and defends against infection. It returns about 3 liters of leaked fluid daily to the bloodstream. Lymph nodes filter lymph and house immune cells. The spleen, thymus, and tonsils are lymphatic organs. Blocked lymphatic vessels cause lymphedema, affecting an estimated 250 million people worldwide.",
     "byline": "The hidden highway",
     "tags": [
       "immune",
@@ -9758,7 +9758,7 @@
     "name": "The Spleen",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The blood-filtering organ that recycles old cells and stages immune responses.",
+    "teaser": "The spleen, the largest lymphatic organ at about 12 centimeters long, filters blood, removes old red blood cells, and stores platelets and monocytes. It contains white pulp for immune surveillance and red pulp for blood filtration. The spleen can regrow from a small fragment after partial removal. People without a spleen face increased risks from encapsulated bacteria.",
     "byline": "The quiet filter",
     "tags": [
       "organs",
@@ -9778,7 +9778,7 @@
     "name": "Bone Marrow",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The soft factory inside your bones that builds a billion blood cells a day.",
+    "teaser": "Bone marrow is the soft tissue inside bones where blood cells are produced through hematopoiesis. Adults produce about 200 billion red blood cells, 100 billion white blood cells, and 400 billion platelets daily. Red marrow in flat bones like the pelvis is the primary site. Bone marrow transplants can treat leukemia and other blood cancers by replacing diseased marrow with healthy stem cells.",
     "byline": "The blood factory",
     "tags": [
       "bones",
@@ -9798,7 +9798,7 @@
     "name": "How Bones Grow",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The growth plates that stretch your skeleton during childhood.",
+    "teaser": "Bones grow in length at the epiphyseal plate, a cartilage layer between the shaft and the end. Chondrocytes divide, elongate, and are replaced by bone tissue. This process continues until the plate fuses, typically by age 25 in humans. Bones grow in width through appositional growth, adding new bone tissue on the outer surface.",
     "byline": "The growing frame",
     "tags": [
       "bones",
@@ -9818,7 +9818,7 @@
     "name": "Osteoporosis",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "Why bones can quietly hollow out, and how to keep yours dense.",
+    "teaser": "Osteoporosis affects approximately 200 million people worldwide, causing bones to become porous and fragile. Women lose bone mass rapidly after menopause due to declining estrogen. Hip fractures carry a 20 to 30 percent mortality rate in the first year. Weight-bearing exercise, calcium, and vitamin D are primary prevention strategies.",
     "byline": "The silent thinning",
     "tags": [
       "bones",
@@ -9838,7 +9838,7 @@
     "name": "How Muscles Contract",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The sliding filaments that turn chemical fuel into movement.",
+    "teaser": "Muscle contraction occurs when calcium release triggers actin and myosin filaments to slide past each other, powered by ATP hydrolysis. The sliding filament theory, proposed in 1954, explains how sarcomeres shorten. A single muscle fiber contains thousands of sarcomeres in series. Muscles can generate up to 30 newtons per square centimeter of cross-sectional area.",
     "byline": "The sliding machine",
     "tags": [
       "muscles",
@@ -9858,7 +9858,7 @@
     "name": "Fast and Slow Muscle Fibers",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "Why sprinters and marathoners are built differently under the skin.",
+    "teaser": "Slow-twitch Type I fibers are rich in mitochondria and capillaries, supporting endurance activities like marathon running. Fast-twitch Type IIa fibers produce rapid, powerful contractions for sprinting. Type IIx fibers are the fastest but fatigue within seconds. Elite marathoners have up to 80 percent slow-twitch fibers; sprinters have predominantly fast-twitch.",
     "byline": "The fiber mix",
     "tags": [
       "muscles",
@@ -9878,7 +9878,7 @@
     "name": "How Neurons Fire",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The electrical wave that carries a thought from one nerve cell to the next.",
+    "teaser": "Neurons transmit signals through action potentials, rapid electrical impulses that travel along axons at speeds up to 120 meters per second. Voltage-gated sodium channels open in sequence, depolarizing the membrane. The all-or-none principle means action potentials fire at full strength or not at all. A neuron can fire up to 500 times per second.",
     "byline": "The body's wiring",
     "tags": [
       "nerves",
@@ -9898,7 +9898,7 @@
     "name": "The Synapse",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The microscopic gap where a nerve impulse becomes a chemical message.",
+    "teaser": "Synapses are junctions where neurons communicate across a 20 nanometer gap. At chemical synapses, calcium influx triggers neurotransmitter release from vesicles into the synaptic cleft. Neurotransmitters bind receptors on the postsynaptic neuron within milliseconds. The human brain contains approximately 100 trillion synapses, forming the most complex network known in the universe.",
     "byline": "The chemical bridge",
     "tags": [
       "nerves",
@@ -9918,7 +9918,7 @@
     "name": "Myelin",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The fatty insulation that makes nerve signals race instead of crawl.",
+    "teaser": "Myelin is a fatty insulation sheath around axons that speeds nerve signal transmission up to 100 times faster than unmyelinated fibers. Produced by oligodendrocytes in the brain and Schwann cells in the periphery, myelin enables saltatory conduction where signals jump between nodes of Ranvier. Demyelinating diseases like multiple sclerosis disrupt this insulation, slowing or blocking nerve signals.",
     "byline": "The fast lane",
     "tags": [
       "nerves",
@@ -9938,7 +9938,7 @@
     "name": "Neuroplasticity",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "Your brain's lifelong ability to rewire itself after learning or injury.",
+    "teaser": "Neuroplasticity is the brain's ability to reorganize itself by forming new neural connections throughout life. London taxi drivers develop enlarged hippocampi from spatial navigation. Stroke patients can recover function through rehabilitation that rewires surrounding brain tissue. Synaptic pruning eliminates unused connections. The brain remains plastic throughout life, though more so in childhood.",
     "byline": "The rewiring brain",
     "tags": [
       "brain",
@@ -9958,7 +9958,7 @@
     "name": "How Memories Are Made",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The three-stage pipeline from moment to lifelong memory.",
+    "teaser": "Short-term memories form through temporary electrical patterns in prefrontal cortex synapses. Long-term memories require protein synthesis and structural changes in synapses, a process called consolidation. The hippocampus converts short-term to long-term memories during sleep. A single neuron can participate in multiple memories through pattern separation and completion.",
     "byline": "The memory factory",
     "tags": [
       "memory",
@@ -9978,7 +9978,7 @@
     "name": "The Hippocampus",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The brain structure that stamps new experiences into long-term memory.",
+    "teaser": "The hippocampus, a seahorse-shaped structure in the temporal lobe, is essential for forming new episodic memories and spatial navigation. Patient H.M., who had his hippocampi removed in 1953, could no longer form new memories but retained old ones. The hippocampus generates new neurons throughout life, one of only two brain regions with adult neurogenesis.",
     "byline": "The memory stamp",
     "tags": [
       "memory",
@@ -9998,7 +9998,7 @@
     "name": "Sleep and Memory",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "Why pulling an all-nighter before an exam is the worst possible study plan.",
+    "teaser": "Sleep strengthens memories through three mechanisms: slow oscillations in deep sleep transfer information from hippocampus to cortex, sleep spindles in stage 2 enhance synaptic plasticity, and REM sleep integrates new memories with existing knowledge. Studies show that a nap after learning improves recall by 30 percent. Sleep deprivation reduces memory formation by up to 40 percent.",
     "byline": "The overnight editor",
     "tags": [
       "sleep",
@@ -10018,7 +10018,7 @@
     "name": "Mirror Neurons",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "Brain cells that fire when you act — and when you watch someone else act.",
+    "teaser": "Mirror neurons fire both when an animal performs an action and when it observes the same action performed by another. Discovered in macaque monkeys in 1992 by Giacomo Rizzolatti, they may underlie empathy, imitation learning, and language development. In humans, mirror neuron systems activate during observation of actions, emotions, and even pain in others.",
     "byline": "The empathy circuits",
     "tags": [
       "brain",
@@ -10038,7 +10038,7 @@
     "name": "The Pain Gate",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "Why rubbing a bumped elbow makes it hurt less.",
+    "teaser": "The gate control theory of pain, proposed by Melzack and Wall in 1965, explains how non-painful input can close neural gates to block pain signals. Rubbing a bruise activates large nerve fibers that inhibit pain transmission in the spinal cord. This theory explains why acupuncture, TENS units, and massage can relieve pain without medication.",
     "byline": "The gatekeeper",
     "tags": [
       "pain",
@@ -10058,7 +10058,7 @@
     "name": "The Stress Response",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The ancient alarm system that floods you with adrenaline and cortisol.",
+    "teaser": "The stress response, or fight-or-flight, begins when the amygdala signals danger to the hypothalamus, activating the sympathetic nervous system. Adrenaline increases heart rate and blood pressure within seconds. Cortisol, released via the HPA axis within minutes, mobilizes glucose and suppresses non-essential functions. Chronic stress elevates cortisol, contributing to obesity, depression, and cardiovascular disease.",
     "byline": "The fight or flight",
     "tags": [
       "stress",
@@ -10078,7 +10078,7 @@
     "name": "Adrenaline",
     "categoryId": "BIOLOGY",
     "subtype": "Neuroscience",
-    "teaser": "The hormone that readies your body for action in an instant.",
+    "teaser": "Adrenaline, or epinephrine, is released from the adrenal medulla during stress, increasing heart rate from 70 to 150 beats per minute, dilating airways, redirecting blood to muscles, and sharpening vision. A single intense stress episode produces enough adrenaline to increase muscle strength by up to 20 percent. Adrenaline's effects last 1 to 2 minutes before breakdown by enzymes.",
     "byline": "The instant boost",
     "tags": [
       "hormones",
@@ -10098,7 +10098,7 @@
     "name": "The Hormone Network",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "Chemical messengers that travel in blood to command distant organs.",
+    "teaser": "The endocrine system uses hormones as chemical messengers to regulate metabolism, growth, reproduction, and mood. Hormones travel through the bloodstream but only affect cells with specific receptors. The hypothalamus links the nervous and endocrine systems, controlling the pituitary gland, which directs other endocrine glands in a hierarchical cascade.",
     "byline": "The chemical telegraph",
     "tags": [
       "hormones",
@@ -10118,7 +10118,7 @@
     "name": "The Thyroid",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The butterfly gland that sets your body's metabolic pace.",
+    "teaser": "The thyroid gland in the neck produces thyroxine and triiodothyronine, regulating metabolism in every cell. Hypothyroidism affects 5 percent of the population, causing fatigue, weight gain, and depression. Hyperthyroidism accelerates metabolism, causing weight loss and rapid heartbeat. The thyroid needs 150 micrograms of iodine daily to produce hormones.",
     "byline": "The metabolism dial",
     "tags": [
       "hormones",
@@ -10138,7 +10138,7 @@
     "name": "Insulin and Blood Sugar",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The hormone shuttle that keeps your blood glucose in the safe zone.",
+    "teaser": "Insulin, produced by beta cells in the pancreatic islets of Langerhans, allows cells to absorb glucose from the blood. After a meal, blood glucose rises and insulin secretion increases 10-fold within minutes. Type 1 diabetes destroys beta cells; type 2 diabetes causes insulin resistance. Uncontrolled diabetes damages blood vessels, nerves, kidneys, and eyes over years.",
     "byline": "The sugar controller",
     "tags": [
       "hormones",
@@ -10158,7 +10158,7 @@
     "name": "Growth Hormone",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The nightly surge that builds bone and muscle while you sleep.",
+    "teaser": "Growth hormone, secreted by the anterior pituitary gland, stimulates cell reproduction and regeneration. It peaks during puberty and deep sleep. The pituitary produces 1 to 2 milligrams daily, declining with age. GH deficiency in children causes dwarfism; excess causes gigantism or acromegaly. Synthetic GH treats growth disorders and is controversially used for anti-aging.",
     "byline": "The night builder",
     "tags": [
       "hormones",
@@ -10178,7 +10178,7 @@
     "name": "The Circadian Clock",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The internal 24-hour timer that sets sleep, hunger, and alertness.",
+    "teaser": "The circadian clock is an internal 24-hour oscillator that regulates sleep, hormone release, body temperature, and metabolism. The suprachiasmatic nucleus in the hypothalamus serves as the master clock, synchronized by light signals through the retina. Circadian disruption increases risks of obesity, diabetes, and cancer. Jet lag results from misalignment between the clock and local time.",
     "byline": "The body's clock",
     "tags": [
       "sleep",
@@ -10198,7 +10198,7 @@
     "name": "Melatonin",
     "categoryId": "BIOLOGY",
     "subtype": "Human biology",
-    "teaser": "The darkness hormone that tells your brain it is time to sleep.",
+    "teaser": "Melatonin is a hormone produced by the pineal gland that signals darkness and promotes sleep. Levels rise 2 to 3 hours before habitual bedtime and peak between 2 and 4 AM. Blue light from screens suppresses melatonin production by up to 50 percent. Melatonin also functions as an antioxidant and immune modulator. Supplemental melatonin reduces jet lag symptoms.",
     "byline": "The dusk signal",
     "tags": [
       "sleep",
@@ -10218,7 +10218,7 @@
     "name": "Rods and Cones",
     "categoryId": "BIOLOGY",
     "subtype": "Sensory biology",
-    "teaser": "The two light-sensing crews that give you night vision and color.",
+    "teaser": "The human retina contains 120 million rods for dim-light vision and 6 million cones for color and detail. Rods contain rhodopsin, sensitive enough to detect a single photon. Cones come in three types sensitive to red, green, and blue wavelengths. The fovea, center of the retina, contains only cones and provides the highest visual acuity.",
     "byline": "The vision team",
     "tags": [
       "vision",
@@ -10238,7 +10238,7 @@
     "name": "How We See Color",
     "categoryId": "BIOLOGY",
     "subtype": "Sensory biology",
-    "teaser": "Three cone types mixing signals to paint the world in millions of hues.",
+    "teaser": "Color vision relies on three types of cone cells with peak sensitivities at red, green, and blue wavelengths. The brain combines signals from all three cone types to perceive millions of colors. Color blindness affects about 8 percent of men and 0.5 percent of women, most commonly red-green deficiency. Tetrachromats, mostly women, have four cone types and can see over 100 million colors.",
     "byline": "The color mixer",
     "tags": [
       "vision",
@@ -10258,7 +10258,7 @@
     "name": "The Blind Spot",
     "categoryId": "BIOLOGY",
     "subtype": "Sensory biology",
-    "teaser": "The gap in your vision you never notice — here is how to find it.",
+    "teaser": "The blind spot, or optic disc, is where the optic nerve exits the eye, creating a 15-degree gap in the visual field with no photoreceptors. The brain fills in the missing information using surrounding visual data, so we rarely notice it. Each eye has a blind spot about 15 degrees nasal to the fovea. Covering one eye reveals the blind spot when a test image disappears.",
     "byline": "The hidden hole",
     "tags": [
       "vision",
