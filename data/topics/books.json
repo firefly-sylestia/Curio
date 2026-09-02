@@ -11837,7 +11837,7 @@
     "subtype": "Novel",
     "name": "Cancer Ward",
     "teaser": "Solzhenitsyn's 1968 novel set in a Soviet cancer ward — where the disease becomes the honest metaphor for the system, and patients debate politics, truth, and survival between treatments.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780451529008-L.jpg",
     "byline": "Aleksandr Solzhenitsyn",
     "exploreAction": {
       "verb": "Read",
@@ -11851,7 +11851,58 @@
       "Hospital"
     ],
     "tier": 2,
-    "pageCount": 560
+    "pageCount": 560,
+    "synopsis": "Aleksandr Solzhenitsyn's novel follows the patients in a cancer ward in a Soviet city in the 1950s, using the hospital as a microcosm of Soviet society. The central figure is Pavel Nikolayevich Rusanov, a mid-level Communist Party bureaucrat who is admitted with a throat tumor and whose smug certainty in the system is gradually undermined by his proximity to suffering. Alongside him are patients from every walk of life: Kostoglotov, a former political prisoner who has been hardened by the Gulag and whose refusal to submit makes him both heroic and abrasive; Yevgenia Aleksandrovna, a nurse whose compassion is strained by the system's indifference; and dozens of others whose stories illuminate the texture of Soviet life under Stalin and Khrushchev. The cancer itself becomes a metaphor for the disease in Soviet society—the lies, the ideological rigidity, the suppression of individual conscience. Solzhenitsyn, who had been diagnosed with cancer himself, wrote the novel in the early 1960s but was unable to publish it in the USSR. It appeared in English in 1968, two years before his Nobel Prize, and remains one of the most searing indictments of totalitarianism ever written.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Admission",
+        "pageRange": "1-45",
+        "summary": "Patients arrive at the cancer ward; Rusanov's political certainty."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Ward",
+        "pageRange": "46-95",
+        "summary": "The patients' stories begin to intertwine."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Kostoglotov",
+        "pageRange": "96-150",
+        "summary": "Kostoglotov's past in the Gulag and his treatment."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Diagnosis",
+        "pageRange": "151-200",
+        "summary": "Each patient confronts their mortality differently."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Recovery",
+        "pageRange": "201-260",
+        "summary": "Treatments begin; hope and despair fluctuate."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The System",
+        "pageRange": "261-320",
+        "summary": "Soviet bureaucracy invades the ward; Rusanov's crisis."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Cure",
+        "pageRange": "321-380",
+        "summary": "Each patient's fate is decided; the metaphor deepens."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "Discharge",
+        "pageRange": "381-430",
+        "summary": "The patients leave; the world outside has not changed."
+      }
+    ]
   },
   {
     "id": "book-we",
@@ -11859,7 +11910,7 @@
     "subtype": "Novel",
     "name": "We",
     "teaser": "Zamyatin's 1924 dystopia of the One State — D-503's numbered happiness and his forbidden soul, in the glass city that taught Orwell and Huxley their blueprints. The grandfather of all dystopias.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780451528261-L.jpg",
     "byline": "Yevgeny Zamyatin",
     "exploreAction": {
       "verb": "Read",
@@ -11873,7 +11924,58 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 224
+    "pageCount": 224,
+    "synopsis": "Yevgeny Zamyatin's dystopian novel, written in 1920 and published abroad in 1924, is set in the One State, a future totalitarian society where citizens live in glass buildings, follow a rigid schedule, and are identified by numbers rather than names. The narrator, D-503, is a mathematician who helps build the Integral, a spaceship intended to spread the One State's logic to other planets. When he meets I-330, a woman who defies the state's regulations and inspires him to think independently, his world begins to crack. The novel is written as D-503's journal, and as he falls in love with I-330, he begins to experience imagination—which the state considers a disease. Zamyatin, a Russian-born engineer who had participated in the Bolshevik Revolution, wrote the novel as a warning about where Soviet communism was heading. It was banned in Russia and influenced both Orwell's 1984 and Huxley's Brave New World. The glass walls, the schedule, the table of regulations, the green wall separating the city from nature—these details made We the prototype for all modern dystopian fiction.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "A Summary",
+        "pageRange": "1-12",
+        "summary": "D-503 introduces the One State and its mathematical perfection."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Editor",
+        "pageRange": "13-22",
+        "summary": "D-503 meets I-330; the first crack in his certainty."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Narrative",
+        "pageRange": "23-34",
+        "summary": "D-503's growing obsession with I-330."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Eye",
+        "pageRange": "35-46",
+        "summary": "The Bureau of Guardians watches; D-503 begins to dream."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Country",
+        "pageRange": "47-60",
+        "summary": "D-503 and I-330 escape beyond the Green Wall."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Well",
+        "pageRange": "61-74",
+        "summary": "D-503 discovers the world outside the One State."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Lightning",
+        "pageRange": "75-88",
+        "summary": "The rebellion intensifies; D-503 is torn."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "The Last",
+        "pageRange": "89-100",
+        "summary": "D-503 undergoes the operation; imagination is removed."
+      }
+    ]
   },
   {
     "id": "book-heart-of-the-matter",
@@ -11881,7 +11983,7 @@
     "subtype": "Novel",
     "name": "The Heart of the Matter",
     "teaser": "Graham Greene's 1948 novel of Scobie, an honest colonial policeman in wartime West Africa, trapped between pity, adultery, and his Catholic faith — the 'entertainment' that became Greene's most controversial masterpiece.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140185034-L.jpg",
     "byline": "Graham Greene",
     "exploreAction": {
       "verb": "Read",
@@ -11895,7 +11997,34 @@
       "Classic"
     ],
     "tier": 2,
-    "pageCount": 320
+    "pageCount": 320,
+    "synopsis": "Graham Greene's novel is set in a British colonial outpost in West Africa during World War II and follows Henry Scobie, a deputy commissioner of police who is a devout Catholic, a devoted husband, and a man of considerable integrity—until love and duty collide. When Scobie's wife Louise is granted leave to visit South Africa, he obtains the money for her passage by accepting a loan from a man he knows to be a criminal. This compromise leads to a love affair with Helen Rolt, a young shipwreck survivor, and Scobie finds himself trapped between his love for Helen, his guilt over Louise, and his Catholic belief that he cannot obtain absolution without ending one of these relationships. The novel is a masterclass in moral psychology, tracing the slow corruption of a good man who believes that his love for Helen is destroying her while his duty to Louise is destroying himself. Greene, a convert to Catholicism, wrote the novel after his own experiences in Sierra Leone, and it won the James Tait Black Memorial Prize. The famous final sentence—'the photograph of oneself comes with its own legend'—has been called one of the most devastating in English literature.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-40",
+        "summary": "Scobie's life in the colony; his relationship with Louise."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "41-80",
+        "summary": "Scobie meets Helen; the affair begins."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "81-120",
+        "summary": "Scobie's guilt deepens; the moral crisis intensifies."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "121-160",
+        "summary": "The trap closes; Scobie's final choice."
+      }
+    ]
   },
   {
     "id": "book-power-and-the-glory",
@@ -11903,7 +12032,7 @@
     "subtype": "Novel",
     "name": "The Power and the Glory",
     "teaser": "Greene's 1940 novel of the last priest in a Mexican state where the Church is outlawed — a whiskey priest, a coward and a saint, hunted across the heat. Greene called it his favorite of his own books.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140185027-L.jpg",
     "byline": "Graham Greene",
     "exploreAction": {
       "verb": "Read",
@@ -11917,7 +12046,34 @@
       "Classic"
     ],
     "tier": 2,
-    "pageCount": 304
+    "pageCount": 304,
+    "synopsis": "Graham Greene's novel follows an unnamed 'whisky priest' who is the last Catholic priest in a Mexican state where the Church has been outlawed by a revolutionary government. The priest is a deeply flawed man—he drinks, he has fathered a child, he is a fugitive—and yet he continues to perform his duties, hearing confessions, administering sacraments, and offering hope to the persecuted faithful. Pursued relentlessly by a police lieutenant who is an atheist and a former seminarian, the priest moves through the impoverished countryside of Mexico, encountering people whose faith sustains them and whose suffering tests his own. The novel explores the nature of grace, the meaning of priesthood, and the paradox of a God who works through flawed human instruments. Greene, who had traveled in Mexico researching the persecution of Catholics, wrote the novel in just three weeks. It was published in 1940 and was immediately controversial—the Vatican placed it on its Index of Forbidden Books, while the literary world recognized it as a masterpiece. The novel's title comes from the Lord's Prayer: 'Thine is the kingdom, the power and the glory.'",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-40",
+        "summary": "The priest flees; the lieutenant begins his pursuit."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "41-80",
+        "summary": "The priest travels through the countryside; encounters with the faithful."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "81-120",
+        "summary": "The priest's moral crisis deepens; his child and the mestizo."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "121-160",
+        "summary": "The priest's final days; his arrest and execution."
+      }
+    ]
   },
   {
     "id": "book-brideshead-revisited",
@@ -11925,7 +12081,7 @@
     "subtype": "Novel",
     "name": "Brideshead Revisited",
     "teaser": "Evelyn Waugh's 1945 novel of memory, faith, and the Marchmain family — Charles Ryder's love for Sebastian and the golden world of Brideshead, recollected during the war. Waugh's most tender book.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316910767-L.jpg",
     "byline": "Evelyn Waugh",
     "exploreAction": {
       "verb": "Read",
@@ -11939,7 +12095,40 @@
       "Memory"
     ],
     "tier": 1,
-    "pageCount": 432
+    "pageCount": 432,
+    "synopsis": "Evelyn Waugh's novel is narrated by Charles Ryder, a middle-class art student at Oxford who becomes entangled with the wealthy and eccentric Flyte family. Charles is invited to Brideshead Castle, the Flytes' ancestral home, and falls in love with the beautiful and troubled Sebastian Flyte. The novel follows their friendship through the 1920s and 1930s, as Sebastian's alcoholism and Catholic guilt destroy him, and Charles is drawn deeper into the family's orbit—eventually marrying Sebastian's sister Julia. But Charles discovers that Julia, too, is bound by the family's Catholic faith, and when she learns that Charles's mother has died (freeing him from the obligation that was preventing his conversion), she insists that they cannot marry. The novel is structured as a frame narrative: Charles is now an army officer during World War II, stationed at Brideshead Castle, which has been requisitioned by the military. His memories of the family, the house, and his lost love are suffused with nostalgia and regret. Waugh, who had converted to Catholicism in 1930, wrote the novel as a meditation on faith, memory, and the passing of an English way of life. It was published in 1945 and became Waugh's most popular work, though he himself considered it inferior to his earlier satires.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Prologue",
+        "pageRange": "1-15",
+        "summary": "Charles Ryder at Brideshead Castle during World War II."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Et in Arcadia Ego",
+        "pageRange": "16-50",
+        "summary": "Charles meets Sebastian at Oxford; the friendship begins."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "A Twitch upon the Thread",
+        "pageRange": "51-100",
+        "summary": "Brideshead Castle; the Flyte family and their Catholic faith."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Man is Not an Oyster",
+        "pageRange": "101-150",
+        "summary": "Sebastian's decline; Charles's relationship with Julia."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Shades of the Prison-House",
+        "pageRange": "151-200",
+        "summary": "The final reckoning with faith and love."
+      }
+    ]
   },
   {
     "id": "book-decline-and-fall",
@@ -11947,7 +12136,7 @@
     "subtype": "Novel",
     "name": "Decline and Fall",
     "teaser": "Waugh's 1928 debut — Paul Pennyfeather is expelled from Oxford for running in his trousers and falls upward into a world of schoolmasters, society hostesses, and Welsh builders. The novel that made Waugh a name.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316910491-L.jpg",
     "byline": "Evelyn Waugh",
     "exploreAction": {
       "verb": "Read",
@@ -11961,7 +12150,52 @@
       "Satire"
     ],
     "tier": 2,
-    "pageCount": 336
+    "pageCount": 336,
+    "synopsis": "Evelyn Waugh's first novel follows Paul Pennyfeather, an Oxford theology student who is sent down for indecent behavior he did not commit (the real culprits are the Bollinger Club, a group of rowdy aristocrats). Penniless and without prospects, Paul becomes a teacher at Llanabba Castle, a second-rate boarding school in Wales, where he encounters a cast of grotesque characters: Captain Grimes, a perpetual bounder; Philbrick, the butler who claims to have been everything from a murderer to a philanthropist; and Margot Beste-Chetwynde, a beautiful and amoral socialite whom Paul foolishly agrees to marry. The novel follows Paul's downward spiral through increasingly absurd misadventures—from teaching to prison to forced labor in South America—and ends with his quiet disappearance from history. Waugh wrote the novel as a satire of English society between the wars, and it immediately established him as the most brilliant comic novelist of his generation. The title, borrowed from Gibbon's Decline and Fall of the Roman Empire, signals Waugh's view that English civilization was heading for collapse. The novel was an instant success and has never been out of print.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Chapter 1",
+        "pageRange": "1-20",
+        "summary": "Paul is sent down from Oxford; his misadventure begins."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Chapter 2",
+        "pageRange": "21-40",
+        "summary": "Paul becomes a teacher at Llanabba Castle."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Chapter 3",
+        "pageRange": "41-60",
+        "summary": "The characters of Llanabba; Captain Grimes and Philbrick."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Chapter 4",
+        "pageRange": "61-80",
+        "summary": "Paul meets Margot Beste-Chetwynde."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Chapter 5",
+        "pageRange": "81-100",
+        "summary": "Paul's engagement to Margot; his arrest."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Chapter 6",
+        "pageRange": "101-120",
+        "summary": "Paul in prison; his sentence and exile to South America."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Chapter 7",
+        "pageRange": "121-135",
+        "summary": "Paul's disappearance; the novel's ironic conclusion."
+      }
+    ]
   },
   {
     "id": "book-a-handful-of-dust",
@@ -11969,7 +12203,7 @@
     "subtype": "Novel",
     "name": "A Handful of Dust",
     "teaser": "Waugh's 1934 novel of Tony Last, whose wife's affair sends him into the jungle of British Guiana — where he reads Dickens aloud forever to a madman. The cruelest ending in English comic fiction.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316910484-L.jpg",
     "byline": "Evelyn Waugh",
     "exploreAction": {
       "verb": "Read",
@@ -11983,7 +12217,34 @@
       "Comedy"
     ],
     "tier": 2,
-    "pageCount": 256
+    "pageCount": 256,
+    "synopsis": "Evelyn Waugh's novel follows Tony Last, a country gentleman whose life is upended when his wife Brenda begins an affair with the social-climbing John Beaver. Tony discovers the affair, and what begins as a civilized separation escalates into a bitter divorce case that exposes the cruelty and vulgarity of English upper-class society. Meanwhile, Tony is lured to Brazil by the fraudulent promise of a lost city—actually a fever-ridden wasteland—where he is held captive by a mad explorer named Mr. Todd, who forces him to read Dickens aloud for the rest of his life. The novel is a devastating satire of the English aristocracy and a meditation on the futility of civilized values in a world governed by money, sex, and class. Waugh drew on his own painful divorce from Evelyn Gardner (who had an affair with Henry Lamb) to write the novel, and the combination of personal bitterness and satirical brilliance produced one of the finest English novels of the twentieth century. The title comes from T.S. Eliot's The Waste Land: 'I will show you fear in a handful of dust.'",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-40",
+        "summary": "Life at Hetton Abbey; the Lasts' marriage."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "41-80",
+        "summary": "Brenda's affair with John Beaver; the separation."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "81-120",
+        "summary": "The divorce case; the destruction of civilized values."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "121-160",
+        "summary": "Tony in Brazil; Mr. Todd and the endless reading of Dickens."
+      }
+    ]
   },
   {
     "id": "book-lucky-jim",
@@ -11991,7 +12252,7 @@
     "subtype": "Novel",
     "name": "Lucky Jim",
     "teaser": "Kingsley Amis's 1954 comic novel of Jim Dixon, a junior lecturer tormented by his professor — the funniest book of the angry-young-man era, built around one unforgettable hungover lecture.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140011548-L.jpg",
     "byline": "Kingsley Amis",
     "exploreAction": {
       "verb": "Read",
@@ -12005,7 +12266,46 @@
       "Academic"
     ],
     "tier": 1,
-    "pageCount": 256
+    "pageCount": 256,
+    "synopsis": "Kingsley Amis's debut novel follows Jim Dixon, a young lecturer in medieval history at a provincial English university, who despises his job, his colleagues, and most of the world around him. Jim is trying to write a scholarly article on 'Merrie England' that will secure his tenure, but his efforts keep being thwarted by the pompous Professor Welch, whose son Bertrand pursues Jim's girlfriend Margaret, and whose daughter Christine turns out to be everything Jim wants but cannot have. The novel follows Jim through a series of excruciating social occasions—a weekend at the Welch family home, a public lecture that goes disastrously wrong, a night of drunken destruction in a hotel—each rendered with comic precision. Lucky Jim is one of the founding texts of the 'Angry Young Men' movement of the 1950s, a generation of working-class writers who rebelled against the establishment. Amis wrote the novel in six months after a drinking session with Philip Larkin, and it won the Somerset Maugham Award. Its influence on British comic fiction is incalculable.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Chapter 1",
+        "pageRange": "1-20",
+        "summary": "Jim's life at the university; his distaste for academic life."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Chapter 2",
+        "pageRange": "21-40",
+        "summary": "The weekend at the Welch household; Bertrand and Christine."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Chapter 3",
+        "pageRange": "41-60",
+        "summary": "Jim's lecture goes wrong; the beer incident."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Chapter 4",
+        "pageRange": "61-80",
+        "summary": "Jim's night of destruction; the fire."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Chapter 5",
+        "pageRange": "81-100",
+        "summary": "The aftermath; Jim's job and Christine."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Chapter 6",
+        "pageRange": "101-118",
+        "summary": "Jim's final triumph; the novel's comic conclusion."
+      }
+    ]
   },
   {
     "id": "book-woman-in-white",
@@ -12013,7 +12313,7 @@
     "subtype": "Novel",
     "name": "The Woman in White",
     "teaser": "Wilkie Collins's 1860 sensation novel — a woman in white on a moonlit road, an identity swap, and a conspiracy told through a chorus of documents. The book that made Victorian readers stay up all night.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439686-L.jpg",
     "byline": "Wilkie Collins",
     "exploreAction": {
       "verb": "Read",
@@ -12027,7 +12327,46 @@
       "Victorian"
     ],
     "tier": 1,
-    "pageCount": 640
+    "pageCount": 640,
+    "synopsis": "Wilkie Collins's sensation novel follows Walter Hartright, a drawing teacher who encounters a mysterious woman dressed in white on a moonlit London road. The woman, Anne Catherick, warns him about someone named 'Laura Fairlie' and then disappears. Hartright soon discovers that Laura Fairlie is the heiress he has been hired to tutor, and that the woman in white bears an uncanny resemblance to her. The novel unravels a conspiracy by Sir Percival Glyde and his ally Count Fosco to steal Laura's fortune through a scheme that involves identity theft, forged documents, and the confinement of both Laura and Anne in a private asylum. Collins, who was Charles Dickens's protégé and collaborator, published the novel in 1859 in Dickens's magazine All the Year Round. It was an immediate sensation— Collins received over 40,000 fan letters— and is widely regarded as the first and finest example of the sensation novel. The novel's influence on detective fiction, mystery, and the thriller genre is immense, and its exploration of women's vulnerability within legal and medical institutions remains strikingly relevant.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Walter Hartright's Narrative",
+        "pageRange": "1-50",
+        "summary": "The encounter with the woman in white; Hartright's journey to Limmeridge House."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Fairlie Inheritance",
+        "pageRange": "51-100",
+        "summary": "Laura Fairlie's story; the engagement to Sir Percival Glyde."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Conspiracy",
+        "pageRange": "101-150",
+        "summary": "Sir Percival and Count Fosco hatch their plan."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Asylum",
+        "pageRange": "151-200",
+        "summary": "Laura is imprisoned in the asylum; Anne Catherick's fate."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Investigation",
+        "pageRange": "201-250",
+        "summary": "Hartright's search for the truth; the evidence against Glyde."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Revelation",
+        "pageRange": "251-300",
+        "summary": "The conspiracy is exposed; the identities are revealed."
+      }
+    ]
   },
   {
     "id": "book-moonstone",
@@ -12035,7 +12374,7 @@
     "subtype": "Novel",
     "name": "The Moonstone",
     "teaser": "Collins's 1868 novel, often called the first English detective novel — a stolen diamond, a cursed night, and Sergeant Cuff's slow, patient detection across a Yorkshire house party. Detection as a form of love.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439686-L.jpg",
     "byline": "Wilkie Collins",
     "exploreAction": {
       "verb": "Read",
@@ -12049,7 +12388,52 @@
       "Detective"
     ],
     "tier": 1,
-    "pageCount": 528
+    "pageCount": 528,
+    "synopsis": "Wilkie Collins's novel is widely regarded as the first detective story in the English language. The narrative is constructed from multiple depositions given by different characters, each offering their own perspective on the theft of the Moonstone, a large yellow diamond that was stolen from an Indian temple during the siege of Seringapatam and brought to England by Colonel Herncastle. The diamond is given to his niece Rachel Verinder on her eighteenth birthday, and that night it disappears from her bedroom. Suspicion falls on the Indian servants, on the local opium addict Godfrey Ablewhite, and on the housekeeper's nephew Franklin Blake, who had been courting Rachel. The narrator, the steward Betteredge, tells his portion of the story through his devotion to Robinson Crusoe; the family doctor throws suspicion on the household; a sailor provides the crucial evidence. Collins constructs the mystery with extraordinary precision, laying clues in plain sight and leading the reader through a labyrinth of deception. The novel was published in 1868 and its influence on detective fiction—from Conan Doyle to Agatha Christie—is incalculable.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Miss Clack's Narrative",
+        "pageRange": "1-30",
+        "summary": "The theft of the Moonstone; Rachel's birthday."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Betteredge's Narrative",
+        "pageRange": "31-80",
+        "summary": "The steward's account; the household's reaction to the theft."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Clack's Narrative",
+        "pageRange": "81-120",
+        "summary": "Miss Clack's suspicions; the Indian connection."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Blake's Narrative",
+        "pageRange": "121-170",
+        "summary": "Franklin Blake's investigation; his memories of the night."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Sergeant",
+        "pageRange": "171-220",
+        "summary": "Sergeant Cuff's investigation; the rose-colored stain."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Discovery",
+        "pageRange": "221-270",
+        "summary": "The truth about the theft; the Indian guardians of the diamond."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Conclusion",
+        "pageRange": "271-300",
+        "summary": "The diamond's fate; Rachel and Franklin's reconciliation."
+      }
+    ]
   },
   {
     "id": "book-sherlock-holmes-studies",
@@ -12057,7 +12441,7 @@
     "subtype": "Short Stories",
     "name": "The Adventures of Sherlock Holmes",
     "teaser": "Conan Doyle's 1892 first collection of Holmes stories — A Scandal in Bohemia, The Red-Headed League, and ten more cases that made the detective and his methods part of the world's imagination.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140439076-L.jpg",
     "byline": "Arthur Conan Doyle",
     "exploreAction": {
       "verb": "Read",
@@ -12071,7 +12455,82 @@
       "Detective"
     ],
     "tier": 1,
-    "pageCount": 352
+    "pageCount": 352,
+    "synopsis": "Arthur Conan Doyle's collection of twelve short stories introduces the world's most famous detective and his chronicler, Dr. John Watson. Sherlock Holmes, who lives at 221B Baker Street, is a consulting detective who uses observation, deduction, and a vast knowledge of crime to solve cases that baffle the Scotland Yard police. The stories range from the jewel theft of 'A Scandal in Bohemia,' where Holmes encounters his intellectual equal in the adventuress Irene Adler, to the mysterious disappearance of 'The Red-Headed League,' from the terrifying 'The Speckled Band' to the political intrigue of 'The Bruce-Partington Plans.' Holmes is a man of contradictions: brilliant but eccentric, cold but capable of deep loyalty, addicted to cocaine but passionately engaged in the pursuit of justice. Watson, the narrator, is the ordinary man through whom we see Holmes's genius, and their friendship—warm, tolerant, and deeply human—is the emotional core of the stories. Doyle published the twelve stories in The Strand Magazine between 1891 and 1892, and they made Holmes an international celebrity. The stories defined the detective genre and established the conventions that every mystery writer since has either followed or subverted.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "A Scandal in Bohemia",
+        "pageRange": "1-18",
+        "summary": "Holmes is outwitted by Irene Adler."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Red-Headed League",
+        "pageRange": "19-34",
+        "summary": "A bizarre job leads to a bank robbery."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "A Case of Identity",
+        "pageRange": "35-48",
+        "summary": "A young woman's stepfather has sinister plans."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Boscombe Valley Mystery",
+        "pageRange": "49-64",
+        "summary": "A murder in the countryside; a family secret."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Five Orange Pips",
+        "pageRange": "65-78",
+        "summary": "The Ku Klux Klan comes to England."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Man with the Twisted Lip",
+        "pageRange": "79-92",
+        "summary": "A missing husband and an opium den."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Adventure of the Blue Carbuncle",
+        "pageRange": "93-108",
+        "summary": "A Christmas goose and a stolen jewel."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "The Adventure of the Speckled Band",
+        "pageRange": "109-128",
+        "summary": "A woman is killed by an exotic snake."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "The Adventure of the Engineer's Thumb",
+        "pageRange": "129-142",
+        "summary": "A hydraulic engineer's terrifying night."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "The Adventure of the Noble Bachelor",
+        "pageRange": "143-156",
+        "summary": "A bride vanishes on her wedding day."
+      },
+      {
+        "chapterNumber": 11,
+        "title": "The Adventure of the Beryl Coronet",
+        "pageRange": "157-172",
+        "summary": "A banker's reckless act leads to theft."
+      },
+      {
+        "chapterNumber": 12,
+        "title": "The Adventure of the Copper Beeches",
+        "pageRange": "173-190",
+        "summary": "A governess's strange employer has a dark secret."
+      }
+    ]
   },
   {
     "id": "book-hound-of-the-baskervilles",
@@ -12079,7 +12538,7 @@
     "subtype": "Novel",
     "name": "The Hound of the Baskervilles",
     "teaser": "Conan Doyle's 1902 novel of the Dartmoor curse — a spectral hound, a dead heir, and Holmes away while Watson investigates the moor. The perfect Gothic detective story, and the most loved Sherlock Holmes novel.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140439076-L.jpg",
     "byline": "Arthur Conan Doyle",
     "exploreAction": {
       "verb": "Read",
@@ -12093,7 +12552,82 @@
       "Gothic"
     ],
     "tier": 1,
-    "pageCount": 192
+    "pageCount": 192,
+    "synopsis": "Arthur Conan Doyle's most famous Sherlock Holmes novel begins with the legend of the Baskerville curse: a spectral hound that has haunted the Baskerville family for generations, claiming the life of Sir Charles Baskerville. When Sir Charles dies under mysterious circumstances on the moor, with the prints of a gigantic hound found near his body, his nephew Henry is warned not to go to Baskerville Hall. Holmes sends Watson to accompany Sir Henry to Devon, while he remains in London—or so it appears. The moor is populated by suspicious characters: the sinister Barrymores, the naturalist Dr. Stapleton, the escaped convict Selden, and the beautiful Beryl Stapleton. As Watson investigates, he discovers that the legend may be more real than he thought. Holmes's dramatic appearance on the moor—emerging from the fog like a phantom—is one of the most famous scenes in detective fiction. The novel, serialized in 1901-1902, was written by Doyle as a sequel to 'The Final Problem,' in which Holmes had apparently died at Reichenbach Falls. The Hound was so popular that Doyle was forced to bring Holmes back to life.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Mr. Sherlock Holmes",
+        "pageRange": "1-12",
+        "summary": "The legend of the Baskerville hound is told to Holmes and Watson."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Curse of the Baskervilles",
+        "pageRange": "13-24",
+        "summary": "Sir Charles's death; the warning to Sir Henry."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Problem",
+        "pageRange": "25-36",
+        "summary": "Holmes assigns Watson to the case."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Baskerville Hall",
+        "pageRange": "37-50",
+        "summary": "Watson arrives in Devon; the moor and its inhabitants."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Three Broken Threads",
+        "pageRange": "51-64",
+        "summary": "Watson's investigation; the Barrymores and the convict."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Baskerville Hall",
+        "pageRange": "65-78",
+        "summary": "Watson's reports to Holmes; the naturalist Dr. Stapleton."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Second Report",
+        "pageRange": "79-92",
+        "summary": "The moor at night; the hound's howl."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "The Third Report",
+        "pageRange": "93-106",
+        "summary": "Watson discovers the truth about Beryl Stapleton."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "The Second Stage",
+        "pageRange": "107-118",
+        "summary": "Holmes arrives on the moor; the trap is set."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "The Gathering of the Hound",
+        "pageRange": "119-130",
+        "summary": "The hound is revealed; Stapleton's true identity."
+      },
+      {
+        "chapterNumber": 11,
+        "title": "The Man on the Tor",
+        "pageRange": "131-140",
+        "summary": "The chase across the moor; Stapleton's escape into the bog."
+      },
+      {
+        "chapterNumber": 12,
+        "title": "The Final Investigation",
+        "pageRange": "141-152",
+        "summary": "Holmes explains the case; the curse is laid to rest."
+      }
+    ]
   },
   {
     "id": "book-and-then-there-were-none",
@@ -12101,7 +12635,7 @@
     "subtype": "Novel",
     "name": "And Then There Were None",
     "teaser": "Agatha Christie's 1939 novel of ten strangers on an island who die one by one to a nursery rhyme — the best-selling mystery of all time, and the purest whodunit ever constructed.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062671578-L.jpg",
     "byline": "Agatha Christie",
     "exploreAction": {
       "verb": "Read",
@@ -12115,7 +12649,40 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 288
+    "pageCount": 288,
+    "synopsis": "Agatha Christie's best-selling mystery novel—over 100 million copies sold—follows ten strangers who are lured to a private island off the coast of Devon by a mysterious host. Upon arrival, they hear a recorded message accusing each of them of a murder that went unpunished. One by one, they begin to die—each death corresponding to a verse of the nursery rhyme 'Ten Little Soldiers' that hangs in each bedroom. The ten are: Justice Wargrave, a retired judge; Vera Claythorne, a former governess; Philip Lombard, a mercenary; Dr. Armstrong, a physician; Emily Brent, a religious spinster; General Macarthur, a war hero; Anthony Marston, a young playboy; Rogers, the butler; Mrs. Rogers, the housekeeper; and Mr. Blore, a retired detective. As the bodies mount and the survivors grow increasingly desperate, they realize that the killer must be among them. Christie's genius lies in the construction: the closed-circle format, the nursery-rhyme structure, and the solution to the mystery—which is revealed in a letter found in a bottle thrown into the sea. Published in 1939, the novel is the best-selling mystery of all time.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One: The Journey",
+        "pageRange": "1-30",
+        "summary": "The ten strangers travel to Soldier Island."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two: The First Night",
+        "pageRange": "31-60",
+        "summary": "The accusation; the first death."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three: The Investigation",
+        "pageRange": "61-100",
+        "summary": "The survivors investigate; paranoia grows."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four: The Deaths Mount",
+        "pageRange": "101-140",
+        "summary": "The deaths continue; the nursery rhyme is fulfilled."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Part Five: The End",
+        "pageRange": "141-170",
+        "summary": "The final survivors; the solution is revealed."
+      }
+    ]
   },
   {
     "id": "book-murder-on-the-orient-express",
@@ -12123,7 +12690,7 @@
     "subtype": "Novel",
     "name": "Murder on the Orient Express",
     "teaser": "Christie's 1934 novel of a murder in a snowbound train car and twelve suspects — the case that forces Poirot to choose between the law and justice. The most ingenious of her locked-room puzzles.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062693662-L.jpg",
     "byline": "Agatha Christie",
     "exploreAction": {
       "verb": "Read",
@@ -12137,7 +12704,40 @@
       "Poirot"
     ],
     "tier": 1,
-    "pageCount": 256
+    "pageCount": 256,
+    "synopsis": "Agatha Christie's Hercule Poirot novel is set on the famous Orient Express, which is stopped by snowdrifts in the Balkans. When an American businessman named Ratchett is found stabbed to death in his locked compartment, Poirot is asked to investigate. The suspects include a Hungarian count and his wife, a Russian princess, an English colonel, a Swedish missionary, an Italian car salesman, and Ratchett's valet. As Poirot interrogates each passenger, he discovers that Ratchett was actually Cassetti, the kidnapper and murderer of a young girl named Daisy Armstrong—and that every person on the train has a connection to the Armstrong family. The solution to the mystery is one of the most audacious in detective fiction: all twelve passengers committed the murder together, each stabbing Ratchett once to ensure that no single person could be identified as the killer. Published in 1934, the novel is one of Christie's most celebrated works and has been adapted numerous times, most famously in Sidney Lumet's 1974 film.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Facts",
+        "pageRange": "1-25",
+        "summary": "Poirot boards the Orient Express; the passengers are introduced."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Night",
+        "pageRange": "26-50",
+        "summary": "The train stops in the snow; Ratchett is found dead."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Investigation",
+        "pageRange": "51-80",
+        "summary": "Poirot interrogates each passenger; contradictions emerge."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Clues",
+        "pageRange": "81-100",
+        "summary": "Poirot discovers the Armstrong connection."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Solution",
+        "pageRange": "101-115",
+        "summary": "Poirot presents two solutions; the truth is more terrible than fiction."
+      }
+    ]
   },
   {
     "id": "book-rebecca",
@@ -12145,7 +12745,7 @@
     "subtype": "Novel",
     "name": "Rebecca",
     "teaser": "Daphne du Maurier's 1938 novel of the nameless second Mrs. de Winter, the house Manderley, and the dead first wife who still rules it — a Gothic romance about the ghosts of marriage.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316259309-L.jpg",
     "byline": "Daphne du Maurier",
     "exploreAction": {
       "verb": "Read",
@@ -12159,7 +12759,46 @@
       "Romance"
     ],
     "tier": 1,
-    "pageCount": 416
+    "pageCount": 416,
+    "synopsis": "Daphne du Maurier's gothic novel follows an unnamed narrator who, as a young lady's companion in Monte Carlo, meets and marries the wealthy widower Maxim de Winter. She accompanies him to Manderley, his grand estate on the Cornish coast, where she is haunted by the memory of his first wife, Rebecca—beautiful, accomplished, and universally beloved. The sinister housekeeper, Mrs. Danvers, constantly reminds the new Mrs. de Winter of Rebecca's superiority, and the narrator's insecurity grows until she believes Maxim still loves his dead wife. The truth, when it comes, is the opposite: Maxim hated Rebecca and killed her, and the novel's second half becomes a murder investigation as the inquest reveals the depth of Rebecca's depravity. The novel is a masterclass in suspense, atmosphere, and the psychology of jealousy. Du Maurier wrote it during a period of personal unhappiness, and the narrator's voice—anxious, self-deprecating, and deeply human—has made the novel one of the most enduring works of twentieth-century English fiction. Alfred Hitchcock's 1940 film adaptation won the Academy Award for Best Picture.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-40",
+        "summary": "The narrator meets Maxim de Winter in Monte Carlo."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Manderley",
+        "pageRange": "41-80",
+        "summary": "The narrator arrives at Manderley; Rebecca's shadow."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Mrs. Danvers",
+        "pageRange": "81-120",
+        "summary": "The housekeeper's psychological torment; the narrator's insecurity."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Inquest",
+        "pageRange": "121-160",
+        "summary": "Rebecca's body is found; the inquest begins."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Truth",
+        "pageRange": "161-200",
+        "summary": "Maxim confesses; the trial and its aftermath."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Epilogue",
+        "pageRange": "201-220",
+        "summary": "Manderley is destroyed; the narrator looks back."
+      }
+    ]
   },
   {
     "id": "book-jamaica-inn",
@@ -12167,7 +12806,7 @@
     "subtype": "Novel",
     "name": "Jamaica Inn",
     "teaser": "Du Maurier's 1936 novel of Mary Yellan, sent to her aunt's Cornish inn on the moors — where the landlord runs a wrecking crew and the storms hide worse. A Gothic thriller of wind, dread, and survival.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316259316-L.jpg",
     "byline": "Daphne du Maurier",
     "exploreAction": {
       "verb": "Read",
@@ -12181,7 +12820,52 @@
       "Cornwall"
     ],
     "tier": 1,
-    "pageCount": 384
+    "pageCount": 384,
+    "synopsis": "Daphne du Maurier's gothic novel follows Mary Yellan, a young woman who is sent to live with her Aunt Patience and Uncle Joss Merlin at Jamaica Inn, a remote coaching inn on the Cornish moors. Mary quickly discovers that the inn is a center of criminal activity: Joss Merlin is the ringleader of a gang of wreckers who lure ships onto the rocks and murder the survivors for their cargo. Aunt Patience has been broken by Joss's brutality, and Mary is trapped in a household of terror. As she investigates the wrecking operation, she discovers that the situation is even more complex than it appears—and that her own cousin Jem Merlin, a horse thief, may be her only ally. The novel is a gripping tale of suspense and moral ambiguity, set against the bleak beauty of the Cornish landscape. Du Maurier wrote it after staying at the real Jamaica Inn in 1930, and the novel was an immediate bestseller. Alfred Hitchcock adapted it into a film in 1939, and the inn itself still exists as a pub and tourist attraction.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Mary Yellan",
+        "pageRange": "1-18",
+        "summary": "Mary's mother dies; she is sent to Jamaica Inn."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Inn",
+        "pageRange": "19-38",
+        "summary": "Mary arrives at Jamaica Inn; the horror of the household."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Joss Merlin",
+        "pageRange": "39-58",
+        "summary": "Uncle Joss's brutality; Aunt Patience's fear."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Wreckers",
+        "pageRange": "59-78",
+        "summary": "Mary discovers the wrecking operation."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Jem Merlin",
+        "pageRange": "79-98",
+        "summary": "The cousin; the question of trust."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Hanging",
+        "pageRange": "99-118",
+        "summary": "The magistrate's justice; the hanging of Joss."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Epilogue",
+        "pageRange": "119-130",
+        "summary": "Mary's final choice; the inn burns."
+      }
+    ]
   },
   {
     "id": "book-orlando",
@@ -12189,7 +12873,7 @@
     "subtype": "Novel",
     "name": "Orlando",
     "teaser": "Woolf's 1928 fantasy-biography of a poet who lives for centuries and changes sex — a love letter to Vita Sackville-West, and the most playful of Woolf's novels. Time, gender, and glory as a game.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780156711609-L.jpg",
     "byline": "Virginia Woolf",
     "exploreAction": {
       "verb": "Read",
@@ -12203,7 +12887,58 @@
       "Gender"
     ],
     "tier": 1,
-    "pageCount": 240
+    "pageCount": 240,
+    "synopsis": "Virginia Woolf's novel follows a single character, Orlando, who is born as a man in Elizabethan England and lives for over three hundred years, eventually transforming into a woman in the eighteenth century. Orlando is a poet, a courtier, a diplomat, and a lover—he/she writes a long poem called 'The Oak Tree' that spans the entire novel, and the poem's completion coincides with the transformation. The novel is a parody of biography, a meditation on the nature of gender, and a love letter to Vita Sackville-West, with whom Woolf was having a passionate affair. Vita's family had lost their ancestral home, Knole House, because it could not pass to a daughter, and Woolf wrote Orlando as a way of giving Vita back her house through fiction. The novel moves from Elizabethan England to Constantinople to eighteenth-century London to the present day, and Woolf's prose shifts accordingly—from florid to satirical to lyrical. Orlando is one of Woolf's most playful and accessible works, and its exploration of gender fluidity has made it increasingly relevant in the twenty-first century.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Elizabethan Age",
+        "pageRange": "1-30",
+        "summary": "Orlando as a young nobleman at the court of Elizabeth I."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Elizabethan Age Continues",
+        "pageRange": "31-55",
+        "summary": "Orlando's love affair with the Russian princess."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Civil War",
+        "pageRange": "56-75",
+        "summary": "Orlando during the reign of Charles II."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Rome",
+        "pageRange": "76-95",
+        "summary": "Orlando as ambassador to Constantinople."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Transformation",
+        "pageRange": "96-115",
+        "summary": "Orlando wakes as a woman."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "London",
+        "pageRange": "116-140",
+        "summary": "Orlando as a woman in the eighteenth century."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Victorian Age",
+        "pageRange": "141-160",
+        "summary": "Orlando's marriage and the completion of 'The Oak Tree.'"
+      },
+      {
+        "chapterNumber": 8,
+        "title": "The Present Day",
+        "pageRange": "161-175",
+        "summary": "Orlando receives the Order of the Garter; the novel ends."
+      }
+    ]
   },
   {
     "id": "book-room-of-ones-own",
@@ -12211,7 +12946,7 @@
     "subtype": "Essay",
     "name": "A Room of One's Own",
     "teaser": "Woolf's 1929 essay on women and fiction — the locked library, the imaginary Shakespeare's sister, and the famous claim that a woman needs money and a room of her own to write. The founding text of feminist criticism.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780156711609-L.jpg",
     "byline": "Virginia Woolf",
     "exploreAction": {
       "verb": "Read",
@@ -12225,7 +12960,52 @@
       "Feminist"
     ],
     "tier": 1,
-    "pageCount": 144
+    "pageCount": 144,
+    "synopsis": "Virginia Woolf's extended essay, based on lectures she delivered at Newnham College and Girton College at Cambridge in 1928, argues that 'a woman must have money and a room of her own if she is to write fiction.' Woolf uses the conceit of a fictional narrator who visits libraries, eats at colleges, and imagines the life of Judith Shakespeare—William's equally gifted but undocumented sister—to explore the material conditions that have prevented women from producing great literature. She traces the history of women's exclusion from education, property, and public life, and argues that the literary tradition has been shaped by these exclusions. The essay is both a work of feminist criticism and a masterpiece of literary prose: Woolf's sentences are luminous, her arguments precise, and her imagination inexhaustible. She concludes that 'we think back through our mothers if we are women,' and that the female literary tradition must be understood on its own terms rather than measured against the male standard. The essay is widely regarded as one of the most important works of feminist thought ever written.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Chapter 1",
+        "pageRange": "1-15",
+        "summary": "The narrator is denied entry to the library; women and money."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Chapter 2",
+        "pageRange": "16-30",
+        "summary": "A day at the British Museum; the history of women."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Chapter 3",
+        "pageRange": "31-50",
+        "summary": "The invention of fiction; the importance of material conditions."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Chapter 4",
+        "pageRange": "51-70",
+        "summary": "Women in the Elizabethan age; the case of Judith Shakespeare."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Chapter 5",
+        "pageRange": "71-90",
+        "summary": "The rise of the female novelist in the eighteenth and nineteenth centuries."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Chapter 6",
+        "pageRange": "91-105",
+        "summary": "The sentence and the androgynous mind."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Chapter 7",
+        "pageRange": "106-118",
+        "summary": "The conclusion: a room of one's own and five hundred pounds a year."
+      }
+    ]
   },
   {
     "id": "book-passage-to-india",
@@ -12233,7 +13013,7 @@
     "subtype": "Novel",
     "name": "A Passage to India",
     "teaser": "Forster's 1924 novel of Dr. Aziz, Mrs. Moore, and the Marabar Caves — a friendship across empire tested by accusation and echo. The novel that asked whether connection can survive politics.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780156028417-L.jpg",
     "byline": "E. M. Forster",
     "exploreAction": {
       "verb": "Read",
@@ -12247,7 +13027,46 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 362
+    "pageCount": 362,
+    "synopsis": "E.M. Forster's novel is set in the Indian city of Chandrapore during the British Raj and follows the friendship between Dr. Aziz, a young Indian Muslim, and Cyril Fielding, an English schoolmaster. When Aziz organizes a picnic to the Marabar Caves for Mrs. Moore and Adela Quested, two Englishwomen, the expedition ends in disaster: Adela emerges from the caves screaming that someone has assaulted her, and Aziz is arrested for the crime. The trial divides the colonial community along racial lines, and the incident exposes the fundamental incompatibility of the British imperial project with genuine human connection. Forster wrote the novel after two visits to India (in 1912 and 1921), and it reflects his growing disillusionment with the British Empire. The novel's central image—the echo in the Marabar Caves, which reduces everything to a meaningless 'boum'—captures the ambiguity and moral complexity that Forster saw at the heart of the colonial encounter. Published in 1924, A Passage to India was Forster's last novel; he spent the remaining forty-six years of his life unable to complete another.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Muslim",
+        "pageRange": "1-30",
+        "summary": "Aziz's life in Chandrapore; his friendship with Fielding."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Hindu",
+        "pageRange": "31-60",
+        "summary": "The Hindu community; the bridge party at the British club."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Mosque",
+        "pageRange": "61-90",
+        "summary": "Aziz plans the picnic; Mrs. Moore and Adela."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Caves",
+        "pageRange": "91-120",
+        "summary": "The expedition to the Marabar Caves; the assault."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Temple",
+        "pageRange": "121-150",
+        "summary": "The trial and its aftermath; Fielding defends Aziz."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Conclusion",
+        "pageRange": "151-175",
+        "summary": "The verdict; the end of the friendship; the echo in the caves."
+      }
+    ]
   },
   {
     "id": "book-howards-end",
@@ -12255,7 +13074,7 @@
     "subtype": "Novel",
     "name": "Howards End",
     "teaser": "Forster's 1910 novel of the Schlegels, the Wilcoxes, and the house that means England — 'Only connect.' The novel of class, culture, and who inherits the land.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780156468985-L.jpg",
     "byline": "E. M. Forster",
     "exploreAction": {
       "verb": "Read",
@@ -12269,7 +13088,58 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 352
+    "pageCount": 352,
+    "synopsis": "E.M. Forster's novel follows three families—the wealthy, materialistic Wilcoxes; the cultured, idealistic Schlegels; and the impoverished, ambitious Basts—whose lives intersect in London and the English countryside at the turn of the twentieth century. The central figure is Margaret Schlegel, who believes in personal connection across class boundaries and who eventually marries Henry Wilcox, a prosperous businessman. Her sister Helen has an affair with Paul Wilcox that produces a child, and the novel traces the consequences of this entanglement across the classes. The house at Howards End, the Wilcox family home, becomes a symbol of England itself—its past, its values, and its future. Forster's famous epigraph, 'Only connect,' captures the novel's central theme: the need to bridge the gap between inner and outer life, between material success and spiritual fulfillment. Published in 1910, Howards End is widely regarded as Forster's finest novel and one of the masterpieces of early twentieth-century English fiction.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "One",
+        "pageRange": "1-15",
+        "summary": "The Schlegel sisters and their London world."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Two",
+        "pageRange": "16-35",
+        "summary": "The Wilcoxes; Margaret meets Henry."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Three",
+        "pageRange": "36-55",
+        "summary": "Helen and Paul's affair; the crisis at Howards End."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Four",
+        "pageRange": "56-75",
+        "summary": "The Basts; Leonard and Jacky."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Five",
+        "pageRange": "76-95",
+        "summary": "Margaret's marriage to Henry; the difficult honeymoon."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Six",
+        "pageRange": "96-115",
+        "summary": "The crisis at Oniton; Henry's confession."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Seven",
+        "pageRange": "116-135",
+        "summary": "The death of Leonard Bast; the end of the Wilcox marriage."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "Eight",
+        "pageRange": "136-155",
+        "summary": "Margaret inherits Howards End; the final reconciliation."
+      }
+    ]
   },
   {
     "id": "book-sons-and-lovers",
@@ -12277,7 +13147,7 @@
     "subtype": "Novel",
     "name": "Sons and Lovers",
     "teaser": "D. H. Lawrence's 1913 novel of Paul Morel, his coal-miner father, and the mother who claims his soul — the Oedipal novel that scandalized and defined modern English fiction. Class, passion, and the family knot.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140183986-L.jpg",
     "byline": "D. H. Lawrence",
     "exploreAction": {
       "verb": "Read",
@@ -12291,7 +13161,76 @@
       "Family"
     ],
     "tier": 2,
-    "pageCount": 432
+    "pageCount": 432,
+    "synopsis": "D.H. Lawrence's semi-autobiographical novel follows the Morel family, working-class people in the Nottinghamshire coal mining region. Walter Morel, a miner, is a charming but drunken man whose marriage to the educated and ambitious Gertrude deteriorates as he spends his evenings at the pub. Gertrude transfers her unfulfilled ambitions to her sons, William and Paul, who become the focus of her emotional life. When William dies, Paul becomes Gertrace's entire world, and the novel traces his relationships with two women—Miriam Leivers, a spiritual and intellectual partner, and Clara Dawes, a more physically passionate woman—as he struggles to break free from his mother's possessive love. The novel is both a realistic portrait of working-class life in the industrial Midlands and a Freudian exploration of the Oedipal bond between mother and son. Lawrence wrote it in the aftermath of his own troubled relationships with his mother and with Jessie Chambers (the model for Miriam), and it remains one of his most powerful and emotionally raw works.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Early Married Life of the Morels",
+        "pageRange": "1-30",
+        "summary": "Gertrude and Walter Morel's courtship and marriage."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Childhood of Paul Morel",
+        "pageRange": "31-60",
+        "summary": "Paul grows up under his mother's influence."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Paul Launches into Life",
+        "pageRange": "61-90",
+        "summary": "Paul's first job; his meeting with Miriam Leivers."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Young Life of Paul",
+        "pageRange": "91-120",
+        "summary": "Paul's artistic ambitions and his relationship with Miriam."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Paul Enters the World",
+        "pageRange": "121-150",
+        "summary": "Paul's affair with Clara Dawes; his mother's jealousy."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Clara",
+        "pageRange": "151-180",
+        "summary": "The physical relationship with Clara; William's death."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Mother",
+        "pageRange": "181-210",
+        "summary": "Gertrude's illness and death; Paul's crisis."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "Strife in Love",
+        "pageRange": "211-240",
+        "summary": "Paul's final break with Miriam; his struggle for freedom."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "Defeat of Miriam",
+        "pageRange": "241-260",
+        "summary": "Paul's inability to commit; the ending."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "Clara",
+        "pageRange": "261-280",
+        "summary": "Clara's return and departure; Paul's final choice."
+      },
+      {
+        "chapterNumber": 11,
+        "title": "The Beginning of a New Phase",
+        "pageRange": "281-300",
+        "summary": "Paul walks into the night; the open ending."
+      }
+    ]
   },
   {
     "id": "book-women-in-love",
@@ -12299,7 +13238,7 @@
     "subtype": "Novel",
     "name": "Women in Love",
     "teaser": "Lawrence's 1920 sequel to Sons and Lovers — two sisters, two men, and the search for a love that is not possession, ending in the Alps. His most philosophical novel, and his most radical.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140183986-L.jpg",
     "byline": "D. H. Lawrence",
     "exploreAction": {
       "verb": "Read",
@@ -12313,7 +13252,52 @@
       "Philosophy"
     ],
     "tier": 2,
-    "pageCount": 544
+    "pageCount": 544,
+    "synopsis": "D.H. Lawrence's novel follows two sisters, Ursula and Gudrun Brangwen, as they form relationships with two industrialists, Rupert Birkin and Gerald Crich. Birkin is a school inspector and intellectual who represents Lawrence's ideal of a man who has transcended conventional morality; Gerald is the heir to a coal mine who embodies the destructive power of industrial capitalism. The novel explores the nature of love, desire, and human connection through the contrast between these two men and the two women they love. Birkin and Ursula achieve a relationship that is both spiritual and physical; Gerald and Gudrun's relationship is more destructive, culminating in Gerald's death in the Alps. The novel is deeply personal—Birkin is based on Lawrence himself, and Gudrun on his wife Frieda—but it also addresses larger questions about the future of European civilization in the age of industrialization. Published in 1920, Women in Love was Lawrence's most controversial novel, banned in Britain for obscenity until 1960.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Wedding Party",
+        "pageRange": "1-25",
+        "summary": "The Crich wedding; the two sisters meet Birkin and Gerald."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Breadalby",
+        "pageRange": "26-50",
+        "summary": "A party at Breadalby; Birkin and Ursula's relationship deepens."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Mino",
+        "pageRange": "51-70",
+        "summary": "Birkin and Ursula's courtship; the cat metaphor."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Divergence",
+        "pageRange": "71-95",
+        "summary": "The two relationships diverge; Gerald and Gudrun."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Germany",
+        "pageRange": "96-120",
+        "summary": "The sisters visit Germany; Gudrun and Loerke."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Alps",
+        "pageRange": "121-145",
+        "summary": "The skiing holiday; Gerald's final act."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Man's World",
+        "pageRange": "146-165",
+        "summary": "Birkin's grief; the novel's philosophical conclusion."
+      }
+    ]
   },
   {
     "id": "book-lady-chatterleys-lover",
@@ -12321,7 +13305,7 @@
     "subtype": "Novel",
     "name": "Lady Chatterley's Lover",
     "teaser": "Lawrence's 1928 novel of Constance Chatterley and the gamekeeper Mellors — the most famous banned book of the 20th century, prosecuted for obscenity in 1960, and finally read as the tender novel it is.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140183986-L.jpg",
     "byline": "D. H. Lawrence",
     "exploreAction": {
       "verb": "Read",
@@ -12335,7 +13319,40 @@
       "Classic"
     ],
     "tier": 2,
-    "pageCount": 416
+    "pageCount": 416,
+    "synopsis": "D.H. Lawrence's final novel follows Constance Chatterley, the wife of Sir Clifford Chatterley, a wealthy industrialist who has been paralyzed from the waist down during World War I. Living in the family estate of Wragby in the Nottinghamshire coal country, Constance is trapped in a loveless marriage with a man who is more interested in his writing and his coal mines than in her. When she begins an affair with Oliver Mellors, the gamekeeper, she discovers physical and emotional fulfillment for the first time. The novel traces their secret relationship and Constance's growing awareness of the class divide that separates them. Lawrence, who was living in exile and dying of tuberculosis, wrote the novel as a protest against the dehumanizing effects of industrialization and the sexual repression of English society. The unexpurgated edition, published in 1960, led to the famous obscenity trial that resulted in the book's legalization in Britain—the judge asked the jury whether it was 'a book you would wish your wife or your servants to read.' It is widely regarded as a landmark in the history of censorship and sexual freedom.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-40",
+        "summary": "Constance's life at Wragby; her growing isolation."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "41-80",
+        "summary": "Constance meets Mellors; the affair begins."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "81-120",
+        "summary": "The relationship deepens; the class divide."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "121-160",
+        "summary": "The consequences of the affair; the confrontation."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Part Five",
+        "pageRange": "161-200",
+        "summary": "The ending; Constance's pregnancy; the letters."
+      }
+    ]
   },
   {
     "id": "book-good-soldier",
@@ -12343,7 +13360,7 @@
     "subtype": "Novel",
     "name": "The Good Soldier",
     "teaser": "Ford Madox Ford's 1915 novel of two couples and nine years of friendship — 'the saddest story' told by the most unreliable narrator in fiction. Dowell's calm confession hides everything it reveals.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141182681-L.jpg",
     "byline": "Ford Madox Ford",
     "exploreAction": {
       "verb": "Read",
@@ -12357,7 +13374,40 @@
       "Unreliable"
     ],
     "tier": 2,
-    "pageCount": 256
+    "pageCount": 256,
+    "synopsis": "Ford Madox Ford's novel is narrated by John Dowell, an American who tells the story of two couples—himself and his wife Florence, and the Englishman Edward Ashburnham and his wife Leonora—who have been friends for nine years. Dowell narrates with a tone of bewildered innocence, gradually revealing that everything he believed about these people was false: Edward and Florence were lovers, Edward had affairs with a servant girl and a young ward, and Florence committed suicide. The novel is a masterwork of unreliable narration and structural innovation: Dowell's chronological confusion, his digressions, and his apparent inability to understand what happened create a narrative that must be reconstructed by the reader. Ford called the novel 'the best novel that modern times have seen,' and while this may be an overstatement, its influence on modernist fiction—particularly on the techniques of point of view and temporal manipulation—is immense. Published in 1915, The Good Soldier is one of the finest novels about the destruction of the Edwardian world.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-30",
+        "summary": "Dowell introduces the four characters; the first hints of deception."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "31-60",
+        "summary": "The truth about Edward and Florence's affair."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "61-90",
+        "summary": "Edward's other affairs; the tragedy of the servant girl."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "91-115",
+        "summary": "The collapse of the two marriages; Florence's suicide."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Part Five",
+        "pageRange": "116-130",
+        "summary": "Dowell's final reflections; the devastation of illusion."
+      }
+    ]
   },
   {
     "id": "book-of-human-bondage",
@@ -12365,7 +13415,7 @@
     "subtype": "Novel",
     "name": "Of Human Bondage",
     "teaser": "Maugham's 1915 semi-autobiographical novel of Philip Carey, the clubfoot and the artist's life — love for the impossible Mildred, poverty in Paris, and the slow education of the heart. The bildungsroman to end bildungsromans.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780451162182-L.jpg",
     "byline": "W. Somerset Maugham",
     "exploreAction": {
       "verb": "Read",
@@ -12379,7 +13429,46 @@
       "Classic"
     ],
     "tier": 2,
-    "pageCount": 704
+    "pageCount": 704,
+    "synopsis": "W. Somerset Maugham's semi-autobiographical novel follows Philip Carey, a young orphan raised by his aunt and uncle in Blackstable. Philip is born with a clubfoot that marks him for mockery, and his struggle with this physical deformity becomes a metaphor for the limitations of human existence. He enrolls at Heidelberg, travels to Paris to study art, and eventually settles in London to study medicine, where he falls hopelessly in love with Mildred Rogers, a vulgar and manipulative waitress who exploits his passion while remaining utterly indifferent to him. Philip's love for Mildred leads him through a cycle of obsession, humiliation, and temporary liberation, each time leaving him poorer and more damaged. Maugham, who had studied medicine in London, drew heavily on his own experiences to create this unflinching portrait of desire, dependency, and the slow accumulation of wisdom through suffering. Published in 1915, Of Human Bondage is widely regarded as Maugham's masterpiece and one of the finest novels about the human condition.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Childhood",
+        "pageRange": "1-40",
+        "summary": "Philip's orphaned childhood and his clubfoot."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Germany",
+        "pageRange": "41-70",
+        "summary": "Philip's student years in Heidelberg; his sexual awakening."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Paris",
+        "pageRange": "71-100",
+        "summary": "Philip's art studies; his decision to abandon painting."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Mildred",
+        "pageRange": "101-150",
+        "summary": "Philip's infatuation with Mildred; the cycle of obsession."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Medicine",
+        "pageRange": "151-200",
+        "summary": "Philip's medical studies; his continued entanglement with Mildred."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The End",
+        "pageRange": "201-250",
+        "summary": "Philip's liberation; his marriage to Sally."
+      }
+    ]
   },
   {
     "id": "book-razors-edge",
@@ -12387,7 +13476,7 @@
     "subtype": "Novel",
     "name": "The Razor's Edge",
     "teaser": "Maugham's 1944 novel of Larry Darrell, who returns from the Great War and refuses the American dream to seek enlightenment in India — told by a narrator who is Maugham himself. The spiritual quest novel of its era.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780451162182-L.jpg",
     "byline": "W. Somerset Maugham",
     "exploreAction": {
       "verb": "Read",
@@ -12401,7 +13490,40 @@
       "Quest"
     ],
     "tier": 1,
-    "pageCount": 384
+    "pageCount": 384,
+    "synopsis": "W. Somerset Maugham's novel follows Larry Darrell, a young American aviator traumatized by the death of his best friend in World War I, who turns down a promising career on Wall Street to seek the meaning of life. Larry travels to Paris, works in coal mines, and eventually goes to India, where he studies with a Hindu holy man and achieves a spiritual enlightenment that he brings back to the Western world. The novel is narrated by an unnamed author character (a stand-in for Maugham himself), who tracks the fates of Larry's friends and lovers: Isabel, the beautiful heiress who loves Larry but cannot accept his vagabond life; Gray, the handsome stockbroker who loses everything in the crash of 1929; and Elliott Templeton, Isabel's uncle, a snob of the first order who lives and dies for social status. The novel is Maugham's most philosophical work, exploring the tension between Western materialism and Eastern spirituality, and its title comes from the Katha Upanishad: 'The sharp edge of a razor is difficult to pass over; thus the wise say the path to Salvation is hard.'",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-40",
+        "summary": "Larry's return from the war; his rejection of conventional life."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "41-80",
+        "summary": "Larry in Paris; Isabel and Gray."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "81-120",
+        "summary": "Larry's journey to India; his spiritual education."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "121-160",
+        "summary": "The fates of Isabel, Gray, and Elliott Templeton."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Part Five",
+        "pageRange": "161-185",
+        "summary": "Larry's return; his final choice; the ending."
+      }
+    ]
   },
   {
     "id": "book-brighton-rock",
@@ -12409,7 +13531,7 @@
     "subtype": "Novel",
     "name": "Brighton Rock",
     "teaser": "Greene's 1938 novel of Pinkie, a teenage gangster in Brighton who believes in hell — and of the girl who knows too much. A thriller that is really a novel about damnation and mercy.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780099478676-L.jpg",
     "byline": "Graham Greene",
     "exploreAction": {
       "verb": "Read",
@@ -12423,7 +13545,34 @@
       "Faith"
     ],
     "tier": 2,
-    "pageCount": 272
+    "pageCount": 272,
+    "synopsis": "Graham Greene's noir thriller follows Pinkie Brown, a teenage gangster who controls the Brighton underworld. When the previous gang leader is murdered, Pinkie takes over and becomes entangled in a race with the Italian gangster Colleoni for control of the city's betting operations. To protect himself from prosecution, Pinkie marries Rose, a simple waitress who witnessed the murder, planning to kill her before she can testify. But Rose, who loves Pinkie with a naive and unconditional devotion, refuses to abandon him, and their twisted relationship becomes the novel's moral center. Greene, a devout Catholic, uses the novel to explore the nature of grace, the possibility of redemption, and the terrifying power of evil. Pinkie is one of the most memorable villains in English fiction: a boy who has been damaged by his upbringing and who uses religion as a weapon while remaining fundamentally incapable of love. Published in 1938, Brighton Rock was Greene's first 'entertainment' and has been adapted into two films and a musical.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-35",
+        "summary": "Pinkie Brown takes over the gang; the race with Colleoni."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "36-70",
+        "summary": "Pinkie marries Rose; Ida Arnold pursues the truth."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "71-110",
+        "summary": "The moral crisis; Pinkie's attempt to destroy Rose's faith."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "111-130",
+        "summary": "The ending; Rose's persistence; Pinkie's final choice."
+      }
+    ]
   },
   {
     "id": "book-quiet-american",
@@ -12431,7 +13580,7 @@
     "subtype": "Novel",
     "name": "The Quiet American",
     "teaser": "Greene's 1955 novel of Saigon in the early Vietnam years — Fowler the jaded journalist, Pyle the idealistic American, and the woman they both love. The novel that warned about American innocence abroad.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780099478676-L.jpg",
     "byline": "Graham Greene",
     "exploreAction": {
       "verb": "Read",
@@ -12445,7 +13594,34 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 192
+    "pageCount": 192,
+    "synopsis": "Graham Greene's novel is set in Vietnam in the early 1950s and follows Thomas Fowler, a cynical English journalist covering the French war against the Viet Minh. Fowler is middle-aged, tired, and content with his Vietnamese mistress Phuong and his daily routine of opium and reporting. His complacency is shattered by the arrival of Alden Pyle, a young American aid worker who is secretly financing a third force in the conflict. Pyle is a fanatical idealist who believes that America can save Vietnam from both Communism and French colonialism, and his naivety leads to catastrophic consequences. When Pyle falls in love with Phuong and begins a scheme that kills innocent Vietnamese civilians, Fowler is drawn into a moral crisis that forces him to choose between his indifference and his conscience. The novel is a prescient critique of American involvement in Vietnam—published in 1955, eighteen years before the Fall of Saigon—and its portrait of the 'quiet American' who destroys what he loves has become a classic of political fiction.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-40",
+        "summary": "Fowler in Saigon; the arrival of Alden Pyle."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "41-80",
+        "summary": "Pyle's third force; the bombing at the Continental."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "81-120",
+        "summary": "Fowler discovers Pyle's scheme; the moral crisis."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "121-150",
+        "summary": "The end of the French war; Fowler's final choice."
+      }
+    ]
   },
   {
     "id": "book-1984-sequel-call",
@@ -12453,7 +13629,7 @@
     "subtype": "Novel",
     "name": "Burmese Days",
     "teaser": "Orwell's 1934 first novel of the British Raj in Burma — the timber business, the club, and the one decent man trapped among racists. The novel that taught Orwell what empire was made of.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780451528636-L.jpg",
     "byline": "George Orwell",
     "exploreAction": {
       "verb": "Read",
@@ -12467,7 +13643,34 @@
       "Colonial"
     ],
     "tier": 2,
-    "pageCount": 304
+    "pageCount": 304,
+    "synopsis": "George Orwell's first novel, published in 1934, is set in the fictional district of Kyauktada in British Burma during the 1920s. John Flory, a lonely timber merchant, is one of the few Englishmen in the district who is not a raging imperialist. He befriends Dr. Veraswami, a Burmese doctor who hopes to be elected to the local European Club, and he falls in love with Elizabeth Lackersteen, an Englishwoman who has come to Burma to find a husband. But Flory's friendship with Veraswami and his liberal views put him at odds with the other Englishmen, and his love for Elizabeth is destroyed by his own moral cowardice and the pressure of colonial society. Orwell, who had served as a police officer in Burma from 1922 to 1927, drew on his own experiences to create a devastating portrait of British imperialism. The novel exposes the corruption, hypocrisy, and brutality of colonial rule, and Flory's fate—his inability to reconcile his ideals with his reality—foreshadows the moral crises of Orwell's later works.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-40",
+        "summary": "Flory's life in Kyauktada; the bazaar; Veraswami."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "41-80",
+        "summary": "Elizabeth arrives; the elephant shooting."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "81-120",
+        "summary": "The strike; the political crisis; Flory's moral cowardice."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "121-150",
+        "summary": "The end of the rebellion; Flory's suicide."
+      }
+    ]
   },
   {
     "id": "book-down-and-out-in-paris-and-london",
@@ -12475,7 +13678,7 @@
     "subtype": "Memoir",
     "name": "Down and Out in Paris and London",
     "teaser": "Orwell's 1933 memoir of poverty — the Paris kitchens, the London doss-houses, and the tramps' code of the road. The book that taught Orwell how the poor actually live, from the inside.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780156976138-L.jpg",
     "byline": "George Orwell",
     "exploreAction": {
       "verb": "Read",
@@ -12489,7 +13692,34 @@
       "Poverty"
     ],
     "tier": 1,
-    "pageCount": 240
+    "pageCount": 240,
+    "synopsis": "George Orwell's first book, published in 1933, is a memoir of his experiences living in poverty in Paris and London in the late 1920s. Orwell lived in a series of flophouses, cheap hotels, and homeless shelters, working as a dishwasher in Parisian restaurants and tramping between London and the south of England. The book is divided into two parts: 'Paris' describes Orwell's life in a run-down hotel and his work in the kitchens of the Grand Hotel and the Hotel X, where he reveals the squalid reality behind the glamour of luxury restaurants; 'London' follows his tramping life, the endless walking, the casual labor, and the grinding humiliation of being poor in a rich country. Orwell writes with a combination of anger, humor, and precise observation that makes the book both a social document and a work of literature. Published in 1933, Down and Out in Paris and London established Orwell's reputation as a writer who could make the invisible visible, and its influence on later works of social realism—from Angela Carter to Matthew Desmond—is incalculable.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Paris",
+        "pageRange": "1-40",
+        "summary": "Orwell's life in Paris; the cheap hotel and the restaurant."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Kitchen",
+        "pageRange": "41-70",
+        "summary": "Orwell works as a plongeur; the squalor of the Grand Hotel."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "London",
+        "pageRange": "71-110",
+        "summary": "Orwell tramps between London and the south of England."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Tramp",
+        "pageRange": "111-145",
+        "summary": "Life on the road; the casual labor; the humiliations of poverty."
+      }
+    ]
   },
   {
     "id": "book-homage-to-catalonia",
@@ -12497,7 +13727,7 @@
     "subtype": "Memoir",
     "name": "Homage to Catalonia",
     "teaser": "Orwell's 1938 account of fighting in the Spanish Civil War — the trenches, the lice, and the betrayal of the revolution by its own allies. The book that made him a socialist and a skeptic of all causes.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780156976138-L.jpg",
     "byline": "George Orwell",
     "exploreAction": {
       "verb": "Read",
@@ -12511,7 +13741,40 @@
       "Memoir"
     ],
     "tier": 1,
-    "pageCount": 272
+    "pageCount": 272,
+    "synopsis": "George Orwell's memoir of his experiences fighting in the Spanish Civil War, published in 1938. Orwell traveled to Spain in December 1936 to join the fight against Franco's fascists and enlisted with the POUM (Partido Obrero de Unificacion Marxista) militia, an anti-Stalinist Marxist group. The book follows Orwell's experiences on the Aragon front, where he fought in the trenches near Huesca, was shot through the throat by a sniper, and returned to Barcelona to find the city consumed by the political infighting between the POUM and the Stalin-backed Communist Party. The Stalinists accused the POUM of being fascist collaborators, and Orwell was forced to flee Spain with his wife, Eileen, narrowly escaping arrest. The book is both a vivid account of combat—Orwell writes with remarkable detachment about the terror of the trenches—and a devastating critique of the Soviet-backed Communist Party's betrayal of the revolution. Homage to Catalonia is widely regarded as one of the finest works of reportage about the Spanish Civil War and a prophetic warning about the dangers of totalitarianism.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-30",
+        "summary": "Orwell arrives in Barcelona; joins the POUM militia."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "31-60",
+        "summary": "Life in the trenches near Huesca; the boredom and terror of war."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "61-90",
+        "summary": "Orwell is shot; his recovery; return to Barcelona."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "91-120",
+        "summary": "The political crisis; the Stalinist purge of the POUM."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Part Five",
+        "pageRange": "121-145",
+        "summary": "Orwell's flight from Spain; his reflections on the war."
+      }
+    ]
   },
   {
     "id": "book-brave-little-tailor",
@@ -12519,7 +13782,7 @@
     "subtype": "Children",
     "name": "The Brave Little Tailor and Other Tales",
     "teaser": "The Grimms' fairy tales of the tailor who kills seven flies and conquers giants — along with Rapunzel, Rumpelstiltskin, and the stories that shaped childhood for two centuries. The collected dark magic of the European folk tale.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140367775-L.jpg",
     "byline": "Jacob and Wilhelm Grimm",
     "exploreAction": {
       "verb": "Read",
@@ -12533,7 +13796,70 @@
       "Children"
     ],
     "tier": 2,
-    "pageCount": 128
+    "pageCount": 128,
+    "synopsis": "A collection of fairy tales by the Brothers Grimm, including 'The Brave Little Tailor,' in which a tailor who kills seven flies with one swat boasts of his strength and is sent on a series of impossible tasks that he completes through wit and cunning. Also included are other classic tales such as 'Hansel and Gretel,' 'Rapunzel,' 'Rumpelstiltskin,' 'Snow White,' 'Cinderella,' 'Sleeping Beauty,' and 'The Frog Prince.' The Brothers Grimm collected and published these tales in the early nineteenth century, drawing on oral tradition and the stories told by German peasants. Their collection, first published in 1812, became one of the most influential works of folklore ever assembled. The tales have been adapted countless times by Disney, theater companies, and filmmakers, and their influence on literature, psychology, and popular culture is immeasurable. Each tale carries its own moral—about courage, greed, obedience, or kindness—and together they form a portrait of the fears and hopes of pre-industrial European society.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Brave Little Tailor",
+        "pageRange": "1-8",
+        "summary": "A tailor kills seven flies and sets out on impossible tasks."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Hansel and Gretel",
+        "pageRange": "9-16",
+        "summary": "Two children are abandoned in the forest and find a candy house."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Rapunzel",
+        "pageRange": "17-22",
+        "summary": "A girl with impossibly long hair is locked in a tower."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Rumpelstiltskin",
+        "pageRange": "23-28",
+        "summary": "A girl must spin straw into gold or lose her life."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Snow White",
+        "pageRange": "29-36",
+        "summary": "A princess flees her jealous stepmother and finds seven dwarfs."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Cinderella",
+        "pageRange": "37-42",
+        "summary": "A mistreated girl goes to the ball with the help of a fairy."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Sleeping Beauty",
+        "pageRange": "43-48",
+        "summary": "A princess falls asleep for a hundred years."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "The Frog Prince",
+        "pageRange": "49-54",
+        "summary": "A princess befriends a frog who becomes a prince."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "Little Red-Cap",
+        "pageRange": "55-60",
+        "summary": "A girl encounters a wolf on her way to grandmother's house."
+      },
+      {
+        "chapterNumber": 10,
+        "title": "The Elves and the Shoemaker",
+        "pageRange": "61-66",
+        "summary": "A poor shoemaker is helped by magical elves."
+      }
+    ]
   },
   {
     "id": "book-little-prince",
@@ -12541,7 +13867,7 @@
     "subtype": "Novella",
     "name": "The Little Prince",
     "teaser": "Saint-Exupéry's 1943 novella of a pilot stranded in the desert who meets a prince from a small planet — a fable about grown-ups, roses, and what is essential. The most translated book in the world after the Bible.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780156012195-L.jpg",
     "byline": "Antoine de Saint-Exupéry",
     "exploreAction": {
       "verb": "Read",
@@ -12555,7 +13881,64 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 96
+    "pageCount": 96,
+    "synopsis": "Antoine de Saint-Exupery's novella, published in 1943, is narrated by a pilot who crash-lands in the Sahara Desert and encounters a young boy from a tiny asteroid. The Little Prince tells the pilot about his home, his beloved rose (whom he left in a fit of jealousy), and the strange adults he has visited on other planets—a king who rules over nothing, a conceited man who wants only admiration, a drunkard who drinks to forget that he is ashamed of drinking, a businessman who counts the stars and claims to own them, and a lamplighter who lights and extinguishes his lamp every minute because his planet rotates so quickly. The Little Prince's journey is a parable about the loss of childhood wonder, the meaning of love, and the importance of seeing with the heart. The book's most famous line—'On ne voit bien qu'avec le coeur. L'essentiel est invisible pour les yeux' (One sees clearly only with the heart. What is essential is invisible to the eye)—has become one of the most quoted sentences in world literature. Saint-Exupery, a French aviator who disappeared during a flight in 1944, wrote the book as an exile in New York, and it has been translated into over three hundred languages.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Chapter 1",
+        "pageRange": "1-6",
+        "summary": "The pilot's drawing of a boa constrictor; his crash in the Sahara."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Chapter 2",
+        "pageRange": "7-12",
+        "summary": "The Little Prince asks the pilot to draw a sheep."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Chapter 3",
+        "pageRange": "13-18",
+        "summary": "The Little Prince's home, Asteroid B-612."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Chapter 4",
+        "pageRange": "19-22",
+        "summary": "The danger of baobab trees; the Little Prince's daily routine."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Chapter 5",
+        "pageRange": "23-28",
+        "summary": "The Little Prince's rose; her vanity and his confusion."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Chapter 6",
+        "pageRange": "29-34",
+        "summary": "The Little Prince's journey to other planets begins."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Chapters 7-15",
+        "pageRange": "35-70",
+        "summary": "The visits to the king, the conceited man, the drunkard, the businessman, the lamplighter, and the geographer."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "Chapters 16-20",
+        "pageRange": "71-95",
+        "summary": "The Little Prince arrives on Earth; the fox and the lesson of taming."
+      },
+      {
+        "chapterNumber": 9,
+        "title": "Chapters 21-27",
+        "pageRange": "96-120",
+        "summary": "The well; the Little Prince's departure; the pilot's grief."
+      }
+    ]
   },
   {
     "id": "book-night",
@@ -12563,7 +13946,7 @@
     "subtype": "Memoir",
     "name": "Night",
     "teaser": "Elie Wiesel's 1958 memoir of his boyhood in Auschwitz and Buchenwald — the night his faith died with his father, and the silence that followed. The essential testimony of the Holocaust, in a voice that refuses comfort.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780374529406-L.jpg",
     "byline": "Elie Wiesel",
     "exploreAction": {
       "verb": "Read",
@@ -12577,7 +13960,52 @@
       "Holocaust"
     ],
     "tier": 1,
-    "pageCount": 144
+    "pageCount": 144,
+    "synopsis": "Elie Wiesel's memoir is a firsthand account of his experiences as a fifteen-year-old boy in the Auschwitz and Buchenwald concentration camps during World War II. Wiesel and his family were deported from their hometown of Sighet in Transylvania in 1944; his mother and younger sister were killed immediately upon arrival at Auschwitz, while his father and he were selected for forced labor. The book traces the eighteen months of horror that followed—the starvation, the brutality, the selection process, the death marches—and the gradual destruction of Wiesel's faith as he watches his father die. The memoir is written in spare, devastating prose that refuses to look away from the worst of human cruelty while also bearing witness to the moments of kindness and resistance that persisted even in the camps. Wiesel, who died in 2016, spent the rest of his life bearing witness to the Holocaust, receiving the Nobel Peace Prize in 1986. Night was originally published in Yiddish in 1956 and in French in 1958; the English translation, published in 1960, became one of the most important works of Holocaust literature.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Night",
+        "pageRange": "1-18",
+        "summary": "The deportation from Sighet; arrival at Auschwitz."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Chapter 2",
+        "pageRange": "19-35",
+        "summary": "The selection; the first night in the camp."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Chapter 3",
+        "pageRange": "36-50",
+        "summary": "The brutal routine of camp life; the beating of Wiesel's father."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Chapter 4",
+        "pageRange": "51-65",
+        "summary": "The hanging of a young boy; the destruction of Wiesel's faith."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Chapter 5",
+        "pageRange": "66-78",
+        "summary": "The evacuation; the death march to Buchenwald."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Chapter 6",
+        "pageRange": "79-90",
+        "summary": "Buchenwald; the death of Wiesel's father; liberation."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Chapter 7",
+        "pageRange": "91-100",
+        "summary": "After liberation; the silence that follows."
+      }
+    ]
   },
   {
     "id": "book-a-tale-of-two-cities",
@@ -12585,7 +14013,7 @@
     "subtype": "Novel",
     "name": "A Tale of Two Cities",
     "teaser": "Dickens's 1859 novel of London and Paris during the French Revolution — resurrection, sacrifice, and the most famous ending in English fiction. The guillotine's shadow over a love story.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439600-L.jpg",
     "byline": "Charles Dickens",
     "exploreAction": {
       "verb": "Read",
@@ -12599,7 +14027,28 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 512
+    "pageCount": 512,
+    "synopsis": "Charles Dickens's historical novel is set during the French Revolution and follows the interconnected lives of characters in London and Paris. Dr. Alexandre Manette, a French doctor who has been imprisoned in the Bastille for eighteen years, is reunited with his daughter Lucie; Charles Darnay, a French aristocrat who has renounced his family's cruelty, marries Lucie; and Sydney Carton, a brilliant but dissolute English lawyer, loves Lucie from afar. The novel's central dramatic device is Carton's sacrifice: when Darnay is condemned to death by the revolutionary Tribunal, Carton—who resembles Darnay—takes his place at the guillotine, famously declaring: 'It is a far, far better thing that I do, than I have ever done; it is a far, far better rest that I go to than I have ever known.' Dickens wrote the novel in 1859, during a period of personal crisis, and it became his most popular and commercially successful work. The novel's opening lines—'It was the best of times, it was the worst of times'—are among the most famous in English literature.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Book the First: Recalled to Life",
+        "pageRange": "1-40",
+        "summary": "Dr. Manette's release from the Bastille; his reunion with Lucie."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Book the Second: The Golden Thread",
+        "pageRange": "41-120",
+        "summary": "Darnay's trial; his marriage to Lucie; Carton's love."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Book the Third: The Track of a Storm",
+        "pageRange": "121-200",
+        "summary": "The Revolution; Darnay's arrest; Carton's sacrifice."
+      }
+    ]
   },
   {
     "id": "book-david-copperfield",
@@ -12607,7 +14056,7 @@
     "subtype": "Novel",
     "name": "David Copperfield",
     "teaser": "Dickens's 1850 autobiographical novel of David's rise from the blacking factory to the novelist's desk — with Mr. Micawber, Uriah Heep, and the warmth of the first-person. Dickens called it his favorite child.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140439441-L.jpg",
     "byline": "Charles Dickens",
     "exploreAction": {
       "verb": "Read",
@@ -12621,7 +14070,52 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 880
+    "pageCount": 880,
+    "synopsis": "Charles Dickens's most autobiographical novel follows David Copperfield from his birth in Blunderstone, Suffolk, through a childhood of hardship and wonder, to his career as a successful author. David's father dies before he is born, and his mother marries the brutal Mr. Murdstone, who sends David to a boarding school and eventually ships him off to work in a bottling factory. David escapes to his aunt Betsey Trotwood, who sends him to a better school, and he eventually becomes a lawyer and then a writer. The novel is populated by some of Dickens's most memorable characters: the gentle but foolish Mr. Micawber, the treacherous Uriah Heep, the loyal Peggotty, the beautiful but shallow Dora, and the steady, loving Agnes. The novel traces David's emotional growth from a helpless child to a mature man, and its exploration of memory, identity, and the power of storytelling has made it one of the most beloved novels in the English language. Dickens, who considered it his 'favourite child,' published it in 1850.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "I Am Born",
+        "pageRange": "1-15",
+        "summary": "David's birth and early childhood in Blunderstone."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "My Early Life",
+        "pageRange": "16-35",
+        "summary": "David's mother and the Murdstones; the bottling factory."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Betsy Trotwood",
+        "pageRange": "36-55",
+        "summary": "David escapes to his aunt; school and growing up."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Uriah Heep",
+        "pageRange": "56-80",
+        "summary": "David's articleship; the treachery of Uriah Heep."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Dora",
+        "pageRange": "81-105",
+        "summary": "David's first marriage to Dora; the difficulties of love."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Storm",
+        "pageRange": "106-125",
+        "summary": "Dora's death; David's grief and travels."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Agnes",
+        "pageRange": "126-145",
+        "summary": "David discovers his feelings for Agnes; the happy ending."
+      }
+    ]
   },
   {
     "id": "book-hard-times",
@@ -12629,7 +14123,7 @@
     "subtype": "Novel",
     "name": "Hard Times",
     "teaser": "Dickens's 1854 novel of the industrial town Coketown and the school of 'facts' — the Gradgrind family raised on statistics, the circus girl Sissy Jupe, and the question of what humans actually need. Dickens's most political novel.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140437690-L.jpg",
     "byline": "Charles Dickens",
     "exploreAction": {
       "verb": "Read",
@@ -12643,7 +14137,40 @@
       "Classic"
     ],
     "tier": 2,
-    "pageCount": 352
+    "pageCount": 352,
+    "synopsis": "Charles Dickens's shortest novel is set in the fictional industrial city of Coketown and follows two parallel stories: the education of Thomas Gradgrind's children, Louisa and Tom, who are raised on facts alone and denied imagination and feeling; and the life of Stephen Blackpool, a working-class weaver who is caught between a brutal wife and a corrupt factory owner. Gradgrind, a retired merchant turned schoolmaster, believes that human beings can be reduced to facts and statistics, and his philosophy destroys his children: Louisa marries the pompous banker Bounderby to escape her father's emotional desert, and Tom descends into crime. Meanwhile, Stephen is wrongly accused of robbery and sent into exile, only to return at the novel's climax to save the man who falsely accused him. Dickens wrote the novel in 1854 as a satire of the Utilitarian philosophy that dominated Victorian education and politics, and its critique of industrial exploitation remains relevant today. The novel's opening—'Now, what I want is, Facts' is one of the most famous in Dickens.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Four Roots",
+        "pageRange": "1-20",
+        "summary": "Gradgrind's philosophy; the education of the children."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Coketown",
+        "pageRange": "21-45",
+        "summary": "The industrial city; Stephen Blackpool's life."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Bounderby",
+        "pageRange": "46-70",
+        "summary": "The banker Bounderby; the union and its discontents."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Tom's Crime",
+        "pageRange": "71-90",
+        "summary": "Tom robs Bounderby's bank; Stephen is blamed."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Revelation",
+        "pageRange": "91-110",
+        "summary": "The truth emerges; Stephen's death; Gradgrind's redemption."
+      }
+    ]
   },
   {
     "id": "book-pickwick-papers",
@@ -12651,7 +14178,7 @@
     "subtype": "Novel",
     "name": "The Pickwick Papers",
     "teaser": "Dickens's 1836 first novel — Mr. Pickwick and his club's comic rambles through England, with Sam Weller's proverbs and the Fleet prison's shadows. The book that made Dickens famous overnight.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140437683-L.jpg",
     "byline": "Charles Dickens",
     "exploreAction": {
       "verb": "Read",
@@ -12665,7 +14192,46 @@
       "Serial"
     ],
     "tier": 2,
-    "pageCount": 800
+    "pageCount": 800,
+    "synopsis": "Charles Dickens's first novel follows the kindly, rotund Samuel Pickwick, founder of the Pickwick Club, and his companions—Tracy Tupman, Nathaniel Winkle, and Augustus Snodgrass—as they travel through the English countryside, attending social events, visiting country inns, and getting into various misadventures. Originally commissioned as a series of humorous sketches to accompany illustrations by Robert Seymour, the novel quickly grew into a vast panorama of English life, populated by an unforgettable cast of characters—the landlady Mrs. Bardell, the cockney Sam Weller, the scheming lawyer Dodson and Fogg, and the villainous Alfred Jingle. The novel's most famous episode—the trial of Bardell v. Pickwick, in which Pickwick is sued for breach of promise of marriage when he is found sleeping in a woman's bed—is one of the great comic set-pieces in English literature. Published in 1837, The Pickwick Papers made Dickens famous overnight and established the template for his later novels: the mixture of comedy and pathos, the vivid characterization, the social observation, and the episodic structure.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Pickwickians",
+        "pageRange": "1-20",
+        "summary": "The Pickwick Club is founded; the first expedition begins."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The First Expedition",
+        "pageRange": "21-50",
+        "summary": "The Muggleton telegraph; the Dingley Dell cricket match."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Sam Weller",
+        "pageRange": "51-80",
+        "summary": "Sam Weller enters the story; the Pickwickians' misadventures."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Bardell v. Pickwick",
+        "pageRange": "81-120",
+        "summary": "The trial; Mrs. Bardell sues Pickwick for breach of promise."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Debtors' Prison",
+        "pageRange": "121-150",
+        "summary": "Pickwick is imprisoned; his generosity to fellow prisoners."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Conclusion",
+        "pageRange": "151-180",
+        "summary": "The Pickwickians' final adventures; the happy ending."
+      }
+    ]
   },
   {
     "id": "book-nicholas-nickleby",
@@ -12673,7 +14239,7 @@
     "subtype": "Novel",
     "name": "Nicholas Nickleby",
     "teaser": "Dickens's 1839 novel of Nicholas's fight against his uncle Ralph and the monstrous schoolmaster Wackford Squeers — a serial that attacked Yorkshire boarding schools and championed the underdog.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140437683-L.jpg",
     "byline": "Charles Dickens",
     "exploreAction": {
       "verb": "Read",
@@ -12687,7 +14253,40 @@
       "Serial"
     ],
     "tier": 2,
-    "pageCount": 960
+    "pageCount": 960,
+    "synopsis": "Charles Dickens's third novel follows Nicholas Nickleby, a young man whose father's death leaves his family penniless. Nicholas is forced to seek work with his cruel uncle Ralph, who sends him to a brutal Yorkshire boarding school run by the sadistic Wackford Squeers. Nicholas escapes with the help of a dwarf named Smike, who turns out to be Ralph's illegitimate son, and the two make their way in the world through a series of adventures involving a traveling theater company, a family of villains, and the secret of Smike's identity. The novel is a picaresque adventure that moves from the dark halls of Dotheboys Hall to the bright lights of the London theater, and its cast of characters includes some of Dickens's most memorable creations: the wicked Uncle Ralph, the terrifying Squeers, the comic Crummles, and the devoted Smike. Published in 1839, Nicholas Nickleby was Dickens's third novel and solidified his reputation as the most popular novelist of his age.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Nicholas at Dotheboys Hall",
+        "pageRange": "1-40",
+        "summary": "Nicholas's encounter with Squeers and the horrors of the school."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Escape",
+        "pageRange": "41-70",
+        "summary": "Nicholas and Smike flee; the traveling theater."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Cheeryble Brothers",
+        "pageRange": "71-100",
+        "summary": "Nicholas finds work with the Cheeryble twins."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Villains",
+        "pageRange": "101-130",
+        "summary": "Ralph's plots; the secret of Smike's identity."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Reckoning",
+        "pageRange": "131-160",
+        "summary": "The truth is revealed; Ralph's downfall; the happy ending."
+      }
+    ]
   },
   {
     "id": "book-tess-of-the-durbervilles",
@@ -12695,7 +14294,7 @@
     "subtype": "Novel",
     "name": "Tess of the d'Urbervilles",
     "teaser": "Hardy's 1891 novel of Tess Durbeyfield, 'a pure woman' destroyed by a society that will not let her be pure — the seduction, the murder, and the sacrifice at Stonehenge. Hardy's most beloved tragedy.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439563-L.jpg",
     "byline": "Thomas Hardy",
     "exploreAction": {
       "verb": "Read",
@@ -12709,7 +14308,58 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 512
+    "pageCount": 512,
+    "synopsis": "Thomas Hardy's tragic novel follows Tess Durbeyfield, a young woman from a poor family in Wessex who discovers that her family is descended from the ancient and noble d'Urberville line. Her parents send her to claim kin with the wealthy Stoke-d'Urberville family, where she is seduced (or raped) by the dissolute Alec d'Urberville and gives birth to a child who dies in infancy. Tess then meets Angel Clare, a clergyman's son who falls in love with her, but when she confesses her past on their wedding night, Angel rejects her. The novel traces Tess's downward spiral through poverty, sexual exploitation, and the cruelty of a society that punishes women for the sins of men. Hardy, who fought a battle with his publishers over the novel's frank treatment of sexuality and its sympathetic portrayal of a 'fallen woman,' subtitled it 'A Pure Woman Faithfully Presented'—a provocation that challenged Victorian morality. The novel ends with Tess's murder of Alec and her execution, and Angel's final words—'Justice' was done—are among the most ambiguous in English literature.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Family",
+        "pageRange": "1-20",
+        "summary": "The Durbeyfields learn of their noble descent."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Alec",
+        "pageRange": "21-45",
+        "summary": "Tess goes to claim kin; the seduction."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Child",
+        "pageRange": "46-60",
+        "summary": "Tess's baby dies; the churchyard."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Angel",
+        "pageRange": "61-85",
+        "summary": "Tess meets Angel Clare at Talbothays Dairy."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Wedding",
+        "pageRange": "86-105",
+        "summary": "The confession; Angel's rejection."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Flintcomb-Ash",
+        "pageRange": "106-125",
+        "summary": "Tess's life of poverty and hardship."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "Alec Returns",
+        "pageRange": "126-145",
+        "summary": "Alec's pursuit; Tess's desperation."
+      },
+      {
+        "chapterNumber": 8,
+        "title": "The End",
+        "pageRange": "146-160",
+        "summary": "The murder; the pursuit; the execution."
+      }
+    ]
   },
   {
     "id": "book-far-from-the-madding-crowd",
@@ -12717,7 +14367,7 @@
     "subtype": "Novel",
     "name": "Far from the Madding Crowd",
     "teaser": "Hardy's 1874 novel of Bathsheba Everdene, the farm she inherits, and the three men who love her — the shepherd Gabriel Oak, the farmer Boldwood, and the soldier Troy. Hardy's sunniest great novel.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439563-L.jpg",
     "byline": "Thomas Hardy",
     "exploreAction": {
       "verb": "Read",
@@ -12731,7 +14381,52 @@
       "Classic"
     ],
     "tier": 2,
-    "pageCount": 480
+    "pageCount": 480,
+    "synopsis": "Thomas Hardy's first major novel is set in the Wessex countryside and follows Bathsheba Everdene, a beautiful and independent young woman who inherits a farm and manages it herself—a rarity in Victorian England. Three men pursue her: Gabriel Oak, a humble shepherd who loves her quietly and faithfully; William Boldwood, a prosperous farmer obsessed with her to the point of madness; and Sergeant Troy, a dashing soldier whose charm masks a shallow and destructive nature. Bathsheba's choice of Troy leads to tragedy—Boldwood murders Troy, and Bathsheba is forced to confront the consequences of her impulsive decisions. Hardy wrote the novel in the aftermath of his own complicated love life, and its portrait of Bathsheba—proud, vulnerable, and ultimately humbled by experience—is one of his finest character studies. Published in 1874, Far from the Madding Crowd was Hardy's breakthrough novel, establishing him as the foremost novelist of rural England.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Shepherd",
+        "pageRange": "1-20",
+        "summary": "Gabriel Oak proposes to Bathsheba; she refuses."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Farm",
+        "pageRange": "21-45",
+        "summary": "Bathsheba inherits the farm; she becomes independent."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Boldwood",
+        "pageRange": "46-65",
+        "summary": "Boldwood receives Bathsheba's valentine; his obsession."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Troy",
+        "pageRange": "66-90",
+        "summary": "Sergeant Troy arrives; Bathsheba falls for him."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Wedding",
+        "pageRange": "91-110",
+        "summary": "Bathsheba and Troy marry; Gabriel is dismissed."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Tragedy",
+        "pageRange": "111-130",
+        "summary": "Troy's death; Boldwood's crime."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The End",
+        "pageRange": "131-150",
+        "summary": "Bathsheba and Gabriel's quiet happiness."
+      }
+    ]
   },
   {
     "id": "book-judge-the-obscure",
@@ -12739,7 +14434,7 @@
     "subtype": "Novel",
     "name": "Jude the Obscure",
     "teaser": "Hardy's 1895 novel of Jude Fawley, the stonemason who dreams of Oxford — and of Sue Bridehead, with whom he breaks every rule. The novel that ended the Victorian novel, and Hardy's fiction career.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439563-L.jpg",
     "byline": "Thomas Hardy",
     "exploreAction": {
       "verb": "Read",
@@ -12753,7 +14448,52 @@
       "Tragedy"
     ],
     "tier": 2,
-    "pageCount": 464
+    "pageCount": 464,
+    "synopsis": "Thomas Hardy's final and most controversial novel follows Jude Fawley, a stonemason and aspiring scholar from the village of Marygreen, who dreams of studying at the University of Christminster (a fictional Oxford). Jude is seduced by his cousin Sue Bridehead, and they form a passionate but unconventional relationship that defies Victorian convention. They live together without marrying, have children, and are shunned by society. When their eldest son kills the younger children and himself with the note 'Done because we are too menny,' the tragedy destroys both Jude and Sue. Hardy's attack on the institutions of marriage, education, and religion was so fierce that the novel was denounced from the pulpit and burned by a bishop. Hardy, who had endured years of public criticism for his earlier novels, abandoned fiction after Jude and spent the remaining thirty years of his life writing poetry. The novel is one of the most powerful indictments of social hypocrisy in English literature, and its influence on modern fiction—from D.H. Lawrence to Philip Roth—is immense.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "At Marygreen",
+        "pageRange": "1-25",
+        "summary": "Jude's childhood; his dream of Christminster."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "At Christminster",
+        "pageRange": "26-50",
+        "summary": "Jude's failed attempt to enter the university; his marriage to Arabella."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "At Melchester",
+        "pageRange": "51-75",
+        "summary": "Jude meets Sue; their relationship begins."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "At Aldbrickham",
+        "pageRange": "76-100",
+        "summary": "Jude and Sue live together; society's judgment."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "At Christminster Again",
+        "pageRange": "101-125",
+        "summary": "Jude returns to Christminster; the tragedy of the children."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "At Aldbrickham Again",
+        "pageRange": "126-145",
+        "summary": "Sue's submission to convention; Jude's decline."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "At Marygreen Again",
+        "pageRange": "146-160",
+        "summary": "Jude's death; Sue's return to Phillotson."
+      }
+    ]
   },
   {
     "id": "book-mayor-of-casterbridge",
@@ -12761,7 +14501,7 @@
     "subtype": "Novel",
     "name": "The Mayor of Casterbridge",
     "teaser": "Hardy's 1886 novel of Michael Henchard, who sells his wife at a fair and spends his life paying for it — a tragedy of character, corn markets, and the town that watches. 'Character is fate' made flesh.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439563-L.jpg",
     "byline": "Thomas Hardy",
     "exploreAction": {
       "verb": "Read",
@@ -12775,7 +14515,46 @@
       "Classic"
     ],
     "tier": 2,
-    "pageCount": 400
+    "pageCount": 400,
+    "synopsis": "Thomas Hardy's novel follows Michael Henchard, a hay-trusser who, in a drunken rage at a country fair, auctions off his wife Susan and their baby daughter to a sailor for five guineas. When he sobers up, he is consumed by remorse and swears not to drink for twenty-one years. He keeps his vow and rises from a humble laborer to become the wealthiest and most powerful man in Casterbridge (a fictional Dorchester), eventually becoming mayor. But his rise is shadowed by his past: the sailor returns, Susan reappears, and Henchard's jealousy, pride, and self-destructive temper destroy everything he has built. The novel traces Henchard's tragic arc from hero to outcast, and Hardy uses his fall to explore the nature of character, the weight of the past, and the arbitrary cruelty of fate. Published in 1886, The Mayor of Casterbridge is one of Hardy's most tightly constructed novels and one of the finest tragic novels in the English language.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Auction",
+        "pageRange": "1-25",
+        "summary": "Henchard auctions his wife at the fair; his remorse."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Rise",
+        "pageRange": "26-55",
+        "summary": "Henchard's twenty-one years of sobriety; his rise to power."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Return",
+        "pageRange": "56-85",
+        "summary": "Susan returns; Henchard meets Elizabeth Jane."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Rival",
+        "pageRange": "86-115",
+        "summary": "Donald Farfrae arrives; Henchard's jealousy."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Downfall",
+        "pageRange": "116-145",
+        "summary": "Henchard's business failures; Susan's death."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The End",
+        "pageRange": "146-165",
+        "summary": "Henchard's final days; his death and burial."
+      }
+    ]
   },
   {
     "id": "book-silas-marner",
@@ -12783,7 +14562,7 @@
     "subtype": "Novel",
     "name": "Silas Marner",
     "teaser": "George Eliot's 1861 novel of the weaver who hoards gold until it is stolen and a child arrives in its place — a fable about what money and love actually buy. Eliot's most perfect small book.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439600-L.jpg",
     "byline": "George Eliot",
     "exploreAction": {
       "verb": "Read",
@@ -12797,7 +14576,52 @@
       "Classic"
     ],
     "tier": 1,
-    "pageCount": 288
+    "pageCount": 288,
+    "synopsis": "George Eliot's novel follows Silas Marner, a linen-weaver who is wrongly accused of theft and banished from his community in Lantern Yard. He settles in the village of Raveloe, where he lives in isolation, hoarding the gold he earns from his weaving. When the gold is stolen by Dunstan Cass, the dissolute son of the local squire, Silas is devastated. But on the same night, a golden-haired child, Eppie, wanders into his cottage, and Silas adopts her. The novel traces the transformation of Silas from a bitter, isolated misanthrope into a loving father, and the parallel story of Godfrey Cass, who has secretly married a woman of low birth and whose attempts to hide his past lead to tragedy. Eliot wrote Silas Marner as a pastoral fable about the redemptive power of love and community, and it remains one of her most accessible and beloved works. Published in 1861, the novel was an immediate success and has been adapted numerous times for stage and screen.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "The Weaver",
+        "pageRange": "1-20",
+        "summary": "Silas's life in Raveloe; his isolation and gold-hoarding."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Theft",
+        "pageRange": "21-40",
+        "summary": "Dunstan steals Silas's gold; the discovery."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Eppie",
+        "pageRange": "41-55",
+        "summary": "The child arrives; Silas adopts her."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Growing Up",
+        "pageRange": "56-70",
+        "summary": "Eppie's childhood; Silas's transformation."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Godfrey's Secret",
+        "pageRange": "71-85",
+        "summary": "Godfrey Cass and his hidden past."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Discovery",
+        "pageRange": "86-100",
+        "summary": "The truth about the gold and Eppie's parentage."
+      },
+      {
+        "chapterNumber": 7,
+        "title": "The Conclusion",
+        "pageRange": "101-110",
+        "summary": "Silas and Eppie's happiness; the ending."
+      }
+    ]
   },
   {
     "id": "book-mill-on-the-floss",
@@ -12805,7 +14629,7 @@
     "subtype": "Novel",
     "name": "The Mill on the Floss",
     "teaser": "Eliot's 1860 novel of Maggie Tulliver, too clever and too loving for her provincial world — and of the brother who cannot forgive her. The novel of family love and its ruin, ending in the flood.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439600-L.jpg",
     "byline": "George Eliot",
     "exploreAction": {
       "verb": "Read",
@@ -12819,7 +14643,46 @@
       "Classic"
     ],
     "tier": 2,
-    "pageCount": 560
+    "pageCount": 560,
+    "synopsis": "George Eliot's most autobiographical novel follows Maggie Tulliver, a brilliant, passionate young woman growing up in the provincial town of St. Ogg's on the River Floss. Maggie's life is shaped by two forces: her desire for intellectual and emotional fulfillment, and the constraints of her society, which punishes women for wanting more than domesticity. Her brother Tom, dutiful and rigid, becomes her antagonist as much as her protector. Maggie's relationships with three men—Philip Wakem, the bookish son of her father's enemy; Stephen Guest, her cousin's wealthy fiancé; and her own brother Tom—lead her through a series of moral crises that culminate in her expulsion from the community. The novel's ending—Maggie and Tom drowned together in a flood of the Floss—is one of the most debated in Victorian fiction: is it a tragedy, a reunion, or a punishment? Eliot wrote the novel in 1860 as a response to the criticism that her earlier works were too pessimistic, and it remains one of the most emotionally powerful novels of the nineteenth century.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Book One",
+        "pageRange": "1-40",
+        "summary": "Maggie's childhood at Dorlcote Mill; her relationship with Tom."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Book Two",
+        "pageRange": "41-80",
+        "summary": "The Tullivers' financial ruin; Maggie and Tom's divergent paths."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Book Three",
+        "pageRange": "81-120",
+        "summary": "Maggie's adolescence; her desire for books and beauty."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Book Four",
+        "pageRange": "121-160",
+        "summary": "Maggie and Philip's relationship; Tom's discovery."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Book Five",
+        "pageRange": "161-200",
+        "summary": "Maggie and Stephen Guest; the crisis of desire."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "Book Six",
+        "pageRange": "201-230",
+        "summary": "Maggie's return; her final meeting with Tom; the flood."
+      }
+    ]
   },
   {
     "id": "book-adam-bede",
@@ -12827,7 +14690,7 @@
     "subtype": "Novel",
     "name": "Adam Bede",
     "teaser": "Eliot's 1859 first novel — the carpenter Adam, the beautiful Hetty, and the infanticide at the heart of the English countryside. Eliot's warmest and most human story, rooted in her own childhood.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439600-L.jpg",
     "byline": "George Eliot",
     "exploreAction": {
       "verb": "Read",
@@ -12841,7 +14704,46 @@
       "Classic"
     ],
     "tier": 2,
-    "pageCount": 560
+    "pageCount": 560,
+    "synopsis": "George Eliot's first novel is set in the rural Midlands in the 1790s and follows Adam Bede, a carpenter who is in love with Hetty Sorrel, a beautiful but vain dairymaid. Hetty, however, is seduced by Arthur Donnithorne, the squire's grandson, who has no intention of marrying her. When Hetty becomes pregnant and attempts to abandon her baby, she is arrested for infanticide and sentenced to death. The novel traces the consequences of Hetty's fall through the community—the shame of her family, the grief of Adam, and the moral crisis of the Methodist preacher Dinah Morris, who visits Hetty in prison. Dinah, who has rejected Adam's proposal, eventually returns to him, and they marry. Eliot wrote Adam Bede as a novel of 'truth and realism,' drawing on her own memories of rural Staffordshire and the stories told by her aunt Elizabeth Evans, a Methodist preacher who had visited a condemned woman in prison. Published in 1859, the novel was an immediate bestseller and established Eliot as one of the foremost novelists of her generation.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Workshop",
+        "pageRange": "1-25",
+        "summary": "Adam Bede at work; his love for Hetty Sorrel."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Hall Farm",
+        "pageRange": "26-50",
+        "summary": "The Hall Farm and its people; Arthur Donnithorne."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Seduction",
+        "pageRange": "51-80",
+        "summary": "Arthur and Hetty's affair; Adam discovers the truth."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "The Prison",
+        "pageRange": "81-105",
+        "summary": "Hetty's arrest; Dinah Morris visits her in prison."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Trial",
+        "pageRange": "106-125",
+        "summary": "Hetty's trial and sentence; the community's reaction."
+      },
+      {
+        "chapterNumber": 6,
+        "title": "The Redemption",
+        "pageRange": "126-145",
+        "summary": "Dinah and Adam's marriage; the ending."
+      }
+    ]
   },
   {
     "id": "book-romola",
@@ -12849,7 +14751,7 @@
     "subtype": "Novel",
     "name": "Romola",
     "teaser": "Eliot's 1863 historical novel set in Renaissance Florence — Romola, the scholar's daughter, and her brilliant faithless husband Tito, against the backdrop of Savonarola's city. Eliot's most ambitious book.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439600-L.jpg",
     "byline": "George Eliot",
     "exploreAction": {
       "verb": "Read",
@@ -12863,7 +14765,40 @@
       "Renaissance"
     ],
     "tier": 3,
-    "pageCount": 640
+    "pageCount": 640,
+    "synopsis": "George Eliot's historical novel is set in Florence during the political turmoil of the 1490s, when Savonarola's religious revival shook the city. Romola, the daughter of the blind scholar Bardo Bardi, is married to Tito Melema, a charming Greek scholar who betrays her repeatedly—stealing her inheritance, taking a mistress, and politically maneuvering against her father's wishes. Romola's journey is one of moral awakening: from a sheltered girl who believes in her husband's goodness, she becomes a woman who must choose between loyalty and justice. The novel explores the nature of conscience, the relationship between knowledge and virtue, and the meaning of moral courage in a time of political and religious upheaval. Eliot wrote Romola during a period of intense personal and creative effort, and it is widely regarded as her most ambitious historical novel. Published in 1863, it was serialized in the Cornhill Magazine and received mixed reviews, but it has since been recognized as one of the finest historical novels in the English language.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-50",
+        "summary": "Florence in the 1490s; Romola and Tito's marriage."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "51-100",
+        "summary": "Tito's betrayals; Romola's growing awareness."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "101-150",
+        "summary": "Savonarola's rise; Romola's moral crisis."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "151-200",
+        "summary": "The Bonfire of the Vanities; Tito's downfall."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Part Five",
+        "pageRange": "201-240",
+        "summary": "Romola's redemption; the ending."
+      }
+    ]
   },
   {
     "id": "book-shirley",
@@ -12871,7 +14806,7 @@
     "subtype": "Novel",
     "name": "Shirley",
     "teaser": "Charlotte Brontë's 1849 novel of the West Riding, the Luddite riots, and two very different women — the quiet Caroline and the heiress Shirley, whose name she made a girl's name. Brontë's most social novel.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439600-L.jpg",
     "byline": "Charlotte Brontë",
     "exploreAction": {
       "verb": "Read",
@@ -12885,7 +14820,40 @@
       "Victorian"
     ],
     "tier": 3,
-    "pageCount": 640
+    "pageCount": 640,
+    "synopsis": "George Eliot's novel is set during the Napoleonic Wars and the Luddite uprisings in Yorkshire, and follows two women: Caroline Helstone, a shy, orphaned vicar's niece who longs for love and purpose; and Shirley Keeldar, a wealthy, independent landowner who refuses to conform to the expectations of her gender. Caroline is in love with Robert Moore, a mill owner who is struggling to modernize his factory and is the target of Luddite attacks. Shirley, meanwhile, offers to buy Robert's mill and save him from financial ruin, and her unconventional behavior scandalizes the neighborhood. The novel traces the intertwining fates of these two women and the men they love, set against the backdrop of industrial conflict and political unrest. Eliot wrote Shirley during a period of personal crisis, and the novel reflects her own struggles with independence, creativity, and the limitations placed on women. Published in 1849 (under the name George Eliot), the novel was Eliot's third and was dedicated to her partner George Henry Lewes.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-50",
+        "summary": "Caroline's life with her uncle; Robert's mill."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "51-100",
+        "summary": "Shirley Keeldar arrives; the Luddite uprisings."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "101-150",
+        "summary": "The two women's lives intersect; the crisis at the mill."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "151-200",
+        "summary": "The romantic entanglements; the Luddite attack."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Part Five",
+        "pageRange": "201-230",
+        "summary": "The resolution; the two couples find happiness."
+      }
+    ]
   },
   {
     "id": "book-villette",
@@ -12893,7 +14861,7 @@
     "subtype": "Novel",
     "name": "Villette",
     "teaser": "Charlotte Brontë's 1853 novel of Lucy Snowe, who goes alone to a Belgian city and teaches in a girls' school — the loneliest and most modern of Brontë's books, and the one she called her best.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439570-L.jpg",
     "byline": "Charlotte Brontë",
     "exploreAction": {
       "verb": "Read",
@@ -12907,7 +14875,40 @@
       "Classic"
     ],
     "tier": 2,
-    "pageCount": 624
+    "pageCount": 624,
+    "synopsis": "George Eliot's final and most autobiographical novel follows Lucy Snowe, a young Englishwoman who travels to Brussels to teach at a girls' school after the death of her godmother. Lucy is a deeply reserved narrator who reveals her feelings through what she withholds rather than what she says, and her account of life in Brussels is colored by her loneliness, her jealousy, and her passion for Paul Emanuel, a brilliant but volatile professor. The novel is widely regarded as one of the finest psychological novels in the English language, and its portrayal of a woman navigating independence, desire, and emotional restraint is remarkably modern. Eliot, who had herself taught at a school in Brussels, drew on her own experiences of homesickness and unrequited love. The novel's ambiguous ending—Lucy never confirms whether Paul reaches her or dies at sea—has been debated by critics for over a century. Charlotte Brontë wrote Villette as her final novel, published in 1853, the year before her death.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-40",
+        "summary": "Lucy Snowe's childhood; her journey to Brussels."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "Part Two",
+        "pageRange": "41-80",
+        "summary": "Life at Madame Beck's school; the arrival of Paul Emanuel."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "Part Three",
+        "pageRange": "81-120",
+        "summary": "Lucy and Paul's relationship deepens; Graham's return."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Part Four",
+        "pageRange": "121-160",
+        "summary": "The piano scene; Lucy's growing independence."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "Part Five",
+        "pageRange": "161-200",
+        "summary": "The carnival; Paul's confession; the ambiguous ending."
+      }
+    ]
   },
   {
     "id": "book-agnes-grey",
@@ -12915,7 +14916,7 @@
     "subtype": "Novel",
     "name": "Agnes Grey",
     "teaser": "Anne Brontë's 1847 novel of a governess's trials in two impossible households — the quietest and most honest of the Brontë novels, and the sharpest portrait of the governess's life in English fiction.",
-    "imageUrl": "",
+    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140437683-L.jpg",
     "byline": "Anne Brontë",
     "exploreAction": {
       "verb": "Read",
@@ -12929,7 +14930,40 @@
       "Victorian"
     ],
     "tier": 2,
-    "pageCount": 256
+    "pageCount": 256,
+    "synopsis": "Anne Brontë's debut novel follows Agnes Grey, the daughter of a clergyman who becomes a governess to support her family after her father's investments fail. The novel traces Agnes's experiences in two households: the Bloomfield family, whose children are cruel and unmanageable, and the Murray family, whose children are charming but morally bankrupt. Agnes maintains her integrity and kindness throughout, and eventually finds love with the rector, Mr. Weston. The novel is a realistic and often uncomfortable portrait of the life of a governess—the loneliness, the powerlessness, and the daily indignities of serving a class that considers you both necessary and inferior. Brontë wrote Agnes Grey based on her own experiences as a governess, and the novel's quiet observation and emotional honesty distinguish it from the more dramatic works of her sisters Charlotte and Emily. Published in 1847 as part of a triple-decker with Wuthering Heights, Agnes Grey was initially overlooked but has since been recognized as a significant work of Victorian realism.",
+    "chapters": [
+      {
+        "chapterNumber": 1,
+        "title": "Part One",
+        "pageRange": "1-20",
+        "summary": "Agnes's family; her decision to become a governess."
+      },
+      {
+        "chapterNumber": 2,
+        "title": "The Bloomfields",
+        "pageRange": "21-50",
+        "summary": "Agnes's first position; the unmanageable children."
+      },
+      {
+        "chapterNumber": 3,
+        "title": "The Murrays",
+        "pageRange": "51-80",
+        "summary": "Agnes's second position; the charming but immoral family."
+      },
+      {
+        "chapterNumber": 4,
+        "title": "Mr. Weston",
+        "pageRange": "81-100",
+        "summary": "Agnes meets the rector; their courtship."
+      },
+      {
+        "chapterNumber": 5,
+        "title": "The Conclusion",
+        "pageRange": "101-115",
+        "summary": "Agnes and Mr. Weston's marriage; the ending."
+      }
+    ]
   },
   {
     "id": "book-tenant-of-wildfell-hall",
