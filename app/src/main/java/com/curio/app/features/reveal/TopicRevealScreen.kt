@@ -2252,6 +2252,90 @@ private fun BookSynopsisCard(
 }
 
 /**
+ * Estimate the real chapter count from grouped chapter titles.
+ * Handles patterns like "Books IV–VIII" (5 chapters), "Chapters 1–10" (10 chapters),
+ * "Chapter 3" (1 chapter), and Roman numeral ranges.
+ */
+private fun estimateChapterCount(chapters: List<com.curio.app.data.BookChapter>): Int {
+    val romanNumerals = mapOf(
+        "I" to 1, "V" to 5, "X" to 10, "L" to 50, "C" to 100, "D" to 500, "M" to 1000
+    )
+
+    fun romanToInt(s: String): Int {
+        val str = s.trim().uppercase()
+        var result = 0
+        var prev = 0
+        for (c in str.reversed()) {
+            val v = romanNumerals[c.toString()] ?: continue
+            result += if (v < prev) -v else v
+            prev = v
+        }
+        return result
+    }
+
+    fun parseNumber(s: String): Int {
+        val trimmed = s.trim()
+        return trimmed.toIntOrNull() ?: romanToInt(trimmed)
+    }
+
+    var total = 0
+    for (ch in chapters) {
+        val title = ch.title
+        // Match patterns: "Books X–Y", "Chapters X-Y", "Ch. X-Y", "Part X, Chapters Y-Z",
+        // "Cantos X–Y", "Canto X"
+        val rangePattern = Regex("(books?|chapters?|ch\\.?|parts?|cantos?|canto)\\s+([IVXLCDM0-9]+)[\u2013\\-–]+([IVXLCDM0-9]+)", RegexOption.IGNORE_CASE)
+        val singlePattern = Regex("(books?|chapters?|ch\\.?|parts?|cantos?|canto)\\s+([IVXLCDM0-9]+)", RegexOption.IGNORE_CASE)
+
+        val rangeMatch = rangePattern.find(title)
+        if (rangeMatch != null) {
+            val from = parseNumber(rangeMatch.groupValues[2])
+            val to = parseNumber(rangeMatch.groupValues[3])
+            if (from > 0 && to >= from) {
+                total += (to - from + 1)
+                continue
+            }
+        }
+
+        val singleMatch = singlePattern.find(title)
+        if (singleMatch != null) {
+            total += 1
+            continue
+        }
+
+        // No recognizable range — count as 1
+        total += 1
+    }
+    return total
+}
+
+/**
+ * Extract a short range label from a chapter title for the chip header.
+ * E.g. "Books IV–VIII" → "Ch. IV–VIII", "Chapters 1–10" → "Ch. 1–10",
+ * "Book I — The Quarrel" → "Ch. I", "Inferno, Cantos I–V" → "Ch. I–V".
+ */
+private fun chapterRangeLabel(ch: com.curio.app.data.BookChapter): String {
+    val rangePattern = Regex(
+        "(books?|chapters?|ch\\.?|parts?|cantos?|canto)\\s+([IVXLCDM0-9]+)[\u2013\\-–]+([IVXLCDM0-9]+)",
+        RegexOption.IGNORE_CASE
+    )
+    val singlePattern = Regex(
+        "(books?|chapters?|ch\\.?|parts?|cantos?|canto)\\s+([IVXLCDM0-9]+)",
+        RegexOption.IGNORE_CASE
+    )
+    val rangeMatch = rangePattern.find(ch.title)
+    if (rangeMatch != null) {
+        val from = rangeMatch.groupValues[2]
+        val to = rangeMatch.groupValues[3]
+        return "Ch. $from–$to"
+    }
+    val singleMatch = singlePattern.find(ch.title)
+    if (singleMatch != null) {
+        return "Ch. ${singleMatch.groupValues[2]}"
+    }
+    return "Ch. ${ch.number}"
+}
+
+/**
  * Horizontal chapter chips showing chapter titles and page ranges.
  */
 @Composable
@@ -2289,7 +2373,7 @@ private fun BookChapterChips(
                 color = cat.categoryInk()
             )
             Text(
-                text = "${chapters.size}",
+                text = "${estimateChapterCount(chapters)}",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -2336,9 +2420,10 @@ private fun BookChapterChip(
             modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            // Chapter number
+            // Chapter range label (extracted from title)
+            val rangeLabel = chapterRangeLabel(chapter)
             Text(
-                text = "Ch. ${chapter.number}",
+                text = rangeLabel,
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold
                 ),
