@@ -1,94 +1,62 @@
 # Prompt.md — current request log
 
-## Request: Level unlocks invisible, more unlocks + pet-shop games, quest fixes, picker hold-action redesign
+## Request: Signature card redesign campaign + Deepen removal + Adjust tool
 
-User report (condensed):
+User direction (v324):
 
-> (1) The level-unlocked card gradients/tones I can't see anywhere — where
-> are they? Add more level unlocks, and add more things to the pet shop for
-> the small pet — maybe some games, ball games etc. (2) The quests on the
-> Home screen are bad — remove it. (3) In the Quests screen it says "quest
-> screen unlocked" even when completed — fix quest issues. (4) The "Try a
-> new lane" daily keeps making you explore a new lane and never completes
-> with the lane it said to explore — fix it.
->
-> Also: rebuild the category picker's tap-and-hold action as a fluid,
-> water-like radial menu (the user pasted a React `RadialHoldMenu` example:
-> gooey blobs welling out of the press point, morphing into a ring of glass
-> discs around the thumb, drag-to-switch with nearest-highlight, release to
-> pick, NO dark overlay, buttons open around the press point).
+> Now we will properly design the signature category styles: remove the
+> Deepen option — keep only default and classic as they are now. Instead of
+> Deepen we will use a saturation/contrast editor that adjusts the card, in
+> the tools. Then we will edit one-by-one each category's signature design —
+> the user describes the design per category. Rules: NO drawing/SVG without
+> permission; use icons/symbols and any already-ready drawings (icon font
+> glyphs, existing card art) as background symbols/icons. Ask ONE category
+> at a time — finish it, commit, then ask for the next.
 
-## Decisions (asked the user)
-
-- **Tones visible:** tone picker in the share-card editor (swatches of every
-  unlocked tone + Auto) — unlocks become visible/pickable.
-- **More unlocks:** 6 new share-card tones + pet-game unlocks (RewardKind.GAME).
-- **Pet shop:** more accessories + Ball/fetch + other mini-games.
-- **Home quests:** remove the "Today's quests" strip.
-
-## Root causes found
-
-1. **Tones invisible** — the 4 premium tones (Midnight/Forest/Lavender/
-   Ember) were auto-applied to share cards by category rotation; there was
-   no UI to see or choose them, so unlocking one changed nothing visible.
-2. **"Try a new lane" never completes** — the discovery daily resolved its
-   target lane LIVE via `CurioPassport.leastEngaged()` at both render and
-   completion; exploring the displayed lane changed its stamp, so by
-   completion time `leastEngaged()` pointed at a different lane.
-3. **"Bonus quests unlocked!" lingered** — the line stayed visible once the
-   bonus quests themselves were claimed.
-4. Home quest strip duplication — quests already live on the Quests screen.
+Also carried over from the previous message: CI failed on
+`RadialHoldMenu.kt` (positionInRoot unresolved, launch deprecation,
+RenderEffect type mismatch) and a reported "solid strip behind the Cancel
+button during mix" in the classic picker page — the strip question is still
+OPEN (asked at the end of this turn).
 
 ## Completed
 
-- **Home** (`HomeScreen.kt`): `HomeDailyStrip` + its "Today's quests" strip
-  removed (quests live on the Quests screen only).
-- **Quests** (`QuestsScreen.kt`): the gold "Bonus quests unlocked!" line now
-  hides once BOTH bonus quests are claimed (`bonus.any { it.id !in awarded }`).
-- **Try-a-new-lane** (`CurioQuests.kt`): the discovery daily PINNS its lane
-  at the 4 AM rollover — new `KEY_DAILY_LANE` / `dailyLaneState`
-  (stored as `CategoryId.name`) + `dailyDiscoveryLane()` (defensive
-  runCatching resolution); both the daily pool and the completion hooks use
-  the pinned lane, so the lane shown is always the lane that completes it.
-- **Tone picker + tones** (`TopicShareCard.kt`, `LevelRewards.kt`):
-  `ShareCardPalette.name`, six new curated tones (Ocean 12, Rose Gold 18,
-  Moss 25, Storm 35, Pearl 45, Sunburst 50) with matching LevelRewards
-  entries; new **Tone** tool pill in the editor opens a scrollable swatch
-  row of every UNLOCKED tone (+ Auto rotation); `TopicShareCard.toneIndex`
-  threads the pick into the live preview AND the Save/Share exports.
-- **Pet shop** (`PetOutfits.kt`, `AppPreferences.kt`, `OutfitShopScreen.kt`):
-  4 new outfits (Polka Bowtie, Sun Hat, Curio Glasses, Tail Puff); new
-  `PetOutfits.Games` catalog (Ball fetch, Star catch, Bubble storm — level-
-  + reward-gated, sparkle-priced) with `ownedGamesState` /
-  `getOwnedGames` / `buyGame`; the shop gained a "Toys & games" section
-  (Locked → Buy → Play, Play fires `CurioPet.notePlay` + a confirm haptic).
-  Game glyphs verified present in the Material Symbols subset.
-- **Radial hold menu** (`features/picker/RadialHoldMenu.kt` NEW +
-  `NewCategoryPicker.kt` + `NewCategoryPickerBrowse.kt`): the picker's
-  tap-and-hold actions are now a gooey radial menu — blobs well out of the
-  press point (blur+alpha-contrast RenderEffect goo on API 31+), settle
-  into a ring of crisp glass discs around the thumb, live drag-to-switch
-  (nearest-disc highlight with hit slop), release over a disc to pick,
-  release over nothing to cancel, no dark scrim. Gesture =
-  `Modifier.radialHoldMenu(HoldSession(onOpen/onMove/onEnd/onTap))` on
-  `NewPickerTile` / `NewPinnedPill` / `NewMixCard` / Continue-exploring
-  tiles / Browse tabs + mix rows; visuals = `RadialHoldMenuOverlay` at the
-  held anchor, fed by shared `holdCursor`/`holdEnd` sheet state.
-  `CategoryOptionPill`/`MixOptionPill` became `internal` (shared with
-  Browse) and render the overlay. `NewPickerTile` kept a plain `onLongClick`
-  for the classic page's hold-to-multi-select. The old `HoldActionsPill` is
-  dead code (no references). All new glyphs (palette, play_circle, star,
-  bubble_chart…) verified in the icons font.
-- Docs: changelog (6 new bullets), `app/AGENTS.md` (v323 bullet), this file.
+- **CI fix (`RadialHoldMenu.kt`)** — three compile errors fixed: added the
+  `androidx.compose.ui.input.pointer.positionInRoot` import; the long-press
+  `launch` now resolves against the pointerInput CoroutineScope
+  (`this@pointerInput.launch`); `buildGooRenderEffect()` now builds a
+  `androidx.compose.ui.graphics.RenderEffect` (createChainEffect /
+  createBlurEffect / createColorFilterEffect + ColorFilter.colorMatrix)
+  instead of the android.graphics one the GraphicsLayer no longer accepts.
+- **Deepen removed** — `ExperimentsScreen` "Deepen signature card elements"
+  toggle row deleted; `AppPreferences` KEY + state + get/set deleted; the
+  `signatureDesignDetailed` branch in `SignatureCard` deleted; the whole
+  ~1325-line `signatureDesignDetailed` function spliced out (verified 0
+  references). Signature cards now pick classic vs `signatureDesign` only.
+- **Adjust tool** — new `CurioIcons.Contrast` tool pill in the editor with a
+  panel of two `Slider` rows (Saturation, Contrast; 0.5–1.5, neutral 1.0,
+  % readout). `TopicShareCard` gained `saturation`/`contrast` params that
+  thread a single `graphicsLayer { colorFilter =
+  ColorFilter.colorMatrix(adjustColorMatrix(...)) }` (luma-weighted
+  saturation × pivot-0.5 contrast, `ColorMatrix.timesAssign`) into the card
+  modifier chain — preview and export (real View.draw pass) both adjust.
+  Reset-all also clears the sliders. 4 call sites wired (2 previews +
+  Save + Share).
+- Docs: changelog (REMOVE Deepen + ADD Adjust), app/AGENTS.md (v324 bullet
+  incl. the signature-redesign contract), this file.
 
 ## Verification
 
-- `git diff --check` passes; all edited regions re-read for compile-safety
-  (imports present, signatures match, nullability resolved — e.g.
-  `CurioCategory.id.name` not `.name`, `byId` wrapped in runCatching).
-- No Gradle compile/build/lint/test command was run because the project DOX
-  explicitly forbids Android Gradle validation in this environment; CI is
-  the verification path.
-- `ANALYSIS.md` remains untracked/untouched; `share-card-improvements.txt`
-  (stale first-request scratch notes) was restored after an accidental
-  uncommitted deletion.
+- `git diff --check` passes; 0 references to deepen APIs; 4/4 call sites
+  carry the new params; `contrast` glyph present in the icons font; splice
+  seam read back clean.
+- No Gradle commands run (project DOX forbids them here) — CI validates.
+
+## Open questions (asked at the end of this turn)
+
+1. The solid strip behind the Cancel button during mix (classic picker
+   page) — which element is it? (Options: the solid "Mix · N" capsule in
+   the bottom row under the floating Cancel pill / the floating Cancel pill
+   itself / the old picker's Mix button beside Cancel / other.)
+2. Which signature category to redesign FIRST (one at a time, per the
+   contract).

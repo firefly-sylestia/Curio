@@ -1,3 +1,5 @@
+REMOVE: The Deepen signature-card option is gone — the detailed background-scene experiment and its Settings toggle are removed; signature cards keep the default and classic looks only.
+ADD: Share-card editor — new Adjust tool with Saturation and Contrast sliders that fine-tune the whole card live (every style, baked into the saved image); it replaces the heavy Deepen scenes with a clean edit.
 ADD: Category picker tap-and-hold is now a fluid radial menu — circular actions well up out of the press point as gooey water blobs (no dark overlay), settle into a ring around your thumb, and stay live-switchable: drag anywhere and the nearest action highlights; release over one to pick it, release over nothing to cancel. Works on the Pinned pills, mix cards, Continue-exploring lanes, and the Browse/Mixes/Pins page.
 FIX: The "Try a new lane" daily now pins its lane for the whole day — exploring the lane it names always completes it (other lane-spins can no longer silently re-aim it elsewhere).
 FIX: Quests — the "Bonus quests unlocked!" line hides again once both bonus quests are claimed, and the Home quest strip is removed (quests live on the Quests screen only).

@@ -545,14 +545,6 @@ object AppPreferences {
     var glassClassicIndicatorState by mutableStateOf(false)
         private set
 
-    // v30x — DEEPENED SIGNATURE CARD ELEMENTS (experiment, default OFF):
-    // the Signature share-card backgrounds render in their fully detailed
-    // form — layered gradient atmospheres, glows, vignettes and rich
-    // hand-drawn scenes per category — instead of the streamlined default
-    // line-art style.
-    var detailedSignatureElementsState by mutableStateOf(false)
-        private set
-
     // v292 — NAV INDICATOR COLOR: what the liquid-glass tab bar's resting
     // active pill wears. "auto" follows the theme (Material → scheme
     // primary, azure hero → azure, rose → rose); "white" and "black" are
@@ -922,7 +914,6 @@ object AppPreferences {
         forceGlassEnabled = prefs(context).getBoolean(KEY_FORCE_GLASS, false)
         legacyGlassBlurState = isLegacyGlassBlurEnabled(context)
         glassClassicIndicatorState = isGlassClassicIndicatorEnabled(context)
-        detailedSignatureElementsState = isDetailedSignatureElementsEnabled(context)
         navIndicatorColorState = getNavIndicatorColor(context)
         navIndicatorOpacityState = getNavIndicatorOpacity(context)
         glassClarityState = isGlassClarityEnabled(context)
@@ -1258,7 +1249,6 @@ object AppPreferences {
     private const val KEY_LEGACY_GLASS_BLUR = "legacy_glass_blur"
     private const val KEY_GLASS_LAB_WALLPAPER = "glass_lab_wallpaper"
     private const val KEY_GLASS_CLASSIC_INDICATOR = "glass_classic_indicator"
-    private const val KEY_DETAILED_SIGNATURE_ELEMENTS = "detailed_signature_elements"
     private const val KEY_NAV_INDICATOR_COLOR = "nav_indicator_color"
     private const val KEY_NAV_INDICATOR_OPACITY = "nav_indicator_opacity"
     private const val KEY_GLASS_CLARITY = "glass_clear_style"
@@ -1496,15 +1486,6 @@ object AppPreferences {
     fun setGlassClassicIndicatorEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_GLASS_CLASSIC_INDICATOR, enabled).apply()
         glassClassicIndicatorState = enabled
-    }
-
-    // Deepened signature share-card elements (experiment, default OFF).
-    fun isDetailedSignatureElementsEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_DETAILED_SIGNATURE_ELEMENTS, false)
-
-    fun setDetailedSignatureElementsEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_DETAILED_SIGNATURE_ELEMENTS, enabled).apply()
-        detailedSignatureElementsState = enabled
     }
 
     // ── Clear-glass style (experiment, default OFF) ──────────────────

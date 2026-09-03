@@ -449,6 +449,26 @@ app/src/main/java/com/curio/app/
   `CategoryId.name`) so the shown lane and the completion check always
   agree (the old live `leastEngaged()` re-resolution could re-aim the
   quest away mid-day).
+- **v324 — Deepen REMOVED; share-card Adjust tool (saturation/contrast);
+  signature redesign contract.** (1) **Deepen is gone** (user direction —
+  "just keep default and classic option"): the Experiments toggle
+  ("Deepen signature card elements"), the `detailedSignatureElementsState`
+  pref API, and the entire `signatureDesignDetailed` function (~1325
+  lines) are DELETED; `SignatureCard` now picks only classic vs
+  `signatureDesign`. (2) **Adjust tool**: `TopicShareSheet` gained an
+  Adjust tool pill (CurioIcons.Contrast) with Saturation/Contrast sliders
+  (0.5–1.5, neutral 1.0); `TopicShareCard` takes `saturation`/`contrast`
+  params and threads a single `graphicsLayer { colorFilter =
+  ColorFilter.colorMatrix(adjustColorMatrix(sat, con)) }` into the card
+  modifier chain (preview + export both adjusted — export is a real
+  `View.draw` pass, so the layer filter is captured). Reset-all also
+  resets the sliders. (3) **Signature redesign contract (v324+):** we are
+  reworking `signatureDesign` per category, ONE category per turn — the
+  user describes the design, we implement + commit, then ask for the next.
+  Rules: NO drawing/SVG without the user's explicit permission — use only
+  icons, symbols, and EXISTING ready-made drawings (e.g. the `CurioIcons`
+  font subset, `Watermark` glyphs, `topicVariant`/`CustomCard` art) as
+  background symbols/icons.
 - **v313 — Topic Browser revamp, pick 1: category-filtered search, dynamic
   chips, one-category browse.** User: "in topic browser let user change
   category and act that category as filters for the search, so it doesn't

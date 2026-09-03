@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -120,7 +121,7 @@ fun Modifier.radialHoldMenu(hold: HoldSession?): Modifier = composed {
             val down = awaitFirstDown(requireUnconsumed = false)
             val pressPos = down.positionInRoot()
             var opened = false
-            val holdJob = launch {
+            val holdJob = this@pointerInput.launch {
                 delay(viewConfig.longPressTimeoutMillis)
                 opened = true
                 hold.onOpen(pressPos)
@@ -393,16 +394,16 @@ private fun Float.pow(e: Int): Float {
  * overlapping blobs visibly MERGE into a water-like whole. RenderEffect is
  * API 31+; older devices render the soft circles without the merge.
  */
-private fun buildGooRenderEffect(): android.graphics.RenderEffect? {
+private fun buildGooRenderEffect(): androidx.compose.ui.graphics.RenderEffect? {
     if (android.os.Build.VERSION.SDK_INT < 31) return null
     return try {
-        android.graphics.RenderEffect.createChainEffect(
-            android.graphics.RenderEffect.createBlurEffect(
-                22f, 22f, android.graphics.Shader.TileMode.DECAL
+        androidx.compose.ui.graphics.RenderEffect.createChainEffect(
+            androidx.compose.ui.graphics.RenderEffect.createBlurEffect(
+                22f, 22f, androidx.compose.ui.graphics.ShaderTileMode.DECAL
             ),
-            android.graphics.RenderEffect.createColorFilterEffect(
-                android.graphics.ColorMatrixColorFilter(
-                    android.graphics.ColorMatrix(floatArrayOf(
+            androidx.compose.ui.graphics.RenderEffect.createColorFilterEffect(
+                androidx.compose.ui.graphics.ColorFilter.colorMatrix(
+                    androidx.compose.ui.graphics.ColorMatrix(floatArrayOf(
                         1f, 0f, 0f, 0f, 0f,
                         0f, 1f, 0f, 0f, 0f,
                         0f, 0f, 1f, 0f, 0f,
@@ -417,7 +418,7 @@ private fun buildGooRenderEffect(): android.graphics.RenderEffect? {
 }
 
 /** Applies [effect] (when non-null) to this layer; no-op otherwise. */
-private fun Modifier.graphicsLayerCompat(effect: android.graphics.RenderEffect?): Modifier =
+private fun Modifier.graphicsLayerCompat(effect: androidx.compose.ui.graphics.RenderEffect?): Modifier =
     if (effect != null) {
         this.graphicsLayer { renderEffect = effect }
     } else {
