@@ -276,7 +276,7 @@ fun OnboardingScreen(navController: NavController) {
                         modifier = Modifier.fillMaxWidth()
                     )
                     Text(
-                        text = "Keep your research your own — and stay curious.",
+                        text = "Keep your research your own, and stay curious.",
                         style = MaterialTheme.typography.labelMedium,
                         color = heroInk().copy(alpha = 0.72f),
                         textAlign = TextAlign.Center,

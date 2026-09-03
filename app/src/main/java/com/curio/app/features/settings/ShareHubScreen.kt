@@ -309,7 +309,7 @@ fun ShareHubScreen(navController: NavController) {
             // ── Design grid ─────────────────────────────────────────────
             item(span = { GridItemSpan(maxLineSpan) }) {
                 CurioSectionLabel(
-                    if (pickedTopic != null) "Designs — ${pickedTopic.name}" else "Designs — preview with any topic"
+                    if (pickedTopic != null) "Designs · ${pickedTopic.name}" else "Designs · preview with any topic"
                 )
             }
             HubDesigns.forEachIndexed { i, design ->

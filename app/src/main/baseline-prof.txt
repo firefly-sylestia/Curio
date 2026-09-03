@@ -1,16 +1,24 @@
-# Curio — starter baseline profile (v331).
+# Curio — starter baseline profile (v332).
 #
-# Manually-authored HRF (human-readable profile) rules. AGP bundles this file
-# into assets/dexopt/baseline.prof and ProfileInstaller (already present
-# transitively via Compose, see the "Skipping profile installation" logcat
-# line) installs it on first launch so ART AOT-compiles these classes at
-# install time instead of JIT-compiling them at runtime.
+# Manually-authored HRF rules. AGP bundles this file into
+# assets/dexopt/baseline.prof, and ProfileInstaller (declared explicitly in
+# app/build.gradle.kts, already present transitively via Compose) installs it
+# on first launch so ART AOT-compiles these methods at install time instead
+# of JIT-compiling them at runtime.
 #
 # Why: the 2026-09-03 logcat showed the JIT compiling giant single methods
 # (e.g. the 30-arg share-card / category-picker composables) at up to
 # 7.7 MB of compiled code each, plus a ~6 MB "Compiler allocated" spike per
 # method — a real memory/CPU cost on first runs, worse on low-RAM devices.
-# These rules AOT-compile the same methods once at install.
+# These rules AOT-compile the same code paths once, at install.
+#
+# HRF syntax notes (validated against the profgen docs and a CI failure):
+#   * Flags H / S / P (Hot / Startup / Post-Startup) are ONLY valid on METHOD
+#     rules. "L" is the DEX descriptor prefix, not a flag.
+#       HSPLcom/curio/app/MainActivity;->**(**)**
+#   * CLASS rules take NO flags (they only pre-allocate the class in the
+#     heap):  Lcom/curio/app/MainActivity;
+#   * Package-wide AOT uses the wildcard method rule:  <pkg>/**->**(**)**
 #
 # Release builds run R8 (minify ON): AGP rewrites these source-symbol rules
 # through the R8 mapping automatically, so source names are correct here.
@@ -18,45 +26,35 @@
 # Keep in sync with the app's actual hot paths; extend with a
 # Macrobenchmark-generated profile if one is ever added.
 
-# ── Startup: activity, crash reporter, splash ──
-HSPLcom/curio/app/MainActivity;
-HSPLcom/curio/app/infrastructure/**;
-HSPLcom/curio/app/features/splash/**;
+# ── Startup: activity entry (pre-allocated + every method AOT'd) ──
+Lcom/curio/app/MainActivity;
+HSPLcom/curio/app/MainActivity;->**(**)**
 
-# ── Startup: data layer init (Room, topic JSON, prefs, repo singletons) ──
-HSPLcom/curio/app/data/CurioDatabase;
-HSPLcom/curio/app/data/CurioRepositoryHolder;
-HSPLcom/curio/app/data/TopicJsonLoader;
-HSPLcom/curio/app/data/TopicRepository;
-HSPLcom/curio/app/data/AppPreferences;
-HSPLcom/curio/app/data/CaptureRepository;
-HSPLcom/curio/app/data/TopicCatalog;
+# ── Startup: crash reporter, splash, data layer, nav + glass pipeline ──
+HSPLcom/curio/app/infrastructure/**->**(**)**
+HSPLcom/curio/app/features/splash/**->**(**)**
+HSPLcom/curio/app/data/**->**(**)**
+HSPLcom/curio/app/navigation/**->**(**)**
+HSPLcom/curio/app/ui/components/liquidglass/**->**(**)**
+HSPLcom/kyant/backdrop/**->**(**)**
 
-# ── Startup: navigation host + bottom bar ──
-HSPLcom/curio/app/navigation/CurioNavHost;->**(**)**
-HSPLcom/curio/app/ui/components/CurioBottomNav;
-HSPLcom/curio/app/ui/components/liquidglass/**;
-HSPLcom/kyant/backdrop/**;
+# ── Hot UI: main tab screens, picker/reveal, shared components ──
+HPLcom/curio/app/features/home/**->**(**)**
+HPLcom/curio/app/features/spin/**->**(**)**
+HPLcom/curio/app/features/cabinet/**->**(**)**
+HPLcom/curio/app/features/profile/**->**(**)**
+HPLcom/curio/app/features/picker/**->**(**)**
+HPLcom/curio/app/features/reveal/**->**(**)**
+HPLcom/curio/app/features/settings/**->**(**)**
+HPLcom/curio/app/features/capture/**->**(**)**
+HPLcom/curio/app/features/detail/**->**(**)**
+HPLcom/curio/app/ui/components/**->**(**)**
+HPLcom/curio/app/ui/theme/**->**(**)**
+HPLcom/curio/app/ui/pet/**->**(**)**
 
-# ── Hot UI: main tab screens (Home / Spin / Cabinet / Profile) ──
-HPLcom/curio/app/features/home/**;
-HPLcom/curio/app/features/spin/**;
-HPLcom/curio/app/features/cabinet/**;
-HPLcom/curio/app/features/profile/**;
-HPLcom/curio/app/ui/components/**;
-HPLcom/curio/app/ui/theme/**;
-HPLcom/curio/app/ui/pet/**;
-
-# ── Hot UI: the giant composables the log flagged (share card editor,
-#    category picker) — AOT every method so no per-method JIT spike ──
-HPLcom/curio/app/ui/components/TopicShare**;->**(**)**
-HPLcom/curio/app/features/picker/NewCategoryPicker**;->**(**)**
-HPLcom/curio/app/features/reveal/**;
-HPLcom/curio/app/features/picker/**;
-HPLcom/curio/app/features/capture/**;
-
-# ── Hot libraries (Room runtime, Gson, OkHttp for cover fetches, Coil) ──
-HPLandroidx/room/**;
-HPLcom/google/gson/**;
-HPLokhttp3/**;
-HPLcoil/**;
+# ── Hot libraries in use (Room runtime, Gson, OkHttp for cover fetches,
+#    Coil for cover images, kyant0 backdrop glass) ──
+HPLandroidx/room/**->**(**)**
+HPLcom/google/gson/**->**(**)**
+HPLokhttp3/**->**(**)**
+HPLcoil/**->**(**)**

@@ -385,7 +385,7 @@ private fun DictationDialog(
                             error != null -> error
                             listening -> "Listening… speak now"
                             partial.isBlank() -> "Nothing heard yet"
-                            else -> "Ready — review the preview below"
+                            else -> "Ready · review the preview below"
                         },
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                         color = if (error != null) MaterialTheme.colorScheme.error

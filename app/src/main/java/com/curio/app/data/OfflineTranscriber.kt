@@ -78,7 +78,7 @@ object VoskModels {
         Info(
             id = "vosk-model-small-en-us-0.15",
             displayName = "Small · English (US)",
-            langLabel = "English — best accuracy on clear US speech",
+            langLabel = "English · most accurate on clear US speech",
             sizeLabel = "~40 MB",
             sizeBytes = 40_600_000L,
             url = "https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip",

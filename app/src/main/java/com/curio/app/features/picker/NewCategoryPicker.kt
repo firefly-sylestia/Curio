@@ -281,7 +281,7 @@ fun NewCategoryPickerSheet(
                 color = MaterialTheme.colorScheme.onBackground
             )
             Text(
-                text = if (pagerState.currentPage == 0) "Curio · Knowledge · Mix — swipe for picks"
+                text = if (pagerState.currentPage == 0) "Curio · Knowledge · Mix. Swipe for picks"
                        else "Pins, mixes & a surprise",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -891,8 +891,8 @@ private fun ClassicPickerPage(
             text = when {
                 mode == PickerMode.MIX && multiSelectMode -> "Tap to toggle lanes"
                 mode == PickerMode.MIX -> "Tap opens · hold to start a mix"
-                mode == PickerMode.CURIO -> "A relaxed, culture-first deck — tap any lane to explore"
-                else -> "Dig into knowledge — tap any lane to explore"
+                mode == PickerMode.CURIO -> "A relaxed, culture-first deck. Tap any lane to explore."
+                else -> "Dig into knowledge. Tap any lane to explore."
             },
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),

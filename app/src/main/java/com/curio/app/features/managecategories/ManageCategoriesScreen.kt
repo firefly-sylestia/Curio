@@ -393,7 +393,7 @@ private fun CategoryRow(
             }
             CurioIcon(
                 name = CurioIcons.DragHandle,
-                contentDescription = if (reorderEnabled) "Drag to reorder" else "Locked — reach the lane-order level",
+                contentDescription = if (reorderEnabled) "Drag to reorder" else "Locked · reach the lane-order level",
                 tint = if (isDragging) {
                     MaterialTheme.colorScheme.primary
                 } else {

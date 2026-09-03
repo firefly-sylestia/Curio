@@ -174,7 +174,7 @@ fun RecycleBinScreen(navController: NavController) {
                     CurioEmptyState(
                         glyph = CurioIcons.Restore,
                         headline = "Recycle bin is empty",
-                        subtext = "Deleted captures wait here so you can bring them back — nothing is lost yet.",
+                        subtext = "Deleted captures wait here so you can bring them back. Nothing is lost yet.",
                         tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
                         modifier = Modifier.padding(top = 8.dp)
                     )

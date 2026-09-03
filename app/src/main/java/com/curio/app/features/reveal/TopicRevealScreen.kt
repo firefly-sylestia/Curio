@@ -1166,8 +1166,8 @@ fun TopicRevealScreen(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        "The live explore timer — the shade notification with " +
-                        "the progress bar and pause/cancel buttons — needs " +
+                        "The live explore timer (the shade notification with " +
+                        "the progress bar and pause/cancel buttons) needs " +
                         "notification permission, which was turned off for " +
                         "Curio earlier."
                     )

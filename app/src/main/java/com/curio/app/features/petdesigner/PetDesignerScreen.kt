@@ -421,7 +421,7 @@ fun PetDesignerScreen(navController: NavController) {
             pushUndo()
             design = auto
             AppPreferences.setPetDesign(context, auto.toText())
-            toast = "Auto-imported — full pet built, bob added & saved"
+            toast = "Auto-imported · full pet built, bob added and saved"
         } else {
             importReview = buildImportReview(pixels, grid, design, target)
         }
@@ -592,14 +592,14 @@ fun PetDesignerScreen(navController: NavController) {
     fun saveAsNewPet() {
         val slot = customPets.indexOfFirst { it == null }
         if (slot == -1) {
-            toast = "Both custom pet slots are full — delete one to make room"
+            toast = "Both custom pet slots are full. Delete one to make room."
             return
         }
         val saved = design.withCustomPetDefaults()
         AppPreferences.setCustomPet(context, slot, saved.toText())
         AppPreferences.setPetDesign(context, saved.toText())
         activeCustomSlot = slot
-        toast = "Saved as Custom ${slot + 1} — it's now your pet"
+        toast = "Saved as Custom ${slot + 1}. It's now your pet."
     }
 
     // v8.56 — delete one custom-pet slot (if it was active, back to Curie).
@@ -762,7 +762,7 @@ fun PetDesignerScreen(navController: NavController) {
 
             // ── Live preview (Pets page) ─────────────────────────────
             item {
-                if (page == PetDesignerPage.PETS) SectionCard("Live preview", if (design.isCustom) "Your custom look" else "The default look — make it yours!") {
+                if (page == PetDesignerPage.PETS) SectionCard("Live preview", if (design.isCustom) "Your custom look" else "The default look. Make it yours!") {
                     CurioPetSprite(
                         stage = CurioPet.currentStage(),
                         mood = previewMood,
@@ -813,7 +813,7 @@ fun PetDesignerScreen(navController: NavController) {
                                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
                             )
                             Text(
-                                "Convert between sizes — pixels keep their palette",
+                                "Convert between sizes. Pixels keep their palette.",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -1061,7 +1061,7 @@ fun PetDesignerScreen(navController: NavController) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text("Pet size", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
                                     Spacer(Modifier.height(4.dp))
-                                    Text("Grow the whole pet — tap to expand", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text("Grow the whole pet. Tap to expand.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                                 CurioIcon(if (sizeExpanded) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown, null, size = 24.dp)
                             }
@@ -1101,7 +1101,7 @@ fun PetDesignerScreen(navController: NavController) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text("Eyes", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold))
                                     Spacer(Modifier.height(4.dp))
-                                    Text("Eye size and placement — tap to expand", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text("Eye size and placement. Tap to expand.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                                 CurioIcon(if (eyesExpanded) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown, null, size = 24.dp)
                             }
@@ -1228,9 +1228,9 @@ fun PetDesignerScreen(navController: NavController) {
                     // card always shows the latest look.
                     if (slot != null) {
                         AppPreferences.setCustomPet(context, slot, saved.toText())
-                        toast = "Saved — Custom ${slot + 1} updated"
+                        toast = "Saved · Custom ${slot + 1} updated"
                     } else {
-                        toast = "Saved — Curie wears it everywhere"
+                        toast = "Saved · Curie wears it everywhere"
                     }
                 } else {
                     AppPreferences.clearPetDesign(context)
@@ -1376,9 +1376,9 @@ fun PetDesignerScreen(navController: NavController) {
                                         pushUndo()
                         design = applyImport(review, design)
                         toast = if (review.touched.isNotEmpty()) {
-                            "Imported — ${review.touched.size} custom color(s) added"
+                            "Imported · ${review.touched.size} custom color(s) added"
                         } else {
-                            "Imported PNG — snapped to nearest palette colors"
+                            "Imported PNG · snapped to nearest palette colors"
                         }
                         importReview = null
                     },
@@ -1838,13 +1838,13 @@ private fun ImportMenuDialog(
             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
         )
         Text(
-            "Bring in a design as an image or as text — or copy the current design to the clipboard.",
+            "Bring in a design as an image or as text, or copy the current design to the clipboard.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(Modifier.height(4.dp))
         ImportMenuOption(CurioIcons.Image, "Import PNG", "Sample image colors before applying") { onPng() }
-        ImportMenuOption(CurioIcons.AutoAwesome, "Auto-import image", "Map colors, build the full pet, add a bob animation and save — one tap") { onAutoPng() }
+        ImportMenuOption(CurioIcons.AutoAwesome, "Auto-import image", "Map colors, build the full pet, add a bob animation, and save in one tap") { onAutoPng() }
         ImportMenuOption(CurioIcons.FormatText, "Paste design text", "Copy from clipboard, edit by hand") { onText() }
         ImportMenuOption(CurioIcons.Share, "Copy design text", "Share the text format with a friend") { onCopy() }
         Spacer(Modifier.height(4.dp))
@@ -2717,7 +2717,7 @@ private fun ColorEditorCard(
         }
         Spacer(Modifier.height(14.dp))
         Text(
-            "Hue — drag the strip",
+            "Hue · drag the strip",
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -3117,8 +3117,8 @@ private fun AnimationTimelineEditor(
     }
     SectionCard(
         "${base.name} timeline",
-        if (design.animations[animationId] == null) "Draw each frame's pose below — untouched frames keep the base design"
-        else "Custom frames — Save pet keeps them"
+        if (design.animations[animationId] == null) "Draw each frame's pose below. Untouched frames keep the base design."
+        else "Custom frames · Save pet keeps them"
     ) {
         // v8.52 — the live preview fills the same width as the drawing grid
         // below ("drawing size"), so the animation plays at the true scale.
@@ -3239,12 +3239,12 @@ private fun AnimationTimelineEditor(
         Text(
             when (frameGrid) {
                     "eyes" -> if (base.mood == "SLEEPY") {
-                        "Paint this frame's eyes — sleepy (curled) frames keep their own closed-eye look, so the layer applies once the pet stands."
+                        "Paint this frame's eyes. Sleepy (curled) frames keep their own closed-eye look, so the layer applies once the pet stands."
                     } else {
-                        "Paint this frame's eyes — your pixels replace the mood's procedural eyes while this frame plays, so the eyes can blink or glance frame by frame."
+                        "Paint this frame's eyes. Your pixels replace the mood's procedural eyes while this frame plays, so the eyes can blink or glance frame by frame."
                     }
                     "curled" -> "Paint this ${base.name} frame's asleep pose."
-                    else -> "Paint this ${base.name} frame's pose — drawn frames override the base design while the animation plays. Blank cells stay transparent."
+                    else -> "Paint this ${base.name} frame's pose. Drawn frames override the base design while the animation plays. Blank cells stay transparent."
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -3307,7 +3307,7 @@ private fun AnimationTimelineEditor(
             // v8.52 — per-frame eyes: a fixed 16×16 grid over the mood's
             // procedural eye art as a locked blueprint for easy alignment.
             Text(
-                "The eyes are authored on a fixed 16×16 grid — the blueprint behind shows the mood's procedural eyes, and the sprite above previews your drawing live.",
+                "The eyes are authored on a fixed 16×16 grid. The blueprint behind shows the mood's procedural eyes, and the sprite above previews your drawing live.",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -3677,7 +3677,7 @@ private fun DrawPickerDialog(
                 Spacer(Modifier.height(6.dp))
                 if (design.customActions.isEmpty()) {
                     Text(
-                        "None yet — create one below. Custom actions fire on their own trigger (tap, save, a set hour…).",
+                        "None yet. Create one below. Custom actions fire on their own trigger (tap, save, a set hour…).",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -4410,7 +4410,7 @@ private fun CanvasStatus(activeTool: PaintTool?) {
                 )
                 Text(
                     if (editing) "Tap the tool again to release it and scroll"
-                    else "Pick Brush, Fill, Clear, Erase, or Pick below — the canvas stays scroll-safe until then",
+                    else "Pick Brush, Fill, Clear, Erase, or Pick below. The canvas stays scroll-safe until then.",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -4512,8 +4512,8 @@ private fun toolHelper(tool: PaintTool?): String = when (tool) {
     PaintTool.FILL -> "Tap a region to fill it with the selected color."
     PaintTool.ERASER -> "Drag to erase pixels back to empty."
     PaintTool.EYEDROPPER -> "Tap a pixel to pick its color, then paint with it."
-    PaintTool.CLEAR -> "Tap a region to fill it with transparency — removes a solid background."
-    null -> "Pick a tool to start editing — with no tool, the canvas scrolls safely."
+    PaintTool.CLEAR -> "Tap a region to fill it with transparency and remove a solid background."
+    null -> "Pick a tool to start editing. With no tool, the canvas scrolls safely."
 }
 
 /** Quick body-color access docked beside the canvas; the full palette stays in Colors. */
@@ -5148,7 +5148,7 @@ private fun CustomActionEditor(
 ) {
     SectionCard(
         "Custom action",
-        "A behavior you made — it fires on its own trigger, wherever your pet is"
+        "A behavior you made. It fires on its own trigger, wherever your pet is."
     ) {
         Text(
             "Action name",
@@ -5222,7 +5222,7 @@ private fun CustomActionEditor(
                 }
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "Runs when the clock hits the chosen hour — a morning hello or a goodnight.",
+                    "Runs when the clock hits the chosen hour, as a morning hello or a goodnight.",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -5244,7 +5244,7 @@ private fun CustomActionEditor(
                 }
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "Runs when you have not touched the pet for a while — a gentle nudge.",
+                    "Runs when you have not touched the pet for a while, as a gentle nudge.",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -5258,7 +5258,7 @@ private fun CustomActionEditor(
         )
         Spacer(Modifier.height(4.dp))
         Text(
-            "One line per row — the pet says one of these when the action fires. Leave empty to stay quiet and just do the move.",
+            "One line per row. The pet says one of these when the action fires. Leave empty to stay quiet and just do the move.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -5468,7 +5468,7 @@ private fun EditorPickPrompt(onOpenPicker: () -> Unit) {
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                "Pick something and it opens right here — one editor at a time.",
+                "Pick something and it opens right here. One editor at a time.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -5776,9 +5776,9 @@ private fun EvolutionChoiceDialog(
     context: android.content.Context
 ) {
     val paths = listOf(
-        EvolutionChoice(CurioPet.EvoPath.FIRE, "Blaze", "🔥", "A fiery spirit — warm, passionate, and bold. Flames dance in its eyes."),
-        EvolutionChoice(CurioPet.EvoPath.WATER, "Tide", "🌊", "A calm current — fluid, deep, and wise. Ripples follow its every move."),
-        EvolutionChoice(CurioPet.EvoPath.NATURE, "Bloom", "🌿", "A gentle bloom — vibrant, nurturing, and free. Leaves rustle where it walks.")
+        EvolutionChoice(CurioPet.EvoPath.FIRE, "Blaze", "🔥", "A fiery spirit: warm, passionate, and bold. Flames dance in its eyes."),
+        EvolutionChoice(CurioPet.EvoPath.WATER, "Tide", "🌊", "A calm current: fluid, deep, and wise. Ripples follow its every move."),
+        EvolutionChoice(CurioPet.EvoPath.NATURE, "Bloom", "🌿", "A gentle bloom: vibrant, nurturing, and free. Leaves rustle where it walks.")
     )
     var selected by remember { mutableStateOf<CurioPet.EvoPath?>(null) }
     Column(

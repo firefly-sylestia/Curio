@@ -234,7 +234,7 @@ fun UpdatesScreen(navController: NavController) {
     }
     val statusSubline = when {
         checkState == UpdateCheckUi.GithubAvailable -> "The latest build is one tap away"
-        checkState == UpdateCheckUi.Failed -> "You may be offline — tap Check to retry"
+        checkState == UpdateCheckUi.Failed -> "You may be offline · tap Check to retry"
         checkState == UpdateCheckUi.Checking -> "Looking for the newest release"
         else -> "v${BuildConfig.VERSION_NAME} · build ${BuildConfig.VERSION_CODE}"
     }
@@ -423,9 +423,9 @@ fun UpdatesScreen(navController: NavController) {
                                             UpdateDownloadUi.Failed, UpdateDownloadUi.InstallFailed -> {
                                                 Text(
                                                     if (downloadState == UpdateDownloadUi.Failed)
-                                                        "Download didn't finish — tap to retry"
+                                                        "Download didn't finish · tap to retry"
                                                     else
-                                                        "Couldn't open the installer — tap to retry",
+                                                        "Couldn't open the installer · tap to retry",
                                                     style = MaterialTheme.typography.labelMedium.copy(
                                                         fontWeight = FontWeight.SemiBold,
                                                         color = MaterialTheme.colorScheme.error
@@ -459,7 +459,7 @@ fun UpdatesScreen(navController: NavController) {
                                     Text("Update checker", style = MaterialTheme.typography.bodyLarge)
                                     Text(
                                         text = if (checkerEnabled) "Checks for new versions on app open"
-                                        else "Off — check manually to save data",
+                                        else "Off · check manually to save data",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         maxLines = 1,

@@ -480,7 +480,7 @@ private fun MinimizedPill(
     ) {
         CurioIcon(
             name = if (paused) CurioIcons.Pause else category.iconGlyph,
-            contentDescription = if (paused) "Paused — tap for timer"
+            contentDescription = if (paused) "Paused · tap for timer"
                                 else "Explore timer",
             tint = ink,
             size = 22.dp

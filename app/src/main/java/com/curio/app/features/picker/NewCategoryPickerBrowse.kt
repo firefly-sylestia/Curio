@@ -438,7 +438,7 @@ private fun MixesTabContent(
         if (mixes.isEmpty()) {
             item(key = "empty") {
                 Text(
-                    "No mixes yet — tap Create a mix to build your first one.",
+                    "No mixes yet. Tap Create a mix to build your first one.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.9f),
                     modifier = Modifier.padding(vertical = 12.dp)
@@ -486,7 +486,7 @@ private fun PinsTabContent(
         if (pinnedCats.isEmpty()) {
             item(key = "empty") {
                 Text(
-                    "Hold a category in Browse to pin it here — the pinned row also sits at the top of the quick sheet.",
+                    "Hold a category in Browse to pin it here. The pinned row also sits at the top of the quick sheet.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.9f),
                     modifier = Modifier.padding(vertical = 12.dp)

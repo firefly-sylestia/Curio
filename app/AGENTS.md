@@ -525,7 +525,37 @@ app/src/main/java/com/curio/app/
   to the library — a record-side throttle needs a fork or upstream knob;
   the idle frameRate churn in the log traces to always-animating pet /
   constellation layers re-invalidating the page, which re-triggers the
-  capture.
+  capture. (3) **POST-CI FIX (v332)**: the first draft of the profile put
+  flags on CLASS rules (`HSPLcom/...;`), which profgen rejects ("Class
+  rules don't support flags") and broke `expandReleaseArtProfileWildcards`
+  on CI. HRF truth: flags H/S/P are only valid on METHOD rules
+  (`HSPLcom/foo/Bar;->**(**)**: the L is the descriptor prefix), class
+  rules take none (`Lcom/foo/Bar;`), and package-wide AOT is the wildcard
+  method rule `<pkg>/**->**(**)**`. The file was rewritten to that shape.
+- **v332 — share-card editor: content toggle + Customise gating; app-wide
+  copy polish (em dashes → middot/prose).** (1) **Content toggle pill**: the
+  edit-mode bottom bar (where Save/Share/Text sit) now shows ONE toggle pill
+  that labels the card's current content (e.g. "Quick fact", "No fact",
+  "Custom fact", a source, star rating, reading progress…) and, when
+  tapped, OPENS the content options (Quick fact / No fact / saved sources /
+  + Custom fact) in the SAME "source" tool panel the toolbar's Content tool
+  opens — they're back where they were before v330 (v330 had spread the
+  content pills directly across the bottom bar, which the user rejected).
+  The toggle highlights while the panel is open and toggles it shut.
+  (2) **Customise pill gated**: the floating Customise button now renders
+  ONLY when `!editMode` (it previously hovered over the card mid-edit; the
+  bottom bar owns Reset/Done/the content toggle while editing). (3)
+  **Copy pass**: rephrased ~160 user-facing strings app-wide to drop the
+  em-dash tic and read in the app's premium register — card meta rows and
+  `metaSeparator`s join with " · " (was " — "), quote attributions and
+  footers lose their leading dash ("— Author" → "Author"; "via Curio —
+  Stay curious" → "via Curio · Stay curious"; "Name — Curio" → "Name ·
+  Curio"; the stray "~ Stay Curious" is gone), tool headings read
+  "$selName font"/"$selName format", full-sentence hints/empty states use
+  period- or semicolon-joined prose instead of dashes, and the share-card
+  editor hint copy ("Tap a thing to select · swipe for another design")
+  is consistent. Scope: UI strings only (never JSON content, chapter/page
+  ranges, name-qualifier parsing, or log/diagnostic text).
 - **v326 — signature redesign campaign BEGINS: Books.** The
   per-category `signatureDesign` rework (one category per turn, commit but
   DON'T push — user reviews each before the next) starts with BOOKS, now a

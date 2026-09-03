@@ -72,7 +72,7 @@ fun CurioTwoStepDeleteDialog(
             title = { Text("Delete $title?", fontWeight = FontWeight.Bold) },
             text = {
                 Text(
-                    "This is the final step — $title won't appear in your Cabinet anymore.\n\n" +
+                    "This is the final step, after which $title will no longer appear in your Cabinet.\n\n" +
                         "It stays in the Recycle bin until you empty it, so nothing is gone for good yet."
                 )
             },

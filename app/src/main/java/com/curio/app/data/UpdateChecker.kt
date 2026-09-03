@@ -313,10 +313,10 @@ object UpdateChecker {
         val notification = NotificationCompat.Builder(appContext, UPDATE_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle("Curio ${release.tagName} is available")
-            .setContentText("A newer version is ready — open Curio and update from the Updates page.")
+            .setContentText("A newer version is ready. Open Curio and update from the Updates page.")
             .setStyle(
                 NotificationCompat.BigTextStyle()
-                    .bigText("A newer version is ready — open Curio and update from the Updates page.")
+                    .bigText("A newer version is ready. Open Curio and update from the Updates page.")
             )
             .setContentIntent(contentIntent)
             .setAutoCancel(true)

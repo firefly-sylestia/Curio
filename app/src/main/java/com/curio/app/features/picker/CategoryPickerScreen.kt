@@ -443,8 +443,8 @@ fun CategoryPickerContent(
             text = when {
                 mode == PickerMode.MIX && multiSelectMode -> "Tap to toggle decks"
                 mode == PickerMode.MIX -> "Tap opens · hold to mix"
-                mode == PickerMode.CURIO -> "A relaxed, culture-first deck — tap any lane to explore"
-                else -> "Dig into knowledge — tap any lane to explore"
+                mode == PickerMode.CURIO -> "A relaxed, culture-first deck. Tap any lane to explore."
+                else -> "Dig into knowledge. Tap any lane to explore."
             },
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
