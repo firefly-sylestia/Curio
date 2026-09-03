@@ -574,6 +574,18 @@ object TopicJsonLoader {
                 )
             }
         } else null
+        // Albums only: per-track list (number/title/duration).
+        val tracksArr = obj.optJSONArray("tracks")
+        val tracks: List<AlbumTrack>? = if (tracksArr != null && tracksArr.length() > 0) {
+            List(tracksArr.length()) { i ->
+                val tr = tracksArr.getJSONObject(i)
+                AlbumTrack(
+                    number = tr.optInt("number", i + 1),
+                    title = tr.optString("title", "Track ${i + 1}"),
+                    duration = tr.optString("duration", "")
+                )
+            }
+        } else null
         return CurioTopic(
             id            = id,
             categoryId    = categoryId,
@@ -590,7 +602,8 @@ object TopicJsonLoader {
             altPageCount  = altPageCount,
             altPageLabel  = altPageLabel,
             synopsis      = synopsis,
-            chapters      = chapters
+            chapters      = chapters,
+            tracks        = tracks
         )
     }
 }

@@ -1,77 +1,76 @@
 # Prompt.md — current request log
 
-## Request: v332 — share-card editor content toggle + Customise gating, app-wide copy polish, CI baseline-profile fix
+## Request: album track lists on Topic Reveal + sheet restyle + keyless album-art fetch
 
-User's follow-up on the share-card editor (commit 9469b675/58e7efe4 batch):
-"i didn't ask you to place the content quick fact / custom fact options at that
-place, i asked you to place the toggle and let it open where it was opening
-before; the Customise button now just stays like that; there are a lot of em
-dashes around the app (not the JSON) — in the app hints etc — rephrase them in
-proper premium English, fix lowercase hint starts." An ask_user clarified:
-toggle pill in the bottom bar that opens the content panel where it used to
-open, whole-app UI copy pass with elegant "old English" register.
+User flow across the album workstream: albums.json gained real per-track lists
+(number/title/duration, 999/1000 albums, ~12,375 tracks — from the earlier
+track-extraction session), then the reveal needed an ALBUMS info section that
+"mirrors books exactly", plus two asks answered via ask_user:
+- Sheet background: **category-tinted wash + top hairline** (both the book
+  notes sheet and the new album track-list sheet looked like a foreign
+  neutral panel over the category-washed reveal page).
+- Album art: **iTunes Search API first, MusicBrainz + Cover Art Archive
+  fallback** — both keyless; **reveal/sheet on-the-fly fetch only** (no
+  Settings bulk hub like books).
 
-Also during the turn, CI failed on the v331 baseline profile
-(`expandReleaseArtProfileWildcards`: "Class rules don't support flags, but
-'HSP' were specified" — `HSPLcom/curio/app/MainActivity;`): class rules in HRF
-take NO flags (flags H/S/P are method-rule-only; "L" is the DEX descriptor
-prefix). Profile rewritten to valid shape.
+## Implementation
 
-Completed:
+### Data layer — `tracks` threaded end to end (Room persisted)
+- `CurioTopic.kt` — new `AlbumTrack(number, title, duration)` model +
+  `CurioTopic.tracks: List<AlbumTrack>?` (albums only, null default).
+- `TopicJsonLoader.kt` — parses the `tracks` array (optInt/optString with
+  defaults, empty array → null).
+- `TopicEntity.kt` / `CachedTopicEntity.kt` — `tracks` TEXT column (JSON
+  string), Gson round-trip both directions, mirrors chapters pattern.
+- `CurioDatabase.kt` — version 11 → 12 + `MIGRATION_11_12` (ALTER TABLE adds
+  `tracks TEXT NOT NULL DEFAULT ''` to `topics` and `cached_topics`).
+- `TopicDao.kt` — `backfillContent` + `updateContent` gained the tracks arg.
+- `TopicRepository.kt` — catalog sync backfills tracks; reveal hydration now
+  also triggers for ALBUMS rows whose tracks are blank.
 
-1. **Content toggle pill** (`TopicShareCard.kt`, `TopicShareSheet`): while
-   editing, the bottom bar (where Save/Share/Text sit) shows ONE pill labelled
-   with the card's current content (`activeSource.label`) + arrow icon. Tapping
-   it opens/closes the "source" tool panel — the SAME panel the toolbar's
-   Content tool opens — which again holds the content source pills (Quick fact
-   / No fact / saved sources / + Custom fact) restored to where they were
-   before v330. Tapping Done still returns Save/Share/Text.
-2. **Customise pill gated**: the floating Customise button now renders only
-   when `!editMode`; mid-edit the bottom bar owns Reset/Done/content toggle.
-3. **Copy pass** (~159 literal replacements, 30 files): em dashes rephrased
-   app-wide in user-facing strings —
-   - card meta rows / `metaSeparator` join with " · " (was " — "),
-   - quote attributions lose the leading dash ("— $quoteAuthor" → author
-     alone), footers unify to "· Stay curious" / "· via Curio",
-     "$sharerName — Curio" → "· Curio", stray "~ Stay Curious" removed,
-   - tool headings "$selName font" / "$selName format", "Tone · level
-     unlocks", adjust hint split into two sentences,
-   - full-sentence hints/empty states (pet designer, stats, settings,
-     experiments, picker, updates, reveal dialog) rephrased into period- or
-     semicolon-joined prose; short status pairs use the middot.
-   Deliberately NOT touched: JSON/topic content, chapter/page ranges
-   ("Books IV–VIII", "pp. 12–14"), name-qualifier parsing (" — " match
-   delimiters), the exported pet-design format headers, crash/log text, and
-   the waveform time range. (Missing-at-first, then added: UpdateChecker
-   notification copy, GlassWidgetLab auto-detect copy.)
-4. **Baseline profile HRF fix** (`app/src/main/baseline-prof.txt`): rewritten
-   to valid rules — class-only line `Lcom/curio/app/MainActivity;` (no flags),
-   single classes AOT'd via `HSPLcom/.../Class;->**(**)**:`, package-wide via
-   `<pkg>/**->**(**)**`, hot libs via their packages. Header documents the
-   syntax lesson. This fixes the release-build CI failure.
+### Keyless album-art resolver — `features/reveal/AlbumArtFetch.kt` (new)
+- iTunes Search API (`entity=album`, term = album + artist): picks the best
+  title/artist match, upscales `100x100bb` → `600x600bb`.
+- Fallback: MusicBrainz release-group search (proper UA, 1 req/s politeness)
+  → Cover Art Archive `/release-group/{id}/front-500` status probe.
+- In-process memo keyed `album|artist` ("" = known miss) so reopens never
+  re-query; Coil's disk cache holds the bytes.
+
+### Reveal UI (`TopicRevealScreen.kt`)
+- `AlbumInfoSection` (below the hero for ALBUMS w/ tracks, gated on the same
+  post-morph `contentUiReady` delay the book section uses): TRACKLIST card
+  (artwork + artist + first-5 track preview + runtime/count + "View the full
+  track list →") plus a scrollable track-chip row for jumps.
+- `AlbumNotesSheet` — full-height ModalBottomSheet mirroring `BookNotesSheet`:
+  artwork + album/artist header, runtime line, LazyColumn of every track
+  (number/title/duration) with the opened track scrolled to + highlighted.
+- `AlbumCoverPoster` — on-the-fly resolve via `AlbumArtFetch` with a tinted
+  Album-glyph placeholder tile while loading / on miss.
+- `NotesSheetTopHairline` shared by both notes sheets.
+
+### Sheet restyle — `CategoryInk.kt`
+- `CurioCategory.notesSheetContainerColor()`: category-tinted elevated wash
+  (dark = near-black hue at 0.27 lightness, light = airy accent pastel) with
+  Material theme + the manual tint toggle falling back to the neutral dialog
+  container. `BookNotesSheet` + `AlbumNotesSheet` both use it, plus the top
+  hairline. (Renamed `bookUiReady` → `contentUiReady` since albums use it.)
+
+### Changelog
+- `fastlane/.../changelogs/20260921.txt` (current versionCode) — two ADD
+  bullets added at the top: Albums TRACKLIST on reveal + keyless art fetch,
+  and the category-tinted notes sheets + hairline.
 
 ## Verification
+- Balance-checked every touched Kotlin file vs HEAD (brace/paren deltas all
+  zero after stripping strings/comments).
+- Albums JSON spot-checked: all 1000 have tracks arrays; every track carries
+  number/title/duration (Gson-safe for the non-null String field).
+- Both keyless endpoints live-probed with curl before coding (iTunes returns
+  resizable artwork; MusicBrainz + CAA front-500 307s to the image).
+- No Gradle locally (project rule) — CI compiles on push.
 
-- All modified files re-lexed (string literals balanced, no unterminated
-  strings); `git diff --check` clean.
-- Audit of remaining dashes in code literals shows only intentional ones
-  (ranges, parsers, log text, format headers).
-- CI validates the profile parse + compile — Gradle not run locally per
-  project rules.
-
-## Follow-up — hold-menu labels shortened
-
-User: the new tap-and-hold menu is good but "sometimes its text is too long".
-Fixed in `CategoryOptionPill` / `MixOptionPill` (NewCategoryPicker.kt):
-labels are now short verbs — Pin/Unpin, Spin (was "Spin ${displayName}",
-e.g. "Spin Artificial Intelligence"), Remove (was "Remove from Continue
-exploring"), Edit, Delete (were "Edit/Delete $name" with long mix names).
-The menu is anchored on the row/card the user held, so the subject is
-visible and the card no longer truncates. Also removed the now-unused `name`
-param from `MixOptionPill` (both call sites updated).
-
-## Notes / follow-ups
-
-- The v330 changelog bullet describing content pills directly in the bottom
-  bar is superseded by the new toggle bullet (both remain in the store
-  changelog per its per-commit append rule).
+## Follow-ups
+- Albums still carry no authored `imageUrl`; if authored art lands later, the
+  poster should prefer `topic.imageUrl` before the resolver (cheap add).
+- If per-track detail (lyrics / "genius link") is wanted later, that's a JSON
+  schema addition (new field per track) + a row action in AlbumNotesSheet.

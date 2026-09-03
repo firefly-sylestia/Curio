@@ -45,6 +45,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -96,6 +97,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
@@ -121,6 +123,7 @@ import com.curio.app.data.CurioQuests
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.data.CurioCategory
+import com.curio.app.data.AlbumTrack
 import com.curio.app.data.BookChapter
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreReminderScheduler
@@ -174,6 +177,7 @@ import com.curio.app.ui.theme.brandRes
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
+import com.curio.app.ui.theme.notesSheetContainerColor
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
@@ -285,12 +289,15 @@ fun TopicRevealScreen(
     }
     var showSynopsisDialog by rememberSaveable { mutableStateOf(false) }
     var selectedChapter by remember { mutableStateOf<BookChapter?>(null) }
-    // v315 — the book section composes only AFTER the shared-element morph
-    // settles (~380ms), so heavy content (poster Coil decode, chapter LazyRow)
-    // never competes with the card expansion frames — the morph stays smooth
-    // on book topics with synopsis + chapters.
-    var bookUiReady by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { delay(380); bookUiReady = true }
+    var showAlbumSheet by rememberSaveable { mutableStateOf(false) }
+    var selectedAlbumTrack by remember { mutableStateOf<AlbumTrack?>(null) }
+    // v315 — the book/album sections compose only AFTER the shared-element
+    // morph settles (~380ms), so heavy content (poster Coil decode, chapter
+    // LazyRow, album track list) never competes with the card expansion
+    // frames — the morph stays smooth on topics with synopsis + chapters +
+    // album track lists.
+    var contentUiReady by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { delay(380); contentUiReady = true }
     LaunchedEffect(topicName, cat.id) {
         // Init is a no-op once Room is populated; skip the mutex wait entirely
         // on warm starts so the resolution starts immediately.
@@ -886,12 +893,12 @@ fun TopicRevealScreen(
 
                 // ── 2.55 Book info section (books only) ──────────────────
                 // Shows book poster, synopsis, and chapter chips for BOOKS
-                // topics. v315 — gated on [bookUiReady] so it composes only
+                // topics. v315 — gated on [contentUiReady] so it composes only
                 // AFTER the shared-element morph settles; the poster Coil
                 // decode + chapter LazyRow otherwise compete with the card
                 // expansion and stall its frames.
                 val bookTopic = resolved
-                if (bookTopic != null && bookUiReady && bookTopic.categoryId == CategoryId.BOOKS &&
+                if (bookTopic != null && contentUiReady && bookTopic.categoryId == CategoryId.BOOKS &&
                     (bookTopic.synopsis != null || !bookTopic.chapters.isNullOrEmpty())) {
                     RevealContentEntrance(delayMillis = 60) {
                         BookInfoSection(
@@ -899,6 +906,27 @@ fun TopicRevealScreen(
                             topic = bookTopic,
                             onSynopsisClick = { showSynopsisDialog = true },
                             onChapterClick = { selectedChapter = it },
+                            modifier = Modifier.padding(top = if (hasTags) 16.dp else progressFloatGap)
+                        )
+                    }
+                }
+
+                // ── 2.56 Album track-list section (albums only) ─────────
+                // Mirrors the book section: an album poster + track-list card
+                // (with a preview + "View the full track list") plus a track
+                // chip row that jumps straight into the sheet at a track.
+                // Albums carry `tracks` (number/title/duration) in the JSON;
+                // gated on [contentUiReady] like the book section so the
+                // poster lookup never competes with the card morph.
+                val albumTopic = resolved
+                if (albumTopic != null && contentUiReady && albumTopic.categoryId == CategoryId.ALBUMS &&
+                    !albumTopic.tracks.isNullOrEmpty()) {
+                    RevealContentEntrance(delayMillis = 60) {
+                        AlbumInfoSection(
+                            cat = cat,
+                            topic = albumTopic,
+                            onOpenSheet = { showAlbumSheet = true },
+                            onTrackClick = { selectedAlbumTrack = it },
                             modifier = Modifier.padding(top = if (hasTags) 16.dp else progressFloatGap)
                         )
                     }
@@ -1065,6 +1093,27 @@ fun TopicRevealScreen(
             onDismiss = {
                 showSynopsisDialog = false
                 selectedChapter = null
+            }
+        )
+    }
+
+    // v332 — the album track-list UI mirrors the book notes sheet: one
+    // full-height ModalBottomSheet hosting the album's complete track list
+    // (number/title/duration) with the artwork up top. A track chip on the
+    // reveal section opens it scrolled to that track.
+    val albumSheetTopic = resolved
+    if (albumSheetTopic != null && albumSheetTopic.categoryId == CategoryId.ALBUMS &&
+        (showAlbumSheet || selectedAlbumTrack != null) &&
+        !albumSheetTopic.tracks.isNullOrEmpty()
+    ) {
+        AlbumNotesSheet(
+            cat = cat,
+            topic = albumSheetTopic,
+            track = selectedAlbumTrack,
+            onSelectTrack = { selectedAlbumTrack = it },
+            onDismiss = {
+                showAlbumSheet = false
+                selectedAlbumTrack = null
             }
         )
     }
@@ -2741,7 +2790,10 @@ private fun BookNotesSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = curioDialogContainerColor(),
+        // v332 — the notes sheets wear the CATEGORY-TINTED wash (same hue
+        // family as the reveal page + cards) instead of the neutral dialog
+        // container, so the sheet reads as part of the category story.
+        containerColor = cat.notesSheetContainerColor(),
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
@@ -2755,6 +2807,10 @@ private fun BookNotesSheet(
                 .fillMaxHeight(0.92f)
                 .padding(bottom = 20.dp)
         ) {
+            // ── Top hairline (v332): a soft category-accent rule under the
+            // drag handle, so the tinted sheet gets a crisp accent top edge.
+            NotesSheetTopHairline(cat)
+            Spacer(Modifier.height(10.dp))
             // ── Header — cover + book title/author + close ──────────────
             Row(
                 verticalAlignment = Alignment.Top,
@@ -3120,6 +3176,584 @@ private fun BookNotesSheet(
                                         }
                                     }
                                 }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Album info section — track list + track chips (albums only)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Shared "top hairline" for the full-height NOTES sheets (book notes +
+ * album track list): a soft accent rule under the drag handle giving the
+ * category-tinted sheet a crisp accent top edge.
+ */
+@Composable
+private fun NotesSheetTopHairline(cat: com.curio.app.data.CurioCategory) {
+    val accent = cat.themedAccent()
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 22.dp)
+            .height(3.dp)
+            .clip(RoundedCornerShape(50))
+            .background(
+                Brush.horizontalGradient(
+                    listOf(
+                        accent.copy(alpha = 0f),
+                        accent.copy(alpha = if (isCurioDarkTheme()) 0.9f else 0.55f),
+                        accent.copy(alpha = 0f)
+                    )
+                )
+            )
+    )
+}
+
+/**
+ * Album info section shown below the hero for ALBUMS topics (mirrors the
+ * book section). Displays:
+ * - Album cover + a TRACKLIST card preview (tap → full sheet)
+ * - Track chips for quick jumps into the track-list sheet at that track
+ */
+@Composable
+private fun AlbumInfoSection(
+    cat: com.curio.app.data.CurioCategory,
+    topic: CurioTopic,
+    onOpenSheet: () -> Unit,
+    onTrackClick: (AlbumTrack) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val tracks = topic.tracks.orEmpty()
+    if (tracks.isEmpty()) return
+
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        AlbumTrackListCard(
+            cat = cat,
+            topic = topic,
+            tracks = tracks,
+            onClick = onOpenSheet
+        )
+        AlbumTrackChips(
+            cat = cat,
+            tracks = tracks,
+            onTrackClick = onTrackClick
+        )
+    }
+}
+
+/**
+ * TRACKLIST card — album artwork + a short track preview (mirrors the book
+ * synopsis card). Tap opens the full-height track-list sheet.
+ */
+@Composable
+private fun AlbumTrackListCard(
+    cat: com.curio.app.data.CurioCategory,
+    topic: CurioTopic,
+    tracks: List<AlbumTrack>,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        color = cat.categorySurface(MaterialTheme.colorScheme.surface),
+        shadowElevation = 3.dp,
+        modifier = modifier.fillMaxWidth().clickable(onClick = onClick)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Header row — icon + TRACKLIST + count + runtime
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+                ) {
+                    CurioIcon(
+                        name = CurioIcons.Album,
+                        contentDescription = null,
+                        tint = cat.categoryInk(),
+                        size = 16.dp,
+                        modifier = Modifier.padding(7.dp)
+                    )
+                }
+                Text(
+                    text = "TRACKLIST".uppercase(),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.2.sp
+                    ),
+                    color = cat.categoryInk()
+                )
+                Spacer(Modifier.weight(1f))
+                val runtime = albumRuntimeSeconds(tracks)
+                val meta = buildString {
+                    append("${tracks.size} tracks")
+                    if (runtime != null) append(" · ${formatAlbumRuntime(runtime)}")
+                }
+                Text(
+                    text = meta,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            // Artwork + a compact first-tracks preview.
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                AlbumCoverPoster(
+                    albumTitle = topic.name,
+                    artist = topic.byline,
+                    accent = cat.themedAccent(),
+                    modifier = Modifier
+                        .size(84.dp)
+                        .shadow(4.dp, RoundedCornerShape(12.dp))
+                )
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    topic.byline.takeIf { it.isNotBlank() }?.let { artist ->
+                        Text(
+                            artist,
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    // Preview the first few tracks (mirror of the book
+                    // synopsis preview — 5 lines max).
+                    val preview = tracks.take(5)
+                    preview.forEach { tr ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = "${tr.number}",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                color = cat.categoryInk(),
+                                maxLines = 1
+                            )
+                            Text(
+                                text = tr.title,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f)
+                            )
+                            if (tr.duration.isNotBlank()) {
+                                Text(
+                                    text = tr.duration,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                    }
+                    if (tracks.size > 5) {
+                        Text(
+                            text = "+ ${tracks.size - 5} more tracks",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+            if (tracks.isNotEmpty()) {
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = "View the full track list →",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = cat.categoryInk(),
+                    modifier = Modifier.align(Alignment.End)
+                )
+            }
+        }
+    }
+}
+
+/** Sum track durations (m:ss / h:mm:ss) into total seconds, or null when
+ *  no track carries a parseable duration. */
+private fun albumRuntimeSeconds(tracks: List<AlbumTrack>): Int? {
+    var total = 0
+    var any = false
+    for (t in tracks) {
+        val parts = t.duration.trim().split(":")
+        val secs = when (parts.size) {
+            2 -> (parts[0].toIntOrNull() ?: 0) * 60 + (parts[1].toIntOrNull() ?: 0)
+            3 -> (parts[0].toIntOrNull() ?: 0) * 3600 + (parts[1].toIntOrNull() ?: 0) * 60 + (parts[2].toIntOrNull() ?: 0)
+            else -> 0
+        }
+        if (secs > 0) { total += secs; any = true }
+    }
+    return if (any) total else null
+}
+
+/** Format total seconds as "47 min" / "1 hr 02 min". */
+private fun formatAlbumRuntime(totalSeconds: Int): String {
+    val h = totalSeconds / 3600
+    val m = (totalSeconds % 3600) / 60
+    return if (h > 0) "$h hr ${m.toString().padStart(2, '0')} min" else "$m min"
+}
+
+/**
+ * Album artwork poster for the reveal + track-list sheet. Albums carry no
+ * authored imageUrl in the catalog, so the artwork is resolved on the fly
+ * (iTunes Search first, MusicBrainz + Cover Art Archive fallback — both
+ * keyless) by [AlbumArtFetch]. While resolving — or when nothing is found —
+ * a tinted rounded tile with the Album glyph stands in.
+ */
+@Composable
+private fun AlbumCoverPoster(
+    albumTitle: String,
+    artist: String,
+    accent: Color,
+    modifier: Modifier = Modifier
+) {
+    var artUrl by remember(albumTitle, artist) { mutableStateOf<String?>(null) }
+    var failed by remember(albumTitle, artist) { mutableStateOf(false) }
+    LaunchedEffect(albumTitle, artist) {
+        if (artUrl == null && !failed) {
+            artUrl = AlbumArtFetch.resolveArtworkUrl(albumTitle, artist)
+            if (artUrl == null) failed = true
+        }
+    }
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(
+                        lerp(accent, Color.White, if (isCurioDarkTheme()) 0.18f else 0.55f),
+                        lerp(accent, Color.Black, 0.45f)
+                    )
+                )
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        CurioIcon(
+            name = CurioIcons.Album,
+            contentDescription = null,
+            tint = Color.White.copy(alpha = if (artUrl == null) 0.75f else 0f),
+            size = 30.dp
+        )
+        val url = artUrl
+        if (url != null) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(url)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = "Album cover",
+                contentScale = ContentScale.Crop,
+                onError = {
+                    failed = true
+                    artUrl = null
+                },
+                modifier = Modifier.matchParentSize()
+            )
+        }
+    }
+}
+
+/** Horizontal track chips (mirror of the book chapter chips) — a tap opens
+ *  the track-list sheet scrolled to that track. */
+@Composable
+private fun AlbumTrackChips(
+    cat: com.curio.app.data.CurioCategory,
+    tracks: List<AlbumTrack>,
+    onTrackClick: (AlbumTrack) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(bottom = 8.dp)
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+            ) {
+                CurioIcon(
+                    name = CurioIcons.MusicNote,
+                    contentDescription = null,
+                    tint = cat.categoryInk(),
+                    size = 16.dp,
+                    modifier = Modifier.padding(7.dp)
+                )
+            }
+            Text(
+                text = "TRACKS".uppercase(),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 1.2.sp
+                ),
+                color = cat.categoryInk()
+            )
+            Text(
+                text = "${tracks.size}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(horizontal = 4.dp)
+        ) {
+            itemsIndexed(tracks) { _, track ->
+                AlbumTrackChip(
+                    cat = cat,
+                    track = track,
+                    onClick = { onTrackClick(track) }
+                )
+            }
+        }
+    }
+}
+
+/** One track chip — number + title + duration (compact, no summary). */
+@Composable
+private fun AlbumTrackChip(
+    cat: com.curio.app.data.CurioCategory,
+    track: AlbumTrack,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+        shadowElevation = 2.dp,
+        modifier = modifier
+            .width(158.dp)
+            .height(66.dp)
+            .clickable(onClick = onClick)
+    ) {
+        Column(
+            modifier = Modifier.padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    text = "TR ${track.number}",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = cat.categoryInk(),
+                    maxLines = 1
+                )
+                if (track.duration.isNotBlank()) {
+                    Text(
+                        text = track.duration,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        modifier = Modifier.weight(1f),
+                        textAlign = TextAlign.End
+                    )
+                }
+            }
+            Text(
+                text = track.title,
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+/**
+ * Album track-list ModalBottomSheet — mirrors the book-notes sheet: album
+ * artwork + title head the sheet, and the full track list (number/title/
+ * duration) fills a tall scrollable body. A track chip on the reveal opens
+ * it scrolled to (and highlighting) that track.
+ */
+@Composable
+private fun AlbumNotesSheet(
+    cat: com.curio.app.data.CurioCategory,
+    topic: CurioTopic,
+    track: AlbumTrack?,
+    onSelectTrack: (AlbumTrack) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val tracks = topic.tracks.orEmpty()
+    if (tracks.isEmpty()) return
+    val accent = cat.themedAccent()
+    // The opened track (from a reveal-section track chip) — null when the
+    // sheet is opened from the TRACKLIST card, in which case no row is
+    // pre-highlighted and the list starts at the top.
+    val currentTrack = track
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = tracks.indexOfFirst { it.number == currentTrack?.number }.coerceAtLeast(0)
+    )
+    LaunchedEffect(currentTrack?.number) {
+        if (currentTrack != null && tracks.size > 1) {
+            listState.animateScrollToItem(
+                tracks.indexOfFirst { it.number == currentTrack?.number }.coerceAtLeast(0)
+            )
+        }
+    }
+    val runtime = albumRuntimeSeconds(tracks)
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        // Same category-tinted wash + top hairline as the book-notes sheet.
+        containerColor = cat.notesSheetContainerColor(),
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = CurioContentMaxWidth)
+                .fillMaxHeight(0.92f)
+                .padding(bottom = 20.dp)
+        ) {
+            // ── Top hairline — matches the book sheet ───────────────────
+            NotesSheetTopHairline(cat)
+            Spacer(Modifier.height(10.dp))
+
+            // ── Header — artwork + album title/artist + close ──────────
+            Row(
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+            ) {
+                AlbumCoverPoster(
+                    albumTitle = topic.name,
+                    artist = topic.byline,
+                    accent = accent,
+                    modifier = Modifier
+                        .size(84.dp)
+                        .shadow(3.dp, RoundedCornerShape(12.dp))
+                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "ALBUM TRACKLIST",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.4.sp
+                        ),
+                        color = cat.categoryInk()
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        topic.name,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    topic.byline.takeIf { it.isNotBlank() }?.let { byline ->
+                        Text(
+                            byline,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    val meta = buildString {
+                        append("${tracks.size} tracks")
+                        if (runtime != null) append(" · ${formatAlbumRuntime(runtime)}")
+                    }
+                    Text(
+                        meta,
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = cat.categoryInk()
+                    )
+                }
+                Surface(
+                    onClick = onDismiss,
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                ) {
+                    CurioIcon(
+                        CurioIcons.Close,
+                        "Close track list",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        size = 20.dp,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+            }
+
+            // ── Full track list — scrollable, selected track highlighted ─
+            Spacer(Modifier.height(14.dp))
+            LazyColumn(
+                state = listState,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                contentPadding = PaddingValues(horizontal = 20.dp, bottom = 8.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                itemsIndexed(tracks) { _, tr ->
+                    val selected = tr.number == currentTrack?.number
+                    Surface(
+                        onClick = { onSelectTrack(tr) },
+                        shape = RoundedCornerShape(14.dp),
+                        color = if (selected) accent
+                                else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+                        shadowElevation = if (selected) 0.dp else 1.dp
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
+                        ) {
+                            Text(
+                                text = "${tr.number}",
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                color = if (selected) cat.onAccent() else cat.categoryInk(),
+                                maxLines = 1,
+                                modifier = Modifier.width(28.dp)
+                            )
+                            Text(
+                                text = tr.title,
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+                                ),
+                                color = if (selected) cat.onAccent() else MaterialTheme.colorScheme.onSurface,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f)
+                            )
+                            if (tr.duration.isNotBlank()) {
+                                Text(
+                                    text = tr.duration,
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = if (selected) cat.onAccent().copy(alpha = 0.85f)
+                                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1
+                                )
                             }
                         }
                     }

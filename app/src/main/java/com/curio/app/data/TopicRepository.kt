@@ -136,8 +136,8 @@ object TopicRepository {
                         if (entities.isNotEmpty()) {
                             dao.insertMissing(entities)
                             entities.forEach { entity ->
-                                if (entity.synopsis.isNotBlank() || entity.chapters.isNotBlank()) {
-                                    dao.backfillContent(entity.id, entity.synopsis, entity.chapters)
+                                if (entity.synopsis.isNotBlank() || entity.chapters.isNotBlank() || entity.tracks.isNotBlank()) {
+                                    dao.backfillContent(entity.id, entity.synopsis, entity.chapters, entity.tracks)
                                 }
                             }
                         }
@@ -212,7 +212,8 @@ object TopicRepository {
         // process (and only for genuinely content-incomplete rows), so a
         // full-lane JSON parse never blocks the reveal.
         val needsHydration = entity.teaser.isBlank() ||
-            (categoryId == CategoryId.BOOKS && entity.synopsis.isBlank())
+            (categoryId == CategoryId.BOOKS && entity.synopsis.isBlank()) ||
+            (categoryId == CategoryId.ALBUMS && entity.tracks.isBlank())
         if (needsHydration && hydratedIds.add(entity.id)) {
             runCatching {
                 TopicJsonLoader.install(context)
@@ -227,7 +228,8 @@ object TopicRepository {
                         byline = freshEntity.byline,
                         tags = freshEntity.tags,
                         synopsis = freshEntity.synopsis,
-                        chapters = freshEntity.chapters
+                        chapters = freshEntity.chapters,
+                        tracks = freshEntity.tracks
                     )
                 }
             }

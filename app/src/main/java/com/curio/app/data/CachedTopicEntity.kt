@@ -51,7 +51,9 @@ data class CachedTopicEntity(
     @ColumnInfo(defaultValue = "")
     val synopsis: String = "",
     @ColumnInfo(defaultValue = "")
-    val chapters: String = "" // JSON array stored as string
+    val chapters: String = "", // JSON array stored as string
+    @ColumnInfo(defaultValue = "")
+    val tracks: String = "" // JSON array stored as string
 ) {
     /** Convert to [CurioTopic]. */
     fun toCurioTopic(): CurioTopic {
@@ -83,6 +85,10 @@ data class CachedTopicEntity(
             chapters = try {
                 if (chapters.isBlank()) null
                 else Gson().fromJson(chapters, object : TypeToken<List<BookChapter>>() {}.type)
+            } catch (_: Exception) { null },
+            tracks = try {
+                if (tracks.isBlank()) null
+                else Gson().fromJson(tracks, object : TypeToken<List<AlbumTrack>>() {}.type)
             } catch (_: Exception) { null }
         )
     }
@@ -109,7 +115,8 @@ data class CachedTopicEntity(
                 altPageLabel = topic.altPageLabel,
                 altPageCount = topic.altPageCount,
                 synopsis = topic.synopsis ?: "",
-                chapters = try { Gson().toJson(topic.chapters) } catch (_: Exception) { "[]" }
+                chapters = try { Gson().toJson(topic.chapters) } catch (_: Exception) { "[]" },
+                tracks = try { Gson().toJson(topic.tracks) } catch (_: Exception) { "[]" }
             )
         }
     }

@@ -85,7 +85,13 @@ data class CurioTopic(
      * Books only: chapter-by-chapter breakdown with page ranges and
      * summaries. Null for non-book topics and legacy JSON without the field.
      */
-    val chapters: List<BookChapter>? = null
+    val chapters: List<BookChapter>? = null,
+    /**
+     * Albums only: the album's track list (number/title/duration) for the
+     * track-list sheet on the reveal screen. Null for non-album topics and
+     * legacy JSON without the field.
+     */
+    val tracks: List<AlbumTrack>? = null
 ) {
     /**
      * Progress target for this topic: pages for books, episodes for anime/
@@ -302,6 +308,21 @@ data class BookChapter(
     val pageStart: Int,
     val pageEnd: Int,
     val summary: String
+)
+
+/**
+ * One track of an album topic — track number + title + duration for the
+ * track-list overlay on TopicRevealScreen.
+ *
+ * @property number Track number (1-based).
+ * @property title Track title (e.g. "Lucy in the Sky with Diamonds").
+ * @property duration Duration as an m:ss string (e.g. "3:28"). Empty for
+ *   albums where the source omits per-track lengths.
+ */
+data class AlbumTrack(
+    val number: Int,
+    val title: String,
+    val duration: String = ""
 )
 
 /**
