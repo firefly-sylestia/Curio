@@ -74,8 +74,55 @@ User direction (paraphrased):
   `saveShareCardEdits`/`loadShareCardEdits` exist besides the sheet.
 - No Gradle commands run (project DOX forbids them here) — CI validates.
 
+## Follow-up (same v330 batch) — mix colors + picker preselection + log
+analysis
+
+User: "fix the colors in your mixes its too saturated in light mode for red
+ones, and also use wide variety of premium colors" + "in old picker page 1
+when i tap multiple ones to start a mix why not use those selection and
+when i tap the + icon it preselects them for new mix creation" + "analyse
+this log fully for heating issues and app optimisation and backend and
+potential crash on other device".
+
+1. **Mix identity palette widened + de-saturated.** `MIX_IDENTITY_TONES`
+   10 → 16 muted "premium" deep tones (oxblood, clay, cocoa, olive,
+   forest, teal, petrol, navy, slate blue, slate, charcoal, bronze,
+   plum, wine, mauve, ink). The old list's loud saturated reds (deep
+   magenta `880E4F`, deep rust `BF360C`) read as harsh red blobs on the
+   cream mix cards in light mode; every replacement keeps the deep
+   tone + white glyph contrast (light) and lifts softly in dark
+   (existing `namedMixIdentity` lerp).
+2. **Classic-page selection flows into the + editor.** `ClassicPickerPage`
+   now reports its pending multi-select lane IDs via `onMixStatus(count,
+   ids, apply)`; `NewCategoryPickerSheet` hoists `page0MixSelection` and
+   `MixEditorSheet` gained `initialSelection: Set<CategoryId>` — tapping
+   + (Create a mix) opens the editor with those lanes pre-ticked.
+   Browse-screen editor calls unchanged (default empty).
+3. **Log analysis (logcat_2026-09-03_15-50-54.txt, ~2m16s session).**
+   No crash / ANR / OOM / network errors in-session. Findings: (a) 548×
+   `setRequestedFrameRate` from the obfuscated glass/backdrop render
+   view (`df.a`/`p7.dispatchDraw` — kyant0 `backdrop` + Haze) — the
+   glass layer redraws continuously even between touches → display
+   never idles → heat/battery on every device; (b) 28 background GCs
+   freeing 44–58MB each (heap peaked ~102MB) — heavy per-frame
+   allocation tied to the constant redraws; (c) `Suspending all threads
+   took 13.152ms` — a GC pause near the 16.6ms frame budget → jank on
+   slower devices; (d) JIT compiling giant Compose methods (up to
+   7.7MB per method) — baseline-profile opportunity (ProfileInstaller
+   present but skipped); (e) benign noise: `vendor.perf.ems.egg` prop
+   denials (Samsung), `Missing inline cache`, RemoteInputConnectionImpl
+   IME warnings. Legacy glass snapshotter (the old 10MB/tick
+   full-screen readback) is API 26–30 only and was NOT the cause here
+   (device is API 36). Backend: session was fully offline — zero
+   network activity; the only network (book-cover fetch) is opt-in and
+   disk-cached. Recommendations: gate/throttle the glass backdrop
+   refresh (don't re-blur when nothing changes), consider a baseline
+   profile to kill the JIT compile spikes, keep the existing liquid-
+   glass auto-disable for budget devices; the 13ms suspension + 100MB
+   heap are the risk vectors for low-RAM devices.
+
 ## NEXT
 
-Push for CI. Then return to the signature-card campaign (one category at a
-time, no SVG without permission) — awaiting the user's pick + design for
-the next category.
+Push this follow-up for CI. Then return to the signature-card campaign
+(one category at a time, no SVG without permission) — awaiting the user's
+pick + design for the next category.

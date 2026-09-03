@@ -209,7 +209,10 @@ fun NewCategoryPickerSheet(
     // v3xx14 — multi-select on page 0 flips the shared bottom row's primary
     // capsule from "Surprise me" to "Mix · N": the classic page reports its
     // pending selection count + an apply closure; the capsule applies it.
+    // v330 — the page ALSO reports the selected lane ids so the + button
+    // opens the mix editor with that pending selection pre-ticked.
     var page0MixCount by remember { mutableIntStateOf(0) }
+    var page0MixSelection by remember { mutableStateOf<List<CategoryId>>(emptyList()) }
     var page0MixApply by remember { mutableStateOf<(() -> Unit)?>(null) }
 
     // Pager: page 0 = classic picker, page 1 = new picker. Default from prefs.
@@ -306,8 +309,9 @@ fun NewCategoryPickerSheet(
                         washCat = washCat,
                         onCategorySelected = onCategorySelected,
                         onCategoriesMixed = onCategoriesMixed,
-                        onMixStatus = { count, apply ->
+                        onMixStatus = { count, ids, apply ->
                             page0MixCount = count
+                            page0MixSelection = ids
                             page0MixApply = apply
                         }
                     )
@@ -455,6 +459,10 @@ fun NewCategoryPickerSheet(
             washCat = washCat,
             categories = categories,
             editMix = editMix,
+            // v330 — a fresh mix inherits the classic page's pending
+            // multi-select lanes (tap lanes on page 1, then + to save them
+            // as a named mix).
+            initialSelection = page0MixSelection.toSet(),
             onDismiss = { showEditor = false },
             onSave = { mix ->
                 AppPreferences.addOrReplaceMix(context, mix)
@@ -765,7 +773,9 @@ private fun ClassicPickerPage(
     onCategoriesMixed: (List<CurioCategory>) -> Unit,
     // v3xx14 — reports the pending multi-select (count + an apply closure)
     // so the SHARED bottom row can swap "Surprise me" for "Mix · N".
-    onMixStatus: (Int, (() -> Unit)?) -> Unit
+    // v330 — ALSO reports the selected lane ids, so the + button can open
+    // the mix editor with this pending selection pre-ticked.
+    onMixStatus: (Int, List<CategoryId>, (() -> Unit)?) -> Unit
 ) {
     val context = LocalContext.current
     val allUnhidden = remember {
@@ -835,7 +845,7 @@ private fun ClassicPickerPage(
     LaunchedEffect(multiSelectMode, selectedSlugs, mode) {
         if (mode == PickerMode.MIX && multiSelectMode && selectedSlugs.isNotEmpty()) {
             val cats = selectedSlugs.mapNotNull { CurioCategories.byRouteSlug(it) }
-            onMixStatus(cats.size) {
+            onMixStatus(cats.size, cats.map { it.id }) {
                 if (cats.isNotEmpty()) {
                     // v318b — an UNNAMED multi-lane selection clears the name.
                     AppPreferences.setLastMixName(context, null)
@@ -843,7 +853,7 @@ private fun ClassicPickerPage(
                 }
             }
         } else {
-            onMixStatus(0, null)
+            onMixStatus(0, emptyList(), null)
         }
     }
     val wide = windowWidthSizeClass().isWide
@@ -1289,16 +1299,29 @@ private fun NewMixCard(
  * solid cover plate and chips keep real contrast in BOTH themes.
  */
 private val MIX_IDENTITY_TONES = listOf(
-    Color(0xFF1F2A44), // deep indigo-slate
-    Color(0xFF37474F), // blue-grey
-    Color(0xFF4E342E), // coffee
-    Color(0xFF3E2723), // espresso
-    Color(0xFF1B5E20), // deep green
-    Color(0xFF004D40), // deep teal
-    Color(0xFF4A148C), // deep purple
-    Color(0xFF880E4F), // deep magenta
-    Color(0xFFBF360C), // deep rust
-    Color(0xFF263238)  // charcoal blue
+    // v330 — a WIDER, muted "premium" palette (16 tones, was 10). The old
+    // list leaned on loud saturated hues (deep magenta 880E4F, deep rust
+    // BF360C) that read as harsh red blobs on the cream mix cards in light
+    // mode. Every tone here is a desaturated deep color — rich enough for
+    // the white glyph on top in light mode, soft when lifted toward white
+    // in dark mode — with the red family (oxblood, clay, wine, mauve) kept
+    // muted so no single mix screams.
+    Color(0xFF6E3B3B), // oxblood — muted red
+    Color(0xFF7A4A36), // clay — muted terracotta
+    Color(0xFF4F3A2E), // cocoa — warm brown
+    Color(0xFF52593A), // olive — muted green
+    Color(0xFF2F5A44), // forest — deep green
+    Color(0xFF2E5B58), // teal — deep teal
+    Color(0xFF2C5364), // petrol — blue-green
+    Color(0xFF2E3D63), // navy — deep indigo
+    Color(0xFF41486B), // slate blue
+    Color(0xFF3B4A56), // slate — blue-grey
+    Color(0xFF333A44), // charcoal — neutral
+    Color(0xFF6A5535), // bronze — muted gold-brown
+    Color(0xFF5A3A5C), // plum — muted purple
+    Color(0xFF5C3040), // wine — muted magenta-red
+    Color(0xFF5A4650), // mauve — greyed pink-purple
+    Color(0xFF2B3644)  // ink — near-black blue
 )
 
 /**
@@ -1938,6 +1961,10 @@ fun MixEditorSheet(
     washCat: CurioCategory,
     categories: List<CurioCategory>,
     editMix: NamedMix?,
+    // v330 — lanes to pre-tick when creating a NEW mix: the classic page's
+    // pending multi-select flows in via the + button, so "tap lanes, then
+    // +" continues into the editor with them already selected.
+    initialSelection: Set<CategoryId> = emptySet(),
     onDismiss: () -> Unit,
     onSave: (NamedMix) -> Unit
 ) {
@@ -1958,7 +1985,7 @@ fun MixEditorSheet(
         // after the editor was closed and reopened.
         var selected by remember {
             mutableStateOf<Set<CategoryId>>(
-                editMix?.laneIds?.toSet() ?: emptySet()
+                editMix?.laneIds?.toSet() ?: initialSelection
             )
         }
         val wide = windowWidthSizeClass().isWide
