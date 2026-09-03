@@ -4325,8 +4325,14 @@ private fun MiddleContent(
                 // v329 — Reading-progress content draws the visual chapter
                 // widget here (same bounds reporting, so the editor's box +
                 // grip sit on the bar exactly as they would on text).
-                if (chapterProgress != null) {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    if (chapterProgress != null) {
+                    Column(
+                        modifier = Modifier.onGloballyPositioned {
+                            callbacks.onFact(it.boundsInWindow())
+                            callbacks.onFactStyle(frostStyle)
+                        },
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
                         ChapterProgressBlock(
                             progress = chapterProgress,
                             fill = palette.accent,
@@ -4342,10 +4348,6 @@ private fun MiddleContent(
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
-                    }
-                    .onGloballyPositioned {
-                        callbacks.onFact(it.boundsInWindow())
-                        callbacks.onFactStyle(frostStyle)
                     }
                 } else {
                     // v316b — the glyph box reports the bounds, NOT the frost
@@ -5940,7 +5942,7 @@ fun TopicShareSheet(
             Spacer(Modifier.height(4.dp))
             val eh = pw * aspect.heightDp.toFloat() / aspect.widthDp.toFloat()
             if (editMode) {
-                // ── v331 — edit-mode bottom bar ─────────────────────────
+                // ── v331 — edit-mode bottom bar ─────────��───────────────
                 // While customising, this row REPLACES Save/Share/Text: a
                 // single CONTENT TOGGLE (shows what the card is currently
                 // saying) plus Reset and Done. Tapping the toggle opens the
