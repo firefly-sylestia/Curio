@@ -176,6 +176,8 @@ object BookCoverFetch {
         var done = 0
         onProgress(0, total)
         for (book in books) {
+            // v328 — cache BOTH stars: the average rating AND its Google
+            // Books ratingsCount, so the reveal can show "★ 4.2 · 1.2k".
             val rating = runCatching {
                 val q = buildString {
                     append("intitle:${Uri.encode(book.name)}")
@@ -188,18 +190,60 @@ object BookCoverFetch {
                         val vi = items.optJSONObject(i)?.optJSONObject("volumeInfo") ?: continue
                         if (vi.has("averageRating")) {
                             val r = vi.optDouble("averageRating", 0.0)
-                            return@runCatching if (r > 0.0) r else null
+                            val c = vi.optInt("ratingsCount", 0)
+                            if (r > 0.0) {
+                                AppPreferences.setBookRatingWithCount(context, book.name, r, c)
+                                return@runCatching r
+                            }
+                            return@runCatching null
                         }
                     }
                     null
                 }
             }.getOrNull()
-            if (rating != null) AppPreferences.setBookRating(context, book.name, rating)
             done++
             onProgress(done, total)
             delay(120L)  // stay inside the keyless quota
         }
     }
+
+    /** One book's Google Books star data (average + ratings count). */
+    data class BookStars(val average: Double, val count: Int)
+
+    /**
+     * Keyless Google Books rating for ONE book (v327 — powers the reveal
+     * page's on-demand star chip; the reveal fetches this when a book opens
+     * and no cached rating exists yet). Null when the query finds nothing.
+     * v328 — returns BOTH stars ([BookStars]) so callers can cache the
+     * ratings count alongside the average.
+     */
+    suspend fun fetchRatingFor(bookName: String, author: String?): BookStars? =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val q = buildString {
+                    append("intitle:${Uri.encode(bookName)}")
+                    if (!author.isNullOrBlank()) append("+inauthor:${Uri.encode(author)}")
+                }
+                val json = httpGet("https://www.googleapis.com/books/v1/volumes?q=$q&maxResults=3")
+                json?.let {
+                    val items = org.json.JSONObject(it).optJSONArray("items") ?: return@runCatching null
+                    for (i in 0 until items.length()) {
+                        val vi = items.optJSONObject(i)?.optJSONObject("volumeInfo") ?: continue
+                        if (vi.has("averageRating")) {
+                            val r = vi.optDouble("averageRating", 0.0)
+                            if (r > 0.0) {
+                                return@runCatching BookStars(
+                                    average = r,
+                                    count = vi.optInt("ratingsCount", 0)
+                                )
+                            }
+                            return@runCatching null
+                        }
+                    }
+                    null
+                }
+            }.getOrNull()
+        }
 
     /** Minimal keyless GET — 8s timeout, best-effort. */
     private fun httpGet(urlString: String): String? = runCatching {

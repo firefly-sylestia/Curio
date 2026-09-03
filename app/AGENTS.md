@@ -408,6 +408,147 @@ app/src/main/java/com/curio/app/
   `drop(1)`) to new `KEY_PICKER_PAGE0_SCROLL` / `KEY_PICKER_PAGE1_SCROLL`
   ("index:offset") behind `AppPreferences.PickerScrollPos`
   get/set helpers — survives closing the picker AND app restarts.
+- **v323 — picker hold actions become a gooey RADIAL menu; share-card
+  Tone tool + 6 new tones; pet shop toys/games; quest fixes.** (1)
+  **Radial hold menu** (`features/picker/RadialHoldMenu.kt`): the old
+  single morphing pill is replaced by a fluid ring — gooey blobs (a
+  blur+alpha-contrast `RenderEffect` chain on API 31+, soft circles below)
+  well out of the PRESS POINT, settle into a ring of crisp glass discs, and
+  stay live-switchable: drag anywhere (the nearest disc highlights with hit
+  slop), release over a disc to pick, release over nothing to cancel. NO
+  dark scrim — the menu exists only while the finger is down. The gesture
+  lives on each tile as `Modifier.radialHoldMenu(HoldSession(onOpen,
+  onMove, onEnd, onTap))` (own-press with the system long-press timeout,
+  consumes the pointer once open so the clickable underneath never fires);
+  the visuals live in `RadialHoldMenuOverlay`, which the sheet/screen
+  renders at the held anchor (clamped inside). Wiring: `NewPickerTile` /
+  `NewPinnedPill` / `NewMixCard` / `ContinueExploringSection` (sheet) and
+  `BrowseTabContent` / `MixesTabContent` / `PinsTabContent` / `BrowseMixRow`
+  (Browse page) pass a `HoldSession`; `CategoryOptionPill` / `MixOptionPill`
+  (now `internal`, shared with Browse) render `RadialHoldMenuOverlay` with
+  the shared `holdCursor`/`holdEnd` sheet state. The classic page's
+  hold-to-multi-select is NOT a radial menu — `NewPickerTile` keeps a plain
+  `onLongClick` for it. The old `HoldActionsPill` is now dead code (keep or
+  delete with care — nothing references it). (2) **Share-card Tone tool**
+  (`TopicShareSheet`): a Palette tool pill opens a swatch row of every tone
+  the player has UNLOCKED (`unlockedToneCount = 4 + LevelRewards.
+  unlockedPaletteCount`); `TopicShareCard.toneIndex: Int?` picks one (null
+  = Auto rotation), `ShareCardPalette` gained a `name`; Save/Share export
+  the picked tone. (3) **Six new tones** added to `curatedTones` (Ocean 12,
+  Rose Gold 18, Moss 25, Storm 35, Pearl 45, Sunburst 50) + matching
+  `LevelRewards` entries; `RewardKind.GAME` unlocks pet games (12 Ball
+  fetch, 25 Star catch, 35 Bubble storm). (4) **Pet shop toys** —
+  `PetOutfits.Games` (id/name/glyph/price/levelRequired/rewardId/tagline),
+  `AppPreferences.getOwnedGames/buyGame` (`ownedGamesState`), shop section
+  with Buy → Play (`CurioPet.notePlay` + haptic); 4 new outfits (Polka
+  Bowtie, Sun Hat, Curio Glasses, Tail Puff). (5) **Quest fixes** — the
+  Home "Today's quests" strip (`HomeDailyStrip`) is REMOVED; the "Bonus
+  quests unlocked!" line hides once both bonus quests are claimed; the
+  "Try a new lane" daily PINS its lane at the 4 AM rollover
+  (`CurioQuests.dailyLaneState` + `dailyDiscoveryLane()`, stored by
+  `CategoryId.name`) so the shown lane and the completion check always
+  agree (the old live `leastEngaged()` re-resolution could re-aim the
+  quest away mid-day).
+- **v327 — reveal poster restored, star-rating view, pet-outfit
+  unequip, editor floating cluster, Collage tone, radial menu fixes.**
+  (1) **Book covers**: `BookCoverPoster` restored to the ce892baa form
+  the user confirmed renders correctly — the `AsyncImage` IS the root
+  (`modifier.clip(RoundedCornerShape(8.dp))`, size/shadow passed in by
+  callers, `ContentScale.Crop`, `onError` walks `coverCandidates`); the
+  gradient-Box + `matchParentSize` wrapper is GONE (it painted over or
+  swallowed the cover). (2) **Star rating VIEW**: `BookCoverFetch.
+  fetchRatingFor(name, author)` — keyless Google Books `intitle:` query,
+  returns the first `averageRating`; the reveal hero (BOOKS only) shows a
+  ★ chip next to the author pill, fetching on demand when
+  `AppPreferences.bookRatingsState[bookName]` is missing and caching via
+  `setBookRating`. (3) **Pet shop unequip**: tapping an EQUIPPED outfit
+  now removes it (`setEquippedOutfit(context, null)`) — the pill label is
+  "Equipped · tap to remove"; owned-outfit tap equips. (4) **Editor
+  floating cluster**: while `editMode`, the Edit-text circle (when
+  `selectedResizeTarget == FACT`) and Reset circle float NEXT to the
+  Done button (`Modifier.align(BottomEnd)` Row) instead of hiding
+  mid-scroll in the tool row; the scrollable tool row no longer holds
+  Edit-text/Reset/Done. (5) **Collage tone**: `CollageCard` now derives
+  its paper/field/band/ink colors from the picked `ShareCardPalette`
+  (`topCream = palette.bgBase`, `bottomSage = palette.accent`, `bottomDark
+  = palette.accentDark`, `inkDark = palette.ink`, `tornEdge = palette.bgMid`,
+  `sagePill = palette.accentDark`) — the Tone tool now customizes Collage.
+  (6) **Radial menu**: discs 46→36dp (`DISC_DP`), release-over-nothing
+  LINGERS (420ms) then fades out (260ms `dismissAlpha` on the overlay
+  root) instead of vanishing instantly, and the goo-blob layer converts
+  ring positions to overlay-LOCAL coords before animating (`centerPx`)
+  — the blobs were morphing from local `cp` to ROOT `p`, landing offset
+  from the crisp discs and breaking the circle.
+- **v326 — signature redesign campaign BEGINS: Books.** The
+  per-category `signatureDesign` rework (one category per turn, commit but
+  DON'T push — user reviews each before the next) starts with BOOKS, now a
+  classic cloth hardcover: oxblood leather gradient + gold-foil double
+  border (the "margins"), a left spine band with gold hinge rules, a REAL
+  icon crest (`crest`/`crestTint` fields → top-right `menu_book` glyph,
+  tilted like a foil stamp — replaces the old hand-drawn `Path` crest),
+  giant faint `auto_stories` watermark bottom-right, and gold ruled lines
+  BEHIND the quick fact (`bodyRuleColor` field → `Modifier.drawBehind` on
+  the body Text, spaced at the body's own line-height so the facts sit ON
+  the lines). Both new fields are optional (default null) so every other
+  category is untouched. Design contract: icons/symbols/existing art ONLY
+  — no SVG/path drawing without the user's permission.
+- **v325 — share-card editor safety net: back-cancels-edit, edit
+  persistence, quick-fact "Edit text" placement, knob-on-text fix;
+  RadialHoldMenu ported off removed Compose APIs.** (1) **Back now
+  cancels the editor first, then exits** (`BackHandler(enabled =
+  editMode)` inside `TopicShareSheet` cancels the editor on the first
+  press; the next press hits the sheet's own back handler and dismisses
+  it — back was previously swallowed while editing). (2) **Edit
+  persistence**: `TopicShareSheet.persistEdits()` writes the current
+  move/text/scale state via `AppPreferences.saveShareCardEdits` on
+  Save/Share AND on dismissal (`onDismissRequest` persists before
+  dismissing), so an accidental exit resumes where you left off; leaving
+  the TOPIC REVEAL screen clears the topic's edits
+  (`DisposableEffect(floatingTopic)` → `AppPreferences.
+  clearShareCardEdits`), so the next share of that topic starts clean.
+  (3) **"Edit text" pill moved NEXT to the floating Done button**
+  (previously it hid mid-scroll in the tool row) — shown when the quick
+  fact is the selected element. (4) **Move knob no longer covers the
+  text**: `MoveHandle` shrinks (30→22dp, glyph 18→13dp) and fades
+  (alpha 0.55) while dragging so the text it moves stays readable.
+  (5) **RadialHoldMenu ported for Compose BOM 2026.05** (CI compile
+  errors: this generation removed `PointerInputChange.
+  positionInRoot()` and made the `awaitEachGesture` scope
+  `@RestrictsSuspension`): the long-press timer now runs on a
+  `rememberCoroutineScope()` coroutine (never inside the restricted
+  scope), root coordinates are `change.position` (node-local) +
+  the node's `LayoutCoordinates.positionInRoot()` captured via
+  `onGloballyPositioned` and read fresh through `rememberUpdatedState`;
+  the goo merge is now a plain `Modifier.blur(18.dp)` layer (the old
+  android.graphics `RenderEffect` chain no longer type-checks) —
+  overlapping soft blobs still blur into one liquid-looking whole on
+  every API level.
+- **v324 — Deepen REMOVED; share-card Adjust tool (saturation/contrast);
+  signature redesign contract.** (1) **Deepen is gone** (user direction —
+  "just keep default and classic option"): the Experiments toggle
+  ("Deepen signature card elements"), the `detailedSignatureElementsState`
+  pref API, and the entire `signatureDesignDetailed` function (~1325
+  lines) are DELETED; `SignatureCard` now picks only classic vs
+  `signatureDesign`. (2) **Adjust tool**: `TopicShareSheet` gained an
+  Adjust tool pill (CurioIcons.Contrast) with Saturation/Contrast sliders
+  (0.5–1.5, neutral 1.0); `TopicShareCard` takes `saturation`/`contrast`
+  params and threads a single `graphicsLayer { colorFilter =
+  ColorFilter.colorMatrix(adjustColorMatrix(sat, con)) }` into the card
+  modifier chain (preview + export both adjusted — export is a real
+  `View.draw` pass, so the layer filter is captured). Reset-all also
+  resets the sliders. (3) **Signature redesign contract (v324+):** we are
+  reworking `signatureDesign` per category, ONE category per turn — the
+  user describes the design, we implement + commit, then ask for the next.
+  Rules: NO drawing/SVG without the user's explicit permission — use only
+  icons, symbols, and EXISTING ready-made drawings (e.g. the `CurioIcons`
+  font subset, `Watermark` glyphs, `topicVariant`/`CustomCard` art) as
+  background symbols/icons. (4) **Mix strip fix** (user: "solid strip
+  behind the cancel button during mix"): the floating Apply "Mix · N"
+  pill is BACK in `ClassicPickerPage`'s multi-select row beside Cancel
+  (`Arrangement.spacedBy(8.dp, Alignment.End)`), and the shared bottom
+  row's solid "Mix · N" capsule is HIDDEN while mixing on the CLASSIC
+  page (`!mixing || pagerState.currentPage != 0`) — it stays on the new
+  page so apply-from-there still works.
 - **v313 — Topic Browser revamp, pick 1: category-filtered search, dynamic
   chips, one-category browse.** User: "in topic browser let user change
   category and act that category as filters for the search, so it doesn't
@@ -1572,6 +1713,34 @@ app/src/main/java/com/curio/app/
   editable: `moveFact` applies `fillMaxWidth` unconditionally and
   `FrostPane` no longer carries a redundant outer full-width fill, so
   the crop actually narrows Paper's pane.
+- **v323 — share-editor refinements (user report) + cover z-order fix.**
+  (1) **Tool panels stay open** — picking an option inside a tool (Design /
+  Text size / Box size / Font / Alignment / Format) no longer collapses the
+  panel (the `toolOpen = null` in every option pill is gone); tap the tool
+  icon again to close it, so the user can keep switching options mid-edit.
+  (2) **Quick-fact select-only-first** — the fact's `BasicTextField` is now
+  `enabled = factEditMode` (INERT by default, so a tap can never hijack the
+  selection into text editing); an invisible tap layer over the field selects
+  the box for moving (grip appears) WITHOUT opening the keyboard, and a new
+  conditional **Edit text** tool pill (shown whenever FACT is selected) arms
+  the field and focuses it via a `FocusRequester`
+  (`LaunchedEffect(factEditMode)` requests focus). Tapping Title / Info row /
+  Category chip calls `LocalFocusManager.clearFocus()` BEFORE switching the
+  selection, and the field's `onFocusChanged(false)` drops `factEditMode`, so
+  text editing never sticks and the keyboard never lingers over the toolbar.
+  (3) **No accidental sheet dismissal while editing** —
+  `TopicShareSheet`'s `ModalBottomSheetState` now uses
+  `confirmValueChange = { if (editMode) it == SheetValue.Expanded else true }`
+  (blocks swipe / drag-handle collapse) and `onDismissRequest = { if
+  (!editMode) onDismiss() }` (blocks back button + scrim taps); Save /
+  Share / Share-as-text still dismiss normally, and Done re-enables
+  dismissal.
+  (4) **Book covers render again** — the v317/v320 gradient placeholder was
+  a LATER `Box` sibling of the `AsyncImage` in `BookCoverPoster`, so it
+  painted ON TOP of every loaded cover ("just a gradient showing" on the
+  reveal page + book-notes sheet); it now lives on the outer Box's own
+  `Modifier.background`, BEHIND the image, so covers show again and the
+  gradient only appears while loading / when all candidates fail.
 - **v317 — merged book-notes sheet (Synopsis | Chapters tabs, expands to
   top) + "Also in" from All + share-card editor overhaul + cover fetch
   under Experiments.** (User: synopsis should show only 5 lines on the

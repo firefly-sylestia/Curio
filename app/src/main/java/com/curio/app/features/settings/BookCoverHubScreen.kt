@@ -13,9 +13,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.layout.width
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -38,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
+import com.curio.app.data.CurioTopic
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -68,12 +77,14 @@ fun BookCoverHubScreen(navController: NavController) {
     var failed by remember { mutableIntStateOf(0) }
 
     // TopicJsonLoader.load is suspend — load the count off the main thread.
-    val bookCount by produceState(initialValue = 0) {
-        value = runCatching { TopicJsonLoader.load(CategoryId.BOOKS) }.map { it.size }.getOrDefault(0)
+    val books by produceState(initialValue = emptyList<CurioTopic>()) {
+        value = runCatching { TopicJsonLoader.load(CategoryId.BOOKS) }.getOrDefault(emptyList())
     }
+    val bookCount = books.size
     // Reactive reads — prefs state updates as fetches complete.
     val failedList = AppPreferences.bookCoverFailedState
     val ratedCount = AppPreferences.bookRatingsState.size
+    val ratingCounts = AppPreferences.bookRatingsCountState
 
     fun start(kind: String) {
         // v320b — fetching is OPT-OUT by default: nothing downloads until
@@ -437,6 +448,111 @@ fun BookCoverHubScreen(navController: NavController) {
                         }
                     }
                 }
+            }
+
+            // ── All covers strip (v328) — every book's cover thumbnail
+            // (renders from the Coil disk cache once fetched; tapping opens
+            // the book's own reveal) with its cached star + count when rated.
+            item(key = "covers-header") {
+                Text(
+                    "All covers — ${books.size} books",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            item(key = "covers-strip") {
+                if (books.isEmpty()) {
+                    Text(
+                        "Loading books…",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        itemsIndexed(books) { _, book ->
+                            CoverTile(
+                                book = book,
+                                rating = AppPreferences.bookRatingsState[book.name],
+                                count = ratingCounts[book.name] ?: 0,
+                                onClick = {
+                                    navController.navigate(
+                                        com.curio.app.navigation.CurioRoutes.revealForBrowse(
+                                            CategoryId.BOOKS.routeSlug,
+                                            book.name
+                                        )
+                                    ) { launchSingleTop = true }
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** One book cover tile in the hub's All-covers strip — the AsyncImage IS
+ *  the poster (the ce892baa contract) inside a fixed 80×112 slot, with the
+ *  cached star + ratings count under it when the book has been rated. */
+@Composable
+private fun CoverTile(
+    book: CurioTopic,
+    rating: Double?,
+    count: Int,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(92.dp)
+    ) {
+        Surface(
+            onClick = onClick,
+            shape = RoundedCornerShape(8.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+            shadowElevation = 2.dp,
+            modifier = Modifier.size(width = 80.dp, height = 112.dp)
+        ) {
+            val cover = BookCoverFetch.coverCandidates(book.name, book.imageUrl).firstOrNull()
+            if (cover != null) {
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(cover)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "Cover of ${book.name}",
+                    modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            }
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            book.name,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth()
+        )
+        if (rating != null && rating > 0.0) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(3.dp)
+            ) {
+                CurioIcon(
+                    CurioIcons.Star, null,
+                    tint = Color(0xFFF6B23B),
+                    size = 11.dp
+                )
+                Text(
+                    String.format("%.1f", rating) + if (count > 0) " · ${count}" else "",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
+                )
             }
         }
     }

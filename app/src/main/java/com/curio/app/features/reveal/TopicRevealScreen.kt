@@ -165,7 +165,6 @@ import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.curioGlassEdge
 import com.curio.app.ui.components.curioInnerGlow
 import com.curio.app.ui.theme.ChangaOneFontFamily
-import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioEditorialBody
 import com.curio.app.ui.theme.CurioGradients
@@ -1009,6 +1008,14 @@ fun TopicRevealScreen(
             DisposableEffect(Unit) {
                 onDispose { SentimentPillHost.content = null }
             }
+            // v325 — LEAVING the reveal screen resets this topic's saved
+            // share-card edits, so the next share starts clean (accidental
+            // sheet exits meanwhile resume — the sheet persists on dismissal).
+            DisposableEffect(floatingTopic) {
+                onDispose {
+                    floatingTopic?.let { AppPreferences.clearShareCardEdits(context, it.name) }
+                }
+            }
             if (showShareSheet) {
                 com.curio.app.ui.components.TopicShareSheet(
                     topicName = floatingTopic.name,
@@ -1020,7 +1027,11 @@ fun TopicRevealScreen(
                     context = context,
                     onDismiss = { showShareSheet = false },
                     categoryFamily = cat.family,
-                    topicByline = floatingTopic.byline
+                    topicByline = floatingTopic.byline,
+                    // v328 — BOOK share cards: hand the chapters so the
+                    // editor can offer Reading progress / Chapter review.
+                    bookChapters = if (cat.id == CategoryId.BOOKS) floatingTopic.chapters.orEmpty()
+                                   else emptyList()
                 )
             }
         }
@@ -2050,6 +2061,63 @@ private fun HeroCard(
                     }
                 }
 
+                // v327 — BOOKS: on-demand keyless star rating, next to the
+                // author pill. The reveal fetches the average rating the
+                // first time a book opens (if the Settings hub hasn't cached
+                // it) and shows a ★ chip — the fetch had no visible view.
+                if (cat.id == CategoryId.BOOKS) {
+                    val bookName = resolved?.name?.takeIf { it.isNotBlank() } ?: fallbackName
+                    val bookRating = AppPreferences.bookRatingsState[bookName]
+                    val bookCount = AppPreferences.bookRatingsCountState[bookName] ?: 0
+                    // LocalContext.current is @Composable — read it here, in
+                    // the composable scope, NOT inside the LaunchedEffect
+                    // body (that lambda is suspend-only and would fail CI).
+                    val context = LocalContext.current
+                    LaunchedEffect(bookName, resolved?.byline) {
+                        if (bookRating == null && bookName.isNotBlank()) {
+                            val stars = BookCoverFetch.fetchRatingFor(bookName, resolved?.byline)
+                            if (stars != null && stars.average > 0.0) {
+                                AppPreferences.setBookRatingWithCount(
+                                    context, bookName, stars.average, stars.count
+                                )
+                            }
+                        }
+                    }
+                    if (bookRating != null && bookRating > 0.0) {
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = ink.copy(alpha = 0.18f),
+                            shadowElevation = 0.dp
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                CurioIcon(
+                                    name = CurioIcons.Star,
+                                    contentDescription = null,
+                                    tint = Color(0xFFF6B23B),
+                                    size = 13.dp
+                                )
+                                Text(
+                                    text = String.format("%.1f", bookRating),
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = ink
+                                )
+                                // v328 — show the ratings count too ("· 12k").
+                                if (bookCount > 0) {
+                                    Text(
+                                        text = "· " + compactCount(bookCount),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = ink.copy(alpha = 0.7f)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
                 // ── Middle — the topic name (auto-grows the card) ──────
                 // Weighted spacers (not SpaceBetween) keep the title centred
                 // between the badge row and the bottom pills whether or not
@@ -2596,50 +2664,34 @@ private fun BookCoverPoster(
         )
     }
     var coverIndex by remember(bookTitle, imageUrl) { mutableStateOf(0) }
-    Box(modifier = modifier.clip(RoundedCornerShape(8.dp))) {
-        if (coverCandidates.isNotEmpty() && coverIndex < coverCandidates.size) {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(coverCandidates[coverIndex])
-                    .crossfade(true)
-                    .build(),
-                contentDescription = "Book cover",
-                onError = { if (coverIndex < coverCandidates.lastIndex) coverIndex += 1 },
-                modifier = Modifier.matchParentSize(),
-                contentScale = ContentScale.Crop
-            )
-        }
-        // Gradient placeholder: always renders behind the image, visible when
-        // the image is loading or all candidates failed.
-        val placeholderColors = listOf(
-            CurioColors.CoralBlush,
-            CurioColors.CategoryViolet,
-            CurioColors.Sage,
+    // v327 — RESTORED to the ce892baa form the user confirmed renders covers
+    // correctly: the AsyncImage IS the root (no gradient Box wrapper, no
+    // Modifier.matchParentSize) — the caller's size/shadow modifier chain is
+    // applied directly to the image, so the cover fills the poster box. The
+    // gradient placeholder experiments (7ba3d7d2) repeatedly painted over or
+    // swallowed the loaded cover, so it is gone.
+    if (coverCandidates.isNotEmpty() && coverIndex < coverCandidates.size) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(coverCandidates[coverIndex])
+                .crossfade(true)
+                .build(),
+            contentDescription = "Book cover",
+            onError = { if (coverIndex < coverCandidates.lastIndex) coverIndex += 1 },
+            modifier = modifier.clip(RoundedCornerShape(8.dp)),
+            contentScale = ContentScale.Crop
         )
-        val gradientColors = remember(bookTitle) {
-            val idx = bookTitle.hashCode().let { kotlin.math.abs(it) % placeholderColors.size }
-            listOf(placeholderColors[idx], placeholderColors[(idx + 1) % placeholderColors.size])
-        }
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .background(
-                    Brush.linearGradient(gradientColors),
-                    RoundedCornerShape(8.dp)
-                )
-        )
-        // Show title initial as a fallback glyph when no image loads
-        if (coverIndex >= coverCandidates.size || coverCandidates.isEmpty()) {
-            Text(
-                text = bookTitle.firstOrNull()?.uppercase() ?: "?",
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White.copy(alpha = 0.85f)
-                ),
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
     }
+}
+
+/** v328 — 1234 → "1.2k", 34500 → "34k" (ratings-count shorthand). */
+private fun compactCount(n: Int): String = when {
+    n < 1000 -> "$n"
+    n < 10000 -> {
+        val tenths = n / 100 // 1234 → 12 → "1.2"
+        if (tenths % 10 == 0) "${tenths / 10}k" else "${tenths / 10}.${tenths % 10}k"
+    }
+    else -> "${n / 1000}k"
 }
 
 /**
@@ -2659,6 +2711,8 @@ private fun BookNotesSheet(
     onSelectChapter: (BookChapter) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val context = LocalContext.current
+    val haptics = LocalHapticFeedback.current
     val chapters = topic.chapters.orEmpty()
     val hasSynopsis = !topic.synopsis.isNullOrBlank()
     val hasChapters = chapters.isNotEmpty()
@@ -2899,6 +2953,55 @@ private fun BookNotesSheet(
                     }
                     BookNotesMode.CHAPTERS -> {
                         if (hasChapters) {
+                            // v328 — reading-progress rail: X of N chapters
+                            // read (tracked by the Mark-read pills below),
+                            // with a filled bar so the reader can see where
+                            // they are at a glance.
+                            val chaptersDone = AppPreferences.bookReadingProgressState[topic.name] ?: 0
+                            val chTotal = chapters.size
+                            val progressLabel = if (chaptersDone > 0)
+                                "$chaptersDone of $chTotal chapters read"
+                            else "$chTotal chapters · tap a chapter to start"
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 20.dp)
+                            ) {
+                                Text(
+                                    progressLabel,
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = cat.categoryInk(),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                            Spacer(Modifier.height(6.dp))
+                            // v328 — a thin progress bar (filled = chapters
+                            // read) under the label.
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 20.dp)
+                                    .height(4.dp)
+                                    .clip(RoundedCornerShape(50))
+                                    .background(
+                                        MaterialTheme.colorScheme.surfaceContainerHighest
+                                    )
+                            ) {
+                                val frac = if (chTotal > 0) (chaptersDone.toFloat() / chTotal).coerceIn(0f, 1f) else 0f
+                                if (frac > 0f) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth(frac)
+                                            .height(4.dp)
+                                            .background(cat.themedAccent(), RoundedCornerShape(50))
+                                    )
+                                }
+                            }
+                            Spacer(Modifier.height(10.dp))
                             // Every chapter — switchable inside the sheet.
                             LazyRow(
                                 state = chipListState,
@@ -2907,22 +3010,43 @@ private fun BookNotesSheet(
                             ) {
                                 itemsIndexed(chapters) { _, ch ->
                                     val selected = ch.number == currentChapter?.number
+                                    val isRead = ch.number <= chaptersDone
                                     Surface(
                                         onClick = { onSelectChapter(ch) },
                                         shape = RoundedCornerShape(50),
-                                        color = if (selected) cat.themedAccent()
-                                                else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+                                        color = when {
+                                            selected -> cat.themedAccent()
+                                            isRead -> MaterialTheme.colorScheme.secondaryContainer
+                                            else -> cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
+                                        },
                                         shadowElevation = if (selected) 0.dp else 1.dp
                                     ) {
-                                        Text(
-                                            text = "CH ${ch.number} · ${ch.title}",
-                                            style = MaterialTheme.typography.labelLarge,
-                                            color = if (selected) cat.onAccent()
-                                                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(5.dp),
                                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
-                                        )
+                                        ) {
+                                            if (isRead) {
+                                                CurioIcon(
+                                                    CurioIcons.Check,
+                                                    null,
+                                                    tint = if (selected) cat.onAccent()
+                                                           else MaterialTheme.colorScheme.onSecondaryContainer,
+                                                    size = 13.dp
+                                                )
+                                            }
+                                            Text(
+                                                text = "CH ${ch.number} · ${ch.title}",
+                                                style = MaterialTheme.typography.labelLarge,
+                                                color = when {
+                                                    selected -> cat.onAccent()
+                                                    isRead -> MaterialTheme.colorScheme.onSecondaryContainer
+                                                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                                                },
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -2957,6 +3081,43 @@ private fun BookNotesSheet(
                                             style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
+                                        // v328 — mark the chapter read (progress
+                                        // only moves forward; the sheet's rail +
+                                        // chips update live).
+                                        val chDone = (AppPreferences.bookReadingProgressState[topic.name] ?: 0) >= ch.number
+                                        Spacer(Modifier.height(4.dp))
+                                        Surface(
+                                            onClick = {
+                                                AppPreferences.setBookReadingProgress(
+                                                    context, topic.name, ch.number
+                                                )
+                                                haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                                            },
+                                            shape = RoundedCornerShape(50),
+                                            color = if (chDone) cat.themedAccent()
+                                                    else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
+                                            shadowElevation = 0.dp
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                                            ) {
+                                                CurioIcon(
+                                                    CurioIcons.Check,
+                                                    null,
+                                                    tint = if (chDone) cat.onAccent()
+                                                           else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    size = 14.dp
+                                                )
+                                                Text(
+                                                    if (chDone) "Read through CH ${ch.number} ✓" else "Mark CH ${ch.number} as read",
+                                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                                    color = if (chDone) cat.onAccent()
+                                                            else MaterialTheme.colorScheme.onSurface
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                             }

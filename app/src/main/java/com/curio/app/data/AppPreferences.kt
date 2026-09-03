@@ -199,6 +199,12 @@ object AppPreferences {
     private const val KEY_BOOK_COVER_PROVIDER = "book_cover_provider"  // BookCoverProvider.name
     private const val KEY_BOOK_COVER_FAILED = "book_cover_failed"     // JSON array of book names
     private const val KEY_BOOK_RATINGS = "book_ratings"               // JSON object name->avg rating
+    private const val KEY_BOOK_RATINGS_COUNT = "book_ratings_count"    // JSON object name->ratings count
+    // v328 — per-book reading progress: JSON object book name -> number of
+    // chapters read (the highest chapter the user has marked read in the
+    // BookNotes chapter view). Powers the reveal's chapter-progress bar and
+    // the share card's "I'm N chapters in" element.
+    private const val KEY_BOOK_READING = "book_reading_progress"      // JSON object name->int
     // v8.34 — custom pet design (Pet designer playground): the imported
     // design's full text (palette + body/curled grids). Always-on when
     // saved — the pet sprite renders this instead of the default until the
@@ -220,6 +226,8 @@ object AppPreferences {
     // v9.x — owned pet outfits (JSON array of outfit ids) + the equipped one.
     private const val KEY_OWNED_OUTFITS = "owned_outfits"
     private const val KEY_EQUIPPED_OUTFIT = "equipped_outfit"
+    // v323 — owned pet toys/games (JSON array of game ids).
+    private const val KEY_OWNED_GAMES = "owned_games"
     // Share card edit persistence — per-topic card customisations saved
     // on share/save so they restore next time the same topic is shared.
     private const val KEY_SHARE_CARD_EDITS = "share_card_edits"   // JSON: topicName → edit data
@@ -543,14 +551,6 @@ object AppPreferences {
     var glassClassicIndicatorState by mutableStateOf(false)
         private set
 
-    // v30x — DEEPENED SIGNATURE CARD ELEMENTS (experiment, default OFF):
-    // the Signature share-card backgrounds render in their fully detailed
-    // form — layered gradient atmospheres, glows, vignettes and rich
-    // hand-drawn scenes per category — instead of the streamlined default
-    // line-art style.
-    var detailedSignatureElementsState by mutableStateOf(false)
-        private set
-
     // v292 — NAV INDICATOR COLOR: what the liquid-glass tab bar's resting
     // active pill wears. "auto" follows the theme (Material → scheme
     // primary, azure hero → azure, rose → rose); "white" and "black" are
@@ -807,6 +807,10 @@ object AppPreferences {
         private set
     var bookRatingsState by mutableStateOf<Map<String, Double>>(emptyMap())
         private set
+    var bookRatingsCountState by mutableStateOf<Map<String, Int>>(emptyMap())
+        private set
+    var bookReadingProgressState by mutableStateOf<Map<String, Int>>(emptyMap())
+        private set
 
     /**
      * v3xx — which picker page opens first in the sheet's pager.
@@ -872,6 +876,9 @@ object AppPreferences {
         private set
     var equippedOutfitState by mutableStateOf<String?>(null)
         private set
+    // v323 — owned pet toys/games (see [PetOutfits.Games]).
+    var ownedGamesState by mutableStateOf<Set<String>>(emptySet())
+        private set
 
     fun initThemeMode(context: Context) {
         themeModeState = getThemeMode(context)
@@ -917,7 +924,6 @@ object AppPreferences {
         forceGlassEnabled = prefs(context).getBoolean(KEY_FORCE_GLASS, false)
         legacyGlassBlurState = isLegacyGlassBlurEnabled(context)
         glassClassicIndicatorState = isGlassClassicIndicatorEnabled(context)
-        detailedSignatureElementsState = isDetailedSignatureElementsEnabled(context)
         navIndicatorColorState = getNavIndicatorColor(context)
         navIndicatorOpacityState = getNavIndicatorOpacity(context)
         glassClarityState = isGlassClarityEnabled(context)
@@ -960,6 +966,8 @@ object AppPreferences {
         bookCoverProviderState = getBookCoverProvider(context)
         bookCoverFailedState = getBookCoverFailed(context)
         bookRatingsState = getBookRatings(context)
+        bookRatingsCountState = getBookRatingsCount(context)
+        bookReadingProgressState = getBookReadingProgress(context)
         pickerDefaultPageState = getPickerDefaultPage(context)
         pickerPage0ModeState = getPickerPage0Mode(context)
         pickerSuggestionsState = getPickerSuggestions(context)
@@ -969,6 +977,7 @@ object AppPreferences {
         sparklesState = getSparkles(context)
         ownedOutfitsState = getOwnedOutfits(context)
         equippedOutfitState = getEquippedOutfit(context)
+        ownedGamesState = getOwnedGames(context)
         evoPathState = getEvoPath(context)
         petPartTransformsState = isPetPartTransformsEnabled(context)
         updateCheckerEnabledState = isUpdateCheckerEnabled(context)
@@ -1252,7 +1261,6 @@ object AppPreferences {
     private const val KEY_LEGACY_GLASS_BLUR = "legacy_glass_blur"
     private const val KEY_GLASS_LAB_WALLPAPER = "glass_lab_wallpaper"
     private const val KEY_GLASS_CLASSIC_INDICATOR = "glass_classic_indicator"
-    private const val KEY_DETAILED_SIGNATURE_ELEMENTS = "detailed_signature_elements"
     private const val KEY_NAV_INDICATOR_COLOR = "nav_indicator_color"
     private const val KEY_NAV_INDICATOR_OPACITY = "nav_indicator_opacity"
     private const val KEY_GLASS_CLARITY = "glass_clear_style"
@@ -1490,15 +1498,6 @@ object AppPreferences {
     fun setGlassClassicIndicatorEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_GLASS_CLASSIC_INDICATOR, enabled).apply()
         glassClassicIndicatorState = enabled
-    }
-
-    // Deepened signature share-card elements (experiment, default OFF).
-    fun isDetailedSignatureElementsEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_DETAILED_SIGNATURE_ELEMENTS, false)
-
-    fun setDetailedSignatureElementsEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_DETAILED_SIGNATURE_ELEMENTS, enabled).apply()
-        detailedSignatureElementsState = enabled
     }
 
     // ── Clear-glass style (experiment, default OFF) ──────────────────
@@ -2063,6 +2062,26 @@ object AppPreferences {
         equippedOutfitState = outfitId
     }
 
+    /** Owned pet-game ids (JSON array, defensive read). */
+    fun getOwnedGames(context: Context): Set<String> {
+        val raw = prefs(context).getString(KEY_OWNED_GAMES, null) ?: return emptySet()
+        return try {
+            val arr = JSONArray(raw)
+            (0 until arr.length()).map { arr.getString(it) }.toSet()
+        } catch (_: Exception) {
+            emptySet()
+        }
+    }
+
+    /** Marks [gameId] as owned (one-time toy purchase). */
+    fun buyGame(context: Context, gameId: String) {
+        val next = ownedGamesState + gameId
+        val arr = JSONArray()
+        next.forEach { arr.put(it) }
+        prefs(context).edit().putString(KEY_OWNED_GAMES, arr.toString()).apply()
+        ownedGamesState = next
+    }
+
     // ── Manage Categories (v7.94) — hidden set + custom order ──────────
     /** Whether [id] is hidden by the user (Manage Categories). */
     fun isCategoryHidden(id: CategoryId): Boolean = id in hiddenCategoriesState
@@ -2449,6 +2468,58 @@ object AppPreferences {
         bookRatingsState = cur
     }
 
+    /** The keyless-fetched ratings COUNTS (Google Books ratingsCount): book
+     *  name → count. Stored next to [getBookRatings] so the reveal can show
+     *  "★ 4.2 · 1.2k ratings" instead of a bare average. */
+    fun getBookRatingsCount(context: Context): Map<String, Int> {
+        val raw = prefs(context).getString(KEY_BOOK_RATINGS_COUNT, null) ?: return emptyMap()
+        return runCatching {
+            val obj = org.json.JSONObject(raw)
+            val out = LinkedHashMap<String, Int>()
+            val keys = obj.keys()
+            while (keys.hasNext()) {
+                val k = keys.next()
+                out[k] = obj.optInt(k, 0)
+            }
+            out
+        }.getOrDefault(emptyMap())
+    }
+
+    /** v328 — cache BOTH stars: the average rating and its ratings count. */
+    fun setBookRatingWithCount(context: Context, name: String, rating: Double, count: Int) {
+        setBookRating(context, name, rating)
+        val cur = getBookRatingsCount(context).toMutableMap()
+        cur[name] = count
+        prefs(context).edit().putString(KEY_BOOK_RATINGS_COUNT, org.json.JSONObject(cur).toString()).apply()
+        bookRatingsCountState = cur
+    }
+
+    /** v328 — chapters read per book (name → highest chapter number read). */
+    fun getBookReadingProgress(context: Context): Map<String, Int> {
+        val raw = prefs(context).getString(KEY_BOOK_READING, null) ?: return emptyMap()
+        return runCatching {
+            val obj = org.json.JSONObject(raw)
+            val out = LinkedHashMap<String, Int>()
+            val keys = obj.keys()
+            while (keys.hasNext()) {
+                val k = keys.next()
+                out[k] = obj.optInt(k, 0)
+            }
+            out
+        }.getOrDefault(emptyMap())
+    }
+
+    /** v328 — record that [chaptersRead] chapters of [name] are done. Only
+     *  ever moves forward (never lowers progress). */
+    fun setBookReadingProgress(context: Context, name: String, chaptersRead: Int) {
+        if (chaptersRead <= 0) return
+        val cur = getBookReadingProgress(context).toMutableMap()
+        if ((cur[name] ?: 0) >= chaptersRead) return
+        cur[name] = chaptersRead
+        prefs(context).edit().putString(KEY_BOOK_READING, org.json.JSONObject(cur).toString()).apply()
+        bookReadingProgressState = cur
+    }
+
     /** The user's curated suggestion ids (empty = use [defaultSuggestions]). */
     fun getPickerSuggestions(context: Context): List<CategoryId> {
         val raw = prefs(context).getString(KEY_PICKER_SUGGESTIONS, null) ?: return emptyList()
@@ -2726,6 +2797,21 @@ object AppPreferences {
             ?.let { JSONObject(it) } ?: return null
         raw.optJSONObject(topicName)
     } catch (_: Exception) { null }
+
+    /** Remove the saved card edits for [topicName] — called when the user
+     *  LEAVES the Topic Reveal screen (v325), so the next share of that
+     *  topic starts clean; accidental sheet exits meanwhile keep the edits
+     *  (persisted on dismissal). */
+    fun clearShareCardEdits(context: Context, topicName: String) {
+        try {
+            val raw = prefs(context).getString(KEY_SHARE_CARD_EDITS, null)
+                ?.let { JSONObject(it) } ?: return
+            if (raw.has(topicName)) {
+                raw.remove(topicName)
+                prefs(context).edit().putString(KEY_SHARE_CARD_EDITS, raw.toString()).apply()
+            }
+        } catch (_: Exception) { }
+    }
 
     /** Record a shared card for the Share Hub gallery. */
     fun recordSharedCard(context: Context, topicName: String, categoryName: String,
