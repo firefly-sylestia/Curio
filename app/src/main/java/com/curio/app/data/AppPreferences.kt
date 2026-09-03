@@ -2510,12 +2510,32 @@ object AppPreferences {
     }
 
     /** v328 — record that [chaptersRead] chapters of [name] are done. Only
-     *  ever moves forward (never lowers progress). */
+     *  ever moves forward (never lowers progress).
+     *  v334 — kept for callers that only ever move forward; the share-card
+     *  slider and the reveal's read toggle use [setBookReadingProgressExact]
+     *  so progress can go BOTH ways (undoing a chapter read). */
     fun setBookReadingProgress(context: Context, name: String, chaptersRead: Int) {
         if (chaptersRead <= 0) return
         val cur = getBookReadingProgress(context).toMutableMap()
         if ((cur[name] ?: 0) >= chaptersRead) return
         cur[name] = chaptersRead
+        prefs(context).edit().putString(KEY_BOOK_READING, org.json.JSONObject(cur).toString()).apply()
+        bookReadingProgressState = cur
+    }
+
+    /**
+     * v334 — set the exact chapter progress for [name] (may go BACKWARD, so
+     * a mis-tapped chapter read can be undone). Zero removes the entry.
+     * The reveal's chapter toggle and the share-card progress slider both
+     * write through this so the Book Notes reader stays in sync.
+     */
+    fun setBookReadingProgressExact(context: Context, name: String, chaptersRead: Int) {
+        val cur = getBookReadingProgress(context).toMutableMap()
+        if (chaptersRead <= 0) {
+            cur.remove(name)
+        } else {
+            cur[name] = chaptersRead
+        }
         prefs(context).edit().putString(KEY_BOOK_READING, org.json.JSONObject(cur).toString()).apply()
         bookReadingProgressState = cur
     }

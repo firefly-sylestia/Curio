@@ -1059,7 +1059,13 @@ fun TopicRevealScreen(
                     // v328 — BOOK share cards: hand the chapters so the
                     // editor can offer Reading progress / Chapter review.
                     bookChapters = if (cat.id == CategoryId.BOOKS) floatingTopic.chapters.orEmpty()
-                                   else emptyList()
+                                   else emptyList(),
+                    // v334 — the book's authored cover + fetched star rating,
+                    // so the share card can show the cover (fetch/override in
+                    // the editor) and the ★ row without a second lookup.
+                    bookImageUrl = if (cat.id == CategoryId.BOOKS) floatingTopic.imageUrl else "",
+                    bookRating = AppPreferences.bookRatingsState[floatingTopic.name]?.takeIf { it > 0.0 },
+                    bookRatingCount = AppPreferences.bookRatingsCountState[floatingTopic.name] ?: 0
                 )
             }
         }
@@ -3137,15 +3143,19 @@ private fun BookNotesSheet(
                                             style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
-                                        // v328 — mark the chapter read (progress
-                                        // only moves forward; the sheet's rail +
-                                        // chips update live).
-                                        val chDone = (AppPreferences.bookReadingProgressState[topic.name] ?: 0) >= ch.number
+                                        // v328/v334 — mark the chapter read; the
+                                        // button TOGGLES so a mis-tap can be
+                                        // undone (progress moves both ways via
+                                        // setBookReadingProgressExact).
+                                        val chaptersDone = AppPreferences.bookReadingProgressState[topic.name] ?: 0
+                                        val chDone = chaptersDone >= ch.number
                                         Spacer(Modifier.height(4.dp))
                                         Surface(
                                             onClick = {
-                                                AppPreferences.setBookReadingProgress(
-                                                    context, topic.name, ch.number
+                                                AppPreferences.setBookReadingProgressExact(
+                                                    context,
+                                                    topic.name,
+                                                    if (chDone) ch.number - 1 else ch.number
                                                 )
                                                 haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                                             },
@@ -3160,14 +3170,14 @@ private fun BookNotesSheet(
                                                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
                                             ) {
                                                 CurioIcon(
-                                                    CurioIcons.Check,
+                                                    if (chDone) CurioIcons.Undo else CurioIcons.Check,
                                                     null,
                                                     tint = if (chDone) cat.onAccent()
                                                            else MaterialTheme.colorScheme.onSurfaceVariant,
                                                     size = 14.dp
                                                 )
                                                 Text(
-                                                    if (chDone) "Read through CH ${ch.number} ✓" else "Mark CH ${ch.number} as read",
+                                                    if (chDone) "Undo CH ${ch.number} ✓ (unread)" else "Mark CH ${ch.number} as read",
                                                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                                                     color = if (chDone) cat.onAccent()
                                                             else MaterialTheme.colorScheme.onSurface
