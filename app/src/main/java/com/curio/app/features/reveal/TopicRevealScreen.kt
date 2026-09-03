@@ -3710,7 +3710,7 @@ private fun AlbumNotesSheet(
             LazyColumn(
                 state = listState,
                 verticalArrangement = Arrangement.spacedBy(6.dp),
-                contentPadding = PaddingValues(horizontal = 20.dp, bottom = 8.dp),
+                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 8.dp),
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
