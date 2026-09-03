@@ -300,9 +300,8 @@ fun HomeScreen(navController: NavController) {
             // floats, the pet sometimes dashes back home and does a little
             // jig at its own (vacant) bed. Bounds-only, like every landmark
             // — the bed's layout never changes, it just springs a beat.
-            // v9.x — the bed also hosts the quest-complete nudge (one-shot
-            // after a claim) and a quick PLAY bubble that starts a real play
-            // moment (feeds the PLAY daily + the pet's play counter).
+            // v9.x — the bed hosts only the quest-complete nudge; play stays
+            // available through the pet's own interactions.
             // One-shot after a quest claim: consume the pending marker in a
             // LaunchedEffect (never during composition — backwards write).
             var nudgeBubble by remember { mutableStateOf(false) }
@@ -355,33 +354,6 @@ fun HomeScreen(navController: NavController) {
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
                         )
-                    }
-                }
-                // Quick PLAY bubble — visible when the pet is awake and at
-                // home: tap to start a play moment right from Home.
-                if (CurioPet.awake && CurioPet.atHome) {
-                    Surface(
-                        onClick = {
-                            // notePlay feeds the PLAY daily quest + persona
-                            // itself (v16); react=false skips the generic
-                            // line so the quick bubble stays quiet.
-                            CurioPet.notePlay(context, react = false)
-                        },
-                        shape = CircleShape,
-                        color = homeRoseAccent(),
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .offset(x = 6.dp, y = 6.dp)
-                            .size(26.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            CurioIcon(
-                                name = CurioIcons.PlayArrow,
-                                contentDescription = "Play with Curie",
-                                tint = Color.White,
-                                size = 15.dp
-                            )
-                        }
                     }
                 }
             }

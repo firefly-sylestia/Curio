@@ -46098,6 +46098,7 @@
     "teaser": "Stanford psychologist Carol Dweck reveals the power of mindset in shaping success. People with a gro...",
     "id": "mindset-the-new-psychology-of-success",
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Mindsets",
@@ -46149,6 +46150,7 @@
     "teaser": "Cain's groundbreaking book challenges the extrovert ideal that dominates American culture. Through r...",
     "id": "quiet-the-power-of-introverts",
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Extrovert Ideal",
@@ -46193,6 +46195,7 @@
     "teaser": "Csikszentmihalyi's landmark work explores the concept of flow, a state of complete absorption in an ...",
     "id": "flow-the-psychology-of-optimal-experience",
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Internal World",
@@ -46244,6 +46247,7 @@
     "teaser": "Harari's sweeping narrative covers the entire history of Homo sapiens, from the evolution of our spe...",
     "id": "sapiens-a-brief-history-of-humankind",
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Cognitive Revolution",
@@ -46288,6 +46292,7 @@
     "teaser": "Stanford psychologist Carol Dweck reveals the power of mindset in shaping success. People with a gro...",
     "id": "mindset",
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Mindsets",
@@ -46332,6 +46337,7 @@
     "teaser": "Cain's groundbreaking book challenges the extrovert ideal that dominates American culture. Through r...",
     "id": "quiet",
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Extrovert Ideal",
@@ -46383,6 +46389,7 @@
     "teaser": "Harari's sweeping narrative covers the entire history of Homo sapiens, from the evolution of our spe...",
     "id": "sapiens",
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Cognitive Revolution",
@@ -46427,6 +46434,7 @@
     "teaser": "Goleman argues that emotional intelligence, not IQ, is the true predictor of success. Through neuros...",
     "id": "emotional-intelligence",
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Emotional Brain",
@@ -46478,6 +46486,7 @@
     "teaser": "Manson's counterintuitive approach to self-help argues that the key to happiness is not positive thi...",
     "id": "the-subtle-art-of-not-giving-a-f-ck",
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Don't Try",
@@ -46529,6 +46538,7 @@
     "teaser": "Ruiz distills ancient Toltec wisdom into four practical agreements: be impeccable with your word, do...",
     "id": "the-four-agreements",
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The First Agreement",
@@ -46587,6 +46597,7 @@
     "teaser": "Schaef's daily meditation book offers 365 reflections for women who struggle with workaholism, perfe...",
     "id": "meditations-for-women-who-do-too-much",
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "January",
@@ -46694,6 +46705,7 @@
     "teaser": "Peterson's bestseller offers 12 practical rules for living a meaningful life. Drawing on mythology, ...",
     "id": "12-rules-for-life",
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Stand Up Straight with Your Shoulders Back",
@@ -46745,6 +46757,7 @@
     "teaser": "Van der Kolk's landmark work explores how trauma reshapes the body and brain, compromising sufferers...",
     "id": "the-body-keeps-the-score",
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Trauma and the Brain",
@@ -46796,6 +46809,7 @@
     "teaser": "Greene's controversial bestseller distills 3,000 years of history into 48 laws of power. Through sto...",
     "id": "the-48-laws-of-power",
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Laws 1-12",
@@ -46861,6 +46875,7 @@
     "teaser": "Cialdini's groundbreaking work on persuasion reveals the six principles that drive compliance: recip...",
     "id": "influence",
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Reciprocity",
@@ -46905,6 +46920,7 @@
     "teaser": "Holiday applies ancient Stoic philosophy to modern challenges. Through stories of historical figures...",
     "id": "the-obstacle-is-the-way",
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Perception",
@@ -46949,6 +46965,7 @@
     "teaser": "Holiday argues that ego is the greatest obstacle to success. Through historical examples and Stoic w...",
     "id": "ego-is-the-enemy",
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Aspire",
@@ -46993,6 +47010,7 @@
     "teaser": "Holiday explores the power of stillness in a world of constant noise. Through stories of history's g...",
     "id": "stillness-is-the-key",
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Mind",
@@ -47037,6 +47055,7 @@
     "teaser": "Pressfield's manifesto on overcoming resistance and becoming a professional artist. He identifies th...",
     "id": "the-war-of-art",
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Resistance",
@@ -47088,6 +47107,7 @@
     "teaser": "McKeown argues that the way forward is not to do more but to do less, better. Through research and i...",
     "id": "essentialism",
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Essence",
@@ -47132,6 +47152,7 @@
     "teaser": "Newport argues that our relationship with technology is broken. Through research and case studies, h...",
     "id": "digital-minimalism",
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "A Movement",
@@ -47183,6 +47204,7 @@
     "teaser": "Newport challenges the passion hypothesis, arguing that passion is not something you find but someth...",
     "id": "so-good-they-can-t-ignore-you",
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Passion Hypothesis",
@@ -47227,6 +47249,7 @@
     "teaser": "Ferriss distills the wisdom of over 100 world-class performers across diverse fields. Through short,...",
     "id": "tribe-of-mentors",
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Getting Started",
@@ -47278,6 +47301,7 @@
     "teaser": "Greene's bestselling introduction to string theory and the search for a unified theory of everything...",
     "id": "the-elegant-universe",
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Tied Up with Strings",
@@ -47329,6 +47353,7 @@
     "teaser": "Sagan's landmark work explores the universe from the atom to the cosmic horizon. Through his charact...",
     "id": "the-cosmos",
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Shores of the Cosmic Ocean",
@@ -47373,6 +47398,7 @@
     "teaser": "Hoff uses the characters of Winnie-the-Pooh to explain the principles of Taoism. Through the simple ...",
     "id": "the-tao-of-pooh",
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Tao of Pooh",
@@ -47431,6 +47457,7 @@
     "teaser": "Gibran's poetic masterpiece offers wisdom on love, marriage, children, work, joy, sorrow, and death....",
     "id": "the-prophet",
     "categoryId": "BOOKS",
+    "subtype": "Poetry",
     "exploreAction": {
       "verb": "Read",
       "targetName": "On Love and Marriage",
@@ -47482,6 +47509,7 @@
     "teaser": "Lewis's theological masterwork argues for the rational basis of Christianity. Through clear, accessi...",
     "id": "mere-christianity",
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Right and Wrong",
@@ -47533,6 +47561,7 @@
     "teaser": "Fromm's philosophical exploration of love argues that love is not a feeling but a practice. Through ...",
     "id": "the-art-of-loving",
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Is Love an Art?",
@@ -47584,6 +47613,7 @@
     "teaser": "Lao Tzu's ancient Chinese text on the Tao, the way of the universe, is one of the most translated wo...",
     "id": "the-tao-te-ching",
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Chapters 1-20",
@@ -47628,6 +47658,7 @@
     "teaser": "Strayed's memoir chronicles her solo hike along the Pacific Crest Trail after the death of her mothe...",
     "id": "wild",
     "categoryId": "BOOKS",
+    "subtype": "Memoir",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Trail",
@@ -47672,6 +47703,7 @@
     "teaser": "Mandel's novel interweaves the lives of people connected to a famous actor who died on stage the nig...",
     "id": "station-eleven",
     "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Before",
@@ -47716,6 +47748,7 @@
     "teaser": "Osman's cozy mystery follows four retirees in a luxury retirement community who meet weekly to inves...",
     "id": "the-thursday-murder-club",
     "categoryId": "BOOKS",
+    "subtype": "Mystery",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Club",
@@ -47760,6 +47793,7 @@
     "teaser": "Backman's novel follows a group of strangers taken hostage during a botched apartment viewing. Throu...",
     "id": "anxious-people",
     "categoryId": "BOOKS",
+    "subtype": "Novel",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Hostage Situation",
@@ -47804,6 +47838,7 @@
     "teaser": "Garmus's novel follows Elizabeth Zott, a brilliant chemist in the 1960s who becomes the host of a co...",
     "id": "lessons-in-chemistry",
     "categoryId": "BOOKS",
+    "subtype": "Historical Fiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Lab",
@@ -47848,6 +47883,7 @@
     "teaser": "Ishiguro's novel follows Klara, an Artificial Friend, as she observes the world from a store window ...",
     "id": "klara-and-the-sun",
     "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Store",
@@ -47892,6 +47928,7 @@
     "teaser": "Greer's Pulitzer Prize-winning novel follows Arthur Less, a middle-aged novelist traveling the world...",
     "id": "less",
     "categoryId": "BOOKS",
+    "subtype": "Novel",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Travel",
@@ -47936,6 +47973,7 @@
     "teaser": "Horowitz's mystery follows Daniel Hawthorne, a brilliant but difficult detective, and his reluctant ...",
     "id": "the-midnight-mass-murders",
     "categoryId": "BOOKS",
+    "subtype": "Mystery",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Crime",
@@ -48008,6 +48046,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Habit Loop",
@@ -48101,6 +48140,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The North and South of Temperament",
@@ -48180,6 +48220,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Showing Up",
@@ -48224,6 +48265,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Perception",
@@ -48345,6 +48387,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Essentialism",
@@ -48431,6 +48474,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Cult of the Head Start",
@@ -48510,6 +48554,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Emotional Brain",
@@ -48589,6 +48634,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Subtle Art of Not Giving a F*ck",
@@ -48668,6 +48714,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Mindsets",
@@ -48760,6 +48807,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Let Them Theory",
@@ -48923,6 +48971,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Xue Er (Learning)",
@@ -49086,6 +49135,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Zarathustra's Prologue",
@@ -49179,6 +49229,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Preliminary Expectoration",
@@ -49272,6 +49323,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Question of Being",
@@ -49372,6 +49424,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Problem of Nothingness",
@@ -49416,6 +49469,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "First Essay: Good and Evil, Good and Bad",
@@ -49481,6 +49535,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Book I",
@@ -49553,6 +49608,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Spell of Plato",
@@ -49639,6 +49695,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Doing the Right Thing",
@@ -49697,6 +49754,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "General Remarks",
@@ -49797,6 +49855,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Our Picture of the Universe",
@@ -49911,6 +49970,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Shores of the Cosmic Ocean",
@@ -49976,6 +50036,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Atoms in Motion",
@@ -50076,6 +50137,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "A Fable for Tomorrow",
@@ -50176,6 +50238,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Introduction",
@@ -50276,6 +50339,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Replicators",
@@ -50355,6 +50419,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "That Noble Savage",
@@ -50448,6 +50513,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Body Keeps the Score",
@@ -50520,6 +50586,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Flashlight",
@@ -50599,6 +50666,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Living in Bet Land",
@@ -50705,6 +50773,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Fantasy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "A Silence of Three Parts",
@@ -50790,6 +50859,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Fantasy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Beneath Koloss",
@@ -50882,6 +50952,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Duke Leto",
@@ -51003,6 +51074,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Fantasy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "An Unexpected Party",
@@ -51081,6 +51153,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The End of the World",
@@ -51153,6 +51226,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Chiba City",
@@ -51224,6 +51298,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "A Treatise on Clothing",
@@ -51295,6 +51370,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Fantasy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Warrior in the Mist",
@@ -51339,6 +51415,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Hearth and the Salamander",
@@ -51404,6 +51481,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Gunslinger",
@@ -51489,6 +51567,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Novel",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Nick's Introduction",
@@ -51575,6 +51654,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Historical Fiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Summer in Maycomb",
@@ -51653,6 +51733,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Novel",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Pencey Prep",
@@ -51739,6 +51820,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Romance",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Bennet Family",
@@ -51818,6 +51900,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Historical Fiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Haunting",
@@ -51903,6 +51986,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Historical Fiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Kite Runner",
@@ -51989,6 +52073,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Historical Fiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Arrival on Himmel Street",
@@ -52061,6 +52146,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Memoir",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Letter One",
@@ -52154,6 +52240,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Fantasy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Birth of Circe",
@@ -52212,6 +52299,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Novel",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Road South",
@@ -52284,6 +52372,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Memoir",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Smart Boy",
@@ -52349,6 +52438,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Memoir",
     "exploreAction": {
       "verb": "Read",
       "targetName": "In Perfect Health I Begin",
@@ -52414,6 +52504,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Memoir",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Sighet",
@@ -52507,6 +52598,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Memoir",
     "exploreAction": {
       "verb": "Read",
       "targetName": "On Running",
@@ -52558,6 +52650,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Memoir",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Becoming Me",
@@ -52609,6 +52702,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Memoir",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The First Layer",
@@ -52674,6 +52768,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Memoir",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Ascent",
@@ -52718,6 +52813,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Resistance Defining Resistance",
@@ -52783,6 +52879,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Digital Minimalism",
@@ -52862,6 +52959,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Problem of Doing Too Much",
@@ -52927,6 +53025,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Library",
@@ -53006,6 +53105,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "To Sleep",
@@ -53078,6 +53178,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Source of Creativity",
@@ -53134,6 +53235,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Paul Muad'Dib",
@@ -53204,6 +53306,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Fantasy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "A Copy of a Map",
@@ -53276,6 +53379,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Fantasy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Dream",
@@ -53355,6 +53459,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Poetry",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Coming of the Ship",
@@ -53434,6 +53539,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Voice Inside Your Head",
@@ -53513,6 +53619,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Inside-Out",
@@ -53585,6 +53692,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Fantasy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "A Long-Expected Party",
@@ -53657,6 +53765,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Clare's Account",
@@ -53701,6 +53810,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Discovery of Time",
@@ -53773,6 +53883,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Hero's Adventure",
@@ -53852,6 +53963,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Matthew Effect",
@@ -53938,6 +54050,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "You Are Not Your Mind",
@@ -54003,6 +54116,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Nightmare of Dreaming",
@@ -54138,6 +54252,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Memoir",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Curriculum",
@@ -54196,6 +54311,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Three Rules of Epidemics",
@@ -54261,6 +54377,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "How Is a Street Prostitute Like a Christmas Santa?",
@@ -54424,6 +54541,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "An Animal of No Significance",
@@ -54503,6 +54621,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Subtle Art of Not Giving a F*ck",
@@ -54555,6 +54674,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Laws 1-12: Enter the Court",
@@ -54599,6 +54719,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Perception",
@@ -54699,6 +54820,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Optimal Stopping",
@@ -54750,6 +54872,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Discipline",
@@ -54871,6 +54994,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Essentialism",
@@ -54957,6 +55081,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Cult of the Head Start",
@@ -55036,6 +55161,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Emotional Brain",
@@ -55115,6 +55241,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Showing Up",
@@ -55194,6 +55321,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Mindsets",
@@ -55286,6 +55414,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Let Them Theory",
@@ -55401,6 +55530,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Laying Plans",
@@ -55508,6 +55638,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Book One",
@@ -55601,6 +55732,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Book I: Justice",
@@ -55686,6 +55818,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Prejudices of Philosophers",
@@ -55751,6 +55884,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Book I",
@@ -55914,6 +56048,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Xue Er (Learning)",
@@ -56077,6 +56212,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Zarathustra's Prologue",
@@ -56134,6 +56270,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Mystery",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Discovery",
@@ -56219,6 +56356,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Novel",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Nick's Introduction",
@@ -56297,6 +56435,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Novel",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Pencey Prep",
@@ -56369,6 +56508,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Memoir",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Letter One",
@@ -56447,6 +56587,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The End of the World",
@@ -56518,6 +56659,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "A Treatise on Clothing",
@@ -56589,6 +56731,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Fantasy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Warrior in the Mist",
@@ -56661,6 +56804,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Source of Creativity",
@@ -56733,6 +56877,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Science Fiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Clare's Account",
@@ -56777,6 +56922,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Discovery of Time",
@@ -56849,6 +56995,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Hero's Adventure",
@@ -56928,6 +57075,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Matthew Effect",
@@ -57014,6 +57162,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "You Are Not Your Mind",
@@ -57079,6 +57228,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Nightmare of Dreaming",
@@ -57214,6 +57364,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Memoir",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Curriculum",
@@ -57272,6 +57423,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Three Rules of Epidemics",
@@ -57337,6 +57489,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Incentives",
@@ -57500,6 +57653,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Philosophy",
     "exploreAction": {
       "verb": "Read",
       "targetName": "An Animal of No Significance",
@@ -57565,6 +57719,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Memoir",
     "exploreAction": {
       "verb": "Read",
       "targetName": "In Perfect Health I Begin",
@@ -57630,6 +57785,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Memoir",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Sighet",
@@ -57723,6 +57879,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Memoir",
     "exploreAction": {
       "verb": "Read",
       "targetName": "On Running",
@@ -57774,6 +57931,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Memoir",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The First Layer",
@@ -57818,6 +57976,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Resistance",
@@ -57883,6 +58042,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "Digital Minimalism",
@@ -57962,6 +58122,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Problem",
@@ -58069,6 +58230,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "How Nudges Shape Choices",
@@ -58162,6 +58324,7 @@
       }
     ],
     "categoryId": "BOOKS",
+    "subtype": "Nonfiction",
     "exploreAction": {
       "verb": "Read",
       "targetName": "The Truth About Relativity",

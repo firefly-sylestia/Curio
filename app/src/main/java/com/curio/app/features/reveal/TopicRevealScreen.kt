@@ -2612,8 +2612,8 @@ private fun BookCoverPoster(
         // Gradient placeholder: always renders behind the image, visible when
         // the image is loading or all candidates failed.
         val placeholderColors = listOf(
-            CurioColors.Coral,
-            CurioColors.Mauve,
+            CurioColors.CoralBlush,
+            CurioColors.CategoryViolet,
             CurioColors.Sage,
         )
         val gradientColors = remember(bookTitle) {
