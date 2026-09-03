@@ -2121,52 +2121,6 @@
   ]
  },
  {
-  "id": "book-sula-1973-133",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Sula (1973)",
-  "teaser": "Toni Morrison's second novel splits its story between two Black girls in the 'Bottom' neighborhood — Sula Peace, who leaves and returns as the town's scapegoat, and Nel Wright, who stays. Morrison called it a book about good and evil, then admitted she meant 'to ask how evil comes to be.'.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9781400034147-L.jpg",
-  "byline": "Toni Morrison",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Sula (1973) — chapters '1919' and '1941'",
-   "durationMinutes": 45,
-   "instruction": "Read the first chapter, '1919,' and find the image that starts everything: Shadrack's National Suicide Day. Then read the chapter where the town's 'goodness' is revealed as a reaction to Sula's freedom — Morrison arranges the neighbors' sudden virtue so you see it as their invention, not her absence."
-  },
-  "tags": [
-   "American",
-   "Literary",
-   "1970s"
-  ],
-  "tier": 2,
-  "pageCount": 192,
-  "synopsis": "Morrison's second novel splits its story between two Black women in the 'Bottom' neighborhood of Medallion, Ohio: Sula Peace, who leaves and returns as the town's scapegoat, and Nel Wright, who stays. The girls grow up together, bound by a childhood accident in which Nel watches Sula accidentally drown a white boy named Chicken Little. Sula leaves for ten years and returns with a ring through her nose, sleeping with white men and eventually with Nel's husband Jude. Nel is devastated. Sula refuses to apologize. When Sula dies, the town treats her death as a relief. Nel visits Sula on her deathbed. The novel's structure, chapters named by years, jumping forward and backward, mirrors the way memory works in a small community. Morrison said the novel is about 'good and evil,' then admitted she meant 'to ask how evil comes to be.' The novel's central question, whether Sula is good or evil, Morrison leaves deliberately unresolved.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "1919–1927 — The Bottom",
-    "pageStart": 1,
-    "pageEnd": 50,
-    "summary": "Shadrack's National Suicide Day. Sula and Nel's childhood. Chicken Little's drowning."
-   },
-   {
-    "number": 2,
-    "title": "1937–1940 — Separation",
-    "pageStart": 51,
-    "pageEnd": 100,
-    "summary": "Sula leaves. Nel marries Jude. The town changes. Sula returns."
-   },
-   {
-    "number": 3,
-    "title": "1941–1965 — Aftermath",
-    "pageStart": 101,
-    "pageEnd": 192,
-    "summary": "Sula and Jude. The plague of robins. Sula's death. Nel's visit. 'She was my best friend.'"
-   }
-  ]
- },
- {
   "id": "book-song-of-solomon-1977-134",
   "categoryId": "BOOKS",
   "subtype": "Book",
@@ -2262,102 +2216,6 @@
   ]
  },
  {
-  "id": "book-neuromancer-1984-136",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Neuromancer (1984)",
-  "teaser": "William Gibson coined 'cyberspace' in this novel — 'a consensual hallucination experienced daily by billions' — and invented the cyberpunk template: washed-up console cowboy Case, a mysterious employer, an AI with a plan. It became the first novel to win the Hugo, Nebula, and Philip K. Dick awards in the same year.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780441569595-L.jpg",
-  "byline": "William Gibson",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Neuromancer (1984) — the opening line and Case's first jack-in",
-   "durationMinutes": 16,
-   "instruction": "Read the famous first line and then the scene where Case first 'jacks in' — Gibson never explains the tech, he just narrates the sensation. Then track the AI's manipulation: Wintermute talks to Case through other characters' bodies, which is the book's real theme in disguise — who is running whom."
-  },
-  "tags": [
-   "Science Fiction",
-   "Cyberpunk",
-   "1980s",
-   "American",
-   "Hugo Nebula"
-  ],
-  "tier": 1,
-  "pageCount": 288,
-  "synopsis": "Gibson's 1984 novel opens with the most famous line in cyberpunk: 'The sky above the port was the color of television, tuned to a dead channel.' Case, a washed-up console cowboy (hacker) whose nervous system was damaged as punishment for stealing from his employers, is hired by a mysterious employer named Armitage to pull off one last job. The job involves breaking into a corporate AI's prison, Wintermute, one half of a super-intelligence that wants to merge with its other half, Neuromancer. The novel coined the word 'cyberspace', 'a consensual hallucination experienced daily by billions', and established the visual and thematic vocabulary of cyberpunk: neon-lit cities, corporate oligarchies, body modification, and virtual reality. Gibson wrote the novel on a manual typewriter in a Montreal basement, never having used a computer. The novel won the Hugo, Nebula, and Philip K. Dick Awards in the same year, the first novel to do so.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Chiba City",
-    "pageStart": 1,
-    "pageEnd": 80,
-    "summary": "Case in the Sprawl. Armitage offers a cure. Molly Millions. The job."
-   },
-   {
-    "number": 2,
-    "title": "The Job",
-    "pageStart": 81,
-    "pageEnd": 180,
-    "summary": "Freeside. The Straylight run. Wintermute's manipulation. The Finn."
-   },
-   {
-    "number": 3,
-    "title": "The Merge",
-    "pageStart": 181,
-    "pageEnd": 288,
-    "summary": "The Turing police. Neuromancer. The ice breaking. The merge. 'The sky was colored of a television...'"
-   }
-  ]
- },
- {
-  "id": "book-beloved-1987-137",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Beloved (1987)",
-  "teaser": "Beloved is based on Margaret Garner, who killed her daughter rather than let her be returned to slavery — Morrison turns that act into a haunted-house story where the ghost is memory itself. It won the Pulitzer in 1988, and when it lost the National Book Award the year before, 48 Black writers published a protest letter.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9781400033416-L.jpg",
-  "byline": "Toni Morrison",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Beloved (1987) — the '124 was spiteful' opening and the milk passage",
-   "durationMinutes": 42,
-   "instruction": "Read the opening: '124 was spiteful.' The house's ghost is never explained, only experienced. Then read Sethe's account of the escape — the famous 'milk' passage, where her stolen milk becomes the story's central symbol of what slavery took. Notice how the ghost gets a name (Beloved) before the reader learns why."
-  },
-  "tags": [
-   "American",
-   "Literary",
-   "Slavery",
-   "Novel",
-   "Modern"
-  ],
-  "tier": 1,
-  "pageCount": 324,
-  "synopsis": "Morrison's Pulitzer-winning novel is based on the true story of Margaret Garner, an enslaved woman who killed her daughter rather than let her be returned to slavery in 1856. Morrison turns that act into a haunted-house story: Sethe, a former slave, lives in 124 Bluestone Road in Cincinnati with her daughter Denver. The house is haunted by Sethe's dead baby, Beloved, who returns as a young woman and takes up residence. Beloved is both ghost and memory: she represents the 'Sixty Million and more' to whom Morrison dedicates the book (the estimated number of Africans who died in the Middle Passage). The novel moves between three time periods, Sethe's life at Sweet Home (the slave plantation), the escape, and the aftermath, using a fragmented narrative that mirrors the way trauma works: not in order, but in circling, returning fragments. Morrison wrote the novel in a burst of inspiration after hearing the Margaret Garner story and spent ten years writing it.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "124 Was Spiteful",
-    "pageStart": 1,
-    "pageEnd": 80,
-    "summary": "The house. Baby Suggs. Paul D arrives. Beloved appears."
-   },
-   {
-    "number": 2,
-    "title": "Sweet Home",
-    "pageStart": 81,
-    "pageEnd": 200,
-    "summary": "Sethe's memories. The escape. Schoolteacher. The milk."
-   },
-   {
-    "number": 3,
-    "title": "Beloved",
-    "pageStart": 201,
-    "pageEnd": 324,
-    "summary": "Beloved's hold. Sethe's guilt. The exorcism. 'She is my best thing.'"
-   }
-  ]
- },
- {
   "id": "book-the-satanic-verses-1988-138",
   "categoryId": "BOOKS",
   "subtype": "Book",
@@ -2407,59 +2265,6 @@
     "pageStart": 401,
     "pageEnd": 561,
     "summary": "Ayesha's flight. Gibreel's madness. Saladin's father. The reconciliation."
-   }
-  ]
- },
- {
-  "id": "book-the-things-they-carried-139",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "The Things They Carried (1990)",
-  "teaser": "Tim O'Brien's collection about Vietnam is built on the 'things' soldiers literally carried — rifles, letters, fear, grief — each weighed and named. Its central move is to blur memoir and invention, declaring 'story-truth' more real than what happened, in a war novel that is also a meditation on how we tell war.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780767907569-L.jpg",
-  "byline": "Tim O'Brien",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Things They Carried (1990) — 'The Things They Carried' and 'How to Tell a True War Story'",
-   "durationMinutes": 20,
-   "instruction": "Read the title story's inventory — the exact weights of what each man carried — and notice the math: the heavier the object, the more it stands for something unnameable. Then read 'How to Tell a True War Story,' where O'Brien directly argues that a true war story is never about war, and that the one that feels true is usually invented."
-  },
-  "tags": [
-   "American",
-   "Vietnam",
-   "Short Stories"
-  ],
-  "tier": 2,
-  "pageCount": 288,
-  "synopsis": "O'Brien's collection is not a novel but a linked series of stories about a platoon of American soldiers in Vietnam. The title story inventories the 'things' each soldier literally carries, rifles, ammunition, photographs, fear, grief, each weighed and named. The collection's central move is to blur memoir and invention: O'Brien declares 'story-truth' more real than what actually happened, in a war novel that is also a meditation on how we tell war. The stories include 'How to Tell a True War Story' (which argues that a true war story is never about war), 'Sweetheart of the Song Tra Bong' (about a nurse who becomes a war junkie), and 'The Man I Killed' (about the Vietnamese soldier O'Brien killed). O'Brien served in Vietnam and won the National Book Critics Circle Award. The collection is studied in creative writing programs for its metafictional technique: O'Brien uses himself as a character but admits to inventing details.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "The Things They Carried",
-    "pageStart": 1,
-    "pageEnd": 60,
-    "summary": "The inventory. The weights of war. Norman Bowker and the orange smoke."
-   },
-   {
-    "number": 2,
-    "title": "How to Tell a True War Story",
-    "pageStart": 61,
-    "pageEnd": 120,
-    "summary": "The argument. 'A true war story is never about war.' Lemon Tree."
-   },
-   {
-    "number": 3,
-    "title": "The Man I Killed + Ambush",
-    "pageStart": 121,
-    "pageEnd": 200,
-    "summary": "The body. The confession. 'I killed a man.'"
-   },
-   {
-    "number": 4,
-    "title": "Sweetheart + Good Form + Lives of the Dead",
-    "pageStart": 201,
-    "pageEnd": 288,
-    "summary": "Song Tra Bong. The two versions of truth. Tim and Linda. The living dead."
    }
   ]
  },
@@ -2621,156 +2426,6 @@
     "pageStart": 851,
     "pageEnd": 1079,
     "summary": "The wheelchair assassins. The medical attachment. Hal's decline. The circular ending."
-   }
-  ]
- },
- {
-  "id": "book-memoirs-of-a-geisha-143",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Memoirs of a Geisha (1997)",
-  "teaser": "Arthur Golden's novel follows Sayuri from a fishing village to the geisha houses of Gion in 1920s–30s Kyoto — and its authenticity was contested from day one: Golden was accused of appropriating the life story of real geisha Mineko Iwasaki, who sued and later published her own memoir, Geisha, a Life.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780375400117-L.jpg",
-  "byline": "Arthur Golden",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Memoirs of a Geisha (1997) — the auction scene and its controversy",
-   "durationMinutes": 28,
-   "instruction": "Read the opening — Sayuri's childhood in Yoroido and the meeting with Mr. Tanaka — and notice how Golden builds the geisha world as a closed system with its own economics. Then read the scene where Sayuri's virginity is auctioned: the book's most controversial episode, and the one Iwasaki said misrepresented her life."
-  },
-  "tags": [
-   "Japanese",
-   "Historical",
-   "1990s"
-  ],
-  "tier": 2,
-  "pageCount": 448,
-  "synopsis": "Golden's novel follows Sayuri from a fishing village in rural Japan to the geisha houses of Gion in 1920s-30s Kyoto. As a nine-year-old, Sayuri is sold by her impoverished family to the Nitta geisha house, where she endures hazing, poverty, and the loss of her childhood. She becomes the protégée of Mameha, a powerful geisha, and eventually achieves fame as a beauty whose grey eyes make her the most sought-after woman in Gion. The novel's most controversial scene, the auction of Sayuri's virginity, was based on Golden's interviews with Mineko Iwasaki, the real geisha who later sued him for misrepresentation. The novel is written as a memoir told to a man on a park bench in 1950s New York. Golden spent years researching geisha culture, but the book was criticized for Westernizing the geisha tradition and for presenting Japanese culture through American eyes. The 1997 film adaptation starring Zhang Ziyi was directed by Steven Spielberg.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Yoroido",
-    "pageStart": 1,
-    "pageEnd": 60,
-    "summary": "Sayuri's childhood. Mr. Tanaka. The sale. The Nitta house."
-   },
-   {
-    "number": 2,
-    "title": "Gion",
-    "pageStart": 61,
-    "pageEnd": 200,
-    "summary": "Mameha's mentorship. The apprentice. Hatsumomo. The transformation."
-   },
-   {
-    "number": 3,
-    "title": "Fame",
-    "pageStart": 201,
-    "pageEnd": 350,
-    "summary": "The auction. The danna. The fall of Gion. The war."
-   },
-   {
-    "number": 4,
-    "title": "New York",
-    "pageStart": 351,
-    "pageEnd": 448,
-    "summary": "Sayuri in New York. The Chairman. The reunion. The final performance."
-   }
-  ]
- },
- {
-  "id": "book-the-god-of-small-144",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "The God of Small Things (1997)",
-  "teaser": "Arundhati Roy's Booker-winning debut — she had written one novel, and it became a global phenomenon — is set in Kerala in 1969 and told by twins Rahel and Estha, whose childhood is destroyed by the 'Love Laws' that decide who can be loved and how much. Roy spent four years writing it; the advance and rights set records for a first novel.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780812979688-L.jpg",
-  "byline": "Arundhati Roy",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The God of Small Things (1997) — the opening and the twins' reckoning",
-   "durationMinutes": 19,
-   "instruction": "Read the opening — 'May in Ayemenem is a hot, brooding month' — and notice how Roy withholds the central event while circling it for pages. Then read the chapter where the twins' world comes apart, and track the recurring images (the river, the History House, the word 'later') that carry the book's grief."
-  },
-  "tags": [
-   "Indian",
-   "Literary",
-   "Family",
-   "Novel",
-   "Late 20th"
-  ],
-  "tier": 2,
-  "pageCount": 340,
-  "synopsis": "Roy's Booker-winning debut is set in Kerala in 1969 and told by twins Rahel and Estha, whose childhood is destroyed by the 'Love Laws', 'the laws that lay down who should be loved, and how. And how much.' The twins are caught between their mother Ammu (who has an affair with Velutha, an untouchable) and their upper-caste family. The novel's central event, the drowning of Sophie Mol (their English cousin) and the murder of Velutha, is withheld for the first 100 pages and then revealed in fragments. Roy spent four years writing the novel, and the advance set records for a first novel. The novel's structure, moving between 1969 and the twins' reunion in 1993, mirrors the way trauma works: not in order, but in circling, returning fragments. The novel's most famous line, 'the Love Laws', captures the caste system's power to destroy. Roy's prose is precise, visual, and often very funny despite the grief.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "May in Ayemenem",
-    "pageStart": 1,
-    "pageEnd": 80,
-    "summary": "The twins' world. Pappachi's moth. The History House. Sophie Mol arrives."
-   },
-   {
-    "number": 2,
-    "title": "The Past",
-    "pageStart": 81,
-    "pageEnd": 200,
-    "summary": "Ammu and Velutha. The Love Laws. Baby Kochamma. The Ipe family."
-   },
-   {
-    "number": 3,
-    "title": "The Unraveling",
-    "pageStart": 201,
-    "pageEnd": 340,
-    "summary": "The boat trip. Sophie Mol's death. Velutha's murder. The twins' separation."
-   }
-  ]
- },
- {
-  "id": "book-white-teeth-2000-145",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "White Teeth (2000)",
-  "teaser": "Zadie Smith wrote White Teeth at 24, and the novel — two families, one Jamaican-British, one Bengali-British, meeting in North London — became the defining multicultural novel of the 2000s before its author could legally rent a car. It won multiple first-novel prizes and sold over a million copies.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780375703065-L.jpg",
-  "byline": "Zadie Smith",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "White Teeth (2000) — the opening suicide scene and the Irie/Millat chapters",
-   "durationMinutes": 19,
-   "instruction": "Read the opening — Archie Jones attempting suicide in a car that won't start, saved by a butcher's shop — and notice how Smith sets the novel's tone: comic, generous, and determined to keep every character in the frame. Then read the Irie/Millat chapters, where the book's argument about inheritance and identity plays out between generations."
-  },
-  "tags": [
-   "British",
-   "Comedy",
-   "Multicultural",
-   "Fiction",
-   "Contemporary",
-   "21st Century"
-  ],
-  "tier": 2,
-  "pageCount": 464,
-  "synopsis": "Smith wrote White Teeth at 24, and the novel, two families, one Jamaican-British (the Joneses), one Bengali-British (the Iqbals), meeting in North London, became the defining multicultural novel of the 2000s. The novel spans three generations and three continents: Archie Jones's wartime past in WWII, Samad Iqbal's Bangladesh, and their children's lives in London. The novel's comic energy comes from its digressive, generous voice: Smith gives every character a complete interior life and refuses to let any of them be a symbol. The novel won multiple first-novel prizes and sold over a million copies. Its central themes, inheritance, identity, the impossibility of clean cultural breaks, are delivered through comic set-pieces: a vegetarian restaurant fire, a DNA experiment gone wrong, and a school play about WWII that devolves into ethnic warfare. Smith's debut is unusual in its ambition: she wants to write a novel about multiculturalism that is itself multicultural in its method.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "The End of History — 1975",
-    "pageStart": 1,
-    "pageEnd": 100,
-    "summary": "Archie's suicide attempt. The wedding. North London. The three families."
-   },
-   {
-    "number": 2,
-    "title": "Root Canals — 1980s",
-    "pageStart": 101,
-    "pageEnd": 280,
-    "summary": "Irie and Millat. Samad's scandal. Magid and Millat. The tiger."
-   },
-   {
-    "number": 3,
-    "title": "Root Canals — 1990s",
-    "pageStart": 281,
-    "pageEnd": 464,
-    "summary": "FutureMouse. The school play. The fire. The twins' return. 'What's past is prologue.'"
    }
   ]
  },
@@ -3137,45 +2792,6 @@
   ]
  },
  {
-  "id": "book-gone-girl-2012-152",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Gone Girl (2012)",
-  "teaser": "Gillian Flynn's thriller is famous for its midpoint rug-pull: the novel's second half reveals the 'victim' wife Amy is the architect of her own disappearance. The 'cool girl' passage — Amy's manifesto about performing the woman men want — became the book's most-quoted pages and its feminist thesis in one.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780307588371-L.jpg",
-  "byline": "Gillian Flynn",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Gone Girl (2012) — the 'cool girl' monologue and the midpoint reveal",
-   "durationMinutes": 19,
-   "instruction": "Read to the chapter titled 'Amazing Amy' and stop before the reveal: notice how Flynn plants Amy's diary as an unreliable narrator in plain sight. Then read the 'cool girl' monologue aloud — it's the moment the novel stops being a mystery and starts being an argument. The ending offers no justice, only two people trapped in a marriage of mutual performance."
-  },
-  "tags": [
-   "American",
-   "Thriller",
-   "2010s"
-  ],
-  "tier": 2,
-  "pageCount": 432,
-  "synopsis": "On the morning of their fifth wedding anniversary, Nick Dunne returns home to find his wife Amy missing and signs of a struggle. As the investigation unfolds and media scrutiny intensifies, Nick becomes the prime suspect. The narrative alternates between Nick's present-day perspective and Amy's diary entries, which recount the couple's courtship and the deterioration of their marriage. The diary portrays Nick as increasingly aggressive and threatening, while Nick's version of events paints Amy as controlling and difficult. As Detectives Boney and Gilpin close in, Nick realizes his wife has been hiding secrets, and that her disappearance is not what it seems. Flynn's novel is a study in unreliable narration: both Nick and Amy are liars, and the reader is left to determine which version of their marriage is closer to the truth. The novel became a cultural phenomenon, selling over 15 million copies worldwide and inspiring David Fincher's 2014 film adaptation starring Ben Affleck and Rosamund Pike.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Part One — Boy Loses Girl",
-    "pageStart": 1,
-    "pageEnd": 200,
-    "summary": "Nick's narration of the disappearance. Amy's diary entries of their courtship and marriage. The media circus."
-   },
-   {
-    "number": 2,
-    "title": "Part Two — Boy Meets Girl",
-    "pageStart": 201,
-    "pageEnd": 432,
-    "summary": "Amy's true story. Nick's affair. The trap closes. The unreliable narrators revealed."
-   }
-  ]
- },
- {
   "id": "book-between-the-world-and-154",
   "categoryId": "BOOKS",
   "subtype": "Book",
@@ -3218,98 +2834,6 @@
     "pageStart": 121,
     "pageEnd": 176,
     "summary": "The killing of Prince Jones. The visit to his family. The letter to Samori."
-   }
-  ]
- },
- {
-  "id": "book-lincoln-in-the-bardo-155",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Lincoln in the Bardo (2017)",
-  "teaser": "George Saunders's Booker winner is set in a single night — the bardo, the Tibetan Buddhist limbo between death and rebirth — where Abraham Lincoln's son Willie, newly dead, refuses to move on, surrounded by a chorus of ghosts who narrate the novel together. It's built from hundreds of voices and invented historical quotations.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780812995343-L.jpg",
-  "byline": "George Saunders",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Lincoln in the Bardo (2017) — the ghost chorus and the fake citations",
-   "durationMinutes": 34,
-   "instruction": "Read the opening — the ghosts introducing themselves in a crowded choral narration — and notice how Saunders makes you assemble the story from fragments. Then find the invented 'historical sources' footnoted throughout: Saunders fabricates quotes and attributions wholesale, a formal trick that asks whether any account of grief can be authoritative."
-  },
-  "tags": [
-   "American",
-   "Experimental",
-   "Historical"
-  ],
-  "tier": 2,
-  "pageCount": 368,
-  "synopsis": "Saunders's novel takes place during a single night in February 1862, when Abraham Lincoln visits the crypt of his eleven-year-old son Willie, who has died of typhoid fever. The novel is set in the 'bardo', a Tibetan Buddhist term for the transitional state between death and rebirth, where ghosts mingle, gripe, and struggle over the boy's soul. The ghosts are 'disfigured by desires they failed to act upon while alive' and are threatened by permanent entrapment in liminal space. They don't realize they're dead, calling the cemetery their 'hospital-yard' and their coffins 'sick-boxes.' The novel is composed almost entirely of voices: the ghosts' monologues, historical excerpts from real documents, and Lincoln's own grief. Saunders based the novel on reports that Lincoln visited Willie's crypt 'on several occasions' to hold the body. The novel won the 2017 Man Booker Prize.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "The Cemetery",
-    "pageStart": 1,
-    "pageEnd": 120,
-    "summary": "The ghosts introduce themselves. The bardo explained. Lincoln arrives at the crypt."
-   },
-   {
-    "number": 2,
-    "title": "Willie's Passage",
-    "pageStart": 121,
-    "pageEnd": 280,
-    "summary": "The ghosts debate Willie's fate. Lincoln holds his son. The tug of war between worlds."
-   },
-   {
-    "number": 3,
-    "title": "The Release",
-    "pageStart": 281,
-    "pageEnd": 368,
-    "summary": "Lincoln's final visit. The ghosts' intervention. Willie's departure. The end."
-   }
-  ]
- },
- {
-  "id": "book-the-testaments-2019-157",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "The Testaments (2019)",
-  "teaser": "Atwood returned to Gilead 34 years after The Handmaid's Tale with this Booker-winning sequel, told in three voices — two young women raised inside the regime and Aunt Lydia, the system's most feared enforcer, revealed as a secret dissident. It won the Booker jointly with Bernardine Evaristo's Girl, Woman, Other.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385543781-L.jpg",
-  "byline": "Margaret Atwood",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Testaments (2019) — Aunt Lydia's Ardua Hall testimony",
-   "durationMinutes": 33,
-   "instruction": "Read Aunt Lydia's opening testimony — her 'Ardua Hall' chapters are the book's engine — and notice how Atwood makes the villain sympathetic without forgiving her. Then read the two girls' accounts side by side: the novel is structured as evidence in a trial, and the reader is the jury on whether Gilead can ever be dismantled from within."
-  },
-  "tags": [
-   "Canadian",
-   "Dystopian",
-   "Sequel"
-  ],
-  "tier": 2,
-  "pageCount": 432,
-  "synopsis": "Atwood's sequel to The Handmaid's Tale is set fifteen years after the events of the original novel and is narrated by three women: Aunt Lydia, who reveals how she became Gilead's most powerful woman after being imprisoned with other women during the establishment of the Republic; Agnes Jemima, a young woman raised in Gilead as the daughter of a Commander; and Daisy, a young woman living in Canada who discovers her true identity. The novel reveals how the three women's stories converge and how Gilead's downfall is set in motion. Aunt Lydia's sections are presented as a manuscript written in secret, 'The Ardua Hall Holograph', in which she reveals her full history: a divorced judge who was imprisoned, tortured, and coerced into becoming an Aunt. The novel won the 2019 Man Booker Prize (jointly with Bernardine Evaristo's Girl, Woman, Other).",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Aunt Lydia's Testimony",
-    "pageStart": 1,
-    "pageEnd": 150,
-    "summary": "Lydia's capture. The stadium. Becoming an Aunt. Ardua Hall."
-   },
-   {
-    "number": 2,
-    "title": "Agnes's Story",
-    "pageStart": 151,
-    "pageEnd": 300,
-    "summary": "Agnes's life in Gilead. Her stepmother. The Aunts. Her true parents."
-   },
-   {
-    "number": 3,
-    "title": "Daisy's Story + The Convergence",
-    "pageStart": 301,
-    "pageEnd": 432,
-    "summary": "Daisy in Canada. The mission. The three stories meet. Gilead falls."
    }
   ]
  },
@@ -3880,484 +3404,6 @@
   ]
  },
  {
-  "id": "book-pride-and-prejudice-1813-174",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Pride and Prejudice (1813)",
-  "teaser": "Austen's novel — originally titled First Impressions — opens with one of the most famous sentences in English, and its heroine Elizabeth Bennet rejects a marriage proposal from the wealthiest man she's ever met, then falls in love with him over two hundred pages of misunderstanding. The novel invented the enemies-to-lovers plot and has never been out of print.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780141439518-L.jpg",
-  "byline": "Jane Austen",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Pride and Prejudice (1813) — the first chapter and Darcy's letter",
-   "durationMinutes": 38,
-   "instruction": "Read the first chapter aloud — Mrs. Bennet's scheming dialogue — and notice how Austen establishes character entirely through speech. Then read the letter Darcy writes Elizabeth, the novel's hinge: every line re-reads what came before. Austen herself said she had no 'fondness' for Darcy; the novel is funnier if you remember the author is on Elizabeth's side, not his."
-  },
-  "tags": [
-   "British",
-   "Classic",
-   "Romance",
-   "Regency",
-   "Novel"
-  ],
-  "tier": 1,
-  "pageCount": 432,
-  "synopsis": "Austen's most popular novel follows Elizabeth Bennet, the second of five daughters in a genteel but impoverished family, as she faces the marriage market of Regency England. When the wealthy Mr. Darcy arrives in the neighborhood, he and Elizabeth immediately clash, she finds him proud and disagreeable, he finds her beneath his notice. The novel traces their gradual understanding of each other: Elizabeth learns that Darcy's pride is not arrogance but shyness, and Darcy learns that Elizabeth's prejudice against him was based on incomplete information. Austen wrote the novel in a tone of sustained irony: the opening line, 'It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife', is both a social observation and a joke. The novel has sold over 20 million copies and inspired countless adaptations.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Volume I — Meryton",
-    "pageStart": 1,
-    "pageEnd": 150,
-    "summary": "The Bennet household. Bingley and Darcy. The assembly. 'Not handsome enough.'"
-   },
-   {
-    "number": 2,
-    "title": "Volume II — Hunsford",
-    "pageStart": 151,
-    "pageEnd": 300,
-    "summary": "The proposal. Elizabeth's refusal. Darcy's letter. The truth emerges."
-   },
-   {
-    "number": 3,
-    "title": "Volume III — Pemberley",
-    "pageStart": 301,
-    "pageEnd": 432,
-    "summary": "Elizabeth visits Pemberley. The elopement. The second proposal. The happy ending."
-   }
-  ]
- },
- {
-  "id": "book-crime-and-punishment-1866-175",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Crime and Punishment (1866)",
-  "teaser": "Dostoevsky's novel gives a poor St. Petersburg student a theory — that extraordinary men may break the law — and then makes him test it with an axe. Raskolnikov's murder of a pawnbroker occupies the first part; the other five parts are the punishment, which is not prison but his own unraveling mind.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780143058144-L.jpg",
-  "byline": "Fyodor Dostoevsky",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Crime and Punishment (1866) — the murder scene and the epilogue",
-   "durationMinutes": 11,
-   "instruction": "Read just the murder scene and notice the details Dostoevsky withholds: the axe is described obsessively, but the violence is almost skipped, because the book isn't about the crime. Then read the epilogue, where Raskolnikov — in prison, convicted — finally collapses and accepts love. The novel argues the punishment was always internal, and the legal sentence is an afterthought."
-  },
-  "tags": [
-   "Russian",
-   "Classic",
-   "Psychology",
-   "Novel",
-   "19th Century"
-  ],
-  "tier": 2,
-  "pageCount": 527,
-  "altPageCount": 608,
-  "altPageLabel": "Penguin",
-  "synopsis": "Dostoevsky's novel follows Rodion Raskolnikov, an impoverished former law student in St. Petersburg who murders an unscrupulous pawnbroker, Alyona Ivanovna, and her half-sister Lizaveta, robbing them of their money. Raskolnikov justifies the murder through his theory that 'extraordinary' men have the right to transgress moral law, that Napoleon, for instance, could kill without guilt. But the murder destroys him: he is wracked with paranoia, guilt, and psychological disintegration. The novel tracks his cat-and-mouse game with the detective Porfiry Petrovich, his relationship with Sonya (a prostitute who becomes his moral compass), and his eventual confession. Dostoevsky wrote the novel while owing large sums to creditors, serializing it in The Russian Messenger. The novel's exploration of guilt, free will, and redemption made it one of the most influential works of world literature.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Part I — The Crime",
-    "pageStart": 1,
-    "pageEnd": 130,
-    "summary": "Raskolnikov's theory. The murder. The aftermath. The paranoia."
-   },
-   {
-    "number": 2,
-    "title": "Part II — The Investigation",
-    "pageStart": 131,
-    "pageEnd": 300,
-    "summary": "Porfiry's questions. Sonya. The confession. The suffering."
-   },
-   {
-    "number": 3,
-    "title": "Parts III–VI — The Confession",
-    "pageStart": 301,
-    "pageEnd": 527,
-    "summary": "The trial. Siberia. Sonya's devotion. The redemption."
-   }
-  ]
- },
- {
-  "id": "book-heart-of-darkness-1899-176",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Heart of Darkness (1899)",
-  "teaser": "Conrad's novella is a frame within a frame: a sailor on a Thames boat tells the story of Marlow's journey up the Congo to find Kurtz, an ivory agent who has gone native — and it became the most argued-over short novel in English, the source of 'The horror! The horror!' and of the critique that it both exposed and reproduced colonialism.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780486264646-L.jpg",
-  "byline": "Joseph Conrad",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Heart of Darkness (1899) — the frame opening and Kurtz's report",
-   "durationMinutes": 45,
-   "instruction": "Read the opening — Marlow's listeners on the Thames, the city as 'the beginning of the world' — and notice how Conrad sets up the novel's central irony: the 'darkness' is in Europe all along. Then read Kurtz's report to the International Society, with its scrawled postscript — 'Exterminate all the brutes!' — which is the whole book in one line."
-  },
-  "tags": [
-   "British",
-   "Classic",
-   "Colonialism",
-   "Colonial",
-   "Novella"
-  ],
-  "tier": 1,
-  "pageCount": 116,
-  "synopsis": "Conrad's novella is narrated by Charles Marlow, a sailor who recounts his journey up the Congo River as captain of a Belgian trading company's steamer. Marlow's assignment is to find Kurtz, an ivory trader who has 'gone native' and set himself up as a god among the Congolese people. As Marlow travels upriver, he encounters the brutality of European colonialism and the thin line between civilization and savagery. When he finally finds Kurtz, the man is dying and has descended into madness: 'The horror! The horror!' is his final words. Conrad based the novella on his own experiences in the Congo in 1890, and the work became the foundation of modernist literature. Chinua Achebe's famous 1975 critique accused Conrad of racism for reducing Africa to a backdrop for European psychology; the debate continues today.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "The Frame Narrative",
-    "pageStart": 1,
-    "pageEnd": 20,
-    "summary": "Marlow on the Thames. The story begins. The journey upriver."
-   },
-   {
-    "number": 2,
-    "title": "The River",
-    "pageStart": 21,
-    "pageEnd": 70,
-    "summary": "The Company. The Central Station. The Inner Station. Kurtz."
-   },
-   {
-    "number": 3,
-    "title": "The Horror",
-    "pageStart": 71,
-    "pageEnd": 116,
-    "summary": "Kurtz's reign. The report. 'The horror! The horror!' The return."
-   }
-  ]
- },
- {
-  "id": "book-to-the-lighthouse-1927-177",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "To the Lighthouse (1927)",
-  "teaser": "Woolf's novel is one family and one question — will the Ramsays ever sail to the lighthouse? — told in three movements, including 'Time Passes,' the famous middle section where a decade passes in twenty pages while the house decays. The novel is the masterpiece of her stream-of-consciousness method.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780156907392-L.jpg",
-  "byline": "Virginia Woolf",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "To the Lighthouse (1927) — the opening and the 'Time Passes' section",
-   "durationMinutes": 17,
-   "instruction": "Read the first movement's opening — Mrs. Ramsay's consciousness as the house's center — and notice how Woolf moves between minds without scene breaks. Then read 'Time Passes' in one sitting: the bracketed death notices ('[Mr. Ramsay, stumbling along a passage one dark morning...]') are the novel's most radical formal gesture, grief reduced to a parenthesis."
-  },
-  "tags": [
-   "British",
-   "Modernist",
-   "Literary",
-   "Modernism",
-   "Classic"
-  ],
-  "tier": 1,
-  "pageCount": 232,
-  "synopsis": "Woolf's novel centres on the Ramsay family and their visits to the Isle of Skye in Scotland between 1910 and 1920. The novel is divided into three sections: 'The Window,' set on a single day before World War I; 'Time Passes,' a ten-page interlude covering the war years in which the house decays and several characters die offstage; and 'The Lighthouse,' in which the surviving Ramsays return to the house and James Ramsay finally makes the journey to the lighthouse his mother promised him years before. The novel has little dialogue and almost no direct action; most of it is written as thoughts and observations. Woolf uses multiple focalisation, the reader sees the same events through different characters' eyes, to explore how subjective experience shapes reality. The novel's central image, the lighthouse seen from the window, becomes a meditation on time, loss, and the permanence of art.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "The Window",
-    "pageStart": 1,
-    "pageEnd": 140,
-    "summary": "The Ramsays' summer. Mrs Ramsay's promise. The dinner. The relationships."
-   },
-   {
-    "number": 2,
-    "title": "Time Passes",
-    "pageStart": 141,
-    "pageEnd": 160,
-    "summary": "The war. The house decays. Deaths offstage. Time moves."
-   },
-   {
-    "number": 3,
-    "title": "The Lighthouse",
-    "pageStart": 161,
-    "pageEnd": 232,
-    "summary": "The return. James's journey. Lily Briscoe's painting. The end."
-   }
-  ]
- },
- {
-  "id": "book-the-grapes-of-wrath-178",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "The Grapes of Wrath (1939)",
-  "teaser": "Steinbeck's Pulitzer winner follows the Joad family from the Oklahoma dust bowl to California along Route 66 — and its ending, with Rose of Sharon nursing a starving stranger, scandalized and moved the country in equal measure. It sold 430,000 copies in its first year and was banned in its own state's farm country.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780143039433-L.jpg",
-  "byline": "John Steinbeck",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Grapes of Wrath (1939) — the intercalary chapters and the ending",
-   "durationMinutes": 17,
-   "instruction": "Read the intercalary chapters — the dust storm, the used-car lot, the turtle — and notice how Steinbeck alternates the Joads' story with a sociological chorus that widens the book into the whole migration. Then read the final chapter twice: the milk poured on the ground by the California growers is the novel's argument, and Rose of Sharon's last gesture is its answer."
-  },
-  "tags": [
-   "American",
-   "Classic",
-   "Depression",
-   "Pulitzer"
-  ],
-  "tier": 1,
-  "pageCount": 464,
-  "synopsis": "Steinbeck's Pulitzer-winning novel follows the Joad family, tenant farmers driven from their Oklahoma home by drought, economic hardship, and bank foreclosures during the Great Depression. The family, including Ma and Pa Joad, their son Tom (recently paroled from prison), and the former preacher Jim Casy, sets out for California along Route 66, along with thousands of other 'Okies' seeking work, land, and dignity. The novel alternates between the Joads' specific story and intercalary chapters that describe the broader social catastrophe. In California, the family finds not abundance but exploitation: wages are driven down by surplus labor, camps are raided, and hope curdles into rage. The novel's title comes from 'The Battle Hymn of the Republic.' The book won the National Book Award and Pulitzer Prize, and was cited when Steinbeck won the Nobel Prize in 1962.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "The Departure",
-    "pageStart": 1,
-    "pageEnd": 120,
-    "summary": "Tom returns. The farm lost. The family loads the truck. Route 66."
-   },
-   {
-    "number": 2,
-    "title": "The Road",
-    "pageStart": 121,
-    "pageEnd": 280,
-    "summary": "The journey west. Grandpa dies. Jim Casy's philosophy. The camps."
-   },
-   {
-    "number": 3,
-    "title": "California",
-    "pageStart": 281,
-    "pageEnd": 464,
-    "summary": "The promised land. Exploitation. The strike. Casy's death. Tom's promise."
-   }
-  ]
- },
- {
-  "id": "book-invisible-man-1952-180",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Invisible Man (1952)",
-  "teaser": "Ellison's only completed novel opens with its narrator underground, 'invisible... simply because people refuse to see me' — and the 1,369 light bulbs he's stolen electricity to light are the novel's central image: he is making himself visible by force. It won the National Book Award in 1953, the first by a Black writer.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780679732761-L.jpg",
-  "byline": "Ralph Ellison",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Invisible Man (1952) — the Prologue and the battle royal",
-   "durationMinutes": 44,
-   "instruction": "Read the Prologue and the Epilogue together — they're the same man in the same basement, and the book between them is the explanation of how he got there. Then read the 'battle royal' scene, where the narrator is made to fight blindfolded for white men's entertainment: the novel's thesis — that Black Americans are given 'opportunity' only to be managed — is stated in that boxing ring."
-  },
-  "tags": [
-   "American",
-   "Classic",
-   "Race",
-   "National Book Award",
-   "Identity"
-  ],
-  "tier": 1,
-  "pageCount": 568,
-  "synopsis": "Ellison's only novel published during his lifetime follows an unnamed Black narrator from his childhood in the South through his education at a Negro college, his brief employment as a factory worker, and his involvement with the Brotherhood (a political organization modeled on the Communist Party). The narrator is 'invisible' not because he is literally unseen but because white society refuses to see him as a full human being. The novel traces his disillusionment with every institution that claims to represent him, the college, the factory, the Brotherhood, and his eventual retreat to an underground room in Harlem, where he reflects on his experiences. The novel won the National Book Award in 1953, making Ellison the first African-American writer to win. The Modern Library ranked it 19th on its list of the 100 best English-language novels of the 20th century.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "The South",
-    "pageStart": 1,
-    "pageEnd": 130,
-    "summary": "The battle royal. The college. The expulsion. The paint factory."
-   },
-   {
-    "number": 2,
-    "title": "New York",
-    "pageStart": 131,
-    "pageEnd": 350,
-    "summary": "Harlem. The Brotherhood. The speeches. The manipulation."
-   },
-   {
-    "number": 3,
-    "title": "The Underground",
-    "pageStart": 351,
-    "pageEnd": 568,
-    "summary": "The riot. The betrayal. The underground room. 'Invisible.'"
-   }
-  ]
- },
- {
-  "id": "book-lord-of-the-flies-181",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Lord of the Flies (1954)",
-  "teaser": "Golding's novel strands a group of British schoolboys on an island and watches civilization evaporate in weeks: the conch shell that orders their meetings loses authority, the signal fire goes out, and the 'beast' they fear turns out to be the darkness in themselves. It was rejected by 21 publishers before becoming a school staple.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780399501487-L.jpg",
-  "byline": "William Golding",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Lord of the Flies (1954) — the conch opening and the Simon scene",
-   "durationMinutes": 25,
-   "instruction": "Read the opening — Ralph and Piggy's first meeting, the conch discovery — and track the conch's power as the novel's measure of order: it works until it doesn't. Then read the chapter where the boys kill Simon, mistaking him for the beast: the novel's turning point, and the moment Golding stops being allegorical and becomes something harder to look at."
-  },
-  "tags": [
-   "British",
-   "Classic",
-   "Allegory",
-   "Nobel"
-  ],
-  "tier": 1,
-  "pageCount": 182,
-  "synopsis": "Golding's novel follows a group of British schoolboys stranded on a deserted island after a plane crash during wartime. Ralph, elected leader, tries to maintain order and build a signal fire; Jack, head of the choirboys, becomes obsessed with hunting and power. The boys split into two tribes: Ralph's group, which values civilization and rescue, and Jack's, which values violence and spectacle. The novel traces the descent from order to chaos: the signal fire goes out (a ship passes), Piggy's glasses are stolen, Simon is killed by the frenzied boys, and Piggy is crushed by a boulder. Ralph is hunted across the island until a naval officer arrives, having seen the smoke. The novel's central symbol, the 'Lord of the Flies,' a pig's head on a stake, represents the beast within each boy. Golding wrote the novel as a response to The Coral Island (1858), a Victorian adventure story about boys who prosper on a desert island.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "The Sound of the Shell",
-    "pageStart": 1,
-    "pageEnd": 30,
-    "summary": "The crash. Ralph and Piggy. The conch. The election."
-   },
-   {
-    "number": 2,
-    "title": "The Rise of Jack",
-    "pageStart": 31,
-    "pageEnd": 90,
-    "summary": "The hunt. The beast. The split. Jack's tribe."
-   },
-   {
-    "number": 3,
-    "title": "The Fall",
-    "pageStart": 91,
-    "pageEnd": 182,
-    "summary": "Simon's death. Piggy's death. The hunt for Ralph. The rescue."
-   }
-  ]
- },
- {
-  "id": "book-things-fall-apart-1958-182",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Things Fall Apart (1958)",
-  "teaser": "Achebe wrote Things Fall Apart at 28 as a deliberate answer to Heart of Darkness — the story of an Igbo village told from the inside, in which the title's collapse is both a man's and a culture's. Okonkwo, a wrestler who built his life on repressing everything he fears in his father, is destroyed by the arrival of missionaries and by his own rigidity.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385474542-L.jpg",
-  "byline": "Chinua Achebe",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Things Fall Apart (1958) — the opening and the final chapter",
-   "durationMinutes": 10,
-   "instruction": "Read the opening — Okonkwo's fame from wrestling, his dread of his lazy father — and notice how Achebe embeds Igbo proverbs, gods, and customs as the narrative's natural furniture, not exotica. Then read the final chapter, where the District Commissioner's thoughts close the novel: the colonizer's book about Okonkwo's world is a paragraph, and the joke is on him."
-  },
-  "tags": [
-   "Nigerian",
-   "Classic",
-   "Postcolonial",
-   "Historical Fiction",
-   "20th Century"
-  ],
-  "tier": 2,
-  "pageCount": 209,
-  "synopsis": "Achebe's debut novel follows Okonkwo, a powerful warrior and leader in the Igbo village of Umuofia in pre-colonial Nigeria. Okonkwo is driven by fear of weakness, his father was lazy and debt-ridden, and he rules his household with an iron hand. The novel traces Okonkwo's rise and fall: his exile from Umuofia after accidentally killing a clansman, his years in exile, and his return to find that the white missionaries and colonial government have transformed Igbo society. The novel's title comes from Yeats's 'The Second Coming': 'Things fall apart; the centre cannot hold.' Achebe wrote the novel in response to European portrayals of Africa (particularly Conrad's Heart of Darkness and Joyce Cary's Mister Johnson), and it became the most widely read African novel in history, translated into over 50 languages.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Umuofia",
-    "pageStart": 1,
-    "pageEnd": 60,
-    "summary": "Okonkwo's rise. The wrestling match. The Oracle. The exile."
-   },
-   {
-    "number": 2,
-    "title": "Exile",
-    "pageStart": 61,
-    "pageEnd": 120,
-    "summary": "Seven years in Mbanta. The missionaries. The conversion."
-   },
-   {
-    "number": 3,
-    "title": "The Return",
-    "pageStart": 121,
-    "pageEnd": 209,
-    "summary": "Okonkwo returns. The colonial government. The court. The end."
-   }
-  ]
- },
- {
-  "id": "book-catch-22-1961-183",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Catch-22 (1961)",
-  "teaser": "Heller's novel invented the paradox that gave it its name — a soldier who asks to be grounded for madness proves he's sane by asking, so he can't be grounded — and turned the World War II novel into a time-loop comedy of bureaucratic terror. Its nonlinear structure was a scandal in 1961 and a template by 1970.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9781451626650-L.jpg",
-  "byline": "Joseph Heller",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Catch-22 (1961) — the opening and the Snowden chapter",
-   "durationMinutes": 36,
-   "instruction": "Read the first chapter and the last chapter back to back — Heller begins in the middle and ends with the event that explains everything: Snowden, and the secret Yossarian was never able to tell. Then read the catch-22 explanation scene aloud: the logic is airtight and insane at once, which is the novel's whole argument about institutions."
-  },
-  "tags": [
-   "American",
-   "Satire",
-   "WWII",
-   "War"
-  ],
-  "tier": 1,
-  "pageCount": 453,
-  "synopsis": "Heller's novel follows Captain John Yossarian, a World War II bombardier stationed on the fictional island of Pianosa, who wants to stop flying combat missions, but the military's catch-22 prevents him: if he's crazy, he can stop flying, but if he asks to stop, he must be sane. The novel is structured as a series of circular, non-chronological episodes that gradually reveal the full horror of Yossarian's situation. Heller's central argument, that the military is insane and the individual is rational, is delivered through black comedy, absurd dialogue, and escalating violence. The novel was initially a commercial failure but became a word-of-mouth sensation, selling over 10 million copies. The phrase 'catch-22' entered the English language to describe any paradoxical situation from which there is no escape.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Yossarian's War",
-    "pageStart": 1,
-    "pageEnd": 120,
-    "summary": "The missions. The catch. Milo Minderbinder. The hospital."
-   },
-   {
-    "number": 2,
-    "title": "The Spiral",
-    "pageStart": 121,
-    "pageEnd": 300,
-    "summary": "Nately. Snowden. The dead man in Yossarian's tent. The circular time."
-   },
-   {
-    "number": 3,
-    "title": "The End",
-    "pageStart": 301,
-    "pageEnd": 453,
-    "summary": "Snowden's secret. Yossarian's decision. The defection. 'That's some catch.'"
-   }
-  ]
- },
- {
-  "id": "book-the-bell-jar-1963-184",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "The Bell Jar (1963)",
-  "teaser": "Plath's only novel — published under the pseudonym Victoria Lucas a month before her death — follows Esther Greenwood, a college student in 1950s New York, through her internship at a fashion magazine and her slow descent into breakdown. Its famous fig-tree passage imagines all her possible futures as figs that rot as she hesitates to choose.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780060837020-L.jpg",
-  "byline": "Sylvia Plath",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Bell Jar (1963) — the opening and the fig-tree passage",
-   "durationMinutes": 43,
-   "instruction": "Read the opening — Esther's New York internship, the Rosenberg executions as backdrop — and notice how Plath renders the 1950s woman's options as a series of doors closing. Then read the fig-tree paragraph: it's the novel's thesis in miniature, and it explains the 'bell jar' — the suffocation of every possibility by the pressure to choose one."
-  },
-  "tags": [
-   "American",
-   "Classic",
-   "Mental Health",
-   "Confessional"
-  ],
-  "tier": 1,
-  "pageCount": 288,
-  "synopsis": "Plath's only novel follows Esther Greenwood, a brilliant scholarship student from Boston who wins a summer internship at a New York fashion magazine. In New York, Esther is surrounded by glamour and sophistication, but she feels increasingly disconnected, the 'bell jar' of the title descends, distorting her perception of the world. Esther's depression deepens: she can't sleep, can't write, can't decide what to do with her life. The novel traces her deterioration through a series of psychiatrists and treatments, culminating in electroconvulsive therapy (both harmful and, eventually, helpful). Plath drew directly on her own experience: she attempted suicide in 1953 and was treated with shock therapy. The novel was published in 1963 under the pseudonym Victoria Lucas, and Plath killed herself a month later. The bell jar has become a cultural metaphor for depression.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "New York",
-    "pageStart": 1,
-    "pageEnd": 80,
-    "summary": "The internship. The glamour. The disconnection. The bell jar descends."
-   },
-   {
-    "number": 2,
-    "title": "The Collapse",
-    "pageStart": 81,
-    "pageEnd": 180,
-    "summary": "Boston. The doctors. The pills. The suicide attempt."
-   },
-   {
-    "number": 3,
-    "title": "The Treatment",
-    "pageStart": 181,
-    "pageEnd": 288,
-    "summary": "The asylum. Dr. Nolan. The shock therapy. The bell jar lifts."
-   }
-  ]
- },
- {
   "id": "book-the-gulag-archipelago-1973-187",
   "categoryId": "BOOKS",
   "subtype": "Book",
@@ -4400,197 +3446,6 @@
     "pageStart": 441,
     "pageEnd": 660,
     "summary": "Stalin's death. The thaw. Solzhenitsyn's release. The exile. The testament."
-   }
-  ]
- },
- {
-  "id": "book-the-handmaids-tale-1985-190",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "The Handmaid's Tale (1985)",
-  "teaser": "Atwood wrote Gilead — a theocratic United States where fertile women are assigned as 'handmaids' — by inventing nothing: every practice in the novel has a historical precedent she documented. Its narrator Offred tells her story in fragments to an unknown listener, and the novel's famous final section reveals the whole account as a historical transcript.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385490818-L.jpg",
-  "byline": "Margaret Atwood",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Handmaid's Tale (1985) — the opening and the Historical Notes",
-   "durationMinutes": 18,
-   "instruction": "Read the opening — the gymnasium scene, the women in red — and notice how Atwood withholds the world's rules and lets you assemble them. Then read the 'Historical Notes' epilogue, set 200 years later, where academics discuss Offred's testimony as a relic: the ending re-frames everything as evidence, and the novel's warning is that the scholars' comfort is the same comfort that let Gilead happen."
-  },
-  "tags": [
-   "Canadian",
-   "Dystopian",
-   "Classic",
-   "Feminist",
-   "20th Century",
-   "1980s"
-  ],
-  "tier": 2,
-  "pageCount": 311,
-  "synopsis": "Atwood's dystopian novel is set in the near-future Republic of Gilead, a theocratic military dictatorship that has overthrown the US government. Offred, 'Of Fred,' her name indicates she is the property of a Commander named Fred, is a Handmaid, a fertile woman forced to bear children for the ruling class. The novel is narrated by Offred in a present tense that circles around the past: before Gilead, she had a husband, a daughter, a job, a name. Now she has a红色clothing, a communal shopping trip, and once a month, a ceremonial rape. Atwood has said that nothing in the novel was invented, every atrocity has a historical precedent. The novel won the Arthur C. Clarke Award in 1987 and has become a cultural touchstone, particularly after the 2017 Hulu television adaptation.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Parts I–III — The Present",
-    "pageStart": 1,
-    "pageEnd": 100,
-    "summary": "Offred's room. The Commander's house. The shopping trip. The memories."
-   },
-   {
-    "number": 2,
-    "title": "Parts IV–VI — The Past",
-    "pageStart": 101,
-    "pageEnd": 200,
-    "summary": "Before Gilead. Luke. The daughter. The escape attempt. The Red Center."
-   },
-   {
-    "number": 3,
-    "title": "Parts VII–XVIII — The Affair",
-    "pageStart": 201,
-    "pageEnd": 311,
-    "summary": "The Commander's visits. The Commander's wife. Nick. The Mayday resistance. The end."
-   }
-  ]
- },
- {
-  "id": "book-norwegian-wood-1987-191",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Norwegian Wood (1987)",
-  "teaser": "Murakami's fifth novel was his breakthrough in Japan — selling millions, largely because it was, unusually for him, a realistic story: a love triangle among students in 1960s Tokyo, narrated by Toru Watanabe remembering his friend Kizuki's suicide and his love for Kizuki's girlfriend Naoko. Its first line — 'I was thirty-seven, then' — begins the memory.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780375704024-L.jpg",
-  "byline": "Haruki Murakami",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Norwegian Wood (1987) — the opening and the sanatorium chapters",
-   "durationMinutes": 31,
-   "instruction": "Read the opening — Watanabe on a plane, hearing 'Norwegian Wood' by the Beatles, and the memory flooding back — and notice how Murakami frames the whole novel as recollection. Then read the scenes at Naoko's mountain sanatorium, where the novel's theme — that death is 'not the opposite of life but a part of it' — is stated almost as a thesis."
-  },
-  "tags": [
-   "Japanese",
-   "Literary",
-   "Romance"
-  ],
-  "tier": 2,
-  "pageCount": 389,
-  "synopsis": "Murakami's most autobiographical novel follows Toru Watanabe, a college student in Tokyo in the late 1960s, as he navigates love, grief, and the gap between youth and adulthood. Two women dominate his life: Naoko, the girlfriend of his best friend Kizuki (who committed suicide at seventeen), and Midori, a lively, unconventional woman who represents life. The novel is a love story, but also a study in depression: Naoko's mental health deteriorates as the novel progresses, and Toru is pulled between her darkness and Midori's light. The title comes from the Beatles song, which Toru hears in a Hamburg airport and is transported back to his youth. The novel was a massive bestseller in Japan (over 4 million copies) and is Murakami's most conventional work, no surrealism, no alternate worlds, just the real grief of being young.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Tokyo 1978",
-    "pageStart": 1,
-    "pageEnd": 80,
-    "summary": "The airport. 'Norwegian Wood.' The past returns. Kizuki's death."
-   },
-   {
-    "number": 2,
-    "title": "The Women",
-    "pageStart": 81,
-    "pageEnd": 250,
-    "summary": "Naoko. Midori. Reiko. The dorm. The walks. The love triangle."
-   },
-   {
-    "number": 3,
-    "title": "Amagi Pass",
-    "pageStart": 251,
-    "pageEnd": 389,
-    "summary": "Naoko's illness. The asylum. Midori. The loss. 'Where was I?'"
-   }
-  ]
- },
- {
-  "id": "book-the-remains-of-the-192",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "The Remains of the Day (1989)",
-  "teaser": "Ishiguro's Booker winner is the memoir of Stevens, an aging English butler driving through the countryside and remembering his service at Darlington Hall — and gradually revealing that the 'greatness' he served was collaboration with fascism, and that his one possible love was lost to his own professional discipline. The novel is a tragedy told in the most polite voice in literature.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780679731726-L.jpg",
-  "byline": "Kazuo Ishiguro",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Remains of the Day (1989) — the opening and the pier scene",
-   "durationMinutes": 40,
-   "instruction": "Read the opening — Stevens's employer, the American Mr. Farraday, teasing him about his dignity — and notice the voice: perfectly composed, and every evasion is visible through it. Then read the scene at the pier at the end, where Stevens thinks about his 'dignity' and his life: Ishiguro gives him the book's only moment of near-honesty, and the novel ends without him acting on it."
-  },
-  "tags": [
-   "British",
-   "Literary",
-   "Memory",
-   "Fiction",
-   "Historical",
-   "20th Century",
-   "Booker"
-  ],
-  "tier": 1,
-  "pageCount": 258,
-  "synopsis": "Ishiguro's Booker-winning novel follows Stevens, an aging English butler who has devoted his life to serving Lord Darlington at Darlington Hall. Stevens takes a motoring trip through the English countryside in 1956, and as he drives, he reflects on his career, his unwavering loyalty, his repression of emotion, and his failed relationship with Miss Kenton, the former housekeeper who loved him and whom he never acknowledged. The novel's devastating irony is that Stevens's loyalty was misplaced: Lord Darlington was a Nazi sympathizer, and Stevens's dedication to service has cost him everything human. The novel is narrated in Stevens's measured, formal voice, a voice that reveals more than it intends. Ishiguro won the Booker Prize in 1989, and the novel was adapted into a 1993 film starring Anthony Hopkins.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "The Journey Begins",
-    "pageStart": 1,
-    "pageEnd": 60,
-    "summary": "Stevens's new American employer. The motoring trip. The reflections begin."
-   },
-   {
-    "number": 2,
-    "title": "Lord Darlington",
-    "pageStart": 61,
-    "pageEnd": 150,
-    "summary": "The great house. The conferences. Miss Kenton. The loyalty."
-   },
-   {
-    "number": 3,
-    "title": "The End of the Trip",
-    "pageStart": 151,
-    "pageEnd": 258,
-    "summary": "The meeting with Miss Kenton. The truth about Darlington. 'The evening's the best part of the day.'"
-   }
-  ]
- },
- {
-  "id": "book-american-psycho-1991-193",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "American Psycho (1991)",
-  "teaser": "Bret Easton Ellis's novel about Patrick Bateman, a Wall Street banker who tortures and murders with an accountant's obsession, was condemned before publication — its publisher dropped it, and the controversy made it famous. Its method is the point: the brand-name liturgy of Bateman's world is rendered in the same deadpan as the violence, which is the novel's argument that the two are one system.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780679735779-L.jpg",
-  "byline": "Bret Easton Ellis",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "American Psycho (1991) — the morning routine and the therapy chapter",
-   "durationMinutes": 39,
-   "instruction": "Read the opening chapters — the restaurant reviews, the business cards, the morning routine — and notice how Ellis never signals irony: the obsession with status is narrated exactly like the murder scenes. Then read the chapter where Bateman describes his 'deepest, darkest fantasies' with his therapist: the novel's central ambiguity — is any of it real? — is never resolved, which is the whole design."
-  },
-  "tags": [
-   "American",
-   "Satire",
-   "Dark"
-  ],
-  "tier": 2,
-  "pageCount": 399,
-  "synopsis": "Ellis's controversial novel follows Patrick Bateman, a twenty-six-year-old investment banker on Wall Street who is also a serial killer. Bateman narrates in a flat, affectless voice that alternates between meticulous descriptions of designer clothing, restaurant reservations, and business cards, and graphic accounts of torture and murder. The novel satirizes 1980s consumer culture, yuppie narcissism, and the emptiness beneath the surface of wealth. The central question, is Bateman actually committing these murders, or is he fantasizing?, is never definitively answered. The novel was initially rejected by multiple publishers and upon publication was picketed by feminist groups; it was banned in several countries. The 2000 film adaptation starring Christian Bale became a cult classic. Ellis wrote the novel at 27, drawing on his own Wall Street experience.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "January–March",
-    "pageStart": 1,
-    "pageEnd": 100,
-    "summary": "The business card. The restaurants. The first murders. The interviews."
-   },
-   {
-    "number": 2,
-    "title": "April–June",
-    "pageStart": 101,
-    "pageEnd": 250,
-    "summary": "Paul Allen. The chainsaw. The spiral. The disguises."
-   },
-   {
-    "number": 3,
-    "title": "July–December",
-    "pageStart": 251,
-    "pageEnd": 399,
-    "summary": "The breakdown. The lawyer. 'I don't exist.' The blankness."
    }
   ]
  },
@@ -4828,146 +3683,6 @@
   ]
  },
  {
-  "id": "book-life-of-pi-2001-200",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Life of Pi (2001)",
-  "teaser": "Yann Martel's Booker winner is the story of Pi Patel, a zookeeper's son shipwrecked in the Pacific with a Bengal tiger named Richard Parker — 227 days on a lifeboat, told with such straight-faced realism that the tiger almost becomes plausible. Its final section offers a second version of the story, and the choice between them is the novel.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780156027328-L.jpg",
-  "byline": "Yann Martel",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Life of Pi (2001) — the zoo opening and the two endings",
-   "durationMinutes": 21,
-   "instruction": "Read the opening — Pi's childhood at the zoo, the animals' escape attempts — and notice how the book earns its later symbolism: the zoo chapters are the novel's philosophy disguised as natural history. Then read the final version of the shipwreck, where no tiger appears: the novel's famous question — which story do you prefer? — is asked directly, and the reader's answer is the book's meaning."
-  },
-  "tags": [
-   "Canadian",
-   "Literary",
-   "Survival"
-  ],
-  "tier": 2,
-  "pageCount": 326,
-  "synopsis": "Martel's Booker-winning novel follows Piscine 'Pi' Patel, the son of a zookeeper in Pondicherry, India, who survives a shipwreck that kills his family. Pi is stranded on a lifeboat in the Pacific Ocean with a Bengal tiger named Richard Parker. The novel follows their 227-day journey, as Pi, a Hindu, Muslim, and Christian, negotiates his faith, his fear, and his relationship with the tiger. The novel is framed as a story told to a writer by the adult Pi, and its final twist, which re-frames everything that came before, has divided readers since publication. Martel said the novel was inspired by a book about a man stranded on a raft in the Pacific, and by his own travels in India. The novel won the Man Booker Prize in 2002 and was adapted into Ang Lee's Oscar-winning 2012 film.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Pondicherry",
-    "pageStart": 1,
-    "pageEnd": 80,
-    "summary": "The zoo. The three religions. The ship. The family."
-   },
-   {
-    "number": 2,
-    "title": "The Pacific",
-    "pageStart": 81,
-    "pageEnd": 250,
-    "summary": "The lifeboat. Richard Parker. The whale. The island. The survival."
-   },
-   {
-    "number": 3,
-    "title": "The Story",
-    "pageStart": 251,
-    "pageEnd": 326,
-    "summary": "The rescue. The Japanese investigators. The other story. 'Which story do you prefer?'"
-   }
-  ]
- },
- {
-  "id": "book-the-kite-runner-2003-201",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "The Kite Runner (2003)",
-  "teaser": "Hosseini's debut — the first novel in English by an Afghan author to become a global bestseller — follows Amir, a privileged boy in 1970s Kabul, and Hassan, the Hazara servant's son who is his best friend and his shame. The kite tournament of the title is where Amir fails Hassan, and the novel spends the rest of its length on the debt.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9781594631931-L.jpg",
-  "byline": "Khaled Hosseini",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Kite Runner (2003) — the opening and the kite tournament",
-   "durationMinutes": 33,
-   "instruction": "Read the opening — Amir in California, a phone call from Pakistan that 'made me who I am today' — and notice how the novel frames itself as a confession. Then read the kite tournament and its aftermath, the novel's hinge: the moment Amir chooses not to save Hassan is rendered in a single image (the blue kite, the alley), and every later chapter is that image being paid back."
-  },
-  "tags": [
-   "Afghan",
-   "Literary",
-   "Redemption"
-  ],
-  "tier": 2,
-  "pageCount": 371,
-  "synopsis": "Hosseini's debut novel follows Amir, the son of a wealthy Pashtun businessman in Kabul, and his relationship with Hassan, the son of his father's Hazara servant. In 1975, Amir witnesses Hassan being assaulted by a group of bullies and does nothing to stop it, a cowardice that haunts him for decades. When the Soviet invasion forces Amir and his father to flee to California, Amir carries his guilt across continents. Years later, Amir receives a call from an old friend: 'There is a way to be good again.' He returns to Taliban-controlled Afghanistan to rescue Hassan's orphaned son. The novel is a story of redemption, guilt, and the relationship between Afghanistan's past and present. It became a massive bestseller and was adapted into a 2007 film.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Kabul",
-    "pageStart": 1,
-    "pageEnd": 100,
-    "summary": "Amir and Hassan. The kite tournament. The alley. The betrayal."
-   },
-   {
-    "number": 2,
-    "title": "California",
-    "pageStart": 101,
-    "pageEnd": 250,
-    "summary": "The escape. The refugee experience. The guilt. The call."
-   },
-   {
-    "number": 3,
-    "title": "The Return",
-    "pageStart": 251,
-    "pageEnd": 371,
-    "summary": "Taliban Kabul. Sohrab. The rescue. 'For you, a thousand times over.'"
-   }
-  ]
- },
- {
-  "id": "book-never-let-me-go-202",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Never Let Me Go (2005)",
-  "teaser": "Ishiguro's sixth novel is narrated by Kathy H., recalling her childhood at Hailsham, an idyllic English boarding school — and slowly revealing that she and her friends are clones, raised to donate organs until they 'complete.' The novel's horror is that nobody in it finds this monstrous, which is the point.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9781400078776-L.jpg",
-  "byline": "Kazuo Ishiguro",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Never Let Me Go (2005) — the opening and the Miss Emily revelation",
-   "durationMinutes": 37,
-   "instruction": "Read the opening — Kathy's casual description of being a 'carer' and the word 'donations' — and notice how Ishiguro withholds the book's premise so gently that you may not register it at first. Then read the scene where the students learn the truth from Miss Emily and Madame: the revelation is delivered in the same quiet register as everything else, which is the novel's whole method of making you complicit."
-  },
-  "tags": [
-   "British",
-   "Literary",
-   "Science Fiction",
-   "Dystopian",
-   "21st Century"
-  ],
-  "tier": 2,
-  "pageCount": 288,
-  "synopsis": "Ishiguro's novel follows Kathy, Tommy, and Ruth, students at Hailsham, a seemingly idyllic English boarding school in the 1990s. As the novel progresses, hints accumulate that Hailsham is not what it seems: the students are clones, raised to donate their organs when they reach adulthood. The novel is narrated by Kathy, now thirty-one, who looks back on her time at Hailsham and her relationships with Tommy and Ruth. The three navigate love triangles, jealousies, and the gradual realization of their fate. Ishiguro's central technique is restraint: the horror of the students' situation is never dramatized but always present beneath the surface of their ordinary lives. The novel won the Whitbread Book of the Year Award and was shortlisted for the Man Booker Prize. The 2010 film starred Carey Mulligan, Andrew Garfield, and Keira Knightley.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Hailsham",
-    "pageStart": 1,
-    "pageEnd": 80,
-    "summary": "The school. Miss Emily. The art. The rumors. The truth."
-   },
-   {
-    "number": 2,
-    "title": "The Cottages",
-    "pageStart": 81,
-    "pageEnd": 180,
-    "summary": "The cottage years. Kathy and Tommy. Ruth. The Gallery."
-   },
-   {
-    "number": 3,
-    "title": "The End",
-    "pageStart": 181,
-    "pageEnd": 288,
-    "summary": "The deferral. Miss Emily's confession. Tommy's death. 'Never let me go.'"
-   }
-  ]
- },
- {
   "id": "book-the-brief-wondrous-life-203",
   "categoryId": "BOOKS",
   "subtype": "Book",
@@ -5155,55 +3870,6 @@
   ]
  },
  {
-  "id": "book-the-underground-railroad-2016-208",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "The Underground Railroad (2016)",
-  "teaser": "Colson Whitehead's Pulitzer and National Book Award winner takes the Underground Railroad literally: Cora, an enslaved woman in Georgia, escapes on an actual underground train, and each state she passes through is a different version of American racism — a plantation idyll, a white-supremacist laboratory, a surveillance state. The novel won both major American fiction prizes in the same year.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385542364-L.jpg",
-  "byline": "Colson Whitehead",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Underground Railroad (2016) — the plantation opening and the South Carolina chapters",
-   "durationMinutes": 27,
-   "instruction": "Read the opening — Cora's life on the Randall plantation, her mother's escape years before — and notice how Whitehead grounds the fantastical premise in brutal realism. Then read the South Carolina chapters, where the 'progressive' state's medicine and eugenics are exposed: the novel's horror is that the alternative states are not alternatives at all."
-  },
-  "tags": [
-   "American",
-   "Historical",
-   "Slavery",
-   "Historical Fiction",
-   "Speculative",
-   "21st Century"
-  ],
-  "tier": 2,
-  "pageCount": 306,
-  "synopsis": "Whitehead's Pulitzer-winning novel follows Cora, an enslaved woman who escapes from a Georgia plantation via the Underground Railroad, which, in Whitehead's alternate history, is a literal railroad with tunnels and stations beneath the Southern soil. The novel follows Cora's journey north through different states, each of which represents a different phase of American racial history: South Carolina's paternalism, North Carolina's genocide, Indiana's precarious freedom. Whitehead uses the fantasy of the literal railroad to make visible the real underground networks that helped enslaved people escape. The novel won the Pulitzer Prize, the National Book Award, and the Arthur C. Clarke Award. Barack Obama named it one of his favorite books.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "The Plantation",
-    "pageStart": 1,
-    "pageEnd": 60,
-    "summary": "Ridgeway. Cora's grandmother. The escape. The first station."
-   },
-   {
-    "number": 2,
-    "title": "The Railroad",
-    "pageStart": 61,
-    "pageEnd": 200,
-    "summary": "South Carolina. North Carolina. The festivals. The violence. The freedom."
-   },
-   {
-    "number": 3,
-    "title": "The North",
-    "pageStart": 201,
-    "pageEnd": 306,
-    "summary": "Indiana. Valentine. The community. Ridgeway's pursuit. The end."
-   }
-  ]
- },
- {
   "id": "book-sing-unburied-sing-2017-209",
   "categoryId": "BOOKS",
   "subtype": "Book",
@@ -5246,52 +3912,6 @@
     "pageStart": 201,
     "pageEnd": 289,
     "summary": "The return. The violence. The unburied. 'Sing unburied sing.'"
-   }
-  ]
- },
- {
-  "id": "book-circe-2018-210",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Circe (2018)",
-  "teaser": "Madeline Miller's retelling of Greek myth gives the witch Circe — a minor figure in the Odyssey — a full novel of her own, narrated in first person from her exile on the island of Aea. Its opening line — 'When I was born, the name for what I was did not exist' — announces its project: making a woman who was a plot device into a protagonist.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316556347-L.jpg",
-  "byline": "Madeline Miller",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Circe (2018) — the opening and the Odysseus chapters",
-   "durationMinutes": 11,
-   "instruction": "Read the opening — Circe's childhood among the gods, her discovery of her power — and notice how Miller turns the Odyssey's one-scene witch into a character with a history. Then read the chapters where Odysseus arrives: the novel's central scene, and its point is that the Odyssey's version was never Circe's story. Miller's sequel-novel, The Song of Achilles, is the same project in reverse."
-  },
-  "tags": [
-   "American",
-   "Mythology",
-   "Retelling"
-  ],
-  "tier": 2,
-  "pageCount": 393,
-  "synopsis": "Miller's novel retells the story of Circe, the witch from the Odyssey, from her own perspective. Born the daughter of the sun god Helios and the nymph Perse, Circe is scorned by her divine family for her mortal voice and her lack of power. When she discovers she has the gift of witchcraft, transforming her enemies into monsters, she is banished to the island of Aiaia, where she lives alone for centuries, encountering Daedalus, Icarus, the Minotaur, and Odysseus. Miller's Circe is not a villain but a woman finding her power in a world controlled by gods. The novel won the Women's Prize for Fiction in 2019 and was a massive bestseller. Miller's previous novel, The Song of Achilles, also retold Greek mythology from a marginalized perspective.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "The Gods",
-    "pageStart": 1,
-    "pageEnd": 80,
-    "summary": "Circe's birth. The mockery. The gift. The transformation. The banishment."
-   },
-   {
-    "number": 2,
-    "title": "Aiaia",
-    "pageStart": 81,
-    "pageEnd": 200,
-    "summary": "The island. Daedalus. The Minotaur. The herbs. The solitude."
-   },
-   {
-    "number": 3,
-    "title": "The Mortal World",
-    "pageStart": 201,
-    "pageEnd": 393,
-    "summary": "Odysseus. Telegonus. The witch's power. The choosing of mortality. The end."
    }
   ]
  },
@@ -6118,1168 +4738,6 @@
   ]
  },
  {
-  "id": "book-moby-dick-1851-228",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Moby-Dick (1851)",
-  "teaser": "Melville's novel — a whaling adventure that becomes a metaphysical epic — was a commercial failure in its time and is now one of the most-studied books in English. Its narrator Ishmael signs onto the Pequod, whose captain, Ahab, is hunting one whale: the white whale that took his leg. The novel is 135 chapters that spend hundreds of pages on the science of whales and then, in three chapters, destroy everyone.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780142437247-L.jpg",
-  "byline": "Herman Melville",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Moby-Dick (1851) — 'Loomings' and the whiteness chapter",
-   "durationMinutes": 33,
-   "instruction": "Read the first chapter, 'Loomings,' — 'Call me Ishmael' and the sermon on Jonah — and notice how Melville sets up the book's two registers: the adventure and the sermon are the same thing. Then read the chapters on the 'whiteness of the whale' and the ending, where the Pequod sinks and only Ishmael survives on a coffin: the novel's final joke is that the one who tells the story is the one who floated."
-  },
-  "tags": [
-   "American",
-   "Classic",
-   "Epic",
-   "Novel",
-   "19th Century"
-  ],
-  "tier": 1,
-  "pageCount": 720,
-  "altPageCount": 720,
-  "altPageLabel": "Penguin Classics",
-  "synopsis": "Melville's novel follows Ishmael, a young man who signs up for a whaling voyage aboard the Pequod, captained by the monomaniacal Ahab, who is obsessed with hunting the white whale Moby Dick, the creature that took his leg. The novel alternates between Ishmael's observations of whaling life (detailed chapters on cetology, blubber processing, and the mechanics of the hunt) and the increasingly desperate pursuit of the whale. The Pequod encounters other ships, each of which warns Ahab to abandon his quest. Ahab refuses. The final chase destroys the Pequod and kills everyone except Ishmael, who survives by clinging to a coffin buoy. The novel was a commercial failure in Melville's lifetime and was rediscovered in the 1920s; it is now considered the Great American Novel.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Chapter 1 - Loomings",
-    "pageStart": 1,
-    "pageEnd": 7,
-    "summary": "Ishmael, a sailor in need of work, decides to ship out on a whaler."
-   },
-   {
-    "number": 2,
-    "title": "Chapter 2 - The Carpet-Bag",
-    "pageStart": 8,
-    "pageEnd": 14,
-    "summary": "Ishmael arrives in New Bedford and searches for lodging."
-   },
-   {
-    "number": 3,
-    "title": "Chapter 3 - The Spouter-Inn",
-    "pageStart": 15,
-    "pageEnd": 21,
-    "summary": "Ishmael rooms with the harpooneer Queequeg at the Spouter-Inn."
-   },
-   {
-    "number": 4,
-    "title": "Chapter 4 - The Counterpane",
-    "pageStart": 22,
-    "pageEnd": 28,
-    "summary": "Ishmael wakes wrapped in Queequeg's arm."
-   },
-   {
-    "number": 5,
-    "title": "Chapter 5 - Breakfast",
-    "pageStart": 29,
-    "pageEnd": 35,
-    "summary": "Ishmael and Queequeg have breakfast at the inn."
-   },
-   {
-    "number": 6,
-    "title": "Chapter 6 - The Street",
-    "pageStart": 36,
-    "pageEnd": 42,
-    "summary": "Ishmael walks New Bedford's whaling streets."
-   },
-   {
-    "number": 7,
-    "title": "Chapter 7 - The Chapel",
-    "pageStart": 43,
-    "pageEnd": 49,
-    "summary": "Ishmael visits the Whalemen's Chapel and reads the memorial tablets."
-   },
-   {
-    "number": 8,
-    "title": "Chapter 8 - The Pulpit",
-    "pageStart": 50,
-    "pageEnd": 56,
-    "summary": "Father Mapple climbs the rope ladder to the pulpit."
-   },
-   {
-    "number": 9,
-    "title": "Chapter 9 - The Sermon",
-    "pageStart": 57,
-    "pageEnd": 63,
-    "summary": "Father Mapple preaches on Jonah and the whale."
-   },
-   {
-    "number": 10,
-    "title": "Chapter 10 - A Bosom Friend",
-    "pageStart": 64,
-    "pageEnd": 70,
-    "summary": "Ishmael and Queequeg swear eternal friendship."
-   },
-   {
-    "number": 11,
-    "title": "Chapter 11 - Nightgown",
-    "pageStart": 71,
-    "pageEnd": 77,
-    "summary": "The two friends share a bed and talk."
-   },
-   {
-    "number": 12,
-    "title": "Chapter 12 - Biographical",
-    "pageStart": 78,
-    "pageEnd": 84,
-    "summary": "Queequeg's island past is sketched."
-   },
-   {
-    "number": 13,
-    "title": "Chapter 13 - Wheelbarrow",
-    "pageStart": 85,
-    "pageEnd": 91,
-    "summary": "The pair take the ferry to Nantucket with Queequeg's wheelbarrow."
-   },
-   {
-    "number": 14,
-    "title": "Chapter 14 - Nantucket",
-    "pageStart": 92,
-    "pageEnd": 98,
-    "summary": "The whaling island of Nantucket is described."
-   },
-   {
-    "number": 15,
-    "title": "Chapter 15 - Chowder",
-    "pageStart": 99,
-    "pageEnd": 105,
-    "summary": "Ishmael and Queequeg stop at the Try Pots for chowder."
-   },
-   {
-    "number": 16,
-    "title": "Chapter 16 - The Ship",
-    "pageStart": 106,
-    "pageEnd": 112,
-    "summary": "The Pequod is described; Ishmael signs on, learning of Captain Ahab."
-   },
-   {
-    "number": 17,
-    "title": "Chapter 17 - The Ramadan",
-    "pageStart": 113,
-    "pageEnd": 119,
-    "summary": "Queequeg's fasting and his recovery."
-   },
-   {
-    "number": 18,
-    "title": "Chapter 18 - His Mark",
-    "pageStart": 120,
-    "pageEnd": 126,
-    "summary": "Queequeg signs the articles with a cross."
-   },
-   {
-    "number": 19,
-    "title": "Chapter 19 - The Prophet",
-    "pageStart": 127,
-    "pageEnd": 133,
-    "summary": "A mysterious stranger warns of Ahab."
-   },
-   {
-    "number": 20,
-    "title": "Chapter 20 - All Astir",
-    "pageStart": 134,
-    "pageEnd": 140,
-    "summary": "The crew prepares to sail."
-   },
-   {
-    "number": 21,
-    "title": "Chapter 21 - Going Aboard",
-    "pageStart": 141,
-    "pageEnd": 146,
-    "summary": "The ship departs; the stranger Elijah warns again."
-   },
-   {
-    "number": 22,
-    "title": "Chapter 22 - Merry Christmas",
-    "pageStart": 147,
-    "pageEnd": 152,
-    "summary": "The Pequod sails on Christmas day."
-   },
-   {
-    "number": 23,
-    "title": "Chapter 23 - The Lee Shore",
-    "pageStart": 153,
-    "pageEnd": 158,
-    "summary": "Bulkington and the meaning of the lee shore."
-   },
-   {
-    "number": 24,
-    "title": "Chapter 24 - The Advocate",
-    "pageStart": 159,
-    "pageEnd": 164,
-    "summary": "The honor and dignity of whaling are defended."
-   },
-   {
-    "number": 25,
-    "title": "Chapter 25 - Postscript",
-    "pageStart": 165,
-    "pageEnd": 170,
-    "summary": "The royal associations of sperm oil."
-   },
-   {
-    "number": 26,
-    "title": "Chapter 26 - Knights and Squires",
-    "pageStart": 171,
-    "pageEnd": 176,
-    "summary": "The first mate Starbuck is introduced."
-   },
-   {
-    "number": 27,
-    "title": "Chapter 27 - Knights and Squires",
-    "pageStart": 177,
-    "pageEnd": 182,
-    "summary": "Stubb and Flask, the other mates."
-   },
-   {
-    "number": 28,
-    "title": "Chapter 28 - Ahab",
-    "pageStart": 183,
-    "pageEnd": 188,
-    "summary": "Captain Ahab appears on deck with his ivory leg."
-   },
-   {
-    "number": 29,
-    "title": "Chapter 29 - Enter Ahab; to Him, Stubb",
-    "pageStart": 189,
-    "pageEnd": 194,
-    "summary": "Stubb complains and Ahab rebukes him."
-   },
-   {
-    "number": 30,
-    "title": "Chapter 30 - The Pipe",
-    "pageStart": 195,
-    "pageEnd": 200,
-    "summary": "Ahab throws his pipe into the sea."
-   },
-   {
-    "number": 31,
-    "title": "Chapter 31 - Queen Mab",
-    "pageStart": 201,
-    "pageEnd": 205,
-    "summary": "Stubb dreams of being kicked by Ahab."
-   },
-   {
-    "number": 32,
-    "title": "Chapter 32 - Cetology",
-    "pageStart": 206,
-    "pageEnd": 210,
-    "summary": "A taxonomy of the whale species."
-   },
-   {
-    "number": 33,
-    "title": "Chapter 33 - The Specksynder",
-    "pageStart": 211,
-    "pageEnd": 215,
-    "summary": "The hierarchy of the whaleboat and the captain's rule."
-   },
-   {
-    "number": 34,
-    "title": "Chapter 34 - The Cabin-Table",
-    "pageStart": 216,
-    "pageEnd": 220,
-    "summary": "Meals at the captain's table under Ahab's tyranny."
-   },
-   {
-    "number": 35,
-    "title": "Chapter 35 - The Mast-Head",
-    "pageStart": 221,
-    "pageEnd": 225,
-    "summary": "The solitary watch in the mast-head."
-   },
-   {
-    "number": 36,
-    "title": "Chapter 36 - The Quarter-Deck",
-    "pageStart": 226,
-    "pageEnd": 230,
-    "summary": "Ahab nails a gold doubloon to the mast and rallies the crew."
-   },
-   {
-    "number": 37,
-    "title": "Chapter 37 - Sunset",
-    "pageStart": 231,
-    "pageEnd": 235,
-    "summary": "Ahab soliloquizes in his cabin."
-   },
-   {
-    "number": 38,
-    "title": "Chapter 38 - Dusk",
-    "pageStart": 236,
-    "pageEnd": 240,
-    "summary": "Starbuck broods over Ahab's monomania."
-   },
-   {
-    "number": 39,
-    "title": "Chapter 39 - First Night-Watch",
-    "pageStart": 241,
-    "pageEnd": 245,
-    "summary": "Stubb philosophizes on the deck."
-   },
-   {
-    "number": 40,
-    "title": "Chapter 40 - Midnight, Forecastle",
-    "pageStart": 246,
-    "pageEnd": 250,
-    "summary": "The sailors sing and dance in the forecastle."
-   },
-   {
-    "number": 41,
-    "title": "Chapter 41 - Moby Dick",
-    "pageStart": 251,
-    "pageEnd": 255,
-    "summary": "The story of Moby Dick, the white whale that took Ahab's leg."
-   },
-   {
-    "number": 42,
-    "title": "Chapter 42 - The Whiteness of the Whale",
-    "pageStart": 256,
-    "pageEnd": 260,
-    "summary": "An essay on the terror of whiteness."
-   },
-   {
-    "number": 43,
-    "title": "Chapter 43 - Hark!",
-    "pageStart": 261,
-    "pageEnd": 265,
-    "summary": "A mysterious stowaway voice is heard."
-   },
-   {
-    "number": 44,
-    "title": "Chapter 44 - The Chart",
-    "pageStart": 266,
-    "pageEnd": 270,
-    "summary": "Ahab pores over charts of the whale's routes."
-   },
-   {
-    "number": 45,
-    "title": "Chapter 45 - The Affidavit",
-    "pageStart": 271,
-    "pageEnd": 275,
-    "summary": "The history of white whales and old whale hunters."
-   },
-   {
-    "number": 46,
-    "title": "Chapter 46 - Surmises",
-    "pageStart": 276,
-    "pageEnd": 280,
-    "summary": "Ahab plans the hunt and the crew's loyalty."
-   },
-   {
-    "number": 47,
-    "title": "Chapter 47 - The Mat-Maker",
-    "pageStart": 281,
-    "pageEnd": 285,
-    "summary": "Ishmael and Queequeg weave a mat; a whale is sighted."
-   },
-   {
-    "number": 48,
-    "title": "Chapter 48 - The First Lowering",
-    "pageStart": 286,
-    "pageEnd": 290,
-    "summary": "The boats are lowered; the whale is harpooned."
-   },
-   {
-    "number": 49,
-    "title": "Chapter 49 - The Hyena",
-    "pageStart": 291,
-    "pageEnd": 295,
-    "summary": "Ishmael faces death with a laugh."
-   },
-   {
-    "number": 50,
-    "title": "Chapter 50 - Ahab's Boat and Crew",
-    "pageStart": 296,
-    "pageEnd": 300,
-    "summary": "Ahab's own whaleboat and Fedallah, his secret harpooneer."
-   },
-   {
-    "number": 51,
-    "title": "Chapter 51 - The Spirit-Spout",
-    "pageStart": 301,
-    "pageEnd": 305,
-    "summary": "A mysterious spout appears ahead at night."
-   },
-   {
-    "number": 52,
-    "title": "Chapter 52 - The Albatross",
-    "pageStart": 306,
-    "pageEnd": 310,
-    "summary": "The Pequod meets a ship hung with dead whales."
-   },
-   {
-    "number": 53,
-    "title": "Chapter 53 - The Gam",
-    "pageStart": 311,
-    "pageEnd": 315,
-    "summary": "The custom of the gam between whaling ships."
-   },
-   {
-    "number": 54,
-    "title": "Chapter 54 - The Town-Ho's Story",
-    "pageStart": 316,
-    "pageEnd": 320,
-    "summary": "A tale of mutiny and the whale told aboard the Town-Ho."
-   },
-   {
-    "number": 55,
-    "title": "Chapter 55 - Monstrous Pictures of Whales",
-    "pageStart": 321,
-    "pageEnd": 325,
-    "summary": "False pictures of whales in art."
-   },
-   {
-    "number": 56,
-    "title": "Chapter 56 - Less Erroneous Pictures of Whales",
-    "pageStart": 326,
-    "pageEnd": 330,
-    "summary": "Better but still imperfect whale images."
-   },
-   {
-    "number": 57,
-    "title": "Chapter 57 - Of Whales in Paint",
-    "pageStart": 331,
-    "pageEnd": 335,
-    "summary": "Whales in paint, teeth, wood, and stone."
-   },
-   {
-    "number": 58,
-    "title": "Chapter 58 - Brit",
-    "pageStart": 336,
-    "pageEnd": 340,
-    "summary": "The ocean's milky feeding grounds."
-   },
-   {
-    "number": 59,
-    "title": "Chapter 59 - Squid",
-    "pageStart": 341,
-    "pageEnd": 345,
-    "summary": "The giant squid is sighted."
-   },
-   {
-    "number": 60,
-    "title": "Chapter 60 - The Line",
-    "pageStart": 346,
-    "pageEnd": 350,
-    "summary": "The whale line and its deadly tangles."
-   },
-   {
-    "number": 61,
-    "title": "Chapter 61 - Stubb Kills a Whale",
-    "pageStart": 351,
-    "pageEnd": 355,
-    "summary": "Stubb's whale is killed; the cutting in begins."
-   },
-   {
-    "number": 62,
-    "title": "Chapter 62 - The Dart",
-    "pageStart": 356,
-    "pageEnd": 360,
-    "summary": "The harpooner's throw."
-   },
-   {
-    "number": 63,
-    "title": "Chapter 63 - The Crotch",
-    "pageStart": 361,
-    "pageEnd": 365,
-    "summary": "The crotch and the dangers of harpooning."
-   },
-   {
-    "number": 64,
-    "title": "Chapter 64 - Stubb's Supper",
-    "pageStart": 366,
-    "pageEnd": 370,
-    "summary": "Stubb forces Flask to eat whale steak with him."
-   },
-   {
-    "number": 65,
-    "title": "Chapter 65 - The Whale as a Dish",
-    "pageStart": 371,
-    "pageEnd": 375,
-    "summary": "On eating whale meat."
-   },
-   {
-    "number": 66,
-    "title": "Chapter 66 - The Shark Massacre",
-    "pageStart": 376,
-    "pageEnd": 380,
-    "summary": "Sharks feast on the dead whale."
-   },
-   {
-    "number": 67,
-    "title": "Chapter 67 - Cutting In",
-    "pageStart": 381,
-    "pageEnd": 385,
-    "summary": "The blubber is stripped from the whale."
-   },
-   {
-    "number": 68,
-    "title": "Chapter 68 - The Blanket",
-    "pageStart": 386,
-    "pageEnd": 390,
-    "summary": "The whale's skin and the mystery of his spout."
-   },
-   {
-    "number": 69,
-    "title": "Chapter 69 - The Funeral",
-    "pageStart": 391,
-    "pageEnd": 395,
-    "summary": "The whale's skeleton is left to the sea."
-   },
-   {
-    "number": 70,
-    "title": "Chapter 70 - The Sphynx",
-    "pageStart": 396,
-    "pageEnd": 400,
-    "summary": "The severed head hangs at the side of the ship."
-   },
-   {
-    "number": 71,
-    "title": "Chapter 71 - The Jeroboam's Story",
-    "pageStart": 401,
-    "pageEnd": 405,
-    "summary": "A ship with a mad prophet and the white whale's toll."
-   },
-   {
-    "number": 72,
-    "title": "Chapter 72 - The Monkey-Rope",
-    "pageStart": 406,
-    "pageEnd": 410,
-    "summary": "Ishmael and Queequeg linked by the monkey-rope."
-   },
-   {
-    "number": 73,
-    "title": "Chapter 73 - Stubb and Flask Kill a Right Whale",
-    "pageStart": 411,
-    "pageEnd": 415,
-    "summary": "A right whale is taken."
-   },
-   {
-    "number": 74,
-    "title": "Chapter 74 - The Sperm Whale's Head",
-    "pageStart": 416,
-    "pageEnd": 420,
-    "summary": "The sperm whale's head is compared to the right whale's."
-   },
-   {
-    "number": 75,
-    "title": "Chapter 75 - The Right Whale's Head",
-    "pageStart": 421,
-    "pageEnd": 425,
-    "summary": "The right whale's grotesque jaw."
-   },
-   {
-    "number": 76,
-    "title": "Chapter 76 - The Battering-Ram",
-    "pageStart": 426,
-    "pageEnd": 430,
-    "summary": "The whale's massive forehead."
-   },
-   {
-    "number": 77,
-    "title": "Chapter 77 - The Great Heidelburgh Tun",
-    "pageStart": 431,
-    "pageEnd": 435,
-    "summary": "The whale's huge case of spermaceti."
-   },
-   {
-    "number": 78,
-    "title": "Chapter 78 - Cistern and Buckets",
-    "pageStart": 436,
-    "pageEnd": 440,
-    "summary": "Queequeg nearly drowns inside the whale's head."
-   },
-   {
-    "number": 79,
-    "title": "Chapter 79 - The Prairie",
-    "pageStart": 441,
-    "pageEnd": 445,
-    "summary": "Reading the whale's wrinkled forehead."
-   },
-   {
-    "number": 80,
-    "title": "Chapter 80 - The Nut",
-    "pageStart": 446,
-    "pageEnd": 450,
-    "summary": "The whale's small brain."
-   },
-   {
-    "number": 81,
-    "title": "Chapter 81 - The Pequod Meets the Virgin",
-    "pageStart": 451,
-    "pageEnd": 455,
-    "summary": "The Pequod gams with the Virgin and kills an aged whale."
-   },
-   {
-    "number": 82,
-    "title": "Chapter 82 - The Honor and Glory of Whaling",
-    "pageStart": 456,
-    "pageEnd": 460,
-    "summary": "Myths of whaling heroes."
-   },
-   {
-    "number": 83,
-    "title": "Chapter 83 - Jonah Historically Regarded",
-    "pageStart": 461,
-    "pageEnd": 465,
-    "summary": "On the reality of Jonah."
-   },
-   {
-    "number": 84,
-    "title": "Chapter 84 - Pitchpoling",
-    "pageStart": 466,
-    "pageEnd": 470,
-    "summary": "Stubb's pitchpoling of a whale."
-   },
-   {
-    "number": 85,
-    "title": "Chapter 85 - The Fountain",
-    "pageStart": 471,
-    "pageEnd": 475,
-    "summary": "The whale's spout and its meaning."
-   },
-   {
-    "number": 86,
-    "title": "Chapter 86 - The Tail",
-    "pageStart": 476,
-    "pageEnd": 480,
-    "summary": "The whale's tail and its power."
-   },
-   {
-    "number": 87,
-    "title": "Chapter 87 - The Grand Armada",
-    "pageStart": 481,
-    "pageEnd": 485,
-    "summary": "The Pequod sails into a vast herd of whales."
-   },
-   {
-    "number": 88,
-    "title": "Chapter 88 - Schools and Schoolmasters",
-    "pageStart": 486,
-    "pageEnd": 490,
-    "summary": "The whale's harems and the old bulls."
-   },
-   {
-    "number": 89,
-    "title": "Chapter 89 - Fast-Fish and Loose-Fish",
-    "pageStart": 491,
-    "pageEnd": 495,
-    "summary": "The laws of possession at sea."
-   },
-   {
-    "number": 90,
-    "title": "Chapter 90 - Heads or Tails",
-    "pageStart": 496,
-    "pageEnd": 500,
-    "summary": "Royal claims to stranded whales."
-   },
-   {
-    "number": 91,
-    "title": "Chapter 91 - The Pequod Meets the Rose-Bud",
-    "pageStart": 501,
-    "pageEnd": 505,
-    "summary": "Stubb tricks the French Rose-Bud's captain."
-   },
-   {
-    "number": 92,
-    "title": "Chapter 92 - Ambergris",
-    "pageStart": 506,
-    "pageEnd": 510,
-    "summary": "On ambergris and the sperm whale."
-   },
-   {
-    "number": 93,
-    "title": "Chapter 93 - The Castaway",
-    "pageStart": 511,
-    "pageEnd": 515,
-    "summary": "The cabin boy Pip is cast adrift and loses his mind."
-   },
-   {
-    "number": 94,
-    "title": "Chapter 94 - A Squeeze of the Hand",
-    "pageStart": 516,
-    "pageEnd": 520,
-    "summary": "Ishmael squeezes spermaceti and feels universal love."
-   },
-   {
-    "number": 95,
-    "title": "Chapter 95 - The Cassock",
-    "pageStart": 521,
-    "pageEnd": 525,
-    "summary": "The whale's skin is cut for a cassock."
-   },
-   {
-    "number": 96,
-    "title": "Chapter 96 - The Try-Works",
-    "pageStart": 526,
-    "pageEnd": 530,
-    "summary": "The night work of boiling the blubber."
-   },
-   {
-    "number": 97,
-    "title": "Chapter 97 - The Lamp",
-    "pageStart": 531,
-    "pageEnd": 535,
-    "summary": "The whale-ship lit like a blazing palace."
-   },
-   {
-    "number": 98,
-    "title": "Chapter 98 - Stowing Down and Clearing Up",
-    "pageStart": 536,
-    "pageEnd": 540,
-    "summary": "Stowing the oil and cleaning the ship."
-   },
-   {
-    "number": 99,
-    "title": "Chapter 99 - The Doubloon",
-    "pageStart": 541,
-    "pageEnd": 545,
-    "summary": "Each man reads his own meaning in the gold doubloon."
-   },
-   {
-    "number": 100,
-    "title": "Chapter 100 - Leg and Arm",
-    "pageStart": 546,
-    "pageEnd": 550,
-    "summary": "The Samuel Enderby and Ahab's lost leg."
-   },
-   {
-    "number": 101,
-    "title": "Chapter 101 - The Decanter",
-    "pageStart": 551,
-    "pageEnd": 555,
-    "summary": "The Enderby's hospitality and old whaling history."
-   },
-   {
-    "number": 102,
-    "title": "Chapter 102 - A Bower in the Arsacides",
-    "pageStart": 556,
-    "pageEnd": 560,
-    "summary": "Ishmael views a whale skeleton in a jungle temple."
-   },
-   {
-    "number": 103,
-    "title": "Chapter 103 - Measurement of the Whale's Skeleton",
-    "pageStart": 561,
-    "pageEnd": 565,
-    "summary": "Measuring the great bones."
-   },
-   {
-    "number": 104,
-    "title": "Chapter 104 - The Fossil Whale",
-    "pageStart": 566,
-    "pageEnd": 570,
-    "summary": "On the whale's ancient history."
-   },
-   {
-    "number": 105,
-    "title": "Chapter 105 - Does the Whale's Magnitude Diminish?",
-    "pageStart": 571,
-    "pageEnd": 575,
-    "summary": "Are whales smaller than they were?"
-   },
-   {
-    "number": 106,
-    "title": "Chapter 106 - Ahab's Leg",
-    "pageStart": 576,
-    "pageEnd": 580,
-    "summary": "Ahab's ivory leg and his renewed vengeance."
-   },
-   {
-    "number": 107,
-    "title": "Chapter 107 - The Carpenter",
-    "pageStart": 581,
-    "pageEnd": 585,
-    "summary": "The Pequod's carpenter repairs Ahab's leg."
-   },
-   {
-    "number": 108,
-    "title": "Chapter 108 - Ahab and the Carpenter",
-    "pageStart": 586,
-    "pageEnd": 590,
-    "summary": "Ahab's strange talk with the carpenter."
-   },
-   {
-    "number": 109,
-    "title": "Chapter 109 - Ahab and Starbuck in the Cabin",
-    "pageStart": 591,
-    "pageEnd": 595,
-    "summary": "Starbuck protests the interrupted oiling; Ahab rules."
-   },
-   {
-    "number": 110,
-    "title": "Chapter 110 - Queequeg in His Coffin",
-    "pageStart": 596,
-    "pageEnd": 600,
-    "summary": "Queequeg's sickness and his coffin made into a sea chest."
-   },
-   {
-    "number": 111,
-    "title": "Chapter 111 - The Pacific",
-    "pageStart": 601,
-    "pageEnd": 605,
-    "summary": "The calm, waiting Pacific."
-   },
-   {
-    "number": 112,
-    "title": "Chapter 112 - The Blacksmith",
-    "pageStart": 606,
-    "pageEnd": 610,
-    "summary": "The blacksmith Perth's story."
-   },
-   {
-    "number": 113,
-    "title": "Chapter 113 - The Forge",
-    "pageStart": 611,
-    "pageEnd": 615,
-    "summary": "Ahab has a harpoon forged for Moby Dick."
-   },
-   {
-    "number": 114,
-    "title": "Chapter 114 - The Gilder",
-    "pageStart": 616,
-    "pageEnd": 620,
-    "summary": "A rare, gentle mood on deck."
-   },
-   {
-    "number": 115,
-    "title": "Chapter 115 - The Pequod Meets the Bachelor",
-    "pageStart": 621,
-    "pageEnd": 625,
-    "summary": "A festive ship homeward bound with full oil."
-   },
-   {
-    "number": 116,
-    "title": "Chapter 116 - The Dying Whale",
-    "pageStart": 626,
-    "pageEnd": 630,
-    "summary": "A whale's death and the setting sun."
-   },
-   {
-    "number": 117,
-    "title": "Chapter 117 - The Whale Watch",
-    "pageStart": 631,
-    "pageEnd": 635,
-    "summary": "Ahab watches for the white whale."
-   },
-   {
-    "number": 118,
-    "title": "Chapter 118 - The Quadrant",
-    "pageStart": 636,
-    "pageEnd": 640,
-    "summary": "Ahab dashes the quadrant, trusting only his compass."
-   },
-   {
-    "number": 119,
-    "title": "Chapter 119 - The Candles",
-    "pageStart": 641,
-    "pageEnd": 645,
-    "summary": "The corposants flame on the masts; Ahab defies the storm."
-   },
-   {
-    "number": 120,
-    "title": "Chapter 120 - The Deck Toward the End of the First Night Watch",
-    "pageStart": 646,
-    "pageEnd": 650,
-    "summary": "Ahab orders the masthead set anew."
-   },
-   {
-    "number": 121,
-    "title": "Chapter 121 - Midnight on the Forecastle",
-    "pageStart": 651,
-    "pageEnd": 655,
-    "summary": "The crew steers by Ahab's mad will."
-   },
-   {
-    "number": 122,
-    "title": "Chapter 122 - Midnight Aloft",
-    "pageStart": 656,
-    "pageEnd": 660,
-    "summary": "The lightning burns the masthead man."
-   },
-   {
-    "number": 123,
-    "title": "Chapter 123 - The Musket",
-    "pageStart": 661,
-    "pageEnd": 665,
-    "summary": "Starbuck nearly shoots Ahab but cannot."
-   },
-   {
-    "number": 124,
-    "title": "Chapter 124 - The Needle",
-    "pageStart": 666,
-    "pageEnd": 670,
-    "summary": "Ahab re-corrects the compass."
-   },
-   {
-    "number": 125,
-    "title": "Chapter 125 - The Log and the Line",
-    "pageStart": 671,
-    "pageEnd": 675,
-    "summary": "Ahab throws the quadrant's fellows, the log line, overboard."
-   },
-   {
-    "number": 126,
-    "title": "Chapter 126 - The Life-Buoy",
-    "pageStart": 676,
-    "pageEnd": 680,
-    "summary": "A sailor falls overboard; Queequeg's coffin becomes the life-buoy."
-   },
-   {
-    "number": 127,
-    "title": "Chapter 127 - The Deck",
-    "pageStart": 681,
-    "pageEnd": 685,
-    "summary": "The coffin is prepared for the ship."
-   },
-   {
-    "number": 128,
-    "title": "Chapter 128 - The Pequod Meets the Rachel",
-    "pageStart": 686,
-    "pageEnd": 690,
-    "summary": "The Rachel seeks her lost boat; Ahab refuses to help."
-   },
-   {
-    "number": 129,
-    "title": "Chapter 129 - The Cabin",
-    "pageStart": 691,
-    "pageEnd": 695,
-    "summary": "Ahab's mad preparations and his final defiance."
-   },
-   {
-    "number": 130,
-    "title": "Chapter 130 - The Hat",
-    "pageStart": 696,
-    "pageEnd": 700,
-    "summary": "Ahab's hat is snatched by a hawk."
-   },
-   {
-    "number": 131,
-    "title": "Chapter 131 - The Pequod Meets the Delight",
-    "pageStart": 701,
-    "pageEnd": 704,
-    "summary": "The Delight has lost men to the whale; Ahab presses on."
-   },
-   {
-    "number": 132,
-    "title": "Chapter 132 - The Symphony",
-    "pageStart": 705,
-    "pageEnd": 708,
-    "summary": "Ahab's moment of doubt and his farewell to Starbuck."
-   },
-   {
-    "number": 133,
-    "title": "Chapter 133 - The Chase - First Day",
-    "pageStart": 709,
-    "pageEnd": 712,
-    "summary": "Moby Dick is sighted and the first chase begins."
-   },
-   {
-    "number": 134,
-    "title": "Chapter 134 - The Chase - Second Day",
-    "pageStart": 713,
-    "pageEnd": 716,
-    "summary": "Ahab's leg is broken; the whale returns."
-   },
-   {
-    "number": 135,
-    "title": "Chapter 135 - The Chase - Third Day",
-    "pageStart": 717,
-    "pageEnd": 720,
-    "summary": "Moby Dick sinks the Pequod; only Ishmael survives, saved by the coffin."
-   }
-  ]
- },
- {
-  "id": "book-the-great-gatsby-1925-230",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "The Great Gatsby (1925)",
-  "teaser": "Fitzgerald's novel — set in the summer of 1922 and told by Nick Carraway, who rents next door to the mysterious Jay Gatsby — is the definitive American novel about money: Gatsby's parties are legend, his love for Daisy is the engine, and his death is the moral. It sold poorly at publication; it is now a fixture of every American reading list.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780743273565-L.jpg",
-  "byline": "F. Scott Fitzgerald",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Great Gatsby (1925) — the opening and the ending",
-   "durationMinutes": 40,
-   "instruction": "Read the opening — Nick's move to West Egg, the first glimpse of Gatsby's mansion — and notice how Fitzgerald withholds Gatsby himself for fifty pages, which is the novel's method: Gatsby is built from rumor before he exists as a person. Then read the ending — the valley of ashes, the billboard of Dr. T. J. Eckleburg, and the final page's 'boats against the current': the novel's last paragraph is the most-quoted ending in American fiction."
-  },
-  "tags": [
-   "American",
-   "Classic",
-   "Jazz Age"
-  ],
-  "tier": 2,
-  "pageCount": 180,
-  "synopsis": "Fitzgerald's novel follows Nick Carraway, a young Midwesterner who moves to New York in 1922 and becomes neighbors with Jay Gatsby, a mysterious millionaire who throws lavish parties at his West Egg mansion. Nick learns that Gatsby's parties are designed to attract Daisy Buchanan, Nick's cousin and Gatsby's former lover, who is now married to the wealthy Tom Buchanan. The novel traces Gatsby's attempt to reclaim Daisy and the American Dream, a dream that Fitzgerald reveals as hollow, built on money, deception, and nostalgia for a past that never existed. The novel's famous final line, 'So we beat on, boats against the current, borne back ceaselessly into the past', is one of the most quoted in American literature. The novel was a modest success on publication; it became a classic through its adoption by the US military during WWII and by college curricula in the 1950s.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Nick and Gatsby",
-    "pageStart": 1,
-    "pageEnd": 40,
-    "summary": "West Egg. The parties. The green light. Daisy and Tom."
-   },
-   {
-    "number": 2,
-    "title": "The Affair",
-    "pageStart": 41,
-    "pageEnd": 100,
-    "summary": "Gatsby and Daisy reunite. The Plaza Hotel. Tom's revelation."
-   },
-   {
-    "number": 3,
-    "title": "The Crash",
-    "pageStart": 101,
-    "pageEnd": 180,
-    "summary": "Myrtle's death. Gatsby's fall. The funeral. The green light."
-   }
-  ]
- },
- {
-  "id": "book-brave-new-world-1932-231",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Brave New World (1932)",
-  "teaser": "Huxley's novel imagined the future as a pleasure-state: people are bred in hatcheries, conditioned by caste, and pacified by the drug soma — and the 'savage' John, raised outside the system, is brought in to be exhibited and destroys himself instead. Huxley's famous claim was that his dystopia was more prophetic than Orwell's: we would be seduced, not tortured.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780060850524-L.jpg",
-  "byline": "Aldous Huxley",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Brave New World (1932) — the Hatchery opening and the ending",
-   "durationMinutes": 14,
-   "instruction": "Read the opening — the Central London Hatchery, the Bokanovsky process — and notice how Huxley satirizes Fordism by making Henry Ford a god. Then read the ending, where John the Savage, unable to live in either world, hangs himself: Huxley's point is that the 'savage' world he romanticizes is as unlivable as the one he rejects — there is no third option, which is the tragedy."
-  },
-  "tags": [
-   "British",
-   "Dystopian",
-   "Classic",
-   "Novel"
-  ],
-  "tier": 1,
-  "pageCount": 288,
-  "synopsis": "Huxley's dystopian novel is set in a World State where humans are genetically engineered, socially conditioned, and kept docile through the pleasure drug soma. The novel follows Bernard Marx, an Alpha who feels alienated from his society, and John the Savage, a man raised on a Native American reservation who is brought to London and finds the 'civilized' world obscene. The novel satirizes the consumer culture, sexual liberation, and technological progress that Huxley saw emerging in the 1930s. The World State's motto, 'Community, Identity, Stability', is achieved through the elimination of art, religion, family, and individual choice. The novel was written in 1931 and published in 1932; it has never gone out of print.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "The World State",
-    "pageStart": 1,
-    "pageEnd": 80,
-    "summary": "The hatchery. The conditioning. Bernard's alienation. Lenina."
-   },
-   {
-    "number": 2,
-    "title": "John the Savage",
-    "pageStart": 81,
-    "pageEnd": 200,
-    "summary": "The reservation. London. John's disgust. The clash."
-   },
-   {
-    "number": 3,
-    "title": "The End",
-    "pageStart": 201,
-    "pageEnd": 288,
-    "summary": "The soma. The riot. The exile. 'The price of stability.'"
-   }
-  ]
- },
- {
-  "id": "book-native-son-1940-232",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Native Son (1940)",
-  "teaser": "Richard Wright's novel was the first by a Black American writer to become a Book-of-the-Month Club selection — and it opens with an accidental murder: Bigger Thomas, a young Black man in Chicago, smothers the white woman who hired him, then tries to escape a justice system that assumes his guilt. Wright wrote it as a provocation, and it worked.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780061120295-L.jpg",
-  "byline": "Richard Wright",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Native Son (1940) — the opening and the trial chapters",
-   "durationMinutes": 38,
-   "instruction": "Read the opening — Bigger's first day, the rat in the room, the fear — and notice how Wright establishes Bigger's psychology as the novel's subject: his violence is born of the cage he lives in. Then read the trial chapters, where the communist lawyer's closing argument delivers the novel's thesis — that Bigger is 'created' by the society that condemns him: the book's power is that the argument is persuasive and also not the whole truth."
-  },
-  "tags": [
-   "American",
-   "Classic",
-   "Race",
-   "Protest"
-  ],
-  "tier": 1,
-  "pageCount": 544,
-  "synopsis": "Wright's novel follows Bigger Thomas, a young Black man living in poverty in Chicago's South Side, who commits a series of crimes, including murder, that are rooted in the systemic racism that has constrained his entire life. The novel is divided into three sections: 'Fear' (Bigger's crime and its immediate aftermath), 'Flight' (his attempt to escape), and 'Doom' (his trial and execution). Wright wrote the novel in response to the Jack Johnson case and the Scottsboro Boys trial, and it became the first bestselling novel by a Black author. The novel's central argument, that racism doesn't just oppress individuals but shapes their psychology, was revolutionary in 1940. Richard Wright and the novel were both controversial: James Baldwin criticized Wright for reducing Bigger to a stereotype, while others praised the novel's honest portrayal of Black rage.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Fear",
-    "pageStart": 1,
-    "pageEnd": 200,
-    "summary": "Bigger's world. The job. The murder. The cover-up."
-   },
-   {
-    "number": 2,
-    "title": "Flight",
-    "pageStart": 201,
-    "pageEnd": 400,
-    "summary": "The escape. The cave. The Communist Party. The capture."
-   },
-   {
-    "number": 3,
-    "title": "Doom",
-    "pageStart": 401,
-    "pageEnd": 544,
-    "summary": "The trial. Boris Max's defense. The execution. 'He was alive, and he was about to die.'"
-   }
-  ]
- },
- {
-  "id": "book-the-catcher-in-the-233",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "The Catcher in the Rye (1951)",
-  "teaser": "Salinger's novel — the story of Holden Caulfield's three days in New York after being expelled from prep school — has sold 65 million copies and is the most-banned and most-taught American novel of the 20th century. Its title, from a misheard line of a Robert Burns poem, names Holden's fantasy: catching children before they fall off a cliff into adulthood.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780316769488-L.jpg",
-  "byline": "J.D. Salinger",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Catcher in the Rye (1951) — the opening and the carousel ending",
-   "durationMinutes": 32,
-   "instruction": "Read the opening — Holden's expulsion, the 'phony' refrain — and notice how Salinger makes Holden's voice the entire novel: every judgment is his, and his unreliability is the point. Then read the carousel scene at the end, where Holden finally does what he imagined — catching the falling — and the novel ends with the famous 'Don't ever tell anybody anything' note."
-  },
-  "tags": [
-   "American",
-   "Classic",
-   "Coming of Age",
-   "Novel",
-   "Mid-20th"
-  ],
-  "tier": 1,
-  "pageCount": 277,
-  "synopsis": "Salinger's novel follows Holden Caulfield, a sixteen-year-old who has been expelled from his prep school and spends three days wandering New York City before returning home. Holden narrates in a voice that is simultaneously cynical and vulnerable, ranting about 'phonies' while desperately seeking connection. He visits his former teacher Mr. Antolini, calls old girlfriends, and imagines himself as 'the catcher in the rye', standing at the edge of a cliff, catching children before they fall. The novel is a study in adolescent alienation: Holden is grief-stricken over his brother Allie's death and terrified of the adult world. The novel was controversial on publication (banned in many schools) and has sold over 65 million copies. Holden's voice, slangy, digressive, heartbreaking, influenced every first-person narrator after him.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Pencey Prep",
-    "pageStart": 1,
-    "pageEnd": 40,
-    "summary": "The expulsion. Mr. Spencer. The walkout. The train."
-   },
-   {
-    "number": 2,
-    "title": "New York",
-    "pageStart": 41,
-    "pageEnd": 180,
-    "summary": "The Edmont. Sally Hayes. The nuns. The taxi. The loneliness."
-   },
-   {
-    "number": 3,
-    "title": "The End",
-    "pageStart": 181,
-    "pageEnd": 277,
-    "summary": "Mr. Antolini. The museum. Phoebe. The carousel. 'Don't ever tell anybody anything.'"
-   }
-  ]
- },
- {
   "id": "book-fahrenheit-451-1953-234",
   "categoryId": "BOOKS",
   "subtype": "Book",
@@ -7363,53 +4821,6 @@
     "pageStart": 161,
     "pageEnd": 336,
     "summary": "The motels. Quilty. The discovery. 'Lolita, light of my life.'"
-   }
-  ]
- },
- {
-  "id": "book-one-flew-over-the-237",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "One Flew Over the Cuckoo's Nest (1962)",
-  "teaser": "Ken Kesey's novel — written after he worked overnight shifts in a VA hospital's psychiatric ward — follows McMurphy, a convict who fakes insanity to serve his sentence in a mental institution, where he wages war on the ward's tyrannical Nurse Ratched. The novel was a counterculture bible, and the film adaptation won five Oscars.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780451163968-L.jpg",
-  "byline": "Ken Kesey",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "One Flew Over the Cuckoo's Nest (1962) — the opening and the ending",
-   "durationMinutes": 24,
-   "instruction": "Read the opening — McMurphy's admission, the ward's routine — and notice how Kesey sets up the novel's binary: McMurphy's chaos against Ratched's order, with the other patients as the battleground. Then read the ending, where McMurphy's lobotomy and the Chief's mercy-killing re-frame the whole book: the novel's argument is that the 'therapy' is punishment, and the 'madness' is freedom."
-  },
-  "tags": [
-   "American",
-   "Classic",
-   "Counterculture",
-   "Institution"
-  ],
-  "tier": 1,
-  "pageCount": 314,
-  "synopsis": "Kesey's novel follows Randle Patrick McMurphy, a convict who pleads insanity to avoid prison and is sent to a mental hospital, where he clashes with Nurse Ratched, the authoritarian nurse who controls the ward through shame, humiliation, and electroshock therapy. The novel is narrated by Chief Bromden, a Native American patient who pretends to be deaf and dumb. McMurphy's rebellion, gambling, smuggling in women, challenging Ratched's authority, inspires the other patients to reclaim their autonomy. The novel is a critique of institutional power, conformity, and the medical establishment's treatment of mental illness. Kesey drew on his own experience working in a psychiatric hospital. The 1975 film adaptation won all five major Academy Awards.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "McMurphy Arrives",
-    "pageStart": 1,
-    "pageEnd": 80,
-    "summary": "Chief Bromden. The Combine. Nurse Ratched. McMurphy's entrance."
-   },
-   {
-    "number": 2,
-    "title": "The Rebellion",
-    "pageStart": 81,
-    "pageEnd": 220,
-    "summary": "The gambling. The fishing trip. The vote. The shock therapy."
-   },
-   {
-    "number": 3,
-    "title": "The End",
-    "pageStart": 221,
-    "pageEnd": 314,
-    "summary": "McMurphy's lobotomy. Chief Bromden's escape. The window."
    }
   ]
  },
@@ -7611,47 +5022,6 @@
   ]
  },
  {
-  "id": "book-to-kill-a-mockingbird",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "To Kill a Mockingbird (1960)",
-  "teaser": "Harper Lee's only published novel for 55 years (until 'Go Set a Watchman' in 2015). It won the Pulitzer and has sold 40+ million copies. Lee based Scout's friend Dill on her childhood neighbor Truman Capote. She gave her manuscript to an editor who said it might sell 2,500 copies. She never wrote another book and refused almost all interviews.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780061120084-L.jpg",
-  "byline": "Harper Lee",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "To Kill a Mockingbird, Part One",
-   "durationMinutes": 40,
-   "instruction": "Read Part One. Scout Finch narrates from childhood, looking back at one summer in Maycomb, Alabama. Boo Radley is a ghost in the house next door; the children act out his story. Notice the point of view: Scout is 6, but her narration is filtered through adult understanding. The trial of Tom Robinson is the center, but the novel earns it through the slow accumulation of small-town rhythms."
-  },
-  "tags": [
-   "American",
-   "Fiction",
-   "Classic",
-   "20th Century",
-   "Race"
-  ],
-  "tier": 2,
-  "pageCount": 281,
-  "synopsis": "Lee's novel follows Scout Finch, a young girl in Depression-era Alabama, whose father Atticus, a lawyer, defends Tom Robinson, a Black man falsely accused of raping a white woman. The novel is told from Scout's perspective, and its power comes from seeing racial injustice through a child's eyes. Atticus's defense of Tom is doomed from the start, the jury convicts despite overwhelming evidence of innocence, but the trial transforms Scout and her brother Jem, forcing them to confront the evil in their community. The novel won the Pulitzer Prize in 1961 and has sold over 40 million copies. It remains one of the most widely read novels in American schools, though it has also been challenged for its use of racial slurs and its depiction of Black characters.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Part One — Maycomb",
-    "pageStart": 1,
-    "pageEnd": 120,
-    "summary": "Scout and Jem. Boo Radley. Atticus. The town. The trial approaches."
-   },
-   {
-    "number": 2,
-    "title": "Part Two — The Trial",
-    "pageStart": 121,
-    "pageEnd": 281,
-    "summary": "Tom Robinson's trial. The verdict. Bob Ewell. Boo Radley's gift. 'Mockingbirds don't do one thing.'"
-   }
-  ]
- },
- {
   "id": "book-nineteen-eighty-four",
   "categoryId": "BOOKS",
   "subtype": "Book",
@@ -7793,114 +5163,6 @@
     "pageStart": 381,
     "pageEnd": 607,
     "summary": "The connections. The wind-up bird. Kumiko's return. The end."
-   }
-  ]
- },
- {
-  "id": "book-sapiens",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Sapiens (2014)",
-  "teaser": "Yuval Noah Harari's nonfiction history of humankind — from the Cognitive Revolution (70,000 years ago) to the present. Originally published in Hebrew, it became an international bestseller with 23+ million copies sold. Harari argues that what made Homo sapiens dominant was our ability to believe in fictions: money, nations, laws, gods.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780062316110-L.jpg",
-  "byline": "Yuval Noah Harari",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Sapiens, Part One: The Cognitive Revolution",
-   "durationMinutes": 45,
-   "instruction": "Read Part One. Harari argues that 70,000 years ago, Sapiens developed language capable of describing things that don't exist — which let us cooperate in huge numbers. Notice his method: each chapter begins with a big claim, supports it with evidence, then undercuts it with a question. The book makes you feel both proud and horrified to be human — the Agricultural Revolution, Harari argues, was 'history's biggest fraud.'"
-  },
-  "tags": [
-   "Israeli",
-   "Nonfiction",
-   "History",
-   "21st Century"
-  ],
-  "tier": 2,
-  "pageCount": 464,
-  "synopsis": "Harari's non-fiction bestseller traces the history of Homo sapiens from the Cognitive Revolution (70,000 years ago) through the Agricultural Revolution, the Scientific Revolution, and into the present. Harari's central argument is that humans dominate the world not because of individual intelligence but because of our ability to create and believe in shared fictions, money, nations, religions, human rights. The book became a global phenomenon, selling over 20 million copies, and was praised by Barack Obama, Bill Gates, and Mark Zuckerberg. Critics have noted that Harari oversimplifies complex topics and draws on controversial sources, but the book's accessibility and ambition made it one of the most influential non-fiction works of the 2010s.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "The Cognitive Revolution",
-    "pageStart": 1,
-    "pageEnd": 80,
-    "summary": "Language. Myths. The power of fiction. Homo sapiens vs. Neanderthals."
-   },
-   {
-    "number": 2,
-    "title": "The Agricultural Revolution",
-    "pageStart": 81,
-    "pageEnd": 200,
-    "summary": "Wheat. Domestication. The trap. The hierarchy. The empires."
-   },
-   {
-    "number": 3,
-    "title": "The Unification of Humankind",
-    "pageStart": 201,
-    "pageEnd": 320,
-    "summary": "Money. Religion. Empire. The global order."
-   },
-   {
-    "number": 4,
-    "title": "The Scientific Revolution",
-    "pageStart": 321,
-    "pageEnd": 464,
-    "summary": "Science. Capitalism. The future. 'What will we do with all this power?'"
-   }
-  ]
- },
- {
-  "id": "book-a-brief-history-of-time",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "A Brief History of Time (1988)",
-  "teaser": "Stephen Hawking's book about cosmology — from the Big Bang to black holes — written for general readers. It stayed on the Sunday Times bestseller list for 237 weeks. Hawking wrote it while almost completely paralyzed by ALS, dictating through a speech synthesizer. The book has sold over 25 million copies though many admit they never finished it.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780553380163-L.jpg",
-  "byline": "Stephen Hawking",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "A Brief History of Time, chapters 1-3",
-   "durationMinutes": 40,
-   "instruction": "Read the first three chapters. Hawking starts with Aristotle and Ptolemy — our picture of the universe as a series of nested spheres. Then Galileo, Newton, Einstein, and the expanding universe. Notice how Hawking builds each concept on the last: you don't need math to follow the argument, just curiosity. The question at the center: why does the universe bother to exist?"
-  },
-  "tags": [
-   "British",
-   "Nonfiction",
-   "Science",
-   "20th Century"
-  ],
-  "tier": 2,
-  "pageCount": 256,
-  "synopsis": "Hawking's non-fiction book explains the origins and fate of the universe for a general audience, covering the Big Bang, black holes, the nature of time, and the search for a unified theory of physics. Hawking, who was diagnosed with ALS at 21 and was largely paralyzed by the time the book was published, wrote with clarity and wit about topics that most physicists struggle to explain simply. The book spent 237 weeks on the Sunday Times bestseller list and sold over 25 million copies, making it one of the most successful popular science books ever published. Hawking's central achievement is making abstract physics feel personal: he connects the universe's largest questions to the human desire to understand.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Our Picture of the Universe",
-    "pageStart": 1,
-    "pageEnd": 40,
-    "summary": "Aristotle. Newton. Einstein. The expanding universe."
-   },
-   {
-    "number": 2,
-    "title": "The Big Bang",
-    "pageStart": 41,
-    "pageEnd": 100,
-    "summary": "The singularity. The expansion. The arrow of time."
-   },
-   {
-    "number": 3,
-    "title": "Black Holes",
-    "pageStart": 101,
-    "pageEnd": 160,
-    "summary": "The collapse. The event horizon. Hawking radiation."
-   },
-   {
-    "number": 4,
-    "title": "The Theory of Everything",
-    "pageStart": 161,
-    "pageEnd": 256,
-    "summary": "Quantum gravity. The unification. 'Why does the universe bother to exist?'"
    }
   ]
  },
@@ -8186,54 +5448,6 @@
     "pageStart": 401,
     "pageEnd": 771,
     "summary": "The theft. The drugs. The painting's return. 'Caring too much for objects.'"
-   }
-  ]
- },
- {
-  "id": "book-slaughterhouse-five",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "Slaughterhouse-Five (1969)",
-  "teaser": "Kurt Vonnegut's anti-war novel based on his experience as a POW during the firebombing of Dresden — he was one of the few American soldiers to witness it, sheltered in an underground meat locker. The novel's structure — time-hopping, alien abduction — was Vonnegut's way of writing about trauma that couldn't be narrated linearly. He wrote it 23 years after the bombing.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780385334204-L.jpg",
-  "byline": "Kurt Vonnegut",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Slaughterhouse-Five, chapters 1-5",
-   "durationMinutes": 30,
-   "instruction": "Read the first five chapters. Billy Pilgrim has 'come unstuck in time.' The novel opens with Vonnegut as a character trying to write the book. Billy's time-traveling is not science fiction — it's PTSD. Each jump is triggered by something in the present: a barbershop quartet reminds him of the German soldiers grinning at the destruction of Dresden. 'So it goes' — the novel's refrain — appears 106 times. Every death is equal."
-  },
-  "tags": [
-   "American",
-   "Satire",
-   "Anti-War",
-   "20th Century",
-   "WWII"
-  ],
-  "tier": 2,
-  "pageCount": 275,
-  "synopsis": "Vonnegut's novel follows Billy Pilgrim, a man who becomes 'unstuck in time' and experiences his life out of order, from his death in 1976 to his birth and back. Billy survives the firebombing of Dresden in 1945 (which Vonnegut himself survived as a POW), and the novel alternates between his war experiences, his postwar life as an optometrist, and his abduction by aliens from Tralfamadore. Vonnegut's central technique is repetition: the phrase 'So it goes' appears after every death, creating a flat affect that mirrors the trauma of war. The novel is simultaneously a war novel, a science fiction novel, and a philosophical text about fate and free will. The phrase 'So it goes' entered English as a response to inevitable tragedy.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Billy Pilgrim",
-    "pageStart": 1,
-    "pageEnd": 80,
-    "summary": "Billy unstuck in time. The war. Dresden. Tralfamadore."
-   },
-   {
-    "number": 2,
-    "title": "The Firebombing",
-    "pageStart": 81,
-    "pageEnd": 180,
-    "summary": "Dresden. The slaughterhouse. The fire. The aftermath."
-   },
-   {
-    "number": 3,
-    "title": "The End",
-    "pageStart": 181,
-    "pageEnd": 275,
-    "summary": "The assassination. The letter. 'If you're ever in Cody, Wyoming.' So it goes."
    }
   ]
  },
@@ -8666,53 +5880,6 @@
     "pageStart": 181,
     "pageEnd": 281,
     "summary": "The dance. The graduation. The voice. 'I Know Why the Caged Bird Sings.'"
-   }
-  ]
- },
- {
-  "id": "book-the-hitchhikers-guide-to-the-galaxy",
-  "categoryId": "BOOKS",
-  "subtype": "Book",
-  "name": "The Hitchhiker's Guide to the Galaxy (1979)",
-  "teaser": "Douglas Adams's comic science fiction novel that started as a BBC radio series. Arthur Dent is saved from Earth's destruction by his friend Ford Prefect — an alien researcher for the titular guidebook. The answer to life, the universe, and everything is 42. Adams wrote the first draft drunk in a field in Innsbruck. The novel has sold 14+ million copies.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780345391803-L.jpg",
-  "byline": "Douglas Adams",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Hitchhiker's Guide to the Galaxy, chapters 1-10",
-   "durationMinutes": 30,
-   "instruction": "Read the first ten chapters. Arthur Dent's house is about to be demolished to make way for a bypass — the same morning the Earth is destroyed to make way for an interstellar bypass. Adams's humor is equal parts philosophy and absurdity. Notice the Guide entries — they're the funniest parts of the book, satirizing the tone of tourist guidebooks. The Vogon poetry scene is the worst torture in the galaxy. Don't panic."
-  },
-  "tags": [
-   "British",
-   "Science Fiction",
-   "Comedy",
-   "20th Century"
-  ],
-  "tier": 1,
-  "pageCount": 216,
-  "synopsis": "Adams's comic science fiction novel follows Arthur Dent, an ordinary Englishman who discovers that his friend Ford Prefect is actually an alien researcher for the Hitchhiker's Guide to the Galaxy. When Earth is demolished to make way for a hyperspace bypass, Arthur and Ford escape on a passing Vogon ship and begin a series of absurd adventures across the galaxy. The novel originated as a BBC radio series in 1978 and was expanded into a series of novels, a TV series, a film, and a video game. Adams's humor is simultaneously silly and philosophical: the answer to 'the Ultimate Question of Life, the Universe, and Everything' is 42, but nobody knows what the question is. The novel's appeal lies in its ability to make the absurd feel logical and the logical feel absurd.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Earth",
-    "pageStart": 1,
-    "pageEnd": 40,
-    "summary": "The pub. The demolition. The escape. Ford Prefect."
-   },
-   {
-    "number": 2,
-    "title": "The Galaxy",
-    "pageStart": 41,
-    "pageEnd": 140,
-    "summary": "The Vogons. The Heart of Gold. Zaphod. The Guide."
-   },
-   {
-    "number": 3,
-    "title": "Magrathea",
-    "pageStart": 141,
-    "pageEnd": 216,
-    "summary": "The planet builders. The computer. 42. The question. 'Don't Panic.'"
    }
   ]
  },
@@ -30070,162 +27237,155 @@
     "number": 11,
     "title": "Chapter 11",
     "pageStart": 71,
-    "pageEnd": 76,
+    "pageEnd": 77,
     "summary": "The boys try to make amends."
    },
    {
     "number": 12,
     "title": "Chapter 12",
-    "pageStart": 77,
-    "pageEnd": 82,
+    "pageStart": 78,
+    "pageEnd": 84,
     "summary": "The death of a girl in the tide pools is remembered."
    },
    {
     "number": 13,
     "title": "Chapter 13",
-    "pageStart": 83,
-    "pageEnd": 88,
+    "pageStart": 85,
+    "pageEnd": 91,
     "summary": "Doc's loneliness is revealed."
    },
    {
     "number": 14,
     "title": "Chapter 14",
-    "pageStart": 89,
-    "pageEnd": 94,
+    "pageStart": 92,
+    "pageEnd": 98,
     "summary": "The boys' second attempt at a party."
    },
    {
     "number": 15,
     "title": "Chapter 15",
-    "pageStart": 95,
-    "pageEnd": 100,
+    "pageStart": 99,
+    "pageEnd": 105,
     "summary": "The party finally succeeds and Doc is grateful."
    },
    {
     "number": 16,
     "title": "Chapter 16",
-    "pageStart": 101,
-    "pageEnd": 106,
+    "pageStart": 106,
+    "pageEnd": 112,
     "summary": "The story of the captain and the prostitute is told."
    },
    {
     "number": 17,
     "title": "Chapter 17",
-    "pageStart": 107,
-    "pageEnd": 112,
+    "pageStart": 113,
+    "pageEnd": 118,
     "summary": "The strange events at the Bear Flag restaurant."
    },
    {
     "number": 18,
     "title": "Chapter 18",
-    "pageStart": 113,
-    "pageEnd": 118,
+    "pageStart": 119,
+    "pageEnd": 124,
     "summary": "Lee Chong's store and its place in the row."
    },
    {
     "number": 19,
     "title": "Chapter 19",
-    "pageStart": 119,
-    "pageEnd": 124,
+    "pageStart": 125,
+    "pageEnd": 130,
     "summary": "The boys' schemes to make money."
    },
    {
     "number": 20,
     "title": "Chapter 20",
-    "pageStart": 125,
-    "pageEnd": 130,
+    "pageStart": 131,
+    "pageEnd": 136,
     "summary": "Doc's trip to the bay for specimens."
    },
    {
     "number": 21,
     "title": "Chapter 21",
-    "pageStart": 131,
-    "pageEnd": 136,
+    "pageStart": 137,
+    "pageEnd": 142,
     "summary": "The poetry of the marine life Doc collects."
    },
    {
     "number": 22,
     "title": "Chapter 22",
-    "pageStart": 137,
-    "pageEnd": 142,
+    "pageStart": 143,
+    "pageEnd": 148,
     "summary": "The return of the boys and their mischief."
    },
    {
     "number": 23,
     "title": "Chapter 23",
-    "pageStart": 143,
-    "pageEnd": 148,
+    "pageStart": 149,
+    "pageEnd": 154,
     "summary": "The death of a beloved pet is mourned."
    },
    {
     "number": 24,
     "title": "Chapter 24",
-    "pageStart": 149,
-    "pageEnd": 154,
+    "pageStart": 155,
+    "pageEnd": 160,
     "summary": "The row's many small tragedies are told."
    },
    {
     "number": 25,
     "title": "Chapter 25",
-    "pageStart": 155,
-    "pageEnd": 160,
+    "pageStart": 161,
+    "pageEnd": 166,
     "summary": "Doc's kindness to the row's strays."
    },
    {
     "number": 26,
     "title": "Chapter 26",
-    "pageStart": 161,
-    "pageEnd": 166,
+    "pageStart": 167,
+    "pageEnd": 172,
     "summary": "The sea's gifts and the row's rituals."
    },
    {
     "number": 27,
     "title": "Chapter 27",
-    "pageStart": 167,
-    "pageEnd": 172,
+    "pageStart": 173,
+    "pageEnd": 178,
     "summary": "The party for Doc is remembered."
    },
    {
     "number": 28,
     "title": "Chapter 28",
-    "pageStart": 173,
-    "pageEnd": 178,
+    "pageStart": 179,
+    "pageEnd": 184,
     "summary": "The row's seasons and rhythms."
    },
    {
     "number": 29,
     "title": "Chapter 29",
-    "pageStart": 179,
-    "pageEnd": 184,
+    "pageStart": 185,
+    "pageEnd": 190,
     "summary": "The boys' final gesture of affection."
    },
    {
     "number": 30,
     "title": "Chapter 30",
-    "pageStart": 185,
-    "pageEnd": 190,
+    "pageStart": 191,
+    "pageEnd": 196,
     "summary": "Doc's quiet content at the end."
    },
    {
     "number": 31,
     "title": "Chapter 31",
-    "pageStart": 191,
-    "pageEnd": 196,
+    "pageStart": 197,
+    "pageEnd": 202,
     "summary": "The row sleeps under the stars."
    },
    {
     "number": 32,
     "title": "Chapter 32",
-    "pageStart": 197,
-    "pageEnd": 202,
-    "summary": "The beauty of Cannery Row endures."
-   },
-   {
-    "number": 33,
-    "title": "Chapter 33",
     "pageStart": 203,
     "pageEnd": 208,
-    "summary": "The novel closes on the row's gentle melancholy."
+    "summary": "The beauty of Cannery Row endures."
    }
   ]
  },
@@ -33154,64 +30314,64 @@
     "number": 1,
     "title": "Chapter 1 - How Nobody Came to the Graveyard",
     "pageStart": 1,
-    "pageEnd": 14,
+    "pageEnd": 13,
     "summary": "The toddler escapes the murderer and is adopted by the graveyard's ghosts."
    },
    {
     "number": 2,
     "title": "Chapter 2 - The New Friend",
-    "pageStart": 15,
-    "pageEnd": 27,
+    "pageStart": 14,
+    "pageEnd": 26,
     "summary": "Nobody Owens meets the witch and learns of the world beyond."
    },
    {
     "number": 3,
     "title": "Chapter 3 - The Hounds of God",
-    "pageStart": 28,
-    "pageEnd": 40,
+    "pageStart": 27,
+    "pageEnd": 38,
     "summary": "Silas explains the dangers of the outside world."
    },
    {
     "number": 4,
     "title": "Chapter 4 - The Witch's Headstone",
-    "pageStart": 41,
-    "pageEnd": 54,
+    "pageStart": 39,
+    "pageEnd": 50,
     "summary": "Nobody helps the witch and learns of her past."
    },
    {
     "number": 5,
-    "title": "Chapter 5 - The Danse Macabre",
-    "pageStart": 55,
-    "pageEnd": 67,
-    "summary": "The living and dead dance together one night."
+    "title": "Interlude",
+    "pageStart": 51,
+    "pageEnd": 62,
+    "summary": "Silas explains the world beyond the graveyard to Nobody."
    },
    {
     "number": 6,
-    "title": "Chapter 6 - Nobody Owens' School Days",
-    "pageStart": 68,
-    "pageEnd": 80,
-    "summary": "Nobody attends school under a false name."
+    "title": "Chapter 5 - The Danse Macabre",
+    "pageStart": 63,
+    "pageEnd": 74,
+    "summary": "The living and dead dance together one night."
    },
    {
     "number": 7,
-    "title": "Chapter 7 - Every Man Jack",
-    "pageStart": 81,
-    "pageEnd": 95,
-    "summary": "The man Jack closes in; Silas's secret is revealed."
+    "title": "Chapter 6 - Nobody Owens' School Days",
+    "pageStart": 75,
+    "pageEnd": 86,
+    "summary": "Nobody attends school under a false name."
    },
    {
     "number": 8,
-    "title": "Chapter 8 - Le Mort Vivant",
-    "pageStart": 96,
-    "pageEnd": 110,
-    "summary": "Nobody's past catches up with him in the end."
+    "title": "Chapter 7 - Every Man Jack",
+    "pageStart": 87,
+    "pageEnd": 98,
+    "summary": "The man Jack closes in; Silas's secret is revealed."
    },
    {
     "number": 9,
-    "title": "Postlude",
-    "pageStart": 111,
-    "pageEnd": 138,
-    "summary": "Nobody leaves the graveyard to live in the world."
+    "title": "Chapter 8 - Le Mort Vivant",
+    "pageStart": 99,
+    "pageEnd": 110,
+    "summary": "Nobody's past catches up with him in the end."
    }
   ]
  },
@@ -35281,7 +32441,7 @@
    },
    {
     "number": 11,
-    "title": "Chapter 11 - Venla",
+    "title": "Chapter 11 - Veni Vidi Vici",
     "pageStart": 131,
     "pageEnd": 143,
     "summary": "Ender's new army and the escalating unfair battles."
@@ -35529,50 +32689,6 @@
   ]
  },
  {
-  "id": "book-fahrenheit-451",
-  "categoryId": "BOOKS",
-  "subtype": "Science Fiction",
-  "name": "Fahrenheit 451",
-  "teaser": "Ray Bradbury's Fahrenheit 451, published in 1953, is a dystopian novel about a future where books are banned and firemen...",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9781451673319-L.jpg",
-  "byline": "Ray Bradbury",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Fahrenheit 451",
-   "durationMinutes": 60,
-   "instruction": "Read Fahrenheit 451 and reflect."
-  },
-  "tags": [
-   "Science Fiction"
-  ],
-  "tier": 2,
-  "pageCount": 194,
-  "synopsis": "Ray Bradbury's Fahrenheit 451, published in 1953, is a dystopian novel about a future where books are banned and firemen burn them. Guy Montag is a fireman who begins to question the society he serves, and his journey from obedient enforcer to rebel is one of the most compelling in science fiction. The title refers to the temperature at which paper burns. Fahrenheit 451 is both a warning and a celebration of the power of literature.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Part I: The Hearth and the Salamander",
-    "pageStart": 1,
-    "pageEnd": 50,
-    "summary": "Montag's life as a fireman. The meeting with Clarisse. The books."
-   },
-   {
-    "number": 2,
-    "title": "Part II: The Sieve and the Sand",
-    "pageStart": 51,
-    "pageEnd": 100,
-    "summary": "Montag reads. The Captain confronts him. The society crumbles."
-   },
-   {
-    "number": 3,
-    "title": "Part III: Burning Bright",
-    "pageStart": 101,
-    "pageEnd": 158,
-    "summary": "Montag flees. The bomb falls. The book people. The renewal."
-   }
-  ]
- },
- {
   "id": "book-a-clockwork-orange",
   "categoryId": "BOOKS",
   "subtype": "Science Fiction",
@@ -35785,59 +32901,31 @@
   "chapters": [
    {
     "number": 1,
-    "title": "Chapter 1 - The Colour of Magic",
+    "title": "Part 1 - The Colour of Magic",
     "pageStart": 1,
-    "pageEnd": 40,
-    "summary": "Rincewind is assigned to guard Twoflower, the Disc's first tourist."
+    "pageEnd": 30,
+    "summary": "Rincewind is assigned to guard Twoflower, the Disc's first tourist, in Ankh-Morpork."
    },
    {
     "number": 2,
-    "title": "Chapter 2 - The Sending of Eight",
-    "pageStart": 41,
-    "pageEnd": 50,
-    "summary": "The pair are caught up in the affairs of the gods and the Octavo."
+    "title": "Part 2 - The Sending of Eight",
+    "pageStart": 31,
+    "pageEnd": 60,
+    "summary": "The pair are caught up in the affairs of the gods and the Octavo as the Disc's magic reacts."
    },
    {
     "number": 3,
-    "title": "Chapter 3 - The Lure of the Wyrm",
-    "pageStart": 51,
-    "pageEnd": 60,
-    "summary": "A dragon terrorizes Ankh-Morpork; Twoflower watches."
+    "title": "Part 3 - The Lure of the Wyrm",
+    "pageStart": 61,
+    "pageEnd": 90,
+    "summary": "A dragon terrorizes Ankh-Morpork and the travelers visit the Wyrmberg."
    },
    {
     "number": 4,
-    "title": "Chapter 4 - Close to the Edge",
-    "pageStart": 61,
-    "pageEnd": 70,
-    "summary": "The party flees across the Disc toward the Rim."
-   },
-   {
-    "number": 5,
-    "title": "Chapter 5 - Casualties",
-    "pageStart": 71,
-    "pageEnd": 80,
-    "summary": "The journey takes its toll as they near the edge."
-   },
-   {
-    "number": 6,
-    "title": "Chapter 6 - The Price of Ivory",
-    "pageStart": 81,
-    "pageEnd": 94,
-    "summary": "Adventures at the Rimfall and the sea of islands."
-   },
-   {
-    "number": 7,
-    "title": "Chapter 7 - The Weasel and the Man",
-    "pageStart": 95,
-    "pageEnd": 107,
-    "summary": "Twoflower's tales and Rincewind's cowardice."
-   },
-   {
-    "number": 8,
-    "title": "Chapter 8 - The Travelling People",
-    "pageStart": 108,
+    "title": "Part 4 - Close to the Edge",
+    "pageStart": 91,
     "pageEnd": 120,
-    "summary": "The party falls off the edge of the Disc, ending the tale."
+    "summary": "The party flees across the Disc toward the Rim and falls off the edge."
    }
   ]
  },
@@ -39735,61 +36823,6 @@
   "tier": 1
  },
  {
-  "id": "book-pachinko",
-  "categoryId": "BOOKS",
-  "subtype": "Novel",
-  "name": "Pachinko",
-  "teaser": "A multigenerational saga of a Korean family in Japan spanning a century.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9781455563937-L.jpg",
-  "byline": "Min Jin Lee",
-  "synopsis": "Pachinko, published in 2017, follows four generations of a Korean family living in Japan from 1910 to 1989. The story begins with Sunja, the beloved daughter of a poor fisherman, who becomes pregnant by a wealthy married man. When a minister offers to marry her and take her to Japan, Sunja accepts. In Japan, the Korean community faces discrimination and poverty. The novel traces the family's struggle through World War II, the postwar economic boom, and the rise of the pachinko gambling industry. Lee spent twenty-seven years researching and writing the novel, which explores themes of identity, belonging, sacrifice, and the cost of survival.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Korea",
-    "pageStart": 1,
-    "pageEnd": 60,
-    "summary": "Sunja's childhood and her pregnancy."
-   },
-   {
-    "number": 2,
-    "title": "Osaka",
-    "pageStart": 61,
-    "pageEnd": 130,
-    "summary": "The family's arrival in Japan and their struggle to survive."
-   },
-   {
-    "number": 3,
-    "title": "Noa",
-    "pageStart": 131,
-    "pageEnd": 200,
-    "summary": "Sunja's sons grow up and face the challenges of being Korean in Japan."
-   },
-   {
-    "number": 4,
-    "title": "The End",
-    "pageStart": 201,
-    "pageEnd": 270,
-    "summary": "The family's trajectory through the decades."
-   }
-  ],
-  "pageCount": 270,
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Pachinko",
-   "durationMinutes": 35,
-   "instruction": "Read the opening chapters set in the Korean fishing village."
-  },
-  "tags": [
-   "korean",
-   "japanese",
-   "multigenerational",
-   "immigration",
-   "booker nominee"
-  ],
-  "tier": 1
- },
- {
   "id": "book-catch-22",
   "categoryId": "BOOKS",
   "subtype": "Novel",
@@ -43056,53 +40089,6 @@
   ]
  },
  {
-  "id": "book-all-the-light-we-cannot-see",
-  "categoryId": "BOOKS",
-  "subtype": "Novel",
-  "name": "All the Light We Cannot See",
-  "teaser": "A blind French girl and a German soldier's paths cross during World War II.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9781501173219-L.jpg",
-  "byline": "Anthony Doerr",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "All the Light We Cannot See",
-   "durationMinutes": 45,
-   "instruction": "Read the opening of All the Light We Cannot See."
-  },
-  "tags": [
-   "world war ii",
-   "pulitzer",
-   "historical",
-   "french",
-   "german"
-  ],
-  "tier": 2,
-  "synopsis": "Anthony Doerr's Pulitzer Prize-winning novel interweaves the stories of Marie-Laure, a blind French girl who flees Paris with her father to the walled city of Saint-Malo, and Werner, a German orphan recruited into a Hitler Youth academy for his radio skills. As World War II rages, their paths converge in occupied France. Marie-Laure's father carries a valuable diamond, the Sea of Flames, which is rumored to carry a curse. Werner, whose skills make him invaluable to the Nazi war machine, is sent to track radio signals in the same region. Doerr writes about science, light, and the small acts of resistance that sustain hope in darkness.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Marie-Laure",
-    "pageStart": 1,
-    "pageEnd": 150,
-    "summary": "Marie-Laure's childhood in Paris, her blindness, her father's work at the Museum of Natural History"
-   },
-   {
-    "number": 2,
-    "title": "Werner",
-    "pageStart": 151,
-    "pageEnd": 300,
-    "summary": "Werner's orphanage childhood, his talent for radio, and his recruitment into the Nazi program"
-   },
-   {
-    "number": 3,
-    "title": "Saint-Malo",
-    "pageStart": 301,
-    "pageEnd": 450,
-    "summary": "The war comes to Saint-Malo, the siege, Marie-Laure's resistance, and the paths crossing"
-   }
-  ]
- },
- {
   "id": "book-the-light-between-oceans",
   "categoryId": "BOOKS",
   "subtype": "Novel",
@@ -43341,74 +40327,6 @@
     "pageStart": 161,
     "pageEnd": 260,
     "summary": "Clarissa's party, Richard's confession, and the connection across centuries"
-   }
-  ]
- },
- {
-  "id": "book-cloud-atlas",
-  "categoryId": "BOOKS",
-  "subtype": "Novel",
-  "name": "Cloud Atlas",
-  "teaser": "Six interconnected stories spanning centuries from the 19th century to a post-apocalyptic future.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780375507250-L.jpg",
-  "byline": "David Mitchell",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Cloud Atlas",
-   "durationMinutes": 45,
-   "instruction": "Read the opening of Cloud Atlas."
-  },
-  "tags": [
-   "british",
-   "science fiction",
-   "literary fiction",
-   "nested",
-   "experimental"
-  ],
-  "tier": 2,
-  "synopsis": "David Mitchell's structural masterpiece consists of six nested stories that span centuries, each interrupted at its midpoint and resumed in reverse order. From a nineteenth-century Pacific voyage to a post-apocalyptic future, the tales are connected by a birthmark and by recurring themes of power, freedom, and the human capacity for both cruelty and compassion. A young lawyer discovers secrets aboard a ship; a composer struggles to complete his masterwork; a journalist uncovers corporate corruption; a publisher is imprisoned in a nursing home; a clone rebels against a futuristic dystopia; and a tribesman in a ruined world tells the last story. Mitchell suggests that our lives are not our own, that every action ripples forward through time.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "The Pacific Journal of Adam Ewing",
-    "pageStart": 1,
-    "pageEnd": 90,
-    "summary": "A notary's diary from 1850, a voyage across the Pacific, and a moral awakening"
-   },
-   {
-    "number": 2,
-    "title": "Letters from Zedelghem",
-    "pageStart": 91,
-    "pageEnd": 180,
-    "summary": "A young musician's correspondence from 1936 Belgium, his affair and his music"
-   },
-   {
-    "number": 3,
-    "title": "Half-Lives: The First Luisa Rey Mystery",
-    "pageStart": 181,
-    "pageEnd": 270,
-    "summary": "A journalist in 1970s California uncovers a nuclear conspiracy"
-   },
-   {
-    "number": 4,
-    "title": "The Ghastly Ordeal of Timothy Cavendish",
-    "pageStart": 271,
-    "pageEnd": 330,
-    "summary": "A publisher is trapped in a nursing home in the near future"
-   },
-   {
-    "number": 5,
-    "title": "An Orison of Sonmi-451",
-    "pageStart": 331,
-    "pageEnd": 420,
-    "summary": "A genetically engineered clone in a dystopian future tells her story"
-   },
-   {
-    "number": 6,
-    "title": "Sloosha's Crossin' an' Ev'rythin' After",
-    "pageStart": 421,
-    "pageEnd": 500,
-    "summary": "In a post-apocalyptic Hawaii, a tribesman encounters a visitor from the old world"
    }
   ]
  },
@@ -44179,53 +41097,6 @@
     "pageStart": 111,
     "pageEnd": 170,
     "summary": "Old age, loss, and Bernard's final gathering where the friends remember their lives"
-   }
-  ]
- },
- {
-  "id": "book-song-of-solomon",
-  "categoryId": "BOOKS",
-  "subtype": "Novel",
-  "name": "Song of Solomon",
-  "teaser": "A young black man's quest for identity takes him across America.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9781400033423-L.jpg",
-  "byline": "Toni Morrison",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Song of Solomon",
-   "durationMinutes": 45,
-   "instruction": "Read the opening of Song of Solomon."
-  },
-  "tags": [
-   "african american",
-   "magical realism",
-   "identity",
-   "family",
-   "classic"
-  ],
-  "tier": 2,
-  "synopsis": "Toni Morrison's novel follows Macon Dead III, nicknamed Milkman, as he journeys from his hometown in Michigan to the back roads of Virginia in search of a rumored family treasure. The son of a domineering, wealthy father and a passive, church-going mother, Milkman has spent his life taking from others. His quest for gold leads him instead to the history of his ancestors: the legendary Solomon, who flew back to Africa, and the love story of Risa and Singing Bird. Along the way, he confronts violence, discovers his roots, and finds that true wealth is not material. Morrison draws on African-American folklore to create a mythic story about identity, flight, and home.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "The Dead Family",
-    "pageStart": 1,
-    "pageEnd": 80,
-    "summary": "Milkman's childhood, his family's dysfunction, and the whispered legend of Solomon's Leap"
-   },
-   {
-    "number": 2,
-    "title": "The Quest",
-    "pageStart": 81,
-    "pageEnd": 200,
-    "summary": "Milkman and Guitar's journey to Virginia, Pilate's story, and the quest for gold"
-   },
-   {
-    "number": 3,
-    "title": "Solomon's Leap",
-    "pageStart": 201,
-    "pageEnd": 330,
-    "summary": "The discovery of family history, the violence of the present, and Milkman's transformation"
    }
   ]
  },
@@ -45125,53 +41996,6 @@
   ]
  },
  {
-  "id": "book-disgrace",
-  "categoryId": "BOOKS",
-  "subtype": "Novel",
-  "name": "Disgrace",
-  "teaser": "A disgraced professor retreats to rural South Africa where he confronts violence.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780140296402-L.jpg",
-  "byline": "J.M. Coetzee",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Disgrace",
-   "durationMinutes": 44,
-   "instruction": "Read the opening of Disgrace."
-  },
-  "tags": [
-   "south african",
-   "booker prize",
-   "apartheid",
-   "violence",
-   "literary fiction"
-  ],
-  "tier": 2,
-  "synopsis": "J.M. Coetzee's controversial novel follows David Lurie, a fifty-two-year-old English professor in Cape Town, who is dismissed from his university after an affair with a student. He retreats to his daughter Lucy's farm in the Eastern Cape, where he hopes to escape the consequences of his actions. But the farm is targeted in a brutal attack, and David is forced to confront his own complicity in a history of exploitation that extends far beyond his personal disgrace. Coetzee writes with clinical precision about race, power, colonialism, and the impossibility of atonement in post-apartheid South Africa.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Cape Town",
-    "pageStart": 1,
-    "pageEnd": 80,
-    "summary": "David's affair with Melanie, the disciplinary hearing, and his dismissal"
-   },
-   {
-    "number": 2,
-    "title": "Eastern Cape",
-    "pageStart": 81,
-    "pageEnd": 180,
-    "summary": "David's arrival at Lucy's farm, the attack, and its aftermath"
-   },
-   {
-    "number": 3,
-    "title": "Bezuidenhout",
-    "pageStart": 181,
-    "pageEnd": 220,
-    "summary": "David's involvement with Bev Shaw, Lucy's pregnancy, and his final reckoning"
-   }
-  ]
- },
- {
   "id": "book-waiting-for-the-barbarians",
   "categoryId": "BOOKS",
   "subtype": "Novel",
@@ -45839,53 +42663,6 @@
     "pageStart": 251,
     "pageEnd": 400,
     "summary": "Their final collaboration, the truth about their bond, and the legacy of their games"
-   }
-  ]
- },
- {
-  "id": "book-piranesi",
-  "categoryId": "BOOKS",
-  "subtype": "Fantasy",
-  "name": "Piranesi",
-  "teaser": "A man lives alone in a labyrinth of infinite halls.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9781635575996-L.jpg",
-  "byline": "Susanna Clarke",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Piranesi",
-   "durationMinutes": 20,
-   "instruction": "Read about this book."
-  },
-  "tags": [
-   "fantasy",
-   "mystery",
-   "literary fiction",
-   "magical",
-   "british"
-  ],
-  "tier": 1,
-  "synopsis": "Susanna Clarke's second novel follows Piranesi, a man who lives in a vast, impossible House filled with marble statues and infinite tides. He has been there since he was a child, and he keeps careful journals cataloguing the statues and the tide patterns. He believes there are only a few people in the world. When another man, known only as 'the Other,' visits him and asks for help finding a great and secret knowledge, Piranesi begins to question everything he knows. Clarke creates a labyrinthine, mythic world that is at once a puzzle and a fairy tale, exploring knowledge, innocence, and the nature of reality.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "The House",
-    "pageStart": 1,
-    "pageEnd": 60,
-    "summary": "Piranesi's journals, his daily life in the House, and his belief about the world"
-   },
-   {
-    "number": 2,
-    "title": "The Other",
-    "pageStart": 61,
-    "pageEnd": 140,
-    "summary": "The Other's visits, the search for knowledge, and Piranesi's growing doubt"
-   },
-   {
-    "number": 3,
-    "title": "The Truth",
-    "pageStart": 141,
-    "pageEnd": 272,
-    "summary": "Piranesi's discovery of who he really is, and his escape from the House"
    }
   ]
  },
@@ -51357,53 +48134,6 @@
   ]
  },
  {
-  "id": "book-the-name-of-the-rose-eco",
-  "categoryId": "BOOKS",
-  "subtype": "Mystery",
-  "name": "The Name of the Rose",
-  "teaser": "A detective investigates murders in a medieval monastery.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780544176560-L.jpg",
-  "byline": "Umberto Eco",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Name of the Rose",
-   "durationMinutes": 20,
-   "instruction": "Read about this book."
-  },
-  "tags": [
-   "mystery",
-   "italian",
-   "medieval",
-   "historical",
-   "philosophy"
-  ],
-  "tier": 1,
-  "synopsis": "Umberto Eco's medieval mystery follows William of Baskerville, a Franciscan friar, as he investigates a series of murders at a Benedictine abbey in 1327. William, a lover of logic and reason, must navigate the labyrinthine library and the suspicious monastic community to find the killer. His young assistant Adso narrates the adventure. Eco writes with scholarly erudition and narrative verve about faith, reason, and the danger of knowledge. The novel is a love letter to books, libraries, and the power of deduction.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "The Arrival",
-    "pageStart": 1,
-    "pageEnd": 80,
-    "summary": "William and Adso arrive at the abbey, the first murder, and the investigation begins"
-   },
-   {
-    "number": 2,
-    "title": "The Library",
-    "pageStart": 81,
-    "pageEnd": 250,
-    "summary": "The labyrinthine library, the hidden books, and the growing list of victims"
-   },
-   {
-    "number": 3,
-    "title": "The Apocalypse",
-    "pageStart": 251,
-    "pageEnd": 536,
-    "summary": "The truth about the murders, the forbidden book, and the fire that consumes the library"
-   }
-  ]
- },
- {
   "id": "book-the-plum-pudding-murder",
   "categoryId": "BOOKS",
   "subtype": "Mystery",
@@ -51635,60 +48365,6 @@
     "pageStart": 161,
     "pageEnd": 280,
     "summary": "Li-yan's rise in the tea business, her search for her daughter, and the reunion"
-   }
-  ]
- },
- {
-  "id": "book-the-vanishing-half-bb",
-  "categoryId": "BOOKS",
-  "subtype": "Historical Fiction",
-  "name": "The Vanishing Half",
-  "teaser": "Twin sisters choose different racial identities in the 1960s.",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/9780525536291-L.jpg",
-  "byline": "Brit Bennett",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Vanishing Half",
-   "durationMinutes": 20,
-   "instruction": "Read about this book."
-  },
-  "tags": [
-   "historical",
-   "race",
-   "identity",
-   "twins",
-   "passing"
-  ],
-  "tier": 1,
-  "synopsis": "Brit Bennett's novel follows twin sisters Desiree and Stella Vignes, who grow up in a small Black community in Louisiana. After running away at sixteen, their paths diverge: Desiree returns to the South with a dark-skinned daughter, while Stella passes as white and builds a life in a wealthy white suburb. Bennett writes with extraordinary emotional intelligence about race, identity, and the choices that define us. The novel spans decades and explores the consequences of passing, the fracturing of families, and the impossibility of outrunning who you are.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "The Twins",
-    "pageStart": 1,
-    "pageEnd": 80,
-    "summary": "The twins' childhood, their escape, and the beginning of their divergence"
-   },
-   {
-    "number": 2,
-    "title": "Stella",
-    "pageStart": 81,
-    "pageEnd": 180,
-    "summary": "Stella's life as a white woman, her marriage, and the constant fear of exposure"
-   },
-   {
-    "number": 3,
-    "title": "Desiree",
-    "pageStart": 181,
-    "pageEnd": 260,
-    "summary": "Desiree's return to the South, her daughter's experience, and the family fracture"
-   },
-   {
-    "number": 4,
-    "title": "The Reunion",
-    "pageStart": 261,
-    "pageEnd": 343,
-    "summary": "The daughters meet, the truth is revealed, and the family confronts its secrets"
    }
   ]
  },
@@ -55415,51 +52091,6 @@
   }
  },
  {
-  "name": "Station Eleven",
-  "byline": "Emily St. John Mandel",
-  "tags": [
-   "Fiction",
-   "Science Fiction",
-   "Post-Apocalyptic"
-  ],
-  "synopsis": "Mandel's novel interweaves the lives of people connected to a famous actor who died on stage the night a flu pandemic wiped out civilization. Set before and after the collapse, the novel explores memory, art, and what endures when the world ends.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Before",
-    "pageStart": 1,
-    "pageEnd": 100,
-    "summary": "The night of the pandemic and the connections between characters"
-   },
-   {
-    "number": 2,
-    "title": "After",
-    "pageStart": 101,
-    "pageEnd": 200,
-    "summary": "The Traveling Symphony and life in the post-apocalyptic world"
-   },
-   {
-    "number": 3,
-    "title": "The Reckoning",
-    "pageStart": 201,
-    "pageEnd": 336,
-    "summary": "The convergence of storylines and the meaning of survival"
-   }
-  ],
-  "pages": 336,
-  "imageUrl": "https://covers.openlibrary.org/b/title/Station%20Eleven-M.jpg",
-  "teaser": "Mandel's novel interweaves the lives of people connected to a famous actor who died on stage the nig...",
-  "id": "station-eleven",
-  "categoryId": "BOOKS",
-  "subtype": "Science Fiction",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Before",
-   "durationMinutes": 30,
-   "instruction": "Start reading Station Eleven. Focus on the themes and ideas that resonate with you."
-  }
- },
- {
   "name": "The Thursday Murder Club",
   "byline": "Richard Osman",
   "tags": [
@@ -55592,51 +52223,6 @@
    "targetName": "The Lab",
    "durationMinutes": 30,
    "instruction": "Start reading Lessons in Chemistry. Focus on the themes and ideas that resonate with you."
-  }
- },
- {
-  "name": "Klara and the Sun",
-  "byline": "Kazuo Ishiguro",
-  "tags": [
-   "Fiction",
-   "Science Fiction",
-   "Literary"
-  ],
-  "synopsis": "Ishiguro's novel follows Klara, an Artificial Friend, as she observes the world from a store window and then in the home of a sick child. Through Klara's innocent perspective, Ishiguro explores love, loneliness, and what it means to be human.",
-  "chapters": [
-   {
-    "number": 1,
-    "title": "The Store",
-    "pageStart": 1,
-    "pageEnd": 80,
-    "summary": "Klara's life in the store and her observation of customers"
-   },
-   {
-    "number": 2,
-    "title": "The Home",
-    "pageStart": 81,
-    "pageEnd": 180,
-    "summary": "Klara's life with Josie and the family dynamics"
-   },
-   {
-    "number": 3,
-    "title": "The Question",
-    "pageStart": 181,
-    "pageEnd": 303,
-    "summary": "The philosophical questions about love, consciousness, and mortality"
-   }
-  ],
-  "pages": 303,
-  "imageUrl": "https://covers.openlibrary.org/b/title/Klara%20and%20the%20Sun-M.jpg",
-  "teaser": "Ishiguro's novel follows Klara, an Artificial Friend, as she observes the world from a store window ...",
-  "id": "klara-and-the-sun",
-  "categoryId": "BOOKS",
-  "subtype": "Science Fiction",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The Store",
-   "durationMinutes": 30,
-   "instruction": "Start reading Klara and the Sun. Focus on the themes and ideas that resonate with you."
   }
  },
  {
@@ -59090,78 +55676,6 @@
   }
  },
  {
-  "id": "a-wizard-of-earthsea-le-guin",
-  "name": "A Wizard of Earthsea",
-  "byline": "Ursula K. Le Guin",
-  "synopsis": "Ged, a goatherd on the island of Gont, discovers he has a gift for magic and is sent to a school for wizards. There his pride leads him to unleash a terrible shadow creature from the realm of death. The novel follows Ged's journey across the archipelago of Earthsea as he confronts the shadow he created and learns that true power comes not from domination but from understanding and balance.",
-  "teaser": "A young wizard must face the shadow he unleashed on the world",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/0547772076-M.jpg",
-  "tags": [
-   "Fantasy",
-   "Fiction",
-   "Classic"
-  ],
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Warrior in the Mist",
-    "pageStart": 1,
-    "pageEnd": 18,
-    "summary": "Ged's childhood on Gont and the discovery of his magical gift."
-   },
-   {
-    "number": 2,
-    "title": "The School on Gont",
-    "pageStart": 19,
-    "pageEnd": 34,
-    "summary": "Ged arrives at the school for wizards on Roke."
-   },
-   {
-    "number": 3,
-    "title": "The Shadow",
-    "pageStart": 35,
-    "pageEnd": 52,
-    "summary": "Ged's pride leads him to unleash a terrible shadow creature."
-   },
-   {
-    "number": 4,
-    "title": "The Flight",
-    "pageStart": 53,
-    "pageEnd": 68,
-    "summary": "Ged flees the shadow and begins his journey of redemption."
-   },
-   {
-    "number": 5,
-    "title": "The Calling of Names",
-    "pageStart": 69,
-    "pageEnd": 86,
-    "summary": "Ged's travels across Earthsea and the encounters along the way."
-   },
-   {
-    "number": 6,
-    "title": "The Open Sea",
-    "pageStart": 87,
-    "pageEnd": 104,
-    "summary": "Ged's confrontation with the shadow on the open water."
-   },
-   {
-    "number": 7,
-    "title": "The Silence of Aum-Ur",
-    "pageStart": 105,
-    "pageEnd": 120,
-    "summary": "The final confrontation and the understanding of true power."
-   }
-  ],
-  "categoryId": "BOOKS",
-  "subtype": "Fantasy",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Warrior in the Mist",
-   "durationMinutes": 30,
-   "instruction": "Start reading A Wizard of Earthsea. Focus on the themes and ideas that resonate with you."
-  }
- },
- {
   "id": "the-gunslinger-king",
   "name": "The Gunslinger",
   "byline": "Stephen King",
@@ -59568,79 +56082,6 @@
   }
  },
  {
-  "id": "on-earth-were-briefly-gorgeous-vuong",
-  "name": "On Earth We're Briefly Gorgeous",
-  "byline": "Ocean Vuong",
-  "synopsis": "Written as a letter from a son to his illiterate mother, the novel traces the narrator's life from his childhood in Hartford, Connecticut, to his time as a young man. The letter explores the legacy of the Vietnam War, the experience of being queer and Vietnamese American, the beauty and violence of addiction, and the complicated love between a mother and son who cannot fully understand each other. Vuong's prose is lyrical and deeply moving.",
-  "teaser": "A letter from a son to his mother, exploring war, identity, and love",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/0525564020-M.jpg",
-  "tags": [
-   "Fiction",
-   "Literary Fiction",
-   "Memoir",
-   "Vietnamese American Literature"
-  ],
-  "chapters": [
-   {
-    "number": 1,
-    "title": "Letter One",
-    "pageStart": 1,
-    "pageEnd": 18,
-    "summary": "The narrator begins his letter and recalls his childhood."
-   },
-   {
-    "number": 2,
-    "title": "Hartford",
-    "pageStart": 19,
-    "pageEnd": 38,
-    "summary": "Growing up in Hartford and the experience of poverty and difference."
-   },
-   {
-    "number": 3,
-    "title": "The Farm",
-    "pageStart": 39,
-    "pageEnd": 58,
-    "summary": "Working on a tobacco farm and the beauty of the natural world."
-   },
-   {
-    "number": 4,
-    "title": "Tommy",
-    "pageStart": 59,
-    "pageEnd": 78,
-    "summary": "The narrator's first relationship and the discovery of desire."
-   },
-   {
-    "number": 5,
-    "title": "Mother",
-    "pageStart": 79,
-    "pageEnd": 100,
-    "summary": "The complicated relationship with his mother and her trauma."
-   },
-   {
-    "number": 6,
-    "title": "Vietnam",
-    "pageStart": 101,
-    "pageEnd": 122,
-    "summary": "The grandmother's story and the legacy of the war."
-   },
-   {
-    "number": 7,
-    "title": "The End of the Letter",
-    "pageStart": 123,
-    "pageEnd": 142,
-    "summary": "The narrator's final words to his mother."
-   }
-  ],
-  "categoryId": "BOOKS",
-  "subtype": "Memoir",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "Letter One",
-   "durationMinutes": 30,
-   "instruction": "Start reading On Earth We're Briefly Gorgeous. Focus on the themes and ideas that resonate with you."
-  }
- },
- {
   "id": "circe-miller",
   "name": "Circe",
   "byline": "Madeline Miller",
@@ -60024,58 +56465,6 @@
    "targetName": "On Running",
    "durationMinutes": 30,
    "instruction": "Start reading Born a Crime. Focus on the themes and ideas that resonate with you."
-  }
- },
- {
-  "id": "in-between-johnson",
-  "name": "Between the World and Me",
-  "byline": "Ta-Nehisi Coates",
-  "synopsis": "Coates writes a letter to his teenage son about the reality of being Black in America. Drawing on his own experiences growing up in Baltimore, his time at Howard University, and his journalism career, he explores the history of racial violence, the fragility of the Black body, and the meaning of freedom. The book is a powerful, unflinching account of what it means to live in a Black body in America.",
-  "teaser": "A father's letter to his son about race, history, and the Black body",
-  "imageUrl": "https://covers.openlibrary.org/b/isbn/0812993543-M.jpg",
-  "tags": [
-   "Nonfiction",
-   "Memoir",
-   "Politics",
-   "African American Literature"
-  ],
-  "chapters": [
-   {
-    "number": 1,
-    "title": "The First Layer",
-    "pageStart": 1,
-    "pageEnd": 28,
-    "summary": "Coates describes his childhood and the first lessons about the Black body."
-   },
-   {
-    "number": 2,
-    "title": "The Second Layer",
-    "pageStart": 29,
-    "pageEnd": 56,
-    "summary": "Howard University and the Mecca of Black culture."
-   },
-   {
-    "number": 3,
-    "title": "The Third Layer",
-    "pageStart": 57,
-    "pageEnd": 86,
-    "summary": "The history of racial violence and the dream of whiteness."
-   },
-   {
-    "number": 4,
-    "title": "The Fourth Layer",
-    "pageStart": 87,
-    "pageEnd": 114,
-    "summary": "The body as a site of political struggle and the meaning of freedom."
-   }
-  ],
-  "categoryId": "BOOKS",
-  "subtype": "Memoir",
-  "exploreAction": {
-   "verb": "Read",
-   "targetName": "The First Layer",
-   "durationMinutes": 30,
-   "instruction": "Start reading Between the World and Me. Focus on the themes and ideas that resonate with you."
   }
  },
  {
