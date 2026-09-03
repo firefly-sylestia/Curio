@@ -59,8 +59,19 @@ User direction (v324):
   (Save, Share, dismiss, reveal-exit).
 - No Gradle commands run (project DOX forbids them here) — CI validates.
 
-## NEXT — Books signature design (awaiting the user's description)
+## NEXT — the category after Books (awaiting the user's pick + design)
 
-The user picked **Books** as the first category to redesign. Awaiting their
-design description. Contract: implement ONE category, commit, then ask for
-the next. No SVG without permission — icons/symbols/existing art only.
+**BOOKS IS DONE** (v326). User direction: "research the book palette
+yourself, and the design should be like a book cover with margins and
+ruled lines, facts properly adjusted with lines." Implemented in
+`signatureDesign` BOOKS entry: classic cloth hardcover — oxblood leather
+gradient, gold-foil double border (margins), left spine band + gold hinge
+rules, real `menu_book` icon crest top-right (new optional `crest`/
+`crestTint` fields — no more hand-drawn paths), faint `auto_stories`
+watermark bottom-right, and gold ruled lines BEHIND the quick fact at the
+body's own line-height (`bodyRuleColor` → `drawBehind`), so the facts sit
+exactly on the lines.
+
+Contract: implement ONE category, COMMIT but DO NOT PUSH (user reviews
+each before the next). No SVG without permission — icons/symbols/existing
+art only.

@@ -449,6 +449,19 @@ app/src/main/java/com/curio/app/
   `CategoryId.name`) so the shown lane and the completion check always
   agree (the old live `leastEngaged()` re-resolution could re-aim the
   quest away mid-day).
+- **v326 — signature redesign campaign BEGINS: Books.** The
+  per-category `signatureDesign` rework (one category per turn, commit but
+  DON'T push — user reviews each before the next) starts with BOOKS, now a
+  classic cloth hardcover: oxblood leather gradient + gold-foil double
+  border (the "margins"), a left spine band with gold hinge rules, a REAL
+  icon crest (`crest`/`crestTint` fields → top-right `menu_book` glyph,
+  tilted like a foil stamp — replaces the old hand-drawn `Path` crest),
+  giant faint `auto_stories` watermark bottom-right, and gold ruled lines
+  BEHIND the quick fact (`bodyRuleColor` field → `Modifier.drawBehind` on
+  the body Text, spaced at the body's own line-height so the facts sit ON
+  the lines). Both new fields are optional (default null) so every other
+  category is untouched. Design contract: icons/symbols/existing art ONLY
+  — no SVG/path drawing without the user's permission.
 - **v325 — share-card editor safety net: back-cancels-edit, edit
   persistence, quick-fact "Edit text" placement, knob-on-text fix;
   RadialHoldMenu ported off removed Compose APIs.** (1) **Back now

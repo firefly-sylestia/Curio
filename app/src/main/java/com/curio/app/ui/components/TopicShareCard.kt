@@ -1605,6 +1605,20 @@ private fun SignatureCard(
             )
         }
 
+        // Small real-icon crest top-right (replaces hand-drawn crests) —
+        // an actual Material Symbols glyph, tilted like a foil stamp.
+        sig.crest?.let { glyph ->
+            CurioIcon(
+                name = glyph,
+                tint = sig.crestTint.takeIf { it != Color.Unspecified }?.copy(alpha = 0.85f) ?: sig.titleColor.copy(alpha = 0.30f),
+                size = 26.dp,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .graphicsLayer { rotationZ = 8f }
+                    .padding(top = 14.dp, end = 14.dp)
+            )
+        }
+
         // Meta parts (byline / year) shared across layouts
         val metaParts = mutableListOf<String>()
         if (quoteText == null && byline.isNotBlank()) metaParts.add(byline)
@@ -1675,11 +1689,27 @@ private fun SignatureCard(
                 lineHeight = (bodySize * sig.bodyLineHeight * bodyScale).sp,
                 color = sig.bodyColor
             ), move).copy(textAlign = align)
+            // Book-cover ruled lines BEHIND the text, spaced at the body's own
+            // line height so the facts sit exactly on the lines (drawn in the
+            // same local space as the text, so they move with the box).
+            val ruleColor = sig.bodyRuleColor
             Text(body, style = factStyle, maxLines = lines(bodyMaxLines, move.factHeightFrac), overflow = TextOverflow.Ellipsis,
-                modifier = (if (centered) Modifier.fillMaxWidth() else Modifier).moveFact(move).onGloballyPositioned {
-                    callbacks.onFact(it.boundsInWindow())
-                    callbacks.onFactStyle(factStyle)
-                })
+                modifier = (if (centered) Modifier.fillMaxWidth() else Modifier)
+                    .moveFact(move)
+                    .then(if (ruleColor != null) Modifier.drawBehind {
+                        val lh = factStyle.lineHeight.toPx()
+                        if (lh > 0f) {
+                            var y = lh * 0.80f
+                            while (y < size.height) {
+                                drawLine(ruleColor, Offset(0f, y), Offset(size.width, y), strokeWidth = 0.8f)
+                                y += lh
+                            }
+                        }
+                    } else Modifier)
+                    .onGloballyPositioned {
+                        callbacks.onFact(it.boundsInWindow())
+                        callbacks.onFactStyle(factStyle)
+                    })
         }
 
         // ── Footer (shared) — FIXED: never moves (only the author/year row
@@ -1847,7 +1877,15 @@ private data class SignatureDesign(
     val layout: SignatureLayout = SignatureLayout.STANDARD,
     // Minimal-style giant faint initial (a letter/symbol) — rendered by the
     // SignatureCard composable over the background, instead of drawn scenes.
-    val watermark: String? = null
+    val watermark: String? = null,
+    // Small icon crest rendered top-right (a REAL icon-font glyph, not a
+    // drawn path) — replaces hand-drawn crests with an actual symbol.
+    val crest: String? = null,
+    val crestTint: Color = Color.Unspecified,
+    // When set, ruled lines are drawn BEHIND the fact text at the body's
+    // own line height, so the facts sit exactly on the lines (printed-page
+    // book-cover look).
+    val bodyRuleColor: Color? = null
 )
 
 
@@ -3096,24 +3134,36 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             footerSpacer = 8.dp, footerFont = BioRhymeFontFamily, footerColor = Color(0xFF6BE3A0).copy(alpha = 0.65f),
             layout = SignatureLayout.SIDE
         )
-        // ═══ BOOKS — quiet library: hairline frame + tiny open-book crest ═══
+        // ═══ BOOKS — classic cloth hardcover: oxblood leather + gold foil
+        // margins, fact text sitting on ruled lines like a printed page ═══
         cat == "BOOKS" -> SignatureDesign(
-            bg = Color(0xFF1A140E), cornerRadius = 8f,
+            bg = Color(0xFF4A1D24), cornerRadius = 8f,
             drawBackground = { w, h ->
-                drawRect(Brush.verticalGradient(listOf(Color(0xFF2C2318), Color(0xFF1A140E), Color(0xFF0C0806))), size = Size(w, h))
-                signatureHairlineFrame(w, h, Color.White.copy(alpha = 0.14f))
-                // Tiny open-book crest, top-right
-                drawPath(Path().apply { moveTo(w * 0.85f, h * 0.105f); quadraticBezierTo(w * 0.86f, h * 0.085f, w * 0.87f, h * 0.105f) }, Color(0xFFC9A24F).copy(alpha = 0.6f), style = Stroke(1.4f))
-                drawPath(Path().apply { moveTo(w * 0.87f, h * 0.105f); quadraticBezierTo(w * 0.88f, h * 0.085f, w * 0.89f, h * 0.105f) }, Color(0xFFC9A24F).copy(alpha = 0.6f), style = Stroke(1.4f))
+                // Cloth cover — deep oxblood leather gradient
+                drawRect(Brush.verticalGradient(listOf(Color(0xFF5A2430), Color(0xFF4A1D24), Color(0xFF2E0F15))), size = Size(w, h))
+                // Gold foil margins — a book cover's double border rule
+                val m1 = kotlin.math.min(w, h) * 0.05f
+                val m2 = kotlin.math.min(w, h) * 0.068f
+                drawRoundRect(Color(0xFFD9B45F).copy(alpha = 0.55f), Offset(m1, m1), Size(w - m1 * 2f, h - m1 * 2f), CornerRadius(3f), style = Stroke(1.2f))
+                drawRoundRect(Color(0xFFD9B45F).copy(alpha = 0.30f), Offset(m2, m2), Size(w - m2 * 2f, h - m2 * 2f), CornerRadius(2f), style = Stroke(0.7f))
+                // Spine band on the left edge — like the leather spine of a
+                // real book, plus its gold hinge rules
+                drawRect(Color(0xFFD9B45F).copy(alpha = 0.10f), Offset(w * 0.030f, m1), Size(w * 0.006f, h - m1 * 2f))
+                drawRect(Color(0xFFD9B45F).copy(alpha = 0.16f), Offset(w * 0.036f, m1), Size(w * 0.006f, h - m1 * 2f))
+                drawRect(Color(0xFFD9B45F).copy(alpha = 0.10f), Offset(w * 0.042f, m1), Size(w * 0.004f, h - m1 * 2f))
             },
-            padding = PaddingValues(22.dp), badgeColor = Color(0xFFC9A24F), badgeInk = Color(0xFF1A140E),
+            padding = PaddingValues(horizontal = 30.dp, vertical = 24.dp), badgeColor = Color(0xFFD9B45F), badgeInk = Color(0xFF3A151B),
             badgeRadius = 14.dp, badgeHPadding = 10.dp, badgeVPadding = 5.dp, badgeIconSize = 12.dp,
             badgeFontSize = 8.sp, badgeLetterSpacing = 1.5.sp, titleTopSpacer = 14.dp,
             titleFont = FrauncesFontFamily, titleSize = 30.sp, titleLineHeight = 36.sp, titleColor = Color(0xFFF5E8D0),
-            metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFFC9A24F),
-            bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFFE0D0B8).copy(alpha = 0.88f),
-            footerSpacer = 8.dp, footerFont = FrauncesFontFamily, footerColor = Color(0xFFC9A24F).copy(alpha = 0.65f),
-            layout = SignatureLayout.STANDARD
+            metaSpacer = 5.dp, metaSeparator = " \u2014 ", metaSize = 10.sp, metaColor = Color(0xFFD9B45F),
+            bodySize = 10f, bodyLineHeight = 1.60f, bodyColor = Color(0xFFF2E6CE).copy(alpha = 0.92f),
+            footerSpacer = 8.dp, footerFont = FrauncesFontFamily, footerColor = Color(0xFFD9B45F).copy(alpha = 0.70f),
+            layout = SignatureLayout.STANDARD,
+            watermark = "auto_stories",
+            crest = "menu_book",
+            crestTint = Color(0xFFD9B45F),
+            bodyRuleColor = Color(0xFFD9B45F).copy(alpha = 0.35f)
         )
         // ═══ CHEMISTRY — quiet lab: hairline frame + tiny hexagon crest ═══
         cat == "CHEMISTRY" -> SignatureDesign(

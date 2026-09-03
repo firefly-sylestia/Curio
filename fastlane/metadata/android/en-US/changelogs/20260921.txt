@@ -1,3 +1,4 @@
+ADD: Signature card redesign, category by category — starting with Books: a classic cloth hardcover look (oxblood leather + gold foil double border), a real open-book icon crest, a faint open-book watermark, and gold ruled lines behind the quick fact so the text sits on the lines like a printed page.
 FIX: Share-card editor — back now cancels the editor first (press again to exit the sheet), and exiting the sheet by mistake no longer loses your work: edits are saved on dismiss and restored when you reopen the sheet (they clear when you leave the topic).
 FIX: Share-card editor — the Edit text circle now sits right next to the floating Done button (it used to hide mid-scroll), and the move knob shrinks and fades while dragging so it no longer covers the text you're moving.
 FIX: Category picker tap-and-hold — rebuilt on the current Compose APIs so the gooey radial menu works on every device (was failing to compile on some builds).
