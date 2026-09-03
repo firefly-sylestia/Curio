@@ -424,7 +424,7 @@ fun CabinetScreen(navController: NavController) {
                     )
                 } else if (selectedFilters.isEmpty() && !showLegacyOnly) {
                     CurioEmptyState(
-                        glyph = CurioIcons.Inventory2,
+                        glyph = CurioIcons.Cabinet,
                         headline = "Your Cabinet is empty",
                         subtext = "Every capture you save will live here. Shuffle to find your first one.",
                         tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),

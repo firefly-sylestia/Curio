@@ -4326,16 +4326,27 @@ private fun MiddleContent(
                 // widget here (same bounds reporting, so the editor's box +
                 // grip sit on the bar exactly as they would on text).
                 if (chapterProgress != null) {
-                    ChapterProgressBlock(
-                        progress = chapterProgress,
-                        fill = palette.accent,
-                        track = palette.ink.copy(alpha = 0.14f),
-                        ink = palette.ink,
-                        modifier = Modifier.onGloballyPositioned {
-                            callbacks.onFact(it.boundsInWindow())
-                            callbacks.onFactStyle(frostStyle)
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        ChapterProgressBlock(
+                            progress = chapterProgress,
+                            fill = palette.accent,
+                            track = palette.ink.copy(alpha = 0.14f),
+                            ink = palette.ink
+                        )
+                        if (factText.isNotBlank()) {
+                            Text(
+                                factText,
+                                style = frostStyle,
+                                color = palette.ink,
+                                maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 16 else 10, move.factHeightFrac),
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
-                    )
+                    }
+                    .onGloballyPositioned {
+                        callbacks.onFact(it.boundsInWindow())
+                        callbacks.onFactStyle(frostStyle)
+                    }
                 } else {
                     // v316b — the glyph box reports the bounds, NOT the frost
                     // pane: the pane's own 18dp padding would otherwise push
@@ -4929,8 +4940,9 @@ fun TopicShareSheet(
     // saveable by default (crash on onSaveInstanceState).
     // v3xx — 3:4 (CLASSIC) is the default aspect; the aspect tool toggles.
     var aspect by remember { mutableStateOf(ShareCardAspect.CLASSIC) }
-    var selectedId by remember { mutableStateOf<String?>(null) }
-    var customText by rememberSaveable { mutableStateOf("") }
+  var selectedId by remember { mutableStateOf<String?>(null) }
+  var showChapterProgress by remember { mutableStateOf(false) }
+  var customText by rememberSaveable { mutableStateOf("") }
     var polaroidCaption by rememberSaveable { mutableStateOf("") }
     // v229d — seeded from [initialStyle] / [initialClassicSignature] so the
     // Share Hub can open the sheet on the picked design.
@@ -5157,9 +5169,9 @@ fun TopicShareSheet(
     // v329 — when Reading progress is the active content the card draws a
     // VISUAL chapter widget (bar + caption) instead of the prose text; the
     // value comes from the live BookNotes pref so the picker updates the card.
-    val progressForCard = if (activeId == "chapter_progress" && hasBookChapters)
-        ChapterProgressUi(chaptersRead, bookChapters.size)
-    else null
+  val progressForCard = if ((activeId == "chapter_progress" || showChapterProgress) && hasBookChapters)
+  ChapterProgressUi(chaptersRead, bookChapters.size)
+  else null
     // v334 — what the CARD renders (unified for every TopicShareCard call):
     // custom facts + chapter reviews always render the LIVE customText (empty
     // stays empty — no placeholder bleeding onto the card); everything else
@@ -5758,8 +5770,18 @@ fun TopicShareSheet(
                                         Pill(
                                             opt.label + (opt.rating?.takeIf { r -> r > 0 }?.let { " · " + "\u2605".repeat(it) } ?: ""),
                                             if (opt.id == CUSTOM_FACT_ID) CurioIcons.Add else CurioIcons.FormatText,
-                                            opt.id == activeId
-                                        ) { selectedId = opt.id }
+  opt.id == activeId || (opt.id == "chapter_progress" && showChapterProgress)
+  ) {
+  if (opt.id == "chapter_progress") {
+  showChapterProgress = true
+  selectedId = opt.id
+  } else if (opt.id == CUSTOM_FACT_ID && showChapterProgress) {
+  selectedId = opt.id
+  } else {
+  showChapterProgress = false
+  selectedId = opt.id
+  }
+  }
                                     }
                                 }
                             }

@@ -738,8 +738,8 @@ fun HomeScreen(navController: NavController) {
                                             color = questInk.copy(alpha = 0.22f)
                                         )
                                         HeroStatSegment(
-                                            glyph = CurioIcons.Inventory2,
-                                            value = if (promoOn) PromoMode.DEMO_SAVED.toString() else "$totalSaved",
+glyph = CurioIcons.Cabinet,
+  value = if (promoOn) PromoMode.DEMO_SAVED.toString() else "$totalSaved",
                                             label = "Cabinet",
                                             tint = questInk,
                                             ink = questInk,
@@ -1409,7 +1409,7 @@ fun HomeScreen(navController: NavController) {
 // ═══════════════════════════════════════════════════════════════════════
 // Hero stat segment — the detail bar's icon/value/label design, on the
 // home banner (Streak · Cabinet · Recent). No blur, per the home spec.
-// ══════════════════════════════════════════════���════════════════════════
+// ═���════════════════════════════════════════════���════════════════════════
 
 /** One mirrored hero watermark glyph — the banner's readable ink at a soft
  *  alpha (the saved-entry hero's HeroWatermarkGlyph role, adapted for Home:
@@ -2611,8 +2611,8 @@ private fun DrawerMaterialStatStrip(onClick: () -> Unit) {
                 )
                 VerticalDivider(modifier = Modifier.height(38.dp))
                 DrawerMaterialStatPane(
-                    glyph = CurioIcons.Inventory2,
-                    value = "$saved",
+glyph = CurioIcons.Cabinet,
+                        value = "$saved",
                     label = "saved",
                     modifier = Modifier.weight(1f)
                 )

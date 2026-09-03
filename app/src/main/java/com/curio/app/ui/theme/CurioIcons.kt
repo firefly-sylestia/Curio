@@ -86,7 +86,8 @@ object CurioIcons {
     const val Remove      = "remove"           // −
     const val AutoAwesome = "auto_awesome"     // sparkles / logomark
     const val Tune         = "tune"            // sliders — Preferences settings entry
-    const val Inventory2  = "inventory_2"      // cabinet empty state
+    const val Inventory2  = "inventory_2"      // storage / backup
+    const val Cabinet     = "shelves"          // cabinet / bookcase
     const val SearchOff   = "search_off"       // no-results state
     const val History     = "history"          // topic history empty
     const val DragHandle  = "drag_handle"      // ⋮ — manage categories drag

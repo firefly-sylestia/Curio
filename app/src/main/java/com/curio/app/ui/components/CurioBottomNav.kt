@@ -215,8 +215,8 @@ object CurioBottomNavItems {
     val Cabinet = CurioBottomDestination(
         route = CurioRoutes.CABINET,
         label = "Cabinet",
-        icon = CurioIcons.Inventory2,
-        selectedIcon = CurioIcons.Inventory2
+        icon = CurioIcons.Cabinet,
+        selectedIcon = CurioIcons.Cabinet
     )
 
     val all: List<CurioBottomDestination> = listOf(Home, Shuffle, Cabinet)
