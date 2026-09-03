@@ -1,105 +1,81 @@
 # Prompt.md — current request log
 
-## Request: v328 — search speed + theming + cover hub + book share-card chapters
+## Request: v330 — share-card editor layout/editing UX + picker hold-action rewrite
 
 User direction (paraphrased):
 
-> Topic browser search results are slow / show loading — make it lazy and
-> cap at 50 topics. The category picker isn't theme-aware (light/dark).
-> Mixes still have color-contrast problems in both themes. In the book
-> cover fetch, show ALL covers there too, and cache both stars (average +
-> count). Add book share-card content: a chapter-progress element and a
-> custom-text chapter-review card. Selecting can be done from the
-> bottom-sheet category and a link tool from share.
-
-## Ask-answers that shaped the work
-
-- **Search target = Browse Topics screen** (full-catalog fuzzy search was
-  re-running on every keystroke → the "loading" feel).
-- **Category UI wrong = the Category panel rows** in Cabinet + Topic
-  Browser: checked rows had NO fill (only the tiny checkbox showed
-  selection) and the panel surface read off (used the Curio LIGHT scheme's
-  warm-tan `surfaceContainerHigh` even under dark-adjacent styles).
-- **Mix contrast = whole-card cohesion** (cover plate + chips).
-- **Share-card chapter features**: chapter progress + written review with a
-  chapter chip, both with an in-editor chapter picker; chapters come from
-  the topic's `chapters` (BookNotes sheet). Reading progress is ALSO
-  tracked from the synopsis bottom-sheet chapter view.
+> Refine the share card editor: (1) position changes should be per-card —
+> each design keeps its OWN layout, not one shared move applied to all
+> styles; (2) during Customise, tapping OUTSIDE the selected box (empty
+> card space, not another box) should auto-deselect; (3) be able to SWIPE
+> between cards while editing; (4) the move grip still hovers over the
+> text while typing the quick fact — fix it; (5) the floating Done/Reset
+> over the card is in the way — put Done/Reset where Save/Share sit, move
+> the content selector (share text / + custom / quick fact / no fact etc.)
+> there too, and when Done is tapped the Save/Share/Share-as-text buttons
+> come back. (6) The category picker tap-and-hold morph action is "totally
+> bad and wrong" — still ~5× huge, collapses before 3 seconds — rewrite
+> the logic fully with a new animation and new button style.
 
 ## Completed
 
-1. **Browse Topics search fast + capped.** `TopicDatabaseScreen`: the
-   full-catalog fuzzy scan keyed a DEBOUNCED needle (`typedNeedle` +
-   `LaunchedEffect` + 200ms delay, stale runs ignored) and search results
-   are capped at the best 50 (`SEARCH_RESULT_CAP`); browse mode still
-   pages all topics at PAGE_SIZE.
-2. **Category picker panels theme-aware.** `CabinetCategoryPanel` +
-   `DatabaseCategoryPanel` surfaces now use `curioDialogContainerColor()`
-   (proper elevated surface in light, lifted dark surface at night), and
-   CHECKED rows get a visible theme-aware category-tinted fill
-   (`lerp(panelBase, accent, 0.22f)` — light accent wash in light, deeper
-   accent lift in dark) with bolded label. Legacy checkbox rows match.
-3. **Mix cards — solid identity pairs.** `namedMixTone` → `namedMixIdentity`
-   returning `(tone, on-tone ink)`: light = deep tone + white glyph; dark =
-   tone lifted 0.70 toward white + near-black glyph. Cover plate + lane
-   chips are now SOLID tone fills with the on-tone glyph (was translucent
-   0.42/0.22 blends that sank in light and washed out in dark).
-4. **Book cover hub — all covers + both stars.** Prefs gained
-   `bookRatingsCount` (+`setBookRatingWithCount`) and the hub gained an
-   "All covers — N books" LazyRow (`CoverTile`: fixed 80×112 slot, the
-   AsyncImage IS the poster with `fillMaxSize`, cached ★ + count under the
-   title, tap → that book's reveal). `BookCoverFetch.fetchRatings` and
-   `fetchRatingFor` now parse + cache `ratingsCount` too (new
-   `BookStars(average, count)` return); the reveal hero shows
-   "★ 4.2 · 1.2k" via a new `compactCount` helper.
-5. **Reading progress in Book Notes.** New prefs
-   `book_reading_progress` (name → highest chapter read; only moves
-   forward). The CHAPTERS tab shows an "X of N chapters read" rail + thin
-   progress bar; chapter chips tick with a ✓ once read; each chapter's
-   detail card has a "Mark CH N as read" pill (haptics confirm).
-6. **Book share-card contents.** `TopicShareSheet` gained an optional
-   `bookChapters` param (threaded from the reveal caller for BOOKS). Two
-   new content options when chapters exist: **Reading progress** ("I'm N
-   of M chapters in", chip row WRITES the BookNotes pref so card + reader
-   stay in sync) and **Chapter review** (custom-text field, review tagged
-   with a "CH N · title" chip via the same chapter chip row).
-7. Docs: changelog v328 entries (top of 20260921.txt).
-
-## Follow-up: v329 — Reading progress is now a VISUAL widget on the card
-
-User clicked "Show chapter progress on the share card as a visual progress
-element instead of text". Implemented in `TopicShareCard.kt`:
-
-- New public `ChapterProgressUi(read, total)` + a shared
-  `ChapterProgressBlock(fill, track, ink)` composable: book glyph + caption
-  ("3 of 12 chapters" / "Finished · all N" / "N chapters ahead of you")
-  over a rounded 5dp track whose fill width = read/total.
-- `TopicShareCard` gained `chapterProgress: ChapterProgressUi? = null` and
-  every style's quick-fact TEXT is replaced by the widget when it's set:
-  Paper (MiddleContent/FrostPane), Vinyl (cream box), Collage (white on
-  sage field), Neumorphic (white on dark plate), Editorial (3-way branch
-  skips the drop-cap), Minimal, Signature (shared `BodyText` helper — no
-  ruled lines), Custom. Each passes its own surface inks for contrast.
-  Bounds reporting kept (`onFact`) so the inline-edit box + move grip sit
-  on the widget.
-- Sheet: `progressForCard` computed when the Reading-progress content is
-  active and passed to the carousel preview + single-style preview + the
-  Save/Share export callsites (export = preview, both render the widget).
-  The Edit-text circle hides for this content; the inert typing field gets
-  the caption so no "Edit the quick fact…" placeholder shows over the bar.
-- Other `TopicShareCard` callers (ShareHub, reveal, entry detail) omit the
-  param → default null → unchanged behavior.
+1. **Per-design (per-style) layout edits.** The editor's single shared
+   `move` became `movesByStyle: Map<ShareCardStyle, ShareCardMove>`
+   (`TopicShareSheet`): a derived `move` for the current style + an
+   `updateMove()` helper, and every pager page renders ITS OWN saved move
+   (`pageMove = movesByStyle[styles[page]]`), so dragging the title on
+   Paper no longer shoves the title on Vinyl. Persistence nests a per-style
+   `moves` object under the topic (new `AppPreferences.saveShareCardEdits
+   (context, topic, edit: JSONObject)`; the sheet builds the JSON);
+   `loadShareCardEdits` parses it, with legacy flat saves (pre-per-style)
+   falling back to one move applied to every style. Reset clears the whole
+   map ("Reset all edits").
+2. **Tap-outside auto-deselect.** `ArrangeableCard`'s edit overlay now
+   lays a full-size, no-indication clickable Box FIRST (behind the element
+   boxes): tapping empty card space clears focus + deselects
+   (`selectedResizeTarget = NONE`); taps on title/fact/meta/badge still
+   select that element; horizontal drags still reach the style pager
+   (clickable children don't block the pager's requireUnconsumed=false
+   scroll).
+3. **Swipe between designs while editing.** Pager `userScrollEnabled` is
+   now `!editMode || selectedResizeTarget == NONE` — swiping works while
+   editing as long as nothing is selected (a selected element means the
+   drag belongs to the move grip / typing field, so it locks the pager).
+   Hint updated: "Tap a thing to select · swipe for another design".
+4. **Grip no longer covers typed text.** The FACT `MoveHandle` hides while
+   `factEditMode` is on (typing) and reappears when text editing ends.
+5. **Bottom-bar editing.** The floating Edit-text/Reset/Done cluster over
+   the card is GONE. While editing, the bottom action row (where
+   Save/Share/Text live) becomes: content pills (Quick fact / No fact /
+   saved sources / + Custom fact with an Add glyph) in a scrollable row,
+   a Reset circle, and a primary **Done** pill. Done → editMode off →
+   Save/Share/Share-as-text reappear. The Edit-text tool moved back into
+   the toolbar row (shown only when the quick fact is selected); the
+   Content tool panel kept only its extras (custom text field, chapter
+   picker, photo, song) since the content pills now live in the bottom bar.
+6. **Category picker hold menu rewritten** (`RadialHoldMenu.kt`). The
+   gooey drag-to-pick radial ring (giant discs, blur goo, instant collapse
+   on lift) is fully replaced by a compact icon+label pill menu:
+   springs in (bouncy scale + fade) ABOVE the finger, clamped inside the
+   sheet; STAYS OPEN after release (no more <1s collapse — the user's "3
+   seconds" complaint) so the user taps an option to run it; tap the
+   full-size scrim to dismiss; ~6s idle auto-dismiss as a safety net.
+   `HoldSession` / `radialHoldMenu` / `HoldAction` / call-sites unchanged;
+   the dead goo blob / ripple / ring helpers were removed.
 
 ## Verification
 
-- `git diff --check` clean; braces balanced (932/932) in TopicShareCard.kt.
-- Grep/read-verified all 8 style swaps + dispatch + 4 sheet callsites carry
-  `chapterProgress`/`progressForCard`; `ChapterProgressUi` public (the
-  public TopicShareCard exposes it); no other callers pass positionally.
+- `git diff --check` clean; brace/paren delta across the TopicShareCard.kt
+  diff is 0 (whole-file string-strip regex is unreliable on this file due
+  to string contents); RadialHoldMenu.kt balanced.
+- Grep-verified all `move =` writes became `updateMove(...)` /
+  `movesByStyle` writes (remaining matches are named args), the pager +
+  single-style branches pass per-style moves, and no other callers of
+  `saveShareCardEdits`/`loadShareCardEdits` exist besides the sheet.
 - No Gradle commands run (project DOX forbids them here) — CI validates.
 
 ## NEXT
 
-Push this follow-up for CI. Then return to the signature-card campaign (one
-category at a time, no SVG without permission) — awaiting the user's pick +
-design for the next category.
+Push for CI. Then return to the signature-card campaign (one category at a
+time, no SVG without permission) — awaiting the user's pick + design for
+the next category.

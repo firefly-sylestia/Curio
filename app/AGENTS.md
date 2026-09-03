@@ -479,6 +479,29 @@ app/src/main/java/com/curio/app/
   ring positions to overlay-LOCAL coords before animating (`centerPx`)
   — the blobs were morphing from local `cp` to ROOT `p`, landing offset
   from the crisp discs and breaking the circle.
+- **v330 — share-card editor: per-design layouts + bottom-bar editing;
+  picker hold actions rebuilt compact.** (1) **Per-style moves**: the
+  editor's single shared `ShareCardMove` became `movesByStyle`
+  (`Map<ShareCardStyle, ShareCardMove>`; each style in the pager renders
+  its OWN saved move via a derived `move` + `updateMove` helper), and
+  persistence nests a per-style `moves` object under the topic
+  (`AppPreferences.saveShareCardEdits` now takes a JSONObject built by
+  the sheet; legacy flat saves load as one move applied to every style).
+  (2) **Editing UX**: pager swiping works while editing when NOTHING is
+  selected (tap empty card space — a full-size clickable deselect box
+  behind the element overlays — to deselect, then swipe); the FACT move
+  grip hides while `factEditMode` so it never covers the typed text; the
+  floating Edit-text/Reset/Done cluster over the card is GONE — while
+  editing the bottom action row becomes content pills (Quick fact / No
+  fact / sources / + Custom fact) + Reset + Done, and Done restores
+  Save/Share/Text (the Edit-text tool moved back into the toolbar row,
+  shown when the fact is selected). (3) **Picker hold menu**:
+  `RadialHoldMenuOverlay` rewritten from the gooey drag-to-pick radial
+  ring into a compact icon+label pill card that springs in ABOVE the
+  finger and STAYS OPEN after release (tap an option, tap the full-size
+  scrim to dismiss, or let the ~6s idle auto-dismiss fire) —
+  `radialHoldMenu`/`HoldSession`/`HoldAction` unchanged; the goo-blob
+  canvas, ripples and ring geometry helpers are gone.
 - **v326 — signature redesign campaign BEGINS: Books.** The
   per-category `signatureDesign` rework (one category per turn, commit but
   DON'T push — user reviews each before the next) starts with BOOKS, now a
