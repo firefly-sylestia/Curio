@@ -355,23 +355,29 @@ fun NewCategoryPickerSheet(
             ) {
                 // v3xx14 — while page 0 is building a mix the primary capsule
                 // becomes "Mix · N" (and applies the pending selection);
-                // otherwise it stays "Surprise me".
+                // otherwise it stays "Surprise me". v324 — on the CLASSIC
+                // page during mix the capsule is HIDDEN (the page's own
+                // floating Apply + Cancel pills own the mix UI) — the solid
+                // "Mix · N" strip behind the Cancel pill is gone. It stays on
+                // the new page, so applying from there still works.
                 val mixing = page0MixCount > 0
-                NewPrimaryCapsule(
-                    label = if (mixing) "Mix · $page0MixCount" else "Surprise me",
-                    glyph = if (mixing) CurioIcons.Check else CurioIcons.Shuffle,
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        if (mixing) {
-                            page0MixApply?.invoke()
-                        } else {
-                            // v318b — a surprise/unnamed deck clears the name.
-                            AppPreferences.setLastMixName(context, null)
-                            val mix = surpriseMiniMix(categories)
-                            if (mix.isNotEmpty()) onCategoriesMixed(mix)
+                if (!mixing || pagerState.currentPage != 0) {
+                    NewPrimaryCapsule(
+                        label = if (mixing) "Mix · $page0MixCount" else "Surprise me",
+                        glyph = if (mixing) CurioIcons.Check else CurioIcons.Shuffle,
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            if (mixing) {
+                                page0MixApply?.invoke()
+                            } else {
+                                // v318b — a surprise/unnamed deck clears the name.
+                                AppPreferences.setLastMixName(context, null)
+                                val mix = surpriseMiniMix(categories)
+                                if (mix.isNotEmpty()) onCategoriesMixed(mix)
+                            }
                         }
-                    }
-                )
+                    )
+                }
                 NewPickerCircle(
                     glyph = CurioIcons.Add,
                     contentDescription = "Create a mix",
@@ -966,18 +972,54 @@ private fun ClassicPickerPage(
         }
 
         if (multiSelectMode && mode == PickerMode.MIX) {
-            // ── Multi-select row — only the floating Cancel pill. The
-            // primary "Mix · N" capsule is GONE here: the shared bottom
-            // row's capsule already swaps to "Mix · N" while selecting
-            // (and applies the pending selection), so a second mix button
-            // on top was redundant. ────────────────────────────────────
+            // ── Multi-select row — the floating Apply + Cancel pills. v324:
+            // the Apply pill is BACK in the page next to Cancel (the old
+            // layout) — the shared bottom row no longer renders the solid
+            // "Mix · N" capsule during mix, because it sat right behind the
+            // floating Cancel pill as a solid strip. ────────────────────
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
             ) {
+                // v324 — Apply ("Mix · N") as a FLOATING primary pill — only
+                // once at least one lane is selected.
+                if (selectedSlugs.isNotEmpty()) {
+                    Surface(
+                        onClick = {
+                            val cats = selectedSlugs.mapNotNull { CurioCategories.byRouteSlug(it) }
+                            if (cats.isNotEmpty()) {
+                                // v318b — an UNNAMED multi-lane selection
+                                // clears the mix name.
+                                AppPreferences.setLastMixName(context, null)
+                                onCategoriesMixed(cats)
+                            }
+                        },
+                        shape = RoundedCornerShape(50),
+                        color = MaterialTheme.colorScheme.primary,
+                        shadowElevation = 3.dp
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Check,
+                                contentDescription = null,
+                                size = 16.dp,
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                            Text(
+                                "Mix · ${selectedSlugs.size}",
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
+                }
                 // v3xx14 — Cancel as a FLOATING pill (raised capsule) — the
                 // escape hatch for the pending multi-select.
                 Surface(

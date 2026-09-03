@@ -468,7 +468,13 @@ app/src/main/java/com/curio/app/
   Rules: NO drawing/SVG without the user's explicit permission — use only
   icons, symbols, and EXISTING ready-made drawings (e.g. the `CurioIcons`
   font subset, `Watermark` glyphs, `topicVariant`/`CustomCard` art) as
-  background symbols/icons.
+  background symbols/icons. (4) **Mix strip fix** (user: "solid strip
+  behind the cancel button during mix"): the floating Apply "Mix · N"
+  pill is BACK in `ClassicPickerPage`'s multi-select row beside Cancel
+  (`Arrangement.spacedBy(8.dp, Alignment.End)`), and the shared bottom
+  row's solid "Mix · N" capsule is HIDDEN while mixing on the CLASSIC
+  page (`!mixing || pagerState.currentPage != 0`) — it stays on the new
+  page so apply-from-there still works.
 - **v313 — Topic Browser revamp, pick 1: category-filtered search, dynamic
   chips, one-category browse.** User: "in topic browser let user change
   category and act that category as filters for the search, so it doesn't
