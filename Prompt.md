@@ -1,77 +1,71 @@
-# Prompt.md — current request log
+# Prompt — Share-card chapter toggle, progress slider, custom-fact fixes, stars, cover, info-row wrap
 
-## Request: v332 — share-card editor content toggle + Customise gating, app-wide copy polish, CI baseline-profile fix
+## Request
+Big share-card batch (v334), plus fixing the CI compile error from the
+previous Genius-pill commit (already fixed + pushed as `8808683d`):
+1. Chapter read toggle — tapping Mark-read must be undoable (progress both ways).
+2. Chapter progress chip separate; track REAL chapters (not merged); slider
+   instead of +/- buttons; the on-card progress widget movable + theme-aware
+   with proper progress display.
+3. Custom fact usable as chapter review; fix duplicate-text bug when tapping
+   the custom-fact box; fix the box disappearing after clearing typed text.
+4. Book star fetch: stars never showed on the card; bulk fetch restarted from
+   the beginning every time.
+5. Book cover: auto-add on the share card, properly placed, user-overridable
+   (gallery / refetch with another provider / remove).
+6. Author/artist/year info below title: wrap to 2nd line when long (was cut),
+   plus width/height size adjustments.
+7. Tapping the quick fact auto-converts it into a custom fact.
+8. Fix the CI compile error and push, then continue.
 
-User's follow-up on the share-card editor (commit 9469b675/58e7efe4 batch):
-"i didn't ask you to place the content quick fact / custom fact options at that
-place, i asked you to place the toggle and let it open where it was opening
-before; the Customise button now just stays like that; there are a lot of em
-dashes around the app (not the JSON) — in the app hints etc — rephrase them in
-proper premium English, fix lowercase hint starts." An ask_user clarified:
-toggle pill in the bottom bar that opens the content panel where it used to
-open, whole-app UI copy pass with elegant "old English" register.
+## Decisions
+- Progress now writes `AppPreferences.setBookReadingProgressExact` (goes
+  backward; zero removes the entry) — reveal toggle + share-card slider both
+  use it so Book Notes stays in sync.
+- Chapter widget on the card already renders in the fact slot via
+  `ChapterProgressBlock` (theme-aware per style, movable via the fact move) —
+  verified, no change needed.
+- Stars: the reveal hands the fetched `bookRating` into the sheet
+  (`bookRating`/`bookRatingCount` params); the quick-fact content carries the
+  rounded rating so the card's star row renders. No re-fetch in the sheet.
+- Cover: sheet auto-loads from the topic's authored `imageUrl` (attempt 0);
+  "Refetch" bumps `coverAttempt` → skips the authored URL and hits the
+  keyless providers (Open Library first via `coverCandidates`). Gallery picker
+  writes `bookCover`; Remove clears it. Card renders a `BookCoverBadge`
+  (44×66 dp jacket, spine + sheen) top-right on every style EXCEPT Collage,
+  which feeds the polaroid photo slot (`userPhoto ?: bookCover`).
+- Info row: `ShareCardMove` gained `metaWidthFrac`/`metaHeightFrac`;
+  `moveMeta` applies the width crop; every style's meta Text now uses
+  `lines(2, move.metaHeightFrac, max = 2)` so long byline/year wraps to a
+  second line by default and the box tool offers "Info width"/"Info lines"
+  sliders when the Info row is selected (META joined `isSizable`).
 
-Also during the turn, CI failed on the v331 baseline profile
-(`expandReleaseArtProfileWildcards`: "Class rules don't support flags, but
-'HSP' were specified" — `HSPLcom/curio/app/MainActivity;`): class rules in HRF
-take NO flags (flags H/S/P are method-rule-only; "L" is the DEX descriptor
-prefix). Profile rewritten to valid shape.
-
-Completed:
-
-1. **Content toggle pill** (`TopicShareCard.kt`, `TopicShareSheet`): while
-   editing, the bottom bar (where Save/Share/Text sit) shows ONE pill labelled
-   with the card's current content (`activeSource.label`) + arrow icon. Tapping
-   it opens/closes the "source" tool panel — the SAME panel the toolbar's
-   Content tool opens — which again holds the content source pills (Quick fact
-   / No fact / saved sources / + Custom fact) restored to where they were
-   before v330. Tapping Done still returns Save/Share/Text.
-2. **Customise pill gated**: the floating Customise button now renders only
-   when `!editMode`; mid-edit the bottom bar owns Reset/Done/content toggle.
-3. **Copy pass** (~159 literal replacements, 30 files): em dashes rephrased
-   app-wide in user-facing strings —
-   - card meta rows / `metaSeparator` join with " · " (was " — "),
-   - quote attributions lose the leading dash ("— $quoteAuthor" → author
-     alone), footers unify to "· Stay curious" / "· via Curio",
-     "$sharerName — Curio" → "· Curio", stray "~ Stay Curious" removed,
-   - tool headings "$selName font" / "$selName format", "Tone · level
-     unlocks", adjust hint split into two sentences,
-   - full-sentence hints/empty states (pet designer, stats, settings,
-     experiments, picker, updates, reveal dialog) rephrased into period- or
-     semicolon-joined prose; short status pairs use the middot.
-   Deliberately NOT touched: JSON/topic content, chapter/page ranges
-   ("Books IV–VIII", "pp. 12–14"), name-qualifier parsing (" — " match
-   delimiters), the exported pet-design format headers, crash/log text, and
-   the waveform time range. (Missing-at-first, then added: UpdateChecker
-   notification copy, GlassWidgetLab auto-detect copy.)
-4. **Baseline profile HRF fix** (`app/src/main/baseline-prof.txt`): rewritten
-   to valid rules — class-only line `Lcom/curio/app/MainActivity;` (no flags),
-   single classes AOT'd via `HSPLcom/.../Class;->**(**)**:`, package-wide via
-   `<pkg>/**->**(**)**`, hot libs via their packages. Header documents the
-   syntax lesson. This fixes the release-build CI failure.
+## Changes
+- `AppPreferences.kt` — new `setBookReadingProgressExact` (both directions).
+- `TopicRevealScreen.kt` — Mark-read → toggle (Undo glyph when read,
+  `ch.number - 1` on un-tap); share-sheet call passes `bookImageUrl`,
+  `bookRating`, `bookRatingCount`.
+- `BookCoverFetch.kt` — `fetchRatings` skips already-cached books (resume,
+  not restart).
+- `TopicShareCard.kt` — progress slider (replaces chapter chips) with
+  dual-direction writes; `cardFactText`/`factFieldText` unified (custom +
+  chapter review render LIVE customText; empty stays empty; routeFactChange
+  writes customText for those, editedFact otherwise); tap-fact auto-convert;
+  `bookCover` param + `BookCoverBadge` + cover controls row (Change/Refetch/
+  Remove) in the content panel; quick-fact rating for book topics;
+  metaWidthFrac/metaHeightFrac + 2-line wrap on all meta sites + save/restore
+  + box-tool sliders.
+- Changelog updated (6 new bullets on top).
 
 ## Verification
+- Bracket/paren balance checked vs HEAD on all 4 touched files — symmetric
+  deltas, balanced.
+- Icons verified: Refresh, Close, PhotoLibrary, Undo, Check all exist.
+- Imports verified: roundToInt, Offset/Size/Brush, shadow/clip/Alignment.
+- No Gradle locally (project rule) — CI compiles on push; watch the Actions
+  run for TopicShareCard compile + validateTopics.
 
-- All modified files re-lexed (string literals balanced, no unterminated
-  strings); `git diff --check` clean.
-- Audit of remaining dashes in code literals shows only intentional ones
-  (ranges, parsers, log text, format headers).
-- CI validates the profile parse + compile — Gradle not run locally per
-  project rules.
-
-## Follow-up — hold-menu labels shortened
-
-User: the new tap-and-hold menu is good but "sometimes its text is too long".
-Fixed in `CategoryOptionPill` / `MixOptionPill` (NewCategoryPicker.kt):
-labels are now short verbs — Pin/Unpin, Spin (was "Spin ${displayName}",
-e.g. "Spin Artificial Intelligence"), Remove (was "Remove from Continue
-exploring"), Edit, Delete (were "Edit/Delete $name" with long mix names).
-The menu is anchored on the row/card the user held, so the subject is
-visible and the card no longer truncates. Also removed the now-unused `name`
-param from `MixOptionPill` (both call sites updated).
-
-## Notes / follow-ups
-
-- The v330 changelog bullet describing content pills directly in the bottom
-  bar is superseded by the new toggle bullet (both remain in the store
-  changelog per its per-commit append rule).
+## Follow-ups
+- Watch the CI run for this push; if it fails, fix and re-push.
+- ShareHub / EntryDetail sheet callers keep defaults (no cover/rating there) —
+  can thread bookImageUrl/bookRating there later if wanted.

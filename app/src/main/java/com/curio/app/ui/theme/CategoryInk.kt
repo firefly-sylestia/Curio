@@ -379,6 +379,34 @@ fun CurioCategory.categorySurface(base: Color = MaterialTheme.colorScheme.surfac
 }
 
 /**
+ * v332 — container for the reveal's full-height NOTES sheets (book
+ * synopsis/chapters and the album track list): a CATEGORY-TINTED elevated
+ * wash. The old neutral dialog container floated over the category-washed
+ * reveal page as a foreign cream/grey panel; this resolves a wash of the
+ * SAME hue family as the reveal page + cards, so the sheet reads as part of
+ * the category story. LIGHT: an airy accent pastel, lighter than the washed
+ * page/cards so the full-height sheet floats as an elevated tinted panel.
+ * DARK: a near-black category tint, a touch lighter than the reveal cards
+ * (0.27 vs 0.22 lightness) so the sheet reads as the raised surface over
+ * the pitch-black page. Material theme + the manual tint toggle keep the
+ * neutral dialog container exactly as before.
+ */
+@Composable
+fun CurioCategory.notesSheetContainerColor(): Color {
+    // v185 — Material theme: bottom sheets stay neutral M3 surfaces.
+    if (materialThemeOn) return curioDialogContainerColor()
+    if (!AppPreferences.tintWashEffective()) return curioDialogContainerColor()
+    if (isCurioDarkTheme()) {
+        val a = toHsl(accent)
+        return fromHsl(a.h, (a.s * 0.55f).coerceAtMost(0.40f), 0.27f)
+    }
+    // Light: airy accent pastel — a notch lighter + softer than the cards
+    // (0.26/0.91 vs the card 0.36/0.86 family) so the sheet lifts off the
+    // washed page without fighting the vivid chips/cards inside it.
+    return lightAccentTint(accent, saturation = 0.26f, lightness = 0.91f)
+}
+
+/**
  * The mood board's tinted canvas — same resolution as [categorySurface]
  * but NOT gated by the theme STYLE: the AMOLED style blacks out category
  * tints app-wide, and the mood board's tinted surface is its identity, so

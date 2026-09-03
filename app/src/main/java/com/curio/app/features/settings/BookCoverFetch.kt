@@ -175,7 +175,16 @@ object BookCoverFetch {
         if (total == 0) { onProgress(0, 0); return }
         var done = 0
         onProgress(0, total)
+        val cachedRatings = AppPreferences.getBookRatings(context)
         for (book in books) {
+            // v334 — already-fetched books are SKIPPED (counted, not re-queried):
+            // a ratings fetch resumes where the last one stopped instead of
+            // restarting from the beginning and hammering the quota.
+            if (cachedRatings.containsKey(book.name)) {
+                done++
+                onProgress(done, total)
+                continue
+            }
             // v328 — cache BOTH stars: the average rating AND its Google
             // Books ratingsCount, so the reveal can show "★ 4.2 · 1.2k".
             val rating = runCatching {

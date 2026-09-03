@@ -68,15 +68,17 @@ interface TopicDao {
     @Query("""
         UPDATE topics
         SET synopsis = CASE WHEN synopsis = '' THEN :synopsis ELSE synopsis END,
-            chapters = CASE WHEN chapters = '' THEN :chapters ELSE chapters END
+            chapters = CASE WHEN chapters = '' THEN :chapters ELSE chapters END,
+            tracks = CASE WHEN tracks = '' THEN :tracks ELSE tracks END
         WHERE id = :id
     """)
-    suspend fun backfillContent(id: String, synopsis: String, chapters: String)
+    suspend fun backfillContent(id: String, synopsis: String, chapters: String, tracks: String)
 
     /** Update the authored fields for a topic hydrated on the reveal screen. */
     @Query("""
         UPDATE topics SET teaser = :teaser, imageUrl = :imageUrl, byline = :byline,
-            tags = :tags, synopsis = :synopsis, chapters = :chapters
+            tags = :tags, synopsis = :synopsis, chapters = :chapters, tracks = :tracks,
+            geniusUrl = :geniusUrl
         WHERE id = :id
     """)
     suspend fun updateContent(
@@ -86,7 +88,9 @@ interface TopicDao {
         byline: String,
         tags: String,
         synopsis: String,
-        chapters: String
+        chapters: String,
+        tracks: String,
+        geniusUrl: String
     )
 
     /** Get topic count for a category. */

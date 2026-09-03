@@ -51,7 +51,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.core.graphics.drawable.toBitmap
+import coil.imageLoader
+import kotlin.coroutines.resume
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
@@ -112,6 +116,8 @@ import com.curio.app.ui.theme.GeomFontFamily
 import com.curio.app.ui.theme.LoraFontFamily
 import com.curio.app.ui.theme.PatrickHandFontFamily
 import com.curio.app.ui.theme.PirataOneFontFamily
+import com.curio.app.ui.theme.fromHsl
+import com.curio.app.ui.theme.toHsl
 import com.curio.app.ui.theme.PlayfairDisplayFontFamily
 import com.curio.app.ui.theme.CormorantGaramondFontFamily
 import com.curio.app.ui.theme.BebasNeueFontFamily
@@ -398,6 +404,12 @@ data class ShareCardMove(
      *  never type-editable. */
     val metaDx: Float = 0f,
     val metaDy: Float = 0f,
+    /** Info-row (author/byline/year) box size — same crop model as the
+     *  title/fact boxes. Width is a fill fraction; height scales the row's
+     *  max lines (1f = 2 lines allowed so long info wraps instead of
+     *  clipping, 0.5f = 1 line, ellipsized). */
+    val metaWidthFrac: Float = 1f,
+    val metaHeightFrac: Float = 1f,
     /** Offset applied to the card's category badge/pill — the B handle
      *  in edit mode. The badge moves freely on the card. */
     val badgeDx: Float = 0f,
@@ -436,8 +448,12 @@ private fun Modifier.moveFact(m: ShareCardMove): Modifier {
 /** Shifts the card's INFO rows (byline, author, year, footer) by the meta
  *  offset — the M handle in edit mode. Info rows move but are never
  *  type-editable. */
-private fun Modifier.moveMeta(m: ShareCardMove): Modifier =
-    if (m.metaDx != 0f || m.metaDy != 0f) this.offset(x = m.metaDx.dp, y = m.metaDy.dp) else this
+private fun Modifier.moveMeta(m: ShareCardMove): Modifier {
+    var mod = this
+    if (m.metaDx != 0f || m.metaDy != 0f) mod = mod.offset(x = m.metaDx.dp, y = m.metaDy.dp)
+    if (m.metaWidthFrac != 1f) mod = mod.fillMaxWidth(m.metaWidthFrac.coerceIn(0.2f, 1f))
+    return mod
+}
 
 /** Shifts the card's category badge/pill by the badge offset — the B
  *  handle in edit mode. */
@@ -639,6 +655,10 @@ fun TopicShareCard(
     quoteText: String? = null,
     quoteAuthor: String? = null,
     userPhoto: androidx.compose.ui.graphics.ImageBitmap? = null,
+    // v334 — BOOK share cards: the authored/fetched cover. Rendered as a
+    // small jacket badge at the top-right on every style (Collage feeds it
+    // into the polaroid photo slot instead, so the two never double up).
+    bookCover: androidx.compose.ui.graphics.ImageBitmap? = null,
     byline: String = "",
     polaroidCaption: String = "",
     classicSignature: Boolean = false,
@@ -676,15 +696,50 @@ fun TopicShareCard(
     val shownDisplay = editedTitle ?: display
     val shownFact = editedFact ?: factText
     val shownQuote = quoteText?.let { shownFact }
-    when (style) {
-        ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress)
-        ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress)
-        ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto, byline, year, polaroidCaption, onPhotoTap, bodyScale, callbacks, move, chapterProgress)
-        ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress)
-        ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress)
-        ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress)
-        ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, bodyScale, callbacks, move, chapterProgress)
-        ShareCardStyle.CUSTOM -> CustomCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress)
+    Box {
+        when (style) {
+            ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress)
+            ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress)
+            ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto ?: bookCover, byline, year, polaroidCaption, onPhotoTap, bodyScale, callbacks, move, chapterProgress)
+            ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress)
+            ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress)
+            ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress)
+            ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, bodyScale, callbacks, move, chapterProgress)
+            ShareCardStyle.CUSTOM -> CustomCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress)
+        }
+        // v334 — the cover badge rides on top of every style EXCEPT Collage
+        // (there it feeds the polaroid photo slot above).
+        if (bookCover != null && style != ShareCardStyle.COLLAGE) {
+            BookCoverBadge(bookCover, Modifier.align(Alignment.TopEnd).padding(top = 34.dp, end = 14.dp))
+        }
+    }
+}
+
+/** v334 — small book-jacket badge: the cover at 2:3 with a spine + sheen
+ *  overlay so it reads as a real jacket sitting on the card. */
+@Composable
+private fun BookCoverBadge(cover: androidx.compose.ui.graphics.ImageBitmap, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .width(44.dp)
+            .height(66.dp)
+            .shadow(3.dp, RoundedCornerShape(3.dp))
+            .clip(RoundedCornerShape(3.dp))
+            .background(Color.White)
+    ) {
+        Canvas(Modifier.fillMaxSize()) {
+            drawImage(cover, dstOffset = androidx.compose.ui.unit.IntOffset(0, 0), dstSize = androidx.compose.ui.unit.IntSize(size.width.toInt(), size.height.toInt()))
+        }
+        // Spine shadow on the left + a vertical sheen so the photo reads as
+        // a physical cover rather than a flat crop.
+        Canvas(Modifier.fillMaxSize()) {
+            val w = size.width; val h = size.height
+            drawRect(Color.Black.copy(alpha = 0.14f), Offset.Zero, Size(w * 0.07f, h))
+            drawRect(
+                Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.22f), Color.Transparent, Color.Transparent)),
+                Offset.Zero, Size(w, h * 0.45f)
+            )
+        }
     }
 }
 
@@ -852,12 +907,12 @@ private fun VinylCard(
                 Text(byline, style = metaStyle(TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
                     fontSize = 13.sp, color = roseDusty
-                ), move), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                ), move), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
             } else if (year != null) {
                 Text(year, style = metaStyle(TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
                     fontSize = 13.sp, color = roseDusty
-                ), move), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                ), move), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
             }
 
             // Accent underline — v316b: belongs to the quick-fact block below,
@@ -971,6 +1026,15 @@ private fun VinylCard(
 
 // STYLE 2 — COLLAGE (torn paper + polaroid + observatory)
 // ═══════════════════════════════════════════════════════════════════════
+/** v335 — desaturate a color to [keep]× its original saturation (keep < 1 =
+ *  more muted) while preserving hue and lightness. Used by the Collage card
+ *  so the picked tone colors its large fields as soft pastels instead of
+ *  raw saturated fills. */
+private fun collageMute(color: Color, keep: Float): Color {
+    val hsl = toHsl(color)
+    return fromHsl(hsl.h, (hsl.s * keep).coerceIn(0f, 1f), hsl.l)
+}
+
 @Composable
 private fun CollageCard(
     display: String, topicName: String, categoryName: String, categoryGlyph: String,
@@ -990,12 +1054,17 @@ private fun CollageCard(
     // ignored here, so the Tone tool had no effect on this style): paper =
     // bgBase, lower field = accent, dark band = accentDark, ink/text =
     // palette ink, torn seam edge = bgMid. White polaroid + photo stay.
+    // v335 — the tone accent filled the whole lower field RAW, so the
+    // saturated level tones (Ember, Rose Gold, Ocean, Sunburst…) looked
+    // garish on the collage; the field, band and pill are now desaturated
+    // toward muted pastels (hue + lightness kept) so the collage keeps its
+    // soft scrapbook feel while still wearing the picked tone.
     val topCream = palette.bgBase
-    val bottomSage = palette.accent
-    val bottomDark = palette.accentDark
+    val bottomSage = collageMute(palette.accent, 0.42f)
+    val bottomDark = collageMute(palette.accentDark, 0.30f)
     val inkDark = palette.ink
     val tornEdge = palette.bgMid
-    val sagePill = palette.accentDark
+    val sagePill = collageMute(palette.accentDark, 0.55f)
 
     Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(topCream, RoundedCornerShape(6.dp))) {
         // ── Layered paper + botanical lower field with a natural torn seam ──
@@ -1142,7 +1211,7 @@ private fun CollageCard(
                         fontFamily = LoraFontFamily, fontSize = 9.sp,
                         letterSpacing = 2.sp, fontWeight = FontWeight.SemiBold,
                         color = inkDark.copy(alpha = 0.55f)
-                    ), move), maxLines = 2, overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                    ), move), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
                 }
             }
         }
@@ -1294,7 +1363,7 @@ private fun NeumorphicCard(
                     Text(metaParts.joinToString("  /  "), style = metaStyle(TextStyle(
                         fontFamily = GeomFontFamily, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 1.3.sp, color = Color.White.copy(alpha = 0.56f)
-                    ), move), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                    ), move), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
                 }
             }
 
@@ -1408,7 +1477,7 @@ private fun EditorialCard(
                 Text(metaParts.joinToString(" · "), style = metaStyle(TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
                     fontSize = 12.sp, color = inkDark.copy(alpha = 0.55f)
-                ), move), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                ), move), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
             }
 
             Spacer(Modifier.height(15.dp))
@@ -1631,10 +1700,10 @@ private fun MinimalCard(
                 Text(byline, style = metaStyle(TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
                     fontSize = 12.sp, color = inkDark.copy(alpha = 0.50f)
-                ), move), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                ), move), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
             } else if (year != null) {
                 Spacer(Modifier.height(6.dp))
-                Text(year, style = metaStyle(TextStyle(fontFamily = LoraFontFamily, fontSize = 12.sp, color = inkDark.copy(alpha = 0.40f)), move), modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                Text(year, style = metaStyle(TextStyle(fontFamily = LoraFontFamily, fontSize = 12.sp, color = inkDark.copy(alpha = 0.40f)), move), maxLines = lines(2, move.metaHeightFrac, max = 2), modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
             }
 
             Spacer(Modifier.weight(1f))
@@ -1832,7 +1901,7 @@ private fun SignatureCard(
                 Text(metaParts.joinToString(sig.metaSeparator), style = metaStyle(TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
                     fontSize = sig.metaSize, color = sig.metaColor
-                ), move), maxLines = 1, overflow = TextOverflow.Ellipsis,
+                ), move), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis,
                     textAlign = if (centered) TextAlign.Center else TextAlign.Start,
                     modifier = (if (centered) Modifier.fillMaxWidth() else Modifier).titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
             }
@@ -4143,7 +4212,7 @@ private fun CustomCard(
                 Text(metaParts.joinToString(sig.metaSeparator), style = metaStyle(TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
                     fontSize = sig.metaSize, color = sig.metaColor
-                ), move), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                ), move), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
             }
             Spacer(Modifier.weight(1f))
             val bodySize = when {
@@ -4240,7 +4309,7 @@ private fun MiddleContent(
                 Text(
                     metaParts.joinToString(" \u2022 "),
                     style = metaStyle(MaterialTheme.typography.labelSmall.copy(fontFamily = LoraFontFamily, fontWeight = FontWeight.SemiBold), move),
-                    color = palette.ink.copy(alpha = 0.50f), maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    color = palette.ink.copy(alpha = 0.50f), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) }
                 )
             }
@@ -4837,6 +4906,12 @@ fun TopicShareSheet(
     // reading-progress pref for this topic) and a Chapter review content
     // (written review tagged with a chosen chapter).
     bookChapters: List<com.curio.app.data.BookChapter> = emptyList(),
+    // v334 — BOOK share cards: the authored cover + fetched Google Books
+    // rating, so the card can show the cover (fetch / override in the editor)
+    // and the real ★ rating without a second lookup.
+    bookImageUrl: String = "",
+    bookRating: Double? = null,
+    bookRatingCount: Int = 0,
     // v229d — the sheet can open PRESELECTED: the Share Hub picks a design on
     // the grid and hands its style index + classic-signature flag here, so the
     // sheet opens on exactly the design the user picked (the reveal + detail
@@ -4911,6 +4986,8 @@ fun TopicShareSheet(
                 titleHeightFrac = o.optDouble("titleHeightFrac", 1.0).toFloat(),
                 factWidthFrac = o.optDouble("factWidthFrac", 1.0).toFloat(),
                 factHeightFrac = o.optDouble("factHeightFrac", 1.0).toFloat(),
+                metaWidthFrac = o.optDouble("metaWidthFrac", 1.0).toFloat(),
+                metaHeightFrac = o.optDouble("metaHeightFrac", 1.0).toFloat(),
                 titleScale = o.optDouble("titleScale", 1.0).toFloat()
             )
             val loaded = mutableMapOf<ShareCardStyle, ShareCardMove>()
@@ -4953,10 +5030,70 @@ fun TopicShareSheet(
             } catch (_: Exception) { }
         }
     }
+    // v334 — BOOK cover on the share card: auto-loaded from the topic's
+    // authored imageUrl (via the keyless resolver), overridable from the
+    // gallery (or removed). Loaded once per sheet; the editor's Content
+    // panel offers fetch / gallery / remove.
+    var bookCover by remember { mutableStateOf<ImageBitmap?>(null) }
+    var coverLoadFailed by remember { mutableStateOf(false) }
+    // v334 — refetch counter: attempt 0 uses the authored cover; every
+    // manual "Refetch" skips it and hits the keyless providers (Open
+    // Library / Google Books) so the user can pull a different cover.
+    var coverAttempt by remember { mutableIntStateOf(0) }
+    val isBookTopic = bookChapters.isNotEmpty() || bookImageUrl.isNotBlank()
+    androidx.compose.runtime.LaunchedEffect(bookImageUrl, isBookTopic, coverAttempt) {
+        if (!isBookTopic || bookCover != null || coverLoadFailed) return@LaunchedEffect
+        val url = if (coverAttempt == 0) bookImageUrl.takeIf { it.isNotBlank() }
+            else com.curio.app.features.settings.BookCoverFetch.coverCandidates(topicName, "").firstOrNull()
+        if (url.isNullOrBlank()) { coverLoadFailed = true; return@LaunchedEffect }
+        val bmp = runCatching {
+            suspendCancellableCoroutine<ImageBitmap?> { cont ->
+                val loader = context.imageLoader
+                val request = coil.request.ImageRequest.Builder(context)
+                    .data(url)
+                    .crossfade(false)
+                    .listener(
+                        onSuccess = { _, result ->
+                            cont.resume(result.drawable.toBitmap().asImageBitmap())
+                        },
+                        onError = { _, _ -> cont.resume(null) }
+                    )
+                    .build()
+                val disp = loader.enqueue(request)
+                cont.invokeOnCancellation { disp.dispose() }
+            }
+        }.getOrNull()
+        if (bmp != null) bookCover = bmp else coverLoadFailed = true
+    }
+    val coverPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            try {
+                val bitmap = android.graphics.BitmapFactory.decodeStream(
+                    context.contentResolver.openInputStream(it)
+                )
+                bitmap?.let { bmp ->
+                    val size = minOf(bmp.width, bmp.height)
+                    val x = (bmp.width - size) / 2
+                    val y = (bmp.height - size) / 2
+                    val cropped = android.graphics.Bitmap.createBitmap(bmp, x, y, size, size)
+                    bookCover = cropped.asImageBitmap()
+                    coverLoadFailed = false
+                }
+            } catch (_: Exception) { }
+        }
+    }
 
     val isQuotes = categoryName == "Quotes"
     val quoteText = if (isQuotes) topicName else quickFact
-    val quick = ShareCardContent(QUICK_FACT_ID, "Quick fact", quickFact)
+    // v334 — BOOK topics carry the fetched Google Books rating on the quick
+    // fact content, so the star row shows on the card (the reveal already
+    // fetched it; the sheet never re-fetches).
+    val quick = ShareCardContent(
+        QUICK_FACT_ID, "Quick fact", quickFact,
+        rating = if (isBookTopic) bookRating?.roundToInt()?.takeIf { it > 0 } else null
+    )
     val quote = ShareCardContent("quote", "Quote", quoteText)
     val custom = ShareCardContent(CUSTOM_FACT_ID, "Custom fact", "")
     // Custom fact + No Fact available for all styles except Quotes
@@ -4994,8 +5131,13 @@ fun TopicShareSheet(
             if (hasBookChapters) listOf(progressContent, reviewContent) else emptyList()
     val defaultId = if (isQuotes) quote.id else savedSources.firstOrNull { it.id == "quote" }?.id ?: quick.id
     val activeId = selectedId ?: defaultId
+    // v334 — the card's fact text is ONE source of truth per content type:
+    // custom facts + chapter reviews always render the LIVE customText (empty
+    // stays empty — no placeholder text bleeding onto the card), the default
+    // quick fact renders the per-share inline edit, and everything else its
+    // authored text.
     val activeSource = when (activeId) {
-        CUSTOM_FACT_ID -> custom.copy(text = customText.ifBlank { "Add your own fact about this discovery…" })
+        CUSTOM_FACT_ID -> custom.copy(text = customText)
         NO_FACT_ID -> noFact
         "chapter_progress" -> progressContent
         "chapter_review" -> {
@@ -5018,6 +5160,23 @@ fun TopicShareSheet(
     val progressForCard = if (activeId == "chapter_progress" && hasBookChapters)
         ChapterProgressUi(chaptersRead, bookChapters.size)
     else null
+    // v334 — what the CARD renders (unified for every TopicShareCard call):
+    // custom facts + chapter reviews always render the LIVE customText (empty
+    // stays empty — no placeholder bleeding onto the card); everything else
+    // renders the per-share inline edit over the authored text.
+    val cardFactText = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review")
+        activeSource.text else editedFact ?: activeSource.text
+    // v334 — what the inline field binds to (mirror of [cardFactText] so the
+    // caret sits on the visible glyphs) and how its edits are routed: custom
+    // facts and chapter reviews write customText, everything else editedFact.
+    val factFieldText = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review")
+        activeSource.text else editedFact ?: activeSource.text
+    fun routeFactChange(newText: String) {
+        when (activeId) {
+            CUSTOM_FACT_ID, "chapter_review" -> customText = newText
+            else -> editedFact = newText
+        }
+    }
 
     val styles = availableStylesForFamily(categoryFamily, topicName)
     val safeIdx = styleIdx.coerceIn(0, styles.lastIndex)
@@ -5066,6 +5225,7 @@ fun TopicShareSheet(
                 put("badgeDx", m.badgeDx); put("badgeDy", m.badgeDy)
                 put("titleWidthFrac", m.titleWidthFrac); put("titleHeightFrac", m.titleHeightFrac)
                 put("factWidthFrac", m.factWidthFrac); put("factHeightFrac", m.factHeightFrac)
+                put("metaWidthFrac", m.metaWidthFrac); put("metaHeightFrac", m.metaHeightFrac)
                 put("titleScale", m.titleScale)
             }
             movesObj.put(style.name, o)
@@ -5142,8 +5302,8 @@ fun TopicShareSheet(
                                 active = page == pagerState.currentPage,
                                 editMode = editMode && page == pagerState.currentPage,
                                 quoteMode = isQuotes,
-                                editFact = if (progressForCard != null) progressContent.text else editedFact ?: (if (activeId == CUSTOM_FACT_ID) customText else activeSource.text),
-                                onFactChange = { editedFact = it },
+                                editFact = if (progressForCard != null) progressContent.text else factFieldText,
+                                onFactChange = { routeFactChange(it) },
                                 factEditMode = factEditMode,
                                 onFactEditModeChange = { factEditMode = it },
                                 onToggleEdit = {
@@ -5154,13 +5314,27 @@ fun TopicShareSheet(
                                         factEditMode = false
                                     }
                                 },
-                                onSelectResizeTarget = { selectedResizeTarget = it },
+                                onSelectResizeTarget = { target ->
+                                    // v334 — tapping the quick fact while the
+                                    // DEFAULT quick fact is showing auto-arms a
+                                    // custom fact seeded with that text, so the
+                                    // user can immediately edit it.
+                                    if (target == ShareCardResizeTarget.FACT &&
+                                        activeId != CUSTOM_FACT_ID && activeId != "chapter_review" &&
+                                        progressForCard == null
+                                    ) {
+                                        selectedId = CUSTOM_FACT_ID
+                                        customText = activeSource.text
+                                        editedFact = null
+                                    }
+                                    selectedResizeTarget = target
+                                },
                                 selectedResizeTarget = selectedResizeTarget,
                                 move = pageMove,
                                 onMove = { movesByStyle = movesByStyle + (styles[page] to it) },
                                 factFieldStyle = factFieldStyle
                             ) { cb ->
-                                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = pageMove, chapterProgress = progressForCard, callbacks = cb)
+                                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = pageMove, chapterProgress = progressForCard, callbacks = cb)
                             }
                         }
                     }
@@ -5188,8 +5362,8 @@ fun TopicShareSheet(
                             active = true,
                             editMode = editMode,
                             quoteMode = isQuotes,
-                            editFact = editedFact ?: (if (activeId == CUSTOM_FACT_ID) customText else activeSource.text),
-                            onFactChange = { editedFact = it },
+                            editFact = factFieldText,
+                            onFactChange = { routeFactChange(it) },
                             factEditMode = factEditMode,
                             onFactEditModeChange = { factEditMode = it },
                             onToggleEdit = {
@@ -5200,13 +5374,26 @@ fun TopicShareSheet(
                                     factEditMode = false
                                 }
                             },
-                            onSelectResizeTarget = { selectedResizeTarget = it },
+                            onSelectResizeTarget = { target ->
+                                // v334 — see the pager branch above: tapping
+                                // the fact auto-converts the default quick fact
+                                // into a custom fact ready to edit.
+                                if (target == ShareCardResizeTarget.FACT &&
+                                    activeId != CUSTOM_FACT_ID && activeId != "chapter_review" &&
+                                    progressForCard == null
+                                ) {
+                                    selectedId = CUSTOM_FACT_ID
+                                    customText = activeSource.text
+                                    editedFact = null
+                                }
+                                selectedResizeTarget = target
+                            },
                             selectedResizeTarget = selectedResizeTarget,
                             move = move,
                             onMove = { updateMove(it) },
                             factFieldStyle = factFieldStyle
                         ) { cb ->
-                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move, chapterProgress = progressForCard, callbacks = cb)
+                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, callbacks = cb)
                         }
                     }
                 }
@@ -5255,7 +5442,8 @@ fun TopicShareSheet(
                 val sel = selectedResizeTarget
                 val isTitle = sel == ShareCardResizeTarget.TITLE
                 val isFact = sel == ShareCardResizeTarget.FACT
-                val isSizable = isTitle || isFact
+                val isMeta = sel == ShareCardResizeTarget.META
+                val isSizable = isTitle || isFact || isMeta
                 val selName = when (sel) {
                     ShareCardResizeTarget.TITLE -> "Title"
                     ShareCardResizeTarget.FACT -> "Quick fact"
@@ -5468,9 +5656,12 @@ fun TopicShareSheet(
                                 if (isTitle) {
                                     SizeSliderColumn("Title width", move.titleWidthFrac, { updateMove(move.copy(titleWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
                                     SizeSliderColumn("Title height", move.titleHeightFrac, { updateMove(move.copy(titleHeightFrac = it)) }, 0.35f..2.5f, steps = 26, modifier = Modifier.fillMaxWidth())
-                                } else {
+                                } else if (isFact) {
                                     SizeSliderColumn("Fact width", move.factWidthFrac, { updateMove(move.copy(factWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
                                     SizeSliderColumn("Fact height", move.factHeightFrac, { updateMove(move.copy(factHeightFrac = it)) }, 0.35f..2.5f, steps = 26, modifier = Modifier.fillMaxWidth())
+                                } else {
+                                    SizeSliderColumn("Info width", move.metaWidthFrac, { updateMove(move.copy(metaWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
+                                    SizeSliderColumn("Info lines", move.metaHeightFrac, { updateMove(move.copy(metaHeightFrac = it)) }, 0.5f..1f, steps = 4, modifier = Modifier.fillMaxWidth())
                                 }
                             }
                         } else {
@@ -5581,39 +5772,76 @@ fun TopicShareSheet(
                             if (hasBookChapters &&
                                 (activeId == "chapter_progress" || activeId == "chapter_review")
                             ) {
-                                val chosen = if (activeId == "chapter_progress") chaptersRead
-                                             else effectiveReviewChapter ?: 0
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState())
-                                ) {
-                                    Text(
-                                        "Chapter",
-                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    bookChapters.forEach { ch ->
-                                        Pill(
-                                            "CH ${ch.number}",
-                                            CurioIcons.MenuBook,
-                                            chosen == ch.number
+                                if (activeId == "chapter_progress") {
+                                    // v334 — progress is a SLIDER (a chapter
+                                    // count can run into the hundreds; chips
+                                    // don't scale). It writes the exact count
+                                    // BOTH ways so a drag back undoes chapters,
+                                    // and stays in sync with Book Notes.
+                                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            modifier = Modifier.fillMaxWidth()
                                         ) {
-                                            if (activeId == "chapter_progress") {
-                                                AppPreferences.setBookReadingProgress(context, topicName, ch.number)
-                                            } else {
+                                            Text(
+                                                "Reading progress",
+                                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                            Text(
+                                                "$chaptersRead of ${bookChapters.size} chapters",
+                                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                        Slider(
+                                            value = chaptersRead.toFloat().coerceIn(0f, bookChapters.size.toFloat()),
+                                            onValueChange = { v ->
+                                                val n = v.roundToInt().coerceIn(0, bookChapters.size)
+                                                if (n != chaptersRead) {
+                                                    AppPreferences.setBookReadingProgressExact(context, topicName, n)
+                                                }
+                                            },
+                                            valueRange = 0f..bookChapters.size.toFloat(),
+                                            steps = (bookChapters.size - 1).coerceAtLeast(0)
+                                        )
+                                        Text(
+                                            "Also updates your Book Notes reading progress for this book — drag back to undo.",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                } else {
+                                    // Chapter review: the review is about ONE
+                                    // chapter, so a chip row is the right picker.
+                                    val chosen = effectiveReviewChapter ?: 0
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState())
+                                    ) {
+                                        Text(
+                                            "Chapter",
+                                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        bookChapters.forEach { ch ->
+                                            Pill(
+                                                "CH ${ch.number}",
+                                                CurioIcons.MenuBook,
+                                                chosen == ch.number
+                                            ) {
                                                 reviewChapterNumber = ch.number
                                             }
                                         }
                                     }
+                                    Text(
+                                        "Your review is tagged \"CH ${effectiveReviewChapter ?: ""}\" on the card.",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
-                                Text(
-                                    if (activeId == "chapter_progress")
-                                        "Also updates your Book Notes reading progress for this book."
-                                    else "Your review is tagged \"CH ${effectiveReviewChapter ?: ""}\" on the card.",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
                             }
                             if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") {
                                 OutlinedTextField(
@@ -5631,7 +5859,36 @@ fun TopicShareSheet(
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             }
-                            if (currentStyle == ShareCardStyle.COLLAGE) {
+                            // v334 — BOOK topics: the cover controls (gallery /
+                            // refetch / remove) replace the generic photo row;
+                            // the polaroid caption stays for Collage.
+                            if (isBookTopic) {
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Surface(onClick = { coverPickerLauncher.launch("image/*") }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(40.dp)) {
+                                        Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                            CurioIcon(name = CurioIcons.PhotoLibrary, tint = if (bookCover != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
+                                            Text(if (bookCover != null) "Change" else "Cover", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (bookCover != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
+                                        }
+                                    }
+                                    Surface(onClick = { coverAttempt += 1 }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(40.dp)) {
+                                        Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                            CurioIcon(name = CurioIcons.Refresh, tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
+                                            Text("Refetch", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        }
+                                    }
+                                    if (bookCover != null) {
+                                        Surface(onClick = { bookCover = null; coverLoadFailed = true }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(40.dp)) {
+                                            Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                                CurioIcon(name = CurioIcons.Close, tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
+                                                Text("Remove", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            }
+                                        }
+                                    }
+                                    if (currentStyle == ShareCardStyle.COLLAGE) {
+                                        OutlinedTextField(value = polaroidCaption, onValueChange = { polaroidCaption = it.take(36) }, placeholder = { Text(if (sharer.isNotBlank()) "$sharer \u00b7 via Curio" else "via Curio", style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)) }, singleLine = true, textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface), shape = RoundedCornerShape(50), modifier = Modifier.weight(1f))
+                                    }
+                                }
+                            } else if (currentStyle == ShareCardStyle.COLLAGE) {
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                                     Surface(onClick = { photoPickerLauncher.launch("image/*") }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(40.dp)) {
                                         Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -5740,7 +5997,7 @@ fun TopicShareSheet(
                     onClick = {
                         haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                         shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move, chapterProgress = progressForCard)
+                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard)
                         }, saveToGallery = true)
                         persistEdits()
                         onDismiss()
@@ -5759,7 +6016,7 @@ fun TopicShareSheet(
                 Button(onClick = {
                     haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                     shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move, chapterProgress = progressForCard)
+                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard)
                     })
                         persistEdits()
                         onDismiss()
@@ -5936,8 +6193,14 @@ private fun AdjustSliderRow(
 
 /**
  * v324 — combined saturation × contrast 4×5 color matrix for the Adjust
- * tool. Saturation is luma-weighted; contrast pivots around 0.5. The
- * matrices multiply so the filter applies saturation first, then contrast.
+ * tool. Saturation is luma-weighted. The matrices multiply so the filter
+ * applies saturation first, then contrast.
+ * v335 — contrast pivots ASYMMETRICALLY: raising contrast (the user's
+ * "make it deeper" direction) pivots near the top of the range (~0.85) so
+ * the light parchment fields slide DOWN toward richer cream instead of
+ * blowing out to white — the old 0.5 pivot pushed every cream tone (all
+ * above 0.5) toward white, which is why the card looked washed out.
+ * Lowering contrast keeps the neutral 0.5 pivot for a clean soft wash.
  */
 private fun adjustColorMatrix(saturation: Float, contrast: Float): ColorMatrix {
     val inv = 1f - saturation
@@ -5950,7 +6213,8 @@ private fun adjustColorMatrix(saturation: Float, contrast: Float): ColorMatrix {
         lr, lg, lb + saturation, 0f, 0f,
         0f, 0f, 0f, 1f, 0f
     ))
-    val t = (1f - contrast) * 0.5f
+    val pivot = if (contrast >= 1f) 0.85f else 0.5f
+    val t = (1f - contrast) * pivot
     val con = ColorMatrix(floatArrayOf(
         contrast, 0f, 0f, 0f, t,
         0f, contrast, 0f, 0f, t,
