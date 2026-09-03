@@ -165,7 +165,6 @@ import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.curioGlassEdge
 import com.curio.app.ui.components.curioInnerGlow
 import com.curio.app.ui.theme.ChangaOneFontFamily
-import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioEditorialBody
 import com.curio.app.ui.theme.CurioGradients
@@ -2058,6 +2057,48 @@ private fun HeroCard(
                     }
                 }
 
+                // v327 — BOOKS: on-demand keyless star rating, next to the
+                // author pill. The reveal fetches the average rating the
+                // first time a book opens (if the Settings hub hasn't cached
+                // it) and shows a ★ chip — the fetch had no visible view.
+                if (cat.id == CategoryId.BOOKS) {
+                    val bookName = resolved?.name?.takeIf { it.isNotBlank() } ?: fallbackName
+                    val bookRating = AppPreferences.bookRatingsState[bookName]
+                    LaunchedEffect(bookName, resolved?.byline) {
+                        if (bookRating == null && bookName.isNotBlank()) {
+                            val r = BookCoverFetch.fetchRatingFor(bookName, resolved?.byline)
+                            if (r != null && r > 0.0) {
+                                AppPreferences.setBookRating(LocalContext.current, bookName, r)
+                            }
+                        }
+                    }
+                    if (bookRating != null && bookRating > 0.0) {
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = ink.copy(alpha = 0.18f),
+                            shadowElevation = 0.dp
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                CurioIcon(
+                                    name = CurioIcons.Star,
+                                    contentDescription = null,
+                                    tint = Color(0xFFF6B23B),
+                                    size = 13.dp
+                                )
+                                Text(
+                                    text = String.format("%.1f", bookRating),
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = ink
+                                )
+                            }
+                        }
+                    }
+                }
+
                 // ── Middle — the topic name (auto-grows the card) ──────
                 // Weighted spacers (not SpaceBetween) keep the title centred
                 // between the badge row and the bottom pills whether or not
@@ -2604,47 +2645,23 @@ private fun BookCoverPoster(
         )
     }
     var coverIndex by remember(bookTitle, imageUrl) { mutableStateOf(0) }
-    // v323 — the gradient lives on the Box's own BACKGROUND so it draws BEHIND
-    // the image: the earlier placeholder was a later sibling child, which
-    // painted ON TOP of the loaded cover and left every book showing only a
-    // gradient.
-    val placeholderColors = listOf(
-        CurioColors.CoralBlush,
-        CurioColors.CategoryViolet,
-        CurioColors.Sage,
-    )
-    val gradientColors = remember(bookTitle) {
-        val idx = bookTitle.hashCode().let { kotlin.math.abs(it) % placeholderColors.size }
-        listOf(placeholderColors[idx], placeholderColors[(idx + 1) % placeholderColors.size])
-    }
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(Brush.linearGradient(gradientColors))
-    ) {
-        if (coverCandidates.isNotEmpty() && coverIndex < coverCandidates.size) {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(coverCandidates[coverIndex])
-                    .crossfade(true)
-                    .build(),
-                contentDescription = "Book cover",
-                onError = { if (coverIndex < coverCandidates.lastIndex) coverIndex += 1 },
-                modifier = Modifier.matchParentSize(),
-                contentScale = ContentScale.Crop
-            )
-        }
-        // Show title initial as a fallback glyph when no image loads
-        if (coverIndex >= coverCandidates.size || coverCandidates.isEmpty()) {
-            Text(
-                text = bookTitle.firstOrNull()?.uppercase() ?: "?",
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White.copy(alpha = 0.85f)
-                ),
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
+    // v327 — RESTORED to the ce892baa form the user confirmed renders covers
+    // correctly: the AsyncImage IS the root (no gradient Box wrapper, no
+    // Modifier.matchParentSize) — the caller's size/shadow modifier chain is
+    // applied directly to the image, so the cover fills the poster box. The
+    // gradient placeholder experiments (7ba3d7d2) repeatedly painted over or
+    // swallowed the loaded cover, so it is gone.
+    if (coverCandidates.isNotEmpty() && coverIndex < coverCandidates.size) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(coverCandidates[coverIndex])
+                .crossfade(true)
+                .build(),
+            contentDescription = "Book cover",
+            onError = { if (coverIndex < coverCandidates.lastIndex) coverIndex += 1 },
+            modifier = modifier.clip(RoundedCornerShape(8.dp)),
+            contentScale = ContentScale.Crop
+        )
     }
 }
 

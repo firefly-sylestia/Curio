@@ -449,6 +449,36 @@ app/src/main/java/com/curio/app/
   `CategoryId.name`) so the shown lane and the completion check always
   agree (the old live `leastEngaged()` re-resolution could re-aim the
   quest away mid-day).
+- **v327 — reveal poster restored, star-rating view, pet-outfit
+  unequip, editor floating cluster, Collage tone, radial menu fixes.**
+  (1) **Book covers**: `BookCoverPoster` restored to the ce892baa form
+  the user confirmed renders correctly — the `AsyncImage` IS the root
+  (`modifier.clip(RoundedCornerShape(8.dp))`, size/shadow passed in by
+  callers, `ContentScale.Crop`, `onError` walks `coverCandidates`); the
+  gradient-Box + `matchParentSize` wrapper is GONE (it painted over or
+  swallowed the cover). (2) **Star rating VIEW**: `BookCoverFetch.
+  fetchRatingFor(name, author)` — keyless Google Books `intitle:` query,
+  returns the first `averageRating`; the reveal hero (BOOKS only) shows a
+  ★ chip next to the author pill, fetching on demand when
+  `AppPreferences.bookRatingsState[bookName]` is missing and caching via
+  `setBookRating`. (3) **Pet shop unequip**: tapping an EQUIPPED outfit
+  now removes it (`setEquippedOutfit(context, null)`) — the pill label is
+  "Equipped · tap to remove"; owned-outfit tap equips. (4) **Editor
+  floating cluster**: while `editMode`, the Edit-text circle (when
+  `selectedResizeTarget == FACT`) and Reset circle float NEXT to the
+  Done button (`Modifier.align(BottomEnd)` Row) instead of hiding
+  mid-scroll in the tool row; the scrollable tool row no longer holds
+  Edit-text/Reset/Done. (5) **Collage tone**: `CollageCard` now derives
+  its paper/field/band/ink colors from the picked `ShareCardPalette`
+  (`topCream = palette.bgBase`, `bottomSage = palette.accent`, `bottomDark
+  = palette.accentDark`, `inkDark = palette.ink`, `tornEdge = palette.bgMid`,
+  `sagePill = palette.accentDark`) — the Tone tool now customizes Collage.
+  (6) **Radial menu**: discs 46→36dp (`DISC_DP`), release-over-nothing
+  LINGERS (420ms) then fades out (260ms `dismissAlpha` on the overlay
+  root) instead of vanishing instantly, and the goo-blob layer converts
+  ring positions to overlay-LOCAL coords before animating (`centerPx`)
+  — the blobs were morphing from local `cp` to ROOT `p`, landing offset
+  from the crisp discs and breaking the circle.
 - **v326 — signature redesign campaign BEGINS: Books.** The
   per-category `signatureDesign` rework (one category per turn, commit but
   DON'T push — user reviews each before the next) starts with BOOKS, now a

@@ -201,6 +201,33 @@ object BookCoverFetch {
         }
     }
 
+    /**
+     * Keyless Google Books rating for ONE book (v327 — powers the reveal
+     * page's on-demand star chip; the reveal fetches this when a book opens
+     * and no cached rating exists yet). Null when the query finds nothing.
+     */
+    suspend fun fetchRatingFor(bookName: String, author: String?): Double? =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val q = buildString {
+                    append("intitle:${Uri.encode(bookName)}")
+                    if (!author.isNullOrBlank()) append("+inauthor:${Uri.encode(author)}")
+                }
+                val json = httpGet("https://www.googleapis.com/books/v1/volumes?q=$q&maxResults=3")
+                json?.let {
+                    val items = org.json.JSONObject(it).optJSONArray("items") ?: return@runCatching null
+                    for (i in 0 until items.length()) {
+                        val vi = items.optJSONObject(i)?.optJSONObject("volumeInfo") ?: continue
+                        if (vi.has("averageRating")) {
+                            val r = vi.optDouble("averageRating", 0.0)
+                            return@runCatching if (r > 0.0) r else null
+                        }
+                    }
+                    null
+                }
+            }.getOrNull()
+        }
+
     /** Minimal keyless GET — 8s timeout, best-effort. */
     private fun httpGet(urlString: String): String? = runCatching {
         val conn = URL(urlString).openConnection() as HttpURLConnection

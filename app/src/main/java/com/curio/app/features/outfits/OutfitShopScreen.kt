@@ -77,7 +77,20 @@ fun OutfitShopScreen(navController: NavController) {
     val previewDesign = remember { PetDesign.evolutionDesign(CurioPet.Stage.FIRST_EVO, null) }
 
     fun buy(outfit: PetOutfits.Outfit) {
-        if (outfit.id in owned) return
+        // v327 — tapping an EQUIPPED outfit REMOVES it (accessories could
+        // only be equipped, never taken off): same pill toggles On → Off.
+        if (equipped == outfit.id) {
+            AppPreferences.setEquippedOutfit(context, null)
+            haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+            toast = "${outfit.name} removed"
+            return
+        }
+        if (outfit.id in owned) {
+            AppPreferences.setEquippedOutfit(context, outfit.id)
+            haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+            toast = "${outfit.name} equipped!"
+            return
+        }
         if (!PetOutfits.isUnlocked(outfit, level)) {
             toast = "Unlocks at Level ${outfit.levelRequired}"
             return
@@ -237,7 +250,7 @@ fun OutfitShopScreen(navController: NavController) {
                                 Text(
                                     text = when {
                                         !unlocked -> "Unlocks at Level ${outfit.levelRequired}"
-                                        isEquipped -> "Equipped · ${outfit.id.capitalizeFirst()}"
+                                        isEquipped -> "Equipped · tap to remove"
                                         isOwned -> "Owned — tap to equip"
                                         else -> "Level ${outfit.levelRequired} · $price sparkles"
                                     },

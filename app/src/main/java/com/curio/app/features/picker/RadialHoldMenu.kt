@@ -63,9 +63,11 @@ import kotlin.math.roundToInt
 // Both share [radialRingPositions] / [radialPickIndex] so what the user
 // sees and what the release resolves are the same geometry.
 
-private const val RING_RADIUS_DP = 76f   // ring radius (dp)
-private const val DISC_DP = 46f          // settled disc diameter (dp)
-private const val HIT_SLOP_DP = 20f      // extra grab radius per disc (dp)
+// v327 — smaller, tighter ring: the old 46dp discs read as "giant balls"
+// and the 76dp ring pushed the top disc off the sheet.
+private const val RING_RADIUS_DP = 60f   // ring radius (dp)
+private const val DISC_DP = 36f          // settled disc diameter (dp)
+private const val HIT_SLOP_DP = 18f      // extra grab radius per disc (dp)
 
 /** Ring centers around [anchor] (px) for [count] actions, starting straight up. */
 fun radialRingPositions(anchor: Offset, count: Int, radiusPx: Float): List<Offset> {
@@ -206,9 +208,16 @@ internal fun RadialHoldMenuOverlay(
     LaunchedEffect(Unit) {
         morph.animateTo(1f, tween(420, easing = FastOutSlowInEasing))
     }
+    // v327 — linger: the menu must not vanish the instant the finger lifts.
+    // Stay open a beat after release, then fade out and auto-close (or fire
+    // the picked action after its ripple).
+    val dismissAlpha = remember { Animatable(1f) }
+    var closing by remember { mutableStateOf(false) }
     // Live highlight: the disc nearest the finger (generous hit slop).
-    val activeIndex = cursor?.let { radialPickIndex(center, actions.size, radiusPx, hitPx, it) }
-    // Release resolution: pick the nearest disc, else cancel.
+    val activeIndex =
+        if (closing) null
+        else cursor?.let { radialPickIndex(center, actions.size, radiusPx, hitPx, it) }
+    // Release resolution: pick the nearest disc, else linger + fade + cancel.
     var pickedIndex by remember { mutableStateOf<Int?>(null) }
     var ripples by remember { mutableStateOf(listOf<RippleSpec>()) }
     var rippleSeq by remember { mutableStateOf(0) }
@@ -222,6 +231,10 @@ internal fun RadialHoldMenuOverlay(
                 delay(240)
                 actions[pick].onClick()
             } else {
+                closing = true
+                // Hold the ring visible for a moment, then fade it out.
+                delay(420)
+                dismissAlpha.animateTo(0f, tween(260, easing = FastOutSlowInEasing))
                 onCancel()
             }
         }
@@ -235,6 +248,7 @@ internal fun RadialHoldMenuOverlay(
             .fillMaxSize()
             .onSizeChanged { scrimSize = it }
             .onGloballyPositioned { overlayRoot = it.positionInRoot() }
+            .graphicsLayer { alpha = dismissAlpha.value }
     ) {
         // ── Liquid (goo) layer — blobs with a water-like merge ───────
         val primary = MaterialTheme.colorScheme.primary
@@ -264,11 +278,15 @@ internal fun RadialHoldMenuOverlay(
                 val cp = centerPx(center, overlayRoot)
                 drawGooBlob(cp, discPx * 0.55f * (1f - morph.value * 0.55f), blobBrush, alpha = 1f - morph.value * 0.55f)
                 // Ring blobs — grow out of the center to their ring slot.
-                positions.forEachIndexed { i, p ->
+                // v327 — positions are ROOT coords; convert to overlay-local
+                // first (the old `p - cp` mixed root + local and the blobs
+                // landed offset from the crisp discs, breaking the circle).
+                val localPositions = positions.map { centerPx(it, overlayRoot) }
+                localPositions.forEachIndexed { i, lp ->
                     val eased = easeOutBack(((morph.value - i * 0.07f).coerceIn(0f, 1f)))
                     val pos = Offset(
-                        cp.x + (p.x - cp.x) * eased,
-                        cp.y + (p.y - cp.y) * eased
+                        cp.x + (lp.x - cp.x) * eased,
+                        cp.y + (lp.y - cp.y) * eased
                     )
                     val grow = discPx * (0.42f + 0.58f * eased)
                     val isActive = activeIndex == i

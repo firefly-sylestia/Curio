@@ -892,12 +892,16 @@ private fun CollageCard(
     callbacks: EditBoundsCallbacks = EditBoundsCallbacks(),
     move: ShareCardMove = ShareCardMove()
 ) {
-    val topCream = Color(0xFFF5EDE0)
-    val bottomSage = Color(0xFF6B7C65)
-    val bottomDark = Color(0xFF4A5A44)
-    val inkDark = Color(0xFF3A4A34)
-    val tornEdge = Color(0xFFE8DFD0)
-    val sagePill = Color(0xFF4A5A44)
+    // v327 — the Collage card wears the picked TONE (the palette used to be
+    // ignored here, so the Tone tool had no effect on this style): paper =
+    // bgBase, lower field = accent, dark band = accentDark, ink/text =
+    // palette ink, torn seam edge = bgMid. White polaroid + photo stay.
+    val topCream = palette.bgBase
+    val bottomSage = palette.accent
+    val bottomDark = palette.accentDark
+    val inkDark = palette.ink
+    val tornEdge = palette.bgMid
+    val sagePill = palette.accentDark
 
     Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(topCream, RoundedCornerShape(6.dp))) {
         // ── Layered paper + botanical lower field with a natural torn seam ──
@@ -4882,27 +4886,81 @@ fun TopicShareSheet(
                 }
             }
 
-                // Floating Customise button — over the card, bottom-right.
-                // v3xx — no more panel: it toggles EDIT MODE, exactly like
-                // tap-and-hold on the card (and becomes Done while editing).
-                Surface(
-                    onClick = {
-                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        editMode = !editMode
-                        toolOpen = null
-                        if (!editMode) {
-                            selectedResizeTarget = ShareCardResizeTarget.NONE
-                            factEditMode = false
+                // Floating action cluster — over the card, bottom-right.
+                // v327 — while EDITING, the Edit-text circle (when the quick
+                // fact is selected) and the Reset circle sit NEXT to the
+                // floating Done button — they used to hide mid-scroll in the
+                // tool row. Not editing: just the Customise pill.
+                if (editMode) {
+                    val sel = selectedResizeTarget
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.align(Alignment.BottomEnd).padding(end = 14.dp, bottom = 6.dp)
+                    ) {
+                        if (sel == ShareCardResizeTarget.FACT) {
+                            EditToolPill(
+                                glyph = CurioIcons.Edit,
+                                description = "Edit text",
+                                active = factEditMode,
+                                onClick = {
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    factEditMode = !factEditMode
+                                    if (!factEditMode) focusManager.clearFocus()
+                                }
+                            )
                         }
-                    },
-                    shape = RoundedCornerShape(50),
-                    color = if (editMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHigh,
-                    shadowElevation = 6.dp,
-                    modifier = Modifier.align(Alignment.BottomEnd).padding(end = 14.dp, bottom = 6.dp)
-                ) {
-                    Row(Modifier.padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        CurioIcon(name = if (editMode) CurioIcons.Check else CurioIcons.Tune, tint = if (editMode) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
-                        Text(if (editMode) "Done" else "Customise", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, color = if (editMode) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant))
+                        EditToolPill(
+                            glyph = CurioIcons.Refresh,
+                            description = "Reset all edits",
+                            active = false,
+                            onClick = {
+                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                editedTitle = null; editedFact = null; bodyScale = 1f
+                                saturation = 1f; contrast = 1f
+                                selectedResizeTarget = ShareCardResizeTarget.NONE
+                                factEditMode = false
+                                move = ShareCardMove()
+                                toolOpen = null
+                            }
+                        )
+                        Surface(
+                            onClick = {
+                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                editMode = !editMode
+                                toolOpen = null
+                                selectedResizeTarget = ShareCardResizeTarget.NONE
+                                factEditMode = false
+                            },
+                            shape = RoundedCornerShape(50),
+                            color = MaterialTheme.colorScheme.primary,
+                            shadowElevation = 6.dp
+                        ) {
+                            Row(Modifier.padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                CurioIcon(name = CurioIcons.Check, tint = MaterialTheme.colorScheme.onPrimary, size = 14.dp)
+                                Text("Done", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary))
+                            }
+                        }
+                    }
+                } else {
+                    // Floating Customise button — over the card, bottom-right.
+                    // v3xx — no more panel: it toggles EDIT MODE, exactly like
+                    // tap-and-hold on the card.
+                    Surface(
+                        onClick = {
+                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            editMode = !editMode
+                            toolOpen = null
+                        },
+                        shape = RoundedCornerShape(50),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        shadowElevation = 6.dp,
+                        modifier = Modifier.align(Alignment.BottomEnd).padding(end = 14.dp, bottom = 6.dp)
+                    ) {
+                        Row(Modifier.padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            CurioIcon(name = CurioIcons.Tune, tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
+                            Text("Customise", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant))
+                        }
                     }
                 }
             }
@@ -5067,49 +5125,10 @@ fun TopicShareSheet(
                             active = toolOpen == "source",
                             onClick = { toolOpen = if (toolOpen == "source") null else "source" }
                         )
-                        EditToolPill(
-                            glyph = CurioIcons.Refresh,
-                            description = "Reset all edits",
-                            active = false,
-                            onClick = {
-                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                editedTitle = null; editedFact = null; bodyScale = 1f
-                                saturation = 1f; contrast = 1f
-                                selectedResizeTarget = ShareCardResizeTarget.NONE
-                                factEditMode = false
-                                move = ShareCardMove()
-                                toolOpen = null
-                            }
-                        )
-                        // v325 — the Edit text circle sits NEXT to the floating
-                        // Done button when the quick fact is selected (it used to
-                        // hide mid-scroll in the tool row). v323 — text editing
-                        // is an EXPLICIT action: tap the box to select/move it,
-                        // then Edit text to type.
-                        if (sel == ShareCardResizeTarget.FACT) {
-                            EditToolPill(
-                                glyph = CurioIcons.Edit,
-                                description = "Edit text",
-                                active = factEditMode,
-                                onClick = {
-                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                    factEditMode = !factEditMode
-                                    if (!factEditMode) focusManager.clearFocus()
-                                }
-                            )
-                        }
-                        EditToolPill(
-                            glyph = CurioIcons.Check,
-                            description = "Done",
-                            active = false,
-                            onClick = {
-                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                editMode = false
-                                selectedResizeTarget = ShareCardResizeTarget.NONE
-                                factEditMode = false
-                                toolOpen = null
-                            }
-                        )
+                        // v327 — Edit-text / Reset / Done moved OUT of the
+                        // scrollable row into the floating cluster beside the
+                        // card (they hid mid-scroll; see the BottomEnd cluster
+                        // above).
                     }
 
                     // ── One small overlay for the open tool ────────────

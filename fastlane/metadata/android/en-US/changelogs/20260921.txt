@@ -1,3 +1,9 @@
+FIX: Book covers on Topic Reveal — restored to the last known-good render (the cover image itself is the poster; no gradient wrapper), so the real cover shows again instead of a gradient.
+ADD: Books on Topic Reveal — the star rating now has a visible view: an on-demand ★ chip beside the author pill fetches and shows the book's average rating (the rating fetch existed with no way to see it).
+FIX: Pet outfit shop — tapping an EQUIPPED outfit now removes it (accessories could only be put on, never taken off); the pill toggles On → tap to remove.
+FIX: Share-card editor — the Edit-text circle (when the quick fact is selected) and the Reset circle now float right next to the Done button; they no longer hide mid-scroll in the tool row.
+ADD: Share-card editor — the Collage card now wears the picked Tone palette (paper, field, band and ink follow the tone), so color customisation works on Collage too.
+FIX: Category picker tap-and-hold — the radial menu discs are smaller (no more giant balls), they stay open a beat after you release and fade out instead of vanishing instantly, and the gooey blobs open in the correct circular ring (they were landing offset from the discs).
 ADD: Signature card redesign, category by category — starting with Books: a classic cloth hardcover look (oxblood leather + gold foil double border), a real open-book icon crest, a faint open-book watermark, and gold ruled lines behind the quick fact so the text sits on the lines like a printed page.
 FIX: Share-card editor — back now cancels the editor first (press again to exit the sheet), and exiting the sheet by mistake no longer loses your work: edits are saved on dismiss and restored when you reopen the sheet (they clear when you leave the topic).
 FIX: Share-card editor — the Edit text circle now sits right next to the floating Done button (it used to hide mid-scroll), and the move knob shrinks and fades while dragging so it no longer covers the text you're moving.
