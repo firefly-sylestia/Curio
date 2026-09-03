@@ -59,6 +59,17 @@ Completed:
 - CI validates the profile parse + compile — Gradle not run locally per
   project rules.
 
+## Follow-up — hold-menu labels shortened
+
+User: the new tap-and-hold menu is good but "sometimes its text is too long".
+Fixed in `CategoryOptionPill` / `MixOptionPill` (NewCategoryPicker.kt):
+labels are now short verbs — Pin/Unpin, Spin (was "Spin ${displayName}",
+e.g. "Spin Artificial Intelligence"), Remove (was "Remove from Continue
+exploring"), Edit, Delete (were "Edit/Delete $name" with long mix names).
+The menu is anchored on the row/card the user held, so the subject is
+visible and the card no longer truncates. Also removed the now-unused `name`
+param from `MixOptionPill` (both call sites updated).
+
 ## Notes / follow-ups
 
 - The v330 changelog bullet describing content pills directly in the bottom

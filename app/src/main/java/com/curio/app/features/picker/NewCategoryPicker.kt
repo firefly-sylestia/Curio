@@ -435,7 +435,6 @@ fun NewCategoryPickerSheet(
         // Tap-and-hold on a saved mix → Edit/Delete option pill overlay.
         mixOptionTarget?.let { target ->
             MixOptionPill(
-                name = target.name,
                 onDismiss = { mixOptionTarget = null; mixAnchor = null; holdCursor = null; holdEnd = null },
                 onEdit = {
                     mixOptionTarget = null; mixAnchor = null; holdCursor = null; holdEnd = null
@@ -1663,7 +1662,7 @@ internal fun CategoryOptionPill(
             add(
                 HoldAction(
                     CurioIcons.PlayArrow,
-                    "Spin ${category.displayName}",
+                    "Spin",
                     MaterialTheme.colorScheme.primary,
                     MaterialTheme.colorScheme.onPrimary,
                     onSpin
@@ -1674,7 +1673,7 @@ internal fun CategoryOptionPill(
             add(
                 HoldAction(
                     CurioIcons.Delete,
-                    "Remove from Continue exploring",
+                    "Remove",
                     MaterialTheme.colorScheme.errorContainer,
                     MaterialTheme.colorScheme.onErrorContainer,
                     onRemove
@@ -1702,7 +1701,6 @@ internal fun CategoryOptionPill(
  */
 @Composable
 internal fun MixOptionPill(
-    name: String,
     onDismiss: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
@@ -1715,14 +1713,14 @@ internal fun MixOptionPill(
         actions = listOf(
             HoldAction(
                 CurioIcons.Edit,
-                "Edit $name",
+                "Edit",
                 MaterialTheme.colorScheme.secondaryContainer,
                 MaterialTheme.colorScheme.onSecondaryContainer,
                 onEdit
             ),
             HoldAction(
                 CurioIcons.Delete,
-                "Delete $name",
+                "Delete",
                 MaterialTheme.colorScheme.errorContainer,
                 MaterialTheme.colorScheme.onErrorContainer,
                 onDelete

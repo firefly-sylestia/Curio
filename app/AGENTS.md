@@ -555,7 +555,13 @@ app/src/main/java/com/curio/app/
   period- or semicolon-joined prose instead of dashes, and the share-card
   editor hint copy ("Tap a thing to select · swipe for another design")
   is consistent. Scope: UI strings only (never JSON content, chapter/page
-  ranges, name-qualifier parsing, or log/diagnostic text).
+  ranges, name-qualifier parsing, or log/diagnostic text). (4)
+  **Hold-menu labels shortened**: `CategoryOptionPill` / `MixOptionPill`
+  rows use short verbs ("Spin", "Remove", "Edit", "Delete") instead of
+  long "Spin <lane>" / "Remove from Continue exploring" / "Edit · <mix
+  name>" phrases — the menu is anchored on the row you held, so the
+  subject is visible and the card stays compact (also dropped the now-unused
+  `name` param from `MixOptionPill`).
 - **v326 — signature redesign campaign BEGINS: Books.** The
   per-category `signatureDesign` rework (one category per turn, commit but
   DON'T push — user reviews each before the next) starts with BOOKS, now a

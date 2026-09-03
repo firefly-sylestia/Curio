@@ -312,7 +312,6 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
     // (Edit / Delete circles) instead of the old dropdown menu.
     mixHoldTarget?.let { target ->
         MixOptionPill(
-            name = target.name,
             onDismiss = { mixHoldTarget = null; mixAnchor = null; holdCursor = null; holdEnd = null },
             onEdit = {
                 mixHoldTarget = null; mixAnchor = null; holdCursor = null; holdEnd = null
