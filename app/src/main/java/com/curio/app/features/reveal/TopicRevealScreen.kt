@@ -3701,10 +3701,11 @@ private fun AlbumNotesSheet(
                 // authors a geniusUrl for this album (opens the album's
                 // annotation page in the browser).
                 val geniusUrl = topic.geniusUrl?.takeIf { it.isNotBlank() }
+                val context = LocalContext.current
                 if (geniusUrl != null) {
                     Surface(
                         onClick = {
-                            openSearchUrl(LocalContext.current, geniusUrl)
+                            openSearchUrl(context, geniusUrl)
                         },
                         shape = RoundedCornerShape(50),
                         color = accent.copy(alpha = 0.14f)
