@@ -1572,6 +1572,34 @@ app/src/main/java/com/curio/app/
   editable: `moveFact` applies `fillMaxWidth` unconditionally and
   `FrostPane` no longer carries a redundant outer full-width fill, so
   the crop actually narrows Paper's pane.
+- **v323 — share-editor refinements (user report) + cover z-order fix.**
+  (1) **Tool panels stay open** — picking an option inside a tool (Design /
+  Text size / Box size / Font / Alignment / Format) no longer collapses the
+  panel (the `toolOpen = null` in every option pill is gone); tap the tool
+  icon again to close it, so the user can keep switching options mid-edit.
+  (2) **Quick-fact select-only-first** — the fact's `BasicTextField` is now
+  `enabled = factEditMode` (INERT by default, so a tap can never hijack the
+  selection into text editing); an invisible tap layer over the field selects
+  the box for moving (grip appears) WITHOUT opening the keyboard, and a new
+  conditional **Edit text** tool pill (shown whenever FACT is selected) arms
+  the field and focuses it via a `FocusRequester`
+  (`LaunchedEffect(factEditMode)` requests focus). Tapping Title / Info row /
+  Category chip calls `LocalFocusManager.clearFocus()` BEFORE switching the
+  selection, and the field's `onFocusChanged(false)` drops `factEditMode`, so
+  text editing never sticks and the keyboard never lingers over the toolbar.
+  (3) **No accidental sheet dismissal while editing** —
+  `TopicShareSheet`'s `ModalBottomSheetState` now uses
+  `confirmValueChange = { if (editMode) it == SheetValue.Expanded else true }`
+  (blocks swipe / drag-handle collapse) and `onDismissRequest = { if
+  (!editMode) onDismiss() }` (blocks back button + scrim taps); Save /
+  Share / Share-as-text still dismiss normally, and Done re-enables
+  dismissal.
+  (4) **Book covers render again** — the v317/v320 gradient placeholder was
+  a LATER `Box` sibling of the `AsyncImage` in `BookCoverPoster`, so it
+  painted ON TOP of every loaded cover ("just a gradient showing" on the
+  reveal page + book-notes sheet); it now lives on the outer Box's own
+  `Modifier.background`, BEHIND the image, so covers show again and the
+  gradient only appears while loading / when all candidates fail.
 - **v317 — merged book-notes sheet (Synopsis | Chapters tabs, expands to
   top) + "Also in" from All + share-card editor overhaul + cover fetch
   under Experiments.** (User: synopsis should show only 5 lines on the

@@ -2596,7 +2596,24 @@ private fun BookCoverPoster(
         )
     }
     var coverIndex by remember(bookTitle, imageUrl) { mutableStateOf(0) }
-    Box(modifier = modifier.clip(RoundedCornerShape(8.dp))) {
+    // v323 — the gradient lives on the Box's own BACKGROUND so it draws BEHIND
+    // the image: the earlier placeholder was a later sibling child, which
+    // painted ON TOP of the loaded cover and left every book showing only a
+    // gradient.
+    val placeholderColors = listOf(
+        CurioColors.CoralBlush,
+        CurioColors.CategoryViolet,
+        CurioColors.Sage,
+    )
+    val gradientColors = remember(bookTitle) {
+        val idx = bookTitle.hashCode().let { kotlin.math.abs(it) % placeholderColors.size }
+        listOf(placeholderColors[idx], placeholderColors[(idx + 1) % placeholderColors.size])
+    }
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(Brush.linearGradient(gradientColors))
+    ) {
         if (coverCandidates.isNotEmpty() && coverIndex < coverCandidates.size) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
@@ -2609,25 +2626,6 @@ private fun BookCoverPoster(
                 contentScale = ContentScale.Crop
             )
         }
-        // Gradient placeholder: always renders behind the image, visible when
-        // the image is loading or all candidates failed.
-        val placeholderColors = listOf(
-            CurioColors.CoralBlush,
-            CurioColors.CategoryViolet,
-            CurioColors.Sage,
-        )
-        val gradientColors = remember(bookTitle) {
-            val idx = bookTitle.hashCode().let { kotlin.math.abs(it) % placeholderColors.size }
-            listOf(placeholderColors[idx], placeholderColors[(idx + 1) % placeholderColors.size])
-        }
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .background(
-                    Brush.linearGradient(gradientColors),
-                    RoundedCornerShape(8.dp)
-                )
-        )
         // Show title initial as a fallback glyph when no image loads
         if (coverIndex >= coverCandidates.size || coverCandidates.isEmpty()) {
             Text(

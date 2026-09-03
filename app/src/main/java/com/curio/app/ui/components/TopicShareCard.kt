@@ -65,6 +65,9 @@ import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -5481,6 +5484,10 @@ private fun ArrangeableCard(
     quoteMode: Boolean,
     editFact: String,
     onFactChange: (String) -> Unit,
+    // v323 — text editing for the quick fact is EXPLICIT: the field stays
+    // inert until the "Edit text" tool turns this on (see the overlay below).
+    factEditMode: Boolean = false,
+    onFactEditModeChange: (Boolean) -> Unit = {},
     onToggleEdit: () -> Unit,
     onSelectResizeTarget: (ShareCardResizeTarget) -> Unit = {},
     selectedResizeTarget: ShareCardResizeTarget = ShareCardResizeTarget.NONE,
@@ -5512,6 +5519,10 @@ private fun ArrangeableCard(
             onFactStyle = { s -> liveFactStyle.value = s }
         )
     }
+    // v323 — tapping any other element must end the quick-fact's text editing:
+    // clear focus (closes the keyboard) before switching the selection.
+    val focusManager = LocalFocusManager.current
+    val factRequester = remember { FocusRequester() }
     Box(
         modifier = Modifier
             .onGloballyPositioned { cardOrigin.value = it.positionInWindow() }
@@ -5560,8 +5571,11 @@ private fun ArrangeableCard(
                                 .offset(t.left.dp, t.top.dp)
                                 .width(t.width.dp)
                                 .height(t.height.dp)
-                                .clickable { onSelectResizeTarget(ShareCardResizeTarget.TITLE) }
-                                .border(1.dp, selBorder(isSel), RoundedCornerShape(8.dp))
+                            .clickable {
+                                focusManager.clearFocus()
+                                onSelectResizeTarget(ShareCardResizeTarget.TITLE)
+                            }
+                            .border(1.dp, selBorder(isSel), RoundedCornerShape(8.dp))
                         )
                         if (isSel) {
                             MoveHandle(
@@ -5589,6 +5603,10 @@ private fun ArrangeableCard(
                     BasicTextField(
                         value = editFact,
                         onValueChange = onFactChange,
+                        // v323 — the field is INERT until the "Edit text" tool
+                        // arms it, so a plain tap can never hijack the selection
+                        // into text editing (the overlay below owns taps).
+                        enabled = factEditMode,
                         // Card-reported style (fallback: the sheet's base Lora
                         // metrics) with the text transparent — the caret + wrap
                         // use the card's real font, size and line height.
@@ -5600,7 +5618,16 @@ private fun ArrangeableCard(
                             .offset(f.left.dp, f.top.dp)
                             .width(f.width.dp)
                             .heightIn(min = f.height.dp)
-                            .onFocusChanged { if (it.isFocused) onSelectResizeTarget(ShareCardResizeTarget.FACT) }
+                            .focusRequester(factRequester)
+                            .onFocusChanged {
+                                if (it.isFocused) {
+                                    onSelectResizeTarget(ShareCardResizeTarget.FACT)
+                                } else {
+                                    // Leaving the field ends text-editing mode, so
+                                    // the next tap selects the box for moving.
+                                    onFactEditModeChange(false)
+                                }
+                            }
                             .border(1.dp, selBorder(isSel), RoundedCornerShape(8.dp)),
                         decorationBox = { inner ->
                             Box(Modifier.fillMaxWidth()) {
@@ -5609,6 +5636,24 @@ private fun ArrangeableCard(
                             }
                         }
                     )
+                    // Tap-to-select layer: while text editing is OFF the field is
+                    // inert, so an invisible box on top selects the fact for moving
+                    // (grip appears) without popping the keyboard. Text editing
+                    // starts only via the explicit "Edit text" tool.
+                    if (!factEditMode) {
+                        Box(
+                            modifier = Modifier
+                                .offset(f.left.dp, f.top.dp)
+                                .width(f.width.dp)
+                                .height(f.height.dp)
+                                .clickable { onSelectResizeTarget(ShareCardResizeTarget.FACT) }
+                        )
+                    }
+                    // When the "Edit text" tool arms the field, focus it so the
+                    // keyboard opens right where the caret should sit.
+                    androidx.compose.runtime.LaunchedEffect(factEditMode) {
+                        if (factEditMode) factRequester.requestFocus()
+                    }
                     if (isSel) {
                         MoveHandle(
                             x = f.left.dp,
@@ -5633,7 +5678,10 @@ private fun ArrangeableCard(
                             .offset(m.left.dp, m.top.dp)
                             .width(m.width.dp)
                             .height(m.height.dp)
-                            .clickable { onSelectResizeTarget(ShareCardResizeTarget.META) }
+                            .clickable {
+                                focusManager.clearFocus()
+                                onSelectResizeTarget(ShareCardResizeTarget.META)
+                            }
                             .border(1.dp, selBorder(isSel), RoundedCornerShape(8.dp))
                     )
                     if (isSel) {
@@ -5664,7 +5712,10 @@ private fun ArrangeableCard(
                             .offset(b.left.dp, b.top.dp)
                             .width(b.width.dp)
                             .height(b.height.dp)
-                            .clickable { onSelectResizeTarget(ShareCardResizeTarget.BADGE) }
+                            .clickable {
+                                focusManager.clearFocus()
+                                onSelectResizeTarget(ShareCardResizeTarget.BADGE)
+                            }
                             .border(1.dp, selBorder(isSel), RoundedCornerShape(8.dp))
                     )
                     if (isSel) {
@@ -5762,7 +5813,6 @@ fun TopicShareSheet(
     // topic + fact payload from its own params.
     shareAsText: (() -> String)? = null
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     // Per-share state — plain remember (not Bundle-saveable): the modal
     // resets these each time it opens, and enums/ImageBitmap aren't Bundle-
     // saveable by default (crash on onSaveInstanceState).
@@ -5779,6 +5829,17 @@ fun TopicShareSheet(
     // Plain remember: edits are a per-share tweak (not Bundle-saveable) and the
     // modal resets them each time, so they should not survive a rotation.
     var editMode by remember { mutableStateOf(false) }
+    // v323 — text editing for the quick fact is EXPLICIT: tap the box to
+    // select/move it, then the "Edit text" tool arms the field. Exiting edit
+    // mode or selecting another element always drops back to select mode.
+    var factEditMode by remember { mutableStateOf(false) }
+    // v323 — while editing, the sheet must NOT be dismissible (a swipe / back
+    // / scrim tap would discard the user's card edits): confirmValueChange
+    // blocks every move away from Expanded until edit mode ends.
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+        confirmValueChange = { if (editMode) it == androidx.compose.material3.SheetValue.Expanded else true }
+    )
     // v3xx — selection model: NOTHING selected when editing starts; the user
     // taps a thing on the card to select it (see ArrangeableCard).
     var selectedResizeTarget by remember { mutableStateOf(ShareCardResizeTarget.NONE) }
@@ -5872,12 +5933,16 @@ fun TopicShareSheet(
     val scope = androidx.compose.runtime.rememberCoroutineScope()
     // Satisfying haptics: confirm on Save/Share, light ticks on Reset/Done.
     val haptics = LocalHapticFeedback.current
+    val focusManager = LocalFocusManager.current
     fun setStyle(i: Int) {
         styleIdx = i.coerceIn(0, styles.lastIndex)
         if (styles.size > 1) scope.launch { pagerState.animateScrollToPage(styleIdx) }
     }
 
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState, containerColor = MaterialTheme.colorScheme.surface, dragHandle = { BottomSheetDefaults.DragHandle() }) {
+    // onDismissRequest also respects edit mode: the back button and scrim taps
+    // are ignored while editing (the swipe path is blocked via the sheet
+    // state's confirmValueChange above).
+    ModalBottomSheet(onDismissRequest = { if (!editMode) onDismiss() }, sheetState = sheetState, containerColor = MaterialTheme.colorScheme.surface, dragHandle = { BottomSheetDefaults.DragHandle() }) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 24.dp).verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
             // v316b — editing owns the whole sheet: the title (and the style
             // label / dots below) hide while edit mode is on so the card +
@@ -5924,10 +5989,15 @@ fun TopicShareSheet(
                                 quoteMode = isQuotes,
                                 editFact = editedFact ?: (if (activeId == CUSTOM_FACT_ID) customText else activeSource.text),
                                 onFactChange = { editedFact = it },
+                                factEditMode = factEditMode,
+                                onFactEditModeChange = { factEditMode = it },
                                 onToggleEdit = {
                                     editMode = !editMode
                                     toolOpen = null
-                                    if (!editMode) selectedResizeTarget = ShareCardResizeTarget.NONE
+                                    if (!editMode) {
+                                        selectedResizeTarget = ShareCardResizeTarget.NONE
+                                        factEditMode = false
+                                    }
                                 },
                                 onSelectResizeTarget = { selectedResizeTarget = it },
                                 selectedResizeTarget = selectedResizeTarget,
@@ -5965,10 +6035,15 @@ fun TopicShareSheet(
                             quoteMode = isQuotes,
                             editFact = editedFact ?: (if (activeId == CUSTOM_FACT_ID) customText else activeSource.text),
                             onFactChange = { editedFact = it },
+                            factEditMode = factEditMode,
+                            onFactEditModeChange = { factEditMode = it },
                             onToggleEdit = {
                                 editMode = !editMode
                                 toolOpen = null
-                                if (!editMode) selectedResizeTarget = ShareCardResizeTarget.NONE
+                                if (!editMode) {
+                                    selectedResizeTarget = ShareCardResizeTarget.NONE
+                                    factEditMode = false
+                                }
                             },
                             onSelectResizeTarget = { selectedResizeTarget = it },
                             selectedResizeTarget = selectedResizeTarget,
@@ -5990,7 +6065,10 @@ fun TopicShareSheet(
                         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         editMode = !editMode
                         toolOpen = null
-                        if (!editMode) selectedResizeTarget = ShareCardResizeTarget.NONE
+                        if (!editMode) {
+                            selectedResizeTarget = ShareCardResizeTarget.NONE
+                            factEditMode = false
+                        }
                     },
                     shape = RoundedCornerShape(50),
                     color = if (editMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -6152,6 +6230,21 @@ fun TopicShareSheet(
                             active = toolOpen == "source",
                             onClick = { toolOpen = if (toolOpen == "source") null else "source" }
                         )
+                        // v323 — text editing for the quick fact is an EXPLICIT
+                        // action: tap the box to select/move it, then Edit text to
+                        // type. Keeps the keyboard from taking over the sheet.
+                        if (sel == ShareCardResizeTarget.FACT) {
+                            EditToolPill(
+                                glyph = CurioIcons.Edit,
+                                description = "Edit text",
+                                active = factEditMode,
+                                onClick = {
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    factEditMode = !factEditMode
+                                    if (!factEditMode) focusManager.clearFocus()
+                                }
+                            )
+                        }
                         EditToolPill(
                             glyph = CurioIcons.Refresh,
                             description = "Reset all edits",
@@ -6160,6 +6253,7 @@ fun TopicShareSheet(
                                 haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 editedTitle = null; editedFact = null; bodyScale = 1f
                                 selectedResizeTarget = ShareCardResizeTarget.NONE
+                                factEditMode = false
                                 move = ShareCardMove()
                                 toolOpen = null
                             }
@@ -6172,6 +6266,7 @@ fun TopicShareSheet(
                                 haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 editMode = false
                                 selectedResizeTarget = ShareCardResizeTarget.NONE
+                                factEditMode = false
                                 toolOpen = null
                             }
                         )
@@ -6185,8 +6280,10 @@ fun TopicShareSheet(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 modifier = Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState())
                             ) {
+                                // v323 — panels STAY OPEN while picking options; tap
+                                // the tool icon again to close.
                                 styles.forEachIndexed { i, st ->
-                                    Pill(st.label, CurioIcons.AutoAwesome, st == currentStyle) { setStyle(i); toolOpen = null }
+                                    Pill(st.label, CurioIcons.AutoAwesome, st == currentStyle) { setStyle(i) }
                                 }
                             }
                             if (currentStyle == ShareCardStyle.SIGNATURE) {
@@ -6210,7 +6307,6 @@ fun TopicShareSheet(
                                         val label = (Math.round(s * 100f) / 100f).toString() + "\u00d7"
                                         Pill(label, "text_increase", s == cur) {
                                             if (isTitle) move = move.copy(titleScale = s) else bodyScale = s
-                                            toolOpen = null
                                         }
                                     }
                                 }
@@ -6239,7 +6335,7 @@ fun TopicShareSheet(
                                 modifier = Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState())
                             ) {
                                 shareFonts.forEach { f ->
-                                    Pill(f.label, "title", elementFont == f.family) { setElementFont(f.family); toolOpen = null }
+                                    Pill(f.label, "title", elementFont == f.family) { setElementFont(f.family) }
                                 }
                             }
                         }
@@ -6247,10 +6343,10 @@ fun TopicShareSheet(
                             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                 Text("$selName alignment", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Pill("Left", "notes", elementAlign == null) { setElementAlign(null); toolOpen = null }
-                                    Pill("Center", "notes", elementAlign == TextAlign.Center) { setElementAlign(TextAlign.Center); toolOpen = null }
-                                    Pill("Right", "notes", elementAlign == TextAlign.End) { setElementAlign(TextAlign.End); toolOpen = null }
-                                    Pill("Justify", "notes", elementAlign == TextAlign.Justify) { setElementAlign(TextAlign.Justify); toolOpen = null }
+                                    Pill("Left", "notes", elementAlign == null) { setElementAlign(null) }
+                                    Pill("Center", "notes", elementAlign == TextAlign.Center) { setElementAlign(TextAlign.Center) }
+                                    Pill("Right", "notes", elementAlign == TextAlign.End) { setElementAlign(TextAlign.End) }
+                                    Pill("Justify", "notes", elementAlign == TextAlign.Justify) { setElementAlign(TextAlign.Justify) }
                                 }
                             }
                         } else {
@@ -6260,10 +6356,10 @@ fun TopicShareSheet(
                             Text("Format \u2014 $selName", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Pill("Bold", CurioIcons.FormatBold, elementBold) {
-                                    setElementBold(!elementBold); toolOpen = null
+                                    setElementBold(!elementBold)
                                 }
                                 Pill("Italic", CurioIcons.FormatItalic, elementItalic) {
-                                    setElementItalic(!elementItalic); toolOpen = null
+                                    setElementItalic(!elementItalic)
                                 }
                             }
                         }

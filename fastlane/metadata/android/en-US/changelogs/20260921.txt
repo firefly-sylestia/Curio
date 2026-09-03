@@ -1,3 +1,7 @@
+FIX: Share card editor — tool panels stay open while you switch options; tap the tool icon again to close. Picking a design, size, font, alignment or format no longer collapses the panel.
+FIX: Share card editor — tapping the quick fact selects it for moving (grip appears, no keyboard); type via the new "Edit text" tool, and tapping the title, info row or category chip ends text editing and closes the keyboard.
+FIX: Share card editor — the sheet can no longer be dismissed by mistake while editing (swipe/back ignored until Done).
+FIX: Book covers — cover images render again on Topic Reveal and in the book-notes sheet (the gradient placeholder was painting over them).
 ADD: Share-card editor rebuilt — an icon-only circular toolbar (design, aspect, text size, box size, font, alignment, bold/italic, content) with one small panel per tool; the Customise button now opens the editor itself. Tap any element on the card to select it and edit it — and the font/format tools now work on the title, quick fact, info row and category chip alike. New fonts (13 total), more alignments (incl. justify), and 3:4 is the default aspect.
 FIX: Category picker polish — one mix button instead of two, compact mix cards without the text lane-list (icons say it all), hold-option pills now pop in right where you pressed, Browse/Mixes/Pins tabs each get their own color with a solid active state, and Back from Browse re-opens the picker.
 FIX: Paper share card — dragging the category chip no longer drags the bulb icon along (bulb stays put), and the quick-fact width is editable again.
