@@ -519,6 +519,79 @@ class EditBoundsCallbacks(
     val onFactStyle: (TextStyle) -> Unit = {}
 )
 
+/** v329 — the Reading-progress share content: how many chapters are read of
+ *  the book's total. When set, every card style draws a compact PROGRESS
+ *  WIDGET in place of the quick-fact text (book icon + "N of M chapters" +
+ *  a filled bar) instead of prose, and the inline editor treats the fact as
+ *  a plain movable box (no text typing). */
+data class ChapterProgressUi(val read: Int, val total: Int)
+
+/**
+ * v329 — the visual chapter-progress element every card style renders in its
+ * quick-fact slot when the Reading-progress content is active. Callers pass
+ * the three inks that read on THEIR surface (Paper's cream, Vinyl's dusty
+ * rose box, Collage's sage field, the dark Clean/Neumorphic plate…), so the
+ * widget keeps real contrast on every design. A small book glyph + "3 of 12
+ * chapters" caption sits over a rounded track whose fill width = read/total.
+ */
+@Composable
+private fun ChapterProgressBlock(
+    progress: ChapterProgressUi,
+    fill: Color,
+    track: Color,
+    ink: Color,
+    modifier: Modifier = Modifier
+) {
+    val frac = if (progress.total > 0) (progress.read.toFloat() / progress.total).coerceIn(0f, 1f) else 0f
+    val caption = when {
+        progress.total <= 0 -> ""
+        progress.read >= progress.total -> "Finished · all ${progress.total} chapters"
+        progress.read <= 0 -> "${progress.total} chapters ahead of you"
+        else -> "${progress.read} of ${progress.total} chapters"
+    }
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(5.dp)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            CurioIcon(
+                name = CurioIcons.MenuBook,
+                contentDescription = null,
+                tint = fill,
+                size = 12.dp
+            )
+            Text(
+                caption,
+                style = TextStyle(
+                    fontFamily = LoraFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 9.sp,
+                    letterSpacing = 0.2.sp,
+                    color = ink
+                ),
+                maxLines = 1
+            )
+        }
+        // Rounded track; the filled segment's width is the read fraction.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(5.dp)
+                .clip(RoundedCornerShape(50))
+                .background(track)
+        ) {
+            if (frac > 0f) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(frac)
+                        .height(5.dp)
+                        .background(fill, RoundedCornerShape(50))
+                )
+            }
+        }
+    }
+}
+
 /** Scales maxLines with the user's height-crop frac so the text box truly
  *  grows (more lines show) or shrinks (fewer lines) instead of jumping.
  *  v229c — ROUNDS to the nearest line instead of flooring: maxLines is an
@@ -583,6 +656,9 @@ fun TopicShareCard(
     // exported image get the same treatment.
     saturation: Float = 1f,
     contrast: Float = 1f,
+    // v329 — when set (Reading-progress content), styles render a visual
+    // progress widget instead of [factText] prose.
+    chapterProgress: ChapterProgressUi? = null,
     callbacks: EditBoundsCallbacks = EditBoundsCallbacks()
 ) {
     // v324 — thread the adjust filter into the card's own modifier chain so
@@ -601,14 +677,14 @@ fun TopicShareCard(
     val shownFact = editedFact ?: factText
     val shownQuote = quoteText?.let { shownFact }
     when (style) {
-        ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move)
-        ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move)
-        ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto, byline, year, polaroidCaption, onPhotoTap, bodyScale, callbacks, move)
-        ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move)
-        ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move)
-        ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move)
-        ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, bodyScale, callbacks, move)
-        ShareCardStyle.CUSTOM -> CustomCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move)
+        ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress)
+        ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress)
+        ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto, byline, year, polaroidCaption, onPhotoTap, bodyScale, callbacks, move, chapterProgress)
+        ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress)
+        ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress)
+        ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress)
+        ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, bodyScale, callbacks, move, chapterProgress)
+        ShareCardStyle.CUSTOM -> CustomCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress)
     }
 }
 
@@ -625,7 +701,8 @@ private fun PaperCard(
     byline: String = "", year: String? = null,
     bodyScale: Float = 1f,
     callbacks: EditBoundsCallbacks = EditBoundsCallbacks(),
-    move: ShareCardMove = ShareCardMove()
+    move: ShareCardMove = ShareCardMove(),
+    chapterProgress: ChapterProgressUi? = null
 ) {
     val qSize = quoteText?.let { quoteFontSize(it.length) } ?: 0.sp
     Box(
@@ -649,7 +726,7 @@ private fun PaperCard(
         Column(modifier = Modifier.fillMaxSize().padding(28.dp),
             verticalArrangement = Arrangement.SpaceBetween) {
             HeaderRow(categoryName, categoryGlyph, palette, move, callbacks)
-            MiddleContent(display, factText, aspect, palette, ratingStars, quoteText, qSize, quoteAuthor, byline, year, bodyScale, callbacks, move)
+            MiddleContent(display, factText, aspect, palette, ratingStars, quoteText, qSize, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress)
             Footer(sharerName, quoteText, quoteAuthor, palette, move, callbacks)
         }
     }
@@ -668,7 +745,8 @@ private fun VinylCard(
     byline: String = "", year: String? = null,
     bodyScale: Float = 1f,
     callbacks: EditBoundsCallbacks = EditBoundsCallbacks(),
-    move: ShareCardMove = ShareCardMove()
+    move: ShareCardMove = ShareCardMove(),
+    chapterProgress: ChapterProgressUi? = null
 ) {
     val roseBg = Color(0xFFF5E6E0)
     val roseDusty = Color(0xFFD4A0A0)
@@ -811,16 +889,31 @@ private fun VinylCard(
                 // not the padded cream surface: the box's own 6/4dp padding
                 // sits outside this Text, so boundsInWindow lands exactly on
                 // the letters and the caret never sits inset from them.
+                // v329 — Reading-progress content draws the chapter widget
+                // here instead of the prose.
                 Box(Modifier.padding(horizontal = 6.dp, vertical = 4.dp)) {
-                    Text(
-                        body, style = factStyle,
-                        maxLines = lines(10, move.factHeightFrac),
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.onGloballyPositioned {
-                            callbacks.onFact(it.boundsInWindow())
-                            callbacks.onFactStyle(factStyle)
-                        }
-                    )
+                    if (chapterProgress != null) {
+                        ChapterProgressBlock(
+                            progress = chapterProgress,
+                            fill = roseDusty,
+                            track = inkDark.copy(alpha = 0.14f),
+                            ink = inkDark.copy(alpha = 0.88f),
+                            modifier = Modifier.onGloballyPositioned {
+                                callbacks.onFact(it.boundsInWindow())
+                                callbacks.onFactStyle(factStyle)
+                            }
+                        )
+                    } else {
+                        Text(
+                            body, style = factStyle,
+                            maxLines = lines(10, move.factHeightFrac),
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.onGloballyPositioned {
+                                callbacks.onFact(it.boundsInWindow())
+                                callbacks.onFactStyle(factStyle)
+                            }
+                        )
+                    }
                 }
             }
 
@@ -890,7 +983,8 @@ private fun CollageCard(
     onPhotoTap: (() -> Unit)? = null,
     bodyScale: Float = 1f,
     callbacks: EditBoundsCallbacks = EditBoundsCallbacks(),
-    move: ShareCardMove = ShareCardMove()
+    move: ShareCardMove = ShareCardMove(),
+    chapterProgress: ChapterProgressUi? = null
 ) {
     // v327 — the Collage card wears the picked TONE (the palette used to be
     // ignored here, so the Tone tool had no effect on this style): paper =
@@ -1077,10 +1171,25 @@ private fun CollageCard(
                 lineHeight = (bodySize.value * 1.55f * bodyScale).sp, color = Color.White.copy(alpha = 0.92f),
                 fontStyle = if (quoteText != null) FontStyle.Italic else FontStyle.Normal
             ), move)
-            Text(body, style = factStyle, maxLines = lines(18, move.factHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned {
-                callbacks.onFact(it.boundsInWindow())
-                callbacks.onFactStyle(factStyle)
-            })
+            // v329 — Reading-progress content draws the chapter widget (white
+            // on the sage/dark field) instead of the prose.
+            if (chapterProgress != null) {
+                ChapterProgressBlock(
+                    progress = chapterProgress,
+                    fill = Color.White,
+                    track = Color.White.copy(alpha = 0.22f),
+                    ink = Color.White.copy(alpha = 0.92f),
+                    modifier = Modifier.moveFact(move).onGloballyPositioned {
+                        callbacks.onFact(it.boundsInWindow())
+                        callbacks.onFactStyle(factStyle)
+                    }
+                )
+            } else {
+                Text(body, style = factStyle, maxLines = lines(18, move.factHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned {
+                    callbacks.onFact(it.boundsInWindow())
+                    callbacks.onFactStyle(factStyle)
+                })
+            }
 
             if (ratingStars != null && ratingStars > 0) {
                 Spacer(Modifier.height(6.dp))
@@ -1116,7 +1225,8 @@ private fun NeumorphicCard(
     byline: String = "", year: String? = null,
     bodyScale: Float = 1f,
     callbacks: EditBoundsCallbacks = EditBoundsCallbacks(),
-    move: ShareCardMove = ShareCardMove()
+    move: ShareCardMove = ShareCardMove(),
+    chapterProgress: ChapterProgressUi? = null
 ) {
     val ink = Color(0xFF101010)
     val paper = Color(0xFFF8F6EF)
@@ -1197,10 +1307,25 @@ private fun NeumorphicCard(
                     color = Color.White.copy(alpha = 0.88f),
                     shadow = Shadow(Color.Black.copy(alpha = 0.62f), Offset(0f, 2f), 5f)
                 ), move)
-                Text(body, style = factStyle, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 8 else 6, move.factHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned {
-                    callbacks.onFact(it.boundsInWindow())
-                    callbacks.onFactStyle(factStyle)
-                })
+                // v329 — Reading-progress content draws the chapter widget
+                // (white on the dark plate) instead of the prose.
+                if (chapterProgress != null) {
+                    ChapterProgressBlock(
+                        progress = chapterProgress,
+                        fill = Color.White,
+                        track = Color.White.copy(alpha = 0.22f),
+                        ink = Color.White.copy(alpha = 0.88f),
+                        modifier = Modifier.moveFact(move).onGloballyPositioned {
+                            callbacks.onFact(it.boundsInWindow())
+                            callbacks.onFactStyle(factStyle)
+                        }
+                    )
+                } else {
+                    Text(body, style = factStyle, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 8 else 6, move.factHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned {
+                        callbacks.onFact(it.boundsInWindow())
+                        callbacks.onFactStyle(factStyle)
+                    })
+                }
                 if (ratingStars != null && ratingStars > 0) {
                     Spacer(Modifier.height(7.dp))
                     StarRow(ratingStars, palette.copy(accent = Color.White, ink = Color.White, inkFaint = Color.White.copy(alpha = 0.45f)))
@@ -1231,7 +1356,8 @@ private fun EditorialCard(
     byline: String = "", year: String? = null,
     bodyScale: Float = 1f,
     callbacks: EditBoundsCallbacks = EditBoundsCallbacks(),
-    move: ShareCardMove = ShareCardMove()
+    move: ShareCardMove = ShareCardMove(),
+    chapterProgress: ChapterProgressUi? = null
 ) {
     val cream = Color(0xFFFAF7F0)
     val inkDark = Color(0xFF1C1814)
@@ -1310,7 +1436,20 @@ private fun EditorialCard(
             ), move)
             val initial = body.take(1)
             val bodyRest = if (body.length > 1) body.drop(1) else ""
-            if (bodyRest.isEmpty()) {
+            // v329 — Reading-progress content draws the chapter widget
+            // (accent bar on the cream page) instead of the drop-cap prose.
+            if (chapterProgress != null) {
+                ChapterProgressBlock(
+                    progress = chapterProgress,
+                    fill = accentRule,
+                    track = inkDark.copy(alpha = 0.13f),
+                    ink = inkDark.copy(alpha = 0.82f),
+                    modifier = Modifier.moveFact(move).onGloballyPositioned {
+                        callbacks.onFact(it.boundsInWindow())
+                        callbacks.onFactStyle(bodyStyle)
+                    }
+                )
+            } else if (bodyRest.isEmpty()) {
                 Text(body, style = bodyStyle,
                     maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac), overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.moveFact(move).onGloballyPositioned {
@@ -1441,7 +1580,8 @@ private fun MinimalCard(
     byline: String = "", year: String? = null,
     bodyScale: Float = 1f,
     callbacks: EditBoundsCallbacks = EditBoundsCallbacks(),
-    move: ShareCardMove = ShareCardMove()
+    move: ShareCardMove = ShareCardMove(),
+    chapterProgress: ChapterProgressUi? = null
 ) {
     val bg = Color(0xFFFFFDF9)
     val inkDark = Color(0xFF1A1A1A)
@@ -1510,11 +1650,26 @@ private fun MinimalCard(
                 fontFamily = LoraFontFamily, fontSize = (bodySize.value * bodyScale).sp,
                 lineHeight = (bodySize.value * 1.50f * bodyScale).sp, color = inkDark.copy(alpha = 0.78f)
             ), move)
-            Text(body, style = factStyle, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac), overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.moveFact(move).onGloballyPositioned {
-                    callbacks.onFact(it.boundsInWindow())
-                    callbacks.onFactStyle(factStyle)
-                })
+            // v329 — Reading-progress content draws the chapter widget
+            // (accent bar on the white page) instead of the prose.
+            if (chapterProgress != null) {
+                ChapterProgressBlock(
+                    progress = chapterProgress,
+                    fill = accent,
+                    track = inkDark.copy(alpha = 0.12f),
+                    ink = inkDark.copy(alpha = 0.78f),
+                    modifier = Modifier.moveFact(move).onGloballyPositioned {
+                        callbacks.onFact(it.boundsInWindow())
+                        callbacks.onFactStyle(factStyle)
+                    }
+                )
+            } else {
+                Text(body, style = factStyle, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac), overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.moveFact(move).onGloballyPositioned {
+                        callbacks.onFact(it.boundsInWindow())
+                        callbacks.onFactStyle(factStyle)
+                    })
+            }
 
             if (ratingStars != null && ratingStars > 0) {
                 Spacer(Modifier.height(8.dp))
@@ -1547,7 +1702,8 @@ private fun SignatureCard(
     classicSignature: Boolean = false,
     bodyScale: Float = 1f,
     callbacks: EditBoundsCallbacks = EditBoundsCallbacks(),
-    move: ShareCardMove = ShareCardMove()
+    move: ShareCardMove = ShareCardMove(),
+    chapterProgress: ChapterProgressUi? = null
 ) {
     val body = quoteText ?: factText
     val title = if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display
@@ -1685,6 +1841,23 @@ private fun SignatureCard(
         // ── Body (shared) ─────────────────────────────────────
         @Composable
         fun BodyText(centered: Boolean = false) {
+            // v329 — Reading-progress content draws the chapter widget in the
+            // signature surface's own tones (no ruled lines; the bar wears
+            // the rule/badge tone) instead of the prose.
+            if (chapterProgress != null) {
+                ChapterProgressBlock(
+                    progress = chapterProgress,
+                    fill = sig.bodyRuleColor ?: sig.badgeColor,
+                    track = sig.bodyColor.copy(alpha = 0.16f),
+                    ink = sig.bodyColor,
+                    modifier = (if (centered) Modifier.fillMaxWidth() else Modifier)
+                        .moveFact(move)
+                        .onGloballyPositioned {
+                            callbacks.onFact(it.boundsInWindow())
+                        }
+                )
+                return
+            }
             // User's format alignment wins; otherwise honor the layout's own
             // alignment (Signature has centered variants).
             val align = move.factAlign ?: if (centered) TextAlign.Center else TextAlign.Start
@@ -3932,7 +4105,8 @@ private fun CustomCard(
     byline: String = "", year: String? = null,
     bodyScale: Float = 1f,
     callbacks: EditBoundsCallbacks = EditBoundsCallbacks(),
-    move: ShareCardMove = ShareCardMove()
+    move: ShareCardMove = ShareCardMove(),
+    chapterProgress: ChapterProgressUi? = null
 ) {
     val body = quoteText ?: factText
     val title = if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display
@@ -3983,10 +4157,26 @@ private fun CustomCard(
                 lineHeight = (bodySize * sig.bodyLineHeight).sp,
                 color = sig.bodyColor
             ), move)
-            Text(body, style = factStyle, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 14 else 10, move.factHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned {
-                callbacks.onFact(it.boundsInWindow())
-                callbacks.onFactStyle(factStyle)
-            })
+            // v329 — Reading-progress content draws the chapter widget in the
+            // signature colors (bar in the badge tone, caption in body ink)
+            // instead of the prose.
+            if (chapterProgress != null) {
+                ChapterProgressBlock(
+                    progress = chapterProgress,
+                    fill = sig.badgeColor,
+                    track = sig.bodyColor.copy(alpha = 0.16f),
+                    ink = sig.bodyColor,
+                    modifier = Modifier.moveFact(move).onGloballyPositioned {
+                        callbacks.onFact(it.boundsInWindow())
+                        callbacks.onFactStyle(factStyle)
+                    }
+                )
+            } else {
+                Text(body, style = factStyle, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 14 else 10, move.factHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned {
+                    callbacks.onFact(it.boundsInWindow())
+                    callbacks.onFactStyle(factStyle)
+                })
+            }
             if (ratingStars != null && ratingStars > 0) {
                 Spacer(Modifier.height(6.dp))
                 StarRow(ratingStars, palette)
@@ -4027,7 +4217,8 @@ private fun MiddleContent(
     byline: String = "", year: String? = null,
     bodyScale: Float = 1f,
     callbacks: EditBoundsCallbacks = EditBoundsCallbacks(),
-    move: ShareCardMove = ShareCardMove()
+    move: ShareCardMove = ShareCardMove(),
+    chapterProgress: ChapterProgressUi? = null
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (quoteText != null) {
@@ -4062,18 +4253,34 @@ private fun MiddleContent(
                 lineHeight = (qfsScaled.value * 1.4f).sp
             ), move)
             FrostPane(palette, Modifier.moveFact(move)) {
-                // v316b — the glyph box reports the bounds, NOT the frost pane:
-                // the pane's own 18dp padding would otherwise push the typing
-                // field's caret 18dp off the visible letters.
-                Text(
-                    factText, style = frostStyle, color = palette.ink,
-                    maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 20 else 14, move.factHeightFrac),
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.onGloballyPositioned {
-                        callbacks.onFact(it.boundsInWindow())
-                        callbacks.onFactStyle(frostStyle)
-                    }
-                )
+                // v329 — Reading-progress content draws the visual chapter
+                // widget here (same bounds reporting, so the editor's box +
+                // grip sit on the bar exactly as they would on text).
+                if (chapterProgress != null) {
+                    ChapterProgressBlock(
+                        progress = chapterProgress,
+                        fill = palette.accent,
+                        track = palette.ink.copy(alpha = 0.14f),
+                        ink = palette.ink,
+                        modifier = Modifier.onGloballyPositioned {
+                            callbacks.onFact(it.boundsInWindow())
+                            callbacks.onFactStyle(frostStyle)
+                        }
+                    )
+                } else {
+                    // v316b — the glyph box reports the bounds, NOT the frost
+                    // pane: the pane's own 18dp padding would otherwise push
+                    // the typing field's caret 18dp off the visible letters.
+                    Text(
+                        factText, style = frostStyle, color = palette.ink,
+                        maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 20 else 14, move.factHeightFrac),
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.onGloballyPositioned {
+                            callbacks.onFact(it.boundsInWindow())
+                            callbacks.onFactStyle(frostStyle)
+                        }
+                    )
+                }
             }
         }
     }
@@ -4770,6 +4977,12 @@ fun TopicShareSheet(
         }
         else -> available.firstOrNull { it.id == activeId } ?: quick
     }
+    // v329 — when Reading progress is the active content the card draws a
+    // VISUAL chapter widget (bar + caption) instead of the prose text; the
+    // value comes from the live BookNotes pref so the picker updates the card.
+    val progressForCard = if (activeId == "chapter_progress" && hasBookChapters)
+        ChapterProgressUi(chaptersRead, bookChapters.size)
+    else null
 
     val styles = availableStylesForFamily(categoryFamily, topicName)
     val safeIdx = styleIdx.coerceIn(0, styles.lastIndex)
@@ -4864,7 +5077,7 @@ fun TopicShareSheet(
                                 active = page == pagerState.currentPage,
                                 editMode = editMode && page == pagerState.currentPage,
                                 quoteMode = isQuotes,
-                                editFact = editedFact ?: (if (activeId == CUSTOM_FACT_ID) customText else activeSource.text),
+                                editFact = if (progressForCard != null) progressContent.text else editedFact ?: (if (activeId == CUSTOM_FACT_ID) customText else activeSource.text),
                                 onFactChange = { editedFact = it },
                                 factEditMode = factEditMode,
                                 onFactEditModeChange = { factEditMode = it },
@@ -4882,7 +5095,7 @@ fun TopicShareSheet(
                                 onMove = { move = it },
                                 factFieldStyle = factFieldStyle
                             ) { cb ->
-                                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move, callbacks = cb)
+                                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move, chapterProgress = progressForCard, callbacks = cb)
                             }
                         }
                     }
@@ -4928,7 +5141,7 @@ fun TopicShareSheet(
                             onMove = { move = it },
                             factFieldStyle = factFieldStyle
                         ) { cb ->
-                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move, callbacks = cb)
+                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move, chapterProgress = progressForCard, callbacks = cb)
                         }
                     }
                 }
@@ -4946,7 +5159,7 @@ fun TopicShareSheet(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.align(Alignment.BottomEnd).padding(end = 14.dp, bottom = 6.dp)
                     ) {
-                        if (sel == ShareCardResizeTarget.FACT) {
+                        if (sel == ShareCardResizeTarget.FACT && progressForCard == null) {
                             EditToolPill(
                                 glyph = CurioIcons.Edit,
                                 description = "Edit text",
@@ -5418,7 +5631,7 @@ fun TopicShareSheet(
                     onClick = {
                         haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                         shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move)
+                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move, chapterProgress = progressForCard)
                         }, saveToGallery = true)
                         persistEdits()
                         onDismiss()
@@ -5437,7 +5650,7 @@ fun TopicShareSheet(
                 Button(onClick = {
                     haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                     shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move)
+                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move, chapterProgress = progressForCard)
                     })
                         persistEdits()
                         onDismiss()

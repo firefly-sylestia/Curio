@@ -65,21 +65,41 @@ User direction (paraphrased):
    with a "CH N · title" chip via the same chapter chip row).
 7. Docs: changelog v328 entries (top of 20260921.txt).
 
+## Follow-up: v329 — Reading progress is now a VISUAL widget on the card
+
+User clicked "Show chapter progress on the share card as a visual progress
+element instead of text". Implemented in `TopicShareCard.kt`:
+
+- New public `ChapterProgressUi(read, total)` + a shared
+  `ChapterProgressBlock(fill, track, ink)` composable: book glyph + caption
+  ("3 of 12 chapters" / "Finished · all N" / "N chapters ahead of you")
+  over a rounded 5dp track whose fill width = read/total.
+- `TopicShareCard` gained `chapterProgress: ChapterProgressUi? = null` and
+  every style's quick-fact TEXT is replaced by the widget when it's set:
+  Paper (MiddleContent/FrostPane), Vinyl (cream box), Collage (white on
+  sage field), Neumorphic (white on dark plate), Editorial (3-way branch
+  skips the drop-cap), Minimal, Signature (shared `BodyText` helper — no
+  ruled lines), Custom. Each passes its own surface inks for contrast.
+  Bounds reporting kept (`onFact`) so the inline-edit box + move grip sit
+  on the widget.
+- Sheet: `progressForCard` computed when the Reading-progress content is
+  active and passed to the carousel preview + single-style preview + the
+  Save/Share export callsites (export = preview, both render the widget).
+  The Edit-text circle hides for this content; the inert typing field gets
+  the caption so no "Edit the quick fact…" placeholder shows over the bar.
+- Other `TopicShareCard` callers (ShareHub, reveal, entry detail) omit the
+  param → default null → unchanged behavior.
+
 ## Verification
 
-- `git diff --check` clean; 8 files changed (+566/−50).
-- Grep/read-verified: debounce seam + SEARCH_RESULT_CAP, both panel
-  surfaces + row fills + `lerp` imports, `namedMixIdentity` callers +
-  doc-comment, ratings-count prefs/fetch/display + `compactCount`
-  placement, `BookStars` call sites (only reveal caller), reading-progress
-  prefs + BookNotes rail/chips/pill (imports present:
-  LocalHapticFeedback/HapticFeedbackType/CurioIcons.Check), TopicShareSheet
-  param order (all callers named-arg, trailing params defaulted) +
-  Pill/MenuBook/horizontalScroll refs exist, CoverTile `fillMaxSize`.
+- `git diff --check` clean; braces balanced (932/932) in TopicShareCard.kt.
+- Grep/read-verified all 8 style swaps + dispatch + 4 sheet callsites carry
+  `chapterProgress`/`progressForCard`; `ChapterProgressUi` public (the
+  public TopicShareCard exposes it); no other callers pass positionally.
 - No Gradle commands run (project DOX forbids them here) — CI validates.
 
 ## NEXT
 
-Commit + push everything for CI. After CI is green, return to the
-signature-card campaign (one category at a time, no SVG without
-permission) — awaiting the user's pick + design for the next category.
+Push this follow-up for CI. Then return to the signature-card campaign (one
+category at a time, no SVG without permission) — awaiting the user's pick +
+design for the next category.
