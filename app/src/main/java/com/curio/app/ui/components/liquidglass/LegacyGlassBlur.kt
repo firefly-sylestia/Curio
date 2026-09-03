@@ -45,9 +45,10 @@ import kotlin.math.min
  *      floating nav / reveal pills are SIBLINGS of this Box, so they never
  *      record themselves into their own backdrop).
  *   2. [CurioLegacyBlurSnapshotter] reads that layer back to pixels on a
- *      throttle (~8 updates/s), downscales it hard (a blurred image needs no
- *      resolution) and stack-blurs it in software. One ~160px-wide pass
- *      costs ~1–3ms — nothing on any device that runs this app.
+ *      throttle (~5 updates/s, v331 — coalesced from ~8/s, see Tuning) and
+ *      downscales it hard to ≤128px (a blurred image needs no resolution)
+ *      and stack-blurs it in software. One pass costs ~1–3ms — nothing on
+ *      any device that runs this app.
  *   3. [curioLegacyGlassCapsule] draws the blurred snapshot region under the
  *      pill (mapped through root coordinates), then layers the same veil /
  *      sheen / rim finish as the simulated glass so both paths read alike.
@@ -209,7 +210,7 @@ fun Modifier.curioLegacyGlassCapsule(container: Color): Modifier {
                     }
                 }
             } else {
-                // Snapshot not ready yet (first ~125ms) — a soft container
+                // Snapshot not ready yet (first ~200ms) — a soft container
                 // wash instead of a flash of empty glass.
                 drawRoundRect(
                     color = container.copy(alpha = 0.88f),
@@ -296,10 +297,18 @@ internal fun stackBlur(bitmap: Bitmap, radius: Int) {
 }
 
 // ── Tuning ──────────────────────────────────────────────────────────────
-// Snapshot cadence (~8/s keeps scroll-following lag imperceptible at blur
-// radii this large) and the working resolution (a blurred image needs none).
-private const val SNAPSHOT_INTERVAL_MS = 125L
-private const val SNAPSHOT_MAX_DIM = 160
+// v331 — SNAPSHOT COALESCING (logcat analysis: this full-screen readback +
+// downscale + stack-blur loop was the app-code hot allocator on the
+// pre-12 path — one ~160px-wide pass was cheap, but at 8 ticks/s it churned
+// a fresh Bitmap + IntArray per tick even while the screen sat still).
+// Cadence drops to ~5/s (scroll-following lag stays imperceptible behind
+// blur radii this large — the backdrop is frosted, not a video) and the
+// working resolution drops to 128px (a blurred image needs none; 128²/160²
+// is a ~36% smaller readback + blur pass, and the frost reads marginally
+// creamier at the same radius). Together ~60% less per-second allocation
+// on the only app-owned glass snapshot path.
+private const val SNAPSHOT_INTERVAL_MS = 200L
+private const val SNAPSHOT_MAX_DIM = 128
 private const val BLUR_RADIUS_PX = 6
 private const val BLUR_ROUNDS = 2
 private const val READBACK_MAX_FAILURES = 4

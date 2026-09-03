@@ -502,6 +502,30 @@ app/src/main/java/com/curio/app/
   scrim to dismiss, or let the ~6s idle auto-dismiss fire) —
   `radialHoldMenu`/`HoldSession`/`HoldAction` unchanged; the goo-blob
   canvas, ripples and ring geometry helpers are gone.
+- **v331 — baseline profile + glass-snapshot coalescing (logcat heat/GC
+  analysis follow-ups).** (1) `app/src/main/baseline-prof.txt` — a
+  manually-authored starter HRF profile (the log showed the JIT compiling
+  single giant composables at up to 7.7 MB each; ART now AOT-compiles
+  those methods at install via ProfileInstaller). Rules target the startup
+  path (MainActivity, crash reporter, splash, data-layer init), the nav
+  host + bottom bar + glass pipeline, the hot tab screens, the giant
+  share-card / picker composables, and hot libs (Room, Gson, OkHttp,
+  Coil). `androidx.profileinstaller:1.4.1` is now declared EXPLICITLY in
+  the catalog + app deps (Compose already pulled it transitively — the
+  "Skipping profile installation" logcat line proved the receiver ran —
+  but the docs require the explicit dep for the profile to install). AGP
+  bundles `src/main/baseline-prof.txt` automatically and rewrites source
+  symbols through the R8 mapping on minified release builds. (2)
+  `LegacyGlassBlur` (pre-Android-12 app-side blur engine) coalesced:
+  `SNAPSHOT_INTERVAL_MS` 125→200 (~5/s) and `SNAPSHOT_MAX_DIM` 160→128
+  (~36% smaller readback+blur pass; ~60% less per-second allocation).
+  NOTE — the modern (API 31+) kyant `LayerBackdrop` cannot be throttled
+  from app code: `LayerBackdropModifier` re-records the full page on
+  EVERY draw and `recordLayer`/`layerCoordinates`/`onDraw` are `internal`
+  to the library — a record-side throttle needs a fork or upstream knob;
+  the idle frameRate churn in the log traces to always-animating pet /
+  constellation layers re-invalidating the page, which re-triggers the
+  capture.
 - **v326 — signature redesign campaign BEGINS: Books.** The
   per-category `signatureDesign` rework (one category per turn, commit but
   DON'T push — user reviews each before the next) starts with BOOKS, now a

@@ -1,5 +1,49 @@
 # Prompt.md — current request log
 
+## Request: v331 — logcat follow-ups: baseline profile + glass snapshot coalescing
+
+User said "do all" on the three logcat recommendations. Completed:
+
+1. **Baseline profile** (`app/src/main/baseline-prof.txt` + explicit
+   `androidx.profileinstaller:1.4.1` dep in catalog + app build).
+   Manually-authored starter HRF covering the startup path (MainActivity,
+   crash reporter, splash, data init), nav host + bottom bar + glass
+   pipeline, hot tab screens, the giant share-card / picker composables
+   (the log showed JIT compiling single methods at up to 7.7 MB each), and
+   hot libs (Room, Gson, OkHttp, Coil). AGP bundles src/main
+   baseline-prof.txt automatically and rewrites rules through the R8
+   mapping on release. ProfileInstaller was already present transitively
+   (the log's "Skipping profile installation" line proved the receiver
+   runs) — the explicit dep is the documented requirement so the profile
+   actually installs.
+2. **Legacy glass snapshot coalescing** (`LegacyGlassBlur.kt`,
+   pre-Android-12 path): `SNAPSHOT_INTERVAL_MS` 125→200 (~5/s, was ~8/s)
+   and `SNAPSHOT_MAX_DIM` 160→128 (~36% smaller readback+blur pass) —
+   ~60% less per-second allocation on the only app-owned glass snapshot
+   loop. Header + tuning comments updated.
+3. **Modern-path backdrop throttle — VERDICT: not possible from app code.**
+   Read the kyant0 backdrop 1.0.6 source (`LayerBackdropModifier.kt` +
+   `LayerBackdrop.kt`): the layer re-records the FULL page on EVERY draw
+   (`drawContent()` then `recordLayer`), and `recordLayer`,
+   `layerCoordinates`, `onDraw` are all `internal` to the library — no
+   public throttle/coalesce knob exists, and reimplementing the modifier
+   would need a library fork. The idle `setRequestedFrameRate` churn
+   (112/548 entries with no pointer within 300ms) traces to the
+   always-animating pet / constellation / badge layers re-invalidating
+   the page every frame, which re-triggers the full-page capture — a
+   product decision (stop those animations vs. keep them), not a code
+   bug. Left as documented; a fork or upstream feature request is the
+   path if it's ever wanted.
+
+## Verification
+
+- Profile HRF format cross-checked against the Android docs (method rules
+  end with the return type — no trailing `;`; class rules keep the `;`;
+  wildcards `**` supported) — fixed my first draft's trailing `;` on the
+  three method rules.
+- No Gradle commands run (project DOX forbids them here) — CI validates
+  the catalog/dep/profile wiring.
+
 ## Request: v330 — share-card editor layout/editing UX + picker hold-action rewrite
 
 User direction (paraphrased):
