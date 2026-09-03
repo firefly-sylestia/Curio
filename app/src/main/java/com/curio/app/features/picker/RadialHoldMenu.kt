@@ -133,7 +133,10 @@ fun Modifier.radialHoldMenu(hold: HoldSession?): Modifier = composed {
     // is restricted and cannot run delay()/launch().
     val scope = rememberCoroutineScope()
     var nodeRoot by remember { mutableStateOf(Offset.Zero) }
-    val currentRoot by rememberUpdatedState(nodeRoot)
+    // NOT `by` — rememberUpdatedState returns a State and we need the State
+    // itself so the gesture reads `.value` fresh on every pointer event
+    // (a `by` delegate unwraps it and would close over the stale offset).
+    val currentRoot = rememberUpdatedState(nodeRoot)
     this.onGloballyPositioned { nodeRoot = it.positionInRoot() }
         .pointerInput(hold) {
             awaitEachGesture {
