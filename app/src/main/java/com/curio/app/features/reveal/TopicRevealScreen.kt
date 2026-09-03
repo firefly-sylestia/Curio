@@ -2064,11 +2064,15 @@ private fun HeroCard(
                 if (cat.id == CategoryId.BOOKS) {
                     val bookName = resolved?.name?.takeIf { it.isNotBlank() } ?: fallbackName
                     val bookRating = AppPreferences.bookRatingsState[bookName]
+                    // LocalContext.current is @Composable — read it here, in
+                    // the composable scope, NOT inside the LaunchedEffect
+                    // body (that lambda is suspend-only and would fail CI).
+                    val context = LocalContext.current
                     LaunchedEffect(bookName, resolved?.byline) {
                         if (bookRating == null && bookName.isNotBlank()) {
                             val r = BookCoverFetch.fetchRatingFor(bookName, resolved?.byline)
                             if (r != null && r > 0.0) {
-                                AppPreferences.setBookRating(LocalContext.current, bookName, r)
+                                AppPreferences.setBookRating(context, bookName, r)
                             }
                         }
                     }
