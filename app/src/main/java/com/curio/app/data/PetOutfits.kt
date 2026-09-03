@@ -265,7 +265,7 @@ object PetOutfits {
     )
 
     val Games: List<PetGame> = listOf(
-        PetGame("ball", "Ball fetch", "play_circle", 25, 12, "game-ball", "Toss the ball — Curie fetches!"),
+        PetGame("ball", "Ball fetch", "play_circle", 25, 12, "game-ball", "Toss the ball, and Curie fetches!"),
         PetGame("starcatch", "Star catch", "star", 60, 25, "game-starcatch", "Catch falling stars together."),
         PetGame("bubbles", "Bubble storm", "bubble_chart", 90, 35, "game-bubbles", "A storm of bubbles to pop.")
     )

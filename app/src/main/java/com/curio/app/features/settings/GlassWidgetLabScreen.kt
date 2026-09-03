@@ -149,7 +149,7 @@ import kotlin.math.sin
                     AppPreferences.setGlassLabWallpaperUri(context, "auto")
                     detectStatus = "Device wallpaper detected."
                 } else {
-                    detectStatus = "Auto-detect blocked \u2014 tap Grant access to allow wallpaper reading."
+                    detectStatus = "Auto-detect is blocked. Tap Grant access to allow wallpaper reading."
                 }
             }
         }

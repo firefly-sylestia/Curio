@@ -1555,7 +1555,7 @@ object PetFacePresets {
     /** Shy — bashful, wide-eyed, blushes at everything. */
     val SHY = Preset(
         name = "Shy",
-        tagline = "Bashful — blushes at everything",
+        tagline = "Bashful, blushes at everything",
         faces = mapOf(
             "HAPPY" to PetFace(eyes = EyeStyle.WIDE, mouth = MouthStyle.SMILE, blush = true),
             "EXCITED" to PetFace(eyes = EyeStyle.HAPPY, mouth = MouthStyle.SMILE, blush = true),
@@ -1603,7 +1603,7 @@ object PetFacePresets {
     /** Sleepyhead — dozy, calm, barely reacts. */
     val SLEEPYHEAD = Preset(
         name = "Sleepyhead",
-        tagline = "Dozy & calm — big yawns, tiny reactions",
+        tagline = "Dozy and calm, with big yawns and tiny reactions",
         faces = mapOf(
             "HAPPY" to PetFace(eyes = EyeStyle.CLOSED, mouth = MouthStyle.SMILE, blush = false),
             "EXCITED" to PetFace(eyes = EyeStyle.CLOSED, mouth = MouthStyle.SMILE, blush = false),

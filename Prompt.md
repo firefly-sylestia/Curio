@@ -1,105 +1,77 @@
 # Prompt.md — current request log
 
-## Request: v328 — search speed + theming + cover hub + book share-card chapters
+## Request: v332 — share-card editor content toggle + Customise gating, app-wide copy polish, CI baseline-profile fix
 
-User direction (paraphrased):
+User's follow-up on the share-card editor (commit 9469b675/58e7efe4 batch):
+"i didn't ask you to place the content quick fact / custom fact options at that
+place, i asked you to place the toggle and let it open where it was opening
+before; the Customise button now just stays like that; there are a lot of em
+dashes around the app (not the JSON) — in the app hints etc — rephrase them in
+proper premium English, fix lowercase hint starts." An ask_user clarified:
+toggle pill in the bottom bar that opens the content panel where it used to
+open, whole-app UI copy pass with elegant "old English" register.
 
-> Topic browser search results are slow / show loading — make it lazy and
-> cap at 50 topics. The category picker isn't theme-aware (light/dark).
-> Mixes still have color-contrast problems in both themes. In the book
-> cover fetch, show ALL covers there too, and cache both stars (average +
-> count). Add book share-card content: a chapter-progress element and a
-> custom-text chapter-review card. Selecting can be done from the
-> bottom-sheet category and a link tool from share.
+Also during the turn, CI failed on the v331 baseline profile
+(`expandReleaseArtProfileWildcards`: "Class rules don't support flags, but
+'HSP' were specified" — `HSPLcom/curio/app/MainActivity;`): class rules in HRF
+take NO flags (flags H/S/P are method-rule-only; "L" is the DEX descriptor
+prefix). Profile rewritten to valid shape.
 
-## Ask-answers that shaped the work
+Completed:
 
-- **Search target = Browse Topics screen** (full-catalog fuzzy search was
-  re-running on every keystroke → the "loading" feel).
-- **Category UI wrong = the Category panel rows** in Cabinet + Topic
-  Browser: checked rows had NO fill (only the tiny checkbox showed
-  selection) and the panel surface read off (used the Curio LIGHT scheme's
-  warm-tan `surfaceContainerHigh` even under dark-adjacent styles).
-- **Mix contrast = whole-card cohesion** (cover plate + chips).
-- **Share-card chapter features**: chapter progress + written review with a
-  chapter chip, both with an in-editor chapter picker; chapters come from
-  the topic's `chapters` (BookNotes sheet). Reading progress is ALSO
-  tracked from the synopsis bottom-sheet chapter view.
-
-## Completed
-
-1. **Browse Topics search fast + capped.** `TopicDatabaseScreen`: the
-   full-catalog fuzzy scan keyed a DEBOUNCED needle (`typedNeedle` +
-   `LaunchedEffect` + 200ms delay, stale runs ignored) and search results
-   are capped at the best 50 (`SEARCH_RESULT_CAP`); browse mode still
-   pages all topics at PAGE_SIZE.
-2. **Category picker panels theme-aware.** `CabinetCategoryPanel` +
-   `DatabaseCategoryPanel` surfaces now use `curioDialogContainerColor()`
-   (proper elevated surface in light, lifted dark surface at night), and
-   CHECKED rows get a visible theme-aware category-tinted fill
-   (`lerp(panelBase, accent, 0.22f)` — light accent wash in light, deeper
-   accent lift in dark) with bolded label. Legacy checkbox rows match.
-3. **Mix cards — solid identity pairs.** `namedMixTone` → `namedMixIdentity`
-   returning `(tone, on-tone ink)`: light = deep tone + white glyph; dark =
-   tone lifted 0.70 toward white + near-black glyph. Cover plate + lane
-   chips are now SOLID tone fills with the on-tone glyph (was translucent
-   0.42/0.22 blends that sank in light and washed out in dark).
-4. **Book cover hub — all covers + both stars.** Prefs gained
-   `bookRatingsCount` (+`setBookRatingWithCount`) and the hub gained an
-   "All covers — N books" LazyRow (`CoverTile`: fixed 80×112 slot, the
-   AsyncImage IS the poster with `fillMaxSize`, cached ★ + count under the
-   title, tap → that book's reveal). `BookCoverFetch.fetchRatings` and
-   `fetchRatingFor` now parse + cache `ratingsCount` too (new
-   `BookStars(average, count)` return); the reveal hero shows
-   "★ 4.2 · 1.2k" via a new `compactCount` helper.
-5. **Reading progress in Book Notes.** New prefs
-   `book_reading_progress` (name → highest chapter read; only moves
-   forward). The CHAPTERS tab shows an "X of N chapters read" rail + thin
-   progress bar; chapter chips tick with a ✓ once read; each chapter's
-   detail card has a "Mark CH N as read" pill (haptics confirm).
-6. **Book share-card contents.** `TopicShareSheet` gained an optional
-   `bookChapters` param (threaded from the reveal caller for BOOKS). Two
-   new content options when chapters exist: **Reading progress** ("I'm N
-   of M chapters in", chip row WRITES the BookNotes pref so card + reader
-   stay in sync) and **Chapter review** (custom-text field, review tagged
-   with a "CH N · title" chip via the same chapter chip row).
-7. Docs: changelog v328 entries (top of 20260921.txt).
-
-## Follow-up: v329 — Reading progress is now a VISUAL widget on the card
-
-User clicked "Show chapter progress on the share card as a visual progress
-element instead of text". Implemented in `TopicShareCard.kt`:
-
-- New public `ChapterProgressUi(read, total)` + a shared
-  `ChapterProgressBlock(fill, track, ink)` composable: book glyph + caption
-  ("3 of 12 chapters" / "Finished · all N" / "N chapters ahead of you")
-  over a rounded 5dp track whose fill width = read/total.
-- `TopicShareCard` gained `chapterProgress: ChapterProgressUi? = null` and
-  every style's quick-fact TEXT is replaced by the widget when it's set:
-  Paper (MiddleContent/FrostPane), Vinyl (cream box), Collage (white on
-  sage field), Neumorphic (white on dark plate), Editorial (3-way branch
-  skips the drop-cap), Minimal, Signature (shared `BodyText` helper — no
-  ruled lines), Custom. Each passes its own surface inks for contrast.
-  Bounds reporting kept (`onFact`) so the inline-edit box + move grip sit
-  on the widget.
-- Sheet: `progressForCard` computed when the Reading-progress content is
-  active and passed to the carousel preview + single-style preview + the
-  Save/Share export callsites (export = preview, both render the widget).
-  The Edit-text circle hides for this content; the inert typing field gets
-  the caption so no "Edit the quick fact…" placeholder shows over the bar.
-- Other `TopicShareCard` callers (ShareHub, reveal, entry detail) omit the
-  param → default null → unchanged behavior.
+1. **Content toggle pill** (`TopicShareCard.kt`, `TopicShareSheet`): while
+   editing, the bottom bar (where Save/Share/Text sit) shows ONE pill labelled
+   with the card's current content (`activeSource.label`) + arrow icon. Tapping
+   it opens/closes the "source" tool panel — the SAME panel the toolbar's
+   Content tool opens — which again holds the content source pills (Quick fact
+   / No fact / saved sources / + Custom fact) restored to where they were
+   before v330. Tapping Done still returns Save/Share/Text.
+2. **Customise pill gated**: the floating Customise button now renders only
+   when `!editMode`; mid-edit the bottom bar owns Reset/Done/content toggle.
+3. **Copy pass** (~159 literal replacements, 30 files): em dashes rephrased
+   app-wide in user-facing strings —
+   - card meta rows / `metaSeparator` join with " · " (was " — "),
+   - quote attributions lose the leading dash ("— $quoteAuthor" → author
+     alone), footers unify to "· Stay curious" / "· via Curio",
+     "$sharerName — Curio" → "· Curio", stray "~ Stay Curious" removed,
+   - tool headings "$selName font" / "$selName format", "Tone · level
+     unlocks", adjust hint split into two sentences,
+   - full-sentence hints/empty states (pet designer, stats, settings,
+     experiments, picker, updates, reveal dialog) rephrased into period- or
+     semicolon-joined prose; short status pairs use the middot.
+   Deliberately NOT touched: JSON/topic content, chapter/page ranges
+   ("Books IV–VIII", "pp. 12–14"), name-qualifier parsing (" — " match
+   delimiters), the exported pet-design format headers, crash/log text, and
+   the waveform time range. (Missing-at-first, then added: UpdateChecker
+   notification copy, GlassWidgetLab auto-detect copy.)
+4. **Baseline profile HRF fix** (`app/src/main/baseline-prof.txt`): rewritten
+   to valid rules — class-only line `Lcom/curio/app/MainActivity;` (no flags),
+   single classes AOT'd via `HSPLcom/.../Class;->**(**)**:`, package-wide via
+   `<pkg>/**->**(**)**`, hot libs via their packages. Header documents the
+   syntax lesson. This fixes the release-build CI failure.
 
 ## Verification
 
-- `git diff --check` clean; braces balanced (932/932) in TopicShareCard.kt.
-- Grep/read-verified all 8 style swaps + dispatch + 4 sheet callsites carry
-  `chapterProgress`/`progressForCard`; `ChapterProgressUi` public (the
-  public TopicShareCard exposes it); no other callers pass positionally.
-- No Gradle commands run (project DOX forbids them here) — CI validates.
+- All modified files re-lexed (string literals balanced, no unterminated
+  strings); `git diff --check` clean.
+- Audit of remaining dashes in code literals shows only intentional ones
+  (ranges, parsers, log text, format headers).
+- CI validates the profile parse + compile — Gradle not run locally per
+  project rules.
 
-## NEXT
+## Follow-up — hold-menu labels shortened
 
-Push this follow-up for CI. Then return to the signature-card campaign (one
-category at a time, no SVG without permission) — awaiting the user's pick +
-design for the next category.
+User: the new tap-and-hold menu is good but "sometimes its text is too long".
+Fixed in `CategoryOptionPill` / `MixOptionPill` (NewCategoryPicker.kt):
+labels are now short verbs — Pin/Unpin, Spin (was "Spin ${displayName}",
+e.g. "Spin Artificial Intelligence"), Remove (was "Remove from Continue
+exploring"), Edit, Delete (were "Edit/Delete $name" with long mix names).
+The menu is anchored on the row/card the user held, so the subject is
+visible and the card no longer truncates. Also removed the now-unused `name`
+param from `MixOptionPill` (both call sites updated).
+
+## Notes / follow-ups
+
+- The v330 changelog bullet describing content pills directly in the bottom
+  bar is superseded by the new toggle bullet (both remain in the store
+  changelog per its per-commit append rule).

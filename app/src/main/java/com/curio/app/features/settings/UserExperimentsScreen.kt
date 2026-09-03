@@ -105,16 +105,16 @@ fun UserExperimentsScreen(navController: NavController) {
             item {
                 CurioSettingsCard(shadowElevation = 0.dp) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    ExperimentSwitchRow("Liquid glass", "Refracting glass on the nav bar and floating pills — not supported by all devices and can be very laggy on lower-end phones", AppPreferences.liquidGlassPillsState) {
+                    ExperimentSwitchRow("Liquid glass", "Refracting glass on the nav bar and floating pills. Not supported by all devices, and can be very laggy on lower-end phones", AppPreferences.liquidGlassPillsState) {
                         AppPreferences.setLiquidGlassPillsEnabled(context, it)
                     }
                     if (AppPreferences.liquidGlassPillsState) {
                         CurioSettingsDivider()
-                        ExperimentSwitchRow("Force glass", "Bypass device capability checks — always enable glass", AppPreferences.forceGlassEnabled) {
+                        ExperimentSwitchRow("Force glass", "Bypass device capability checks and always enable glass", AppPreferences.forceGlassEnabled) {
                             AppPreferences.setForceGlassEnabled(context, it)
                         }
                         CurioSettingsDivider()
-                        ExperimentSwitchRow("Clear glass", "Less frost, stronger refraction — glass reads clear like the glow under your finger", AppPreferences.glassClarityState) {
+                        ExperimentSwitchRow("Clear glass", "Less frost, stronger refraction. Glass reads clear, like the glow under your finger", AppPreferences.glassClarityState) {
                             AppPreferences.setGlassClarityEnabled(context, it)
                         }
                         CurioSettingsDivider()
@@ -122,7 +122,7 @@ fun UserExperimentsScreen(navController: NavController) {
                         CurioSettingsRow(
                             CurioIcons.Tune,
                             "Tune glass",
-                            "Reflection, refraction and blur — with a live preview"
+                            "Reflection, refraction and blur, with a live preview"
                         ) { showGlassTuning = true }
                         if (showGlassTuning) {
                             GlassTuningDialog(onDismiss = { showGlassTuning = false })
@@ -149,7 +149,7 @@ fun UserExperimentsScreen(navController: NavController) {
             item {
                 CurioSettingsCard(shadowElevation = 0.dp) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    ExperimentSwitchRow("Classic category picker", "The new picker is the default — turn this on to swap back to the old glass-pill picker view", AppPreferences.classicPickerEnabledState) {
+                    ExperimentSwitchRow("Classic category picker", "The new picker is the default. Turn this on to swap back to the old glass-pill picker view.", AppPreferences.classicPickerEnabledState) {
                         AppPreferences.setClassicPickerEnabled(context, it)
                     }
                 }
@@ -194,7 +194,7 @@ fun UserExperimentsScreen(navController: NavController) {
                     }
                     CurioSettingsDivider()
                     // Pet outside app
-                    ExperimentSwitchRow("Pet outside the app", "Let your pet float over other apps — long-press to bring it home", AppPreferences.petOutsideAppState) { wanted ->
+                    ExperimentSwitchRow("Pet outside the app", "Let your pet float over other apps. Long-press to bring it home.", AppPreferences.petOutsideAppState) { wanted ->
                         if (wanted && !android.provider.Settings.canDrawOverlays(context)) {
                             runCatching {
                                 context.startActivity(

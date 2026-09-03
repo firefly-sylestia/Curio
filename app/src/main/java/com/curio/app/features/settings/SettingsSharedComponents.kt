@@ -360,7 +360,7 @@ fun OfflineModelDialog(
                 }
             }
             Text(
-                "The offline model turns pre-recorded voice notes into text on your device. Small models are fast and light; the Large model is more accurate but a heavier download. (v158 — the Full server-grade models are gone: they lagged and crashed phones.) Downloads keep running if you close this screen — pause or cancel them anytime, and several can download at once. No internet needed while it runs.",
+                "The offline model turns pre-recorded voice notes into text on your device. Small models are fast and light; the Large model is more accurate, at the cost of a heavier download. Downloads keep running if you close this screen, and you may pause or cancel them at any time; several can download at once. No internet is needed while it runs.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp)
@@ -608,8 +608,8 @@ fun OfflineModelDialog(
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                if (enough) "You have ${VoskModels.formatModelSize(free)} free — go ahead."
-                                else "Only ${VoskModels.formatModelSize(free)} free — the download will likely fail. Free up space first.",
+                                if (enough) "You have ${VoskModels.formatModelSize(free)} free. Go ahead."
+                                else "Only ${VoskModels.formatModelSize(free)} free. The download will likely fail, so free up space first.",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = if (enough) MaterialTheme.colorScheme.onSurfaceVariant
                                         else MaterialTheme.colorScheme.error

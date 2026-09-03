@@ -2762,29 +2762,15 @@ object AppPreferences {
     }
 
     // ── Share card edit persistence ─────────────────────────────────
-    /** Save per-topic card customisations (move + text edits) so they
-     *  restore when the same topic is shared again. [topicName] is the
-     *  key; the value is a JSON object with move fields + editedTitle +
-     *  editedFact + bodyScale. */
-    fun saveShareCardEdits(context: Context, topicName: String,
-        titleDx: Float, titleDy: Float, factDx: Float, factDy: Float,
-        metaDx: Float, metaDy: Float, badgeDx: Float, badgeDy: Float,
-        titleWidthFrac: Float, titleHeightFrac: Float, factWidthFrac: Float, factHeightFrac: Float,
-        titleScale: Float, bodyScale: Float, editedTitle: String?, editedFact: String?) {
+    /** Save per-topic card customisations so they restore when the same
+     *  topic is shared again. [topicName] is the key; [edit] is the JSON
+     *  the share sheet builds — it carries a per-style "moves" object
+     *  (each style keeps its OWN position/size offsets), bodyScale and the
+     *  edited title/fact. Callers own the JSON field names. */
+    fun saveShareCardEdits(context: Context, topicName: String, edit: JSONObject) {
         val json = try {
             val raw = prefs(context).getString(KEY_SHARE_CARD_EDITS, null)
                 ?.let { JSONObject(it) } ?: JSONObject()
-            val edit = JSONObject().apply {
-                put("titleDx", titleDx); put("titleDy", titleDy)
-                put("factDx", factDx); put("factDy", factDy)
-                put("metaDx", metaDx); put("metaDy", metaDy)
-                put("badgeDx", badgeDx); put("badgeDy", badgeDy)
-                put("titleWidthFrac", titleWidthFrac); put("titleHeightFrac", titleHeightFrac)
-                put("factWidthFrac", factWidthFrac); put("factHeightFrac", factHeightFrac)
-                put("titleScale", titleScale); put("bodyScale", bodyScale)
-                if (editedTitle != null) put("editedTitle", editedTitle)
-                if (editedFact != null) put("editedFact", editedFact)
-            }
             raw.put(topicName, edit)
             raw.toString()
         } catch (_: Exception) { return }

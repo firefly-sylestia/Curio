@@ -111,11 +111,11 @@ fun ExperimentsScreen(navController: NavController) {
                     }
                     if (AppPreferences.liquidGlassPillsState) {
                         CurioSettingsDivider()
-                        ExperimentSwitchRow("Force glass", "Bypass device capability checks — always enable glass", AppPreferences.forceGlassEnabled) {
+                        ExperimentSwitchRow("Force glass", "Bypass device capability checks and always enable glass", AppPreferences.forceGlassEnabled) {
                             AppPreferences.setForceGlassEnabled(context, it)
                         }
                         CurioSettingsDivider()
-                        ExperimentSwitchRow("Clear glass", "Less frost, stronger refraction — glass reads clear like the glow under your finger", AppPreferences.glassClarityState) {
+                        ExperimentSwitchRow("Clear glass", "Less frost, stronger refraction. Glass reads clear, like the glow under your finger", AppPreferences.glassClarityState) {
                             AppPreferences.setGlassClarityEnabled(context, it)
                         }
                         CurioSettingsDivider()
@@ -123,7 +123,7 @@ fun ExperimentsScreen(navController: NavController) {
                         CurioSettingsRow(
                             CurioIcons.Tune,
                             "Tune glass",
-                            "Reflection, refraction and blur — with a live preview"
+                            "Reflection, refraction and blur, with a live preview"
                         ) { showGlassTuning = true }
                         if (showGlassTuning) {
                             GlassTuningDialog(onDismiss = { showGlassTuning = false })
@@ -158,7 +158,7 @@ fun ExperimentsScreen(navController: NavController) {
                     }
                     CurioSettingsDivider()
                     // Pet outside app
-                    ExperimentSwitchRow("Pet outside the app", "Let your pet float over other apps — long-press to bring it home", AppPreferences.petOutsideAppState) { wanted ->
+                    ExperimentSwitchRow("Pet outside the app", "Let your pet float over other apps. Long-press to bring it home.", AppPreferences.petOutsideAppState) { wanted ->
                         if (wanted && !android.provider.Settings.canDrawOverlays(context)) {
                             runCatching {
                                 context.startActivity(
@@ -264,7 +264,7 @@ fun ExperimentsScreen(navController: NavController) {
                         AppPreferences.setPaperStatCardsEnabled(context, it)
                     }
                     CurioSettingsDivider()
-                    ExperimentSwitchRow("Torn paper edges", "Torn edges on the stat card — extended tear on top", AppPreferences.paperStatTearState) {
+                    ExperimentSwitchRow("Torn paper edges", "Torn edges on the stat card, with an extended tear on top", AppPreferences.paperStatTearState) {
                         AppPreferences.setPaperStatTearEnabled(context, it)
                     }
                     CurioSettingsDivider()
@@ -275,7 +275,7 @@ fun ExperimentsScreen(navController: NavController) {
                     // v108 — the layered white paper lip below the hero's own
                     // bottom tear is OFF by default; the toggle restores it
                     // for comparison.
-                    ExperimentSwitchRow("Torn hero under-sheet", "The white paper lip below torn heroes — off: the hero tears straight into the page", AppPreferences.heroTearSheetState) {
+                    ExperimentSwitchRow("Torn hero under-sheet", "The white paper lip below torn heroes. When off, the hero tears straight into the page.", AppPreferences.heroTearSheetState) {
                         AppPreferences.setHeroTearSheetEnabled(context, it)
                     }
                 }
@@ -303,7 +303,7 @@ fun ExperimentsScreen(navController: NavController) {
                         AppPreferences.setStarZoom3dEnabled(context, it)
                     }
                     CurioSettingsDivider()
-                    ExperimentSwitchRow("Drawer constellation", "The star map at the top of the navigation drawer — off shows a small stat strip", AppPreferences.drawerConstellationState) {
+                    ExperimentSwitchRow("Drawer constellation", "The star map at the top of the navigation drawer. When off, a small stat strip shows instead.", AppPreferences.drawerConstellationState) {
                         AppPreferences.setDrawerConstellationEnabled(context, it)
                     }
                     CurioSettingsDivider()
@@ -385,8 +385,8 @@ fun ExperimentsScreen(navController: NavController) {
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf(
-                        Triple("coil", "Coil spring", "Wire coil through the hole — spiral-notebook look"),
-                        Triple("split", "Split ring", "Closed metal torus — keyring / binder-ring look"),
+                        Triple("coil", "Coil spring", "Wire coil through the hole, for a spiral-notebook look"),
+                        Triple("split", "Split ring", "Closed metal torus, for a keyring or binder-ring look"),
                         Triple("oblique", "Oblique coil", "Short coil segments springing out of the hole")
                     ).forEach { (value, label, desc) ->
                         Surface(

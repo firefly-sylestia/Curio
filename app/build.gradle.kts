@@ -179,6 +179,12 @@ dependencies {
     implementation(libs.backdrop)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    // Baseline profiles: applies app/src/main/baseline-prof.txt on first
+    // launch so ART AOT-compiles the hot startup/UI paths at install instead
+    // of JIT-compiling giant composables at runtime (logcat showed single
+    // methods compiling at up to 7.7 MB). Already present transitively via
+    // Compose; declared explicitly per the baseline-profile docs.
+    implementation(libs.androidx.profileinstaller)
     implementation(libs.androidx.savedstate)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.navigation.compose)

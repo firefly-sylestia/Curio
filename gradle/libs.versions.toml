@@ -39,6 +39,11 @@ gson = "2.14.0"
 sqliteJdbc = "3.46.0.0"
 kotlinxCoroutines = "1.11.0"
 workRuntimeKtx = "2.11.2"
+# Baseline profiles: ProfileInstaller applies the bundled baseline-prof.txt
+# on first launch so ART AOT-compiles hot paths at install (kills the JIT
+# spikes the logcat showed). Declared explicitly per the docs even though
+# Compose pulls it transitively — see app/src/main/baseline-prof.txt.
+profileinstaller = "1.4.1"
 leakcanary = "2.14"
 uiUnit = "1.11.2"
 osmdroid = "6.1.18"
@@ -89,6 +94,7 @@ androidx-media3-exoplayer-midi = { group = "androidx.media3", name = "media3-exo
 org-jellyfin-media3-ffmpeg-decoder = { group = "org.jellyfin.media3", name = "media3-ffmpeg-decoder", version = "1.9.0+1" }
 androidx-palette-ktx = { group = "androidx.palette", name = "palette-ktx", version.ref = "paletteKtx" }
 androidx-glance-appwidget = { group = "androidx.glance", name = "glance-appwidget", version.ref = "glance" }
+androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
 androidx-glance-material3 = { group = "androidx.glance", name = "glance-material3", version.ref = "glance" }
 androidx-compose-animation = { group = "androidx.compose.animation", name = "animation", version.ref = "animation" }
 androidx-compose-animation-graphics = { group = "androidx.compose.animation", name = "animation-graphics", version.ref = "animationGraphics" }

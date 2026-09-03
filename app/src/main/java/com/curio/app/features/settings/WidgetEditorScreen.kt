@@ -69,7 +69,7 @@ fun WidgetEditorScreen(navController: NavController) {
             onBack = { navController.popBackStack() }
         )
         Text(
-            text = "Edits apply straight to the widget on your home screen — no launcher support needed.",
+            text = "Edits apply straight to the widget on your home screen. No launcher support is needed.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 20.dp)

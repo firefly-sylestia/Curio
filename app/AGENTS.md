@@ -479,6 +479,89 @@ app/src/main/java/com/curio/app/
   ring positions to overlay-LOCAL coords before animating (`centerPx`)
   — the blobs were morphing from local `cp` to ROOT `p`, landing offset
   from the crisp discs and breaking the circle.
+- **v330 — share-card editor: per-design layouts + bottom-bar editing;
+  picker hold actions rebuilt compact.** (1) **Per-style moves**: the
+  editor's single shared `ShareCardMove` became `movesByStyle`
+  (`Map<ShareCardStyle, ShareCardMove>`; each style in the pager renders
+  its OWN saved move via a derived `move` + `updateMove` helper), and
+  persistence nests a per-style `moves` object under the topic
+  (`AppPreferences.saveShareCardEdits` now takes a JSONObject built by
+  the sheet; legacy flat saves load as one move applied to every style).
+  (2) **Editing UX**: pager swiping works while editing when NOTHING is
+  selected (tap empty card space — a full-size clickable deselect box
+  behind the element overlays — to deselect, then swipe); the FACT move
+  grip hides while `factEditMode` so it never covers the typed text; the
+  floating Edit-text/Reset/Done cluster over the card is GONE — while
+  editing the bottom action row becomes content pills (Quick fact / No
+  fact / sources / + Custom fact) + Reset + Done, and Done restores
+  Save/Share/Text (the Edit-text tool moved back into the toolbar row,
+  shown when the fact is selected). (3) **Picker hold menu**:
+  `RadialHoldMenuOverlay` rewritten from the gooey drag-to-pick radial
+  ring into a compact icon+label pill card that springs in ABOVE the
+  finger and STAYS OPEN after release (tap an option, tap the full-size
+  scrim to dismiss, or let the ~6s idle auto-dismiss fire) —
+  `radialHoldMenu`/`HoldSession`/`HoldAction` unchanged; the goo-blob
+  canvas, ripples and ring geometry helpers are gone.
+- **v331 — baseline profile + glass-snapshot coalescing (logcat heat/GC
+  analysis follow-ups).** (1) `app/src/main/baseline-prof.txt` — a
+  manually-authored starter HRF profile (the log showed the JIT compiling
+  single giant composables at up to 7.7 MB each; ART now AOT-compiles
+  those methods at install via ProfileInstaller). Rules target the startup
+  path (MainActivity, crash reporter, splash, data-layer init), the nav
+  host + bottom bar + glass pipeline, the hot tab screens, the giant
+  share-card / picker composables, and hot libs (Room, Gson, OkHttp,
+  Coil). `androidx.profileinstaller:1.4.1` is now declared EXPLICITLY in
+  the catalog + app deps (Compose already pulled it transitively — the
+  "Skipping profile installation" logcat line proved the receiver ran —
+  but the docs require the explicit dep for the profile to install). AGP
+  bundles `src/main/baseline-prof.txt` automatically and rewrites source
+  symbols through the R8 mapping on minified release builds. (2)
+  `LegacyGlassBlur` (pre-Android-12 app-side blur engine) coalesced:
+  `SNAPSHOT_INTERVAL_MS` 125→200 (~5/s) and `SNAPSHOT_MAX_DIM` 160→128
+  (~36% smaller readback+blur pass; ~60% less per-second allocation).
+  NOTE — the modern (API 31+) kyant `LayerBackdrop` cannot be throttled
+  from app code: `LayerBackdropModifier` re-records the full page on
+  EVERY draw and `recordLayer`/`layerCoordinates`/`onDraw` are `internal`
+  to the library — a record-side throttle needs a fork or upstream knob;
+  the idle frameRate churn in the log traces to always-animating pet /
+  constellation layers re-invalidating the page, which re-triggers the
+  capture. (3) **POST-CI FIX (v332)**: the first draft of the profile put
+  flags on CLASS rules (`HSPLcom/...;`), which profgen rejects ("Class
+  rules don't support flags") and broke `expandReleaseArtProfileWildcards`
+  on CI. HRF truth: flags H/S/P are only valid on METHOD rules
+  (`HSPLcom/foo/Bar;->**(**)**: the L is the descriptor prefix), class
+  rules take none (`Lcom/foo/Bar;`), and package-wide AOT is the wildcard
+  method rule `<pkg>/**->**(**)**`. The file was rewritten to that shape.
+- **v332 — share-card editor: content toggle + Customise gating; app-wide
+  copy polish (em dashes → middot/prose).** (1) **Content toggle pill**: the
+  edit-mode bottom bar (where Save/Share/Text sit) now shows ONE toggle pill
+  that labels the card's current content (e.g. "Quick fact", "No fact",
+  "Custom fact", a source, star rating, reading progress…) and, when
+  tapped, OPENS the content options (Quick fact / No fact / saved sources /
+  + Custom fact) in the SAME "source" tool panel the toolbar's Content tool
+  opens — they're back where they were before v330 (v330 had spread the
+  content pills directly across the bottom bar, which the user rejected).
+  The toggle highlights while the panel is open and toggles it shut.
+  (2) **Customise pill gated**: the floating Customise button now renders
+  ONLY when `!editMode` (it previously hovered over the card mid-edit; the
+  bottom bar owns Reset/Done/the content toggle while editing). (3)
+  **Copy pass**: rephrased ~160 user-facing strings app-wide to drop the
+  em-dash tic and read in the app's premium register — card meta rows and
+  `metaSeparator`s join with " · " (was " — "), quote attributions and
+  footers lose their leading dash ("— Author" → "Author"; "via Curio —
+  Stay curious" → "via Curio · Stay curious"; "Name — Curio" → "Name ·
+  Curio"; the stray "~ Stay Curious" is gone), tool headings read
+  "$selName font"/"$selName format", full-sentence hints/empty states use
+  period- or semicolon-joined prose instead of dashes, and the share-card
+  editor hint copy ("Tap a thing to select · swipe for another design")
+  is consistent. Scope: UI strings only (never JSON content, chapter/page
+  ranges, name-qualifier parsing, or log/diagnostic text). (4)
+  **Hold-menu labels shortened**: `CategoryOptionPill` / `MixOptionPill`
+  rows use short verbs ("Spin", "Remove", "Edit", "Delete") instead of
+  long "Spin <lane>" / "Remove from Continue exploring" / "Edit · <mix
+  name>" phrases — the menu is anchored on the row you held, so the
+  subject is visible and the card stays compact (also dropped the now-unused
+  `name` param from `MixOptionPill`).
 - **v326 — signature redesign campaign BEGINS: Books.** The
   per-category `signatureDesign` rework (one category per turn, commit but
   DON'T push — user reviews each before the next) starts with BOOKS, now a

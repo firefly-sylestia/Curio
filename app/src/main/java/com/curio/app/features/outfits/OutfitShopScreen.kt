@@ -251,7 +251,7 @@ fun OutfitShopScreen(navController: NavController) {
                                     text = when {
                                         !unlocked -> "Unlocks at Level ${outfit.levelRequired}"
                                         isEquipped -> "Equipped · tap to remove"
-                                        isOwned -> "Owned — tap to equip"
+                                        isOwned -> "Owned · tap to equip"
                                         else -> "Level ${outfit.levelRequired} · $price sparkles"
                                     },
                                     style = MaterialTheme.typography.bodySmall,
@@ -445,6 +445,6 @@ private fun String.capitalizeFirst(): String =
 
 /** A one-line hint about the next outfit/palette/lane-order unlock. */
 private fun levelUnlockHint(level: Int): String {
-    val next = LevelRewards.nextReward(level) ?: return "Max level — every reward unlocked!"
+    val next = LevelRewards.nextReward(level) ?: return "Max level · every reward unlocked!"
     return "Next unlock at Level ${next.level}: ${next.title}"
 }

@@ -492,7 +492,7 @@ private fun PreferencesSection(highlightKey: String? = null) {
             CompactSwitchRow(
                 "Floating explore bubble",
                 if (overlayUsable) "Timer bubble over other apps · overlay permission granted"
-                else "Timer bubble over other apps — needs the overlay permission",
+                else "Timer bubble over other apps · needs the overlay permission",
                 overlayEnabled
             ) { enabled ->
                 if (enabled && !AppPreferences.overlayActuallyUsable(context)) {
@@ -869,7 +869,7 @@ fun GlassTuningDialog(onDismiss: () -> Unit) {
     Dialog(onDismissRequest = onDismiss) {
         CurioSettingsCard(shadowElevation = 0.dp) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                CurioCardHeader(CurioIcons.Info, "Tune liquid glass", "Drag a slider — the capsule previews it live")
+                CurioCardHeader(CurioIcons.Info, "Tune liquid glass", "Drag a slider · the capsule previews it live")
                 // v258 — REAL PREVIEW: an actual [liquidGlassCapsule] pill
                 // you can DRAG over a colorful collage. Every slider writes
                 // the same preference state the real capsules read, so the

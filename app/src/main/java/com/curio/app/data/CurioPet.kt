@@ -2291,7 +2291,7 @@ object CurioPet {
             "The shiny ones pop nicely!",
             "Catch them before they float away!",
             "I love a good bubble pop!",
-            "Pop the shiny ones — avoid the prickly!",
+            "Pop the shiny ones, but mind the prickly!",
             "Bubbles everywhere!",
             "They tickle when they pop near me!"
         ))
@@ -2309,7 +2309,7 @@ object CurioPet {
             "Pop-tastic! We got $count!",
             "Look at all those pops! $count!",
             "Best bubble day ever!",
-            "High five — $count pops!",
+            "High five for $count pops!",
             "Not a single bubble escaped us!",
             "The bubbles never stood a chance!"
         ))
@@ -2325,7 +2325,7 @@ object CurioPet {
         Stage.FIRST_EVO -> pickLine(listOf(
             "Ow! Prickly!",
             "That one bit back!",
-            "Yikes — spike bubble!",
+            "Yikes! A spike bubble!",
             "No fair, it had spikes!",
             "Ouch! My nose!",
             "Spiky! I won't pop that one again."

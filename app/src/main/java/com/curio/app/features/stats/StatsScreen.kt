@@ -375,7 +375,7 @@ private fun StatsConstellationCard(
                             color = ink
                         )
                         Text(
-                            "Every star is a lane you've explored — bigger means more knowledge built there.",
+                            "Every star is a lane you've explored. Bigger means more knowledge built there.",
                             style = MaterialTheme.typography.bodySmall,
                             color = muted
                         )
@@ -486,15 +486,15 @@ private fun BrainProfileCard(
                         color = ink
                     )
                     Text(
-                        "Six cognitive muscles, scored from your real activity — each has a science-backed way to grow.",
+                        "Six cognitive muscles, scored from your real activity. Each has a science-backed way to grow.",
                         style = MaterialTheme.typography.bodySmall,
                         color = muted
                     )
                 }
             }
             Text(
-                if (totalWords > 0) "$totalWords words written — the generation effect at work."
-                else "No words written yet — journal after an explore to build expression.",
+                if (totalWords > 0) "$totalWords words written. The generation effect at work."
+                else "No words written yet. Journal after an explore to build expression.",
                 style = MaterialTheme.typography.labelSmall,
                 color = muted
             )
@@ -712,7 +712,7 @@ private fun JourneyCard(
                 }
             } else {
                 Text(
-                    "Earn your first medal on the Quests page — every stage you complete glows here.",
+                    "Earn your first medal on the Quests page. Every stage you complete glows here.",
                     style = MaterialTheme.typography.bodySmall,
                     color = muted
                 )
@@ -747,7 +747,7 @@ private fun LanesBreakdownCard(
         Spacer(Modifier.height(8.dp))
         if (explored.isEmpty()) {
             Text(
-                "No lanes explored yet — spin a deck and save something to light this up.",
+                "No lanes explored yet. Spin a deck and save something to light this up.",
                 style = MaterialTheme.typography.bodySmall,
                 color = muted
             )

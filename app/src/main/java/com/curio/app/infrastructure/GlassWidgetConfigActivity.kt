@@ -275,7 +275,7 @@ class GlassWidgetConfigActivity : ComponentActivity() {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text("Default · Samsung blur", fontWeight = FontWeight.Bold)
                                 Text(
-                                    "Just the launcher's frosted blur — no pane customization",
+                                    "Only the launcher's frosted blur, with no pane customization",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )

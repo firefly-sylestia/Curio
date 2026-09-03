@@ -1478,7 +1478,7 @@ private fun BoxScope.DetailStickyBar(
             // QUOTES topics: the byline prefaces the saved quote so the card
             // reads "Author Name — quote" (same as the old EntryShareSheet).
             val quoteText = if (detailIsQuotes && !firstQuote.isNullOrBlank() && resolvedEntry.topic.byline.isNotBlank()) {
-                "${resolvedEntry.topic.byline} — ${firstQuote}"
+                "${resolvedEntry.topic.byline} · ${firstQuote}"
             } else {
                 firstQuote
             }
@@ -4564,7 +4564,7 @@ private fun entryShareText(entry: CurioEntry, category: CurioCategory, isQuote: 
         val author = entry.topic.byline.ifBlank { null }
         return buildString {
             append("\u201c${quote.orEmpty()}\u201d")
-            if (!author.isNullOrBlank()) append(" — $author")
+            if (!author.isNullOrBlank()) append(" · $author")
         }
     }
     val formatLabel = entry.format.name.replace(Regex("([a-z])([A-Z])"), "$1 $2")
@@ -4577,6 +4577,6 @@ private fun entryShareText(entry: CurioEntry, category: CurioCategory, isQuote: 
         append(entry.topic.name).append('\n')
         append(entry.topic.teaser).append("\n\n")
         append(category.displayName).append(" · ").append(formatLabel).append(" · captured ").append(daysAgo)
-        append("\n\nvia Curio — Stay curious")
+        append("\n\nvia Curio · Stay curious")
     }
 }

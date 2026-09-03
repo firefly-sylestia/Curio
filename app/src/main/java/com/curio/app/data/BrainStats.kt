@@ -161,27 +161,27 @@ fun brainProfile(
     return listOf(
         BrainDimension(
             "knowledge", "Knowledge", "explore", knowledge, dimensionLevel(knowledge),
-            "Sample a new lane — a broad web of connected facts is how knowledge compounds."
+            "Sample a new lane; a broad web of connected facts is how knowledge compounds."
         ),
         BrainDimension(
             "memory", "Memory", "bookmark", memory, dimensionLevel(memory),
-            "Revisit a saved capture today — retrieval practice is the strongest memory builder."
+            "Revisit a saved capture today; retrieval practice is the strongest memory builder."
         ),
         BrainDimension(
             "expression", "Expression", "edit_note", expression, dimensionLevel(expression),
-            "Write a few journal lines after each explore — the generation effect deepens learning."
+            "Write a few journal lines after each explore; the generation effect deepens learning."
         ),
         BrainDimension(
             "focus", "Focus", "hub", focus, dimensionLevel(focus),
-            "Start an explore session and stay in it — sustained attention trains focus."
+            "Start an explore session and stay in it; sustained attention trains focus."
         ),
         BrainDimension(
             "consistency", "Consistency", "local_fire_department", consistency, dimensionLevel(consistency),
-            "Keep the streak alive — spaced practice is how memory consolidates."
+            "Keep the streak alive; spaced practice is how memory consolidates."
         ),
         BrainDimension(
             "curiosity", "Curiosity", "auto_awesome", curiosity, dimensionLevel(curiosity),
-            "Spin into unfamiliar lanes — novelty-seeking is the engine of learning."
+            "Spin into unfamiliar lanes; novelty-seeking is the engine of learning."
         )
     )
 }

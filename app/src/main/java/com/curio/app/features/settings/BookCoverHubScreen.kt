@@ -198,9 +198,9 @@ fun BookCoverHubScreen(navController: NavController) {
                             )
                             Text(
                                 if (fetchOn)
-                                    "ON — covers and ratings can be downloaded"
+                                    "ON · covers and ratings can be downloaded"
                                 else
-                                    "OFF by default — nothing downloads until you turn this on",
+                                    "OFF by default · nothing downloads until you turn this on",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -322,7 +322,7 @@ fun BookCoverHubScreen(navController: NavController) {
                     )
                     if (!fetchOn) {
                         Text(
-                            "Fetching is off — flip the switch above to download covers and ratings.",
+                            "Fetching is off. Turn the switch above on to download covers and ratings.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -384,7 +384,7 @@ fun BookCoverHubScreen(navController: NavController) {
             if (failedList.isNotEmpty()) {
                 item(key = "failed-header") {
                     Text(
-                        "Failed covers — tap to retry one",
+                        "Failed covers · tap to retry one",
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -455,7 +455,7 @@ fun BookCoverHubScreen(navController: NavController) {
             // the book's own reveal) with its cached star + count when rated.
             item(key = "covers-header") {
                 Text(
-                    "All covers — ${books.size} books",
+                    "All covers · ${books.size} books",
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
