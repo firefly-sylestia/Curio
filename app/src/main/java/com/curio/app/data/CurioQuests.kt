@@ -53,6 +53,11 @@ object CurioQuests {
     private const val KEY_DAILY_DATE = "daily_date"
     private const val KEY_DAILY_PROGRESS = "daily_progress"
     private const val KEY_DAILY_AWARDED = "daily_awarded"
+    // v323 — the "Try a new lane" daily PINs its target lane for the whole
+    // day. The old behavior re-resolved the passport's least-engaged lane at
+    // every display AND every completion check, so exploring the lane the
+    // quest showed changed that lane's stamp and the quest never completed.
+    private const val KEY_DAILY_LANE = "daily_lane"
     private const val KEY_BEST_STREAK = "best_streak"
     // Weekly quests (v8.42) — week-long goals, reset every Monday 4 AM.
     private const val KEY_WEEKLY_DATE = "weekly_date"
@@ -79,6 +84,9 @@ object CurioQuests {
     var dailyProgressState by mutableStateOf<Map<String, Int>>(emptyMap())
         private set
     var dailyAwardedState by mutableStateOf<Set<String>>(emptySet())
+        private set
+    // v323 — the discovery daily's pinned lane name for today (null = none).
+    var dailyLaneState by mutableStateOf<String?>(null)
         private set
     var bestStreakState by mutableIntStateOf(0)
         private set
@@ -427,7 +435,10 @@ object CurioQuests {
             val base = (epochDay % list.size).toInt()
             return list[if (base < 0) base + list.size else base]
         }
-        val hasDiscoveryTarget = context == null || CurioPassport.leastEngaged(context) != null
+        // v323 — the DISCOVERY slot exists when the day has a pinned lane (or
+        // the fallback still finds one), so the pool matches what the UI shows.
+        val pinnedLane = dailyDiscoveryLane()
+        val hasDiscoveryTarget = pinnedLane != null || context == null || CurioPassport.leastEngaged(context) != null
         val core: List<DailyQuest> = if (discovery != null && hasDiscoveryTarget) {
             listOf(pick(warmups), discovery, pick(creations))
         } else {
@@ -464,6 +475,7 @@ object CurioQuests {
         dailyDateState = prefs.getInt(KEY_DAILY_DATE, -1)
         dailyProgressState = readIntMap(prefs.getString(KEY_DAILY_PROGRESS, null))
         dailyAwardedState = readStringSet(prefs.getString(KEY_DAILY_AWARDED, null))
+        dailyLaneState = prefs.getString(KEY_DAILY_LANE, null)?.takeIf { it.isNotBlank() }
         bestStreakState = prefs.getInt(KEY_BEST_STREAK, 0)
         weeklyDateState = prefs.getLong(KEY_WEEKLY_DATE, -1L)
         weeklyProgressState = readIntMap(prefs.getString(KEY_WEEKLY_PROGRESS, null))
@@ -548,6 +560,7 @@ object CurioQuests {
             .putInt(KEY_DAILY_DATE, dailyDateState)
             .putString(KEY_DAILY_PROGRESS, dailyProgress.toString())
             .putString(KEY_DAILY_AWARDED, JSONArray(dailyAwardedState.toList()).toString())
+            .putString(KEY_DAILY_LANE, dailyLaneState)
             .putInt(KEY_BEST_STREAK, bestStreakState)
             .putLong(KEY_WEEKLY_DATE, weeklyDateState)
             .putString(KEY_WEEKLY_PROGRESS, weeklyProgress.toString())
@@ -563,7 +576,23 @@ object CurioQuests {
         dailyDateState = today
         dailyProgressState = emptyMap()
         dailyAwardedState = emptySet()
+        // v323 — pin the discovery lane AT ROLLOVER (before any action can
+        // change the stamps), so today's "Try a new lane" names exactly one
+        // lane and completes only when THAT lane is spun/explored.
+        dailyLaneState = CurioPassport.leastEngaged(context)?.id?.name
         write(context)
+    }
+
+    /**
+     * v323 — the lane today's "Try a new lane" daily is pinned to (fixed at
+     * the 4 AM rollover; null when every lane is mastered or not seeded).
+     */
+    fun dailyDiscoveryLane(): CurioCategory? {
+        val name = dailyLaneState ?: return null
+        val id = runCatching { CategoryId.valueOf(name) }.getOrNull() ?: return null
+        // runCatching: a stale saved name (lane removed from the catalog)
+        // must not crash the daily pool / quest rows.
+        return runCatching { CurioCategories.byId(id) }.getOrNull()
     }
 
     /**
@@ -632,7 +661,9 @@ object CurioQuests {
         // category and no reveal/explore reports WILDCARD back — there is no
         // proper wildcard topic page to open. Real lanes keep the explore
         // path in [onExplore] too, so opening the topic still counts.
-        val discoveryTarget = CurioPassport.leastEngaged(context)
+        // v323 — the target is the day's PINNED lane (fixed at rollover), so
+        // it always matches the lane the quest shows the user.
+        val discoveryTarget = dailyDiscoveryLane() ?: CurioPassport.leastEngaged(context)
         if (discoveryTarget != null && categoryId == discoveryTarget.id) {
             bumpDaily(context, DailyKind.DISCOVERY)
         }
@@ -650,8 +681,10 @@ object CurioQuests {
         // v8.42 — the week's explore count + distinct-lane set (weekly quests).
         bumpWeekly(context, WeeklyKind.EXPLORE, categoryId)
         // v8.6 — the "New Lane" discovery daily (spec §6.2) completes when the
-        // passport's least-engaged lane is explored.
-        val discoveryTarget = CurioPassport.leastEngaged(context)
+        // day's PINNED lane is explored (v323 — the lane is fixed at the 4 AM
+        // rollover, so exploring the lane the quest names always completes it,
+        // even if other lanes get explored first).
+        val discoveryTarget = dailyDiscoveryLane() ?: CurioPassport.leastEngaged(context)
         if (discoveryTarget != null && categoryId == discoveryTarget.id) {
             bumpDaily(context, DailyKind.DISCOVERY)
         }

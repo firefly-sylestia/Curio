@@ -220,6 +220,8 @@ object AppPreferences {
     // v9.x — owned pet outfits (JSON array of outfit ids) + the equipped one.
     private const val KEY_OWNED_OUTFITS = "owned_outfits"
     private const val KEY_EQUIPPED_OUTFIT = "equipped_outfit"
+    // v323 — owned pet toys/games (JSON array of game ids).
+    private const val KEY_OWNED_GAMES = "owned_games"
     // Share card edit persistence — per-topic card customisations saved
     // on share/save so they restore next time the same topic is shared.
     private const val KEY_SHARE_CARD_EDITS = "share_card_edits"   // JSON: topicName → edit data
@@ -872,6 +874,9 @@ object AppPreferences {
         private set
     var equippedOutfitState by mutableStateOf<String?>(null)
         private set
+    // v323 — owned pet toys/games (see [PetOutfits.Games]).
+    var ownedGamesState by mutableStateOf<Set<String>>(emptySet())
+        private set
 
     fun initThemeMode(context: Context) {
         themeModeState = getThemeMode(context)
@@ -969,6 +974,7 @@ object AppPreferences {
         sparklesState = getSparkles(context)
         ownedOutfitsState = getOwnedOutfits(context)
         equippedOutfitState = getEquippedOutfit(context)
+        ownedGamesState = getOwnedGames(context)
         evoPathState = getEvoPath(context)
         petPartTransformsState = isPetPartTransformsEnabled(context)
         updateCheckerEnabledState = isUpdateCheckerEnabled(context)
@@ -2061,6 +2067,26 @@ object AppPreferences {
     fun setEquippedOutfit(context: Context, outfitId: String?) {
         prefs(context).edit().putString(KEY_EQUIPPED_OUTFIT, outfitId).apply()
         equippedOutfitState = outfitId
+    }
+
+    /** Owned pet-game ids (JSON array, defensive read). */
+    fun getOwnedGames(context: Context): Set<String> {
+        val raw = prefs(context).getString(KEY_OWNED_GAMES, null) ?: return emptySet()
+        return try {
+            val arr = JSONArray(raw)
+            (0 until arr.length()).map { arr.getString(it) }.toSet()
+        } catch (_: Exception) {
+            emptySet()
+        }
+    }
+
+    /** Marks [gameId] as owned (one-time toy purchase). */
+    fun buyGame(context: Context, gameId: String) {
+        val next = ownedGamesState + gameId
+        val arr = JSONArray()
+        next.forEach { arr.put(it) }
+        prefs(context).edit().putString(KEY_OWNED_GAMES, arr.toString()).apply()
+        ownedGamesState = next
     }
 
     // ── Manage Categories (v7.94) — hidden set + custom order ──────────

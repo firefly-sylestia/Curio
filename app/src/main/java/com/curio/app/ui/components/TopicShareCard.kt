@@ -167,7 +167,9 @@ data class ShareCardPalette(
     val accent: Color,
     val accentDark: Color,
     val ink: Color,
-    val inkFaint: Color
+    val inkFaint: Color,
+    // v323 — human name shown by the Tone tool's swatches (Auto = rotation).
+    val name: String = ""
 )
 
 // Curated tones — warm, beautiful, NOT derived from category colors.
@@ -180,62 +182,118 @@ private val curatedTones = listOf(
     ShareCardPalette(
         bgBase = Color(0xFFFDF0EE), bgLight = Color(0xFFFDF6F5), bgMid = Color(0xFFF8E0DC),
         accent = Color(0xFFB85C6E), accentDark = Color(0xFF8A3A4C),
-        ink = Color(0xFF2C1A1E), inkFaint = Color(0xFF8A6B72)
+        ink = Color(0xFF2C1A1E), inkFaint = Color(0xFF8A6B72),
+        name = "Warm Rose"
     ),
     // Soft Sage — deep teal on greenish cream
     ShareCardPalette(
         bgBase = Color(0xFFF0F5F0), bgLight = Color(0xFFF7FAF7), bgMid = Color(0xFFDCE8DC),
         accent = Color(0xFF5E8A72), accentDark = Color(0xFF3D6B52),
-        ink = Color(0xFF1A2420), inkFaint = Color(0xFF6B8A7C)
+        ink = Color(0xFF1A2420), inkFaint = Color(0xFF6B8A7C),
+        name = "Soft Sage"
     ),
     // Golden Ochre — warm gold on pale parchment
     ShareCardPalette(
         bgBase = Color(0xFFFAF5EB), bgLight = Color(0xFFFDFBF5), bgMid = Color(0xFFF0E6D0),
         accent = Color(0xFFB08840), accentDark = Color(0xFF8A6520),
-        ink = Color(0xFF2A2010), inkFaint = Color(0xFF8A7A60)
+        ink = Color(0xFF2A2010), inkFaint = Color(0xFF8A7A60),
+        name = "Golden Ochre"
     ),
     // Deep Indigo — moody purple on cool parchment
     ShareCardPalette(
         bgBase = Color(0xFFF2EFF8), bgLight = Color(0xFFF8F6FC), bgMid = Color(0xFFE2DDEF),
         accent = Color(0xFF6A5A9A), accentDark = Color(0xFF4A3A7A),
-        ink = Color(0xFF1C1630), inkFaint = Color(0xFF7A6A90)
+        ink = Color(0xFF1C1630), inkFaint = Color(0xFF7A6A90),
+        name = "Deep Indigo"
     ),
     // Midnight (Level 2) — deep navy with a silver-moon accent
     ShareCardPalette(
         bgBase = Color(0xFF1E2433), bgLight = Color(0xFF2A3142), bgMid = Color(0xFF171C29),
         accent = Color(0xFF9FB4D8), accentDark = Color(0xFF6E86B3),
-        ink = Color(0xFFEDF1F8), inkFaint = Color(0xFF9AA6BE)
+        ink = Color(0xFFEDF1F8), inkFaint = Color(0xFF9AA6BE),
+        name = "Midnight"
     ),
     // Forest (Level 8) — mossy pine on soft mushroom
     ShareCardPalette(
         bgBase = Color(0xFFEDF1E8), bgLight = Color(0xFFF6F8F2), bgMid = Color(0xFFD9E2D0),
         accent = Color(0xFF4E6E4A), accentDark = Color(0xFF33512F),
-        ink = Color(0xFF1B2418), inkFaint = Color(0xFF64755E)
+        ink = Color(0xFF1B2418), inkFaint = Color(0xFF64755E),
+        name = "Forest"
     ),
     // Lavender (Level 15) — lilac on cool grey-cream
     ShareCardPalette(
         bgBase = Color(0xFFF3EFF7), bgLight = Color(0xFFFAF7FC), bgMid = Color(0xFFE3DBEF),
         accent = Color(0xFF8B74B8), accentDark = Color(0xFF664F93),
-        ink = Color(0xFF221B31), inkFaint = Color(0xFF7C6E96)
+        ink = Color(0xFF221B31), inkFaint = Color(0xFF7C6E96),
+        name = "Lavender"
     ),
     // Ember (Level 30) — charcoal with a molten orange accent
     ShareCardPalette(
         bgBase = Color(0xFF26211D), bgLight = Color(0xFF332C26), bgMid = Color(0xFF1C1815),
         accent = Color(0xFFE0853F), accentDark = Color(0xFFB4602A),
-        ink = Color(0xFFFAF1E8), inkFaint = Color(0xFFA08E7E)
+        ink = Color(0xFFFAF1E8), inkFaint = Color(0xFFA08E7E),
+        name = "Ember"
+    ),
+    // v323 — six more premium tones unlocked by higher levels (see
+    // [LevelRewards]): Ocean (12), Rose Gold (18), Moss (25), Storm (35),
+    // Pearl (45), Sunburst (50).
+    // Ocean — deep teal-blue on pale foam
+    ShareCardPalette(
+        bgBase = Color(0xFFEAF2F4), bgLight = Color(0xFFF4FAFB), bgMid = Color(0xFFD3E6EA),
+        accent = Color(0xFF2E6E8E), accentDark = Color(0xFF1D4E68),
+        ink = Color(0xFF0F242E), inkFaint = Color(0xFF5F7C8A),
+        name = "Ocean"
+    ),
+    // Rose Gold — blush copper on warm cream
+    ShareCardPalette(
+        bgBase = Color(0xFFFAF1ED), bgLight = Color(0xFFFDF8F5), bgMid = Color(0xFFF0DDD4),
+        accent = Color(0xFFC08A7A), accentDark = Color(0xFF9C6353),
+        ink = Color(0xFF2B1B16), inkFaint = Color(0xFF8A6F66),
+        name = "Rose Gold"
+    ),
+    // Moss — earthy olive on parchment
+    ShareCardPalette(
+        bgBase = Color(0xFFF4F1E8), bgLight = Color(0xFFFAF8F2), bgMid = Color(0xFFE2DCC8),
+        accent = Color(0xFF7A6B3E), accentDark = Color(0xFF57491F),
+        ink = Color(0xFF26210F), inkFaint = Color(0xFF7C7158),
+        name = "Moss"
+    ),
+    // Storm — slate blue-grey on light mist
+    ShareCardPalette(
+        bgBase = Color(0xFFEDF0F4), bgLight = Color(0xFFF6F8FA), bgMid = Color(0xFFD5DBE3),
+        accent = Color(0xFF5A6B80), accentDark = Color(0xFF3D4C5E),
+        ink = Color(0xFF181E26), inkFaint = Color(0xFF667180),
+        name = "Storm"
+    ),
+    // Pearl — ivory with a cool silver-lilac accent
+    ShareCardPalette(
+        bgBase = Color(0xFFF6F2F0), bgLight = Color(0xFFFCFAF9), bgMid = Color(0xFFE5DEDA),
+        accent = Color(0xFF9A8FA8), accentDark = Color(0xFF6F647D),
+        ink = Color(0xFF241F29), inkFaint = Color(0xFF7C727F),
+        name = "Pearl"
+    ),
+    // Sunburst — warm amber on soft cream
+    ShareCardPalette(
+        bgBase = Color(0xFFFCF4E2), bgLight = Color(0xFFFFFAF0), bgMid = Color(0xFFF3E2BC),
+        accent = Color(0xFFD98E2B), accentDark = Color(0xFFA9641A),
+        ink = Color(0xFF2A1D08), inkFaint = Color(0xFF8F7A52),
+        name = "Sunburst"
     )
 )
 
 /** How many tones the player may use at [level] (base 4 + level unlocks). */
 fun unlockedToneCount(level: Int): Int = 4 + LevelRewards.unlockedPaletteCount(level)
 
-private fun paletteFor(accent: Color): ShareCardPalette {
-    // Cycle through the player's AVAILABLE tones using the accent hash.
-    // Premium tones only join the rotation once their level reward lands,
-    // so unlocking one visibly changes the share-card look.
+private fun paletteFor(accent: Color, toneOverride: Int? = null): ShareCardPalette {
+    // v323 — an explicit pick from the Tone tool wins; otherwise cycle
+    // through the player's AVAILABLE tones using the accent hash. Premium
+    // tones only join the rotation once their level reward lands, so
+    // unlocking one visibly changes the share-card look.
     val count = unlockedToneCount(CurioQuests.levelForXp(CurioQuests.xpState))
         .coerceIn(1, curatedTones.size)
-    return curatedTones[Math.abs(accent.hashCode()) % count]
+    val idx = toneOverride?.takeIf { it in curatedTones.indices && it < count }
+        ?: Math.abs(accent.hashCode()) % count
+    return curatedTones[idx]
 }
 
 // ─── Family → available styles mapping ─────────────────────────────────
@@ -514,12 +572,16 @@ fun TopicShareCard(
     editedTitle: String? = null,
     editedFact: String? = null,
     move: ShareCardMove = ShareCardMove(),
+    // v323 — explicit share-card tone pick (index into [curatedTones]); null
+    // keeps the automatic per-category rotation. Only unlocked tones are
+    // offered by the editor's Tone tool.
+    toneIndex: Int? = null,
     callbacks: EditBoundsCallbacks = EditBoundsCallbacks()
 ) {
     val display = topicName.substringBeforeLast(" (")
     // Extract year from trailing parentheses — "Appetite for Destruction (1987)" → "1987"
     val year = topicName.substringAfterLast("(").substringBeforeLast(")").takeIf { it.all { c -> c.isDigit() } && it.length == 4 }
-    val palette = paletteFor(accent)
+    val palette = paletteFor(accent, toneIndex)
     // Resolve per-share text edits once — every style renders the same values,
     // and quote cards show the edited quote as both the body and the quote.
     val shownDisplay = editedTitle ?: display
@@ -5833,6 +5895,9 @@ fun TopicShareSheet(
     // select/move it, then the "Edit text" tool arms the field. Exiting edit
     // mode or selecting another element always drops back to select mode.
     var factEditMode by remember { mutableStateOf(false) }
+    // v323 — explicit tone pick: -1 = automatic per-category rotation, else
+    // an index into the unlocked [curatedTones] (offered by the Tone tool).
+    var toneIndex by remember { mutableIntStateOf(-1) }
     // v323 — while editing, the sheet must NOT be dismissible (a swipe / back
     // / scrim tap would discard the user's card edits): confirmValueChange
     // blocks every move away from Expanded until edit mode ends.
@@ -6005,7 +6070,7 @@ fun TopicShareSheet(
                                 onMove = { move = it },
                                 factFieldStyle = factFieldStyle
                             ) { cb ->
-                                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move, callbacks = cb)
+                                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move, callbacks = cb)
                             }
                         }
                     }
@@ -6051,7 +6116,7 @@ fun TopicShareSheet(
                             onMove = { move = it },
                             factFieldStyle = factFieldStyle
                         ) { cb ->
-                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move, callbacks = cb)
+                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move, callbacks = cb)
                         }
                     }
                 }
@@ -6213,6 +6278,12 @@ fun TopicShareSheet(
                             onClick = { toolOpen = if (toolOpen == "font") null else "font" }
                         )
                         EditToolPill(
+                            glyph = CurioIcons.Palette,
+                            description = "Card tone",
+                            active = toolOpen == "tone",
+                            onClick = { toolOpen = if (toolOpen == "tone") null else "tone" }
+                        )
+                        EditToolPill(
                             glyph = "notes",
                             description = "Alignment",
                             active = toolOpen == "align",
@@ -6339,6 +6410,34 @@ fun TopicShareSheet(
                                 }
                             }
                         }
+                        // v323 — the Tone tool: every UNLOCKED tone as a swatch
+                        // (level rewards visibly buy new card looks). Auto keeps
+                        // the per-category rotation. Panels stay open while
+                        // switching (tap the tool icon to close).
+                        "tone" -> Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text("Tone \u2014 level unlocks", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState())
+                            ) {
+                                ToneSwatch(
+                                    name = "Auto",
+                                    bg = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                    ring = MaterialTheme.colorScheme.secondary,
+                                    selected = toneIndex < 0
+                                ) { toneIndex = -1 }
+                                val toneCount = unlockedToneCount(CurioQuests.levelForXp(CurioQuests.xpState)).coerceIn(1, curatedTones.size)
+                                curatedTones.take(toneCount).forEachIndexed { i, p ->
+                                    ToneSwatch(
+                                        name = p.name,
+                                        bg = p.bgBase,
+                                        ring = p.accent,
+                                        selected = toneIndex == i
+                                    ) { toneIndex = i }
+                                }
+                            }
+                        }
                         "align" -> if (sel == ShareCardResizeTarget.TITLE || sel == ShareCardResizeTarget.FACT) {
                             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                 Text("$selName alignment", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -6414,7 +6513,7 @@ fun TopicShareSheet(
                     onClick = {
                         haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                         shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move)
+                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move)
                         }, saveToGallery = true)
                         AppPreferences.saveShareCardEdits(context, topicName, move.titleDx, move.titleDy, move.factDx, move.factDy, move.metaDx, move.metaDy, move.badgeDx, move.badgeDy, move.titleWidthFrac, move.titleHeightFrac, move.factWidthFrac, move.factHeightFrac, move.titleScale, bodyScale, editedTitle, editedFact)
                         onDismiss()
@@ -6433,7 +6532,7 @@ fun TopicShareSheet(
                 Button(onClick = {
                     haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                     shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption, classicSignature = classicDesign, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move)
+                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move)
                     })
                         AppPreferences.saveShareCardEdits(context, topicName, move.titleDx, move.titleDy, move.factDx, move.factDy, move.metaDx, move.metaDy, move.badgeDx, move.badgeDy, move.titleWidthFrac, move.titleHeightFrac, move.factWidthFrac, move.factHeightFrac, move.titleScale, bodyScale, editedTitle, editedFact)
                         onDismiss()
@@ -6508,6 +6607,56 @@ private fun BoxScope.MoveHandle(
             contentDescription = "Move",
             tint = Color.White,
             size = 18.dp
+        )
+    }
+}
+
+/**
+ * v323 — one tone swatch in the editor's Tone tool: a circle in the tone's
+ * base fill with its accent ring; the picked tone wears a bold ring + check.
+ * Only unlocked tones are offered (the toolbar computes [unlockedToneCount]).
+ */
+@Composable
+private fun ToneSwatch(
+    name: String,
+    bg: Color,
+    ring: Color,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier.width(54.dp)
+    ) {
+        Surface(
+            onClick = onClick,
+            shape = CircleShape,
+            color = bg,
+            shadowElevation = if (selected) 3.dp else 0.dp,
+            modifier = Modifier
+                .size(38.dp)
+                .border(if (selected) 2.5.dp else 1.dp, if (selected) ring else ring.copy(alpha = 0.5f), CircleShape)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                if (selected) {
+                    CurioIcon(
+                        name = CurioIcons.Check,
+                        contentDescription = null,
+                        size = 16.dp,
+                        tint = if (bg.luminance() > 0.5f) ring else Color.White
+                    )
+                }
+            }
+        }
+        Text(
+            name,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = if (selected) FontWeight.ExtraBold else FontWeight.Medium
+            ),
+            color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }

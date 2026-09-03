@@ -62,8 +62,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.layout.boundsInRoot
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -202,6 +200,11 @@ fun NewCategoryPickerSheet(
     var optionAnchor by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
     var removeAnchor by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
     var mixAnchor by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
+    // v323 — the radial hold session's LIVE finger position + the release
+    // position. Shared by every tile (only one hold can be active at once):
+    // the gesture feeds them, the open overlay consumes them.
+    var holdCursor by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
+    var holdEnd by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
 
     // v3xx14 — multi-select on page 0 flips the shared bottom row's primary
     // capsule from "Surprise me" to "Mix · N": the classic page reports its
@@ -329,10 +332,12 @@ fun NewCategoryPickerSheet(
                                 onCategoriesMixed(cats)
                             }
                         },
-                        onMixOption = { mix, pos -> mixOptionTarget = mix; mixAnchor = pos },
+                        onMixOption = { mix, pos -> mixOptionTarget = mix; mixAnchor = pos; holdCursor = null; holdEnd = null },
                         onNewMix = { editMix = null; showEditor = true },
-                        onOptionTarget = { cat, pos -> optionTarget = cat; optionAnchor = pos },
-                        onRemoveTarget = { cat, pos -> removeTarget = cat; removeAnchor = pos },
+                        onOptionTarget = { cat, pos -> optionTarget = cat; optionAnchor = pos; holdCursor = null; holdEnd = null },
+                        onRemoveTarget = { cat, pos -> removeTarget = cat; removeAnchor = pos; holdCursor = null; holdEnd = null },
+                        onHoldMove = { holdCursor = it },
+                        onHoldEnd = { holdEnd = it },
                         onAddSuggestion = { showAddSuggestion = true }
                     )
                 }
@@ -387,47 +392,53 @@ fun NewCategoryPickerSheet(
         optionTarget?.let { target ->
             CategoryOptionPill(
                 category = target,
-                onDismiss = { optionTarget = null; optionAnchor = null },
+                onDismiss = { optionTarget = null; optionAnchor = null; holdCursor = null; holdEnd = null },
                 onPinToggle = {
                     pinnedToggle(target.id)
-                    optionTarget = null; optionAnchor = null
+                    optionTarget = null; optionAnchor = null; holdCursor = null; holdEnd = null
                 },
                 onSpin = {
-                    optionTarget = null; optionAnchor = null
+                    optionTarget = null; optionAnchor = null; holdCursor = null; holdEnd = null
                     if (target.isReady) onCategorySelected(target)
                 },
-                anchor = optionAnchor
+                anchor = optionAnchor,
+                cursor = holdCursor,
+                endPos = holdEnd
             )
         }
         removeTarget?.let { target ->
             CategoryOptionPill(
                 category = target,
-                onDismiss = { removeTarget = null; removeAnchor = null },
+                onDismiss = { removeTarget = null; removeAnchor = null; holdCursor = null; holdEnd = null },
                 onRemove = {
                     // Removing a curated lane writes the user's suggestion
                     // list live, so the section updates without closing the
                     // picker.
                     AppPreferences.removePickerSuggestion(context, target.id)
-                    removeTarget = null; removeAnchor = null
+                    removeTarget = null; removeAnchor = null; holdCursor = null; holdEnd = null
                 },
-                anchor = removeAnchor
+                anchor = removeAnchor,
+                cursor = holdCursor,
+                endPos = holdEnd
             )
         }
         // Tap-and-hold on a saved mix → Edit/Delete option pill overlay.
         mixOptionTarget?.let { target ->
             MixOptionPill(
                 name = target.name,
-                onDismiss = { mixOptionTarget = null; mixAnchor = null },
+                onDismiss = { mixOptionTarget = null; mixAnchor = null; holdCursor = null; holdEnd = null },
                 onEdit = {
-                    mixOptionTarget = null; mixAnchor = null
+                    mixOptionTarget = null; mixAnchor = null; holdCursor = null; holdEnd = null
                     editMix = target
                     showEditor = true
                 },
                 onDelete = {
-                    mixOptionTarget = null; mixAnchor = null
+                    mixOptionTarget = null; mixAnchor = null; holdCursor = null; holdEnd = null
                     deleteMix = target
                 },
-                anchor = mixAnchor
+                anchor = mixAnchor,
+                cursor = holdCursor,
+                endPos = holdEnd
             )
         }
     }
@@ -502,6 +513,9 @@ private fun NewPickerPage(
     onNewMix: () -> Unit,
     onOptionTarget: (CurioCategory, androidx.compose.ui.geometry.Offset) -> Unit,
     onRemoveTarget: (CurioCategory, androidx.compose.ui.geometry.Offset) -> Unit,
+    // v323 — the radial hold session's live move + release feed (screen-level).
+    onHoldMove: (androidx.compose.ui.geometry.Offset) -> Unit,
+    onHoldEnd: (androidx.compose.ui.geometry.Offset) -> Unit,
     onAddSuggestion: () -> Unit
 ) {
     val context = LocalContext.current
@@ -537,7 +551,12 @@ private fun NewPickerPage(
                         NewPinnedPill(
                             category = cat,
                             onClick = { onSpinLane(cat) },
-                            onLongClick = { pos -> onOptionTarget(cat, pos) }
+                            hold = HoldSession(
+                                onOpen = { pos -> onOptionTarget(cat, pos) },
+                                onMove = onHoldMove,
+                                onEnd = onHoldEnd,
+                                onTap = {}
+                            )
                         )
                     }
                 }
@@ -583,7 +602,12 @@ private fun NewPickerPage(
                                     categories = categories,
                                     active = mix.laneIds.toSet() == deckIds.toSet(),
                                     onApply = { onApplyMix(mix) },
-                                    onLongClick = { pos -> onMixOption(mix, pos) },
+                                    hold = HoldSession(
+                                        onOpen = { pos -> onMixOption(mix, pos) },
+                                        onMove = onHoldMove,
+                                        onEnd = onHoldEnd,
+                                        onTap = {}
+                                    ),
                                     modifier = Modifier.weight(1f)
                                 )
                             }
@@ -618,6 +642,8 @@ private fun NewPickerPage(
                 deckIds = deckIds,
                 onSpinLane = onSpinLane,
                 onRemoveTarget = onRemoveTarget,
+                onHoldMove = onHoldMove,
+                onHoldEnd = onHoldEnd,
                 onAdd = onAddSuggestion
             )
         }
@@ -639,6 +665,9 @@ private fun ContinueExploringSection(
     onSpinLane: (CurioCategory) -> Unit,
     // v3xx — option pill receives the held spot (window coords).
     onRemoveTarget: (CurioCategory, androidx.compose.ui.geometry.Offset) -> Unit,
+    // v323 — the radial hold session's live move + release feed.
+    onHoldMove: (androidx.compose.ui.geometry.Offset) -> Unit,
+    onHoldEnd: (androidx.compose.ui.geometry.Offset) -> Unit,
     onAdd: () -> Unit
 ) {
     val context = LocalContext.current
@@ -693,7 +722,12 @@ private fun ContinueExploringSection(
                                 // Continue exploring too.
                                 selected = cat.id in deckSet,
                                 onClick = { onSpinLane(cat) },
-                                onLongClick = { pos -> onRemoveTarget(cat, pos) },
+                                hold = HoldSession(
+                                    onOpen = { pos -> onRemoveTarget(cat, pos) },
+                                    onMove = onHoldMove,
+                                    onEnd = onHoldEnd,
+                                    onTap = {}
+                                ),
                                 modifier = Modifier.weight(1f)
                             )
                         }
@@ -1083,9 +1117,9 @@ private fun NewMixCard(
     categories: List<CurioCategory>,
     active: Boolean = false,
     onApply: () -> Unit,
-    // v3xx — receives the card's own center (window coords) so the option
-    // pill pops in AT the held spot.
-    onLongClick: ((androidx.compose.ui.geometry.Offset) -> Unit)? = null,
+    // v323 — the radial hold session (open at the finger, move/end feed the
+    // overlay); null keeps the card tap-only.
+    hold: HoldSession? = null,
     modifier: Modifier = Modifier
 ) {
     val shape = RoundedCornerShape(20.dp)
@@ -1093,7 +1127,6 @@ private fun NewMixCard(
     val lead = lanes.firstOrNull()
     val mixTone = namedMixTone(mix)
     val cardFill = if (active) lerp(newPickerIdleFill(), mixTone, 0.08f) else newPickerIdleFill()
-    val holdCenter = remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
     Surface(
         shape = shape,
         color = cardFill,
@@ -1101,11 +1134,8 @@ private fun NewMixCard(
         modifier = modifier
             .height(96.dp)
             .then(if (active) Modifier.border(2.dp, mixTone, shape) else Modifier)
-            .onGloballyPositioned { holdCenter.value = it.boundsInRoot().center }
-            .combinedClickable(
-                onClick = onApply,
-                onLongClick = onLongClick?.let { { it(holdCenter.value) } }
-            )
+            .radialHoldMenu(hold)
+            .combinedClickable(onClick = onApply)
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
@@ -1244,8 +1274,9 @@ private fun namedMixTone(mix: NamedMix): Color {
  * call: the tint fill alone carries selection; the tick read as a pale
  * white dot in dark mode). The tile NEVER draws a border in EITHER theme
  * (v3xx13 — user call: no borders at all); pinned lanes read via the pin
- * badge only. Tap-and-hold surfaces the option pill / remove pill
- * (caller's onLongClick).
+ * badge only. Tap-and-hold surfaces the option pill / remove pill via the
+ * radial hold session ([hold]); the classic page passes [onLongClick]
+ * for its hold-to-multi-select instead.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1256,9 +1287,12 @@ fun NewPickerTile(
     comingSoon: Boolean = false,
     labelOverride: String? = null,
     onClick: () -> Unit,
-    // v3xx — the long-press callback receives the tile's own center in
-    // window coords so the option pill can pop in AT the held spot.
-    onLongClick: ((androidx.compose.ui.geometry.Offset) -> Unit)? = null,
+    // v323 — the radial hold session (open at the finger, move/end feed the
+    // overlay); null keeps the tile tap-only.
+    hold: HoldSession? = null,
+    // v323 — plain long-press callback for surfaces that DON'T use the
+    // radial menu (e.g. the classic page's hold-to-multi-select).
+    onLongClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val shape = RoundedCornerShape(20.dp)
@@ -1270,8 +1304,6 @@ fun NewPickerTile(
     val fill = if (selected) catAccent else newPickerIdleFill()
     val iconTint = if (selected) catInk else MaterialTheme.colorScheme.onSurfaceVariant
     val labelColor = if (selected) catInk else MaterialTheme.colorScheme.onSurface
-    // Where THIS tile sits on screen — read at long-press time.
-    val holdCenter = remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
     Surface(
         shape = shape,
         color = fill,
@@ -1279,14 +1311,11 @@ fun NewPickerTile(
         modifier = modifier
             .fillMaxWidth()
             .height(88.dp)
-            .onGloballyPositioned { holdCenter.value = it.boundsInRoot().center }
             .then(
                 if (comingSoon) Modifier
-                else Modifier.combinedClickable(
-                    enabled = true,
-                    onClick = onClick,
-                    onLongClick = onLongClick?.let { { it(holdCenter.value) } }
-                )
+                else Modifier
+                    .radialHoldMenu(hold)
+                    .combinedClickable(onClick = onClick, onLongClick = onLongClick)
             )
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -1375,19 +1404,18 @@ fun NewPickerTile(
 internal fun NewPinnedPill(
     category: CurioCategory,
     onClick: () -> Unit,
-    // v3xx — receives the pill's own center (window coords) so the option
-    // pill pops in AT the held spot.
-    onLongClick: (androidx.compose.ui.geometry.Offset) -> Unit
+    // v323 — the radial hold session (open at the finger, move/end feed the
+    // overlay).
+    hold: HoldSession
 ) {
     val shape = RoundedCornerShape(50)
-    val holdCenter = remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
     Surface(
         shape = shape,
         color = newPickerIdleFill(),
         shadowElevation = 0.dp,
         modifier = Modifier
-            .onGloballyPositioned { holdCenter.value = it.boundsInRoot().center }
-            .combinedClickable(onClick = onClick, onLongClick = { onLongClick(holdCenter.value) })
+            .radialHoldMenu(hold)
+            .combinedClickable(onClick = onClick)
     ) {
         // Taller pill: 12dp vertical padding (was 9dp) + larger glyph.
         Row(
@@ -1520,13 +1548,16 @@ internal class HoldAction(
  * direct-pin-on-long-press behavior.
  */
 @Composable
-private fun CategoryOptionPill(
+internal fun CategoryOptionPill(
     category: CurioCategory,
     onDismiss: () -> Unit,
     onPinToggle: (() -> Unit)? = null,
     onSpin: (() -> Unit)? = null,
     onRemove: (() -> Unit)? = null,
-    anchor: androidx.compose.ui.geometry.Offset? = null
+    anchor: androidx.compose.ui.geometry.Offset? = null,
+    // v323 — the radial menu's live cursor + release position.
+    cursor: androidx.compose.ui.geometry.Offset? = null,
+    endPos: androidx.compose.ui.geometry.Offset? = null
 ) {
     val context = LocalContext.current
     val isPinned = remember { category.id in AppPreferences.getPinnedCategories(context) }
@@ -1566,22 +1597,35 @@ private fun CategoryOptionPill(
         }
     }
     if (actions.isEmpty()) return
-    HoldActionsPill(actions = actions, onDismiss = onDismiss, anchor = anchor)
+    // v323 — the radial hold menu replaces the single capsule: actions ring
+    // AROUND the press point, no dark scrim, live drag-to-switch. [cursor]
+    // drives the highlight, [endPos] resolves the pick (or cancels).
+    RadialHoldMenuOverlay(
+        anchor = anchor ?: androidx.compose.ui.geometry.Offset.Zero,
+        actions = actions,
+        cursor = cursor,
+        endPos = endPos,
+        onCancel = onDismiss
+    )
 }
 
 /**
  * v318b — tap-and-hold on a saved mix opens the same morphing pill: Edit +
- * Delete as circular icon buttons (no text, no dialog).
+ * Delete as circular icon buttons (no text, no dialog). v323 — now the
+ * radial hold menu.
  */
 @Composable
-private fun MixOptionPill(
+internal fun MixOptionPill(
     name: String,
     onDismiss: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
-    anchor: androidx.compose.ui.geometry.Offset? = null
+    anchor: androidx.compose.ui.geometry.Offset? = null,
+    cursor: androidx.compose.ui.geometry.Offset? = null,
+    endPos: androidx.compose.ui.geometry.Offset? = null
 ) {
-    HoldActionsPill(
+    RadialHoldMenuOverlay(
+        anchor = anchor ?: androidx.compose.ui.geometry.Offset.Zero,
         actions = listOf(
             HoldAction(
                 CurioIcons.Edit,
@@ -1598,8 +1642,9 @@ private fun MixOptionPill(
                 onDelete
             )
         ),
-        onDismiss = onDismiss,
-        anchor = anchor
+        cursor = cursor,
+        endPos = endPos,
+        onCancel = onDismiss
     )
 }
 

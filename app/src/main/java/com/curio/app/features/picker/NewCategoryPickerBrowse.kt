@@ -42,8 +42,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.layout.boundsInRoot
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -119,6 +117,11 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
     // pop in AT the held spot instead of dead-center.
     var optionAnchor by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
     var mixAnchor by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
+    // v323 — the radial hold session's LIVE finger position + release.
+    // Shared by every tile (only one hold can be active at once): the
+    // gesture feeds them, the open overlay consumes them.
+    var holdCursor by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
+    var holdEnd by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
 
     // System back behaves like the on-screen back arrow: pop to Spin and
     // re-open its category picker sheet.
@@ -185,7 +188,9 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
                             AppPreferences.setLastSpinCategories(context, listOf(cat.id))
                             navController.navigateToTab(CurioRoutes.SPIN)
                         },
-                        onOptionTarget = { cat, pos -> optionTarget = cat; optionAnchor = pos }
+                        onOptionTarget = { cat, pos -> optionTarget = cat; optionAnchor = pos; holdCursor = null; holdEnd = null },
+                        onHoldMove = { holdCursor = it },
+                        onHoldEnd = { holdEnd = it }
                     )
                     BrowseTab.MIXES -> MixesTabContent(
                         deckIds = deckIds,
@@ -201,7 +206,9 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
                         onEditMix = { editMix = it; showEditor = true },
                         onDeleteMix = { deleteMix = it },
                         onNewMix = { editMix = null; showEditor = true },
-                        onHoldMix = { mix, pos -> mixHoldTarget = mix; mixAnchor = pos }
+                        onHoldMix = { mix, pos -> mixHoldTarget = mix; mixAnchor = pos; holdCursor = null; holdEnd = null },
+                        onHoldMove = { holdCursor = it },
+                        onHoldEnd = { holdEnd = it }
                     )
                     BrowseTab.PINS -> PinsTabContent(
                         context = context,
@@ -209,7 +216,9 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
                             AppPreferences.setLastSpinCategories(context, listOf(cat.id))
                             navController.navigateToTab(CurioRoutes.SPIN)
                         },
-                        onOptionTarget = { cat, pos -> optionTarget = cat; optionAnchor = pos }
+                        onOptionTarget = { cat, pos -> optionTarget = cat; optionAnchor = pos; holdCursor = null; holdEnd = null },
+                        onHoldMove = { holdCursor = it },
+                        onHoldEnd = { holdEnd = it }
                     )
                 }
             }
@@ -280,54 +289,43 @@ fun CategoryPickerBrowseScreen(navController: NavController) {
         )
     }
     optionTarget?.let { target ->
-        val isPinned = target.id in AppPreferences.getPinnedCategories(context)
-        BrowseOptionPill(
+        CategoryOptionPill(
             category = target,
-            isPinned = isPinned,
-            onDismiss = { optionTarget = null; optionAnchor = null },
+            onDismiss = { optionTarget = null; optionAnchor = null; holdCursor = null; holdEnd = null },
             onPinToggle = {
                 AppPreferences.togglePinnedCategory(context, target.id)
-                optionTarget = null; optionAnchor = null
+                optionTarget = null; optionAnchor = null; holdCursor = null; holdEnd = null
             },
             onSpin = {
-                optionTarget = null; optionAnchor = null
+                optionTarget = null; optionAnchor = null; holdCursor = null; holdEnd = null
                 if (target.isReady) {
                     AppPreferences.setLastSpinCategories(context, listOf(target.id))
                     navController.navigateToTab(CurioRoutes.SPIN)
                 }
             },
-            anchor = optionAnchor
+            anchor = optionAnchor,
+            cursor = holdCursor,
+            endPos = holdEnd
         )
     }
     // v318b — tap-and-hold on a saved mix row: the same morphing icon pill
     // (Edit / Delete circles) instead of the old dropdown menu.
     mixHoldTarget?.let { target ->
-        HoldActionsPill(
-            actions = listOf(
-                HoldAction(
-                    CurioIcons.Edit,
-                    "Edit ${target.name}",
-                    MaterialTheme.colorScheme.secondaryContainer,
-                    MaterialTheme.colorScheme.onSecondaryContainer,
-                    {
-                        mixHoldTarget = null; mixAnchor = null
-                        editMix = target
-                        showEditor = true
-                    }
-                ),
-                HoldAction(
-                    CurioIcons.Delete,
-                    "Delete ${target.name}",
-                    MaterialTheme.colorScheme.errorContainer,
-                    MaterialTheme.colorScheme.onErrorContainer,
-                    {
-                        mixHoldTarget = null; mixAnchor = null
-                        deleteMix = target
-                    }
-                )
-            ),
-            onDismiss = { mixHoldTarget = null; mixAnchor = null },
-            anchor = mixAnchor
+        MixOptionPill(
+            name = target.name,
+            onDismiss = { mixHoldTarget = null; mixAnchor = null; holdCursor = null; holdEnd = null },
+            onEdit = {
+                mixHoldTarget = null; mixAnchor = null; holdCursor = null; holdEnd = null
+                editMix = target
+                showEditor = true
+            },
+            onDelete = {
+                mixHoldTarget = null; mixAnchor = null; holdCursor = null; holdEnd = null
+                deleteMix = target
+            },
+            anchor = mixAnchor,
+            cursor = holdCursor,
+            endPos = holdEnd
         )
     }
 }
@@ -365,7 +363,10 @@ private fun BrowseTabContent(
     context: android.content.Context,
     onSpinLane: (CurioCategory) -> Unit,
     // v3xx — option pill receives the held spot (window coords).
-    onOptionTarget: (CurioCategory, androidx.compose.ui.geometry.Offset) -> Unit
+    onOptionTarget: (CurioCategory, androidx.compose.ui.geometry.Offset) -> Unit,
+    // v323 — feed the radial hold overlay's live cursor + release.
+    onHoldMove: (androidx.compose.ui.geometry.Offset) -> Unit,
+    onHoldEnd: (androidx.compose.ui.geometry.Offset) -> Unit
 ) {
     val allUnhidden = remember {
         CurioCategories.all.filter { it.id !in AppPreferences.hiddenCategoriesState }
@@ -394,9 +395,12 @@ private fun BrowseTabContent(
                 pinned = cat.id in pinnedSet,
                 comingSoon = !cat.isReady,
                 onClick = { if (cat.isReady) onSpinLane(cat) },
-                onLongClick = if (cat.isReady) {
-                    { pos -> onOptionTarget(cat, pos) }
-                } else null
+                hold = if (cat.isReady) HoldSession(
+                    onOpen = { pos -> onOptionTarget(cat, pos) },
+                    onMove = onHoldMove,
+                    onEnd = onHoldEnd,
+                    onTap = {}
+                ) else null
             )
         }
     }
@@ -411,7 +415,10 @@ private fun MixesTabContent(
     onDeleteMix: (NamedMix) -> Unit,
     onNewMix: () -> Unit,
     // v3xx — option pill receives the held spot (window coords).
-    onHoldMix: (NamedMix, androidx.compose.ui.geometry.Offset) -> Unit
+    onHoldMix: (NamedMix, androidx.compose.ui.geometry.Offset) -> Unit,
+    // v323 — feed the radial hold overlay's live cursor + release.
+    onHoldMove: (androidx.compose.ui.geometry.Offset) -> Unit,
+    onHoldEnd: (androidx.compose.ui.geometry.Offset) -> Unit
 ) {
     val mixes = AppPreferences.savedMixesState
     val categories = CurioCategories.visible
@@ -446,7 +453,9 @@ private fun MixesTabContent(
                     onApply = { onApplyMix(mix) },
                     onEdit = { onEditMix(mix) },
                     onDelete = { onDeleteMix(mix) },
-                    onHold = { pos -> onHoldMix(mix, pos) }
+                    onHold = { pos -> onHoldMix(mix, pos) },
+                    onHoldMove = onHoldMove,
+                    onHoldEnd = onHoldEnd
                 )
             }
         }
@@ -459,7 +468,10 @@ private fun PinsTabContent(
     context: android.content.Context,
     onSpinLane: (CurioCategory) -> Unit,
     // v3xx — option pill receives the held spot (window coords).
-    onOptionTarget: (CurioCategory, androidx.compose.ui.geometry.Offset) -> Unit
+    onOptionTarget: (CurioCategory, androidx.compose.ui.geometry.Offset) -> Unit,
+    // v323 — feed the radial hold overlay's live cursor + release.
+    onHoldMove: (androidx.compose.ui.geometry.Offset) -> Unit,
+    onHoldEnd: (androidx.compose.ui.geometry.Offset) -> Unit
 ) {
     var pinnedCats by remember {
         mutableStateOf(
@@ -483,10 +495,6 @@ private fun PinsTabContent(
         } else {
             items(pinnedCats, key = { it.id }) { cat ->
                 val shape = RoundedCornerShape(18.dp)
-                // Where this row sits on screen — read at long-press time.
-                val holdCenter = androidx.compose.runtime.remember {
-                    mutableStateOf(androidx.compose.ui.geometry.Offset.Zero)
-                }
                 // NEUTRAL pin row — no category accent.
                 Surface(
                     shape = shape,
@@ -495,11 +503,15 @@ private fun PinsTabContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp)
-                        .onGloballyPositioned { holdCenter.value = it.boundsInRoot().center }
-                        .combinedClickable(
-                            onClick = { onSpinLane(cat) },
-                            onLongClick = { onOptionTarget(cat, holdCenter.value) }
+                        .radialHoldMenu(
+                            HoldSession(
+                                onOpen = { pos -> onOptionTarget(cat, pos) },
+                                onMove = onHoldMove,
+                                onEnd = onHoldEnd,
+                                onTap = {}
+                            )
                         )
+                        .combinedClickable(onClick = { onSpinLane(cat) })
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -564,16 +576,14 @@ private fun BrowseMixRow(
     onApply: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
-    // v318b — long-press opens the screen-level morphing icon pill (the old
-    // 3-item dropdown here is gone; no text, no dropdown). v3xx — the
-    // callback receives this row's own center (window coords) so the pill
-    // pops in AT the held spot.
-    onHold: (androidx.compose.ui.geometry.Offset) -> Unit
+    // v323 — the radial hold session: the ring opens AT the press point
+    // (onOpen), the live finger feeds the highlight (onMove), and the
+    // release position resolves the pick (onEnd).
+    onHold: (androidx.compose.ui.geometry.Offset) -> Unit,
+    onHoldMove: (androidx.compose.ui.geometry.Offset) -> Unit,
+    onHoldEnd: (androidx.compose.ui.geometry.Offset) -> Unit
 ) {
     val shape = RoundedCornerShape(18.dp)
-    val holdCenter = androidx.compose.runtime.remember {
-        mutableStateOf(androidx.compose.ui.geometry.Offset.Zero)
-    }
     Surface(
         shape = shape,
         color = newPickerIdleFill(),
@@ -581,8 +591,15 @@ private fun BrowseMixRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 8.dp)
-            .onGloballyPositioned { holdCenter.value = it.boundsInRoot().center }
-            .combinedClickable(onClick = onApply, onLongClick = { onHold(holdCenter.value) })
+            .radialHoldMenu(
+                HoldSession(
+                    onOpen = onHold,
+                    onMove = onHoldMove,
+                    onEnd = onHoldEnd,
+                    onTap = {}
+                )
+            )
+            .combinedClickable(onClick = onApply)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -653,44 +670,6 @@ private fun BrowseMixRow(
 }
 
 
-/**
- * v318b — the Browse tab's tap-and-hold option pill: the OLD dialog-style
- * centered panel is gone; Pin/Unpin + Spin live in the shared morphing
- * [HoldActionsPill] as circular icon buttons. No text.
- */
-@Composable
-internal fun BrowseOptionPill(
-    category: CurioCategory,
-    isPinned: Boolean,
-    onDismiss: () -> Unit,
-    onPinToggle: () -> Unit,
-    onSpin: () -> Unit,
-    anchor: androidx.compose.ui.geometry.Offset? = null
-) {
-    val actions = buildList {
-        add(
-            HoldAction(
-                CurioIcons.PushPin,
-                if (isPinned) "Unpin" else "Pin",
-                MaterialTheme.colorScheme.secondaryContainer,
-                MaterialTheme.colorScheme.onSecondaryContainer,
-                onPinToggle
-            )
-        )
-        if (category.isReady) {
-            add(
-                HoldAction(
-                    CurioIcons.PlayArrow,
-                    "Spin ${category.displayName}",
-                    MaterialTheme.colorScheme.primary,
-                    MaterialTheme.colorScheme.onPrimary,
-                    onSpin
-                )
-            )
-        }
-    }
-    HoldActionsPill(actions = actions, onDismiss = onDismiss, anchor = anchor)
-}
 
 
 /**

@@ -1417,8 +1417,10 @@ private fun DailyCard(
         )
         Spacer(Modifier.height(2.dp))
         // v8.27 — bonus unlock line: pops in gold once the core trio is done.
+        // v323 — hides again once BOTH bonus quests are themselves claimed
+        // ("Bonus quests unlocked!" shouldn't linger after they're done).
         AnimatedVisibility(
-            visible = coreDone && bonus.isNotEmpty(),
+            visible = coreDone && bonus.isNotEmpty() && bonus.any { it.id !in awarded },
             enter = fadeIn(tween(220)) + scaleIn(initialScale = 0.85f)
         ) {
             Row(
@@ -1754,9 +1756,11 @@ private fun DailyQuestRow(
     )
     // v8.6 — the discovery daily names the lane the passport wants the user
     // to try, and its Go chip routes straight into that lane's Spin deck
-    // (spec §6.2/§6.3).
+    // (spec §6.2/§6.3). v323 — the lane is PINNED at the 4 AM rollover
+    // ([CurioQuests.dailyDiscoveryLane]) so the row names the same lane the
+    // completion hooks check — exploring it always completes the quest.
     val discoveryLane = if (quest.kind == CurioQuests.DailyKind.DISCOVERY) {
-        CurioPassport.leastEngaged(context)
+        CurioQuests.dailyDiscoveryLane() ?: CurioPassport.leastEngaged(context)
     } else null
     val questTitle = when {
         discoveryLane != null -> "New lane, try ${discoveryLane.displayName}"

@@ -1,6 +1,9 @@
 package com.curio.app.features.outfits
 
 import androidx.compose.foundation.background
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,7 +66,10 @@ fun OutfitShopScreen(navController: NavController) {
     val sparkles = AppPreferences.sparklesState
     val owned = AppPreferences.ownedOutfitsState
     val equipped = AppPreferences.equippedOutfitState
+    // v323 — owned toys/games unlock a "Play" action (a real pet moment).
+    val ownedGames = AppPreferences.ownedGamesState
     var toast by remember { mutableStateOf<String?>(null) }
+    val haptics = LocalHapticFeedback.current
     val glassBackdrop = rememberLayerBackdrop()
 
     // Preview sprites: the outfit layered over a neutral default body so the
@@ -83,6 +89,30 @@ fun OutfitShopScreen(navController: NavController) {
         AppPreferences.buyOutfit(context, outfit.id)
         AppPreferences.setEquippedOutfit(context, outfit.id)
         toast = "${outfit.name} equipped!"
+    }
+
+    // v323 — one-time toy purchase; owning a game unlocks its Play action.
+    fun buyGame(game: PetOutfits.PetGame) {
+        if (game.id in ownedGames) return
+        if (!PetOutfits.isGameUnlocked(game, level)) {
+            toast = "Unlocks at Level ${game.levelRequired}"
+            return
+        }
+        if (!AppPreferences.spendSparkles(context, game.price)) {
+            toast = "Not enough sparkles"
+            return
+        }
+        AppPreferences.buyGame(context, game.id)
+        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+        toast = "${game.name} unlocked!"
+    }
+
+    // v323 — Play a purchased toy: a real pet play moment (feeds the
+    // "Play with your pet" daily + the pet's persona) with a confirm buzz.
+    fun playGame(game: PetOutfits.PetGame) {
+        CurioPet.notePlay(context)
+        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+        toast = "Playing ${game.name} with Curie!"
     }
 
     Box(
@@ -251,6 +281,114 @@ fun OutfitShopScreen(navController: NavController) {
                         }
                     }
                 }
+                // ── Toys & games (v323) — one-time sparkle purchases that
+                // unlock a play mode with Curie. Level-gated first (some tie
+                // to a LevelRewards.GAME reward), then Buy → Play.
+                item("games-header") {
+                    Column(modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp)) {
+                        Text(
+                            "Toys & games",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            "One-time buys that unlock play modes with Curie.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                items(PetOutfits.Games, key = { "game-" + it.id }) { game ->
+                    val unlocked = PetOutfits.isGameUnlocked(game, level)
+                    val isOwned = game.id in ownedGames
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(
+                            alpha = if (unlocked) 1f else 0.6f
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(14.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(RoundedCornerShape(15.dp))
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CurioIcon(
+                                    name = game.glyph,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    size = 22.dp
+                                )
+                            }
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Text(
+                                        text = game.name,
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.ExtraBold
+                                        ),
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                                Spacer(Modifier.height(3.dp))
+                                Text(
+                                    text = when {
+                                        !unlocked -> "Unlocks at Level ${game.levelRequired}"
+                                        isOwned -> game.tagline
+                                        else -> "Level ${game.levelRequired} · ${game.price} sparkles"
+                                    },
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = curioSageInk(),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                            Surface(
+                                onClick = { if (isOwned) playGame(game) else buyGame(game) },
+                                shape = CircleShape,
+                                color = when {
+                                    isOwned -> MaterialTheme.colorScheme.secondaryContainer
+                                    unlocked -> MaterialTheme.colorScheme.primary
+                                    else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                },
+                                modifier = Modifier.size(width = 88.dp, height = 38.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = when {
+                                            !unlocked -> "Locked"
+                                            isOwned -> "Play"
+                                            else -> "Buy"
+                                        },
+                                        style = MaterialTheme.typography.labelLarge.copy(
+                                            fontWeight = FontWeight.ExtraBold
+                                        ),
+                                        color = when {
+                                            isOwned -> MaterialTheme.colorScheme.onSecondaryContainer
+                                            unlocked -> MaterialTheme.colorScheme.onPrimary
+                                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                                        },
+                                        maxLines = 1
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
                 item("unlock-note") {
                     Text(
                         text = levelUnlockHint(level),
@@ -263,8 +401,8 @@ fun OutfitShopScreen(navController: NavController) {
         }
         // Sticky hero (the settings-family torn banner).
         SettingsHeroHeader(
-            title = "Pet outfit shop",
-            subtitle = "Cosmetic looks for Curie · sparkles only",
+            title = "Pet shop",
+            subtitle = "Outfits & toys for Curie · sparkles only",
             onBack = { navController.popBackStack() },
             glassBackdrop = glassBackdrop
         )

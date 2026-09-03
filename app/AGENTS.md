@@ -408,6 +408,47 @@ app/src/main/java/com/curio/app/
   `drop(1)`) to new `KEY_PICKER_PAGE0_SCROLL` / `KEY_PICKER_PAGE1_SCROLL`
   ("index:offset") behind `AppPreferences.PickerScrollPos`
   get/set helpers — survives closing the picker AND app restarts.
+- **v323 — picker hold actions become a gooey RADIAL menu; share-card
+  Tone tool + 6 new tones; pet shop toys/games; quest fixes.** (1)
+  **Radial hold menu** (`features/picker/RadialHoldMenu.kt`): the old
+  single morphing pill is replaced by a fluid ring — gooey blobs (a
+  blur+alpha-contrast `RenderEffect` chain on API 31+, soft circles below)
+  well out of the PRESS POINT, settle into a ring of crisp glass discs, and
+  stay live-switchable: drag anywhere (the nearest disc highlights with hit
+  slop), release over a disc to pick, release over nothing to cancel. NO
+  dark scrim — the menu exists only while the finger is down. The gesture
+  lives on each tile as `Modifier.radialHoldMenu(HoldSession(onOpen,
+  onMove, onEnd, onTap))` (own-press with the system long-press timeout,
+  consumes the pointer once open so the clickable underneath never fires);
+  the visuals live in `RadialHoldMenuOverlay`, which the sheet/screen
+  renders at the held anchor (clamped inside). Wiring: `NewPickerTile` /
+  `NewPinnedPill` / `NewMixCard` / `ContinueExploringSection` (sheet) and
+  `BrowseTabContent` / `MixesTabContent` / `PinsTabContent` / `BrowseMixRow`
+  (Browse page) pass a `HoldSession`; `CategoryOptionPill` / `MixOptionPill`
+  (now `internal`, shared with Browse) render `RadialHoldMenuOverlay` with
+  the shared `holdCursor`/`holdEnd` sheet state. The classic page's
+  hold-to-multi-select is NOT a radial menu — `NewPickerTile` keeps a plain
+  `onLongClick` for it. The old `HoldActionsPill` is now dead code (keep or
+  delete with care — nothing references it). (2) **Share-card Tone tool**
+  (`TopicShareSheet`): a Palette tool pill opens a swatch row of every tone
+  the player has UNLOCKED (`unlockedToneCount = 4 + LevelRewards.
+  unlockedPaletteCount`); `TopicShareCard.toneIndex: Int?` picks one (null
+  = Auto rotation), `ShareCardPalette` gained a `name`; Save/Share export
+  the picked tone. (3) **Six new tones** added to `curatedTones` (Ocean 12,
+  Rose Gold 18, Moss 25, Storm 35, Pearl 45, Sunburst 50) + matching
+  `LevelRewards` entries; `RewardKind.GAME` unlocks pet games (12 Ball
+  fetch, 25 Star catch, 35 Bubble storm). (4) **Pet shop toys** —
+  `PetOutfits.Games` (id/name/glyph/price/levelRequired/rewardId/tagline),
+  `AppPreferences.getOwnedGames/buyGame` (`ownedGamesState`), shop section
+  with Buy → Play (`CurioPet.notePlay` + haptic); 4 new outfits (Polka
+  Bowtie, Sun Hat, Curio Glasses, Tail Puff). (5) **Quest fixes** — the
+  Home "Today's quests" strip (`HomeDailyStrip`) is REMOVED; the "Bonus
+  quests unlocked!" line hides once both bonus quests are claimed; the
+  "Try a new lane" daily PINS its lane at the 4 AM rollover
+  (`CurioQuests.dailyLaneState` + `dailyDiscoveryLane()`, stored by
+  `CategoryId.name`) so the shown lane and the completion check always
+  agree (the old live `leastEngaged()` re-resolution could re-aim the
+  quest away mid-day).
 - **v313 — Topic Browser revamp, pick 1: category-filtered search, dynamic
   chips, one-category browse.** User: "in topic browser let user change
   category and act that category as filters for the search, so it doesn't

@@ -848,25 +848,8 @@ fun HomeScreen(navController: NavController) {
             // Saved (40dp of dead space when no session/queue is live).
             Spacer(Modifier.height(12.dp))
 
-            // ── Today's quests — compact progress strip (v9.x) ─────────
-            // The day's three CORE dailies with live progress bars, so quest
-            // progress lives on Home, not only in the Quests screen. Tap
-            // anywhere to open Quests. Reads reactive state, so bars fill
-            // the instant an action lands.
-            // The strip's centering modifier lives HERE (ColumnScope — the
-            // same widthIn+align the quest block uses), not inside the
-            // composable: Modifier.align only exists on a ColumnScope.
-            HomeDailyStrip(
-                context = context,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .widthIn(max = if (windowWidthSizeClass().isWide) WideContentMaxWidth else Dp.Infinity)
-                    .align(Alignment.CenterHorizontally),
-                onClick = {
-                    navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true }
-                }
-            )
+            // v323 — the Home "Today's quests" strip was removed per user
+            // direction (quests live on the Quests screen only).
             Spacer(Modifier.height(12.dp))
 
             // ── 2. Currently exploring — live session card ──────────────
@@ -1579,97 +1562,6 @@ private fun TopBarPill(
 // Quest block — the big solid Shuffle CTA that lives between the hero
 // tear and the content below.
 // ═══════════════════════════════════════════════════════════════════════
-
-/**
- * v9.x — the day's three CORE daily quests with live progress, so quest
- * progress shows on Home. Tap opens the Quests screen. Bonus quests are
- * intentionally hidden here (they only unlock after the core trio is
- * claimed — Quests owns that reveal).
- */
-@Composable
-private fun HomeDailyStrip(
-    context: Context,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    val quests = CurioQuests.dailyQuestsFor(CurioQuests.todayEpochDay(), context).filterNot { it.bonus }.take(3)
-    val awarded = CurioQuests.dailyAwardedState
-    val progress = CurioQuests.dailyProgressState
-    val doneCount = quests.count { it.id in awarded }
-    val accent = homeRoseAccent()
-    val ink = homeReadableInk(accent)
-    val allDone = doneCount == quests.size
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(20.dp),
-        color = if (allDone) accent.copy(alpha = 0.16f)
-        else MaterialTheme.colorScheme.surfaceContainerHigh,
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                CurioIcon(
-                    name = CurioIcons.EmojiEvents,
-                    contentDescription = null,
-                    tint = ink,
-                    size = 16.dp
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = "Today's quests · $doneCount/${quests.size}",
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(1f)
-                )
-                if (!allDone) {
-                    Text(
-                        text = "Open",
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                        color = ink
-                    )
-                }
-            }
-            Spacer(Modifier.height(8.dp))
-            quests.forEach { quest ->
-                val p = (progress[quest.kind.name] ?: 0).coerceIn(0, quest.target)
-                val done = quest.id in awarded
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 3.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = quest.title,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (done) ink else MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Spacer(Modifier.width(10.dp))
-                    Text(
-                        text = "$p/${quest.target}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                LinearProgressIndicator(
-                    progress = { p.toFloat() / quest.target.coerceAtLeast(1) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(4.dp)
-                        .clip(RoundedCornerShape(50)),
-                    color = if (done) accent else ink,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            }
-        }
-    }
-}
 
 @Composable
 private fun QuestShuffleCard(

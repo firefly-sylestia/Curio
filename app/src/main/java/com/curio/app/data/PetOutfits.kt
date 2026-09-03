@@ -111,6 +111,106 @@ object PetOutfits {
             )
         ),
         Outfit(
+            id = "bowtie",
+            name = "Polka Bowtie",
+            glyph = "pets",
+            price = 12,
+            levelRequired = 5,
+            art = listOf(
+                "................",
+                "................",
+                "................",
+                "................",
+                "................",
+                "................",
+                "................",
+                ".....ss..ss.....",
+                "......ssss......",
+                ".....ssssss.....",
+                "......ssss......",
+                ".......ss.......",
+                "................",
+                "................",
+                "................",
+                "................"
+            )
+        ),
+        Outfit(
+            id = "sunhat",
+            name = "Sun Hat",
+            glyph = "pets",
+            price = 55,
+            levelRequired = 15,
+            art = listOf(
+                "................",
+                "................",
+                ".oooooooooooooo.",
+                ".o............o.",
+                "..oooooooooooo..",
+                "...oooooooooo...",
+                "....oooooooo....",
+                "................",
+                "................",
+                "................",
+                "................",
+                "................",
+                "................",
+                "................",
+                "................",
+                "................"
+            )
+        ),
+        Outfit(
+            id = "glasses",
+            name = "Curio Glasses",
+            glyph = "pets",
+            price = 75,
+            levelRequired = 25,
+            art = listOf(
+                "................",
+                "................",
+                "................",
+                "................",
+                "....oo....oo....",
+                "...oooo..oooo...",
+                "....oo....oo....",
+                "......oooo......",
+                "................",
+                "................",
+                "................",
+                "................",
+                "................",
+                "................",
+                "................",
+                "................"
+            )
+        ),
+        Outfit(
+            id = "tailpuff",
+            name = "Tail Puff",
+            glyph = "pets",
+            price = 100,
+            levelRequired = 35,
+            art = listOf(
+                "................",
+                "................",
+                "................",
+                "................",
+                "................",
+                "................",
+                "................",
+                "................",
+                "................",
+                "...........oo...",
+                "..........o..o..",
+                "..........o..o..",
+                "...........oo...",
+                "................",
+                "................",
+                "................"
+            )
+        ),
+        Outfit(
             id = "galaxy",
             name = "Galaxy Drifter",
             glyph = "auto_awesome",
@@ -145,4 +245,36 @@ object PetOutfits {
     fun isUnlocked(outfit: Outfit, level: Int): Boolean =
         level >= outfit.levelRequired &&
             (outfit.rewardId.isEmpty() || LevelRewards.isUnlocked(level, outfit.rewardId))
+
+    // ── Toys & games — one-time sparkle purchases that unlock a play mode
+    //    with Curie (v323). Each game is level-gated first (some tie to a
+    //    LevelRewards.GAME reward), then purchasable; owning it unlocks the
+    //    "Play" action in the shop, which fires a real pet play moment.
+    data class PetGame(
+        val id: String,
+        val name: String,
+        val glyph: String,
+        /** Sparkle price. */
+        val price: Int,
+        /** Level required to unlock in the shop. */
+        val levelRequired: Int,
+        /** The level-reward id that unlocks this game ("" = shop-only). */
+        val rewardId: String = "",
+        /** One-line flavor shown under the name. */
+        val tagline: String
+    )
+
+    val Games: List<PetGame> = listOf(
+        PetGame("ball", "Ball fetch", "play_circle", 25, 12, "game-ball", "Toss the ball — Curie fetches!"),
+        PetGame("starcatch", "Star catch", "star", 60, 25, "game-starcatch", "Catch falling stars together."),
+        PetGame("bubbles", "Bubble storm", "bubble_chart", 90, 35, "game-bubbles", "A storm of bubbles to pop.")
+    )
+
+    /** The game with [id], or null. */
+    fun gameById(id: String?): PetGame? = Games.firstOrNull { it.id == id }
+
+    /** Whether [game] is unlocked at [level] (level + reward gate). */
+    fun isGameUnlocked(game: PetGame, level: Int): Boolean =
+        level >= game.levelRequired &&
+            (game.rewardId.isEmpty() || LevelRewards.isUnlocked(level, game.rewardId))
 }
