@@ -29,13 +29,34 @@ User direction (v324):
   (`Arrangement.spacedBy(8.dp, Alignment.End)`), and the shared bottom
   row's solid "Mix · N" capsule is hidden while mixing on the CLASSIC page
   (`!mixing || pagerState.currentPage != 0`) — it stays on the new page.
-- Docs: changelog (REMOVE Deepen, ADD Adjust, FIX mix strip), app/AGENTS.md
-  (v324 bullet incl. redesign contract + strip fix), this file.
+- **v325 — share-card editor safety net (user report).** (1) Back cancels
+  the Customise editor first, then (second press) exits the sheet
+  (`BackHandler(enabled = editMode)` in `TopicShareSheet`). (2) Edits are
+  now PERSISTENT across sheet dismissals — `persistEdits()` saves the
+  current move/text/scale state on Save/Share AND on dismissal, so an
+  accidental exit resumes where you left off; leaving the TOPIC REVEAL
+  screen clears the topic's edits (`clearShareCardEdits` in a
+  `DisposableEffect(floatingTopic)` in `TopicRevealScreen`). (3) The
+  "Edit text" circle moved NEXT to the floating Done button (shown when
+  the quick fact is selected). (4) The move knob shrinks and fades while
+  dragging so it no longer covers the text. (5) **RadialHoldMenu re-ported
+  for Compose BOM 2026.05** (second CI failure — this generation removed
+  `PointerInputChange.positionInRoot()` and the gesture scope is
+  `@RestrictsSuspension`): hold timer runs on a `rememberCoroutineScope`
+  coroutine; root coords = `change.position` + `LayoutCoordinates.
+  positionInRoot()` via `onGloballyPositioned`/`rememberUpdatedState`;
+  the goo merge is now `Modifier.blur(18.dp)` (no more android.graphics
+  RenderEffect chain).
+- Docs: changelog (v325 FIXes + radial-menu compile fix), app/AGENTS.md
+  (v325 bullet), this file.
 
 ## Verification
 
 - `git diff --check` passes; 0 deepen refs; 4/4 call sites carry the new
-  params; contrast glyph in the icons font; splice seam read back clean.
+  params; contrast glyph in the icons font; splice seam read back clean;
+  RadialHoldMenu grep clean of `positionInRoot`(pointer) / `RenderEffect`
+  / restricted-scope `launch`; persistence + clear hooks verified by grep
+  (Save, Share, dismiss, reveal-exit).
 - No Gradle commands run (project DOX forbids them here) — CI validates.
 
 ## NEXT — Books signature design (awaiting the user's description)

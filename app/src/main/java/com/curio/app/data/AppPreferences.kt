@@ -2734,6 +2734,21 @@ object AppPreferences {
         raw.optJSONObject(topicName)
     } catch (_: Exception) { null }
 
+    /** Remove the saved card edits for [topicName] — called when the user
+     *  LEAVES the Topic Reveal screen (v325), so the next share of that
+     *  topic starts clean; accidental sheet exits meanwhile keep the edits
+     *  (persisted on dismissal). */
+    fun clearShareCardEdits(context: Context, topicName: String) {
+        try {
+            val raw = prefs(context).getString(KEY_SHARE_CARD_EDITS, null)
+                ?.let { JSONObject(it) } ?: return
+            if (raw.has(topicName)) {
+                raw.remove(topicName)
+                prefs(context).edit().putString(KEY_SHARE_CARD_EDITS, raw.toString()).apply()
+            }
+        } catch (_: Exception) { }
+    }
+
     /** Record a shared card for the Share Hub gallery. */
     fun recordSharedCard(context: Context, topicName: String, categoryName: String,
         style: String, aspect: String) {

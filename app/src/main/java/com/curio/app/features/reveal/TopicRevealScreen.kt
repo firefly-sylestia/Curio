@@ -1009,6 +1009,14 @@ fun TopicRevealScreen(
             DisposableEffect(Unit) {
                 onDispose { SentimentPillHost.content = null }
             }
+            // v325 — LEAVING the reveal screen resets this topic's saved
+            // share-card edits, so the next share starts clean (accidental
+            // sheet exits meanwhile resume — the sheet persists on dismissal).
+            DisposableEffect(floatingTopic) {
+                onDispose {
+                    floatingTopic?.let { AppPreferences.clearShareCardEdits(context, it.name) }
+                }
+            }
             if (showShareSheet) {
                 com.curio.app.ui.components.TopicShareSheet(
                     topicName = floatingTopic.name,

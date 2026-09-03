@@ -4696,10 +4696,28 @@ fun TopicShareSheet(
         if (styles.size > 1) scope.launch { pagerState.animateScrollToPage(styleIdx) }
     }
 
+    // v325 — persist the CURRENT edits (move + text + scale) so an accidental
+    // exit can be resumed by reopening the sheet. Runs on Save/Share AND on
+    // dismissal; only LEAVING the Topic Reveal screen clears the topic's edits
+    // (see TopicRevealScreen).
+    fun persistEdits() {
+        AppPreferences.saveShareCardEdits(context, topicName, move.titleDx, move.titleDy, move.factDx, move.factDy, move.metaDx, move.metaDy, move.badgeDx, move.badgeDy, move.titleWidthFrac, move.titleHeightFrac, move.factWidthFrac, move.factHeightFrac, move.titleScale, bodyScale, editedTitle, editedFact)
+    }
+
     // onDismissRequest also respects edit mode: the back button and scrim taps
     // are ignored while editing (the swipe path is blocked via the sheet
-    // state's confirmValueChange above).
-    ModalBottomSheet(onDismissRequest = { if (!editMode) onDismiss() }, sheetState = sheetState, containerColor = MaterialTheme.colorScheme.surface, dragHandle = { BottomSheetDefaults.DragHandle() }) {
+    // state's confirmValueChange above). v325 — dismissal persists the edits
+    // first, so exiting by mistake resumes where you left off.
+    ModalBottomSheet(onDismissRequest = { if (!editMode) { persistEdits(); onDismiss() } }, sheetState = sheetState, containerColor = MaterialTheme.colorScheme.surface, dragHandle = { BottomSheetDefaults.DragHandle() }) {
+        // v325 — BACK cancels the Customise editor first, then (on a second
+        // press) exits the sheet — it was previously swallowed while editing.
+        BackHandler(enabled = editMode) {
+            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            editMode = false
+            selectedResizeTarget = ShareCardResizeTarget.NONE
+            factEditMode = false
+            toolOpen = null
+        }
         Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 24.dp).verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
             // v316b — editing owns the whole sheet: the title (and the style
             // label / dots below) hide while edit mode is on so the card +
@@ -4999,21 +5017,6 @@ fun TopicShareSheet(
                             active = toolOpen == "source",
                             onClick = { toolOpen = if (toolOpen == "source") null else "source" }
                         )
-                        // v323 — text editing for the quick fact is an EXPLICIT
-                        // action: tap the box to select/move it, then Edit text to
-                        // type. Keeps the keyboard from taking over the sheet.
-                        if (sel == ShareCardResizeTarget.FACT) {
-                            EditToolPill(
-                                glyph = CurioIcons.Edit,
-                                description = "Edit text",
-                                active = factEditMode,
-                                onClick = {
-                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                    factEditMode = !factEditMode
-                                    if (!factEditMode) focusManager.clearFocus()
-                                }
-                            )
-                        }
                         EditToolPill(
                             glyph = CurioIcons.Refresh,
                             description = "Reset all edits",
@@ -5028,6 +5031,23 @@ fun TopicShareSheet(
                                 toolOpen = null
                             }
                         )
+                        // v325 — the Edit text circle sits NEXT to the floating
+                        // Done button when the quick fact is selected (it used to
+                        // hide mid-scroll in the tool row). v323 — text editing
+                        // is an EXPLICIT action: tap the box to select/move it,
+                        // then Edit text to type.
+                        if (sel == ShareCardResizeTarget.FACT) {
+                            EditToolPill(
+                                glyph = CurioIcons.Edit,
+                                description = "Edit text",
+                                active = factEditMode,
+                                onClick = {
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    factEditMode = !factEditMode
+                                    if (!factEditMode) focusManager.clearFocus()
+                                }
+                            )
+                        }
                         EditToolPill(
                             glyph = CurioIcons.Check,
                             description = "Done",
@@ -5227,7 +5247,7 @@ fun TopicShareSheet(
                         shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
                             TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move)
                         }, saveToGallery = true)
-                        AppPreferences.saveShareCardEdits(context, topicName, move.titleDx, move.titleDy, move.factDx, move.factDy, move.metaDx, move.metaDy, move.badgeDx, move.badgeDy, move.titleWidthFrac, move.titleHeightFrac, move.factWidthFrac, move.factHeightFrac, move.titleScale, bodyScale, editedTitle, editedFact)
+                        persistEdits()
                         onDismiss()
                     },
                     shape = RoundedCornerShape(50),
@@ -5246,7 +5266,7 @@ fun TopicShareSheet(
                     shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
                         TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = activeSource.text, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = editedFact, move = move)
                     })
-                        AppPreferences.saveShareCardEdits(context, topicName, move.titleDx, move.titleDy, move.factDx, move.factDy, move.metaDx, move.metaDy, move.badgeDx, move.badgeDy, move.titleWidthFrac, move.titleHeightFrac, move.factWidthFrac, move.factHeightFrac, move.titleScale, bodyScale, editedTitle, editedFact)
+                        persistEdits()
                         onDismiss()
                 }, shape = RoundedCornerShape(50), colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimary), modifier = Modifier.weight(1f).height(44.dp)) {
                     Text("Share", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold))
@@ -5296,17 +5316,25 @@ private fun BoxScope.MoveHandle(
 ) {
     val density = androidx.compose.ui.platform.LocalDensity.current
     val latestDelta by rememberUpdatedState(onDelta)
+    // v325 — while dragging, the knob shrinks and fades so the text it moves
+    // stays readable underneath (it used to sit right on the glyphs).
+    var dragging by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .offset(x = x, y = y)
-            .size(30.dp)
+            .size(22.dp)
             .graphicsLayer {
-                shadowElevation = 3.dp.toPx(); shape = CircleShape; clip = false
+                shadowElevation = 2.dp.toPx(); shape = CircleShape; clip = false
+                alpha = if (dragging) 0.55f else 1f
             }
             .background(CoffeeChromeDeep, CircleShape)
             .border(1.dp, Color.White.copy(alpha = 0.45f), CircleShape)
             .pointerInput(Unit) {
-                detectDragGestures { _, dragAmount ->
+                detectDragGestures(
+                    onDragStart = { dragging = true },
+                    onDragEnd = { dragging = false },
+                    onDragCancel = { dragging = false }
+                ) { _, dragAmount ->
                     val dx = with(density) { dragAmount.x.toDp().value }
                     val dy = with(density) { dragAmount.y.toDp().value }
                     latestDelta(dx, dy)
@@ -5318,7 +5346,7 @@ private fun BoxScope.MoveHandle(
             name = CurioIcons.DragHandle,
             contentDescription = "Move",
             tint = Color.White,
-            size = 18.dp
+            size = if (dragging) 11.dp else 13.dp
         )
     }
 }

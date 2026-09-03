@@ -1,3 +1,6 @@
+FIX: Share-card editor — back now cancels the editor first (press again to exit the sheet), and exiting the sheet by mistake no longer loses your work: edits are saved on dismiss and restored when you reopen the sheet (they clear when you leave the topic).
+FIX: Share-card editor — the Edit text circle now sits right next to the floating Done button (it used to hide mid-scroll), and the move knob shrinks and fades while dragging so it no longer covers the text you're moving.
+FIX: Category picker tap-and-hold — rebuilt on the current Compose APIs so the gooey radial menu works on every device (was failing to compile on some builds).
 REMOVE: The Deepen signature-card option is gone — the detailed background-scene experiment and its Settings toggle are removed; signature cards keep the default and classic looks only.
 FIX: Category picker — during mix, the floating Apply pill is back beside Cancel in the page, and the big solid "Mix · N" strip behind the Cancel button is gone (the bottom capsule stays for the new page and idle state).
 ADD: Share-card editor — new Adjust tool with Saturation and Contrast sliders that fine-tune the whole card live (every style, baked into the saved image); it replaces the heavy Deepen scenes with a clean edit.

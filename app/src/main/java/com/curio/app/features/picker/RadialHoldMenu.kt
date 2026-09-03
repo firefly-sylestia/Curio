@@ -19,19 +19,22 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.positionInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.IntOffset
@@ -50,8 +53,8 @@ import kotlin.math.roundToInt
 // The category picker's tap-and-hold actions, rebuilt from the old single
 // capsule into a fluid radial menu:
 //  - NO dark scrim — the menu exists only while the finger is down.
-//  - Circular actions well up OUT of the press point (gooey blob morph) and
-//    settle into a ring AROUND it.
+//  - Circular actions well up OUT of the press point (gooey blob morph, a
+//    soft layer blur merges the blobs) and settle into a ring AROUND it.
 //  - Drag anywhere: the nearest disc highlights live; release over one to
 //    pick it, release over nothing to cancel.
 //
@@ -112,44 +115,60 @@ class HoldSession(
  * Attaches the radial-hold gesture. Place BEFORE any clickable in the chain
  * so the hold owns the pointer once it opens. The long-press uses the
  * system's own timeout ([LocalViewConfiguration.longPressTimeoutMillis]).
+ *
+ * v325 — this Compose generation (BOM 2026.05) removed
+ * `PointerInputChange.positionInRoot()` and made the gesture scope
+ * `@RestrictsSuspension` (no `launch`/`delay` inside it), so: the long-press
+ * timer runs on a [rememberCoroutineScope] coroutine (never inside the
+ * restricted scope), and root coordinates are computed as
+ * `change.position` (node-local) + the node's own
+ * `LayoutCoordinates.positionInRoot()` captured via [onGloballyPositioned]
+ * and read fresh through [rememberUpdatedState] (the never-restarting
+ * gesture must not close over a stale root).
  */
 fun Modifier.radialHoldMenu(hold: HoldSession?): Modifier = composed {
     if (hold == null) return@composed this
     val viewConfig = LocalViewConfiguration.current
-    this.pointerInput(hold) {
-        awaitEachGesture {
-            val down = awaitFirstDown(requireUnconsumed = false)
-            val pressPos = down.positionInRoot()
-            var opened = false
-            val holdJob = this@pointerInput.launch {
-                delay(viewConfig.longPressTimeoutMillis)
-                opened = true
-                hold.onOpen(pressPos)
-            }
-            while (true) {
-                val event = awaitPointerEvent()
-                val change = event.changes.firstOrNull { it.id == down.id } ?: break
-                if (change.pressed) {
-                    if (opened) {
-                        hold.onMove(change.positionInRoot())
-                        // Own the pointer once the menu is open so the
-                        // clickable underneath never sees the release.
-                        change.consume()
-                    }
-                } else {
-                    holdJob.cancel()
-                    if (opened) hold.onEnd(change.positionInRoot()) else hold.onTap()
-                    break
+    // A REAL CoroutineScope for the hold timer — the awaitEachGesture scope
+    // is restricted and cannot run delay()/launch().
+    val scope = rememberCoroutineScope()
+    var nodeRoot by remember { mutableStateOf(Offset.Zero) }
+    val currentRoot by rememberUpdatedState(nodeRoot)
+    this.onGloballyPositioned { nodeRoot = it.positionInRoot() }
+        .pointerInput(hold) {
+            awaitEachGesture {
+                val down = awaitFirstDown(requireUnconsumed = false)
+                val pressPos = down.position + currentRoot.value
+                var opened = false
+                val holdJob = scope.launch {
+                    delay(viewConfig.longPressTimeoutMillis)
+                    opened = true
+                    hold.onOpen(pressPos)
                 }
+                while (true) {
+                    val event = awaitPointerEvent()
+                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                    if (change.pressed) {
+                        if (opened) {
+                            hold.onMove(change.position + currentRoot.value)
+                            // Own the pointer once the menu is open so the
+                            // clickable underneath never sees the release.
+                            change.consume()
+                        }
+                    } else {
+                        holdJob.cancel()
+                        if (opened) hold.onEnd(change.position + currentRoot.value) else hold.onTap()
+                        break
+                    }
+                }
+                holdJob.cancel()
             }
-            holdJob.cancel()
         }
-    }
 }
 
 /**
- * The radial menu visuals: a gooey liquid blob layer (blur + alpha-contrast
- * chain effect on API 31+, soft circles below) morphing out of [anchor],
+ * The radial menu visuals: a gooey liquid blob layer (overlapping soft
+ * circles blurred into a liquid whole) morphing out of [anchor],
  * with crisp glass discs on top. [cursor] highlights the nearest disc;
  * [endPos] (the release point) resolves the pick and fires its action.
  */
@@ -228,11 +247,14 @@ internal fun RadialHoldMenuOverlay(
                 radius = 1f
             )
         }
-        val gooChain = remember(primary) { buildGooRenderEffect() }
+        // v325 — the goo merge is now a plain layer blur (Modifier.blur):
+        // overlapping soft blobs blur into one liquid-looking whole on every
+        // API level. The old RenderEffect chain (android.graphics) no longer
+        // type-checks against this Compose's GraphicsLayerScope.
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .graphicsLayerCompat(gooChain)
+                .blur(18.dp)
         ) {
             Canvas(Modifier.fillMaxSize()) {
                 // Center pool — fades once the ring settles.
@@ -388,39 +410,3 @@ private fun Float.pow(e: Int): Float {
     repeat(e) { r *= this }
     return r
 }
-
-/**
- * The goo filter: blur + alpha-contrast chain (like an SVG goo filter), so
- * overlapping blobs visibly MERGE into a water-like whole. RenderEffect is
- * API 31+; older devices render the soft circles without the merge.
- */
-private fun buildGooRenderEffect(): androidx.compose.ui.graphics.RenderEffect? {
-    if (android.os.Build.VERSION.SDK_INT < 31) return null
-    return try {
-        androidx.compose.ui.graphics.RenderEffect.createChainEffect(
-            androidx.compose.ui.graphics.RenderEffect.createBlurEffect(
-                22f, 22f, androidx.compose.ui.graphics.ShaderTileMode.DECAL
-            ),
-            androidx.compose.ui.graphics.RenderEffect.createColorFilterEffect(
-                androidx.compose.ui.graphics.ColorFilter.colorMatrix(
-                    androidx.compose.ui.graphics.ColorMatrix(floatArrayOf(
-                        1f, 0f, 0f, 0f, 0f,
-                        0f, 1f, 0f, 0f, 0f,
-                        0f, 0f, 1f, 0f, 0f,
-                        0f, 0f, 0f, 26f, -11f
-                    ))
-                )
-            )
-        )
-    } catch (_: Throwable) {
-        null
-    }
-}
-
-/** Applies [effect] (when non-null) to this layer; no-op otherwise. */
-private fun Modifier.graphicsLayerCompat(effect: androidx.compose.ui.graphics.RenderEffect?): Modifier =
-    if (effect != null) {
-        this.graphicsLayer { renderEffect = effect }
-    } else {
-        this
-    }

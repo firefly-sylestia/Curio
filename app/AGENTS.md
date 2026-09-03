@@ -449,6 +449,37 @@ app/src/main/java/com/curio/app/
   `CategoryId.name`) so the shown lane and the completion check always
   agree (the old live `leastEngaged()` re-resolution could re-aim the
   quest away mid-day).
+- **v325 — share-card editor safety net: back-cancels-edit, edit
+  persistence, quick-fact "Edit text" placement, knob-on-text fix;
+  RadialHoldMenu ported off removed Compose APIs.** (1) **Back now
+  cancels the editor first, then exits** (`BackHandler(enabled =
+  editMode)` inside `TopicShareSheet` cancels the editor on the first
+  press; the next press hits the sheet's own back handler and dismisses
+  it — back was previously swallowed while editing). (2) **Edit
+  persistence**: `TopicShareSheet.persistEdits()` writes the current
+  move/text/scale state via `AppPreferences.saveShareCardEdits` on
+  Save/Share AND on dismissal (`onDismissRequest` persists before
+  dismissing), so an accidental exit resumes where you left off; leaving
+  the TOPIC REVEAL screen clears the topic's edits
+  (`DisposableEffect(floatingTopic)` → `AppPreferences.
+  clearShareCardEdits`), so the next share of that topic starts clean.
+  (3) **"Edit text" pill moved NEXT to the floating Done button**
+  (previously it hid mid-scroll in the tool row) — shown when the quick
+  fact is the selected element. (4) **Move knob no longer covers the
+  text**: `MoveHandle` shrinks (30→22dp, glyph 18→13dp) and fades
+  (alpha 0.55) while dragging so the text it moves stays readable.
+  (5) **RadialHoldMenu ported for Compose BOM 2026.05** (CI compile
+  errors: this generation removed `PointerInputChange.
+  positionInRoot()` and made the `awaitEachGesture` scope
+  `@RestrictsSuspension`): the long-press timer now runs on a
+  `rememberCoroutineScope()` coroutine (never inside the restricted
+  scope), root coordinates are `change.position` (node-local) +
+  the node's `LayoutCoordinates.positionInRoot()` captured via
+  `onGloballyPositioned` and read fresh through `rememberUpdatedState`;
+  the goo merge is now a plain `Modifier.blur(18.dp)` layer (the old
+  android.graphics `RenderEffect` chain no longer type-checks) —
+  overlapping soft blobs still blur into one liquid-looking whole on
+  every API level.
 - **v324 — Deepen REMOVED; share-card Adjust tool (saturation/contrast);
   signature redesign contract.** (1) **Deepen is gone** (user direction —
   "just keep default and classic option"): the Experiments toggle
