@@ -3320,6 +3320,7 @@ private fun AlbumTrackListCard(
                     albumTitle = topic.name,
                     artist = topic.byline,
                     accent = cat.themedAccent(),
+                    imageUrl = topic.imageUrl,
                     modifier = Modifier
                         .size(84.dp)
                         .shadow(4.dp, RoundedCornerShape(12.dp))
@@ -3427,12 +3428,17 @@ private fun AlbumCoverPoster(
     albumTitle: String,
     artist: String,
     accent: Color,
+    imageUrl: String? = null,
     modifier: Modifier = Modifier
 ) {
-    var artUrl by remember(albumTitle, artist) { mutableStateOf<String?>(null) }
-    var failed by remember(albumTitle, artist) { mutableStateOf(false) }
-    LaunchedEffect(albumTitle, artist) {
-        if (artUrl == null && !failed) {
+    // v333 — albums now ship an AUTHORED `imageUrl` in the catalog (iTunes /
+    // MusicBrainz artwork), so the poster prefers it and only falls back to
+    // the on-the-fly keyless resolver for albums without one (older rows).
+    val authoredUrl = imageUrl?.takeIf { it.isNotBlank() }
+    var artUrl by remember(albumTitle, artist, authoredUrl) { mutableStateOf<String?>(authoredUrl) }
+    var failed by remember(albumTitle, artist, authoredUrl) { mutableStateOf(false) }
+    LaunchedEffect(albumTitle, artist, authoredUrl) {
+        if (artUrl == null && !failed && authoredUrl == null) {
             artUrl = AlbumArtFetch.resolveArtworkUrl(albumTitle, artist)
             if (artUrl == null) failed = true
         }
@@ -3649,6 +3655,7 @@ private fun AlbumNotesSheet(
                     albumTitle = topic.name,
                     artist = topic.byline,
                     accent = accent,
+                    imageUrl = topic.imageUrl,
                     modifier = Modifier
                         .size(84.dp)
                         .shadow(3.dp, RoundedCornerShape(12.dp))
@@ -3689,6 +3696,38 @@ private fun AlbumNotesSheet(
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                         color = cat.categoryInk()
                     )
+                }
+                // v333 — a Genius link pill beside Close when the catalog
+                // authors a geniusUrl for this album (opens the album's
+                // annotation page in the browser).
+                val geniusUrl = topic.geniusUrl?.takeIf { it.isNotBlank() }
+                if (geniusUrl != null) {
+                    Surface(
+                        onClick = {
+                            openSearchUrl(LocalContext.current, geniusUrl)
+                        },
+                        shape = RoundedCornerShape(50),
+                        color = accent.copy(alpha = 0.14f)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp),
+                            modifier = Modifier.padding(horizontal = 9.dp, vertical = 7.dp)
+                        ) {
+                            CurioIcon(
+                                CurioIcons.OpenInNew,
+                                "Open album on Genius",
+                                tint = cat.onAccent(),
+                                size = 16.dp
+                            )
+                            Text(
+                                "GENIUS",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                color = cat.categoryInk(),
+                                maxLines = 1
+                            )
+                        }
+                    }
                 }
                 Surface(
                     onClick = onDismiss,

@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [CaptureEntity::class, TopicEntity::class, CachedTopicEntity::class],
-    version = 12,
+    version = 13,
     exportSchema = false
 )
 abstract class CurioDatabase : RoomDatabase() {
@@ -210,6 +210,14 @@ abstract class CurioDatabase : RoomDatabase() {
             }
         }
 
+        /** v12 → v13: add geniusUrl column for album topics (Genius link). */
+        val MIGRATION_12_13 = object : Migration(12, 13) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE topics ADD COLUMN geniusUrl TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE cached_topics ADD COLUMN geniusUrl TEXT NOT NULL DEFAULT ''")
+            }
+        }
+
         fun getInstance(context: Context): CurioDatabase {
             return INSTANCE ?: synchronized(this) {
                 INSTANCE ?: Room.databaseBuilder(
@@ -224,7 +232,7 @@ abstract class CurioDatabase : RoomDatabase() {
                     // text store, so the write-throughput tradeoff is negligible —
                     // backup integrity wins.
                     .setJournalMode(RoomDatabase.JournalMode.TRUNCATE)
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13)
                     .fallbackToDestructiveMigration(false)
                     .build()
                     .also { INSTANCE = it }

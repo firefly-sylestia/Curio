@@ -574,6 +574,9 @@ object TopicJsonLoader {
                 )
             }
         } else null
+        // Albums only: Genius album page (v333 — authored link surfaced in the
+        // track-list sheet header). Null for non-album topics without a link.
+        val geniusUrl = obj.optString("geniusUrl", "").takeIf { it.isNotBlank() }
         // Albums only: per-track list (number/title/duration).
         val tracksArr = obj.optJSONArray("tracks")
         val tracks: List<AlbumTrack>? = if (tracksArr != null && tracksArr.length() > 0) {
@@ -603,7 +606,8 @@ object TopicJsonLoader {
             altPageLabel  = altPageLabel,
             synopsis      = synopsis,
             chapters      = chapters,
-            tracks        = tracks
+            tracks        = tracks,
+            geniusUrl     = geniusUrl
         )
     }
 }

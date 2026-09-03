@@ -131,6 +131,7 @@ object CurioIcons {
     const val TravelExplore = "travel_explore"   // globe + magnifier — explore in the user's chosen engine
     const val YouTubeActivity = "youtube_activity" // rounded play tile — explore in YouTube
     const val MusicNote = "music_note"          // ♪ — Apple Music / music rows
+    const val OpenInNew = "open_in_new"         // ⤢ — external link (album Genius page, v333)
     const val PlayCircle = "play_circle"        // ▶ in a ring — Spotify
     const val ContentCopy = "content_copy"      // two overlapping squares — copy to clipboard
     const val Pause       = "pause"

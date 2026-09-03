@@ -91,7 +91,13 @@ data class CurioTopic(
      * track-list sheet on the reveal screen. Null for non-album topics and
      * legacy JSON without the field.
      */
-    val tracks: List<AlbumTrack>? = null
+    val tracks: List<AlbumTrack>? = null,
+    /**
+     * Albums only: the album's Genius page URL (authored in the catalog).
+     * Surfaced as a link in the track-list sheet header. Null for non-album
+     * topics and legacy JSON without the field.
+     */
+    val geniusUrl: String? = null
 ) {
     /**
      * Progress target for this topic: pages for books, episodes for anime/

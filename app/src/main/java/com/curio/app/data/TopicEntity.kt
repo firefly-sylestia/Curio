@@ -48,7 +48,9 @@ data class TopicEntity(
     @ColumnInfo(defaultValue = "")
     val chapters: String = "", // JSON array stored as string
     @ColumnInfo(defaultValue = "")
-    val tracks: String = "" // JSON array stored as string
+    val tracks: String = "", // JSON array stored as string
+    @ColumnInfo(defaultValue = "")
+    val geniusUrl: String = "" // albums only — Genius album page (v333)
 ) {
     /** Convert to [CurioTopic] for backward compatibility. */
     fun toCurioTopic(): CurioTopic {
@@ -84,7 +86,8 @@ data class TopicEntity(
             tracks = try {
                 if (tracks.isBlank()) null
                 else Gson().fromJson(tracks, object : com.google.gson.reflect.TypeToken<List<AlbumTrack>>() {}.type)
-            } catch (_: Exception) { null }
+            } catch (_: Exception) { null },
+            geniusUrl = geniusUrl.takeIf { it.isNotBlank() }
         )
     }
 
@@ -111,7 +114,8 @@ data class TopicEntity(
                 altPageCount = topic.altPageCount,
                 synopsis = topic.synopsis ?: "",
                 chapters = try { Gson().toJson(topic.chapters) } catch (_: Exception) { "[]" },
-                tracks = try { Gson().toJson(topic.tracks) } catch (_: Exception) { "[]" }
+                tracks = try { Gson().toJson(topic.tracks) } catch (_: Exception) { "[]" },
+                geniusUrl = topic.geniusUrl ?: ""
             )
         }
     }

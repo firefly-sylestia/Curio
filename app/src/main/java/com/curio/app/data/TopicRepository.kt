@@ -213,7 +213,8 @@ object TopicRepository {
         // full-lane JSON parse never blocks the reveal.
         val needsHydration = entity.teaser.isBlank() ||
             (categoryId == CategoryId.BOOKS && entity.synopsis.isBlank()) ||
-            (categoryId == CategoryId.ALBUMS && entity.tracks.isBlank())
+            (categoryId == CategoryId.ALBUMS &&
+                (entity.tracks.isBlank() || entity.geniusUrl.isBlank()))
         if (needsHydration && hydratedIds.add(entity.id)) {
             runCatching {
                 TopicJsonLoader.install(context)
@@ -229,7 +230,8 @@ object TopicRepository {
                         tags = freshEntity.tags,
                         synopsis = freshEntity.synopsis,
                         chapters = freshEntity.chapters,
-                        tracks = freshEntity.tracks
+                        tracks = freshEntity.tracks,
+                        geniusUrl = freshEntity.geniusUrl
                     )
                 }
             }

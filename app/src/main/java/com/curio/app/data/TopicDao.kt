@@ -77,7 +77,8 @@ interface TopicDao {
     /** Update the authored fields for a topic hydrated on the reveal screen. */
     @Query("""
         UPDATE topics SET teaser = :teaser, imageUrl = :imageUrl, byline = :byline,
-            tags = :tags, synopsis = :synopsis, chapters = :chapters, tracks = :tracks
+            tags = :tags, synopsis = :synopsis, chapters = :chapters, tracks = :tracks,
+            geniusUrl = :geniusUrl
         WHERE id = :id
     """)
     suspend fun updateContent(
@@ -88,7 +89,8 @@ interface TopicDao {
         tags: String,
         synopsis: String,
         chapters: String,
-        tracks: String
+        tracks: String,
+        geniusUrl: String
     )
 
     /** Get topic count for a category. */
