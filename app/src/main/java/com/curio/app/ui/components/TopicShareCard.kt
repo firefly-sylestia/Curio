@@ -116,6 +116,8 @@ import com.curio.app.ui.theme.GeomFontFamily
 import com.curio.app.ui.theme.LoraFontFamily
 import com.curio.app.ui.theme.PatrickHandFontFamily
 import com.curio.app.ui.theme.PirataOneFontFamily
+import com.curio.app.ui.theme.fromHsl
+import com.curio.app.ui.theme.toHsl
 import com.curio.app.ui.theme.PlayfairDisplayFontFamily
 import com.curio.app.ui.theme.CormorantGaramondFontFamily
 import com.curio.app.ui.theme.BebasNeueFontFamily
@@ -1024,6 +1026,15 @@ private fun VinylCard(
 
 // STYLE 2 — COLLAGE (torn paper + polaroid + observatory)
 // ═══════════════════════════════════════════════════════════════════════
+/** v335 — desaturate a color to [keep]× its original saturation (keep < 1 =
+ *  more muted) while preserving hue and lightness. Used by the Collage card
+ *  so the picked tone colors its large fields as soft pastels instead of
+ *  raw saturated fills. */
+private fun collageMute(color: Color, keep: Float): Color {
+    val hsl = toHsl(color)
+    return fromHsl(hsl.h, (hsl.s * keep).coerceIn(0f, 1f), hsl.l)
+}
+
 @Composable
 private fun CollageCard(
     display: String, topicName: String, categoryName: String, categoryGlyph: String,
@@ -1043,12 +1054,17 @@ private fun CollageCard(
     // ignored here, so the Tone tool had no effect on this style): paper =
     // bgBase, lower field = accent, dark band = accentDark, ink/text =
     // palette ink, torn seam edge = bgMid. White polaroid + photo stay.
+    // v335 — the tone accent filled the whole lower field RAW, so the
+    // saturated level tones (Ember, Rose Gold, Ocean, Sunburst…) looked
+    // garish on the collage; the field, band and pill are now desaturated
+    // toward muted pastels (hue + lightness kept) so the collage keeps its
+    // soft scrapbook feel while still wearing the picked tone.
     val topCream = palette.bgBase
-    val bottomSage = palette.accent
-    val bottomDark = palette.accentDark
+    val bottomSage = collageMute(palette.accent, 0.42f)
+    val bottomDark = collageMute(palette.accentDark, 0.30f)
     val inkDark = palette.ink
     val tornEdge = palette.bgMid
-    val sagePill = palette.accentDark
+    val sagePill = collageMute(palette.accentDark, 0.55f)
 
     Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(topCream, RoundedCornerShape(6.dp))) {
         // ── Layered paper + botanical lower field with a natural torn seam ──
@@ -5032,7 +5048,7 @@ fun TopicShareSheet(
         if (url.isNullOrBlank()) { coverLoadFailed = true; return@LaunchedEffect }
         val bmp = runCatching {
             suspendCancellableCoroutine<ImageBitmap?> { cont ->
-                val loader = coil.imageLoader(context)
+                val loader = context.imageLoader
                 val request = coil.request.ImageRequest.Builder(context)
                     .data(url)
                     .crossfade(false)
@@ -6177,8 +6193,14 @@ private fun AdjustSliderRow(
 
 /**
  * v324 — combined saturation × contrast 4×5 color matrix for the Adjust
- * tool. Saturation is luma-weighted; contrast pivots around 0.5. The
- * matrices multiply so the filter applies saturation first, then contrast.
+ * tool. Saturation is luma-weighted. The matrices multiply so the filter
+ * applies saturation first, then contrast.
+ * v335 — contrast pivots ASYMMETRICALLY: raising contrast (the user's
+ * "make it deeper" direction) pivots near the top of the range (~0.85) so
+ * the light parchment fields slide DOWN toward richer cream instead of
+ * blowing out to white — the old 0.5 pivot pushed every cream tone (all
+ * above 0.5) toward white, which is why the card looked washed out.
+ * Lowering contrast keeps the neutral 0.5 pivot for a clean soft wash.
  */
 private fun adjustColorMatrix(saturation: Float, contrast: Float): ColorMatrix {
     val inv = 1f - saturation
@@ -6191,7 +6213,8 @@ private fun adjustColorMatrix(saturation: Float, contrast: Float): ColorMatrix {
         lr, lg, lb + saturation, 0f, 0f,
         0f, 0f, 0f, 1f, 0f
     ))
-    val t = (1f - contrast) * 0.5f
+    val pivot = if (contrast >= 1f) 0.85f else 0.5f
+    val t = (1f - contrast) * pivot
     val con = ColorMatrix(floatArrayOf(
         contrast, 0f, 0f, 0f, t,
         0f, contrast, 0f, 0f, t,
