@@ -1,3 +1,9 @@
+ADD: Browse Topics search is instant — results are debounced (the full-catalog scan no longer re-runs on every keystroke) and capped at the best 50 topics, so a broad query returns immediately.
+FIX: Category panel (Cabinet + Topic Browser) — checked rows now wear a visible category-tinted fill (selection was only the tiny checkbox) and the panel surface follows the theme instead of a fixed tan block.
+FIX: Mix cards in the picker — cover plates and lane chips are now SOLID identity tones with contrasting glyphs (deep tone + white in light, lifted tone + near-black in dark), so mixes read with real contrast in both themes instead of translucent washes.
+ADD: Book covers hub — an "All covers" strip shows every book's cached cover with its ★ rating + ratings count; the count is cached beside the average and now shows on Topic Reveal too ("★ 4.2 · 1.2k").
+ADD: Book Notes — reading progress: mark any chapter read (only moves forward) with a "X of N chapters read" rail and progress bar in the sheet; chapters you've read tick off in the chip row.
+ADD: Book share cards — two new content options in the editor: Reading progress ("I'm N of M chapters in", also writes your Book Notes progress) and Chapter review (your written review tagged with a chapter chip); pick the chapter from a chip row.
 FIX: Book covers on Topic Reveal — restored to the last known-good render (the cover image itself is the poster; no gradient wrapper), so the real cover shows again instead of a gradient.
 ADD: Books on Topic Reveal — the star rating now has a visible view: an on-demand ★ chip beside the author pill fetches and shows the book's average rating (the rating fetch existed with no way to see it).
 FIX: Pet outfit shop — tapping an EQUIPPED outfit now removes it (accessories could only be put on, never taken off); the pill toggles On → tap to remove.

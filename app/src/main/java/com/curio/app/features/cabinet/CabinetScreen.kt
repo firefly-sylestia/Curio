@@ -1218,7 +1218,12 @@ private fun BoxScope.CabinetCategoryPanel(
 
     Surface(
         shape = RoundedCornerShape(24.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        // v328 — the panel surface now follows the theme (it used the bare
+        // surfaceContainerHigh, which in the Curio LIGHT scheme is a warm tan
+        // that read as a cream block even in dark-adjacent styles): the dialog
+        // container is a dark lifted surface at night and a proper elevated
+        // surface in light.
+        color = com.curio.app.ui.theme.curioDialogContainerColor(),
         tonalElevation = 3.dp,
         shadowElevation = 4.dp,
         modifier = Modifier
@@ -1307,16 +1312,24 @@ private fun CabinetCategoryCheckboxRow(
     checked: Boolean,
     onToggle: () -> Unit
 ) {
+    val accent = cat.themedAccent()
+    // v328 — CHECKED rows get a visible category-tinted FILL (the row used
+    // to stay transparent, so only the tiny checkbox showed selection). The
+    // wash is theme-aware: a soft accent tint over the panel surface in
+    // light, a deeper accent lift over the dark panel in dark mode, so the
+    // row reads as selected in BOTH themes.
+    val panelBase = com.curio.app.ui.theme.curioDialogContainerColor()
+    val rowFill = if (checked) lerp(panelBase, accent, 0.22f) else panelBase
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
+            .background(rowFill)
             .clickable(onClick = onToggle)
             .padding(horizontal = 6.dp, vertical = 4.dp)
     ) {
-        val accent = cat.themedAccent()
         Checkbox(
             checked = checked,
             onCheckedChange = { onToggle() },
@@ -1330,7 +1343,9 @@ private fun CabinetCategoryCheckboxRow(
         CurioIcon(cat.iconGlyph, null, tint = cat.categoryInk(), size = 16.dp)
         Text(
             cat.displayName,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = if (checked) FontWeight.ExtraBold else FontWeight.Normal
+            ),
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -1353,12 +1368,16 @@ private fun CabinetLegacyCheckboxRow(
     onToggle: () -> Unit
 ) {
     val accent = MaterialTheme.colorScheme.tertiary
+    // v328 — same checked-row fill as the category rows (theme-aware).
+    val panelBase = com.curio.app.ui.theme.curioDialogContainerColor()
+    val rowFill = if (checked) lerp(panelBase, accent, 0.22f) else panelBase
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
+            .background(rowFill)
             .clickable(onClick = onToggle)
             .padding(horizontal = 6.dp, vertical = 4.dp)
     ) {

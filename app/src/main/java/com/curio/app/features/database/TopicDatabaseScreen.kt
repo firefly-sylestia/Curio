@@ -61,6 +61,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -408,7 +409,24 @@ fun TopicDatabaseScreen(navController: NavController) {
     // Keyed on the done-set snapshot (structural equality) so badges refresh.
     // v8.54 — with a non-default sort active the list flattens to one sorted
     // run (section headers would break a global A–Z / year order).
-    val needle = searchQuery.trim().lowercase()
+    // v328 — the search needle is DEBOUNCED: the old code re-ran the
+    // full-catalog fuzzy scan (every topic × edit distance, on
+    // Dispatchers.Default) on EVERY keystroke, which is exactly what made
+    // results feel slow and "loading" as you typed. The heavy scans below
+    // key on [needle], which only updates ~200ms after the user pauses —
+    // and the results are capped at [SEARCH_RESULT_CAP] topics, so a
+    // broad query returns instantly instead of sorting thousands of hits.
+    val typedNeedle = searchQuery.trim().lowercase()
+    var needle by remember { mutableStateOf("") }
+    LaunchedEffect(typedNeedle) {
+        if (typedNeedle.isEmpty()) needle = ""  // exiting search clears instantly
+        else {
+            kotlinx.coroutines.delay(SEARCH_DEBOUNCE_MS)
+            // Ignore stale runs: only apply if the query hasn't changed
+            // again while we waited (keeps results honest while typing).
+            if (typedNeedle == searchQuery.trim().lowercase()) needle = typedNeedle
+        }
+    }
     // v314 — typo-tolerant matching: [matchLevel] returns 0 for a plain
     // substring (strong), 1 for a fuzzy (typo-tolerated) match and null for
     // no match. Search results also PRIORITIZE any lane whose name the query
@@ -500,7 +518,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                     compareBy<RankedHit> { !it.priority }
                         .thenBy { it.fuzzy }
                         .thenComparator { a, b -> titleComparator.compare(a.indexed, b.indexed) }
-                ).map { hit ->
+                ).take(SEARCH_RESULT_CAP).map { hit ->
                     val indexed = hit.indexed
                     DatabaseRow(
                         key = indexed.topic.id,
@@ -1165,6 +1183,14 @@ private val DatabaseFilterPanelHeight = 352.dp
 /** v292g — page size for Topic Database pagination. */
 private const val PAGE_SIZE = 100
 
+/** v328 — search results are capped at the best 50 (a broad query returns
+ *  instantly; typing further narrows them). Browse mode still pages all
+ *  topics at [PAGE_SIZE] per page. */
+private const val SEARCH_RESULT_CAP = 50
+/** v328 — pause before the full-catalog search scan fires (typing feeds the
+ *  field live; the expensive scan waits for the query to settle). */
+private const val SEARCH_DEBOUNCE_MS = 200L
+
 /** Rows scrolled before the floating back-to-top arrow appears (≈ one
  *  full screen — each row is roughly 70dp tall). */
 private const val BackToTopRowThreshold = 10
@@ -1252,7 +1278,12 @@ private fun BoxScope.DatabaseCategoryPanel(
 
     Surface(
         shape = RoundedCornerShape(24.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        // v328 — the panel surface now follows the theme (it used the bare
+        // surfaceContainerHigh, which in the Curio LIGHT scheme is a warm tan
+        // that read as a cream block even in dark-adjacent styles): the dialog
+        // container is a dark lifted surface at night and a proper elevated
+        // surface in light.
+        color = com.curio.app.ui.theme.curioDialogContainerColor(),
         tonalElevation = 3.dp,
         shadowElevation = 4.dp,
         modifier = Modifier
@@ -1331,16 +1362,24 @@ private fun CategoryCheckboxRow(
     checked: Boolean,
     onToggle: () -> Unit
 ) {
+    val accent = cat.themedAccent()
+    // v328 — CHECKED rows get a visible category-tinted FILL (the row used
+    // to stay transparent, so only the tiny checkbox showed selection). The
+    // wash is theme-aware: a soft accent tint over the panel surface in
+    // light, a deeper accent lift over the dark panel in dark mode, so the
+    // row reads as selected in BOTH themes.
+    val panelBase = com.curio.app.ui.theme.curioDialogContainerColor()
+    val rowFill = if (checked) lerp(panelBase, accent, 0.22f) else panelBase
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
+            .background(rowFill)
             .clickable(onClick = onToggle)
             .padding(horizontal = 6.dp, vertical = 4.dp)
     ) {
-        val accent = cat.themedAccent()
         Checkbox(
             checked = checked,
             onCheckedChange = { onToggle() },
@@ -1354,7 +1393,9 @@ private fun CategoryCheckboxRow(
         CurioIcon(cat.iconGlyph, null, tint = cat.categoryInk(), size = 16.dp)
         Text(
             cat.displayName,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = if (checked) FontWeight.ExtraBold else FontWeight.Normal
+            ),
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

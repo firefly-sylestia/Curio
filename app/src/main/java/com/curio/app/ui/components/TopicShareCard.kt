@@ -4606,6 +4606,11 @@ fun TopicShareSheet(
     context: android.content.Context, savedSources: List<ShareCardContent> = emptyList(),
     onDismiss: () -> Unit, categoryFamily: CategoryFamily = CategoryFamily.WILDCARD,
     topicByline: String = "",
+    // v328 — BOOK share cards: when the caller hands the topic's chapters,
+    // the editor offers a Chapter progress content (reads the BookNotes
+    // reading-progress pref for this topic) and a Chapter review content
+    // (written review tagged with a chosen chapter).
+    bookChapters: List<com.curio.app.data.BookChapter> = emptyList(),
     // v229d — the sheet can open PRESELECTED: the Share Hub picks a design on
     // the grid and hands its style index + classic-signature flag here, so the
     // sheet opens on exactly the design the user picked (the reveal + detail
@@ -4714,12 +4719,55 @@ fun TopicShareSheet(
     val custom = ShareCardContent(CUSTOM_FACT_ID, "Custom fact", "")
     // Custom fact + No Fact available for all styles except Quotes
     val noFact = ShareCardContent(NO_FACT_ID, "No fact", "")
-    val available = if (isQuotes) listOf(quote) else listOf(quick, noFact) + savedSources + listOf(custom)
+    // v328 — BOOK share cards: Chapter progress + Chapter review contents,
+    // offered only when the caller handed the topic's chapters. Progress
+    // reads the BookNotes reading-progress pref (highest chapter read); the
+    // review tags the user's own text with a chosen chapter chip.
+    val hasBookChapters = bookChapters.isNotEmpty()
+    val chaptersRead = if (hasBookChapters)
+        (AppPreferences.bookReadingProgressState[topicName] ?: 0).coerceIn(0, bookChapters.size)
+    else 0
+    // Chapter review state: which chapter the review is about (defaults to
+    // the current reading spot, or chapter 1).
+    var reviewChapterNumber by remember { mutableIntStateOf(0) }
+    val effectiveReviewChapter = when {
+        !hasBookChapters -> null
+        reviewChapterNumber > 0 && bookChapters.any { it.number == reviewChapterNumber } -> reviewChapterNumber
+        chaptersRead > 0 -> chaptersRead
+        else -> bookChapters.firstOrNull()?.number
+    }
+    val progressContent = ShareCardContent(
+        id = "chapter_progress",
+        label = "Reading progress",
+        text = if (chaptersRead > 0) "I'm $chaptersRead of ${bookChapters.size} chapters in"
+               else "${bookChapters.size} chapters to discover"
+    )
+    val reviewContent = ShareCardContent(
+        id = "chapter_review",
+        label = "Chapter review",
+        text = ""
+    )
+    val available = if (isQuotes) listOf(quote)
+        else listOf(quick, noFact) + savedSources + listOf(custom) +
+            if (hasBookChapters) listOf(progressContent, reviewContent) else emptyList()
     val defaultId = if (isQuotes) quote.id else savedSources.firstOrNull { it.id == "quote" }?.id ?: quick.id
     val activeId = selectedId ?: defaultId
     val activeSource = when (activeId) {
         CUSTOM_FACT_ID -> custom.copy(text = customText.ifBlank { "Add your own fact about this discovery…" })
         NO_FACT_ID -> noFact
+        "chapter_progress" -> progressContent
+        "chapter_review" -> {
+            val chip = effectiveReviewChapter?.let { num ->
+                val ch = bookChapters.firstOrNull { c -> c.number == num }
+                "CH $num" + (ch?.title?.takeIf { t -> t.isNotBlank() }?.let { t -> " · $t" } ?: "")
+            }
+            reviewContent.copy(
+                text = buildString {
+                    chip?.let { append(it).append("\n") }
+                    append(customText.ifBlank { "Write your review of this chapter…" })
+                }
+            )
+        }
         else -> available.firstOrNull { it.id == activeId } ?: quick
     }
 
@@ -5275,8 +5323,64 @@ fun TopicShareSheet(
                                     }
                                 }
                             }
-                            if (activeId == CUSTOM_FACT_ID) {
-                                OutlinedTextField(customText, { customText = it }, placeholder = { Text("Your custom fact", style = MaterialTheme.typography.bodyMedium) }, minLines = 2, maxLines = 4, modifier = Modifier.fillMaxWidth())
+                            // v328 — BOOK chapter contents: pick the chapter
+                            // (CH 1..N) that the progress/review refers to.
+                            // For Reading progress the pick WRITES the
+                            // BookNotes pref (progress only moves forward), so
+                            // the card and the notes reader stay in sync; for
+                            // Chapter review it tags the review text.
+                            if (hasBookChapters &&
+                                (activeId == "chapter_progress" || activeId == "chapter_review")
+                            ) {
+                                val chosen = if (activeId == "chapter_progress") chaptersRead
+                                             else effectiveReviewChapter ?: 0
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState())
+                                ) {
+                                    Text(
+                                        "Chapter",
+                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    bookChapters.forEach { ch ->
+                                        Pill(
+                                            "CH ${ch.number}",
+                                            CurioIcons.MenuBook,
+                                            chosen == ch.number
+                                        ) {
+                                            if (activeId == "chapter_progress") {
+                                                AppPreferences.setBookReadingProgress(context, topicName, ch.number)
+                                            } else {
+                                                reviewChapterNumber = ch.number
+                                            }
+                                        }
+                                    }
+                                }
+                                Text(
+                                    if (activeId == "chapter_progress")
+                                        "Also updates your Book Notes reading progress for this book."
+                                    else "Your review is tagged \"CH ${effectiveReviewChapter ?: ""}\" on the card.",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") {
+                                OutlinedTextField(
+                                    customText,
+                                    { customText = it },
+                                    placeholder = {
+                                        Text(
+                                            if (activeId == "chapter_review") "Write your review of this chapter…"
+                                            else "Your custom fact",
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    },
+                                    minLines = 2,
+                                    maxLines = 4,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
                             }
                             if (currentStyle == ShareCardStyle.COLLAGE) {
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {

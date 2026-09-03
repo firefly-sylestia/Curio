@@ -199,6 +199,12 @@ object AppPreferences {
     private const val KEY_BOOK_COVER_PROVIDER = "book_cover_provider"  // BookCoverProvider.name
     private const val KEY_BOOK_COVER_FAILED = "book_cover_failed"     // JSON array of book names
     private const val KEY_BOOK_RATINGS = "book_ratings"               // JSON object name->avg rating
+    private const val KEY_BOOK_RATINGS_COUNT = "book_ratings_count"    // JSON object name->ratings count
+    // v328 — per-book reading progress: JSON object book name -> number of
+    // chapters read (the highest chapter the user has marked read in the
+    // BookNotes chapter view). Powers the reveal's chapter-progress bar and
+    // the share card's "I'm N chapters in" element.
+    private const val KEY_BOOK_READING = "book_reading_progress"      // JSON object name->int
     // v8.34 — custom pet design (Pet designer playground): the imported
     // design's full text (palette + body/curled grids). Always-on when
     // saved — the pet sprite renders this instead of the default until the
@@ -801,6 +807,10 @@ object AppPreferences {
         private set
     var bookRatingsState by mutableStateOf<Map<String, Double>>(emptyMap())
         private set
+    var bookRatingsCountState by mutableStateOf<Map<String, Int>>(emptyMap())
+        private set
+    var bookReadingProgressState by mutableStateOf<Map<String, Int>>(emptyMap())
+        private set
 
     /**
      * v3xx — which picker page opens first in the sheet's pager.
@@ -956,6 +966,8 @@ object AppPreferences {
         bookCoverProviderState = getBookCoverProvider(context)
         bookCoverFailedState = getBookCoverFailed(context)
         bookRatingsState = getBookRatings(context)
+        bookRatingsCountState = getBookRatingsCount(context)
+        bookReadingProgressState = getBookReadingProgress(context)
         pickerDefaultPageState = getPickerDefaultPage(context)
         pickerPage0ModeState = getPickerPage0Mode(context)
         pickerSuggestionsState = getPickerSuggestions(context)
@@ -2454,6 +2466,58 @@ object AppPreferences {
         cur[name] = rating
         prefs(context).edit().putString(KEY_BOOK_RATINGS, org.json.JSONObject(cur).toString()).apply()
         bookRatingsState = cur
+    }
+
+    /** The keyless-fetched ratings COUNTS (Google Books ratingsCount): book
+     *  name → count. Stored next to [getBookRatings] so the reveal can show
+     *  "★ 4.2 · 1.2k ratings" instead of a bare average. */
+    fun getBookRatingsCount(context: Context): Map<String, Int> {
+        val raw = prefs(context).getString(KEY_BOOK_RATINGS_COUNT, null) ?: return emptyMap()
+        return runCatching {
+            val obj = org.json.JSONObject(raw)
+            val out = LinkedHashMap<String, Int>()
+            val keys = obj.keys()
+            while (keys.hasNext()) {
+                val k = keys.next()
+                out[k] = obj.optInt(k, 0)
+            }
+            out
+        }.getOrDefault(emptyMap())
+    }
+
+    /** v328 — cache BOTH stars: the average rating and its ratings count. */
+    fun setBookRatingWithCount(context: Context, name: String, rating: Double, count: Int) {
+        setBookRating(context, name, rating)
+        val cur = getBookRatingsCount(context).toMutableMap()
+        cur[name] = count
+        prefs(context).edit().putString(KEY_BOOK_RATINGS_COUNT, org.json.JSONObject(cur).toString()).apply()
+        bookRatingsCountState = cur
+    }
+
+    /** v328 — chapters read per book (name → highest chapter number read). */
+    fun getBookReadingProgress(context: Context): Map<String, Int> {
+        val raw = prefs(context).getString(KEY_BOOK_READING, null) ?: return emptyMap()
+        return runCatching {
+            val obj = org.json.JSONObject(raw)
+            val out = LinkedHashMap<String, Int>()
+            val keys = obj.keys()
+            while (keys.hasNext()) {
+                val k = keys.next()
+                out[k] = obj.optInt(k, 0)
+            }
+            out
+        }.getOrDefault(emptyMap())
+    }
+
+    /** v328 — record that [chaptersRead] chapters of [name] are done. Only
+     *  ever moves forward (never lowers progress). */
+    fun setBookReadingProgress(context: Context, name: String, chaptersRead: Int) {
+        if (chaptersRead <= 0) return
+        val cur = getBookReadingProgress(context).toMutableMap()
+        if ((cur[name] ?: 0) >= chaptersRead) return
+        cur[name] = chaptersRead
+        prefs(context).edit().putString(KEY_BOOK_READING, org.json.JSONObject(cur).toString()).apply()
+        bookReadingProgressState = cur
     }
 
     /** The user's curated suggestion ids (empty = use [defaultSuggestions]). */

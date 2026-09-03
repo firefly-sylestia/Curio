@@ -1167,7 +1167,11 @@ private fun NewMixCard(
     val shape = RoundedCornerShape(20.dp)
     val lanes = mix.laneIds.mapNotNull { id -> categories.firstOrNull { it.id == id } }
     val lead = lanes.firstOrNull()
-    val mixTone = namedMixTone(mix)
+    // v328 — (tone, on-tone ink) identity pair: the tone fills the cover
+    // plate + chips SOLID and the ink draws the glyphs on top, so both read
+    // with real contrast in light (deep tone + white) and dark (light tone +
+    // near-black) instead of translucent blends that sank into the surface.
+    val (mixTone, mixInk) = namedMixIdentity(mix)
     val cardFill = if (active) lerp(newPickerIdleFill(), mixTone, 0.08f) else newPickerIdleFill()
     Surface(
         shape = shape,
@@ -1198,23 +1202,17 @@ private fun NewMixCard(
                         modifier = Modifier
                             .size(38.dp)
                             .clip(RoundedCornerShape(13.dp))
-                            // v3xx14 — the lead-lane cover was washed out at
-                            // 16% alpha; blend the accent in properly so the
-                            // mix keeps a real color identity.
-                            .background(
-                                lerp(
-                                    MaterialTheme.colorScheme.surfaceContainerHighest,
-                                    mixTone,
-                                    0.42f
-                                )
-                            ),
+                            // v328 — SOLID tone cover (was a 0.42 translucent
+                            // blend that sank the deep icon into the plate in
+                            // light and washed it out in dark).
+                            .background(mixTone),
                         contentAlignment = Alignment.Center
                     ) {
                         CurioIcon(
                             name = lead?.iconGlyph ?: CurioIcons.Tune,
                             contentDescription = null,
                             size = 20.dp,
-                            tint = mixTone
+                            tint = mixInk
                         )
                     }
                     Spacer(Modifier.width(9.dp))
@@ -1250,14 +1248,17 @@ private fun NewMixCard(
                             modifier = Modifier
                                 .size(20.dp)
                                 .clip(RoundedCornerShape(7.dp))
-                                .background(mixTone.copy(alpha = 0.22f)),
+                                // v328 — solid tone chips with the on-tone
+                                // glyph (was 0.22 alpha + tone glyph: a pale
+                                // wash that disappeared in both themes).
+                                .background(mixTone),
                             contentAlignment = Alignment.Center
                         ) {
                             CurioIcon(
                                 name = cat.iconGlyph,
                                 contentDescription = null,
                                 size = 12.dp,
-                                tint = mixTone
+                                tint = mixInk
                             )
                         }
                         if (i < shown.size - 1) Spacer(Modifier.width(5.dp))
@@ -1282,8 +1283,10 @@ private fun NewMixCard(
  * light mode). Each mix resolves ONE tone deterministically from its stable
  * id ([NamedMix.createdAtMillis]), so the cover plate, footer chips and
  * Active label all read as a single per-mix identity — and the active card
- * gets a highlight ring in the same tone. Dark mode lightens the tone so
- * the chips stay visible on the dark card surface.
+ * gets a highlight ring in the same tone. v328 — [namedMixIdentity]
+ * resolves the tone together with the ink that reads ON it (deep tone +
+ * white in light; a clearly lightened tone + near-black in dark) so the
+ * solid cover plate and chips keep real contrast in BOTH themes.
  */
 private val MIX_IDENTITY_TONES = listOf(
     Color(0xFF1F2A44), // deep indigo-slate
@@ -1298,13 +1301,31 @@ private val MIX_IDENTITY_TONES = listOf(
     Color(0xFF263238)  // charcoal blue
 )
 
-/** The one dark identity color for a saved mix (theme-aware twin in dark mode). */
+/**
+ * The mix identity PAIR for a saved mix: (tone, ink-that-reads-ON-tone).
+ * v328 — the old single [Color] lightened the tone toward white in dark
+ * mode, but every use re-blended it over the card surface (0.42 blend for
+ * the cover, 0.22 alpha for the chips), so in LIGHT the deep tone + deep
+ * icon sank into the plate and in DARK the pale tone washed over pale
+ * chips — muddy in both themes. Now the tone is used as a SOLID fill and
+ * [ink] is the contrast ink on top: deep tone + white glyph in light, a
+ * clearly lightened tone + near-black glyph in dark. One pair for the
+ * cover plate, footer chips and Active ring/label, so the card holds its
+ * identity AND its contrast in both themes.
+ */
 @Composable
-private fun namedMixTone(mix: NamedMix): Color {
+private fun namedMixIdentity(mix: NamedMix): Pair<Color, Color> {
     val size = MIX_IDENTITY_TONES.size
     val i = ((mix.createdAtMillis % size) + size) % size
     val tone = MIX_IDENTITY_TONES[i.toInt()]
-    return if (isCurioDarkTheme()) lerp(tone, Color.White, 0.58f) else tone
+    return if (isCurioDarkTheme()) {
+        // Dark: lift the tone clearly toward white so the plate/chips read
+        // on the near-black card, with a near-black glyph on top.
+        lerp(tone, Color.White, 0.70f) to Color(0xFF17181C)
+    } else {
+        // Light: the deep identity tone with a white glyph.
+        tone to Color.White
+    }
 }
 
 /**
