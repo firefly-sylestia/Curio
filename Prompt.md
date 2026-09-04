@@ -1,64 +1,74 @@
-# Prompt — Topic Browser: slow search, two-tier (exact + smart) results, Also-in accuracy, cover toggle
+# Prompt — Tablet-wide redesign (editorial, no torn) + new Spin layout + tablet features
 
-## Request
-1. Search results are still slow in Topic Browser — is it the "smart"
-   (fuzzy) search? Asked: do the exact-word search; only when it yields
-   nothing fall back to the smart search, and show both searches.
-   (Clarified with the user: **show both — Exact matches on top, extra
-   typo-tolerant "Similar matches" below as their own section**.)
-2. "Also in" pills are inaccurate — the category being searched sometimes
-   doesn't show; arrange so whoever has the matching TITLE shows first.
-3. Book covers are loading even when the fetch toggle is OFF — fix.
+## Request (user, 2026-09-04)
+"Completely redesigning the layout in tablet mode — even for wide screens.
+Fully redesigning, and NOT using torn style in tablet UI, totally different
+layout, additional tablet-targeted features, and a new layout for the
+shuffle page too."
 
-## Root causes
-1. **Slow search** — per settled query the screen ran TWO independent
-   full-catalog scans (catHitCounts + rows) and, inside each, the fuzzy
-   pass re-split every topic's name/byline/subtype with a Regex on every
-   call (thousands of topics × 3 fields × per scan). Sorting also ignored
-   how directly the TITLE answered the query once fuzzy hits were mixed in.
-2. **Also-in** — pills were the top-6 lanes by raw hit count, so lanes
-   owning an exact title match (count 1) lost to high-count fuzzy lanes.
-3. **Covers** — `BookCoverPoster` always fetched (authored URL then the
-   Open Library fallback) and the reveal's ★ rating hit Google Books
-   unconditionally; `isBookFetchEnabled` was never consulted outside the
-   bulk hub.
+## Design decisions (user-confirmed)
+1. **Style: Clean editorial.** Flat surfaces, large type hierarchy, thin
+   dividers, quiet spacing — no heavy card chrome, no tears, no ragged
+   edges. Palette (rose/ink + category colors) stays the same.
+2. **Scope: everything incl. secondary.** Main tabs (Home, Spin, Cabinet,
+   Profile) + Topic Browser, Reveal/Detail, Settings — full sweep.
+3. **Spin (shuffle) layout anchor:** the deck is currently VERTICAL (front
+   ticket with peeks stacked behind). On tablet it becomes SIDEWAYS — a
+   horizontal hand/fan across the wide stage — and the rest of the Spin
+   page is redesigned coherently around that.
+4. **Tablet-targeted features: ALL of them** (master–detail panes,
+   multi-column grids, drag & drop, keyboard + hover, split-view companion
+   info) — user asked for my ranking of which are best/most functional
+   (delivered in chat) and to add all.
+5. **Ship mode: always-on**, like the current wide layout (>=600dp wide →
+   new design; replaces today's wide mode outright; no Settings toggle).
 
-## Changes
-1. **TopicDatabaseScreen.kt** — search is now ONE catalog scan per settled
-   needle (`SearchPass` produceState replaces the double produceState):
-   - word lists pre-split ONCE per topic at index build (`IndexedTopic`
-     nameWords/bylineWords/subtypeWords); fuzzy checks run against the
-     retained lists, no per-query Regex splits.
-   - matches split into `exact` (substring) and `similar` (typo) groups;
-     both sorted title-first via a new `titleRank` (exact title →
-     startsWith → title contains → fuzzy title → other-field match), then
-     lane-mention priority, then name. Rows render under two labelled
-     dividers: "Exact matches (N)" then "Similar matches (N)"
-     (`DatabaseRow.groupHeader` + `SearchGroupHeaderRow`); pagination and
-     content types updated to carry the dividers.
-   - per-lane totals AND exact-title counts accumulate in the same pass →
-     the filter-panel chip counts and the "Also in" pills come from
-     `SearchPass.laneHits` / `laneExactTitles` (pills sorted: lanes with a
-     title match first, then by hit count, capped 8).
-2. **TopicRevealScreen.kt** — cover + rating consent:
-   - `BookCoverPoster` reads `AppPreferences.bookFetchEnabledState` and
-     sets `ImageRequest.networkCachePolicy(DISABLED)` when the toggle is
-     off — Coil serves only cached covers and never reaches the network.
-   - the reveal's on-demand ★ rating fetch is gated on the same toggle
-     (it hits Google Books).
-3. Changelog updated (Topic Browser search groups + Also-in + cover
-   consent + the earlier perf bullets).
+## My feature ranking (delivered to user)
+Most value → least, all being added:
+1. **Master–detail panes** — biggest tablet win: list + live preview
+   (Cabinet list/open entry, Browser results/reveal, Recent/detail).
+2. **Multi-column grids** — turns the narrow phone rows (Cabinet shelves,
+   Browser, Stats) into true tablet spreads.
+3. **Split-view companion pane** — related topics/lanes/notes beside the
+   current reading surface (Reveal, Home hero, Detail).
+4. **Keyboard + hover** — cheap, high-functionality: arrow nav, hover
+   reveals, context menus for keyboard/tablet-trackpad users.
+5. **Drag & drop** — most powerful but needs the most design care; rolls
+   out after 1–4 have settled (Cabinet reorder, card moves, etc.).
 
-## Verification
-- No Gradle in this environment (forbidden; CI validates on push).
-- Brace/paren balance: both edited files report zero NEW imbalance vs the
-  HEAD baseline (TopicRevealScreen has a clean 0 delta; TopicDatabaseScreen
-  symmetric +56 parens/+2 braces/+3 brackets).
-- Full diff reviewed; greps confirm no stale `catHitCounts` /
-  `fuzzyContains(` / old `RankedHit` shape references remain.
+## Editorial tablet design tokens (Phase 0 — new `ui/tablet/` package)
+- **Surfaces:** page = flat tinted canvas (current theme background);
+  cards become quiet `surfaceContainerLow/High` panels with
+  `RoundedCornerShape(16–20)` tops, hairline `1dp` dividers; NO torn
+  shapes anywhere in wide mode.
+- **Headers:** large page title (display/headline), thin rule under the
+  title bar instead of torn hero banners; section headers = small caps
+  label + hairline.
+- **Type:** lean on the existing type scale, bumped one step on wide
+  (hero titles to displayLarge, section titles to titleLarge).
+- **Rail chrome:** existing NavigationRail; nav rail content restyled
+  editorial (flat selected indicator, no capsules/shadows).
+
+## Phase plan (each phase = commit; wide-only so phones untouched)
+- **Phase 1 — Foundation + Spin (shuffle) pilot.** New tablet editorial
+  tokens/primitives (`ui/tablet/`); Spin's wide layout fully redesigned:
+  horizontal deck hand (ticket + 2 peeks fanned sideways, scaled to the
+  stage), editorial header strip, side browse/queue panel, controls and
+  reveal redesigned to match, watermark gutters retained. Phone Spin
+  untouched.
+- **Phase 2 — Home.** Editorial wide layout: title strip + stat row
+  (streak/cabinet/recent as flat panels), lane chips, companion "continue
+  exploring" pane.
+- **Phase 3 — Cabinet + Recent.** Master–detail (list ↔ open entry) +
+  multi-column grid; drag & drop reorder.
+- **Phase 4 — Topic Browser.** Multi-column results + master–detail
+  (row → reveal pane) + keyboard/hover.
+- **Phase 5 — Reveal/Detail.** Editorial content column, no torn sheet;
+  companion "related" pane; big cover layout.
+- **Phase 6 — Settings/Profile + polish sweep.** Editorial sections,
+  grids; hover/keyboard everywhere; tear references removed from wide
+  paths (phone paths untouched).
 
 ## Status
-Complete. Committed and pushed. Notes for the follow-up: `topicsByCat` is
-only a produceState invalidation key (kept harmless); fuzzy scan still
-runs on every settled query per the user's "show both searches" choice —
-the pre-split word lists keep that pass cheap.
+Phase 0/1 in progress — Spin deck internals being studied for the
+horizontal hand layout.
