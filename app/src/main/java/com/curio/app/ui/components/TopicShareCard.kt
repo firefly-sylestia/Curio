@@ -720,10 +720,14 @@ fun TopicShareCard(
     val shownDisplay = editedTitle ?: display
     val shownFact = editedFact ?: factText
     val shownQuote = quoteText?.let { shownFact }
+    // v336 — the album's heart-picked favorite tracks (multi-select hearts in
+    // the album track-list sheet). Read reactively so the Vinyl card strip
+    // updates the moment a heart is toggled; empty for non-album topics.
+    val albumFavTracks = AppPreferences.albumFavTracksState[topicName].orEmpty()
     Box {
         when (style) {
             ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact)
-            ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact)
+            ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact, favoriteTracks = albumFavTracks)
             ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto ?: bookCover, byline, year, polaroidCaption, onPhotoTap, bodyScale, callbacks, move, chapterProgress, chapterFact)
             ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact)
             ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact)
@@ -846,7 +850,10 @@ private fun VinylCard(
     move: ShareCardMove = ShareCardMove(),
     chapterProgress: ChapterProgressUi? = null,
     // v335 — a stacked custom fact rendered below the progress widget.
-    chapterFact: String = ""
+    chapterFact: String = "",
+    // v336 — the album's heart-picked favorite tracks (multi-select): when
+    // non-empty the single typed favorite line is replaced by this strip.
+    favoriteTracks: List<String> = emptyList()
 ) {
     val roseBg = Color(0xFFF5E6E0)
     val roseDusty = Color(0xFFD4A0A0)
@@ -1053,10 +1060,73 @@ private fun VinylCard(
             }
         }
 
-        // ── Favorite song — small user-set corner chip (replaces the old info box) ──
+        // ── Favorite corner chip ──
+        // v336 — when the user heart-picked tracks in the album track-list
+        // sheet, this corner chip becomes a FAVORITE TRACKS strip (header +
+        // up to three hearts, "+N more" for the rest) instead of the single
+        // typed favorite line — the hearts win because they're the real
+        // album's songs, not free text.
         val is34v = aspect == ShareCardAspect.CLASSIC
         val favSong = AppPreferences.favoriteSongState.trim()
-        if (favSong.isNotEmpty()) {
+        if (favoriteTracks.isNotEmpty()) {
+            val shownFavs = favoriteTracks.take(3)
+            val extra = favoriteTracks.size - shownFavs.size
+            Surface(
+                shape = RoundedCornerShape(6.dp),
+                color = Color(0xFFFDF0EE).copy(alpha = 0.90f),
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = if (is34v) 12.dp else 16.dp, bottom = if (is34v) 26.dp else 22.dp)
+                    .widthIn(max = if (is34v) 165.dp else 205.dp)
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    modifier = Modifier.padding(horizontal = 7.dp, vertical = 5.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        ShareHeartGlyph(
+                            color = inkDark.copy(alpha = 0.85f),
+                            iconSize = if (is34v) 7.dp else 9.dp,
+                            filled = true
+                        )
+                        Text("FAVORITE TRACKS", style = TextStyle(fontFamily = GeomFontFamily, fontSize = if (is34v) 5.sp else 6.sp,
+                            fontWeight = FontWeight.ExtraBold, letterSpacing = 1.1.sp, color = inkDark.copy(alpha = 0.78f)))
+                    }
+                    shownFavs.forEach { t ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            ShareHeartGlyph(
+                                color = roseDusty.copy(alpha = 0.95f),
+                                iconSize = if (is34v) 5.5.dp else 7.dp,
+                                filled = true
+                            )
+                            Text(
+                                t,
+                                style = TextStyle(fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
+                                    fontSize = if (is34v) 6.5.sp else 8.sp, lineHeight = if (is34v) 8.sp else 10.sp,
+                                    color = inkDark.copy(alpha = 0.82f)),
+                                maxLines = 1, overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                    if (extra > 0) {
+                        Text(
+                            "+$extra more",
+                            style = TextStyle(fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
+                                fontSize = if (is34v) 6.sp else 7.5.sp, color = roseDusty),
+                            maxLines = 1, overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+        } else if (favSong.isNotEmpty()) {
             Surface(
                 shape = RoundedCornerShape(6.dp),
                 color = Color(0xFFFDF0EE).copy(alpha = 0.88f),
@@ -1080,6 +1150,37 @@ private fun VinylCard(
                     }
                 }
             }
+        }
+    }
+}
+
+/** v336 — a tiny heart drawn directly for the share card (the bundled
+ *  Material Symbols subset has no "favorite" ligature, and the software
+ *  export pipeline rasterizes Canvas identically to the preview). */
+@Composable
+private fun ShareHeartGlyph(
+    color: Color,
+    iconSize: Dp,
+    filled: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Canvas(modifier.size(iconSize)) {
+        val w = this.size.width
+        val h = this.size.height
+        val heart = Path().apply {
+            moveTo(w * 0.50f, h * 0.30f)
+            cubicTo(w * 0.50f, h * 0.21f, w * 0.44f, h * 0.14f, w * 0.33f, h * 0.14f)
+            cubicTo(w * 0.17f, h * 0.14f, w * 0.10f, h * 0.25f, w * 0.10f, h * 0.36f)
+            cubicTo(w * 0.10f, h * 0.52f, w * 0.24f, h * 0.65f, w * 0.50f, h * 0.92f)
+            cubicTo(w * 0.76f, h * 0.65f, w * 0.90f, h * 0.52f, w * 0.90f, h * 0.36f)
+            cubicTo(w * 0.90f, h * 0.25f, w * 0.83f, h * 0.14f, w * 0.67f, h * 0.14f)
+            cubicTo(w * 0.56f, h * 0.14f, w * 0.50f, h * 0.21f, w * 0.50f, h * 0.30f)
+            close()
+        }
+        if (filled) {
+            drawPath(heart, color)
+        } else {
+            drawPath(heart, color, style = Stroke(width = w * 0.10f))
         }
     }
 }
@@ -6201,15 +6302,40 @@ fun TopicShareSheet(
                                 }
                             }
                             if (currentStyle == ShareCardStyle.VINYL) {
-                                OutlinedTextField(
-                                    value = AppPreferences.favoriteSongState,
-                                    onValueChange = { AppPreferences.setFavoriteSong(context, it.take(40)) },
-                                    placeholder = { Text("Your favorite song (shown on Vinyl)", style = MaterialTheme.typography.labelMedium) },
-                                    singleLine = true,
-                                    textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                                    shape = RoundedCornerShape(50),
-                                    modifier = Modifier.fillMaxWidth()
-                                )
+                                // v336 — when the user heart-picked favorite
+                                // tracks in the album's track-list sheet, those
+                                // wins over the typed line (the field hides and
+                                // the card renders the heart strip instead).
+                                if (AppPreferences.albumFavTracksState[topicName].orEmpty().isEmpty()) {
+                                    OutlinedTextField(
+                                        value = AppPreferences.favoriteSongState,
+                                        onValueChange = { AppPreferences.setFavoriteSong(context, it.take(40)) },
+                                        placeholder = { Text("Your favorite song (shown on Vinyl)", style = MaterialTheme.typography.labelMedium) },
+                                        singleLine = true,
+                                        textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                                        shape = RoundedCornerShape(50),
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                } else {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        CurioIcon(
+                                            name = CurioIcons.MusicNote,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            size = 16.dp
+                                        )
+                                        Text(
+                                            "Favorite tracks come from the hearts you picked in the album's track list",
+                                            style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

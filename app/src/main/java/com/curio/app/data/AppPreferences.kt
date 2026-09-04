@@ -50,6 +50,11 @@ object AppPreferences {
     private const val NAME = "curio_app_prefs"
     private const val KEY_DISPLAY_NAME = "display_name"
     private const val KEY_FAVORITE_SONG = "favorite_song"
+    // v336 — per-album favorite tracks (heart picks in the album track-list
+    // sheet): JSON object album name → JSON array of picked track titles in
+    // the order they were picked. Feeds the Vinyl share card's "favorite
+    // tracks" strip (multi-select hearts, replaces the single typed line).
+    private const val KEY_ALBUM_FAV_TRACKS = "album_fav_tracks"
     private const val KEY_THEME_MODE = "theme_mode"       // "light", "dark", "system" (v81)
     private const val KEY_CUSTOM_TAGLINE = "custom_streak_tagline"
     private const val KEY_LAST_NOTIFIED_UPDATE = "last_notified_update_version"
@@ -251,6 +256,50 @@ object AppPreferences {
     fun setFavoriteSong(context: Context, song: String) {
         prefs(context).edit().putString(KEY_FAVORITE_SONG, song).apply()
         favoriteSongState = song
+    }
+
+    // ── Album favorite tracks (v336 — heart picks) ───────────────────────
+    // Per-album heart picks (multiple allowed): album name → list of picked
+    // track titles in pick order. The album track-list sheet toggles these
+    // and the Vinyl share card renders the strip.
+    fun getAlbumFavoriteTracks(context: Context): Map<String, List<String>> {
+        val raw = prefs(context).getString(KEY_ALBUM_FAV_TRACKS, null) ?: return emptyMap()
+        return runCatching {
+            val obj = org.json.JSONObject(raw)
+            val out = LinkedHashMap<String, List<String>>()
+            val keys = obj.keys()
+            while (keys.hasNext()) {
+                val k = keys.next()
+                val arr = obj.optJSONArray(k) ?: continue
+                val list = (0 until arr.length()).mapNotNull { i -> arr.optString(i).takeIf { it.isNotBlank() } }
+                if (list.isNotEmpty()) out[k] = list
+            }
+            out
+        }.getOrDefault(emptyMap())
+    }
+
+    /** Replace the whole favorite set for [albumName] (an empty list clears it). */
+    fun setAlbumFavoriteTracks(context: Context, albumName: String, tracks: List<String>) {
+        val cur = getAlbumFavoriteTracks(context).toMutableMap()
+        if (tracks.isEmpty()) cur.remove(albumName) else cur[albumName] = tracks
+        persistAlbumFavoriteTracks(context, cur)
+    }
+
+    /** Toggle one track's heart for [albumName]; returns the new list. */
+    fun toggleAlbumFavoriteTrack(context: Context, albumName: String, trackTitle: String): List<String> {
+        val cur = getAlbumFavoriteTracks(context).toMutableMap()
+        val list = (cur[albumName] ?: emptyList()).toMutableList()
+        if (!list.remove(trackTitle)) list.add(trackTitle)
+        if (list.isEmpty()) cur.remove(albumName) else cur[albumName] = list
+        persistAlbumFavoriteTracks(context, cur)
+        return cur[albumName] ?: emptyList()
+    }
+
+    private fun persistAlbumFavoriteTracks(context: Context, cur: Map<String, List<String>>) {
+        val obj = org.json.JSONObject()
+        cur.forEach { (k, v) -> obj.put(k, org.json.JSONArray(v)) }
+        prefs(context).edit().putString(KEY_ALBUM_FAV_TRACKS, obj.toString()).apply()
+        albumFavTracksState = cur
     }
 
     // ── Custom streak tagline (v53) ──────────────────────────────────
@@ -528,6 +577,11 @@ object AppPreferences {
     var displayNameState by mutableStateOf("Curious Explorer")
         internal set
     var favoriteSongState by mutableStateOf("")
+        internal set
+    // v336 — per-album favorite tracks (heart picks): album name → picked
+    // track titles in pick order. Reactive so the sheet hearts + the Vinyl
+    // share-card strip update the moment a heart is tapped.
+    var albumFavTracksState by mutableStateOf<Map<String, List<String>>>(emptyMap())
         internal set
     var profileAvatarPathState by mutableStateOf("")
         internal set
@@ -933,6 +987,7 @@ object AppPreferences {
         drawerConstellationState = isDrawerConstellationEnabled(context)
         displayNameState = getDisplayName(context)
         favoriteSongState = getFavoriteSong(context)
+        albumFavTracksState = getAlbumFavoriteTracks(context)
         profileAvatarPathState = getProfileAvatarPath(context)
         customBlurEngineState = isCustomBlurEngineEnabled(context)
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)

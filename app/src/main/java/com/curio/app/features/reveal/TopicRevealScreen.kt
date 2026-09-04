@@ -13,6 +13,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
@@ -23,6 +24,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -47,6 +49,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.item
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.Image
@@ -56,6 +59,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.Button
@@ -86,7 +91,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -3619,6 +3626,16 @@ private fun AlbumTrackChip(
  * artwork + title head the sheet, and the full track list (number/title/
  * duration) fills a tall scrollable body. A track chip on the reveal opens
  * it scrolled to (and highlighting) that track.
+ *
+ * v336 additions — all INSIDE the one sheet (no separate popups):
+ *  - the album's synopsis as a collapsible "About this album" card pinned
+ *    at the TOP of the track list (tap to expand/collapse),
+ *  - a ♥ on every track row: multi-select favorite picks persisted per
+ *    album (AppPreferences) that render as the Vinyl share card's
+ *    FAVORITE TRACKS strip,
+ *  - a LISTEN pill offering Apple Music / Spotify / YouTube Music / Amazon
+ *    Music / Deezer that opens the service DIRECTLY (no explore session),
+ *    plus the catalog-authored Genius pill.
  */
 @Composable
 private fun AlbumNotesSheet(
@@ -3635,18 +3652,34 @@ private fun AlbumNotesSheet(
     // sheet is opened from the TRACKLIST card, in which case no row is
     // pre-highlighted and the list starts at the top.
     val currentTrack = track
+    // v336 — a collapsible "About this album" synopsis card sits at the top
+    // of the track list when the catalog authors one; every scroll target
+    // below shifts by one row so a chip-jump still lands on its track.
+    val synopsis = topic.synopsis?.takeIf { it.isNotBlank() }
+    val synopsisOffset = if (synopsis != null) 1 else 0
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // Card-open (no pre-selected track) starts at the TOP (the synopsis card
+    // when present); a chip-jump starts on that track, shifted past the
+    // synopsis row.
     val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = tracks.indexOfFirst { it.number == currentTrack?.number }.coerceAtLeast(0)
+        initialFirstVisibleItemIndex = if (currentTrack != null)
+            synopsisOffset + tracks.indexOfFirst { it.number == currentTrack.number }.coerceAtLeast(0)
+        else 0
     )
     LaunchedEffect(currentTrack?.number) {
         if (currentTrack != null && tracks.size > 1) {
             listState.animateScrollToItem(
-                tracks.indexOfFirst { it.number == currentTrack?.number }.coerceAtLeast(0)
+                synopsisOffset + tracks.indexOfFirst { it.number == currentTrack?.number }.coerceAtLeast(0)
             )
         }
     }
     val runtime = albumRuntimeSeconds(tracks)
+    val context = LocalContext.current
+    val haptics = LocalHapticFeedback.current
+    // v336 — heart-picked favorite tracks for this album (multi-select).
+    // Read reactively so a row-heart tap updates every heart in the sheet
+    // (and the Vinyl share card) without leaving it.
+    val favTracks = AppPreferences.albumFavTracksState[topic.name].orEmpty()
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -3721,14 +3754,94 @@ private fun AlbumNotesSheet(
                         color = cat.categoryInk()
                     )
                 }
-                // v333 — a Genius link pill beside Close when the catalog
-                // authors a geniusUrl for this album (opens the album's
-                // annotation page in the browser).
-                val geniusUrl = topic.geniusUrl?.takeIf { it.isNotBlank() }
-                val context = LocalContext.current
+                Surface(
+                    onClick = onDismiss,
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                ) {
+                    CurioIcon(
+                        CurioIcons.Close,
+                        "Close track list",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        size = 20.dp,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+            }
+
+            // ── v336 — Listen actions row: a LISTEN pill (always present)
+            // offering Apple Music / Spotify / YouTube Music / Amazon Music /
+            // Deezer straight from the sheet (no explore session), plus the
+            // catalog-authored Genius pill when a geniusUrl exists.
+            Spacer(Modifier.height(12.dp))
+            var listenMenuOpen by remember { mutableStateOf(false) }
+            val geniusUrl = topic.geniusUrl?.takeIf { it.isNotBlank() }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+            ) {
+                Box {
+                    Surface(
+                        onClick = { listenMenuOpen = true },
+                        shape = RoundedCornerShape(50),
+                        color = accent.copy(alpha = 0.14f)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp),
+                            modifier = Modifier.padding(horizontal = 11.dp, vertical = 7.dp)
+                        ) {
+                            CurioIcon(
+                                CurioIcons.MusicNote,
+                                "Listen to this album",
+                                tint = cat.onAccent(),
+                                size = 16.dp
+                            )
+                            Text(
+                                "LISTEN",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                color = cat.categoryInk(),
+                                maxLines = 1
+                            )
+                        }
+                    }
+                    DropdownMenu(
+                        expanded = listenMenuOpen,
+                        onDismissRequest = { listenMenuOpen = false }
+                    ) {
+                        albumListenServices.forEach { srv ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        srv.label,
+                                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
+                                    )
+                                },
+                                onClick = {
+                                    listenMenuOpen = false
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    val url = albumListenUrl(topic, srv.id)
+                                    if (url.isNotBlank()) openSearchUrl(context, url)
+                                },
+                                leadingIcon = {
+                                    CurioIcon(
+                                        srv.icon,
+                                        "Open in ${srv.label}",
+                                        tint = accent,
+                                        size = 18.dp
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
                 if (geniusUrl != null) {
                     Surface(
                         onClick = {
+                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                             openSearchUrl(context, geniusUrl)
                         },
                         shape = RoundedCornerShape(50),
@@ -3754,19 +3867,6 @@ private fun AlbumNotesSheet(
                         }
                     }
                 }
-                Surface(
-                    onClick = onDismiss,
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
-                ) {
-                    CurioIcon(
-                        CurioIcons.Close,
-                        "Close track list",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        size = 20.dp,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
             }
 
             // ── Full track list — scrollable, selected track highlighted ─
@@ -3779,6 +3879,14 @@ private fun AlbumNotesSheet(
                     .weight(1f)
                     .fillMaxWidth()
             ) {
+                if (synopsis != null) {
+                    item(key = "album_about") {
+                        AlbumSynopsisAccordion(
+                            cat = cat,
+                            synopsis = synopsis
+                        )
+                    }
+                }
                 itemsIndexed(tracks) { _, tr ->
                     val selected = tr.number == currentTrack?.number
                     Surface(
@@ -3819,10 +3927,182 @@ private fun AlbumNotesSheet(
                                     maxLines = 1
                                 )
                             }
+                            // v336 — favorite heart: taps add/remove this track
+                            // from the album's share-card favorites (multi-
+                            // select; the Vinyl card renders the whole strip).
+                            val fav = favTracks.contains(tr.title)
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(CircleShape)
+                                    .clickable {
+                                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                        AppPreferences.toggleAlbumFavoriteTrack(context, topic.name, tr.title)
+                                    }
+                            ) {
+                                HeartGlyph(
+                                    color = if (fav) Color(0xFFE5484D)
+                                            else if (selected) cat.onAccent().copy(alpha = 0.85f)
+                                            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                    iconSize = 18.dp,
+                                    filled = fav,
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// v336 — Album sheet helpers (synopsis accordion, heart glyph, listen links)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** The services offered by the album sheet's LISTEN pill (v336) — search
+ *  deep links that open the installed app (or the browser) DIRECTLY,
+ *  bypassing the explore session entirely. Extensible later. */
+private data class AlbumListenService(val id: String, val label: String, val icon: String)
+
+private val albumListenServices = listOf(
+    AlbumListenService("apple", "Apple Music", CurioIcons.MusicNote),
+    AlbumListenService("spotify", "Spotify", CurioIcons.PlayCircle),
+    AlbumListenService("ytm", "YouTube Music", CurioIcons.YouTubeActivity),
+    AlbumListenService("amazon", "Amazon Music", "radio"),
+    AlbumListenService("deezer", "Deezer", CurioIcons.Album)
+)
+
+/** v336 — the search deep link for [service] on the album sheet. Artist +
+ *  album title (trailing "(1966)" year stripped — search engines rank a
+ *  bare title higher), then the same scheme tricks [openSearchUrl] already
+ *  handles: Apple Music via `music://` (falls back to https when the app
+ *  isn't installed), Spotify/Amazon/Deezer via their web search routes,
+ *  YouTube Music pinned to the app package by [openSearchUrl]. */
+private fun albumListenUrl(topic: CurioTopic, service: String): String {
+    val title = topic.name.replace(Regex("""\s+\(\d{4}\)\s*$"""), "")
+    val q = Uri.encode(listOfNotNull(
+        topic.byline.takeIf { it.isNotBlank() },
+        title
+    ).joinToString(" "))
+    return when (service) {
+        "apple" -> "music://music.apple.com/search?term=$q"
+        "spotify" -> "https://open.spotify.com/search/$q"
+        "ytm" -> "https://music.youtube.com/search?q=$q"
+        "amazon" -> "https://music.amazon.com/search/$q"
+        else -> "https://www.deezer.com/search/$q"
+    }
+}
+
+/**
+ * v336 — the album synopsis as a collapsible card pinned at the TOP of the
+ * track-list sheet (one sheet — no separate popup). Collapsed it shows a
+ * two-line teaser with a chevron; tapping the card expands the full
+ * description or collapses it back.
+ */
+@Composable
+private fun AlbumSynopsisAccordion(
+    cat: com.curio.app.data.CurioCategory,
+    synopsis: String,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Surface(
+        shape = RoundedCornerShape(18.dp),
+        color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { expanded = !expanded }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .animateContentSize()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = cat.themedAccent().copy(alpha = 0.16f)
+                ) {
+                    CurioIcon(
+                        CurioIcons.MusicNote,
+                        null,
+                        tint = cat.categoryInk(),
+                        size = 15.dp,
+                        modifier = Modifier.padding(6.dp)
+                    )
+                }
+                Text(
+                    "ABOUT THIS ALBUM",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.2.sp
+                    ),
+                    color = cat.categoryInk(),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    if (expanded) "Hide" else "Read",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = cat.categoryInk().copy(alpha = 0.9f)
+                )
+                CurioIcon(
+                    if (expanded) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
+                    if (expanded) "Collapse synopsis" else "Expand synopsis",
+                    tint = cat.categoryInk(),
+                    size = 20.dp
+                )
+            }
+            Text(
+                text = synopsis,
+                style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = if (expanded) Int.MAX_VALUE else 2,
+                overflow = if (expanded) TextOverflow.Clip else TextOverflow.Ellipsis,
+                modifier = Modifier.padding(top = 10.dp)
+            )
+        }
+    }
+}
+
+/**
+ * v336 — a tiny heart drawn directly (the bundled Material Symbols subset
+ * has no "favorite" ligature, so a Canvas heart can never render as tofu,
+ * and it exports identically through the share-card software pipeline).
+ * [iconSize] avoids shadowing DrawScope.size.
+ */
+@Composable
+private fun HeartGlyph(
+    color: Color,
+    iconSize: Dp,
+    filled: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Canvas(modifier.size(iconSize)) {
+        val w = this.size.width
+        val h = this.size.height
+        val heart = Path().apply {
+            moveTo(w * 0.50f, h * 0.30f)
+            cubicTo(w * 0.50f, h * 0.21f, w * 0.44f, h * 0.14f, w * 0.33f, h * 0.14f)
+            cubicTo(w * 0.17f, h * 0.14f, w * 0.10f, h * 0.25f, w * 0.10f, h * 0.36f)
+            cubicTo(w * 0.10f, h * 0.52f, w * 0.24f, h * 0.65f, w * 0.50f, h * 0.92f)
+            cubicTo(w * 0.76f, h * 0.65f, w * 0.90f, h * 0.52f, w * 0.90f, h * 0.36f)
+            cubicTo(w * 0.90f, h * 0.25f, w * 0.83f, h * 0.14f, w * 0.67f, h * 0.14f)
+            cubicTo(w * 0.56f, h * 0.14f, w * 0.50f, h * 0.21f, w * 0.50f, h * 0.30f)
+            close()
+        }
+        if (filled) {
+            drawPath(heart, color)
+        } else {
+            drawPath(heart, color, style = Stroke(width = w * 0.10f))
         }
     }
 }
