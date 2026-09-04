@@ -66,6 +66,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
@@ -895,7 +896,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                 // rows; phones keep the pinned overlay + fixed reservation.
                 if (wide) {
                     item(key = "hero", contentType = "hero") {
-                        heroFor(backdrop = null)
+                        heroFor(null)
                     }
                     if (filterUiVisible) {
                         item(key = "filter-ui", contentType = "filter-ui") {
@@ -1194,7 +1195,7 @@ fun TopicDatabaseScreen(navController: NavController) {
         // instead (heroFor above), so this pinned overlay only composes on
         // phones where the list reserves its footprint.
         if (!wide) {
-            heroFor(backdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null)
+            heroFor(if (isLiquidGlassPillsActive()) chipGlassBackdrop else null)
         }
     }
 }

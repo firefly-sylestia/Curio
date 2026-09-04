@@ -563,7 +563,7 @@ fun CabinetScreen(navController: NavController) {
             // hero simply sits above the empty state.
             if (wide) {
                 Box(Modifier.fillMaxWidth()) {
-                    cabinetHeroFor(backdrop = null)
+                    cabinetHeroFor(null)
                 }
             }
             MorphEntrance {
@@ -695,7 +695,7 @@ fun CabinetScreen(navController: NavController) {
                     // reservation.
                     if (wide) {
                         item(key = "hero", span = { GridItemSpan(maxLineSpan) }, contentType = "hero") {
-                            cabinetHeroFor(backdrop = null)
+                            cabinetHeroFor(null)
                         }
                         if (filterUiVisible) {
                             item(key = "filter-ui", span = { GridItemSpan(maxLineSpan) }, contentType = "filter-ui") {
@@ -883,7 +883,7 @@ fun CabinetScreen(navController: NavController) {
         // the hero as the grid's leading item / empty-page top block
         // (cabinetHeroFor above).
         if (!wide) {
-            cabinetHeroFor(backdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null)
+            cabinetHeroFor(if (isLiquidGlassPillsActive()) chipGlassBackdrop else null)
         }
     }
 }
