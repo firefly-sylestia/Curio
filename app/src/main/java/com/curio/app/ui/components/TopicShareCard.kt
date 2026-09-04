@@ -331,7 +331,7 @@ const val NO_FACT_ID = "no_fact"
 
 // v3xx — every selectable element on the card: NONE = nothing selected
 // (the edit chrome is hidden until the user taps a thing).
-enum class ShareCardResizeTarget { NONE, TITLE, FACT, META, BADGE, COVER }
+enum class ShareCardResizeTarget { NONE, TITLE, FACT, META, BADGE, COVER, FAVTRACKS }
 
 private fun quoteFontSize(length: Int): TextUnit = when {
     length > 900 -> 15.sp; length > 650 -> 17.sp; length > 420 -> 19.sp
@@ -420,7 +420,12 @@ data class ShareCardMove(
      *  can place the jacket anywhere on the card. Persisted per style with
      *  the rest of the move edits. */
     val coverDx: Float = 0f,
-    val coverDy: Float = 0f
+    val coverDy: Float = 0f,
+    /** v353 — offset applied to the ALBUM favorite-tracks strip, so the user
+     *  can drag it anywhere on the card (mirrors coverDx/coverDy). Persisted
+     *  per style with the rest of the move edits. */
+    val favDx: Float = 0f,
+    val favDy: Float = 0f
 )
 
 /** Modifier that shifts a card's TITLE by the move offset + box size + scale and
@@ -466,6 +471,11 @@ private fun Modifier.moveMeta(m: ShareCardMove): Modifier {
  *  handle in edit mode. */
 private fun Modifier.moveBadge(m: ShareCardMove): Modifier =
     if (m.badgeDx != 0f || m.badgeDy != 0f) this.offset(x = m.badgeDx.dp, y = m.badgeDy.dp) else this
+
+/** v353 — shifts the album favorite-tracks strip by the fav offset — the
+ *  strip drags exactly like the cover/jacket badge. */
+private fun Modifier.moveFav(m: ShareCardMove): Modifier =
+    if (m.favDx != 0f || m.favDy != 0f) this.offset(x = m.favDx.dp, y = m.favDy.dp) else this
 
 /** v3xx — user title font/alignment/bold/italic override (null = style's own). */
 private fun titleStyle(base: TextStyle, m: ShareCardMove): TextStyle {
@@ -539,6 +549,9 @@ class EditBoundsCallbacks(
     // v335 — the book-cover jacket badge reports its bounds so the editor
     // can select + drag it like the other movable elements.
     val onCover: (androidx.compose.ui.geometry.Rect) -> Unit = {},
+    // v353 — the album favorite-tracks strip reports its bounds so the
+    // editor can select + drag it like the cover/jacket.
+    val onFavTrack: (androidx.compose.ui.geometry.Rect) -> Unit = {},
     // v316b — the ACTUAL TextStyle the card used for its quick fact, so the
     // invisible typing field above it lays out with identical metrics
     // (family, size, line height) and the caret never drifts off the text.
@@ -728,7 +741,7 @@ fun TopicShareCard(
     Box {
         when (style) {
             ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact)
-            ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact, hideTypedFavSong = albumFavTracks.isNotEmpty())
+            ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact, hideTypedFavSong = albumFavTracks.isNotEmpty() && AppPreferences.albumFavStripVisibleState)
             ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto ?: bookCover, byline, year, polaroidCaption, onPhotoTap, bodyScale, callbacks, move, chapterProgress, chapterFact)
             ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact)
             ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact)
@@ -776,31 +789,42 @@ fun TopicShareCard(
         // tokens + corner (see FavoriteTracksBadge) so the strip belongs to
         // the card instead of reading as a vinyl sticker everywhere. Empty
         // for non-album topics, so other cards never change.
-        if (albumFavTracks.isNotEmpty()) {
-            // Hide the Vinyl typed favorite-song line when heart-picked
-            // tracks exist (both would fight over the same bottom corner).
+        // v353 — the strip hides entirely when the user turns it off in the
+        // share editor (global preference, default on).
+        if (albumFavTracks.isNotEmpty() && AppPreferences.albumFavStripVisibleState) {
+            // v353 — per-style POSITIONING pass: the strip parks where each
+            // design actually leaves room (Minimal moved off the top-end
+            // where its glyph + the cover jacket sit; Editorial cleared the
+            // colophon slug; the rest nudge clear of footers).
             val favSlot = when (style) {
                 ShareCardStyle.NEUMORPHIC -> Alignment.TopStart to
                     PaddingValues(top = 88.dp, start = 22.dp, end = 22.dp)
                 ShareCardStyle.EDITORIAL -> Alignment.BottomStart to
-                    PaddingValues(start = 26.dp, bottom = 62.dp)
-                ShareCardStyle.MINIMAL -> Alignment.TopEnd to
-                    PaddingValues(top = 46.dp, end = 22.dp, start = 22.dp)
+                    PaddingValues(start = 28.dp, bottom = 80.dp)
+                ShareCardStyle.MINIMAL -> Alignment.BottomStart to
+                    PaddingValues(start = 26.dp, bottom = 34.dp)
                 // Vinyl: bottom-start is where the typed song chip lives; it
                 // is suppressed (below) so the album strip owns that corner.
                 ShareCardStyle.VINYL, ShareCardStyle.PAPER -> Alignment.BottomStart to
-                    PaddingValues(start = if (aspect == ShareCardAspect.CLASSIC) 12.dp else 16.dp, bottom = if (aspect == ShareCardAspect.CLASSIC) 30.dp else 26.dp)
+                    PaddingValues(start = if (aspect == ShareCardAspect.CLASSIC) 14.dp else 18.dp, bottom = if (aspect == ShareCardAspect.CLASSIC) 28.dp else 26.dp)
                 ShareCardStyle.COLLAGE -> Alignment.BottomStart to
-                    PaddingValues(start = 20.dp, bottom = if (aspect == ShareCardAspect.CLASSIC) 38.dp else 34.dp)
+                    PaddingValues(start = 22.dp, bottom = if (aspect == ShareCardAspect.CLASSIC) 40.dp else 36.dp)
                 ShareCardStyle.SIGNATURE, ShareCardStyle.CUSTOM -> Alignment.BottomStart to
-                    PaddingValues(start = if (aspect == ShareCardAspect.CLASSIC) 14.dp else 18.dp, bottom = if (aspect == ShareCardAspect.CLASSIC) 58.dp else 54.dp)
+                    PaddingValues(start = if (aspect == ShareCardAspect.CLASSIC) 18.dp else 22.dp, bottom = if (aspect == ShareCardAspect.CLASSIC) 62.dp else 58.dp)
             }
             FavoriteTracksBadge(
                 tracks = albumFavTracks,
                 style = style,
                 palette = palette,
                 classic = aspect == ShareCardAspect.CLASSIC,
-                modifier = Modifier.align(favSlot.first).padding(favSlot.second)
+                // v353 — the strip is a movable element like the cover: its
+                // offset comes from [move.favDx]/[move.favDy] and it reports
+                // its bounds so the editor can select + drag it.
+                modifier = Modifier
+                    .align(favSlot.first)
+                    .padding(favSlot.second)
+                    .moveFav(move)
+                    .onGloballyPositioned { callbacks.onFavTrack(it.boundsInWindow()) }
             )
         }
     }
@@ -1158,6 +1182,11 @@ private fun VinylCard(
  *  read as native to the card instead of a vinyl sticker pasted on top.
  *  Up to three songs, then "+N more".
  */
+/** v353 — the leading glyph a favorite-tracks strip uses per card style:
+ *  NOTE = filled eighth note, VINYL = tiny record disc, EQ = equalizer bars,
+ *  STAR = masthead ornament, DOT = quiet full-stop dot. */
+private enum class FavGlyph { NOTE, VINYL, EQ, STAR, DOT }
+
 private data class FavStripTokens(
     val bg: Color,
     val border: Color?,
@@ -1167,7 +1196,8 @@ private data class FavStripTokens(
     val serifBody: Boolean,
     val capsSpacing: Boolean,
     val radius: Dp,
-    val alpha: Float
+    val alpha: Float,
+    val glyph: FavGlyph = FavGlyph.NOTE
 )
 
 @Composable
@@ -1178,53 +1208,66 @@ private fun FavoriteTracksBadge(
     classic: Boolean,
     modifier: Modifier = Modifier
 ) {
+    // v353 — the strip is no longer the same sticker on every card: the
+    // boxless designs (Editorial, Minimal) render the favorites as plain
+    // type with no surface, everything else keeps its (now style-true)
+    // badge.
+    when (style) {
+        ShareCardStyle.EDITORIAL -> EditorialFavStrip(tracks, palette, classic, modifier)
+        ShareCardStyle.MINIMAL -> MinimalFavStrip(tracks, palette, classic, modifier)
+        else -> BoxedFavStrip(tracks, style, palette, classic, modifier)
+    }
+}
+
+/** v353 — the boxed favorite-tracks badge (Paper, Vinyl, Collage,
+ *  Neumorphic, Signature, Custom): per-style tokens + a per-style leading
+ *  glyph instead of the same heart everywhere. */
+@Composable
+private fun BoxedFavStrip(
+    tracks: List<String>,
+    style: ShareCardStyle,
+    palette: ShareCardPalette,
+    classic: Boolean,
+    modifier: Modifier = Modifier
+) {
     val shownFavs = tracks.take(3)
     val extra = tracks.size - shownFavs.size
     // v340 — per-style tokens: colors, borders, type and radius match the
     // design underneath so the strip belongs to the card it sits on.
+    // v353 — each style's leading glyph: Paper a music note, Vinyl a tiny
+    // record disc, Collage a note, Neumorphic equalizer bars, Signature /
+    // Custom a note.
     val tok: FavStripTokens = when (style) {
         ShareCardStyle.PAPER -> FavStripTokens(
             bg = palette.bgBase, border = palette.ink.copy(alpha = 0.14f),
             labelInk = palette.ink.copy(alpha = 0.80f), bodyInk = palette.ink.copy(alpha = 0.84f),
             heart = palette.accent, serifBody = true, capsSpacing = true,
-            radius = 7.dp, alpha = 0.94f
+            radius = 7.dp, alpha = 0.94f, glyph = FavGlyph.NOTE
         )
         ShareCardStyle.VINYL -> FavStripTokens(
             bg = Color(0xFFFDF0EE), border = Color(0xFFD4A0A0).copy(alpha = 0.35f),
             labelInk = Color(0xFF3A2A20).copy(alpha = 0.78f), bodyInk = Color(0xFF3A2A20).copy(alpha = 0.82f),
             heart = Color(0xFFD4A0A0), serifBody = true, capsSpacing = true,
-            radius = 7.dp, alpha = 0.92f
+            radius = 7.dp, alpha = 0.92f, glyph = FavGlyph.VINYL
         )
         ShareCardStyle.COLLAGE -> FavStripTokens(
             bg = Color(0xFFFFFDF6), border = Color(0xFFD9BE8A).copy(alpha = 0.55f),
             labelInk = Color(0xFF3A2A20).copy(alpha = 0.72f), bodyInk = Color(0xFF3A2A20).copy(alpha = 0.80f),
             heart = palette.accentDark, serifBody = true, capsSpacing = false,
-            radius = 3.dp, alpha = 0.97f
+            radius = 3.dp, alpha = 0.97f, glyph = FavGlyph.NOTE
         )
         ShareCardStyle.NEUMORPHIC -> FavStripTokens(
             bg = Color.Black.copy(alpha = 0.62f), border = Color.White.copy(alpha = 0.16f),
             labelInk = Color.White.copy(alpha = 0.82f), bodyInk = Color.White.copy(alpha = 0.88f),
             heart = palette.accent.copy(alpha = 0.9f), serifBody = false, capsSpacing = true,
-            radius = 50.dp, alpha = 1f
-        )
-        ShareCardStyle.EDITORIAL -> FavStripTokens(
-            bg = Color(0xFFFFFCF6), border = Color(0xFF1C1814).copy(alpha = 0.22f),
-            labelInk = Color(0xFF1C1814).copy(alpha = 0.85f), bodyInk = Color(0xFF1C1814).copy(alpha = 0.80f),
-            heart = palette.accent, serifBody = true, capsSpacing = false,
-            radius = 2.dp, alpha = 0.96f
-        )
-        ShareCardStyle.MINIMAL -> FavStripTokens(
-            bg = Color(0xFFFFFDF9), border = Color(0xFF1A1A1A).copy(alpha = 0.30f),
-            labelInk = Color(0xFF1A1A1A).copy(alpha = 0.80f), bodyInk = Color(0xFF1A1A1A).copy(alpha = 0.80f),
-            heart = palette.accent, serifBody = false, capsSpacing = true,
-            radius = 0.dp, alpha = 0.98f
+            radius = 50.dp, alpha = 1f, glyph = FavGlyph.EQ
         )
         // Signature + Custom wear the tone palette like their category slugs.
         else -> FavStripTokens(
             bg = palette.bgBase, border = palette.accent.copy(alpha = 0.40f),
             labelInk = palette.ink.copy(alpha = 0.82f), bodyInk = palette.ink.copy(alpha = 0.84f),
             heart = palette.accentDark, serifBody = true, capsSpacing = false,
-            radius = 8.dp, alpha = 0.97f
+            radius = 8.dp, alpha = 0.97f, glyph = FavGlyph.NOTE
         )
     }
     Surface(
@@ -1244,10 +1287,10 @@ private fun FavoriteTracksBadge(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                ShareHeartGlyph(
+                ShareMusicGlyph(
+                    variant = tok.glyph,
                     color = tok.labelInk.copy(alpha = 0.85f),
-                    iconSize = if (classic) 7.dp else 9.dp,
-                    filled = true
+                    iconSize = if (classic) 7.dp else 9.dp
                 )
                 Text(
                     "FAVORITE TRACKS",
@@ -1266,10 +1309,10 @@ private fun FavoriteTracksBadge(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    ShareHeartGlyph(
+                    ShareMusicGlyph(
+                        variant = tok.glyph,
                         color = tok.heart.copy(alpha = 0.95f),
-                        iconSize = if (classic) 5.5.dp else 7.dp,
-                        filled = true
+                        iconSize = if (classic) 5.5.dp else 7.dp
                     )
                     Text(
                         t,
@@ -1304,6 +1347,144 @@ private fun FavoriteTracksBadge(
     }
 }
 
+/** v353 — EDITORIAL: no box. A masthead rule + caps label, then each track
+ *  as a serif-italic line with a small note ornament — type only, like the
+ *  rest of the masthead design. */
+@Composable
+private fun EditorialFavStrip(
+    tracks: List<String>,
+    palette: ShareCardPalette,
+    classic: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val ink = Color(0xFF1C1814)
+    val shownFavs = tracks.take(3)
+    val extra = tracks.size - shownFavs.size
+    Column(
+        verticalArrangement = Arrangement.spacedBy(if (classic) 2.dp else 3.dp),
+        modifier = modifier.widthIn(max = if (classic) 230.dp else 290.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(if (classic) 12.dp else 16.dp)
+                    .height(1.5.dp)
+                    .background(ink.copy(alpha = 0.55f))
+            )
+            ShareMusicGlyph(
+                variant = FavGlyph.STAR,
+                color = palette.accent.copy(alpha = 0.9f),
+                iconSize = if (classic) 6.dp else 7.5.dp
+            )
+            Text(
+                "FAVORITE TRACKS",
+                style = TextStyle(
+                    fontFamily = LoraFontFamily,
+                    fontSize = if (classic) 5.5.sp else 6.5.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 1.2.sp,
+                    color = ink.copy(alpha = 0.85f)
+                )
+            )
+        }
+        shownFavs.forEach { t ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                ShareMusicGlyph(
+                    variant = FavGlyph.NOTE,
+                    color = palette.accent.copy(alpha = 0.70f),
+                    iconSize = if (classic) 5.dp else 6.5.dp
+                )
+                Text(
+                    t,
+                    style = TextStyle(
+                        fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
+                        fontSize = if (classic) 7.5.sp else 9.sp, lineHeight = if (classic) 9.sp else 11.sp,
+                        color = ink.copy(alpha = 0.82f)
+                    ),
+                    maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+        if (extra > 0) {
+            Text(
+                "+$extra more",
+                style = TextStyle(
+                    fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
+                    fontSize = if (classic) 6.5.sp else 8.sp, color = palette.accent.copy(alpha = 0.95f)
+                ),
+                maxLines = 1, overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+/** v353 — MINIMAL: no box, no per-row icons. A quiet caps label with a dot,
+ *  then the tracks joined by dots on ONE line — type only, as quiet as the
+ *  design underneath. */
+@Composable
+private fun MinimalFavStrip(
+    tracks: List<String>,
+    palette: ShareCardPalette,
+    classic: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val ink = Color(0xFF1A1A1A)
+    val shownFavs = tracks.take(3)
+    val extra = tracks.size - shownFavs.size
+    Column(
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+        modifier = modifier.widthIn(max = if (classic) 250.dp else 330.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            ShareMusicGlyph(
+                variant = FavGlyph.DOT,
+                color = palette.accent.copy(alpha = 0.9f),
+                iconSize = if (classic) 6.dp else 7.dp
+            )
+            Text(
+                "FAVORITES",
+                style = TextStyle(
+                    fontFamily = GeomFontFamily,
+                    fontSize = if (classic) 5.5.sp else 6.5.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 1.4.sp,
+                    color = ink.copy(alpha = 0.72f)
+                )
+            )
+        }
+        Text(
+            shownFavs.joinToString("  \u00b7  "),
+            style = TextStyle(
+                fontFamily = GeomFontFamily,
+                fontSize = if (classic) 6.5.sp else 8.sp, lineHeight = if (classic) 8.sp else 10.sp,
+                fontWeight = FontWeight.SemiBold, color = ink.copy(alpha = 0.72f)
+            ),
+            maxLines = 1, overflow = TextOverflow.Ellipsis
+        )
+        if (extra > 0) {
+            Text(
+                "+$extra more",
+                style = TextStyle(
+                    fontFamily = GeomFontFamily, fontWeight = FontWeight.Bold,
+                    fontSize = if (classic) 5.5.sp else 7.sp, color = palette.accent.copy(alpha = 0.9f)
+                ),
+                maxLines = 1, overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
 /** v336 — a tiny heart drawn directly for the share card (the bundled
  *  Material Symbols subset has no "favorite" ligature, and the software
  *  export pipeline rasterizes Canvas identically to the preview). */
@@ -1331,6 +1512,67 @@ private fun ShareHeartGlyph(
             drawPath(heart, color)
         } else {
             drawPath(heart, color, style = Stroke(width = w * 0.10f))
+        }
+    }
+}
+
+/** v353 — per-style leading glyphs for the favorite-tracks strip, drawn
+ *  directly (Canvas rasterizes identically in the export pipeline): a
+ *  filled music note, a tiny vinyl disc, equalizer bars, a masthead star
+ *  and a quiet dot. */
+@Composable
+private fun ShareMusicGlyph(
+    variant: FavGlyph,
+    color: Color,
+    iconSize: Dp,
+    modifier: Modifier = Modifier
+) {
+    Canvas(modifier.size(iconSize)) {
+        val w = this.size.width
+        val h = this.size.height
+        when (variant) {
+            FavGlyph.NOTE -> {
+                // Filled eighth note: oval head + stem + curved flag.
+                drawOval(color, Offset(w * 0.28f, h * 0.62f), Size(w * 0.44f, h * 0.30f))
+                drawRoundRect(color, Offset(w * 0.52f, h * 0.08f), Size(w * 0.12f, h * 0.72f), CornerRadius(w * 0.06f))
+                val flag = Path().apply {
+                    moveTo(w * 0.64f, h * 0.10f)
+                    quadraticBezierTo(w * 0.92f, h * 0.30f, w * 0.66f, h * 0.54f)
+                    quadraticBezierTo(w * 0.84f, h * 0.44f, w * 0.78f, h * 0.18f)
+                    close()
+                }
+                drawPath(flag, color)
+            }
+            FavGlyph.VINYL -> {
+                // Record disc: solid platter + lighter label + spindle hole.
+                drawCircle(color, radius = w * 0.44f, center = Offset(w * 0.5f, h * 0.5f))
+                drawCircle(Color.White.copy(alpha = 0.55f), radius = w * 0.16f, center = Offset(w * 0.5f, h * 0.5f))
+                drawCircle(Color.White.copy(alpha = 0.9f), radius = w * 0.05f, center = Offset(w * 0.5f, h * 0.5f))
+            }
+            FavGlyph.EQ -> {
+                // Three equalizer bars, staggered heights.
+                val bw = w * 0.18f
+                drawRoundRect(color, Offset(w * 0.06f, h * 0.45f), Size(bw, h * 0.45f), CornerRadius(bw * 0.4f))
+                drawRoundRect(color, Offset(w * 0.41f, h * 0.12f), Size(bw, h * 0.78f), CornerRadius(bw * 0.4f))
+                drawRoundRect(color, Offset(w * 0.76f, h * 0.30f), Size(bw, h * 0.60f), CornerRadius(bw * 0.4f))
+            }
+            FavGlyph.STAR -> {
+                val cx = w * 0.5f; val cy = h * 0.5f
+                val outer = w * 0.48f; val inner = outer * 0.42f
+                val star = Path()
+                for (i in 0 until 10) {
+                    val r = if (i % 2 == 0) outer else inner
+                    val ang = Math.toRadians(-90.0 + i * 36.0)
+                    val x = cx + (r * Math.cos(ang)).toFloat()
+                    val y = cy + (r * Math.sin(ang)).toFloat()
+                    if (i == 0) star.moveTo(x, y) else star.lineTo(x, y)
+                }
+                star.close()
+                drawPath(star, color)
+            }
+            FavGlyph.DOT -> {
+                drawCircle(color, radius = w * 0.30f, center = Offset(w * 0.5f, h * 0.5f))
+            }
         }
     }
 }
@@ -5015,6 +5257,8 @@ private fun ArrangeableCard(
     val badgeRect = androidx.compose.runtime.remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
     // v335 — the book-cover jacket badge's bounds (0 until a cover exists).
     val coverRect = androidx.compose.runtime.remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
+    // v353 — the album favorite-tracks strip's bounds (0 while hidden).
+    val favRect = androidx.compose.runtime.remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
     // v316b — the card reports the ACTUAL style its fact renders with, so the
     // invisible field above it uses identical metrics (family/size/line).
     val liveFactStyle = androidx.compose.runtime.remember { mutableStateOf(factFieldStyle) }
@@ -5025,6 +5269,7 @@ private fun ArrangeableCard(
             onMeta = { r -> metaRect.value = r },
             onBadge = { r -> badgeRect.value = r },
             onCover = { r -> coverRect.value = r },
+            onFavTrack = { r -> favRect.value = r },
             onFactStyle = { s -> liveFactStyle.value = s }
         )
     }
@@ -5059,10 +5304,11 @@ private fun ArrangeableCard(
                     }
 
                 // v341/v342 — PicsArt-style alignment guides: while a selected
-                // box is dragged, its edges and centre magnet-snap to the
-                // card's own edges + centre lines AND to the other boxes'
-                // edges and centres (tight snap reach, wider faint hint band);
-                // the overlay draws the guide lines full-card until lift.
+                // box is dragged, its edges and centre align with the
+                // card's own edges + centre lines AND with the other boxes'
+                // edges and centres; v353 — GUIDE-ONLY (the magnet pull is
+                // gone): the overlay draws a faint hint line full-card while
+                // aligned, and the box never sticks.
                 //
                 // v342 — every selectable element's CURRENT card-local bounds,
                 // computed ONCE here so a drag can align to the card frame AND
@@ -5074,7 +5320,8 @@ private fun ArrangeableCard(
                 val rMeta = local(metaRect.value)
                 val rBadge = local(badgeRect.value)
                 val rCover = local(coverRect.value)
-                val rAll = listOf(rTitle, rFact, rMeta, rBadge, rCover)
+                val rFav = local(favRect.value)
+                val rAll = listOf(rTitle, rFact, rMeta, rBadge, rCover, rFav)
 
                 // v342 — the OTHER boxes a live drag can magnet-align to
                 // (excluding the dragged box itself by instance identity).
@@ -5260,7 +5507,7 @@ private fun ArrangeableCard(
                             y = f.top.dp,
                             onDelta = { dx, dy ->
                                 // v340 — base-rect clamp (see the title handle).
-                                // v341 — magnet snap (see the title handle).
+                                // v353 — guide-only alignment (no magnet pull).
                                 val bx = f.left - move.factDx
                                 val by = f.top - move.factDy
                                 // v342 - cross-element alignment (see title).
@@ -5348,7 +5595,7 @@ private fun ArrangeableCard(
                             y = (b.top - 2f).coerceIn(0f, (ch - 24f).coerceAtLeast(0f)).dp,
                             onDelta = { dx, dy ->
                                 // v340 — base-rect clamp (see the title handle).
-                                // v341 — magnet snap (see the title handle).
+                                // v353 — guide-only alignment (no magnet pull).
                                 val bx = b.left - move.badgeDx
                                 val by = b.top - move.badgeDy
                                 // v342 - cross-element alignment (see title).
@@ -5389,10 +5636,9 @@ private fun ArrangeableCard(
                             y = (cv.bottom - 24f).coerceIn(0f, (ch - 24f).coerceAtLeast(0f)).dp,
                             onDelta = { dx, dy ->
                                 // v340 — base-rect clamp (see the title handle).
-                                // v341 — magnet snap (see the title handle).
+                                // v353 — guide-only (no magnet snap, see below).
                                 val bx = cv.left - move.coverDx
                                 val by = cv.top - move.coverDy
-                                // v342 - cross-element alignment (see title).
                                 val othersC = alignOthers(cv)
                                 val xs = magnetAxis(bx, cv.width, cw, -bx, cw - bx - cv.width, (move.coverDx + dx).coerceIn(-bx, cw - bx - cv.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersC, bx, cv.width))
                                 val ys = magnetAxis(by, cv.height, ch, -by, ch - by - cv.height, (move.coverDy + dy).coerceIn(-by, ch - by - cv.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersC, by, cv.height))
@@ -5405,13 +5651,49 @@ private fun ArrangeableCard(
                     }
                 }
 
+                // v353 — the album favorite-tracks strip is a movable element
+                // too: tap to select, then a single grip drags it around the
+                // card (mirrors the cover/jacket block above).
+                val rf = rFav
+                val rfOk = rf.width > 0f && rf.height > 0f
+                if (rfOk) {
+                    val isSel = sel == ShareCardResizeTarget.FAVTRACKS
+                    Box(
+                        modifier = Modifier
+                            .offset(rf.left.dp, rf.top.dp)
+                            .width(rf.width.dp)
+                            .height(rf.height.dp)
+                            .clickable {
+                                focusManager.clearFocus()
+                                onSelectResizeTarget(ShareCardResizeTarget.FAVTRACKS)
+                            }
+                            .border(1.dp, selBorder(isSel), RoundedCornerShape(6.dp))
+                    )
+                    if (isSel) {
+                        MoveHandle(
+                            x = (rf.right - 24f).coerceIn(0f, (cw - 24f).coerceAtLeast(0f)).dp,
+                            y = (rf.bottom - 24f).coerceIn(0f, (ch - 24f).coerceAtLeast(0f)).dp,
+                            onDelta = { dx, dy ->
+                                val bx = rf.left - move.favDx
+                                val by = rf.top - move.favDy
+                                val othersF = alignOthers(rf)
+                                val xs = magnetAxis(bx, rf.width, cw, -bx, cw - bx - rf.width, (move.favDx + dx).coerceIn(-bx, cw - bx - rf.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersF, bx, rf.width))
+                                val ys = magnetAxis(by, rf.height, ch, -by, ch - by - rf.height, (move.favDy + dy).coerceIn(-by, ch - by - rf.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersF, by, rf.height))
+                                dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
+                                onMove(move.copy(favDx = xs.offset, favDy = ys.offset))
+                            },
+                            onDragStart = { dragActive = true },
+                            onDragEnd = { dragActive = false; dragGuides = DragGuides() }
+                        )
+                    }
+                }
+
                 // v341/v342 — PicsArt-style alignment guides. Always composed
                 // but only draws while a box drag is live: a FAINT centre
                 // crosshair appears the moment any grip is pulled (centering
                 // hint); near an alignment line the box first shows a faint
-                // full-card HINT, and when the drag magnet-snaps to the card
-                // centre/edge or to another box's edge, a bright guide line
-                // marks the snapped axis. Reads happen inside the draw scope
+                // full-card HINT (same faint line — v353 the bright snapped
+                // guides are gone with the magnet). Reads happen inside the draw scope
                 // so per-frame drag updates only redraw this canvas, never
                 // recompose the overlay. Halo + bright core keeps the lines
                 // visible on light and dark cards alike.
@@ -5659,6 +5941,8 @@ fun TopicShareSheet(
                 badgeDy = o.optDouble("badgeDy", 0.0).toFloat(),
                 coverDx = o.optDouble("coverDx", 0.0).toFloat(),
                 coverDy = o.optDouble("coverDy", 0.0).toFloat(),
+                favDx = o.optDouble("favDx", 0.0).toFloat(),
+                favDy = o.optDouble("favDy", 0.0).toFloat(),
                 titleWidthFrac = o.optDouble("titleWidthFrac", 1.0).toFloat(),
                 titleHeightFrac = o.optDouble("titleHeightFrac", 1.0).toFloat(),
                 factWidthFrac = o.optDouble("factWidthFrac", 1.0).toFloat(),
@@ -5945,6 +6229,7 @@ fun TopicShareSheet(
                 put("metaDx", m.metaDx); put("metaDy", m.metaDy)
                 put("badgeDx", m.badgeDx); put("badgeDy", m.badgeDy)
                 put("coverDx", m.coverDx); put("coverDy", m.coverDy)
+                put("favDx", m.favDx); put("favDy", m.favDy)
                 put("titleWidthFrac", m.titleWidthFrac); put("titleHeightFrac", m.titleHeightFrac)
                 put("factWidthFrac", m.factWidthFrac); put("factHeightFrac", m.factHeightFrac)
                 put("metaWidthFrac", m.metaWidthFrac); put("metaHeightFrac", m.metaHeightFrac)
@@ -6181,6 +6466,7 @@ fun TopicShareSheet(
                     ShareCardResizeTarget.META -> "Info row"
                     ShareCardResizeTarget.BADGE -> "Category chip"
                     ShareCardResizeTarget.COVER -> "Book cover"
+                    ShareCardResizeTarget.FAVTRACKS -> "Favorite tracks"
                     ShareCardResizeTarget.NONE -> "Nothing selected"
                 }
                 val elementFont = when (sel) {
@@ -6189,6 +6475,7 @@ fun TopicShareSheet(
                     ShareCardResizeTarget.META -> move.metaFont
                     ShareCardResizeTarget.BADGE -> move.badgeFont
                     ShareCardResizeTarget.COVER -> null
+                    ShareCardResizeTarget.FAVTRACKS -> null
                     ShareCardResizeTarget.NONE -> null
                 }
                 val elementAlign = when (sel) {
@@ -6202,6 +6489,7 @@ fun TopicShareSheet(
                     ShareCardResizeTarget.META -> move.metaBold
                     ShareCardResizeTarget.BADGE -> move.badgeBold
                     ShareCardResizeTarget.COVER -> false
+                    ShareCardResizeTarget.FAVTRACKS -> false
                     ShareCardResizeTarget.NONE -> false
                 }
                 val elementItalic = when (sel) {
@@ -6210,6 +6498,7 @@ fun TopicShareSheet(
                     ShareCardResizeTarget.META -> move.metaItalic
                     ShareCardResizeTarget.BADGE -> move.badgeItalic
                     ShareCardResizeTarget.COVER -> false
+                    ShareCardResizeTarget.FAVTRACKS -> false
                     ShareCardResizeTarget.NONE -> false
                 }
                 val setElementFont: (FontFamily?) -> Unit = { fam ->
@@ -6219,6 +6508,7 @@ fun TopicShareSheet(
                         ShareCardResizeTarget.META -> move.copy(metaFont = fam)
                         ShareCardResizeTarget.BADGE -> move.copy(badgeFont = fam)
                         ShareCardResizeTarget.COVER -> move
+                        ShareCardResizeTarget.FAVTRACKS -> move
                         ShareCardResizeTarget.NONE -> move
                     })
                 }
@@ -6236,6 +6526,7 @@ fun TopicShareSheet(
                         ShareCardResizeTarget.META -> move.copy(metaBold = v)
                         ShareCardResizeTarget.BADGE -> move.copy(badgeBold = v)
                         ShareCardResizeTarget.COVER -> move
+                        ShareCardResizeTarget.FAVTRACKS -> move
                         ShareCardResizeTarget.NONE -> move
                     })
                 }
@@ -6246,6 +6537,7 @@ fun TopicShareSheet(
                         ShareCardResizeTarget.META -> move.copy(metaItalic = v)
                         ShareCardResizeTarget.BADGE -> move.copy(badgeItalic = v)
                         ShareCardResizeTarget.COVER -> move
+                        ShareCardResizeTarget.FAVTRACKS -> move
                         ShareCardResizeTarget.NONE -> move
                     })
                 }
@@ -6702,40 +6994,73 @@ fun TopicShareSheet(
                                     OutlinedTextField(value = polaroidCaption, onValueChange = { polaroidCaption = it.take(36) }, placeholder = { Text(if (sharer.isNotBlank()) "$sharer \u00b7 via Curio" else "via Curio", style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)) }, singleLine = true, textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface), shape = RoundedCornerShape(50), modifier = Modifier.weight(1f))
                                 }
                             }
-                            if (currentStyle == ShareCardStyle.VINYL) {
-                                // v336/v337 — when the user heart-picked
-                                // favorite tracks in the album's track-list
-                                // sheet, those win over the typed line: the
-                                // field hides here and the heart strip shows
-                                // on every card style.
-                                if (AppPreferences.albumFavTracksState[topicName].orEmpty().isEmpty()) {
-                                    OutlinedTextField(
-                                        value = AppPreferences.favoriteSongState,
-                                        onValueChange = { AppPreferences.setFavoriteSong(context, it.take(40)) },
-                                        placeholder = { Text("Your favorite song (shown on Vinyl)", style = MaterialTheme.typography.labelMedium) },
-                                        singleLine = true,
-                                        textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                                        shape = RoundedCornerShape(50),
-                                        modifier = Modifier.fillMaxWidth()
+                            val albumFavs = AppPreferences.albumFavTracksState[topicName].orEmpty()
+                            if (currentStyle == ShareCardStyle.VINYL && albumFavs.isEmpty()) {
+                                // v336/v337 — the typed favorite-song line
+                                // only shows when no heart-picks exist (the
+                                // heart strip owns that corner otherwise).
+                                OutlinedTextField(
+                                    value = AppPreferences.favoriteSongState,
+                                    onValueChange = { AppPreferences.setFavoriteSong(context, it.take(40)) },
+                                    placeholder = { Text("Your favorite song (shown on Vinyl)", style = MaterialTheme.typography.labelMedium) },
+                                    singleLine = true,
+                                    textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                                    shape = RoundedCornerShape(50),
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                            if (albumFavs.isNotEmpty()) {
+                                // v353 — the heart-picked strip's editor row
+                                // (any style): explains the pick and offers a
+                                // Show / Hide toggle so the user can drop the
+                                // strip from the card without clearing picks.
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    CurioIcon(
+                                        name = CurioIcons.MusicNote,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        size = 16.dp
                                     )
-                                } else {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        modifier = Modifier.fillMaxWidth()
+                                    Text(
+                                        "Favorite tracks are the songs you heart-picked in the album's track list",
+                                        style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    val stripVisible = AppPreferences.albumFavStripVisibleState
+                                    Surface(
+                                        onClick = {
+                                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                            AppPreferences.setAlbumFavStripVisible(context, !stripVisible)
+                                        },
+                                        shape = RoundedCornerShape(50),
+                                        color = if (stripVisible) MaterialTheme.colorScheme.secondaryContainer
+                                                else MaterialTheme.colorScheme.surfaceContainerHigh,
+                                        modifier = Modifier.height(36.dp)
                                     ) {
-                                        CurioIcon(
-                                            name = CurioIcons.MusicNote,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            size = 16.dp
-                                        )
-                                        Text(
-                                            "Favorite tracks are the songs you heart-picked in the album's track list — they show on every card style",
-                                            style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
-                                            maxLines = 2,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
+                                        Row(
+                                            Modifier.padding(horizontal = 12.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(5.dp)
+                                        ) {
+                                            ShareHeartGlyph(
+                                                color = if (stripVisible) MaterialTheme.colorScheme.primary
+                                                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                iconSize = 11.dp,
+                                                filled = stripVisible
+                                            )
+                                            Text(
+                                                if (stripVisible) "On card" else "Hidden",
+                                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                                color = if (stripVisible) MaterialTheme.colorScheme.primary
+                                                        else MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -6946,16 +7271,12 @@ private fun BoxScope.MoveHandle(
 private const val SNAP_REACH = 3f
 private const val HINT_REACH = 8f
 
-/** v342 — one-axis magnet helper behind the PicsArt-style alignment guides.
- *  Given the element's BASE (zero-offset) edge [base], its [size], the card's
- *  [cardSize], the element's own clamp range [min]..[max] and the drag
- *  position [cur], it considers the card's left/top edge, centre line and
- *  right/bottom edge PLUS every extra (offset, line) candidate ([extra] — the
- *  other boxes' edges/centres from hCands/vCands). A candidate only counts
- *  when it sits inside the clamp range. The NEAREST candidate within [snap]
- *  dp snaps the offset (bright line); a candidate inside the wider [hint]
- *  band does NOT grab the box, it only reports a faint guide line so the
- *  user sees the alignment before it engages. */
+/** v353 — one-axis alignment helper (NO magnet). The drag position is always
+ *  applied as-is — the box follows the finger exactly, nothing sticks. The
+ *  helper only watches whether the element ALIGNS with the card's edges /
+ *  centre or with another element's edges / centre (the [extra] candidates):
+ *  when a candidate sits within the [hint] band it reports a faint guide
+ *  line so the user still SEES the alignment, without any pull. */
 private fun magnetAxis(
     base: Float, size: Float, cardSize: Float,
     min: Float, max: Float, cur: Float,
@@ -6976,21 +7297,19 @@ private fun magnetAxis(
         if (d <= bestDist) { bestDist = d; best = cand to line }
     }
     val b = best ?: return AxisSnap(cur)
-    return AxisSnap(
-        offset = if (bestDist <= snap) b.first else cur,
-        snapLine = if (bestDist <= snap) b.second else null,
-        hintLine = if (bestDist > snap) b.second else null
-    )
+    // v353 — NEVER snap: offsets stay exactly where the finger put them.
+    // The line only shows as a faint hint inside the band.
+    return AxisSnap(offset = cur, hintLine = b.second)
 }
 
-/** v342 — one-axis magnet result: the offset to apply (snapped only when a
- *  guide engaged), the bright snapped guide line (card-local dp, null when
- *  there is none) and the faint hint line (same units, null when none). */
+/** v342/v353 — one-axis alignment result: the offset to apply (always the
+ *  drag position — no snap anymore) and the faint hint line (card-local dp,
+ *  null when there is none). The bright snapped line is never emitted now. */
 private class AxisSnap(val offset: Float, val snapLine: Float? = null, val hintLine: Float? = null)
 
 /** v342 — the guide lines a live drag currently sits on, as card-local dp
- *  floats (null = not snapped on that axis). [vx]/[hy] are the bright lines
- *  the box snapped to; [hintVx]/[hintHy] are faint near-miss hints that only
+ *  floats (null = not aligned on that axis). [vx]/[hy] are kept for symmetry
+ *  but never set now; [hintVx]/[hintHy] are the faint near-miss hints that
  *  preview the alignment without grabbing the box. */
 private class DragGuides(
     val vx: Float? = null,

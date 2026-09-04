@@ -77,13 +77,24 @@ object BookCoverFetch {
         resolved
     }
 
-    /** Keyless Google Books volume search → the first match's cover thumbnail. */
+    /** v354 — Google Books volumes endpoint. Stays fully KEYLESS unless the
+     *  optional GOOGLE_BOOKS_API_KEY BuildConfig value is set (free tier,
+     *  higher daily quota), in which case &key= is appended. */
+    private fun googleBooksUrl(q: String): String {
+        val key = com.curio.app.BuildConfig.GOOGLE_BOOKS_API_KEY
+            .takeIf { it.isNotBlank() }
+        return "https://www.googleapis.com/books/v1/volumes?q=$q&maxResults=3" +
+            (key?.let { "&key=$it" } ?: "")
+    }
+
+    /** Keyless (or keyed, v354) Google Books volume search → the first
+     *  match's cover thumbnail. */
     private fun googleThumbnail(title: String, author: String?): String? {
         val q = buildString {
             append("intitle:${Uri.encode(title)}")
             if (!author.isNullOrBlank()) append("+inauthor:${Uri.encode(author)}")
         }
-        val json = httpGet("https://www.googleapis.com/books/v1/volumes?q=$q&maxResults=3")
+        val json = httpGet(googleBooksUrl(q))
             ?: return null
         return runCatching {
             val items = org.json.JSONObject(json).optJSONArray("items") ?: return null
@@ -200,7 +211,7 @@ object BookCoverFetch {
                     append("intitle:${Uri.encode(book.name)}")
                     if (!book.byline.isNullOrBlank()) append("+inauthor:${Uri.encode(book.byline)}")
                 }
-                val json = httpGet("https://www.googleapis.com/books/v1/volumes?q=$q&maxResults=3")
+                val json = httpGet(googleBooksUrl(q))
                 json?.let {
                     val items = org.json.JSONObject(it).optJSONArray("items") ?: return@runCatching null
                     for (i in 0 until items.length()) {
@@ -244,7 +255,7 @@ object BookCoverFetch {
                     append("intitle:${Uri.encode(bookName)}")
                     if (!author.isNullOrBlank()) append("+inauthor:${Uri.encode(author)}")
                 }
-                val json = httpGet("https://www.googleapis.com/books/v1/volumes?q=$q&maxResults=3")
+                val json = httpGet(googleBooksUrl(q))
                 json?.let {
                     val items = org.json.JSONObject(it).optJSONArray("items") ?: return@runCatching null
                     for (i in 0 until items.length()) {

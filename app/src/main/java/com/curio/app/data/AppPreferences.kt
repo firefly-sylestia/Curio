@@ -55,6 +55,9 @@ object AppPreferences {
     // the order they were picked. Feeds the Vinyl share card's "favorite
     // tracks" strip (multi-select hearts, replaces the single typed line).
     private const val KEY_ALBUM_FAV_TRACKS = "album_fav_tracks"
+    // v353 — whether the heart-picked favorite-tracks strip renders on the
+    // album share card (default ON; the share editor can hide it).
+    private const val KEY_ALBUM_FAV_STRIP_VISIBLE = "album_fav_strip_visible"
     private const val KEY_BOOK_FAVORITES = "book_favorites"
     // v350 — per-category cover-fetch consent: ALBUMS and SERIES get their
     // own toggles alongside books (opt-OUT by default like books), so the
@@ -226,6 +229,9 @@ object AppPreferences {
     private const val KEY_SERIES_EPISODE_LIKES = "series_episode_likes"
     // v352 — the user's OWN book rating (pen-nib pick, 0..5): book name -> double.
     private const val KEY_BOOK_CUSTOM_RATINGS = "book_custom_ratings"
+    // v354 — whether the user's own book-rating row (the pen/book picker in
+    // the book-notes sheet) is visible; separate from reading progress.
+    private const val KEY_BOOK_RATING_VISIBLE = "book_rating_visible"
     // v352 — the LAST RESOLVED cover URL per book (what the hub's provider
     // actually found, e.g. a Google Books thumbnail). The reveal poster and
     // share card prefer this over the bare Open Library fallback so
@@ -454,6 +460,18 @@ object AppPreferences {
         bookCustomRatingsState = cur
     }
 
+    // ── Book rating visibility (v354) ────────────────────────────────────
+    // Whether the book notes sheet shows the user's own rating row, separate
+    // from reading progress. Default ON; the sheet can hide it without
+    // clearing the rating.
+    fun isBookRatingVisible(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_BOOK_RATING_VISIBLE, true)
+
+    fun setBookRatingVisible(context: Context, visible: Boolean) {
+        prefs(context).edit().putBoolean(KEY_BOOK_RATING_VISIBLE, visible).apply()
+        bookRatingVisibleState = visible
+    }
+
     // ── Resolved book cover URLs (v352 — hub results) ────────────────────
     // The hub's providers resolve real cover URLs (Google Books thumbnails
     // especially) that the reveal poster has no way to guess on its own.
@@ -524,6 +542,18 @@ object AppPreferences {
         cur.forEach { (k, v) -> obj.put(k, org.json.JSONArray(v)) }
         prefs(context).edit().putString(KEY_ALBUM_FAV_TRACKS, obj.toString()).apply()
         albumFavTracksState = cur
+    }
+
+    // ── Album favorite-tracks strip visibility (v353) ────────────────────
+    // The share-card editor can hide the heart-picked strip per user
+    // preference (global, default visible). Kept reactive so the card hides
+    // the moment the toggle flips.
+    fun isAlbumFavStripVisible(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_ALBUM_FAV_STRIP_VISIBLE, true)
+
+    fun setAlbumFavStripVisible(context: Context, visible: Boolean) {
+        prefs(context).edit().putBoolean(KEY_ALBUM_FAV_STRIP_VISIBLE, visible).apply()
+        albumFavStripVisibleState = visible
     }
 
     // ── Custom streak tagline (v53) ──────────────────────────────────
@@ -823,6 +853,9 @@ object AppPreferences {
     // v352 — the user's own book ratings: book name → 0..5 (pen-nib pick).
     var bookCustomRatingsState by mutableStateOf<Map<String, Double>>(emptyMap())
         internal set
+    // v354 — the user's own book-rating row visible in the book-notes sheet.
+    var bookRatingVisibleState by mutableStateOf(true)
+        internal set
     // v352 — last resolved cover URL per book (hub provider results).
     var bookCoverUrlsState by mutableStateOf<Map<String, String>>(emptyMap())
         internal set
@@ -830,6 +863,9 @@ object AppPreferences {
     // track titles in pick order. Reactive so the sheet hearts + the Vinyl
     // share-card strip update the moment a heart is tapped.
     var albumFavTracksState by mutableStateOf<Map<String, List<String>>>(emptyMap())
+        internal set
+    // v353 — heart-picked favorite-tracks strip visible on share cards.
+    var albumFavStripVisibleState by mutableStateOf(true)
         internal set
     var profileAvatarPathState by mutableStateOf("")
         internal set
@@ -1246,6 +1282,7 @@ object AppPreferences {
         seriesFavoritesState = getSeriesFavorites(context)
         seriesWatchedState = getSeriesWatched(context)
         albumFavTracksState = getAlbumFavoriteTracks(context)
+        albumFavStripVisibleState = isAlbumFavStripVisible(context)
         profileAvatarPathState = getProfileAvatarPath(context)
         customBlurEngineState = isCustomBlurEngineEnabled(context)
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
@@ -1302,6 +1339,7 @@ object AppPreferences {
         seriesEpisodeLikesState = getSeriesEpisodeLikes(context)
         bookCustomRatingsState = getBookCustomRatings(context)
         bookCoverUrlsState = getBookCoverUrls(context)
+        bookRatingVisibleState = isBookRatingVisible(context)
         pickerDefaultPageState = getPickerDefaultPage(context)
         pickerPage0ModeState = getPickerPage0Mode(context)
         pickerSuggestionsState = getPickerSuggestions(context)

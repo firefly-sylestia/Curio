@@ -37,6 +37,18 @@ val envReleaseVersion: String? = System.getenv("RELEASE_VERSION")
     ?.removePrefix("v")
     ?.takeIf { it.isNotEmpty() }
 
+// v354 — OPTIONAL Google Books API key (free tier): when set (e.g. as a
+// GitHub Actions secret GOOGLE_BOOKS_API_KEY or a local env var), book-cover
+// and rating lookups append &key= for the reliable quota. Empty locally.
+// Setup: copy .env.example and set GOOGLE_BOOKS_API_KEY in your environment
+// (or repo Settings > Secrets and variables > Actions).
+val envGoogleBooksApiKey: String? = System.getenv("GOOGLE_BOOKS_API_KEY")?.trim()?.takeIf { it.isNotEmpty() }
+// Escaped for the generated BuildConfig string literal (quotes/backslashes).
+val gbkEscaped: String = envGoogleBooksApiKey
+    ?.replace("\\", "\\\\")
+    ?.replace("\"", "\\\"")
+    .orEmpty()
+
 // Only create release signing if ALL four secrets are present and non-empty.
 // GitHub Actions exports missing secrets as empty strings, so .takeIf { it.isNotEmpty() }
 // converts them back to null. Without this guard, AGP would create a signing config
@@ -62,6 +74,11 @@ android {
         // date-based; 20260920 is the +1 bump over the previous 20260919.
         versionCode = 20260921
         versionName = envReleaseVersion ?: "1.1.1"
+
+        // v354 — optional Google Books API key baked into BuildConfig so the
+        // keyless fetchers can upgrade to keyed (higher-quota) calls when the
+        // repo secret is present; empty string otherwise (no behaviour change).
+        buildConfigField("String", "GOOGLE_BOOKS_API_KEY", "\"$gbkEscaped\"")
 
         // Only include English locale — saves ~5-8 MB of APK size.
         // Curio ships as a single-language app. Add others as needed.

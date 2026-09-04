@@ -19,11 +19,15 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.plus
 import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -2793,6 +2797,29 @@ private fun BookCoverPoster(
     // (and the keyless fallback URL) on every book visit even when the user
     // never enabled fetching.
     val bookFetchConsent = AppPreferences.bookFetchEnabledState
+    // v354 — INPUT-SIDE fallback: when the toggle is ON but every static
+    // candidate above failed (no authored URL, no hub-resolved cover, and
+    // the Open Library guess 404s), the poster LIVE-resolves a Google Books
+    // thumbnail and persists it, so a cover can appear without visiting the
+    // Settings hub. Only runs while fetching is consented.
+    val context = LocalContext.current
+    var liveFallbackDone by remember(bookTitle, imageUrl) { mutableStateOf(false) }
+    LaunchedEffect(bookTitle, imageUrl, bookFetchConsent, coverIndex, liveFallbackDone) {
+        // Fires only after EVERY static candidate has actually ERRORED
+        // (onError bumps coverIndex past the list), never on first open.
+        val exhausted = coverIndex >= coverCandidates.size
+        if (bookFetchConsent && !liveFallbackDone && exhausted) {
+            val url = com.curio.app.features.settings.BookCoverFetch.resolveCoverUrl(
+                context, bookTitle, null, "",
+                com.curio.app.features.settings.BookCoverFetch.BookCoverProvider.GOOGLE_BOOKS
+            )
+            if (url != null) {
+                AppPreferences.setBookCoverUrl(context, bookTitle, url)
+                coverIndex = 0
+            }
+            liveFallbackDone = true
+        }
+    }
     // v338 — EMPTY-STATE FIX: the poster is a real two-tone book-plate with a
     // menu_book glyph BEHIND the loaded cover instead of an empty clipped
     // AsyncImage. When a cover is missing (no URL, fetch OFF with nothing
@@ -2830,7 +2857,7 @@ private fun BookCoverPoster(
                     )
                     .build(),
                 contentDescription = "Book cover",
-                onError = { if (coverIndex < coverCandidates.lastIndex) coverIndex += 1 },
+                onError = { coverIndex += 1 },
                 modifier = Modifier.matchParentSize(),
                 contentScale = ContentScale.Crop
             )
@@ -3140,12 +3167,15 @@ private fun BookNotesSheet(
                 Spacer(Modifier.height(12.dp))
             }
 
-            // ── Reviews & your rating (v352) — compact, pinned under the
-            // progress rail: the fetched Google Books average (small) and the
-            // user's OWN fountain-pen-nib pick for the book.
+            // ── Reviews & your rating (v352/v354) — compact, pinned under
+            // the progress rail: the fetched Google Books average (small) and
+            // the user's OWN book-glyph rating. The user rating row is its
+            // OWN toggleable element (like reading progress, but separate):
+            // a book icon in the header hides it without clearing the pick.
             val fetchedRating = AppPreferences.bookRatingsState[bookName]?.takeIf { it > 0.0 }
             val fetchedCount = AppPreferences.bookRatingsCountState[bookName] ?: 0
             val customRating = AppPreferences.bookCustomRatingsState[bookName] ?: 0.0
+            val ratingVisible = AppPreferences.bookRatingVisibleState
             Spacer(Modifier.height(10.dp))
             Surface(
                 shape = RoundedCornerShape(16.dp),
@@ -3196,39 +3226,72 @@ private fun BookNotesSheet(
                         )
                     }
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            "YOUR RATING",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = FontWeight.ExtraBold,
-                                letterSpacing = 1.sp
-                            ),
-                            color = ink
-                        )
-                        Spacer(Modifier.height(2.dp))
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            PenNibRating(
-                                value = customRating,
-                                tint = accent,
-                                onSurfaceVariant = onSurfaceVariant,
-                                onRate = { n ->
-                                    haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                                    AppPreferences.setBookCustomRating(
-                                        context, bookName,
-                                        if (customRating.toInt() == n) 0.0 else n.toDouble()
-                                    )
-                                }
+                            Text(
+                                "YOUR RATING",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    letterSpacing = 1.sp
+                                ),
+                                color = ink,
+                                modifier = Modifier.weight(1f)
                             )
-                            if (customRating > 0.0) {
-                                Spacer(Modifier.width(6.dp))
-                                Text(
-                                    "${customRating.toInt()} / 5",
-                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                    color = onSurfaceVariant
+                            // v354 — hide/show the whole picker row (the
+                            // rating itself is never cleared by hiding).
+                            Surface(
+                                onClick = {
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    AppPreferences.setBookRatingVisible(context, !ratingVisible)
+                                },
+                                shape = CircleShape,
+                                color = if (ratingVisible)
+                                    accent.copy(alpha = 0.18f)
+                                else surfaceHigh
+                            ) {
+                                BookGlyph(
+                                    color = if (ratingVisible) ink else onSurfaceVariant,
+                                    iconSize = 14.dp,
+                                    filled = ratingVisible,
+                                    modifier = Modifier.padding(5.dp)
                                 )
                             }
+                        }
+                        Spacer(Modifier.height(2.dp))
+                        if (ratingVisible) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                BookRatingPicker(
+                                    value = customRating,
+                                    tint = accent,
+                                    onSurfaceVariant = onSurfaceVariant,
+                                    onRate = { n ->
+                                        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        AppPreferences.setBookCustomRating(
+                                            context, bookName,
+                                            if (customRating.toInt() == n) 0.0 else n.toDouble()
+                                        )
+                                    }
+                                )
+                                if (customRating > 0.0) {
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(
+                                        "${customRating.toInt()} / 5",
+                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                        color = onSurfaceVariant
+                                    )
+                                }
+                            }
+                        } else {
+                            Text(
+                                "Rating hidden · tap the book to show it",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = onSurfaceVariant
+                            )
                         }
                     }
                 }
@@ -3268,7 +3331,13 @@ private fun BookNotesSheet(
                                 isRead -> surfaceAlt
                                 else -> surface
                             },
-                            shadowElevation = if (isOpen) 0.dp else 1.dp
+                            // v354 — no elevation flip: the old 1dp lift popped
+                            // in/out on expand (glitchy touch shadow). A read
+                            // row gets a solid accent border instead.
+                            shadowElevation = 0.dp,
+                            border = if (isRead)
+                                BorderStroke(1.dp, accent.copy(alpha = 0.55f))
+                            else null
                         ) {
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 Row(
@@ -3277,18 +3346,27 @@ private fun BookNotesSheet(
                                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
                                 ) {
                                     // Leading chip: a ✓ when the chapter is
-                                    // read — SOLID accent fill (v352) so the
-                                    // read state reads at a glance.
+                                    // read — SOLID fill + rim (v354) so the
+                                    // read state reads cleanly on any palette.
                                     Box(
                                         modifier = Modifier
                                             .size(30.dp)
                                             .clip(CircleShape)
                                             .background(
                                                 when {
-                                                    isOpen -> onAccent.copy(alpha = 0.18f)
+                                                    isOpen -> onAccent
                                                     isRead -> accent
                                                     else -> surfaceHigh
                                                 }
+                                            )
+                                            .border(
+                                                1.dp,
+                                                when {
+                                                    isRead -> onAccent.copy(alpha = 0.7f)
+                                                    isOpen -> accent.copy(alpha = 0.5f)
+                                                    else -> onSurfaceVariant.copy(alpha = 0.25f)
+                                                },
+                                                CircleShape
                                             ),
                                         contentAlignment = Alignment.Center
                                     ) {
@@ -3296,14 +3374,14 @@ private fun BookNotesSheet(
                                             CurioIcon(
                                                 CurioIcons.Check,
                                                 null,
-                                                tint = onAccent,
+                                                tint = if (isOpen) accent else onAccent,
                                                 size = 15.dp
                                             )
                                         } else {
                                             Text(
                                                 "${ch.number}",
                                                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                                                color = if (isOpen) onAccent else onSurfaceVariant
+                                                color = if (isOpen) accent else onSurfaceVariant
                                             )
                                         }
                                     }
@@ -3349,9 +3427,17 @@ private fun BookNotesSheet(
                                     Surface(
                                         onClick = { toggleChapterRead(ch) },
                                         shape = CircleShape,
+                                        // v354 — solid + rim so the done state
+                                        // reads clearly (was a washed-out disc).
                                         color = if (chDone)
                                             if (isOpen) onAccent else accent
-                                            else surface.copy(alpha = 0.7f)
+                                            else surface.copy(alpha = 0.7f),
+                                        border = BorderStroke(
+                                            1.dp,
+                                            if (chDone)
+                                                if (isOpen) accent.copy(alpha = 0.5f) else onAccent.copy(alpha = 0.7f)
+                                                else onSurfaceVariant.copy(alpha = 0.25f)
+                                        )
                                     ) {
                                         CurioIcon(
                                             CurioIcons.FoldedCorner,
@@ -3370,15 +3456,19 @@ private fun BookNotesSheet(
                                         size = 20.dp
                                     )
                                 }
-                                // Expanded: pages, the chapter notes, and the
-                                // Mark-read / Undo pill (accordion detail).
-                                androidx.compose.animation.AnimatedVisibility(
+                                // v354 — expand/collapse: height + fade together
+                                // (the old fade-only pop read glitchy).
+                                AnimatedVisibility(
                                     visible = isOpen,
-                                    enter = androidx.compose.animation.fadeIn(
-                                        animationSpec = androidx.compose.animation.core.tween(160)
+                                    enter = expandVertically(
+                                        animationSpec = tween(180)
+                                    ) + fadeIn(
+                                        animationSpec = tween(140)
                                     ),
-                                    exit = androidx.compose.animation.fadeOut(
-                                        animationSpec = androidx.compose.animation.core.tween(120)
+                                    exit = shrinkVertically(
+                                        animationSpec = tween(140)
+                                    ) + fadeOut(
+                                        animationSpec = tween(120)
                                     )
                                 ) {
                                     Column(
@@ -4786,7 +4876,12 @@ private fun EpisodeNotesSheet(
                                 isWatched -> surfaceAlt
                                 else -> surface
                             },
-                            shadowElevation = if (isOpen) 0.dp else 1.dp
+                            // v354 — no elevation flip (glitchy touch shadow);
+                            // watched rows get a solid accent border instead.
+                            shadowElevation = 0.dp,
+                            border = if (isWatched)
+                                BorderStroke(1.dp, accent.copy(alpha = 0.55f))
+                            else null
                         ) {
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 Row(
@@ -4795,18 +4890,26 @@ private fun EpisodeNotesSheet(
                                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
                                 ) {
                                     // Leading chip: a ✓ when watched — SOLID
-                                    // accent fill (v352, mirrors the book
-                                    // sheet's read chip).
+                                    // fill + rim (v354, mirrors the book sheet).
                                     Box(
                                         modifier = Modifier
                                             .size(30.dp)
                                             .clip(CircleShape)
                                             .background(
                                                 when {
-                                                    isOpen -> onAccent.copy(alpha = 0.18f)
+                                                    isOpen -> onAccent
                                                     isWatched -> accent
                                                     else -> surfaceHigh
                                                 }
+                                            )
+                                            .border(
+                                                1.dp,
+                                                when {
+                                                    isWatched -> onAccent.copy(alpha = 0.7f)
+                                                    isOpen -> accent.copy(alpha = 0.5f)
+                                                    else -> onSurfaceVariant.copy(alpha = 0.25f)
+                                                },
+                                                CircleShape
                                             ),
                                         contentAlignment = Alignment.Center
                                     ) {
@@ -4814,14 +4917,14 @@ private fun EpisodeNotesSheet(
                                             CurioIcon(
                                                 CurioIcons.Check,
                                                 null,
-                                                tint = onAccent,
+                                                tint = if (isOpen) accent else onAccent,
                                                 size = 15.dp
                                             )
                                         } else {
                                             Text(
                                                 "${ep.number}",
                                                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                                                color = if (isOpen) onAccent else onSurfaceVariant
+                                                color = if (isOpen) accent else onSurfaceVariant
                                             )
                                         }
                                     }
@@ -4864,9 +4967,17 @@ private fun EpisodeNotesSheet(
                                     Surface(
                                         onClick = { toggleWatched(ep) },
                                         shape = CircleShape,
+                                        // v354 — solid + rim (fixed the
+                                        // washed-out watched disc).
                                         color = if (isWatched)
                                             if (isOpen) onAccent else accent
-                                            else surface.copy(alpha = 0.7f)
+                                            else surface.copy(alpha = 0.7f),
+                                        border = BorderStroke(
+                                            1.dp,
+                                            if (isWatched)
+                                                if (isOpen) accent.copy(alpha = 0.5f) else onAccent.copy(alpha = 0.7f)
+                                                else onSurfaceVariant.copy(alpha = 0.25f)
+                                        )
                                     ) {
                                         CurioIcon(
                                             CurioIcons.FoldedCorner,
@@ -4885,15 +4996,19 @@ private fun EpisodeNotesSheet(
                                         size = 20.dp
                                     )
                                 }
-                                // Expanded: season/episode id, the summary, and
-                                // the Watched / Undo pill (accordion detail).
-                                androidx.compose.animation.AnimatedVisibility(
+                                // v354 — expand/collapse: height + fade together
+                                // (the old fade-only pop read glitchy).
+                                AnimatedVisibility(
                                     visible = isOpen,
-                                    enter = androidx.compose.animation.fadeIn(
-                                        animationSpec = androidx.compose.animation.core.tween(160)
+                                    enter = expandVertically(
+                                        animationSpec = tween(180)
+                                    ) + fadeIn(
+                                        animationSpec = tween(140)
                                     ),
-                                    exit = androidx.compose.animation.fadeOut(
-                                        animationSpec = androidx.compose.animation.core.tween(120)
+                                    exit = shrinkVertically(
+                                        animationSpec = tween(140)
+                                    ) + fadeOut(
+                                        animationSpec = tween(120)
                                     )
                                 ) {
                                     Column(
@@ -5063,31 +5178,31 @@ private fun HeartGlyph(
     }
 }
 
-/** v352 — fountain-pen NIB rating: five ink nibs instead of stars, so a
- *  book gets a writer's rating. Tapping nib N sets N; tapping the current
- *  value again clears the pick. */
+/** v354 — BOOK rating: five open-book glyphs (the user asked for a book
+ *  instead of the fountain-pen nibs). Tapping book N sets N; tapping the
+ *  current value again clears the pick. */
 @Composable
-private fun PenNibRating(
+private fun BookRatingPicker(
     value: Double,
     tint: Color,
     onSurfaceVariant: Color,
     onRate: (Int) -> Unit,
-    nibSize: Dp = 20.dp,
+    iconSize: Dp = 18.dp,
     modifier: Modifier = Modifier
 ) {
-    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
         for (i in 1..5) {
             val filled = value >= i
             Box(
                 modifier = Modifier
-                    .size(nibSize + 8.dp)
+                    .size(iconSize + 8.dp)
                     .clip(CircleShape)
                     .clickable { onRate(i) },
                 contentAlignment = Alignment.Center
             ) {
-                NibGlyph(
+                BookGlyph(
                     color = if (filled) tint else onSurfaceVariant.copy(alpha = 0.55f),
-                    iconSize = nibSize,
+                    iconSize = iconSize,
                     filled = filled
                 )
             }
@@ -5095,9 +5210,10 @@ private fun PenNibRating(
     }
 }
 
-/** A single fountain-pen nib silhouette (filled = solid ink, outline = empty). */
+/** A single open-book silhouette: two page planes from a centre spine
+ *  (filled = solid ink pages, outline = empty). */
 @Composable
-private fun NibGlyph(
+private fun BookGlyph(
     color: Color,
     iconSize: Dp,
     filled: Boolean,
@@ -5106,30 +5222,39 @@ private fun NibGlyph(
     Canvas(modifier.size(iconSize)) {
         val w = this.size.width
         val h = this.size.height
-        val nib = Path().apply {
-            moveTo(w * 0.24f, 0f)
-            lineTo(w * 0.76f, 0f)
-            lineTo(w * 0.60f, h * 0.66f)
-            quadraticBezierTo(w * 0.57f, h * 0.88f, w * 0.50f, h)
-            quadraticBezierTo(w * 0.43f, h * 0.88f, w * 0.40f, h * 0.66f)
+        val sp = h * 0.5f          // spine height (book stands ~2:1.3)
+        val thickness = w * 0.07f  // page block depth
+        val left = Path().apply {
+            moveTo(w * 0.50f, h * 0.16f)
+            quadraticBezierTo(w * 0.36f, h * 0.10f, w * 0.12f, h * 0.14f)
+            lineTo(w * 0.10f, h * 0.84f)
+            quadraticBezierTo(w * 0.34f, h * 0.80f, w * 0.50f, h * 0.88f)
             close()
         }
+        val right = Path().apply {
+            moveTo(w * 0.50f, h * 0.16f)
+            quadraticBezierTo(w * 0.64f, h * 0.10f, w * 0.88f, h * 0.14f)
+            lineTo(w * 0.90f, h * 0.84f)
+            quadraticBezierTo(w * 0.66f, h * 0.80f, w * 0.50f, h * 0.88f)
+            close()
+        }
+        val spine = Path().apply {
+            moveTo(w * 0.50f, h * 0.16f)
+            lineTo(w * 0.50f, h * 0.88f)
+        }
         if (filled) {
-            drawPath(nib, color)
-            // Breather hole + slit for the inked nib.
-            drawCircle(
-                color = color.copy(alpha = 0.35f),
-                radius = w * 0.05f,
-                center = Offset(w * 0.50f, h * 0.38f)
-            )
-            drawLine(
-                color = color.copy(alpha = 0.35f),
-                start = Offset(w * 0.50f, h * 0.42f),
-                end = Offset(w * 0.50f, h * 0.96f),
-                strokeWidth = w * 0.035f
-            )
+            drawPath(left, color)
+            drawPath(right, color)
+            drawPath(spine, color.copy(alpha = 0.45f), style = Stroke(width = thickness))
         } else {
-            drawPath(nib, color, style = Stroke(width = w * 0.09f))
+            drawPath(left, color, style = Stroke(width = w * 0.09f))
+            drawPath(right, color, style = Stroke(width = w * 0.09f))
+            drawLine(
+                color = color.copy(alpha = 0.55f),
+                start = Offset(w * 0.50f, h * 0.20f),
+                end = Offset(w * 0.50f, h * 0.84f),
+                strokeWidth = w * 0.08f
+            )
         }
     }
 }
