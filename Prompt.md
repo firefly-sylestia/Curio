@@ -117,7 +117,42 @@ Most value → least, all being added:
     were deferred — entries open through the torn EntryDetail route
     (Phase 5) and reorder needs a new persistent order field + migration
     (Phase 6 conversation).
-- Next: Phase 4 Topic Browser multi-column + reveal pane.
+- **Phase 4 DONE (Topic Browser + shared settings hero)** — this commit.
+  - `TopicDatabaseScreen.kt` wide layout rebuilt as master–detail:
+    `ScreenEntrance → Row { master Box(weight 1f) + reveal pane(344dp) }`.
+    - Multi-column grid: `displayRows` = `buildWideRows(paginatedRows)`
+      merges consecutive topic rows into two-up `DatabaseWideRow` pairs
+      (keys `p-{a}|{b}` / `t-{k}`; sections/group headers stay
+      full-width); phones map rows 1:1 → single-cell slots, byte-
+      identical. `DatabaseTopicRowSlot` renders one or two rows; taps
+      route through `onTopicTap`.
+    - Reveal pane: `DatabaseRevealPaneSlot` — placeholder ("Select a
+      topic") or `DatabaseRevealPane` (category chip, ExtraBold title,
+      byline · subtype, explored badge, hairline, teaser, synopsis, tag
+      FlowRow chips, Open-topic CTA → revealForBrowse). Pane state
+      `paneTopic` cleared on needle/cats change; top-aligned to
+      `contentTop`.
+    - Overlays (scroll indicator, back-to-top, page nav, filter
+      panel/chips) moved INSIDE the master Box so they never draw over
+      the pane; master end padding 12dp on wide; back-to-top + panel
+      offsets use `settingsHeroContentTopHeight()`.
+  - Shared settings-hero pass (`SettingsHubScreen.kt`):
+    `SettingsHeroHeader` branches wide → flat editorial header
+    (`SettingsWideHeroHeight = 148.dp`, surfaceContainerHigh fill,
+    onSurface ink, hairline rule; tear/sheet/shadow/symbols phone-only).
+    New `@Composable settingsHeroContentTopHeight()` = wide
+    height or `SettingsHeroTotalHeight`; ALL 13 settings-family
+    consumers updated (Backup, UserExperiments, Experiments,
+    SettingsSection, ShareHub, SettingsHub, Updates, Outfits,
+    ManageCategories, PetDesigner, Quests, PromoMode, Support,
+    RecycleBin; Recent keeps its own wide branch). Phones untouched.
+  - Verification: 15 files brace/paren-balanced 0/0/0 vs HEAD, no
+    negative nesting; depth walk confirms ScreenEntrance → Row → master
+    Box → overlays → pane → closes; stale const/import refs gone;
+    new symbols wired (displayRows/wide build/panes).
+  - Follow-ups deferred to Phase 5/6: torn EntryDetail/Reveal heroes,
+    keyboard/hover, drag-reorder (needs DB order field + migration
+    conversation).
 
 ## Tuning knobs (Phase 1)
 - `xOff` ±73/±129 (PeekCard) — sliver width per side.

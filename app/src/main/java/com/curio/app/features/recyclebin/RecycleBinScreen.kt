@@ -80,7 +80,7 @@ import com.curio.app.ui.theme.themedAccent
 import kotlinx.coroutines.launch
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.curio.app.features.settings.SettingsHeroTotalHeight
+import com.curio.app.features.settings.settingsHeroContentTopHeight
 
 /**
  * Recycle bin (v302) — full redesign matching concept UI.
@@ -188,7 +188,7 @@ fun RecycleBinScreen(navController: NavController) {
                     contentPadding = PaddingValues(
                         start = wideContentEdgePadding(),
                         end = wideContentEdgePadding(),
-                        top = SettingsHeroTotalHeight,
+                        top = settingsHeroContentTopHeight(),
                         bottom = if (multiSelectMode) 88.dp else 24.dp
                     ),
                     verticalArrangement = Arrangement.spacedBy(8.dp)

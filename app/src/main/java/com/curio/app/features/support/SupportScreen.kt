@@ -52,7 +52,7 @@ import com.curio.app.ui.theme.CurioIcons
 import kotlinx.coroutines.delay
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.curio.app.features.settings.SettingsHeroTotalHeight
+import com.curio.app.features.settings.settingsHeroContentTopHeight
 
 /**
  * Support & diagnostics — the dedicated page behind Profile's
@@ -116,7 +116,7 @@ fun SupportScreen(navController: NavController) {
                 contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),
-                    top = SettingsHeroTotalHeight,
+                    top = settingsHeroContentTopHeight(),
                     bottom = 24.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(10.dp)

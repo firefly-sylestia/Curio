@@ -97,7 +97,7 @@ fun UserExperimentsScreen(navController: NavController) {
         LazyColumn(
             state = listState,
             modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
-            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight, bottom = 24.dp),
+            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = settingsHeroContentTopHeight(), bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             // Liquid glass section

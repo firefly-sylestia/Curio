@@ -41,7 +41,7 @@ import com.curio.app.data.LevelRewards
 import com.curio.app.data.PetDesign
 import com.curio.app.data.PetOutfits
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.SettingsHeroTotalHeight
+import com.curio.app.features.settings.settingsHeroContentTopHeight
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.components.CurioSettingsCard
@@ -141,7 +141,7 @@ fun OutfitShopScreen(navController: NavController) {
                 contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),
-                    top = SettingsHeroTotalHeight,
+                    top = settingsHeroContentTopHeight(),
                     bottom = 28.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(8.dp)

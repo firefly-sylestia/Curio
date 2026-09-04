@@ -125,7 +125,7 @@ import com.curio.app.ui.theme.readableAccentInk
 import com.curio.app.ui.theme.themedAccent
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.curio.app.features.settings.SettingsHeroTotalHeight
+import com.curio.app.features.settings.settingsHeroContentTopHeight
 
 /**
  * Quests & levels — Curio's gamification home (v8.0).
@@ -234,7 +234,7 @@ val glassBackdrop = rememberLayerBackdrop()
             LazyColumn(
                 state = listState,
                 modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
-                contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight, bottom = 20.dp),
+                contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = settingsHeroContentTopHeight(), bottom = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                                 // v8.5 — Pet hero: the level card is replaced by the pet

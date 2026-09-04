@@ -64,7 +64,7 @@ import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryInk
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.curio.app.features.settings.SettingsHeroTotalHeight
+import com.curio.app.features.settings.settingsHeroContentTopHeight
 
 /**
  * Manage Categories — see Curio category-management contract.
@@ -170,7 +170,7 @@ val glassBackdrop = rememberLayerBackdrop()
                     end = wideContentEdgePadding(),
                     // v255 — SCROLLING HERO: the banner is the list's first
                     // item and scrolls away with the page.
-                    top = SettingsHeroTotalHeight,
+                    top = settingsHeroContentTopHeight(),
                     bottom = 32.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(2.dp)

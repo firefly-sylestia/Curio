@@ -150,7 +150,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.isCurioDarkTheme
 import java.io.File
-import com.curio.app.features.settings.SettingsHeroTotalHeight
+import com.curio.app.features.settings.settingsHeroContentTopHeight
 
 /** One editable color in the palette — its grid key, name and hex. */
 private data class PaletteSlot(val key: Char, val name: String)
@@ -651,7 +651,7 @@ fun PetDesignerScreen(navController: NavController) {
             contentPadding = PaddingValues(
                 start = edgePad,
                 end = edgePad,
-                top = SettingsHeroTotalHeight,
+                top = settingsHeroContentTopHeight(),
                 bottom = 16.dp
             ),
             verticalArrangement = Arrangement.spacedBy(10.dp)

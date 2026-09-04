@@ -172,7 +172,7 @@ fun ShareHubScreen(navController: NavController) {
             contentPadding = PaddingValues(
                 start = wideContentEdgePadding(),
                 end = wideContentEdgePadding(),
-                top = SettingsHeroTotalHeight,
+                top = settingsHeroContentTopHeight(),
                 bottom = 24.dp
             ),
             horizontalArrangement = Arrangement.spacedBy(10.dp),

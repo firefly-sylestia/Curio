@@ -191,7 +191,7 @@ val glassBackdrop = rememberLayerBackdrop()
             modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
             // v255 — SCROLLING HERO (the Home/Profile construction): the
             // banner lives INSIDE the list and scrolls away with the page.
-            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight, bottom = 24.dp),
+            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = settingsHeroContentTopHeight(), bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
                         item { CurioSectionLabel(page.title) }

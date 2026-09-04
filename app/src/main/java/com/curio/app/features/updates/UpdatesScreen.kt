@@ -78,7 +78,7 @@ import java.io.File
 import kotlinx.coroutines.launch
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.curio.app.features.settings.SettingsHeroTotalHeight
+import com.curio.app.features.settings.settingsHeroContentTopHeight
 
 /**
  * Updates — the dedicated sub-page for the in-app updater (v112). Own UI
@@ -265,7 +265,7 @@ fun UpdatesScreen(navController: NavController) {
                 contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),
-                    top = SettingsHeroTotalHeight,
+                    top = settingsHeroContentTopHeight(),
                     bottom = 24.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(10.dp)

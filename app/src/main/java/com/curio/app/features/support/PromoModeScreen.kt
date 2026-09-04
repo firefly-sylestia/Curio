@@ -68,7 +68,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.curio.app.features.settings.SettingsHeroTotalHeight
+import com.curio.app.features.settings.settingsHeroContentTopHeight
 
 /**
  * Promo mode — the hidden, share-ready promo page. v24: reached from the
@@ -129,7 +129,7 @@ fun PromoModeScreen(navController: NavController) {
                 contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),
-                    top = SettingsHeroTotalHeight,
+                    top = settingsHeroContentTopHeight(),
                     bottom = 32.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
