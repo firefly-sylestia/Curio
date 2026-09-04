@@ -685,3 +685,48 @@ SECTION E — DUPLICATE CHAPTER TITLES (8 books) + MIXED FORMATS (5)
   MIXED 10/11 prefixed | The Shadow of the Wind
   MIXED 135/136 prefixed | Moby-Dick
   MIXED 24/28 prefixed | Frankenstein
+======================================================================
+v340 — FIXES APPLIED (this file was the checklist; data/topics/books.json
+has since been repaired). Re-run the audit to re-flag what remains.
+======================================================================
+
+FIXED — Moby-Dick numbering (was the big Section-E "MIXED 135/136" case):
+  `number` was offset one below the title's own number from chapter 57 on
+  (and duplicated at 56 and 90). Entries now carry the number their title
+  says: 1-135 real chapters + Epilogue = 136.
+
+FIXED — Grouped ranges split into individual chapters (progress counted
+  one "Part I: Chapters 1-5" as a single chapter):
+    The Divine Comedy  4 -> 100 cantos (Inferno 34, Purgatorio 33, Paradiso 33)
+    Inferno            7 ->  34 cantos
+    Dead Souls         4 ->  15 (Part I 11 + Part II 4 — Gogol's real split)
+    Lady Susan         4 ->  42 (41 letters + Conclusion)
+    The 48 Laws of Power 4 -> 48 laws
+    Roman Stories (2023) 3 ->  8 stories
+    Twenty Love Poems & a Song of Despair 2 -> 21 (20 poems + the song)
+
+FIXED — Heaven (Mieko Kawakami): the novel has 9 UNNUMBERED, UNTITLED
+  chapters; the 10 invented titles ("The First Note", "Whale Park"...) were
+  replaced with plain "Chapter 1..9" (accurate plot summaries retained).
+
+FIXED — Section A wrong counts expanded to real, web-verified counts:
+  The Two Towers 19, The Fellowship of the Ring 22, The Return of the King
+  22, Lucky Jim 25, The Grapes of Wrath 30, Wuthering Heights 34, Madame
+  Bovary 35, Tom Sawyer 35, Jane Eyre 38, Huckleberry Finn 43, A Tale of Two
+  Cities 45, Crime and Punishment 48, Dandelion Wine 51, Oliver Twist 53,
+  Emma 55, Great Expectations 59, A Game of Thrones 73, The Color Purple 90
+  (letters), Don Quixote 126, War and Peace 361. Each now lists one entry
+  per real chapter ("Chapter N" / "Letter N").
+
+FIXED — Schema split: all 989 chapter entries that used the `chapterNumber`
+  variant now use `number` (142 books), and every book's chapter numbers are
+  sequential 1..N so the reading-progress model is sound.
+
+APP FIX (TopicRevealScreen): the reader now shows the BOOK's own chapter
+  label from the title ("Chapter 57", "Letter I", "Part II", "Epilogue"...)
+  instead of the positional index, so offset/letter books (Frankenstein,
+  The Graveyard Book, Moby-Dick…) no longer read "CH 5 · Chapter 1".
+
+STILL OPEN (unchanged, next pass): the ~530 part/volume-level "chapters"
+  (Part I/II/III…, Book I-XII…) across the catalog — those are real divisions
+  but coarse; expanding them to per-chapter lists needs per-book research.

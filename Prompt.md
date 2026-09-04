@@ -1,49 +1,64 @@
-# Request Log — book chapter audit + cover-art sheet palettes
+# Request Log — book chapter data repair (names / numbers / progress)
 
 ## Status: implementation complete — committed & pushed (CI pending)
 
 ## The request (user, paraphrased)
-1. Re-analyse the book chapter names/counts again properly (many were wrong); tell how
-   many are wrong and list them in a `.txt`.
-2. Re-read the DOX (master.md + AGENTS.md chain) — stop putting the Codebuff tool footer
-   on commit messages; plain conventional-format messages only.
-3. The book/album notes-sheet background colours from the cover art are bad; derive a FULL
-   palette from the cover (background + cards + chips + text, each element its own role)
-   instead of one dominant tint; keep the category fallback when no cover is fetched.
+- The chapter audit missed many books with wrong chapter names.
+- Many books still show wrong chapter numbers in reading progress; grouped
+  entries ("Chapters 3-5") count as one chapter.
+- Heaven (Kawakami) has the wrong chapter data too.
+- Fix all.
+
+## Root causes (found by analysis)
+1. **Moby-Dick**: `number` was offset one below the title's own chapter number
+   from ch. 57 on (duplicates at 56 and 90) — progress/jump-by-number broke.
+2. **Grouped entries**: several books stored whole ranges as one entry
+   (Divine Comedy 4 cantos-groups, Dead Souls "Part I: Chapters 1-5", Lady
+   Susan "Letters I–V", The 48 Laws "Laws 1-12", Neruda "Poems 1–10",
+   Roman Stories "Stories 1–3", Inferno canto groups) — progress counted them
+   as ONE chapter each.
+3. **Heaven**: the novel has 9 unnumbered/untitled chapters; the data had 10
+   with invented titles ("The First Note", "Whale Park"…).
+4. **20 Section-A classics** (web-verified last session) had 3-15 coarse
+   beat-level entries instead of their real chapter counts.
+5. **Schema split**: 989 entries across 142 books used `chapterNumber`
+   instead of `number` (loader fell back to positional, so rendering worked
+   but the data was split-brained).
+6. **Display**: the reader showed the positional index ("CH 5 · Chapter 1"
+   for Frankenstein / Graveyard Book) because titles carried the real label.
 
 ## What was done
-### 1. Chapter audit → `books-chapter-audit.txt` (committed)
-Analysed `data/topics/books.json` (796 books, 5,418 chapter entries):
-- SECTION A — 20 books with CONFIRMED WRONG chapter counts (web-verified real structures,
-  e.g. War and Peace 361, Don Quixote 126, Great Expectations 59, The Two Towers 19, …).
-- SECTION B — 530 books with ≤5 "chapters" (part-level / fabricated divisions for novels;
-  essays/poetry legitimately have few).
-- SECTION C — 49 books with bare "Chapter N" placeholder titles.
-- SECTION D — 142 books using the `chapterNumber` schema variant instead of `number`
-  (app falls back to positional numbering so they render, but data is split-brained).
-- SECTION E — 8 duplicate chapter titles + 5 mixed-format books.
-- 657 of 796 (~83%) flagged overall; the audit also lists count-verified-correct books.
+### data/topics/books.json (5,418 -> 6,790 chapter entries)
+- Moby-Dick renumbered to its own titles (135 + Epilogue = 136).
+- Grouped ranges split into individual entries:
+  The Divine Comedy 4→100 cantos, Inferno 7→34, Dead Souls 4→15,
+  Lady Susan 4→42 (41 letters + Conclusion), The 48 Laws of Power 4→48,
+  Roman Stories 3→8, Neruda 2→21 (20 poems + the song).
+- Heaven → 9 chapters ("Chapter 1..9", accurate plot summaries kept, last two
+  merged), invented titles/pages dropped.
+- Section-A expansions to real verified counts (Two Towers 19, Fellowship 22,
+  Return of the King 22, Lucky Jim 25, Grapes of Wrath 30, Wuthering Heights
+  34, Madame Bovary 35, Tom Sawyer 35, Jane Eyre 38, Huckleberry Finn 43,
+  Tale of Two Cities 45, Crime and Punishment 48, Dandelion Wine 51, Oliver
+  Twist 53, Emma 55, Great Expectations 59, Game of Thrones 73, Color Purple
+  90 letters, Don Quixote 126, War and Peace 361).
+- Schema unified (`chapterNumber` → `number`, 989 entries) + every book's
+  chapter numbers are sequential ints 1..N. Validated: 796 topics, 0 errors.
 
-### 2. DOX / commit hygiene
-Re-read master.md + root AGENTS.md + app/AGENTS.md. Commit messages are now plain
-conventional format with NO tool/Codebuff footers (this commit follows that rule).
+### App (TopicRevealScreen.kt)
+- `chapterDisplayLabel()` derives the real label from the title ("Chapter 57",
+  "Letter I", "Part II", "Canto 1 (Inferno)", "Epilogue"…) and the chapter
+  chip / sheet header / Mark-read button use it instead of the raw position,
+  fixing Frankenstein/Graveyard-Book-style offset displays everywhere.
 
-### 3. Full cover-art palettes for the notes sheets
-- `CoverPalette.kt`: new `CoverSwatches` (all six androidx-Palette slots) +
-  `fetchCoverSwatches` (192px decode); `fetchCoverSwatch` kept as a wrapper.
-- `CategoryInk.kt`: new `CoverSheetPalette` (container / surface / surfaceHigh / surfaceAlt /
-  accent / onAccent / ink / onSurface / onSurfaceVariant / onSurfaceAlt) +
-  `CurioCategory.notesSheetPalette()` — classic album-art recipe (vibrant pops as accent,
-  dark shades anchor the bg, light shades lift cards, text tones from wash lightness),
-  dark + light recipes, same Material-theme / tint-wash gates as before.
-- `TopicRevealScreen.kt`: BookNotesSheet + AlbumNotesSheet fetch the swatches and map every
-  colour role (container, cards, chips, tabs, progress bar, read-chips, close button, text,
-  listen/genius pills, track hearts) to the palette with per-element category fallbacks;
-  AlbumSynopsisAccordion now takes the resolved colours. No cover / fetch off / Material
-  theme → exactly the old behaviour.
+### Audit / docs
+- books-chapter-audit.txt: appended a "v340 — FIXES APPLIED" section.
+- tools/fix_book_chapters.py committed (rerunnable).
+- Store changelog updated (2 FIX bullets).
 
 ## Notes / follow-ups
-- The audit is a report only — the actual chapter-data repair (real counts, titles, schema
-  unify) is a large data task left for a follow-up request.
-- `notesSheetContainerColorForCover` is now dead in CategoryInk (kept; harmless).
-- CI validates compile; the palette math is only visible on-device.
+- Still open: ~530 books whose chapters are part/volume-level (Part I/II/III,
+  Book I-XII…) — real divisions but coarse; expanding needs per-book
+  research. Books with genuinely TITLED chapters (Game of Thrones, Don
+  Quixote, The Color Purple) now have correct counts but plain "Chapter N"
+  titles (real names need per-book sources).

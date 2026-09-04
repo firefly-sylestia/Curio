@@ -2669,7 +2669,7 @@ private fun BookChapterChip(
         ) {
             // Chapter number — v320: compact "CH 3" (was "Ch. 3")
             Text(
-                text = "CH ${chapter.number}",
+                text = chapterDisplayLabel(chapter.number, chapter.title),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold
                 ),
@@ -2802,6 +2802,23 @@ private fun compactCount(n: Int): String = when {
  * is tall (fills ~92% of the screen) with a scrollable body so neither the
  * full synopsis nor the chapter reader ever feels cramped.
  */
+/** v340 — the book's OWN chapter label carried by the title ("Chapter 57",
+ *  "Letter I", "Book II", "Canto 12", "Part 3", "Law 4"...) so the reader
+ *  shows the real numbering instead of the positional index; untitled
+ *  chapters fall back to the compact "CH N". */
+private val BookChapterLabelRegex = Regex(
+    "^(Chapter|CH|Ch\\.?|Letter|Letters?|Book|Canto|Law|Poem|Story|Part|Volume|Section|Act)\\s+(?:[IVX]+|\\d+|One|Two|Three|Four|Five|Six|Seven|Eight|Nine|Ten|Eleven|Twelve)\\b" +
+        "|^(Conclusion|Epilogue|Prologue|Preface|Interlude|Afterword|Postscript|Coda)\\b",
+    RegexOption.IGNORE_CASE
+)
+
+/** The label prefix of [title] when it self-labels ("Chapter 5 - The Danse
+ *  Macabre" -> "Chapter 5"), else the positional "CH N". */
+private fun chapterDisplayLabel(number: Int, title: String): String {
+    val m = BookChapterLabelRegex.find(title)
+    return m?.value ?: "CH $number"
+}
+
 @Composable
 private fun BookNotesSheet(
     cat: com.curio.app.data.CurioCategory,
@@ -2956,7 +2973,7 @@ private fun BookNotesSheet(
                         val pages = if (currentChapter.pageStart > 0 && currentChapter.pageEnd > 0)
                             " · pp. ${currentChapter.pageStart}–${currentChapter.pageEnd}" else ""
                         Text(
-                            "CH ${currentChapter.number}$pages",
+                            "${chapterDisplayLabel(currentChapter.number, currentChapter.title)}$pages",
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                             color = ink
                         )
@@ -3166,8 +3183,11 @@ private fun BookNotesSheet(
                                                     size = 13.dp
                                                 )
                                             }
+                                            val chLabel = chapterDisplayLabel(ch.number, ch.title)
                                             Text(
-                                                text = "CH ${ch.number} · ${ch.title}",
+                                                text = if (chLabel.startsWith("CH ")) "CH ${ch.number} · ${ch.title}"
+                                                       else if (ch.title.startsWith(chLabel) && ch.title.length > chLabel.length) ch.title
+                                                       else chLabel,
                                                 style = MaterialTheme.typography.labelLarge,
                                                 color = when {
                                                     selected -> onAccent
@@ -3246,7 +3266,7 @@ private fun BookNotesSheet(
                                                     size = 14.dp
                                                 )
                                                 Text(
-                                                    if (chDone) "Undo CH ${ch.number} ✓ (unread)" else "Mark CH ${ch.number} as read",
+                                                    if (chDone) "Undo ${chapterDisplayLabel(ch.number, ch.title)} ✓ (unread)" else "Mark ${chapterDisplayLabel(ch.number, ch.title)} as read",
                                                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                                                     color = if (chDone) onAccent
                                                             else onSurface
