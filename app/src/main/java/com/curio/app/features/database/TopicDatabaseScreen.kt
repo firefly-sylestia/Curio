@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -69,6 +70,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
@@ -792,14 +794,20 @@ fun TopicDatabaseScreen(navController: NavController) {
         // ── Scroll content — fills the screen, runs under the ragged tear.
         // v-tablet — wide windows split the page into a MASTER column (the
         // scrolling results, two-up on wide) and a REVEAL pane beside it;
-        // phones keep the full-width list exactly as before.
+        // phones keep the full-width list exactly as before. The master
+        // stays in PLAIN Box scope (no Row wrapper) so the overlays' align
+        // + AnimatedVisibility calls resolve exactly like the phone layout;
+        // on wide the master reserves the pane's lane via end padding.
         ScreenEntrance {
-            Row(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize()) {
                 // ── Master column — the scrolling result list ────────────
                 Box(
                     modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
+                        .fillMaxSize()
+                        // Wide: reserve the reveal pane's lane on the right
+                        // (344dp pane + 12dp gap + 28dp page margin) so the
+                        // overlays align to the LIST, not the whole window.
+                        .padding(end = if (wide) 384.dp else 0.dp)
                 ) {
             LazyColumn(
                 state = listState,
@@ -1063,21 +1071,27 @@ fun TopicDatabaseScreen(navController: NavController) {
                         .padding(bottom = 28.dp)
                 )
             }
-            } // ── master Box close ────────────────────────────────────────
+                } // ── master Box close ────────────────────────────────────
 
-            // ── v-tablet — REVEAL pane: the selected topic previews beside
-            // the list (master-detail); a quiet placeholder invites the
-            // first tap. Phone: absent — rows navigate as before.
-            if (wide) {
-                DatabaseRevealPaneSlot(
-                    selected = paneTopic,
-                    doneTopics = doneTopics,
-                    contentTop = contentTop,
-                    onClose = { paneTopic = null },
-                    onOpen = onTopicTap
-                )
-            }
-            } // ── Row close ───────────────────────────────────────────────
+                // ── v-tablet — REVEAL pane: right lane beside the master
+                // (master-detail); a quiet placeholder invites the first
+                // tap. Phone: absent — rows navigate as before.
+                if (wide) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(end = 28.dp)
+                    ) {
+                        DatabaseRevealPaneSlot(
+                            selected = paneTopic,
+                            doneTopics = doneTopics,
+                            contentTop = contentTop,
+                            onClose = { paneTopic = null },
+                            onOpen = onTopicTap
+                        )
+                    }
+                }
+            } // ── stage Box close (master + pane siblings) ─────────────────
         } // ── ScreenEntrance close ─────────────────────────────────────────
         // Hold-to-jump state
         var showPagePicker by remember { mutableStateOf(false) }
@@ -1948,7 +1962,7 @@ private fun DatabaseRevealPaneSlot(
             modifier = Modifier
                 .width(344.dp)
                 .fillMaxHeight()
-                .padding(top = contentTop, bottom = 24.dp, end = 28.dp)
+                .padding(top = contentTop, bottom = 24.dp)
         ) {
             Surface(
                 shape = RoundedCornerShape(20.dp),
@@ -2015,7 +2029,7 @@ private fun DatabaseRevealPane(
         modifier = Modifier
             .width(344.dp)
             .fillMaxHeight()
-            .padding(top = contentTop, bottom = 24.dp, end = 28.dp)
+            .padding(top = contentTop, bottom = 24.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             // ── Pane header — category chip + close ──────────────────────
