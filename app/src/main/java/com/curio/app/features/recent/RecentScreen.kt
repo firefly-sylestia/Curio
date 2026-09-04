@@ -47,6 +47,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioEmptyState
+import androidx.compose.foundation.layout.statusBarsPadding
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
@@ -122,6 +123,10 @@ private fun RecentFeedItem.topicIdentityKey(): String = when (this) {
  * allowing the complete persisted recent feed to be browsed.
  */
 @Composable
+/** v-tablet — wide header footprint (editorial, no torn hero): status-bar
+ *  inset plus the slim identity row below it. */
+private val RecentWideHeaderHeight = 124.dp
+
 fun RecentScreen(navController: NavController) {
     val entries by produceState<List<CurioEntry>>(initialValue = emptyList()) {
         try {
@@ -163,11 +168,21 @@ val glassBackdrop = rememberLayerBackdrop()
             // list's first item — and scrolls away with it.
             if (feed.isEmpty()) {
                 Column {
-                    SettingsHeroHeader(
-                        title = "Recents",
-                        subtitle = "Your latest discoveries, all in one place",
-                        onBack = { navController.popBackStack() }
-                    )
+                    // v-tablet — wide windows use the editorial header (no
+                    // torn hero); phones keep the settings-family torn hero.
+                    if (windowWidthSizeClass().isWide) {
+                        RecentWideHeader(
+                            title = "Recents",
+                            subtitle = "Your latest discoveries, all in one place",
+                            onBack = { navController.popBackStack() }
+                        )
+                    } else {
+                        SettingsHeroHeader(
+                            title = "Recents",
+                            subtitle = "Your latest discoveries, all in one place",
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
                     CurioEmptyState(
                         glyph = CurioIcons.History,
                         headline = "No discoveries yet",
@@ -183,7 +198,10 @@ val glassBackdrop = rememberLayerBackdrop()
                     contentPadding = PaddingValues(
                         start = wideContentEdgePadding(),
                         end = wideContentEdgePadding(),
-                        top = SettingsHeroTotalHeight,
+                        // v-tablet — wide rows scroll under the slim
+                        // editorial header instead of the torn hero.
+                        top = if (windowWidthSizeClass().isWide) RecentWideHeaderHeight
+                            else SettingsHeroTotalHeight,
                         bottom = 24.dp
                     ),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -210,8 +228,78 @@ val glassBackdrop = rememberLayerBackdrop()
                 // RESTORED (user request) — STICKY HERO drawn on TOP of the scroll
         // content: rows slide under the ragged tear as they scroll up, and
         // the back pill refracts them through REAL liquid glass.
+        if (windowWidthSizeClass().isWide) {
+            // v-tablet — editorial sticky header on the page wash (no torn
+            // hero, no glass backdrop needed for a flat identity row).
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth()
+            ) {
+                RecentWideHeader(
+                    title = "Recents",
+                    subtitle = "Your latest discoveries, all in one place",
+                    onBack = { navController.popBackStack() }
+                )
+            }
+        } else {
         SettingsHeroHeader(title = "Recents", subtitle = "Your latest discoveries, all in one place", onBack = { navController.popBackStack() }, glassBackdrop = glassBackdrop)
+        }
 
+    }
+}
+
+/**
+ * v-tablet — editorial Recent header for wide windows: a flat back pill +
+ * identity row sitting on the page wash (phones keep the torn hero).
+ */
+@Composable
+private fun RecentWideHeader(
+    title: String,
+    subtitle: String,
+    onBack: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .padding(start = 28.dp, end = 28.dp, top = 12.dp, bottom = 12.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Surface(
+                onClick = onBack,
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                shadowElevation = 0.dp
+            ) {
+                Box(Modifier.padding(10.dp)) {
+                    CurioIcon(
+                        name = CurioIcons.ArrowBack,
+                        contentDescription = "Back",
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        size = 20.dp
+                    )
+                }
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
     }
 }
 

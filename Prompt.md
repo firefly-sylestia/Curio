@@ -89,7 +89,8 @@ Most value → least, all being added:
     1.4) so short landscape windows compress instead of clipping.
   - Category/Filter pills flat (shadowElevation 0).
   Numbers are tunable against device screenshots.
-- **Phase 2 DONE (Home) — committed locally, NOT pushed (awaiting user).**
+- **Phase 2 DONE (Home) — committed locally `170d43c1`, NOT pushed**
+  (awaiting user; Phase 1 was pushed on their "push and continue").
   In `HomeScreen.kt`: `catalogTotal` hoisted beside totalSaved; the torn
   quest-hero wrapper collapses on wide and renders the new
   `HomeEditorialHeader` (BoxScope, comfortable 800dp column): greeting
@@ -98,7 +99,25 @@ Most value → least, all being added:
   elevation, same nav as the phone stats), hairline rule. Phone hero
   byte-identical (same brace/paren balance as HEAD). Body sections and
   sticky pills unchanged below the header.
-- Next: Phase 3 Cabinet/Recent master-detail + multi-column grids + drag.
+- **Phase 3 DONE (Cabinet + Recent) — committed locally, NOT pushed.**
+  - `CabinetScreen.kt`: `CabinetHeroHeader` goes editorial on wide
+    (`compact` == wide): banner backing turns transparent + square, torn
+    under-sheet/shadow/watermark symbols phone-only, ink resolves to
+    theme on-surface colors over the wash, search glass sits on a quiet
+    panel tint; new `CabinetEditorialHeaderHeight = 148.dp` feeds
+    `heroTotal` so the filter panel/chips align under the actual header.
+    Phone hero byte-identical (heroInk/heroWash resolve to the old
+    values when !compact). Grid stays Adaptive(176dp) wide.
+  - `RecentScreen.kt`: both torn `SettingsHeroHeader` uses branch wide →
+    new `RecentWideHeader` (flat back pill + identity row, hairline-free)
+    on the wash; list top padding uses `RecentWideHeaderHeight = 124.dp`
+    wide. Phone path untouched. (SettingsHeroHeader itself is shared with
+    Topic Database / History → Phase 4/6 redesigns it once.)
+  - Note: true master–detail in-pane previews + persistent drag-reorder
+    were deferred — entries open through the torn EntryDetail route
+    (Phase 5) and reorder needs a new persistent order field + migration
+    (Phase 6 conversation).
+- Next: Phase 4 Topic Browser multi-column + reveal pane.
 
 ## Tuning knobs (Phase 1)
 - `xOff` ±73/±129 (PeekCard) — sliver width per side.

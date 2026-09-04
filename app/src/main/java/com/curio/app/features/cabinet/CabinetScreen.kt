@@ -211,7 +211,11 @@ fun CabinetScreen(navController: NavController) {
     // v31 — the hero keeps its original height. v42 — the Category pill
     // moved INSIDE the hero (beside the title), so content reserves only
     // the filter UI when it is visible.
-    val heroTotal = compactBannerHeight + CabinetHeroSheetExtent
+    // v-tablet — wide windows use the slim editorial header height (the
+    // torn banner + white sheet are phone-only); the filter UI below it
+    // keeps aligning under the actual header footprint.
+    val heroTotal = if (wide) CabinetEditorialHeaderHeight
+        else compactBannerHeight + CabinetHeroSheetExtent
     val contentTop = heroTotal +
         (if (categoryPanelOpen) CabinetFilterPanelHeight
          else if (filterUiVisible) CabinetChipBarHeight
@@ -809,6 +813,9 @@ fun CabinetScreen(navController: NavController) {
 private val CabinetHeroBannerHeight = 180.dp
 /** Banner height on wide windows (tablet/landscape). */
 private val CabinetHeroBannerHeightCompact = 140.dp
+/** v-tablet — the slim wide/editorial header footprint (tablets/landscape):
+ *  no torn sheet below it; the banner collapses onto the page wash. */
+private val CabinetEditorialHeaderHeight = 148.dp
 /** Extra layout space reserved for the under-sheet below the torn banner. */
 private val CabinetHeroSheetExtent = 24.dp
 /** Fixed tear seed — the Cabinet tears in its own bold pattern, never re-rolls. */
@@ -874,7 +881,10 @@ private fun CabinetHeroHeader(
     glassBackdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null
 ) {
     val bannerHeight = if (compact) CabinetHeroBannerHeightCompact else CabinetHeroBannerHeight
-    val totalHeight = bannerHeight + CabinetHeroSheetExtent
+    // v-tablet — compact is the wide/tablet variant: the banner collapses to
+    // the slim editorial header (no torn sheet seam on tablets).
+    val totalHeight = if (compact) CabinetEditorialHeaderHeight
+        else bannerHeight + CabinetHeroSheetExtent
     val heroTornShape = remember(CABINET_TEAR_SEED) { SoftTornBottomShape(CABINET_TEAR_SEED, bold = true) }
     val sheetShape = remember(CABINET_TEAR_SEED) {
         SoftTornSheetShape(CABINET_TEAR_SEED, lip = 10.dp, baseline = 14.dp, bold = true)
@@ -900,6 +910,13 @@ private fun CabinetHeroHeader(
     }
     val fill by animateColorAsState(targetFill, tween(CurioMotion.Durations.Morph), label = "cabinetHeroFill")
     val ink by animateColorAsState(targetInk, tween(CurioMotion.Durations.Morph), label = "cabinetHeroInk")
+    // v-tablet — wide/editorial ink: theme text colors over the page wash
+    // instead of on-banner ink; the banner fill resolves to a quiet panel
+    // tint only used as the glass pills' backdrop. On phones these resolve
+    // to the exact on-banner values, so nothing changes there.
+    val heroInk = if (compact) MaterialTheme.colorScheme.onSurface else ink
+    val heroInkSoft = if (compact) MaterialTheme.colorScheme.onSurfaceVariant else ink.copy(alpha = 0.82f)
+    val heroWash = if (compact) MaterialTheme.colorScheme.surfaceContainerHigh else fill
     val heroSymbols = CurioIcons.heroWatermarkSymbols(activeCat?.family ?: CategoryFamily.WILDCARD)
     Box(
         modifier = Modifier
@@ -911,7 +928,8 @@ private fun CabinetHeroHeader(
         // still reads (never a bright white sliver on the black page).
         // v108 — OFF by default (Settings → Experiments → Paper & headers);
         // the toggle restores this extra paper layer.
-        if (AppPreferences.heroTearSheetState) {
+        // v-tablet — the torn under-sheet is phone-only.
+        if (!compact && AppPreferences.heroTearSheetState) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -924,7 +942,8 @@ private fun CabinetHeroHeader(
                 )
         )
         }
-        // ── Torn-edge shadow — hairline dark rim under the seam.
+        // ── Torn-edge shadow — hairline dark rim under the seam (phone).
+        if (!compact) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()                .height(bannerHeight)
@@ -932,11 +951,15 @@ private fun CabinetHeroHeader(
                 .clip(heroTornShape)
                 .background(Color.Black.copy(alpha = 0.20f))
             )
-            // ── Solid rose banner, torn bottom edge — shares the exact rose
+        }
+        // ── v-tablet — WIDE editorial: the banner backing turns transparent
+        // and square so the shared content column below reads as a flat
+        // header on the page wash; phones keep the solid torn rose banner.
+        // ── Solid rose banner, torn bottom edge — shares the exact rose
         // family as Profile/Settings (settingsRoseAccent).
         Surface(
-            shape = heroTornShape,
-            color = fill,
+            shape = if (compact) RoundedCornerShape(0.dp) else heroTornShape,
+            color = if (compact) Color.Transparent else fill,
             shadowElevation = 0.dp,
             modifier = Modifier
                 .fillMaxWidth()
@@ -946,6 +969,7 @@ private fun CabinetHeroHeader(
                 // Mirrored watermark collage — the ACTIVE category's family
                 // symbols pop around the banner edges (the settings/profile
                 // collage), so a Movies view scatters film glyphs, etc.
+                if (!compact) {
                 val symbols = heroSymbols
                 val pairs = listOf(
                     CabinetHeroPair(biasX = 0.93f, biasY = -0.85f, size = 44.dp, rotation = 12f, alpha = 0.11f),
@@ -957,6 +981,7 @@ private fun CabinetHeroHeader(
                 pairs.forEachIndexed { i, pair ->
                     CabinetHeroSymbol(symbols[i * 2], BiasAlignment(-pair.biasX, pair.biasY), pair.size, -pair.rotation, pair.alpha, ink)
                     CabinetHeroSymbol(symbols[i * 2 + 1], BiasAlignment(pair.biasX, pair.biasY), pair.size, pair.rotation, pair.alpha, ink)
+                }
                 }
                 Column(
                     modifier = Modifier
@@ -981,8 +1006,8 @@ private fun CabinetHeroHeader(
                                 label = "Cancel",
                                 glyph = CurioIcons.Close,
                                 contentDescription = "Close search",
-                                ink = ink,
-                                backdrop = fill,
+                                ink = heroInk,
+                                backdrop = heroWash,
                                 modifier = if (isLiquidGlassPillsActive() && glassBackdrop != null)
                                     Modifier.liquidGlassCapsule(
                                         MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
@@ -995,7 +1020,7 @@ private fun CabinetHeroHeader(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                trailing(ink, fill)
+                                trailing(heroInk, heroWash)
                             }
                         }
                     }
@@ -1039,7 +1064,11 @@ private fun CabinetHeroHeader(
                                 ink = MaterialTheme.colorScheme.onSurface,
                                 // v108 — dark: the filter chips' near-black
                                 // raised glass instead of the mid-tone lift.
-                                fill = curioSearchFill(fill),
+                                // v-tablet — wide: the frosted search glass
+                                // sits on the wash (a quiet panel tint).
+                                fill = curioSearchFill(
+                                    if (compact) MaterialTheme.colorScheme.surfaceContainerHigh else fill
+                                ),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .focusRequester(searchFocus)
@@ -1058,7 +1087,7 @@ private fun CabinetHeroHeader(
                                     Text(
                                         title,
                                         style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
-                                        color = ink,
+                                        color = heroInk,
                                         maxLines = 1
                                     )
                                     // v27 — experimental paper-title underline (two
@@ -1073,12 +1102,12 @@ private fun CabinetHeroHeader(
                                     Text(
                                         subtitle,
                                         style = MaterialTheme.typography.labelMedium,
-                                        color = ink.copy(alpha = 0.82f),
+                                        color = heroInkSoft,
                                         maxLines = 1
                                     )
                                 }
                                 if (titleTrailing != null) {
-                                    titleTrailing(ink, fill)
+                                    titleTrailing(heroInk, heroWash)
                                 }
                             }
                         }
