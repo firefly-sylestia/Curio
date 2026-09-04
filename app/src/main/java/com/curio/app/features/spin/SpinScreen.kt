@@ -20,7 +20,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
@@ -1167,103 +1169,172 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             CurioWatermarkBackdrop(activeCat = deckCat)
         }
 
-        // ── Landscape / tablet: side-by-side layout (v7.x) ─────────
-        //    On wide windows the bottom bar would waste horizontal space;
-        //    Categories + Filter move to a right-edge rail as tall
-        //    vertical pills, and the deck + Spin button stay centered.
+        // ── v-tablet — WIDE / TABLET — editorial stage ───────────────
+        // Fully redesigned wide layout (no torn hero, no bottom capsule): a
+        // quiet page header — deck identity + pool subtitle under a hairline
+        // rule — then the SIDEWAYS deck hand (hero ticket centered with the
+        // peek strips fanned left/right behind it), the spin orb beneath,
+        // and flat editorial category/filter controls. Phones keep their
+        // vertical deck untouched.
         val wide = windowWidthSizeClass().isWide
         if (wide) {
-            // Wide / landscape: deck centered vertically, controls below.
-            // No side rail — Categories/Filter sit as horizontal pills
-            // below the deck, same as phone but with more breathing room.
+            // v-tablet — the sideways fan scales to BOTH axes: width (the
+            // existing wideFit cap) AND the height left after the new page
+            // header + controls, so short landscape windows compress the
+            // hand instead of clipping it.
+            val stageHeadroom = (maxHeight - 236.dp).coerceAtLeast(220.dp)
+            val horizontalFit = minOf(
+                wideFit,
+                (stageHeadroom / 600.dp).coerceIn(if (compactHeight) 0.5f else 0.75f, 1.4f)
+            )
+            val deckLabel = when {
+                isMixedDeck && mixName != null -> mixName
+                isMixedDeck -> "Mixed deck"
+                else -> deckCat.displayName
+            }
+            val deckCountLabel = when {
+                isMixedDeck && mixName != null -> "$mixedTopicCount topics · mixed"
+                isMixedDeck -> "$mixedTopicCount topics · ${activeCatIds.size} lanes"
+                else -> "${filteredPool.size} topics · ${deckCat.displayName}"
+            }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(bottom = 84.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                SpinDeckSection(
-                    compact = compactHeight,
-                    extraCompact = false,
-                    densityExtraCompact = false,
-                    roomy = false,
-                    cat = deckCat,
-                    deckAccent = deckAccent,
-                    deckGradient = deckGradient,
-                    isMixed = isMixedDeck,
-                    mixSeed = mixSeed,
-                    displayPool = hand,
-                    cycleIndex = cycleIndex,
-                    shuffling = shuffling,
-                    shuffleProgress = shuffleProgress,
-                    landedTopic = landedTopic,
-                    opening = isOpening,
-                    enabled = filteredPool.isNotEmpty() && !shuffling,
-                    buttonPulse = buttonPulse,
-                    fitScale = wideFit,
-                    poolLoading = poolLoading,
-                    poolLoadFailed = poolLoadFailed,
-                    onRetryPool = { poolRetryKey++ },
-                    onCardTap = onDeckCardTap,
-                    onCycle = onDeckCycle,
-                    onSpinClick = onSpinClick
-                )
-                // Categories + Filter as horizontal pills below deck
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 16.dp)
+                // ── Editorial page header — identity + hairline rule ──
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 36.dp, end = 36.dp, top = 26.dp)
                 ) {
-                    // Category pill
-                    Surface(
-                        onClick = { showCategoryPicker = true },
-                        shape = RoundedCornerShape(50),
-                        color = deckCat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-                        shadowElevation = 3.dp
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Row(
-                            Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            CurioIcon(name = deckCat.iconGlyph, tint = deckCat.categoryInk(), size = 18.dp)
-                            Text(
-                                // v318b — an applied NAMED mix stamps the pill
-                                // with its name; unnamed mixes stay "Mixed · N".
-                                when {
-                                    isMixedDeck && mixName != null -> mixName
-                                    isMixedDeck -> "Mixed · $mixedTopicCount"
-                                    else -> deckCat.displayName
-                                },
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                color = deckCat.categoryInk()
-                            )
-                        }
+                        CurioIcon(
+                            name = deckCat.iconGlyph,
+                            tint = deckCat.categoryInk().copy(alpha = 0.85f),
+                            size = 20.dp
+                        )
+                        Text(
+                            text = deckLabel,
+                            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
-                    // Filter pill
-                    Surface(
-                        onClick = { showFilters = true },
-                        shape = RoundedCornerShape(50),
-                        color = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty())
-                            deckCat.themedAccent() else deckCat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-                        shadowElevation = 3.dp
-                    ) {
+                    Text(
+                        text = deckCountLabel,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
+                    )
+                    Spacer(Modifier.height(14.dp))
+                    // Hairline rule (the editorial replacement for the torn
+                    // hero seam — flat, quiet, one pixel).
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
+                    )
+                }
+                // ── Deck stage — the sideways hand, centered in the
+                //    space left under the header ───────────────────────
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        SpinDeckSection(
+                            compact = compactHeight,
+                            extraCompact = false,
+                            densityExtraCompact = false,
+                            roomy = false,
+                            horizontal = true,
+                            cat = deckCat,
+                            deckAccent = deckAccent,
+                            deckGradient = deckGradient,
+                            isMixed = isMixedDeck,
+                            mixSeed = mixSeed,
+                            displayPool = hand,
+                            cycleIndex = cycleIndex,
+                            shuffling = shuffling,
+                            shuffleProgress = shuffleProgress,
+                            landedTopic = landedTopic,
+                            opening = isOpening,
+                            enabled = filteredPool.isNotEmpty() && !shuffling,
+                            buttonPulse = buttonPulse,
+                            fitScale = horizontalFit,
+                            poolLoading = poolLoading,
+                            poolLoadFailed = poolLoadFailed,
+                            onRetryPool = { poolRetryKey++ },
+                            onCardTap = onDeckCardTap,
+                            onCycle = onDeckCycle,
+                            onSpinClick = onSpinClick
+                        )
+                        // Flat editorial controls under the orb.
                         Row(
-                            Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            modifier = Modifier.padding(top = 18.dp, bottom = 10.dp)
                         ) {
-                            CurioIcon(
-                                name = CurioIcons.Search,
-                                tint = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty()) deckCat.onAccent() else deckCat.categoryInk(),
-                                size = 18.dp
-                            )
-                            Text(
-                                if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty()) "Filter · ${filteredPool.size}" else "Filter",
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                color = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty()) deckCat.onAccent() else deckCat.categoryInk()
-                            )
+                            // Category pill
+                            Surface(
+                                onClick = { showCategoryPicker = true },
+                                shape = RoundedCornerShape(50),
+                                color = deckCat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
+                                shadowElevation = 0.dp
+                            ) {
+                                Row(
+                                    Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    CurioIcon(name = deckCat.iconGlyph, tint = deckCat.categoryInk(), size = 18.dp)
+                                    Text(
+                                        // v318b — an applied NAMED mix stamps the pill
+                                        // with its name; unnamed mixes stay "Mixed · N".
+                                        when {
+                                            isMixedDeck && mixName != null -> mixName
+                                            isMixedDeck -> "Mixed · $mixedTopicCount"
+                                            else -> deckCat.displayName
+                                        },
+                                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                        color = deckCat.categoryInk()
+                                    )
+                                }
+                            }
+                            // Filter pill
+                            Surface(
+                                onClick = { showFilters = true },
+                                shape = RoundedCornerShape(50),
+                                color = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty())
+                                    deckCat.themedAccent() else deckCat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
+                                shadowElevation = 0.dp
+                            ) {
+                                Row(
+                                    Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    CurioIcon(
+                                        name = CurioIcons.Search,
+                                        tint = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty()) deckCat.onAccent() else deckCat.categoryInk(),
+                                        size = 18.dp
+                                    )
+                                    Text(
+                                        if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty()) "Filter · ${filteredPool.size}" else "Filter",
+                                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                        color = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty()) deckCat.onAccent() else deckCat.categoryInk()
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -1517,6 +1588,8 @@ private fun ColumnScope.SpinDeckSection(
     extraCompact: Boolean = false,
     densityExtraCompact: Boolean = false,
     roomy: Boolean = false,
+    // v-tablet — SIDEWAYS stage: the deck re-fans left/right (wide windows).
+    horizontal: Boolean = false,
     cat: CurioCategory,
     deckAccent: Color,
     deckGradient: List<Color>,
@@ -1574,6 +1647,7 @@ private fun ColumnScope.SpinDeckSection(
             extraCompact = extraCompact,
             densityExtraCompact = densityExtraCompact,
             roomy = roomy,
+            horizontal = horizontal,
             fitScale = fitScale,
             loading = poolLoading,
             loadFailed = poolLoadFailed,
@@ -2601,6 +2675,8 @@ private fun Carousel(
     extraCompact: Boolean = false,
     densityExtraCompact: Boolean = false,
     roomy: Boolean = false,
+    // v-tablet — sideways stage (wide windows): fan left/right, 470dp box.
+    horizontal: Boolean = false,
     fitScale: Float = 1f,
     loading: Boolean = false,
     loadFailed: Boolean = false,
@@ -2666,7 +2742,10 @@ private fun Carousel(
                 }
             }
             .height(
-                when {
+                // v-tablet — sideways hand keeps the vertical deck's box
+                // breathing room so the ticket never grazes the orb.
+                if (horizontal) 470.dp * fitScale
+                else when {
                     densityExtraCompact -> 325.dp
                     extraCompact -> 350.dp
                     compact -> 390.dp
@@ -2725,7 +2804,8 @@ private fun Carousel(
                         gradient = deckGradient,
                         cat = cat,
                         topic = topic,
-                        shuffling = shuffling
+                        shuffling = shuffling,
+                        horizontal = horizontal
                     )
                 }
             }
@@ -3425,21 +3505,47 @@ private fun PeekCard(
     gradient: List<Color>,
     cat: CurioCategory,
     topic: CurioTopic?,
-    shuffling: Boolean
+    shuffling: Boolean,
+    // v-tablet — SIDEWAYS hand (wide stage): the same strips re-fan
+    // LEFT/RIGHT behind the hero ticket instead of above/below it.
+    horizontal: Boolean = false
 ) {
-    val isTop = slot < 0
+    val isTop = !horizontal && slot < 0
+    // v-tablet — in the sideways hand the LEFT pair is the outer edge that
+    // carries the readable content (mirror of `isTop` in the vertical fan).
+    val isLeft = horizontal && slot < 0
     val far = kotlin.math.abs(slot) == 2
-    // Slightly lower + wider fan: the whole deck sits a few px closer to
-    // the spin button and the far pair is spread a touch more so each
-    // layer reads as a separate card instead of one blurred pile.
-    // v6.11 — compact screens scale the fan offsets + card sizes down so
-    // the deck keeps the same look, just tighter on short screens.
-    val yOff = when (slot) {
+    // ── Fan geometry ────────────────────────────────────────────────
+    // VERTICAL (phone): slightly lower + wider fan — the deck sits a few
+    // px closer to the spin button and the far pair spreads a touch more
+    // so each layer reads as a separate card instead of one blurred pile.
+    // v6.11 — compact screens scale fan offsets + card sizes down.
+    // SIDEWAYS (tablet): the tucked hand — each strip's CENTER sits so its
+    // outer ~110-150dp sliver clears the hero's side edge while the rest
+    // tucks UNDER the ticket (the hero draws in front at zIndex 10): near
+    // cards tuck deepest (~70% hidden), far cards splay further out but
+    // smaller + dimmer. Outer tips rise a few dp for the fan's arc. All
+    // offsets scale with the deck so proportions hold at any stage size.
+    val yOff = if (horizontal) when (slot) {
+        -2 -> -12f * scale
+        -1 -> -5f * scale
+        1 -> -5f * scale
+        else -> -12f * scale
+    } else when (slot) {
         -2 -> -178f * scale
         -1 -> -134f * scale
         1 -> 146f * scale
         else -> 188f * scale
     }
+    // v-tablet — horizontal hand x-offsets (dp at deck scale). Center sits
+    // so ~110dp (near, ∓73) / ~150dp (far, ∓129) of the strip clears the
+    // 143dp hero half-width on its side; the rest hides behind the ticket.
+    val xOff = if (horizontal) when (slot) {
+        -2 -> -129f * scale
+        -1 -> -73f * scale
+        1 -> 73f * scale
+        else -> 129f * scale
+    } else 0f
     // v6.5 — peek cards grew ~13% so the topic title inside each background
     // card has room to read instead of hiding behind the fan. Proportions
     // are kept — only the overall size went up, never the shape.
@@ -3602,7 +3708,16 @@ private fun PeekCard(
             )
             .graphicsLayer {
                 translationY = yOff.dp.toPx()
-                rotationZ = when (slot) { -2 -> -3.5f; -1 -> -1.4f; 1 -> 1.4f; else -> 3.5f }
+                // v-tablet — sideways hand shifts along X instead of Y.
+                if (horizontal) translationX = xOff.dp.toPx()
+                // v-tablet — the hand tilts its outer tips UP (left pair
+                // CCW, right pair CW), slightly stronger than the vertical
+                // fan's ±1.4°/±3.5° so the splay reads at tablet scale.
+                rotationZ = if (horizontal) {
+                    when (slot) { -2 -> -5f; -1 -> -2.4f; 1 -> 2.4f; else -> 5f }
+                } else {
+                    when (slot) { -2 -> -3.5f; -1 -> -1.4f; 1 -> 1.4f; else -> 3.5f }
+                }
                 scaleX = if (far) 0.92f else 0.98f
                 scaleY = if (far) 0.92f else 0.98f
                 // Fully opaque while the slot travels. The outgoing
@@ -3626,51 +3741,46 @@ private fun PeekCard(
                 // instead of a full-height hard slot cut, and the durations
                 // sit UNDER the ~340ms tick floor so each step completes
                 // before the next tick lands.
-                val dir = if (isTop) -1f else 1f
-                if (shuffling) {
-                    slideInVertically(
-                        animationSpec = tween(PeekWipeInMs, easing = FastOutSlowInEasing)
-                    ) { height -> (height * dir * PeekWipeTravel).toInt() } +
-                    fadeIn(animationSpec = tween(PeekWipeInMs, easing = FastOutSlowInEasing)) togetherWith
-                    slideOutVertically(
-                        animationSpec = tween(PeekWipeOutMs, easing = FastOutSlowInEasing)
-                    ) { height -> (height * -dir * PeekWipeTravel).toInt() } +
-                    // The classic default fades across the full motion. The
-                    // experimental tail-fade option preserves the newer
-                    // travel-first, end-only fade behavior.
-                    if (tailFadeOn) {
-                        fadeOut(
-                            animationSpec = tween(
-                                durationMillis = 90,
-                                delayMillis = PeekWipeOutMs - 90,
-                                easing = FastOutSlowInEasing
-                            )
-                        )
-                    } else {
-                        fadeOut(animationSpec = tween(PeekWipeOutMs, easing = FastOutSlowInEasing))
-                    } using SizeTransform(clip = false)
+                // v-tablet — the SIDEWAYS hand wipes ALONG its own axis:
+                // left cards slide in from the left and out toward the hero,
+                // right cards mirror; the vertical fan keeps its vertical
+                // wipe. Same travel + fade recipe, only the axis differs.
+                val dir = if (isTop || isLeft) -1f else 1f
+                val inMs = if (shuffling) PeekWipeInMs else PeekIdleInMs
+                val outMs = if (shuffling) PeekWipeOutMs else PeekIdleOutMs
+                val wipeIn = if (horizontal) {
+                    slideInHorizontally(
+                        animationSpec = tween(inMs, easing = FastOutSlowInEasing)
+                    ) { w -> (w * dir * PeekWipeTravel).toInt() }
                 } else {
-                    // Idle re-fan (landing re-deal / category switch) — a
-                    // slower, softer pass in the same per-side direction.
                     slideInVertically(
-                        animationSpec = tween(PeekIdleInMs, easing = FastOutSlowInEasing)
-                    ) { height -> (height * dir * PeekWipeTravel).toInt() } +
-                    fadeIn(animationSpec = tween(PeekIdleInMs, easing = FastOutSlowInEasing)) togetherWith
-                    slideOutVertically(
-                        animationSpec = tween(PeekIdleOutMs, easing = FastOutSlowInEasing)
-                    ) { height -> (height * -dir * PeekWipeTravel).toInt() } +
-                    if (tailFadeOn) {
-                        fadeOut(
-                            animationSpec = tween(
-                                durationMillis = 90,
-                                delayMillis = PeekIdleOutMs - 90,
-                                easing = FastOutSlowInEasing
-                            )
-                        )
-                    } else {
-                        fadeOut(animationSpec = tween(PeekIdleOutMs, easing = FastOutSlowInEasing))
-                    } using SizeTransform(clip = false)
+                        animationSpec = tween(inMs, easing = FastOutSlowInEasing)
+                    ) { h -> (h * dir * PeekWipeTravel).toInt() }
                 }
+                val wipeOut = if (horizontal) {
+                    slideOutHorizontally(
+                        animationSpec = tween(outMs, easing = FastOutSlowInEasing)
+                    ) { w -> (w * -dir * PeekWipeTravel).toInt() }
+                } else {
+                    slideOutVertically(
+                        animationSpec = tween(outMs, easing = FastOutSlowInEasing)
+                    ) { h -> (h * -dir * PeekWipeTravel).toInt() }
+                }
+                val fadeInT = fadeIn(animationSpec = tween(inMs, easing = FastOutSlowInEasing))
+                // The classic default fades across the full motion. The
+                // tail-fade option preserves travel-first, end-only fading.
+                val fadeOutT = if (tailFadeOn) {
+                    fadeOut(
+                        animationSpec = tween(
+                            durationMillis = 90,
+                            delayMillis = outMs - 90,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
+                } else {
+                    fadeOut(animationSpec = tween(outMs, easing = FastOutSlowInEasing))
+                }
+                wipeIn + fadeInT togetherWith wipeOut + fadeOutT using SizeTransform(clip = false)
             },
             label = "peekSlot_$slot"
         ) { currentTopic ->
@@ -3705,11 +3815,25 @@ private fun PeekCard(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 14.dp, vertical = 10.dp),
-                    verticalArrangement = if (isTop) Arrangement.Top else Arrangement.Bottom
+                    // v-tablet — sideways-hand content rides the OUTER edge
+                    // (the only part that clears the hero), vertically
+                    // centered; the vertical fan pins to top/bottom as before.
+                    verticalArrangement = when {
+                        horizontal -> Arrangement.Center
+                        isTop -> Arrangement.Top
+                        else -> Arrangement.Bottom
+                    }
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        // v-tablet — horizontal fan anchors content to the
+                        // visible outer side (left slots Start, right End).
+                        modifier = if (horizontal) Modifier.fillMaxWidth() else Modifier,
+                        horizontalArrangement = when {
+                            horizontal && isLeft -> Arrangement.Start
+                            horizontal -> Arrangement.End
+                            else -> Arrangement.spacedBy(8.dp)
+                        }
                     ) {
                         CurioIcon(
                             name = cat.iconGlyph,

@@ -70,5 +70,28 @@ Most value → least, all being added:
   paths (phone paths untouched).
 
 ## Status
-Phase 0/1 in progress — Spin deck internals being studied for the
-horizontal hand layout.
+- Crash fix (pre-design): share card exported a fetched cover as a Coil
+  HARDWARE bitmap into a software capture canvas →
+  "Software rendering doesn't support hardware bitmaps". Fixed with
+  `.allowHardware(false)` + memory-cache DISABLED on the cover fetch
+  (MoodBoardExport recipe). COMMITTED + PUSHED (`cd1533b8`).
+- **Phase 1 DONE (Spin) — committed locally, NOT pushed (user review).**
+  Pure-stage + tucked-hand decisions implemented in `SpinScreen.kt`:
+  - Wide branch rebuilt: editorial page header (deck identity + pool
+    subtitle, hairline rule — no tear), deck stage fills the rest.
+  - `horizontal` param threads SpinDeckSection → Carousel → PeekCard.
+    Peek strips re-fan LEFT/RIGHT (xOff ∓73/∓129dp scaled, tips-up arc
+    yOff ∓5/∓12, rotation ±2.4°/±5°) tucked under the 143dp-half hero;
+    content rides the outer edge; wipes run along the horizontal axis;
+    vertical geometry byte-identical (phone untouched).
+  - Horizontal scale = min(width wideFit, height headroom/600dp capped
+    1.4) so short landscape windows compress instead of clipping.
+  - Category/Filter pills flat (shadowElevation 0).
+  Numbers are tunable against device screenshots.
+- Next: Phase 2 Home editorial wide layout.
+
+## Tuning knobs (Phase 1)
+- `xOff` ±73/±129 (PeekCard) — sliver width per side.
+- `yOff`/rotation ∓5/∓12, ±2.4/±5 — hand arc.
+- Carousel horizontal box height 470dp; header paddings;
+  `stageHeadroom` −236dp & 600dp divisor / 1.4 cap in the wide branch.
