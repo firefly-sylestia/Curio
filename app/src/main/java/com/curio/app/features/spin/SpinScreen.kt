@@ -128,6 +128,7 @@ import com.curio.app.data.CurioTopic
 import com.curio.app.data.SmartDensityMode
 import com.curio.app.data.StreakTracker
 import com.curio.app.data.TopicJsonLoader
+import com.curio.app.data.TopicRepository
 import com.curio.app.data.titleAndYearQualifier
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToQuestRoute
@@ -525,6 +526,18 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         // resolvable — read the scope's own `value` (the current pool,
         // seeded from cache on a warm return) instead.
         if (value.isEmpty()) poolLoading = true
+        // v3xx — SMART SMALL-POOL START: when the cache seed left the deck
+        // empty (cold start / memory shed), seed it RIGHT AWAY with a small
+        // Room sample (indexed LIMIT queries, no lane mapping) so cards
+        // render on the very first frames instead of a "Gathering the
+        // deck…" wait. The full pool below replaces the seed when it
+        // lands — the fan is keyed on the loaded pool, so it re-deals and
+        // spins then draw from the FULL catalog, never the sample. No-op
+        // while Room is still populating (first launch): the hint stays.
+        if (value.isEmpty()) {
+            val seed = TopicRepository.sampleTopics(context, poolIds)
+            if (seed.isNotEmpty()) value = seed
+        }
         poolLoadFailed = false
         val merged = mutableListOf<CurioTopic>()
         val seen = mutableSetOf<String>()

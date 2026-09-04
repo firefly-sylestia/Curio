@@ -1,111 +1,64 @@
-# Prompt — Tablet UI: revert the editorial redesign to the mobile design; torn header not sticky in landscape
+# Request Log — catalog staleness, browser loading, picker apply, Spin deck
 
-## Request (user, 2026-09-04)
-"the tablet ui overhall is bad — from topic browser the lists shows in 2
-grid its bad, the open topic also doesnt open, and the in shuffle page the
-category picker and filter isnt there, and also the non tear design is bad
-also the home stat card so fix all of them do web research and use the
-mobile design as the start and just dont make the tear header sticky in
-landscape tablet, properly research and fix everything."
+## Status: implementation complete — committed & pushed pending CI
 
-## Interpretation (user-confirmed)
-The previous session shipped a full "clean editorial / no-tear" tablet
-redesign across 7 commits (8920a88c..29eeee78: Spin stage rebuild, Home /
-Cabinet / Recents / Settings editorial headers, Topic Browser 2-up
-master-detail grid + reveal pane). The user rejects all of it. Direction:
-1. **Revert the redesign wholesale** — tablet/wide returns to the MOBILE
-   design (torn heroes, phone layouts). This fixes: Browser 2-grid → back
-   to the single-column list; Browser tap → opens the topic again (rows
-   navigate straight to the reveal); Spin's Category + Filter pills are
-   present under the deck on wide; torn heroes restored everywhere
-   ("non-tear design is bad"); Home stat row back in the torn hero
-   ("home stat card").
-2. **One wide-only deviation, user-confirmed via ask_user "Scroll away
-   everywhere" (incl. Browser + Cabinet search/filter headers):** on WIDE
-   windows (>=600dp — landscape tablet) the torn header is NOT sticky — it
-   scrolls away with the content. Phones keep the pinned glass hero
-   (v263 "RESTORED STICKY HERO") byte-for-byte.
+## The request (user, paraphrased)
+1. Topics that were removed/overridden in the data still show on device — duplicate old
+   listings linger even though the JSON no longer has them.
+2. Topic Browser has loading lag when loading topics.
+3. Category picker: category switching should NOT apply instantly on tap — apply when the
+   picker is closed (user picked "Apply when I close the panel" when asked).
+4. Spin shuffle deck: use smart loading with a small pool; always show cards while data is
+   loading; when the full data loads, the shuffle picks from that again during spin.
 
-Web research grounding: NN/g (sticky headers eat viewport space; worst on
-short landscape viewports) + single-column vs forced multi-column list
-readability for dense text rows — both support the user's asks.
+## Root causes found
+- **Stale rows:** `TopicRepository.syncCatalogFromJson` (the only cross-release sync) only did
+  `insertMissing` + content `backfillContent` — it NEVER deleted rows that vanished from the
+  shipped JSON, so removed/renamed/deduped topics lived in Room forever. It also only ran when
+  `versionCode` changed, so dev/CI builds that keep the same versionCode never re-synced at all.
+  `TopicJsonLoader.parseAndCache` and `refreshLaneFromAssets` also only upserted. Room's `topics`
+  table is a pure mirror of the bundled JSON (user data lives in `cached_topics`/captures), so a
+  per-lane replace is safe.
+- **Browser flash-lag:** `searchPass` was a `produceState` that RESTARTED with an empty list on
+  every key change (category filter, settled search, done-set) → a visible "No topics match"
+  flash + re-derivation between every switch.
+- **Picker timing:** the panel's checkboxes committed to the live filter on EVERY tap, so the
+  whole 16k-topic filter pass re-ran behind the open panel per tap.
+- **Spin deck:** the pool `produceState` showed a "Gathering the deck…" hint while the full
+  lane pool loaded (cold cache / memory shed), leaving the fan empty instead of dealing
+  immediately.
 
-## What changed (all Android `app/` only)
+## Changes made
+- `TopicRepository`: catalog sync now MIRRORS each lane (delete category + insertAll) after a
+  successful asset parse — removals/renames/dedupes leave Room. Trigger widened: runs when the
+  versionCode changed OR the APK's `lastUpdateTime` changed (new `AppPreferences`
+  `last_catalog_sync_update_ms` stamp) — covers same-versionCode installs. Fresh import stamps
+  both. `refreshLaneFromAssets` now also deletes+inserts. Added `sampleTopics(context, ids)`
+  (small Room random sample per lane; WILDCARD samples every canonical lane) + private
+  `packageLastUpdateTime`.
+- `TopicDao`: added `getRandomTopics(categoryId, limit)` (ORDER BY RANDOM() LIMIT n — no lane
+  mapping).
+- `TopicJsonLoader`: `parseAndCache`'s Room write mirrors the lane for canonical categories
+  (WILDCARD merge still upserts).
+- `SpinScreen`: when the cache seed is empty, the pool is seeded immediately with
+  `TopicRepository.sampleTopics` so cards render on early frames; the full loaded pool replaces
+  the seed when it lands and the fan re-deals (keyed on the loaded pool) — spins draw from the
+  full catalog.
+- `TopicDatabaseScreen`: category panel is now STAGED — `pendingCats` edited by the checkboxes,
+  committed once on Done; closing via the pill discards. Also converted `searchPass` from
+  `produceState` (empty-list restart) to a retained `mutableStateOf` + `LaunchedEffect`, so the
+  previous rows stay on screen while the new set computes on `Dispatchers.Default`;
+  `searchPassReady` gates only the first build ("Preparing topics…" instead of a one-frame
+  "No topics match").
 
-### A. Revert to mobile baseline (`git checkout cd1533b8` on 20 files)
-Restored 19 Kotlin screens + the store changelog to the pre-redesign
-state (cd1533b8 = parent of the redesign; phones were already
-byte-identical there, so this is a clean full revert). Files: SpinScreen,
-HomeScreen, CabinetScreen, TopicDatabaseScreen, RecentScreen,
-ManageCategoriesScreen, OutfitShopScreen, PetDesignerScreen,
-QuestsScreen, RecycleBinScreen, BackupToolsScreen, ExperimentsScreen,
-SettingsHubScreen, SettingsSectionScreen, ShareHubScreen,
-UserExperimentsScreen, PromoModeScreen, SupportScreen, UpdatesScreen.
-No redesign symbols (SettingsWideHeroHeight, settingsHeroContentTopHeight,
-RecentWideHeader, HomeEditorial*, DatabaseWideRow/Pane, buildWideRows)
-left anywhere — grep-verified. Commit range cd1533b8..HEAD was exactly
-the 7 redesign commits (+Prompt.md), so restoring = clean revert.
+## Not changed (deliberate)
+- Version-gated + install-gated sync location unchanged (background, once per install).
+- `insertMissing`/`backfillContent` DAO methods left in place (unused now, harmless API).
 
-### B. Torn hero scrolls away on wide (16 screens)
-Shared rule (see app/AGENTS.md "Torn heroes on WIDE windows scroll away"):
-list/grid top contentPadding `SettingsHeroTotalHeight` → `if (wide) 0.dp
-else …`; an `if (wide) item(key="hero")` leads the scroll content; the
-pinned overlay call wraps in `if (!wide)`. In-list heroes pass
-`glassBackdrop = null` (opaque back pill). On wide the list's
-`layerBackdrop` is skipped wherever the hero sits inside the captured node
-(self-sample cycle) and inner-pill liquid-glass gates add `!wide`.
+## Validation
+No Gradle builds in this environment (CI compiles on push). Verified: brace/paren balance on all
+six edited files, imports present, no leftover references, phone + wide paths share the same
+pending/commit lambdas. fastlane changelog + Prompt.md updated.
 
-Simple screens (title-only heroes, duplicated small hero calls):
-Experiments, UserExperiments, BackupTools, SettingsSection, Support,
-PromoMode, Quests, Updates, OutfitShop (imports isWide +
-windowWidthSizeClass added), ManageCategories, Recents (non-empty branch;
-empty branch untouched — its own in-flow hero already leads the page),
-Recycle Bin (same), ShareHub (grid: `item(key="hero", span={…})`, `wide`
-pre-existed).
-Empty-state branches left as-is where they already own an in-flow hero
-(Recents/Recycle Bin empty columns) or nothing scrolls.
-
-Complex screens (hero carries search/category/sort controls + filter UI):
-- **Topic Browser** (`TopicDatabaseScreen.kt`): hero call extracted into a
-  local `heroFor(backdrop)` @Composable lambda + `heroGlassOn` gate; wide
-  list = hero item + (when filter UI open) a `filter-ui` item reusing
-  DatabaseCategoryPanel / ActiveFilterChips with a new `restTop = 0.dp`
-  param (0 = flush under the in-list hero; phone overlay keeps its pinned
-  rest top). Phone overlay + pinned filter AnimatedVisibility gated
-  `if (!wide)`; `contentTop` resolves 0 on wide (list padding, scroll
-  indicator); back-to-top arrow offset 90.dp on wide; page-nav glass
-  gated; grid/list layer gate adds `&& !wide`.
-- **Cabinet** (`CabinetScreen.kt`): same treatment — `cabinetHeroFor`
-  lambda + `cabinetHeroGlassOn`; wide grid = hero item + filter-ui item
-  (CabinetCategoryPanel / CabinetActiveFilterChips with `barTop = 0.dp`);
-  pinned filter bar gated phone-only; empty-state branch wraps the hero at
-  the top of its Column on wide; layer gate adds `&& !wide`;
-  cabinetTitle/cabinetSubtitle hoisted above the root Box.
-- **Pet Designer** (`PetDesignerScreen.kt`): wide list = hero first item;
-  pinned overlay phone-only; the floating StudioFloatingToolbar already
-  pins itself under the status bar and is designed to stay while the hero
-  scrolls (v156 comment) — untouched.
-- **Profile**: hero already scrolls as the LazyColumn's first item — no
-  change. **WidgetEditor**: hero in a plain Column, nothing scrolls behind
-  it — no change. **SettingsHub two-pane (wide)**: hero is an in-flow top
-  bar above the panes (nothing scrolls under it) — no change.
-
-Phone paths verified behavior-identical: every gated expression collapses
-to the old value when `!wide`, and brace/paren balance is 0/0/0 vs the
-cd1533b8 baseline across all 16 edited files (script-verified).
-
-## Verification
-- No Gradle build possible in this environment (CI validates on push).
-- Structure checks run: brace/paren/bracket balance delta 0 across the 16
-  edited files; no leftover redesign symbols; imports for
-  `windowWidthSizeClass`/`isWide` present in every edited file; one `wide`
-  val per file.
-- Watch CI on the push; if it reports NEW errors in untouched files, the
-  previous fix may be incomplete (VERIFY-ONE-CYCLE).
-
-## Follow-ups
-- Tuning numbers (back-to-top 90.dp, wide in-list hero at default banner
-  size) are knobs against device screenshots.
-- The wide in-list hero sits inside the list's `wideContentEdgePadding`
-  column (not full-bleed) — the mobile look, just centered; revisit if the
-  tear reads too narrow on very wide windows.
+## Follow-ups if CI fails
+Fix in one cycle from the CI log.

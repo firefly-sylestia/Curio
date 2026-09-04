@@ -205,6 +205,29 @@ fun TopicDatabaseScreen(navController: NavController) {
     }
     // Tiny search box INSIDE the panel, filtering the category list itself.
     var catPanelQuery by rememberSaveable { mutableStateOf("") }
+    // v3xx — STAGED apply: the panel's checkboxes edit a PENDING set while
+    // it is open, and the list keeps showing the COMMITTED selection — no
+    // full re-filter + scroll reset behind the panel on every tap (the lag
+    // while switching categories). Tapping Done commits the pending set
+    // once; closing the panel without Done (pill toggle) discards it. The
+    // pending set is re-seeded from the committed selection every time the
+    // panel opens (including a restored open panel).
+    var pendingCats by remember { mutableStateOf<Set<CategoryId>?>(null) }
+    LaunchedEffect(categoryPanelOpen) {
+        pendingCats = if (categoryPanelOpen) selectedCats else null
+    }
+    val onPanelToggle: (CategoryId) -> Unit = { id ->
+        val base = pendingCats ?: selectedCats
+        pendingCats = if (id in base) base - id else base + id
+    }
+    val onPanelClearAll = {
+        pendingCats = emptySet()
+        catPanelQuery = ""
+    }
+    val onPanelDone = {
+        (pendingCats ?: selectedCats).let { commitCats { it } }
+        categoryPanelOpen = false
+    }
     // The category UI visible under the hero: the open panel, or the compact
     // active-filter chips row whenever at least one lane is selected.
     val filterUiVisible = categoryPanelOpen || selectedCats.isNotEmpty()
@@ -464,16 +487,17 @@ fun TopicDatabaseScreen(navController: NavController) {
     // groups: EXACT (substring) matches first, then SIMILAR (typo-tolerant)
     // matches — both searches shown, exact on top.
     val topicsByCat = remember(indexedTopics) { indexedTopics.groupBy { it.category.id } }
-    val searchPass by produceState<SearchPass>(
-        initialValue = SearchPass(rows = emptyList()),
-        catalog,
-        topicsByCat,
-        indexedTopics,
-        effectiveCats,
-        needle,
-        doneTopics
-    ) {
-        value = withContext(Dispatchers.Default) {
+    // v3xx — the merged rows are recomputed on every key change (category
+    // filter, settled query, done-set) but the PREVIOUS rows stay on screen
+    // while the new set builds on [Dispatchers.Default]. produceState used
+    // to restart with an EMPTY list on each key change — flashing "No
+    // topics match" (and resetting pagination feel) between every category
+    // switch and query settle: the perceived loading lag while browsing.
+    // [searchPassReady] gates only the very first build (nothing retained).
+    var searchPass by remember { mutableStateOf(SearchPass(rows = emptyList())) }
+    var searchPassReady by remember { mutableStateOf(false) }
+    LaunchedEffect(catalog, topicsByCat, indexedTopics, effectiveCats, needle, doneTopics) {
+        val next = withContext(Dispatchers.Default) {
             val indexById = indexedTopics.associateBy { it.topic.id }
             if (needle.isEmpty()) {
                 // BROWSE MODE: per-lane with section headers (unchanged).
@@ -578,6 +602,8 @@ fun TopicDatabaseScreen(navController: NavController) {
                 )
             }
         }
+        searchPass = next
+        searchPassReady = true
     }
     // The unified row list the rest of the screen consumes (pagination,
     // scroll restore and the alphabet rail all read `rows` unchanged).
@@ -880,15 +906,10 @@ fun TopicDatabaseScreen(navController: NavController) {
                                         counts = chips.associate { it.first.id to it.second },
                                         query = catPanelQuery,
                                         onQueryChange = { catPanelQuery = it },
-                                        selected = effectiveCats,
-                                        onToggle = { id ->
-                                            commitCats { current -> if (id in current) current - id else current + id }
-                                        },
-                                        onClearAll = {
-                                            commitCats { emptySet() }
-                                            catPanelQuery = ""
-                                        },
-                                        onDone = { categoryPanelOpen = false },
+                                        selected = pendingCats ?: effectiveCats,
+                                        onToggle = onPanelToggle,
+                                        onClearAll = onPanelClearAll,
+                                        onDone = onPanelDone,
                                         restTop = 0.dp
                                     )
                                 }
@@ -910,7 +931,11 @@ fun TopicDatabaseScreen(navController: NavController) {
                 // Keep the loading state through both so the intermediate
                 // empty `rows` value never flashes "No topics match".
                 val browserLoading = catalogLoading ||
-                    (catalog.isNotEmpty() && indexedTopics.isEmpty() && totalTopics > 0)
+                    (catalog.isNotEmpty() && indexedTopics.isEmpty() && totalTopics > 0) ||
+                    // v3xx — until the FIRST row build lands there is nothing
+                    // to retain, so show the preparing note instead of a
+                    // one-frame "No topics match" flash.
+                    (catalog.isNotEmpty() && !searchPassReady)
                 if (browserLoading) {
                     item("loading") {
                         Text(
@@ -1128,15 +1153,10 @@ fun TopicDatabaseScreen(navController: NavController) {
                     counts = chips.associate { it.first.id to it.second },
                     query = catPanelQuery,
                     onQueryChange = { catPanelQuery = it },
-                    selected = effectiveCats,
-                    onToggle = { id ->
-                        commitCats { current -> if (id in current) current - id else current + id }
-                    },
-                    onClearAll = {
-                        commitCats { emptySet() }
-                        catPanelQuery = ""
-                    },
-                    onDone = { categoryPanelOpen = false }
+                    selected = pendingCats ?: effectiveCats,
+                    onToggle = onPanelToggle,
+                    onClearAll = onPanelClearAll,
+                    onDone = onPanelDone
                 )
             } else if (selectedCats.isNotEmpty()) {
                 // v314 — the active-filter chips row: exactly the selected

@@ -59,22 +59,29 @@ object TopicRepository {
             if (count == 0) {
                 populateFromJson(context, dao)
                 // A fresh import writes the FULL catalog from JSON — remember
-                // this version so the upgrade-only sync below doesn't re-parse
-                // every lane again in the same release.
+                // this version + install stamp so the upgrade-only sync below
+                // doesn't re-parse every lane again in the same release.
                 AppPreferences.setTopicCatalogSyncVersion(context, BuildConfig.VERSION_CODE)
+                AppPreferences.setTopicCatalogLastUpdate(context, packageLastUpdateTime(context))
             }
 
             val importedCount = dao.getTotalCount()
             if (importedCount > 0) {
-                // Re-sync from the JSON assets only when the app was UPDATED
-                // (newly authored topics/content ship in releases), never on
+                // Re-sync from the JSON assets when the app was UPDATED (newly
+                // authored topics/content ship in releases) — OR when the APK
+                // was re-installed with data edits under the SAME versionCode
+                // (dev/CI builds), which versionCode alone would miss. Never on
                 // every process restart — the parsed catalog is immutable
-                // between versions, so per-launch syncs would re-parse every
+                // between installs, so per-launch syncs would re-parse every
                 // lane of JSON for no reason. Room already holds it.
                 val currentVersion = BuildConfig.VERSION_CODE
-                if (AppPreferences.getTopicCatalogSyncVersion(context) != currentVersion) {
+                val installedAt = packageLastUpdateTime(context)
+                if (AppPreferences.getTopicCatalogSyncVersion(context) != currentVersion ||
+                    AppPreferences.getTopicCatalogLastUpdate(context) != installedAt
+                ) {
                     syncCatalogFromJson(context, dao)
                     AppPreferences.setTopicCatalogSyncVersion(context, currentVersion)
+                    AppPreferences.setTopicCatalogLastUpdate(context, installedAt)
                 }
                 initialized = true
                 // v294 — Pre-warm TopicJsonLoader caches from Room so
@@ -120,9 +127,15 @@ object TopicRepository {
     }
 
     /**
-     * Sync the bundled catalog for every canonical category on app update.
-     * Missing topics are inserted, while existing rows only receive newly
-     * authored synopsis/chapter content so local catalog edits are preserved.
+     * Reconcile the bundled catalog for every canonical category on app
+     * update / re-install: each lane's Room rows are REPLACED to mirror the
+     * shipped JSON exactly. The old sync only inserted missing topics (and
+     * backfilled content), so topics REMOVED or RENAMED (new id) in a data
+     * release were never deleted — stale "old listings" lingered in the
+     * browser forever and post-dedupe data showed both copies. Room's
+     * topics table is a pure mirror of the bundled assets (user data lives
+     * in other tables), so a full lane replace is safe; a lane whose parse
+     * fails or comes back empty is skipped, never wiped.
      */
     private suspend fun syncCatalogFromJson(context: Context, dao: TopicDao) {
         TopicJsonLoader.install(context)
@@ -131,15 +144,11 @@ object TopicRepository {
                 .filter { it != CategoryId.WILDCARD }
                 .forEach { category ->
                     runCatching {
-                        val entities = TopicJsonLoader.reloadFromAssets(category)
-                            .map(TopicEntity::fromCurioTopic)
-                        if (entities.isNotEmpty()) {
-                            dao.insertMissing(entities)
-                            entities.forEach { entity ->
-                                if (entity.synopsis.isNotBlank() || entity.chapters.isNotBlank() || entity.tracks.isNotBlank()) {
-                                    dao.backfillContent(entity.id, entity.synopsis, entity.chapters, entity.tracks)
-                                }
-                            }
+                        val topics = TopicJsonLoader.reloadFromAssets(category)
+                        if (topics.isNotEmpty()) {
+                            val entities = topics.map(TopicEntity::fromCurioTopic)
+                            dao.deleteCategory(category.name)
+                            dao.insertAll(entities)
                         }
                     }.onFailure { error ->
                         Log.w("TopicRepository", "Failed to sync ${category.name}: ${error.message}")
@@ -246,15 +255,56 @@ object TopicRepository {
     }
 
     /**
+     * v3xx — a SMALL random sample straight from Room (indexed LIMIT
+     * queries — never maps a whole lane). Seeds the Spin deck instantly
+     * while the full pool is still loading, so the fan is never empty.
+     * WILDCARD samples a few topics from EVERY canonical lane (its pool is
+     * a merge, so no single-lane sample would represent it). Empty only
+     * when Room isn't populated yet — callers keep their loading hint.
+     */
+    suspend fun sampleTopics(context: Context, categoryIds: List<CategoryId>, perLane: Int = 14): List<CurioTopic> {
+        if (!initialized) return emptyList()
+        return runCatching {
+            val dao = CurioDatabase.getInstance(context).topicDao()
+            val out = ArrayList<CurioTopic>()
+            val seen = HashSet<String>()
+            fun add(entity: TopicEntity) {
+                val t = entity.toCurioTopic()
+                if (seen.add(t.id)) out.add(t)
+            }
+            categoryIds.forEach { id ->
+                if (id == CategoryId.WILDCARD) {
+                    CategoryId.values()
+                        .filter { it != CategoryId.WILDCARD }
+                        .forEach { lane ->
+                            dao.getRandomTopics(lane.name, 3).forEach { add(it) }
+                        }
+                } else {
+                    dao.getRandomTopics(id.name, perLane).forEach { add(it) }
+                }
+            }
+            out
+        }.getOrDefault(emptyList())
+    }
+
+    /** The APK's install/update time — changes on EVERY install regardless
+     *  of versionCode, so data edits in same-version builds still reconcile. */
+    @Suppress("DEPRECATION")
+    private fun packageLastUpdateTime(context: Context): Long = runCatching {
+        context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime
+    }.getOrDefault(0L)
+
+    /**
      * v316 — force one lane's Room copy to match the shipped JSON. The
      * version-gated sync only re-imports on app updates, so topics added to
      * the JSON between releases can be ABSENT from Room — and because
      * [TopicJsonLoader.load] serves Room rows on its fast path, the loader
      * would then never see the new topic either (the reveal's fallback was
      * silently masked by stale Room rows). Parses the bundled asset
-     * directly (bypassing the Room mask), REPLACE-upserts the whole lane
-     * back into Room, and returns the fresh pool. Null only if the asset
-     * parse itself failed.
+     * directly (bypassing the Room mask), MIRRORS the whole lane back into
+     * Room (delete + insert — rows dropped from the asset leave Room too),
+     * and returns the fresh pool. Null only if the asset parse itself
+     * failed.
      */
     suspend fun refreshLaneFromAssets(context: Context, categoryId: CategoryId): List<CurioTopic>? =
         withContext(Dispatchers.IO) {
@@ -263,6 +313,9 @@ object TopicRepository {
                 val parsed = TopicJsonLoader.reloadFromAssets(categoryId)
                 if (parsed.isNotEmpty()) {
                     val dao = CurioDatabase.getInstance(context).topicDao()
+                    // Mirror the whole lane: rows dropped from the asset leave
+                    // Room too (the old upsert-only write kept ghosts forever).
+                    dao.deleteCategory(categoryId.name)
                     dao.insertAll(parsed.map { TopicEntity.fromCurioTopic(it) })
                 }
                 parsed
