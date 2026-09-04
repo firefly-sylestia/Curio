@@ -1,45 +1,61 @@
-# Request Log — browser category Done bug + spin button size
+# Request Log — Topic Browser load + category-switch latency vs reference commit
 
 ## Status: implementation complete — committing & pushing (CI will validate)
 
 ## The request (user, paraphrased)
-After the browser-lag work, the user pointed at commit d9a376d2 as the good
-reference for loading behavior and asked me to analyse + ASK before touching
-anything, covering:
-1. Topic Browser: search "got unselected" when a category was picked, "Also
-   in" didn't show all categories, and search used to feel faster; the new
-   category picker + smart search should stay.
-2. Whether the Spin (shuffle) page on phones changed — the circular spin
-   button looked bigger than in the reference commit (tablet redesign was
-   suspected).
+The topic-browser scroll lag is gone, but compared to the referenced commit
+(d9a376d2) the initial topic LOAD takes longer, and switching categories shows
+the new topics with a delay. Fix if possible; explain the reason first. Also
+dump versionCode and versionName.
 
-## What the user decided (ask_user answers)
-- Ignore the earlier search/Also-in answers. The one real bug to fix:
-  selecting a category in the browser's category panel (or chip) and tapping
-  Done did not apply the selection.
-- Spin: compare vs current; if nothing differs, just decrease the circular
-  spin button size, including the size it takes while spinning.
+## Version (asked by the user)
+versionName = 1.1.1 (tag-driven via env; default "1.1.1" in build), versionCode = 20260921
+(app/build.gradle.kts lines 63-64).
 
-## Analysis
-- SpinScreen.kt phone path was byte-identical between d9a376d2 and HEAD
-  (same 114dp idle / 98dp landed plate); the tablet redesigns were already
-  reverted wholesale. So per the user's instruction the button was simply
-  made smaller.
-- TopicDatabaseScreen: the category panel stages picks in `pendingCats` and
-  Done ran `(pendingCats ?: selectedCats).let { commitCats { it } }` — inside
-  the trailing lambda `it` is the CURRENT committed set commitCats passes in,
-  so Done committed the old selection and silently discarded the pending
-  pick. That is exactly "select a category, tap Done, nothing happens".
+## Analysis / root causes
+1. Data: topic count grew only 4% since d9a376d2 (20,015 → 20,877) but bytes
+   grew 34% (18.5 → 24.9 MB) — albums.json 0.95 → 3.24 MB (per-track arrays +
+   synopses) and books.json ~2.6 MB (chapter arrays + synopses) landed AFTER
+   the reference commit, so every cold parse of those lanes is 3-4× heavier.
+2. Code — cold open built the pipeline up to THREE times:
+   - catalog was produced by a per-category produceState, then SWAPPED to a
+     merged-index derivation the moment loadIndex() landed → two catalog
+     identities, and indexedTopics + the row build ran for EACH source.
+   - indexedTopics' produceState seeded itself with a 20k map from the cached
+     index and then IMMEDIATELY rebuilt the same 20k objects in its block
+     (produceState always runs its block) → the seed was pure duplicate work
+     on every open, warm or cold.
+   - parseAndCache awaited a full Room deleteCategory + insertAll (entities
+     embed chapter/track JSON) on the render path of the cold open.
+3. Category-switch delay: every switch re-ran indexedTopics.associateBy (20k)
+   + per-lane filter + sort over the whole catalog on Dispatchers.Default,
+   while the OLD rows stayed on screen — so the new list appeared only after a
+   full-catalog rebuild (a visible beat on big lanes).
 
 ## Changes
-1. TopicDatabaseScreen.kt — Done now commits the pending set:
-   `commitCats { pendingCats ?: it }` (returns the pending set explicitly).
-2. SpinScreen.kt — spin button dialed down ~10%: plate 114/98 → 102/88
-   (non-compact), 102/90 → 92/82 (compact); orbit box 176/156 → 166/146;
-   casino glyph 60/52 → 54/47; shuffle glyph 72 → 64.
-3. Changelog: two FIX bullets added at the top.
+TopicDatabaseScreen.kt:
+- Catalog now derives ONCE from the loader memory cache (remember keyed on
+  visibleCategories + a fill-generation). A LaunchedEffect fills only the
+  lanes the cache is missing (deduped with the app-start prewarm via the
+  loader's shared in-flight parse) and bumps the generation once. No
+  index-source swap, no second identity. catalogFilled guards the loading
+  note so a lane that fails to parse can't hold "Preparing topics…" forever
+  (v49 skip semantics preserved).
+- indexedTopics builds its 20k entries ONCE per catalog identity (empty seed);
+  the old duplicate seed build and the useIndex source branches are gone.
+- Browse-mode row build uses the pre-grouped topicsByCat lists instead of a
+  fresh associateBy + filter + sort over all topics per switch — a lane
+  switch now walks only the selected lanes' prebuilt rows. The id map moved
+  into the search branch (only paid when a query settles).
+- Removed the now-unused CatalogState data class + TopicIndexEntry import.
 
-## Open / follow-up
-- "Also in" and "search unselected" concerns were explicitly deprioritized by
-  the user; left untouched. Smart search + new picker stay.
-- CI (GitHub Actions) validates compilation — local env forbids Gradle.
+TopicJsonLoader.kt:
+- The Room mirror (deleteCategory + insertAll) after an asset parse now runs
+  fire-and-forget on the loader scope instead of blocking parseAndCache, so a
+  cold browser open renders rows the moment the JSON is parsed; Room catches
+  up in the background (reloadFromAssets callers still get awaited writes).
+
+## Validation
+Structural checks (brace/paren balance) clean; CI compiles on push (local env
+forbids Gradle). Behavioral spot-checks on-device recommended next build:
+cold-open load time, lane switch latency, search toggle with WILDCARD.
