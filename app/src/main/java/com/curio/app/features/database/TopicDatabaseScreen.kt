@@ -225,8 +225,15 @@ fun TopicDatabaseScreen(navController: NavController) {
         pendingCats = emptySet()
         catPanelQuery = ""
     }
+    // v342 — DONE COMMITS THE PENDING SET. The old line ran
+    // `(pendingCats ?: selectedCats).let { commitCats { it } }` — inside that
+    // trailing lambda `it` is the CURRENT committed selection (the argument
+    // commitCats passes to update), not the pending set, so Done was an
+    // identity commit: ticking categories in the panel then tapping Done
+    // silently discarded the pick and the filter never changed. The update
+    // now explicitly returns the pending set when one exists.
     val onPanelDone = {
-        (pendingCats ?: selectedCats).let { commitCats { it } }
+        commitCats { pendingCats ?: it }
         categoryPanelOpen = false
     }
     // The category UI visible under the hero: the open panel, or the compact
