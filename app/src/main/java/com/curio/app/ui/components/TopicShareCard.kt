@@ -5058,10 +5058,55 @@ private fun ArrangeableCard(
                         )
                     }
 
-                // v341 — PicsArt-style alignment guides: while a selected box
-                // is dragged, its edges and centre magnet-snap to the card's
-                // own edges and centre lines (6 dp reach); the overlay draws
-                // the active guide lines full-card until the grip lifts.
+                // v341/v342 — PicsArt-style alignment guides: while a selected
+                // box is dragged, its edges and centre magnet-snap to the
+                // card's own edges + centre lines AND to the other boxes'
+                // edges and centres (tight snap reach, wider faint hint band);
+                // the overlay draws the guide lines full-card until lift.
+                //
+                // v342 — every selectable element's CURRENT card-local bounds,
+                // computed ONCE here so a drag can align to the card frame AND
+                // to the other boxes (see alignOthers / hCands / vCands below).
+                // A zero rect = that element is absent on this style, which the
+                // helpers skip.
+                val rTitle = if (!quoteMode) local(titleRect.value) else androidx.compose.ui.geometry.Rect.Zero
+                val rFact = local(factRect.value)
+                val rMeta = local(metaRect.value)
+                val rBadge = local(badgeRect.value)
+                val rCover = local(coverRect.value)
+                val rAll = listOf(rTitle, rFact, rMeta, rBadge, rCover)
+
+                // v342 — the OTHER boxes a live drag can magnet-align to
+                // (excluding the dragged box itself by instance identity).
+                fun alignOthers(dragged: androidx.compose.ui.geometry.Rect): List<androidx.compose.ui.geometry.Rect> =
+                    rAll.filter { it.width > 0f && it.height > 0f && it !== dragged }
+
+                // Horizontal candidates: (move offset that lands the dragged
+                // box, card-local guide line) for every other box's left /
+                // centre / right edge.
+                fun hCands(
+                    others: List<androidx.compose.ui.geometry.Rect>,
+                    base: Float, w: Float
+                ): List<Pair<Float, Float>> = others.flatMap { r ->
+                    listOf(
+                        r.left - base to r.left,
+                        r.centerX - base - w / 2f to r.centerX,
+                        r.right - base - w to r.right
+                    )
+                }
+
+                // Vertical twin of hCands: top / centre / bottom edges.
+                fun vCands(
+                    others: List<androidx.compose.ui.geometry.Rect>,
+                    base: Float, h: Float
+                ): List<Pair<Float, Float>> = others.flatMap { r ->
+                    listOf(
+                        r.top - base to r.top,
+                        r.centerY - base - h / 2f to r.centerY,
+                        r.bottom - base - h to r.bottom
+                    )
+                }
+
                 var dragGuides by remember { mutableStateOf(DragGuides()) }
                 var dragActive by remember { mutableStateOf(false) }
 
@@ -5094,7 +5139,7 @@ private fun ArrangeableCard(
 
                 // TITLE — tap selects; grip only when selected.
                 if (!quoteMode) {
-                    val t = local(titleRect.value)
+                    val t = rTitle
                     val tOk = t.width > 0f && t.height > 0f
                     if (tOk) {
                         val isSel = sel == ShareCardResizeTarget.TITLE
@@ -5126,10 +5171,15 @@ private fun ArrangeableCard(
                                     // the box outside the card.
                                     val bx = t.left - move.titleDx
                                     val by = t.top - move.titleDy
-                                    val (nx, nxLine) = magnetAxis(bx, t.width, cw, -bx, cw - bx - t.width, (move.titleDx + dx).coerceIn(-bx, cw - bx - t.width), 6f)
-                                    val (ny, nyLine) = magnetAxis(by, t.height, ch, -by, ch - by - t.height, (move.titleDy + dy).coerceIn(-by, ch - by - t.height), 6f)
-                                    dragGuides = DragGuides(vx = nxLine.takeIf { !it.isNaN() }, hy = nyLine.takeIf { !it.isNaN() })
-                                    onMove(move.copy(titleDx = nx, titleDy = ny))
+                                    // v342 - the box also aligns to the OTHER
+                                    // boxes (edges + centre) via alignOthers /
+                                    // hCands / vCands; magnetAxis picks the
+                                    // nearest candidate inside this clamp.
+                                    val othersT = alignOthers(t)
+                                    val xs = magnetAxis(bx, t.width, cw, -bx, cw - bx - t.width, (move.titleDx + dx).coerceIn(-bx, cw - bx - t.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersT, bx, t.width))
+                                    val ys = magnetAxis(by, t.height, ch, -by, ch - by - t.height, (move.titleDy + dy).coerceIn(-by, ch - by - t.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersT, by, t.height))
+                                    dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
+                                    onMove(move.copy(titleDx = xs.offset, titleDy = ys.offset))
                                 },
                                 onDragStart = { dragActive = true },
                                 onDragEnd = { dragActive = false; dragGuides = DragGuides() }
@@ -5143,7 +5193,7 @@ private fun ArrangeableCard(
                 // caret sits on the visible glyphs of every font). Always
                 // present (so tapping the fact focuses/selects it); its border
                 // only appears once selected.
-                val f = local(factRect.value)
+                val f = rFact
                 val fOk = f.width > 0f && f.height > 0f
                 if (fOk) {
                     val isSel = sel == ShareCardResizeTarget.FACT
@@ -5213,10 +5263,12 @@ private fun ArrangeableCard(
                                 // v341 — magnet snap (see the title handle).
                                 val bx = f.left - move.factDx
                                 val by = f.top - move.factDy
-                                val (nx, nxLine) = magnetAxis(bx, f.width, cw, -bx, cw - bx - f.width, (move.factDx + dx).coerceIn(-bx, cw - bx - f.width), 6f)
-                                val (ny, nyLine) = magnetAxis(by, f.height, ch, -by, ch - by - f.height, (move.factDy + dy).coerceIn(-by, ch - by - f.height), 6f)
-                                dragGuides = DragGuides(vx = nxLine.takeIf { !it.isNaN() }, hy = nyLine.takeIf { !it.isNaN() })
-                                onMove(move.copy(factDx = nx, factDy = ny))
+                                // v342 - cross-element alignment (see title).
+                                val othersF = alignOthers(f)
+                                val xs = magnetAxis(bx, f.width, cw, -bx, cw - bx - f.width, (move.factDx + dx).coerceIn(-bx, cw - bx - f.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersF, bx, f.width))
+                                val ys = magnetAxis(by, f.height, ch, -by, ch - by - f.height, (move.factDy + dy).coerceIn(-by, ch - by - f.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersF, by, f.height))
+                                dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
+                                onMove(move.copy(factDx = xs.offset, factDy = ys.offset))
                             },
                             onDragStart = { dragActive = true },
                             onDragEnd = { dragActive = false; dragGuides = DragGuides() }
@@ -5226,7 +5278,7 @@ private fun ArrangeableCard(
 
                 // AUTHOR / YEAR info rows — tap the row to select, grip only
                 // when selected. The row's box spans its reported bounds.
-                val m = local(metaRect.value)
+                val m = rMeta
                 val mPad = 18f
                 if (m.width > 0f && m.height > 0f) {
                     val isSel = sel == ShareCardResizeTarget.META
@@ -5258,10 +5310,12 @@ private fun ArrangeableCard(
                                 val by = m.top - move.metaDy
                                 val maxX = (cw - bx - m.width - mPad).coerceAtLeast(-bx + mPad)
                                 val maxY = (ch - by - m.height - mPad).coerceAtLeast(-by + mPad)
-                                val (nx, nxLine) = magnetAxis(bx, m.width, cw, -bx + mPad, maxX, (move.metaDx + dx).coerceIn(-bx + mPad, maxX), 6f)
-                                val (ny, nyLine) = magnetAxis(by, m.height, ch, -by + mPad, maxY, (move.metaDy + dy).coerceIn(-by + mPad, maxY), 6f)
-                                dragGuides = DragGuides(vx = nxLine.takeIf { !it.isNaN() }, hy = nyLine.takeIf { !it.isNaN() })
-                                onMove(move.copy(metaDx = nx, metaDy = ny))
+                                // v342 - cross-element alignment (see title).
+                                val othersM = alignOthers(m)
+                                val xs = magnetAxis(bx, m.width, cw, -bx + mPad, maxX, (move.metaDx + dx).coerceIn(-bx + mPad, maxX), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersM, bx, m.width))
+                                val ys = magnetAxis(by, m.height, ch, -by + mPad, maxY, (move.metaDy + dy).coerceIn(-by + mPad, maxY), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersM, by, m.height))
+                                dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
+                                onMove(move.copy(metaDx = xs.offset, metaDy = ys.offset))
                             },
                             onDragStart = { dragActive = true },
                             onDragEnd = { dragActive = false; dragGuides = DragGuides() }
@@ -5273,7 +5327,7 @@ private fun ArrangeableCard(
                 // Anchored to the chip's REPORTED bounds (each style reports
                 // its real category pill), so the grip sits on the chip
                 // wherever it is — never a guessed corner.
-                val b = local(badgeRect.value)
+                val b = rBadge
                 val bOk = b.width > 0f && b.height > 0f
                 if (bOk) {
                     val isSel = sel == ShareCardResizeTarget.BADGE
@@ -5297,10 +5351,12 @@ private fun ArrangeableCard(
                                 // v341 — magnet snap (see the title handle).
                                 val bx = b.left - move.badgeDx
                                 val by = b.top - move.badgeDy
-                                val (nx, nxLine) = magnetAxis(bx, b.width, cw, -bx - 2f, cw - bx - b.width + 2f, (move.badgeDx + dx).coerceIn(-bx - 2f, cw - bx - b.width + 2f), 6f)
-                                val (ny, nyLine) = magnetAxis(by, b.height, ch, -by - 2f, ch - by - b.height + 2f, (move.badgeDy + dy).coerceIn(-by - 2f, ch - by - b.height + 2f), 6f)
-                                dragGuides = DragGuides(vx = nxLine.takeIf { !it.isNaN() }, hy = nyLine.takeIf { !it.isNaN() })
-                                onMove(move.copy(badgeDx = nx, badgeDy = ny))
+                                // v342 - cross-element alignment (see title).
+                                val othersB = alignOthers(b)
+                                val xs = magnetAxis(bx, b.width, cw, -bx - 2f, cw - bx - b.width + 2f, (move.badgeDx + dx).coerceIn(-bx - 2f, cw - bx - b.width + 2f), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersB, bx, b.width))
+                                val ys = magnetAxis(by, b.height, ch, -by - 2f, ch - by - b.height + 2f, (move.badgeDy + dy).coerceIn(-by - 2f, ch - by - b.height + 2f), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersB, by, b.height))
+                                dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
+                                onMove(move.copy(badgeDx = xs.offset, badgeDy = ys.offset))
                             },
                             onDragStart = { dragActive = true },
                             onDragEnd = { dragActive = false; dragGuides = DragGuides() }
@@ -5312,7 +5368,7 @@ private fun ArrangeableCard(
                 // selected. The jacket reports its own bounds (each style's
                 // badge overlay), so the chrome sits on the real cover even
                 // after it has been dragged around the card.
-                val cv = local(coverRect.value)
+                val cv = rCover
                 val cvOk = cv.width > 0f && cv.height > 0f
                 if (cvOk) {
                     val isSel = sel == ShareCardResizeTarget.COVER
@@ -5336,10 +5392,12 @@ private fun ArrangeableCard(
                                 // v341 — magnet snap (see the title handle).
                                 val bx = cv.left - move.coverDx
                                 val by = cv.top - move.coverDy
-                                val (nx, nxLine) = magnetAxis(bx, cv.width, cw, -bx, cw - bx - cv.width, (move.coverDx + dx).coerceIn(-bx, cw - bx - cv.width), 6f)
-                                val (ny, nyLine) = magnetAxis(by, cv.height, ch, -by, ch - by - cv.height, (move.coverDy + dy).coerceIn(-by, ch - by - cv.height), 6f)
-                                dragGuides = DragGuides(vx = nxLine.takeIf { !it.isNaN() }, hy = nyLine.takeIf { !it.isNaN() })
-                                onMove(move.copy(coverDx = nx, coverDy = ny))
+                                // v342 - cross-element alignment (see title).
+                                val othersC = alignOthers(cv)
+                                val xs = magnetAxis(bx, cv.width, cw, -bx, cw - bx - cv.width, (move.coverDx + dx).coerceIn(-bx, cw - bx - cv.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersC, bx, cv.width))
+                                val ys = magnetAxis(by, cv.height, ch, -by, ch - by - cv.height, (move.coverDy + dy).coerceIn(-by, ch - by - cv.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersC, by, cv.height))
+                                dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
+                                onMove(move.copy(coverDx = xs.offset, coverDy = ys.offset))
                             },
                             onDragStart = { dragActive = true },
                             onDragEnd = { dragActive = false; dragGuides = DragGuides() }
@@ -5347,25 +5405,30 @@ private fun ArrangeableCard(
                     }
                 }
 
-                // v341 — PicsArt-style alignment guides. Always composed but
-                // only draws while a box drag is live: a FAINT centre
+                // v341/v342 — PicsArt-style alignment guides. Always composed
+                // but only draws while a box drag is live: a FAINT centre
                 // crosshair appears the moment any grip is pulled (centering
-                // hint), and when the drag magnet-snaps to the card centre or
-                // an edge, a bright full-card guide line marks the snapped
-                // axis. Reads happen inside the draw scope so per-frame drag
-                // updates only redraw this canvas, never recompose the
-                // overlay. Halo + bright core keeps the lines visible on
-                // light and dark cards alike.
+                // hint); near an alignment line the box first shows a faint
+                // full-card HINT, and when the drag magnet-snaps to the card
+                // centre/edge or to another box's edge, a bright guide line
+                // marks the snapped axis. Reads happen inside the draw scope
+                // so per-frame drag updates only redraw this canvas, never
+                // recompose the overlay. Halo + bright core keeps the lines
+                // visible on light and dark cards alike.
                 Canvas(Modifier.fillMaxSize()) {
-                    if (dragActive || dragGuides.vx != null || dragGuides.hy != null) {
+                    if (dragActive || dragGuides.vx != null || dragGuides.hy != null ||
+                        dragGuides.hintVx != null || dragGuides.hintHy != null
+                    ) {
                         val gd = editDensity
-                        fun guide(vertical: Boolean, at: Float) {
+                        // darkAlpha / lightAlpha / lightW let HINTS draw thin
+                        // and faint while SNAPPED guides keep the bright halo.
+                        fun guide(vertical: Boolean, at: Float, darkAlpha: Float, lightAlpha: Float, lightW: Float) {
                             val px = if (vertical) with(gd) { at.dp.toPx() } else 0f
                             val py = if (vertical) 0f else with(gd) { at.dp.toPx() }
                             val ex = if (vertical) px else size.width
                             val ey = if (vertical) size.height else py
-                            drawLine(Color.Black.copy(alpha = 0.30f), Offset(px, py), Offset(ex, ey), strokeWidth = with(gd) { 3.dp.toPx() })
-                            drawLine(Color.White.copy(alpha = 0.95f), Offset(px, py), Offset(ex, ey), strokeWidth = with(gd) { 1.dp.toPx() })
+                            drawLine(Color.Black.copy(alpha = darkAlpha), Offset(px, py), Offset(ex, ey), strokeWidth = with(gd) { 3.dp.toPx() })
+                            drawLine(Color.White.copy(alpha = lightAlpha), Offset(px, py), Offset(ex, ey), strokeWidth = with(gd) { lightW.dp.toPx() })
                         }
                         if (dragActive) {
                             // Centering hint: faint crosshair while any box moves.
@@ -5374,8 +5437,12 @@ private fun ArrangeableCard(
                             drawLine(Color.White.copy(alpha = 0.28f), Offset(cx, 0f), Offset(cx, size.height), strokeWidth = with(gd) { 0.7.dp.toPx() })
                             drawLine(Color.White.copy(alpha = 0.28f), Offset(0f, cy), Offset(size.width, cy), strokeWidth = with(gd) { 0.7.dp.toPx() })
                         }
-                        dragGuides.vx?.let { guide(true, it) }
-                        dragGuides.hy?.let { guide(false, it) }
+                        // Faint alignment hints first (near a line but not
+                        // snapped), then the bright snapped guides on top.
+                        dragGuides.hintVx?.let { guide(true, it, 0.15f, 0.32f, 0.6f) }
+                        dragGuides.hintHy?.let { guide(false, it, 0.15f, 0.32f, 0.6f) }
+                        dragGuides.vx?.let { guide(true, it, 0.30f, 0.95f, 1f) }
+                        dragGuides.hy?.let { guide(false, it, 0.30f, 0.95f, 1f) }
                     }
                 }
             }
@@ -5536,6 +5603,10 @@ fun TopicShareSheet(
     var showChapterProgress by remember { mutableStateOf(false) }
     var customText by rememberSaveable { mutableStateOf("") }
     var polaroidCaption by rememberSaveable { mutableStateOf("") }
+    // v342 — which chapter the chapter-review chip tags. Declared with the
+    // other sheet state so the restore effect below can seed it (the review
+    // text lives in [customText] and persists the same way).
+    var reviewChapterNumber by remember { mutableIntStateOf(0) }
     // v229d — seeded from [initialStyle] / [initialClassicSignature] so the
     // Share Hub can open the sheet on the picked design.
     var styleIdx by remember { mutableIntStateOf(initialStyle) }
@@ -5612,6 +5683,19 @@ fun TopicShareSheet(
             bodyScale = saved.optDouble("bodyScale", 1.0).toFloat()
             editedTitle = saved.optString("editedTitle", null)?.takeIf { it.isNotBlank() }
             editedFact = saved.optString("editedFact", null)?.takeIf { it.isNotBlank() }
+            // v342 — restore the picked CONTENT and its live text too (custom
+            // fact, chapter review + its chip, the reading-progress toggle,
+            // collage caption), so Save/Share keeps them exactly like the
+            // size/position edits instead of resetting to the quick fact.
+            // The restored id is re-validated against what this topic offers
+            // at render time (see the activeId derivation below), so a stale
+            // save can never render a phantom content.
+            saved.optString("selectedId", null)?.takeIf { it.isNotBlank() }
+                ?.let { selectedId = it }
+            customText = saved.optString("customText", "")
+            polaroidCaption = saved.optString("polaroidCaption", "")
+            showChapterProgress = saved.optBoolean("showChapterProgress", false)
+            reviewChapterNumber = saved.optInt("reviewChapterNumber", 0)
         }
     }
     val sharer = AppPreferences.getDisplayName(context).ifBlank { "" }
@@ -5731,9 +5815,10 @@ fun TopicShareSheet(
     val chaptersRead = if (hasBookChapters)
         (AppPreferences.bookReadingProgressState[topicName] ?: 0).coerceIn(0, bookChapters.size)
     else 0
-    // Chapter review state: which chapter the review is about (defaults to
-    // the current reading spot, or chapter 1).
-    var reviewChapterNumber by remember { mutableIntStateOf(0) }
+    // v342 — [reviewChapterNumber] now lives with the other sheet state at
+    // the top of this function so the saved-edit restore can seed it; here it
+    // only feeds the review chip tag (defaults to the current reading spot,
+    // or chapter 1).
     val effectiveReviewChapter = when {
         !hasBookChapters -> null
         reviewChapterNumber > 0 && bookChapters.any { it.number == reviewChapterNumber } -> reviewChapterNumber
@@ -5755,7 +5840,10 @@ fun TopicShareSheet(
         else listOf(quick, noFact) + savedSources + listOf(custom) +
             if (hasBookChapters) listOf(progressContent, reviewContent) else emptyList()
     val defaultId = if (isQuotes) quote.id else savedSources.firstOrNull { it.id == "quote" }?.id ?: quick.id
-    val activeId = selectedId ?: defaultId
+    // v342 — a restored [selectedId] is only honoured when it names one of
+    // this topic's current contents (the same guard that keeps a stale save
+    // from rendering a phantom pick); anything else falls back to the default.
+    val activeId = if (selectedId != null && available.any { it.id == selectedId }) selectedId!! else defaultId
     // v334 — the card's fact text is ONE source of truth per content type:
     // custom facts + chapter reviews always render the LIVE customText (empty
     // stays empty — no placeholder text bleeding onto the card), the default
@@ -5868,6 +5956,15 @@ fun TopicShareSheet(
         edit.put("bodyScale", bodyScale)
         if (editedTitle != null) edit.put("editedTitle", editedTitle)
         if (editedFact != null) edit.put("editedFact", editedFact)
+        // v342 — the picked content + its live text persist exactly like the
+        // moves: which content is shown, the custom-fact / chapter-review
+        // text, the review's chapter chip, the reading-progress toggle and
+        // the collage caption all come back when the sheet reopens.
+        if (selectedId != null) edit.put("selectedId", selectedId)
+        edit.put("customText", customText)
+        edit.put("polaroidCaption", polaroidCaption)
+        edit.put("showChapterProgress", showChapterProgress)
+        edit.put("reviewChapterNumber", reviewChapterNumber)
         AppPreferences.saveShareCardEdits(context, topicName, edit)
     }
 
@@ -6842,38 +6939,65 @@ private fun BoxScope.MoveHandle(
     }
 }
 
-/** v341 — one-axis magnet helper behind the PicsArt-style alignment guides.
+// v342 — snap (stick) vs hint (preview) reach for the alignment guides, in
+// card-local dp floats. The snap reach is HALF the old 6 dp so boxes only
+// grab a guide when the user is actually aiming at it; the hint band keeps
+// the line visible slightly earlier so alignment is still discoverable.
+private const val SNAP_REACH = 3f
+private const val HINT_REACH = 8f
+
+/** v342 — one-axis magnet helper behind the PicsArt-style alignment guides.
  *  Given the element's BASE (zero-offset) edge [base], its [size], the card's
- *  [cardSize] and the element's own clamp range [min]..[max], it snaps the
- *  dragged offset to the nearest of: the card's left/top edge, its centre
- *  line, or its right/bottom edge — but only when the candidate is inside the
- *  element's clamp range AND within [snap] dp of the current offset. Returns
- *  the (possibly snapped) offset and the card-local line it now sits on
- *  (Float.NaN = no snap on this axis). */
+ *  [cardSize], the element's own clamp range [min]..[max] and the drag
+ *  position [cur], it considers the card's left/top edge, centre line and
+ *  right/bottom edge PLUS every extra (offset, line) candidate ([extra] — the
+ *  other boxes' edges/centres from hCands/vCands). A candidate only counts
+ *  when it sits inside the clamp range. The NEAREST candidate within [snap]
+ *  dp snaps the offset (bright line); a candidate inside the wider [hint]
+ *  band does NOT grab the box, it only reports a faint guide line so the
+ *  user sees the alignment before it engages. */
 private fun magnetAxis(
     base: Float, size: Float, cardSize: Float,
-    min: Float, max: Float, cur: Float, snap: Float
-): Pair<Float, Float> {
-    var best = cur
-    var bestLine = Float.NaN
-    var bestDist = snap
+    min: Float, max: Float, cur: Float,
+    snap: Float, hint: Float,
+    extra: List<Pair<Float, Float>> = emptyList()
+): AxisSnap {
+    var best: Pair<Float, Float>? = null
+    var bestDist = hint
     // (offset that lands the element on the line, card-local line position)
     val candidates = listOf(
         -base to 0f,
         cardSize / 2f - base - size / 2f to cardSize / 2f,
         cardSize - base - size to cardSize
-    )
+    ) + extra
     for ((cand, line) in candidates) {
         if (cand < min - 0.01f || cand > max + 0.01f) continue
         val d = kotlin.math.abs(cand - cur)
-        if (d <= bestDist) { bestDist = d; best = cand; bestLine = line }
+        if (d <= bestDist) { bestDist = d; best = cand to line }
     }
-    return best to bestLine
+    val b = best ?: return AxisSnap(cur)
+    return AxisSnap(
+        offset = if (bestDist <= snap) b.first else cur,
+        snapLine = if (bestDist <= snap) b.second else null,
+        hintLine = if (bestDist > snap) b.second else null
+    )
 }
 
-/** v341 — the guide lines a live drag currently sits on, as card-local dp
- *  floats (null = not snapped on that axis). */
-private class DragGuides(val vx: Float? = null, val hy: Float? = null)
+/** v342 — one-axis magnet result: the offset to apply (snapped only when a
+ *  guide engaged), the bright snapped guide line (card-local dp, null when
+ *  there is none) and the faint hint line (same units, null when none). */
+private class AxisSnap(val offset: Float, val snapLine: Float? = null, val hintLine: Float? = null)
+
+/** v342 — the guide lines a live drag currently sits on, as card-local dp
+ *  floats (null = not snapped on that axis). [vx]/[hy] are the bright lines
+ *  the box snapped to; [hintVx]/[hintHy] are faint near-miss hints that only
+ *  preview the alignment without grabbing the box. */
+private class DragGuides(
+    val vx: Float? = null,
+    val hy: Float? = null,
+    val hintVx: Float? = null,
+    val hintHy: Float? = null
+)
 
 /**
  * v323 — one tone swatch in the editor's Tone tool: a circle in the tone's

@@ -1,51 +1,52 @@
-# Request Log — Web-series info (like books/albums) + album-style book sheet
+# Request Log — Share-card magnet feel, cross-element guides, content persistence
 
 ## Status: implementation complete — committing & pushing (CI will validate)
 
 ## The request (user, paraphrased)
-Start adding info for WEB SERIES the way books and albums were enriched: a
-real synopsis plus episode data. Also adapt the book notes bottom sheet to the
-album layout: one scrolling sheet with the synopsis in a collapse at the top
-and the chapters below it as their own accordion rows, with a like (heart) and
-read action.
+1. The magnetic snap in the share-card editor is too strong — soften it.
+2. Show alignment guides against OTHER elements too (not just the card frame).
+3. Custom-fact editing and selecting chapter progress don't survive sharing the
+   card: reopening it keeps only the size/position changes. Make content picks
+   and the live text persist too, "for better persistent".
 
-## Clarifications from the user
-- Episode data = synopsis + FULL real episode lists (not a small sample), in
-  batches researched with the web.
-- Each episode carries: number + title + a short summary.
-- Sheet layout: album-style ONE sheet (no Synopsis | Chapters tabs).
-- Actions: a book-level favorite heart (like the album hearts) + keep the
-  per-chapter read toggles with progress.
+## What changed (all in app/src/main/java/com/curio/app/ui/components/TopicShareCard.kt)
 
-## What shipped
-1. Data model + plumbing (committed `a0cddbb2`):
-   - `SeriesEpisode(season, number, title, summary)` + `CurioTopic.episodes`
-     parsed from JSON (`episodes` array) in TopicJsonLoader; null-safe,
-     hydrated only for SERIES topics.
-   - Room: `episodes` TEXT columns on `topics` + `cached_topics`,
-     DAO `updateContent` includes it, v14 migration adds both columns, and
-     the repository hydration maps rows back to `SeriesEpisode` lists.
-2. First web-researched series batch (`a0cddbb2`): Chernobyl (5), Band of
-   Brothers (10), The Queen's Gambit (7), Watchmen (9), Fleabag (12) = 43
-   episodes with real one-line summaries from Wikipedia; human tone, no em
-   dashes. Script: `tools/enrich_series_batch1.py` (kept for future batches).
-3. Book notes sheet redesigned album-style (this commit):
-   - `BookNotesSheet` is now ONE `ModalBottomSheet`: header (cover, title,
-     byline, fetched rating, favorite heart + close), pinned reading-progress
-     rail, then a single LazyColumn with `BookSynopsisAccordion`
-     (About-this-book, Read/Hide) on top and every chapter as an expandable
-     row (pages, notes, Mark-read/Undo pill) below.
-   - The old `mode` seed still decides what opens pre-expanded (synopsis card
-     → synopsis open; chapter chip → that chapter open + scrolled to).
-   - New `AppPreferences` book-favorites store (heart per book title,
-     reactive state, mirrors album hearts) + header heart toggle; chapter
-     read semantics unchanged (chapter N read when N <= progress).
+### 1 + 2. Magnet + cross-element alignment guides (v342)
+- Every drag handle previously ran one-axis `magnetAxis` with a fixed 6 dp
+  reach against the card's left/centre/right (top/centre/bottom) lines only.
+- `magnetAxis` now takes a `snap` and a `hint` reach plus an `extra` candidate
+  list, and returns an `AxisSnap(offset, snapLine, hintLine)`:
+  - Snap reach halved 6 -> 3 dp (SNAP_REACH): the box only STICKS when the
+    user is actually aiming at a guide (fixes "too strong").
+  - Hint band 8 dp (HINT_REACH): a box near a line but past the snap zone
+    does NOT grab; it only reports a faint guide line (alignment preview).
+- ArrangeableCard computes every selectable element's card-local bounds ONCE
+  (`rTitle/rFact/rMeta/rBadge/rCover`, zero = absent) and `alignOthers` /
+  `hCands` / `vCands` build the other boxes' left/centre/right (and
+  top/centre/bottom) candidates for the dragged box; each of the 5 handles
+  (title, fact, meta, badge, cover) feeds those into `magnetAxis`.
+- `DragGuides` gained `hintVx/hintHy`; the overlay Canvas draws faint thin
+  hint lines under the bright snapped guides. Centring crosshair unchanged.
+- Meta keeps its padded clamp; all candidates outside an element's own clamp
+  range are ignored, so snapping never pushes a box out of the card.
 
-## Not yet done (next batches / later work)
-- More series batches with web research (199 series total in series.json).
-- Series reveal UI (episode chips + episode-list sheet mirroring album/book
-  track-list sheet) once more shows are enriched.
-- Show/season favorites mirroring album hearts if wanted.
+### 3. Persistence of the picked content + live text (v342)
+- `persistEdits()` now also writes: `selectedId`, `customText`,
+  `polaroidCaption`, `showChapterProgress`, `reviewChapterNumber`.
+- The saved-edit restore effect reads them back; `reviewChapterNumber` was
+  moved up to the sheet-state block so the restore can seed it.
+- The restored `selectedId` is re-validated: `activeId` only honours it when
+  the id names one of the topic's current contents, else the default content
+  is used (a stale save can never render a phantom pick).
+- Sizes/moves/bodyScale/editedTitle/editedFact keep their old behaviour;
+  clearing on leaving the Topic Reveal screen is unchanged.
+
+## Verification
+- Brace/paren deltas balanced (+0/+0 braces; +43/+43 parens — the one-paren
+  residual imbalance in the file predates these edits, confirmed against
+  HEAD). No leftover `nxLine`/`nyLine` or old 6f call sites; 10 call sites
+  updated + 1 definition.
+- CI (GitHub Actions) validates the compile; this environment forbids Gradle.
 
 ## Version note
 versionName 1.1.1, versionCode 20260921.
