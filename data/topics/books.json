@@ -37155,61 +37155,6 @@
     "tier": 2
   },
   {
-    "id": "book-the-adventures-of-huckleberry-finn",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "The Adventures of Huckleberry Finn",
-    "teaser": "Mark Twain's 1884 novel sends Huck Finn down the Mississippi on a raft with Jim, a runaway slave, after Huck escapes his abusive father. Their journey is a picaresque adventure and a moral education, as Huck decides to help Jim even at the cost of his own salvation, in what Ernest Hemingway called the source of all modern American literature.",
-    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780486280615-L.jpg",
-    "byline": "Mark Twain",
-    "synopsis": "Adventures of Huckleberry Finn, published in 1884, follows Huck Finn as he escapes his abusive father and travels down the Mississippi River on a raft with Jim, a runaway slave. The novel is a picaresque adventure that satirizes Southern society, racism, and religious hypocrisy. Huck's moral development is the novel's central theme: he must decide whether to follow society's rules or his own conscience.",
-    "chapters": [
-      {
-        "number": 1,
-        "title": "The Escape",
-        "pageStart": 1,
-        "pageEnd": 40,
-        "summary": "Huck fakes his death and meets Jim."
-      },
-      {
-        "number": 2,
-        "title": "The River",
-        "pageStart": 41,
-        "pageEnd": 100,
-        "summary": "Huck and Jim travel down the Mississippi."
-      },
-      {
-        "number": 3,
-        "title": "The Duke and the King",
-        "pageStart": 101,
-        "pageEnd": 160,
-        "summary": "Two con men join the raft and cause chaos."
-      },
-      {
-        "number": 4,
-        "title": "The End",
-        "pageStart": 161,
-        "pageEnd": 200,
-        "summary": "Huck decides to help Jim escape to freedom."
-      }
-    ],
-    "pageCount": 200,
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Adventures of Huckleberry Finn",
-      "durationMinutes": 40,
-      "instruction": "Read the opening of The Adventures of Huckleberry Finn."
-    },
-    "tags": [
-      "american",
-      "classic",
-      "adventure",
-      "satire",
-      "mississippi"
-    ],
-    "tier": 2
-  },
-  {
     "id": "book-the-adventures-of-tom-sawyer",
     "categoryId": "BOOKS",
     "subtype": "Novel",
@@ -40739,53 +40684,6 @@
         "pageStart": 251,
         "pageEnd": 336,
         "summary": "Lucrezia's final gambit and her fight for freedom"
-      }
-    ]
-  },
-  {
-    "id": "book-the-vanishing-brit",
-    "categoryId": "BOOKS",
-    "subtype": "Novel",
-    "name": "The Vanishing Half",
-    "teaser": "Brit Bennett's 2020 novel follows identical twin sisters Stella and Desiree Vignes, who run away from their small Louisiana town of Mallard in 1954 and then choose opposite paths: Desiree returns home with a dark-skinned daughter, while light-skinned Stella passes as white, hiding her past even from her husband.",
-    "imageUrl": "https://covers.openlibrary.org/b/isbn/9780525536291-L.jpg",
-    "byline": "Brit Bennett",
-    "exploreAction": {
-      "verb": "Read",
-      "targetName": "The Vanishing Brit",
-      "durationMinutes": 45,
-      "instruction": "Read the opening of The Vanishing Brit."
-    },
-    "tags": [
-      "american",
-      "african american",
-      "race",
-      "identity",
-      "twins"
-    ],
-    "tier": 2,
-    "synopsis": "Brit Bennett's 2020 novel follows identical twin sisters Stella and Desiree Vignes, who grow up in Mallard, a small Louisiana town of light-skinned Black residents. In 1954 the teenage twins run away to New Orleans, and there their paths split for good. Desiree eventually returns to Mallard with a daughter whose dark skin draws stares, while Stella seizes the chance to pass as white, marrying a wealthy man who knows nothing of her origins. The novel traces the consequences over decades, as Desiree's daughter Jude and Stella's daughter Kennedy grow up in separate worlds, one Black and one white, and the sisters' choices echo through the next generation. Spanning the civil rights era to the 1990s, The Vanishing Half is a sweeping story about identity, race, and the stories we tell about ourselves. It was a New York Times bestseller and was named a best book of the year by numerous publications.",
-    "chapters": [
-      {
-        "number": 1,
-        "title": "The Island",
-        "pageStart": 1,
-        "pageEnd": 60,
-        "summary": "The family arrives, the island's beauty, and the first signs of trouble"
-      },
-      {
-        "number": 2,
-        "title": "The Tension",
-        "pageStart": 61,
-        "pageEnd": 140,
-        "summary": "The family's conflicts deepen, the island's isolation becomes oppressive"
-      },
-      {
-        "number": 3,
-        "title": "The Reckoning",
-        "pageStart": 141,
-        "pageEnd": 224,
-        "summary": "The truth about the island, the family's decision, and the meaning of home"
       }
     ]
   },
@@ -50038,8 +49936,8 @@
     "exploreAction": {
       "verb": "Read",
       "targetName": "Brave New World",
-      "durationMinutes": 20,
-      "instruction": "Read about Brave New World."
+      "durationMinutes": 75,
+      "instruction": "Read Brave New World. Start with the opening chapters at the Central London Hatchery, where the Bokanovsky Process and hypnopaedia establish a world that engineers contentment. Follow Bernard and Lenina to the Savage Reservation, and then John's ruinous arrival in London — the novel's heart is the debate between John and Mustapha Mond about whether a painless, stable world is worth the cost of art, religion, and freedom."
     },
     "tags": [
       "dystopian",
@@ -50048,7 +49946,7 @@
       "social commentary"
     ],
     "tier": 2,
-    "synopsis": "Aldous Huxley's dystopian novel is set in a future World State where humans are genetically engineered and socially conditioned for predetermined roles. Stability is the highest value, and everything from family to religion has been eliminated. John the Savage, raised on a Native American reservation, enters this world and is horrified by its shallow pleasures and lack of feeling. Huxley writes a satirical science fiction about the dangers of technological control, the loss of individuality, and the dehumanizing effects of a society that prioritizes comfort over truth.",
+    "synopsis": "Aldous Huxley's 1932 novel Brave New World imagines a future World State where human beings are no longer born but decanted in bottles, genetically tailored into five castes from the intelligent Alpha to the near-savage Epsilon, and conditioned from infancy through hypnopaedia and Pavlovian reward to love their assigned place in a society that has abolished family, monogamy, religion, art, and anything that might make a person want more than his or her allotted happiness. Stability is the state's highest good, purchased with soma, a pleasure drug with no side effects, and with the nightly Solidarity Services that turn citizens into a single ecstatic body.\n\nThe plot follows two discontents: Bernard Marx, an Alpha who is physically small and socially awkward and so feels the loneliness his civilization has outlawed; and Lenina Crowne, a conformist Beta who follows every rule and yet, on a trip to the Savage Reservation in New Mexico, falls in love with John, a man born naturally to a woman from the World State who was left behind years earlier. John has grown up reading Shakespeare and knows a language of grief, sin, and love that the World State has erased. When Bernard brings John and his dying mother Linda back to London, John becomes a sensation, then a scandal, and his refusal to take soma or accept the state's version of happiness leads him into a final confrontation with Mustapha Mond, one of the ten World Controllers, who argues patiently that art, religion, and freedom are too high a price for truth, and that a stable, painless, pleasurable world is the best one mankind can have.\n\nHuxley's satire works because it is not a crude warning but a seduction: the World State is tempting. Its citizens are healthy, safe, and untroubled. The horror is that the price is the loss of everything that makes a life feel like a person's own — love that risks loss, belief that risks doubt, art that risks offense. When John retreats to a lighthouse to live self-denyingly and is dragged back into the crowd's spectacle, his suicide is the novel's final statement: a human being cannot live in a world built to eliminate the very things that make life worth enduring. The book's afterword, Brave New World Revisited (1958), shows Huxley believing that the real world was converging on his fiction faster than he had feared.",
     "chapters": [
       {
         "number": 1,
@@ -50176,7 +50074,8 @@
         "pageEnd": 288,
         "summary": "The discovery of John's body and the final line"
       }
-    ]
+    ],
+    "pageCount": 311
   },
   {
     "name": "12 Rules for Life",
