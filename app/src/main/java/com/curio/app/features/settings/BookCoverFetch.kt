@@ -38,12 +38,16 @@ object BookCoverFetch {
         GOOGLE_BOOKS("Google Books", "Keyless title+author search")
     }
 
-    /** Resolves cover URL candidates for a book. */
+    /** Resolves cover URL candidates for a book. v352 — the last RESOLVED
+     *  URL from the hub (e.g. a Google Books thumbnail) sits between the
+     *  authored imageUrl and the bare Open Library title fallback, so covers
+     *  the hub actually found show up on the reveal + share card too. */
     fun coverCandidates(bookName: String, imageUrl: String): List<String> =
         listOfNotNull(
             imageUrl.takeIf { it.isNotBlank() },
+            AppPreferences.bookCoverUrlsState[bookName]?.takeIf { it.isNotBlank() },
             "https://covers.openlibrary.org/b/title/${Uri.encode(bookName)}-M.jpg",
-        )
+        ).distinct()
 
     /** Single-URL convenience for bulk fetch (uses first candidate). */
     fun coverUrlFor(bookName: String, imageUrl: String): String =
@@ -61,12 +65,16 @@ object BookCoverFetch {
         imageUrl: String,
         provider: BookCoverProvider
     ): String? = withContext(Dispatchers.IO) {
-        imageUrl.takeIf { it.isNotBlank() }
+        val resolved = imageUrl.takeIf { it.isNotBlank() }
             ?: when (provider) {
                 BookCoverProvider.OPEN_LIBRARY ->
                     "https://covers.openlibrary.org/b/title/${Uri.encode(bookName)}-M.jpg"
                 BookCoverProvider.GOOGLE_BOOKS -> googleThumbnail(bookName, author)
             }
+        // v352 — remember what the hub actually resolved so the reveal poster
+        // (and the share card) can reuse it instead of re-guessing.
+        if (resolved != null) AppPreferences.setBookCoverUrl(context, bookName, resolved)
+        resolved
     }
 
     /** Keyless Google Books volume search → the first match's cover thumbnail. */
@@ -197,6 +205,10 @@ object BookCoverFetch {
                     val items = org.json.JSONObject(it).optJSONArray("items") ?: return@runCatching null
                     for (i in 0 until items.length()) {
                         val vi = items.optJSONObject(i)?.optJSONObject("volumeInfo") ?: continue
+                        // v352 — CONTINUE past hits without a rating instead of
+                        // aborting: the first Google Books match is often a
+                        // preview-only volume with no averageRating, while a
+                        // later match has one.
                         if (vi.has("averageRating")) {
                             val r = vi.optDouble("averageRating", 0.0)
                             val c = vi.optInt("ratingsCount", 0)
@@ -204,7 +216,6 @@ object BookCoverFetch {
                                 AppPreferences.setBookRatingWithCount(context, book.name, r, c)
                                 return@runCatching r
                             }
-                            return@runCatching null
                         }
                     }
                     null
@@ -238,6 +249,9 @@ object BookCoverFetch {
                     val items = org.json.JSONObject(it).optJSONArray("items") ?: return@runCatching null
                     for (i in 0 until items.length()) {
                         val vi = items.optJSONObject(i)?.optJSONObject("volumeInfo") ?: continue
+                        // v352 — CONTINUE past hits without a rating instead of
+                        // aborting (first Google Books match is often a
+                        // preview-only volume with no averageRating).
                         if (vi.has("averageRating")) {
                             val r = vi.optDouble("averageRating", 0.0)
                             if (r > 0.0) {
@@ -246,7 +260,6 @@ object BookCoverFetch {
                                     count = vi.optInt("ratingsCount", 0)
                                 )
                             }
-                            return@runCatching null
                         }
                     }
                     null

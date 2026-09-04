@@ -218,6 +218,19 @@ object AppPreferences {
     // the share card's "I'm N chapters in" element.
     private const val KEY_BOOK_READING = "book_reading_progress"      // JSON object name->int
     private const val KEY_SERIES_WATCHED = "series_watched_progress"   // JSON object show -> JSON array "S1E3" keys
+    // v352 — per-chapter heart picks: JSON object book name -> JSON array of
+    // chapter numbers the user liked. Toggled from the book-notes sheet rows.
+    private const val KEY_BOOK_CHAPTER_LIKES = "book_chapter_likes"
+    // v352 — per-episode heart picks: JSON object show name -> JSON array of
+    // "S1E3" keys the user liked. Toggled from the episode-list sheet rows.
+    private const val KEY_SERIES_EPISODE_LIKES = "series_episode_likes"
+    // v352 — the user's OWN book rating (pen-nib pick, 0..5): book name -> double.
+    private const val KEY_BOOK_CUSTOM_RATINGS = "book_custom_ratings"
+    // v352 — the LAST RESOLVED cover URL per book (what the hub's provider
+    // actually found, e.g. a Google Books thumbnail). The reveal poster and
+    // share card prefer this over the bare Open Library fallback so
+    // hub-fetched covers appear on the reveal instead of a placeholder.
+    private const val KEY_BOOK_COVER_URLS = "book_cover_urls"
     // v8.34 — custom pet design (Pet designer playground): the imported
     // design's full text (palette + body/curled grids). Always-on when
     // saved — the pet sprite renders this instead of the default until the
@@ -348,6 +361,125 @@ object AppPreferences {
         prefs(context).edit().putString(KEY_SERIES_WATCHED, obj.toString()).apply()
         seriesWatchedState = cur
         return added
+    }
+
+    // ── Book chapter likes (v352 — per-chapter heart picks) ─────────────
+    // One heart per CHAPTER (multiple per book allowed), keyed by chapter
+    // NUMBER so grouped chapters keep a stable identity. Toggled from the
+    // book-notes sheet's per-row heart chip.
+    fun getBookChapterLikes(context: Context): Map<String, Set<Int>> {
+        val raw = prefs(context).getString(KEY_BOOK_CHAPTER_LIKES, null) ?: return emptyMap()
+        return runCatching {
+            val obj = org.json.JSONObject(raw)
+            val out = LinkedHashMap<String, Set<Int>>()
+            val keys = obj.keys()
+            while (keys.hasNext()) {
+                val k = keys.next()
+                val arr = obj.optJSONArray(k) ?: continue
+                out[k] = (0 until arr.length()).mapNotNull { i -> arr.optInt(i, -1).takeIf { it > 0 } }.toSet()
+            }
+            out
+        }.getOrDefault(emptyMap())
+    }
+
+    /** Toggle the like heart for [chapterNumber] of [bookName]; true = now liked. */
+    fun toggleBookChapterLike(context: Context, bookName: String, chapterNumber: Int): Boolean {
+        val cur = getBookChapterLikes(context).toMutableMap()
+        val set = (cur[bookName] ?: emptySet()).toMutableSet()
+        val added = !set.remove(chapterNumber)
+        if (added) set.add(chapterNumber)
+        if (set.isEmpty()) cur.remove(bookName) else cur[bookName] = set
+        val obj = org.json.JSONObject()
+        cur.forEach { (name, nums) -> obj.put(name, org.json.JSONArray(nums.toList())) }
+        prefs(context).edit().putString(KEY_BOOK_CHAPTER_LIKES, obj.toString()).apply()
+        bookChapterLikesState = cur
+        return added
+    }
+
+    // ── Series episode likes (v352 — per-episode heart picks) ────────────
+    // One heart per EPISODE (multiple per show allowed), keyed by the same
+    // "S1E3" identity the watched store uses. Toggled from the episode-list
+    // sheet's per-row heart chip.
+    fun getSeriesEpisodeLikes(context: Context): Map<String, Set<String>> {
+        val raw = prefs(context).getString(KEY_SERIES_EPISODE_LIKES, null) ?: return emptyMap()
+        return runCatching {
+            val obj = org.json.JSONObject(raw)
+            val out = LinkedHashMap<String, Set<String>>()
+            val keys = obj.keys()
+            while (keys.hasNext()) {
+                val k = keys.next()
+                val arr = obj.optJSONArray(k) ?: continue
+                out[k] = (0 until arr.length()).mapNotNull { i -> arr.optString(i).takeIf { it.isNotBlank() } }.toSet()
+            }
+            out
+        }.getOrDefault(emptyMap())
+    }
+
+    /** Toggle the like heart for [episodeKey] of [showName]; true = now liked. */
+    fun toggleSeriesEpisodeLike(context: Context, showName: String, episodeKey: String): Boolean {
+        val cur = getSeriesEpisodeLikes(context).toMutableMap()
+        val set = (cur[showName] ?: emptySet()).toMutableSet()
+        val added = !set.remove(episodeKey)
+        if (added) set.add(episodeKey)
+        if (set.isEmpty()) cur.remove(showName) else cur[showName] = set
+        val obj = org.json.JSONObject()
+        cur.forEach { (name, keys) -> obj.put(name, org.json.JSONArray(keys.toList())) }
+        prefs(context).edit().putString(KEY_SERIES_EPISODE_LIKES, obj.toString()).apply()
+        seriesEpisodeLikesState = cur
+        return added
+    }
+
+    // ── Custom book ratings (v352 — pen-nib pick, 0..5) ──────────────────
+    // The user's OWN star rating for a book, stored separately from the
+    // fetched Google Books average so the sheet can show both.
+    fun getBookCustomRatings(context: Context): Map<String, Double> {
+        val raw = prefs(context).getString(KEY_BOOK_CUSTOM_RATINGS, null) ?: return emptyMap()
+        return runCatching {
+            val obj = org.json.JSONObject(raw)
+            val out = LinkedHashMap<String, Double>()
+            val keys = obj.keys()
+            while (keys.hasNext()) {
+                val k = keys.next()
+                out[k] = obj.optDouble(k, 0.0)
+            }
+            out
+        }.getOrDefault(emptyMap())
+    }
+
+    /** Set (or clear, when [rating] <= 0) the user's own rating for [name]. */
+    fun setBookCustomRating(context: Context, name: String, rating: Double) {
+        val cur = getBookCustomRatings(context).toMutableMap()
+        if (rating <= 0.0) cur.remove(name) else cur[name] = rating
+        prefs(context).edit().putString(KEY_BOOK_CUSTOM_RATINGS, org.json.JSONObject(cur).toString()).apply()
+        bookCustomRatingsState = cur
+    }
+
+    // ── Resolved book cover URLs (v352 — hub results) ────────────────────
+    // The hub's providers resolve real cover URLs (Google Books thumbnails
+    // especially) that the reveal poster has no way to guess on its own.
+    // Persisting the winner lets the reveal + share card reuse it.
+    fun getBookCoverUrls(context: Context): Map<String, String> {
+        val raw = prefs(context).getString(KEY_BOOK_COVER_URLS, null) ?: return emptyMap()
+        return runCatching {
+            val obj = org.json.JSONObject(raw)
+            val out = LinkedHashMap<String, String>()
+            val keys = obj.keys()
+            while (keys.hasNext()) {
+                val k = keys.next()
+                out[k] = obj.optString(k)
+            }
+            out
+        }.getOrDefault(emptyMap())
+    }
+
+    /** Remember the resolved cover URL for [name] (ignores blanks). */
+    fun setBookCoverUrl(context: Context, name: String, url: String) {
+        if (url.isBlank()) return
+        val cur = getBookCoverUrls(context).toMutableMap()
+        if (cur[name] == url) return
+        cur[name] = url
+        prefs(context).edit().putString(KEY_BOOK_COVER_URLS, org.json.JSONObject(cur).toString()).apply()
+        bookCoverUrlsState = cur
     }
 
     // ── Album favorite tracks (v336 — heart picks) ───────────────────────
@@ -681,6 +813,18 @@ object AppPreferences {
     // v350 — watched episodes per show: show name → set of "S1E3" keys.
     // Reactive so the episode sheet's toggles + progress update in place.
     var seriesWatchedState by mutableStateOf<Map<String, Set<String>>>(emptyMap())
+        internal set
+    // v352 — per-chapter heart picks: book name → set of liked chapter numbers.
+    var bookChapterLikesState by mutableStateOf<Map<String, Set<Int>>>(emptyMap())
+        internal set
+    // v352 — per-episode heart picks: show name → set of liked "S1E3" keys.
+    var seriesEpisodeLikesState by mutableStateOf<Map<String, Set<String>>>(emptyMap())
+        internal set
+    // v352 — the user's own book ratings: book name → 0..5 (pen-nib pick).
+    var bookCustomRatingsState by mutableStateOf<Map<String, Double>>(emptyMap())
+        internal set
+    // v352 — last resolved cover URL per book (hub provider results).
+    var bookCoverUrlsState by mutableStateOf<Map<String, String>>(emptyMap())
         internal set
     // v336 — per-album favorite tracks (heart picks): album name → picked
     // track titles in pick order. Reactive so the sheet hearts + the Vinyl
@@ -1154,6 +1298,10 @@ object AppPreferences {
         bookRatingsState = getBookRatings(context)
         bookRatingsCountState = getBookRatingsCount(context)
         bookReadingProgressState = getBookReadingProgress(context)
+        bookChapterLikesState = getBookChapterLikes(context)
+        seriesEpisodeLikesState = getSeriesEpisodeLikes(context)
+        bookCustomRatingsState = getBookCustomRatings(context)
+        bookCoverUrlsState = getBookCoverUrls(context)
         pickerDefaultPageState = getPickerDefaultPage(context)
         pickerPage0ModeState = getPickerPage0Mode(context)
         pickerSuggestionsState = getPickerSuggestions(context)
