@@ -1,75 +1,60 @@
-# Prompt — Share card: cabinet icon, chapter progress + custom fact on all styles, fetch-to-show cover, font-resize box, draggable cover
+# Prompt — Implement the long-note detail lag fixes (logcat follow-up)
 
 ## Request
-User pointed at commit 6e76c013 (albums track-list sheet) asking why the
-Cabinet icon changed, and listed five follow-ups modelled on the
-`v0/book-share-progress-fact` branch:
-1. Fix the cabinet icon (font regression).
-2. Chapter progress bar should be SEPARATE, with a custom fact added below
-   it — the reference branch only did this for the paper style; make it
-   work on every card style.
-3. Book cover must NOT be visible by default in the share card — tap
-   "Fetch" and only then does it appear.
-4. Font resizing: the fact BOX shrank/grew with the font size; a long
-   paragraph still didn't fit at small fonts. Box footprint must stay
-   stable while text size changes.
-5. Add drag-to-move for the book cover (like the badge/chip).
+Implement the three fixes agreed after the earlier logcat triage of the
+saved-note detail page lagging on very long notes (glass OFF): cache the
+AnnotatedString, gate layerBackdrop off when glass is off, budget the
+paper-card canvas.
 
-## Root causes found
-- **Cabinet icon:** the bundled `material_symbols_outlined.ttf` was
-  re-subset at some point and the ASCII `2` glyph was dropped, so the
-  GSUB ligature rule for `inventory_2` was pruned and the glyph failed to
-  form — the tab rendered the literal string `inventory_2`. (Feature branch
-  additionally pointed at a never-added `shelves` glyph.) Rebuilt the font
-  from the full font keeping HEAD's glyph set + the missing digits; all
-  200 referenced icons re-ligate (verified with HarfBuzz).
-- **Progress bar + custom fact:** on main, Reading-progress content and the
-  custom fact were mutually exclusive content "sources" — picking one hid
-  the other, and styles rendered EITHER the chapter widget OR prose.
-- **Cover auto-fetch:** a LaunchedEffect auto-loaded the authored cover on
-  sheet open (v334 behavior).
-- **Font resize box shrink:** fact text used a fixed `maxLines` cap
-  (`lines(base, frac)`) while the font itself scaled via `bodyScale` —
-  smaller font → shorter box AND same line cap → truncation got worse.
-- **Cover not movable:** `ShareCardMove` had offsets only for title/fact/
-  meta/badge; the jacket badge was placed with a hardcoded offset and no
-  bounds reporting.
+## Root causes (from the logcat triage)
+1. Saved-note bodies rebuilt a full `AnnotatedString` via
+   `buildRichAnnotated(...)` on every recomposition of their subtree.
+2. The detail page applied kyant's `.layerBackdrop(detailGlassBackdrop)`
+   UNCONDITIONALLY — with glass off there is no consumer, yet the whole
+   (potentially giant) page kept being recorded to an offscreen layer,
+   which matched the capture's idle ~60fps redraw bursts + texture-sized
+   LOS churn even with glass OFF.
+3. The paper-card decor (texture clouds + speck field, coffee stains)
+   was built per-DRAW: each redraw seeded `kotlin.random.Random`,
+   allocated 4+ radial-gradient `Brush`es, organic `Path`s and the speck
+   scatter. The canvas re-records while typing / when the page invalidates,
+   so those per-draw allocations were the large-object churn driver.
 
-## Fixes implemented (TopicShareCard.kt + rebuilt icon font)
-1. Cabinet icon — font rebuilt (see above); verified glyph shaping.
-2. `TopicShareSheet` splits progress from fact: new `showChapterProgress`
-   state; the Reading-progress pill turns the bar ON, Custom fact keeps it
-   on (picking anything else turns it off). New `chapterFact` param threads
-   a stacked custom-fact Text UNDER the progress widget on ALL eight styles
-   (Paper via shared MiddleContent, Vinyl, Collage, Neumorphic, Editorial,
-   Minimal, Signature incl. its centred layouts, Custom); blank when no
-   custom fact. Progress + fact also flow into the export/share paths.
-3. Cover no longer loads on open: `coverFetchRequested` gates the
-   LaunchedEffect; the editor's Content panel shows Gallery / Fetch /
-   Remove. First Fetch uses the authored URL; failures show "Try again"
-   (bumps attempt → keyless providers), a shown cover shows "Refetch";
-   Remove re-arms so the next tap is a fresh Fetch.
-4. New `fitLines(base, frac, fontScale)` cap replaces the fixed line cap on
-   every fact render: line count ÷ font multiplier so the box height stays
-   put (smaller text fits MORE lines in the same box, larger fewer).
-   Applied to all styles' fact text, the custom fact under the bar, and the
-   Editorial drop-cap continuation text.
-5. Book-cover drag: `ShareCardMove` gains `coverDx/coverDy` (persisted per
-   style in the edits JSON), the jacket reports bounds via a new
-   `EditBoundsCallbacks.onCover`, the ArrangeableCard chrome gets a COVER
-   selection target (tap to select, coffee grip drags it, clamped to the
-   card), and the toolbar's exhaustive `when (sel)` blocks handle COVER
-   (no font/format tools for it).
+## Changes
+1. `RichTextEditor.kt` — new `@Composable rememberRichAnnotated(text,
+   spans, highlightColor)` remembering the built AnnotatedString keyed on
+   its inputs. `EntryDetailScreen.kt`'s seven read-only note render sites
+   (note, review, journal, quote card, observed / surprised / learn-next
+   field notes) now use it, so parent recompositions reuse the same
+   instance and the giant `Text` can skip re-layout. The live editor keeps
+   calling `buildRichAnnotated` directly (spans change per keystroke).
+2. `EntryDetailScreen.kt` — the `layerBackdrop` capture is gated on
+   `isInScreenGlassActive()` (the same predicate the sticky pills use):
+   `.then(if (detailGlassCaptureOn) Modifier.layerBackdrop(...) else
+   Modifier)`. Holder + nullable backdrop plumbing unchanged; pills only
+   consume the capture when glass is active.
+3. `PaperCard.kt` — the decor canvas on BOTH `PaperCard` and
+   `TornPaperCard` became a `Spacer` + `Modifier.drawWithCache`: the
+   seeded geometry is BUILT once per (size, seed, palette) and only
+   REPLAYED per draw. New private `PaperTextureSpec` / `CoffeeStainsSpec`
+   holders mirror the deleted per-draw helpers with identical Random
+   sequences (byte-identical rendering per size); rules / red margin /
+   sheen replay inline from cached scalars. `key(...)` on the palette +
+   flag inputs forces a fresh cache when only those change at the same
+   size (editor color toggles). Sheen hoisted via `remember` on PaperCard.
+   Note: `TopicShareCard.kt` has its own unrelated private
+   `drawPaperTexture(palette)` — untouched.
 
 ## Verification
-- No Gradle build in this environment (forbidden; CI validates on push).
-- Brace/paren balance of the working file matches pristine HEAD's signals
-  (identical net deltas — checker artifacts only, no new imbalance).
-- Diff re-read end-to-end; conventions matched to existing badge/meta
-  chrome, MoveHandle signature, dp-unit math, persistence format.
-- Changelog (20260921.txt) updated with ADD/FIX bullets.
+- No Gradle in this environment (forbidden; CI validates on push).
+- Brace/paren balance: all three files report ZERO imbalance vs a clean
+  HEAD baseline (PaperCard +45 parens / +15 braces, symmetric).
+- Read-backs of every edited region; call-site greps confirm no stale
+  references and no other callers of the removed helpers.
+- Changelog (20260921.txt) updated with a FIX: Performance bullet.
 
 ## Status
-Complete. Committed and pushed with the font + changelog. Follow-ups (from
-the earlier logcat request, separate): lazy/cached long-note rendering on
-the entry Detail page — not part of this request.
+Complete. Committed and pushed. Residual (from the same triage, NOT in
+this request's scope): the detail body is still one non-lazy
+Column(verticalScroll) — a lazy/capped note renderer is the follow-up if
+the remaining hot spots persist.
