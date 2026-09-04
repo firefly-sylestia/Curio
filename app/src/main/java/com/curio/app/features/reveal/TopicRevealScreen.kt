@@ -1090,11 +1090,12 @@ fun TopicRevealScreen(
         navController.popBackStack()
     }
 
-    // v315/v316b — the book notes UI is ONE ModalBottomSheet that hosts BOTH
-    // the synopsis AND the chapter reader (segmented Synopsis | Chapters tabs
-    // inside the sheet), so the sheet is never too small and you can switch
-    // without closing. The tab it opens on mirrors what you tapped: the
-    // synopsis card opens Synopsis, a chapter chip opens Chapters.
+    // v315/v316b/v348 — the book notes UI is ONE ModalBottomSheet (album
+    // style): a collapsible "About this book" synopsis card at the top with
+    // the full chapter list below it as expandable rows, so nothing requires
+    // a tab switch. What you tapped seeds the sheet: the synopsis card opens
+    // with the synopsis pre-expanded, a chapter chip expands that chapter
+    // and scrolls to it.
     val bookSheetTopic = resolved
     if (bookSheetTopic != null && bookSheetTopic.categoryId == CategoryId.BOOKS &&
         (showSynopsisDialog || selectedChapter != null) &&
@@ -2710,7 +2711,12 @@ private fun BookChapterChip(
     }
 }
 
-/** What the book-notes bottom sheet shows. */
+/**
+ * What opened the book-notes sheet: the synopsis card (SYNOPSIS) or a
+ * chapter chip (CHAPTERS). v348 — the sheet itself is one album-style
+ * scroll (synopsis accordion + chapter rows); the mode only seeds which
+ * part is pre-expanded.
+ */
 private enum class BookNotesMode { SYNOPSIS, CHAPTERS }
 
 /**
@@ -2856,43 +2862,57 @@ private fun BookNotesSheet(
     val chapters = topic.chapters.orEmpty()
     val hasSynopsis = !topic.synopsis.isNullOrBlank()
     val hasChapters = chapters.isNotEmpty()
-    // The reader defaults to the opened chapter (or the first one).
-    val currentChapter = chapter ?: chapters.firstOrNull()
-    // Internal tab — seeded by whichever surface opened the sheet, so both
-    // sections live in the same sheet and you can switch without closing.
-    var tab by remember(mode) { mutableStateOf(mode) }
-    val effectiveTab = when {
-        tab == BookNotesMode.CHAPTERS && !hasChapters -> BookNotesMode.SYNOPSIS
-        tab == BookNotesMode.SYNOPSIS && !hasSynopsis -> BookNotesMode.CHAPTERS
-        else -> tab
+    // v348 — ALBUM-STYLE single sheet (no Synopsis | Chapters tabs): the
+    // synopsis is a collapsible "About this book" card pinned at the top of
+    // the chapter list (mirroring the album sheet's "About this album"), and
+    // every chapter is an expandable row below it. Opening from the Synopsis
+    // card pre-expands the synopsis; opening from a chapter chip expands that
+    // chapter and scrolls to it.
+    var synopsisExpanded by rememberSaveable(mode) {
+        mutableStateOf(mode == BookNotesMode.SYNOPSIS)
     }
+    var expandedNumber by rememberSaveable(chapter?.number, chapters.size) {
+        mutableStateOf<Int?>(chapter?.number ?: if (mode == BookNotesMode.CHAPTERS) chapters.firstOrNull()?.number else null)
+    }
+    // v348 — favorite heart for the whole book (book-level, like the album
+    // hearts). Reactive: tapping toggles AppPreferences and this recomposes.
+    val bookName = topic.name
+    val isFavBook = bookName in AppPreferences.bookFavoritesState
+    // Reading progress (identical semantics to the old reader tab): the
+    // number of chapters marked read; chapter N is read when N <= chaptersDone.
+    val chaptersDone = AppPreferences.bookReadingProgressState[bookName] ?: 0
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val chipListState = rememberLazyListState(
-        initialFirstVisibleItemIndex = chapters.indexOfFirst { it.number == currentChapter?.number }.coerceAtLeast(0)
-    )
-    LaunchedEffect(currentChapter?.number) {
-        if (hasChapters && chapters.size > 1) {
-            chipListState.animateScrollToItem(
-                chapters.indexOfFirst { it.number == currentChapter?.number }.coerceAtLeast(0)
-            )
+    val listState = rememberLazyListState()
+    LaunchedEffect(chapter?.number, chapters.size, hasSynopsis) {
+        val idx = chapters.indexOfFirst { it.number == chapter?.number }
+        if (idx >= 0) {
+            listState.animateScrollToItem(idx + (if (hasSynopsis) 1 else 0))
         }
+    }
+    fun toggleChapter(ch: BookChapter) {
+        expandedNumber = if (expandedNumber == ch.number) null else ch.number
+        onSelectChapter(ch)
+    }
+    fun toggleChapterRead(ch: BookChapter) {
+        val chDone = chaptersDone >= ch.number
+        AppPreferences.setBookReadingProgressExact(
+            context,
+            bookName,
+            if (chDone) ch.number - 1 else ch.number
+        )
+        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
     }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        // v332 — the notes sheets wear the CATEGORY-TINTED wash (same hue
-        // family as the reveal page + cards) instead of the neutral dialog
-        // container, so the sheet reads as part of the category story.
-        // v339 — when the cover's palette is available it replaces the
-        // category accent entirely (fallback stays when it isn't).
+        // The notes sheets wear the CATEGORY-TINTED wash (same hue family as
+        // the reveal page + cards); when the cover's palette is available it
+        // replaces the category accent entirely (fallback stays when not).
         containerColor = coverPal?.container ?: cat.notesSheetContainerColor(),
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
-        // v316b — the sheet body fills ~92% of the screen so it expands
-        // toward the top; the inner body scrolls instead of the sheet being
-        // a short pop-up.
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -2900,11 +2920,10 @@ private fun BookNotesSheet(
                 .fillMaxHeight(0.92f)
                 .padding(bottom = 20.dp)
         ) {
-            // ── Top hairline (v332): a soft category-accent rule under the
-            // drag handle, so the tinted sheet gets a crisp accent top edge.
+            // ── Top hairline — soft accent rule under the drag handle ─────
             NotesSheetTopHairline(cat)
             Spacer(Modifier.height(10.dp))
-            // ── Header — cover + book title/author + close ──────────────
+            // ── Header — cover + title/author + heart + close ────────────
             Row(
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -2968,289 +2987,228 @@ private fun BookNotesSheet(
                             )
                         }
                     }
-                    if (effectiveTab == BookNotesMode.CHAPTERS && currentChapter != null) {
-                        Spacer(Modifier.height(4.dp))
-                        val pages = if (currentChapter.pageStart > 0 && currentChapter.pageEnd > 0)
-                            " · pp. ${currentChapter.pageStart}–${currentChapter.pageEnd}" else ""
-                        Text(
-                            "${chapterDisplayLabel(currentChapter.number, currentChapter.title)}$pages",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = ink
+                }
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.End
+                ) {
+                    // v348 — book-level favorite heart (mirrors the album
+                    // hearts in look and feel).
+                    Surface(
+                        onClick = {
+                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            AppPreferences.toggleBookFavorite(context, bookName)
+                        },
+                        shape = CircleShape,
+                        color = if (isFavBook) accent.copy(alpha = 0.2f) else surface.copy(alpha = 0.6f)
+                    ) {
+                        Box(
+                            modifier = Modifier.padding(8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            HeartGlyph(
+                                color = if (isFavBook) Color(0xFFE5484D) else onSurfaceVariant,
+                                iconSize = 19.dp,
+                                filled = isFavBook
+                            )
+                        }
+                    }
+                    Surface(
+                        onClick = onDismiss,
+                        shape = CircleShape,
+                        color = surface.copy(alpha = 0.6f)
+                    ) {
+                        CurioIcon(
+                            CurioIcons.Close,
+                            "Close book notes",
+                            tint = onSurfaceVariant,
+                            size = 20.dp,
+                            modifier = Modifier.padding(8.dp)
                         )
                     }
                 }
-                Surface(
-                    onClick = onDismiss,
-                    shape = CircleShape,
-                    color = surface.copy(alpha = 0.6f)
+            }
+
+            // ── Pinned reading-progress rail (v328) — stays above the list ─
+            if (hasChapters) {
+                Spacer(Modifier.height(12.dp))
+                val progressLabel = if (chaptersDone > 0)
+                    "$chaptersDone of ${chapters.size} chapters read"
+                else "${chapters.size} chapters · tap a chapter to read its notes"
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
                 ) {
-                    CurioIcon(
-                        CurioIcons.Close,
-                        "Close book notes",
-                        tint = onSurfaceVariant,
-                        size = 20.dp,
-                        modifier = Modifier.padding(8.dp)
+                    Text(
+                        progressLabel,
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = ink,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        "$chaptersDone / ${chapters.size}",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                        color = accent
                     )
                 }
-            }
-
-            // ── Segmented Synopsis | Chapters switch (v316b) ─────────────
-            if (hasSynopsis && hasChapters) {
-                Spacer(Modifier.height(14.dp))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(horizontal = 20.dp)
+                Spacer(Modifier.height(6.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(surfaceHigh)
                 ) {
-                    // Synopsis tab
-                    Surface(
-                        onClick = { tab = BookNotesMode.SYNOPSIS },
-                        shape = RoundedCornerShape(50),
-                        color = if (effectiveTab == BookNotesMode.SYNOPSIS) accent
-                                else surface,
-                        shadowElevation = if (effectiveTab == BookNotesMode.SYNOPSIS) 0.dp else 1.dp
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
-                        ) {
-                            CurioIcon(
-                                CurioIcons.MenuBook, null,
-                                tint = if (effectiveTab == BookNotesMode.SYNOPSIS) onAccent
-                                       else onSurfaceVariant,
-                                size = 15.dp
-                            )
-                            Text(
-                                "Synopsis",
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                color = if (effectiveTab == BookNotesMode.SYNOPSIS) onAccent
-                                        else onSurfaceVariant
-                            )
-                        }
-                    }
-                    // Chapters tab
-                    Surface(
-                        onClick = {
-                            tab = BookNotesMode.CHAPTERS
-                            // First visit to the reader: preselect the first chapter.
-                            if (currentChapter == null) chapters.firstOrNull()?.let { onSelectChapter(it) }
-                        },
-                        shape = RoundedCornerShape(50),
-                        color = if (effectiveTab == BookNotesMode.CHAPTERS) accent
-                                else surface,
-                        shadowElevation = if (effectiveTab == BookNotesMode.CHAPTERS) 0.dp else 1.dp
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
-                        ) {
-                            CurioIcon(
-                                CurioIcons.AutoAwesome, null,
-                                tint = if (effectiveTab == BookNotesMode.CHAPTERS) onAccent
-                                       else onSurfaceVariant,
-                                size = 15.dp
-                            )
-                            Text(
-                                "Chapters · ${chapters.size}",
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                color = if (effectiveTab == BookNotesMode.CHAPTERS) onAccent
-                                        else onSurfaceVariant
-                            )
-                        }
+                    val frac = if (chapters.size > 0)
+                        (chaptersDone.toFloat() / chapters.size).coerceIn(0f, 1f) else 0f
+                    if (frac > 0f) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(frac)
+                                .height(4.dp)
+                                .background(accent, RoundedCornerShape(50))
+                        )
                     }
                 }
+                Spacer(Modifier.height(12.dp))
             }
 
-            // ── Body — the active section fills the rest and scrolls ─────
-            Column(
+            // ── One scroll: synopsis accordion, then the chapter list ─────
+            LazyColumn(
+                state = listState,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 8.dp),
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(top = 16.dp, bottom = 4.dp)
             ) {
-                when (effectiveTab) {
-                    BookNotesMode.SYNOPSIS -> {
-                        Surface(
-                            shape = RoundedCornerShape(20.dp),
-                            color = surface,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 20.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(18.dp),
-                                verticalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                Text(
-                                    "SYNOPSIS",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = FontWeight.ExtraBold,
-                                        letterSpacing = 1.2.sp
-                                    ),
-                                    color = ink
-                                )
-                                Text(
-                                    topic.synopsis.orEmpty(),
-                                    style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
-                                    color = onSurface
-                                )
-                            }
-                        }
+                if (hasSynopsis) {
+                    item(key = "book_about") {
+                        BookSynopsisAccordion(
+                            surface = surface,
+                            accent = accent,
+                            ink = ink,
+                            onSurface = onSurface,
+                            synopsis = topic.synopsis.orEmpty(),
+                            initiallyExpanded = synopsisExpanded || !hasChapters
+                        )
                     }
-                    BookNotesMode.CHAPTERS -> {
-                        if (hasChapters) {
-                            // v328 — reading-progress rail: X of N chapters
-                            // read (tracked by the Mark-read pills below),
-                            // with a filled bar so the reader can see where
-                            // they are at a glance.
-                            val chaptersDone = AppPreferences.bookReadingProgressState[topic.name] ?: 0
-                            val chTotal = chapters.size
-                            val progressLabel = if (chaptersDone > 0)
-                                "$chaptersDone of $chTotal chapters read"
-                            else "$chTotal chapters · tap a chapter to start"
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 20.dp)
-                            ) {
-                                Text(
-                                    progressLabel,
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = ink,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                            Spacer(Modifier.height(6.dp))
-                            // v328 — a thin progress bar (filled = chapters
-                            // read) under the label.
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 20.dp)
-                                    .height(4.dp)
-                                    .clip(RoundedCornerShape(50))
-                                    .background(
-                                        surfaceHigh
-                                    )
-                            ) {
-                                val frac = if (chTotal > 0) (chaptersDone.toFloat() / chTotal).coerceIn(0f, 1f) else 0f
-                                if (frac > 0f) {
+                }
+                if (hasChapters) {
+                    itemsIndexed(chapters) { _, ch ->
+                        val isOpen = expandedNumber == ch.number
+                        val isRead = ch.number <= chaptersDone
+                        Surface(
+                            onClick = { toggleChapter(ch) },
+                            shape = RoundedCornerShape(14.dp),
+                            color = when {
+                                isOpen -> accent
+                                isRead -> surfaceAlt
+                                else -> surface
+                            },
+                            shadowElevation = if (isOpen) 0.dp else 1.dp
+                        ) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
+                                ) {
+                                    // Leading chip: a ✓ when the chapter is
+                                    // read, otherwise its number.
                                     Box(
                                         modifier = Modifier
-                                            .fillMaxWidth(frac)
-                                            .height(4.dp)
-                                            .background(accent, RoundedCornerShape(50))
-                                    )
-                                }
-                            }
-                            Spacer(Modifier.height(10.dp))
-                            // Every chapter — switchable inside the sheet.
-                            LazyRow(
-                                state = chipListState,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                contentPadding = PaddingValues(horizontal = 20.dp)
-                            ) {
-                                itemsIndexed(chapters) { _, ch ->
-                                    val selected = ch.number == currentChapter?.number
-                                    val isRead = ch.number <= chaptersDone
-                                    Surface(
-                                        onClick = { onSelectChapter(ch) },
-                                        shape = RoundedCornerShape(50),
-                                        color = when {
-                                            selected -> accent
-                                            isRead -> surfaceAlt
-                                            else -> surface
-                                        },
-                                        shadowElevation = if (selected) 0.dp else 1.dp
+                                            .size(30.dp)
+                                            .clip(CircleShape)
+                                            .background(
+                                                when {
+                                                    isOpen -> onAccent.copy(alpha = 0.18f)
+                                                    isRead -> surfaceHigh
+                                                    else -> surfaceHigh
+                                                }
+                                            ),
+                                        contentAlignment = Alignment.Center
                                     ) {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(5.dp),
-                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
-                                        ) {
-                                            if (isRead) {
-                                                CurioIcon(
-                                                    CurioIcons.Check,
-                                                    null,
-                                                    tint = if (selected) onAccent
-                                                           else onSurfaceAlt,
-                                                    size = 13.dp
-                                                )
-                                            }
-                                            val chLabel = chapterDisplayLabel(ch.number, ch.title)
+                                        if (isRead) {
+                                            CurioIcon(
+                                                CurioIcons.Check,
+                                                null,
+                                                tint = if (isOpen) onAccent else onSurfaceAlt,
+                                                size = 15.dp
+                                            )
+                                        } else {
                                             Text(
-                                                text = if (chLabel.startsWith("CH ")) "CH ${ch.number} · ${ch.title}"
-                                                       else if (ch.title.startsWith(chLabel) && ch.title.length > chLabel.length) ch.title
-                                                       else chLabel,
-                                                style = MaterialTheme.typography.labelLarge,
-                                                color = when {
-                                                    selected -> onAccent
-                                                    isRead -> onSurfaceAlt
-                                                    else -> onSurfaceVariant
-                                                },
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
+                                                "${ch.number}",
+                                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                                color = if (isOpen) onAccent else onSurfaceVariant
                                             )
                                         }
                                     }
+                                    Text(
+                                        text = ch.title,
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            fontWeight = if (isOpen || isRead) FontWeight.Bold else FontWeight.Normal
+                                        ),
+                                        color = if (isOpen) onAccent else onSurface,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    CurioIcon(
+                                        if (isOpen) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
+                                        if (isOpen) "Collapse chapter" else "Expand chapter",
+                                        tint = if (isOpen) onAccent.copy(alpha = 0.9f) else onSurfaceVariant,
+                                        size = 20.dp
+                                    )
                                 }
-                            }
-                            Spacer(Modifier.height(12.dp))
-                            val ch = currentChapter
-                            if (ch != null) {
-                                Surface(
-                                    shape = RoundedCornerShape(20.dp),
-                                    color = surface,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 20.dp)
+                                // Expanded: pages, the chapter notes, and the
+                                // Mark-read / Undo pill (accordion detail).
+                                androidx.compose.animation.AnimatedVisibility(
+                                    visible = isOpen,
+                                    enter = androidx.compose.animation.fadeIn(
+                                        animationSpec = androidx.compose.animation.core.tween(160)
+                                    ),
+                                    exit = androidx.compose.animation.fadeOut(
+                                        animationSpec = androidx.compose.animation.core.tween(120)
+                                    )
                                 ) {
                                     Column(
-                                        modifier = Modifier.padding(18.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(start = 14.dp, end = 14.dp, bottom = 14.dp)
                                     ) {
-                                        Text(
-                                            ch.title,
-                                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                                            color = onSurface
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(1.dp)
+                                                .background(onAccent.copy(alpha = 0.18f))
                                         )
                                         if (ch.pageStart > 0 && ch.pageEnd > 0) {
                                             Text(
                                                 "pp. ${ch.pageStart}–${ch.pageEnd}",
-                                                style = MaterialTheme.typography.labelMedium,
-                                                color = ink
+                                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                                color = if (isOpen) onAccent.copy(alpha = 0.9f) else ink
                                             )
                                         }
                                         Text(
                                             ch.summary.ifBlank { "No summary for this chapter." },
-                                            style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
-                                            color = onSurface
+                                            style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 25.sp),
+                                            color = if (isOpen) onAccent else onSurface
                                         )
-                                        // v328/v334 — mark the chapter read; the
-                                        // button TOGGLES so a mis-tap can be
-                                        // undone (progress moves both ways via
-                                        // setBookReadingProgressExact).
-                                        val chaptersDone = AppPreferences.bookReadingProgressState[topic.name] ?: 0
                                         val chDone = chaptersDone >= ch.number
-                                        Spacer(Modifier.height(4.dp))
                                         Surface(
-                                            onClick = {
-                                                AppPreferences.setBookReadingProgressExact(
-                                                    context,
-                                                    topic.name,
-                                                    if (chDone) ch.number - 1 else ch.number
-                                                )
-                                                haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                                            },
+                                            onClick = { toggleChapterRead(ch) },
                                             shape = RoundedCornerShape(50),
-                                            color = if (chDone) accent
-                                                    else surfaceHigh,
+                                            color = if (isOpen)
+                                                if (chDone) onAccent.copy(alpha = 0.2f) else onAccent
+                                                else if (chDone) accent else surfaceHigh,
                                             shadowElevation = 0.dp
                                         ) {
                                             Row(
@@ -3261,15 +3219,22 @@ private fun BookNotesSheet(
                                                 CurioIcon(
                                                     if (chDone) CurioIcons.Undo else CurioIcons.Check,
                                                     null,
-                                                    tint = if (chDone) onAccent
-                                                           else onSurfaceVariant,
+                                                    tint = if (chDone)
+                                                        if (isOpen) onAccent else onSurfaceAlt
+                                                        else if (isOpen) accent else onSurfaceVariant,
                                                     size = 14.dp
                                                 )
                                                 Text(
-                                                    if (chDone) "Undo ${chapterDisplayLabel(ch.number, ch.title)} ✓ (unread)" else "Mark ${chapterDisplayLabel(ch.number, ch.title)} as read",
+                                                    if (chDone)
+                                                        "Undo ${chapterDisplayLabel(ch.number, ch.title)} · marked unread"
+                                                    else
+                                                        "Mark ${chapterDisplayLabel(ch.number, ch.title)} as read",
                                                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                                    color = if (chDone) onAccent
-                                                            else onSurface
+                                                    color = if (chDone)
+                                                        if (isOpen) onAccent else onSurface
+                                                        else if (isOpen) accent else onSurface,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
                                                 )
                                             }
                                         }
@@ -3283,6 +3248,89 @@ private fun BookNotesSheet(
         }
     }
 }
+
+/**
+ * v348 — the book synopsis as a collapsible card pinned at the TOP of the
+ * book-notes sheet (mirrors the album sheet's "About this album" accordion):
+ * collapsed it shows a two-line teaser with a Read/Hide affordance, tapping
+ * the card expands the full description or collapses it back.
+ */
+@Composable
+private fun BookSynopsisAccordion(
+    surface: Color,
+    accent: Color,
+    ink: Color,
+    onSurface: Color,
+    synopsis: String,
+    initiallyExpanded: Boolean,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember(initiallyExpanded) { mutableStateOf(initiallyExpanded) }
+    Surface(
+        shape = RoundedCornerShape(18.dp),
+        color = surface,
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { expanded = !expanded }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .animateContentSize()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = accent.copy(alpha = 0.16f)
+                ) {
+                    CurioIcon(
+                        CurioIcons.MenuBook,
+                        null,
+                        tint = ink,
+                        size = 15.dp,
+                        modifier = Modifier.padding(6.dp)
+                    )
+                }
+                Text(
+                    "ABOUT THIS BOOK",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.2.sp
+                    ),
+                    color = ink,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    if (expanded) "Hide" else "Read",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = ink.copy(alpha = 0.9f)
+                )
+                CurioIcon(
+                    if (expanded) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
+                    if (expanded) "Collapse synopsis" else "Expand synopsis",
+                    tint = ink,
+                    size = 20.dp
+                )
+            }
+            Text(
+                text = synopsis,
+                style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                color = onSurface,
+                maxLines = if (expanded) Int.MAX_VALUE else 2,
+                overflow = if (expanded) TextOverflow.Clip else TextOverflow.Ellipsis,
+                modifier = Modifier.padding(top = 10.dp)
+            )
+        }
+    }
+}
+
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Album info section — track list + track chips (albums only)

@@ -1,61 +1,51 @@
-# Request Log — Topic Browser load + category-switch latency vs reference commit
+# Request Log — Web-series info (like books/albums) + album-style book sheet
 
 ## Status: implementation complete — committing & pushing (CI will validate)
 
 ## The request (user, paraphrased)
-The topic-browser scroll lag is gone, but compared to the referenced commit
-(d9a376d2) the initial topic LOAD takes longer, and switching categories shows
-the new topics with a delay. Fix if possible; explain the reason first. Also
-dump versionCode and versionName.
+Start adding info for WEB SERIES the way books and albums were enriched: a
+real synopsis plus episode data. Also adapt the book notes bottom sheet to the
+album layout: one scrolling sheet with the synopsis in a collapse at the top
+and the chapters below it as their own accordion rows, with a like (heart) and
+read action.
 
-## Version (asked by the user)
-versionName = 1.1.1 (tag-driven via env; default "1.1.1" in build), versionCode = 20260921
-(app/build.gradle.kts lines 63-64).
+## Clarifications from the user
+- Episode data = synopsis + FULL real episode lists (not a small sample), in
+  batches researched with the web.
+- Each episode carries: number + title + a short summary.
+- Sheet layout: album-style ONE sheet (no Synopsis | Chapters tabs).
+- Actions: a book-level favorite heart (like the album hearts) + keep the
+  per-chapter read toggles with progress.
 
-## Analysis / root causes
-1. Data: topic count grew only 4% since d9a376d2 (20,015 → 20,877) but bytes
-   grew 34% (18.5 → 24.9 MB) — albums.json 0.95 → 3.24 MB (per-track arrays +
-   synopses) and books.json ~2.6 MB (chapter arrays + synopses) landed AFTER
-   the reference commit, so every cold parse of those lanes is 3-4× heavier.
-2. Code — cold open built the pipeline up to THREE times:
-   - catalog was produced by a per-category produceState, then SWAPPED to a
-     merged-index derivation the moment loadIndex() landed → two catalog
-     identities, and indexedTopics + the row build ran for EACH source.
-   - indexedTopics' produceState seeded itself with a 20k map from the cached
-     index and then IMMEDIATELY rebuilt the same 20k objects in its block
-     (produceState always runs its block) → the seed was pure duplicate work
-     on every open, warm or cold.
-   - parseAndCache awaited a full Room deleteCategory + insertAll (entities
-     embed chapter/track JSON) on the render path of the cold open.
-3. Category-switch delay: every switch re-ran indexedTopics.associateBy (20k)
-   + per-lane filter + sort over the whole catalog on Dispatchers.Default,
-   while the OLD rows stayed on screen — so the new list appeared only after a
-   full-catalog rebuild (a visible beat on big lanes).
+## What shipped
+1. Data model + plumbing (committed `a0cddbb2`):
+   - `SeriesEpisode(season, number, title, summary)` + `CurioTopic.episodes`
+     parsed from JSON (`episodes` array) in TopicJsonLoader; null-safe,
+     hydrated only for SERIES topics.
+   - Room: `episodes` TEXT columns on `topics` + `cached_topics`,
+     DAO `updateContent` includes it, v14 migration adds both columns, and
+     the repository hydration maps rows back to `SeriesEpisode` lists.
+2. First web-researched series batch (`a0cddbb2`): Chernobyl (5), Band of
+   Brothers (10), The Queen's Gambit (7), Watchmen (9), Fleabag (12) = 43
+   episodes with real one-line summaries from Wikipedia; human tone, no em
+   dashes. Script: `tools/enrich_series_batch1.py` (kept for future batches).
+3. Book notes sheet redesigned album-style (this commit):
+   - `BookNotesSheet` is now ONE `ModalBottomSheet`: header (cover, title,
+     byline, fetched rating, favorite heart + close), pinned reading-progress
+     rail, then a single LazyColumn with `BookSynopsisAccordion`
+     (About-this-book, Read/Hide) on top and every chapter as an expandable
+     row (pages, notes, Mark-read/Undo pill) below.
+   - The old `mode` seed still decides what opens pre-expanded (synopsis card
+     → synopsis open; chapter chip → that chapter open + scrolled to).
+   - New `AppPreferences` book-favorites store (heart per book title,
+     reactive state, mirrors album hearts) + header heart toggle; chapter
+     read semantics unchanged (chapter N read when N <= progress).
 
-## Changes
-TopicDatabaseScreen.kt:
-- Catalog now derives ONCE from the loader memory cache (remember keyed on
-  visibleCategories + a fill-generation). A LaunchedEffect fills only the
-  lanes the cache is missing (deduped with the app-start prewarm via the
-  loader's shared in-flight parse) and bumps the generation once. No
-  index-source swap, no second identity. catalogFilled guards the loading
-  note so a lane that fails to parse can't hold "Preparing topics…" forever
-  (v49 skip semantics preserved).
-- indexedTopics builds its 20k entries ONCE per catalog identity (empty seed);
-  the old duplicate seed build and the useIndex source branches are gone.
-- Browse-mode row build uses the pre-grouped topicsByCat lists instead of a
-  fresh associateBy + filter + sort over all topics per switch — a lane
-  switch now walks only the selected lanes' prebuilt rows. The id map moved
-  into the search branch (only paid when a query settles).
-- Removed the now-unused CatalogState data class + TopicIndexEntry import.
+## Not yet done (next batches / later work)
+- More series batches with web research (199 series total in series.json).
+- Series reveal UI (episode chips + episode-list sheet mirroring album/book
+  track-list sheet) once more shows are enriched.
+- Show/season favorites mirroring album hearts if wanted.
 
-TopicJsonLoader.kt:
-- The Room mirror (deleteCategory + insertAll) after an asset parse now runs
-  fire-and-forget on the loader scope instead of blocking parseAndCache, so a
-  cold browser open renders rows the moment the JSON is parsed; Room catches
-  up in the background (reloadFromAssets callers still get awaited writes).
-
-## Validation
-Structural checks (brace/paren balance) clean; CI compiles on push (local env
-forbids Gradle). Behavioral spot-checks on-device recommended next build:
-cold-open load time, lane switch latency, search toggle with WILDCARD.
+## Version note
+versionName 1.1.1, versionCode 20260921.

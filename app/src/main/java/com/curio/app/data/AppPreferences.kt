@@ -55,6 +55,7 @@ object AppPreferences {
     // the order they were picked. Feeds the Vinyl share card's "favorite
     // tracks" strip (multi-select hearts, replaces the single typed line).
     private const val KEY_ALBUM_FAV_TRACKS = "album_fav_tracks"
+    private const val KEY_BOOK_FAVORITES = "book_favorites"
     private const val KEY_THEME_MODE = "theme_mode"       // "light", "dark", "system" (v81)
     private const val KEY_CUSTOM_TAGLINE = "custom_streak_tagline"
     private const val KEY_LAST_NOTIFIED_UPDATE = "last_notified_update_version"
@@ -256,6 +257,33 @@ object AppPreferences {
     fun setFavoriteSong(context: Context, song: String) {
         prefs(context).edit().putString(KEY_FAVORITE_SONG, song).apply()
         favoriteSongState = song
+    }
+
+    // ── Book favorites (v348 — heart pick) ───────────────────────────────
+    // A single heart per book (favorite shelf), stored by book NAME (keys are
+    // the same identity the reading progress and fetched ratings use). The
+    // book notes sheet toggles it; the book share card can read it later.
+    fun getBookFavorites(context: Context): Set<String> {
+        val raw = prefs(context).getString(KEY_BOOK_FAVORITES, null) ?: return emptySet()
+        return runCatching {
+            val arr = org.json.JSONArray(raw)
+            (0 until arr.length()).mapNotNull { i -> arr.optString(i).takeIf { it.isNotBlank() } }.toSet()
+        }.getOrDefault(emptySet())
+    }
+
+    /** Toggle the favorite heart for [bookName]; returns true when it is now a favorite. */
+    fun toggleBookFavorite(context: Context, bookName: String): Boolean {
+        val cur = getBookFavorites(context).toMutableSet()
+        val added = !cur.remove(bookName)
+        if (added) cur.add(bookName)
+        persistBookFavorites(context, cur)
+        return added
+    }
+
+    private fun persistBookFavorites(context: Context, cur: Set<String>) {
+        val arr = org.json.JSONArray(cur.toList())
+        prefs(context).edit().putString(KEY_BOOK_FAVORITES, arr.toString()).apply()
+        bookFavoritesState = cur
     }
 
     // ── Album favorite tracks (v336 — heart picks) ───────────────────────
@@ -577,6 +605,10 @@ object AppPreferences {
     var displayNameState by mutableStateOf("Curious Explorer")
         internal set
     var favoriteSongState by mutableStateOf("")
+        internal set
+    // v348 — favorite books (heart pick): book names, reactive so the sheet
+    // heart + any future share-card chip update the moment it is tapped.
+    var bookFavoritesState by mutableStateOf<Set<String>>(emptySet())
         internal set
     // v336 — per-album favorite tracks (heart picks): album name → picked
     // track titles in pick order. Reactive so the sheet hearts + the Vinyl
@@ -987,6 +1019,7 @@ object AppPreferences {
         drawerConstellationState = isDrawerConstellationEnabled(context)
         displayNameState = getDisplayName(context)
         favoriteSongState = getFavoriteSong(context)
+        bookFavoritesState = getBookFavorites(context)
         albumFavTracksState = getAlbumFavoriteTracks(context)
         profileAvatarPathState = getProfileAvatarPath(context)
         customBlurEngineState = isCustomBlurEngineEnabled(context)
