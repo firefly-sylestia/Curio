@@ -75,7 +75,8 @@ Most value → least, all being added:
   "Software rendering doesn't support hardware bitmaps". Fixed with
   `.allowHardware(false)` + memory-cache DISABLED on the cover fetch
   (MoodBoardExport recipe). COMMITTED + PUSHED (`cd1533b8`).
-- **Phase 1 DONE (Spin) — committed locally, NOT pushed (user review).**
+- **Phase 1 DONE (Spin)** — committed `8920a88c`, then PUSHED on user's
+  "push and continue" (`cd1533b8..8920a88c`).
   Pure-stage + tucked-hand decisions implemented in `SpinScreen.kt`:
   - Wide branch rebuilt: editorial page header (deck identity + pool
     subtitle, hairline rule — no tear), deck stage fills the rest.
@@ -88,7 +89,16 @@ Most value → least, all being added:
     1.4) so short landscape windows compress instead of clipping.
   - Category/Filter pills flat (shadowElevation 0).
   Numbers are tunable against device screenshots.
-- Next: Phase 2 Home editorial wide layout.
+- **Phase 2 DONE (Home) — committed locally, NOT pushed (awaiting user).**
+  In `HomeScreen.kt`: `catalogTotal` hoisted beside totalSaved; the torn
+  quest-hero wrapper collapses on wide and renders the new
+  `HomeEditorialHeader` (BoxScope, comfortable 800dp column): greeting
+  kicker + ExtraBold name, Streak · Cabinet · Topics as quiet flat
+  panels (`HomeEditorialStat`, surfaceContainerLow, rounded 18, no
+  elevation, same nav as the phone stats), hairline rule. Phone hero
+  byte-identical (same brace/paren balance as HEAD). Body sections and
+  sticky pills unchanged below the header.
+- Next: Phase 3 Cabinet/Recent master-detail + multi-column grids + drag.
 
 ## Tuning knobs (Phase 1)
 - `xOff` ±73/±129 (PeekCard) — sliver width per side.
