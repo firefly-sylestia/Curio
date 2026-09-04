@@ -1458,7 +1458,7 @@ fun HomeScreen(navController: NavController) {
  * overlays the phone hero).
  */
 @Composable
-private fun BoxScope.HomeEditorialHeader(
+private fun HomeEditorialHeader(
     displayName: String,
     streakDays: Int,
     totalSaved: Int,
@@ -1469,12 +1469,17 @@ private fun BoxScope.HomeEditorialHeader(
     onTopics: () -> Unit
 ) {
     val accent = MaterialTheme.colorScheme.primary
+    // Centered inside the full-bleed wrapper so the identity column lands
+    // in the same comfortable column as the body. Plain composable (no
+    // BoxScope dependency) so call sites don't need a scoped receiver.
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.TopCenter
+    ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            // Sit in the same comfortable centered column as the body.
             .widthIn(max = WideContentMaxWidth)
-            .align(Alignment.CenterHorizontally)
             .statusBarsPadding()
             // Clear the floating menu/profile pill band.
             .padding(start = 28.dp, end = 28.dp, top = 64.dp, bottom = 22.dp)
@@ -1535,6 +1540,7 @@ private fun BoxScope.HomeEditorialHeader(
                 .height(1.dp)
                 .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
         )
+    }
     }
 }
 

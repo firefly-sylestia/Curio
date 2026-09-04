@@ -122,11 +122,11 @@ private fun RecentFeedItem.topicIdentityKey(): String = when (this) {
  * category-glyph watermark language as Home, Spin, and detail pages while
  * allowing the complete persisted recent feed to be browsed.
  */
-@Composable
 /** v-tablet — wide header footprint (editorial, no torn hero): status-bar
  *  inset plus the slim identity row below it. */
 private val RecentWideHeaderHeight = 124.dp
 
+@Composable
 fun RecentScreen(navController: NavController) {
     val entries by produceState<List<CurioEntry>>(initialValue = emptyList()) {
         try {
