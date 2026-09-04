@@ -2403,7 +2403,7 @@ private fun BookInfoSection(
         // v352 — only chapters with a real summary preview become chips on
         // the reveal row; blank-summary chapters stay in the sheet's full
         // list (they still open there) but no longer render empty boxes.
-        val chipChapters = chapters.filter { it.summary.isNotBlank() }
+        val chipChapters = chapters.orEmpty().filter { it.summary.isNotBlank() }
         if (chipChapters.isNotEmpty()) {
             BookChapterChips(
                 cat = cat,
