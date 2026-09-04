@@ -105,6 +105,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -2128,8 +2129,11 @@ private fun HeroCard(
                     // the composable scope, NOT inside the LaunchedEffect
                     // body (that lambda is suspend-only and would fail CI).
                     val context = LocalContext.current
-                    LaunchedEffect(bookName, resolved?.byline) {
-                        if (bookRating == null && bookName.isNotBlank()) {
+                    // v333 — the on-demand ★ rating also respects the book-
+                    // fetch consent toggle (it hits Google Books).
+                    val ratingFetchConsent = AppPreferences.bookFetchEnabledState
+                    LaunchedEffect(bookName, resolved?.byline, ratingFetchConsent) {
+                        if (ratingFetchConsent && bookRating == null && bookName.isNotBlank()) {
                             val stars = BookCoverFetch.fetchRatingFor(bookName, resolved?.byline)
                             if (stars != null && stars.average > 0.0) {
                                 AppPreferences.setBookRatingWithCount(
@@ -2719,6 +2723,13 @@ private fun BookCoverPoster(
         )
     }
     var coverIndex by remember(bookTitle, imageUrl) { mutableStateOf(0) }
+    // v333 — honor the Settings book-fetch consent toggle (isBookFetchEnabled,
+    // the same gate the bulk "Fetch covers" hub uses). With fetching OFF the
+    // poster serves ONLY what Coil already holds in its memory/disk cache and
+    // never reaches the network — the reveal was auto-downloading covers
+    // (and the keyless fallback URL) on every book visit even when the user
+    // never enabled fetching.
+    val bookFetchConsent = AppPreferences.bookFetchEnabledState
     // v327 — RESTORED to the ce892baa form the user confirmed renders covers
     // correctly: the AsyncImage IS the root (no gradient Box wrapper, no
     // Modifier.matchParentSize) — the caller's size/shadow modifier chain is
@@ -2730,6 +2741,9 @@ private fun BookCoverPoster(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(coverCandidates[coverIndex])
                 .crossfade(true)
+                .networkCachePolicy(
+                    if (bookFetchConsent) CachePolicy.ENABLED else CachePolicy.DISABLED
+                )
                 .build(),
             contentDescription = "Book cover",
             onError = { if (coverIndex < coverCandidates.lastIndex) coverIndex += 1 },

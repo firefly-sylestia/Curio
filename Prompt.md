@@ -1,60 +1,64 @@
-# Prompt — Implement the long-note detail lag fixes (logcat follow-up)
+# Prompt — Topic Browser: slow search, two-tier (exact + smart) results, Also-in accuracy, cover toggle
 
 ## Request
-Implement the three fixes agreed after the earlier logcat triage of the
-saved-note detail page lagging on very long notes (glass OFF): cache the
-AnnotatedString, gate layerBackdrop off when glass is off, budget the
-paper-card canvas.
+1. Search results are still slow in Topic Browser — is it the "smart"
+   (fuzzy) search? Asked: do the exact-word search; only when it yields
+   nothing fall back to the smart search, and show both searches.
+   (Clarified with the user: **show both — Exact matches on top, extra
+   typo-tolerant "Similar matches" below as their own section**.)
+2. "Also in" pills are inaccurate — the category being searched sometimes
+   doesn't show; arrange so whoever has the matching TITLE shows first.
+3. Book covers are loading even when the fetch toggle is OFF — fix.
 
-## Root causes (from the logcat triage)
-1. Saved-note bodies rebuilt a full `AnnotatedString` via
-   `buildRichAnnotated(...)` on every recomposition of their subtree.
-2. The detail page applied kyant's `.layerBackdrop(detailGlassBackdrop)`
-   UNCONDITIONALLY — with glass off there is no consumer, yet the whole
-   (potentially giant) page kept being recorded to an offscreen layer,
-   which matched the capture's idle ~60fps redraw bursts + texture-sized
-   LOS churn even with glass OFF.
-3. The paper-card decor (texture clouds + speck field, coffee stains)
-   was built per-DRAW: each redraw seeded `kotlin.random.Random`,
-   allocated 4+ radial-gradient `Brush`es, organic `Path`s and the speck
-   scatter. The canvas re-records while typing / when the page invalidates,
-   so those per-draw allocations were the large-object churn driver.
+## Root causes
+1. **Slow search** — per settled query the screen ran TWO independent
+   full-catalog scans (catHitCounts + rows) and, inside each, the fuzzy
+   pass re-split every topic's name/byline/subtype with a Regex on every
+   call (thousands of topics × 3 fields × per scan). Sorting also ignored
+   how directly the TITLE answered the query once fuzzy hits were mixed in.
+2. **Also-in** — pills were the top-6 lanes by raw hit count, so lanes
+   owning an exact title match (count 1) lost to high-count fuzzy lanes.
+3. **Covers** — `BookCoverPoster` always fetched (authored URL then the
+   Open Library fallback) and the reveal's ★ rating hit Google Books
+   unconditionally; `isBookFetchEnabled` was never consulted outside the
+   bulk hub.
 
 ## Changes
-1. `RichTextEditor.kt` — new `@Composable rememberRichAnnotated(text,
-   spans, highlightColor)` remembering the built AnnotatedString keyed on
-   its inputs. `EntryDetailScreen.kt`'s seven read-only note render sites
-   (note, review, journal, quote card, observed / surprised / learn-next
-   field notes) now use it, so parent recompositions reuse the same
-   instance and the giant `Text` can skip re-layout. The live editor keeps
-   calling `buildRichAnnotated` directly (spans change per keystroke).
-2. `EntryDetailScreen.kt` — the `layerBackdrop` capture is gated on
-   `isInScreenGlassActive()` (the same predicate the sticky pills use):
-   `.then(if (detailGlassCaptureOn) Modifier.layerBackdrop(...) else
-   Modifier)`. Holder + nullable backdrop plumbing unchanged; pills only
-   consume the capture when glass is active.
-3. `PaperCard.kt` — the decor canvas on BOTH `PaperCard` and
-   `TornPaperCard` became a `Spacer` + `Modifier.drawWithCache`: the
-   seeded geometry is BUILT once per (size, seed, palette) and only
-   REPLAYED per draw. New private `PaperTextureSpec` / `CoffeeStainsSpec`
-   holders mirror the deleted per-draw helpers with identical Random
-   sequences (byte-identical rendering per size); rules / red margin /
-   sheen replay inline from cached scalars. `key(...)` on the palette +
-   flag inputs forces a fresh cache when only those change at the same
-   size (editor color toggles). Sheen hoisted via `remember` on PaperCard.
-   Note: `TopicShareCard.kt` has its own unrelated private
-   `drawPaperTexture(palette)` — untouched.
+1. **TopicDatabaseScreen.kt** — search is now ONE catalog scan per settled
+   needle (`SearchPass` produceState replaces the double produceState):
+   - word lists pre-split ONCE per topic at index build (`IndexedTopic`
+     nameWords/bylineWords/subtypeWords); fuzzy checks run against the
+     retained lists, no per-query Regex splits.
+   - matches split into `exact` (substring) and `similar` (typo) groups;
+     both sorted title-first via a new `titleRank` (exact title →
+     startsWith → title contains → fuzzy title → other-field match), then
+     lane-mention priority, then name. Rows render under two labelled
+     dividers: "Exact matches (N)" then "Similar matches (N)"
+     (`DatabaseRow.groupHeader` + `SearchGroupHeaderRow`); pagination and
+     content types updated to carry the dividers.
+   - per-lane totals AND exact-title counts accumulate in the same pass →
+     the filter-panel chip counts and the "Also in" pills come from
+     `SearchPass.laneHits` / `laneExactTitles` (pills sorted: lanes with a
+     title match first, then by hit count, capped 8).
+2. **TopicRevealScreen.kt** — cover + rating consent:
+   - `BookCoverPoster` reads `AppPreferences.bookFetchEnabledState` and
+     sets `ImageRequest.networkCachePolicy(DISABLED)` when the toggle is
+     off — Coil serves only cached covers and never reaches the network.
+   - the reveal's on-demand ★ rating fetch is gated on the same toggle
+     (it hits Google Books).
+3. Changelog updated (Topic Browser search groups + Also-in + cover
+   consent + the earlier perf bullets).
 
 ## Verification
 - No Gradle in this environment (forbidden; CI validates on push).
-- Brace/paren balance: all three files report ZERO imbalance vs a clean
-  HEAD baseline (PaperCard +45 parens / +15 braces, symmetric).
-- Read-backs of every edited region; call-site greps confirm no stale
-  references and no other callers of the removed helpers.
-- Changelog (20260921.txt) updated with a FIX: Performance bullet.
+- Brace/paren balance: both edited files report zero NEW imbalance vs the
+  HEAD baseline (TopicRevealScreen has a clean 0 delta; TopicDatabaseScreen
+  symmetric +56 parens/+2 braces/+3 brackets).
+- Full diff reviewed; greps confirm no stale `catHitCounts` /
+  `fuzzyContains(` / old `RankedHit` shape references remain.
 
 ## Status
-Complete. Committed and pushed. Residual (from the same triage, NOT in
-this request's scope): the detail body is still one non-lazy
-Column(verticalScroll) — a lazy/capped note renderer is the follow-up if
-the remaining hot spots persist.
+Complete. Committed and pushed. Notes for the follow-up: `topicsByCat` is
+only a produceState invalidation key (kept harmless); fuzzy scan still
+runs on every settled query per the user's "show both searches" choice —
+the pre-split word lists keep that pass cheap.
