@@ -393,12 +393,6 @@ fun HomeScreen(navController: NavController) {
             totalSaved = CurioRepositoryHolder.repo.count()
         } catch (_: Exception) {}
     }
-    // v-tablet — catalog total hoisted so BOTH the phone hero's Topics stat
-    // and the wide editorial header read it (same lazy refresh as the old
-    // hero-local count: warm cache first, then the IO recount).
-    val catalogTotal by produceState(initialValue = TopicCatalog.totalTopicCount()) {
-        value = TopicJsonLoader.countCanonicalTopics()
-    }
 
     val navInsets = WindowInsets.navigationBars.asPaddingValues()
 
@@ -484,30 +478,8 @@ fun HomeScreen(navController: NavController) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    // v-tablet — WIDE Home: the wrapper collapses around the
-                    // editorial header (no torn-banner height); phones keep
-                    // the full torn quest-hero height.
-                    .then(
-                        if (windowWidthSizeClass().isWide) Modifier
-                        else Modifier.height(homeHeroHeight + HomeQuestSheetExtent)
-                    )
+                    .height(homeHeroHeight + HomeQuestSheetExtent)
             ) {
-                // v-tablet — tablets/wide windows swap the torn-rose quest
-                // hero for the editorial Home header: greeting kicker + name
-                // and the Streak · Cabinet · Topics values as quiet flat
-                // panels under a hairline rule. Phones keep the classic hero.
-                if (windowWidthSizeClass().isWide) {
-                    HomeEditorialHeader(
-                        displayName = displayName,
-                        streakDays = streakDays,
-                        totalSaved = totalSaved,
-                        topicsTotal = catalogTotal,
-                        promoOn = promoOn,
-                        onStreak = { navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true } },
-                        onCabinet = { navController.navigateToTab(CurioRoutes.CABINET) },
-                        onTopics = { navController.navigate(CurioRoutes.DATABASE) { launchSingleTop = true } }
-                    )
-                } else {
                 // ── White under-sheet — same as the detail hero's: the
                 // sheet's torn top hides behind the opaque banner while its
                 // uneven lip reads white below the tear, and the page wash
@@ -800,14 +772,12 @@ fun HomeScreen(navController: NavController) {
                 // The menu + profile pills no longer live here — they moved
                 // to a scroll-reactive STICKY bar outside the hero (they pop
                 // out of the coral into frosted floating pills on scroll).
-                } // v-tablet — end of the phone torn-hero branch (the wide
-                //    editorial header above replaces the hero on tablets)
             }
 
             // Give the quest block a deliberate breathing room below the
             // hero's white sheet so the shuffle deck never feels pinned to
             // the torn edge.
-            Spacer(Modifier.height(if (windowWidthSizeClass().isWide) 14.dp else 26.dp))
+            Spacer(Modifier.height(26.dp))
 
             // ── Quest block — below the hero tear, above the content ────
             // "TODAY'S QUEST" eyebrow (no indicator) + the big solid Shuffle
@@ -1444,148 +1414,6 @@ fun HomeScreen(navController: NavController) {
 /** One mirrored hero watermark glyph — the banner's readable ink at a soft
  *  alpha (the saved-entry hero's HeroWatermarkGlyph role, adapted for Home:
  *  the banner ink instead of solid white). */
-// ═══════════════════════════════════════════════════════════════════════
-// v-tablet — the WIDE Home editorial header (replaces the torn-rose quest
-// hero on wide windows): greeting kicker + the user's name, the
-// Streak · Cabinet · Topics values as quiet flat panels, closed by a
-// hairline rule. Flat editorial: no tears, no banner chrome.
-// ═══════════════════════════════════════════════════════════════════════
-
-/**
- * v-tablet — wide/tablet editorial Home header. Sits in the same
- * comfortable centered column as the body; status-bar padded and clearing
- * the floating menu/profile pill band (which overlays it exactly like it
- * overlays the phone hero).
- */
-@Composable
-private fun HomeEditorialHeader(
-    displayName: String,
-    streakDays: Int,
-    totalSaved: Int,
-    topicsTotal: Int,
-    promoOn: Boolean,
-    onStreak: () -> Unit,
-    onCabinet: () -> Unit,
-    onTopics: () -> Unit
-) {
-    val accent = MaterialTheme.colorScheme.primary
-    // Centered inside the full-bleed wrapper so the identity column lands
-    // in the same comfortable column as the body. Plain composable (no
-    // BoxScope dependency) so call sites don't need a scoped receiver.
-    Box(
-        modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.TopCenter
-    ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .widthIn(max = WideContentMaxWidth)
-            .statusBarsPadding()
-            // Clear the floating menu/profile pill band.
-            .padding(start = 28.dp, end = 28.dp, top = 64.dp, bottom = 22.dp)
-    ) {
-        Text(
-            text = greetingWordForNow(),
-            style = MaterialTheme.typography.labelLarge.copy(
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = 0.3.sp
-            ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Spacer(Modifier.height(2.dp))
-        Text(
-            text = displayName,
-            style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.ExtraBold),
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Spacer(Modifier.height(22.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            HomeEditorialStat(
-                glyph = "local_fire_department",
-                value = if (promoOn) PromoMode.DEMO_STREAK.toString() else "$streakDays",
-                label = "Streak",
-                accent = accent,
-                modifier = Modifier.weight(1f),
-                onClick = onStreak
-            )
-            HomeEditorialStat(
-                glyph = CurioIcons.Inventory2,
-                value = if (promoOn) PromoMode.DEMO_SAVED.toString() else "$totalSaved",
-                label = "Cabinet",
-                accent = accent,
-                modifier = Modifier.weight(1f),
-                onClick = onCabinet
-            )
-            HomeEditorialStat(
-                glyph = CurioIcons.AutoAwesome,
-                value = "$topicsTotal",
-                label = "Topics",
-                accent = accent,
-                modifier = Modifier.weight(1f),
-                onClick = onTopics
-            )
-        }
-        Spacer(Modifier.height(20.dp))
-        // Hairline rule — the editorial seam under the identity block.
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
-        )
-    }
-    }
-}
-
-/** One quiet flat stat panel in the wide Home header. */
-@Composable
-private fun HomeEditorialStat(
-    glyph: String,
-    value: String,
-    label: String,
-    accent: Color,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        shadowElevation = 0.dp,
-        tonalElevation = 0.dp,
-        modifier = modifier
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            CurioIcon(name = glyph, tint = accent, size = 20.dp)
-            Column {
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1
-                )
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
-                )
-            }
-        }
-    }
-}
-
 @Composable
 private fun BoxScope.HomeHeroSymbol(
     glyph: String,

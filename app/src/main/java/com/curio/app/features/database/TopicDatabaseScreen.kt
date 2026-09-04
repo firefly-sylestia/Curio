@@ -11,14 +11,12 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -30,7 +28,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -40,7 +37,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.items as gridItems
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Checkbox
@@ -70,7 +66,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
@@ -91,7 +86,7 @@ import com.kyant.backdrop.backdrops.LayerBackdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.features.settings.SettingsHeroHeader
-import com.curio.app.features.settings.settingsHeroContentTopHeight
+import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
@@ -213,13 +208,17 @@ fun TopicDatabaseScreen(navController: NavController) {
     // The category UI visible under the hero: the open panel, or the compact
     // active-filter chips row whenever at least one lane is selected.
     val filterUiVisible = categoryPanelOpen || selectedCats.isNotEmpty()
+    // v-tablet — on WIDE windows (landscape tablet) the torn hero is NOT
+    // sticky: it leads the list as its first item (with the filter UI below
+    // it) and scrolls away with the rows; the pinned glass overlay + filter
+    // bar stay phone-only.
+    val wide = windowWidthSizeClass().isWide
     // v36 — the Sort/Search pills live back INSIDE the hero (their top
     // row). v42 — the Category pill moved INSIDE the hero too (beside the
     // title), so content reserves only the filter UI when it is visible.
-    // v-tablet — wide windows engage the master-detail layout (two-up
-    // result grid + reveal pane); this single gate drives it all.
-    val wide = windowWidthSizeClass().isWide
-    val contentTop = settingsHeroContentTopHeight() +
+    // v-tablet — wide: the hero + filter UI scroll as list items, so no
+    // fixed top reservation (0); phones keep the pinned-hero reservation.
+    val contentTop = if (wide) 0.dp else DatabaseHeroTotalHeight +
         (if (categoryPanelOpen) DatabaseFilterPanelHeight
          else if (selectedCats.isNotEmpty()) DatabaseChipRowHeight
          else 0.dp) + 12.dp
@@ -435,20 +434,6 @@ fun TopicDatabaseScreen(navController: NavController) {
             if (typedNeedle == searchQuery.trim().lowercase()) needle = typedNeedle
         }
     }
-    // v-tablet — the reveal pane's selected topic. Tapping a row on wide
-    // previews it here instead of navigating; phones navigate as before.
-    var paneTopic by remember { mutableStateOf<CurioTopic?>(null) }
-    // A stale preview of a topic the new query/filter no longer shows is
-    // more confusing than no preview — clear it whenever the needle or the
-    // active lane set changes.
-    LaunchedEffect(needle, effectiveCats) { paneTopic = null }
-    val onTopicTap: (CurioTopic) -> Unit = { topic ->
-        if (wide) paneTopic = topic
-        else navController.navigate(
-            CurioRoutes.revealForBrowse(topic.categoryId.routeSlug, topic.name)
-        ) { launchSingleTop = true }
-    }
-
     // v314 — typo-tolerant matching: [matchLevel] returns 0 for a plain
     // substring (strong), 1 for a fuzzy (typo-tolerated) match and null for
     // no match. Search results also PRIORITIZE any lane whose name the query
@@ -665,23 +650,6 @@ fun TopicDatabaseScreen(navController: NavController) {
         // Keep all section headers + the topic rows for this page.
         rows.filter { it.section != null || it.groupHeader != null || it.key in pageTopicKeys }
     }
-    // v-tablet — the display list drives BOTH layouts: wide windows merge
-    // consecutive topic rows into two-up pairs (the multi-column grid),
-    // phones pass rows through unchanged (each topic keeps its own slot,
-    // so the phone list is byte-identical to before).
-    val displayRows = remember(paginatedRows, wide) {
-        if (wide) buildWideRows(paginatedRows)
-        else paginatedRows.map {
-            DatabaseWideRow(
-                key = it.key,
-                section = it.section,
-                sectionCount = it.sectionCount,
-                groupHeader = it.groupHeader,
-                first = it.topic,
-                firstDone = it.done
-            )
-        }
-    }
     // Preserve the session page on the first composition after navigation, then
     // reset only when the category filter actually changes.
     var categoryInitialized by remember { mutableStateOf(false) }
@@ -791,41 +759,152 @@ fun TopicDatabaseScreen(navController: NavController) {
                 alphaScale = 0.45f
             )
         }
+        // v-tablet — hero liquid glass only exists while the hero is PINNED
+        // over the rows (phones): as a wide scrolling list item there are no
+        // fixed rows behind its pills to refract, and sampling the list layer
+        // that now CONTAINS the hero would self-capture. The backdrop is
+        // passed per placement (null on wide → opaque back pill).
+        val heroGlassOn = !wide && isLiquidGlassPillsActive() && chipGlassBackdrop != null
+        val heroFor: @Composable (LayerBackdrop?) -> Unit = { backdrop ->
+            SettingsHeroHeader(
+                title = "Topic Database",
+                subtitle = if (totalTopics > 0) "$totalTopics topics across ${catalog.size} lanes" else "Every topic, one place",
+                onBack = { navController.popBackStack() },
+                searchActive = searchActive,
+                searchQuery = searchQuery,
+                onSearchQueryChange = { searchQuery = it },
+                onCloseSearch = { searchActive = false; searchQuery = "" },
+                searchFocus = searchFocus,
+                searchPlaceholder = if (totalTopics > 0) "Search $totalTopics topics…" else "Search topics…",
+                titleAtTop = true,
+                glassBackdrop = backdrop,
+                // v42 — the Category pill lives INSIDE the hero beside the
+                // title, directly under the Sort/Search pills.
+                titleTrailing = { ink ->
+                    SettingsHeroActionPill(
+                        onClick = {
+                            if (categoryPanelOpen) catPanelQuery = ""
+                            categoryPanelOpen = !categoryPanelOpen
+                        },
+                        glyph = CurioIcons.Tune,
+                        label = if (selectedCats.isEmpty()) "Category · All"
+                                else "Categories · ${selectedCats.size}",
+                        ink = ink,
+                        // v292h — liquid glass category pill
+                        modifier = if (heroGlassOn)
+                            Modifier.liquidGlassCapsule(
+                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                                backdrop = chipGlassBackdrop
+                            )
+                        else Modifier,
+                        // v314 — chevron flips with the panel: ▾ closed, ▴ open.
+                        trailingGlyph = if (categoryPanelOpen)
+                            CurioIcons.KeyboardArrowUp
+                        else CurioIcons.KeyboardArrowDown,
+                        trailingContentDescription = if (categoryPanelOpen) "Hide category options"
+                            else "Show category options",
+                        emphasized = categoryPanelOpen || selectedCats.isNotEmpty()
+                    )
+                },
+                // Passed as a NAMED argument (not trailing-lambda syntax): the
+                // @Composable slot isn't the last parameter, and the trailing
+                // form fails to bind under K2.
+                trailing = { ink ->
+                    // v105 — the sort dropdown is gone; the hero row keeps the
+                    // Search pill only. The pet landmark rides the header with
+                    // the search box: the pet still walks over and pokes it, and
+                    // the tour's Browse-Topics stop points at it.
+                    PetLandmark(
+                        id = "search",
+                        kind = PetLandmarks.Kind.FUN,
+                        screen = "database"
+                    ) { lm ->
+                        SettingsHeroActionPill(
+                            onClick = { searchActive = true },
+                            glyph = CurioIcons.Search,
+                            contentDescription = "Search topics",
+                            ink = ink,
+                            modifier = lm.then(
+                                // v292h — liquid glass search pill matching the
+                                // back button and page nav pills.
+                                if (heroGlassOn)
+                                    Modifier.liquidGlassCapsule(
+                                        MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                                        backdrop = chipGlassBackdrop
+                                    )
+                                else Modifier
+                            ),
+                            // v85 — emphasized hero fill (the hero action-pill
+                            // language).
+                            emphasized = true
+                        )
+                    }
+                }
+            )
+        }
         // ── Scroll content — fills the screen, runs under the ragged tear.
-        // v-tablet — wide windows split the page into a MASTER column (the
-        // scrolling results, two-up on wide) and a REVEAL pane beside it;
-        // phones keep the full-width list exactly as before. The master
-        // stays in PLAIN Box scope (no Row wrapper) so the overlays' align
-        // + AnimatedVisibility calls resolve exactly like the phone layout;
-        // on wide the master reserves the pane's lane via end padding.
         ScreenEntrance {
-            Box(modifier = Modifier.fillMaxSize()) {
-                // ── Master column — the scrolling result list ────────────
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        // Wide: reserve the reveal pane's lane on the right
-                        // (344dp pane + 12dp gap + 28dp page margin) so the
-                        // overlays align to the LIST, not the whole window.
-                        .padding(end = if (wide) 384.dp else 0.dp)
-                ) {
             LazyColumn(
                 state = listState,
                 // v245 — the glass hero pills sample this local capture to
                 // refract the scrolling rows, so record whenever liquid glass
                 // is on (not gated on the filter UI being visible).
                 modifier = Modifier.fillMaxSize()
-                    .then(if (isLiquidGlassPillsActive())
+                    // v-tablet — on wide the hero lives INSIDE this list, so
+                    // it must NOT record into the capture its own pills would
+                    // sample (self-sample cycle): the layer is phone-only.
+                    .then(if (isLiquidGlassPillsActive() && !wide)
                         Modifier.layerBackdrop(chipGlassBackdrop)
                     else Modifier),
                 contentPadding = PaddingValues(
-                    start = if (wide) 16.dp else wideContentEdgePadding(),
-                    end = if (wide) 12.dp else wideContentEdgePadding(),
+                    start = wideContentEdgePadding(),
+                    end = wideContentEdgePadding(),
                     top = contentTop,
                     bottom = 24.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
+                // v-tablet — WIDE windows: the torn hero (and the open
+                // category filter UI) lead the list and scroll away with the
+                // rows; phones keep the pinned overlay + fixed reservation.
+                if (wide) {
+                    item(key = "hero", contentType = "hero") {
+                        heroFor(backdrop = null)
+                    }
+                    if (filterUiVisible) {
+                        item(key = "filter-ui", contentType = "filter-ui") {
+                            if (categoryPanelOpen) {
+                                Box(Modifier.fillMaxWidth()) {
+                                    DatabaseCategoryPanel(
+                                        categories = visibleCategories,
+                                        counts = chips.associate { it.first.id to it.second },
+                                        query = catPanelQuery,
+                                        onQueryChange = { catPanelQuery = it },
+                                        selected = effectiveCats,
+                                        onToggle = { id ->
+                                            commitCats { current -> if (id in current) current - id else current + id }
+                                        },
+                                        onClearAll = {
+                                            commitCats { emptySet() }
+                                            catPanelQuery = ""
+                                        },
+                                        onDone = { categoryPanelOpen = false },
+                                        restTop = 0.dp
+                                    )
+                                }
+                            } else if (selectedCats.isNotEmpty()) {
+                                Box(Modifier.fillMaxWidth()) {
+                                    ActiveFilterChips(
+                                        categories = visibleCategories.filter { it.id in effectiveCats },
+                                        onRemove = { id -> commitCats { current -> current - id } },
+                                        onClearAll = { commitCats { emptySet() } },
+                                        restTop = 0.dp
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
                 // ── Loading / empty / list states ──────────────────────────
                 // Catalog parsing and indexing are separate background steps.
                 // Keep the loading state through both so the intermediate
@@ -913,7 +992,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                         }
                     } else {
                         items(
-                        displayRows,
+                        paginatedRows,
                         key = { it.key },
                         // v49 — section headers and topic rows reuse their own
                         // LazyColumn slots instead of being treated as one
@@ -934,35 +1013,42 @@ fun TopicDatabaseScreen(navController: NavController) {
                                 cat = row.section,
                                 count = row.sectionCount
                             )
-                            row.first != null -> DatabaseTopicRowSlot(
-                                first = row.first,
-                                firstDone = row.firstDone,
-                                second = row.second,
-                                secondDone = row.secondDone,
-                                // Wide: preview in the reveal pane; phones
-                                // navigate to the read-only reveal route.
-                                onTopicTap = onTopicTap
+                            row.topic != null -> DatabaseTopicRow(
+                                cat = CurioCategories.byId(row.topic.categoryId),
+                                topic = row.topic,
+                                done = row.done,
+                                onClick = {
+                                    // Browse-Topics mode: the reveal opens
+                                    // read-only (no explore, no recents
+                                    // recording) and Back always returns here
+                                    // with the scroll position restored.
+                                    navController.navigate(
+                                        CurioRoutes.revealForBrowse(
+                                            row.topic.categoryId.routeSlug,
+                                            row.topic.name
+                                        )
+                                    ) { launchSingleTop = true }
+                                }
                             )
                         }
                     }
                 }
                 }
             }
-            // ── Master-scoped overlays — live over the LIST, clear of the
-            //    reveal pane on wide ─────────────────────────────────────
-            // Side scroll indicator — speed-scrolling knob (v26) with the
-            // A–Z fast-scroller rail (tap it to open, tap a letter to jump).
-            CurioVerticalScrollIndicator(
-                state = listState.scrollIndicatorState,
-                onScrollBy = { listState.dispatchRawDelta(it) },
-                alphabet = alphabetLetters,
-                activeAlphabetIndex = activeAlphabetIndex,
-                onAlphabetSelect = onAlphabetSelect,
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .fillMaxHeight()
-                    .padding(top = contentTop, bottom = 16.dp)
-            )
+        }
+        // Side scroll indicator — speed-scrolling knob (v26) with the A–Z
+        // fast-scroller rail (tap the knob to open it, tap a letter to jump).
+        CurioVerticalScrollIndicator(
+            state = listState.scrollIndicatorState,
+            onScrollBy = { listState.dispatchRawDelta(it) },
+            alphabet = alphabetLetters,
+            activeAlphabetIndex = activeAlphabetIndex,
+            onAlphabetSelect = onAlphabetSelect,
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight()
+                .padding(top = contentTop, bottom = 16.dp)
+        )
 
         // ── Floating back-to-top arrow (v26) — once the list is scrolled
         // down a ways (≈ a full screen of rows), a small arrow floats at the
@@ -980,8 +1066,10 @@ fun TopicDatabaseScreen(navController: NavController) {
             modifier = Modifier
                 // Floating just below the pinned chip bar, centered over the
                 // list — clear of the scroll-indicator strip on the right.
+                // v-tablet — on wide the hero scrolled away by the time this
+                // appears, so it floats just under the status-bar inset.
                 .align(Alignment.TopCenter)
-                .padding(top = settingsHeroContentTopHeight() + 74.dp)
+                .padding(top = if (wide) 90.dp else DatabaseHeroTotalHeight + 74.dp)
         ) {
             Surface(
                 onClick = {
@@ -1018,6 +1106,9 @@ fun TopicDatabaseScreen(navController: NavController) {
         // the compact active-filter chips row whenever lanes are selected.
         // Only the active lanes ever render chips now — searching shows no
         // auto-opened every-lane bar, matching the user's request.
+        // v-tablet — the PINNED filter UI is phone-only: wide windows
+        // compose it as a scrolling list item right under the hero instead.
+        if (!wide) {
         AnimatedVisibility(
             visible = filterUiVisible,
             enter = slideInVertically(
@@ -1057,126 +1148,34 @@ fun TopicDatabaseScreen(navController: NavController) {
                 )
             }
         }
+        }
 
-            // ── v294 — FLOATING PAGE NAV: reusable liquid glass component ──
-            if (totalPages > 1) {
-                LiquidGlassPageNav(
-                    currentPage = currentPage,
-                    totalPages = totalPages,
-                    onPageChange = { currentPage = it },
-                    visible = pageNavVisible,
-                    glassBackdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 28.dp)
-                )
-            }
-                } // ── master Box close ────────────────────────────────────
-
-                // ── v-tablet — REVEAL pane: right lane beside the master
-                // (master-detail); a quiet placeholder invites the first
-                // tap. Phone: absent — rows navigate as before.
-                if (wide) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .padding(end = 28.dp)
-                    ) {
-                        DatabaseRevealPaneSlot(
-                            selected = paneTopic,
-                            doneTopics = doneTopics,
-                            contentTop = contentTop,
-                            onClose = { paneTopic = null },
-                            onOpen = onTopicTap
-                        )
-                    }
-                }
-            } // ── stage Box close (master + pane siblings) ─────────────────
-        } // ── ScreenEntrance close ─────────────────────────────────────────
+        // ── v294 — FLOATING PAGE NAV: reusable liquid glass component ──
+        if (totalPages > 1) {
+            LiquidGlassPageNav(
+                currentPage = currentPage,
+                totalPages = totalPages,
+                onPageChange = { currentPage = it },
+                visible = pageNavVisible,
+                glassBackdrop = if (isLiquidGlassPillsActive() && !wide) chipGlassBackdrop else null,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 28.dp)
+            )
+        }
         // Hold-to-jump state
         var showPagePicker by remember { mutableStateOf(false) }
 
-// ── Torn rose hero on top — rows disappear under the tear. v36 —
-        // the Sort dropdown + Search pill ride the hero's top row again
-        // (they briefly sat in a below-hero row in v33; the user wanted
-        // them back on the banner), the title stays at the TOP
-        // (titleAtTop), and the search pill still morphs the hero into a
-        // search field while active.
-        SettingsHeroHeader(
-            title = "Topic Database",
-            subtitle = if (totalTopics > 0) "$totalTopics topics across ${catalog.size} lanes" else "Every topic, one place",
-            onBack = { navController.popBackStack() },
-            searchActive = searchActive,
-            searchQuery = searchQuery,
-            onSearchQueryChange = { searchQuery = it },
-            onCloseSearch = { searchActive = false; searchQuery = "" },
-            searchFocus = searchFocus,
-            searchPlaceholder = if (totalTopics > 0) "Search $totalTopics topics…" else "Search topics…",
-            titleAtTop = true,
-            glassBackdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null,
-            // v42 — the Category pill lives INSIDE the hero beside the
-            // title, directly under the Sort/Search pills.
-            titleTrailing = { ink ->
-                SettingsHeroActionPill(
-                    onClick = {
-                        if (categoryPanelOpen) catPanelQuery = ""
-                        categoryPanelOpen = !categoryPanelOpen
-                    },
-                    glyph = CurioIcons.Tune,
-                    label = if (selectedCats.isEmpty()) "Category · All"
-                            else "Categories · ${selectedCats.size}",
-                    ink = ink,
-                    // v292h — liquid glass category pill
-                    modifier = if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
-                        Modifier.liquidGlassCapsule(
-                            MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
-                            backdrop = chipGlassBackdrop
-                        )
-                    else Modifier,
-                    // v314 — chevron flips with the panel: ▾ closed, ▴ open.
-                    trailingGlyph = if (categoryPanelOpen)
-                        CurioIcons.KeyboardArrowUp
-                    else CurioIcons.KeyboardArrowDown,
-                    trailingContentDescription = if (categoryPanelOpen) "Hide category options"
-                        else "Show category options",
-                    emphasized = categoryPanelOpen || selectedCats.isNotEmpty()
-                )
-            },
-            // Passed as a NAMED argument (not trailing-lambda syntax): the
-            // @Composable slot isn't the last parameter, and the trailing
-            // form fails to bind under K2.
-            trailing = { ink ->
-                // v105 — the sort dropdown is gone; the hero row keeps the
-                // Search pill only. The pet landmark rides the header with
-                // the search box: the pet still walks over and pokes it, and
-                // the tour's Browse-Topics stop points at it.
-                PetLandmark(
-                    id = "search",
-                    kind = PetLandmarks.Kind.FUN,
-                    screen = "database"
-                ) { lm ->
-                    SettingsHeroActionPill(
-                        onClick = { searchActive = true },
-                        glyph = CurioIcons.Search,
-                        contentDescription = "Search topics",
-                        ink = ink,
-                        modifier = lm.then(
-                            // v292h — liquid glass search pill matching the
-                            // back button and page nav pills.
-                            if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
-                                Modifier.liquidGlassCapsule(
-                                    MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
-                                    backdrop = chipGlassBackdrop
-                                )
-                            else Modifier
-                        ),
-                        // v85 — emphasized hero fill (the hero action-pill
-                        // language).
-                        emphasized = true
-                    )
-                }
-            }
-        )
+// ── Torn rose hero — phone-only pinned overlay: rows disappear under the
+        // tear. v36 — the Sort/Search pills ride the hero's top row, the
+        // title stays at the TOP (titleAtTop), and the search pill still
+        // morphs the hero into a search field while active.
+        // v-tablet — WIDE windows scroll the hero as the list's first item
+        // instead (heroFor above), so this pinned overlay only composes on
+        // phones where the list reserves its footprint.
+        if (!wide) {
+            heroFor(backdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null)
+        }
     }
 }
 
@@ -1340,6 +1339,9 @@ private fun editDistance(a: String, b: String): Int {
 // the hero opens a collapsed-by-default PANEL (own tiny search box + checkbox
 // multi-select); once lanes are selected, a compact ACTIVE-FILTER chips row
 // sits under the hero with one-tap removal.
+private val DatabaseHeroTotalHeight = SettingsHeroTotalHeight
+/** Where the category UI (panel or active-filter chips) rests under the hero. */
+private val DatabaseChipBarRestTop = DatabaseHeroTotalHeight + 4.dp
 /** The active-filter chips row's layout height — content starts below it. */
 private val DatabaseChipRowHeight = 52.dp
 /** The category PANEL's layout height — search header + scrollable checkbox
@@ -1371,7 +1373,11 @@ private const val BackToTopRowThreshold = 10
 private fun BoxScope.ActiveFilterChips(
     categories: List<CurioCategory>,
     onRemove: (CategoryId) -> Unit,
-    onClearAll: () -> Unit
+    onClearAll: () -> Unit,
+    // v-tablet — how far below the Box top the chips sit: under the pinned
+    // hero on phones, or flush at 0 when composed as an in-list item on
+    // wide windows (the hero above it is part of the same scroll).
+    restTop: Dp = DatabaseChipBarRestTop
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -1380,7 +1386,7 @@ private fun BoxScope.ActiveFilterChips(
             .align(Alignment.TopStart)
             .fillMaxWidth()
             .padding(vertical = 6.dp)
-            .offset(y = settingsHeroContentTopHeight() + 4.dp)
+            .offset(y = restTop)
             .horizontalScroll(rememberScrollState())
     ) {
         categories.forEach { cat ->
@@ -1437,7 +1443,11 @@ private fun BoxScope.DatabaseCategoryPanel(
     selected: Set<CategoryId>,
     onToggle: (CategoryId) -> Unit,
     onClearAll: () -> Unit,
-    onDone: () -> Unit
+    onDone: () -> Unit,
+    // v-tablet — how far below the Box top the panel rests: under the
+    // pinned hero on phones, or flush at 0 when composed as an in-list item
+    // on wide windows (the hero above it is part of the same scroll).
+    restTop: Dp = DatabaseChipBarRestTop
 ) {
     val q = query.trim().lowercase()
     val shown = if (q.isEmpty()) categories
@@ -1458,7 +1468,7 @@ private fun BoxScope.DatabaseCategoryPanel(
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .padding(top = 8.dp)
-            .offset(y = settingsHeroContentTopHeight() + 4.dp)
+            .offset(y = restTop)
     ) {
         Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
             Row(
@@ -1851,350 +1861,6 @@ private fun DatabaseTopicRow(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
                 size = 20.dp
             )
-        }
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════════════
-// v-tablet — MASTER-DETAIL: the two-up result grid + the reveal pane
-// ═══════════════════════════════════════════════════════════════════════
-
-/** v-tablet — one slot in the result list: a section/group header (full
- *  width) or a topic that fills one grid cell ([second] == null) or two
- *  cells side by side. Phones build this 1:1 from the legacy rows, so the
- *  compact list is unchanged. */
-private data class DatabaseWideRow(
-    val key: String,
-    val section: CurioCategory? = null,
-    val sectionCount: Int = 0,
-    val groupHeader: SearchGroupHeader? = null,
-    val first: CurioTopic? = null,
-    val firstDone: Boolean = false,
-    val second: CurioTopic? = null,
-    val secondDone: Boolean = false
-)
-
-/** v-tablet — merges consecutive topic rows into two-up pairs (the
- *  multi-column grid on wide windows); section/group headers keep their own
- *  full-width slots so the category rhythm and the search group dividers
- *  survive. */
-private fun buildWideRows(rows: List<DatabaseRow>): List<DatabaseWideRow> {
-    val out = ArrayList<DatabaseWideRow>(rows.size)
-    var pending: DatabaseRow? = null
-    for (r in rows) {
-        if (r.topic == null) {
-            pending?.let { p ->
-                out += DatabaseWideRow(key = "t-${p.key}", first = p.topic, firstDone = p.done)
-                pending = null
-            }
-            out += DatabaseWideRow(
-                key = r.key,
-                section = r.section,
-                sectionCount = r.sectionCount,
-                groupHeader = r.groupHeader
-            )
-        } else if (pending == null) {
-            pending = r
-        } else {
-            val p = pending
-            pending = null
-            out += DatabaseWideRow(
-                key = "p-${p.key}|${r.key}",
-                first = p.topic, firstDone = p.done,
-                second = r.topic, secondDone = r.done
-            )
-        }
-    }
-    pending?.let { p ->
-        out += DatabaseWideRow(key = "t-${p.key}", first = p.topic, firstDone = p.done)
-    }
-    return out
-}
-
-/** v-tablet — renders one result slot: a full-width row on phones, a
- *  two-up pair on wide. Tapping always routes through [onTopicTap]. */
-@Composable
-private fun DatabaseTopicRowSlot(
-    first: CurioTopic,
-    firstDone: Boolean,
-    second: CurioTopic?,
-    secondDone: Boolean,
-    onTopicTap: (CurioTopic) -> Unit
-) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Box(modifier = Modifier.weight(1f)) {
-            DatabaseTopicRow(
-                cat = CurioCategories.byId(first.categoryId),
-                topic = first,
-                done = firstDone,
-                onClick = { onTopicTap(first) }
-            )
-        }
-        if (second != null) {
-            Box(modifier = Modifier.weight(1f)) {
-                DatabaseTopicRow(
-                    cat = CurioCategories.byId(second.categoryId),
-                    topic = second,
-                    done = secondDone,
-                    onClick = { onTopicTap(second) }
-                )
-            }
-        }
-    }
-}
-
-/** v-tablet — the reveal pane host: a quiet placeholder invites the first
- *  tap; a selected topic renders the editorial preview panel. */
-@Composable
-private fun DatabaseRevealPaneSlot(
-    selected: CurioTopic?,
-    doneTopics: Set<String>,
-    contentTop: Dp,
-    onClose: () -> Unit,
-    onOpen: (CurioTopic) -> Unit
-) {
-    val t = selected
-    if (t == null) {
-        Box(
-            modifier = Modifier
-                .width(344.dp)
-                .fillMaxHeight()
-                .padding(top = contentTop, bottom = 24.dp)
-        ) {
-            Surface(
-                shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerLow,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(24.dp)
-                ) {
-                    CurioIcon(
-                        CurioIcons.Search, null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f),
-                        size = 40.dp
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        "Select a topic",
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        "Preview it here, then open the full reveal.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-        }
-    } else {
-        DatabaseRevealPane(
-            cat = CurioCategories.byId(t.categoryId),
-            topic = t,
-            done = "${t.categoryId.name}::${t.name}" in doneTopics,
-            contentTop = contentTop,
-            onClose = onClose,
-            onOpen = { onOpen(t) }
-        )
-    }
-}
-
-/** v-tablet — the editorial reveal pane: category identity, title, byline,
- *  teaser, synopsis and tags in a quiet panel, with an Open CTA that routes
- *  to the real (read-only) reveal. */
-@Composable
-private fun DatabaseRevealPane(
-    cat: CurioCategory,
-    topic: CurioTopic,
-    done: Boolean,
-    contentTop: Dp,
-    onClose: () -> Unit,
-    onOpen: () -> Unit
-) {
-    Surface(
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
-        modifier = Modifier
-            .width(344.dp)
-            .fillMaxHeight()
-            .padding(top = contentTop, bottom = 24.dp)
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            // ── Pane header — category chip + close ──────────────────────
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 18.dp, end = 12.dp, top = 14.dp, bottom = 4.dp)
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(50),
-                    color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                    ) {
-                        CurioIcon(
-                            cat.iconGlyph, null,
-                            tint = cat.categoryInk(),
-                            size = 14.dp
-                        )
-                        Text(
-                            cat.displayName,
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                            color = cat.categoryInk()
-                        )
-                    }
-                }
-                Spacer(Modifier.weight(1f))
-                Surface(
-                    onClick = onClose,
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                        CurioIcon(
-                            CurioIcons.Close, "Close preview",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            size = 18.dp
-                        )
-                    }
-                }
-            }
-            // ── Scrollable body ──────────────────────────────────────────
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 18.dp, vertical = 10.dp)
-            ) {
-                Text(
-                    topic.name,
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                val meta = listOfNotNull(
-                    topic.byline.takeIf { it.isNotBlank() },
-                    topic.subtype.takeIf { it.isNotBlank() }
-                )
-                if (meta.isNotEmpty()) {
-                    Spacer(Modifier.height(6.dp))
-                    Text(
-                        meta.joinToString(" · "),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                if (done) {
-                    Spacer(Modifier.height(10.dp))
-                    Surface(
-                        shape = RoundedCornerShape(50),
-                        color = curioSageInk().copy(alpha = 0.16f)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                        ) {
-                            CurioIcon(
-                                CurioIcons.Check, null,
-                                tint = curioSageInk(),
-                                size = 12.dp
-                            )
-                            Text(
-                                "explored",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = curioSageInk()
-                            )
-                        }
-                    }
-                }
-                Spacer(Modifier.height(14.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(1.dp)
-                        .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
-                )
-                Spacer(Modifier.height(14.dp))
-                Text(
-                    topic.teaser,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                topic.synopsis?.takeIf { it.isNotBlank() }?.let { syn ->
-                    Spacer(Modifier.height(10.dp))
-                    Text(
-                        syn,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                if (topic.tags.isNotEmpty()) {
-                    Spacer(Modifier.height(12.dp))
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        topic.tags.forEach { tag ->
-                            Surface(
-                                shape = RoundedCornerShape(50),
-                                color = MaterialTheme.colorScheme.surfaceContainerHigh
-                            ) {
-                                Text(
-                                    tag,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-            // ── CTA footer ───────────────────────────────────────────────
-            Surface(
-                onClick = onOpen,
-                shape = RoundedCornerShape(50),
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 18.dp, vertical = 12.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-                ) {
-                    CurioIcon(
-                        CurioIcons.OpenInNew, null,
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        size = 16.dp
-                    )
-                    Text(
-                        "Open topic",
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
-            }
         }
     }
 }

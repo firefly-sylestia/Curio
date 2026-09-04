@@ -150,7 +150,7 @@ import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.isCurioDarkTheme
 import java.io.File
-import com.curio.app.features.settings.settingsHeroContentTopHeight
+import com.curio.app.features.settings.SettingsHeroTotalHeight
 
 /** One editable color in the palette — its grid key, name and hex. */
 private data class PaletteSlot(val key: Char, val name: String)
@@ -651,11 +651,25 @@ fun PetDesignerScreen(navController: NavController) {
             contentPadding = PaddingValues(
                 start = edgePad,
                 end = edgePad,
-                top = settingsHeroContentTopHeight(),
+                // v-tablet — wide (landscape tablet): the torn hero leads the
+                // list as its first item and scrolls away (the toolbar stays
+                // pinned on top); phones keep the pinned overlay.
+                top = if (wide) 0.dp else SettingsHeroTotalHeight,
                 bottom = 16.dp
             ),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            // v-tablet — WIDE windows: the torn hero leads the list and
+            // scrolls away with it (the pinned overlay is phone-only).
+            if (wide) {
+                item(key = "hero", contentType = "hero") {
+                    SettingsHeroHeader(
+                        title = "Pet designer",
+                        subtitle = "Draw your own Curie",
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+            }
             // ── Editor page: picker trigger / Editing header (v8.56) ──
             //    The editor is the center of the screen — one dialog is the
             //    only chooser, and after that ONLY the chosen editor renders.
@@ -1187,13 +1201,17 @@ fun PetDesignerScreen(navController: NavController) {
         // RESTORED (user request) — STICKY HERO: pinned on top while the
         // editor list scrolls behind the tear. Glass back pill refracts
         // the captured content.
-        SettingsHeroHeader(
-            title = "Pet designer",
-            subtitle = "Draw your own Curie",
-            onBack = { navController.popBackStack() },
-            compact = wide,
-            glassBackdrop = petGlassBackdrop
-        )
+        // v-tablet — the pinned overlay is phone-only; wide windows scroll
+        // the hero as the list's first item instead.
+        if (!wide) {
+            SettingsHeroHeader(
+                title = "Pet designer",
+                subtitle = "Draw your own Curie",
+                onBack = { navController.popBackStack() },
+                compact = wide,
+                glassBackdrop = petGlassBackdrop
+            )
+        }
 
         // v156 — the floating action capsule pinned to the TOP of the
         // screen: save / undo / redo / reset / share / import. At rest it

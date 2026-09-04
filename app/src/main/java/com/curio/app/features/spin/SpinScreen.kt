@@ -20,9 +20,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
@@ -1152,13 +1150,12 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         // BoxWithConstraints scope rather than inside the Row/Column below:
         // the nested layout lambdas can't resolve this scope's maxWidth as
         // an implicit receiver, which broke the CI build.
-        // v27t — the deck scales up on tablets/landscape, but only a little
-        // (cap 1.12 — the first tablet pass went to 1.6 and read as a
-        // blown-up phone deck): the sideways hand stays close to phone
-        // scale so the fan reads as a tidy stage, never a wall of cards.
+        // v27t — the deck now scales UP on tablets/landscape (cap raised
+        // from 1.0 to 1.6): the front ticket and the two peek cards grow
+        // with the stage instead of staying phone-sized in empty gutters.
         // The proportional fan keeps exactly 2 peek cards at any scale.
         val wideFit = ((maxWidth - 130.dp) / 360.dp).coerceIn(
-            if (compactHeight) 0.62f else 0.78f, 1.12f
+            if (compactHeight) 0.62f else 0.78f, 1.6f
         )
         // ── Watermark backdrop — every category glyph scattered around ──
         //    the screen in a muted shade, behind all content, so the quiet
@@ -1170,87 +1167,60 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             CurioWatermarkBackdrop(activeCat = deckCat)
         }
 
-        // ── v-tablet — WIDE / TABLET — the deck IS the page ──────────
-        // Fully redesigned wide layout (no torn hero, no page header, no
-        // bottom capsule — the first wide pass shipped an editorial title
-        // strip and the user called it noise): the SIDEWAYS deck hand
-        // (hero ticket centered with the peek strips fanned left/right
-        // behind it) with the spin orb beneath owns the full stage, and
-        // the category/filter pills FLOAT at the bottom so short
-        // landscape windows never clip them or the orb. Phones keep their
-        // vertical deck untouched.
+        // ── Landscape / tablet: side-by-side layout (v7.x) ─────────
+        //    On wide windows the bottom bar would waste horizontal space;
+        //    Categories + Filter move to a right-edge rail as tall
+        //    vertical pills, and the deck + Spin button stay centered.
         val wide = windowWidthSizeClass().isWide
         if (wide) {
-            // v-tablet — SIDEWAYS stage with NO page header (the first wide
-            // pass shipped an editorial title strip; the user called it out
-            // as noise — the deck IS the page). The hand + orb own the full
-            // stage and the category/filter pills FLOAT at the bottom, so
-            // short landscape windows can never clip them or the spin orb.
-            // The fan scales to BOTH axes: width (the wideFit cap) and the
-            // height actually left after the bottom clearance + orb, so
-            // landscape compresses the hand instead of clipping it.
-            val stageFit = ((maxHeight - 250.dp) / 470.dp).coerceIn(
-                if (compactHeight) 0.5f else 0.72f, 1.1f
-            )
-            val horizontalFit = minOf(wideFit, stageFit)
-            // ── Deck stage — the sideways hand + spin orb, centered ──
-            Box(
+            // Wide / landscape: deck centered vertically, controls below.
+            // No side rail — Categories/Filter sit as horizontal pills
+            // below the deck, same as phone but with more breathing room.
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    // Clear the floating pills (and the gesture bar) so the
-                    // orb never hides behind them on short screens.
-                    .padding(bottom = 96.dp),
-                contentAlignment = Alignment.Center
+                    .padding(bottom = 84.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    SpinDeckSection(
-                            compact = compactHeight,
-                            extraCompact = false,
-                            densityExtraCompact = false,
-                            roomy = false,
-                            horizontal = true,
-                            cat = deckCat,
-                            deckAccent = deckAccent,
-                            deckGradient = deckGradient,
-                            isMixed = isMixedDeck,
-                            mixSeed = mixSeed,
-                            displayPool = hand,
-                            cycleIndex = cycleIndex,
-                            shuffling = shuffling,
-                            shuffleProgress = shuffleProgress,
-                            landedTopic = landedTopic,
-                            opening = isOpening,
-                            enabled = filteredPool.isNotEmpty() && !shuffling,
-                            buttonPulse = buttonPulse,
-                            fitScale = horizontalFit,
-                            poolLoading = poolLoading,
-                            poolLoadFailed = poolLoadFailed,
-                            onRetryPool = { poolRetryKey++ },
-                            onCardTap = onDeckCardTap,
-                            onCycle = onDeckCycle,
-                            onSpinClick = onSpinClick
-                        )
-                    }
-                }
-            // ── Floating controls — bottom-center, clear of the gesture
-            //    bar; always visible in every orientation ─────────────
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 30.dp),
-                contentAlignment = Alignment.BottomCenter
-            ) {
+                SpinDeckSection(
+                    compact = compactHeight,
+                    extraCompact = false,
+                    densityExtraCompact = false,
+                    roomy = false,
+                    cat = deckCat,
+                    deckAccent = deckAccent,
+                    deckGradient = deckGradient,
+                    isMixed = isMixedDeck,
+                    mixSeed = mixSeed,
+                    displayPool = hand,
+                    cycleIndex = cycleIndex,
+                    shuffling = shuffling,
+                    shuffleProgress = shuffleProgress,
+                    landedTopic = landedTopic,
+                    opening = isOpening,
+                    enabled = filteredPool.isNotEmpty() && !shuffling,
+                    buttonPulse = buttonPulse,
+                    fitScale = wideFit,
+                    poolLoading = poolLoading,
+                    poolLoadFailed = poolLoadFailed,
+                    onRetryPool = { poolRetryKey++ },
+                    onCardTap = onDeckCardTap,
+                    onCycle = onDeckCycle,
+                    onSpinClick = onSpinClick
+                )
+                // Categories + Filter as horizontal pills below deck
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(top = 16.dp)
                 ) {
-                    // Category pill — floating (was under the orb, where
-                    // short landscape windows clipped it).
+                    // Category pill
                     Surface(
                         onClick = { showCategoryPicker = true },
                         shape = RoundedCornerShape(50),
                         color = deckCat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-                        shadowElevation = 0.dp
+                        shadowElevation = 3.dp
                     ) {
                         Row(
                             Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
@@ -1271,13 +1241,13 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                             )
                         }
                     }
-                    // Filter pill — floating.
+                    // Filter pill
                     Surface(
                         onClick = { showFilters = true },
                         shape = RoundedCornerShape(50),
                         color = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty())
                             deckCat.themedAccent() else deckCat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-                        shadowElevation = 0.dp
+                        shadowElevation = 3.dp
                     ) {
                         Row(
                             Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
@@ -1547,8 +1517,6 @@ private fun ColumnScope.SpinDeckSection(
     extraCompact: Boolean = false,
     densityExtraCompact: Boolean = false,
     roomy: Boolean = false,
-    // v-tablet — SIDEWAYS stage: the deck re-fans left/right (wide windows).
-    horizontal: Boolean = false,
     cat: CurioCategory,
     deckAccent: Color,
     deckGradient: List<Color>,
@@ -1606,7 +1574,6 @@ private fun ColumnScope.SpinDeckSection(
             extraCompact = extraCompact,
             densityExtraCompact = densityExtraCompact,
             roomy = roomy,
-            horizontal = horizontal,
             fitScale = fitScale,
             loading = poolLoading,
             loadFailed = poolLoadFailed,
@@ -2634,8 +2601,6 @@ private fun Carousel(
     extraCompact: Boolean = false,
     densityExtraCompact: Boolean = false,
     roomy: Boolean = false,
-    // v-tablet — sideways stage (wide windows): fan left/right, 470dp box.
-    horizontal: Boolean = false,
     fitScale: Float = 1f,
     loading: Boolean = false,
     loadFailed: Boolean = false,
@@ -2701,10 +2666,7 @@ private fun Carousel(
                 }
             }
             .height(
-                // v-tablet — sideways hand keeps the vertical deck's box
-                // breathing room so the ticket never grazes the orb.
-                if (horizontal) 470.dp * fitScale
-                else when {
+                when {
                     densityExtraCompact -> 325.dp
                     extraCompact -> 350.dp
                     compact -> 390.dp
@@ -2763,8 +2725,7 @@ private fun Carousel(
                         gradient = deckGradient,
                         cat = cat,
                         topic = topic,
-                        shuffling = shuffling,
-                        horizontal = horizontal
+                        shuffling = shuffling
                     )
                 }
             }
@@ -3464,47 +3425,21 @@ private fun PeekCard(
     gradient: List<Color>,
     cat: CurioCategory,
     topic: CurioTopic?,
-    shuffling: Boolean,
-    // v-tablet — SIDEWAYS hand (wide stage): the same strips re-fan
-    // LEFT/RIGHT behind the hero ticket instead of above/below it.
-    horizontal: Boolean = false
+    shuffling: Boolean
 ) {
-    val isTop = !horizontal && slot < 0
-    // v-tablet — in the sideways hand the LEFT pair is the outer edge that
-    // carries the readable content (mirror of `isTop` in the vertical fan).
-    val isLeft = horizontal && slot < 0
+    val isTop = slot < 0
     val far = kotlin.math.abs(slot) == 2
-    // ── Fan geometry ────────────────────────────────────────────────
-    // VERTICAL (phone): slightly lower + wider fan — the deck sits a few
-    // px closer to the spin button and the far pair spreads a touch more
-    // so each layer reads as a separate card instead of one blurred pile.
-    // v6.11 — compact screens scale fan offsets + card sizes down.
-    // SIDEWAYS (tablet): the tucked hand — each strip's CENTER sits so its
-    // outer ~110-150dp sliver clears the hero's side edge while the rest
-    // tucks UNDER the ticket (the hero draws in front at zIndex 10): near
-    // cards tuck deepest (~70% hidden), far cards splay further out but
-    // smaller + dimmer. Outer tips rise a few dp for the fan's arc. All
-    // offsets scale with the deck so proportions hold at any stage size.
-    val yOff = if (horizontal) when (slot) {
-        -2 -> -12f * scale
-        -1 -> -5f * scale
-        1 -> -5f * scale
-        else -> -12f * scale
-    } else when (slot) {
+    // Slightly lower + wider fan: the whole deck sits a few px closer to
+    // the spin button and the far pair is spread a touch more so each
+    // layer reads as a separate card instead of one blurred pile.
+    // v6.11 — compact screens scale the fan offsets + card sizes down so
+    // the deck keeps the same look, just tighter on short screens.
+    val yOff = when (slot) {
         -2 -> -178f * scale
         -1 -> -134f * scale
         1 -> 146f * scale
         else -> 188f * scale
     }
-    // v-tablet — horizontal hand x-offsets (dp at deck scale). Center sits
-    // so ~110dp (near, ∓73) / ~150dp (far, ∓129) of the strip clears the
-    // 143dp hero half-width on its side; the rest hides behind the ticket.
-    val xOff = if (horizontal) when (slot) {
-        -2 -> -129f * scale
-        -1 -> -73f * scale
-        1 -> 73f * scale
-        else -> 129f * scale
-    } else 0f
     // v6.5 — peek cards grew ~13% so the topic title inside each background
     // card has room to read instead of hiding behind the fan. Proportions
     // are kept — only the overall size went up, never the shape.
@@ -3667,16 +3602,7 @@ private fun PeekCard(
             )
             .graphicsLayer {
                 translationY = yOff.dp.toPx()
-                // v-tablet — sideways hand shifts along X instead of Y.
-                if (horizontal) translationX = xOff.dp.toPx()
-                // v-tablet — the hand tilts its outer tips UP (left pair
-                // CCW, right pair CW), slightly stronger than the vertical
-                // fan's ±1.4°/±3.5° so the splay reads at tablet scale.
-                rotationZ = if (horizontal) {
-                    when (slot) { -2 -> -5f; -1 -> -2.4f; 1 -> 2.4f; else -> 5f }
-                } else {
-                    when (slot) { -2 -> -3.5f; -1 -> -1.4f; 1 -> 1.4f; else -> 3.5f }
-                }
+                rotationZ = when (slot) { -2 -> -3.5f; -1 -> -1.4f; 1 -> 1.4f; else -> 3.5f }
                 scaleX = if (far) 0.92f else 0.98f
                 scaleY = if (far) 0.92f else 0.98f
                 // Fully opaque while the slot travels. The outgoing
@@ -3700,46 +3626,51 @@ private fun PeekCard(
                 // instead of a full-height hard slot cut, and the durations
                 // sit UNDER the ~340ms tick floor so each step completes
                 // before the next tick lands.
-                // v-tablet — the SIDEWAYS hand wipes ALONG its own axis:
-                // left cards slide in from the left and out toward the hero,
-                // right cards mirror; the vertical fan keeps its vertical
-                // wipe. Same travel + fade recipe, only the axis differs.
-                val dir = if (isTop || isLeft) -1f else 1f
-                val inMs = if (shuffling) PeekWipeInMs else PeekIdleInMs
-                val outMs = if (shuffling) PeekWipeOutMs else PeekIdleOutMs
-                val wipeIn = if (horizontal) {
-                    slideInHorizontally(
-                        animationSpec = tween(inMs, easing = FastOutSlowInEasing)
-                    ) { w -> (w * dir * PeekWipeTravel).toInt() }
-                } else {
+                val dir = if (isTop) -1f else 1f
+                if (shuffling) {
                     slideInVertically(
-                        animationSpec = tween(inMs, easing = FastOutSlowInEasing)
-                    ) { h -> (h * dir * PeekWipeTravel).toInt() }
-                }
-                val wipeOut = if (horizontal) {
-                    slideOutHorizontally(
-                        animationSpec = tween(outMs, easing = FastOutSlowInEasing)
-                    ) { w -> (w * -dir * PeekWipeTravel).toInt() }
-                } else {
+                        animationSpec = tween(PeekWipeInMs, easing = FastOutSlowInEasing)
+                    ) { height -> (height * dir * PeekWipeTravel).toInt() } +
+                    fadeIn(animationSpec = tween(PeekWipeInMs, easing = FastOutSlowInEasing)) togetherWith
                     slideOutVertically(
-                        animationSpec = tween(outMs, easing = FastOutSlowInEasing)
-                    ) { h -> (h * -dir * PeekWipeTravel).toInt() }
-                }
-                val fadeInT = fadeIn(animationSpec = tween(inMs, easing = FastOutSlowInEasing))
-                // The classic default fades across the full motion. The
-                // tail-fade option preserves travel-first, end-only fading.
-                val fadeOutT = if (tailFadeOn) {
-                    fadeOut(
-                        animationSpec = tween(
-                            durationMillis = 90,
-                            delayMillis = outMs - 90,
-                            easing = FastOutSlowInEasing
+                        animationSpec = tween(PeekWipeOutMs, easing = FastOutSlowInEasing)
+                    ) { height -> (height * -dir * PeekWipeTravel).toInt() } +
+                    // The classic default fades across the full motion. The
+                    // experimental tail-fade option preserves the newer
+                    // travel-first, end-only fade behavior.
+                    if (tailFadeOn) {
+                        fadeOut(
+                            animationSpec = tween(
+                                durationMillis = 90,
+                                delayMillis = PeekWipeOutMs - 90,
+                                easing = FastOutSlowInEasing
+                            )
                         )
-                    )
+                    } else {
+                        fadeOut(animationSpec = tween(PeekWipeOutMs, easing = FastOutSlowInEasing))
+                    } using SizeTransform(clip = false)
                 } else {
-                    fadeOut(animationSpec = tween(outMs, easing = FastOutSlowInEasing))
+                    // Idle re-fan (landing re-deal / category switch) — a
+                    // slower, softer pass in the same per-side direction.
+                    slideInVertically(
+                        animationSpec = tween(PeekIdleInMs, easing = FastOutSlowInEasing)
+                    ) { height -> (height * dir * PeekWipeTravel).toInt() } +
+                    fadeIn(animationSpec = tween(PeekIdleInMs, easing = FastOutSlowInEasing)) togetherWith
+                    slideOutVertically(
+                        animationSpec = tween(PeekIdleOutMs, easing = FastOutSlowInEasing)
+                    ) { height -> (height * -dir * PeekWipeTravel).toInt() } +
+                    if (tailFadeOn) {
+                        fadeOut(
+                            animationSpec = tween(
+                                durationMillis = 90,
+                                delayMillis = PeekIdleOutMs - 90,
+                                easing = FastOutSlowInEasing
+                            )
+                        )
+                    } else {
+                        fadeOut(animationSpec = tween(PeekIdleOutMs, easing = FastOutSlowInEasing))
+                    } using SizeTransform(clip = false)
                 }
-                wipeIn + fadeInT togetherWith wipeOut + fadeOutT using SizeTransform(clip = false)
             },
             label = "peekSlot_$slot"
         ) { currentTopic ->
@@ -3774,25 +3705,11 @@ private fun PeekCard(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(horizontal = 14.dp, vertical = 10.dp),
-                    // v-tablet — sideways-hand content rides the OUTER edge
-                    // (the only part that clears the hero), vertically
-                    // centered; the vertical fan pins to top/bottom as before.
-                    verticalArrangement = when {
-                        horizontal -> Arrangement.Center
-                        isTop -> Arrangement.Top
-                        else -> Arrangement.Bottom
-                    }
+                    verticalArrangement = if (isTop) Arrangement.Top else Arrangement.Bottom
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        // v-tablet — horizontal fan anchors content to the
-                        // visible outer side (left slots Start, right End).
-                        modifier = if (horizontal) Modifier.fillMaxWidth() else Modifier,
-                        horizontalArrangement = when {
-                            horizontal && isLeft -> Arrangement.Start
-                            horizontal -> Arrangement.End
-                            else -> Arrangement.spacedBy(8.dp)
-                        }
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         CurioIcon(
                             name = cat.iconGlyph,

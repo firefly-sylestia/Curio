@@ -87,12 +87,25 @@ fun ExperimentsScreen(navController: NavController) {
         // OUTSIDE this capture, so no self-sample cycle.
         val listState = rememberLazyListState()
         val glassBackdrop = rememberLayerBackdrop()
+        // v-tablet — the torn hero is NOT sticky on wide windows (landscape
+        // tablet): it leads the list as its first item and scrolls away with
+        // it; the pinned glass overlay stays phone-only.
+        val wide = windowWidthSizeClass().isWide
         LazyColumn(
             state = listState,
             modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
-            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = settingsHeroContentTopHeight(), bottom = 24.dp),
+            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = if (wide) 0.dp else SettingsHeroTotalHeight, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            if (wide) {
+                item(key = "hero", contentType = "hero") {
+                    SettingsHeroHeader(
+                        title = "Dev page",
+                        subtitle = "Experimental features and developer options",
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+            }
             // v223 — the "Spin visuals" section is GONE: all five
             // experiments (Main card shadow, Nav-style buttons, Top-lit deck
             // cards, Tinted deck edges, Roomier deck titles) CONCLUDED with
@@ -367,12 +380,15 @@ fun ExperimentsScreen(navController: NavController) {
         }
         // Drawn on TOP of the scroll content — rows slide under the ragged
         // tear as they scroll up. Its back pill refracts the captured rows.
-        SettingsHeroHeader(
-            title = "Dev page",
-            subtitle = "Experimental features and developer options",
-            onBack = { navController.popBackStack() },
-            glassBackdrop = glassBackdrop
-        )
+        // (Phone-only: wide windows scroll the hero as the first list item.)
+        if (!wide) {
+            SettingsHeroHeader(
+                title = "Dev page",
+                subtitle = "Experimental features and developer options",
+                onBack = { navController.popBackStack() },
+                glassBackdrop = glassBackdrop
+            )
+        }
     }
 
     // ── Ring style picker — the three 3D ring looks, single-select ──

@@ -138,21 +138,6 @@ private val SettingsHeroSheetExtent = 24.dp
  *  the hero (the hero overlays the content, letting rows disappear under
  *  the ragged tear as they scroll). */
 val SettingsHeroTotalHeight = SettingsHeroBannerHeight + SettingsHeroSheetExtent
-
-/** v-tablet — the Settings hero's flat editorial footprint on WIDE windows
- *  (status-bar inset + identity row + hairline rule; no torn banner).
- *  Shorter than the torn banner because the flat header needs no tear
- *  under-sheet. */
-val SettingsWideHeroHeight = 148.dp
-
-/** v-tablet — width-aware height for screens that reserve the hero's
- *  footprint under their content: the flat editorial header on wide
- *  windows, the torn banner + under-sheet on phones. Every settings
- *  family screen calls this for its scroll-content top padding, so the
- *  editorial tablet header lands flush with the content it rules. */
-@Composable
-fun settingsHeroContentTopHeight(): Dp =
-    if (windowWidthSizeClass().isWide) SettingsWideHeroHeight else SettingsHeroTotalHeight
 /** One mirrored hero watermark pair — the left glyph mirrors the right
  *  (the Profile/Home quest hero construction, adapted for Settings). */
 private data class SettingsHeroPair(
@@ -213,19 +198,14 @@ fun SettingsHeroHeader(
     // v31 — the extraRow slot (the Topic Database's Category pill) is gone:
     // that pill now rides its own row BELOW the hero so the banner keeps
     // its original height and the header text never moves down.
-    // v-tablet — WIDE windows wear the flat editorial header (identity row
-    // directly on the page wash): the tear shapes, rose fill and watermark
-    // collage are phone-only, and the pill/title ink resolves to the theme
-    // on-surface so flat pills read on the wash.
-    val wide = windowWidthSizeClass().isWide
     val bannerHeight = if (compact) 140.dp else SettingsHeroBannerHeight
-    val totalHeight = if (wide) SettingsWideHeroHeight else bannerHeight + SettingsHeroSheetExtent
+    val totalHeight = bannerHeight + SettingsHeroSheetExtent
     val heroTornShape = remember(SETTINGS_HERO_TEAR_SEED) { SoftTornBottomShape(SETTINGS_HERO_TEAR_SEED, bold = true) }
     val sheetShape = remember(SETTINGS_HERO_TEAR_SEED) {
         SoftTornSheetShape(SETTINGS_HERO_TEAR_SEED, lip = 10.dp, baseline = 14.dp, bold = true)
     }
-    val fill = if (wide) MaterialTheme.colorScheme.surfaceContainerHigh else settingsRoseAccent()
-    val ink = if (wide) MaterialTheme.colorScheme.onSurface else settingsReadableInk(fill)
+    val fill = settingsRoseAccent()
+    val ink = settingsReadableInk(fill)
     // v12 — AMOLED: the pure-black banner carries the rose accent through the
     // watermark collage + back pill (the black-glass language); the title
     // stays white for readability.
@@ -237,10 +217,6 @@ fun SettingsHeroHeader(
         modifier = Modifier
             .fillMaxWidth()            .height(totalHeight)
         ) {
-            // ── Phone: the torn rose banner layers (under-sheet, seam
-            // shadow, rose banner + watermark collage). Wide windows skip
-            // them entirely — the flat editorial header sits on the wash.
-            if (!wide) {
             // ── Under-sheet — the shared white paper layer, so the tear stays
             // bright beneath the rose hero in EVERY theme (light + dark). This
             // matches the app-wide hero pattern (Home uses the same warm
@@ -305,21 +281,7 @@ fun SettingsHeroHeader(
                     SettingsHeroSymbol(symbols[i * 2], BiasAlignment(-pair.biasX, pair.biasY), pair.size, -pair.rotation, pair.alpha, symbolTint)
                     SettingsHeroSymbol(symbols[i * 2 + 1], BiasAlignment(pair.biasX, pair.biasY), pair.size, pair.rotation, pair.alpha, symbolTint)
                 }
-            }
-            }
-        }
-        // v-tablet — the hairline rule that closes the flat editorial
-        // header on wide (phones: absent — the tear itself is the rule).
-        if (wide) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .align(Alignment.BottomStart)
-                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
-            )
-        }
-        Column(
+                Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .statusBarsPadding()
@@ -477,6 +439,8 @@ fun SettingsHeroHeader(
                         }
                     }
                 }
+            }
+        }
     }
 }
 
@@ -865,7 +829,7 @@ fun SettingsHubScreen(navController: NavController) {
                 state = gridState,
                 columns = if (wide) GridCells.Adaptive(minSize = 300.dp) else GridCells.Fixed(1),
                 modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
-                contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = settingsHeroContentTopHeight(), bottom = 24.dp),
+                contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight, bottom = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
