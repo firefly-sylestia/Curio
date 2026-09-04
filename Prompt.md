@@ -1,71 +1,47 @@
-# Prompt — Share-card chapter toggle, progress slider, custom-fact fixes, stars, cover, info-row wrap
+# Prompt — Logcat triage: saved-note detail lags on very long notes (no liquid glass)
 
 ## Request
-Big share-card batch (v334), plus fixing the CI compile error from the
-previous Genius-pill commit (already fixed + pushed as `8808683d`):
-1. Chapter read toggle — tapping Mark-read must be undoable (progress both ways).
-2. Chapter progress chip separate; track REAL chapters (not merged); slider
-   instead of +/- buttons; the on-card progress widget movable + theme-aware
-   with proper progress display.
-3. Custom fact usable as chapter review; fix duplicate-text bug when tapping
-   the custom-fact box; fix the box disappearing after clearing typed text.
-4. Book star fetch: stars never showed on the card; bulk fetch restarted from
-   the beginning every time.
-5. Book cover: auto-add on the share card, properly placed, user-overridable
-   (gallery / refetch with another provider / remove).
-6. Author/artist/year info below title: wrap to 2nd line when long (was cut),
-   plus width/height size adjustments.
-7. Tapping the quick fact auto-converts it into a custom fact.
-8. Fix the CI compile error and push, then continue.
+User pasted a logcat taken with liquid glass OFF and asked:
+1. What issues does the log show?
+2. In the detail view of saved notes, when the note text is very long, how
+   much lag is visible in the logs?
 
-## Decisions
-- Progress now writes `AppPreferences.setBookReadingProgressExact` (goes
-  backward; zero removes the entry) — reveal toggle + share-card slider both
-  use it so Book Notes stays in sync.
-- Chapter widget on the card already renders in the fact slot via
-  `ChapterProgressBlock` (theme-aware per style, movable via the fact move) —
-  verified, no change needed.
-- Stars: the reveal hands the fetched `bookRating` into the sheet
-  (`bookRating`/`bookRatingCount` params); the quick-fact content carries the
-  rounded rating so the card's star row renders. No re-fetch in the sheet.
-- Cover: sheet auto-loads from the topic's authored `imageUrl` (attempt 0);
-  "Refetch" bumps `coverAttempt` → skips the authored URL and hits the
-  keyless providers (Open Library first via `coverCandidates`). Gallery picker
-  writes `bookCover`; Remove clears it. Card renders a `BookCoverBadge`
-  (44×66 dp jacket, spine + sheen) top-right on every style EXCEPT Collage,
-  which feeds the polaroid photo slot (`userPhoto ?: bookCover`).
-- Info row: `ShareCardMove` gained `metaWidthFrac`/`metaHeightFrac`;
-  `moveMeta` applies the width crop; every style's meta Text now uses
-  `lines(2, move.metaHeightFrac, max = 2)` so long byline/year wraps to a
-  second line by default and the box tool offers "Info width"/"Info lines"
-  sliders when the Info row is selected (META joined `isSizable`).
+## Analysis (no code changes yet — diagnosis only)
+The pasted capture (2026-09-04 09:12:19 → 09:13:15, MainActivity) shows:
 
-## Changes
-- `AppPreferences.kt` — new `setBookReadingProgressExact` (both directions).
-- `TopicRevealScreen.kt` — Mark-read → toggle (Undo glyph when read,
-  `ch.number - 1` on un-tap); share-sheet call passes `bookImageUrl`,
-  `bookRating`, `bookRatingCount`.
-- `BookCoverFetch.kt` — `fetchRatings` skips already-cached books (resume,
-  not restart).
-- `TopicShareCard.kt` — progress slider (replaces chapter chips) with
-  dual-direction writes; `cardFactText`/`factFieldText` unified (custom +
-  chapter review render LIVE customText; empty stays empty; routeFactChange
-  writes customText for those, editedFact otherwise); tap-fact auto-convert;
-  `bookCover` param + `BookCoverBadge` + cover controls row (Change/Refetch/
-  Remove) in the content panel; quick-fact rating for book topics;
-  metaWidthFrac/metaHeightFrac + 2-line wrap on all meta sites + save/restore
-  + box-tool sliders.
-- Changelog updated (6 new bullets on top).
+- **GC storm / allocation churn** — the dominant signal. Background
+  concurrent mark-compact GC fires roughly every ~0.4–0.6 s, each cycle
+  freeing 33–76 MB; ~120 MB/s of garbage in the densest stretch
+  (09:12:23.2–24.2 freed 122 MB in ~1 s). Heap saw-tooths up to
+  111 MB live / 159 MB total (09:12:34.781). GC pauses reach ~2–5 ms.
+- **Large-object (LOS) churn during interaction** — single GCs free
+  12–44 MB of LOS objects (big arrays/bitmaps) while the user scrolls
+  (09:12:34.7–35.5: 5 GCs in 0.7 s, ~168 MB of LOS total). This is the
+  "note too long" signature: giant text/spans rebuilt per recomposition +
+  heavy paper-card canvas work.
+- **Continuous redraw bursts with zero input** — ~60 fps dispatchDraw /
+  recreateChildDisplayList bursts (09:12:20.3–24.3, 29.8–31.9) with no
+  pointer events at all; the UI never idles on the page in view.
+- **No Choreographer / "Skipped N frames" lines** in the capture, so exact
+  dropped-frame counts can't be read; jank must be inferred from GC cadence
+  + frame-log gaps. Recommend capturing `Choreographer`/gfxinfo to quantify.
 
-## Verification
-- Bracket/paren balance checked vs HEAD on all 4 touched files — symmetric
-  deltas, balanced.
-- Icons verified: Refresh, Close, PhotoLibrary, Undo, Check all exist.
-- Imports verified: roundToInt, Offset/Size/Brush, shadow/clip/Alignment.
-- No Gradle locally (project rule) — CI compiles on push; watch the Actions
-  run for TopicShareCard compile + validateTopics.
+### Code suspects for the long-note detail lag (EntryDetailScreen.kt /
+PaperCard.kt, verified by reading)
+1. Whole detail body = one NON-LAZY `Column(verticalScroll)` (hero + meta +
+   body). A giant note makes one huge always-composed subtree; every
+   invalidation above it re-records everything.
+2. Note text rendered as a single `Text(buildRichAnnotated(note, spans…))`
+   built in composition — a fresh full AnnotatedString on every
+   recomposition of that node (LOS-size arrays for long notes).
+3. `PaperCard`/`NotePaperCard` canvas work scales with card height
+   (ruled-line while-loop + `drawPaperTexture` specks/gradients per draw);
+   an unbounded-height note card redraws all of it on each invalid frame.
+4. Quote-card `onTextLayout` truncation loop mutates text state during
+   layout → measure/layout churn on cards with long quotes.
+5. Note: liquid glass OFF still shows the churn — glass is not the cause.
 
-## Follow-ups
-- Watch the CI run for this push; if it fails, fix and re-push.
-- ShareHub / EntryDetail sheet callers keep defaults (no cover/rating there) —
-  can thread bookImageUrl/bookRating there later if wanted.
+## Status
+Diagnosis delivered; no code changed. Open follow-ups: capture with
+Choreographer for frame counts; then fix (lazy body / remember AnnotatedString /
+texture budget / layout-safe truncation).
