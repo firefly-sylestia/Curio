@@ -94,12 +94,25 @@ fun UserExperimentsScreen(navController: NavController) {
         }
         val listState = rememberLazyListState()
         val glassBackdrop = rememberLayerBackdrop()
+        // v-tablet — the torn hero is NOT sticky on wide windows (landscape
+        // tablet): it leads the list as its first item and scrolls away with
+        // it; the pinned glass overlay stays phone-only.
+        val wide = windowWidthSizeClass().isWide
         LazyColumn(
             state = listState,
             modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
-            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight, bottom = 24.dp),
+            contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = if (wide) 0.dp else SettingsHeroTotalHeight, bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            if (wide) {
+                item(key = "hero", contentType = "hero") {
+                    SettingsHeroHeader(
+                        title = "Experiments",
+                        subtitle = "Try features before they ship",
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+            }
             // Liquid glass section
             item { CurioSectionLabel("Liquid glass") }
             item {
@@ -265,12 +278,16 @@ fun UserExperimentsScreen(navController: NavController) {
                 }
             }
         }
-        SettingsHeroHeader(
-            title = "Experiments",
-            subtitle = "Try features before they ship",
-            onBack = { navController.popBackStack() },
-            glassBackdrop = glassBackdrop
-        )
+        // v-tablet — pinned glass overlay is phone-only; wide windows scroll
+        // the hero as the list's first item instead.
+        if (!wide) {
+            SettingsHeroHeader(
+                title = "Experiments",
+                subtitle = "Try features before they ship",
+                onBack = { navController.popBackStack() },
+                glassBackdrop = glassBackdrop
+            )
+        }
     }
 }
 

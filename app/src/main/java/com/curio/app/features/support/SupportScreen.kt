@@ -108,6 +108,11 @@ fun SupportScreen(navController: NavController) {
         ScreenEntrance {
             val listState = rememberLazyListState()
             val glassBackdrop = rememberLayerBackdrop()
+            // v-tablet — the torn hero is NOT sticky on wide windows
+            // (landscape tablet): it leads the list as its first item and
+            // scrolls away with it; the pinned glass overlay stays
+            // phone-only.
+            val wide = windowWidthSizeClass().isWide
             LazyColumn(
                 state = listState,
                 modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
@@ -116,11 +121,20 @@ fun SupportScreen(navController: NavController) {
                 contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),
-                    top = SettingsHeroTotalHeight,
+                    top = if (wide) 0.dp else SettingsHeroTotalHeight,
                     bottom = 24.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                if (wide) {
+                    item(key = "hero", contentType = "hero") {
+                        SettingsHeroHeader(
+                            title = "Support & diagnostics",
+                            subtitle = "Reports & help",
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
+                }
                 item { CurioSectionLabel("Feedback") }
                 item {
                     CurioSettingsCard(shadowElevation = 0.dp) {
@@ -276,12 +290,16 @@ fun SupportScreen(navController: NavController) {
             // RESTORED (user request) — STICKY HERO drawn on TOP of the scroll
             // content: rows slide under the ragged tear as they scroll up, and
             // the back pill refracts them through REAL liquid glass.
-            SettingsHeroHeader(
-                title = "Support & diagnostics",
+            // v-tablet — pinned overlay is phone-only; wide windows scroll
+            // the hero as the list's first item instead.
+            if (!wide) {
+                SettingsHeroHeader(
+                    title = "Support & diagnostics",
                             subtitle = "Reports & help",
-                onBack = { navController.popBackStack() },
-                glassBackdrop = glassBackdrop
-            )
+                    onBack = { navController.popBackStack() },
+                    glassBackdrop = glassBackdrop
+                )
+            }
         }
     }
 }

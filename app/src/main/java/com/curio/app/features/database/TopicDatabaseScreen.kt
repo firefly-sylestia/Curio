@@ -205,13 +205,43 @@ fun TopicDatabaseScreen(navController: NavController) {
     }
     // Tiny search box INSIDE the panel, filtering the category list itself.
     var catPanelQuery by rememberSaveable { mutableStateOf("") }
+    // v3xx — STAGED apply: the panel's checkboxes edit a PENDING set while
+    // it is open, and the list keeps showing the COMMITTED selection — no
+    // full re-filter + scroll reset behind the panel on every tap (the lag
+    // while switching categories). Tapping Done commits the pending set
+    // once; closing the panel without Done (pill toggle) discards it. The
+    // pending set is re-seeded from the committed selection every time the
+    // panel opens (including a restored open panel).
+    var pendingCats by remember { mutableStateOf<Set<CategoryId>?>(null) }
+    LaunchedEffect(categoryPanelOpen) {
+        pendingCats = if (categoryPanelOpen) selectedCats else null
+    }
+    val onPanelToggle: (CategoryId) -> Unit = { id ->
+        val base = pendingCats ?: selectedCats
+        pendingCats = if (id in base) base - id else base + id
+    }
+    val onPanelClearAll = {
+        pendingCats = emptySet()
+        catPanelQuery = ""
+    }
+    val onPanelDone = {
+        (pendingCats ?: selectedCats).let { commitCats { it } }
+        categoryPanelOpen = false
+    }
     // The category UI visible under the hero: the open panel, or the compact
     // active-filter chips row whenever at least one lane is selected.
     val filterUiVisible = categoryPanelOpen || selectedCats.isNotEmpty()
+    // v-tablet — on WIDE windows (landscape tablet) the torn hero is NOT
+    // sticky: it leads the list as its first item (with the filter UI below
+    // it) and scrolls away with the rows; the pinned glass overlay + filter
+    // bar stay phone-only.
+    val wide = windowWidthSizeClass().isWide
     // v36 — the Sort/Search pills live back INSIDE the hero (their top
     // row). v42 — the Category pill moved INSIDE the hero too (beside the
     // title), so content reserves only the filter UI when it is visible.
-    val contentTop = DatabaseHeroTotalHeight +
+    // v-tablet — wide: the hero + filter UI scroll as list items, so no
+    // fixed top reservation (0); phones keep the pinned-hero reservation.
+    val contentTop = if (wide) 0.dp else DatabaseHeroTotalHeight +
         (if (categoryPanelOpen) DatabaseFilterPanelHeight
          else if (selectedCats.isNotEmpty()) DatabaseChipRowHeight
          else 0.dp) + 12.dp
@@ -437,7 +467,7 @@ fun TopicDatabaseScreen(navController: NavController) {
             val dn = cat.displayName.lowercase()
             dn.contains(needle) ||
                 (needle.length >= 4 && needle.contains(dn)) ||
-                fuzzyContains(dn, needle)
+                fuzzyContainsOnWords(dn, needle)
         }.map { it.id }.toSet()
     }
     // Title-first sort: exact title matches rank highest, then startsWith, then contains
@@ -449,86 +479,29 @@ fun TopicDatabaseScreen(navController: NavController) {
             else -> 3 // matched in other fields
         }
     }
-    // v313 — per-category SEARCH-HIT counts, computed off the UI thread. Feeds
-    // the category panel's per-lane counts (hits while searching, full totals
-    // while browsing) and the "Also in" suggestion pills.
-    val indexById = remember(indexedTopics) { indexedTopics.associateBy { it.topic.id } }
-    val catHitCounts by produceState<Map<CategoryId, Int>>(
-        initialValue = emptyMap(),
-        catalog,
-        indexById,
-        needle
-    ) {
-        value = if (needle.isEmpty()) emptyMap()
-        else withContext(Dispatchers.Default) {
-            val out = mutableMapOf<CategoryId, Int>()
-            catalog.forEach { (cat, topics) ->
-                val n = topics.count { t ->
-                    indexById[t.id]?.let { matchLevel(it, needle) != null } == true
-                }
-                if (n > 0) out[cat.id] = n
-            }
-            out
-        }
-    }
-    // The dynamic chip data (full per-lane totals while browsing; per-lane
-    // hit counts while searching) — feeds the category panel's counts.
-    val chips: List<Pair<CurioCategory, Int>> = remember(catalog, catHitCounts, needle) {
-        if (needle.isEmpty()) catalog.map { it.first to it.second.size }
-        else catalog.mapNotNull { (cat, _) -> catHitCounts[cat.id]?.let { cat to it } }
-    }
-    // Filtering and sorting happen on Dispatchers.Default. `remember` only
-    // caches work; it still performs the entire sort on the UI thread.
-    val rows by produceState<List<DatabaseRow>>(
-        initialValue = emptyList(),
-        catalog,
-        indexedTopics,
-        effectiveCats,
-        needle,
-        doneTopics
-    ) {
-        value = withContext(Dispatchers.Default) {
+    // v333 — ONE catalog scan per settled query produces BOTH the result
+    // rows and the per-lane stats (panel counts + "Also in" pills). The old
+    // code ran two independent full-catalog scans per query (one for counts,
+    // one for rows) and re-split every topic's fields per scan — a big slice
+    // of the "results feel slow" cost. Results are split into two labelled
+    // groups: EXACT (substring) matches first, then SIMILAR (typo-tolerant)
+    // matches — both searches shown, exact on top.
+    val topicsByCat = remember(indexedTopics) { indexedTopics.groupBy { it.category.id } }
+    // v3xx — the merged rows are recomputed on every key change (category
+    // filter, settled query, done-set) but the PREVIOUS rows stay on screen
+    // while the new set builds on [Dispatchers.Default]. produceState used
+    // to restart with an EMPTY list on each key change — flashing "No
+    // topics match" (and resetting pagination feel) between every category
+    // switch and query settle: the perceived loading lag while browsing.
+    // [searchPassReady] gates only the very first build (nothing retained).
+    var searchPass by remember { mutableStateOf(SearchPass(rows = emptyList())) }
+    var searchPassReady by remember { mutableStateOf(false) }
+    LaunchedEffect(catalog, topicsByCat, indexedTopics, effectiveCats, needle, doneTopics) {
+        val next = withContext(Dispatchers.Default) {
             val indexById = indexedTopics.associateBy { it.topic.id }
-            // v292h — when searching, collect ALL matches globally, sort by
-            // name relevance, and render flat (no category sections). When
-            // browsing, keep the per-lane A–Z order with section headers.
-            if (needle.isNotEmpty()) {
-                // SEARCH MODE: flat results sorted by relevance.
-                // v313 — the selected categories FILTER search: results come
-                // ONLY from the selected lanes (or every lane when none are
-                // selected).
-                // v314 — ranking: lanes mentioned by the query first, then
-                // strong (substring) matches before fuzzy (typo) ones, then
-                // the title-first comparator.
-                val allHits = mutableListOf<RankedHit>()
-                catalog.forEach { (cat, topics) ->
-                    if (effectiveCats.isNotEmpty() && cat.id !in effectiveCats) return@forEach
-                    topics.mapNotNull { indexById[it.id] }.forEach { indexed ->
-                        val level = matchLevel(indexed, needle)
-                        if (level != null) {
-                            allHits += RankedHit(
-                                indexed = indexed,
-                                priority = indexed.category.id in priorityCats,
-                                fuzzy = level == 1
-                            )
-                        }
-                    }
-                }
-                allHits.sortedWith(
-                    compareBy<RankedHit> { !it.priority }
-                        .thenBy { it.fuzzy }
-                        .thenComparator { a, b -> titleComparator.compare(a.indexed, b.indexed) }
-                ).take(SEARCH_RESULT_CAP).map { hit ->
-                    val indexed = hit.indexed
-                    DatabaseRow(
-                        key = indexed.topic.id,
-                        topic = indexed.topic,
-                        done = "${indexed.category.id.name}::${indexed.topic.name}" in doneTopics
-                    )
-                }
-            } else {
-                // BROWSE MODE: per-lane with section headers.
-                buildList {
+            if (needle.isEmpty()) {
+                // BROWSE MODE: per-lane with section headers (unchanged).
+                val rows = buildList {
                     catalog.forEach { (cat, topics) ->
                         if (effectiveCats.isNotEmpty() && cat.id !in effectiveCats) return@forEach
                         val shown = topics.mapNotNull { indexById[it.id] }
@@ -552,8 +525,117 @@ fun TopicDatabaseScreen(navController: NavController) {
                         }
                     }
                 }
+                SearchPass(rows = rows)
+            } else {
+                // SEARCH MODE — v313 filter: results come ONLY from the
+                // selected lanes (or every lane when none are selected); the
+                // per-lane stats still scan EVERY lane so the panel counts
+                // and "Also in" pills stay accurate.
+                val exact = ArrayList<RankedHit>()
+                val similar = ArrayList<RankedHit>()
+                val laneTotals = HashMap<CategoryId, Int>()
+                val laneExactTitles = HashMap<CategoryId, Int>()
+                catalog.forEach { (cat, topics) ->
+                    val included = effectiveCats.isEmpty() || cat.id in effectiveCats
+                    topics.mapNotNull { indexById[it.id] }.forEach { indexed ->
+                        val level = matchLevel(indexed, needle)
+                        if (level != null) {
+                            val rank = titleRank(indexed, needle)
+                            laneTotals[cat.id] = (laneTotals[cat.id] ?: 0) + 1
+                            if (rank <= 2) {
+                                laneExactTitles[cat.id] = (laneExactTitles[cat.id] ?: 0) + 1
+                            }
+                            if (included) {
+                                val hit = RankedHit(
+                                    indexed = indexed,
+                                    priority = indexed.category.id in priorityCats,
+                                    titleRank = rank
+                                )
+                                if (level == 0) exact += hit else similar += hit
+                            }
+                        }
+                    }
+                }
+                // v333 — title-first inside BOTH groups: exact title →
+                // startsWith → title contains → typo-tolerant title → matched
+                // only in other fields, so whoever has the matching title
+                // shows first.
+                val groupOrder = compareBy<RankedHit> { it.titleRank }
+                    .thenBy { !it.priority }
+                    .thenBy { it.indexed.topic.name.lowercase() }
+                exact.sortWith(groupOrder)
+                similar.sortWith(groupOrder)
+                val exactShown = exact.take(SEARCH_RESULT_CAP)
+                val similarShown = similar.take((SEARCH_RESULT_CAP - exactShown.size).coerceAtLeast(0))
+                val rows = buildList {
+                    fun rowOf(hit: RankedHit): DatabaseRow {
+                        val indexed = hit.indexed
+                        return DatabaseRow(
+                            key = indexed.topic.id,
+                            topic = indexed.topic,
+                            done = "${indexed.category.id.name}::${indexed.topic.name}" in doneTopics
+                        )
+                    }
+                    if (exactShown.isNotEmpty()) {
+                        add(
+                            DatabaseRow(
+                                key = "grp-exact",
+                                groupHeader = SearchGroupHeader("Exact matches", exactShown.size)
+                            )
+                        )
+                        exactShown.forEach { add(rowOf(it)) }
+                    }
+                    if (similarShown.isNotEmpty()) {
+                        add(
+                            DatabaseRow(
+                                key = "grp-similar",
+                                groupHeader = SearchGroupHeader("Similar matches", similarShown.size)
+                            )
+                        )
+                        similarShown.forEach { add(rowOf(it)) }
+                    }
+                }
+                SearchPass(
+                    rows = rows,
+                    laneHits = laneTotals,
+                    laneExactTitles = laneExactTitles
+                )
             }
         }
+        searchPass = next
+        searchPassReady = true
+    }
+    // The unified row list the rest of the screen consumes (pagination,
+    // scroll restore and the alphabet rail all read `rows` unchanged).
+    val rows = searchPass.rows
+    // The dynamic chip data (full per-lane totals while browsing; per-lane
+    // hit counts while searching) — feeds the category panel's counts.
+    val chips: List<Pair<CurioCategory, Int>> = remember(catalog, searchPass, needle) {
+        if (needle.isEmpty()) catalog.map { it.first to it.second.size }
+        else catalog.mapNotNull { (cat, _) -> searchPass.laneHits[cat.id]?.let { cat to it } }
+    }
+    // v333 — the "Also in" pill lanes, TITLE-aware: lanes that own a topic
+    // whose TITLE matches the query rank first (then by hit count), so the
+    // category the user is searching for is never buried under high-count
+    // fuzzy lanes. Hoisted to the composable scope (like `chips`) because
+    // remember() isn't legal inside the LazyColumn content DSL.
+    val otherLanes: List<Pair<CurioCategory, Int>> = remember(searchPass, needle, effectiveCats) {
+        if (needle.isEmpty()) emptyList()
+        else searchPass.laneHits.entries
+            .asSequence()
+            .filter { (id, n) -> n > 0 && (effectiveCats.isEmpty() || id !in effectiveCats) }
+            .sortedWith(
+                compareByDescending<Map.Entry<CategoryId, Int>> { e ->
+                    searchPass.laneExactTitles[e.key] ?: 0
+                }
+                    .thenByDescending { it.value }
+                    .thenBy { CurioCategories.byId(it.key).displayName }
+            )
+            .take(8)
+            .mapNotNull { (id, n) ->
+                CurioCategories.all.firstOrNull { it.id == id }?.let { it to n }
+            }
+            .toList()
     }
 
     // ── v293 — PAGINATION (100 per page) ─────────────────────────────
@@ -592,7 +674,7 @@ fun TopicDatabaseScreen(navController: NavController) {
     }
     val paginatedRows = remember(rows, pageTopicKeys) {
         // Keep all section headers + the topic rows for this page.
-        rows.filter { it.section != null || it.key in pageTopicKeys }
+        rows.filter { it.section != null || it.groupHeader != null || it.key in pageTopicKeys }
     }
     // Preserve the session page on the first composition after navigation, then
     // reset only when the category filter actually changes.
@@ -703,6 +785,89 @@ fun TopicDatabaseScreen(navController: NavController) {
                 alphaScale = 0.45f
             )
         }
+        // v-tablet — hero liquid glass only exists while the hero is PINNED
+        // over the rows (phones): as a wide scrolling list item there are no
+        // fixed rows behind its pills to refract, and sampling the list layer
+        // that now CONTAINS the hero would self-capture. The backdrop is
+        // passed per placement (null on wide → opaque back pill).
+        val heroGlassOn = !wide && isLiquidGlassPillsActive() && chipGlassBackdrop != null
+        val heroFor: @Composable (LayerBackdrop?) -> Unit = { backdrop ->
+            SettingsHeroHeader(
+                title = "Topic Database",
+                subtitle = if (totalTopics > 0) "$totalTopics topics across ${catalog.size} lanes" else "Every topic, one place",
+                onBack = { navController.popBackStack() },
+                searchActive = searchActive,
+                searchQuery = searchQuery,
+                onSearchQueryChange = { searchQuery = it },
+                onCloseSearch = { searchActive = false; searchQuery = "" },
+                searchFocus = searchFocus,
+                searchPlaceholder = if (totalTopics > 0) "Search $totalTopics topics…" else "Search topics…",
+                titleAtTop = true,
+                glassBackdrop = backdrop,
+                // v42 — the Category pill lives INSIDE the hero beside the
+                // title, directly under the Sort/Search pills.
+                titleTrailing = { ink ->
+                    SettingsHeroActionPill(
+                        onClick = {
+                            if (categoryPanelOpen) catPanelQuery = ""
+                            categoryPanelOpen = !categoryPanelOpen
+                        },
+                        glyph = CurioIcons.Tune,
+                        label = if (selectedCats.isEmpty()) "Category · All"
+                                else "Categories · ${selectedCats.size}",
+                        ink = ink,
+                        // v292h — liquid glass category pill
+                        modifier = if (heroGlassOn)
+                            Modifier.liquidGlassCapsule(
+                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                                backdrop = chipGlassBackdrop
+                            )
+                        else Modifier,
+                        // v314 — chevron flips with the panel: ▾ closed, ▴ open.
+                        trailingGlyph = if (categoryPanelOpen)
+                            CurioIcons.KeyboardArrowUp
+                        else CurioIcons.KeyboardArrowDown,
+                        trailingContentDescription = if (categoryPanelOpen) "Hide category options"
+                            else "Show category options",
+                        emphasized = categoryPanelOpen || selectedCats.isNotEmpty()
+                    )
+                },
+                // Passed as a NAMED argument (not trailing-lambda syntax): the
+                // @Composable slot isn't the last parameter, and the trailing
+                // form fails to bind under K2.
+                trailing = { ink ->
+                    // v105 — the sort dropdown is gone; the hero row keeps the
+                    // Search pill only. The pet landmark rides the header with
+                    // the search box: the pet still walks over and pokes it, and
+                    // the tour's Browse-Topics stop points at it.
+                    PetLandmark(
+                        id = "search",
+                        kind = PetLandmarks.Kind.FUN,
+                        screen = "database"
+                    ) { lm ->
+                        SettingsHeroActionPill(
+                            onClick = { searchActive = true },
+                            glyph = CurioIcons.Search,
+                            contentDescription = "Search topics",
+                            ink = ink,
+                            modifier = lm.then(
+                                // v292h — liquid glass search pill matching the
+                                // back button and page nav pills.
+                                if (heroGlassOn)
+                                    Modifier.liquidGlassCapsule(
+                                        MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                                        backdrop = chipGlassBackdrop
+                                    )
+                                else Modifier
+                            ),
+                            // v85 — emphasized hero fill (the hero action-pill
+                            // language).
+                            emphasized = true
+                        )
+                    }
+                }
+            )
+        }
         // ── Scroll content — fills the screen, runs under the ragged tear.
         ScreenEntrance {
             LazyColumn(
@@ -711,7 +876,10 @@ fun TopicDatabaseScreen(navController: NavController) {
                 // refract the scrolling rows, so record whenever liquid glass
                 // is on (not gated on the filter UI being visible).
                 modifier = Modifier.fillMaxSize()
-                    .then(if (isLiquidGlassPillsActive())
+                    // v-tablet — on wide the hero lives INSIDE this list, so
+                    // it must NOT record into the capture its own pills would
+                    // sample (self-sample cycle): the layer is phone-only.
+                    .then(if (isLiquidGlassPillsActive() && !wide)
                         Modifier.layerBackdrop(chipGlassBackdrop)
                     else Modifier),
                 contentPadding = PaddingValues(
@@ -722,12 +890,52 @@ fun TopicDatabaseScreen(navController: NavController) {
                 ),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
+                // v-tablet — WIDE windows: the torn hero (and the open
+                // category filter UI) lead the list and scroll away with the
+                // rows; phones keep the pinned overlay + fixed reservation.
+                if (wide) {
+                    item(key = "hero", contentType = "hero") {
+                        heroFor(backdrop = null)
+                    }
+                    if (filterUiVisible) {
+                        item(key = "filter-ui", contentType = "filter-ui") {
+                            if (categoryPanelOpen) {
+                                Box(Modifier.fillMaxWidth()) {
+                                    DatabaseCategoryPanel(
+                                        categories = visibleCategories,
+                                        counts = chips.associate { it.first.id to it.second },
+                                        query = catPanelQuery,
+                                        onQueryChange = { catPanelQuery = it },
+                                        selected = pendingCats ?: effectiveCats,
+                                        onToggle = onPanelToggle,
+                                        onClearAll = onPanelClearAll,
+                                        onDone = onPanelDone,
+                                        restTop = 0.dp
+                                    )
+                                }
+                            } else if (selectedCats.isNotEmpty()) {
+                                Box(Modifier.fillMaxWidth()) {
+                                    ActiveFilterChips(
+                                        categories = visibleCategories.filter { it.id in effectiveCats },
+                                        onRemove = { id -> commitCats { current -> current - id } },
+                                        onClearAll = { commitCats { emptySet() } },
+                                        restTop = 0.dp
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
                 // ── Loading / empty / list states ──────────────────────────
                 // Catalog parsing and indexing are separate background steps.
                 // Keep the loading state through both so the intermediate
                 // empty `rows` value never flashes "No topics match".
                 val browserLoading = catalogLoading ||
-                    (catalog.isNotEmpty() && indexedTopics.isEmpty() && totalTopics > 0)
+                    (catalog.isNotEmpty() && indexedTopics.isEmpty() && totalTopics > 0) ||
+                    // v3xx — until the FIRST row build lands there is nothing
+                    // to retain, so show the preparing note instead of a
+                    // one-frame "No topics match" flash.
+                    (catalog.isNotEmpty() && !searchPassReady)
                 if (browserLoading) {
                     item("loading") {
                         Text(
@@ -764,35 +972,21 @@ fun TopicDatabaseScreen(navController: NavController) {
                     // from — so results never hide and you can always see /
                     // jump to which categories matched. Tap = toggle that lane
                     // into the active set.
-                    if (needle.isNotEmpty()) {
-                        val others = if (effectiveCats.isNotEmpty()) {
-                            catHitCounts
-                                .filterKeys { it !in effectiveCats }
-                                .mapNotNull { (id, n) ->
-                                    CurioCategories.all.firstOrNull { it.id == id }?.let { it to n }
+                    // v333 — ordering is now TITLE-aware: lanes that own a
+                    // topic whose TITLE matches the query rank first (then by
+                    // hit count), so the category the user is searching for is
+                    // never buried under high-count fuzzy lanes.
+                    if (needle.isNotEmpty() && otherLanes.isNotEmpty()) {
+                        item(key = "search-suggestions") {
+                            // v318b — tapping an "Also in" pill SWITCHES the
+                            // filter to that single lane (replacing the
+                            // selection); no more silent add-to-set surprise.
+                            SearchSuggestionRow(
+                                hits = otherLanes,
+                                onSelect = { id ->
+                                    commitCats { setOf(id) }
                                 }
-                        } else {
-                            // Searching from All: surface the lanes with the
-                            // most hits (capped so the row stays scannable).
-                            catHitCounts
-                                .mapNotNull { (id, n) ->
-                                    CurioCategories.all.firstOrNull { it.id == id }?.let { it to n }
-                                }
-                                .sortedByDescending { it.second }
-                                .take(6)
-                        }.sortedByDescending { it.second }
-                        if (others.isNotEmpty()) {
-                            item(key = "search-suggestions") {
-                                // v318b — tapping an "Also in" pill SWITCHES the
-                                // filter to that single lane (replacing the
-                                // selection); no more silent add-to-set surprise.
-                                SearchSuggestionRow(
-                                    hits = others,
-                                    onSelect = { id ->
-                                        commitCats { setOf(id) }
-                                    }
-                                )
-                            }
+                            )
                         }
                     }
                     if (rows.isEmpty()) {
@@ -829,9 +1023,17 @@ fun TopicDatabaseScreen(navController: NavController) {
                         // LazyColumn slots instead of being treated as one
                         // interchangeable item type, so fast wheel scrolling
                         // over a 16k-row catalog doesn't churn slot types.
-                        contentType = { row -> if (row.section != null) "section" else "topic" }
+                        contentType = { row ->
+                            if (row.section != null || row.groupHeader != null) "section" else "topic"
+                        }
                     ) { row ->
                         when {
+                            // v333 — the search group dividers (Exact matches /
+                            // Similar matches) render like the section headers.
+                            row.groupHeader != null -> SearchGroupHeaderRow(
+                                label = row.groupHeader.label,
+                                count = row.groupHeader.count
+                            )
                             row.section != null -> DatabaseSectionHeader(
                                 cat = row.section,
                                 count = row.sectionCount
@@ -889,8 +1091,10 @@ fun TopicDatabaseScreen(navController: NavController) {
             modifier = Modifier
                 // Floating just below the pinned chip bar, centered over the
                 // list — clear of the scroll-indicator strip on the right.
+                // v-tablet — on wide the hero scrolled away by the time this
+                // appears, so it floats just under the status-bar inset.
                 .align(Alignment.TopCenter)
-                .padding(top = DatabaseHeroTotalHeight + 74.dp)
+                .padding(top = if (wide) 90.dp else DatabaseHeroTotalHeight + 74.dp)
         ) {
             Surface(
                 onClick = {
@@ -927,6 +1131,9 @@ fun TopicDatabaseScreen(navController: NavController) {
         // the compact active-filter chips row whenever lanes are selected.
         // Only the active lanes ever render chips now — searching shows no
         // auto-opened every-lane bar, matching the user's request.
+        // v-tablet — the PINNED filter UI is phone-only: wide windows
+        // compose it as a scrolling list item right under the hero instead.
+        if (!wide) {
         AnimatedVisibility(
             visible = filterUiVisible,
             enter = slideInVertically(
@@ -946,15 +1153,10 @@ fun TopicDatabaseScreen(navController: NavController) {
                     counts = chips.associate { it.first.id to it.second },
                     query = catPanelQuery,
                     onQueryChange = { catPanelQuery = it },
-                    selected = effectiveCats,
-                    onToggle = { id ->
-                        commitCats { current -> if (id in current) current - id else current + id }
-                    },
-                    onClearAll = {
-                        commitCats { emptySet() }
-                        catPanelQuery = ""
-                    },
-                    onDone = { categoryPanelOpen = false }
+                    selected = pendingCats ?: effectiveCats,
+                    onToggle = onPanelToggle,
+                    onClearAll = onPanelClearAll,
+                    onDone = onPanelDone
                 )
             } else if (selectedCats.isNotEmpty()) {
                 // v314 — the active-filter chips row: exactly the selected
@@ -966,6 +1168,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                 )
             }
         }
+        }
 
         // ── v294 — FLOATING PAGE NAV: reusable liquid glass component ──
         if (totalPages > 1) {
@@ -974,7 +1177,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                 totalPages = totalPages,
                 onPageChange = { currentPage = it },
                 visible = pageNavVisible,
-                glassBackdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null,
+                glassBackdrop = if (isLiquidGlassPillsActive() && !wide) chipGlassBackdrop else null,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 28.dp)
@@ -983,87 +1186,16 @@ fun TopicDatabaseScreen(navController: NavController) {
         // Hold-to-jump state
         var showPagePicker by remember { mutableStateOf(false) }
 
-// ── Torn rose hero on top — rows disappear under the tear. v36 —
-        // the Sort dropdown + Search pill ride the hero's top row again
-        // (they briefly sat in a below-hero row in v33; the user wanted
-        // them back on the banner), the title stays at the TOP
-        // (titleAtTop), and the search pill still morphs the hero into a
-        // search field while active.
-        SettingsHeroHeader(
-            title = "Topic Database",
-            subtitle = if (totalTopics > 0) "$totalTopics topics across ${catalog.size} lanes" else "Every topic, one place",
-            onBack = { navController.popBackStack() },
-            searchActive = searchActive,
-            searchQuery = searchQuery,
-            onSearchQueryChange = { searchQuery = it },
-            onCloseSearch = { searchActive = false; searchQuery = "" },
-            searchFocus = searchFocus,
-            searchPlaceholder = if (totalTopics > 0) "Search $totalTopics topics…" else "Search topics…",
-            titleAtTop = true,
-            glassBackdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null,
-            // v42 — the Category pill lives INSIDE the hero beside the
-            // title, directly under the Sort/Search pills.
-            titleTrailing = { ink ->
-                SettingsHeroActionPill(
-                    onClick = {
-                        if (categoryPanelOpen) catPanelQuery = ""
-                        categoryPanelOpen = !categoryPanelOpen
-                    },
-                    glyph = CurioIcons.Tune,
-                    label = if (selectedCats.isEmpty()) "Category · All"
-                            else "Categories · ${selectedCats.size}",
-                    ink = ink,
-                    // v292h — liquid glass category pill
-                    modifier = if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
-                        Modifier.liquidGlassCapsule(
-                            MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
-                            backdrop = chipGlassBackdrop
-                        )
-                    else Modifier,
-                    // v314 — chevron flips with the panel: ▾ closed, ▴ open.
-                    trailingGlyph = if (categoryPanelOpen)
-                        CurioIcons.KeyboardArrowUp
-                    else CurioIcons.KeyboardArrowDown,
-                    trailingContentDescription = if (categoryPanelOpen) "Hide category options"
-                        else "Show category options",
-                    emphasized = categoryPanelOpen || selectedCats.isNotEmpty()
-                )
-            },
-            // Passed as a NAMED argument (not trailing-lambda syntax): the
-            // @Composable slot isn't the last parameter, and the trailing
-            // form fails to bind under K2.
-            trailing = { ink ->
-                // v105 — the sort dropdown is gone; the hero row keeps the
-                // Search pill only. The pet landmark rides the header with
-                // the search box: the pet still walks over and pokes it, and
-                // the tour's Browse-Topics stop points at it.
-                PetLandmark(
-                    id = "search",
-                    kind = PetLandmarks.Kind.FUN,
-                    screen = "database"
-                ) { lm ->
-                    SettingsHeroActionPill(
-                        onClick = { searchActive = true },
-                        glyph = CurioIcons.Search,
-                        contentDescription = "Search topics",
-                        ink = ink,
-                        modifier = lm.then(
-                            // v292h — liquid glass search pill matching the
-                            // back button and page nav pills.
-                            if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
-                                Modifier.liquidGlassCapsule(
-                                    MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
-                                    backdrop = chipGlassBackdrop
-                                )
-                            else Modifier
-                        ),
-                        // v85 — emphasized hero fill (the hero action-pill
-                        // language).
-                        emphasized = true
-                    )
-                }
-            }
-        )
+// ── Torn rose hero — phone-only pinned overlay: rows disappear under the
+        // tear. v36 — the Sort/Search pills ride the hero's top row, the
+        // title stays at the TOP (titleAtTop), and the search pill still
+        // morphs the hero into a search field while active.
+        // v-tablet — WIDE windows scroll the hero as the list's first item
+        // instead (heroFor above), so this pinned overlay only composes on
+        // phones where the list reserves its footprint.
+        if (!wide) {
+            heroFor(backdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null)
+        }
     }
 }
 
@@ -1076,7 +1208,23 @@ private data class IndexedTopic(
     val bylineKey: String,
     val teaserKey: String,
     val tagKeys: List<String>,
-    val year: Int?
+    val year: Int?,
+    // v333 — pre-split word lists for the fuzzy (typo-tolerant) pass. The
+    // old code re-split name/byline/subtype with a Regex on EVERY search
+    // settle (thousands of topics × 3 fields × per keystroke), which was a
+    // big slice of the "results feel slow" cost. Words are split ONCE per
+    // topic at index build; the per-query fuzzy check is then pure word
+    // comparisons over these retained lists.
+    val nameWords: List<String> = splitSearchWords(nameKey),
+    val bylineWords: List<String> = splitSearchWords(bylineKey),
+    val subtypeWords: List<String> = splitSearchWords(subtypeKey)
+)
+
+/** v333 — a labelled search-result group header row ("Exact matches" /
+ *  "Similar matches") inserted between result groups while searching. */
+private data class SearchGroupHeader(
+    val label: String,
+    val count: Int
 )
 
 /** One row in the database list — a category section header or a topic. */
@@ -1090,14 +1238,27 @@ private data class DatabaseRow(
     val section: CurioCategory? = null,
     val sectionCount: Int = 0,
     val topic: CurioTopic? = null,
-    val done: Boolean = false
+    val done: Boolean = false,
+    // v333 — search group header rows (exact / similar). Non-null means the
+    // row is a labelled divider between the two result groups.
+    val groupHeader: SearchGroupHeader? = null
 )
 
-/** One search hit with its ranking inputs — lane mention + strong/fuzzy. */
+/** One search hit with its ranking inputs — title relevance + lane mention. */
 private data class RankedHit(
     val indexed: IndexedTopic,
     val priority: Boolean,
-    val fuzzy: Boolean
+    val titleRank: Int
+)
+
+/** v333 — one search pass result: the labelled row groups (already sorted &
+ *  capped) plus per-lane stats that feed the filter-panel counts and the
+ *  "Also in" pills — computed in the SAME catalog scan so the search runs
+ *  once per settled query instead of twice. */
+private data class SearchPass(
+    val rows: List<DatabaseRow>,
+    val laneHits: Map<CategoryId, Int> = emptyMap(),
+    val laneExactTitles: Map<CategoryId, Int> = emptyMap()
 )
 
 /**
@@ -1115,23 +1276,51 @@ private fun matchLevel(t: IndexedTopic, needle: String): Int? {
     return null
 }
 
+/** v333 — splits a lowercase search key into words ONCE at index build (see
+ *  [IndexedTopic]); the fuzzy pass compares tokens against these retained
+ *  lists instead of re-splitting every field with a Regex on every settled
+ *  query — re-splitting thousands of topics × 3 fields per keystroke was a
+ *  big slice of the "results feel slow" cost. */
+private val SearchWordSplit = Regex("[^a-z0-9]+")
+
+/** Splits a lowercase key into words (called once per topic at index build). */
+private fun splitSearchWords(key: String): List<String> =
+    if (key.isBlank()) emptyList() else key.split(SearchWordSplit).filter { it.isNotBlank() }
+
 /** Typo-tolerant fallback — bounded to sane query lengths so the fuzzy pass
  *  over the catalog stays cheap (it runs off the UI thread in produceState). */
 private fun fuzzyTopicMatch(t: IndexedTopic, needle: String): Boolean {
     if (needle.length < 3 || needle.length > 48) return false
-    return fuzzyContains(t.nameKey, needle) ||
-        fuzzyContains(t.bylineKey, needle) ||
-        fuzzyContains(t.subtypeKey, needle)
+    return fuzzyContainsWords(t.nameWords, needle) ||
+        fuzzyContainsWords(t.bylineWords, needle) ||
+        fuzzyContainsWords(t.subtypeWords, needle)
 }
 
-/** All query tokens must fuzzy-match some word in the field ("hary ptter"
- *  → harry + potter: transposed/skipped letters still hit). */
-private fun fuzzyContains(hay: String, needle: String): Boolean {
+/** All query tokens must fuzzy-match some word in the word list ("hary
+ *  ptter" → harry + potter: transposed/skipped letters still hit). */
+private fun fuzzyContainsWords(words: List<String>, needle: String): Boolean {
+    if (words.isEmpty()) return false
     val tokens = needle.split(' ').filter { it.isNotBlank() }
-    val words = hay.split(Regex("[^a-z0-9]+")).filter { it.isNotBlank() }
     if (tokens.size > 1) return tokens.all { tok -> words.any { fuzzyWord(it, tok) } }
     return words.any { fuzzyWord(it, needle) }
 }
+
+/** v333 — title relevance: how directly the TOPIC NAME answers the query
+ *  (0 exact → 3 typo-tolerant title → 4 matched only in other fields). The
+ *  search sorts by this FIRST inside both result groups, so whoever has the
+ *  matching title shows first. */
+private fun titleRank(t: IndexedTopic, needle: String): Int = when {
+    t.nameKey == needle -> 0
+    t.nameKey.startsWith(needle) -> 1
+    t.nameKey.contains(needle) -> 2
+    fuzzyContainsWords(t.nameWords, needle) -> 3
+    else -> 4
+}
+
+/** String convenience for callers without a prebuilt word list (lane-name
+ *  priority matching) — splits on the fly; only called for ~36 lane names. */
+private fun fuzzyContainsOnWords(hay: String, needle: String): Boolean =
+    fuzzyContainsWords(splitSearchWords(hay), needle)
 
 private fun fuzzyWord(word: String, token: String): Boolean {
     if (word == token) return true
@@ -1204,7 +1393,11 @@ private const val BackToTopRowThreshold = 10
 private fun BoxScope.ActiveFilterChips(
     categories: List<CurioCategory>,
     onRemove: (CategoryId) -> Unit,
-    onClearAll: () -> Unit
+    onClearAll: () -> Unit,
+    // v-tablet — how far below the Box top the chips sit: under the pinned
+    // hero on phones, or flush at 0 when composed as an in-list item on
+    // wide windows (the hero above it is part of the same scroll).
+    restTop: Dp = DatabaseChipBarRestTop
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -1213,7 +1406,7 @@ private fun BoxScope.ActiveFilterChips(
             .align(Alignment.TopStart)
             .fillMaxWidth()
             .padding(vertical = 6.dp)
-            .offset(y = DatabaseChipBarRestTop)
+            .offset(y = restTop)
             .horizontalScroll(rememberScrollState())
     ) {
         categories.forEach { cat ->
@@ -1270,7 +1463,11 @@ private fun BoxScope.DatabaseCategoryPanel(
     selected: Set<CategoryId>,
     onToggle: (CategoryId) -> Unit,
     onClearAll: () -> Unit,
-    onDone: () -> Unit
+    onDone: () -> Unit,
+    // v-tablet — how far below the Box top the panel rests: under the
+    // pinned hero on phones, or flush at 0 when composed as an in-list item
+    // on wide windows (the hero above it is part of the same scroll).
+    restTop: Dp = DatabaseChipBarRestTop
 ) {
     val q = query.trim().lowercase()
     val shown = if (q.isEmpty()) categories
@@ -1291,7 +1488,7 @@ private fun BoxScope.DatabaseCategoryPanel(
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .padding(top = 8.dp)
-            .offset(y = DatabaseChipBarRestTop)
+            .offset(y = restTop)
     ) {
         Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
             Row(
@@ -1519,6 +1716,37 @@ private fun SearchSuggestionRow(
                 }
             }
         }
+    }
+}
+
+/**
+ * v333 — one search-result group divider ("EXACT MATCHES · 12" / "SIMILAR
+ * MATCHES · 3") above the relevant rows: shares the section-header cadence
+ * but carries a neutral primary label instead of a category dot, so the
+ * two-tier search reads as Exact matches first, typo-tolerant Similar
+ * matches below.
+ */
+@Composable
+private fun SearchGroupHeaderRow(label: String, count: Int) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            // v27r — the section header sits higher (was 14dp top padding),
+            // tucking the label against the previous row.
+            .padding(top = 6.dp, bottom = 2.dp)
+    ) {
+        Text(
+            text = label.uppercase(),
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = "$count",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+        )
     }
 }
 

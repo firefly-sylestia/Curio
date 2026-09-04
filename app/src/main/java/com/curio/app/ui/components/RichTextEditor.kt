@@ -144,6 +144,28 @@ fun buildRichAnnotated(text: String, spans: List<TextSpan>, highlightColor: Colo
     }
 
 /**
+ * v332 — @Composable wrapper of [buildRichAnnotated] for READ-ONLY render
+ * sites (the saved-entry detail pages): remembers the built [AnnotatedString]
+ * keyed on (text, spans, highlight), so parent recompositions / scroll
+ * invalidations reuse the SAME instance instead of rebuilding a fresh
+ * AnnotatedString — with its full span-buffer allocations — on every pass
+ * (one of the long-note detail lag sources from the logcat triage: a giant
+ * note rebuilt its whole annotated string per recomposition, churning
+ * large-object allocations). Only for STATIC text whose inputs change
+ * rarely; the live editor keeps calling [buildRichAnnotated] directly
+ * because its spans legitimately change on every keystroke.
+ */
+@Composable
+fun rememberRichAnnotated(
+    text: String,
+    spans: List<TextSpan>,
+    highlightColor: Color
+): AnnotatedString =
+    remember(text, spans, highlightColor) {
+        buildRichAnnotated(text, spans, highlightColor)
+    }
+
+/**
  * Extracts the styled [TextSpan]s carried by an [AnnotatedString] — used to
  * read the editor's spans back out after Compose merges them while typing
  * (BasicTextField preserves span styles across edits, so no manual diffing).

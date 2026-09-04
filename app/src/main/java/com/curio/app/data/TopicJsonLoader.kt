@@ -213,6 +213,14 @@ object TopicJsonLoader {
                 val appCtx = appContext
                 if (appCtx != null) {
                     val db = com.curio.app.data.CurioDatabase.getInstance(appCtx)
+                    // A real asset parse is authoritative: mirror the lane so
+                    // rows removed from the JSON also leave Room (the loader
+                    // only parses a canonical lane when Room doesn't serve it,
+                    // so the delete is a no-op on a healthy lane — WILDCARD is
+                    // a merge of every lane, never mirrored, just upserted).
+                    if (id != CategoryId.WILDCARD) {
+                        db.topicDao().deleteCategory(id.name)
+                    }
                     val entities = parsed.map { com.curio.app.data.TopicEntity.fromCurioTopic(it) }
                     db.topicDao().insertAll(entities)
                 }

@@ -212,7 +212,10 @@ fun CabinetScreen(navController: NavController) {
     // moved INSIDE the hero (beside the title), so content reserves only
     // the filter UI when it is visible.
     val heroTotal = compactBannerHeight + CabinetHeroSheetExtent
-    val contentTop = heroTotal +
+    // v-tablet — wide (landscape tablet): the torn hero + filter UI lead
+    // the grid as leading items and scroll away with it, so no fixed top
+    // reservation (0); phones keep the pinned-hero reservation.
+    val contentTop = if (wide) 0.dp else heroTotal +
         (if (categoryPanelOpen) CabinetFilterPanelHeight
          else if (filterUiVisible) CabinetChipBarHeight
          else 0.dp) + 12.dp
@@ -336,6 +339,163 @@ fun CabinetScreen(navController: NavController) {
     // wash spacer registers a frame later). A stale wash is harmless — only
     // the Cabinet route reads it, and Cabinet republishes on every visit.
 
+    val cabinetTitle = when {
+        selectionMode -> "${selectedEntryIds.size} selected"
+        showLegacyOnly -> "Legacy Cabinet"
+        else -> "The Cabinet"
+    }
+    val cabinetSubtitle = when {
+        selectionMode -> "Long-press cards to select · ${if (showLegacyOnly) "legacy" else "current filter"}"
+        showLegacyOnly -> "Restored FieldMind records"
+        selectedFilters.size == 1 -> "Showing ${CurioCategories.byId(selectedFilters.first()).displayName}"
+        selectedFilters.size > 1 -> "Showing ${selectedFilters.size} categories"
+        else -> "Your saved captures"
+    }
+    // v-tablet — hero liquid glass only matters while the hero is PINNED
+    // over the scrolling cards (phones): as a wide leading grid item there
+    // are no fixed cards behind its pills to refract, and sampling the grid
+    // layer that now CONTAINS the hero would self-capture.
+    val cabinetHeroGlassOn = !wide && isLiquidGlassPillsActive() && chipGlassBackdrop != null
+    // The torn hero — one definition, two placements: the pinned overlay at
+    // the end of the page (phones, backdrop = the cards capture so its glass
+    // pills refract them) or the grid's leading scrolling item / empty-page
+    // top block on wide windows (backdrop null → opaque pills).
+    val cabinetHeroFor: @Composable (com.kyant.backdrop.backdrops.LayerBackdrop?) -> Unit = { backdrop ->
+        CabinetHeroHeader(
+            title = cabinetTitle,
+            subtitle = cabinetSubtitle,
+            activeCat = filterCat,
+            legacyMode = showLegacyOnly,
+            searchActive = searchActive,
+            searchQuery = searchQuery,
+            onSearchQueryChange = { searchQuery = it },
+            onCloseSearch = { searchActive = false; searchQuery = "" },
+            searchFocus = searchFocus,
+            compact = wide,
+            // v42 — the Category pill lives INSIDE the hero beside the
+            // title, directly under the sort/search pills; hidden while
+            // selecting (the selection pills own the top row then).
+            titleTrailing = if (selectionMode) null else { ink, backdrop ->
+                // v316 — the pill opens the category PANEL; the label reflects
+                // the current multi-select ("All" / count / Legacy).
+                val categoryLabel = when {
+                    showLegacyOnly -> "Category · Legacy"
+                    selectedFilters.isEmpty() -> "Category · All"
+                    else -> "Categories · ${selectedFilters.size}"
+                }
+                CabinetHeroActionPill(
+                    onClick = {
+                        if (categoryPanelOpen) catPanelQuery = ""
+                        categoryPanelOpen = !categoryPanelOpen
+                    },
+                    glyph = CurioIcons.Tune,
+                    label = categoryLabel,
+                    ink = ink,
+                    backdrop = backdrop,
+                    modifier = if (cabinetHeroGlassOn)
+                        Modifier.liquidGlassCapsule(
+                            MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                            backdrop = chipGlassBackdrop
+                        )
+                    else Modifier,
+                    // v316 — chevron flips with the panel: ▾ closed, ▴ open.
+                    trailingGlyph = if (categoryPanelOpen) CurioIcons.KeyboardArrowUp
+                        else CurioIcons.KeyboardArrowDown,
+                    trailingContentDescription = if (categoryPanelOpen) "Hide category options"
+                        else "Show category options",
+                    emphasized = categoryPanelOpen || selectedFilters.isNotEmpty() || showLegacyOnly
+                )
+            },
+            // Passed as a NAMED argument (not trailing-lambda syntax): the
+            // @Composable slot isn't the last parameter, and the trailing
+            // form fails to bind it under K2.
+            trailing = { ink, backdrop ->
+                if (selectionMode) {
+                    CabinetHeroActionPill(
+                        onClick = {
+                            selectedEntryIds = if (allVisibleSelected) {
+                                selectedEntryIds - categorySelectionIds
+                            } else {
+                                selectedEntryIds + categorySelectionIds
+                            }
+                        },
+                        label = if (allVisibleSelected) "Clear" else "Select all",
+                        ink = ink,
+                        backdrop = backdrop,
+                        modifier = if (cabinetHeroGlassOn)
+                            Modifier.liquidGlassCapsule(
+                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                                backdrop = chipGlassBackdrop
+                            )
+                        else Modifier,
+                        emphasized = true
+                    )
+                    CabinetHeroActionPill(
+                        onClick = {
+                            if (selectedEntryIds.isNotEmpty()) showBulkDeleteConfirm = true
+                        },
+                        label = "Delete (${selectedEntryIds.size})",
+                        ink = ink,
+                        backdrop = backdrop,
+                        modifier = if (cabinetHeroGlassOn)
+                            Modifier.liquidGlassCapsule(
+                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                                backdrop = chipGlassBackdrop
+                            )
+                        else Modifier,
+                        emphasized = true,
+                        destructive = true
+                    )
+                    CabinetHeroActionPill(
+                        onClick = { selectionMode = false; selectedEntryIds = emptySet() },
+                        glyph = CurioIcons.Close,
+                        contentDescription = "Cancel selection",
+                        ink = ink,
+                        backdrop = backdrop,
+                        modifier = if (cabinetHeroGlassOn)
+                            Modifier.liquidGlassCapsule(
+                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                                backdrop = chipGlassBackdrop
+                            )
+                        else Modifier
+                    )
+                } else {
+                    // v105 — the sort dropdown is gone; the hero row keeps
+                    // the Search pill + Recycle Bin pill.
+                    CabinetHeroActionPill(
+                        onClick = { searchActive = true },
+                        glyph = CurioIcons.Search,
+                        contentDescription = "Search captures",
+                        ink = ink,
+                        backdrop = backdrop,
+                        modifier = if (cabinetHeroGlassOn)
+                            Modifier.liquidGlassCapsule(
+                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                                backdrop = chipGlassBackdrop
+                            )
+                        else Modifier,
+                        // v85 — emphasized hero fill (the hero action-pill
+                        // language).
+                        emphasized = true
+                    )
+                    CabinetHeroActionPill(
+                        onClick = { navController.navigate(CurioRoutes.RECYCLE_BIN) },
+                        glyph = CurioIcons.Delete,
+                        contentDescription = "Recycle bin",
+                        ink = ink,
+                        backdrop = backdrop,
+                        modifier = if (cabinetHeroGlassOn)
+                            Modifier.liquidGlassCapsule(
+                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                                backdrop = chipGlassBackdrop
+                            )
+                        else Modifier
+                    )
+                }
+            },
+            glassBackdrop = backdrop
+        )
+    }
     // The hero banner runs up BEHIND the status bar (it applies its own
     // status-bar inset), so the root Box carries no status-bar padding.
     Box(
@@ -393,11 +553,19 @@ fun CabinetScreen(navController: NavController) {
                 kind = PetLandmarks.Kind.CURIOUS,
                 screen = "cabinet"
             ) { m ->
-            Box(
+            Column(
                 modifier = m
                     .fillMaxSize()
                     .padding(top = contentTop)
             ) {
+            // v-tablet — wide empty page: the torn hero leads the page (the
+            // pinned overlay is phone-only). Nothing scrolls here, so the
+            // hero simply sits above the empty state.
+            if (wide) {
+                Box(Modifier.fillMaxWidth()) {
+                    cabinetHeroFor(backdrop = null)
+                }
+            }
             MorphEntrance {
                 if (searchActive && searchQuery.isNotBlank()) {
                     // Live search came up empty — tell the user what didn't
@@ -513,10 +681,71 @@ fun CabinetScreen(navController: NavController) {
                     // expensive when the panel/chips are hidden.
                     modifier = m
                         .fillMaxSize()
-                        .then(if (filterUiVisible && isLiquidGlassPillsActive())
+                        // v-tablet — on wide the hero lives INSIDE this
+                        // grid, so it must NOT record into the capture its
+                        // own pills would sample (self-sample cycle): the
+                        // layer is phone-only.
+                        .then(if (filterUiVisible && !wide && isLiquidGlassPillsActive())
                             Modifier.layerBackdrop(chipGlassBackdrop)
                         else Modifier)
                 ) {
+                    // v-tablet — WIDE windows: the torn hero (and the open
+                    // category filter UI) lead the grid and scroll away with
+                    // the cards; phones keep the pinned overlay + fixed
+                    // reservation.
+                    if (wide) {
+                        item(key = "hero", span = { GridItemSpan(maxLineSpan) }, contentType = "hero") {
+                            cabinetHeroFor(backdrop = null)
+                        }
+                        if (filterUiVisible) {
+                            item(key = "filter-ui", span = { GridItemSpan(maxLineSpan) }, contentType = "filter-ui") {
+                                // Per-lane counts + legacy presence (mirrors
+                                // the phone overlay's remembered values).
+                                val catCounts = remember(entries) {
+                                    entries.filterNot { it.isLegacy }
+                                        .groupingBy { it.topic.categoryId }
+                                        .eachCount()
+                                }
+                                val hasLegacyEntries = entries.any { it.isLegacy }
+                                Box(Modifier.fillMaxWidth()) {
+                                    if (categoryPanelOpen) {
+                                        CabinetCategoryPanel(
+                                            categories = CurioCategories.visible,
+                                            counts = catCounts,
+                                            hasLegacy = hasLegacyEntries || showLegacyOnly,
+                                            query = catPanelQuery,
+                                            onQueryChange = { catPanelQuery = it },
+                                            selected = selectedFilters,
+                                            legacySelected = showLegacyOnly,
+                                            onToggleCategory = { id ->
+                                                commitFilters { current -> if (id in current) current - id else current + id }
+                                            },
+                                            onToggleLegacy = { showLegacyOnly = !showLegacyOnly },
+                                            onClearAll = {
+                                                commitFilters { emptySet() }
+                                                showLegacyOnly = false
+                                                catPanelQuery = ""
+                                            },
+                                            onDone = { categoryPanelOpen = false },
+                                            barTop = 0.dp
+                                        )
+                                    } else if (filterUiVisible) {
+                                        CabinetActiveFilterChips(
+                                            categories = CurioCategories.visible.filter { it.id in selectedFilters },
+                                            legacySelected = showLegacyOnly,
+                                            onRemoveCategory = { id -> commitFilters { current -> current - id } },
+                                            onRemoveLegacy = { showLegacyOnly = false },
+                                            onClearAll = {
+                                                commitFilters { emptySet() }
+                                                showLegacyOnly = false
+                                            },
+                                            barTop = 0.dp
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                     items(visibleEntries, key = { it.id }) { entry ->
                         // v8.38 — the Cabinet→Detail morph is gone: the detail
                         // page pops up from center instead of expanding out of
@@ -581,6 +810,9 @@ fun CabinetScreen(navController: NavController) {
         // v105 — smoother: a longer, decelerating slide (LinearOutSlowIn)
         // with a matched fade so the chips settle gently instead of
         // snapping down.
+        // v-tablet — the PINNED filter bar is phone-only: wide windows
+        // compose it as a scrolling grid item right under the hero instead.
+        if (!wide) {
         AnimatedVisibility(
             visible = filterUiVisible,
             enter = slideInVertically(
@@ -638,6 +870,7 @@ fun CabinetScreen(navController: NavController) {
                 )
             }
         }
+        }
 
         // ── Torn rose hero banner — drawn ON TOP of the scroll content; the
         // search field expands INSIDE the banner when search is active.
@@ -646,152 +879,12 @@ fun CabinetScreen(navController: NavController) {
         // the banner): Sort + Search normally, Select-all/Clear + Delete +
         // Cancel while selecting. The back pill stays gone and the title
         // sits at the TOP of the banner.
-        val cabinetTitle = when {
-            selectionMode -> "${selectedEntryIds.size} selected"
-            showLegacyOnly -> "Legacy Cabinet"
-            else -> "The Cabinet"
+        // v-tablet — the PINNED overlay is phone-only: wide windows scroll
+        // the hero as the grid's leading item / empty-page top block
+        // (cabinetHeroFor above).
+        if (!wide) {
+            cabinetHeroFor(backdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null)
         }
-        val cabinetSubtitle = when {
-            selectionMode -> "Long-press cards to select · ${if (showLegacyOnly) "legacy" else "current filter"}"
-            showLegacyOnly -> "Restored FieldMind records"
-            selectedFilters.size == 1 -> "Showing ${CurioCategories.byId(selectedFilters.first()).displayName}"
-            selectedFilters.size > 1 -> "Showing ${selectedFilters.size} categories"
-            else -> "Your saved captures"
-        }
-        CabinetHeroHeader(
-            title = cabinetTitle,
-            subtitle = cabinetSubtitle,
-            activeCat = filterCat,
-            legacyMode = showLegacyOnly,
-            searchActive = searchActive,
-            searchQuery = searchQuery,
-            onSearchQueryChange = { searchQuery = it },
-            onCloseSearch = { searchActive = false; searchQuery = "" },
-            searchFocus = searchFocus,
-            compact = wide,
-            // v42 — the Category pill lives INSIDE the hero beside the
-            // title, directly under the sort/search pills; hidden while
-            // selecting (the selection pills own the top row then).
-            titleTrailing = if (selectionMode) null else { ink, backdrop ->
-                // v316 — the pill opens the category PANEL; the label reflects
-                // the current multi-select ("All" / count / Legacy).
-                val categoryLabel = when {
-                    showLegacyOnly -> "Category · Legacy"
-                    selectedFilters.isEmpty() -> "Category · All"
-                    else -> "Categories · ${selectedFilters.size}"
-                }
-                CabinetHeroActionPill(
-                    onClick = {
-                        if (categoryPanelOpen) catPanelQuery = ""
-                        categoryPanelOpen = !categoryPanelOpen
-                    },
-                    glyph = CurioIcons.Tune,
-                    label = categoryLabel,
-                    ink = ink,
-                    backdrop = backdrop,
-                    modifier = if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
-                        Modifier.liquidGlassCapsule(
-                            MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
-                            backdrop = chipGlassBackdrop
-                        )
-                    else Modifier,
-                    // v316 — chevron flips with the panel: ▾ closed, ▴ open.
-                    trailingGlyph = if (categoryPanelOpen) CurioIcons.KeyboardArrowUp
-                        else CurioIcons.KeyboardArrowDown,
-                    trailingContentDescription = if (categoryPanelOpen) "Hide category options"
-                        else "Show category options",
-                    emphasized = categoryPanelOpen || selectedFilters.isNotEmpty() || showLegacyOnly
-                )
-            },
-            // Passed as a NAMED argument (not trailing-lambda syntax): the
-            // @Composable slot isn't the last parameter, and the trailing
-            // form fails to bind it under K2.
-            trailing = { ink, backdrop ->
-                if (selectionMode) {
-                    CabinetHeroActionPill(
-                        onClick = {
-                            selectedEntryIds = if (allVisibleSelected) {
-                                selectedEntryIds - categorySelectionIds
-                            } else {
-                                selectedEntryIds + categorySelectionIds
-                            }
-                        },
-                        label = if (allVisibleSelected) "Clear" else "Select all",
-                        ink = ink,
-                        backdrop = backdrop,
-                        modifier = if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
-                            Modifier.liquidGlassCapsule(
-                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
-                                backdrop = chipGlassBackdrop
-                            )
-                        else Modifier,
-                        emphasized = true
-                    )
-                    CabinetHeroActionPill(
-                        onClick = {
-                            if (selectedEntryIds.isNotEmpty()) showBulkDeleteConfirm = true
-                        },
-                        label = "Delete (${selectedEntryIds.size})",
-                        ink = ink,
-                        backdrop = backdrop,
-                        modifier = if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
-                            Modifier.liquidGlassCapsule(
-                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
-                                backdrop = chipGlassBackdrop
-                            )
-                        else Modifier,
-                        emphasized = true,
-                        destructive = true
-                    )
-                    CabinetHeroActionPill(
-                        onClick = { selectionMode = false; selectedEntryIds = emptySet() },
-                        glyph = CurioIcons.Close,
-                        contentDescription = "Cancel selection",
-                        ink = ink,
-                        backdrop = backdrop,
-                        modifier = if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
-                            Modifier.liquidGlassCapsule(
-                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
-                                backdrop = chipGlassBackdrop
-                            )
-                        else Modifier
-                    )
-                } else {
-                    // v105 — the sort dropdown is gone; the hero row keeps
-                    // the Search pill + Recycle Bin pill.
-                    CabinetHeroActionPill(
-                        onClick = { searchActive = true },
-                        glyph = CurioIcons.Search,
-                        contentDescription = "Search captures",
-                        ink = ink,
-                        backdrop = backdrop,
-                        modifier = if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
-                            Modifier.liquidGlassCapsule(
-                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
-                                backdrop = chipGlassBackdrop
-                            )
-                        else Modifier,
-                        // v85 — emphasized hero fill (the hero action-pill
-                        // language).
-                        emphasized = true
-                    )
-                    CabinetHeroActionPill(
-                        onClick = { navController.navigate(CurioRoutes.RECYCLE_BIN) },
-                        glyph = CurioIcons.Delete,
-                        contentDescription = "Recycle bin",
-                        ink = ink,
-                        backdrop = backdrop,
-                        modifier = if (isLiquidGlassPillsActive() && chipGlassBackdrop != null)
-                            Modifier.liquidGlassCapsule(
-                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
-                                backdrop = chipGlassBackdrop
-                            )
-                        else Modifier
-                    )
-                }
-            },
-            glassBackdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null
-        )
     }
 }
 

@@ -210,6 +210,10 @@ fun QuestsScreen(navController: NavController) {
     }
     val listState = rememberLazyListState()
 val glassBackdrop = rememberLayerBackdrop()
+    // v-tablet — the torn hero is NOT sticky on wide windows (landscape
+    // tablet): it leads the list as its first item and scrolls away with it;
+    // the pinned glass overlay stays phone-only.
+    val wide = windowWidthSizeClass().isWide
 
     Box(
         modifier = Modifier
@@ -234,9 +238,18 @@ val glassBackdrop = rememberLayerBackdrop()
             LazyColumn(
                 state = listState,
                 modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
-                contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight, bottom = 20.dp),
+                contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = if (wide) 0.dp else SettingsHeroTotalHeight, bottom = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                if (wide) {
+                    item(key = "hero", contentType = "hero") {
+                        SettingsHeroHeader(
+                            title = "Quests & levels",
+                            subtitle = "Grow your curiosity, one chain at a time",
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
+                }
                                 // v8.5 — Pet hero: the level card is replaced by the pet
                 // companion (level + XP ring + growth line + speech bubble)
                 // when the pet is enabled; the classic level card returns
@@ -369,7 +382,11 @@ val glassBackdrop = rememberLayerBackdrop()
                 // RESTORED (user request) — STICKY HERO drawn on TOP of the scroll
         // content: rows slide under the ragged tear as they scroll up, and
         // the back pill refracts them through REAL liquid glass.
-        SettingsHeroHeader(title = "Quests & levels", subtitle = "Grow your curiosity, one chain at a time", onBack = { navController.popBackStack() }, glassBackdrop = glassBackdrop)
+        // v-tablet — pinned glass overlay is phone-only; wide windows scroll
+        // the hero as the list's first item instead.
+        if (!wide) {
+            SettingsHeroHeader(title = "Quests & levels", subtitle = "Grow your curiosity, one chain at a time", onBack = { navController.popBackStack() }, glassBackdrop = glassBackdrop)
+        }
 
         // v8.6 — non-blocking level-up celebration (spec §9.1): tap to
         // dismiss; also auto-dismisses after ~2.5s. The pet hops with the

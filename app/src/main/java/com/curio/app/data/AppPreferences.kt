@@ -299,6 +299,21 @@ object AppPreferences {
     fun setTopicCatalogSyncVersion(context: Context, version: Int) =
         prefs(context).edit().putInt(KEY_LAST_CATALOG_SYNC_VERSION, version).apply()
 
+    // ── Topic catalog install stamp (v3xx) ────────────────────────────
+    // The package's lastUpdateTime the catalog was last synced under.
+    // versionCode only changes on RELEASES, so a data edit shipped in a
+    // build that kept the same versionCode never triggered the sync — and
+    // removed/renamed/deduped topics stayed in Room forever. Every APK
+    // install/update bumps lastUpdateTime, so the reconcile below also
+    // fires across same-versionCode builds (dev iteration, CI installs).
+    private const val KEY_LAST_CATALOG_SYNC_UPDATE = "last_catalog_sync_update_ms"
+
+    fun getTopicCatalogLastUpdate(context: Context): Long =
+        prefs(context).getLong(KEY_LAST_CATALOG_SYNC_UPDATE, 0L)
+
+    fun setTopicCatalogLastUpdate(context: Context, time: Long) =
+        prefs(context).edit().putLong(KEY_LAST_CATALOG_SYNC_UPDATE, time).apply()
+
     // ── Update-check result cache (v115) ─────────────────────────────
     // The last successful check's release info is SAVED locally so the
     // Updates page shows the release notes instantly on open — no

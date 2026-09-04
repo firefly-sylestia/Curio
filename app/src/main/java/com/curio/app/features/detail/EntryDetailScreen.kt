@@ -117,7 +117,7 @@ import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.CurioTwoStepDeleteDialog
 import com.curio.app.ui.components.NotePaperCard
 import com.curio.app.ui.components.WaveformExtractor
-import com.curio.app.ui.components.buildRichAnnotated
+import com.curio.app.ui.components.rememberRichAnnotated
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.media3.common.AudioAttributes
@@ -345,10 +345,18 @@ fun EntryDetailScreen(
         // this Column (outside the captured node), so they can never sample
         // themselves — the bottom-nav architecture, no self-capture cycle.
         val detailGlassBackdrop = rememberLayerBackdrop()
+        // v332 — the capture itself is GATED on the in-screen-glass toggle:
+        // with glass off there is no consumer, yet the layerBackdrop
+        // modifier still recorded this whole (potentially giant, long-note)
+        // page to an offscreen layer on every redraw — the logcat triage
+        // showed the detail page re-recording at full rate even with glass
+        // OFF, churning texture-sized buffers (LOS allocations). Same gate
+        // the sticky pills already apply (isInScreenGlassActive).
+        val detailGlassCaptureOn = isInScreenGlassActive()
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .layerBackdrop(detailGlassBackdrop)
+                .then(if (detailGlassCaptureOn) Modifier.layerBackdrop(detailGlassBackdrop) else Modifier)
                 .verticalScroll(detailScroll)
         ) {
         // ── Expressive hero banner — one composed card: the category glyph
@@ -2213,8 +2221,13 @@ private fun SoundBiteRender(
                     minHeight = 120.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) {
+                    // v332 — remember the built AnnotatedString: a long note
+                    // used to rebuild its whole rich-text buffer on every
+                    // recomposition of this subtree (large-object churn while
+                    // scrolling the page). The same remembered instance also
+                    // lets the Text node skip re-layout entirely.
                     Text(
-                        buildRichAnnotated(data.note, data.noteSpans.orEmpty(), notePaperHighlight(noteSheet)),
+                        rememberRichAnnotated(data.note, data.noteSpans.orEmpty(), notePaperHighlight(noteSheet)),
                         style = savedNoteStyle(),
                         color = notePaperInk(noteSheet)
                     )
@@ -2669,7 +2682,7 @@ private fun ReelNotesRender(entry: CurioEntry, category: CurioCategory) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    buildRichAnnotated(data.reviewText, data.reviewSpans.orEmpty(), notePaperHighlight(reviewSheet)),
+                    rememberRichAnnotated(data.reviewText, data.reviewSpans.orEmpty(), notePaperHighlight(reviewSheet)),
                     style = savedNoteStyle(),
                     color = notePaperInk(reviewSheet)
                 )
@@ -2735,7 +2748,7 @@ private fun MarginaliaRender(entry: CurioEntry, category: CurioCategory, navCont
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        buildRichAnnotated(
+                        rememberRichAnnotated(
                             data.journalText,
                             data.journalSpans.orEmpty(),
                             notePaperHighlight(journalSheet)
@@ -2882,7 +2895,7 @@ private fun RenderQuoteCards(
                         // glyphs outside the text flow. The text therefore
                         // stays 1:1 with its saved rich spans, while the
                         // opening mark sits at the true start of the card.
-                        text = buildRichAnnotated(
+                        text = rememberRichAnnotated(
                             renderedQuote,
                             cardSpans,
                             notePaperHighlight(quoteSheet)
@@ -3985,7 +3998,7 @@ private fun FieldNotesRender(entry: CurioEntry, category: CurioCategory, navCont
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        buildRichAnnotated(text, data.observedSpans.orEmpty(), notePaperHighlight(observedSheet)),
+                        rememberRichAnnotated(text, data.observedSpans.orEmpty(), notePaperHighlight(observedSheet)),
                         style = savedNoteStyle(),
                         color = notePaperInk(observedSheet)
                     )
@@ -4007,7 +4020,7 @@ private fun FieldNotesRender(entry: CurioEntry, category: CurioCategory, navCont
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        buildRichAnnotated(text, data.surprisedSpans.orEmpty(), notePaperHighlight(surprisedSheet)),
+                        rememberRichAnnotated(text, data.surprisedSpans.orEmpty(), notePaperHighlight(surprisedSheet)),
                         style = savedNoteStyle(),
                         color = notePaperInk(surprisedSheet)
                     )
@@ -4029,7 +4042,7 @@ private fun FieldNotesRender(entry: CurioEntry, category: CurioCategory, navCont
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        buildRichAnnotated(text, data.learnNextSpans.orEmpty(), notePaperHighlight(learnNextSheet)),
+                        rememberRichAnnotated(text, data.learnNextSpans.orEmpty(), notePaperHighlight(learnNextSheet)),
                         style = savedNoteStyle(),
                         color = notePaperInk(learnNextSheet)
                     )

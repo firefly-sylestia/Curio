@@ -172,12 +172,25 @@ fun ShareHubScreen(navController: NavController) {
             contentPadding = PaddingValues(
                 start = wideContentEdgePadding(),
                 end = wideContentEdgePadding(),
-                top = SettingsHeroTotalHeight,
+                // v-tablet — wide (landscape tablet): the torn hero scrolls
+                // as the grid's first row, so no fixed top reservation.
+                top = if (wide) 0.dp else SettingsHeroTotalHeight,
                 bottom = 24.dp
             ),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // v-tablet — wide windows: the torn hero leads the grid and
+            // scrolls away with it (not pinned); phones keep the overlay.
+            if (wide) {
+                item(key = "hero", span = { GridItemSpan(maxLineSpan) }, contentType = "hero") {
+                    SettingsHeroHeader(
+                        title = "Share hub",
+                        subtitle = "Browse every design, pick a topic, share a card",
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+            }
             // ── Topic search ────────────────────────────────────────────
             item(span = { GridItemSpan(maxLineSpan) }) {
                 CurioSearchField(
@@ -348,13 +361,18 @@ fun ShareHubScreen(navController: NavController) {
                 .fillMaxHeight()
                 .padding(top = 10.dp, bottom = 16.dp)
         )
-        SettingsHeroHeader(
-            title = "Share hub",
-            subtitle = "Browse every design, pick a topic, share a card",
-            onBack = { navController.popBackStack() },
-            compact = wide,
-            glassBackdrop = glassBackdrop
-        )
+        // v-tablet — pinned overlay is phone-only (wide windows scroll the
+        // hero as the grid's first row instead). compact = wide resolves to
+        // false here, i.e. the phone-size banner on phones — unchanged.
+        if (!wide) {
+            SettingsHeroHeader(
+                title = "Share hub",
+                subtitle = "Browse every design, pick a topic, share a card",
+                onBack = { navController.popBackStack() },
+                compact = wide,
+                glassBackdrop = glassBackdrop
+            )
+        }
 
         // v229d — FLOATING Share pill: the old full-width button sat at the
         // bottom of a long scroll ("all the way down in share hub"); the

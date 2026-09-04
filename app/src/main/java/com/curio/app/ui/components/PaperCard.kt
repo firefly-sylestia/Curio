@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -29,12 +30,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
@@ -50,6 +53,7 @@ import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalDensity
@@ -197,10 +201,14 @@ fun PaperCard(
                 // field in a stacked editor.
                 .padding(bottom = 18.dp)
         ) {
+        // v332 — sheen hoisted (was rebuilt per recomposition) and the decor
+        // canvas below became a drawWithCache pass, so the paper texture /
+        // coffee geometry is built once per size instead of on every redraw.
+        val paperSheen = remember { rigidCardSheen() }
         Box(
             // Subtle rigid-card sheen — a whisper of top light + bottom
             // depth so the slip reads as stiff paper stock, not a flat fill.
-            modifier = Modifier.background(rigidCardSheen())
+            modifier = Modifier.background(paperSheen)
         ) {
             // Faint ruled lines behind the content — the notebook texture.
             // (notePaperRule() is @Composable, so resolve it here in the
@@ -229,32 +237,51 @@ fun PaperCard(
             // [seed] the grain derives from it, so saved views keep their
             // texture between opens too.
             val paperSeed = remember(baseSeed) { baseSeed * 0x51A7 + 7 }
-            Canvas(modifier = Modifier.matchParentSize()) {
-                // Real paper texture — fine grain + soft tonal patches (the
-                // crumpled-then-flattened tooth) under the rules and ink.
-                // Seeded per card so each sheet's pattern is its own.
-                drawPaperTexture(size, density, sharedGrainBrush, paperInkColor, paperSeed)
-                if (ruled) {
-                    var y = ruleStart
-                    while (y < size.height) {
-                        drawLine(
-                            color = ruleColor,
-                            start = Offset(0f, y),
-                            end = Offset(size.width, y),
-                            strokeWidth = 1f
+            // v332 — the whole decor is ONE drawWithCache pass: the seeded
+            // texture + stain geometry (Paths, radial-gradient brushes, the
+            // speck scatter) is BUILT once per (size, seed, palette) and only
+            // REPLAYED per draw — the old Canvas seeded a Random, allocated
+            // four radial brushes and the speck field on every redraw (the
+            // canvas re-records while typing and whenever the page
+            // invalidates; those per-draw allocations were a large-object
+            // churn source on the long-note detail page). key() keeps the
+            // cache honest when only the palette/flags change at the same
+            // size (e.g. the editor's paper-color toggles).
+            key(paperSeed, ruleColor, paperInkColor, ruled, redMargin, coffeeStains, ruleSpacingPx) {
+                Spacer(
+                    modifier = Modifier.matchParentSize().drawWithCache {
+                        val texture = PaperTextureSpec.build(
+                            size, density, sharedGrainBrush, paperInkColor, paperSeed
                         )
-                        y += ruleSpacingPx
+                        val stains =
+                            if (coffeeStains) CoffeeStainsSpec.build(size, density, paperSeed) else null
+                        val marginStroke = with(density) { 1.2.dp.toPx() }
+                        onDrawBehind {
+                            texture.draw(this)
+                            if (ruled) {
+                                var y = ruleStart
+                                while (y < size.height) {
+                                    drawLine(
+                                        color = ruleColor,
+                                        start = Offset(0f, y),
+                                        end = Offset(size.width, y),
+                                        strokeWidth = 1f
+                                    )
+                                    y += ruleSpacingPx
+                                }
+                            }
+                            if (redMargin) {
+                                drawLine(
+                                    color = PaperMarginRed.copy(alpha = 0.55f),
+                                    start = Offset(marginInset, 0f),
+                                    end = Offset(marginInset, size.height),
+                                    strokeWidth = marginStroke
+                                )
+                            }
+                            stains?.draw(this)
+                        }
                     }
-                }
-                if (redMargin) {
-                    drawLine(
-                        color = PaperMarginRed.copy(alpha = 0.55f),
-                        start = Offset(marginInset, 0f),
-                        end = Offset(marginInset, size.height),
-                        strokeWidth = with(density) { 1.2.dp.toPx() }
-                    )
-                }
-                if (coffeeStains) drawCoffeeStains(size, density, paperSeed)
+                )
             }
             // Watermark paper — a faint scatter of category icons behind the
             // text (over the rules, like a printed page watermark).
@@ -395,68 +422,84 @@ fun notePaperStyleOf(
 }
 
 /**
- * The paper's own texture — a clean, quiet tooth:
- *
- * Layer 1 — Soft tonal variation: large-scale cloudy patches of slightly
- *   darker/lighter tone, like uneven fiber density in real paper.
- * Layer 2 — Fine grain field: scattered micro-specks (the paper tooth)
- *   drawn as individual dots, denser than the old bitmap but still soft.
- *
- * v7.16 — the old long curved fiber strands and big S-curve crease lines
- * are GONE (they read as muddy streaks on every sheet), and everything is
- * seeded from [seed] so every card wears its OWN pattern instead of the
- * same one on all papers. [grainBrush] stays as a subtle shared whisper
- * underneath (uniform grain, not a pattern) — the per-card seeded layers
- * are what make each sheet unique.
+ * v332 — PREBUILT paper texture: the grain wash + tonal clouds + speck
+ * field, resolved to PIXELS once per (size, seed, palette) so a redraw is a
+ * pure replay of retained primitives. The old per-draw helper seeded a
+ * Random and allocated four radial-gradient brushes plus the whole
+ * speck scatter on EVERY redraw — the paper canvas re-records while typing
+ * and whenever the page invalidates, so on the long-note detail page those
+ * per-draw allocations showed up as large-object churn in the logcat.
+ * Built in the decor's drawWithCache cache phase using the SAME Random
+ * sequences (identical geometry per size), then [draw] replays per frame
+ * with no allocations (Offset/Color are inline value classes).
  */
-private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawPaperTexture(
-    canvasSize: Size,
-    density: Density,
-    grainBrush: Brush,
-    ink: Color,
-    seed: Int,
-    grainAlpha: Float = 0.30f
+private class PaperTextureSpec(
+    private val wash: Brush,
+    private val clouds: List<Cloud>,
+    private val specks: List<Speck>
 ) {
-    val w = canvasSize.width
-    val h = canvasSize.height
-    // Subtle base wash — the SHARED grain bitmap as a whisper underneath
-    // the per-card layers. Fixed low alpha so every sheet gets a uniform
-    // paper-grain feel without repeating a visible pattern (the per-card
-    // seeded specks below are what differ between sheets).
-    drawRect(brush = grainBrush, alpha = 0.12f)
-    // Layer 1 — soft tonal variation: several large cloudy patches of
-    // slightly altered tone, like uneven pulp density. Radial gradients
-    // at random positions, very low alpha so they whisper.
-    val rndTone = Random(seed)
-    repeat(4) {
-        val cx = w * (0.1f + rndTone.nextFloat() * 0.8f)
-        val cy = h * (0.1f + rndTone.nextFloat() * 0.8f)
-        val radius = (w.coerceAtMost(h)) * (0.25f + rndTone.nextFloat() * 0.45f)
-        val toneAlpha = 0.015f + rndTone.nextFloat() * 0.020f
-        val toneColor = if (it % 2 == 0) ink.copy(alpha = toneAlpha)
-                        else Color.White.copy(alpha = toneAlpha)
-        drawCircle(
-            brush = Brush.radialGradient(
-                colors = listOf(toneColor, Color.Transparent),
-                center = Offset(cx, cy),
-                radius = radius
-            ),
-            radius = radius,
-            center = Offset(cx, cy)
-        )
+    class Cloud(val brush: Brush, val radius: Float, val center: Offset)
+    class Speck(val color: Color, val radius: Float, val center: Offset)
+
+    fun draw(scope: DrawScope) {
+        // Subtle base wash — the SHARED grain bitmap as a whisper underneath
+        // the per-card layers (fixed low alpha, same as the old helper).
+        scope.drawRect(brush = wash, alpha = 0.12f)
+        for (c in clouds) scope.drawCircle(brush = c.brush, radius = c.radius, center = c.center)
+        for (s in specks) scope.drawCircle(color = s.color, radius = s.radius, center = s.center)
     }
-    // Layer 2 — fine grain field: individual micro-specks scattered across
-    // the page. More numerous and slightly larger than the old bitmap so
-    // the tooth actually reads instead of looking like dirt. Seeded per
-    // card so no two sheets share the same speckle scatter.
-    val rndGrain = Random(seed + 0x1F3D5)
-    val specCount = (w * h / (with(density) { 80.dp.toPx() * 80.dp.toPx() })).toInt().coerceIn(60, 300)
-    repeat(specCount) {
-        val sx = rndGrain.nextFloat() * w
-        val sy = rndGrain.nextFloat() * h
-        val sr = with(density) { (0.4f + rndGrain.nextFloat() * 0.9f).dp.toPx() }
-        val sa = (0.03f + rndGrain.nextFloat() * 0.05f) * grainAlpha
-        drawCircle(color = ink.copy(alpha = sa), radius = sr, center = Offset(sx, sy))
+
+    companion object {
+        fun build(
+            size: Size,
+            density: Density,
+            grainBrush: Brush,
+            ink: Color,
+            seed: Int,
+            grainAlpha: Float = 0.30f
+        ): PaperTextureSpec {
+            val w = size.width
+            val h = size.height
+            // Layer 1 — soft tonal variation: several large cloudy patches
+            // of slightly altered tone (Random consumption order kept
+            // identical to the old per-draw loop, so sheets render the
+            // same). The radial brushes are built here, once per size.
+            val clouds = ArrayList<Cloud>(4)
+            val rndTone = Random(seed)
+            repeat(4) { i ->
+                val cx = w * (0.1f + rndTone.nextFloat() * 0.8f)
+                val cy = h * (0.1f + rndTone.nextFloat() * 0.8f)
+                val radius = (w.coerceAtMost(h)) * (0.25f + rndTone.nextFloat() * 0.45f)
+                val toneAlpha = 0.015f + rndTone.nextFloat() * 0.020f
+                val toneColor = if (i % 2 == 0) ink.copy(alpha = toneAlpha)
+                                else Color.White.copy(alpha = toneAlpha)
+                clouds.add(
+                    Cloud(
+                        brush = Brush.radialGradient(
+                            colors = listOf(toneColor, Color.Transparent),
+                            center = Offset(cx, cy),
+                            radius = radius
+                        ),
+                        radius = radius,
+                        center = Offset(cx, cy)
+                    )
+                )
+            }
+            // Layer 2 — fine grain field: individual micro-specks scattered
+            // across the page (same count + Random sequence as before).
+            val rndGrain = Random(seed + 0x1F3D5)
+            val specCount =
+                (w * h / (with(density) { 80.dp.toPx() * 80.dp.toPx() })).toInt().coerceIn(60, 300)
+            val specks = ArrayList<Speck>(specCount)
+            repeat(specCount) {
+                val sx = rndGrain.nextFloat() * w
+                val sy = rndGrain.nextFloat() * h
+                val sr = with(density) { (0.4f + rndGrain.nextFloat() * 0.9f).dp.toPx() }
+                val sa = (0.03f + rndGrain.nextFloat() * 0.05f) * grainAlpha
+                specks.add(Speck(ink.copy(alpha = sa), sr, Offset(sx, sy)))
+            }
+            return PaperTextureSpec(grainBrush, clouds, specks)
+        }
     }
 }
 
@@ -565,174 +608,220 @@ private fun buildNormalPaperPath(
 }
 
 /**
- * Realistic coffee-stain blotches along the paper's edges — the dried-cup
- * look with proper ring-concentrated rims (the classic coffee-ring effect
- * where dissolved solids migrate to the edge and leave a dark, crisp ring
- * with a light translucent body), irregular organic pooling shapes, and
- * directional drip runs. v7.16 — seeded from [seed] (the card's own texture
- * seed) so every coffee paper spills a DIFFERENT stain layout instead of
- * the same blotches on every sheet; deterministic per card, so
- * recomposition/typing never re-rolls them.
+ * v332 — PREBUILT coffee-stain blotches (dried rings + drips + splatter +
+ * washed footprints), resolved to PIXELS once per (size, seed) in the decor's
+ * drawWithCache cache phase. The old per-draw helper built its organic
+ * Paths and radial brushes — a full Random pass — on EVERY redraw;
+ * the replay here only strokes/fills retained primitives. Random sequences
+ * are consumed in the same order as before, so every sheet's stains render
+ * identically to the pre-cache version.
  */
-private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawCoffeeStains(
-    canvasSize: Size,
-    density: Density,
-    seed: Int
+private class CoffeeStainsSpec(
+    private val stains: List<Stain>,
+    private val washes: List<Wash>
 ) {
-    val rnd = Random(seed * 31 + 0xCAFE5EED)
-    // Richer warm coffee brown — deeper than the old #6B4226 so the ring
-    // reads clearly on cream and pastel sheets.
-    val coffee = Color(0xFF5C3620)
-    val w = canvasSize.width
-    val h = canvasSize.height
-    // Main stains pinned to edges/corners; the writing area stays clean.
-    val spots = listOf(
-        0.11f to 0.14f,
-        0.85f to 0.19f,
-        0.07f to 0.81f,
-        0.84f to 0.82f,
-        0.48f to 0.09f
-    )
-    spots.forEachIndexed { i, (fx, fy) ->
-        val center = Offset(
-            w * (fx + (rnd.nextFloat() - 0.5f) * 0.04f),
-            h * (fy + (rnd.nextFloat() - 0.5f) * 0.04f)
-        )
-        val r = with(density) { (10 + rnd.nextInt(15)).dp.toPx() }
-        val ringAlpha = 0.10f + rnd.nextFloat() * 0.08f
-        // Create an organic pooling shape — sampled N points around the
-        // circle with radial wobble so the puddle reads as real dried
-        // coffee, not a compass-drawn circle.
-        fun poolPath(points: Int, wobble: Float, squashX: Float = 1f, squashY: Float = 1f): Path = Path().apply {
-            var first = true
-            repeat(points) { k ->
-                val ang = (k.toFloat() / points) * (Math.PI * 2).toFloat()
-                val rr = r * (1f + (rnd.nextFloat() - 0.5f) * wobble)
-                val px = center.x + cos(ang) * rr * squashX
-                val py = center.y + sin(ang) * rr * squashY
-                if (first) { moveTo(px, py); first = false } else lineTo(px, py)
+    class Drip(val path: Path, val color: Color)
+    class Dot(val color: Color, val radius: Float, val center: Offset)
+
+    /** One dried stain: the organic pool + its halo/body fills + ring +
+     *  optional inner ghost ring + drips + splatter dots. */
+    class Stain(
+        val pool: Path,
+        val haloBrush: Brush,
+        val bodyBrush: Brush,
+        val wideColor: Color,
+        val wideWidth: Float,
+        val crispColor: Color,
+        val crispWidth: Float,
+        val innerPath: Path?,
+        val innerColor: Color,
+        val innerWidth: Float,
+        val drips: List<Drip>,
+        val dots: List<Dot>
+    ) {
+        fun draw(scope: DrawScope) {
+            // Bleed halo + translucent body + the two ring passes.
+            scope.drawPath(pool, brush = haloBrush)
+            scope.drawPath(pool, brush = bodyBrush)
+            scope.drawPath(pool, color = wideColor, style = Stroke(width = wideWidth))
+            scope.drawPath(pool, color = crispColor, style = Stroke(width = crispWidth))
+            if (innerPath != null) {
+                scope.drawPath(innerPath, color = innerColor, style = Stroke(width = innerWidth))
             }
-            close()
-        }
-        // Slightly squashed pools — coffee never dries in a perfect circle.
-        val sqX = 0.85f + rnd.nextFloat() * 0.30f
-        val sqY = 0.85f + rnd.nextFloat() * 0.30f
-        val pool = poolPath(20, 0.32f, sqX, sqY)
-        // Bleed halo (v7.33) — the damp ring the liquid left as it soaked
-        // into the paper grain around the dried pool, so the stain reads as
-        // absorbed into the sheet rather than painted on top of it.
-        drawPath(
-            pool,
-            brush = Brush.radialGradient(
-                colors = listOf(
-                    coffee.copy(alpha = ringAlpha * 0.05f),
-                    Color.Transparent
-                ),
-                center = center,
-                radius = r * 1.45f
-            )
-        )
-        // Light translucent body inside the ring — the dried liquid's
-        // faint stain, fading toward the rim where the ring concentrates.
-        drawPath(
-            pool,
-            brush = Brush.radialGradient(
-                colors = listOf(
-                    coffee.copy(alpha = ringAlpha * 0.20f),
-                    coffee.copy(alpha = ringAlpha * 0.07f),
-                    Color.Transparent
-                ),
-                center = center,
-                radius = r * 1.15f
-            )
-        )
-        // The concentrated ring — darker, slightly wider on the outside.
-        // Real coffee rings: dissolved solids migrate to the perimeter,
-        // leaving a crisp dark rim. Two passes: a soft wider stroke and a
-        // crisp thinner stroke on top for the concentrated edge.
-        drawPath(
-            pool,
-            color = coffee.copy(alpha = ringAlpha * 0.60f),
-            style = Stroke(width = with(density) { 2.4.dp.toPx() })
-        )
-        drawPath(
-            pool,
-            color = coffee.copy(alpha = ringAlpha * 0.42f),
-            style = Stroke(width = with(density) { 1.1.dp.toPx() })
-        )
-        // Inner ghost ring — some stains have a fainter inner ring where
-        // the cup was lifted and set back down (rocking cup effect).
-        if (i % 2 == 1) {
-            val inner = poolPath(14, 0.18f, sqX * 0.85f, sqY * 0.85f)
-            drawPath(
-                inner,
-                color = coffee.copy(alpha = ringAlpha * 0.50f),
-                style = Stroke(width = with(density) { 1.3.dp.toPx() })
-            )
-        }
-        // Directional drip runs (v7.33) — tapered streaks that narrow
-        // toward the bottom, like coffee that ran down the page and dried
-        // thinner as it stretched.
-        repeat(if (i % 3 == 0) 2 else 1) {
-            val angle = (-0.3f + rnd.nextFloat() * 0.6f) // roughly downward ±0.3 rad
-            val dripStart = Offset(
-                center.x + cos(angle) * r * 0.9f,
-                center.y + sin(angle) * r * 0.9f
-            )
-            val dripLen = with(density) { (6 + rnd.nextInt(10)).dp.toPx() }
-            val dripEnd = Offset(
-                dripStart.x + cos(angle) * dripLen * 0.5f,
-                dripStart.y + sin(angle) * dripLen
-            )
-            val dripMid = Offset(
-                (dripStart.x + dripEnd.x) / 2f + (rnd.nextFloat() - 0.5f) * dripLen * 0.25f,
-                (dripStart.y + dripEnd.y) / 2f
-            )
-            val tipW = with(density) { (0.7f + rnd.nextFloat() * 0.8f).dp.toPx() }
-            val dripPath = Path().apply {
-                moveTo(dripStart.x - tipW, dripStart.y)
-                quadraticTo(dripMid.x - tipW * 0.4f, dripMid.y, dripEnd.x, dripEnd.y)
-                quadraticTo(dripMid.x + tipW * 0.4f, dripMid.y, dripStart.x + tipW, dripStart.y)
-                close()
-            }
-            drawPath(
-                dripPath,
-                color = coffee.copy(alpha = ringAlpha * 0.45f)
-            )
-        }
-        // Satellite splatter dots — tiny drops around the main stain.
-        repeat(if (i % 2 == 0) 5 else 3) {
-            val a = rnd.nextFloat() * (Math.PI * 2).toFloat()
-            val d = r * (1.15f + rnd.nextFloat() * 0.65f)
-            val drop = Offset(center.x + cos(a) * d, center.y + sin(a) * d)
-            if (drop.x in 0f..w && drop.y in 0f..h) {
-                drawCircle(
-                    color = coffee.copy(alpha = ringAlpha * 0.55f),
-                    radius = with(density) { (0.8 + rnd.nextFloat() * 1.5).dp.toPx() },
-                    center = drop
-                )
+            for (d in drips) scope.drawPath(d.path, color = d.color)
+            for (d in dots) {
+                scope.drawCircle(color = d.color, radius = d.radius, center = d.center)
             }
         }
     }
-    // Faint washed patches — the cup's moist footprint on the page,
-    // softer and fewer (v7.33) so they whisper instead of muddying the sheet.
-    repeat(2) {
-        val px = w * (0.18f + rnd.nextFloat() * 0.64f)
-        val py = h * (0.30f + rnd.nextFloat() * 0.45f)
-        val pr = with(density) { (20 + rnd.nextInt(28)).dp.toPx() }
-        drawCircle(
-            brush = Brush.radialGradient(
-                colors = listOf(
-                    coffee.copy(alpha = 0.035f),
-                    coffee.copy(alpha = 0.012f),
-                    Color.Transparent
-                ),
-                center = Offset(px, py),
-                radius = pr
-            ),
-            radius = pr,
-            center = Offset(px, py)
-        )
+
+    /** One faint washed footprint (radial, no path). */
+    class Wash(val brush: Brush, val radius: Float, val center: Offset)
+
+    fun draw(scope: DrawScope) {
+        for (s in stains) s.draw(scope)
+        for (w in washes) scope.drawCircle(brush = w.brush, radius = w.radius, center = w.center)
+    }
+
+    companion object {
+        fun build(size: Size, density: Density, seed: Int): CoffeeStainsSpec {
+            val rnd = Random(seed * 31 + 0xCAFE5EED)
+            // Richer warm coffee brown — deeper than the old #6B4226 so the
+            // ring reads clearly on cream and pastel sheets.
+            val coffee = Color(0xFF5C3620)
+            val w = size.width
+            val h = size.height
+            val twoFourDp = with(density) { 2.4.dp.toPx() }
+            val oneOneDp = with(density) { 1.1.dp.toPx() }
+            val oneThreeDp = with(density) { 1.3.dp.toPx() }
+            // Main stains pinned to edges/corners; the writing area stays
+            // clean (same anchor list as the old helper).
+            val spots = listOf(
+                0.11f to 0.14f,
+                0.85f to 0.19f,
+                0.07f to 0.81f,
+                0.84f to 0.82f,
+                0.48f to 0.09f
+            )
+            fun poolPath(r: Float, center: Offset, points: Int, wobble: Float, squashX: Float, squashY: Float): Path =
+                Path().apply {
+                    var first = true
+                    repeat(points) { k ->
+                        val ang = (k.toFloat() / points) * (Math.PI * 2).toFloat()
+                        val rr = r * (1f + (rnd.nextFloat() - 0.5f) * wobble)
+                        val px = center.x + cos(ang) * rr * squashX
+                        val py = center.y + sin(ang) * rr * squashY
+                        if (first) { moveTo(px, py); first = false } else lineTo(px, py)
+                    }
+                    close()
+                }
+
+            val stains = ArrayList<Stain>(spots.size)
+            spots.forEachIndexed { i, (fx, fy) ->
+                val center = Offset(
+                    w * (fx + (rnd.nextFloat() - 0.5f) * 0.04f),
+                    h * (fy + (rnd.nextFloat() - 0.5f) * 0.04f)
+                )
+                val r = with(density) { (10 + rnd.nextInt(15)).dp.toPx() }
+                val ringAlpha = 0.10f + rnd.nextFloat() * 0.08f
+                // Slightly squashed pools — coffee never dries in a perfect
+                // circle.
+                val sqX = 0.85f + rnd.nextFloat() * 0.30f
+                val sqY = 0.85f + rnd.nextFloat() * 0.30f
+                val pool = poolPath(r, center, 20, 0.32f, sqX, sqY)
+                // Bleed halo (v7.33) — the damp ring the liquid left as it
+                // soaked into the paper grain around the dried pool.
+                val haloBrush = Brush.radialGradient(
+                    colors = listOf(
+                        coffee.copy(alpha = ringAlpha * 0.05f),
+                        Color.Transparent
+                    ),
+                    center = center,
+                    radius = r * 1.45f
+                )
+                // Light translucent body inside the ring — the dried
+                // liquid's faint stain, fading toward the rim.
+                val bodyBrush = Brush.radialGradient(
+                    colors = listOf(
+                        coffee.copy(alpha = ringAlpha * 0.20f),
+                        coffee.copy(alpha = ringAlpha * 0.07f),
+                        Color.Transparent
+                    ),
+                    center = center,
+                    radius = r * 1.15f
+                )
+                // Inner ghost ring — some stains have a fainter inner ring
+                // where the cup was lifted and set back down.
+                val inner: Pair<Path, Color>? =
+                    if (i % 2 == 1) {
+                        val innerPath = poolPath(r, center, 14, 0.18f, sqX * 0.85f, sqY * 0.85f)
+                        innerPath to coffee.copy(alpha = ringAlpha * 0.50f)
+                    } else null
+                // Directional drip runs (v7.33) — tapered streaks that
+                // narrow toward the bottom.
+                val drips = ArrayList<Drip>()
+                repeat(if (i % 3 == 0) 2 else 1) {
+                    val angle = (-0.3f + rnd.nextFloat() * 0.6f) // roughly downward ±0.3 rad
+                    val dripStart = Offset(
+                        center.x + cos(angle) * r * 0.9f,
+                        center.y + sin(angle) * r * 0.9f
+                    )
+                    val dripLen = with(density) { (6 + rnd.nextInt(10)).dp.toPx() }
+                    val dripEnd = Offset(
+                        dripStart.x + cos(angle) * dripLen * 0.5f,
+                        dripStart.y + sin(angle) * dripLen
+                    )
+                    val dripMid = Offset(
+                        (dripStart.x + dripEnd.x) / 2f + (rnd.nextFloat() - 0.5f) * dripLen * 0.25f,
+                        (dripStart.y + dripEnd.y) / 2f
+                    )
+                    val tipW = with(density) { (0.7f + rnd.nextFloat() * 0.8f).dp.toPx() }
+                    val dripPath = Path().apply {
+                        moveTo(dripStart.x - tipW, dripStart.y)
+                        quadraticTo(dripMid.x - tipW * 0.4f, dripMid.y, dripEnd.x, dripEnd.y)
+                        quadraticTo(dripMid.x + tipW * 0.4f, dripMid.y, dripStart.x + tipW, dripStart.y)
+                        close()
+                    }
+                    drips.add(Drip(dripPath, coffee.copy(alpha = ringAlpha * 0.45f)))
+                }
+                // Satellite splatter dots — tiny drops around the main stain.
+                val dots = ArrayList<Dot>()
+                repeat(if (i % 2 == 0) 5 else 3) {
+                    val a = rnd.nextFloat() * (Math.PI * 2).toFloat()
+                    val d = r * (1.15f + rnd.nextFloat() * 0.65f)
+                    val drop = Offset(center.x + cos(a) * d, center.y + sin(a) * d)
+                    if (drop.x in 0f..w && drop.y in 0f..h) {
+                        dots.add(
+                            Dot(
+                                color = coffee.copy(alpha = ringAlpha * 0.55f),
+                                radius = with(density) { (0.8 + rnd.nextFloat() * 1.5).dp.toPx() },
+                                center = drop
+                            )
+                        )
+                    }
+                }
+                stains.add(
+                    Stain(
+                        pool = pool,
+                        haloBrush = haloBrush,
+                        bodyBrush = bodyBrush,
+                        wideColor = coffee.copy(alpha = ringAlpha * 0.60f),
+                        wideWidth = twoFourDp,
+                        crispColor = coffee.copy(alpha = ringAlpha * 0.42f),
+                        crispWidth = oneOneDp,
+                        innerPath = inner?.first,
+                        innerColor = inner?.second ?: Color.Transparent,
+                        innerWidth = oneThreeDp,
+                        drips = drips,
+                        dots = dots
+                    )
+                )
+            }
+            // Faint washed patches — the cup's moist footprint on the page,
+            // softer and fewer (v7.33) so they whisper instead of muddying.
+            val washes = ArrayList<Wash>(2)
+            repeat(2) {
+                val px = w * (0.18f + rnd.nextFloat() * 0.64f)
+                val py = h * (0.30f + rnd.nextFloat() * 0.45f)
+                val pr = with(density) { (20 + rnd.nextInt(28)).dp.toPx() }
+                washes.add(
+                    Wash(
+                        brush = Brush.radialGradient(
+                            colors = listOf(
+                                coffee.copy(alpha = 0.035f),
+                                coffee.copy(alpha = 0.012f),
+                                Color.Transparent
+                            ),
+                            center = Offset(px, py),
+                            radius = pr
+                        ),
+                        radius = pr,
+                        center = Offset(px, py)
+                    )
+                )
+            }
+            return CoffeeStainsSpec(stains, washes)
+        }
     }
 }
 
@@ -1632,33 +1721,50 @@ fun TornPaperCard(
             // the margin line is drawn at the same 22dp position [PaperCard]
             // uses, clear of the ragged left edge.
             val marginInset = with(density) { 22.dp.toPx() }
-            Canvas(modifier = Modifier.matchParentSize()) {
-                drawPaperTexture(
-                    size, density, sharedGrainBrush, paperInkColor,
-                    seed = effectiveSeed, grainAlpha = 1f
-                )
-                if (ruled) {
-                    var y = ruleStartPx
-                    while (y < size.height) {
-                        drawLine(
-                            color = ruleColor,
-                            start = Offset(0f, y),
-                            end = Offset(size.width, y),
-                            strokeWidth = 1f
+            // v332 — same drawWithCache pass as [PaperCard]: texture + stain
+            // geometry built once per (size, seed, palette), replayed per
+            // draw with no Random / brush / Path allocations.
+            key(effectiveSeed, ruleColor, paperInkColor, ruled, redMargin, coffeeStains, ruleSpacingPx) {
+                Spacer(
+                    modifier = Modifier.matchParentSize().drawWithCache {
+                        val texture = PaperTextureSpec.build(
+                            size, density, sharedGrainBrush, paperInkColor,
+                            seed = effectiveSeed, grainAlpha = 1f
                         )
-                        y += ruleSpacingPx
+                        val stains =
+                            if (coffeeStains) CoffeeStainsSpec.build(size, density, effectiveSeed) else null
+                        val marginStroke = with(density) { 1.2.dp.toPx() }
+                        onDrawBehind {
+                            texture.draw(this)
+                            if (ruled) {
+                                var y = ruleStartPx
+                                while (y < size.height) {
+                                    drawLine(
+                                        color = ruleColor,
+                                        start = Offset(0f, y),
+                                        end = Offset(size.width, y),
+                                        strokeWidth = 1f
+                                    )
+                                    y += ruleSpacingPx
+                                }
+                            }
+                            if (redMargin) {
+                                drawLine(
+                                    color = PaperMarginRed.copy(alpha = 0.55f),
+                                    start = Offset(marginInset, 0f),
+                                    end = Offset(marginInset, size.height),
+                                    strokeWidth = marginStroke
+                                )
+                            }
+                            stains?.draw(this)
+                            // The sheen is drawn LAST so it reads ON TOP of
+                            // the grain — under it, the texture flattens the
+                            // vertical light gradient and the torn slip looks
+                            // flat (comment preserved from the old Canvas).
+                            drawRect(brush = sheen)
+                        }
                     }
-                }
-                if (redMargin) {
-                    drawLine(
-                        color = PaperMarginRed.copy(alpha = 0.55f),
-                        start = Offset(marginInset, 0f),
-                        end = Offset(marginInset, size.height),
-                        strokeWidth = with(density) { 1.2.dp.toPx() }
-                    )
-                }
-                if (coffeeStains) drawCoffeeStains(size, density, effectiveSeed)
-                drawRect(brush = sheen)
+                )
             }
             // Watermark paper — a faint scatter of category icons behind the
             // text, clipped to the torn outline by the Surface.

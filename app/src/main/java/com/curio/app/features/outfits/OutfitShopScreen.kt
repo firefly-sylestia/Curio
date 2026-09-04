@@ -43,7 +43,9 @@ import com.curio.app.data.PetOutfits
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
 import com.curio.app.features.settings.heroPageBackground
+import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
+import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.pet.CurioPetSprite
@@ -71,6 +73,10 @@ fun OutfitShopScreen(navController: NavController) {
     var toast by remember { mutableStateOf<String?>(null) }
     val haptics = LocalHapticFeedback.current
     val glassBackdrop = rememberLayerBackdrop()
+    // v-tablet — the torn hero is NOT sticky on wide windows (landscape
+    // tablet): it leads the list as its first item and scrolls away with it;
+    // the pinned glass overlay stays phone-only.
+    val wide = windowWidthSizeClass().isWide
 
     // Preview sprites: the outfit layered over a neutral default body so the
     // shop card always shows exactly what you'd get.
@@ -141,11 +147,20 @@ fun OutfitShopScreen(navController: NavController) {
                 contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
                     end = wideContentEdgePadding(),
-                    top = SettingsHeroTotalHeight,
+                    top = if (wide) 0.dp else SettingsHeroTotalHeight,
                     bottom = 28.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                if (wide) {
+                    item(key = "hero", contentType = "hero") {
+                        SettingsHeroHeader(
+                            title = "Pet shop",
+                            subtitle = "Outfits & toys for Curie · sparkles only",
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
+                }
                 // ── Sparkle balance — the shop's wallet ────────────────
                 item("wallet") {
                     CurioSettingsCard {
@@ -412,13 +427,16 @@ fun OutfitShopScreen(navController: NavController) {
                 }
             }
         }
-        // Sticky hero (the settings-family torn banner).
-        SettingsHeroHeader(
-            title = "Pet shop",
-            subtitle = "Outfits & toys for Curie · sparkles only",
-            onBack = { navController.popBackStack() },
-            glassBackdrop = glassBackdrop
-        )
+        // Sticky hero (the settings-family torn banner) — phone-only: wide
+        // windows scroll the hero as the list's first item instead (v-tablet).
+        if (!wide) {
+            SettingsHeroHeader(
+                title = "Pet shop",
+                subtitle = "Outfits & toys for Curie · sparkles only",
+                onBack = { navController.popBackStack() },
+                glassBackdrop = glassBackdrop
+            )
+        }
         // Toast — transient feedback for buy/unlock/equip.
         toast?.let { message ->
             Surface(

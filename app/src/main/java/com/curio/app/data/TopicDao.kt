@@ -33,6 +33,12 @@ interface TopicDao {
     @Query("SELECT * FROM topics WHERE categoryId = :categoryId ORDER BY RANDOM() LIMIT 1")
     suspend fun getRandom(categoryId: String): TopicEntity?
 
+    /** Get a small random sample of topics for a category (indexed LIMIT
+     *  query — never maps the whole lane). Seeds the Spin deck instantly
+     *  while the full pool loads. */
+    @Query("SELECT * FROM topics WHERE categoryId = :categoryId ORDER BY RANDOM() LIMIT :limit")
+    suspend fun getRandomTopics(categoryId: String, limit: Int): List<TopicEntity>
+
     /** Search topics by name, byline, teaser, or tags. Title matches first. */
     @Query("""
         SELECT * FROM topics 

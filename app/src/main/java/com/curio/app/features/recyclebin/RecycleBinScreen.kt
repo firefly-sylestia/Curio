@@ -105,6 +105,10 @@ fun RecycleBinScreen(navController: NavController) {
     }
     val listState = rememberLazyListState()
     val glassBackdrop = rememberLayerBackdrop()
+    // v-tablet — the torn hero is NOT sticky on wide windows (landscape
+    // tablet): it leads the list as its first item and scrolls away with it;
+    // the pinned glass overlay stays phone-only.
+    val wide = windowWidthSizeClass().isWide
 
     // Selection state
     var selectedIds by remember { mutableStateOf(emptySet<String>()) }
@@ -188,11 +192,21 @@ fun RecycleBinScreen(navController: NavController) {
                     contentPadding = PaddingValues(
                         start = wideContentEdgePadding(),
                         end = wideContentEdgePadding(),
-                        top = SettingsHeroTotalHeight,
+                        top = if (wide) 0.dp else SettingsHeroTotalHeight,
                         bottom = if (multiSelectMode) 88.dp else 24.dp
                     ),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    if (wide) {
+                        item(key = "hero", contentType = "hero") {
+                            SettingsHeroHeader(
+                                title = "Recycle bin",
+                                subtitle = if (trashed.isEmpty()) "Recently deleted captures"
+                                else "${trashed.size} items in recycle bin",
+                                onBack = { navController.popBackStack() }
+                            )
+                        }
+                    }
                     // ── Summary card ─────────────────────────────────
                     item("summary") {
                         BinSummaryCard(
@@ -284,14 +298,17 @@ fun RecycleBinScreen(navController: NavController) {
             )
         }
 
-        // Sticky hero
-        SettingsHeroHeader(
-            title = "Recycle bin",
-            subtitle = if (trashed.isEmpty()) "Recently deleted captures"
-            else "${trashed.size} items in recycle bin",
-            onBack = { navController.popBackStack() },
-            glassBackdrop = glassBackdrop
-        )
+        // Sticky hero — phone-only: wide windows scroll the hero as the
+        // list's first item instead (v-tablet).
+        if (!wide) {
+            SettingsHeroHeader(
+                title = "Recycle bin",
+                subtitle = if (trashed.isEmpty()) "Recently deleted captures"
+                else "${trashed.size} items in recycle bin",
+                onBack = { navController.popBackStack() },
+                glassBackdrop = glassBackdrop
+            )
+        }
 
         // ── Multi-select bottom bar ──────────────────────────────────
         AnimatedVisibility(
