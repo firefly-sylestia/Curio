@@ -202,6 +202,9 @@ dependencies {
     implementation(libs.androidx.compose.animation)
     implementation(libs.io.coil.kt.coil.compose)
     implementation(libs.io.coil.kt.coil.svg)
+    // v338 — cover-art swatch extraction (androidx Palette): the book/album
+    // notes sheets tint themselves from the artwork's dominant colors.
+    implementation(libs.androidx.palette.ktx)
     implementation(libs.org.jetbrains.kotlinx.coroutines.android)
 
     // Room database

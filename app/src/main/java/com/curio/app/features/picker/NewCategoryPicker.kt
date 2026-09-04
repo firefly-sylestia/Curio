@@ -214,6 +214,21 @@ fun NewCategoryPickerSheet(
     var page0MixCount by remember { mutableIntStateOf(0) }
     var page0MixSelection by remember { mutableStateOf<List<CategoryId>>(emptyList()) }
     var page0MixApply by remember { mutableStateOf<(() -> Unit)?>(null) }
+    // v337 — Continue-exploring tick-to-mix (page 1): holding any lane in
+    // the Continue exploring grid starts a live multi-select there (tap to
+    // toggle more); the shared capsule becomes "Mix · N" to apply (spin all
+    // together), the section's Cancel pill leaves it.
+    var exploreTick by remember { mutableStateOf(false) }
+    var exploreSelIds by remember { mutableStateOf<List<CategoryId>>(emptyList()) }
+    val toggleExploreTick: (CurioCategory) -> Unit = { cat ->
+        if (!exploreTick) {
+            exploreTick = true
+            exploreSelIds = listOf(cat.id)
+        } else {
+            exploreSelIds = if (cat.id in exploreSelIds)
+                exploreSelIds - cat.id else exploreSelIds + cat.id
+        }
+    }
 
     // Pager: page 0 = classic picker, page 1 = new picker. Default from prefs.
     val initialPage = AppPreferences.pickerDefaultPageState.coerceIn(0, 1)
@@ -225,6 +240,13 @@ fun NewCategoryPickerSheet(
     LaunchedEffect(pagerState.currentPage) {
         if (pagerState.currentPage != initialPage) {
             AppPreferences.setPickerDefaultPage(context, pagerState.currentPage)
+        }
+        // v337 — Continue-exploring tick mode is page-1-only: leaving the
+        // page drops the pending tick selection so the capsule returns to
+        // "Surprise me".
+        if (pagerState.currentPage != 1) {
+            exploreTick = false
+            exploreSelIds = emptyList()
         }
     }
 
@@ -342,7 +364,17 @@ fun NewCategoryPickerSheet(
                         onRemoveTarget = { cat, pos -> removeTarget = cat; removeAnchor = pos; holdCursor = null; holdEnd = null },
                         onHoldMove = { holdCursor = it },
                         onHoldEnd = { holdEnd = it },
-                        onAddSuggestion = { showAddSuggestion = true }
+                        onAddSuggestion = { showAddSuggestion = true },
+                        // v337 — Continue exploring tick-to-mix (see the
+                        // states above): hold starts the tick (selecting that
+                        // lane), later taps toggle more lanes.
+                        exploreTick = exploreTick,
+                        exploreSelIds = exploreSelIds,
+                        onExploreStartOrToggle = toggleExploreTick,
+                        onExploreCancel = {
+                            exploreTick = false
+                            exploreSelIds = emptyList()
+                        }
                     )
                 }
             }
@@ -365,14 +397,32 @@ fun NewCategoryPickerSheet(
                 // "Mix · N" strip behind the Cancel pill is gone. It stays on
                 // the new page, so applying from there still works.
                 val mixing = page0MixCount > 0
+                val exploreMixing = exploreTick && exploreSelIds.isNotEmpty()
                 if (!mixing || pagerState.currentPage != 0) {
                     NewPrimaryCapsule(
-                        label = if (mixing) "Mix · $page0MixCount" else "Surprise me",
-                        glyph = if (mixing) CurioIcons.Check else CurioIcons.Shuffle,
+                        label = when {
+                            mixing -> "Mix · $page0MixCount"
+                            exploreMixing -> "Mix · ${exploreSelIds.size}"
+                            else -> "Surprise me"
+                        },
+                        glyph = if (mixing || exploreMixing) CurioIcons.Check else CurioIcons.Shuffle,
                         modifier = Modifier.weight(1f),
                         onClick = {
                             if (mixing) {
                                 page0MixApply?.invoke()
+                            } else if (exploreMixing) {
+                                // v337 — apply the Continue-exploring tick
+                                // selection as a transient unnamed mix.
+                                val cats = exploreSelIds.mapNotNull { id ->
+                                    categories.firstOrNull { it.id == id }
+                                }
+                                exploreTick = false
+                                exploreSelIds = emptyList()
+                                if (cats.isNotEmpty()) {
+                                    // v318b — an unnamed selection clears the name.
+                                    AppPreferences.setLastMixName(context, null)
+                                    onCategoriesMixed(cats)
+                                }
                             } else {
                                 // v318b — a surprise/unnamed deck clears the name.
                                 AppPreferences.setLastMixName(context, null)
@@ -425,6 +475,12 @@ fun NewCategoryPickerSheet(
                     // list live, so the section updates without closing the
                     // picker.
                     AppPreferences.removePickerSuggestion(context, target.id)
+                    removeTarget = null; removeAnchor = null; holdCursor = null; holdEnd = null
+                },
+                // v337 — curated lanes can ALSO start the Continue-exploring
+                // tick with this lane picked.
+                onMixStart = {
+                    toggleExploreTick(target)
                     removeTarget = null; removeAnchor = null; holdCursor = null; holdEnd = null
                 },
                 anchor = removeAnchor,
@@ -529,7 +585,13 @@ private fun NewPickerPage(
     // v323 — the radial hold session's live move + release feed (screen-level).
     onHoldMove: (androidx.compose.ui.geometry.Offset) -> Unit,
     onHoldEnd: (androidx.compose.ui.geometry.Offset) -> Unit,
-    onAddSuggestion: () -> Unit
+    onAddSuggestion: () -> Unit,
+    // v337 — Continue-exploring tick-to-mix (hoisted: the shared capsule
+    // applies the pending lanes).
+    exploreTick: Boolean,
+    exploreSelIds: List<CategoryId>,
+    onExploreStartOrToggle: (CurioCategory) -> Unit,
+    onExploreCancel: () -> Unit
 ) {
     val context = LocalContext.current
     LazyColumn(
@@ -653,6 +715,12 @@ private fun NewPickerPage(
             ContinueExploringSection(
                 categories = categories,
                 deckIds = deckIds,
+                // v337 — tick-to-mix states hoisted to the sheet (the shared
+                // capsule applies the pending lanes).
+                exploreTick = exploreTick,
+                exploreSelIds = exploreSelIds,
+                onStartOrToggle = onExploreStartOrToggle,
+                onCancel = onExploreCancel,
                 onSpinLane = onSpinLane,
                 onRemoveTarget = onRemoveTarget,
                 onHoldMove = onHoldMove,
@@ -664,17 +732,34 @@ private fun NewPickerPage(
 }
 
 /**
- * "Continue exploring": the user's most-spun categories (from CurioPassport)
- * first, then curated "fun to explore" lanes up to 10 total. The user can
- * remove a lane (tap-and-hold → Remove pill) and add from the full list.
- * Reads the suggestions LIVE ([AppPreferences.pickerSuggestionsState]) so
- * Add/Remove in the picker's sheets updates this grid instantly, without
- * closing and reopening the picker.
+ * "Continue exploring" — split into TWO zones so the activity logic never
+ * shuffles the user's hand-picked list:
+ *  - AUTO first row — the lanes you spun most (CurioPassport) fill exactly
+ *    one row and are driven purely by that logic (they re-order/re-fill by
+ *    spin counts alone). Tap to spin; holding one STARTS a tick-mix with it
+ *    picked.
+ *  - CURATED rows below — your hand-picked "fun to explore" list:
+ *    removable (hold → Remove), growing through the + Add tile, filling the
+ *    rest of the 10-slot budget. Reads the suggestions LIVE
+ *    ([AppPreferences.pickerSuggestionsState]) so Add/Remove updates this
+ *    grid instantly, without closing the picker.
+ *
+ * v337 — tick-to-mix: holding an AUTO-row lane starts a live multi-select
+ * (that lane picked); holding a CURATED lane opens its pill, whose Mix
+ * button starts the tick too. While ticking, lane taps TOGGLE instead of
+ * spinning, the shared bottom capsule becomes "Mix · N" (apply = spin them
+ * together), and the Cancel pill here leaves the mode.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ContinueExploringSection(
     categories: List<CurioCategory>,
     deckIds: List<CategoryId>,
+    // v337 — tick-to-mix (hoisted to the sheet so the capsule applies).
+    exploreTick: Boolean,
+    exploreSelIds: List<CategoryId>,
+    onStartOrToggle: (CurioCategory) -> Unit,
+    onCancel: () -> Unit,
     onSpinLane: (CurioCategory) -> Unit,
     // v3xx — option pill receives the held spot (window coords).
     onRemoveTarget: (CurioCategory, androidx.compose.ui.geometry.Offset) -> Unit,
@@ -685,6 +770,7 @@ private fun ContinueExploringSection(
 ) {
     val context = LocalContext.current
     val deckSet = remember(deckIds) { deckIds.toSet() }
+    val tickSet = remember(exploreSelIds) { exploreSelIds.toSet() }
     val visibleIds = remember { categories.map { it.id }.toSet() }
     // Most-spun (CurioPassport spin counts), desc, ready + visible only.
     val mostUsed = remember {
@@ -697,26 +783,107 @@ private fun ContinueExploringSection(
     // removing one here recomposes this list immediately.
     val curated = AppPreferences.pickerSuggestionsState
         .ifEmpty { AppPreferences.defaultSuggestions }
-    val combined = remember(mostUsed, curated) {
-        val seen = mutableSetOf<CategoryId>()
-        val out = mutableListOf<CategoryId>()
-        mostUsed.forEach { if (seen.add(it)) out.add(it) }
-        curated.forEach { if (seen.add(it) && it in visibleIds) out.add(it) }
-        out.take(10)
-    }
     val wide = windowWidthSizeClass().isWide
-    // Manual chunked rows — NOT a nested LazyVerticalGrid. This section
-    // renders inside a LazyColumn item, and lazy items are measured with an
-    // INFINITE max height, so a nested lazy grid crashed the picker
-    // ("Vertically scrollable component was measured with an infinity
-    // maximum height constraints"). With ≤10 lanes + the Add tile it's
-    // small enough to lay out as plain rows, like the mixes grid.
+    // Manual chunked rows — NOT a nested LazyVerticalGrid: this section
+    // renders inside a LazyColumn item measured with an INFINITE max
+    // height, so a nested lazy grid crashed the picker ("Vertically
+    // scrollable component was measured with an infinity maximum height
+    // constraints"). ≤10 lanes + the Add tile fit as plain rows.
     val cols = if (wide) 4 else 3
-    val tiles: List<CategoryId?> = mutableListOf<CategoryId?>().apply {
-        addAll(combined)
-        add(null)  // null = the "+ Add" tile
+    // v337 — AUTO first row: exactly the top [cols] most-spun lanes.
+    val autoIds = remember(mostUsed, cols) { mostUsed.take(cols) }
+    // CURATED remainder — the user's list, deduped against the auto row,
+    // filling the rest of the 10-slot budget.
+    val curatedIds = remember(autoIds, curated, visibleIds) {
+        val seen = autoIds.toMutableSet()
+        val out = mutableListOf<CategoryId>()
+        curated.forEach { if (it in visibleIds && seen.add(it)) out.add(it) }
+        out.take((10 - autoIds.size).coerceAtLeast(0))
     }
+
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (exploreTick) {
+            // v337 — tick-mode banner: instruction + Cancel pill.
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    if (exploreSelIds.isEmpty())
+                        "Tap lanes to build a mix"
+                    else "Building a mix · ${exploreSelIds.size} picked",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    modifier = Modifier.weight(1f)
+                )
+                Surface(
+                    onClick = onCancel,
+                    shape = RoundedCornerShape(50),
+                    color = newPickerIdleFill(),
+                    shadowElevation = 2.dp
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+                    ) {
+                        CurioIcon(
+                            name = CurioIcons.Close,
+                            contentDescription = null,
+                            size = 14.dp,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            "Cancel",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+        }
+
+        // ── Row 1: the AUTO most-spun row (logic-driven) ─────────────
+        if (autoIds.isNotEmpty()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                autoIds.forEach { id ->
+                    val cat = categories.firstOrNull { it.id == id }
+                    if (cat != null) {
+                        NewPickerTile(
+                            category = cat,
+                            // Ticking highlights picks; at rest the current
+                            // deck's lanes keep their ACTIVE accent.
+                            selected = if (exploreTick) id in tickSet else id in deckSet,
+                            onClick = {
+                                if (exploreTick) onStartOrToggle(cat) else onSpinLane(cat)
+                            },
+                            // v337 — holding the AUTO row starts the tick mix
+                            // with this lane picked (no Remove here — the
+                            // logic owns this row).
+                            hold = if (exploreTick) null else HoldSession(
+                                onOpen = { _ -> onStartOrToggle(cat) },
+                                onMove = onHoldMove,
+                                onEnd = onHoldEnd,
+                                onTap = {}
+                            ),
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+                repeat(cols - autoIds.size) { Spacer(Modifier.weight(1f)) }
+            }
+        }
+
+        // ── Curated rows (your hand-picked list) + Add tile ──────────
+        val tiles: List<CategoryId?> = mutableListOf<CategoryId?>().apply {
+            addAll(curatedIds)
+            if (!exploreTick) add(null)  // null = the "+ Add" tile
+        }
         tiles.chunked(cols).forEach { rowIds ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -730,12 +897,13 @@ private fun ContinueExploringSection(
                         if (cat != null) {
                             NewPickerTile(
                                 category = cat,
-                                // v3xx14 — lanes already in the current deck
-                                // wear the category's ACTIVE accent in
-                                // Continue exploring too.
-                                selected = cat.id in deckSet,
-                                onClick = { onSpinLane(cat) },
-                                hold = HoldSession(
+                                selected = if (exploreTick) id in tickSet else id in deckSet,
+                                onClick = {
+                                    if (exploreTick) onStartOrToggle(cat) else onSpinLane(cat)
+                                },
+                                hold = if (exploreTick) null else HoldSession(
+                                    // Curated lanes: pill with Remove (and the
+                                    // Mix button starts the tick too).
                                     onOpen = { pos -> onRemoveTarget(cat, pos) },
                                     onMove = onHoldMove,
                                     onEnd = onHoldEnd,
@@ -842,7 +1010,9 @@ private fun ClassicPickerPage(
     // Keep the shared bottom row in sync: while multi-selecting on Mix the
     // capsule reports the count + an apply closure; otherwise it clears.
     LaunchedEffect(multiSelectMode, selectedSlugs, mode) {
-        if (mode == PickerMode.MIX && multiSelectMode && selectedSlugs.isNotEmpty()) {
+        // v337 — hold-to-mix now works on every tab (Curio/Knowledge/Mix),
+        // so the shared capsule reports the pending count from any of them.
+        if (multiSelectMode && selectedSlugs.isNotEmpty()) {
             val cats = selectedSlugs.mapNotNull { CurioCategories.byRouteSlug(it) }
             onMixStatus(cats.size, cats.map { it.id }) {
                 if (cats.isNotEmpty()) {
@@ -874,9 +1044,12 @@ private fun ClassicPickerPage(
                     accent = washCat.themedAccent(),
                     accentInk = washCat.onAccent(),
                     onClick = {
-                        modeName = m.name
-                        // Leaving Mix drops a transient multi-select.
-                        if (m != PickerMode.MIX) {
+                        // v337 — switching TABS drops a transient multi-
+                        // select (previously only leaving Mix did, because
+                        // hold-to-mix lived on Mix alone — Curio/Knowledge
+                        // now support it too).
+                        if (modeName != m.name) {
+                            modeName = m.name
                             multiSelectMode = false
                             selectedSlugs = emptySet()
                         }
@@ -888,10 +1061,10 @@ private fun ClassicPickerPage(
         // Hint row — mode aware.
         Text(
             text = when {
-                mode == PickerMode.MIX && multiSelectMode -> "Tap to toggle lanes"
+                multiSelectMode -> "Tap to toggle lanes"
                 mode == PickerMode.MIX -> "Tap opens · hold to start a mix"
-                mode == PickerMode.CURIO -> "A relaxed, culture-first deck. Tap any lane to explore."
-                else -> "Dig into knowledge. Tap any lane to explore."
+                mode == PickerMode.CURIO -> "A relaxed, culture-first deck. Tap to explore · hold to start a mix"
+                else -> "Dig into knowledge. Tap to explore · hold to start a mix"
             },
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
@@ -964,14 +1137,21 @@ private fun ClassicPickerPage(
                                 )
                             }
                             gridItems(lanes) { cat ->
+                                // v337 — hold-to-tick works on Curio and
+                                // Knowledge too: selected lanes tick on, taps
+                                // toggle while ticking, taps spin at rest.
+                                val slug = cat.id.routeSlug
                                 NewPickerTile(
                                     category = cat,
                                     comingSoon = !cat.isReady,
-                                    selected = false,
+                                    selected = multiSelectMode && slug in selectedSlugs,
                                     onClick = {
                                         if (!cat.isReady) return@NewPickerTile
-                                        onCategorySelected(cat)
-                                    }
+                                        if (multiSelectMode) toggleSlug(slug) else onCategorySelected(cat)
+                                    },
+                                    onLongClick = if (cat.isReady) {
+                                        { if (!multiSelectMode) multiSelectMode = true; toggleSlug(slug) }
+                                    } else null
                                 )
                             }
                         }
@@ -980,12 +1160,13 @@ private fun ClassicPickerPage(
             }
         }
 
-        if (multiSelectMode && mode == PickerMode.MIX) {
+        if (multiSelectMode) {
             // ── Multi-select row — the floating Apply + Cancel pills. v324:
             // the Apply pill is BACK in the page next to Cancel (the old
             // layout) — the shared bottom row no longer renders the solid
             // "Mix · N" capsule during mix, because it sat right behind the
-            // floating Cancel pill as a solid strip. ────────────────────
+            // floating Cancel pill as a solid strip. v337 — shown on every
+            // tab now that hold-to-mix works on Curio/Knowledge too. ─────
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -1639,6 +1820,9 @@ internal fun CategoryOptionPill(
     onPinToggle: (() -> Unit)? = null,
     onSpin: (() -> Unit)? = null,
     onRemove: (() -> Unit)? = null,
+    // v337 — Continue-exploring curated lanes: starts the tick-to-mix with
+    // this lane picked.
+    onMixStart: (() -> Unit)? = null,
     anchor: androidx.compose.ui.geometry.Offset? = null,
     // v323 — the radial menu's live cursor + release position.
     cursor: androidx.compose.ui.geometry.Offset? = null,
@@ -1677,6 +1861,17 @@ internal fun CategoryOptionPill(
                     MaterialTheme.colorScheme.errorContainer,
                     MaterialTheme.colorScheme.onErrorContainer,
                     onRemove
+                )
+            )
+        }
+        if (onMixStart != null) {
+            add(
+                HoldAction(
+                    CurioIcons.Add,
+                    "Mix",
+                    MaterialTheme.colorScheme.primaryContainer,
+                    MaterialTheme.colorScheme.onPrimaryContainer,
+                    onMixStart
                 )
             )
         }

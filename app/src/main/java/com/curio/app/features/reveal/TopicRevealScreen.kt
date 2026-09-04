@@ -152,6 +152,7 @@ import com.curio.app.data.isMusicTopic
 import com.curio.app.data.titleAndYearQualifier
 import com.curio.app.data.matchesSavedName
 import com.curio.app.data.matchesSavedNameStrict
+import com.curio.app.data.fetchCoverSwatch
 import com.curio.app.data.openSearchUrl
 import com.curio.app.data.resolveAppleMusicItemUrl
 import com.curio.app.infrastructure.ExploreSessionService
@@ -186,6 +187,7 @@ import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.notesSheetContainerColor
+import com.curio.app.ui.theme.notesSheetContainerColorForCover
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
@@ -2737,26 +2739,48 @@ private fun BookCoverPoster(
     // (and the keyless fallback URL) on every book visit even when the user
     // never enabled fetching.
     val bookFetchConsent = AppPreferences.bookFetchEnabledState
-    // v327 — RESTORED to the ce892baa form the user confirmed renders covers
-    // correctly: the AsyncImage IS the root (no gradient Box wrapper, no
-    // Modifier.matchParentSize) — the caller's size/shadow modifier chain is
-    // applied directly to the image, so the cover fills the poster box. The
-    // gradient placeholder experiments (7ba3d7d2) repeatedly painted over or
-    // swallowed the loaded cover, so it is gone.
-    if (coverCandidates.isNotEmpty() && coverIndex < coverCandidates.size) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(coverCandidates[coverIndex])
-                .crossfade(true)
-                .networkCachePolicy(
-                    if (bookFetchConsent) CachePolicy.ENABLED else CachePolicy.DISABLED
+    // v338 — EMPTY-STATE FIX: the poster is a real two-tone book-plate with a
+    // menu_book glyph BEHIND the loaded cover instead of an empty clipped
+    // AsyncImage. When a cover is missing (no URL, fetch OFF with nothing
+    // cached, or every candidate failed) there is now a visible, shadow-able
+    // surface — the caller's shadow previously fell on a transparent hole
+    // and read as a glitchy blur box. The cover (when it arrives) paints
+    // OVER the plate, so the placeholder never competes with artwork.
+    val shape = RoundedCornerShape(8.dp)
+    Box(
+        modifier = modifier
+            .clip(shape)
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.surfaceContainerHigh,
+                        MaterialTheme.colorScheme.surfaceContainerHighest
+                    )
                 )
-                .build(),
-            contentDescription = "Book cover",
-            onError = { if (coverIndex < coverCandidates.lastIndex) coverIndex += 1 },
-            modifier = modifier.clip(RoundedCornerShape(8.dp)),
-            contentScale = ContentScale.Crop
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        CurioIcon(
+            name = CurioIcons.MenuBook,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
+            size = 26.dp
         )
+        if (coverCandidates.isNotEmpty() && coverIndex < coverCandidates.size) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(coverCandidates[coverIndex])
+                    .crossfade(true)
+                    .networkCachePolicy(
+                        if (bookFetchConsent) CachePolicy.ENABLED else CachePolicy.DISABLED
+                    )
+                    .build(),
+                contentDescription = "Book cover",
+                onError = { if (coverIndex < coverCandidates.lastIndex) coverIndex += 1 },
+                modifier = Modifier.matchParentSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
     }
 }
 
@@ -2789,6 +2813,18 @@ private fun BookNotesSheet(
 ) {
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
+    // v338 — cover-art swatch: the sheet tints itself from the BOOK cover's
+    // dominant colour instead of the static category accent (null swatch →
+    // category-tint fallback). Honors the book-fetch consent gate, so no
+    // network is touched when the toggle is OFF (cached covers only).
+    var coverSwatch by remember(topic.imageUrl) { mutableStateOf<Color?>(null) }
+    LaunchedEffect(topic.imageUrl) {
+        coverSwatch = fetchCoverSwatch(
+            context,
+            topic.imageUrl,
+            networkAllowed = AppPreferences.bookFetchEnabledState
+        )
+    }
     val chapters = topic.chapters.orEmpty()
     val hasSynopsis = !topic.synopsis.isNullOrBlank()
     val hasChapters = chapters.isNotEmpty()
@@ -2820,7 +2856,9 @@ private fun BookNotesSheet(
         // v332 — the notes sheets wear the CATEGORY-TINTED wash (same hue
         // family as the reveal page + cards) instead of the neutral dialog
         // container, so the sheet reads as part of the category story.
-        containerColor = cat.notesSheetContainerColor(),
+        // v338 — when the cover's swatch is available it replaces the
+        // category accent entirely (fallback stays when it isn't).
+        containerColor = cat.notesSheetContainerColorForCover(coverSwatch),
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
@@ -3676,6 +3714,13 @@ private fun AlbumNotesSheet(
     val runtime = albumRuntimeSeconds(tracks)
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
+    // v338 — cover-art swatch: the sheet tints itself from the ALBUM cover's
+    // dominant colour (null swatch → category-tint fallback). Albums have no
+    // consent gate, so fetching is always allowed.
+    var coverSwatch by remember(topic.imageUrl) { mutableStateOf<Color?>(null) }
+    LaunchedEffect(topic.imageUrl) {
+        coverSwatch = fetchCoverSwatch(context, topic.imageUrl, networkAllowed = true)
+    }
     // v336 — heart-picked favorite tracks for this album (multi-select).
     // Read reactively so a row-heart tap updates every heart in the sheet
     // (and the Vinyl share card) without leaving it.
@@ -3685,7 +3730,9 @@ private fun AlbumNotesSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         // Same category-tinted wash + top hairline as the book-notes sheet.
-        containerColor = cat.notesSheetContainerColor(),
+        // v338 — when the cover's swatch is available it replaces the
+        // category accent (fallback stays when it isn't).
+        containerColor = cat.notesSheetContainerColorForCover(coverSwatch),
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {

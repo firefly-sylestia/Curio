@@ -153,11 +153,26 @@ fun Modifier.radialHoldMenu(hold: HoldSession?): Modifier = composed {
                     opened = true
                     hold.onOpen(pressPos)
                 }
+                // v337 — SCROLL-CANCEL: while the menu hasn't opened yet, any
+                // pointer travel beyond touch slop means this is a SCROLL (or
+                // a drag past the tile), not a hold — the timer is cancelled
+                // and the gesture gives up, so scrolling through the grids no
+                // longer pops an option menu at the release point. Before
+                // this, only a lift aborted the hold timer: a finger that
+                // lingered even briefly on a tile mid-scroll opened the menu
+                // the instant the timeout passed.
+                val slop = viewConfig.touchSlop
                 while (true) {
                     val event = awaitPointerEvent()
                     val change = event.changes.firstOrNull { it.id == down.id } ?: break
                     if (change.pressed) {
-                        if (opened) {
+                        if (!opened) {
+                            val moved = (change.position + currentRoot.value - pressPos).getDistance()
+                            if (moved > slop) {
+                                holdJob.cancel()
+                                break
+                            }
+                        } else {
                             hold.onMove(change.position + currentRoot.value)
                             // Own the pointer once the menu is open so the
                             // clickable underneath never sees the release.

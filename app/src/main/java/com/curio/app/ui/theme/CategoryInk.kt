@@ -407,6 +407,28 @@ fun CurioCategory.notesSheetContainerColor(): Color {
 }
 
 /**
+ * v338 — cover-extracted variant of [notesSheetContainerColor]: the notes
+ * sheets for books/albums wear a wash derived from the COVER ARTWORK's
+ * dominant swatch instead of the static category accent, so a warm cover
+ * tints the sheet warm, a cool one cool, etc. Same light/dark recipe as the
+ * category version, fed by the swatch's hue/saturation. Falls back to
+ * [notesSheetContainerColor] whenever the swatch is unavailable (no
+ * authored cover, fetch failed, or Material theme / tint-wash off) —
+ * callers pass null in those cases.
+ */
+@Composable
+fun CurioCategory.notesSheetContainerColorForCover(swatch: Color?): Color {
+    if (swatch == null) return notesSheetContainerColor()
+    if (materialThemeOn) return notesSheetContainerColor()
+    if (!AppPreferences.tintWashEffective()) return notesSheetContainerColor()
+    if (isCurioDarkTheme()) {
+        val a = toHsl(swatch)
+        return fromHsl(a.h, (a.s * 0.55f).coerceAtMost(0.40f), 0.27f)
+    }
+    return lightAccentTint(swatch, saturation = 0.26f, lightness = 0.91f)
+}
+
+/**
  * The mood board's tinted canvas — same resolution as [categorySurface]
  * but NOT gated by the theme STYLE: the AMOLED style blacks out category
  * tints app-wide, and the mood board's tinted surface is its identity, so
