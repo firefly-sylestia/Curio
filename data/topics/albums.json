@@ -84940,28 +84940,6 @@
     "geniusUrl": "https://genius.com/albums/stevie-wonder/someday-at-christmas"
   },
   {
-    "id": "album-live-at-carnegie-hall",
-    "categoryId": "ALBUMS",
-    "subtype": "Album",
-    "name": "Live at Carnegie Hall",
-    "teaser": "2016 Van Morrison's live album from 1995: 'Moondance', 'Days Like This', and 'Brown Eyed Girl' capture his band at Carnegie Hall. The album was recorded over two nights. It is a superb live document.",
-    "imageUrl": "",
-    "byline": "Van Morrison",
-    "exploreAction": {
-      "verb": "Listen",
-      "targetName": "Live at Carnegie Hall (2016) end-to-end",
-      "durationMinutes": 126,
-      "instruction": "Listen to the performance — the band is tight and Morrison is in fine voice. The album captures his live power."
-    },
-    "tags": [
-      "R&B",
-      "Live",
-      "2016"
-    ],
-    "tier": 1,
-    "geniusUrl": "https://genius.com/albums/van-morrison/live-at-carnegie-hall"
-  },
-  {
     "id": "album-in-concert",
     "categoryId": "ALBUMS",
     "subtype": "Album",
