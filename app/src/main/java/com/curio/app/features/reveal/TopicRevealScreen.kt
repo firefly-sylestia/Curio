@@ -22,7 +22,8 @@ import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.plus
+// Note: EnterTransition/ExitTransition combine with + (the operator resolves
+// without an explicit import on this Compose BOM — see other UI files).
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
