@@ -615,6 +615,19 @@ object TopicJsonLoader {
                 )
             }
         } else null
+        // Series only: per-episode guide (season + episode + title + summary).
+        val episodesArr = obj.optJSONArray("episodes")
+        val episodes: List<SeriesEpisode>? = if (episodesArr != null && episodesArr.length() > 0) {
+            List(episodesArr.length()) { i ->
+                val ep = episodesArr.getJSONObject(i)
+                SeriesEpisode(
+                    season = ep.optInt("season", 1),
+                    number = ep.optInt("number", i + 1),
+                    title = ep.optString("title", "Episode ${i + 1}"),
+                    summary = ep.optString("summary", "")
+                )
+            }
+        } else null
         return CurioTopic(
             id            = id,
             categoryId    = categoryId,
@@ -633,7 +646,8 @@ object TopicJsonLoader {
             synopsis      = synopsis,
             chapters      = chapters,
             tracks        = tracks,
-            geniusUrl     = geniusUrl
+            geniusUrl     = geniusUrl,
+            episodes      = episodes
         )
     }
 }

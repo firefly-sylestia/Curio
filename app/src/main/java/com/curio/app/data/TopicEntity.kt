@@ -50,7 +50,9 @@ data class TopicEntity(
     @ColumnInfo(defaultValue = "")
     val tracks: String = "", // JSON array stored as string
     @ColumnInfo(defaultValue = "")
-    val geniusUrl: String = "" // albums only — Genius album page (v333)
+    val geniusUrl: String = "", // albums only — Genius album page (v333)
+    @ColumnInfo(defaultValue = "")
+    val episodes: String = "" // series only — per-episode guide (v348)
 ) {
     /** Convert to [CurioTopic] for backward compatibility. */
     fun toCurioTopic(): CurioTopic {
@@ -87,7 +89,11 @@ data class TopicEntity(
                 if (tracks.isBlank()) null
                 else Gson().fromJson(tracks, object : com.google.gson.reflect.TypeToken<List<AlbumTrack>>() {}.type)
             } catch (_: Exception) { null },
-            geniusUrl = geniusUrl.takeIf { it.isNotBlank() }
+            geniusUrl = geniusUrl.takeIf { it.isNotBlank() },
+            episodes = try {
+                if (episodes.isBlank()) null
+                else Gson().fromJson(episodes, object : com.google.gson.reflect.TypeToken<List<SeriesEpisode>>() {}.type)
+            } catch (_: Exception) { null }
         )
     }
 
@@ -115,7 +121,8 @@ data class TopicEntity(
                 synopsis = topic.synopsis ?: "",
                 chapters = try { Gson().toJson(topic.chapters) } catch (_: Exception) { "[]" },
                 tracks = try { Gson().toJson(topic.tracks) } catch (_: Exception) { "[]" },
-                geniusUrl = topic.geniusUrl ?: ""
+                geniusUrl = topic.geniusUrl ?: "",
+                episodes = try { Gson().toJson(topic.episodes) } catch (_: Exception) { "[]" }
             )
         }
     }

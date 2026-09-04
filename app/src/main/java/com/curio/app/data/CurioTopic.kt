@@ -97,7 +97,14 @@ data class CurioTopic(
      * Surfaced as a link in the track-list sheet header. Null for non-album
      * topics and legacy JSON without the field.
      */
-    val geniusUrl: String? = null
+    val geniusUrl: String? = null,
+    /**
+     * Series (web/TV) only: the series' complete episode guide — season +
+     * episode number + title + short summary per episode — authored like the
+     * books' chapters / albums' tracks. Null for non-series topics and
+     * legacy JSON without the field.
+     */
+    val episodes: List<SeriesEpisode>? = null
 ) {
     /**
      * Progress target for this topic: pages for books, episodes for anime/
@@ -329,6 +336,22 @@ data class AlbumTrack(
     val number: Int,
     val title: String,
     val duration: String = ""
+)
+
+/**
+ * One episode of a series topic — season + episode number + title + short
+ * summary, mirroring how books carry chapters and albums carry tracks.
+ *
+ * @property season Season number (1-based).
+ * @property number Episode number WITHIN its season (1-based).
+ * @property title Episode title.
+ * @property summary One-to-two-line summary of the episode's story.
+ */
+data class SeriesEpisode(
+    val season: Int,
+    val number: Int,
+    val title: String,
+    val summary: String = ""
 )
 
 /**
