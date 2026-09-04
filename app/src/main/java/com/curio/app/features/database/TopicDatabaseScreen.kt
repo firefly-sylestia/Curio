@@ -581,6 +581,29 @@ fun TopicDatabaseScreen(navController: NavController) {
         if (needle.isEmpty()) catalog.map { it.first to it.second.size }
         else catalog.mapNotNull { (cat, _) -> searchPass.laneHits[cat.id]?.let { cat to it } }
     }
+    // v333 — the "Also in" pill lanes, TITLE-aware: lanes that own a topic
+    // whose TITLE matches the query rank first (then by hit count), so the
+    // category the user is searching for is never buried under high-count
+    // fuzzy lanes. Hoisted to the composable scope (like `chips`) because
+    // remember() isn't legal inside the LazyColumn content DSL.
+    val otherLanes: List<Pair<CurioCategory, Int>> = remember(searchPass, needle, effectiveCats) {
+        if (needle.isEmpty()) emptyList()
+        else searchPass.laneHits.entries
+            .asSequence()
+            .filter { (id, n) -> n > 0 && (effectiveCats.isEmpty() || id !in effectiveCats) }
+            .sortedWith(
+                compareByDescending<Map.Entry<CategoryId, Int>> { e ->
+                    searchPass.laneExactTitles[e.key] ?: 0
+                }
+                    .thenByDescending { it.value }
+                    .thenBy { CurioCategories.byId(it.key).displayName }
+            )
+            .take(8)
+            .mapNotNull { (id, n) ->
+                CurioCategories.all.firstOrNull { it.id == id }?.let { it to n }
+            }
+            .toList()
+    }
 
     // ── v293 — PAGINATION (100 per page) ─────────────────────────────
     // The topic rows are paginated so only a manageable slice renders per
@@ -794,36 +817,17 @@ fun TopicDatabaseScreen(navController: NavController) {
                     // topic whose TITLE matches the query rank first (then by
                     // hit count), so the category the user is searching for is
                     // never buried under high-count fuzzy lanes.
-                    if (needle.isNotEmpty()) {
-                        val others = remember(searchPass, effectiveCats) {
-                            searchPass.laneHits.entries
-                                .asSequence()
-                                .filter { (id, n) -> n > 0 && (effectiveCats.isEmpty() || id !in effectiveCats) }
-                                .sortedWith(
-                                    compareByDescending<Map.Entry<CategoryId, Int>> { e ->
-                                        searchPass.laneExactTitles[e.key] ?: 0
-                                    }
-                                        .thenByDescending { it.value }
-                                        .thenBy { CurioCategories.byId(it.key).displayName }
-                                )
-                                .take(8)
-                                .mapNotNull { (id, n) ->
-                                    CurioCategories.all.firstOrNull { it.id == id }?.let { it to n }
+                    if (needle.isNotEmpty() && otherLanes.isNotEmpty()) {
+                        item(key = "search-suggestions") {
+                            // v318b — tapping an "Also in" pill SWITCHES the
+                            // filter to that single lane (replacing the
+                            // selection); no more silent add-to-set surprise.
+                            SearchSuggestionRow(
+                                hits = otherLanes,
+                                onSelect = { id ->
+                                    commitCats { setOf(id) }
                                 }
-                                .toList()
-                        }
-                        if (others.isNotEmpty()) {
-                            item(key = "search-suggestions") {
-                                // v318b — tapping an "Also in" pill SWITCHES the
-                                // filter to that single lane (replacing the
-                                // selection); no more silent add-to-set surprise.
-                                SearchSuggestionRow(
-                                    hits = others,
-                                    onSelect = { id ->
-                                        commitCats { setOf(id) }
-                                    }
-                                )
-                            }
+                            )
                         }
                     }
                     if (rows.isEmpty()) {
