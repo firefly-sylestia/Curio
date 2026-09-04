@@ -286,13 +286,27 @@ fun TopicDatabaseScreen(navController: NavController) {
     // display name (Wildcard naturally sits near the end), so lanes are
     // easy to find instead of following the deck's default order.
     // v294 — "All" (WILDCARD) only shows when searching; default view is per-category.
-    val visibleCategories = if (searchActive) {
-        CurioCategories.visible + listOf(CurioCategories.byId(CategoryId.WILDCARD))
-    } else {
-        CurioCategories.visible
+    // v339 — STABLE IDENTITY: computed once per (search mode, hidden/order state)
+    // instead of a fresh list on every recomposition. `catalog` is remembered
+    // on this list, the `indexedTopics` produceState and the row-build
+    // LaunchedEffect below are keyed on `catalog`, so a NEW list instance on
+    // every recomposition restarted the whole pipeline — each restart rebuilt
+    // ~16k IndexedTopic + row objects on the background thread, allocating
+    // tens of MB and forcing a GC every second or two (the browser jank and
+    // the constant "loading" feeling while scrolling).
+    val visibleCategories = remember(
+        searchActive,
+        AppPreferences.hiddenCategoriesState,
+        AppPreferences.categoryOrderState
+    ) {
+        val base = if (searchActive) {
+            CurioCategories.visible + listOf(CurioCategories.byId(CategoryId.WILDCARD))
+        } else {
+            CurioCategories.visible
+        }
+        base.distinctBy { it.id }
+            .sortedBy { it.displayName.lowercase() }
     }
-        .distinctBy { it.id }
-        .sortedBy { it.displayName.lowercase() }
     // The merged wildcard pool duplicates every canonical topic, so the
     // Wildcard lane shows ONLY the hand-curated wildcard.json originals —
     // the ten lanes keep their own topics and the sections never overlap.

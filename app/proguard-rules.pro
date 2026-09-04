@@ -55,3 +55,14 @@
 # Vosk's own binding classes extend com.sun.jna.PointerType and are resolved
 # through JNA reflection — keep them whole too.
 -keep class org.vosk.** { *; }
+
+# v339 — Share hub crash fix (on-device VerifyError). R8's optimizer
+# outlines repeated code from the giant share-card composables into shared
+# synthetic methods; for these files the outline ended up with ~60 parameters
+# and more registers than ART's verifier allows, so opening the Share hub
+# (which composes every card style as a preview cell) crashed with
+# "Verifier rejected class … register v3 has type Undefined". Keeping the
+# file-level classes preserves their original bytecode — R8 still shrinks
+# and obfuscates the rest of the app, these files just skip the outlining.
+-keep class com.curio.app.ui.components.TopicShareCardKt { *; }
+-keep class com.curio.app.features.settings.ShareHubScreenKt { *; }
