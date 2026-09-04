@@ -394,23 +394,18 @@ fun TopicDatabaseScreen(navController: NavController) {
     val indexedTopics by produceState<List<IndexedTopic>>(
         // Warm-cache seed: when the index is already prewarmed, the rows are
         // ready on the very first frame — no "Preparing topics…" flash.
-        initialValue = TopicJsonLoader.cachedIndex().orEmpty().map { entry ->
-            IndexedTopic(
-                category = CurioCategories.byId(entry.topic.categoryId),
-                topic = entry.topic,
-                nameKey = entry.nameKey,
-                subtypeKey = entry.subtypeKey,
-                bylineKey = entry.bylineKey,
-                teaserKey = entry.teaserKey,
-                tagKeys = entry.tagKeys,
-                year = entry.year
-            )
-        },
-        catalog,
-        useIndex
-    ) {
-        value = if (useIndex) {
-            indexEntries.orEmpty().map { entry ->
+        //
+        // v340 — the seed is a REMEMBERED value keyed on the cached-index
+        // identity, not an inline expression. produceState re-evaluates its
+        // initialValue on EVERY recomposition (typing in the search field,
+        // opening/closing the category panel, returning from a topic), so an
+        // inline 16k-element map with per-topic regex word splits ran on the
+        // main thread per recomposition — the "search/loading is laggy" feel
+        // that survived the pipeline fixes below. The map now runs once per
+        // index instance and the same remembered list seeds every
+        // recomposition until the catalog actually changes.
+        initialValue = remember(TopicJsonLoader.cachedIndex()) {
+            TopicJsonLoader.cachedIndex().orEmpty().map { entry ->
                 IndexedTopic(
                     category = CurioCategories.byId(entry.topic.categoryId),
                     topic = entry.topic,
@@ -421,6 +416,29 @@ fun TopicDatabaseScreen(navController: NavController) {
                     tagKeys = entry.tagKeys,
                     year = entry.year
                 )
+            }
+        },
+        catalog,
+        useIndex
+    ) {
+        value = if (useIndex) {
+            // v340 — the index remap also runs OFF the main thread: a search
+            // toggle changes `catalog`, which restarts this producer, and the
+            // old inline remap then rebuilt all 16k IndexedTopic objects on
+            // the UI thread inside the producer before the new rows appeared.
+            withContext(Dispatchers.Default) {
+                indexEntries.orEmpty().map { entry ->
+                    IndexedTopic(
+                        category = CurioCategories.byId(entry.topic.categoryId),
+                        topic = entry.topic,
+                        nameKey = entry.nameKey,
+                        subtypeKey = entry.subtypeKey,
+                        bylineKey = entry.bylineKey,
+                        teaserKey = entry.teaserKey,
+                        tagKeys = entry.tagKeys,
+                        year = entry.year
+                    )
+                }
             }
         } else {
             withContext(Dispatchers.Default) {

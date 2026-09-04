@@ -136,6 +136,7 @@ import com.curio.app.ui.theme.AntonFontFamily
 import kotlin.math.roundToInt
 import kotlin.math.sin
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.verticalScroll
@@ -727,7 +728,7 @@ fun TopicShareCard(
     Box {
         when (style) {
             ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact)
-            ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact)
+            ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact, hideTypedFavSong = albumFavTracks.isNotEmpty())
             ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto ?: bookCover, byline, year, polaroidCaption, onPhotoTap, bodyScale, callbacks, move, chapterProgress, chapterFact)
             ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact)
             ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact)
@@ -740,24 +741,66 @@ fun TopicShareCard(
         // v335 — the jacket is a movable element like the badge: its offset
         // comes from [move.coverDx]/[move.coverDy] and it reports its bounds
         // so the editor's chrome can select + drag it.
+        // v340 — the DEFAULT pocket is per-style: each design anchors the
+        // jacket where ITS top-right art (or headline/crest) leaves a gap,
+        // so a fresh cover lands in that style's natural spot instead of
+        // always overlapping the same corner decoration. The user can still
+        // drag it anywhere (move offsets apply on top).
         if (bookCover != null && style != ShareCardStyle.COLLAGE) {
+            val coverSlot = when (style) {
+                ShareCardStyle.PAPER -> Alignment.TopEnd to PaddingValues(top = 64.dp, end = 16.dp)
+                ShareCardStyle.VINYL -> Alignment.TopEnd to PaddingValues(top = 70.dp, end = 18.dp)
+                // Clean wears a huge rotated glyph top-right: drop the jacket
+                // BELOW it instead of over the category art.
+                ShareCardStyle.NEUMORPHIC -> Alignment.TopEnd to PaddingValues(top = 186.dp, end = 20.dp)
+                // Editorial: masthead rules + headline own the top; the
+                // bottom-right sits beside the colophon's left-aligned slug.
+                ShareCardStyle.EDITORIAL -> Alignment.BottomEnd to PaddingValues(bottom = 26.dp, end = 18.dp)
+                ShareCardStyle.MINIMAL -> Alignment.TopEnd to PaddingValues(top = 48.dp, end = 16.dp)
+                // Signature/Custom: small crest at top-right — the jacket
+                // parks just below it.
+                ShareCardStyle.SIGNATURE, ShareCardStyle.CUSTOM -> Alignment.TopEnd to PaddingValues(top = 56.dp, end = 16.dp)
+                ShareCardStyle.COLLAGE -> Alignment.TopEnd to PaddingValues(top = 34.dp, end = 14.dp)
+            }
             BookCoverBadge(
                 cover = bookCover,
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
+                    .align(coverSlot.first)
                     .offset(x = move.coverDx.dp, y = move.coverDy.dp)
-                    .padding(top = 34.dp, end = 14.dp),
+                    .padding(coverSlot.second),
                 callbacks = callbacks
             )
         }
-        // v337 — heart-picked album tracks render as ONE shared corner strip
-        // above EVERY style (was Vinyl-only). Empty for non-album topics, so
-        // other cards never change.
+        // v337 — heart-picked album tracks render as a per-style corner
+        // sticker above every style. v340 — each design wears its OWN visual
+        // tokens + corner (see FavoriteTracksBadge) so the strip belongs to
+        // the card instead of reading as a vinyl sticker everywhere. Empty
+        // for non-album topics, so other cards never change.
         if (albumFavTracks.isNotEmpty()) {
+            // Hide the Vinyl typed favorite-song line when heart-picked
+            // tracks exist (both would fight over the same bottom corner).
+            val favSlot = when (style) {
+                ShareCardStyle.NEUMORPHIC -> Alignment.TopStart to
+                    PaddingValues(top = 88.dp, start = 22.dp, end = 22.dp)
+                ShareCardStyle.EDITORIAL -> Alignment.BottomStart to
+                    PaddingValues(start = 26.dp, bottom = 62.dp)
+                ShareCardStyle.MINIMAL -> Alignment.TopEnd to
+                    PaddingValues(top = 46.dp, end = 22.dp, start = 22.dp)
+                // Vinyl: bottom-start is where the typed song chip lives; it
+                // is suppressed (below) so the album strip owns that corner.
+                ShareCardStyle.VINYL, ShareCardStyle.PAPER -> Alignment.BottomStart to
+                    PaddingValues(start = if (aspect == ShareCardAspect.CLASSIC) 12.dp else 16.dp, bottom = if (aspect == ShareCardAspect.CLASSIC) 30.dp else 26.dp)
+                ShareCardStyle.COLLAGE -> Alignment.BottomStart to
+                    PaddingValues(start = 20.dp, bottom = if (aspect == ShareCardAspect.CLASSIC) 38.dp else 34.dp)
+                ShareCardStyle.SIGNATURE, ShareCardStyle.CUSTOM -> Alignment.BottomStart to
+                    PaddingValues(start = if (aspect == ShareCardAspect.CLASSIC) 14.dp else 18.dp, bottom = if (aspect == ShareCardAspect.CLASSIC) 58.dp else 54.dp)
+            }
             FavoriteTracksBadge(
                 tracks = albumFavTracks,
+                style = style,
+                palette = palette,
                 classic = aspect == ShareCardAspect.CLASSIC,
-                modifier = Modifier.align(Alignment.BottomStart)
+                modifier = Modifier.align(favSlot.first).padding(favSlot.second)
             )
         }
     }
@@ -860,7 +903,11 @@ private fun VinylCard(
     move: ShareCardMove = ShareCardMove(),
     chapterProgress: ChapterProgressUi? = null,
     // v335 — a stacked custom fact rendered below the progress widget.
-    chapterFact: String = ""
+    chapterFact: String = "",
+    // v341 — hide the typed favorite-song chip when heart-picked album
+    // tracks exist: both would fight over the bottom-start corner (the
+    // TopicShareCard-level FavoriteTracksBadge owns that spot then).
+    hideTypedFavSong: Boolean = false
 ) {
     val roseBg = Color(0xFFF5E6E0)
     val roseDusty = Color(0xFFD4A0A0)
@@ -1074,7 +1121,8 @@ private fun VinylCard(
         // stays the plain typed favorite line.
         val is34v = aspect == ShareCardAspect.CLASSIC
         val favSong = AppPreferences.favoriteSongState.trim()
-        if (favSong.isNotEmpty()) {
+        // v341 — suppressed when the heart-picked album strip owns the corner.
+        if (favSong.isNotEmpty() && !hideTypedFavSong) {
             Surface(
                 shape = RoundedCornerShape(6.dp),
                 color = Color(0xFFFDF0EE).copy(alpha = 0.88f),
@@ -1103,45 +1151,114 @@ private fun VinylCard(
 }
 
 /** v337 — FAVORITE TRACKS strip: the album's heart-picked tracks render on
- *  EVERY card style (Paper, Vinyl, Collage, Neumorphic, Editorial, Minimal,
- *  Signature, Custom) as one shared corner sticker drawn at the
- *  TopicShareCard level, above whatever style is active. Cream sticker +
- *  dark ink, so it stays legible on any card surface. Up to three songs,
- *  then "+N more". */
+ *  EVERY card style as a sticker drawn at the TopicShareCard level, above
+ *  whatever style is active. v340 — the sticker is no longer one shared
+ *  cream/rose vinyl chip: each style gets its OWN visual language + corner
+ *  (colors/typography/shape picked from that design), so the album favorites
+ *  read as native to the card instead of a vinyl sticker pasted on top.
+ *  Up to three songs, then "+N more".
+ */
+private data class FavStripTokens(
+    val bg: Color,
+    val border: Color?,
+    val labelInk: Color,
+    val bodyInk: Color,
+    val heart: Color,
+    val serifBody: Boolean,
+    val capsSpacing: Boolean,
+    val radius: Dp,
+    val alpha: Float
+)
+
 @Composable
 private fun FavoriteTracksBadge(
     tracks: List<String>,
+    style: ShareCardStyle,
+    palette: ShareCardPalette,
     classic: Boolean,
     modifier: Modifier = Modifier
 ) {
     val shownFavs = tracks.take(3)
     val extra = tracks.size - shownFavs.size
-    val chipInk = Color(0xFF3A2A20)
-    val chipRose = Color(0xFFD4A0A0)
+    // v340 — per-style tokens: colors, borders, type and radius match the
+    // design underneath so the strip belongs to the card it sits on.
+    val tok: FavStripTokens = when (style) {
+        ShareCardStyle.PAPER -> FavStripTokens(
+            bg = palette.bgBase, border = palette.ink.copy(alpha = 0.14f),
+            labelInk = palette.ink.copy(alpha = 0.80f), bodyInk = palette.ink.copy(alpha = 0.84f),
+            heart = palette.accent, serifBody = true, capsSpacing = true,
+            radius = 7.dp, alpha = 0.94f
+        )
+        ShareCardStyle.VINYL -> FavStripTokens(
+            bg = Color(0xFFFDF0EE), border = Color(0xFFD4A0A0).copy(alpha = 0.35f),
+            labelInk = Color(0xFF3A2A20).copy(alpha = 0.78f), bodyInk = Color(0xFF3A2A20).copy(alpha = 0.82f),
+            heart = Color(0xFFD4A0A0), serifBody = true, capsSpacing = true,
+            radius = 7.dp, alpha = 0.92f
+        )
+        ShareCardStyle.COLLAGE -> FavStripTokens(
+            bg = Color(0xFFFFFDF6), border = Color(0xFFD9BE8A).copy(alpha = 0.55f),
+            labelInk = Color(0xFF3A2A20).copy(alpha = 0.72f), bodyInk = Color(0xFF3A2A20).copy(alpha = 0.80f),
+            heart = palette.accentDark, serifBody = true, capsSpacing = false,
+            radius = 3.dp, alpha = 0.97f
+        )
+        ShareCardStyle.NEUMORPHIC -> FavStripTokens(
+            bg = Color.Black.copy(alpha = 0.62f), border = Color.White.copy(alpha = 0.16f),
+            labelInk = Color.White.copy(alpha = 0.82f), bodyInk = Color.White.copy(alpha = 0.88f),
+            heart = palette.accent.copy(alpha = 0.9f), serifBody = false, capsSpacing = true,
+            radius = 50.dp, alpha = 1f
+        )
+        ShareCardStyle.EDITORIAL -> FavStripTokens(
+            bg = Color(0xFFFFFCF6), border = Color(0xFF1C1814).copy(alpha = 0.22f),
+            labelInk = Color(0xFF1C1814).copy(alpha = 0.85f), bodyInk = Color(0xFF1C1814).copy(alpha = 0.80f),
+            heart = palette.accent, serifBody = true, capsSpacing = false,
+            radius = 2.dp, alpha = 0.96f
+        )
+        ShareCardStyle.MINIMAL -> FavStripTokens(
+            bg = Color(0xFFFFFDF9), border = Color(0xFF1A1A1A).copy(alpha = 0.30f),
+            labelInk = Color(0xFF1A1A1A).copy(alpha = 0.80f), bodyInk = Color(0xFF1A1A1A).copy(alpha = 0.80f),
+            heart = palette.accent, serifBody = false, capsSpacing = true,
+            radius = 0.dp, alpha = 0.98f
+        )
+        // Signature + Custom wear the tone palette like their category slugs.
+        else -> FavStripTokens(
+            bg = palette.bgBase, border = palette.accent.copy(alpha = 0.40f),
+            labelInk = palette.ink.copy(alpha = 0.82f), bodyInk = palette.ink.copy(alpha = 0.84f),
+            heart = palette.accentDark, serifBody = true, capsSpacing = false,
+            radius = 8.dp, alpha = 0.97f
+        )
+    }
     Surface(
-        shape = RoundedCornerShape(6.dp),
-        color = Color(0xFFFDF0EE).copy(alpha = 0.92f),
-        // [modifier] carries the caller's BoxScope alignment; the offsets
-        // below clear each style's bottom footer.
+        shape = RoundedCornerShape(tok.radius),
+        color = tok.bg.copy(alpha = tok.alpha),
+        border = tok.border?.let { BorderStroke(0.8.dp, it) },
+        // [modifier] carries the caller's BoxScope alignment + per-style
+        // corner inset; each design clears its own footer below.
         modifier = modifier
-            .padding(start = if (classic) 12.dp else 16.dp, bottom = if (classic) 30.dp else 26.dp)
             .widthIn(max = if (classic) 168.dp else 210.dp)
     ) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(2.dp),
-            modifier = Modifier.padding(horizontal = 7.dp, vertical = 5.dp)
+            verticalArrangement = Arrangement.spacedBy(if (tok.serifBody) 2.dp else 1.dp),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 ShareHeartGlyph(
-                    color = chipInk.copy(alpha = 0.85f),
+                    color = tok.labelInk.copy(alpha = 0.85f),
                     iconSize = if (classic) 7.dp else 9.dp,
                     filled = true
                 )
-                Text("FAVORITE TRACKS", style = TextStyle(fontFamily = GeomFontFamily, fontSize = if (classic) 5.sp else 6.sp,
-                    fontWeight = FontWeight.ExtraBold, letterSpacing = 1.1.sp, color = chipInk.copy(alpha = 0.78f)))
+                Text(
+                    "FAVORITE TRACKS",
+                    style = TextStyle(
+                        fontFamily = if (tok.capsSpacing) GeomFontFamily else LoraFontFamily,
+                        fontSize = if (classic) 5.sp else 6.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = if (tok.capsSpacing) 1.1.sp else 0.6.sp,
+                        color = tok.labelInk
+                    )
+                )
             }
             shownFavs.forEach { t ->
                 Row(
@@ -1150,15 +1267,21 @@ private fun FavoriteTracksBadge(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     ShareHeartGlyph(
-                        color = chipRose.copy(alpha = 0.95f),
+                        color = tok.heart.copy(alpha = 0.95f),
                         iconSize = if (classic) 5.5.dp else 7.dp,
                         filled = true
                     )
                     Text(
                         t,
-                        style = TextStyle(fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
+                        style = if (tok.serifBody) TextStyle(
+                            fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
                             fontSize = if (classic) 6.5.sp else 8.sp, lineHeight = if (classic) 8.sp else 10.sp,
-                            color = chipInk.copy(alpha = 0.82f)),
+                            color = tok.bodyInk
+                        ) else TextStyle(
+                            fontFamily = GeomFontFamily,
+                            fontSize = if (classic) 6.sp else 7.5.sp, lineHeight = if (classic) 7.5.sp else 9.sp,
+                            fontWeight = FontWeight.SemiBold, color = tok.bodyInk
+                        ),
                         maxLines = 1, overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
@@ -1167,8 +1290,13 @@ private fun FavoriteTracksBadge(
             if (extra > 0) {
                 Text(
                     "+$extra more",
-                    style = TextStyle(fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
-                        fontSize = if (classic) 6.sp else 7.5.sp, color = chipRose),
+                    style = if (tok.serifBody) TextStyle(
+                        fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
+                        fontSize = if (classic) 6.sp else 7.5.sp, color = tok.heart
+                    ) else TextStyle(
+                        fontFamily = GeomFontFamily, fontWeight = FontWeight.Bold,
+                        fontSize = if (classic) 6.sp else 7.5.sp, color = tok.heart
+                    ),
                     maxLines = 1, overflow = TextOverflow.Ellipsis
                 )
             }
@@ -4930,6 +5058,13 @@ private fun ArrangeableCard(
                         )
                     }
 
+                // v341 — PicsArt-style alignment guides: while a selected box
+                // is dragged, its edges and centre magnet-snap to the card's
+                // own edges and centre lines (6 dp reach); the overlay draws
+                // the active guide lines full-card until the grip lifts.
+                var dragGuides by remember { mutableStateOf(DragGuides()) }
+                var dragActive by remember { mutableStateOf(false) }
+
                 // v3xx — NEW selection model: nothing is shown when edit mode
                 // starts (the user asked: no boxes/grips on hold). Tapping a
                 // thing on the card selects it — the selected box gets the
@@ -4979,10 +5114,25 @@ private fun ArrangeableCard(
                                 x = t.left.dp,
                                 y = t.top.dp,
                                 onDelta = { dx, dy ->
-                                    val nx = (move.titleDx + dx).coerceIn(-t.left, cw - t.left - t.width)
-                                    val ny = (move.titleDy + dy).coerceIn(-t.top, ch - t.top - t.height)
+                                    // v340 — clamp against the UNMOVED rect
+                                    // (base = reported minus current offset).
+                                    // The old bound used the moved rect, so
+                                    // every grab after the first re-clamped
+                                    // against an ever-shrinking range and the
+                                    // element got stuck halfway (title that
+                                    // "wouldn't go high enough" on Clean).
+                                    // v341 — the base-rect clamps feed the
+                                    // magnet helper, so snapping never pushes
+                                    // the box outside the card.
+                                    val bx = t.left - move.titleDx
+                                    val by = t.top - move.titleDy
+                                    val (nx, nxLine) = magnetAxis(bx, t.width, cw, -bx, cw - bx - t.width, (move.titleDx + dx).coerceIn(-bx, cw - bx - t.width), 6f)
+                                    val (ny, nyLine) = magnetAxis(by, t.height, ch, -by, ch - by - t.height, (move.titleDy + dy).coerceIn(-by, ch - by - t.height), 6f)
+                                    dragGuides = DragGuides(vx = nxLine.takeIf { !it.isNaN() }, hy = nyLine.takeIf { !it.isNaN() })
                                     onMove(move.copy(titleDx = nx, titleDy = ny))
-                                }
+                                },
+                                onDragStart = { dragActive = true },
+                                onDragEnd = { dragActive = false; dragGuides = DragGuides() }
                             )
                         }
                     }
@@ -5059,10 +5209,17 @@ private fun ArrangeableCard(
                             x = f.left.dp,
                             y = f.top.dp,
                             onDelta = { dx, dy ->
-                                val nx = (move.factDx + dx).coerceIn(-f.left, cw - f.left - f.width)
-                                val ny = (move.factDy + dy).coerceIn(-f.top, ch - f.top - f.height)
+                                // v340 — base-rect clamp (see the title handle).
+                                // v341 — magnet snap (see the title handle).
+                                val bx = f.left - move.factDx
+                                val by = f.top - move.factDy
+                                val (nx, nxLine) = magnetAxis(bx, f.width, cw, -bx, cw - bx - f.width, (move.factDx + dx).coerceIn(-bx, cw - bx - f.width), 6f)
+                                val (ny, nyLine) = magnetAxis(by, f.height, ch, -by, ch - by - f.height, (move.factDy + dy).coerceIn(-by, ch - by - f.height), 6f)
+                                dragGuides = DragGuides(vx = nxLine.takeIf { !it.isNaN() }, hy = nyLine.takeIf { !it.isNaN() })
                                 onMove(move.copy(factDx = nx, factDy = ny))
-                            }
+                            },
+                            onDragStart = { dragActive = true },
+                            onDragEnd = { dragActive = false; dragGuides = DragGuides() }
                         )
                     }
                 }
@@ -5089,12 +5246,25 @@ private fun ArrangeableCard(
                             x = (m.right + mPad).coerceAtMost(cw - 16f).dp,
                             y = m.bottom.dp.coerceAtMost((ch - 16f).dp),
                             onDelta = { dx, dy ->
-                                val maxX = (cw - m.right - mPad).coerceAtLeast(-m.left + mPad)
-                                val maxY = (ch - m.bottom - mPad).coerceAtLeast(-m.top + mPad)
-                                val nx = (move.metaDx + dx).coerceIn(-m.left + mPad, maxX)
-                                val ny = (move.metaDy + dy).coerceIn(-m.top + mPad, maxY)
+                                // v340 — base-rect clamp: keep the row at least
+                                // [mPad] inside the card, computed from the
+                                // UNMOVED rect so the range never shrinks as
+                                // the row travels (see the title handle).
+                                // v341 — the row's own padded clamp range feeds
+                                // the magnet helper (centre-line snaps still
+                                // work; the edge snaps are out of range here,
+                                // so the row keeps its padding).
+                                val bx = m.left - move.metaDx
+                                val by = m.top - move.metaDy
+                                val maxX = (cw - bx - m.width - mPad).coerceAtLeast(-bx + mPad)
+                                val maxY = (ch - by - m.height - mPad).coerceAtLeast(-by + mPad)
+                                val (nx, nxLine) = magnetAxis(bx, m.width, cw, -bx + mPad, maxX, (move.metaDx + dx).coerceIn(-bx + mPad, maxX), 6f)
+                                val (ny, nyLine) = magnetAxis(by, m.height, ch, -by + mPad, maxY, (move.metaDy + dy).coerceIn(-by + mPad, maxY), 6f)
+                                dragGuides = DragGuides(vx = nxLine.takeIf { !it.isNaN() }, hy = nyLine.takeIf { !it.isNaN() })
                                 onMove(move.copy(metaDx = nx, metaDy = ny))
-                            }
+                            },
+                            onDragStart = { dragActive = true },
+                            onDragEnd = { dragActive = false; dragGuides = DragGuides() }
                         )
                     }
                 }
@@ -5123,10 +5293,17 @@ private fun ArrangeableCard(
                             x = (b.left - 2f).coerceIn(0f, (cw - 24f).coerceAtLeast(0f)).dp,
                             y = (b.top - 2f).coerceIn(0f, (ch - 24f).coerceAtLeast(0f)).dp,
                             onDelta = { dx, dy ->
-                                val nx = (move.badgeDx + dx).coerceIn(-b.left - 2f, cw - b.left - b.width + 2f)
-                                val ny = (move.badgeDy + dy).coerceIn(-b.top - 2f, ch - b.top - b.height + 2f)
+                                // v340 — base-rect clamp (see the title handle).
+                                // v341 — magnet snap (see the title handle).
+                                val bx = b.left - move.badgeDx
+                                val by = b.top - move.badgeDy
+                                val (nx, nxLine) = magnetAxis(bx, b.width, cw, -bx - 2f, cw - bx - b.width + 2f, (move.badgeDx + dx).coerceIn(-bx - 2f, cw - bx - b.width + 2f), 6f)
+                                val (ny, nyLine) = magnetAxis(by, b.height, ch, -by - 2f, ch - by - b.height + 2f, (move.badgeDy + dy).coerceIn(-by - 2f, ch - by - b.height + 2f), 6f)
+                                dragGuides = DragGuides(vx = nxLine.takeIf { !it.isNaN() }, hy = nyLine.takeIf { !it.isNaN() })
                                 onMove(move.copy(badgeDx = nx, badgeDy = ny))
-                            }
+                            },
+                            onDragStart = { dragActive = true },
+                            onDragEnd = { dragActive = false; dragGuides = DragGuides() }
                         )
                     }
                 }
@@ -5155,11 +5332,50 @@ private fun ArrangeableCard(
                             x = (cv.right - 24f).coerceIn(0f, (cw - 24f).coerceAtLeast(0f)).dp,
                             y = (cv.bottom - 24f).coerceIn(0f, (ch - 24f).coerceAtLeast(0f)).dp,
                             onDelta = { dx, dy ->
-                                val nx = (move.coverDx + dx).coerceIn(-cv.left, cw - cv.left - cv.width)
-                                val ny = (move.coverDy + dy).coerceIn(-cv.top, ch - cv.top - cv.height)
+                                // v340 — base-rect clamp (see the title handle).
+                                // v341 — magnet snap (see the title handle).
+                                val bx = cv.left - move.coverDx
+                                val by = cv.top - move.coverDy
+                                val (nx, nxLine) = magnetAxis(bx, cv.width, cw, -bx, cw - bx - cv.width, (move.coverDx + dx).coerceIn(-bx, cw - bx - cv.width), 6f)
+                                val (ny, nyLine) = magnetAxis(by, cv.height, ch, -by, ch - by - cv.height, (move.coverDy + dy).coerceIn(-by, ch - by - cv.height), 6f)
+                                dragGuides = DragGuides(vx = nxLine.takeIf { !it.isNaN() }, hy = nyLine.takeIf { !it.isNaN() })
                                 onMove(move.copy(coverDx = nx, coverDy = ny))
-                            }
+                            },
+                            onDragStart = { dragActive = true },
+                            onDragEnd = { dragActive = false; dragGuides = DragGuides() }
                         )
+                    }
+                }
+
+                // v341 — PicsArt-style alignment guides. Always composed but
+                // only draws while a box drag is live: a FAINT centre
+                // crosshair appears the moment any grip is pulled (centering
+                // hint), and when the drag magnet-snaps to the card centre or
+                // an edge, a bright full-card guide line marks the snapped
+                // axis. Reads happen inside the draw scope so per-frame drag
+                // updates only redraw this canvas, never recompose the
+                // overlay. Halo + bright core keeps the lines visible on
+                // light and dark cards alike.
+                Canvas(Modifier.fillMaxSize()) {
+                    if (dragActive || dragGuides.vx != null || dragGuides.hy != null) {
+                        val gd = editDensity
+                        fun guide(vertical: Boolean, at: Float) {
+                            val px = if (vertical) with(gd) { at.dp.toPx() } else 0f
+                            val py = if (vertical) 0f else with(gd) { at.dp.toPx() }
+                            val ex = if (vertical) px else size.width
+                            val ey = if (vertical) size.height else py
+                            drawLine(Color.Black.copy(alpha = 0.30f), Offset(px, py), Offset(ex, ey), strokeWidth = with(gd) { 3.dp.toPx() })
+                            drawLine(Color.White.copy(alpha = 0.95f), Offset(px, py), Offset(ex, ey), strokeWidth = with(gd) { 1.dp.toPx() })
+                        }
+                        if (dragActive) {
+                            // Centering hint: faint crosshair while any box moves.
+                            val cx = with(gd) { (cw / 2f).dp.toPx() }
+                            val cy = with(gd) { (ch / 2f).dp.toPx() }
+                            drawLine(Color.White.copy(alpha = 0.28f), Offset(cx, 0f), Offset(cx, size.height), strokeWidth = with(gd) { 0.7.dp.toPx() })
+                            drawLine(Color.White.copy(alpha = 0.28f), Offset(0f, cy), Offset(size.width, cy), strokeWidth = with(gd) { 0.7.dp.toPx() })
+                        }
+                        dragGuides.vx?.let { guide(true, it) }
+                        dragGuides.hy?.let { guide(false, it) }
                     }
                 }
             }
@@ -5221,6 +5437,59 @@ private fun SizeSliderColumn(
             },
             valueRange = range,
             steps = steps,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+/** v340 — TEXT-size slider: a continuous 0.5×–2.0× range in 1% steps with a
+ *  haptic tick per step and a live × readout, replacing the old fixed-step
+ *  buttons (0.5/0.7/0.85/1.0… jumped straight from too-small to cut-off for
+ *  long titles/facts). The value is rounded to the nearest 0.01 so the card
+ *  never renders a visually-aliased in-between size, and every tick lands
+ *  with haptic feedback exactly like the box-size sliders. */
+@Composable
+private fun TextSizeSliderColumn(
+    label: String,
+    value: Float,
+    onValueChange: (Float) -> Unit
+) {
+    val haptics = LocalHapticFeedback.current
+    val range = 0.5f..2.0f
+    // 1% = 0.01 over the 1.5 span → 150 snap steps.
+    val stepsTotal = 150
+    fun stepIndex(v: Float): Int =
+        (((v - range.start) / (range.endInclusive - range.start)) * stepsTotal)
+            .roundToInt().coerceIn(0, stepsTotal)
+    fun stepValue(v: Float): Float =
+        (range.start + (range.endInclusive - range.start) * stepIndex(v) / stepsTotal)
+            .let { kotlin.math.round(it * 100f) / 100f }
+    var lastStep by remember { mutableIntStateOf(stepIndex(value)) }
+    Column {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(label, style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("${stepValue(value)}×", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary))
+        }
+        Slider(
+            value = value.coerceIn(range.start, range.endInclusive),
+            onValueChange = { v ->
+                val snapped = stepValue(v)
+                onValueChange(snapped)
+                val s = stepIndex(v)
+                if (s != lastStep) {
+                    lastStep = s
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                }
+            },
+            onValueChangeFinished = {
+                haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+            },
+            valueRange = range,
+            steps = stepsTotal - 1,
             modifier = Modifier.fillMaxWidth()
         )
     }
@@ -6001,22 +6270,35 @@ fun TopicShareSheet(
                                 }
                             }
                         }
+                        // v340 — text size is a PRECISE slider now (the old
+                        // fixed % buttons jumped 0.15–0.3× at a time, so long
+                        // text went from too small to cut off with no middle
+                        // ground). Continuous 1% steps with a haptic tick per
+                        // step and a live × readout.
                         "size" -> if (isSizable) {
                             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                 Text("$selName size", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                val cur = if (isTitle) move.titleScale else bodyScale
+                                TextSizeSliderColumn(
+                                    label = if (isTitle) "Title text" else "Quick-fact text",
+                                    value = cur,
+                                    onValueChange = { s -> if (isTitle) updateMove(move.copy(titleScale = s)) else bodyScale = s }
+                                )
                                 Row(
+                                    verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    modifier = Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState())
+                                    modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    val opts = if (isTitle) listOf(0.75f, 0.9f, 1.0f, 1.15f, 1.3f, 1.5f)
-                                                 else listOf(0.5f, 0.7f, 0.85f, 1.0f, 1.15f, 1.3f, 1.5f, 1.8f)
-                                    val cur = if (isTitle) move.titleScale else bodyScale
-                                    opts.forEach { s ->
-                                        val label = (Math.round(s * 100f) / 100f).toString() + "\u00d7"
-                                        Pill(label, "text_increase", s == cur) {
-                                            if (isTitle) updateMove(move.copy(titleScale = s)) else bodyScale = s
-                                        }
+                                    Pill("Reset to 1\u00d7", CurioIcons.Refresh, cur == 1f) {
+                                        if (isTitle) updateMove(move.copy(titleScale = 1f)) else bodyScale = 1f
                                     }
+                                    Text(
+                                        if (isTitle) "Longer titles auto-fit their box — this scales the type precisely."
+                                        else "Longer facts auto-shrink to fit — this overrides the auto size by exactly the amount you set.",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.weight(1f)
+                                    )
                                 }
                             }
                         } else {
@@ -6515,10 +6797,16 @@ private fun CustomiseLabel(text: String) {
 @Composable
 private fun BoxScope.MoveHandle(
     x: Dp, y: Dp,
-    onDelta: (dx: Float, dy: Float) -> Unit
+    onDelta: (dx: Float, dy: Float) -> Unit,
+    // v341 — drag-lifecycle hooks: the editor's alignment guides render while
+    // the grip is live and clear the instant it lifts (see ArrangeableCard).
+    onDragStart: () -> Unit = {},
+    onDragEnd: () -> Unit = {}
 ) {
     val density = androidx.compose.ui.platform.LocalDensity.current
     val latestDelta by rememberUpdatedState(onDelta)
+    val latestStart by rememberUpdatedState(onDragStart)
+    val latestEnd by rememberUpdatedState(onDragEnd)
     // v325 — while dragging, the knob shrinks and fades so the text it moves
     // stays readable underneath (it used to sit right on the glyphs).
     var dragging by remember { mutableStateOf(false) }
@@ -6534,9 +6822,9 @@ private fun BoxScope.MoveHandle(
             .border(1.dp, Color.White.copy(alpha = 0.45f), CircleShape)
             .pointerInput(Unit) {
                 detectDragGestures(
-                    onDragStart = { dragging = true },
-                    onDragEnd = { dragging = false },
-                    onDragCancel = { dragging = false }
+                    onDragStart = { dragging = true; latestStart() },
+                    onDragEnd = { dragging = false; latestEnd() },
+                    onDragCancel = { dragging = false; latestEnd() }
                 ) { _, dragAmount ->
                     val dx = with(density) { dragAmount.x.toDp().value }
                     val dy = with(density) { dragAmount.y.toDp().value }
@@ -6553,6 +6841,39 @@ private fun BoxScope.MoveHandle(
         )
     }
 }
+
+/** v341 — one-axis magnet helper behind the PicsArt-style alignment guides.
+ *  Given the element's BASE (zero-offset) edge [base], its [size], the card's
+ *  [cardSize] and the element's own clamp range [min]..[max], it snaps the
+ *  dragged offset to the nearest of: the card's left/top edge, its centre
+ *  line, or its right/bottom edge — but only when the candidate is inside the
+ *  element's clamp range AND within [snap] dp of the current offset. Returns
+ *  the (possibly snapped) offset and the card-local line it now sits on
+ *  (Float.NaN = no snap on this axis). */
+private fun magnetAxis(
+    base: Float, size: Float, cardSize: Float,
+    min: Float, max: Float, cur: Float, snap: Float
+): Pair<Float, Float> {
+    var best = cur
+    var bestLine = Float.NaN
+    var bestDist = snap
+    // (offset that lands the element on the line, card-local line position)
+    val candidates = listOf(
+        -base to 0f,
+        cardSize / 2f - base - size / 2f to cardSize / 2f,
+        cardSize - base - size to cardSize
+    )
+    for ((cand, line) in candidates) {
+        if (cand < min - 0.01f || cand > max + 0.01f) continue
+        val d = kotlin.math.abs(cand - cur)
+        if (d <= bestDist) { bestDist = d; best = cand; bestLine = line }
+    }
+    return best to bestLine
+}
+
+/** v341 — the guide lines a live drag currently sits on, as card-local dp
+ *  floats (null = not snapped on that axis). */
+private class DragGuides(val vx: Float? = null, val hy: Float? = null)
 
 /**
  * v323 — one tone swatch in the editor's Tone tool: a circle in the tone's
