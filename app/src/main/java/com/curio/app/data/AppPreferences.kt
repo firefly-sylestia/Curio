@@ -56,6 +56,12 @@ object AppPreferences {
     // tracks" strip (multi-select hearts, replaces the single typed line).
     private const val KEY_ALBUM_FAV_TRACKS = "album_fav_tracks"
     private const val KEY_BOOK_FAVORITES = "book_favorites"
+    // v350 — per-category cover-fetch consent: ALBUMS and SERIES get their
+    // own toggles alongside books (opt-OUT by default like books), so the
+    // user can switch fetching on for each category in Settings.
+    private const val KEY_ALBUM_FETCH_ENABLED = "album_fetch_enabled"    // bool — opt-out, default false
+    private const val KEY_SERIES_FETCH_ENABLED = "series_fetch_enabled"  // bool — opt-out, default false
+    private const val KEY_SERIES_FAVORITES = "series_favorites"
     private const val KEY_THEME_MODE = "theme_mode"       // "light", "dark", "system" (v81)
     private const val KEY_CUSTOM_TAGLINE = "custom_streak_tagline"
     private const val KEY_LAST_NOTIFIED_UPDATE = "last_notified_update_version"
@@ -211,6 +217,7 @@ object AppPreferences {
     // BookNotes chapter view). Powers the reveal's chapter-progress bar and
     // the share card's "I'm N chapters in" element.
     private const val KEY_BOOK_READING = "book_reading_progress"      // JSON object name->int
+    private const val KEY_SERIES_WATCHED = "series_watched_progress"   // JSON object show -> JSON array "S1E3" keys
     // v8.34 — custom pet design (Pet designer playground): the imported
     // design's full text (palette + body/curled grids). Always-on when
     // saved — the pet sprite renders this instead of the default until the
@@ -284,6 +291,63 @@ object AppPreferences {
         val arr = org.json.JSONArray(cur.toList())
         prefs(context).edit().putString(KEY_BOOK_FAVORITES, arr.toString()).apply()
         bookFavoritesState = cur
+    }
+
+    // ── Series favorites (v350 — heart pick) ────────────────────────────
+    // One heart per series (favorite shelf), stored by show NAME just like
+    // the book favorites. The episode-list sheet header toggles it.
+    fun getSeriesFavorites(context: Context): Set<String> {
+        val raw = prefs(context).getString(KEY_SERIES_FAVORITES, null) ?: return emptySet()
+        return runCatching {
+            val arr = org.json.JSONArray(raw)
+            (0 until arr.length()).mapNotNull { i -> arr.optString(i).takeIf { it.isNotBlank() } }.toSet()
+        }.getOrDefault(emptySet())
+    }
+
+    /** Toggle the favorite heart for [showName]; returns true when it is now a favorite. */
+    fun toggleSeriesFavorite(context: Context, showName: String): Boolean {
+        val cur = getSeriesFavorites(context).toMutableSet()
+        val added = !cur.remove(showName)
+        if (added) cur.add(showName)
+        val arr = org.json.JSONArray(cur.toList())
+        prefs(context).edit().putString(KEY_SERIES_FAVORITES, arr.toString()).apply()
+        seriesFavoritesState = cur
+        return added
+    }
+
+    // ── Series watched progress (v350) ───────────────────────────────────
+    // Per-show set of watched episode keys ("S1E3"): JSON object show name →
+    // JSON array of keys. The episode-list sheet toggles an episode; the UI
+    // derives watched counts per season from the authored episode list.
+    fun getSeriesWatched(context: Context): Map<String, Set<String>> {
+        val raw = prefs(context).getString(KEY_SERIES_WATCHED, null) ?: return emptyMap()
+        return runCatching {
+            val obj = org.json.JSONObject(raw)
+            val out = LinkedHashMap<String, Set<String>>()
+            val keys = obj.keys()
+            while (keys.hasNext()) {
+                val k = keys.next()
+                val arr = obj.optJSONArray(k) ?: continue
+                out[k] = (0 until arr.length()).mapNotNull { i ->
+                    arr.optString(i).takeIf { it.isNotBlank() }
+                }.toSet()
+            }
+            out
+        }.getOrDefault(emptyMap())
+    }
+
+    /** Toggle one episode ("S1E3") of [showName] as watched; returns true when it is now watched. */
+    fun toggleSeriesEpisodeWatched(context: Context, showName: String, episodeKey: String): Boolean {
+        val cur = getSeriesWatched(context).toMutableMap()
+        val set = (cur[showName] ?: emptySet()).toMutableSet()
+        val added = !set.remove(episodeKey)
+        if (added) set.add(episodeKey)
+        if (set.isEmpty()) cur.remove(showName) else cur[showName] = set
+        val obj = org.json.JSONObject()
+        cur.forEach { (name, keys) -> obj.put(name, org.json.JSONArray(keys.toList())) }
+        prefs(context).edit().putString(KEY_SERIES_WATCHED, obj.toString()).apply()
+        seriesWatchedState = cur
+        return added
     }
 
     // ── Album favorite tracks (v336 — heart picks) ───────────────────────
@@ -610,6 +674,14 @@ object AppPreferences {
     // heart + any future share-card chip update the moment it is tapped.
     var bookFavoritesState by mutableStateOf<Set<String>>(emptySet())
         internal set
+    // v350 — favorite series (heart pick): show names, reactive like the
+    // book favorites. The episode-list sheet heart updates instantly.
+    var seriesFavoritesState by mutableStateOf<Set<String>>(emptySet())
+        internal set
+    // v350 — watched episodes per show: show name → set of "S1E3" keys.
+    // Reactive so the episode sheet's toggles + progress update in place.
+    var seriesWatchedState by mutableStateOf<Map<String, Set<String>>>(emptyMap())
+        internal set
     // v336 — per-album favorite tracks (heart picks): album name → picked
     // track titles in pick order. Reactive so the sheet hearts + the Vinyl
     // share-card strip update the moment a heart is tapped.
@@ -902,6 +974,13 @@ object AppPreferences {
      */
     var bookFetchEnabledState by mutableStateOf(false)
         private set
+    // v350 — per-category cover-fetch consent states (album + series toggles
+    // beside the book one) so each category's poster fetch can be switched on
+    // and off independently.
+    var albumFetchEnabledState by mutableStateOf(false)
+        private set
+    var seriesFetchEnabledState by mutableStateOf(false)
+        private set
     var bookCoverProviderState by mutableStateOf("OPEN_LIBRARY")
         private set
     var bookCoverFailedState by mutableStateOf<List<String>>(emptyList())
@@ -1020,6 +1099,8 @@ object AppPreferences {
         displayNameState = getDisplayName(context)
         favoriteSongState = getFavoriteSong(context)
         bookFavoritesState = getBookFavorites(context)
+        seriesFavoritesState = getSeriesFavorites(context)
+        seriesWatchedState = getSeriesWatched(context)
         albumFavTracksState = getAlbumFavoriteTracks(context)
         profileAvatarPathState = getProfileAvatarPath(context)
         customBlurEngineState = isCustomBlurEngineEnabled(context)
@@ -1066,6 +1147,8 @@ object AppPreferences {
         pickerMixesSeededState = isPickerMixesSeeded(context)
         lastMixNameState = getLastMixName(context)
         bookFetchEnabledState = isBookFetchEnabled(context)
+        albumFetchEnabledState = isAlbumFetchEnabled(context)
+        seriesFetchEnabledState = isSeriesFetchEnabled(context)
         bookCoverProviderState = getBookCoverProvider(context)
         bookCoverFailedState = getBookCoverFailed(context)
         bookRatingsState = getBookRatings(context)
@@ -2523,6 +2606,25 @@ object AppPreferences {
     fun setBookFetchEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_BOOK_FETCH_ENABLED, enabled).apply()
         bookFetchEnabledState = enabled
+    }
+
+    // v350 — per-category consent toggles for album + series poster fetching.
+    // Same opt-OUT-by-default semantics as the book toggle; the READER of a
+    // topic checks its own category's toggle before touching the network.
+    fun isAlbumFetchEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_ALBUM_FETCH_ENABLED, false)
+
+    fun setAlbumFetchEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_ALBUM_FETCH_ENABLED, enabled).apply()
+        albumFetchEnabledState = enabled
+    }
+
+    fun isSeriesFetchEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_SERIES_FETCH_ENABLED, false)
+
+    fun setSeriesFetchEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_SERIES_FETCH_ENABLED, enabled).apply()
+        seriesFetchEnabledState = enabled
     }
 
     /** The selected cover provider (a BookCoverProvider enum name). */

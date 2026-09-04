@@ -301,6 +301,8 @@ fun TopicRevealScreen(
     var selectedChapter by remember { mutableStateOf<BookChapter?>(null) }
     var showAlbumSheet by rememberSaveable { mutableStateOf(false) }
     var selectedAlbumTrack by remember { mutableStateOf<AlbumTrack?>(null) }
+    // v350 — the series episode-list sheet (album-style) for SERIES topics.
+    var showSeriesSheet by rememberSaveable { mutableStateOf(false) }
     // v315 — the book/album sections compose only AFTER the shared-element
     // morph settles (~380ms), so heavy content (poster Coil decode, chapter
     // LazyRow, album track list) never competes with the card expansion
@@ -942,6 +944,25 @@ fun TopicRevealScreen(
                     }
                 }
 
+                // ── 2.57 Series episode-list section (series only) ──────
+                // Mirrors the book + album sections: a poster card with the
+                // synopsis preview and episode count; tapping it opens the
+                // full-height episode-list sheet (v350). Gated on
+                // [contentUiReady] like the book/album sections so the poster
+                // lookup never competes with the card morph.
+                val seriesTopic = resolved
+                if (seriesTopic != null && contentUiReady && seriesTopic.categoryId == CategoryId.SERIES &&
+                    !seriesTopic.episodes.isNullOrEmpty()) {
+                    RevealContentEntrance(delayMillis = 60) {
+                        SeriesInfoSection(
+                            cat = cat,
+                            topic = seriesTopic,
+                            onOpenSheet = { showSeriesSheet = true },
+                            modifier = Modifier.padding(top = if (hasTags) 16.dp else progressFloatGap)
+                        )
+                    }
+                }
+
                 // ── 2.6 Action row — Express yourself / Explore ──────────────
                 // v8.57 — the actions moved OUT of the bottom dock to sit
                 // right below the hero card: always visible, no scaffold.
@@ -1132,6 +1153,20 @@ fun TopicRevealScreen(
                 showAlbumSheet = false
                 selectedAlbumTrack = null
             }
+        )
+    }
+
+    // v350 — the series episode-list sheet (album-style, mirrors the book /
+    // album sheets): poster header + favorite heart, watched-progress rail,
+    // the synopsis accordion, then the episodes grouped by season.
+    val seriesSheetTopic = resolved
+    if (seriesSheetTopic != null && seriesSheetTopic.categoryId == CategoryId.SERIES &&
+        showSeriesSheet && !seriesSheetTopic.episodes.isNullOrEmpty()
+    ) {
+        EpisodeNotesSheet(
+            cat = cat,
+            topic = seriesSheetTopic,
+            onDismiss = { showSeriesSheet = false }
         )
     }
 
@@ -2103,6 +2138,7 @@ private fun HeroCard(
                 val bylineLabel = when (cat.id) {
                     CategoryId.ALBUMS -> "Artist"
                     CategoryId.BOOKS -> "Author"
+                    CategoryId.SERIES -> "Created by"
                     CategoryId.FILMS -> "Director"
                     CategoryId.ANIMATED_MOVIES -> "Director"
                     CategoryId.ARTWORKS -> "Painter"
@@ -3263,7 +3299,10 @@ private fun BookSynopsisAccordion(
     onSurface: Color,
     synopsis: String,
     initiallyExpanded: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // v350 — the series episode sheet reuses this accordion; the label swaps
+    // to "ABOUT THIS SERIES" while the behaviour stays identical.
+    label: String = "ABOUT THIS BOOK"
 ) {
     var expanded by remember(initiallyExpanded) { mutableStateOf(initiallyExpanded) }
     Surface(
@@ -3297,7 +3336,7 @@ private fun BookSynopsisAccordion(
                     )
                 }
                 Text(
-                    "ABOUT THIS BOOK",
+                    label,
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 1.2.sp
@@ -3584,8 +3623,12 @@ private fun AlbumCoverPoster(
     val authoredUrl = imageUrl?.takeIf { it.isNotBlank() }
     var artUrl by remember(albumTitle, artist, authoredUrl) { mutableStateOf<String?>(authoredUrl) }
     var failed by remember(albumTitle, artist, authoredUrl) { mutableStateOf(false) }
-    LaunchedEffect(albumTitle, artist, authoredUrl) {
-        if (artUrl == null && !failed && authoredUrl == null) {
+    // v350 — the ALBUM cover-fetch toggle now gates the keyless fallback
+    // (authored art always shows; the network resolver only runs when the
+    // album toggle is ON, mirroring the book + series consent gates).
+    val consent = AppPreferences.albumFetchEnabledState
+    LaunchedEffect(albumTitle, artist, authoredUrl, consent) {
+        if (artUrl == null && !failed && authoredUrl == null && consent) {
             artUrl = AlbumArtFetch.resolveArtworkUrl(albumTitle, artist)
             if (artUrl == null) failed = true
         }
@@ -3764,13 +3807,18 @@ private fun AlbumNotesSheet(
     val tracks = topic.tracks.orEmpty()
     if (tracks.isEmpty()) return
     val context = LocalContext.current
-    // v339 — cover-art palette: the sheet derives its FULL colour set
+    // v339/v350 — cover-art palette: the sheet derives its FULL colour set
     // (background + cards + chips + text) from the ALBUM cover's artwork
-    // (null swatches → per-element category fallback). Albums have no
-    // consent gate, so fetching is always allowed.
+    // (null swatches → per-element category fallback). v350 — the album
+    // cover-fetch toggle gates the lookup like the book/series gates: when
+    // OFF, only already-cached art is served, nothing touches the network.
     var coverSwatches by remember(topic.imageUrl) { mutableStateOf<CoverSwatches?>(null) }
     LaunchedEffect(topic.imageUrl) {
-        coverSwatches = fetchCoverSwatches(context, topic.imageUrl, networkAllowed = true)
+        coverSwatches = fetchCoverSwatches(
+            context,
+            topic.imageUrl,
+            networkAllowed = AppPreferences.albumFetchEnabledState
+        )
     }
     val coverPal = cat.notesSheetPalette(coverSwatches)
     val accent = coverPal?.accent ?: cat.themedAccent()
@@ -4118,6 +4166,620 @@ private val albumListenServices = listOf(
  *  handles: Apple Music via `music://` (falls back to https when the app
  *  isn't installed), Spotify/Amazon/Deezer via their web search routes,
  *  YouTube Music pinned to the app package by [openSearchUrl]. */
+// ═══════════════════════════════════════════════════════════════════════════
+// Series info section — poster + episode list (series only)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Series section on the reveal: a poster card with the synopsis preview and
+ *  episode count; tapping the card opens the full episode-list sheet (v350,
+ *  mirrors the album track-list card). */
+@Composable
+private fun SeriesInfoSection(
+    cat: com.curio.app.data.CurioCategory,
+    topic: CurioTopic,
+    onOpenSheet: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val episodes = topic.episodes.orEmpty()
+    if (episodes.isEmpty()) return
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        SeriesPosterCard(
+            cat = cat,
+            topic = topic,
+            episodes = episodes,
+            onClick = onOpenSheet
+        )
+    }
+}
+
+/** EPISODES card — poster + synopsis preview + season/episode meta. Tap opens
+ *  the full-height episode-list sheet (mirrors the album track-list card). */
+@Composable
+private fun SeriesPosterCard(
+    cat: com.curio.app.data.CurioCategory,
+    topic: CurioTopic,
+    episodes: List<com.curio.app.data.SeriesEpisode>,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val seasonCount = episodes.map { it.season }.distinct().size
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        color = cat.categorySurface(MaterialTheme.colorScheme.surface),
+        shadowElevation = 3.dp,
+        modifier = modifier.fillMaxWidth().clickable(onClick = onClick)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Header row — icon + EPISODES + count + season meta
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+                ) {
+                    CurioIcon(
+                        name = CurioIcons.Movies,
+                        contentDescription = null,
+                        tint = cat.categoryInk(),
+                        size = 16.dp,
+                        modifier = Modifier.padding(7.dp)
+                    )
+                }
+                Text(
+                    text = "EPISODES",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.2.sp
+                    ),
+                    color = cat.categoryInk()
+                )
+                Spacer(Modifier.weight(1f))
+                val meta = buildString {
+                    append("${episodes.size} episode")
+                    if (episodes.size != 1) append("s")
+                    if (seasonCount > 1) append(" · $seasonCount seasons")
+                }
+                Text(
+                    text = meta,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            // Poster + synopsis preview (or a short episode-title preview).
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                SeriesPoster(
+                    showName = topic.name,
+                    accent = cat.themedAccent(),
+                    imageUrl = topic.imageUrl,
+                    modifier = Modifier
+                        .size(width = 76.dp, height = 112.dp)
+                        .shadow(4.dp, RoundedCornerShape(10.dp))
+                )
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    topic.byline.takeIf { it.isNotBlank() }?.let { creator ->
+                        Text(
+                            creator,
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    val synopsis = topic.synopsis?.takeIf { it.isNotBlank() }
+                    if (synopsis != null) {
+                        Text(
+                            text = synopsis,
+                            style = MaterialTheme.typography.bodySmall.copy(lineHeight = 18.sp),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 4,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    } else {
+                        episodes.take(4).forEach { ep ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(
+                                    text = ep.key(),
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = cat.categoryInk(),
+                                    maxLines = 1
+                                )
+                                Text(
+                                    text = ep.title,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            if (episodes.isNotEmpty()) {
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = "View the episode list →",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = cat.categoryInk(),
+                    modifier = Modifier.align(Alignment.End)
+                )
+            }
+        }
+    }
+}
+
+/** Keyed "S1E3" for an episode — matches the watched-progress store keys. */
+private fun com.curio.app.data.SeriesEpisode.key(): String = "S${season}E${number}"
+
+/** Series poster tile: authored imageUrl first, then the keyless TVMaze /
+ *  iTunes resolver (only when the SERIES cover-fetch toggle is ON), and a
+ *  tinted gradient tile with the Movies glyph while resolving / on miss. */
+@Composable
+private fun SeriesPoster(
+    showName: String,
+    accent: Color,
+    imageUrl: String? = null,
+    modifier: Modifier = Modifier
+) {
+    val authoredUrl = imageUrl?.takeIf { it.isNotBlank() }
+    var artUrl by remember(showName, authoredUrl) { mutableStateOf<String?>(authoredUrl) }
+    var failed by remember(showName, authoredUrl) { mutableStateOf(false) }
+    // v350 — the keyless fallback only runs when the SERIES fetch toggle is on.
+    val consent = AppPreferences.seriesFetchEnabledState
+    LaunchedEffect(showName, authoredUrl, consent) {
+        if (artUrl == null && !failed && authoredUrl == null && consent) {
+            artUrl = SeriesPosterFetch.resolvePosterUrl(showName)
+            if (artUrl == null) failed = true
+        }
+    }
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(10.dp))
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(
+                        lerp(accent, Color.White, if (isCurioDarkTheme()) 0.18f else 0.55f),
+                        lerp(accent, Color.Black, 0.45f)
+                    )
+                )
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        CurioIcon(
+            name = CurioIcons.Movies,
+            contentDescription = null,
+            tint = Color.White.copy(alpha = if (artUrl == null) 0.75f else 0f),
+            size = 30.dp
+        )
+        val url = artUrl
+        if (url != null) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(url)
+                    .crossfade(false)
+                    .build(),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
+    }
+}
+
+/**
+ * v350 — the full-height EPISODE LIST sheet for a series topic. One
+ * album-style scroll (mirrors the book-notes / album-track-list sheets): a
+ * header with the poster + title + favorite heart, a pinned watched-progress
+ * rail, a collapsible "About this series" synopsis accordion at the top, and
+ * the episodes grouped by season as expandable rows (summary + watched
+ * toggle). The whole sheet wears the poster's extracted palette when the
+ * series cover-fetch toggle is on; otherwise the category tint.
+ */
+@Composable
+private fun EpisodeNotesSheet(
+    cat: com.curio.app.data.CurioCategory,
+    topic: CurioTopic,
+    onDismiss: () -> Unit
+) {
+    val episodes = topic.episodes.orEmpty()
+    if (episodes.isEmpty()) return
+    val context = LocalContext.current
+    val haptics = LocalHapticFeedback.current
+    val fetchConsent = AppPreferences.seriesFetchEnabledState
+    var coverSwatches by remember(topic.imageUrl) { mutableStateOf<CoverSwatches?>(null) }
+    LaunchedEffect(topic.imageUrl, fetchConsent) {
+        coverSwatches = fetchCoverSwatches(context, topic.imageUrl, networkAllowed = fetchConsent)
+    }
+    val coverPal = cat.notesSheetPalette(coverSwatches)
+    val accent = coverPal?.accent ?: cat.themedAccent()
+    val onAccent = coverPal?.onAccent ?: cat.onAccent()
+    val ink = coverPal?.ink ?: cat.categoryInk()
+    val surface = coverPal?.surface ?: cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
+    val surfaceHigh = coverPal?.surfaceHigh ?: cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+    val surfaceAlt = coverPal?.surfaceAlt ?: MaterialTheme.colorScheme.secondaryContainer
+    val onSurfaceAlt = coverPal?.onSurfaceAlt ?: MaterialTheme.colorScheme.onSecondaryContainer
+    val onSurface = coverPal?.onSurface ?: MaterialTheme.colorScheme.onSurface
+    val onSurfaceVariant = coverPal?.onSurfaceVariant ?: MaterialTheme.colorScheme.onSurfaceVariant
+    val showName = topic.name
+    val hasSynopsis = !topic.synopsis.isNullOrBlank()
+    val seasons = episodes.map { it.season }.distinct().sorted()
+    // v350 — favorite heart for the whole series (like the book heart).
+    val isFavSeries = showName in AppPreferences.seriesFavoritesState
+    // Watched progress: derived from the watched "S1E3" keys against the
+    // authored episode list (so grouped/season data counts real episodes).
+    val watchedKeys = AppPreferences.seriesWatchedState[showName].orEmpty()
+    val watchedTotal = episodes.count { it.key() in watchedKeys }
+    var expandedKey by rememberSaveable { mutableStateOf<String?>(null) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val listState = rememberLazyListState()
+
+    fun toggleEpisode(ep: com.curio.app.data.SeriesEpisode) {
+        expandedKey = if (expandedKey == ep.key()) null else ep.key()
+    }
+    fun toggleWatched(ep: com.curio.app.data.SeriesEpisode) {
+        AppPreferences.toggleSeriesEpisodeWatched(context, showName, ep.key())
+        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = coverPal?.container ?: cat.notesSheetContainerColor(),
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = CurioContentMaxWidth)
+                .fillMaxHeight(0.92f)
+                .padding(bottom = 20.dp)
+        ) {
+            // ── Top hairline — soft accent rule under the drag handle ─────
+            NotesSheetTopHairline(cat)
+            Spacer(Modifier.height(10.dp))
+            // ── Header — poster + title/creator + heart + close ──────────
+            Row(
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+            ) {
+                SeriesPoster(
+                    showName = showName,
+                    accent = accent,
+                    imageUrl = topic.imageUrl,
+                    modifier = Modifier
+                        .size(width = 76.dp, height = 112.dp)
+                        .shadow(3.dp, RoundedCornerShape(10.dp))
+                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "SERIES NOTES",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.4.sp
+                        ),
+                        color = ink
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        topic.name,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                        color = onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    topic.byline.takeIf { it.isNotBlank() }?.let { creator ->
+                        Text(
+                            "Created by $creator",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.End
+                ) {
+                    // v350 — series-level favorite heart (mirrors the book
+                    // and album hearts in look and feel).
+                    Surface(
+                        onClick = {
+                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            AppPreferences.toggleSeriesFavorite(context, showName)
+                        },
+                        shape = CircleShape,
+                        color = if (isFavSeries) accent.copy(alpha = 0.2f) else surface.copy(alpha = 0.6f)
+                    ) {
+                        Box(
+                            modifier = Modifier.padding(8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            HeartGlyph(
+                                color = if (isFavSeries) Color(0xFFE5484D) else onSurfaceVariant,
+                                iconSize = 19.dp,
+                                filled = isFavSeries
+                            )
+                        }
+                    }
+                    Surface(
+                        onClick = onDismiss,
+                        shape = CircleShape,
+                        color = surface.copy(alpha = 0.6f)
+                    ) {
+                        CurioIcon(
+                            CurioIcons.Close,
+                            "Close series notes",
+                            tint = onSurfaceVariant,
+                            size = 20.dp,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                }
+            }
+
+            // ── Pinned watched-progress rail — stays above the list ──────
+            Spacer(Modifier.height(12.dp))
+            val progressLabel = if (watchedTotal > 0)
+                "$watchedTotal of ${episodes.size} episodes watched"
+            else "${episodes.size} episodes · tap an episode to read its notes"
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+            ) {
+                Text(
+                    progressLabel,
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = ink,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    "$watchedTotal / ${episodes.size}",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = accent
+                )
+            }
+            Spacer(Modifier.height(6.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(surfaceHigh)
+            ) {
+                val frac = (watchedTotal.toFloat() / episodes.size).coerceIn(0f, 1f)
+                if (frac > 0f) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(frac)
+                            .height(4.dp)
+                            .background(accent, RoundedCornerShape(50))
+                    )
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+
+            // ── One scroll: synopsis accordion, then seasons + episodes ──
+            LazyColumn(
+                state = listState,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 8.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                if (hasSynopsis) {
+                    item(key = "series_about") {
+                        BookSynopsisAccordion(
+                            surface = surface,
+                            accent = accent,
+                            ink = ink,
+                            onSurface = onSurface,
+                            synopsis = topic.synopsis.orEmpty(),
+                            initiallyExpanded = !hasSynopsis || episodes.isEmpty(),
+                            label = "ABOUT THIS SERIES"
+                        )
+                    }
+                }
+                seasons.forEach { season ->
+                    val seasonEps = episodes.filter { it.season == season }
+                    val watchedSeason = seasonEps.count { it.key() in watchedKeys }
+                    item(key = "season_$season") {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 2.dp, top = 8.dp, end = 2.dp, bottom = 2.dp)
+                        ) {
+                            Text(
+                                "SEASON $season",
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    letterSpacing = 1.sp
+                                ),
+                                color = ink
+                            )
+                            Spacer(Modifier.weight(1f))
+                            Text(
+                                "$watchedSeason / ${seasonEps.size} watched",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = onSurfaceVariant
+                            )
+                        }
+                    }
+                    itemsIndexed(seasonEps) { _, ep ->
+                        val isOpen = expandedKey == ep.key()
+                        val isWatched = ep.key() in watchedKeys
+                        Surface(
+                            onClick = { toggleEpisode(ep) },
+                            shape = RoundedCornerShape(14.dp),
+                            color = when {
+                                isOpen -> accent
+                                isWatched -> surfaceAlt
+                                else -> surface
+                            },
+                            shadowElevation = if (isOpen) 0.dp else 1.dp
+                        ) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
+                                ) {
+                                    // Leading chip: a ✓ when watched, otherwise
+                                    // the episode number within the season.
+                                    Box(
+                                        modifier = Modifier
+                                            .size(30.dp)
+                                            .clip(CircleShape)
+                                            .background(
+                                                when {
+                                                    isOpen -> onAccent.copy(alpha = 0.18f)
+                                                    isWatched -> surfaceHigh
+                                                    else -> surfaceHigh
+                                                }
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        if (isWatched) {
+                                            CurioIcon(
+                                                CurioIcons.Check,
+                                                null,
+                                                tint = if (isOpen) onAccent else onSurfaceAlt,
+                                                size = 15.dp
+                                            )
+                                        } else {
+                                            Text(
+                                                "${ep.number}",
+                                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                                color = if (isOpen) onAccent else onSurfaceVariant
+                                            )
+                                        }
+                                    }
+                                    Text(
+                                        text = ep.title,
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            fontWeight = if (isOpen || isWatched) FontWeight.Bold else FontWeight.Normal
+                                        ),
+                                        color = if (isOpen) onAccent else onSurface,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    CurioIcon(
+                                        if (isOpen) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
+                                        if (isOpen) "Collapse episode" else "Expand episode",
+                                        tint = if (isOpen) onAccent.copy(alpha = 0.9f) else onSurfaceVariant,
+                                        size = 20.dp
+                                    )
+                                }
+                                // Expanded: season/episode id, the summary, and
+                                // the Watched / Undo pill (accordion detail).
+                                androidx.compose.animation.AnimatedVisibility(
+                                    visible = isOpen,
+                                    enter = androidx.compose.animation.fadeIn(
+                                        animationSpec = androidx.compose.animation.core.tween(160)
+                                    ),
+                                    exit = androidx.compose.animation.fadeOut(
+                                        animationSpec = androidx.compose.animation.core.tween(120)
+                                    )
+                                ) {
+                                    Column(
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(start = 14.dp, end = 14.dp, bottom = 14.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(1.dp)
+                                                .background(onAccent.copy(alpha = 0.18f))
+                                        )
+                                        Text(
+                                            "Season $season · Episode ${ep.number}",
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                            color = if (isOpen) onAccent.copy(alpha = 0.9f) else ink
+                                        )
+                                        Text(
+                                            ep.summary.ifBlank { "No summary for this episode." },
+                                            style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 25.sp),
+                                            color = if (isOpen) onAccent else onSurface
+                                        )
+                                        Surface(
+                                            onClick = { toggleWatched(ep) },
+                                            shape = RoundedCornerShape(50),
+                                            color = if (isOpen)
+                                                if (isWatched) onAccent.copy(alpha = 0.2f) else onAccent
+                                                else if (isWatched) accent else surfaceHigh,
+                                            shadowElevation = 0.dp
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                                            ) {
+                                                CurioIcon(
+                                                    if (isWatched) CurioIcons.Undo else CurioIcons.Check,
+                                                    null,
+                                                    tint = if (isWatched)
+                                                        if (isOpen) onAccent else onSurfaceAlt
+                                                        else if (isOpen) accent else onSurfaceVariant,
+                                                    size = 14.dp
+                                                )
+                                                Text(
+                                                    if (isWatched) "Watched · undo" else "Mark ${ep.key()} as watched",
+                                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                                    color = if (isWatched)
+                                                        if (isOpen) onAccent else onSurface
+                                                        else if (isOpen) accent else onSurface,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 private fun albumListenUrl(topic: CurioTopic, service: String): String {
     val title = topic.name.replace(Regex("""\s+\(\d{4}\)\s*$"""), "")
     val q = Uri.encode(listOfNotNull(
