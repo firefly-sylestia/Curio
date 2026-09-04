@@ -117,6 +117,18 @@ Most value → least, all being added:
     were deferred — entries open through the torn EntryDetail route
     (Phase 5) and reorder needs a new persistent order field + migration
     (Phase 6 conversation).
+- **Phase 1 Spin tune (user feedback) — this commit.** The tablet Spin page
+  was rebuilt per the user's follow-up: (1) the editorial title header
+  (identity + pool count + hairline) is REMOVED — "the deck is bad again,
+  don't give that header", so the deck IS the page; (2) the deck is
+  SMALLER on tablets: `wideFit` cap 1.6 → 1.12 and the height fit is now
+  `stageFit = ((maxHeight − 250dp)/470dp)` capped at 1.1 (was a fixed
+  headroom ÷ 600 capped 1.4) — the hand sits near phone scale instead of
+  blowing up; (3) the Category/Filter pills became FLOATING buttons
+  bottom-center (`padding bottom 30dp`) instead of an inline row under
+  the orb, and the deck stage reserves `bottom = 96dp` so short
+  landscape windows never clip the pills or the spin orb. Phone branch
+  untouched (balance 0/0 vs HEAD). Pushed.
 - **Phase 4 DONE (Topic Browser + shared settings hero)** — this commit.
   - `TopicDatabaseScreen.kt` wide layout rebuilt as master–detail:
     `ScreenEntrance → Row { master Box(weight 1f) + reveal pane(344dp) }`.

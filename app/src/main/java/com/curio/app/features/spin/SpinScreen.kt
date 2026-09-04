@@ -1152,12 +1152,13 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
         // BoxWithConstraints scope rather than inside the Row/Column below:
         // the nested layout lambdas can't resolve this scope's maxWidth as
         // an implicit receiver, which broke the CI build.
-        // v27t — the deck now scales UP on tablets/landscape (cap raised
-        // from 1.0 to 1.6): the front ticket and the two peek cards grow
-        // with the stage instead of staying phone-sized in empty gutters.
+        // v27t — the deck scales up on tablets/landscape, but only a little
+        // (cap 1.12 — the first tablet pass went to 1.6 and read as a
+        // blown-up phone deck): the sideways hand stays close to phone
+        // scale so the fan reads as a tidy stage, never a wall of cards.
         // The proportional fan keeps exactly 2 peek cards at any scale.
         val wideFit = ((maxWidth - 130.dp) / 360.dp).coerceIn(
-            if (compactHeight) 0.62f else 0.78f, 1.6f
+            if (compactHeight) 0.62f else 0.78f, 1.12f
         )
         // ── Watermark backdrop — every category glyph scattered around ──
         //    the screen in a muted shade, behind all content, so the quiet
@@ -1169,89 +1170,40 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             CurioWatermarkBackdrop(activeCat = deckCat)
         }
 
-        // ── v-tablet — WIDE / TABLET — editorial stage ───────────────
-        // Fully redesigned wide layout (no torn hero, no bottom capsule): a
-        // quiet page header — deck identity + pool subtitle under a hairline
-        // rule — then the SIDEWAYS deck hand (hero ticket centered with the
-        // peek strips fanned left/right behind it), the spin orb beneath,
-        // and flat editorial category/filter controls. Phones keep their
+        // ── v-tablet — WIDE / TABLET — the deck IS the page ──────────
+        // Fully redesigned wide layout (no torn hero, no page header, no
+        // bottom capsule — the first wide pass shipped an editorial title
+        // strip and the user called it noise): the SIDEWAYS deck hand
+        // (hero ticket centered with the peek strips fanned left/right
+        // behind it) with the spin orb beneath owns the full stage, and
+        // the category/filter pills FLOAT at the bottom so short
+        // landscape windows never clip them or the orb. Phones keep their
         // vertical deck untouched.
         val wide = windowWidthSizeClass().isWide
         if (wide) {
-            // v-tablet — the sideways fan scales to BOTH axes: width (the
-            // existing wideFit cap) AND the height left after the new page
-            // header + controls, so short landscape windows compress the
-            // hand instead of clipping it.
-            val stageHeadroom = (maxHeight - 236.dp).coerceAtLeast(220.dp)
-            val horizontalFit = minOf(
-                wideFit,
-                (stageHeadroom / 600.dp).coerceIn(if (compactHeight) 0.5f else 0.75f, 1.4f)
+            // v-tablet — SIDEWAYS stage with NO page header (the first wide
+            // pass shipped an editorial title strip; the user called it out
+            // as noise — the deck IS the page). The hand + orb own the full
+            // stage and the category/filter pills FLOAT at the bottom, so
+            // short landscape windows can never clip them or the spin orb.
+            // The fan scales to BOTH axes: width (the wideFit cap) and the
+            // height actually left after the bottom clearance + orb, so
+            // landscape compresses the hand instead of clipping it.
+            val stageFit = ((maxHeight - 250.dp) / 470.dp).coerceIn(
+                if (compactHeight) 0.5f else 0.72f, 1.1f
             )
-            val deckLabel = when {
-                isMixedDeck && mixName != null -> mixName
-                isMixedDeck -> "Mixed deck"
-                else -> deckCat.displayName
-            }
-            val deckCountLabel = when {
-                isMixedDeck && mixName != null -> "$mixedTopicCount topics · mixed"
-                isMixedDeck -> "$mixedTopicCount topics · ${activeCatIds.size} lanes"
-                else -> "${filteredPool.size} topics · ${deckCat.displayName}"
-            }
-            Column(
+            val horizontalFit = minOf(wideFit, stageFit)
+            // ── Deck stage — the sideways hand + spin orb, centered ──
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 84.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    // Clear the floating pills (and the gesture bar) so the
+                    // orb never hides behind them on short screens.
+                    .padding(bottom = 96.dp),
+                contentAlignment = Alignment.Center
             ) {
-                // ── Editorial page header — identity + hairline rule ──
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 36.dp, end = 36.dp, top = 26.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        CurioIcon(
-                            name = deckCat.iconGlyph,
-                            tint = deckCat.categoryInk().copy(alpha = 0.85f),
-                            size = 20.dp
-                        )
-                        Text(
-                            text = deckLabel,
-                            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                    Text(
-                        text = deckCountLabel,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1
-                    )
-                    Spacer(Modifier.height(14.dp))
-                    // Hairline rule (the editorial replacement for the torn
-                    // hero seam — flat, quiet, one pixel).
-                    Box(
-                        Modifier
-                            .fillMaxWidth()
-                            .height(1.dp)
-                            .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
-                    )
-                }
-                // ── Deck stage — the sideways hand, centered in the
-                //    space left under the header ───────────────────────
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        SpinDeckSection(
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    SpinDeckSection(
                             compact = compactHeight,
                             extraCompact = false,
                             densityExtraCompact = false,
@@ -1278,63 +1230,70 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                             onCycle = onDeckCycle,
                             onSpinClick = onSpinClick
                         )
-                        // Flat editorial controls under the orb.
+                    }
+                }
+            // ── Floating controls — bottom-center, clear of the gesture
+            //    bar; always visible in every orientation ─────────────
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 30.dp),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Category pill — floating (was under the orb, where
+                    // short landscape windows clipped it).
+                    Surface(
+                        onClick = { showCategoryPicker = true },
+                        shape = RoundedCornerShape(50),
+                        color = deckCat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
+                        shadowElevation = 0.dp
+                    ) {
                         Row(
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(top = 18.dp, bottom = 10.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            // Category pill
-                            Surface(
-                                onClick = { showCategoryPicker = true },
-                                shape = RoundedCornerShape(50),
-                                color = deckCat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-                                shadowElevation = 0.dp
-                            ) {
-                                Row(
-                                    Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    CurioIcon(name = deckCat.iconGlyph, tint = deckCat.categoryInk(), size = 18.dp)
-                                    Text(
-                                        // v318b — an applied NAMED mix stamps the pill
-                                        // with its name; unnamed mixes stay "Mixed · N".
-                                        when {
-                                            isMixedDeck && mixName != null -> mixName
-                                            isMixedDeck -> "Mixed · $mixedTopicCount"
-                                            else -> deckCat.displayName
-                                        },
-                                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                        color = deckCat.categoryInk()
-                                    )
-                                }
-                            }
-                            // Filter pill
-                            Surface(
-                                onClick = { showFilters = true },
-                                shape = RoundedCornerShape(50),
-                                color = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty())
-                                    deckCat.themedAccent() else deckCat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-                                shadowElevation = 0.dp
-                            ) {
-                                Row(
-                                    Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    CurioIcon(
-                                        name = CurioIcons.Search,
-                                        tint = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty()) deckCat.onAccent() else deckCat.categoryInk(),
-                                        size = 18.dp
-                                    )
-                                    Text(
-                                        if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty()) "Filter · ${filteredPool.size}" else "Filter",
-                                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                        color = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty()) deckCat.onAccent() else deckCat.categoryInk()
-                                    )
-                                }
-                            }
+                            CurioIcon(name = deckCat.iconGlyph, tint = deckCat.categoryInk(), size = 18.dp)
+                            Text(
+                                // v318b — an applied NAMED mix stamps the pill
+                                // with its name; unnamed mixes stay "Mixed · N".
+                                when {
+                                    isMixedDeck && mixName != null -> mixName
+                                    isMixedDeck -> "Mixed · $mixedTopicCount"
+                                    else -> deckCat.displayName
+                                },
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                color = deckCat.categoryInk()
+                            )
+                        }
+                    }
+                    // Filter pill — floating.
+                    Surface(
+                        onClick = { showFilters = true },
+                        shape = RoundedCornerShape(50),
+                        color = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty())
+                            deckCat.themedAccent() else deckCat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
+                        shadowElevation = 0.dp
+                    ) {
+                        Row(
+                            Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Search,
+                                tint = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty()) deckCat.onAccent() else deckCat.categoryInk(),
+                                size = 18.dp
+                            )
+                            Text(
+                                if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty()) "Filter · ${filteredPool.size}" else "Filter",
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                color = if (activeFilters.isNotEmpty() || activeSubtypes.isNotEmpty()) deckCat.onAccent() else deckCat.categoryInk()
+                            )
                         }
                     }
                 }
