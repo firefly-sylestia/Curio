@@ -7,7 +7,7 @@ import androidx.palette.graphics.Palette
 import coil.imageLoader
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import coil.request.ImageResult
+import coil.request.SuccessResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -38,7 +38,8 @@ suspend fun fetchCoverSwatch(context: Context, url: String?, networkAllowed: Boo
                 )
                 .build()
             val result = context.imageLoader.execute(request)
-            val drawable = (result as? ImageResult.Success)?.drawable ?: return@runCatching null
+            // Coil 2.7: success is the top-level SuccessResult type.
+            val drawable = (result as? SuccessResult)?.drawable ?: return@runCatching null
             val bitmap = drawable.toBitmap(96, 96)
             val palette = Palette.from(bitmap).generate()
             val swatch = palette.vibrantSwatch
