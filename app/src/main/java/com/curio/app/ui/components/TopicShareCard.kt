@@ -5090,7 +5090,7 @@ private fun ArrangeableCard(
                 ): List<Pair<Float, Float>> = others.flatMap { r ->
                     listOf(
                         r.left - base to r.left,
-                        r.centerX - base - w / 2f to r.centerX,
+                        r.center.x - base - w / 2f to r.center.x,
                         r.right - base - w to r.right
                     )
                 }
@@ -5102,7 +5102,7 @@ private fun ArrangeableCard(
                 ): List<Pair<Float, Float>> = others.flatMap { r ->
                     listOf(
                         r.top - base to r.top,
-                        r.centerY - base - h / 2f to r.centerY,
+                        r.center.y - base - h / 2f to r.center.y,
                         r.bottom - base - h to r.bottom
                     )
                 }
