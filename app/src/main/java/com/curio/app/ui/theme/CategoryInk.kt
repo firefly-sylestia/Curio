@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
+import com.curio.app.data.CoverSwatches
 import com.curio.app.data.CurioCategory
 
 /**
@@ -426,6 +427,77 @@ fun CurioCategory.notesSheetContainerColorForCover(swatch: Color?): Color {
         return fromHsl(a.h, (a.s * 0.55f).coerceAtMost(0.40f), 0.27f)
     }
     return lightAccentTint(swatch, saturation = 0.26f, lightness = 0.91f)
+}
+
+/**
+ * v339 — the FULL palette for the book/album notes sheets, derived from the
+ * COVER ARTWORK rather than a single tint. Every element gets its own role:
+ * the container is a deep/muted cover shade, cards lift off it, the vibrant
+ * swatch drives selected states, and text tones adapt to the wash's
+ * lightness so each element reads distinctly from the others.
+ */
+data class CoverSheetPalette(
+    val container: Color,
+    val surface: Color,
+    val surfaceHigh: Color,
+    val surfaceAlt: Color,
+    val accent: Color,
+    val onAccent: Color,
+    val ink: Color,
+    val onSurface: Color,
+    val onSurfaceVariant: Color,
+    val onSurfaceAlt: Color
+)
+
+/**
+ * v339 — derives the full [CoverSheetPalette] from the cover's [swatches]
+ * using the classic album-art recipe: the vibrant swatch pops as the accent,
+ * the dark shades anchor the background, the light shades lift the surfaces,
+ * and text tones are computed from the wash's lightness. Returns null when
+ * no swatches exist OR the Material theme / manual tint-wash gates are off —
+ * callers then fall back to the existing per-element category colours.
+ */
+@Composable
+fun CurioCategory.notesSheetPalette(swatches: CoverSwatches?): CoverSheetPalette? {
+    if (swatches == null) return null
+    if (materialThemeOn) return null
+    if (!AppPreferences.tintWashEffective()) return null
+    val vibrant = swatches.vibrant ?: swatches.lightVibrant ?: swatches.muted
+    val dark = swatches.darkVibrant ?: swatches.darkMuted
+        ?: swatches.muted ?: swatches.vibrant ?: swatches.lightVibrant
+    val accent = vibrant ?: return null
+    val h = toHsl(dark ?: accent)
+    val onAccent = if (accent.luminance() > 0.5f) Color(0xFF121216) else Color(0xFFF4F4F6)
+    if (isCurioDarkTheme()) {
+        // Deep cover-tinted canvas; cards step up through the dark tones and
+        // the vibrant swatch pops against the near-black wash.
+        return CoverSheetPalette(
+            container = fromHsl(h.h, (h.s * 0.55f).coerceAtMost(0.35f), 0.20f),
+            surface = fromHsl(h.h, (h.s * 0.55f).coerceAtMost(0.35f), 0.27f),
+            surfaceHigh = fromHsl(h.h, (h.s * 0.60f).coerceAtMost(0.40f), 0.34f),
+            surfaceAlt = fromHsl(h.h, (h.s * 0.65f).coerceAtMost(0.45f), 0.24f),
+            accent = accent,
+            onAccent = onAccent,
+            ink = fromHsl(h.h, (h.s * 0.30f).coerceAtMost(0.25f), 0.88f),
+            onSurface = fromHsl(h.h, (h.s * 0.20f).coerceAtMost(0.18f), 0.92f),
+            onSurfaceVariant = fromHsl(h.h, (h.s * 0.15f).coerceAtMost(0.14f), 0.66f),
+            onSurfaceAlt = fromHsl(h.h, (h.s * 0.20f).coerceAtMost(0.18f), 0.90f)
+        )
+    }
+    // Light: airy cover-tinted canvas, near-white cards, vibrant pops for
+    // selected states, deep cover-tinted ink for headers.
+    return CoverSheetPalette(
+        container = fromHsl(h.h, (h.s * 0.42f).coerceAtMost(0.28f), 0.93f),
+        surface = fromHsl(h.h, (h.s * 0.30f).coerceAtMost(0.22f), 0.97f),
+        surfaceHigh = fromHsl(h.h, (h.s * 0.28f).coerceAtMost(0.20f), 0.88f),
+        surfaceAlt = fromHsl(h.h, (h.s * 0.35f).coerceAtMost(0.24f), 0.90f),
+        accent = accent,
+        onAccent = onAccent,
+        ink = fromHsl(h.h, (h.s * 0.50f).coerceAtMost(0.35f), 0.26f),
+        onSurface = fromHsl(h.h, (h.s * 0.18f).coerceAtMost(0.16f), 0.16f),
+        onSurfaceVariant = fromHsl(h.h, (h.s * 0.14f).coerceAtMost(0.12f), 0.46f),
+        onSurfaceAlt = fromHsl(h.h, (h.s * 0.20f).coerceAtMost(0.18f), 0.20f)
+    )
 }
 
 /**

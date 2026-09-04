@@ -1,64 +1,49 @@
-# Request Log — catalog staleness, browser loading, picker apply, Spin deck
+# Request Log — book chapter audit + cover-art sheet palettes
 
-## Status: implementation complete — committed & pushed pending CI
+## Status: implementation complete — committed & pushed (CI pending)
 
 ## The request (user, paraphrased)
-1. Topics that were removed/overridden in the data still show on device — duplicate old
-   listings linger even though the JSON no longer has them.
-2. Topic Browser has loading lag when loading topics.
-3. Category picker: category switching should NOT apply instantly on tap — apply when the
-   picker is closed (user picked "Apply when I close the panel" when asked).
-4. Spin shuffle deck: use smart loading with a small pool; always show cards while data is
-   loading; when the full data loads, the shuffle picks from that again during spin.
+1. Re-analyse the book chapter names/counts again properly (many were wrong); tell how
+   many are wrong and list them in a `.txt`.
+2. Re-read the DOX (master.md + AGENTS.md chain) — stop putting the Codebuff tool footer
+   on commit messages; plain conventional-format messages only.
+3. The book/album notes-sheet background colours from the cover art are bad; derive a FULL
+   palette from the cover (background + cards + chips + text, each element its own role)
+   instead of one dominant tint; keep the category fallback when no cover is fetched.
 
-## Root causes found
-- **Stale rows:** `TopicRepository.syncCatalogFromJson` (the only cross-release sync) only did
-  `insertMissing` + content `backfillContent` — it NEVER deleted rows that vanished from the
-  shipped JSON, so removed/renamed/deduped topics lived in Room forever. It also only ran when
-  `versionCode` changed, so dev/CI builds that keep the same versionCode never re-synced at all.
-  `TopicJsonLoader.parseAndCache` and `refreshLaneFromAssets` also only upserted. Room's `topics`
-  table is a pure mirror of the bundled JSON (user data lives in `cached_topics`/captures), so a
-  per-lane replace is safe.
-- **Browser flash-lag:** `searchPass` was a `produceState` that RESTARTED with an empty list on
-  every key change (category filter, settled search, done-set) → a visible "No topics match"
-  flash + re-derivation between every switch.
-- **Picker timing:** the panel's checkboxes committed to the live filter on EVERY tap, so the
-  whole 16k-topic filter pass re-ran behind the open panel per tap.
-- **Spin deck:** the pool `produceState` showed a "Gathering the deck…" hint while the full
-  lane pool loaded (cold cache / memory shed), leaving the fan empty instead of dealing
-  immediately.
+## What was done
+### 1. Chapter audit → `books-chapter-audit.txt` (committed)
+Analysed `data/topics/books.json` (796 books, 5,418 chapter entries):
+- SECTION A — 20 books with CONFIRMED WRONG chapter counts (web-verified real structures,
+  e.g. War and Peace 361, Don Quixote 126, Great Expectations 59, The Two Towers 19, …).
+- SECTION B — 530 books with ≤5 "chapters" (part-level / fabricated divisions for novels;
+  essays/poetry legitimately have few).
+- SECTION C — 49 books with bare "Chapter N" placeholder titles.
+- SECTION D — 142 books using the `chapterNumber` schema variant instead of `number`
+  (app falls back to positional numbering so they render, but data is split-brained).
+- SECTION E — 8 duplicate chapter titles + 5 mixed-format books.
+- 657 of 796 (~83%) flagged overall; the audit also lists count-verified-correct books.
 
-## Changes made
-- `TopicRepository`: catalog sync now MIRRORS each lane (delete category + insertAll) after a
-  successful asset parse — removals/renames/dedupes leave Room. Trigger widened: runs when the
-  versionCode changed OR the APK's `lastUpdateTime` changed (new `AppPreferences`
-  `last_catalog_sync_update_ms` stamp) — covers same-versionCode installs. Fresh import stamps
-  both. `refreshLaneFromAssets` now also deletes+inserts. Added `sampleTopics(context, ids)`
-  (small Room random sample per lane; WILDCARD samples every canonical lane) + private
-  `packageLastUpdateTime`.
-- `TopicDao`: added `getRandomTopics(categoryId, limit)` (ORDER BY RANDOM() LIMIT n — no lane
-  mapping).
-- `TopicJsonLoader`: `parseAndCache`'s Room write mirrors the lane for canonical categories
-  (WILDCARD merge still upserts).
-- `SpinScreen`: when the cache seed is empty, the pool is seeded immediately with
-  `TopicRepository.sampleTopics` so cards render on early frames; the full loaded pool replaces
-  the seed when it lands and the fan re-deals (keyed on the loaded pool) — spins draw from the
-  full catalog.
-- `TopicDatabaseScreen`: category panel is now STAGED — `pendingCats` edited by the checkboxes,
-  committed once on Done; closing via the pill discards. Also converted `searchPass` from
-  `produceState` (empty-list restart) to a retained `mutableStateOf` + `LaunchedEffect`, so the
-  previous rows stay on screen while the new set computes on `Dispatchers.Default`;
-  `searchPassReady` gates only the first build ("Preparing topics…" instead of a one-frame
-  "No topics match").
+### 2. DOX / commit hygiene
+Re-read master.md + root AGENTS.md + app/AGENTS.md. Commit messages are now plain
+conventional format with NO tool/Codebuff footers (this commit follows that rule).
 
-## Not changed (deliberate)
-- Version-gated + install-gated sync location unchanged (background, once per install).
-- `insertMissing`/`backfillContent` DAO methods left in place (unused now, harmless API).
+### 3. Full cover-art palettes for the notes sheets
+- `CoverPalette.kt`: new `CoverSwatches` (all six androidx-Palette slots) +
+  `fetchCoverSwatches` (192px decode); `fetchCoverSwatch` kept as a wrapper.
+- `CategoryInk.kt`: new `CoverSheetPalette` (container / surface / surfaceHigh / surfaceAlt /
+  accent / onAccent / ink / onSurface / onSurfaceVariant / onSurfaceAlt) +
+  `CurioCategory.notesSheetPalette()` — classic album-art recipe (vibrant pops as accent,
+  dark shades anchor the bg, light shades lift cards, text tones from wash lightness),
+  dark + light recipes, same Material-theme / tint-wash gates as before.
+- `TopicRevealScreen.kt`: BookNotesSheet + AlbumNotesSheet fetch the swatches and map every
+  colour role (container, cards, chips, tabs, progress bar, read-chips, close button, text,
+  listen/genius pills, track hearts) to the palette with per-element category fallbacks;
+  AlbumSynopsisAccordion now takes the resolved colours. No cover / fetch off / Material
+  theme → exactly the old behaviour.
 
-## Validation
-No Gradle builds in this environment (CI compiles on push). Verified: brace/paren balance on all
-six edited files, imports present, no leftover references, phone + wide paths share the same
-pending/commit lambdas. fastlane changelog + Prompt.md updated.
-
-## Follow-ups if CI fails
-Fix in one cycle from the CI log.
+## Notes / follow-ups
+- The audit is a report only — the actual chapter-data repair (real counts, titles, schema
+  unify) is a large data task left for a follow-up request.
+- `notesSheetContainerColorForCover` is now dead in CategoryInk (kept; harmless).
+- CI validates compile; the palette math is only visible on-device.

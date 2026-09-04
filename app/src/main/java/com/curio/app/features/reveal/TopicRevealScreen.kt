@@ -151,7 +151,8 @@ import com.curio.app.data.isMusicTopic
 import com.curio.app.data.titleAndYearQualifier
 import com.curio.app.data.matchesSavedName
 import com.curio.app.data.matchesSavedNameStrict
-import com.curio.app.data.fetchCoverSwatch
+import com.curio.app.data.CoverSwatches
+import com.curio.app.data.fetchCoverSwatches
 import com.curio.app.data.openSearchUrl
 import com.curio.app.data.resolveAppleMusicItemUrl
 import com.curio.app.infrastructure.ExploreSessionService
@@ -186,7 +187,7 @@ import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.notesSheetContainerColor
-import com.curio.app.ui.theme.notesSheetContainerColorForCover
+import com.curio.app.ui.theme.notesSheetPalette
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
@@ -2812,18 +2813,29 @@ private fun BookNotesSheet(
 ) {
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
-    // v338 — cover-art swatch: the sheet tints itself from the BOOK cover's
-    // dominant colour instead of the static category accent (null swatch →
-    // category-tint fallback). Honors the book-fetch consent gate, so no
-    // network is touched when the toggle is OFF (cached covers only).
-    var coverSwatch by remember(topic.imageUrl) { mutableStateOf<Color?>(null) }
+    // v339 — cover-art palette: the sheet derives its FULL colour set
+    // (background + cards + chips + text) from the BOOK cover's artwork
+    // (null swatches → per-element category fallback). Honors the
+    // book-fetch consent gate, so no network is touched when the toggle
+    // is OFF (cached covers only).
+    var coverSwatches by remember(topic.imageUrl) { mutableStateOf<CoverSwatches?>(null) }
     LaunchedEffect(topic.imageUrl) {
-        coverSwatch = fetchCoverSwatch(
+        coverSwatches = fetchCoverSwatches(
             context,
             topic.imageUrl,
             networkAllowed = AppPreferences.bookFetchEnabledState
         )
     }
+    val coverPal = cat.notesSheetPalette(coverSwatches)
+    val accent = coverPal?.accent ?: cat.themedAccent()
+    val onAccent = coverPal?.onAccent ?: cat.onAccent()
+    val ink = coverPal?.ink ?: cat.categoryInk()
+    val surface = coverPal?.surface ?: cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
+    val surfaceHigh = coverPal?.surfaceHigh ?: cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+    val surfaceAlt = coverPal?.surfaceAlt ?: MaterialTheme.colorScheme.secondaryContainer
+    val onSurfaceAlt = coverPal?.onSurfaceAlt ?: MaterialTheme.colorScheme.onSecondaryContainer
+    val onSurface = coverPal?.onSurface ?: MaterialTheme.colorScheme.onSurface
+    val onSurfaceVariant = coverPal?.onSurfaceVariant ?: MaterialTheme.colorScheme.onSurfaceVariant
     val chapters = topic.chapters.orEmpty()
     val hasSynopsis = !topic.synopsis.isNullOrBlank()
     val hasChapters = chapters.isNotEmpty()
@@ -2855,9 +2867,9 @@ private fun BookNotesSheet(
         // v332 — the notes sheets wear the CATEGORY-TINTED wash (same hue
         // family as the reveal page + cards) instead of the neutral dialog
         // container, so the sheet reads as part of the category story.
-        // v338 — when the cover's swatch is available it replaces the
+        // v339 — when the cover's palette is available it replaces the
         // category accent entirely (fallback stays when it isn't).
-        containerColor = cat.notesSheetContainerColorForCover(coverSwatch),
+        containerColor = coverPal?.container ?: cat.notesSheetContainerColor(),
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
@@ -2897,13 +2909,13 @@ private fun BookNotesSheet(
                             fontWeight = FontWeight.ExtraBold,
                             letterSpacing = 1.4.sp
                         ),
-                        color = cat.categoryInk()
+                        color = ink
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
                         topic.name,
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = onSurface,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -2911,7 +2923,7 @@ private fun BookNotesSheet(
                         Text(
                             byline,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -2935,7 +2947,7 @@ private fun BookNotesSheet(
                                 text = String.format("%.1f", fetchedRating) +
                                     " · keyless Google Books rating",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = onSurfaceVariant
                             )
                         }
                     }
@@ -2946,19 +2958,19 @@ private fun BookNotesSheet(
                         Text(
                             "CH ${currentChapter.number}$pages",
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = cat.categoryInk()
+                            color = ink
                         )
                     }
                 }
                 Surface(
                     onClick = onDismiss,
                     shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                    color = surface.copy(alpha = 0.6f)
                 ) {
                     CurioIcon(
                         CurioIcons.Close,
                         "Close book notes",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = onSurfaceVariant,
                         size = 20.dp,
                         modifier = Modifier.padding(8.dp)
                     )
@@ -2972,13 +2984,12 @@ private fun BookNotesSheet(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.padding(horizontal = 20.dp)
                 ) {
-                    val accent = cat.themedAccent()
                     // Synopsis tab
                     Surface(
                         onClick = { tab = BookNotesMode.SYNOPSIS },
                         shape = RoundedCornerShape(50),
                         color = if (effectiveTab == BookNotesMode.SYNOPSIS) accent
-                                else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+                                else surface,
                         shadowElevation = if (effectiveTab == BookNotesMode.SYNOPSIS) 0.dp else 1.dp
                     ) {
                         Row(
@@ -2988,15 +2999,15 @@ private fun BookNotesSheet(
                         ) {
                             CurioIcon(
                                 CurioIcons.MenuBook, null,
-                                tint = if (effectiveTab == BookNotesMode.SYNOPSIS) cat.onAccent()
-                                       else MaterialTheme.colorScheme.onSurfaceVariant,
+                                tint = if (effectiveTab == BookNotesMode.SYNOPSIS) onAccent
+                                       else onSurfaceVariant,
                                 size = 15.dp
                             )
                             Text(
                                 "Synopsis",
                                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                color = if (effectiveTab == BookNotesMode.SYNOPSIS) cat.onAccent()
-                                        else MaterialTheme.colorScheme.onSurfaceVariant
+                                color = if (effectiveTab == BookNotesMode.SYNOPSIS) onAccent
+                                        else onSurfaceVariant
                             )
                         }
                     }
@@ -3009,7 +3020,7 @@ private fun BookNotesSheet(
                         },
                         shape = RoundedCornerShape(50),
                         color = if (effectiveTab == BookNotesMode.CHAPTERS) accent
-                                else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+                                else surface,
                         shadowElevation = if (effectiveTab == BookNotesMode.CHAPTERS) 0.dp else 1.dp
                     ) {
                         Row(
@@ -3019,15 +3030,15 @@ private fun BookNotesSheet(
                         ) {
                             CurioIcon(
                                 CurioIcons.AutoAwesome, null,
-                                tint = if (effectiveTab == BookNotesMode.CHAPTERS) cat.onAccent()
-                                       else MaterialTheme.colorScheme.onSurfaceVariant,
+                                tint = if (effectiveTab == BookNotesMode.CHAPTERS) onAccent
+                                       else onSurfaceVariant,
                                 size = 15.dp
                             )
                             Text(
                                 "Chapters · ${chapters.size}",
                                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                color = if (effectiveTab == BookNotesMode.CHAPTERS) cat.onAccent()
-                                        else MaterialTheme.colorScheme.onSurfaceVariant
+                                color = if (effectiveTab == BookNotesMode.CHAPTERS) onAccent
+                                        else onSurfaceVariant
                             )
                         }
                     }
@@ -3046,7 +3057,7 @@ private fun BookNotesSheet(
                     BookNotesMode.SYNOPSIS -> {
                         Surface(
                             shape = RoundedCornerShape(20.dp),
-                            color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+                            color = surface,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 20.dp)
@@ -3061,12 +3072,12 @@ private fun BookNotesSheet(
                                         fontWeight = FontWeight.ExtraBold,
                                         letterSpacing = 1.2.sp
                                     ),
-                                    color = cat.categoryInk()
+                                    color = ink
                                 )
                                 Text(
                                     topic.synopsis.orEmpty(),
                                     style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = onSurface
                                 )
                             }
                         }
@@ -3092,7 +3103,7 @@ private fun BookNotesSheet(
                                 Text(
                                     progressLabel,
                                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = cat.categoryInk(),
+                                    color = ink,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                     modifier = Modifier.weight(1f)
@@ -3108,7 +3119,7 @@ private fun BookNotesSheet(
                                     .height(4.dp)
                                     .clip(RoundedCornerShape(50))
                                     .background(
-                                        MaterialTheme.colorScheme.surfaceContainerHighest
+                                        surfaceHigh
                                     )
                             ) {
                                 val frac = if (chTotal > 0) (chaptersDone.toFloat() / chTotal).coerceIn(0f, 1f) else 0f
@@ -3117,7 +3128,7 @@ private fun BookNotesSheet(
                                         modifier = Modifier
                                             .fillMaxWidth(frac)
                                             .height(4.dp)
-                                            .background(cat.themedAccent(), RoundedCornerShape(50))
+                                            .background(accent, RoundedCornerShape(50))
                                     )
                                 }
                             }
@@ -3135,9 +3146,9 @@ private fun BookNotesSheet(
                                         onClick = { onSelectChapter(ch) },
                                         shape = RoundedCornerShape(50),
                                         color = when {
-                                            selected -> cat.themedAccent()
-                                            isRead -> MaterialTheme.colorScheme.secondaryContainer
-                                            else -> cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
+                                            selected -> accent
+                                            isRead -> surfaceAlt
+                                            else -> surface
                                         },
                                         shadowElevation = if (selected) 0.dp else 1.dp
                                     ) {
@@ -3150,8 +3161,8 @@ private fun BookNotesSheet(
                                                 CurioIcon(
                                                     CurioIcons.Check,
                                                     null,
-                                                    tint = if (selected) cat.onAccent()
-                                                           else MaterialTheme.colorScheme.onSecondaryContainer,
+                                                    tint = if (selected) onAccent
+                                                           else onSurfaceAlt,
                                                     size = 13.dp
                                                 )
                                             }
@@ -3159,9 +3170,9 @@ private fun BookNotesSheet(
                                                 text = "CH ${ch.number} · ${ch.title}",
                                                 style = MaterialTheme.typography.labelLarge,
                                                 color = when {
-                                                    selected -> cat.onAccent()
-                                                    isRead -> MaterialTheme.colorScheme.onSecondaryContainer
-                                                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                                                    selected -> onAccent
+                                                    isRead -> onSurfaceAlt
+                                                    else -> onSurfaceVariant
                                                 },
                                                 maxLines = 1,
                                                 overflow = TextOverflow.Ellipsis
@@ -3175,7 +3186,7 @@ private fun BookNotesSheet(
                             if (ch != null) {
                                 Surface(
                                     shape = RoundedCornerShape(20.dp),
-                                    color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+                                    color = surface,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(horizontal = 20.dp)
@@ -3187,19 +3198,19 @@ private fun BookNotesSheet(
                                         Text(
                                             ch.title,
                                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                                            color = MaterialTheme.colorScheme.onSurface
+                                            color = onSurface
                                         )
                                         if (ch.pageStart > 0 && ch.pageEnd > 0) {
                                             Text(
                                                 "pp. ${ch.pageStart}–${ch.pageEnd}",
                                                 style = MaterialTheme.typography.labelMedium,
-                                                color = cat.categoryInk()
+                                                color = ink
                                             )
                                         }
                                         Text(
                                             ch.summary.ifBlank { "No summary for this chapter." },
                                             style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
-                                            color = MaterialTheme.colorScheme.onSurface
+                                            color = onSurface
                                         )
                                         // v328/v334 — mark the chapter read; the
                                         // button TOGGLES so a mis-tap can be
@@ -3218,8 +3229,8 @@ private fun BookNotesSheet(
                                                 haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                                             },
                                             shape = RoundedCornerShape(50),
-                                            color = if (chDone) cat.themedAccent()
-                                                    else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
+                                            color = if (chDone) accent
+                                                    else surfaceHigh,
                                             shadowElevation = 0.dp
                                         ) {
                                             Row(
@@ -3230,15 +3241,15 @@ private fun BookNotesSheet(
                                                 CurioIcon(
                                                     if (chDone) CurioIcons.Undo else CurioIcons.Check,
                                                     null,
-                                                    tint = if (chDone) cat.onAccent()
-                                                           else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                    tint = if (chDone) onAccent
+                                                           else onSurfaceVariant,
                                                     size = 14.dp
                                                 )
                                                 Text(
                                                     if (chDone) "Undo CH ${ch.number} ✓ (unread)" else "Mark CH ${ch.number} as read",
                                                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                                    color = if (chDone) cat.onAccent()
-                                                            else MaterialTheme.colorScheme.onSurface
+                                                    color = if (chDone) onAccent
+                                                            else onSurface
                                                 )
                                             }
                                         }
@@ -3684,7 +3695,25 @@ private fun AlbumNotesSheet(
 ) {
     val tracks = topic.tracks.orEmpty()
     if (tracks.isEmpty()) return
-    val accent = cat.themedAccent()
+    val context = LocalContext.current
+    // v339 — cover-art palette: the sheet derives its FULL colour set
+    // (background + cards + chips + text) from the ALBUM cover's artwork
+    // (null swatches → per-element category fallback). Albums have no
+    // consent gate, so fetching is always allowed.
+    var coverSwatches by remember(topic.imageUrl) { mutableStateOf<CoverSwatches?>(null) }
+    LaunchedEffect(topic.imageUrl) {
+        coverSwatches = fetchCoverSwatches(context, topic.imageUrl, networkAllowed = true)
+    }
+    val coverPal = cat.notesSheetPalette(coverSwatches)
+    val accent = coverPal?.accent ?: cat.themedAccent()
+    val onAccent = coverPal?.onAccent ?: cat.onAccent()
+    val ink = coverPal?.ink ?: cat.categoryInk()
+    val surface = coverPal?.surface ?: cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
+    val surfaceHigh = coverPal?.surfaceHigh ?: cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+    val surfaceAlt = coverPal?.surfaceAlt ?: MaterialTheme.colorScheme.secondaryContainer
+    val onSurfaceAlt = coverPal?.onSurfaceAlt ?: MaterialTheme.colorScheme.onSecondaryContainer
+    val onSurface = coverPal?.onSurface ?: MaterialTheme.colorScheme.onSurface
+    val onSurfaceVariant = coverPal?.onSurfaceVariant ?: MaterialTheme.colorScheme.onSurfaceVariant
     // The opened track (from a reveal-section track chip) — null when the
     // sheet is opened from the TRACKLIST card, in which case no row is
     // pre-highlighted and the list starts at the top.
@@ -3711,15 +3740,7 @@ private fun AlbumNotesSheet(
         }
     }
     val runtime = albumRuntimeSeconds(tracks)
-    val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
-    // v338 — cover-art swatch: the sheet tints itself from the ALBUM cover's
-    // dominant colour (null swatch → category-tint fallback). Albums have no
-    // consent gate, so fetching is always allowed.
-    var coverSwatch by remember(topic.imageUrl) { mutableStateOf<Color?>(null) }
-    LaunchedEffect(topic.imageUrl) {
-        coverSwatch = fetchCoverSwatch(context, topic.imageUrl, networkAllowed = true)
-    }
     // v336 — heart-picked favorite tracks for this album (multi-select).
     // Read reactively so a row-heart tap updates every heart in the sheet
     // (and the Vinyl share card) without leaving it.
@@ -3729,9 +3750,9 @@ private fun AlbumNotesSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         // Same category-tinted wash + top hairline as the book-notes sheet.
-        // v338 — when the cover's swatch is available it replaces the
+        // v339 — when the cover's palette is available it replaces the
         // category accent (fallback stays when it isn't).
-        containerColor = cat.notesSheetContainerColorForCover(coverSwatch),
+        containerColor = coverPal?.container ?: cat.notesSheetContainerColor(),
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
@@ -3770,13 +3791,13 @@ private fun AlbumNotesSheet(
                             fontWeight = FontWeight.ExtraBold,
                             letterSpacing = 1.4.sp
                         ),
-                        color = cat.categoryInk()
+                        color = ink
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
                         topic.name,
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = onSurface,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -3784,7 +3805,7 @@ private fun AlbumNotesSheet(
                         Text(
                             byline,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -3797,18 +3818,18 @@ private fun AlbumNotesSheet(
                     Text(
                         meta,
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                        color = cat.categoryInk()
+                        color = ink
                     )
                 }
                 Surface(
                     onClick = onDismiss,
                     shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                    color = surface.copy(alpha = 0.6f)
                 ) {
                     CurioIcon(
                         CurioIcons.Close,
                         "Close track list",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = onSurfaceVariant,
                         size = 20.dp,
                         modifier = Modifier.padding(8.dp)
                     )
@@ -3843,13 +3864,13 @@ private fun AlbumNotesSheet(
                             CurioIcon(
                                 CurioIcons.MusicNote,
                                 "Listen to this album",
-                                tint = cat.onAccent(),
+                                tint = onAccent,
                                 size = 16.dp
                             )
                             Text(
                                 "LISTEN",
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                                color = cat.categoryInk(),
+                                color = ink,
                                 maxLines = 1
                             )
                         }
@@ -3901,13 +3922,13 @@ private fun AlbumNotesSheet(
                             CurioIcon(
                                 CurioIcons.OpenInNew,
                                 "Open album on Genius",
-                                tint = cat.onAccent(),
+                                tint = onAccent,
                                 size = 16.dp
                             )
                             Text(
                                 "GENIUS",
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                                color = cat.categoryInk(),
+                                color = ink,
                                 maxLines = 1
                             )
                         }
@@ -3928,7 +3949,10 @@ private fun AlbumNotesSheet(
                 if (synopsis != null) {
                     item(key = "album_about") {
                         AlbumSynopsisAccordion(
-                            cat = cat,
+                            surface = surface,
+                            accent = accent,
+                            ink = ink,
+                            onSurface = onSurface,
                             synopsis = synopsis
                         )
                     }
@@ -3939,7 +3963,7 @@ private fun AlbumNotesSheet(
                         onClick = { onSelectTrack(tr) },
                         shape = RoundedCornerShape(14.dp),
                         color = if (selected) accent
-                                else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+                                else surface,
                         shadowElevation = if (selected) 0.dp else 1.dp
                     ) {
                         Row(
@@ -3950,7 +3974,7 @@ private fun AlbumNotesSheet(
                             Text(
                                 text = "${tr.number}",
                                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                color = if (selected) cat.onAccent() else cat.categoryInk(),
+                                color = if (selected) onAccent else ink,
                                 maxLines = 1,
                                 modifier = Modifier.width(28.dp)
                             )
@@ -3959,7 +3983,7 @@ private fun AlbumNotesSheet(
                                 style = MaterialTheme.typography.bodyLarge.copy(
                                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
                                 ),
-                                color = if (selected) cat.onAccent() else MaterialTheme.colorScheme.onSurface,
+                                color = if (selected) onAccent else onSurface,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.weight(1f)
@@ -3968,8 +3992,8 @@ private fun AlbumNotesSheet(
                                 Text(
                                     text = tr.duration,
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = if (selected) cat.onAccent().copy(alpha = 0.85f)
-                                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    color = if (selected) onAccent.copy(alpha = 0.85f)
+                                            else onSurfaceVariant,
                                     maxLines = 1
                                 )
                             }
@@ -3988,8 +4012,8 @@ private fun AlbumNotesSheet(
                             ) {
                                 HeartGlyph(
                                     color = if (fav) Color(0xFFE5484D)
-                                            else if (selected) cat.onAccent().copy(alpha = 0.85f)
-                                            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                            else if (selected) onAccent.copy(alpha = 0.85f)
+                                            else onSurfaceVariant.copy(alpha = 0.6f),
                                     iconSize = 18.dp,
                                     filled = fav,
                                     modifier = Modifier.align(Alignment.Center)
@@ -4049,14 +4073,17 @@ private fun albumListenUrl(topic: CurioTopic, service: String): String {
  */
 @Composable
 private fun AlbumSynopsisAccordion(
-    cat: com.curio.app.data.CurioCategory,
+    surface: Color,
+    accent: Color,
+    ink: Color,
+    onSurface: Color,
     synopsis: String,
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
     Surface(
         shape = RoundedCornerShape(18.dp),
-        color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+        color = surface,
         modifier = modifier
             .fillMaxWidth()
             .clickable { expanded = !expanded }
@@ -4074,12 +4101,12 @@ private fun AlbumSynopsisAccordion(
             ) {
                 Surface(
                     shape = CircleShape,
-                    color = cat.themedAccent().copy(alpha = 0.16f)
+                    color = accent.copy(alpha = 0.16f)
                 ) {
                     CurioIcon(
                         CurioIcons.MusicNote,
                         null,
-                        tint = cat.categoryInk(),
+                        tint = ink,
                         size = 15.dp,
                         modifier = Modifier.padding(6.dp)
                     )
@@ -4090,7 +4117,7 @@ private fun AlbumSynopsisAccordion(
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 1.2.sp
                     ),
-                    color = cat.categoryInk(),
+                    color = ink,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
@@ -4098,19 +4125,19 @@ private fun AlbumSynopsisAccordion(
                 Text(
                     if (expanded) "Hide" else "Read",
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                    color = cat.categoryInk().copy(alpha = 0.9f)
+                    color = ink.copy(alpha = 0.9f)
                 )
                 CurioIcon(
                     if (expanded) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
                     if (expanded) "Collapse synopsis" else "Expand synopsis",
-                    tint = cat.categoryInk(),
+                    tint = ink,
                     size = 20.dp
                 )
             }
             Text(
                 text = synopsis,
                 style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
-                color = MaterialTheme.colorScheme.onSurface,
+                color = onSurface,
                 maxLines = if (expanded) Int.MAX_VALUE else 2,
                 overflow = if (expanded) TextOverflow.Clip else TextOverflow.Ellipsis,
                 modifier = Modifier.padding(top = 10.dp)
