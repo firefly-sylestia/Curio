@@ -5271,6 +5271,20 @@ fun TopicShareSheet(
                 val request = coil.request.ImageRequest.Builder(context)
                     .data(url)
                     .crossfade(false)
+                    // Export crash fix (same recipe as MoodBoardExport): the
+                    // share sheet's Save/Share rasterizes the card through a
+                    // SOFTWARE canvas (shareComposableCard → composeView.draw),
+                    // and Coil decodes HARDWARE bitmaps by default on API 26+.
+                    // Drawing a hardware bitmap into that software canvas
+                    // throws "Software rendering doesn't support hardware
+                    // bitmaps" (IllegalArgumentException) the moment a fetched
+                    // cover is on the card. Decode software so both the
+                    // on-screen preview and the PNG export paths can draw it.
+                    // Memory cache DISABLED so a prior hardware decode of the
+                    // same URL (e.g. the reveal poster) can never be handed
+                    // back from the cache as this software request's result.
+                    .allowHardware(false)
+                    .memoryCachePolicy(coil.request.CachePolicy.DISABLED)
                     .listener(
                         onSuccess = { _, result ->
                             cont.resume(result.drawable.toBitmap().asImageBitmap())
