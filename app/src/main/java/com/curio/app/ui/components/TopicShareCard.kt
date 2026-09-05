@@ -5923,15 +5923,17 @@ private fun ArrangeableCard(
                                 onDragEnd = { dragActive = false; dragGuides = DragGuides() }
                             )
                             CornerResizeHandle(
-                                x = (t.right - 26f).coerceIn(0f, (cw - 26f).coerceAtLeast(0f)).dp,
-                                y = (t.bottom - 26f).coerceIn(0f, (ch - 26f).coerceAtLeast(0f)).dp,
+                                x = (t.right - 26f).dp,
+                                y = (t.bottom - 26f).dp,
                                 onDelta = { dx, dy ->
                                     val baseW = t.width / move.titleWidthFrac.coerceAtLeast(0.2f)
                                     val baseH = t.height / move.titleHeightFrac.coerceAtLeast(0.2f)
                                     val factor = maxOf(1f + dx / baseW, 1f + dy / baseH).coerceIn(0.2f, 6f)
+                                    val nw = (move.titleWidthFrac * factor).coerceIn(0.2f, 1f)
+                                    val nh = (move.titleHeightFrac * factor).coerceIn(0.2f, 6f)
                                     onMove(move.copy(
-                                        titleWidthFrac = (move.titleWidthFrac * factor).coerceIn(0.2f, 1f),
-                                        titleHeightFrac = (move.titleHeightFrac * factor).coerceIn(0.2f, 6f)
+                                        titleWidthFrac = nw,
+                                        titleHeightFrac = nh
                                     ))
                                 },
                                 onDragStart = { dragActive = true },
@@ -5940,6 +5942,7 @@ private fun ArrangeableCard(
                         }
                     }
                     ShareCardResizeTarget.FACT -> {
+                        val mRect = rMeta
                         val f = rFact
                         if (f.width > 0f && f.height > 0f) {
                             MoveHandle(
@@ -5956,12 +5959,27 @@ private fun ArrangeableCard(
                                     // rows travel WITH the fact (like the info
                                     // row follows the title), while each stays
                                     // separately draggable via its own grip.
-                                    val appliedDx = xs.offset - move.factDx
-                                    val appliedDy = ys.offset - move.factDy
+                                    // v369/v370 — proportional grouped move: title +
+                                    // author/info rows travel WITH the fact, but
+                                    // only while the quick fact is being dragged.
+                                    // Use the RAW finger delta (not the
+                                    // magnet helper's snap offset) so the title
+                                    // and info rows follow the fact precisely
+                                    // without overshooting, and clamp their
+                                    // position to the card so nothing leaves the
+                                    // card. When a manual edit has been made
+                                    // (fact already moved/resized), the whole
+                                    // group still moves so the fact track is
+                                    // consistent.
+                                    val rawDx = dx; val rawDy = dy
+                                    val newTitleDx = (move.titleDx + rawDx).coerceIn(-(t.width / 2f), cw - t.width / 2f)
+                                    val newTitleDy = (move.titleDy + rawDy).coerceIn(-t.height / 2f, ch - t.height / 2f)
+                                    val newMetaDx = (move.metaDx + rawDx).coerceIn(-mRect.width / 2f, cw - mRect.width / 2f).coerceAtLeast(-mRect.width * 0.2f)
+                                    val newMetaDy = (move.metaDy + rawDy).coerceIn(-mRect.height / 2f, ch - mRect.height / 2f)
                                     onMove(move.copy(
                                         factDx = xs.offset, factDy = ys.offset,
-                                        titleDx = move.titleDx + appliedDx, titleDy = move.titleDy + appliedDy,
-                                        metaDx = move.metaDx + appliedDx, metaDy = move.metaDy + appliedDy
+                                        titleDx = newTitleDx, titleDy = newTitleDy,
+                                        metaDx = newMetaDx, metaDy = newMetaDy
                                     ))
                                 },
                                 onDragStart = {
@@ -7182,22 +7200,20 @@ fun TopicShareSheet(
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Text("$selName box", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 if (isTitle) {
-                                    SizeSliderColumn("Title width", move.titleWidthFrac, { updateMove(move.copy(titleWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
-                                    SizeSliderColumn("Title height", move.titleHeightFrac, { updateMove(move.copy(titleHeightFrac = it)) }, 0.35f..2.5f, steps = 26, modifier = Modifier.fillMaxWidth())
-                                    // v370 — WHOLE-BOX scale: one slider that
-                                    // grows/shrinks the whole box (width AND
-                                    // height together, shape kept) — the same
-                                    // math as the corner grip, as a precise
-                                    // slider. Width can't exceed the card, so
-                                    // it tracks height up to 100%.
-                                    SizeSliderColumn("Whole box", move.titleHeightFrac, { v -> updateMove(move.copy(titleHeightFrac = v, titleWidthFrac = minOf(1f, v))) }, 0.35f..5f, steps = 46, modifier = Modifier.fillMaxWidth())
+                                    // v370 — Title width can shrink below the
+                                    // old 0.3f floor when a cover sits to the
+                                    // left: the title narrows and the cover
+                                    // takes the left side. Height is also a
+                                    // bigger range so tall cards can grow
+                                    // the title block more.
+                                    SizeSliderColumn("Title width", move.titleWidthFrac, { updateMove(move.copy(titleWidthFrac = it)) }, 0.18f..1f, steps = 81, modifier = Modifier.fillMaxWidth())
+                                    SizeSliderColumn("Title height", move.titleHeightFrac, { updateMove(move.copy(titleHeightFrac = it)) }, 0.35f..5f, steps = 46, modifier = Modifier.fillMaxWidth())
                                 } else if (isFact) {
-                                    SizeSliderColumn("Fact width", move.factWidthFrac, { updateMove(move.copy(factWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
-                                    // v369 — the fact box height range runs to
-                                    // 5x so tall 9:16 cards can expand a long
-                                    // fact far past the old 2.5x cap.
+                                    SizeSliderColumn("Fact width", move.factWidthFrac, { updateMove(move.copy(factWidthFrac = it)) }, 0.18f..1f, steps = 81, modifier = Modifier.fillMaxWidth())
+                                    // v370 — fact box height: tall 9:16 cards
+                                    // can grow a long fact far past the old
+                                    // 2.5x cap.
                                     SizeSliderColumn("Fact height", move.factHeightFrac, { updateMove(move.copy(factHeightFrac = it)) }, 0.35f..5f, steps = 46, modifier = Modifier.fillMaxWidth())
-                                    SizeSliderColumn("Whole box", move.factHeightFrac, { v -> updateMove(move.copy(factHeightFrac = v, factWidthFrac = minOf(1f, v))) }, 0.35f..5f, steps = 46, modifier = Modifier.fillMaxWidth())
                                 } else if (isFav) {
                                     // v370 — ALBUM favorite-tracks strip box:
                                     // width is a fill fraction of its natural
