@@ -49,6 +49,16 @@ val gbkEscaped: String = envGoogleBooksApiKey
     ?.replace("\"", "\\\"")
     .orEmpty()
 
+// v356 — OPTIONAL LibraryThing developer key (free tier): covers.librarything.com
+// is ISBN-based and requires it (see .env.example / repo secrets). Unset = the
+// LibraryThing provider row stays hidden and lookups fall through to the
+// keyless providers (iTunes → Google Books → Open Library).
+val envLibraryThingApiKey: String? = System.getenv("LIBRARY_THING_API_KEY")?.trim()?.takeIf { it.isNotEmpty() }
+val ltkEscaped: String = envLibraryThingApiKey
+    ?.replace("\\", "\\\\")
+    ?.replace("\"", "\\\"")
+    .orEmpty()
+
 // Only create release signing if ALL four secrets are present and non-empty.
 // GitHub Actions exports missing secrets as empty strings, so .takeIf { it.isNotEmpty() }
 // converts them back to null. Without this guard, AGP would create a signing config
@@ -79,6 +89,10 @@ android {
         // keyless fetchers can upgrade to keyed (higher-quota) calls when the
         // repo secret is present; empty string otherwise (no behaviour change).
         buildConfigField("String", "GOOGLE_BOOKS_API_KEY", "\"$gbkEscaped\"")
+
+        // v356 — optional LibraryThing key: enables the LibraryThing cover
+        // provider in the hub (hidden without a key); empty string otherwise.
+        buildConfigField("String", "LIBRARY_THING_API_KEY", "\"$ltkEscaped\"")
 
         // Only include English locale — saves ~5-8 MB of APK size.
         // Curio ships as a single-language app. Add others as needed.

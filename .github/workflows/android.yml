@@ -69,6 +69,11 @@ jobs:
           # present it is baked into BuildConfig.GOOGLE_BOOKS_API_KEY and the
           # book fetchers append &key= for the higher quota; unset stays keyless.
           GOOGLE_BOOKS_API_KEY: ${{ secrets.GOOGLE_BOOKS_API_KEY }}
+          # v356 — optional: free LibraryThing developer key. When present it
+          # is baked into BuildConfig.LIBRARY_THING_API_KEY and the hub shows
+          # the LibraryThing cover source; unset hides it (keyless providers
+          # keep working).
+          LIBRARY_THING_API_KEY: ${{ secrets.LIBRARY_THING_API_KEY }}
         run: |
           # Bundle the source catalogs as Android assets. The app imports these
           # JSON files into its user database on first launch (and retries for

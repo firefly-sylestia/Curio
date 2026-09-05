@@ -2799,11 +2799,12 @@ private fun BookCoverPoster(
     // (and the keyless fallback URL) on every book visit even when the user
     // never enabled fetching.
     val bookFetchConsent = AppPreferences.bookFetchEnabledState
-    // v354 — INPUT-SIDE fallback: when the toggle is ON but every static
+    // v354/v356 — INPUT-SIDE fallback: when the toggle is ON but every static
     // candidate above failed (no authored URL, no hub-resolved cover, and
-    // the Open Library guess 404s), the poster LIVE-resolves a Google Books
-    // thumbnail and persists it, so a cover can appear without visiting the
-    // Settings hub. Only runs while fetching is consented.
+    // the Open Library guess 404s), the poster LIVE-resolves a cover and
+    // persists it. v356 — iTunes is tried FIRST (keyless ebook search), then
+    // Google Books, then LibraryThing (only when its free key is configured),
+    // so the best keyless source wins before the older fallbacks.
     val context = LocalContext.current
     var liveFallbackDone by remember(bookTitle, imageUrl) { mutableStateOf(false) }
     LaunchedEffect(bookTitle, imageUrl, bookFetchConsent, coverIndex, liveFallbackDone) {
@@ -2811,10 +2812,18 @@ private fun BookCoverPoster(
         // (onError bumps coverIndex past the list), never on first open.
         val exhausted = coverIndex >= coverCandidates.size
         if (bookFetchConsent && !liveFallbackDone && exhausted) {
-            val url = com.curio.app.features.settings.BookCoverFetch.resolveCoverUrl(
-                context, bookTitle, null, "",
-                com.curio.app.features.settings.BookCoverFetch.BookCoverProvider.GOOGLE_BOOKS
+            val providers = listOf(
+                com.curio.app.features.settings.BookCoverFetch.BookCoverProvider.ITUNES,
+                com.curio.app.features.settings.BookCoverFetch.BookCoverProvider.GOOGLE_BOOKS,
+                com.curio.app.features.settings.BookCoverFetch.BookCoverProvider.LIBRARY_THING
             )
+            var url: String? = null
+            for (p in providers) {
+                url = com.curio.app.features.settings.BookCoverFetch.resolveCoverUrl(
+                    context, bookTitle, null, "", p
+                )
+                if (url != null) break
+            }
             if (url != null) {
                 AppPreferences.setBookCoverUrl(context, bookTitle, url)
                 coverIndex = 0

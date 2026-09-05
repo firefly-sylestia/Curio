@@ -65,8 +65,16 @@ fun BookCoverHubScreen(navController: NavController) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var providerName by remember { mutableStateOf(AppPreferences.bookCoverProviderState) }
+    // v356 — iTunes is the default source. LibraryThing only applies when its
+    // free key is configured (BuildConfig.LIBRARY_THING_API_KEY); without a
+    // key a stored LIBRARY_THING pick silently falls back to iTunes.
     val provider = runCatching { BookCoverFetch.BookCoverProvider.valueOf(providerName) }
-        .getOrDefault(BookCoverFetch.BookCoverProvider.OPEN_LIBRARY)
+        .getOrDefault(BookCoverFetch.BookCoverProvider.ITUNES)
+        .let { p ->
+            if (p == BookCoverFetch.BookCoverProvider.LIBRARY_THING &&
+                com.curio.app.BuildConfig.LIBRARY_THING_API_KEY.isBlank()
+            ) BookCoverFetch.BookCoverProvider.ITUNES else p
+        }
 
     // Fetch engine state.
     var job by remember { mutableStateOf<Job?>(null) }
@@ -222,7 +230,14 @@ fun BookCoverHubScreen(navController: NavController) {
                 )
                 Spacer(Modifier.height(8.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    BookCoverFetch.BookCoverProvider.entries.forEach { p ->
+                    // v356 — LibraryThing needs its free key (BuildConfig);
+                    // without one the row is hidden rather than failing every
+                    // fetch. iTunes is listed first (the default source).
+                    val providers = BookCoverFetch.BookCoverProvider.entries.filter { p ->
+                        p != BookCoverFetch.BookCoverProvider.LIBRARY_THING ||
+                            com.curio.app.BuildConfig.LIBRARY_THING_API_KEY.isNotBlank()
+                    }
+                    providers.forEach { p ->
                         val selected = p == provider
                         Surface(
                             onClick = {

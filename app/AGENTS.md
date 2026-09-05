@@ -449,6 +449,29 @@ app/src/main/java/com/curio/app/
     hole punched in the accent row in dark mode (fixed).
   - **No chevron:** the ▼/▲ expand arrow is removed from the
     chapter/episode rows (rows still expand on tap).
+- **v356 — book-cover providers: iTunes FIRST + LibraryThing (keyed).**
+  User: "add i tunes provider for books and make that first and then
+  fallback other, and also add librarything too".
+  - `BookCoverProvider` enum reordered BEST-FIRST: **ITUNES →
+    GOOGLE_BOOKS → OPEN_LIBRARY → LIBRARY_THING**;
+    `AppPreferences.getBookCoverProvider` default is now `ITUNES` (fresh
+    installs / unknown stored values).
+  - **iTunes** (`itunesThumbnail`): keyless
+    `itunes.apple.com/search?term=…&entity=ebook`, upscales the 100px
+    artwork token to 600px, picks the best title+author match via the
+    shared `matchScore` heuristic (same as the album resolver).
+  - **LibraryThing** (`libraryThingCover`): ISBN-gated + key-gated —
+    resolves the ISBN via a keyless Google Books volume search
+    (`industryIdentifiers`), then
+    `covers.librarything.com/devkey/{key}/large/isbn/{isbn}`; needs
+    `LIBRARY_THING_API_KEY` (optional BuildConfig via env/secret,
+    `.env.example` + `android.yml` wired). No key = the hub row is hidden
+    and lookups fall through to the keyless providers.
+  - **Reveal poster live fallback** now cascades iTunes → Google Books →
+    LibraryThing (only when keyed) instead of Google Books alone.
+  - Hub provider picker follows the enum order (iTunes first); a stored
+    LIBRARY_THING pick with no key configured silently falls back to
+    iTunes.
 - **v323 — picker hold actions become a gooey RADIAL menu; share-card
   Tone tool + 6 new tones; pet shop toys/games; quest fixes.** (1)
   **Radial hold menu** (`features/picker/RadialHoldMenu.kt`): the old

@@ -31,17 +31,22 @@ object BookCoverFetch {
 
     val TITLE = "Book covers & ratings"
 
-    /** Cover providers the hub offers. Open Library = the reveal's own
-     *  title-cover fallback; Google Books = keyless volume search. */
+    /** Cover providers the hub offers, ordered BEST-FIRST (v356): iTunes is
+     *  the default keyless ebook search; Google Books is the keyless volume
+     *  search; Open Library is the pure title-cover fallback; LibraryThing
+     *  needs a free key (LIBRARY_THING_API_KEY) and resolves covers via ISBN. */
     enum class BookCoverProvider(val label: String, val description: String) {
+        ITUNES("iTunes", "Keyless ebook search"),
+        GOOGLE_BOOKS("Google Books", "Keyless title+author search"),
         OPEN_LIBRARY("Open Library", "Title covers · keyless"),
-        GOOGLE_BOOKS("Google Books", "Keyless title+author search")
+        LIBRARY_THING("LibraryThing", "ISBN covers · free key")
     }
 
-    /** Resolves cover URL candidates for a book. v352 — the last RESOLVED
-     *  URL from the hub (e.g. a Google Books thumbnail) sits between the
-     *  authored imageUrl and the bare Open Library title fallback, so covers
-     *  the hub actually found show up on the reveal + share card too. */
+    /** Resolves cover URL candidates for a book. v352/v356 — the last
+     *  RESOLVED URL from the hub (whatever provider found it — iTunes,
+     *  Google Books or LibraryThing) sits between the authored imageUrl and
+     *  the bare Open Library title fallback, so covers the hub actually
+     *  found show up on the reveal + share card too. */
     fun coverCandidates(bookName: String, imageUrl: String): List<String> =
         listOfNotNull(
             imageUrl.takeIf { it.isNotBlank() },
@@ -67,9 +72,11 @@ object BookCoverFetch {
     ): String? = withContext(Dispatchers.IO) {
         val resolved = imageUrl.takeIf { it.isNotBlank() }
             ?: when (provider) {
+                BookCoverProvider.ITUNES -> itunesThumbnail(bookName, author)
+                BookCoverProvider.GOOGLE_BOOKS -> googleThumbnail(bookName, author)
                 BookCoverProvider.OPEN_LIBRARY ->
                     "https://covers.openlibrary.org/b/title/${Uri.encode(bookName)}-M.jpg"
-                BookCoverProvider.GOOGLE_BOOKS -> googleThumbnail(bookName, author)
+                BookCoverProvider.LIBRARY_THING -> libraryThingCover(bookName, author)
             }
         // v352 — remember what the hub actually resolved so the reveal poster
         // (and the share card) can reuse it instead of re-guessing.
@@ -105,6 +112,111 @@ object BookCoverFetch {
             }
             null
         }.getOrNull()
+    }
+
+    /**
+     * v356 — iTunes Search API, keyless ebook search (the same provider the
+     * album/series posters already use). The 100px `artworkUrl100` token is
+     * upscaled to 600px for the poster. Picks the best title+author match
+     * (exact beats fuzzy), so a wrong-edition result doesn't win.
+     */
+    private fun itunesThumbnail(title: String, author: String?): String? {
+        val term = buildString {
+            append(Uri.encode(title.trim()))
+            if (!author.isNullOrBlank()) append("+").append(Uri.encode(author.trim()))
+        }
+        val json = httpGet("https://itunes.apple.com/search?term=$term&entity=ebook&limit=10")
+            ?: return null
+        return runCatching {
+            val results = org.json.JSONObject(json).optJSONArray("results") ?: return null
+            var best: String? = null
+            var bestScore = 0
+            for (i in 0 until results.length()) {
+                val r = results.optJSONObject(i) ?: continue
+                val name = r.optString("trackName")
+                val art = r.optString("artworkUrl100")
+                if (art.isBlank()) continue
+                val score = matchScore(name, title, r.optString("artistName"), author)
+                if (score > bestScore) {
+                    bestScore = score
+                    best = art
+                }
+                if (score >= 3) break
+            }
+            best
+                ?.replace("100x100bb", "600x600bb")
+                ?.replace("http://", "https://")
+        }.getOrNull()
+    }
+
+    /**
+     * v356 — LibraryThing covers (the best quality for ISBN-resolvable
+     * books), but ISBN-based and key-gated: covers.librarything.com/devkey/
+     * {key}/large/isbn/{isbn}. Resolution is a keyless Google Books volume
+     * search for the ISBN, then the cover URL. Returns null when no key is
+     * configured or no ISBN can be found, so the caller falls through to the
+     * next provider (and the hub hides the row entirely without a key).
+     */
+    private fun libraryThingCover(title: String, author: String?): String? {
+        val key = com.curio.app.BuildConfig.LIBRARY_THING_API_KEY
+            .takeIf { it.isNotBlank() } ?: return null
+        val isbn = resolveIsbn(title, author) ?: return null
+        return "https://covers.librarything.com/devkey/$key/large/isbn/$isbn"
+    }
+
+    /** First ISBN (ISBN-13 preferred) from a keyless Google Books search. */
+    private fun resolveIsbn(title: String, author: String?): String? {
+        val q = buildString {
+            append("intitle:${Uri.encode(title)}")
+            if (!author.isNullOrBlank()) append("+inauthor:${Uri.encode(author)}")
+        }
+        val json = httpGet(googleBooksUrl(q)) ?: return null
+        return runCatching {
+            val items = org.json.JSONObject(json).optJSONArray("items") ?: return null
+            for (i in 0 until items.length()) {
+                val vi = items.optJSONObject(i)?.optJSONObject("volumeInfo") ?: continue
+                val ids = vi.optJSONArray("industryIdentifiers") ?: continue
+                for (j in 0 until ids.length()) {
+                    val id = ids.optJSONObject(j) ?: continue
+                    val type = id.optString("type")
+                    val value = id.optString("identifier").trim()
+                    if (value.isNotEmpty() && (type == "ISBN_13" || type == "ISBN_10")) {
+                        return value
+                    }
+                }
+            }
+            null
+        }.getOrNull()
+    }
+
+    /**
+     * Rough relevance score (same heuristic as the album resolver): 3 = exact
+     * title AND author, 2 = exact title (or fuzzy title + exact author),
+     * 1 = fuzzy containment / shared word, 0 = no match.
+     */
+    private fun matchScore(name: String, wantName: String, author: String, wantAuthor: String?): Int {
+        val n = name.trim()
+        val w = wantName.trim()
+        val titleExact = n.equals(w, ignoreCase = true)
+        val titleFuzzy = !w.isBlank() && (n.contains(w, ignoreCase = true) ||
+            w.contains(n, ignoreCase = true) ||
+            titleWordsOverlap(n, w))
+        val authorExact = !wantAuthor.isNullOrBlank() &&
+            author.trim().equals(wantAuthor.trim(), ignoreCase = true)
+        return when {
+            titleExact && authorExact -> 3
+            titleExact -> 2
+            titleFuzzy && authorExact -> 2
+            titleFuzzy -> 1
+            else -> 0
+        }
+    }
+
+    /** True when the two titles share a meaningful (≥4 char) word. */
+    private fun titleWordsOverlap(a: String, b: String): Boolean {
+        val wa = a.split(Regex("[^A-Za-z0-9]+")).filter { it.length >= 4 }.map { it.lowercase() }.toSet()
+        val wb = b.split(Regex("[^A-Za-z0-9]+")).filter { it.length >= 4 }.map { it.lowercase() }.toSet()
+        return wa.any { it in wb }
     }
 
     /**

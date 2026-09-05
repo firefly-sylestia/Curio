@@ -1,62 +1,65 @@
-# Request Log — Book/series notes-sheet cleanup (no close, rating under author, tick-free read state)
+# Request Log — Book-cover providers: iTunes first + LibraryThing
 
 ## Status: implementation complete — committing & pushing (CI will validate)
 
-## The request (user, paraphrased)
-- Add an instruction to NEVER put a cross/close button in a bottom sheet.
-- Remove the cross close button from the book synopsis (book-notes) bottom sheet.
-- Remove the "Your rating" row; put the rating just below the author name;
-  use a DIFFERENT icon for the rating (not the star).
-- Remove the "tap a chapter to read its note" hint.
-- Add an instruction not to add useless notes (filler hint copy).
-- Remove the arrow icon from the chapter chips (rows).
-- The read-status state shown for chapters is bad — the user dislikes the
-  active state with the tick icon.
-- When a chapter is expanded AND read in dark mode it looks bad — fix it.
-- Question: what other book-cover-fetch APIs are available?
+## The request (user)
+"add i tunes provider for books and make that first and then fallback other,
+and also add, lirary thing too" — follow-up to the v355 notes-sheet cleanup
+(already pushed as 9aa243ce).
 
-## Ask (ask_user, 4 questions — answers recorded)
-1. Rating source under author name: **Both** (Google average + my own rating).
-2. Rating icon: **Award ribbon** (`CurioIcons.WorkspacePremium`).
-3. Series sheet scope: **Yes, both sheets** (book + series stay in sync).
-4. Read state: **Soft accent tint + number** (no tick; disc keeps the number).
+## Ask / decisions
+- User picked iTunes as the FIRST provider; the others fall back after it.
+- LibraryThing added too — it is ISBN-based and key-gated, so it degrades
+  gracefully when no key is configured (row hidden, lookups fall through).
 
-## What was done (TopicRevealScreen.kt)
-- **Close button removed** from BookNotesSheet + SeriesNotesSheet (swipe/back
-  dismisses; heart stays in the header).
-- **"REVIEWS & YOUR RATING" card deleted** (both the Google reviews block and
-  the BookRatingPicker row); `BookRatingPicker` + `BookGlyph` composables
-  deleted with it. `bookRatingVisibleState` pref API stays dormant.
-- **Header rating, below author name:** one award-ribbon glyph + "4.2 ·
-  yours 4 / 5" (Google avg + custom pick; only what exists).
-- **Star → WorkspacePremium** on the reveal hero rating chip and the
-  synopsis-card rating chip too (consistent icon everywhere).
-- **"tap a chapter/episode to read its notes" suffix removed** from both
-  progress rails ("N chapters" / "N episodes" only).
-- **Tick gone:** leading chip always shows the chapter/episode number; a
-  read/watched row tints the disc soft accent (18% fill + accent number +
-  accent ring). Mark-read FoldedCorner = solid accent fill + onAccent icon +
-  onAccent rim in EVERY state (fixes the open+read dark-mode punch-hole).
-- **▼/▲ chevron removed** from chapter/episode rows (rows still expand on tap).
+## What was done
+### BookCoverFetch.kt
+- `BookCoverProvider` enum reordered BEST-FIRST: **ITUNES → GOOGLE_BOOKS →
+  OPEN_LIBRARY → LIBRARY_THING** (new entries: ITUNES "Keyless ebook
+  search", LIBRARY_THING "ISBN covers · free key").
+- `itunesThumbnail(title, author)`: keyless `itunes.apple.com/search?term=
+  …&entity=ebook&limit=10`, relevance-scored via `matchScore` (copied from
+  AlbumArtFetch), artwork token `100x100bb` → `600x600bb`.
+- `libraryThingCover(title, author)`: requires `BuildConfig.
+  LIBRARY_THING_API_KEY`; resolves ISBN via keyless Google Books
+  `industryIdentifiers` (`resolveIsbn`), then
+  `covers.librarything.com/devkey/{key}/large/isbn/{isbn}`. Null without
+  key/ISBN → caller falls through.
+- `resolveCoverUrl` gains the two new provider branches.
 
-## Docs
-- app/AGENTS.md: durable rules "No close buttons in bottom sheets" + "No
-  filler hint copy" (UI section) + versioned **v355** entry.
-- fastlane changelog 20260921.txt: 4 concise FIX bullets at the top (no
-  REMOVE — the rating picker never reached a pushed release).
+### TopicRevealScreen.kt (BookCoverPoster)
+- Live INPUT-SIDE fallback now cascades **iTunes → Google Books →
+  LibraryThing** (first non-null wins) instead of Google Books alone.
+
+### Defaults / hub (AppPreferences.kt, BookCoverHubScreen.kt)
+- `getBookCoverProvider` default → "ITUNES" (state seed updated too).
+- Hub `provider` resolution defaults to ITUNES; a stored LIBRARY_THING pick
+  with no key silently falls back to iTunes.
+- Provider picker hides the LibraryThing row when the key is blank
+  (BuildConfig.LIBRARY_THING_API_KEY), so no keyless user sees a
+  guaranteed-fail source.
+
+### Build / CI
+- `app/build.gradle.kts`: new optional `LIBRARY_THING_API_KEY` BuildConfig
+  field (env → escaped string, mirrors GOOGLE_BOOKS_API_KEY).
+- `.env.example`: LIBRARY_THING_API_KEY documented.
+- `.github/workflows/android.yml`: secret passed to the build env.
+
+### Docs
+- app/AGENTS.md: **v356** versioned entry.
+- fastlane changelog 20260921.txt: 2 ADD bullets at the top.
 - Prompt.md: this log.
 
-## Book cover API research (answer in the reply)
-- Open Library Covers API (current fallback, keyless, title/ISBN covers)
-- Google Books API (current, keyless or keyed with GOOGLE_BOOKS_API_KEY)
-- Alternatives: Open Library Search API, ISBNdb (keyed, ISBN-based),
-  OpenBD (Japan), LibraryThing (keyed), Internet Archive / Book Cover
-  Archive (via Cover Art Archive or archive.org), Apple iTunes Search
-  (keyless, ebooks), Wikipedia/Wikidata (via Special:FilePath / Commons),
-  HathiTrust (no key, slow), Amazon (no official API), CovertArt / MusicBrainz
-  (albums only), NovelGraphs/MyAnimeList (manga).
+## Notes
+- iTunes covers are the DEFAULT source but only take effect for fresh
+  installs / unknown stored values (existing users keep their saved pick —
+  they can switch in the hub, where iTunes now lists first).
+- LibraryThing returns a default placeholder image for cover-less books
+  (same as Open Library's default-cover behavior) — accepted as a cached
+  cover rather than a failure.
 
 ## Verification
-- Brace/paren balance + all edit regions re-read after replacement; no
-  leftover BookGlyph/BookRatingPicker/tap-hint/tick/chevron references in
-  TopicRevealScreen.kt. CI will validate the real compile.
+- All edited regions re-read after replacement; BookCoverFetch braces
+  balanced; `BuildConfig.LIBRARY_THING_API_KEY` added to build.gradle.kts
+  and referenced via the fully-qualified path (matches the existing
+  GOOGLE_BOOKS_API_KEY pattern). CI will validate the real compile.

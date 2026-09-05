@@ -1161,7 +1161,9 @@ object AppPreferences {
         private set
     var seriesFetchEnabledState by mutableStateOf(false)
         private set
-    var bookCoverProviderState by mutableStateOf("OPEN_LIBRARY")
+    // v356 — iTunes is the DEFAULT cover source (keyless, tried first);
+    // Google Books / Open Library / LibraryThing follow it in the hub.
+    var bookCoverProviderState by mutableStateOf("ITUNES")
         private set
     var bookCoverFailedState by mutableStateOf<List<String>>(emptyList())
         private set
@@ -2813,9 +2815,10 @@ object AppPreferences {
         seriesFetchEnabledState = enabled
     }
 
-    /** The selected cover provider (a BookCoverProvider enum name). */
+    /** The selected cover provider (a BookCoverProvider enum name). v356 —
+     *  defaults to ITUNES (the keyless first-choice source). */
     fun getBookCoverProvider(context: Context): String =
-        prefs(context).getString(KEY_BOOK_COVER_PROVIDER, "OPEN_LIBRARY") ?: "OPEN_LIBRARY"
+        prefs(context).getString(KEY_BOOK_COVER_PROVIDER, "ITUNES") ?: "ITUNES"
 
     fun setBookCoverProvider(context: Context, name: String) {
         prefs(context).edit().putString(KEY_BOOK_COVER_PROVIDER, name).apply()
