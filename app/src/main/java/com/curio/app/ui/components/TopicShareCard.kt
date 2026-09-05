@@ -4790,7 +4790,7 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             footerSpacer = 8.dp, footerFont = PatrickHandFontFamily, footerColor = Color(0xFFC9B8E0).copy(alpha = 0.65f),
             layout = SignatureLayout.SIDE
         )
-        // ══�� MANGA — speedlines, ChangaOne title ═══
+        // ══��� MANGA — speedlines, ChangaOne title ═══
         cat == "MANGA" -> SignatureDesign(
             bg = Color(0xFF0E0E12), cornerRadius = 8f,
             drawBackground = { w, h ->
@@ -5778,7 +5778,7 @@ private fun Watermark(family: CategoryFamily, glyph: String, tint: Color, seed: 
 
 // ═══════════════════════════════════════════════════════════════════════
 // SHARE SHEET
-// ═══════════════════════════════════════════════════════���═══════════════
+// ═════════════════════��═════════════════════════════════���═══════════════
 /**
  * Wraps the preview card: tap-and-hold toggles inline editing, which works
  * on EVERY style. While editing: the QUICK-FACT becomes a transparent
@@ -7194,7 +7194,7 @@ fun TopicShareSheet(
                         Spacer(Modifier.height(6.dp))
                         OutlinedTextField(
                             value = factFieldText,
-                            onValueChange = routeFactChange,
+                            onValueChange = { routeFactChange(it) },
                             textStyle = MaterialTheme.typography.bodyMedium.copy(
                                 color = MaterialTheme.colorScheme.onSurface,
                                 lineHeight = 22.sp
