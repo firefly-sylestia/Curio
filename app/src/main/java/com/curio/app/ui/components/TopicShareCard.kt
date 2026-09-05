@@ -7174,6 +7174,7 @@ fun TopicShareSheet(
             // seat; this box binds the SAME editFact / customText so typing
             // here is identical. When the selected fact is not editable (e.g.
             // reading-progress caption) the floating box stays hidden.
+            val factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…"
             if (editMode && factEditMode && (activeId == CUSTOM_FACT_ID || activeId == "chapter_review" || (activeId == QUICK_FACT_ID && progressForCard == null))) {
                 Surface(
                     shape = RoundedCornerShape(14.dp),
