@@ -499,6 +499,30 @@ app/src/main/java/com/curio/app/
   unset = null → callers keep the search link. Wired into BOTH the album
   sheet's LISTEN pill (Spotify entry) and the Explore "Listen in" flow for
   Spotify (albums/tracks/artists).
+- **v359 — share-card favorite-tracks strip: Minimal rule moves with the
+  fact; Collage + Signature strip tokens + placement fixed.** User: "for the
+  minimal card style there's a line above the quick fact or custom fact
+  which should move along with the move, also the favorite tracks box isn't
+  matching in collage, and signature styles so fix it, and properly place
+  them so that they don't overlap".
+  - **Minimal fact group:** the thick accent rule above the quick/custom
+    fact is now INSIDE the same `moveFact(move)` group as the gap + fact
+    text (one `Column`), so the rule travels with the box on drag and stays
+    glued while the box resizes — it can no longer desync and float where
+    the fact used to be.
+  - **Collage strip:** the bottom is a dark band under the torn seam, so
+    the strip is now a translucent DARK slip (black 34% + white hairline
+    border + white serif type + gold-tape heart) instead of the
+    warm-white tone box that clashed with the band; reads on the band AND
+    anywhere the user drags it.
+  - **Signature/Custom strip:** backgrounds vary per category (paper-white
+    and dark scenes alike), so the strip is a dark stamp pill (black 55% +
+    white border + white type + accent heart) instead of a tone-palette box
+    that clashed with the card's own colors.
+  - **Placement:** Collage and Signature/Custom strips raised from
+    ~40/58dp to **bottom 80dp (classic 84dp)** so they clear the collage's
+    torn-seam footer wave and the signature footer line — still movable via
+    the editor's F-handle.
 - **v323 — picker hold actions become a gooey RADIAL menu; share-card
   Tone tool + 6 new tones; pet shop toys/games; quest fixes.** (1)
   **Radial hold menu** (`features/picker/RadialHoldMenu.kt`): the old
