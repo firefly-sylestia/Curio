@@ -2789,15 +2789,17 @@ private fun BookCoverPoster(
     imageUrl: String,
     modifier: Modifier = Modifier
 ) {
-    // v352 — the last cover the hub's provider actually RESOLVED (e.g. a
-    // Google Books thumbnail) rides between the authored URL and the bare
-    // Open Library fallback, so hub-fetched covers appear on the reveal.
+    // v360 — the last VERIFIED cover the hub stored comes FIRST: the bulk
+    // fetch only stores a URL after it decodes to a real image, so a stored
+    // URL that differs from the authored one means the authored URL was a
+    // dead placeholder (Open Library's 1x1 GIF). Authored imageUrl still
+    // wins when nothing is stored, then the bare Open Library title guess.
     // The state is read OUTSIDE remember so a hub fetch recomposes this.
     val resolvedUrl = AppPreferences.bookCoverUrlsState[bookTitle]?.takeIf { it.isNotBlank() }
     val coverCandidates = remember(bookTitle, imageUrl, resolvedUrl) {
         listOfNotNull(
-            imageUrl.takeIf { it.isNotBlank() },
             resolvedUrl,
+            imageUrl.takeIf { it.isNotBlank() },
             "https://covers.openlibrary.org/b/title/${Uri.encode(bookTitle)}-M.jpg",
         ).distinct()
     }
@@ -2878,6 +2880,17 @@ private fun BookCoverPoster(
                     )
                     .build(),
                 contentDescription = "Book cover",
+                // v360 — Open Library serves a 1x1 GIF (HTTP 200) for missing
+                // covers, so onError never fires and the dead cover would win.
+                // A successfully-decoded image that is tiny (a placeholder) is
+                // skipped exactly like a 404, so the poster falls through to
+                // the hub-verified cover / provider cascade.
+                onSuccess = { _, result ->
+                    val d = (result as? coil.request.SuccessResult)?.drawable
+                    val w = d?.intrinsicWidth ?: 0
+                    val h = d?.intrinsicHeight ?: 0
+                    if (w < 40 || h < 40) coverIndex += 1
+                },
                 onError = { coverIndex += 1 },
                 modifier = Modifier.matchParentSize(),
                 contentScale = ContentScale.Crop

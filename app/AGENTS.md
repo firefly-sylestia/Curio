@@ -523,6 +523,53 @@ app/src/main/java/com/curio/app/
     ~40/58dp to **bottom 80dp (classic 84dp)** so they clear the collage's
     torn-seam footer wave and the signature footer line — still movable via
     the editor's F-handle.
+- **v360 — share-card meta row moves edge-to-edge; book-cover fetch
+  verifies real covers, skips covered, survives exit; series data batch
+  2.** User: "during card editing the author year etc that info move is
+  bad… the separate one is bad like it have restriction to move to too much
+  to the sides while others don't so fix it, also i don't see the new
+  series synopsis style layout inside, also then the book fetching in
+  experiment fix so when i tap fetch it fetches from the start when the
+  books already have the cover and when i exit the page during fetch it
+  cancels and restart from start, also many book covers are not getting
+  fetched like a handful of dust, a perfect spy and many more".
+  - **Meta row clamp (share card):** the author/year info row used a padded
+    clamp (`mPad = 18f`) that kept it ~18px off every card edge while
+    title/fact/badge/cover could travel to the true edges. It now clamps
+    edge-to-edge exactly like the other elements (base-rect clamp, so the
+    range never shrinks as the row travels); the magnet/alignment helpers
+    unchanged.
+  - **Book-cover fetch — placeholder-aware verification:** the bulk fetch
+    now VERIFIES a cover decodes to a real image (>= 40px short edge)
+    instead of trusting "it loaded". Open Library serves a 1x1 GIF with
+    HTTP 200 for missing covers, so dead authored URLs ("A Handful of
+    Dust", "A Perfect Spy" and many more — every one of the 796 books has
+    an authored imageUrl that short-circuited the providers) silently
+    counted as successes. `fetchAll` now builds candidate URLs per book
+    (stored-verified first, then authored, then the provider cascade:
+    chosen provider first, then iTunes → Google Books → Open Library →
+    LibraryThing) and the first candidate that decodes at real size wins
+    and is remembered via `setBookCoverUrl`.
+  - **Skip covered + resume:** new persisted `bookCoverDoneState` (book
+    names whose covers VERIFIED) — "Fetch all covers" skips those and only
+    runs the remaining/failed books, so re-tapping resumes where the last
+    run stopped instead of restarting at book #1.
+  - **Survives leaving the page:** the fetch job + progress state moved out
+    of the screen into `BookCoverFetchSession` (a process-lifetime
+    `CoroutineScope` in BookCoverFetch.kt). Leaving the hub no longer
+    cancels the run; re-entering shows the live progress and Cancel still
+    works. Hub + per-row retry route through the session.
+  - **Reveal poster:** `BookCoverPoster` also skips tiny/placeholder
+    successes (its `onSuccess` checks decoded size, bumping the candidate
+    index like a 404 would) and its candidate order is now verified-first,
+    so a hub-fetched real cover beats a dead authored URL on the reveal
+    too. `coverCandidates` ordering updated the same way (verified stored
+    URL first; authored second; Open Library title guess last).
+  - **Series data batch 2** (`tools/enrich_series_batch2.py`, mirrors
+    batch 1): synopsis + full episode lists added for **Sherlock, Squid
+    Game, The Last of Us, Severance, Wednesday** — the reveal's series card
+    (poster + synopsis preview + episode-list sheet) previously only
+    rendered for the 5 batch-1 shows; now 10 shows carry the layout.
 - **v323 — picker hold actions become a gooey RADIAL menu; share-card
   Tone tool + 6 new tones; pet shop toys/games; quest fixes.** (1)
   **Radial hold menu** (`features/picker/RadialHoldMenu.kt`): the old

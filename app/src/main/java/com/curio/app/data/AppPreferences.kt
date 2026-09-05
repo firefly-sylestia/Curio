@@ -213,6 +213,11 @@ object AppPreferences {
     private const val KEY_BOOK_FETCH_ENABLED = "book_fetch_enabled"    // bool — opt-out, default false
     private const val KEY_BOOK_COVER_PROVIDER = "book_cover_provider"  // BookCoverProvider.name
     private const val KEY_BOOK_COVER_FAILED = "book_cover_failed"     // JSON array of book names
+    // v360 — book names whose covers VERIFIED as real images (not Open
+    // Library's 1x1 placeholder) in a bulk fetch. The hub skips these on
+    // "Fetch all covers" so a re-tap resumes where the last run left off
+    // instead of restarting from book #1.
+    private const val KEY_BOOK_COVER_DONE = "book_cover_done"
     private const val KEY_BOOK_RATINGS = "book_ratings"               // JSON object name->avg rating
     private const val KEY_BOOK_RATINGS_COUNT = "book_ratings_count"    // JSON object name->ratings count
     // v328 — per-book reading progress: JSON object book name -> number of
@@ -1167,6 +1172,10 @@ object AppPreferences {
         private set
     var bookCoverFailedState by mutableStateOf<List<String>>(emptyList())
         private set
+    // v360 — verified-real covers (see KEY_BOOK_COVER_DONE): "Fetch all
+    // covers" skips these and only runs the not-yet-verified / failed books.
+    var bookCoverDoneState by mutableStateOf<List<String>>(emptyList())
+        private set
     var bookRatingsState by mutableStateOf<Map<String, Double>>(emptyMap())
         private set
     var bookRatingsCountState by mutableStateOf<Map<String, Int>>(emptyMap())
@@ -1334,6 +1343,7 @@ object AppPreferences {
         seriesFetchEnabledState = isSeriesFetchEnabled(context)
         bookCoverProviderState = getBookCoverProvider(context)
         bookCoverFailedState = getBookCoverFailed(context)
+        bookCoverDoneState = getBookCoverDone(context)
         bookRatingsState = getBookRatings(context)
         bookRatingsCountState = getBookRatingsCount(context)
         bookReadingProgressState = getBookReadingProgress(context)
@@ -2838,6 +2848,21 @@ object AppPreferences {
     fun setBookCoverFailed(context: Context, names: List<String>) {
         prefs(context).edit().putString(KEY_BOOK_COVER_FAILED, org.json.JSONArray(names).toString()).apply()
         bookCoverFailedState = names
+    }
+
+    /** Book names whose covers VERIFIED as real images in a bulk fetch. */
+    fun getBookCoverDone(context: Context): List<String> {
+        val raw = prefs(context).getString(KEY_BOOK_COVER_DONE, null) ?: return emptyList()
+        return runCatching {
+            org.json.JSONArray(raw).let { arr ->
+                (0 until arr.length()).mapNotNull { i -> arr.optString(i).takeIf { it.isNotBlank() } }
+            }
+        }.getOrDefault(emptyList())
+    }
+
+    fun setBookCoverDone(context: Context, names: List<String>) {
+        prefs(context).edit().putString(KEY_BOOK_COVER_DONE, org.json.JSONArray(names).toString()).apply()
+        bookCoverDoneState = names
     }
 
     /** The keyless-fetched average ratings: book name → Google Books average. */

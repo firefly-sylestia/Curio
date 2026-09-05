@@ -3,14 +3,24 @@ package com.curio.app.features.settings
 import android.content.Context
 import android.net.Uri
 import android.os.SystemClock
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import coil.Coil
 import coil.request.CachePolicy
 import coil.request.ImageRequest
+import coil.request.SuccessResult
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.TopicJsonLoader
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
@@ -42,15 +52,16 @@ object BookCoverFetch {
         LIBRARY_THING("LibraryThing", "ISBN covers · free key")
     }
 
-    /** Resolves cover URL candidates for a book. v352/v356 — the last
-     *  RESOLVED URL from the hub (whatever provider found it — iTunes,
-     *  Google Books or LibraryThing) sits between the authored imageUrl and
-     *  the bare Open Library title fallback, so covers the hub actually
-     *  found show up on the reveal + share card too. */
+    /** Resolves cover URL candidates for a book. v360 — the last VERIFIED
+     *  URL from the hub comes FIRST: the bulk fetch only stores a URL after
+     *  it decodes to a real image, so a stored URL that differs from the
+     *  authored one means the authored URL was a dead placeholder (Open
+     *  Library's 1x1 GIF). Authored imageUrl still wins when no verified
+     *  URL exists, then the bare Open Library title fallback. */
     fun coverCandidates(bookName: String, imageUrl: String): List<String> =
         listOfNotNull(
-            imageUrl.takeIf { it.isNotBlank() },
             AppPreferences.bookCoverUrlsState[bookName]?.takeIf { it.isNotBlank() },
+            imageUrl.takeIf { it.isNotBlank() },
             "https://covers.openlibrary.org/b/title/${Uri.encode(bookName)}-M.jpg",
         ).distinct()
 
@@ -226,6 +237,14 @@ object BookCoverFetch {
      * list so the hub can retry just them later. When [onlyFailed] is true,
      * only the previously-failed books are retried and successes are dropped
      * from the failed list.
+     *
+     * v360 — the run is RESUMABLE: books whose covers already VERIFIED as
+     * real images (the done set) are skipped, so re-tapping "Fetch all
+     * covers" continues from where the last run stopped instead of
+     * restarting at book #1. A cover only counts as done when it actually
+     * decodes to a real image — Open Library serves a 1x1 GIF (HTTP 200)
+     * for missing covers, so a placeholder falls through the provider
+     * cascade and the authored URL never silently "succeeds".
      */
     suspend fun fetchAll(
         context: Context,
@@ -237,12 +256,21 @@ object BookCoverFetch {
             runCatching { TopicJsonLoader.load(CategoryId.BOOKS) }.getOrNull().orEmpty()
         }
         val failedBefore = AppPreferences.bookCoverFailedState.toMutableSet()
-        var targets: List<BookTopic> = books
+        val doneBefore = AppPreferences.bookCoverDoneState.toMutableSet()
+        var targets: List<BookTopic>
         if (onlyFailed) {
             targets = books.filter { it.name in failedBefore }
             if (targets.isEmpty()) {
                 onProgress(0, 0, 0)
                 AppPreferences.setBookCoverFailed(context, emptyList())
+                return
+            }
+        } else {
+            // v360 — skip already-verified covers; still re-check the
+            // previously-failed ones (they are never in the done set).
+            targets = books.filter { it.name !in doneBefore }
+            if (targets.isEmpty()) {
+                onProgress(0, 0, 0)
                 return
             }
         }
@@ -254,31 +282,17 @@ object BookCoverFetch {
         onProgress(0, total, 0)
         for (book in targets) {
             val started = SystemClock.elapsedRealtime()
-            val url = resolveCoverUrl(context, book.name, book.byline, book.imageUrl, provider)
-            val ok = if (url == null) false else runCatching {
-                suspendCancellableCoroutine<Boolean> { cont ->
-                    val request = ImageRequest.Builder(context)
-                        .data(url)
-                        // Bulk pass: skip the memory cache (300 decoded covers
-                        // would bloat heap) — the disk cache is what we're
-                        // filling; the reveal re-decodes from it on demand.
-                        .memoryCachePolicy(CachePolicy.DISABLED)
-                        .diskCachePolicy(CachePolicy.ENABLED)
-                        .listener(
-                            onSuccess = { _, _ -> cont.resume(true) },
-                            onError = { _, _ -> cont.resume(false) }
-                        )
-                        .build()
-                    val disposable = loader.enqueue(request)
-                    cont.invokeOnCancellation { disposable.dispose() }
-                }
-            }.getOrDefault(false)
-            if (ok) {
+            // v360 — resolve AND verify (placeholder-aware), cascading through
+            // the provider list when the authored URL is dead/tiny.
+            val url = resolveVerifiedCoverUrl(context, loader, book, provider)
+            if (url != null) {
                 done++
                 failedBefore.remove(book.name)
+                doneBefore.add(book.name)
             } else {
                 failed++
                 stillFailed.add(book.name)
+                doneBefore.remove(book.name)
             }
             onProgress(done, total, failed)
             val took = SystemClock.elapsedRealtime() - started
@@ -286,8 +300,79 @@ object BookCoverFetch {
         }
         AppPreferences.setBookCoverFailed(
             context,
-            if (onlyFailed) stillFailed else failedBefore.toList() + stillFailed
+            if (onlyFailed) stillFailed
+            else (failedBefore + stillFailed).toList()
         )
+        AppPreferences.setBookCoverDone(context, doneBefore.toList())
+    }
+
+    /**
+     * v360 — resolve ONE book's cover and VERIFY it decodes to a real
+     * image. Candidate URLs, in order: the hub's last VERIFIED/stored URL,
+     * the authored imageUrl, then the provider cascade (the chosen provider
+     * first, then the rest best-first: iTunes, Google Books, Open Library,
+     * LibraryThing). The first candidate that loads at a real size wins and
+     * is remembered for the reveal + share card. Open Library's missing-cover
+     * placeholder is a 1x1 GIF served with HTTP 200, so "loaded" alone is
+     * not enough — the decoded dimensions decide.
+     */
+    private suspend fun resolveVerifiedCoverUrl(
+        context: Context,
+        loader: coil.ImageLoader,
+        book: BookTopic,
+        preferred: BookCoverProvider
+    ): String? = withContext(Dispatchers.IO) {
+        val candidates = LinkedHashSet<String>()
+        AppPreferences.bookCoverUrlsState[book.name]?.takeIf { it.isNotBlank() }?.let { candidates.add(it) }
+        book.imageUrl.takeIf { it.isNotBlank() }?.let { candidates.add(it) }
+        val cascade = listOf(preferred) + BookCoverProvider.entries.filter { it != preferred }
+        for (p in cascade) {
+            when (p) {
+                BookCoverProvider.ITUNES -> itunesThumbnail(book.name, book.byline)?.let { candidates.add(it) }
+                BookCoverProvider.GOOGLE_BOOKS -> googleThumbnail(book.name, book.byline)?.let { candidates.add(it) }
+                BookCoverProvider.OPEN_LIBRARY ->
+                    candidates.add("https://covers.openlibrary.org/b/title/${Uri.encode(book.name)}-M.jpg")
+                BookCoverProvider.LIBRARY_THING -> libraryThingCover(book.name, book.byline)?.let { candidates.add(it) }
+            }
+        }
+        for (url in candidates) {
+            if (loadsRealImage(context, loader, url)) {
+                AppPreferences.setBookCoverUrl(context, book.name, url)
+                return@withContext url
+            }
+        }
+        null
+    }
+
+    /**
+     * v360 — true only when Coil decodes [url] into a REAL cover (at least
+     * 40px on the short edge). Open Library's missing-cover placeholder is a
+     * 1x1 GIF served with HTTP 200, so a plain onSuccess ("it loaded")
+     * counts broken covers as done; the decoded size decides instead.
+     */
+    private suspend fun loadsRealImage(
+        context: Context,
+        loader: coil.ImageLoader,
+        url: String
+    ): Boolean = suspendCancellableCoroutine { cont ->
+        val request = ImageRequest.Builder(context)
+            .data(url)
+            // Same bulk-pass policy as fetchAll: fill the DISK cache; skip
+            // the memory cache (300 decoded covers would bloat heap).
+            .memoryCachePolicy(CachePolicy.DISABLED)
+            .diskCachePolicy(CachePolicy.ENABLED)
+            .listener(
+                onSuccess = { _, result ->
+                    val d = (result as? SuccessResult)?.drawable
+                    val w = d?.intrinsicWidth ?: 0
+                    val h = d?.intrinsicHeight ?: 0
+                    cont.resume(w >= 40 && h >= 40)
+                },
+                onError = { _, _ -> cont.resume(false) }
+            )
+            .build()
+        val disposable = loader.enqueue(request)
+        cont.invokeOnCancellation { disposable.dispose() }
     }
 
     /**
@@ -405,4 +490,74 @@ object BookCoverFetch {
             conn.disconnect()
         }
     }.getOrNull()
+}
+
+/**
+ * v360 — the hub's bulk-fetch RUN lives here, NOT in the screen: the job
+ * runs on a process-lifetime scope, so leaving the hub page no longer
+ * cancels the fetch (it used to die with the composable and restart from
+ * book #1 next visit). Progress state is Compose state read by the hub, so
+ * re-entering the page shows the live run and Cancel still works.
+ */
+object BookCoverFetchSession {
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    var job: Job? = null
+        private set
+    var busy by mutableStateOf(false)
+        private set
+    var label by mutableStateOf("")
+        private set
+    var done by mutableIntStateOf(0)
+        private set
+    var total by mutableIntStateOf(0)
+        private set
+    var failed by mutableIntStateOf(0)
+        private set
+
+    /** Starts (or ignores, when already busy / consent off) a bulk run.
+     *  kind: "covers" | "failed" | "ratings". */
+    fun start(
+        context: Context,
+        provider: BookCoverFetch.BookCoverProvider,
+        kind: String,
+        consent: Boolean
+    ) {
+        if (busy || !consent) return
+        job = scope.launch {
+            busy = true
+            done = 0; total = 0; failed = 0
+            try {
+                when (kind) {
+                    "covers" -> {
+                        label = "Fetching covers…"
+                        BookCoverFetch.fetchAll(context, provider) { d, t, f ->
+                            done = d; total = t; failed = f
+                        }
+                    }
+                    "failed" -> {
+                        label = "Retrying failed covers…"
+                        BookCoverFetch.fetchAll(context, provider, onlyFailed = true) { d, t, f ->
+                            done = d; total = t; failed = f
+                        }
+                    }
+                    "ratings" -> {
+                        label = "Fetching ratings…"
+                        BookCoverFetch.fetchRatings(context) { d, t ->
+                            done = d; total = t
+                        }
+                    }
+                }
+            } catch (_: CancellationException) {
+                // Cancelled — whatever was cached stays.
+            } finally {
+                busy = false
+                job = null
+            }
+        }
+    }
+
+    fun cancel() {
+        job?.cancel()
+    }
 }

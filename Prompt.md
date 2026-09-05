@@ -1,48 +1,67 @@
-# Request Log — share-card fixes: Minimal fact rule moves, Collage/Signature favorite-tracks strip
+# Request Log — meta-row move clamp, series synopsis data, book-cover fetch fixes
 
 ## Status: implementation complete — committing & pushing (CI will validate)
 
 ## The request (user)
-"for the minimal card style theres a line above the quick fact or custom
-fact which should move along with the move, also the favrptire tracks box
-isnt matching in collage, and signature styles so fix it, and properly
-place them so that they dont overlap"
+"during card editing the auhor year etc that info move is bad, like its
+good it can be moved with the title and then separate too but the separate
+one is bad like it have restriction to move to too much to the sides while
+others dont so fix it, also i dont see the new series synopsis style
+layout inside, also then the book fetching in experiment fix so when i tap
+fetch it fetches fromt the start when the books already have the cover and
+when i exit the page during fetch it cancels,and resrt from star, also
+many book covers are not getting fetchd, like heaven a handful of dusts, a
+perfect spy and many more so can we fix it"
 
-Three parts:
-1. Minimal card: the accent rule above the quick/custom fact must move
-   with the fact box (it currently drifts).
-2. Collage + Signature: the favorite-tracks strip "isn't matching" the
-   card's design.
-3. Proper placement so the strip doesn't overlap other elements.
+## Answers / decisions (asked user)
+1. Series synopsis: **Enrich series data** (author synopsis + episodes for
+   a batch of popular series so the layout appears for them).
+2. Book fetch: **Skip covered + survive exit** (already-covered books are
+   skipped; the fetch keeps running if you leave the page; re-tapping
+   resumes where it left off).
 
 ## What was done
 ### TopicShareCard.kt
-- **Minimal fact group (v359):** the thick accent rule, the 16dp gap and
-  the fact text are now ONE `Column` under `moveFact(move)` (previously
-  the rule used `factShift(move)` separately from the text's `moveFact`,
-  so a drag could desync them). The rule now travels with the box on drag
-  and stays glued while the box resizes.
-- **Collage strip (v359):** the collage's bottom is a dark band under the
-  torn seam, so the strip's tokens flipped from the warm-white tone box to
-  a translucent DARK slip — black 34% bg + white hairline border + white
-  serif type + the polaroid's gold-tape heart. Reads on the band AND
-  anywhere the user drags it.
-- **Signature/Custom strip (v359):** backgrounds vary per category
-  (paper-white and dark scenes alike), so the strip is now a dark stamp
-  pill — black 55% + white border + white type + accent heart — instead
-  of a tone-palette box that clashed with the card's own colors.
-- **Placement (v359):** Collage raised 40/36dp → 84/80dp bottom;
-  Signature/Custom raised 62/58dp → 84/80dp bottom (classic/normal) so
-  the strip clears the collage's torn-seam footer wave and the signature
-  footer line. Still movable via the editor's F-handle.
+- META handle clamp: removed the `mPad = 18f` padding restriction — the
+  author/year row now clamps edge-to-edge (`-bx, cw - bx - m.width`)
+  exactly like title/fact/badge/cover; base-rect clamp preserved.
+
+### BookCoverFetch.kt + BookCoverHubScreen.kt + AppPreferences.kt
+- **Root cause found:** ALL 796 books carry an authored `imageUrl`, so
+  `resolveCoverUrl` short-circuited to it and the providers never ran; and
+  Open Library serves a 1x1 GIF (HTTP 200) for missing covers, so dead
+  URLs (A Handful of Dust, A Perfect Spy...) counted as "success".
+- New `resolveVerifiedCoverUrl` + `loadsRealImage` (Coil decode, >= 40px
+  short edge): per-book candidates = stored-verified → authored →
+  provider cascade (chosen first, then iTunes → Google Books → Open
+  Library → LibraryThing); first real cover wins + remembered.
+- New persisted `bookCoverDoneState` (KEY_BOOK_COVER_DONE): "Fetch all
+  covers" skips verified books; re-tap resumes, not restarts.
+- New `BookCoverFetchSession` object: process-lifetime scope + Compose
+  progress state. Hub no longer uses rememberCoroutineScope — leaving the
+  page doesn't cancel; re-entry shows live progress; Cancel works.
+- Hub "Retry failed" per-row also routes through the session.
+
+### TopicRevealScreen.kt
+- `BookCoverPoster.onSuccess` now checks decoded size: tiny/placeholder
+  successes bump the candidate index like a 404 (Open Library 1x1 GIF
+  previously won with no onError). Candidate order is verified-first to
+  match `coverCandidates`.
+
+### Series data batch 2 (tools/enrich_series_batch2.py)
+- Synopsis + full episode lists for **Sherlock (13), Squid Game (9), The
+  Last of Us (9), Severance (9), Wednesday (8)** — 10 series total now
+  render the reveal series card + episode-list sheet (was 5).
+- No em/en dashes; episode entries validated (season/number/title/summary).
 
 ### Docs
-- app/AGENTS.md: **v359** entry (after v358).
-- fastlane changelog 20260921.txt: FIX bullet at the top.
+- app/AGENTS.md: **v360** entry.
+- fastlane changelog 20260921.txt: FIX/ADD bullets at the top.
 - Prompt.md: this log.
 
 ## Verification
-- Braces balanced (checked with grep counts). `factShift` still used by
-  the Paper + Editorial rules, so no dead code. The Collage footer wave
-  and Signature footer sit at ~22dp bottom padding with the strip default
-  at 80dp+ — no overlap. CI will validate the real compile.
+- Braces/parens balanced (TopicShareCard + TopicRevealScreen +1 paren
+  deltas are pre-existing at HEAD — verified via git stash).
+- series.json parsed + episode schema validated; 10 series with data.
+- `coil.ImageLoader` type confirmed against MainActivity usage. CI will
+  validate the real compile.

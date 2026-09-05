@@ -5539,7 +5539,6 @@ private fun ArrangeableCard(
                 // AUTHOR / YEAR info rows — tap the row to select, grip only
                 // when selected. The row's box spans its reported bounds.
                 val m = rMeta
-                val mPad = 18f
                 if (m.width > 0f && m.height > 0f) {
                     val isSel = sel == ShareCardResizeTarget.META
                     Box(
@@ -5555,25 +5554,23 @@ private fun ArrangeableCard(
                     )
                     if (isSel) {
                         MoveHandle(
-                            x = (m.right + mPad).coerceAtMost(cw - 16f).dp,
+                            // v360 — the grip parks just past the row's right
+                            // edge (same as every other handle sits on its box).
+                            x = (m.right + 18f).coerceAtMost(cw - 16f).dp,
                             y = m.bottom.dp.coerceAtMost((ch - 16f).dp),
                             onDelta = { dx, dy ->
-                                // v340 — base-rect clamp: keep the row at least
-                                // [mPad] inside the card, computed from the
-                                // UNMOVED rect so the range never shrinks as
-                                // the row travels (see the title handle).
-                                // v341 — the row's own padded clamp range feeds
-                                // the magnet helper (centre-line snaps still
-                                // work; the edge snaps are out of range here,
-                                // so the row keeps its padding).
+                                // v360 — the info row clamps like EVERY other
+                                // element now (edge to edge): the old 18f
+                                // padding box kept author/year off the card's
+                                // sides while title/fact/badge/cover could
+                                // travel to the true edges. Base-rect clamp so
+                                // the range never shrinks as the row travels.
                                 val bx = m.left - move.metaDx
                                 val by = m.top - move.metaDy
-                                val maxX = (cw - bx - m.width - mPad).coerceAtLeast(-bx + mPad)
-                                val maxY = (ch - by - m.height - mPad).coerceAtLeast(-by + mPad)
                                 // v342 - cross-element alignment (see title).
                                 val othersM = alignOthers(m)
-                                val xs = magnetAxis(bx, m.width, cw, -bx + mPad, maxX, (move.metaDx + dx).coerceIn(-bx + mPad, maxX), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersM, bx, m.width))
-                                val ys = magnetAxis(by, m.height, ch, -by + mPad, maxY, (move.metaDy + dy).coerceIn(-by + mPad, maxY), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersM, by, m.height))
+                                val xs = magnetAxis(bx, m.width, cw, -bx, cw - bx - m.width, (move.metaDx + dx).coerceIn(-bx, cw - bx - m.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersM, bx, m.width))
+                                val ys = magnetAxis(by, m.height, ch, -by, ch - by - m.height, (move.metaDy + dy).coerceIn(-by, ch - by - m.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersM, by, m.height))
                                 dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
                                 onMove(move.copy(metaDx = xs.offset, metaDy = ys.offset))
                             },
