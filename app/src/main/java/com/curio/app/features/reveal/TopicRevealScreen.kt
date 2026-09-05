@@ -13,17 +13,25 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+// Note: EnterTransition/ExitTransition combine with + (the operator resolves
+// without an explicit import on this Compose BOM — see other UI files).
 import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -56,6 +64,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.Button
@@ -86,7 +96,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -145,6 +157,8 @@ import com.curio.app.data.isMusicTopic
 import com.curio.app.data.titleAndYearQualifier
 import com.curio.app.data.matchesSavedName
 import com.curio.app.data.matchesSavedNameStrict
+import com.curio.app.data.CoverSwatches
+import com.curio.app.data.fetchCoverSwatches
 import com.curio.app.data.openSearchUrl
 import com.curio.app.data.resolveAppleMusicItemUrl
 import com.curio.app.infrastructure.ExploreSessionService
@@ -179,6 +193,7 @@ import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.notesSheetContainerColor
+import com.curio.app.ui.theme.notesSheetPalette
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import com.curio.app.ui.theme.curioDialogContainerColor
@@ -292,6 +307,8 @@ fun TopicRevealScreen(
     var selectedChapter by remember { mutableStateOf<BookChapter?>(null) }
     var showAlbumSheet by rememberSaveable { mutableStateOf(false) }
     var selectedAlbumTrack by remember { mutableStateOf<AlbumTrack?>(null) }
+    // v350 — the series episode-list sheet (album-style) for SERIES topics.
+    var showSeriesSheet by rememberSaveable { mutableStateOf(false) }
     // v315 — the book/album sections compose only AFTER the shared-element
     // morph settles (~380ms), so heavy content (poster Coil decode, chapter
     // LazyRow, album track list) never competes with the card expansion
@@ -933,6 +950,25 @@ fun TopicRevealScreen(
                     }
                 }
 
+                // ── 2.57 Series episode-list section (series only) ──────
+                // Mirrors the book + album sections: a poster card with the
+                // synopsis preview and episode count; tapping it opens the
+                // full-height episode-list sheet (v350). Gated on
+                // [contentUiReady] like the book/album sections so the poster
+                // lookup never competes with the card morph.
+                val seriesTopic = resolved
+                if (seriesTopic != null && contentUiReady && seriesTopic.categoryId == CategoryId.SERIES &&
+                    !seriesTopic.episodes.isNullOrEmpty()) {
+                    RevealContentEntrance(delayMillis = 60) {
+                        SeriesInfoSection(
+                            cat = cat,
+                            topic = seriesTopic,
+                            onOpenSheet = { showSeriesSheet = true },
+                            modifier = Modifier.padding(top = if (hasTags) 16.dp else progressFloatGap)
+                        )
+                    }
+                }
+
                 // ── 2.6 Action row — Express yourself / Explore ──────────────
                 // v8.57 — the actions moved OUT of the bottom dock to sit
                 // right below the hero card: always visible, no scaffold.
@@ -1081,11 +1117,12 @@ fun TopicRevealScreen(
         navController.popBackStack()
     }
 
-    // v315/v316b — the book notes UI is ONE ModalBottomSheet that hosts BOTH
-    // the synopsis AND the chapter reader (segmented Synopsis | Chapters tabs
-    // inside the sheet), so the sheet is never too small and you can switch
-    // without closing. The tab it opens on mirrors what you tapped: the
-    // synopsis card opens Synopsis, a chapter chip opens Chapters.
+    // v315/v316b/v348 — the book notes UI is ONE ModalBottomSheet (album
+    // style): a collapsible "About this book" synopsis card at the top with
+    // the full chapter list below it as expandable rows, so nothing requires
+    // a tab switch. What you tapped seeds the sheet: the synopsis card opens
+    // with the synopsis pre-expanded, a chapter chip expands that chapter
+    // and scrolls to it.
     val bookSheetTopic = resolved
     if (bookSheetTopic != null && bookSheetTopic.categoryId == CategoryId.BOOKS &&
         (showSynopsisDialog || selectedChapter != null) &&
@@ -1122,6 +1159,20 @@ fun TopicRevealScreen(
                 showAlbumSheet = false
                 selectedAlbumTrack = null
             }
+        )
+    }
+
+    // v350 — the series episode-list sheet (album-style, mirrors the book /
+    // album sheets): poster header + favorite heart, watched-progress rail,
+    // the synopsis accordion, then the episodes grouped by season.
+    val seriesSheetTopic = resolved
+    if (seriesSheetTopic != null && seriesSheetTopic.categoryId == CategoryId.SERIES &&
+        showSeriesSheet && !seriesSheetTopic.episodes.isNullOrEmpty()
+    ) {
+        EpisodeNotesSheet(
+            cat = cat,
+            topic = seriesSheetTopic,
+            onDismiss = { showSeriesSheet = false }
         )
     }
 
@@ -2093,6 +2144,7 @@ private fun HeroCard(
                 val bylineLabel = when (cat.id) {
                     CategoryId.ALBUMS -> "Artist"
                     CategoryId.BOOKS -> "Author"
+                    CategoryId.SERIES -> "Created by"
                     CategoryId.FILMS -> "Director"
                     CategoryId.ANIMATED_MOVIES -> "Director"
                     CategoryId.ARTWORKS -> "Painter"
@@ -2354,10 +2406,14 @@ private fun BookInfoSection(
                     onClick = onSynopsisClick
             )
         }
-        if (!chapters.isNullOrEmpty()) {
+        // v352 — only chapters with a real summary preview become chips on
+        // the reveal row; blank-summary chapters stay in the sheet's full
+        // list (they still open there) but no longer render empty boxes.
+        val chipChapters = chapters.orEmpty().filter { it.summary.isNotBlank() }
+        if (chipChapters.isNotEmpty()) {
             BookChapterChips(
                 cat = cat,
-                chapters = chapters,
+                chapters = chipChapters,
                 onChapterClick = onChapterClick
             )
         }
@@ -2439,7 +2495,9 @@ private fun BookSynopsisCard(
                                 size = 12.dp
                             )
                             Text(
-                                text = String.format("%.1f", fetchedRating),
+                                text = String.format("%.1f", fetchedRating) +
+                                    (if (AppPreferences.bookRatingsCountState[bookTitle]?.let { it > 0 } == true)
+                                        " · ${compactCount(AppPreferences.bookRatingsCountState[bookTitle] ?: 0)}" else ""),
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -2660,7 +2718,7 @@ private fun BookChapterChip(
         ) {
             // Chapter number — v320: compact "CH 3" (was "Ch. 3")
             Text(
-                text = "CH ${chapter.number}",
+                text = chapterDisplayLabel(chapter.number, chapter.title),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold
                 ),
@@ -2701,7 +2759,12 @@ private fun BookChapterChip(
     }
 }
 
-/** What the book-notes bottom sheet shows. */
+/**
+ * What opened the book-notes sheet: the synopsis card (SYNOPSIS) or a
+ * chapter chip (CHAPTERS). v348 — the sheet itself is one album-style
+ * scroll (synopsis accordion + chapter rows); the mode only seeds which
+ * part is pre-expanded.
+ */
 private enum class BookNotesMode { SYNOPSIS, CHAPTERS }
 
 /**
@@ -2716,11 +2779,17 @@ private fun BookCoverPoster(
     imageUrl: String,
     modifier: Modifier = Modifier
 ) {
-    val coverCandidates = remember(bookTitle, imageUrl) {
+    // v352 — the last cover the hub's provider actually RESOLVED (e.g. a
+    // Google Books thumbnail) rides between the authored URL and the bare
+    // Open Library fallback, so hub-fetched covers appear on the reveal.
+    // The state is read OUTSIDE remember so a hub fetch recomposes this.
+    val resolvedUrl = AppPreferences.bookCoverUrlsState[bookTitle]?.takeIf { it.isNotBlank() }
+    val coverCandidates = remember(bookTitle, imageUrl, resolvedUrl) {
         listOfNotNull(
             imageUrl.takeIf { it.isNotBlank() },
+            resolvedUrl,
             "https://covers.openlibrary.org/b/title/${Uri.encode(bookTitle)}-M.jpg",
-        )
+        ).distinct()
     }
     var coverIndex by remember(bookTitle, imageUrl) { mutableStateOf(0) }
     // v333 — honor the Settings book-fetch consent toggle (isBookFetchEnabled,
@@ -2730,26 +2799,71 @@ private fun BookCoverPoster(
     // (and the keyless fallback URL) on every book visit even when the user
     // never enabled fetching.
     val bookFetchConsent = AppPreferences.bookFetchEnabledState
-    // v327 — RESTORED to the ce892baa form the user confirmed renders covers
-    // correctly: the AsyncImage IS the root (no gradient Box wrapper, no
-    // Modifier.matchParentSize) — the caller's size/shadow modifier chain is
-    // applied directly to the image, so the cover fills the poster box. The
-    // gradient placeholder experiments (7ba3d7d2) repeatedly painted over or
-    // swallowed the loaded cover, so it is gone.
-    if (coverCandidates.isNotEmpty() && coverIndex < coverCandidates.size) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(coverCandidates[coverIndex])
-                .crossfade(true)
-                .networkCachePolicy(
-                    if (bookFetchConsent) CachePolicy.ENABLED else CachePolicy.DISABLED
+    // v354 — INPUT-SIDE fallback: when the toggle is ON but every static
+    // candidate above failed (no authored URL, no hub-resolved cover, and
+    // the Open Library guess 404s), the poster LIVE-resolves a Google Books
+    // thumbnail and persists it, so a cover can appear without visiting the
+    // Settings hub. Only runs while fetching is consented.
+    val context = LocalContext.current
+    var liveFallbackDone by remember(bookTitle, imageUrl) { mutableStateOf(false) }
+    LaunchedEffect(bookTitle, imageUrl, bookFetchConsent, coverIndex, liveFallbackDone) {
+        // Fires only after EVERY static candidate has actually ERRORED
+        // (onError bumps coverIndex past the list), never on first open.
+        val exhausted = coverIndex >= coverCandidates.size
+        if (bookFetchConsent && !liveFallbackDone && exhausted) {
+            val url = com.curio.app.features.settings.BookCoverFetch.resolveCoverUrl(
+                context, bookTitle, null, "",
+                com.curio.app.features.settings.BookCoverFetch.BookCoverProvider.GOOGLE_BOOKS
+            )
+            if (url != null) {
+                AppPreferences.setBookCoverUrl(context, bookTitle, url)
+                coverIndex = 0
+            }
+            liveFallbackDone = true
+        }
+    }
+    // v338 — EMPTY-STATE FIX: the poster is a real two-tone book-plate with a
+    // menu_book glyph BEHIND the loaded cover instead of an empty clipped
+    // AsyncImage. When a cover is missing (no URL, fetch OFF with nothing
+    // cached, or every candidate failed) there is now a visible, shadow-able
+    // surface — the caller's shadow previously fell on a transparent hole
+    // and read as a glitchy blur box. The cover (when it arrives) paints
+    // OVER the plate, so the placeholder never competes with artwork.
+    val shape = RoundedCornerShape(8.dp)
+    Box(
+        modifier = modifier
+            .clip(shape)
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.surfaceContainerHigh,
+                        MaterialTheme.colorScheme.surfaceContainerHighest
+                    )
                 )
-                .build(),
-            contentDescription = "Book cover",
-            onError = { if (coverIndex < coverCandidates.lastIndex) coverIndex += 1 },
-            modifier = modifier.clip(RoundedCornerShape(8.dp)),
-            contentScale = ContentScale.Crop
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        CurioIcon(
+            name = CurioIcons.MenuBook,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
+            size = 26.dp
         )
+        if (coverCandidates.isNotEmpty() && coverIndex < coverCandidates.size) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(coverCandidates[coverIndex])
+                    .crossfade(true)
+                    .networkCachePolicy(
+                        if (bookFetchConsent) CachePolicy.ENABLED else CachePolicy.DISABLED
+                    )
+                    .build(),
+                contentDescription = "Book cover",
+                onError = { coverIndex += 1 },
+                modifier = Modifier.matchParentSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
     }
 }
 
@@ -2771,6 +2885,23 @@ private fun compactCount(n: Int): String = when {
  * is tall (fills ~92% of the screen) with a scrollable body so neither the
  * full synopsis nor the chapter reader ever feels cramped.
  */
+/** v340 — the book's OWN chapter label carried by the title ("Chapter 57",
+ *  "Letter I", "Book II", "Canto 12", "Part 3", "Law 4"...) so the reader
+ *  shows the real numbering instead of the positional index; untitled
+ *  chapters fall back to the compact "CH N". */
+private val BookChapterLabelRegex = Regex(
+    "^(Chapter|CH|Ch\\.?|Letter|Letters?|Book|Canto|Law|Poem|Story|Part|Volume|Section|Act)\\s+(?:[IVX]+|\\d+|One|Two|Three|Four|Five|Six|Seven|Eight|Nine|Ten|Eleven|Twelve)\\b" +
+        "|^(Conclusion|Epilogue|Prologue|Preface|Interlude|Afterword|Postscript|Coda)\\b",
+    RegexOption.IGNORE_CASE
+)
+
+/** The label prefix of [title] when it self-labels ("Chapter 5 - The Danse
+ *  Macabre" -> "Chapter 5"), else the positional "CH N". */
+private fun chapterDisplayLabel(number: Int, title: String): String {
+    val m = BookChapterLabelRegex.find(title)
+    return m?.value ?: "CH $number"
+}
+
 @Composable
 private fun BookNotesSheet(
     cat: com.curio.app.data.CurioCategory,
@@ -2782,44 +2913,96 @@ private fun BookNotesSheet(
 ) {
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
+    // v339 — cover-art palette: the sheet derives its FULL colour set
+    // (background + cards + chips + text) from the BOOK cover's artwork
+    // (null swatches → per-element category fallback). Honors the
+    // book-fetch consent gate, so no network is touched when the toggle
+    // is OFF (cached covers only). v352 — when the topic has no authored
+    // cover, the hub's last RESOLVED cover URL drives the palette too.
+    val paletteUrl = topic.imageUrl.takeIf { it.isNotBlank() }
+        ?: AppPreferences.bookCoverUrlsState[topic.name]?.takeIf { it.isNotBlank() }
+    var coverSwatches by remember(paletteUrl) { mutableStateOf<CoverSwatches?>(null) }
+    LaunchedEffect(paletteUrl) {
+        coverSwatches = fetchCoverSwatches(
+            context,
+            paletteUrl,
+            networkAllowed = AppPreferences.bookFetchEnabledState
+        )
+    }
+    val coverPal = cat.notesSheetPalette(coverSwatches)
+    val accent = coverPal?.accent ?: cat.themedAccent()
+    val onAccent = coverPal?.onAccent ?: cat.onAccent()
+    val ink = coverPal?.ink ?: cat.categoryInk()
+    val surface = coverPal?.surface ?: cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
+    val surfaceHigh = coverPal?.surfaceHigh ?: cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+    val surfaceAlt = coverPal?.surfaceAlt ?: MaterialTheme.colorScheme.secondaryContainer
+    val onSurfaceAlt = coverPal?.onSurfaceAlt ?: MaterialTheme.colorScheme.onSecondaryContainer
+    val onSurface = coverPal?.onSurface ?: MaterialTheme.colorScheme.onSurface
+    val onSurfaceVariant = coverPal?.onSurfaceVariant ?: MaterialTheme.colorScheme.onSurfaceVariant
     val chapters = topic.chapters.orEmpty()
     val hasSynopsis = !topic.synopsis.isNullOrBlank()
     val hasChapters = chapters.isNotEmpty()
-    // The reader defaults to the opened chapter (or the first one).
-    val currentChapter = chapter ?: chapters.firstOrNull()
-    // Internal tab — seeded by whichever surface opened the sheet, so both
-    // sections live in the same sheet and you can switch without closing.
-    var tab by remember(mode) { mutableStateOf(mode) }
-    val effectiveTab = when {
-        tab == BookNotesMode.CHAPTERS && !hasChapters -> BookNotesMode.SYNOPSIS
-        tab == BookNotesMode.SYNOPSIS && !hasSynopsis -> BookNotesMode.CHAPTERS
-        else -> tab
+    // v348 — ALBUM-STYLE single sheet (no Synopsis | Chapters tabs): the
+    // synopsis is a collapsible "About this book" card pinned at the top of
+    // the chapter list (mirroring the album sheet's "About this album"), and
+    // every chapter is an expandable row below it. v352 — the synopsis
+    // starts COLLAPSED whatever opened the sheet; a chapter chip still
+    // expands + jumps straight to that chapter.
+    var expandedNumber by rememberSaveable(chapters.size) {
+        mutableStateOf<Int?>(null)
     }
+    // v348 — favorite heart for the whole book (book-level, like the album
+    // hearts). Reactive: tapping toggles AppPreferences and this recomposes.
+    val bookName = topic.name
+    val isFavBook = bookName in AppPreferences.bookFavoritesState
+    // Reading progress (identical semantics to the old reader tab): the
+    // number of chapters marked read; chapter N is read when N <= chaptersDone.
+    val chaptersDone = AppPreferences.bookReadingProgressState[bookName] ?: 0
+    // v352 — per-chapter Like hearts (book name → liked chapter numbers).
+    val chapterLikes = AppPreferences.bookChapterLikesState[bookName].orEmpty()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val chipListState = rememberLazyListState(
-        initialFirstVisibleItemIndex = chapters.indexOfFirst { it.number == currentChapter?.number }.coerceAtLeast(0)
-    )
-    LaunchedEffect(currentChapter?.number) {
-        if (hasChapters && chapters.size > 1) {
-            chipListState.animateScrollToItem(
-                chapters.indexOfFirst { it.number == currentChapter?.number }.coerceAtLeast(0)
-            )
+    val listState = rememberLazyListState()
+    // v352 — chapter switching no longer lags: the seed chapter drives an
+    // INSTANT scrollToItem (the old animated glide over a long list is what
+    // made chip-hopping jank), and tapping a row only toggles local expansion
+    // instead of round-tripping through the reveal's selectedChapter (which
+    // used to reset sheet state + re-scroll on every tap).
+    var opened by remember { mutableStateOf(false) }
+    LaunchedEffect(chapter?.number, chapters.size) {
+        if (chapter != null) {
+            expandedNumber = chapter.number
+        } else if (mode == BookNotesMode.CHAPTERS && !opened) {
+            expandedNumber = chapters.firstOrNull()?.number
         }
+        opened = true
+        val idx = chapters.indexOfFirst { it.number == chapter?.number }
+        if (idx >= 0) {
+            listState.scrollToItem(idx + (if (hasSynopsis) 1 else 0))
+        }
+    }
+    fun toggleChapter(ch: BookChapter) {
+        expandedNumber = if (expandedNumber == ch.number) null else ch.number
+    }
+    fun toggleChapterRead(ch: BookChapter) {
+        val chDone = chaptersDone >= ch.number
+        AppPreferences.setBookReadingProgressExact(
+            context,
+            bookName,
+            if (chDone) ch.number - 1 else ch.number
+        )
+        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
     }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        // v332 — the notes sheets wear the CATEGORY-TINTED wash (same hue
-        // family as the reveal page + cards) instead of the neutral dialog
-        // container, so the sheet reads as part of the category story.
-        containerColor = cat.notesSheetContainerColor(),
+        // The notes sheets wear the CATEGORY-TINTED wash (same hue family as
+        // the reveal page + cards); when the cover's palette is available it
+        // replaces the category accent entirely (fallback stays when not).
+        containerColor = coverPal?.container ?: cat.notesSheetContainerColor(),
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
-        // v316b — the sheet body fills ~92% of the screen so it expands
-        // toward the top; the inner body scrolls instead of the sheet being
-        // a short pop-up.
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -2827,11 +3010,10 @@ private fun BookNotesSheet(
                 .fillMaxHeight(0.92f)
                 .padding(bottom = 20.dp)
         ) {
-            // ── Top hairline (v332): a soft category-accent rule under the
-            // drag handle, so the tinted sheet gets a crisp accent top edge.
+            // ── Top hairline — soft accent rule under the drag handle ─────
             NotesSheetTopHairline(cat)
             Spacer(Modifier.height(10.dp))
-            // ── Header — cover + book title/author + close ──────────────
+            // ── Header — cover + title/author + heart + close ────────────
             Row(
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -2853,13 +3035,13 @@ private fun BookNotesSheet(
                             fontWeight = FontWeight.ExtraBold,
                             letterSpacing = 1.4.sp
                         ),
-                        color = cat.categoryInk()
+                        color = ink
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
                         topic.name,
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = onSurface,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -2867,7 +3049,7 @@ private fun BookNotesSheet(
                         Text(
                             byline,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -2891,313 +3073,434 @@ private fun BookNotesSheet(
                                 text = String.format("%.1f", fetchedRating) +
                                     " · keyless Google Books rating",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = onSurfaceVariant
                             )
                         }
                     }
-                    if (effectiveTab == BookNotesMode.CHAPTERS && currentChapter != null) {
-                        Spacer(Modifier.height(4.dp))
-                        val pages = if (currentChapter.pageStart > 0 && currentChapter.pageEnd > 0)
-                            " · pp. ${currentChapter.pageStart}–${currentChapter.pageEnd}" else ""
-                        Text(
-                            "CH ${currentChapter.number}$pages",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = cat.categoryInk()
+                }
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.End
+                ) {
+                    // v348 — book-level favorite heart (mirrors the album
+                    // hearts in look and feel).
+                    Surface(
+                        onClick = {
+                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            AppPreferences.toggleBookFavorite(context, bookName)
+                        },
+                        shape = CircleShape,
+                        color = if (isFavBook) accent.copy(alpha = 0.2f) else surface.copy(alpha = 0.6f)
+                    ) {
+                        Box(
+                            modifier = Modifier.padding(8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            HeartGlyph(
+                                color = if (isFavBook) Color(0xFFE5484D) else onSurfaceVariant,
+                                iconSize = 19.dp,
+                                filled = isFavBook
+                            )
+                        }
+                    }
+                    Surface(
+                        onClick = onDismiss,
+                        shape = CircleShape,
+                        color = surface.copy(alpha = 0.6f)
+                    ) {
+                        CurioIcon(
+                            CurioIcons.Close,
+                            "Close book notes",
+                            tint = onSurfaceVariant,
+                            size = 20.dp,
+                            modifier = Modifier.padding(8.dp)
                         )
                     }
                 }
-                Surface(
-                    onClick = onDismiss,
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+            }
+
+            // ── Pinned reading-progress rail (v328) — stays above the list ─
+            if (hasChapters) {
+                Spacer(Modifier.height(12.dp))
+                val progressLabel = if (chaptersDone > 0)
+                    "$chaptersDone of ${chapters.size} chapters read"
+                else "${chapters.size} chapters · tap a chapter to read its notes"
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
                 ) {
-                    CurioIcon(
-                        CurioIcons.Close,
-                        "Close book notes",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        size = 20.dp,
-                        modifier = Modifier.padding(8.dp)
+                    Text(
+                        progressLabel,
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = ink,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        "$chaptersDone / ${chapters.size}",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                        color = accent
                     )
                 }
+                Spacer(Modifier.height(6.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp)
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(surfaceHigh)
+                ) {
+                    val frac = if (chapters.size > 0)
+                        (chaptersDone.toFloat() / chapters.size).coerceIn(0f, 1f) else 0f
+                    if (frac > 0f) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(frac)
+                                .height(4.dp)
+                                .background(accent, RoundedCornerShape(50))
+                        )
+                    }
+                }
+                Spacer(Modifier.height(12.dp))
             }
 
-            // ── Segmented Synopsis | Chapters switch (v316b) ─────────────
-            if (hasSynopsis && hasChapters) {
-                Spacer(Modifier.height(14.dp))
+            // ── Reviews & your rating (v352/v354) — compact, pinned under
+            // the progress rail: the fetched Google Books average (small) and
+            // the user's OWN book-glyph rating. The user rating row is its
+            // OWN toggleable element (like reading progress, but separate):
+            // a book icon in the header hides it without clearing the pick.
+            val fetchedRating = AppPreferences.bookRatingsState[bookName]?.takeIf { it > 0.0 }
+            val fetchedCount = AppPreferences.bookRatingsCountState[bookName] ?: 0
+            val customRating = AppPreferences.bookCustomRatingsState[bookName] ?: 0.0
+            val ratingVisible = AppPreferences.bookRatingVisibleState
+            Spacer(Modifier.height(10.dp))
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = surface.copy(alpha = 0.65f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+            ) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(horizontal = 20.dp)
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
                 ) {
-                    val accent = cat.themedAccent()
-                    // Synopsis tab
-                    Surface(
-                        onClick = { tab = BookNotesMode.SYNOPSIS },
-                        shape = RoundedCornerShape(50),
-                        color = if (effectiveTab == BookNotesMode.SYNOPSIS) accent
-                                else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
-                        shadowElevation = if (effectiveTab == BookNotesMode.SYNOPSIS) 0.dp else 1.dp
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
-                        ) {
-                            CurioIcon(
-                                CurioIcons.MenuBook, null,
-                                tint = if (effectiveTab == BookNotesMode.SYNOPSIS) cat.onAccent()
-                                       else MaterialTheme.colorScheme.onSurfaceVariant,
-                                size = 15.dp
-                            )
+                    if (fetchedRating != null) {
+                        Column {
                             Text(
-                                "Synopsis",
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                color = if (effectiveTab == BookNotesMode.SYNOPSIS) cat.onAccent()
-                                        else MaterialTheme.colorScheme.onSurfaceVariant
+                                "REVIEWS",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    letterSpacing = 1.sp
+                                ),
+                                color = ink
                             )
+                            Spacer(Modifier.height(2.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                CurioIcon(
+                                    CurioIcons.Star,
+                                    null,
+                                    tint = Color(0xFFF6B23B),
+                                    size = 14.dp
+                                )
+                                Text(
+                                    text = String.format("%.1f", fetchedRating) +
+                                        if (fetchedCount > 0) " · ${compactCount(fetchedCount)} ratings" else "",
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = onSurface
+                                )
+                            }
                         }
+                        Box(
+                            modifier = Modifier
+                                .width(1.dp)
+                                .height(30.dp)
+                                .background(onSurfaceVariant.copy(alpha = 0.25f))
+                        )
                     }
-                    // Chapters tab
-                    Surface(
-                        onClick = {
-                            tab = BookNotesMode.CHAPTERS
-                            // First visit to the reader: preselect the first chapter.
-                            if (currentChapter == null) chapters.firstOrNull()?.let { onSelectChapter(it) }
-                        },
-                        shape = RoundedCornerShape(50),
-                        color = if (effectiveTab == BookNotesMode.CHAPTERS) accent
-                                else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
-                        shadowElevation = if (effectiveTab == BookNotesMode.CHAPTERS) 0.dp else 1.dp
-                    ) {
+                    Column(modifier = Modifier.weight(1f)) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            CurioIcon(
-                                CurioIcons.AutoAwesome, null,
-                                tint = if (effectiveTab == BookNotesMode.CHAPTERS) cat.onAccent()
-                                       else MaterialTheme.colorScheme.onSurfaceVariant,
-                                size = 15.dp
-                            )
                             Text(
-                                "Chapters · ${chapters.size}",
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                color = if (effectiveTab == BookNotesMode.CHAPTERS) cat.onAccent()
-                                        else MaterialTheme.colorScheme.onSurfaceVariant
+                                "YOUR RATING",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    letterSpacing = 1.sp
+                                ),
+                                color = ink,
+                                modifier = Modifier.weight(1f)
+                            )
+                            // v354 — hide/show the whole picker row (the
+                            // rating itself is never cleared by hiding).
+                            Surface(
+                                onClick = {
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    AppPreferences.setBookRatingVisible(context, !ratingVisible)
+                                },
+                                shape = CircleShape,
+                                color = if (ratingVisible)
+                                    accent.copy(alpha = 0.18f)
+                                else surfaceHigh
+                            ) {
+                                BookGlyph(
+                                    color = if (ratingVisible) ink else onSurfaceVariant,
+                                    iconSize = 14.dp,
+                                    filled = ratingVisible,
+                                    modifier = Modifier.padding(5.dp)
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(2.dp))
+                        if (ratingVisible) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                BookRatingPicker(
+                                    value = customRating,
+                                    tint = accent,
+                                    onSurfaceVariant = onSurfaceVariant,
+                                    onRate = { n ->
+                                        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        AppPreferences.setBookCustomRating(
+                                            context, bookName,
+                                            if (customRating.toInt() == n) 0.0 else n.toDouble()
+                                        )
+                                    }
+                                )
+                                if (customRating > 0.0) {
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(
+                                        "${customRating.toInt()} / 5",
+                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                        color = onSurfaceVariant
+                                    )
+                                }
+                            }
+                        } else {
+                            Text(
+                                "Rating hidden · tap the book to show it",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = onSurfaceVariant
                             )
                         }
                     }
                 }
             }
+            Spacer(Modifier.height(10.dp))
 
-            // ── Body — the active section fills the rest and scrolls ─────
-            Column(
+            // ── One scroll: synopsis accordion, then the chapter list ─────
+            LazyColumn(
+                state = listState,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 8.dp),
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(top = 16.dp, bottom = 4.dp)
             ) {
-                when (effectiveTab) {
-                    BookNotesMode.SYNOPSIS -> {
-                        Surface(
-                            shape = RoundedCornerShape(20.dp),
-                            color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 20.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(18.dp),
-                                verticalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                Text(
-                                    "SYNOPSIS",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = FontWeight.ExtraBold,
-                                        letterSpacing = 1.2.sp
-                                    ),
-                                    color = cat.categoryInk()
-                                )
-                                Text(
-                                    topic.synopsis.orEmpty(),
-                                    style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
+                if (hasSynopsis) {
+                    item(key = "book_about") {
+                        BookSynopsisAccordion(
+                            surface = surface,
+                            accent = accent,
+                            ink = ink,
+                            onSurface = onSurface,
+                            synopsis = topic.synopsis.orEmpty(),
+                            initiallyExpanded = !hasChapters
+                        )
                     }
-                    BookNotesMode.CHAPTERS -> {
-                        if (hasChapters) {
-                            // v328 — reading-progress rail: X of N chapters
-                            // read (tracked by the Mark-read pills below),
-                            // with a filled bar so the reader can see where
-                            // they are at a glance.
-                            val chaptersDone = AppPreferences.bookReadingProgressState[topic.name] ?: 0
-                            val chTotal = chapters.size
-                            val progressLabel = if (chaptersDone > 0)
-                                "$chaptersDone of $chTotal chapters read"
-                            else "$chTotal chapters · tap a chapter to start"
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 20.dp)
-                            ) {
-                                Text(
-                                    progressLabel,
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = cat.categoryInk(),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-                            Spacer(Modifier.height(6.dp))
-                            // v328 — a thin progress bar (filled = chapters
-                            // read) under the label.
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 20.dp)
-                                    .height(4.dp)
-                                    .clip(RoundedCornerShape(50))
-                                    .background(
-                                        MaterialTheme.colorScheme.surfaceContainerHighest
-                                    )
-                            ) {
-                                val frac = if (chTotal > 0) (chaptersDone.toFloat() / chTotal).coerceIn(0f, 1f) else 0f
-                                if (frac > 0f) {
+                }
+                if (hasChapters) {
+                    itemsIndexed(chapters) { _, ch ->
+                        val isOpen = expandedNumber == ch.number
+                        val isRead = ch.number <= chaptersDone
+                        Surface(
+                            onClick = { toggleChapter(ch) },
+                            shape = RoundedCornerShape(14.dp),
+                            color = when {
+                                isOpen -> accent
+                                isRead -> surfaceAlt
+                                else -> surface
+                            },
+                            // v354 — no elevation flip: the old 1dp lift popped
+                            // in/out on expand (glitchy touch shadow). A read
+                            // row gets a solid accent border instead.
+                            shadowElevation = 0.dp,
+                            border = if (isRead)
+                                BorderStroke(1.dp, accent.copy(alpha = 0.55f))
+                            else null
+                        ) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
+                                ) {
+                                    // Leading chip: a ✓ when the chapter is
+                                    // read — SOLID fill + rim (v354) so the
+                                    // read state reads cleanly on any palette.
                                     Box(
                                         modifier = Modifier
-                                            .fillMaxWidth(frac)
-                                            .height(4.dp)
-                                            .background(cat.themedAccent(), RoundedCornerShape(50))
-                                    )
-                                }
-                            }
-                            Spacer(Modifier.height(10.dp))
-                            // Every chapter — switchable inside the sheet.
-                            LazyRow(
-                                state = chipListState,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                contentPadding = PaddingValues(horizontal = 20.dp)
-                            ) {
-                                itemsIndexed(chapters) { _, ch ->
-                                    val selected = ch.number == currentChapter?.number
-                                    val isRead = ch.number <= chaptersDone
-                                    Surface(
-                                        onClick = { onSelectChapter(ch) },
-                                        shape = RoundedCornerShape(50),
-                                        color = when {
-                                            selected -> cat.themedAccent()
-                                            isRead -> MaterialTheme.colorScheme.secondaryContainer
-                                            else -> cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
-                                        },
-                                        shadowElevation = if (selected) 0.dp else 1.dp
-                                    ) {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(5.dp),
-                                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
-                                        ) {
-                                            if (isRead) {
-                                                CurioIcon(
-                                                    CurioIcons.Check,
-                                                    null,
-                                                    tint = if (selected) cat.onAccent()
-                                                           else MaterialTheme.colorScheme.onSecondaryContainer,
-                                                    size = 13.dp
-                                                )
-                                            }
-                                            Text(
-                                                text = "CH ${ch.number} · ${ch.title}",
-                                                style = MaterialTheme.typography.labelLarge,
-                                                color = when {
-                                                    selected -> cat.onAccent()
-                                                    isRead -> MaterialTheme.colorScheme.onSecondaryContainer
-                                                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                                            .size(30.dp)
+                                            .clip(CircleShape)
+                                            .background(
+                                                when {
+                                                    isOpen -> onAccent
+                                                    isRead -> accent
+                                                    else -> surfaceHigh
+                                                }
+                                            )
+                                            .border(
+                                                1.dp,
+                                                when {
+                                                    isRead -> onAccent.copy(alpha = 0.7f)
+                                                    isOpen -> accent.copy(alpha = 0.5f)
+                                                    else -> onSurfaceVariant.copy(alpha = 0.25f)
                                                 },
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
+                                                CircleShape
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        if (isRead) {
+                                            CurioIcon(
+                                                CurioIcons.Check,
+                                                null,
+                                                tint = if (isOpen) accent else onAccent,
+                                                size = 15.dp
+                                            )
+                                        } else {
+                                            Text(
+                                                "${ch.number}",
+                                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                                color = if (isOpen) accent else onSurfaceVariant
                                             )
                                         }
                                     }
+                                    Text(
+                                        text = ch.title,
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            fontWeight = if (isOpen || isRead) FontWeight.Bold else FontWeight.Normal
+                                        ),
+                                        color = if (isOpen) onAccent else onSurface,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    // v352 — per-row action chips: the Like
+                                    // heart and the Mark-read toggle live on
+                                    // the row (not inside the expanded panel),
+                                    // so both are one tap away. Read state is
+                                    // a SOLID accent fill (no more washed-out
+                                    // read chips).
+                                    val isLiked = ch.number in chapterLikes
+                                    val chDone = chaptersDone >= ch.number
+                                    Surface(
+                                        onClick = {
+                                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                            AppPreferences.toggleBookChapterLike(context, bookName, ch.number)
+                                        },
+                                        shape = CircleShape,
+                                        color = if (isLiked) Color(0xFFE5484D).copy(alpha = 0.18f)
+                                                else surface.copy(alpha = 0.7f)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier.padding(6.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            HeartGlyph(
+                                                color = if (isLiked) Color(0xFFE5484D)
+                                                        else if (isOpen) onAccent.copy(alpha = 0.85f) else onSurfaceVariant,
+                                                iconSize = 16.dp,
+                                                filled = isLiked
+                                            )
+                                        }
+                                    }
+                                    Surface(
+                                        onClick = { toggleChapterRead(ch) },
+                                        shape = CircleShape,
+                                        // v354 — solid + rim so the done state
+                                        // reads clearly (was a washed-out disc).
+                                        color = if (chDone)
+                                            if (isOpen) onAccent else accent
+                                            else surface.copy(alpha = 0.7f),
+                                        border = BorderStroke(
+                                            1.dp,
+                                            if (chDone)
+                                                if (isOpen) accent.copy(alpha = 0.5f) else onAccent.copy(alpha = 0.7f)
+                                                else onSurfaceVariant.copy(alpha = 0.25f)
+                                        )
+                                    ) {
+                                        CurioIcon(
+                                            CurioIcons.FoldedCorner,
+                                            if (chDone) "Mark chapter unread" else "Mark chapter read",
+                                            tint = if (chDone)
+                                                if (isOpen) accent else onAccent
+                                                else onSurfaceVariant,
+                                            size = 16.dp,
+                                            modifier = Modifier.padding(6.dp)
+                                        )
+                                    }
+                                    CurioIcon(
+                                        if (isOpen) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
+                                        if (isOpen) "Collapse chapter" else "Expand chapter",
+                                        tint = if (isOpen) onAccent.copy(alpha = 0.9f) else onSurfaceVariant,
+                                        size = 20.dp
+                                    )
                                 }
-                            }
-                            Spacer(Modifier.height(12.dp))
-                            val ch = currentChapter
-                            if (ch != null) {
-                                Surface(
-                                    shape = RoundedCornerShape(20.dp),
-                                    color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 20.dp)
+                                // v354 — expand/collapse: height + fade together
+                                // (the old fade-only pop read glitchy).
+                                AnimatedVisibility(
+                                    visible = isOpen,
+                                    enter = expandVertically(
+                                        animationSpec = tween(180)
+                                    ) + fadeIn(
+                                        animationSpec = tween(140)
+                                    ),
+                                    exit = shrinkVertically(
+                                        animationSpec = tween(140)
+                                    ) + fadeOut(
+                                        animationSpec = tween(120)
+                                    )
                                 ) {
                                     Column(
-                                        modifier = Modifier.padding(18.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(start = 14.dp, end = 14.dp, bottom = 14.dp)
                                     ) {
-                                        Text(
-                                            ch.title,
-                                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                                            color = MaterialTheme.colorScheme.onSurface
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(1.dp)
+                                                .background(onAccent.copy(alpha = 0.18f))
                                         )
                                         if (ch.pageStart > 0 && ch.pageEnd > 0) {
                                             Text(
                                                 "pp. ${ch.pageStart}–${ch.pageEnd}",
-                                                style = MaterialTheme.typography.labelMedium,
-                                                color = cat.categoryInk()
+                                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                                color = if (isOpen) onAccent.copy(alpha = 0.9f) else ink
                                             )
                                         }
                                         Text(
                                             ch.summary.ifBlank { "No summary for this chapter." },
-                                            style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
-                                            color = MaterialTheme.colorScheme.onSurface
+                                            style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 25.sp),
+                                            color = if (isOpen) onAccent else onSurface
                                         )
-                                        // v328/v334 — mark the chapter read; the
-                                        // button TOGGLES so a mis-tap can be
-                                        // undone (progress moves both ways via
-                                        // setBookReadingProgressExact).
-                                        val chaptersDone = AppPreferences.bookReadingProgressState[topic.name] ?: 0
-                                        val chDone = chaptersDone >= ch.number
-                                        Spacer(Modifier.height(4.dp))
-                                        Surface(
-                                            onClick = {
-                                                AppPreferences.setBookReadingProgressExact(
-                                                    context,
-                                                    topic.name,
-                                                    if (chDone) ch.number - 1 else ch.number
-                                                )
-                                                haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                                            },
-                                            shape = RoundedCornerShape(50),
-                                            color = if (chDone) cat.themedAccent()
-                                                    else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh),
-                                            shadowElevation = 0.dp
-                                        ) {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
-                                            ) {
-                                                CurioIcon(
-                                                    if (chDone) CurioIcons.Undo else CurioIcons.Check,
-                                                    null,
-                                                    tint = if (chDone) cat.onAccent()
-                                                           else MaterialTheme.colorScheme.onSurfaceVariant,
-                                                    size = 14.dp
-                                                )
-                                                Text(
-                                                    if (chDone) "Undo CH ${ch.number} ✓ (unread)" else "Mark CH ${ch.number} as read",
-                                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                                    color = if (chDone) cat.onAccent()
-                                                            else MaterialTheme.colorScheme.onSurface
-                                                )
-                                            }
-                                        }
+                                        // v352 — the Mark-read toggle + Like
+                                        // heart moved OUT of the expanded panel
+                                        // onto the row (chips above); the
+                                        // panel now only holds pages + notes.
                                     }
                                 }
                             }
@@ -3208,6 +3511,92 @@ private fun BookNotesSheet(
         }
     }
 }
+
+/**
+ * v348 — the book synopsis as a collapsible card pinned at the TOP of the
+ * book-notes sheet (mirrors the album sheet's "About this album" accordion):
+ * collapsed it shows a two-line teaser with a Read/Hide affordance, tapping
+ * the card expands the full description or collapses it back.
+ */
+@Composable
+private fun BookSynopsisAccordion(
+    surface: Color,
+    accent: Color,
+    ink: Color,
+    onSurface: Color,
+    synopsis: String,
+    initiallyExpanded: Boolean,
+    modifier: Modifier = Modifier,
+    // v350 — the series episode sheet reuses this accordion; the label swaps
+    // to "ABOUT THIS SERIES" while the behaviour stays identical.
+    label: String = "ABOUT THIS BOOK"
+) {
+    var expanded by remember(initiallyExpanded) { mutableStateOf(initiallyExpanded) }
+    Surface(
+        shape = RoundedCornerShape(18.dp),
+        color = surface,
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { expanded = !expanded }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .animateContentSize()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = accent.copy(alpha = 0.16f)
+                ) {
+                    CurioIcon(
+                        CurioIcons.MenuBook,
+                        null,
+                        tint = ink,
+                        size = 15.dp,
+                        modifier = Modifier.padding(6.dp)
+                    )
+                }
+                Text(
+                    label,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.2.sp
+                    ),
+                    color = ink,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    if (expanded) "Hide" else "Read",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = ink.copy(alpha = 0.9f)
+                )
+                CurioIcon(
+                    if (expanded) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
+                    if (expanded) "Collapse synopsis" else "Expand synopsis",
+                    tint = ink,
+                    size = 20.dp
+                )
+            }
+            Text(
+                text = synopsis,
+                style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                color = onSurface,
+                maxLines = if (expanded) Int.MAX_VALUE else 2,
+                overflow = if (expanded) TextOverflow.Clip else TextOverflow.Ellipsis,
+                modifier = Modifier.padding(top = 10.dp)
+            )
+        }
+    }
+}
+
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Album info section — track list + track chips (albums only)
@@ -3461,8 +3850,12 @@ private fun AlbumCoverPoster(
     val authoredUrl = imageUrl?.takeIf { it.isNotBlank() }
     var artUrl by remember(albumTitle, artist, authoredUrl) { mutableStateOf<String?>(authoredUrl) }
     var failed by remember(albumTitle, artist, authoredUrl) { mutableStateOf(false) }
-    LaunchedEffect(albumTitle, artist, authoredUrl) {
-        if (artUrl == null && !failed && authoredUrl == null) {
+    // v350 — the ALBUM cover-fetch toggle now gates the keyless fallback
+    // (authored art always shows; the network resolver only runs when the
+    // album toggle is ON, mirroring the book + series consent gates).
+    val consent = AppPreferences.albumFetchEnabledState
+    LaunchedEffect(albumTitle, artist, authoredUrl, consent) {
+        if (artUrl == null && !failed && authoredUrl == null && consent) {
             artUrl = AlbumArtFetch.resolveArtworkUrl(albumTitle, artist)
             if (artUrl == null) failed = true
         }
@@ -3619,6 +4012,16 @@ private fun AlbumTrackChip(
  * artwork + title head the sheet, and the full track list (number/title/
  * duration) fills a tall scrollable body. A track chip on the reveal opens
  * it scrolled to (and highlighting) that track.
+ *
+ * v336 additions — all INSIDE the one sheet (no separate popups):
+ *  - the album's synopsis as a collapsible "About this album" card pinned
+ *    at the TOP of the track list (tap to expand/collapse),
+ *  - a ♥ on every track row: multi-select favorite picks persisted per
+ *    album (AppPreferences) that render as the Vinyl share card's
+ *    FAVORITE TRACKS strip,
+ *  - a LISTEN pill offering Apple Music / Spotify / YouTube Music / Amazon
+ *    Music / Deezer that opens the service DIRECTLY (no explore session),
+ *    plus the catalog-authored Genius pill.
  */
 @Composable
 private fun AlbumNotesSheet(
@@ -3630,29 +4033,69 @@ private fun AlbumNotesSheet(
 ) {
     val tracks = topic.tracks.orEmpty()
     if (tracks.isEmpty()) return
-    val accent = cat.themedAccent()
+    val context = LocalContext.current
+    // v339/v350 — cover-art palette: the sheet derives its FULL colour set
+    // (background + cards + chips + text) from the ALBUM cover's artwork
+    // (null swatches → per-element category fallback). v350 — the album
+    // cover-fetch toggle gates the lookup like the book/series gates: when
+    // OFF, only already-cached art is served, nothing touches the network.
+    var coverSwatches by remember(topic.imageUrl) { mutableStateOf<CoverSwatches?>(null) }
+    LaunchedEffect(topic.imageUrl) {
+        coverSwatches = fetchCoverSwatches(
+            context,
+            topic.imageUrl,
+            networkAllowed = AppPreferences.albumFetchEnabledState
+        )
+    }
+    val coverPal = cat.notesSheetPalette(coverSwatches)
+    val accent = coverPal?.accent ?: cat.themedAccent()
+    val onAccent = coverPal?.onAccent ?: cat.onAccent()
+    val ink = coverPal?.ink ?: cat.categoryInk()
+    val surface = coverPal?.surface ?: cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
+    val surfaceHigh = coverPal?.surfaceHigh ?: cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+    val surfaceAlt = coverPal?.surfaceAlt ?: MaterialTheme.colorScheme.secondaryContainer
+    val onSurfaceAlt = coverPal?.onSurfaceAlt ?: MaterialTheme.colorScheme.onSecondaryContainer
+    val onSurface = coverPal?.onSurface ?: MaterialTheme.colorScheme.onSurface
+    val onSurfaceVariant = coverPal?.onSurfaceVariant ?: MaterialTheme.colorScheme.onSurfaceVariant
     // The opened track (from a reveal-section track chip) — null when the
     // sheet is opened from the TRACKLIST card, in which case no row is
     // pre-highlighted and the list starts at the top.
     val currentTrack = track
+    // v336 — a collapsible "About this album" synopsis card sits at the top
+    // of the track list when the catalog authors one; every scroll target
+    // below shifts by one row so a chip-jump still lands on its track.
+    val synopsis = topic.synopsis?.takeIf { it.isNotBlank() }
+    val synopsisOffset = if (synopsis != null) 1 else 0
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // Card-open (no pre-selected track) starts at the TOP (the synopsis card
+    // when present); a chip-jump starts on that track, shifted past the
+    // synopsis row.
     val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = tracks.indexOfFirst { it.number == currentTrack?.number }.coerceAtLeast(0)
+        initialFirstVisibleItemIndex = if (currentTrack != null)
+            synopsisOffset + tracks.indexOfFirst { it.number == currentTrack.number }.coerceAtLeast(0)
+        else 0
     )
     LaunchedEffect(currentTrack?.number) {
         if (currentTrack != null && tracks.size > 1) {
             listState.animateScrollToItem(
-                tracks.indexOfFirst { it.number == currentTrack?.number }.coerceAtLeast(0)
+                synopsisOffset + tracks.indexOfFirst { it.number == currentTrack?.number }.coerceAtLeast(0)
             )
         }
     }
     val runtime = albumRuntimeSeconds(tracks)
+    val haptics = LocalHapticFeedback.current
+    // v336 — heart-picked favorite tracks for this album (multi-select).
+    // Read reactively so a row-heart tap updates every heart in the sheet
+    // (and the Vinyl share card) without leaving it.
+    val favTracks = AppPreferences.albumFavTracksState[topic.name].orEmpty()
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         // Same category-tinted wash + top hairline as the book-notes sheet.
-        containerColor = cat.notesSheetContainerColor(),
+        // v339 — when the cover's palette is available it replaces the
+        // category accent (fallback stays when it isn't).
+        containerColor = coverPal?.container ?: cat.notesSheetContainerColor(),
         dragHandle = { BottomSheetDefaults.DragHandle() },
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
@@ -3691,13 +4134,13 @@ private fun AlbumNotesSheet(
                             fontWeight = FontWeight.ExtraBold,
                             letterSpacing = 1.4.sp
                         ),
-                        color = cat.categoryInk()
+                        color = ink
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
                         topic.name,
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = onSurface,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -3705,7 +4148,7 @@ private fun AlbumNotesSheet(
                         Text(
                             byline,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = onSurfaceVariant,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -3718,17 +4161,97 @@ private fun AlbumNotesSheet(
                     Text(
                         meta,
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                        color = cat.categoryInk()
+                        color = ink
                     )
                 }
-                // v333 — a Genius link pill beside Close when the catalog
-                // authors a geniusUrl for this album (opens the album's
-                // annotation page in the browser).
-                val geniusUrl = topic.geniusUrl?.takeIf { it.isNotBlank() }
-                val context = LocalContext.current
+                Surface(
+                    onClick = onDismiss,
+                    shape = CircleShape,
+                    color = surface.copy(alpha = 0.6f)
+                ) {
+                    CurioIcon(
+                        CurioIcons.Close,
+                        "Close track list",
+                        tint = onSurfaceVariant,
+                        size = 20.dp,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+            }
+
+            // ── v336 — Listen actions row: a LISTEN pill (always present)
+            // offering Apple Music / Spotify / YouTube Music / Amazon Music /
+            // Deezer straight from the sheet (no explore session), plus the
+            // catalog-authored Genius pill when a geniusUrl exists.
+            Spacer(Modifier.height(12.dp))
+            var listenMenuOpen by remember { mutableStateOf(false) }
+            val geniusUrl = topic.geniusUrl?.takeIf { it.isNotBlank() }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+            ) {
+                Box {
+                    Surface(
+                        onClick = { listenMenuOpen = true },
+                        shape = RoundedCornerShape(50),
+                        color = accent.copy(alpha = 0.14f)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(5.dp),
+                            modifier = Modifier.padding(horizontal = 11.dp, vertical = 7.dp)
+                        ) {
+                            CurioIcon(
+                                CurioIcons.MusicNote,
+                                "Listen to this album",
+                                tint = onAccent,
+                                size = 16.dp
+                            )
+                            Text(
+                                "LISTEN",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                color = ink,
+                                maxLines = 1
+                            )
+                        }
+                    }
+                    DropdownMenu(
+                        expanded = listenMenuOpen,
+                        onDismissRequest = { listenMenuOpen = false }
+                    ) {
+                        albumListenServices.forEach { srv ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(
+                                        srv.label,
+                                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
+                                    )
+                                },
+                                onClick = {
+                                    listenMenuOpen = false
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    val url = albumListenUrl(topic, srv.id)
+                                    if (url.isNotBlank()) openSearchUrl(context, url)
+                                },
+                                leadingIcon = {
+                                    CurioIcon(
+                                        srv.icon,
+                                        "Open in ${srv.label}",
+                                        tint = accent,
+                                        size = 18.dp
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
                 if (geniusUrl != null) {
                     Surface(
                         onClick = {
+                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                             openSearchUrl(context, geniusUrl)
                         },
                         shape = RoundedCornerShape(50),
@@ -3742,30 +4265,17 @@ private fun AlbumNotesSheet(
                             CurioIcon(
                                 CurioIcons.OpenInNew,
                                 "Open album on Genius",
-                                tint = cat.onAccent(),
+                                tint = onAccent,
                                 size = 16.dp
                             )
                             Text(
                                 "GENIUS",
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                                color = cat.categoryInk(),
+                                color = ink,
                                 maxLines = 1
                             )
                         }
                     }
-                }
-                Surface(
-                    onClick = onDismiss,
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
-                ) {
-                    CurioIcon(
-                        CurioIcons.Close,
-                        "Close track list",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        size = 20.dp,
-                        modifier = Modifier.padding(8.dp)
-                    )
                 }
             }
 
@@ -3779,13 +4289,24 @@ private fun AlbumNotesSheet(
                     .weight(1f)
                     .fillMaxWidth()
             ) {
+                if (synopsis != null) {
+                    item(key = "album_about") {
+                        AlbumSynopsisAccordion(
+                            surface = surface,
+                            accent = accent,
+                            ink = ink,
+                            onSurface = onSurface,
+                            synopsis = synopsis
+                        )
+                    }
+                }
                 itemsIndexed(tracks) { _, tr ->
                     val selected = tr.number == currentTrack?.number
                     Surface(
                         onClick = { onSelectTrack(tr) },
                         shape = RoundedCornerShape(14.dp),
                         color = if (selected) accent
-                                else cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+                                else surface,
                         shadowElevation = if (selected) 0.dp else 1.dp
                     ) {
                         Row(
@@ -3796,7 +4317,7 @@ private fun AlbumNotesSheet(
                             Text(
                                 text = "${tr.number}",
                                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                color = if (selected) cat.onAccent() else cat.categoryInk(),
+                                color = if (selected) onAccent else ink,
                                 maxLines = 1,
                                 modifier = Modifier.width(28.dp)
                             )
@@ -3805,7 +4326,7 @@ private fun AlbumNotesSheet(
                                 style = MaterialTheme.typography.bodyLarge.copy(
                                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
                                 ),
-                                color = if (selected) cat.onAccent() else MaterialTheme.colorScheme.onSurface,
+                                color = if (selected) onAccent else onSurface,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.weight(1f)
@@ -3814,15 +4335,928 @@ private fun AlbumNotesSheet(
                                 Text(
                                     text = tr.duration,
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = if (selected) cat.onAccent().copy(alpha = 0.85f)
-                                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    color = if (selected) onAccent.copy(alpha = 0.85f)
+                                            else onSurfaceVariant,
                                     maxLines = 1
+                                )
+                            }
+                            // v336 — favorite heart: taps add/remove this track
+                            // from the album's share-card favorites (multi-
+                            // select; the Vinyl card renders the whole strip).
+                            val fav = favTracks.contains(tr.title)
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(CircleShape)
+                                    .clickable {
+                                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                        AppPreferences.toggleAlbumFavoriteTrack(context, topic.name, tr.title)
+                                    }
+                            ) {
+                                HeartGlyph(
+                                    color = if (fav) Color(0xFFE5484D)
+                                            else if (selected) onAccent.copy(alpha = 0.85f)
+                                            else onSurfaceVariant.copy(alpha = 0.6f),
+                                    iconSize = 18.dp,
+                                    filled = fav,
+                                    modifier = Modifier.align(Alignment.Center)
                                 )
                             }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// v336 — Album sheet helpers (synopsis accordion, heart glyph, listen links)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** The services offered by the album sheet's LISTEN pill (v336) — search
+ *  deep links that open the installed app (or the browser) DIRECTLY,
+ *  bypassing the explore session entirely. Extensible later. */
+private data class AlbumListenService(val id: String, val label: String, val icon: String)
+
+private val albumListenServices = listOf(
+    AlbumListenService("apple", "Apple Music", CurioIcons.MusicNote),
+    AlbumListenService("spotify", "Spotify", CurioIcons.PlayCircle),
+    AlbumListenService("ytm", "YouTube Music", CurioIcons.YouTubeActivity),
+    AlbumListenService("amazon", "Amazon Music", "radio"),
+    AlbumListenService("deezer", "Deezer", CurioIcons.Album)
+)
+
+/** v336 — the search deep link for [service] on the album sheet. Artist +
+ *  album title (trailing "(1966)" year stripped — search engines rank a
+ *  bare title higher), then the same scheme tricks [openSearchUrl] already
+ *  handles: Apple Music via `music://` (falls back to https when the app
+ *  isn't installed), Spotify/Amazon/Deezer via their web search routes,
+ *  YouTube Music pinned to the app package by [openSearchUrl]. */
+// ═══════════════════════════════════════════════════════════════════════════
+// Series info section — poster + episode list (series only)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Series section on the reveal: a poster card with the synopsis preview and
+ *  episode count; tapping the card opens the full episode-list sheet (v350,
+ *  mirrors the album track-list card). */
+@Composable
+private fun SeriesInfoSection(
+    cat: com.curio.app.data.CurioCategory,
+    topic: CurioTopic,
+    onOpenSheet: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val episodes = topic.episodes.orEmpty()
+    if (episodes.isEmpty()) return
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        SeriesPosterCard(
+            cat = cat,
+            topic = topic,
+            episodes = episodes,
+            onClick = onOpenSheet
+        )
+    }
+}
+
+/** EPISODES card — poster + synopsis preview + season/episode meta. Tap opens
+ *  the full-height episode-list sheet (mirrors the album track-list card). */
+@Composable
+private fun SeriesPosterCard(
+    cat: com.curio.app.data.CurioCategory,
+    topic: CurioTopic,
+    episodes: List<com.curio.app.data.SeriesEpisode>,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val seasonCount = episodes.map { it.season }.distinct().size
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        color = cat.categorySurface(MaterialTheme.colorScheme.surface),
+        shadowElevation = 3.dp,
+        modifier = modifier.fillMaxWidth().clickable(onClick = onClick)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Header row — icon + EPISODES + count + season meta
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+                ) {
+                    CurioIcon(
+                        name = CurioIcons.Movies,
+                        contentDescription = null,
+                        tint = cat.categoryInk(),
+                        size = 16.dp,
+                        modifier = Modifier.padding(7.dp)
+                    )
+                }
+                Text(
+                    text = "EPISODES",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.2.sp
+                    ),
+                    color = cat.categoryInk()
+                )
+                Spacer(Modifier.weight(1f))
+                val meta = buildString {
+                    append("${episodes.size} episode")
+                    if (episodes.size != 1) append("s")
+                    if (seasonCount > 1) append(" · $seasonCount seasons")
+                }
+                Text(
+                    text = meta,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            // Poster + synopsis preview (or a short episode-title preview).
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                SeriesPoster(
+                    showName = topic.name,
+                    accent = cat.themedAccent(),
+                    imageUrl = topic.imageUrl,
+                    modifier = Modifier
+                        .size(width = 76.dp, height = 112.dp)
+                        .shadow(4.dp, RoundedCornerShape(10.dp))
+                )
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    topic.byline.takeIf { it.isNotBlank() }?.let { creator ->
+                        Text(
+                            creator,
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    val synopsis = topic.synopsis?.takeIf { it.isNotBlank() }
+                    if (synopsis != null) {
+                        Text(
+                            text = synopsis,
+                            style = MaterialTheme.typography.bodySmall.copy(lineHeight = 18.sp),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 4,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    } else {
+                        episodes.take(4).forEach { ep ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(
+                                    text = ep.key(),
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = cat.categoryInk(),
+                                    maxLines = 1
+                                )
+                                Text(
+                                    text = ep.title,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            if (episodes.isNotEmpty()) {
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = "View the episode list →",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = cat.categoryInk(),
+                    modifier = Modifier.align(Alignment.End)
+                )
+            }
+        }
+    }
+}
+
+/** Keyed "S1E3" for an episode — matches the watched-progress store keys. */
+private fun com.curio.app.data.SeriesEpisode.key(): String = "S${season}E${number}"
+
+/** Series poster tile: authored imageUrl first, then the keyless TVMaze /
+ *  iTunes resolver (only when the SERIES cover-fetch toggle is ON), and a
+ *  tinted gradient tile with the Movies glyph while resolving / on miss. */
+@Composable
+private fun SeriesPoster(
+    showName: String,
+    accent: Color,
+    imageUrl: String? = null,
+    modifier: Modifier = Modifier
+) {
+    val authoredUrl = imageUrl?.takeIf { it.isNotBlank() }
+    var artUrl by remember(showName, authoredUrl) { mutableStateOf<String?>(authoredUrl) }
+    var failed by remember(showName, authoredUrl) { mutableStateOf(false) }
+    // v350 — the keyless fallback only runs when the SERIES fetch toggle is on.
+    val consent = AppPreferences.seriesFetchEnabledState
+    LaunchedEffect(showName, authoredUrl, consent) {
+        if (artUrl == null && !failed && authoredUrl == null && consent) {
+            artUrl = SeriesPosterFetch.resolvePosterUrl(showName)
+            if (artUrl == null) failed = true
+        }
+    }
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(10.dp))
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(
+                        lerp(accent, Color.White, if (isCurioDarkTheme()) 0.18f else 0.55f),
+                        lerp(accent, Color.Black, 0.45f)
+                    )
+                )
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        CurioIcon(
+            name = CurioIcons.Movies,
+            contentDescription = null,
+            tint = Color.White.copy(alpha = if (artUrl == null) 0.75f else 0f),
+            size = 30.dp
+        )
+        val url = artUrl
+        if (url != null) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(url)
+                    .crossfade(false)
+                    .build(),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
+    }
+}
+
+/**
+ * v350 — the full-height EPISODE LIST sheet for a series topic. One
+ * album-style scroll (mirrors the book-notes / album-track-list sheets): a
+ * header with the poster + title + favorite heart, a pinned watched-progress
+ * rail, a collapsible "About this series" synopsis accordion at the top, and
+ * the episodes grouped by season as expandable rows (summary + watched
+ * toggle). The whole sheet wears the poster's extracted palette when the
+ * series cover-fetch toggle is on; otherwise the category tint.
+ */
+@Composable
+private fun EpisodeNotesSheet(
+    cat: com.curio.app.data.CurioCategory,
+    topic: CurioTopic,
+    onDismiss: () -> Unit
+) {
+    val episodes = topic.episodes.orEmpty()
+    if (episodes.isEmpty()) return
+    val context = LocalContext.current
+    val haptics = LocalHapticFeedback.current
+    val fetchConsent = AppPreferences.seriesFetchEnabledState
+    var coverSwatches by remember(topic.imageUrl) { mutableStateOf<CoverSwatches?>(null) }
+    LaunchedEffect(topic.imageUrl, fetchConsent) {
+        coverSwatches = fetchCoverSwatches(context, topic.imageUrl, networkAllowed = fetchConsent)
+    }
+    val coverPal = cat.notesSheetPalette(coverSwatches)
+    val accent = coverPal?.accent ?: cat.themedAccent()
+    val onAccent = coverPal?.onAccent ?: cat.onAccent()
+    val ink = coverPal?.ink ?: cat.categoryInk()
+    val surface = coverPal?.surface ?: cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow)
+    val surfaceHigh = coverPal?.surfaceHigh ?: cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+    val surfaceAlt = coverPal?.surfaceAlt ?: MaterialTheme.colorScheme.secondaryContainer
+    val onSurfaceAlt = coverPal?.onSurfaceAlt ?: MaterialTheme.colorScheme.onSecondaryContainer
+    val onSurface = coverPal?.onSurface ?: MaterialTheme.colorScheme.onSurface
+    val onSurfaceVariant = coverPal?.onSurfaceVariant ?: MaterialTheme.colorScheme.onSurfaceVariant
+    val showName = topic.name
+    val hasSynopsis = !topic.synopsis.isNullOrBlank()
+    val seasons = episodes.map { it.season }.distinct().sorted()
+    // v350 — favorite heart for the whole series (like the book heart).
+    val isFavSeries = showName in AppPreferences.seriesFavoritesState
+    // Watched progress: derived from the watched "S1E3" keys against the
+    // authored episode list (so grouped/season data counts real episodes).
+    val watchedKeys = AppPreferences.seriesWatchedState[showName].orEmpty()
+    // v352 — per-episode Like hearts (show name → liked "S1E3" keys).
+    val episodeLikes = AppPreferences.seriesEpisodeLikesState[showName].orEmpty()
+    val watchedTotal = episodes.count { it.key() in watchedKeys }
+    var expandedKey by rememberSaveable { mutableStateOf<String?>(null) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val listState = rememberLazyListState()
+
+    fun toggleEpisode(ep: com.curio.app.data.SeriesEpisode) {
+        expandedKey = if (expandedKey == ep.key()) null else ep.key()
+    }
+    fun toggleWatched(ep: com.curio.app.data.SeriesEpisode) {
+        AppPreferences.toggleSeriesEpisodeWatched(context, showName, ep.key())
+        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = coverPal?.container ?: cat.notesSheetContainerColor(),
+        dragHandle = { BottomSheetDefaults.DragHandle() },
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = CurioContentMaxWidth)
+                .fillMaxHeight(0.92f)
+                .padding(bottom = 20.dp)
+        ) {
+            // ── Top hairline — soft accent rule under the drag handle ─────
+            NotesSheetTopHairline(cat)
+            Spacer(Modifier.height(10.dp))
+            // ── Header — poster + title/creator + heart + close ──────────
+            Row(
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+            ) {
+                SeriesPoster(
+                    showName = showName,
+                    accent = accent,
+                    imageUrl = topic.imageUrl,
+                    modifier = Modifier
+                        .size(width = 76.dp, height = 112.dp)
+                        .shadow(3.dp, RoundedCornerShape(10.dp))
+                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "SERIES NOTES",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.4.sp
+                        ),
+                        color = ink
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        topic.name,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                        color = onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    topic.byline.takeIf { it.isNotBlank() }?.let { creator ->
+                        Text(
+                            "Created by $creator",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.End
+                ) {
+                    // v350 — series-level favorite heart (mirrors the book
+                    // and album hearts in look and feel).
+                    Surface(
+                        onClick = {
+                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            AppPreferences.toggleSeriesFavorite(context, showName)
+                        },
+                        shape = CircleShape,
+                        color = if (isFavSeries) accent.copy(alpha = 0.2f) else surface.copy(alpha = 0.6f)
+                    ) {
+                        Box(
+                            modifier = Modifier.padding(8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            HeartGlyph(
+                                color = if (isFavSeries) Color(0xFFE5484D) else onSurfaceVariant,
+                                iconSize = 19.dp,
+                                filled = isFavSeries
+                            )
+                        }
+                    }
+                    Surface(
+                        onClick = onDismiss,
+                        shape = CircleShape,
+                        color = surface.copy(alpha = 0.6f)
+                    ) {
+                        CurioIcon(
+                            CurioIcons.Close,
+                            "Close series notes",
+                            tint = onSurfaceVariant,
+                            size = 20.dp,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    }
+                }
+            }
+
+            // ── Pinned watched-progress rail — stays above the list ──────
+            Spacer(Modifier.height(12.dp))
+            val progressLabel = if (watchedTotal > 0)
+                "$watchedTotal of ${episodes.size} episodes watched"
+            else "${episodes.size} episodes · tap an episode to read its notes"
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+            ) {
+                Text(
+                    progressLabel,
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = ink,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    "$watchedTotal / ${episodes.size}",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = accent
+                )
+            }
+            Spacer(Modifier.height(6.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(surfaceHigh)
+            ) {
+                val frac = (watchedTotal.toFloat() / episodes.size).coerceIn(0f, 1f)
+                if (frac > 0f) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(frac)
+                            .height(4.dp)
+                            .background(accent, RoundedCornerShape(50))
+                    )
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+
+            // ── One scroll: synopsis accordion, then seasons + episodes ──
+            LazyColumn(
+                state = listState,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 8.dp),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                if (hasSynopsis) {
+                    item(key = "series_about") {
+                        BookSynopsisAccordion(
+                            surface = surface,
+                            accent = accent,
+                            ink = ink,
+                            onSurface = onSurface,
+                            synopsis = topic.synopsis.orEmpty(),
+                            initiallyExpanded = !hasSynopsis || episodes.isEmpty(),
+                            label = "ABOUT THIS SERIES"
+                        )
+                    }
+                }
+                seasons.forEach { season ->
+                    val seasonEps = episodes.filter { it.season == season }
+                    val watchedSeason = seasonEps.count { it.key() in watchedKeys }
+                    item(key = "season_$season") {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 2.dp, top = 8.dp, end = 2.dp, bottom = 2.dp)
+                        ) {
+                            Text(
+                                "SEASON $season",
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    letterSpacing = 1.sp
+                                ),
+                                color = ink
+                            )
+                            Spacer(Modifier.weight(1f))
+                            Text(
+                                "$watchedSeason / ${seasonEps.size} watched",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = onSurfaceVariant
+                            )
+                        }
+                    }
+                    itemsIndexed(seasonEps) { _, ep ->
+                        val isOpen = expandedKey == ep.key()
+                        val isWatched = ep.key() in watchedKeys
+                        Surface(
+                            onClick = { toggleEpisode(ep) },
+                            shape = RoundedCornerShape(14.dp),
+                            color = when {
+                                isOpen -> accent
+                                isWatched -> surfaceAlt
+                                else -> surface
+                            },
+                            // v354 — no elevation flip (glitchy touch shadow);
+                            // watched rows get a solid accent border instead.
+                            shadowElevation = 0.dp,
+                            border = if (isWatched)
+                                BorderStroke(1.dp, accent.copy(alpha = 0.55f))
+                            else null
+                        ) {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
+                                ) {
+                                    // Leading chip: a ✓ when watched — SOLID
+                                    // fill + rim (v354, mirrors the book sheet).
+                                    Box(
+                                        modifier = Modifier
+                                            .size(30.dp)
+                                            .clip(CircleShape)
+                                            .background(
+                                                when {
+                                                    isOpen -> onAccent
+                                                    isWatched -> accent
+                                                    else -> surfaceHigh
+                                                }
+                                            )
+                                            .border(
+                                                1.dp,
+                                                when {
+                                                    isWatched -> onAccent.copy(alpha = 0.7f)
+                                                    isOpen -> accent.copy(alpha = 0.5f)
+                                                    else -> onSurfaceVariant.copy(alpha = 0.25f)
+                                                },
+                                                CircleShape
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        if (isWatched) {
+                                            CurioIcon(
+                                                CurioIcons.Check,
+                                                null,
+                                                tint = if (isOpen) accent else onAccent,
+                                                size = 15.dp
+                                            )
+                                        } else {
+                                            Text(
+                                                "${ep.number}",
+                                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                                color = if (isOpen) accent else onSurfaceVariant
+                                            )
+                                        }
+                                    }
+                                    Text(
+                                        text = ep.title,
+                                        style = MaterialTheme.typography.bodyLarge.copy(
+                                            fontWeight = if (isOpen || isWatched) FontWeight.Bold else FontWeight.Normal
+                                        ),
+                                        color = if (isOpen) onAccent else onSurface,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    // v352 — per-row action chips (mirroring
+                                    // the book sheet): the Like heart and the
+                                    // Watched toggle live on the row; watched
+                                    // gets a SOLID accent fill.
+                                    val isLiked = ep.key() in episodeLikes
+                                    Surface(
+                                        onClick = {
+                                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                            AppPreferences.toggleSeriesEpisodeLike(context, showName, ep.key())
+                                        },
+                                        shape = CircleShape,
+                                        color = if (isLiked) Color(0xFFE5484D).copy(alpha = 0.18f)
+                                                else surface.copy(alpha = 0.7f)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier.padding(6.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            HeartGlyph(
+                                                color = if (isLiked) Color(0xFFE5484D)
+                                                        else if (isOpen) onAccent.copy(alpha = 0.85f) else onSurfaceVariant,
+                                                iconSize = 16.dp,
+                                                filled = isLiked
+                                            )
+                                        }
+                                    }
+                                    Surface(
+                                        onClick = { toggleWatched(ep) },
+                                        shape = CircleShape,
+                                        // v354 — solid + rim (fixed the
+                                        // washed-out watched disc).
+                                        color = if (isWatched)
+                                            if (isOpen) onAccent else accent
+                                            else surface.copy(alpha = 0.7f),
+                                        border = BorderStroke(
+                                            1.dp,
+                                            if (isWatched)
+                                                if (isOpen) accent.copy(alpha = 0.5f) else onAccent.copy(alpha = 0.7f)
+                                                else onSurfaceVariant.copy(alpha = 0.25f)
+                                        )
+                                    ) {
+                                        CurioIcon(
+                                            CurioIcons.FoldedCorner,
+                                            if (isWatched) "Mark episode unwatched" else "Mark episode watched",
+                                            tint = if (isWatched)
+                                                if (isOpen) accent else onAccent
+                                                else onSurfaceVariant,
+                                            size = 16.dp,
+                                            modifier = Modifier.padding(6.dp)
+                                        )
+                                    }
+                                    CurioIcon(
+                                        if (isOpen) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
+                                        if (isOpen) "Collapse episode" else "Expand episode",
+                                        tint = if (isOpen) onAccent.copy(alpha = 0.9f) else onSurfaceVariant,
+                                        size = 20.dp
+                                    )
+                                }
+                                // v354 — expand/collapse: height + fade together
+                                // (the old fade-only pop read glitchy).
+                                AnimatedVisibility(
+                                    visible = isOpen,
+                                    enter = expandVertically(
+                                        animationSpec = tween(180)
+                                    ) + fadeIn(
+                                        animationSpec = tween(140)
+                                    ),
+                                    exit = shrinkVertically(
+                                        animationSpec = tween(140)
+                                    ) + fadeOut(
+                                        animationSpec = tween(120)
+                                    )
+                                ) {
+                                    Column(
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(start = 14.dp, end = 14.dp, bottom = 14.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(1.dp)
+                                                .background(onAccent.copy(alpha = 0.18f))
+                                        )
+                                        Text(
+                                            "Season $season · Episode ${ep.number}",
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                            color = if (isOpen) onAccent.copy(alpha = 0.9f) else ink
+                                        )
+                                        Text(
+                                            ep.summary.ifBlank { "No summary for this episode." },
+                                            style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 25.sp),
+                                            color = if (isOpen) onAccent else onSurface
+                                        )
+                                        // v352 — the Watched toggle + Like
+                                        // heart moved onto the row (chips
+                                        // above); the panel now only holds
+                                        // the episode notes.
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun albumListenUrl(topic: CurioTopic, service: String): String {
+    val title = topic.name.replace(Regex("""\s+\(\d{4}\)\s*$"""), "")
+    val q = Uri.encode(listOfNotNull(
+        topic.byline.takeIf { it.isNotBlank() },
+        title
+    ).joinToString(" "))
+    return when (service) {
+        "apple" -> "music://music.apple.com/search?term=$q"
+        "spotify" -> "https://open.spotify.com/search/$q"
+        "ytm" -> "https://music.youtube.com/search?q=$q"
+        "amazon" -> "https://music.amazon.com/search/$q"
+        else -> "https://www.deezer.com/search/$q"
+    }
+}
+
+/**
+ * v336 — the album synopsis as a collapsible card pinned at the TOP of the
+ * track-list sheet (one sheet — no separate popup). Collapsed it shows a
+ * two-line teaser with a chevron; tapping the card expands the full
+ * description or collapses it back.
+ */
+@Composable
+private fun AlbumSynopsisAccordion(
+    surface: Color,
+    accent: Color,
+    ink: Color,
+    onSurface: Color,
+    synopsis: String,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Surface(
+        shape = RoundedCornerShape(18.dp),
+        color = surface,
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { expanded = !expanded }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .animateContentSize()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Surface(
+                    shape = CircleShape,
+                    color = accent.copy(alpha = 0.16f)
+                ) {
+                    CurioIcon(
+                        CurioIcons.MusicNote,
+                        null,
+                        tint = ink,
+                        size = 15.dp,
+                        modifier = Modifier.padding(6.dp)
+                    )
+                }
+                Text(
+                    "ABOUT THIS ALBUM",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.2.sp
+                    ),
+                    color = ink,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    if (expanded) "Hide" else "Read",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = ink.copy(alpha = 0.9f)
+                )
+                CurioIcon(
+                    if (expanded) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
+                    if (expanded) "Collapse synopsis" else "Expand synopsis",
+                    tint = ink,
+                    size = 20.dp
+                )
+            }
+            Text(
+                text = synopsis,
+                style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                color = onSurface,
+                maxLines = if (expanded) Int.MAX_VALUE else 2,
+                overflow = if (expanded) TextOverflow.Clip else TextOverflow.Ellipsis,
+                modifier = Modifier.padding(top = 10.dp)
+            )
+        }
+    }
+}
+
+/**
+ * v336 — a tiny heart drawn directly (the bundled Material Symbols subset
+ * has no "favorite" ligature, so a Canvas heart can never render as tofu,
+ * and it exports identically through the share-card software pipeline).
+ * [iconSize] avoids shadowing DrawScope.size.
+ */
+@Composable
+private fun HeartGlyph(
+    color: Color,
+    iconSize: Dp,
+    filled: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Canvas(modifier.size(iconSize)) {
+        val w = this.size.width
+        val h = this.size.height
+        val heart = Path().apply {
+            moveTo(w * 0.50f, h * 0.30f)
+            cubicTo(w * 0.50f, h * 0.21f, w * 0.44f, h * 0.14f, w * 0.33f, h * 0.14f)
+            cubicTo(w * 0.17f, h * 0.14f, w * 0.10f, h * 0.25f, w * 0.10f, h * 0.36f)
+            cubicTo(w * 0.10f, h * 0.52f, w * 0.24f, h * 0.65f, w * 0.50f, h * 0.92f)
+            cubicTo(w * 0.76f, h * 0.65f, w * 0.90f, h * 0.52f, w * 0.90f, h * 0.36f)
+            cubicTo(w * 0.90f, h * 0.25f, w * 0.83f, h * 0.14f, w * 0.67f, h * 0.14f)
+            cubicTo(w * 0.56f, h * 0.14f, w * 0.50f, h * 0.21f, w * 0.50f, h * 0.30f)
+            close()
+        }
+        if (filled) {
+            drawPath(heart, color)
+        } else {
+            drawPath(heart, color, style = Stroke(width = w * 0.10f))
+        }
+    }
+}
+
+/** v354 — BOOK rating: five open-book glyphs (the user asked for a book
+ *  instead of the fountain-pen nibs). Tapping book N sets N; tapping the
+ *  current value again clears the pick. */
+@Composable
+private fun BookRatingPicker(
+    value: Double,
+    tint: Color,
+    onSurfaceVariant: Color,
+    onRate: (Int) -> Unit,
+    iconSize: Dp = 18.dp,
+    modifier: Modifier = Modifier
+) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+        for (i in 1..5) {
+            val filled = value >= i
+            Box(
+                modifier = Modifier
+                    .size(iconSize + 8.dp)
+                    .clip(CircleShape)
+                    .clickable { onRate(i) },
+                contentAlignment = Alignment.Center
+            ) {
+                BookGlyph(
+                    color = if (filled) tint else onSurfaceVariant.copy(alpha = 0.55f),
+                    iconSize = iconSize,
+                    filled = filled
+                )
+            }
+        }
+    }
+}
+
+/** A single open-book silhouette: two page planes from a centre spine
+ *  (filled = solid ink pages, outline = empty). */
+@Composable
+private fun BookGlyph(
+    color: Color,
+    iconSize: Dp,
+    filled: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Canvas(modifier.size(iconSize)) {
+        val w = this.size.width
+        val h = this.size.height
+        val sp = h * 0.5f          // spine height (book stands ~2:1.3)
+        val thickness = w * 0.07f  // page block depth
+        val left = Path().apply {
+            moveTo(w * 0.50f, h * 0.16f)
+            quadraticBezierTo(w * 0.36f, h * 0.10f, w * 0.12f, h * 0.14f)
+            lineTo(w * 0.10f, h * 0.84f)
+            quadraticBezierTo(w * 0.34f, h * 0.80f, w * 0.50f, h * 0.88f)
+            close()
+        }
+        val right = Path().apply {
+            moveTo(w * 0.50f, h * 0.16f)
+            quadraticBezierTo(w * 0.64f, h * 0.10f, w * 0.88f, h * 0.14f)
+            lineTo(w * 0.90f, h * 0.84f)
+            quadraticBezierTo(w * 0.66f, h * 0.80f, w * 0.50f, h * 0.88f)
+            close()
+        }
+        val spine = Path().apply {
+            moveTo(w * 0.50f, h * 0.16f)
+            lineTo(w * 0.50f, h * 0.88f)
+        }
+        if (filled) {
+            drawPath(left, color)
+            drawPath(right, color)
+            drawPath(spine, color.copy(alpha = 0.45f), style = Stroke(width = thickness))
+        } else {
+            drawPath(left, color, style = Stroke(width = w * 0.09f))
+            drawPath(right, color, style = Stroke(width = w * 0.09f))
+            drawLine(
+                color = color.copy(alpha = 0.55f),
+                start = Offset(w * 0.50f, h * 0.20f),
+                end = Offset(w * 0.50f, h * 0.84f),
+                strokeWidth = w * 0.08f
+            )
         }
     }
 }

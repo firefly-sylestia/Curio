@@ -6,6 +6,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -208,21 +209,38 @@ object TopicJsonLoader {
             if (cacheGeneration == generation) cache[id] = parsed
         }
         // v294 — Also populate Room database for fast subsequent access.
+        // v347 — the mirror no longer blocks the caller: parseAndCache sits on
+        // the render path of the Topic Database's cold open (its fallback used
+        // to await this delete + full-lane insert — books/albums entities
+        // carry chapter/track JSON, so one lane could cost a visible beat on a
+        // mid device, before the browser had anything to show). The write now
+        // runs fire-and-forget on the loader scope: rows render the moment the
+        // JSON is parsed and Room catches up in the background. Best-effort
+        // either way — [reloadFromAssets]'s callers do their own awaited
+        // writes, so an authoritative refresh is unaffected.
         try {
             if (com.curio.app.data.TopicRepository.isInitialized() && parsed.isNotEmpty()) {
                 val appCtx = appContext
                 if (appCtx != null) {
                     val db = com.curio.app.data.CurioDatabase.getInstance(appCtx)
-                    // A real asset parse is authoritative: mirror the lane so
-                    // rows removed from the JSON also leave Room (the loader
-                    // only parses a canonical lane when Room doesn't serve it,
-                    // so the delete is a no-op on a healthy lane — WILDCARD is
-                    // a merge of every lane, never mirrored, just upserted).
-                    if (id != CategoryId.WILDCARD) {
-                        db.topicDao().deleteCategory(id.name)
+                    val mirrorId = id
+                    loadScope.launch(Dispatchers.IO) {
+                        runCatching {
+                            // A real asset parse is authoritative: mirror the
+                            // lane so rows removed from the JSON also leave
+                            // Room (the loader only parses a canonical lane
+                            // when Room doesn't serve it, so the delete is a
+                            // no-op on a healthy lane — WILDCARD is a merge of
+                            // every lane, never mirrored, just upserted).
+                            if (mirrorId != CategoryId.WILDCARD) {
+                                db.topicDao().deleteCategory(mirrorId.name)
+                            }
+                            val entities = parsed.map {
+                                com.curio.app.data.TopicEntity.fromCurioTopic(it)
+                            }
+                            db.topicDao().insertAll(entities)
+                        }
                     }
-                    val entities = parsed.map { com.curio.app.data.TopicEntity.fromCurioTopic(it) }
-                    db.topicDao().insertAll(entities)
                 }
             }
         } catch (_: Exception) { /* Room population is best-effort */ }
@@ -597,6 +615,19 @@ object TopicJsonLoader {
                 )
             }
         } else null
+        // Series only: per-episode guide (season + episode + title + summary).
+        val episodesArr = obj.optJSONArray("episodes")
+        val episodes: List<SeriesEpisode>? = if (episodesArr != null && episodesArr.length() > 0) {
+            List(episodesArr.length()) { i ->
+                val ep = episodesArr.getJSONObject(i)
+                SeriesEpisode(
+                    season = ep.optInt("season", 1),
+                    number = ep.optInt("number", i + 1),
+                    title = ep.optString("title", "Episode ${i + 1}"),
+                    summary = ep.optString("summary", "")
+                )
+            }
+        } else null
         return CurioTopic(
             id            = id,
             categoryId    = categoryId,
@@ -615,7 +646,8 @@ object TopicJsonLoader {
             synopsis      = synopsis,
             chapters      = chapters,
             tracks        = tracks,
-            geniusUrl     = geniusUrl
+            geniusUrl     = geniusUrl,
+            episodes      = episodes
         )
     }
 }

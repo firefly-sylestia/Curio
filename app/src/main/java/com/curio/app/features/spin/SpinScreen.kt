@@ -3792,6 +3792,9 @@ private fun SpinButton(
     // full-size, so it read oversized next to the shrunken fan. It now
     // shrinks WITH the deck (the orbit ring too), floored at 0.75 so the
     // CTA never gets tiny.
+    // v346 — button dialed down ~10% (102/92 idle, 88/82 landed; orbit
+    // 166/146) so the CTA reads slimmer next to the deck instead of an
+    // oversized disc — glyphs follow so the die keeps its breathing room.
     val sizeScale = fitScale.coerceIn(0.75f, 1f)
     val plateTint = tint
     val orbitColor = shineAccent
@@ -3801,12 +3804,12 @@ private fun SpinButton(
     // Keep the animated orbit/dots at the same radius while making the
     // actual circular button plate a little tighter and more elegant.
     val buttonSize = (if (compact) {
-        if (landedTopic != null) 90.dp else 102.dp
+        if (landedTopic != null) 82.dp else 92.dp
     } else {
-        if (landedTopic != null) 98.dp else 114.dp
+        if (landedTopic != null) 88.dp else 102.dp
     }) * sizeScale
     Box(
-        modifier = Modifier.size((if (compact) 156.dp else 176.dp) * sizeScale),
+        modifier = Modifier.size((if (compact) 146.dp else 166.dp) * sizeScale),
         contentAlignment = Alignment.Center
     ) {
         OrbitRing(active = isShuffling, color = orbitColor, modifier = Modifier.fillMaxSize())
@@ -3880,7 +3883,7 @@ private fun SpinButton(
                         ShuffleGlyph(
                             tint = glyphInk,
                             modifier = Modifier
-                                .size(72.dp)
+                                .size(64.dp)
                                 // Keep the animated die on the same optical
                                 // center as the resting casino glyph.
                         )
@@ -3900,7 +3903,7 @@ private fun SpinButton(
                         CurioIcon(
                             CurioIcons.Casino, null,
                             tint = glyphInk,
-                            size = if (landedTopic != null) 52.dp else 60.dp,
+                            size = if (landedTopic != null) 47.dp else 54.dp,
                             // Optical correction for the casino glyph's
                             // visible bounds. The parent Box and button are
                             // already centered; only the die's ink needs a

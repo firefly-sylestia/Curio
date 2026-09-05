@@ -65,6 +65,10 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          # v354 — optional: free Google Books API key. When the secret is
+          # present it is baked into BuildConfig.GOOGLE_BOOKS_API_KEY and the
+          # book fetchers append &key= for the higher quota; unset stays keyless.
+          GOOGLE_BOOKS_API_KEY: ${{ secrets.GOOGLE_BOOKS_API_KEY }}
         run: |
           # Bundle the source catalogs as Android assets. The app imports these
           # JSON files into its user database on first launch (and retries for

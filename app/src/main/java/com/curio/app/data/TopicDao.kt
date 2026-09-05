@@ -84,7 +84,7 @@ interface TopicDao {
     @Query("""
         UPDATE topics SET teaser = :teaser, imageUrl = :imageUrl, byline = :byline,
             tags = :tags, synopsis = :synopsis, chapters = :chapters, tracks = :tracks,
-            geniusUrl = :geniusUrl
+            geniusUrl = :geniusUrl, episodes = :episodes
         WHERE id = :id
     """)
     suspend fun updateContent(
@@ -96,7 +96,8 @@ interface TopicDao {
         synopsis: String,
         chapters: String,
         tracks: String,
-        geniusUrl: String
+        geniusUrl: String,
+        episodes: String
     )
 
     /** Get topic count for a category. */

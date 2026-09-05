@@ -169,6 +169,41 @@ fun UserExperimentsScreen(navController: NavController) {
                 }
             }
 
+            // Cover fetching — per-category consent, v350. Each category
+            // (books / albums / series) gets its own toggle so the user can
+            // switch poster fetching on per category; they all stay OFF by
+            // default (nothing downloads without explicit consent).
+            item { CurioSectionLabel("Cover fetching") }
+            item {
+                CurioSettingsCard(shadowElevation = 0.dp) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        ExperimentSwitchRow(
+                            "Books",
+                            "Fetch book covers + ratings from the keyless providers",
+                            AppPreferences.bookFetchEnabledState
+                        ) {
+                            AppPreferences.setBookFetchEnabled(context, it)
+                        }
+                        CurioSettingsDivider()
+                        ExperimentSwitchRow(
+                            "Albums",
+                            "Fetch album artwork (iTunes / MusicBrainz, keyless)",
+                            AppPreferences.albumFetchEnabledState
+                        ) {
+                            AppPreferences.setAlbumFetchEnabled(context, it)
+                        }
+                        CurioSettingsDivider()
+                        ExperimentSwitchRow(
+                            "Series",
+                            "Fetch series posters (TVMaze / iTunes, keyless)",
+                            AppPreferences.seriesFetchEnabledState
+                        ) {
+                            AppPreferences.setSeriesFetchEnabled(context, it)
+                        }
+                    }
+                }
+            }
+
             // Content tools — non-toggle experiments
             item { CurioSectionLabel("Content tools") }
             item {

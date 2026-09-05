@@ -223,7 +223,8 @@ object TopicRepository {
         val needsHydration = entity.teaser.isBlank() ||
             (categoryId == CategoryId.BOOKS && entity.synopsis.isBlank()) ||
             (categoryId == CategoryId.ALBUMS &&
-                (entity.tracks.isBlank() || entity.geniusUrl.isBlank()))
+                (entity.tracks.isBlank() || entity.geniusUrl.isBlank())) ||
+            (categoryId == CategoryId.SERIES && entity.episodes.isBlank())
         if (needsHydration && hydratedIds.add(entity.id)) {
             runCatching {
                 TopicJsonLoader.install(context)
@@ -240,7 +241,8 @@ object TopicRepository {
                         synopsis = freshEntity.synopsis,
                         chapters = freshEntity.chapters,
                         tracks = freshEntity.tracks,
-                        geniusUrl = freshEntity.geniusUrl
+                        geniusUrl = freshEntity.geniusUrl,
+                        episodes = freshEntity.episodes
                     )
                 }
             }

@@ -106,6 +106,7 @@ There is **no root wrapper object**. The file is a bare JSON array. The
 | `altPageLabel` | string | ❌ | **Books only** (v126). Short label for `altPageCount` — the edition name (`"Lombardo"`, `"Wordsworth"`, `"Modern Library"`, `"Penguin Classics"`, `"Corrected text"`). Default `""`. |
 | `episodeCount` | int | ❌ | **Anime only** (v29). Total episodes for watching progress tracking. Anime films deliberately carry no `episodeCount`. Default omitted. |
 | `geniusUrl` | string | ❌ | **Albums only** (v333). The album's Genius page (`https://genius.com/albums/<artist>/<album>`), authored by `tools/enrich_albums_art_genius.py` (slug-constructed; the official Genius API, when a `GENIUS_API_TOKEN` is supplied, validates each URL). Surfaced as a "GENIUS" pill in the track-list sheet header. Default omitted. |
+| `synopsis` | string | ❌ | Narrative description. **Books** (v11): a detailed synopsis powering the Synopsis overlay + chapter reader on Topic Reveal. **Albums** (v334): a description-style synopsis (context, how it was made, sound, legacy) authored in batches of ~35 by the data authoring flow. Written in human prose, no em dashes. Default omitted. |
 | `tracks` | array | ❌ | **Albums only** (v332). The album's track list — `[{ "number": 1, "title": "…", "duration": "3:28" }, …]` — powering the TRACKLIST card + track-list sheet on Topic Reveal. `duration` is an `m:ss` (or `h:mm:ss`) string, empty when the source omits per-track lengths. Default omitted. |
 
 ---

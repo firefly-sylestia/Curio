@@ -66,6 +66,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
@@ -75,7 +76,6 @@ import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.publicationYear
-import com.curio.app.data.TopicIndexEntry
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.features.settings.SettingsHeroActionPill
 import com.curio.app.ui.components.CurioSearchField
@@ -224,8 +224,15 @@ fun TopicDatabaseScreen(navController: NavController) {
         pendingCats = emptySet()
         catPanelQuery = ""
     }
+    // v342 — DONE COMMITS THE PENDING SET. The old line ran
+    // `(pendingCats ?: selectedCats).let { commitCats { it } }` — inside that
+    // trailing lambda `it` is the CURRENT committed selection (the argument
+    // commitCats passes to update), not the pending set, so Done was an
+    // identity commit: ticking categories in the panel then tapping Done
+    // silently discarded the pick and the filter never changed. The update
+    // now explicitly returns the pending set when one exists.
     val onPanelDone = {
-        (pendingCats ?: selectedCats).let { commitCats { it } }
+        commitCats { pendingCats ?: it }
         categoryPanelOpen = false
     }
     // The category UI visible under the hero: the open panel, or the compact
@@ -285,145 +292,110 @@ fun TopicDatabaseScreen(navController: NavController) {
     // display name (Wildcard naturally sits near the end), so lanes are
     // easy to find instead of following the deck's default order.
     // v294 — "All" (WILDCARD) only shows when searching; default view is per-category.
-    val visibleCategories = if (searchActive) {
-        CurioCategories.visible + listOf(CurioCategories.byId(CategoryId.WILDCARD))
-    } else {
-        CurioCategories.visible
+    // v339 — STABLE IDENTITY: computed once per (search mode, hidden/order state)
+    // instead of a fresh list on every recomposition. `catalog` is remembered
+    // on this list, the `indexedTopics` produceState and the row-build
+    // LaunchedEffect below are keyed on `catalog`, so a NEW list instance on
+    // every recomposition restarted the whole pipeline — each restart rebuilt
+    // ~16k IndexedTopic + row objects on the background thread, allocating
+    // tens of MB and forcing a GC every second or two (the browser jank and
+    // the constant "loading" feeling while scrolling).
+    val visibleCategories = remember(
+        searchActive,
+        AppPreferences.hiddenCategoriesState,
+        AppPreferences.categoryOrderState
+    ) {
+        val base = if (searchActive) {
+            CurioCategories.visible + listOf(CurioCategories.byId(CategoryId.WILDCARD))
+        } else {
+            CurioCategories.visible
+        }
+        base.distinctBy { it.id }
+            .sortedBy { it.displayName.lowercase() }
     }
-        .distinctBy { it.id }
-        .sortedBy { it.displayName.lowercase() }
     // The merged wildcard pool duplicates every canonical topic, so the
     // Wildcard lane shows ONLY the hand-curated wildcard.json originals —
     // the ten lanes keep their own topics and the sections never overlap.
     fun laneTopics(cat: CurioCategory, topics: List<CurioTopic>): List<CurioTopic> =
         if (cat.id == CategoryId.WILDCARD) topics.filter { it.categoryId == CategoryId.WILDCARD }
         else topics
-    val cachedCatalog = remember(visibleCategories) {
+    // v347 — ONE catalog derivation from the loader's memory cache, with the
+    // fill off the composition path:
+    //  - Before v347 the catalog was built from TWO sources (a per-category
+    //    produceState, then a swap to a merged-index derivation the moment
+    //    loadIndex() landed). On a cold open that churned TWO catalog
+    //    identities and rebuilt IndexedTopic + rows from each source, so the
+    //    browser sat on "Preparing topics…" longer than the older builds.
+    //    Both sources are the SAME cached lane lists, so the catalog now
+    //    derives from the loader cache directly.
+    //  - The cached lane lists are stable objects: catalog recomputes only
+    //    when the lane set changes (search toggle, hidden/order prefs) or
+    //    right after a fill actually loaded something — one identity per
+    //    open, so indexedTopics and the row build each run ONCE.
+    var catalogGen by remember { mutableIntStateOf(0) }
+    val catalog: List<Pair<CurioCategory, List<CurioTopic>>> = remember(
+        visibleCategories, catalogGen
+    ) {
         visibleCategories.mapNotNull { cat ->
             TopicJsonLoader.cached(cat.id)?.let { topics -> cat to laneTopics(cat, topics) }
         }
     }
-    // v29 — the merged index path: the prebuilt topic_index.json (search
-    // keys + year precomputed by scripts/build_topic_index.py) is parsed
-    // when present; v174f — it no longer ships, so TopicJsonLoader builds
-    // the same index at runtime from the per-category pools, prewarmed at
-    // app start. Either way the browser renders from ONE merged list
-    // INSTANTLY (no per-category parses, no runtime lowercase/year work)
-    // and stays flat as the catalog grows past 20k. Falls back to the live
-    // per-category load when the index is missing (or still warming on a
-    // cold start).
-    val indexEntries by produceState<List<TopicIndexEntry>?>(
-        initialValue = TopicJsonLoader.cachedIndex(),
-        AppPreferences.hiddenCategoriesState,
-        AppPreferences.categoryOrderState
-    ) {
-        value = withContext(Dispatchers.Default) {
-            runCatching { TopicJsonLoader.loadIndex() }.getOrNull()
-        }
+    // [catalogFilled] flips true after the first fill attempt so a lane that
+    // genuinely fails to parse (v49 — skipped, never fatal) can't hold the
+    // screen on "Preparing topics…" forever: like the old fallback, the rest
+    // of the catalog still renders without the broken lane.
+    var catalogFilled by remember(visibleCategories) {
+        mutableStateOf(visibleCategories.all { TopicJsonLoader.cached(it.id) != null })
     }
-    val useIndex = indexEntries != null
-    // The fallback per-category load only runs when the index is absent.
-    val catalogState by produceState<CatalogState>(
-        initialValue = CatalogState(
-            entries = cachedCatalog,
-            loading = cachedCatalog.size < visibleCategories.size
-        ),
-        AppPreferences.hiddenCategoriesState,
-        AppPreferences.categoryOrderState,
-        useIndex
-    ) {
-        if (useIndex) {
-            value = CatalogState(entries = emptyList(), loading = false)
-        } else {
-            value = withContext(Dispatchers.Default) {
-                // Load the canonical lanes; the wildcard lane reuses those
-                // caches (its pool merges every lane, then we keep only its
-                // own curiosities) so the extra lane adds no duplicate parses.
+    // Fill any lane the loader hasn't parsed yet (cold open, or a lane the
+    // app-start prewarm hasn't reached), then bump the generation so catalog
+    // picks up the warm cache in ONE recompute. load() dedupes with the
+    // prewarm (shared in-flight parse), so no lane is ever parsed twice. The
+    // generation only bumps when a fill actually loaded something — a warm
+    // lane-set change (search toggle) keeps one catalog identity.
+    LaunchedEffect(visibleCategories) {
+        val missing = visibleCategories.filter { TopicJsonLoader.cached(it.id) == null }
+        if (missing.isNotEmpty()) {
+            withContext(Dispatchers.Default) {
                 // v49 — a failed lane is SKIPPED, never fatal: an exception
-                // here used to kill the produceState producer and freeze the
-                // screen on "Loading topics…" forever. One bad file now
-                // drops just its lane; the rest of the catalog still renders.
-                CatalogState(
-                    entries = visibleCategories.mapNotNull { cat ->
-                        runCatching {
-                            cat to laneTopics(cat, TopicJsonLoader.load(cat.id))
-                        }.getOrNull()
-                    },
-                    loading = false
-                )
+                // here used to freeze the screen on "Loading topics…". One
+                // bad file now drops just its lane; the rest still renders.
+                missing.forEach { cat -> runCatching { TopicJsonLoader.load(cat.id) } }
             }
+            catalogGen++
         }
+        catalogFilled = true
     }
-    val catalog: List<Pair<CurioCategory, List<CurioTopic>>> = if (useIndex) {
-        remember(indexEntries, visibleCategories) {
-            val byId = indexEntries.orEmpty().groupBy { it.topic.categoryId }
-            visibleCategories.mapNotNull { cat ->
-                val topics = byId[cat.id]
-                    ?.map { it.topic }
-                    ?.let { laneTopics(cat, it) }
-                    .orEmpty()
-                if (topics.isEmpty()) null else cat to topics
-            }
-        }
-    } else {
-        catalogState.entries
-    }
-    val catalogLoading = !useIndex && catalogState.loading
+    val catalogLoading = !catalogFilled || catalog.size < visibleCategories.size
     val totalTopics = catalog.sumOf { it.second.size }
 
-    // Build the expensive search/sort fields off the composition thread once
-    // per catalog load (the index path uses the PRE-COMPUTED keys + year, so
-    // that work disappears entirely). Sorting used to lowercase strings and
-    // create year regexes for thousands of topics on the UI thread on every
-    // chip tap.
+    // Build the search/sort fields (lowercase keys + word lists + year) OFF
+    // the composition thread, ONCE per catalog identity. v347 — the old code
+    // seeded this producer with a 20k map derived from the merged index and
+    // then IMMEDIATELY rebuilt the same 20k objects from that index in the
+    // producer body (produceState always runs its block on launch, so the
+    // seed was pure duplicate work on every open — warm or cold), and on a
+    // cold start the whole thing ran a THIRD time when the index source
+    // swapped in behind the fallback. One build per open now.
     val indexedTopics by produceState<List<IndexedTopic>>(
-        // Warm-cache seed: when the index is already prewarmed, the rows are
-        // ready on the very first frame — no "Preparing topics…" flash.
-        initialValue = TopicJsonLoader.cachedIndex().orEmpty().map { entry ->
-            IndexedTopic(
-                category = CurioCategories.byId(entry.topic.categoryId),
-                topic = entry.topic,
-                nameKey = entry.nameKey,
-                subtypeKey = entry.subtypeKey,
-                bylineKey = entry.bylineKey,
-                teaserKey = entry.teaserKey,
-                tagKeys = entry.tagKeys,
-                year = entry.year
-            )
-        },
-        catalog,
-        useIndex
+        initialValue = emptyList(),
+        catalog
     ) {
-        value = if (useIndex) {
-            indexEntries.orEmpty().map { entry ->
-                IndexedTopic(
-                    category = CurioCategories.byId(entry.topic.categoryId),
-                    topic = entry.topic,
-                    nameKey = entry.nameKey,
-                    subtypeKey = entry.subtypeKey,
-                    bylineKey = entry.bylineKey,
-                    teaserKey = entry.teaserKey,
-                    tagKeys = entry.tagKeys,
-                    year = entry.year
-                )
-            }
-        } else {
-            withContext(Dispatchers.Default) {
-                catalog.flatMap { (cat, topics) ->
-                    topics.map { topic ->
-                        IndexedTopic(
-                            category = cat,
-                            topic = topic,
-                            nameKey = topic.name.lowercase(),
-                            subtypeKey = topic.subtype.lowercase(),
-                            bylineKey = topic.byline.lowercase(),
-                            teaserKey = topic.teaser.lowercase(),
-                            tagKeys = topic.tags.map(String::lowercase),
-                            year = topicYear(topic)
-                        )
-                    }
-                }.distinctBy { it.topic.id }
-            }
+        value = withContext(Dispatchers.Default) {
+            catalog.flatMap { (cat, topics) ->
+                topics.map { topic ->
+                    IndexedTopic(
+                        category = cat,
+                        topic = topic,
+                        nameKey = topic.name.lowercase(),
+                        subtypeKey = topic.subtype.lowercase(),
+                        bylineKey = topic.byline.lowercase(),
+                        teaserKey = topic.teaser.lowercase(),
+                        tagKeys = topic.tags.map(String::lowercase),
+                        year = topicYear(topic)
+                    )
+                }
+            }.distinctBy { it.topic.id }
         }
     }
     // v7.97 — a persisted filter can outlive its lane (a category hidden in
@@ -470,15 +442,6 @@ fun TopicDatabaseScreen(navController: NavController) {
                 fuzzyContainsOnWords(dn, needle)
         }.map { it.id }.toSet()
     }
-    // Title-first sort: exact title matches rank highest, then startsWith, then contains
-    val titleComparator = compareBy<IndexedTopic> { t ->
-        when {
-            t.nameKey == needle -> 0 // exact match
-            t.nameKey.startsWith(needle) -> 1 // starts with
-            t.nameKey.contains(needle) -> 2 // contains in title
-            else -> 3 // matched in other fields
-        }
-    }
     // v333 — ONE catalog scan per settled query produces BOTH the result
     // rows and the per-lane stats (panel counts + "Also in" pills). The old
     // code ran two independent full-catalog scans per query (one for counts,
@@ -498,15 +461,19 @@ fun TopicDatabaseScreen(navController: NavController) {
     var searchPassReady by remember { mutableStateOf(false) }
     LaunchedEffect(catalog, topicsByCat, indexedTopics, effectiveCats, needle, doneTopics) {
         val next = withContext(Dispatchers.Default) {
-            val indexById = indexedTopics.associateBy { it.topic.id }
             if (needle.isEmpty()) {
-                // BROWSE MODE: per-lane with section headers (unchanged).
+                // BROWSE MODE: per-lane with section headers. v347 — rows
+                // come from the PRE-GROUPED lane lists (topicsByCat, built
+                // once per indexedTopics) instead of a fresh
+                // `indexedTopics.associateBy` + filter + sort over all ~20k
+                // topics on every category switch: with an empty needle the
+                // filter and sort are no-ops and the lane order is already
+                // final, so a lane switch only walks the SELECTED lanes'
+                // prebuilt lists instead of remapping the whole catalog.
                 val rows = buildList {
-                    catalog.forEach { (cat, topics) ->
+                    catalog.forEach { (cat, _) ->
                         if (effectiveCats.isNotEmpty() && cat.id !in effectiveCats) return@forEach
-                        val shown = topics.mapNotNull { indexById[it.id] }
-                            .filter { matchLevel(it, needle) != null }
-                            .sortedWith(titleComparator)
+                        val shown = topicsByCat[cat.id].orEmpty()
                         if (shown.isEmpty()) return@forEach
                         // v314 — headers whenever browsing All or several lanes
                         // are selected; a single selected lane stays flat under
@@ -530,7 +497,10 @@ fun TopicDatabaseScreen(navController: NavController) {
                 // SEARCH MODE — v313 filter: results come ONLY from the
                 // selected lanes (or every lane when none are selected); the
                 // per-lane stats still scan EVERY lane so the panel counts
-                // and "Also in" pills stay accurate.
+                // and "Also in" pills stay accurate. (The id map is built
+                // HERE, only when a query is actually settled — browse
+                // switches never pay for it.)
+                val indexById = indexedTopics.associateBy { it.topic.id }
                 val exact = ArrayList<RankedHit>()
                 val similar = ArrayList<RankedHit>()
                 val laneTotals = HashMap<CategoryId, Int>()
@@ -895,7 +865,7 @@ fun TopicDatabaseScreen(navController: NavController) {
                 // rows; phones keep the pinned overlay + fixed reservation.
                 if (wide) {
                     item(key = "hero", contentType = "hero") {
-                        heroFor(backdrop = null)
+                        heroFor(null)
                     }
                     if (filterUiVisible) {
                         item(key = "filter-ui", contentType = "filter-ui") {
@@ -1194,7 +1164,7 @@ fun TopicDatabaseScreen(navController: NavController) {
         // instead (heroFor above), so this pinned overlay only composes on
         // phones where the list reserves its footprint.
         if (!wide) {
-            heroFor(backdrop = if (isLiquidGlassPillsActive()) chipGlassBackdrop else null)
+            heroFor(if (isLiquidGlassPillsActive()) chipGlassBackdrop else null)
         }
     }
 }
@@ -1228,11 +1198,6 @@ private data class SearchGroupHeader(
 )
 
 /** One row in the database list — a category section header or a topic. */
-private data class CatalogState(
-    val entries: List<Pair<CurioCategory, List<CurioTopic>>>,
-    val loading: Boolean
-)
-
 private data class DatabaseRow(
     val key: String,
     val section: CurioCategory? = null,
