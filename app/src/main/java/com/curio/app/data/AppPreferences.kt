@@ -112,6 +112,7 @@ object AppPreferences {
     private const val KEY_REMINDER_ENABLED = "reminder_enabled"
     private const val KEY_REMINDER_HOUR = "reminder_hour"
     private const val KEY_TINT_WASH_ENABLED = "tint_wash_enabled"
+    private const val KEY_SHARE_AUTO_FIT = "share_auto_fit"
     private const val KEY_ENTRY_META_ENABLED = "entry_meta_enabled"
     private const val KEY_SMART_SPIN_LAYOUT = "smart_spin_layout"
     // v7.4 — the density rule is a 3-way STRENGTH picker now. The legacy
@@ -1007,6 +1008,16 @@ object AppPreferences {
         private set
 
     /**
+     * Reactive share-card SMART AUTO-FIT state — updated by
+     * [setShareAutoFitEnabled] so the editor's toggle applies instantly:
+     * long quick-fact text auto-shrinks, grows the fact box and nudges it
+     * up (default ON; manual moves/resizes of a box disable auto-fit for
+     * that box).
+     */
+    var shareAutoFitState by mutableStateOf(true)
+        private set
+
+    /**
      * Reactive entry-meta state — updated by [setEntryMetaEnabled] so the
      * saved-entry meta card (date & time / mood / type), the "Captured
      * today · 3:42 PM" time, and the journal's mood + attachment sections
@@ -1357,6 +1368,7 @@ object AppPreferences {
         glassReflectionScaleState = getGlassReflectionScale(context)
         glassIndicatorShadowScaleState = getGlassIndicatorShadowScale(context)
         tintWashEnabledState = isTintWashEnabled(context)
+        shareAutoFitState = isShareAutoFitEnabled(context)
         entryMetaEnabledState = isEntryMetaEnabled(context)
         smartSpinLayoutState = isSmartSpinLayoutEnabled(context)
         smartDensityModeState = getSmartDensityMode(context)
@@ -1988,6 +2000,16 @@ object AppPreferences {
     fun setGlassIndicatorShadowScale(context: Context, value: Float) {
         prefs(context).edit().putInt(KEY_GLASS_INDICATOR_SHADOW_SCALE, (value * 100).toInt()).apply()
         glassIndicatorShadowScaleState = value.coerceIn(0f, 2f)
+    }
+
+    // ── Share-card smart auto-fit ─────────────────────────────────────
+    /** Whether the share-card editor's smart auto-fit is on (default ON). */
+    fun isShareAutoFitEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_SHARE_AUTO_FIT, true)
+
+    fun setShareAutoFitEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_SHARE_AUTO_FIT, enabled).apply()
+        shareAutoFitState = enabled
     }
 
     // ── Category tint wash ────────────────────────────────────────────

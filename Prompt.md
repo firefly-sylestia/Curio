@@ -1,56 +1,52 @@
-# Request Log — notes-sheet cover colors accurate + top glow follows the palette
+# Request Log — advance share-card adapt system
 
-## Status: complete — committing & pushing (CI will validate)
+## Status: in progress (implementation started)
 
 ## The request (user)
-"the color extraction and applying in the bottom sheet of series books and
-album synopsis are not very accurate and also that top style like a glow
-that doesnt change color too. so can u fix it, in app"
+Long list for the share-card editor: smart auto-adjust for long texts
+(box grows + moves up, default ON), fact box height must expand much more
+on the tall card, corner-drag whole-box resize, grouped move (fact drags
+title+info along, each still separately draggable), more (darker) color
+tones, auto text color, sat/contrast must only hit the background (never
+text/polaroid), fix handles that stop working when overlapping another
+box, inline editing for custom fact / chapter progress / chapter review
+(no toolbar text box), editable chapter title for chapter review, and
+after pushing: ask the user for a testing review.
 
-## Root causes found (empirical, via a Palette simulation on real covers)
+## User decisions (ask_user)
+1. Dark tones: **available immediately** (no level gate).
+2. Chapter review title: **separate edit field** next to the chapter
+   picker (chip stays above the review; review text edited inline).
+3. Auto-fit vs manual edits: **manual edits win** — once the user moves
+   or resizes a box, auto-fit stops adjusting that box.
 
-1. **Wash hue came from the DARK swatch.** `notesSheetPalette` keyed the
-   sheet container off `darkVibrant ?: darkMuted ?: ...` — on most covers
-   the dark swatch is near-grey (low saturation), and a near-grey's HSL
-   hue is numerically noisy. Result: colorful covers washed out to neutral
-   (e.g. On the Road's tan/grey-blue art rendered a #ECECEE grey sheet).
-2. **The tint was too faint to read.** Light-mode container saturation was
-   capped at 0.28 at 0.93 lightness — a whisper of cream, so the cover hue
-   barely showed even when the hue was right.
-3. **Near-black covers degenerated.** Covers dominated by black (Open
-   Library dark covers, e.g. The Midnight Mass Murders) returned
-   achromatic swatches → the sheet went grey with a pure-black accent
-   (invisible on dark, muddy in light).
-4. **The top "glow" never changed color.** `NotesSheetTopHairline` hardcoded
-   `cat.themedAccent()` — the static category accent — so the hairline glow
-   under the drag handle stayed category-colored while the cover-tinted
-   sheet changed around it.
-
-## Fix
-
-- `data/CoverPalette.kt` — extraction: 192→256px decode, and
-  `Palette.Builder(...).maximumColorCount(24)` (default 16 merges a
-  cover's hues into a muddy average).
-- `ui/theme/CategoryInk.kt` — `notesSheetPalette` rebuilt:
-  - Accent = vibrant-family pick, kept only when it carries real hue
-    (saturation ≥ 0.14); otherwise the most-saturated swatch; if ALL are
-    achromatic → return null → category wash (no more grey sheets / black
-    accents).
-  - Accent lightness pulled into a usable band (floor 0.22→0.30, light-mode
-    ceiling 0.72→0.60) so progress bars/selected rows/pills stay visible.
-  - Wash hue now from the ACCENT (the cover's hue carrier), wash
-    saturation raised (`(s·0.55).coerceIn(0.16, 0.42)` light /
-    `≤0.45` dark), lightness 0.93→0.90 light — the cover hue actually reads.
-- `features/reveal/TopicRevealScreen.kt` — `NotesSheetTopHairline` takes
-  the sheet's RESOLVED accent (cover-derived, category fallback); all three
-  sheets (book / album / series) pass their `accent`.
-
-Verified with a Python Palette simulation on real book/album/series covers:
-colorful covers now tint the sheet with their own hue (tan, periwinkle,
-rose), black/minimal covers fall back to the category wash, and accents are
-never invisible.
+## Implementation map (TopicShareCard.kt + AppPreferences)
+- `AppPreferences.shareAutoFitState` (default true) + getter/setter.
+- Auto-fit computed INSIDE TopicShareCard at render (so export matches):
+  length → autoHeightFrac + autoDy (negative), applied to fact box; autoDy
+  also nudges title + meta (consistent with the grouped-move request).
+  Disabled per fact box once the user manually moved/resized it.
+- Fact height: slider 0.35f..5f (was ..2.5f), `lines` max 28→64,
+  `fitLines` max 48→80, inline field maxLines 24→60.
+- Corner resize: new corner grip on the selected title/fact/meta box that
+  scales width+height together; "Whole box" slider in the Box-size panel.
+- Grouped move: the fact MoveHandle adds its applied delta to title + meta
+  offsets too (title→meta grouping already exists).
+- Tones: add `unlockLevel: Int?` to ShareCardPalette (null = always);
+  pool = tones with null level or <= current level; ~8 new dark tones
+  (null level) with auto-derived light ink.
+- Sat/contrast: remove whole-card colorFilter; thread the matrix into each
+  style and apply it to the BACKGROUND layers only.
+- Handles: collect all MoveHandle/corner specs, draw them LAST in the
+  overlay so a handle always wins touch over an overlapping box.
+- Inline editing: chapter_review field binds customText only (chip is the
+  prefix in the rendered text) + field shifted down one line to sit on the
+  review text; remove the toolbar OutlinedTextField for custom/review;
+  add a "Chapter title" override field in the Content panel (persisted
+  per share); "Edit text" pill shows for custom fact even under progress.
+- Auto-fit toggle switch in the Text-size panel (default ON).
 
 ## Docs
-- app/AGENTS.md: v363 entry (cover-color accuracy pass).
-- fastlane changelog 20260921.txt: FIX bullet at the top.
+- fastlane changelog 20260921.txt: bullets at top after this lands.
+- app/AGENTS.md: v369 entry.
 - Prompt.md: this log.
