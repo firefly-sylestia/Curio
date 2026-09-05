@@ -137,14 +137,35 @@ suspend fun resolveAppleMusicItemUrl(topic: CurioTopic): String? = withContext(D
         .takeIf { it.length == 2 }
         ?.lowercase(Locale.ROOT)
         ?: "us"
+    // v107 — focused catalog query: artist + title. byline IS the artist
+    // for Album/Song topics; a trailing "(1984)" makes the API return
+    // zero results, so strip it. The subtype word ("Song") adds no signal
+    // here.
+    val byline = topic.byline.takeIf { it.isNotBlank() }
+        ?: if (topic.subtype.equals("Album", ignoreCase = true)) extractArtist(topic.teaser) else null
+    val title = topic.name.replace(TRAILING_YEAR_IN_PARENS, "").trim()
+
+    // v364 — ALBUM deep links resolve through the ARTIST'S REAL catalog:
+    // the search API's ranking is unreliable for famous catalogs — the
+    // actual "Nevermind" (Nirvana) and "The Dark Side of the Moon" (Pink
+    // Floyd) never appear in the top 25 search hits at all, so a
+    // results[0] deep link opened a tribute album, a same-title single by
+    // another artist, or a totally different album ("The Wall") — which
+    // reads as a wrong or blank Apple Music page. New path: resolve the
+    // artist ID, pull their album catalog (/lookup), and match the title
+    // with a strict score gate; fall back to a SCORED search (never blind
+    // results[0]) and finally null, which sends the caller to the plain
+    // search link.
+    if (entity == "album") {
+        return@withContext runCatching {
+            val artistId = resolveArtistId(byline, storefront)
+            val web = artistId?.let { bestAlbumFromCatalog(it, title, byline, storefront) }
+                ?: bestAlbumFromSearch(title, byline, storefront)
+            web?.let { toAppleMusicDeepLink(it) }
+        }.getOrNull()
+    }
+
     runCatching {
-        // v107 — focused catalog query: artist + title. byline IS the
-        // artist for Album/Song topics; a trailing "(1984)" makes the API
-        // return zero results, so strip it. The subtype word ("Song") adds
-        // no signal here.
-        val byline = topic.byline.takeIf { it.isNotBlank() }
-            ?: if (topic.subtype.equals("Album", ignoreCase = true)) extractArtist(topic.teaser) else null
-        val title = topic.name.replace(TRAILING_YEAR_IN_PARENS, "").trim()
         val query = Uri.encode(listOfNotNull(byline, title).joinToString(" "))
         val conn = URL(
             "https://itunes.apple.com/search?term=$query&media=music&entity=$entity&country=$storefront&limit=1"
@@ -160,19 +181,155 @@ suspend fun resolveAppleMusicItemUrl(topic: CurioTopic): String? = withContext(D
             // via the ALBUM page + ?i=trackId (the /song/{id} route 404s),
             // and the URL's country matches the device storefront.
             val web = when (entity) {
-                "album" -> first.optString("collectionViewUrl")
                 "song" -> first.optString("trackViewUrl")
                 else -> first.optString("artistLinkUrl")
             }
             if (web.isBlank()) return@runCatching null
-            "music://" + web
-                .removePrefix("https://")
-                .removePrefix("http://")
-                .replace(UO_TRACKING_PARAM, "")
+            toAppleMusicDeepLink(web)
         } finally {
             conn.disconnect()
         }
     }.getOrNull()
+}
+
+/** v364 — `music://` deep link from an https Apple Music page URL. */
+private fun toAppleMusicDeepLink(web: String): String =
+    "music://" + web
+        .removePrefix("https://")
+        .removePrefix("http://")
+        .replace(UO_TRACKING_PARAM, "")
+
+/** v364 — keyless GET with the same 8s timeouts as the existing paths. */
+private fun itunesHttpGet(url: String): String? = runCatching {
+    val conn = URL(url).openConnection() as HttpURLConnection
+    try {
+        conn.connectTimeout = 8000
+        conn.readTimeout = 8000
+        if (conn.responseCode != HttpURLConnection.HTTP_OK) return null
+        conn.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+    } finally {
+        conn.disconnect()
+    }
+}.getOrNull()
+
+/** v364 — the artist's iTunes ID (exact name match on the musicArtist
+ *  search; null when the name isn't found or the network fails). */
+private fun resolveArtistId(byline: String?, storefront: String): Long? {
+    if (byline.isNullOrBlank()) return null
+    val json = itunesHttpGet(
+        "https://itunes.apple.com/search?term=${Uri.encode(byline)}&media=music&entity=musicArtist&country=$storefront&limit=5"
+    ) ?: return null
+    val results = runCatching { JSONObject(json).optJSONArray("results") }.getOrNull() ?: return null
+    for (i in 0 until results.length()) {
+        val r = results.optJSONObject(i) ?: continue
+        if (r.optString("artistName").equals(byline, ignoreCase = true)) {
+            val id = r.optLong("artistId", 0L)
+            if (id > 0L) return id
+        }
+    }
+    null
+}
+
+/**
+ * v364 — best album URL from the artist's OWN catalog (/lookup entity=album,
+ * up to 200 albums). Score gate: >= 25 means an EXACT title (any artist) or
+ * a title-containment fuzzy WITH the exact artist — anything weaker
+ * (word-overlap fuzzy, a tribute/single by another artist) is rejected so
+ * a wrong-album deep link never ships. Ties prefer real albums
+ * (trackCount > 0 — a trackless preorder renders as a blank page).
+ */
+private fun bestAlbumFromCatalog(
+    artistId: Long,
+    title: String,
+    byline: String?,
+    storefront: String
+): String? {
+    val json = itunesHttpGet(
+        "https://itunes.apple.com/lookup?id=$artistId&entity=album&country=$storefront&limit=200"
+    ) ?: return null
+    val results = runCatching { JSONObject(json).optJSONArray("results") }.getOrNull() ?: return null
+    var bestUrl: String? = null
+    var bestScore = 0
+    var bestTracks = false
+    for (i in 0 until results.length()) {
+        val r = results.optJSONObject(i) ?: continue
+        if (r.optString("wrapperType") != "collection") continue
+        val score = appleAlbumScore(
+            r.optString("collectionName"), title, r.optString("artistName"), byline
+        )
+        if (score < 25) continue
+        val tracks = r.optInt("trackCount", 0) > 0
+        if (score > bestScore || (score == bestScore && tracks && !bestTracks)) {
+            bestScore = score
+            bestTracks = tracks
+            bestUrl = r.optString("collectionViewUrl").takeIf { it.isNotBlank() }
+        }
+        if (score >= 35) break
+    }
+    bestUrl
+}
+
+/** v364 — fallback scored search (10 results, same >= 25 gate as the
+ *  catalog path): catches albums whose artist name differs from the topic's
+ *  byline, so the artist lookup can't run. */
+private fun bestAlbumFromSearch(
+    title: String,
+    byline: String?,
+    storefront: String
+): String? {
+    val query = Uri.encode(listOfNotNull(byline, title).joinToString(" "))
+    val json = itunesHttpGet(
+        "https://itunes.apple.com/search?term=$query&media=music&entity=album&country=$storefront&limit=10"
+    ) ?: return null
+    val results = runCatching { JSONObject(json).optJSONArray("results") }.getOrNull() ?: return null
+    var bestUrl: String? = null
+    var bestScore = 0
+    var bestTracks = false
+    for (i in 0 until results.length()) {
+        val r = results.optJSONObject(i) ?: continue
+        val score = appleAlbumScore(
+            r.optString("collectionName"), title, r.optString("artistName"), byline
+        )
+        if (score < 25) continue
+        val tracks = r.optInt("trackCount", 0) > 0
+        if (score > bestScore || (score == bestScore && tracks && !bestTracks)) {
+            bestScore = score
+            bestTracks = tracks
+            bestUrl = r.optString("collectionViewUrl").takeIf { it.isNotBlank() }
+        }
+        if (score >= 35) break
+    }
+    bestUrl
+}
+
+/** v364 — iTunes album relevance: 35 = exact title + exact artist, 30 =
+ *  exact title, 25 = containment-fuzzy title + exact artist, 20 =
+ *  containment only, 15 = word-overlap + exact artist, 10 = overlap only,
+ *  0 = no match. The >= 25 gate admits only results that are unmistakably
+ *  the album. */
+private fun appleAlbumScore(name: String, wantTitle: String, artist: String, wantArtist: String?): Int {
+    val n = name.trim()
+    val w = wantTitle.trim()
+    val titleExact = n.equals(w, ignoreCase = true)
+    val containment = !w.isBlank() &&
+        (n.contains(w, ignoreCase = true) || w.contains(n, ignoreCase = true))
+    val overlap = titleWordsOverlap(n, w)
+    val artistExact = !wantArtist.isNullOrBlank() &&
+        artist.trim().equals(wantArtist.trim(), ignoreCase = true)
+    val titleScore = when {
+        titleExact -> 30
+        containment -> 20
+        overlap -> 10
+        else -> 0
+    }
+    return titleScore + if (artistExact) 5 else 0
+}
+
+/** True when the two titles share a meaningful (>= 4 char) word. */
+private fun titleWordsOverlap(a: String, b: String): Boolean {
+    val wa = a.split(Regex("[^A-Za-z0-9]+")).filter { it.length >= 4 }.map { it.lowercase() }.toSet()
+    val wb = b.split(Regex("[^A-Za-z0-9]+")).filter { it.length >= 4 }.map { it.lowercase() }.toSet()
+    return wa.any { it in wb }
 }
 
 /**
@@ -199,7 +356,14 @@ suspend fun resolveSpotifyItemUrl(topic: CurioTopic): String? = withContext(Disp
     val byline = topic.byline.takeIf { it.isNotBlank() }
         ?: if (topic.subtype.equals("Album", ignoreCase = true)) extractArtist(topic.teaser) else null
     val title = topic.name.replace(TRAILING_YEAR_IN_PARENS, "").trim()
-    val query = Uri.encode(listOfNotNull(byline, title).joinToString(" "))
+    // v364 — field-scoped quoted query: album:"..." artist:"..." / track:"..."
+    // / artist:"..." — the plain "artist title" query lets weak matches in
+    // (a same-title single by another artist can outrank the real album).
+    val artistPart = byline?.takeIf { it.isNotBlank() }?.let { " artist:\"$it\"" } ?: ""
+    val query = Uri.encode(
+        if (type == "artist") "artist:\"$title\""
+        else "$type:\"$title\"$artistPart"
+    )
     runCatching {
         val conn = URL("https://api.spotify.com/v1/search?q=$query&type=$type&limit=5")
             .openConnection() as HttpURLConnection
@@ -223,6 +387,9 @@ suspend fun resolveSpotifyItemUrl(topic: CurioTopic): String? = withContext(Disp
                     item.optJSONArray("artists")?.optJSONObject(0)?.optString("name").orEmpty(),
                     byline
                 )
+                // v364 — reject weak fuzzy-only matches (score 1): a wrong
+                // item is worse than falling back to the search link.
+                if (score < 2) continue
                 if (score > bestScore) {
                     bestScore = score
                     bestId = id

@@ -1,45 +1,40 @@
-# Request Log — fetch is provider-exclusive + Clear-covers memory-cache fix
+# Request Log — album deep-link accuracy + roadmap (synopsis batch, series enrichment)
 
-## Status: implementation complete — committing & pushing (CI will validate)
+## Status: album link fix complete — committing; next: book synopsis batch, then series enrichment
 
 ## The request (user)
-"the clear all covers doesnt work. and also i feel like the fecthing of
-covers is still uses the old api, heres what i want from other auto
-loading they are fine but when i select the provider and tap fetch then
-it should only feth from that for the fetch button not for the fallbacks"
+"the direct albumn open links are not accurate and it gives no result
+like oens blank apple music, so any way to fix" — plus instruction to
+then do the book synopsis fix ("many books dont have proper synopsis,
+start with 30 per batch, proper web searched sunopsis detailed, no need
+to ask") and then series enrichment.
 
-## Diagnosis
-Two root causes, both in `BookCoverFetch`:
-1. **"Clear doesn't work":** `clearAllCovers` only cleared the Coil DISK
-   cache. Decoded covers kept rendering instantly from the MEMORY cache,
-   so the hub's strip (and the reveal poster) looked unchanged after a
-   clear — it seemed broken.
-2. **"Still uses the old API":** `resolveVerifiedCoverUrl` (the bulk-fetch
-   path) built candidates as stored-URL → authored imageUrl → chosen
-   provider → cascade of ALL providers. Books with real authored covers
-   kept their identical image no matter which provider was selected
-   (authored always won first), so clearing + re-fetching with a new
-   provider showed the same covers — the fetch button was never a pure
-   provider test.
+## Diagnosis (verified live against the iTunes API)
+`resolveAppleMusicItemUrl` took `results[0]` of a `limit=1` album search
+with NO relevance check. The search API's ranking is unreliable for
+famous catalogs:
+- "Nirvana Nevermind" → real album NOT in top 25; top hits are tribute
+  albums and "Nevermind - Single" by Dennis Lloyd (another artist).
+- "Pink Floyd The Dark Side of the Moon" → real album NOT in top 25; top
+  hit is "Jenny of Oldstones" by a band NAMED "The Dark Side of the Moon".
+- "Pink Floyd …" with the album search also surfaced "The Wall" first.
+So LISTEN opened wrong albums (or blank pages) — the user's report.
 
-## What was done (BookCoverFetch.kt)
-- `resolveVerifiedCoverUrl`: now resolves ONLY the chosen provider's
-  URL(s) — no stored URL, no authored imageUrl, no fallback cascade.
-  A book the chosen provider can't serve is marked failed (lands in the
-  failed list / retry set). Verification (`loadsRealImage`, ≥40px short
-  edge) still applies. The reveal poster / share card / hub tiles keep
-  their own authored-first fallback via `coverCandidates` — the "auto
-  loading" the user said is fine — untouched.
-- `clearAllCovers`: now clears BOTH Coil caches — `memoryCache?.clear()`
-  in addition to `diskCache?.clear()`.
+## Fix (ExploreSearch.kt, v364)
+- Album path: resolve artist ID (musicArtist search, exact name) → pull
+  the artist's OWN catalog (`/lookup?id=…&entity=album&limit=200`) →
+  best title match with `appleAlbumScore` gate >= 25 (35 exact+artist,
+  30 exact, 25 containment+artist), tie-break `trackCount > 0` (preorders
+  render blank). Verified live: Nevermind 35, Dark Side 35, Sgt. Pepper
+  35, Led Zeppelin IV "(Remastered)" 25.
+- Fallback: SCORED search (limit=10, same gate); null → caller's search
+  link (never a wrong deep link).
+- Song/artist paths untouched (songs verified working). Both call sites
+  (reveal "Listen in" + album sheet LISTEN pill) use this resolver.
+- Spotify: field-scoped quoted query (`album:"…" artist:"…"`) + gate >= 2
+  (was > 0) so same-title other-artist items can't win.
 
-## Docs
-- app/AGENTS.md: **v363** entry (provider-exclusive fetch + memory-cache
-  clear).
-- fastlane changelog 20260921.txt: FIX bullet at the top.
-- Prompt.md: this log.
-
-## Verification
-- Braces/parens balanced (111/111, 320/320) on BookCoverFetch.kt.
-- `resolveVerifiedCoverUrl` has exactly one caller (`fetchAll`) — no other
-  path depended on the old cascade. CI will validate.
+## Next (user-ordered, no further questions)
+1. Book synopsis fix — first batch of 30 books whose synopses are
+   missing/short/weak; web-research and write detailed synopses.
+2. Series enrichment — continue batches (synopsis + episode lists).

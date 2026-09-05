@@ -626,6 +626,38 @@ app/src/main/java/com/curio/app/
     (MusicKit, $99/yr Apple Developer Program) which is overkill for album
     deep links. So album links stay keyless; no BuildConfig plumbing
     needed.
+- **v364 — album deep links resolve through the ARTIST'S REAL catalog.**
+  User: "the direct albumn open links are not accurate and it gives no
+  result like oens blank apple music, so any way to fix". Root cause
+  (verified live against the iTunes API): `resolveAppleMusicItemUrl` took
+  `results[0]` from a `limit=1` album search with NO relevance check, and
+  the search API's ranking is unreliable for famous catalogs — the real
+  "Nevermind" (Nirvana) and "The Dark Side of the Moon" (Pink Floyd)
+  don't appear in the top 25 hits AT ALL, so deep links opened tribute
+  albums, same-title singles by other artists, or a different album
+  entirely ("The Wall"), which reads as a wrong or blank page.
+  - **New album path (ExploreSearch.kt):** resolve the ARTIST ID via a
+    `entity=musicArtist` search (exact name match), pull the artist's OWN
+    album catalog (`/lookup?id={artistId}&entity=album&limit=200`), and
+    pick the best title match with a strict score gate
+    (`appleAlbumScore`: 35 = exact title + exact artist, 30 = exact
+    title, 25 = containment-fuzzy + exact artist; reject < 25),
+    preferring `trackCount > 0` (a trackless preorder renders as a blank
+    page). Verified: Nevermind 35 ✓, Dark Side of the Moon 35 ✓, Sgt.
+    Pepper 35 ✓, Led Zeppelin IV → "(Remastered)" 25 ✓.
+  - **Fallback:** a SCORED search (`limit=10`, same >= 25 gate) replaces
+    blind `results[0]` for albums whose artist name differs from the
+    byline; when nothing clears the gate the resolver returns null and
+    the caller falls back to the plain SEARCH link — a search is always
+    better than a wrong album. Song/artist paths are untouched (songs
+    were verified working; the song `trackViewUrl` route is preserved).
+    Both the reveal's "Listen in" and the album sheet's LISTEN pill use
+    this resolver, so both are fixed.
+  - **Spotify (same build):** the query is now field-scoped and quoted
+    (`album:"..." artist:"..."` / `track:"..."` / `artist:"..."`) and
+    the match gate rises from score > 0 to >= 2 (reject weak fuzzy-only
+    hits → search fallback), so a same-title item by another artist can't
+    win.
 - **v363 — fetch is provider-EXCLUSIVE; Clear also wipes memory cache.**
   User: "the clear all covers doesnt work … i feel like the fetching of
   covers is still uses the old api … when i select the provider and tap
