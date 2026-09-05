@@ -51,7 +51,9 @@ suspend fun fetchCoverSwatches(context: Context, url: String?, networkAllowed: B
             val request = ImageRequest.Builder(context)
                 .data(url)
                 // Small decode: palette work is on the hue, not the pixels.
-                .size(192)
+                // 256 keeps enough pixel detail for the quantizer to separate
+                // the cover's real hues (192 merged near-neighbours).
+                .size(256)
                 .allowHardware(false)
                 .networkCachePolicy(
                     if (networkAllowed) CachePolicy.ENABLED else CachePolicy.DISABLED
@@ -60,8 +62,11 @@ suspend fun fetchCoverSwatches(context: Context, url: String?, networkAllowed: B
             val result = context.imageLoader.execute(request)
             // Coil 2.7: success is the top-level SuccessResult type.
             val drawable = (result as? SuccessResult)?.drawable ?: return@runCatching null
-            val bitmap = drawable.toBitmap(192, 192)
-            val palette = Palette.from(bitmap).generate()
+            val bitmap = drawable.toBitmap(256, 256)
+            // 24 median-cut buckets instead of the default 16: finer buckets
+            // keep each hue family distinct (16 tends to merge a cover's
+            // colors into one muddy average, which dulls the swatches).
+            val palette = Palette.Builder(bitmap).maximumColorCount(24).generate()
             CoverSwatches(
                 vibrant = palette.vibrantSwatch?.rgb?.let { Color(it) },
                 muted = palette.mutedSwatch?.rgb?.let { Color(it) },

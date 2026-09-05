@@ -648,7 +648,32 @@ app/src/main/java/com/curio/app/
   Last Unicorn, The Power of Now, The Prophet, Homo Deus, The Art of
   War, Outliers, Grit, The Midnight Library, Quiet). 92 books total now
   carry quality synopses; the quality bar going forward is connected
-  prose, never topic catalogues.
+  prose,  never topic catalogues.
+- **v368 — notes-sheet cover colors accurate; top glow follows the
+  palette.** User: "the color extraction and applying in the bottom sheet
+  of series books and album synopsis are not very accurate and also that
+  top style like a glow that doesnt change color too. so can u fix it, in
+  app". Root causes (diagnosed with a Python Palette simulation on real
+  covers): (1) `notesSheetPalette` keyed the sheet wash off the DARK
+  swatch — near-grey on most covers, and a near-grey's HSL hue is
+  numerically noisy, so colorful covers washed out to neutral; (2) the
+  light-mode wash was capped at 0.28 saturation / 0.93 lightness — a
+  whisper of cream; (3) near-black covers (Open Library dark art) returned
+  achromatic swatches → grey sheet + invisible black accent; (4)
+  `NotesSheetTopHairline` hardcoded `cat.themedAccent()`, so the top glow
+  never changed color. Fixes: `fetchCoverSwatches` decodes at 256px and
+  quantizes 24 buckets (the default 16 merges a cover's hues into a muddy
+  average); `notesSheetPalette` keeps the vibrant-family accent only when
+  it carries real hue (sat >= 0.14, else the most-saturated swatch, else
+  null → category wash), pulls accent lightness into a usable band (floor
+  0.22→0.30, light-mode ceiling 0.72→0.60) so progress bars/selected
+  rows/pills stay visible, and drives the wash hue from the ACCENT with a
+  stronger visible tint (light `(s·0.55)` in [0.16, 0.42] at 0.90
+  lightness; dark cap 0.45 at 0.20); the hairline now takes the sheet's
+  RESOLVED accent in all three sheets (book / album / series). Verified
+  with the simulation: On the Road now wears its tan, The Little Prince a
+  visible periwinkle, and black/minimal covers fall back to the category
+  wash.
 - **v366 — book synopsis batch 2 + series batch 4.** Continuation of
   v365 (user: "yup go ahead"). `tools/enrich_book_synopses_batch2.py`
   rewrote the next 30 shortest synopses (Up from Slavery, Influence,

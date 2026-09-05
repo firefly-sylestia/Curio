@@ -462,21 +462,43 @@ fun CurioCategory.notesSheetPalette(swatches: CoverSwatches?): CoverSheetPalette
     if (swatches == null) return null
     if (materialThemeOn) return null
     if (!AppPreferences.tintWashEffective()) return null
+    // Accent = the classic vibrant-family pick, kept ONLY when it actually
+    // carries the cover's hue. Near-grey swatches (pure-black or white
+    // minimal covers — every target lands achromatic) turn the whole sheet
+    // grey with an invisible accent, so those return null and the category
+    // wash wins instead.
     val vibrant = swatches.vibrant ?: swatches.lightVibrant ?: swatches.muted
-    val dark = swatches.darkVibrant ?: swatches.darkMuted
-        ?: swatches.muted ?: swatches.vibrant ?: swatches.lightVibrant
-    val accent = vibrant ?: return null
-    val h = toHsl(dark ?: accent)
-    val onAccent = if (accent.luminance() > 0.5f) Color(0xFF121216) else Color(0xFFF4F4F6)
+    val accent = if (vibrant != null && toHsl(vibrant).s >= 0.14f) vibrant
+    else listOfNotNull(
+        swatches.vibrant, swatches.lightVibrant, swatches.muted,
+        swatches.darkVibrant, swatches.darkMuted, swatches.lightMuted
+    ).maxByOrNull { toHsl(it).s }?.takeIf { toHsl(it).s >= 0.14f } ?: return null
+    // Usable accent: never near-black (it melts into the dark canvas) and
+    // never near-white (it melts into the light cards). Hold the cover's hue
+    // + saturation and pull lightness into a readable band so progress bars,
+    // selected rows and pills stay visible against the sheet surfaces.
+    val accentHsl = toHsl(accent)
+    val accentFinal = when {
+        accentHsl.l < 0.22f -> fromHsl(accentHsl.h, accentHsl.s, 0.30f)
+        !isCurioDarkTheme() && accentHsl.l > 0.72f -> fromHsl(accentHsl.h, accentHsl.s, 0.60f)
+        else -> accent
+    }
+    // The wash hue comes from the ACCENT — the cover's hue carrier. The old
+    // recipe keyed off the DARK swatch, which is near-grey on most covers
+    // (its hue is numerically noisy), so even colourful covers washed out to
+    // neutral. The wash also holds MORE saturation now so the cover hue
+    // actually reads on the sheet instead of a whisper of cream.
+    val h = toHsl(accentFinal)
+    val onAccent = if (accentFinal.luminance() > 0.5f) Color(0xFF121216) else Color(0xFFF4F4F6)
     if (isCurioDarkTheme()) {
         // Deep cover-tinted canvas; cards step up through the dark tones and
-        // the vibrant swatch pops against the near-black wash.
+        // the accent pops against the near-black wash.
         return CoverSheetPalette(
-            container = fromHsl(h.h, (h.s * 0.55f).coerceAtMost(0.35f), 0.20f),
+            container = fromHsl(h.h, (h.s * 0.55f).coerceAtMost(0.45f), 0.20f),
             surface = fromHsl(h.h, (h.s * 0.55f).coerceAtMost(0.35f), 0.27f),
             surfaceHigh = fromHsl(h.h, (h.s * 0.60f).coerceAtMost(0.40f), 0.34f),
             surfaceAlt = fromHsl(h.h, (h.s * 0.65f).coerceAtMost(0.45f), 0.24f),
-            accent = accent,
+            accent = accentFinal,
             onAccent = onAccent,
             ink = fromHsl(h.h, (h.s * 0.30f).coerceAtMost(0.25f), 0.88f),
             onSurface = fromHsl(h.h, (h.s * 0.20f).coerceAtMost(0.18f), 0.92f),
@@ -484,14 +506,15 @@ fun CurioCategory.notesSheetPalette(swatches: CoverSwatches?): CoverSheetPalette
             onSurfaceAlt = fromHsl(h.h, (h.s * 0.20f).coerceAtMost(0.18f), 0.90f)
         )
     }
-    // Light: airy cover-tinted canvas, near-white cards, vibrant pops for
-    // selected states, deep cover-tinted ink for headers.
+    // Light: cover-tinted canvas (stronger than the old whisper — the cover
+    // hue should read), near-white cards, accent pops for selected states,
+    // deep cover-tinted ink for headers.
     return CoverSheetPalette(
-        container = fromHsl(h.h, (h.s * 0.42f).coerceAtMost(0.28f), 0.93f),
+        container = fromHsl(h.h, (h.s * 0.55f).coerceIn(0.16f, 0.42f), 0.90f),
         surface = fromHsl(h.h, (h.s * 0.30f).coerceAtMost(0.22f), 0.97f),
         surfaceHigh = fromHsl(h.h, (h.s * 0.28f).coerceAtMost(0.20f), 0.88f),
         surfaceAlt = fromHsl(h.h, (h.s * 0.35f).coerceAtMost(0.24f), 0.90f),
-        accent = accent,
+        accent = accentFinal,
         onAccent = onAccent,
         ink = fromHsl(h.h, (h.s * 0.50f).coerceAtMost(0.35f), 0.26f),
         onSurface = fromHsl(h.h, (h.s * 0.18f).coerceAtMost(0.16f), 0.16f),

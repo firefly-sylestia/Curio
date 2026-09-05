@@ -1,47 +1,56 @@
-# Request Log — book synopsis quality pass (connected prose)
+# Request Log — notes-sheet cover colors accurate + top glow follows the palette
 
 ## Status: complete — committing & pushing (CI will validate)
 
 ## The request (user)
-"analyse the books properly i feel some synopsis doesnt feel connected
-like i ont know, proper synopsis"
+"the color extraction and applying in the bottom sheet of series books and
+album synopsis are not very accurate and also that top style like a glow
+that doesnt change color too. so can u fix it, in app"
 
-## Audit findings
-Re-read all 60 rewritten synopses. The problem: the NON-FICTION ones
-were listy, sentences of the form "he shows X; he explores Y; he
-examines Z" with colon-catalogues (Predictably Irrational, Nudge, Ego
-Is the Enemy, Stillness Is the Key, The Tipping Point, Algorithms to
-Live By, The 48 Laws of Power, So Good They Can't Ignore You). A scan
-of the remaining 736 catalog entries found the same disease in the
-shortest ones (320-494 chars): thin one-paragraph blurbs with
-disconnected sentences.
+## Root causes found (empirical, via a Palette simulation on real covers)
 
-## Fix (tools/enrich_book_synopses_quality1.py) — 32 books
-Rewrote as flowing, connected prose. The recipe applied to every one:
-open with a human hook (Ariely's bandage story, Duckworth's classroom
-question, Tolle's night of despair, the nurses, the lobsters), develop
-the argument through natural transitions and woven-in examples (no
-mid-sentence colon-catalogues), and close by tying the whole together.
-- 8 of my own listy rewrites: Predictably Irrational, Nudge, Ego Is
-  the Enemy, Stillness Is the Key, The Tipping Point, Algorithms to
-  Live By, The 48 Laws of Power, So Good They Can't Ignore You.
-- 24 worst short ones: The Dispossessed, The Princess Bride, The
-  Jungle, Sister Carrie, Uncle Tom's Cabin, Love in the Time of
-  Cholera, Gideon the Ninth, The Souls of Black Folk, Ball Lightning,
-  The Tale of Genji, The Four Agreements, 12 Rules for Life, The Dark
-  Forest, Solaris, The Lion the Witch and the Wardrobe, The Last
-  Unicorn, The Power of Now, The Prophet, Homo Deus, The Art of War,
-  Outliers, Grit, The Midnight Library, Quiet.
-Validation: 32/32 entries changed, 988-1283 chars, no em/en dashes,
-curly quotes, double spaces or paren mismatches.
+1. **Wash hue came from the DARK swatch.** `notesSheetPalette` keyed the
+   sheet container off `darkVibrant ?: darkMuted ?: ...` — on most covers
+   the dark swatch is near-grey (low saturation), and a near-grey's HSL
+   hue is numerically noisy. Result: colorful covers washed out to neutral
+   (e.g. On the Road's tan/grey-blue art rendered a #ECECEE grey sheet).
+2. **The tint was too faint to read.** Light-mode container saturation was
+   capped at 0.28 at 0.93 lightness — a whisper of cream, so the cover hue
+   barely showed even when the hue was right.
+3. **Near-black covers degenerated.** Covers dominated by black (Open
+   Library dark covers, e.g. The Midnight Mass Murders) returned
+   achromatic swatches → the sheet went grey with a pure-black accent
+   (invisible on dark, muddy in light).
+4. **The top "glow" never changed color.** `NotesSheetTopHairline` hardcoded
+   `cat.themedAccent()` — the static category accent — so the hairline glow
+   under the drag handle stayed category-colored while the cover-tinted
+   sheet changed around it.
 
-## Status
-92 books now carry quality synopses. Going forward the quality bar is
-connected prose, never topic catalogues. Remaining: ~700 books still on
-the old longer-format synopses (mostly fine; the shortest ones are
-already done in batches 1, 2 and this pass).
+## Fix
+
+- `data/CoverPalette.kt` — extraction: 192→256px decode, and
+  `Palette.Builder(...).maximumColorCount(24)` (default 16 merges a
+  cover's hues into a muddy average).
+- `ui/theme/CategoryInk.kt` — `notesSheetPalette` rebuilt:
+  - Accent = vibrant-family pick, kept only when it carries real hue
+    (saturation ≥ 0.14); otherwise the most-saturated swatch; if ALL are
+    achromatic → return null → category wash (no more grey sheets / black
+    accents).
+  - Accent lightness pulled into a usable band (floor 0.22→0.30, light-mode
+    ceiling 0.72→0.60) so progress bars/selected rows/pills stay visible.
+  - Wash hue now from the ACCENT (the cover's hue carrier), wash
+    saturation raised (`(s·0.55).coerceIn(0.16, 0.42)` light /
+    `≤0.45` dark), lightness 0.93→0.90 light — the cover hue actually reads.
+- `features/reveal/TopicRevealScreen.kt` — `NotesSheetTopHairline` takes
+  the sheet's RESOLVED accent (cover-derived, category fallback); all three
+  sheets (book / album / series) pass their `accent`.
+
+Verified with a Python Palette simulation on real book/album/series covers:
+colorful covers now tint the sheet with their own hue (tan, periwinkle,
+rose), black/minimal covers fall back to the category wash, and accents are
+never invisible.
 
 ## Docs
-- app/AGENTS.md: v367 entry (quality pass).
+- app/AGENTS.md: v363 entry (cover-color accuracy pass).
 - fastlane changelog 20260921.txt: FIX bullet at the top.
 - Prompt.md: this log.
