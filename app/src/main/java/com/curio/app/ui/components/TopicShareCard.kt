@@ -7193,15 +7193,15 @@ fun TopicShareSheet(
                         )
                         Spacer(Modifier.height(6.dp))
                         BasicTextField(
-                            value = editFact,
-                            onValueChange = onFactChange,
+                            value = factFieldText,
+                            onValueChange = routeFactChange,
                             textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface, lineHeight = 22.sp),
                             cursorBrush = SolidColor(CoffeeChromeDeep),
                             singleLine = false,
                             maxLines = 8,
                             decorationBox = { inner ->
                                 Box(Modifier.fillMaxWidth()) {
-                                    if (editFact.isBlank()) Text(factFieldPlaceholder, style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
+                                    if (factFieldText.isBlank()) Text(factFieldPlaceholder, style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
                                     inner()
                                 }
                             },
