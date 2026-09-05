@@ -3949,6 +3949,9 @@ private fun AlbumNotesSheet(
     }
     val runtime = albumRuntimeSeconds(tracks)
     val haptics = LocalHapticFeedback.current
+    // v357 — coroutine scope for the LISTEN pill's Apple Music album lookup
+    // (deep-link resolution is a suspend iTunes search).
+    val scope = rememberCoroutineScope()
     // v336 — heart-picked favorite tracks for this album (multi-select).
     // Read reactively so a row-heart tap updates every heart in the sheet
     // (and the Vinyl share card) without leaving it.
@@ -4098,8 +4101,22 @@ private fun AlbumNotesSheet(
                                 onClick = {
                                     listenMenuOpen = false
                                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                    val url = albumListenUrl(topic, srv.id)
-                                    if (url.isNotBlank()) openSearchUrl(context, url)
+                                    // v357 — Apple Music opens the REAL album:
+                                    // an iTunes lookup resolves the album page
+                                    // (the same native deep link songs use),
+                                    // falling back to a search on a miss. The
+                                    // other services have no keyless album-ID
+                                    // lookup, so they keep the search link.
+                                    if (srv.id == "apple") {
+                                        scope.launch {
+                                            val url = resolveAppleMusicItemUrl(topic)
+                                                ?: albumListenUrl(topic, srv.id)
+                                            if (url.isNotBlank()) openSearchUrl(context, url)
+                                        }
+                                    } else {
+                                        val url = albumListenUrl(topic, srv.id)
+                                        if (url.isNotBlank()) openSearchUrl(context, url)
+                                    }
                                 },
                                 leadingIcon = {
                                     CurioIcon(

@@ -472,6 +472,22 @@ app/src/main/java/com/curio/app/
   - Hub provider picker follows the enum order (iTunes first); a stored
     LIBRARY_THING pick with no key configured silently falls back to
     iTunes.
+- **v357 — album LISTEN pill: Apple Music deep-links to the REAL album.**
+  User: "for album open links in apple music it's searching only… but for
+  song it perfectly opens the song inside the album, so can't we do the
+  same for albums too, and maybe for other services too".
+  - The album sheet's LISTEN → Apple Music entry now resolves the album via
+    `resolveAppleMusicItemUrl(topic)` (iTunes lookup, entity=album →
+    `collectionViewUrl` → `music://…/album/{id}` — the same native deep
+    link songs already use) and falls back to the search link only when
+    the lookup misses. Runs off a `rememberCoroutineScope` in
+    `AlbumNotesSheet`.
+  - Other services stay search deep links: Spotify needs OAuth
+    (client-credentials), Deezer now requires login/app registration, and
+    YouTube Music / Amazon Music expose no keyless album-ID lookup — there
+    is no keyless album deep link for them. (Spotify album deep links
+    could be added behind optional CLIENT_ID/CLIENT_SECRET secrets if ever
+    wanted.)
 - **v323 — picker hold actions become a gooey RADIAL menu; share-card
   Tone tool + 6 new tones; pet shop toys/games; quest fixes.** (1)
   **Radial hold menu** (`features/picker/RadialHoldMenu.kt`): the old
