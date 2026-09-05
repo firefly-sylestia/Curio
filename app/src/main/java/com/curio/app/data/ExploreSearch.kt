@@ -227,7 +227,7 @@ private fun resolveArtistId(byline: String?, storefront: String): Long? {
             if (id > 0L) return id
         }
     }
-    null
+    return null
 }
 
 /**
@@ -266,7 +266,7 @@ private fun bestAlbumFromCatalog(
         }
         if (score >= 35) break
     }
-    bestUrl
+    return bestUrl
 }
 
 /** v364 — fallback scored search (10 results, same >= 25 gate as the
@@ -299,7 +299,7 @@ private fun bestAlbumFromSearch(
         }
         if (score >= 35) break
     }
-    bestUrl
+    return bestUrl
 }
 
 /** v364 — iTunes album relevance: 35 = exact title + exact artist, 30 =
