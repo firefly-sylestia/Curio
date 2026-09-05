@@ -626,6 +626,29 @@ app/src/main/java/com/curio/app/
     (MusicKit, $99/yr Apple Developer Program) which is overkill for album
     deep links. So album links stay keyless; no BuildConfig plumbing
     needed.
+- **v367 — book synopsis QUALITY pass (connected prose).** User: "analyse
+  the books properly i feel some synopsis doesnt feel connected like i
+  ont know, proper synopsis". Audit of the 60 rewritten synopses found
+  the problem: the non-fiction ones were LISTY, sentences of the form
+  "he shows X; he explores Y; he examines Z" with colon-catalogues of
+  topics (Predictably Irrational, Nudge, Ego Is the Enemy, Stillness Is
+  the Key, The Tipping Point, Algorithms to Live By, The 48 Laws of
+  Power, So Good They Can't Ignore You), and the shortest pre-existing
+  synopses in the catalog (320-494 chars) had the same disconnected
+  feel. `tools/enrich_book_synopses_quality1.py` rewrote 32 synopses as
+  flowing, connected prose: each opens with a human hook (Ariely's
+  bandage-burn story, Duckworth's classroom question, Tolle's night of
+  despair), develops the argument through natural transitions instead of
+  catalogues, and closes by tying the whole together. 8 of my own
+  listy rewrites + 24 of the worst short ones (The Dispossessed, The
+  Princess Bride, The Jungle, Sister Carrie, Uncle Tom's Cabin, Love in
+  the Time of Cholera, Gideon the Ninth, The Souls of Black Folk, Ball
+  Lightning, The Tale of Genji, The Four Agreements, 12 Rules for Life,
+  The Dark Forest, Solaris, The Lion the Witch and the Wardrobe, The
+  Last Unicorn, The Power of Now, The Prophet, Homo Deus, The Art of
+  War, Outliers, Grit, The Midnight Library, Quiet). 92 books total now
+  carry quality synopses; the quality bar going forward is connected
+  prose, never topic catalogues.
 - **v366 — book synopsis batch 2 + series batch 4.** Continuation of
   v365 (user: "yup go ahead"). `tools/enrich_book_synopses_batch2.py`
   rewrote the next 30 shortest synopses (Up from Slavery, Influence,

@@ -1,46 +1,47 @@
-# Request Log — synopsis batch 2 + series batch 4 + album-resolver CI fix
+# Request Log — book synopsis quality pass (connected prose)
 
-## Status: all done — committing & pushing (CI will validate)
+## Status: complete — committing & pushing (CI will validate)
 
 ## The request (user)
-"yup go ahead and also fix this cl" (the pasted CI failure).
+"analyse the books properly i feel some synopsis doesnt feel connected
+like i ont know, proper synopsis"
 
-## 1. CI fix (ExploreSearch.kt) — DONE, pushed (99d0829c)
-The v364 album-resolver helpers were block-body functions ending in a
-bare expression (`null` / `bestUrl`) instead of an explicit `return`,
-which fails Kotlin with "Missing return statement" (lines 231, 270,
-303). Fixed `resolveArtistId` (return null), `bestAlbumFromCatalog`
-(return bestUrl), `bestAlbumFromSearch` (return bestUrl).
+## Audit findings
+Re-read all 60 rewritten synopses. The problem: the NON-FICTION ones
+were listy, sentences of the form "he shows X; he explores Y; he
+examines Z" with colon-catalogues (Predictably Irrational, Nudge, Ego
+Is the Enemy, Stillness Is the Key, The Tipping Point, Algorithms to
+Live By, The 48 Laws of Power, So Good They Can't Ignore You). A scan
+of the remaining 736 catalog entries found the same disease in the
+shortest ones (320-494 chars): thin one-paragraph blurbs with
+disconnected sentences.
 
-## 2. Book synopsis batch 2 — DONE
-tools/enrich_book_synopses_batch2.py rewrote the next 30 shortest
-synopses (1073-1327 chars, detailed web-verified, no em/en dashes):
-Up from Slavery, Influence, Little House on the Prairie, Freakonomics,
-The Ocean at the End of the Lane, My Antonia, The Awakening, The 48
-Laws of Power, The Bridge of San Luis Rey, Hogfather, Going Postal,
-Watership Down, The Republic, The Tombs of Atuan, Lessons in
-Chemistry, Maggie, Progress and Poverty, The Posthumous Memoirs of
-Bras Cubas, Brave New World Revisited, Ethan Frome, The Tipping
-Point, Pedro Paramo, Death Comes for the Archbishop, Tom Sawyer,
-Assassin's Apprentice, All Systems Red, Sapiens, Tuesdays with
-Morrie, Of Mice and Men, Rendezvous with Rama. 60 books now
-enriched. Diff: exactly 30 synopsis lines (2-space indent, no
-trailing newline format preserved).
+## Fix (tools/enrich_book_synopses_quality1.py) — 32 books
+Rewrote as flowing, connected prose. The recipe applied to every one:
+open with a human hook (Ariely's bandage story, Duckworth's classroom
+question, Tolle's night of despair, the nurses, the lobsters), develop
+the argument through natural transitions and woven-in examples (no
+mid-sentence colon-catalogues), and close by tying the whole together.
+- 8 of my own listy rewrites: Predictably Irrational, Nudge, Ego Is
+  the Enemy, Stillness Is the Key, The Tipping Point, Algorithms to
+  Live By, The 48 Laws of Power, So Good They Can't Ignore You.
+- 24 worst short ones: The Dispossessed, The Princess Bride, The
+  Jungle, Sister Carrie, Uncle Tom's Cabin, Love in the Time of
+  Cholera, Gideon the Ninth, The Souls of Black Folk, Ball Lightning,
+  The Tale of Genji, The Four Agreements, 12 Rules for Life, The Dark
+  Forest, Solaris, The Lion the Witch and the Wardrobe, The Last
+  Unicorn, The Power of Now, The Prophet, Homo Deus, The Art of War,
+  Outliers, Grit, The Midnight Library, Quiet.
+Validation: 32/32 entries changed, 988-1283 chars, no em/en dashes,
+curly quotes, double spaces or paren mismatches.
 
-## 3. Series batch 4 — DONE
-tools/enrich_series_batch4.py added synopsis + first-season episodes
-(titles verified against episode guides): The Good Place (13), Ted
-Lasso (10), The Mandalorian (8), Succession (10), True Detective (8).
-20 shows now carry episode data.
+## Status
+92 books now carry quality synopses. Going forward the quality bar is
+connected prose, never topic catalogues. Remaining: ~700 books still on
+the old longer-format synopses (mostly fine; the shortest ones are
+already done in batches 1, 2 and this pass).
 
 ## Docs
-- app/AGENTS.md: v366 entry (batches 2/4 + CI fix note).
-- fastlane changelog 20260921.txt: ADD bullets at the top.
+- app/AGENTS.md: v367 entry (quality pass).
+- fastlane changelog 20260921.txt: FIX bullet at the top.
 - Prompt.md: this log.
-
-## Next
-- Book synopsis batch 3 (next 30 shortest) and series batch 5
-  (Seinfeld, Twin Peaks, The X-Files, Lost, The Office US, Friends,
-  The Good Place done, Fargo, 24, Dark, Money Heist, Arcane, The
-  Bear, Peaky Blinders, Better Call Saul, Mindhunter, etc.) whenever
-  the user wants.
