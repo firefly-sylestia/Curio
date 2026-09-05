@@ -1,102 +1,47 @@
-# Request Log — Album fav-tracks strip redesign + movable; magnet snap removed; book covers + rating/read-chip fixes
+# Request Log — book synopsis quality pass (connected prose)
 
-## Status: implementation complete — committing & pushing (CI will validate)
+## Status: complete — committing & pushing (CI will validate)
 
-## The request (user, paraphrased)
-Two turns bundled into one push:
+## The request (user)
+"analyse the books properly i feel some synopsis doesnt feel connected
+like i ont know, proper synopsis"
 
-**A. Favorite-tracks strip on album share cards**
-- It uses the same BOX style everywhere even on designs without boxes, and
-  the positioning is bad — fix per style, and change the strip's icons per
-  style too.
-- Add a way to HIDE the strip entirely.
-- Make the strip MOVABLE like the other card elements.
-- Remove the magnet snap entirely — even at 3 dp it feels too strong (the
-  previous "soften to 3dp" pass wasn't enough).
-- Push everything together (don't push the strip work alone first).
+## Audit findings
+Re-read all 60 rewritten synopses. The problem: the NON-FICTION ones
+were listy, sentences of the form "he shows X; he explores Y; he
+examines Z" with colon-catalogues (Predictably Irrational, Nudge, Ego
+Is the Enemy, Stillness Is the Key, The Tipping Point, Algorithms to
+Live By, The 48 Laws of Power, So Good They Can't Ignore You). A scan
+of the remaining 736 catalog entries found the same disease in the
+shortest ones (320-494 chars): thin one-paragraph blurbs with
+disconnected sentences.
 
-**B. Book covers + notes-sheet polish**
-- Check commit 5d517a2d (user thought it related to book-cover loading).
-- Book covers still aren't loading on the topic reveal — add more providers;
-  an optional free API key via GitHub secrets is acceptable — add a .env
-  example.
-- The "Your rating" picker: swap the pen-nib icons for a book motif; give it
-  purpose like reading progress (add/hide) but separate from the fetched
-  reviews.
-- The marked-as-read box has a visual glitch — no solid colour or border.
-- Collapse/expand is glitchy and the touch shadow is bad.
+## Fix (tools/enrich_book_synopses_quality1.py) — 32 books
+Rewrote as flowing, connected prose. The recipe applied to every one:
+open with a human hook (Ariely's bandage story, Duckworth's classroom
+question, Tolle's night of despair, the nurses, the lobsters), develop
+the argument through natural transitions and woven-in examples (no
+mid-sentence colon-catalogues), and close by tying the whole together.
+- 8 of my own listy rewrites: Predictably Irrational, Nudge, Ego Is
+  the Enemy, Stillness Is the Key, The Tipping Point, Algorithms to
+  Live By, The 48 Laws of Power, So Good They Can't Ignore You.
+- 24 worst short ones: The Dispossessed, The Princess Bride, The
+  Jungle, Sister Carrie, Uncle Tom's Cabin, Love in the Time of
+  Cholera, Gideon the Ninth, The Souls of Black Folk, Ball Lightning,
+  The Tale of Genji, The Four Agreements, 12 Rules for Life, The Dark
+  Forest, Solaris, The Lion the Witch and the Wardrobe, The Last
+  Unicorn, The Power of Now, The Prophet, Homo Deus, The Art of War,
+  Outliers, Grit, The Midnight Library, Quiet.
+Validation: 32/32 entries changed, 988-1283 chars, no em/en dashes,
+curly quotes, double spaces or paren mismatches.
 
-## Findings
-- Commit 5d517a2d is ONLY an albums.json synopsis batch — it never touches
-  book covers or the reveal; nothing to port. (Reported to the user.)
-- Book covers: the reveal poster only knew the authored URL + Open Library
-  guess + (post-v352) the hub's persisted resolved URL. When all failed it
-  sat on the placeholder plate.
+## Status
+92 books now carry quality synopses. Going forward the quality bar is
+connected prose, never topic catalogues. Remaining: ~700 books still on
+the old longer-format synopses (mostly fine; the shortest ones are
+already done in batches 1, 2 and this pass).
 
-## What was done
-
-### Favorite-tracks strip (TopicShareCard.kt + AppPreferences.kt)
-- Per-style rendering: `FavoriteTracksBadge` now dispatches — boxed badge for
-  Paper/Vinyl/Collage/Neumorphic/Signature/Custom (with per-style tokens) and
-  NO-BOX type renderings for Editorial (masthead rule + caps label + italic
-  serif rows with note ornaments) and Minimal (quiet caps label + one dotted
-  line). New `FavGlyph` enum + `ShareMusicGlyph` Canvas glyphs: filled music
-  note (Paper/Collage/Signature/Custom), tiny vinyl disc (Vinyl), equalizer
-  bars (Neumorphic), masthead star + note (Editorial), dot (Minimal).
-- Positioning pass: Minimal moved from top-end to bottom-start; Editorial
-  cleared the colophon slug; nudges clear of footers elsewhere.
-- Hide toggle: `albumFavStripVisibleState` (default true, `KEY_ALBUM_FAV_STRIP_VISIBLE`)
-  + a Show/Hide pill in the share editor (any style, favs present); hiding
-  also brings the typed favorite-song line back on Vinyl.
-- Movable: `ShareCardMove.favDx/favDy`, `Modifier.moveFav`, new
-  `EditBoundsCallbacks.onFavTrack`, `ShareCardResizeTarget.FAVTRACKS`, editor
-  selection box + grip (mirrors the cover), favRect wired into the alignment
-  candidate list, and favDx/favDy persisted per style (save + restore).
-- Magnet snap REMOVED: `magnetAxis` now always returns the raw drag offset —
-  the box never sticks; only a faint hint guide draws when aligned. Comments
-  updated; SNAP_REACH/HINT_REACH constants kept for the hint band only.
-
-### Book covers (TopicRevealScreen.kt, BookCoverFetch.kt, build, CI)
-- `BookCoverPoster` self-heals: when book fetching is ON and every static
-  candidate fails, a LaunchedEffect live-resolves a Google Books thumbnail
-  (persists it via `setBookCoverUrl`) and loads it — covers appear without
-  the Settings hub.
-- Optional free API key: `GOOGLE_BOOKS_API_KEY` read at build time →
-  `BuildConfig.GOOGLE_BOOKS_API_KEY`; `BookCoverFetch.googleBooksUrl(q)`
-  appends `&key=` when set (used by googleThumbnail + fetchRatings +
-  fetchRatingFor). `.env.example` documents it; android.yml passes the
-  `GOOGLE_BOOKS_API_KEY` secret through to the build env.
-
-### Notes sheet (TopicRevealScreen.kt, AppPreferences.kt)
-- Rating picker: pen nibs replaced by `BookRatingPicker`/`BookGlyph` (five
-  open-book glyphs; filled = rated, tap again clears).
-- Hideable, separate from reviews: `bookRatingVisibleState`
-  (`KEY_BOOK_RATING_VISIBLE`, default true); a book icon in the "YOUR RATING"
-  header hides/shows the picker (shows "Rating hidden · tap the book to show
-  it"), never clears the rating.
-- Read/watched chips (book + series sheets): SOLID fills with a 1dp rim in
-  every state; the row surface drops its elevation flip (flat shadow) and a
-  read/watched row gains a subtle accent border; expand/collapse now animates
-  height (expandVertically/shrinkVertically) + fade together instead of the
-  glitchy fade-only pop.
-
-## Files touched
-- app/src/main/java/com/curio/app/data/AppPreferences.kt (strip visibility,
-  book rating visibility)
-- app/src/main/java/com/curio/app/ui/components/TopicShareCard.kt (strip
-  redesign + movable + snap removal)
-- app/src/main/java/com/curio/app/features/reveal/TopicRevealScreen.kt
-  (poster self-heal, book rating, read chips, expand/collapse)
-- app/src/main/java/com/curio/app/features/settings/BookCoverFetch.kt
-  (keyed Google Books endpoint)
-- app/build.gradle.kts (BuildConfig.GOOGLE_BOOKS_API_KEY)
-- .github/workflows/android.yml (secret pass-through)
-- .env.example (new)
-- fastlane changelog
-
-## Verification
-- Brace/paren balance across edited files (all deltas even vs HEAD's two
-  pre-existing +1s), no leftover PenNibRating/NibGlyph references, animation
-  imports (expandVertically/shrinkVertically/plus) added for the combined
-  transitions, BorderStroke imported for the chip rims. CI will validate the
-  real compile.
+## Docs
+- app/AGENTS.md: v367 entry (quality pass).
+- fastlane changelog 20260921.txt: FIX bullet at the top.
+- Prompt.md: this log.

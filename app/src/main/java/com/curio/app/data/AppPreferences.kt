@@ -213,6 +213,13 @@ object AppPreferences {
     private const val KEY_BOOK_FETCH_ENABLED = "book_fetch_enabled"    // bool — opt-out, default false
     private const val KEY_BOOK_COVER_PROVIDER = "book_cover_provider"  // BookCoverProvider.name
     private const val KEY_BOOK_COVER_FAILED = "book_cover_failed"     // JSON array of book names
+    // v360 — book names whose covers VERIFIED as real images (not Open
+    // Library's 1x1 placeholder) in a bulk fetch. The hub skips these on
+    // "Fetch all covers" so a re-tap resumes where the last run left off
+    // instead of restarting from book #1.
+    private const val KEY_BOOK_COVER_DONE = "book_cover_done"
+    // v362 — per-chapter PERSONAL notes (book name → chapter number → text).
+    private const val KEY_BOOK_CHAPTER_NOTES = "book_chapter_notes"
     private const val KEY_BOOK_RATINGS = "book_ratings"               // JSON object name->avg rating
     private const val KEY_BOOK_RATINGS_COUNT = "book_ratings_count"    // JSON object name->ratings count
     // v328 — per-book reading progress: JSON object book name -> number of
@@ -400,6 +407,49 @@ object AppPreferences {
         prefs(context).edit().putString(KEY_BOOK_CHAPTER_LIKES, obj.toString()).apply()
         bookChapterLikesState = cur
         return added
+    }
+
+    // ── Book chapter PERSONAL notes (v362) ──────────────────────────────
+    // One text note per chapter (book name → chapter number → text), written
+    // from the book-notes sheet's expanded chapter panel. Empty text removes
+    // the note; keyed by chapter NUMBER (stable across re-groupings).
+    fun getBookChapterNotes(context: Context): Map<String, Map<Int, String>> {
+        val raw = prefs(context).getString(KEY_BOOK_CHAPTER_NOTES, null) ?: return emptyMap()
+        return runCatching {
+            val obj = org.json.JSONObject(raw)
+            val out = LinkedHashMap<String, Map<Int, String>>()
+            val keys = obj.keys()
+            while (keys.hasNext()) {
+                val k = keys.next()
+                val inner = obj.optJSONObject(k) ?: continue
+                val notes = LinkedHashMap<Int, String>()
+                val inKeys = inner.keys()
+                while (inKeys.hasNext()) {
+                    val num = inKeys.next().toIntOrNull() ?: continue
+                    val text = inner.optString(num.toString()).takeIf { it.isNotBlank() }
+                    if (text != null) notes[num] = text
+                }
+                if (notes.isNotEmpty()) out[k] = notes
+            }
+            out
+        }.getOrDefault(emptyMap())
+    }
+
+    /** Save (or clear, when [text] is blank) the personal note for
+     *  [chapterNumber] of [bookName]. */
+    fun setBookChapterNote(context: Context, bookName: String, chapterNumber: Int, text: String) {
+        val cur = getBookChapterNotes(context).toMutableMap()
+        val notes = (cur[bookName] ?: emptyMap()).toMutableMap()
+        if (text.isBlank()) notes.remove(chapterNumber) else notes[chapterNumber] = text
+        if (notes.isEmpty()) cur.remove(bookName) else cur[bookName] = notes
+        val obj = org.json.JSONObject()
+        cur.forEach { (name, map) ->
+            val inner = org.json.JSONObject()
+            map.forEach { (num, t) -> inner.put(num.toString(), t) }
+            obj.put(name, inner)
+        }
+        prefs(context).edit().putString(KEY_BOOK_CHAPTER_NOTES, obj.toString()).apply()
+        bookChapterNotesState = cur
     }
 
     // ── Series episode likes (v352 — per-episode heart picks) ────────────
@@ -847,6 +897,10 @@ object AppPreferences {
     // v352 — per-chapter heart picks: book name → set of liked chapter numbers.
     var bookChapterLikesState by mutableStateOf<Map<String, Set<Int>>>(emptyMap())
         internal set
+    // v362 — personal text notes per chapter (book name → chapter number →
+    // text). Reactive so the sheet's note field updates immediately.
+    var bookChapterNotesState by mutableStateOf<Map<String, Map<Int, String>>>(emptyMap())
+        internal set
     // v352 — per-episode heart picks: show name → set of liked "S1E3" keys.
     var seriesEpisodeLikesState by mutableStateOf<Map<String, Set<String>>>(emptyMap())
         internal set
@@ -1161,9 +1215,15 @@ object AppPreferences {
         private set
     var seriesFetchEnabledState by mutableStateOf(false)
         private set
-    var bookCoverProviderState by mutableStateOf("OPEN_LIBRARY")
+    // v356 — iTunes is the DEFAULT cover source (keyless, tried first);
+    // Google Books / Open Library / LibraryThing follow it in the hub.
+    var bookCoverProviderState by mutableStateOf("ITUNES")
         private set
     var bookCoverFailedState by mutableStateOf<List<String>>(emptyList())
+        private set
+    // v360 — verified-real covers (see KEY_BOOK_COVER_DONE): "Fetch all
+    // covers" skips these and only runs the not-yet-verified / failed books.
+    var bookCoverDoneState by mutableStateOf<List<String>>(emptyList())
         private set
     var bookRatingsState by mutableStateOf<Map<String, Double>>(emptyMap())
         private set
@@ -1332,10 +1392,12 @@ object AppPreferences {
         seriesFetchEnabledState = isSeriesFetchEnabled(context)
         bookCoverProviderState = getBookCoverProvider(context)
         bookCoverFailedState = getBookCoverFailed(context)
+        bookCoverDoneState = getBookCoverDone(context)
         bookRatingsState = getBookRatings(context)
         bookRatingsCountState = getBookRatingsCount(context)
         bookReadingProgressState = getBookReadingProgress(context)
         bookChapterLikesState = getBookChapterLikes(context)
+        bookChapterNotesState = getBookChapterNotes(context)
         seriesEpisodeLikesState = getSeriesEpisodeLikes(context)
         bookCustomRatingsState = getBookCustomRatings(context)
         bookCoverUrlsState = getBookCoverUrls(context)
@@ -2813,9 +2875,18 @@ object AppPreferences {
         seriesFetchEnabledState = enabled
     }
 
-    /** The selected cover provider (a BookCoverProvider enum name). */
-    fun getBookCoverProvider(context: Context): String =
-        prefs(context).getString(KEY_BOOK_COVER_PROVIDER, "OPEN_LIBRARY") ?: "OPEN_LIBRARY"
+    /** The selected cover provider (a BookCoverProvider enum name). v356 —
+     *  defaults to ITUNES (the keyless first-choice source). v361 — when the
+     *  free LibraryThing key is configured (BuildConfig) and no provider was
+     *  ever picked, LIBRARY_THING is the default: a fresh install with the
+     *  key set gets the highest-quality ISBN covers immediately instead of
+     *  the keyless fallback. */
+    fun getBookCoverProvider(context: Context): String {
+        val stored = prefs(context).getString(KEY_BOOK_COVER_PROVIDER, null)
+        if (!stored.isNullOrBlank()) return stored
+        return if (com.curio.app.BuildConfig.LIBRARY_THING_API_KEY.isNotBlank())
+            "LIBRARY_THING" else "ITUNES"
+    }
 
     fun setBookCoverProvider(context: Context, name: String) {
         prefs(context).edit().putString(KEY_BOOK_COVER_PROVIDER, name).apply()
@@ -2835,6 +2906,36 @@ object AppPreferences {
     fun setBookCoverFailed(context: Context, names: List<String>) {
         prefs(context).edit().putString(KEY_BOOK_COVER_FAILED, org.json.JSONArray(names).toString()).apply()
         bookCoverFailedState = names
+    }
+
+    /** Book names whose covers VERIFIED as real images in a bulk fetch. */
+    fun getBookCoverDone(context: Context): List<String> {
+        val raw = prefs(context).getString(KEY_BOOK_COVER_DONE, null) ?: return emptyList()
+        return runCatching {
+            org.json.JSONArray(raw).let { arr ->
+                (0 until arr.length()).mapNotNull { i -> arr.optString(i).takeIf { it.isNotBlank() } }
+            }
+        }.getOrDefault(emptyList())
+    }
+
+    fun setBookCoverDone(context: Context, names: List<String>) {
+        prefs(context).edit().putString(KEY_BOOK_COVER_DONE, org.json.JSONArray(names).toString()).apply()
+        bookCoverDoneState = names
+    }
+
+    /** v361 — wipe EVERY book-cover record (resolved URLs, verified-done
+     *  set, failed list) so the hub's "Clear all covers" starts a provider
+     *  test from a blank slate. The Coil disk cache is cleared by the caller
+     *  (BookCoverFetch.clearAllCovers) so old artwork doesn't linger. */
+    fun clearBookCovers(context: Context) {
+        prefs(context).edit()
+            .remove(KEY_BOOK_COVER_URLS)
+            .remove(KEY_BOOK_COVER_DONE)
+            .remove(KEY_BOOK_COVER_FAILED)
+            .apply()
+        bookCoverUrlsState = emptyMap()
+        bookCoverDoneState = emptyList()
+        bookCoverFailedState = emptyList()
     }
 
     /** The keyless-fetched average ratings: book name → Google Books average. */

@@ -368,7 +368,88 @@
    "Philosophy",
    "2010s"
   ],
-  "tier": 1
+  "tier": 1,
+  "synopsis": "Michael Schur's comedy about the afterlife is one of the smartest sitcoms ever made. Eleanor Shellstrop, a selfish Arizona woman who sold placebos and never did anything for anyone, dies and wakes up in the Good Place, the neighborhood of eternal reward designed by the architect Michael, where she is introduced as a beloved human rights lawyer and philanthropist. She knows she was sent there by mistake, and to stay she must become a genuinely good person, which is hard when everyone around her is perfect. Kristen Bell plays Eleanor, William Jackson Harper plays Chidi, the indecisive ethics professor who teaches her, Jameela Jamil plays Tahani, whose own goodness is a form of vanity, and Manny Jacinto plays Jason, who is not the monk he pretends to be. The show is a philosophical romp through ethics and the meaning of a good life, and its first season ends with one of the great twists in television history.",
+  "episodes": [
+   {
+    "season": 1,
+    "number": 1,
+    "title": "Everything Is Fine",
+    "summary": "Eleanor Shellstrop dies and wakes in the Good Place, greeted by the architect Michael, who mistakes her for a philanthropist. She quickly realizes she was sent by mistake, and she is a terrible person who belongs nowhere near paradise."
+   },
+   {
+    "season": 1,
+    "number": 2,
+    "title": "Flying",
+    "summary": "Eleanor tries to be good by attaching herself to Chidi, the ethics professor assigned as her soulmate, while Tahani and Jason, a silent monk, appear as perfect as the neighborhood demands. She decides to make Chidi teach her to be a better person."
+   },
+   {
+    "season": 1,
+    "number": 3,
+    "title": "Tahani Al-Jamil",
+    "summary": "Tahani's backstory reveals a lifelong rivalry with her famous sister, and Eleanor, terrified of exposure, spins an elaborate lie about her own charitable past. Jason lets slip that he is not what he seems."
+   },
+   {
+    "season": 1,
+    "number": 4,
+    "title": "Jason Mendoza",
+    "summary": "Jason's real story comes out: he is a small-time crook from Jacksonville who died hiding in a safe. Eleanor's cover is blown with Chidi and Tahani, and the four of them begin to realize how badly they fit the neighborhood."
+   },
+   {
+    "season": 1,
+    "number": 5,
+    "title": "Category 55 Emergency Doomsday Crisis",
+    "summary": "Michael tests the residents with a staged emergency, and Eleanor, Jason and Chidi fail spectacularly. Chidi grows suspicious of the neighborhood's cheerful perfection, and Eleanor is told to fix things before she gets sent away."
+   },
+   {
+    "season": 1,
+    "number": 6,
+    "title": "What We Owe to Each Other",
+    "summary": "Chidi's ethics lessons push Eleanor toward real change while Tahani and Jason try a date that goes nowhere. Michael watches from his control room as his experiment strains at the seams."
+   },
+   {
+    "season": 1,
+    "number": 7,
+    "title": "The Eternal Shriek",
+    "summary": "A terrible shriek echoes through the neighborhood and Eleanor and Jason investigate where it comes from, while Michael is forced to admit that even paradise has a secret room and a secret purpose."
+   },
+   {
+    "season": 1,
+    "number": 8,
+    "title": "Most Improved Player",
+    "summary": "Michael announces a self-improvement competition and the four residents work on their flaws: Eleanor on selfishness, Chidi on indecision, Tahani on vanity, Jason on everything. Michael watches them with a little too much interest."
+   },
+   {
+    "season": 1,
+    "number": 9,
+    "title": "...Someone Like Me as a Member",
+    "summary": "Eleanor panics when someone who knew her real life on Earth arrives in the neighborhood and could expose her lie, and she scrambles to control a situation that is slipping away."
+   },
+   {
+    "season": 1,
+    "number": 10,
+    "title": "Chidi's Choice",
+    "summary": "Chidi is asked to choose between Eleanor and Tahani, and his inability to decide becomes the test of the neighborhood itself. Eleanor begins to realize what Chidi means to her."
+   },
+   {
+    "season": 1,
+    "number": 11,
+    "title": "What's My Motivation",
+    "summary": "The group splits apart and Eleanor and Chidi go looking for the truth about the neighborhood, finding rooms and clues that the Good Place was never supposed to have."
+   },
+   {
+    "season": 1,
+    "number": 12,
+    "title": "Mindy St. Claire",
+    "summary": "The Medium Place is revealed: Mindy St. Claire, who died before her case could be decided, lives in eternal mediocrity between the two places. Eleanor gets the proof she needs that the system is not what it seems."
+   },
+   {
+    "season": 1,
+    "number": 13,
+    "title": "Michael's Gambit",
+    "summary": "The great reveal: the neighborhood is the Bad Place, Michael is a demon, and Eleanor, Chidi, Tahani and Jason have been torturing one another through centuries of reboots. Eleanor's hidden message to Chidi survives, and Michael is exposed before his bosses."
+   }
+  ]
  },
  {
   "id": "series-dexter",
@@ -434,7 +515,52 @@
    "American",
    "2000s"
   ],
-  "tier": 1
+  "tier": 1,
+  "synopsis": "Vince Gilligan's crime drama follows Walter White, a high school chemistry teacher in Albuquerque who is diagnosed with inoperable lung cancer and turns to cooking methamphetamine to secure his family's future. Bryan Cranston plays Walt, whose quiet desperation curdles into a ruthless alter ego, Heisenberg, and Aaron Paul plays Jesse Pinkman, his former student and reluctant partner. The show tracks the slow corruption of a good man across five seasons, from a single batch in an RV to a drug empire, a family torn apart and a body count that follows him home. Widely regarded as one of the greatest television dramas ever made, it won sixteen Emmy Awards and a place in the culture that its imitators have never matched.",
+  "episodes": [
+   {
+    "season": 1,
+    "number": 1,
+    "title": "Pilot",
+    "summary": "Walter White, a fifty-year-old high school chemistry teacher, learns he has inoperable lung cancer. On a DEA ride-along with his brother-in-law Hank he spots Jesse Pinkman, a former student, and decides to cook meth to secure his family's future before he dies."
+   },
+   {
+    "season": 1,
+    "number": 2,
+    "title": "Cat's in the Bag...",
+    "summary": "Walt and Jesse kill Emilio and take the surviving witness, Krazy-8, prisoner in Jesse's basement. They try to dissolve Emilio's body in a bathtub with hydrofluoric acid, which eats straight through the floor, and the mess is only the beginning of their problems."
+   },
+   {
+    "season": 1,
+    "number": 3,
+    "title": "...And the Bag's in the River",
+    "summary": "Walt prepares to free Krazy-8 but catches him with a shard of broken plate, a weapon meant for Walt's throat. He strangles the man in the basement and returns home to lie to Skyler about where the gambling money came from."
+   },
+   {
+    "season": 1,
+    "number": 4,
+    "title": "Cancer Man",
+    "summary": "Walt tells the family about his illness and begins chemotherapy, while his pride keeps him from accepting help. Jesse is thrown out by his parents, and Walt lashes out at a group of loud young men, using his car to make a point."
+   },
+   {
+    "season": 1,
+    "number": 5,
+    "title": "Gray Matter",
+    "summary": "Flashbacks show Walt walking away from Gray Matter Technologies, the company he co-founded and sold his share of for five thousand dollars. Gretchen and Elliot Schwartz offer to pay for his treatment, and after a painful visit Walt finally agrees."
+   },
+   {
+    "season": 1,
+    "number": 6,
+    "title": "Crazy Handful of Nothin'",
+    "summary": "Jesse tries to sell the meth alone and is beaten and cheated by the dealer Tuco. Walt confronts Tuco in his office with a bag of fulminated mercury, blowing the place up to prove a point and walking out with his money."
+   },
+   {
+    "season": 1,
+    "number": 7,
+    "title": "A No-Rough-Stuff-Type Deal",
+    "summary": "Tuco takes Walt and Jesse to the desert for a deal and kills his own man in front of them. Walt prepares ricin but cannot use it, and the episode ends with the unstable Tuco forcing the pair into his trunk, their freedom gone."
+   }
+  ]
  },
  {
   "id": "series-the-wire",
@@ -456,7 +582,88 @@
    "American",
    "2000s"
   ],
-  "tier": 1
+  "tier": 1,
+  "synopsis": "David Simon's masterpiece, drawn from his years as a Baltimore crime reporter, is a novel for television: a season-long story about one institution and the people caught inside it. Season one follows a police detail assembled to take down the Barksdale drug organization, and refuses to treat cops, dealers or addicts as caricatures, showing the game from every side of the wire. The show's cast of then-unknowns, Dominic West, Idris Elba, Michael K. Williams and Andre Royo among them, became stars on its strength, and its five seasons, each devoted to a different institution, the drug trade, the docks, city politics, schools and the press, are widely regarded as the most honest portrait of American urban life ever put on television.",
+  "episodes": [
+   {
+    "season": 1,
+    "number": 1,
+    "title": "The Target",
+    "summary": "At the murder trial of D'Angelo Barksdale, the key witness recants on the stand, and homicide detective Jimmy McNulty points the judge at the Barksdale organization. The judge pressures the department to open a case the brass would rather ignore."
+   },
+   {
+    "season": 1,
+    "number": 2,
+    "title": "The Detail",
+    "summary": "The detail assembles in a dusty basement with a stolen budget and no real support. McNulty meets the team, and the young dealers Wallace and Bodie run the towers while the Barksdales figure out who is coming at them."
+   },
+   {
+    "season": 1,
+    "number": 3,
+    "title": "The Buys",
+    "summary": "The detail starts making undercover buys with the addict Bubbles, building a case brick by brick. Stringer Bell runs the business side of the organization while Avon Barksdale keeps the street, and a witness is found dead."
+   },
+   {
+    "season": 1,
+    "number": 4,
+    "title": "Old Cases",
+    "summary": "The detail reopens the murder of the witness who recanted at trial, and D'Angelo teaches Wallace and Bodie the game of chess, where the king stays the king. McNulty and Kima pore over the old file for a connection."
+   },
+   {
+    "season": 1,
+    "number": 5,
+    "title": "The Pager",
+    "summary": "The detail gets court approval to monitor the pagers and begins to map the organization's calls. A shooting at the towers puts the Barksdales on edge, and the wiretap case starts to take real shape."
+   },
+   {
+    "season": 1,
+    "number": 6,
+    "title": "The Wire",
+    "summary": "The wiretap comes online and the detail hears the organization's voice for the first time. D'Angelo is locked up again after the towers shooting, and McNulty's ex-wife complicates his life outside the case."
+   },
+   {
+    "season": 1,
+    "number": 7,
+    "title": "One Arrest",
+    "summary": "To keep the wiretap alive the detail must show a result, so they arrest a low-level dealer and charge D'Angelo, who refuses to give up his crew. The Barksdales bring in lawyers and begin to smell the investigation."
+   },
+   {
+    "season": 1,
+    "number": 8,
+    "title": "Lessons",
+    "summary": "The detail learns how the organization is really run while the Barksdales adapt to the pressure. McNulty pushes for more resources, and the case begins to cost people on both sides of the wire."
+   },
+   {
+    "season": 1,
+    "number": 9,
+    "title": "Game Day",
+    "summary": "The detail watches a football game that settles a bet between rival dealers, and the wiretap catches something that could break the case. McNulty learns how little his bosses want the investigation to succeed."
+   },
+   {
+    "season": 1,
+    "number": 10,
+    "title": "The Cost",
+    "summary": "The case eats money and lives: a police shooting and a dealer's death raise the stakes. D'Angelo is sent to prison, where the organization's code puts him in a cell with his own family's protection."
+   },
+   {
+    "season": 1,
+    "number": 11,
+    "title": "The Hunt",
+    "summary": "Avon and Stringer retaliate against their rivals and the detail races to keep up. Omar Little, the man who robs dealers, makes his presence felt, and the body count pulls the case toward its end."
+   },
+   {
+    "season": 1,
+    "number": 12,
+    "title": "Cleaning Up",
+    "summary": "The Barksdales clean house to protect themselves: Wallace, the young dealer who broke under the weight of what he had done, is killed by his own friends, and Wee-Bey prepares to take the fall for the organization."
+   },
+   {
+    "season": 1,
+    "number": 13,
+    "title": "Sentencing",
+    "summary": "The case collapses when the wiretap evidence is thrown out, and the Barksdales walk largely untouched. D'Angelo takes twenty years rather than break the code, McNulty is exiled to a harbor boat, and the game goes on."
+   }
+  ]
  },
  {
   "id": "series-game-of-thrones",
@@ -479,7 +686,70 @@
    "American",
    "2010s"
   ],
-  "tier": 1
+  "tier": 1,
+  "synopsis": "HBO's adaptation of George R. R. Martin's A Song of Ice and Fire turned the fantasy epic into the biggest television series of its era. In the Seven Kingdoms of Westeros, noble houses scheme for the Iron Throne while winter and something far older gather beyond the Wall in the north, and across the Narrow Sea a deposed king's daughter raises dragons from stone eggs. The show's first season established its signature ruthlessness, killing off beloved characters without warning and making every alliance a knife's edge away from betrayal. Its eight seasons redefined event television, broke viewing records around the world, and ended in a finale so divisive it is still argued about today.",
+  "episodes": [
+   {
+    "season": 1,
+    "number": 1,
+    "title": "Winter Is Coming",
+    "summary": "Ned Stark executes a deserter from the Wall and returns to Winterfell with news that could change everything. Bran climbs the tower and catches Queen Cersei with her brother Jaime, who pushes him from the window to keep the secret."
+   },
+   {
+    "season": 1,
+    "number": 2,
+    "title": "The Kingsroad",
+    "summary": "Ned leaves for King's Landing to serve as the King's Hand, Jon Snow heads north to the Wall, and an assassin sent to finish Bran is stopped by Catelyn. Tyrion travels with Jon and is taken hostage by Catelyn."
+   },
+   {
+    "season": 1,
+    "number": 3,
+    "title": "Lord Snow",
+    "summary": "Ned takes his seat on the small council and learns how much Robert's realm is in debt. Bran wakes from his coma, Jon begins his training at Castle Black, and Arya starts sword lessons with the dancing master."
+   },
+   {
+    "season": 1,
+    "number": 4,
+    "title": "Cripples, Bastards, and Broken Things",
+    "summary": "Ned investigates the death of the previous Hand, Jon Arryn, following his trail through the book of noble lineages. Tyrion visits the Wall, and the new recruit Samwell Tarly arrives, mocked by everyone."
+   },
+   {
+    "season": 1,
+    "number": 5,
+    "title": "The Wolf and the Lion",
+    "summary": "Ned confronts Cersei with the truth about her children and Jaime attacks him in the street, killing his men and leaving Ned wounded. Catelyn seizes Tyrion at an inn and carries him to the Eyrie for trial."
+   },
+   {
+    "season": 1,
+    "number": 6,
+    "title": "A Golden Crown",
+    "summary": "At the Eyrie, Tyrion demands a trial by combat and the sellsword Bronn fights for him and wins. Across the sea, Viserys threatens Daenerys one time too many and Khal Drogo pours a golden crown over his head."
+   },
+   {
+    "season": 1,
+    "number": 7,
+    "title": "You Win or You Die",
+    "summary": "Ned tells Cersei he knows her secret and gives her a chance to flee, a mercy that costs him. Robert is mortally gored by a boar, names Ned regent, and Littlefinger's knife finds Ned's back the moment he needs a friend."
+   },
+   {
+    "season": 1,
+    "number": 8,
+    "title": "The Pointy End",
+    "summary": "Ned is arrested for treason and the Lannisters take control of the capital. Robb calls the banners of the north and marches south to rescue his father, while Arya escapes the castle with the recruiter Yoren."
+   },
+   {
+    "season": 1,
+    "number": 9,
+    "title": "Baelor",
+    "summary": "Robb wins a great victory at the Whispering Wood and takes Jaime prisoner. To protect Sansa, Ned confesses to treason, but Joffrey orders his head taken anyway, and the sword falls before anyone can stop it."
+   },
+   {
+    "season": 1,
+    "number": 10,
+    "title": "Fire and Blood",
+    "summary": "The North, in grief and fury, proclaims Robb the King in the North. Daenerys walks into Khal Drogo's funeral pyre and emerges unburnt, cradling three newborn dragons, as winter and war settle over Westeros."
+   }
+  ]
  },
  {
   "id": "series-the-sopranos",
@@ -501,7 +771,88 @@
    "American",
    "1990s"
   ],
-  "tier": 1
+  "tier": 1,
+  "synopsis": "David Chase's drama about a New Jersey mob boss in therapy changed television. James Gandolfini plays Tony Soprano, struggling to hold together his two families, the one at home with his wife Carmela and their children, and the one in the business, his uncle Junior, his crew and the FBI circling outside. Tony's sessions with Dr. Jennifer Melfi ground the show's violence in psychology, the panic attacks, the dreams, the mother he cannot escape, and the show balanced brutality with black comedy and genuine tenderness. Its six seasons redefined what a drama could do, and its final scene, a cut to black that still divides viewers, became the most discussed ending in television history.",
+  "episodes": [
+   {
+    "season": 1,
+    "number": 1,
+    "title": "The Sopranos",
+    "summary": "Tony Soprano collapses during a panic attack after a family of ducks leaves his pool, and his doctor sends him to a psychiatrist. In therapy with Dr. Melfi he begins to untangle his mother Livia, his uncle Junior and the weight of running the family business."
+   },
+   {
+    "season": 1,
+    "number": 2,
+    "title": "46 Long",
+    "summary": "Tony struggles with his mother's demands and his uncle's resentment, while the crew chases a thief who has been ripping off their trucks. Melfi presses Tony on why he came to therapy at all."
+   },
+   {
+    "season": 1,
+    "number": 3,
+    "title": "Denial, Anger, Acceptance",
+    "summary": "Junior angers Tony by using one of Livia's friends as a messenger, and the two circle each other without quite going to war. Tony lies to Melfi about his business, and the panic attacks keep coming."
+   },
+   {
+    "season": 1,
+    "number": 4,
+    "title": "Meadowlands",
+    "summary": "Meadow's troubles at school and AJ's wildness strain Tony's home life. The FBI steps up its surveillance of the Sopranos, and Tony's version of his own life starts to crack under Melfi's questions."
+   },
+   {
+    "season": 1,
+    "number": 5,
+    "title": "College",
+    "summary": "Tony takes Meadow to visit colleges in Maine and spots a man from the old neighborhood who testified against his crew and entered witness protection. He kills the man with his bare hands, while Carmela wrestles with what she knows."
+   },
+   {
+    "season": 1,
+    "number": 6,
+    "title": "Pax Soprana",
+    "summary": "Tony brokers peace with Junior, making his uncle the official boss while keeping the real power for himself. After Melfi is raped, Tony finds the attacker and beats him nearly to death."
+   },
+   {
+    "season": 1,
+    "number": 7,
+    "title": "Down Neck",
+    "summary": "AJ is diagnosed with attention deficit disorder and Tony's own childhood comes flooding back, his father's stories and his mother's coldness. Melfi begins to see the shape of the man under the boss."
+   },
+   {
+    "season": 1,
+    "number": 8,
+    "title": "The Legend of Tennessee Moltisanti",
+    "summary": "Christopher broods about being overlooked and starts writing a screenplay, while the crew buzzes about who is and is not a made man. A hit goes wrong and the heat comes down on the family."
+   },
+   {
+    "season": 1,
+    "number": 9,
+    "title": "Boca",
+    "summary": "Junior's secret romance in Florida becomes a joke after the FBI gets video of him, and Tony lets the news slip to Carmela, humiliating his uncle in front of the whole family. Melfi's attacker turns up dead."
+   },
+   {
+    "season": 1,
+    "number": 10,
+    "title": "A Hit Is a Hit",
+    "summary": "Christopher and Adriana try to break into the music business with a rapper, and the money gets laundered in plain sight. Tony and Carmela clash over her plans for a business of her own."
+   },
+   {
+    "season": 1,
+    "number": 11,
+    "title": "Nobody Knows Anything",
+    "summary": "An FBI raid rattles the crew and Tony begins to suspect that Pussy, who has gone missing, may have been turned. Junior quietly moves against Tony as the family's war edges closer to home."
+   },
+   {
+    "season": 1,
+    "number": 12,
+    "title": "Isabella",
+    "summary": "Sedated and depressed after a car accident, Tony hallucinates a beautiful neighbor named Isabella while the FBI builds its case. Junior's crew prepares a move against Tony that will change everything."
+   },
+   {
+    "season": 1,
+    "number": 13,
+    "title": "I Dream of Jeannie Cusamano",
+    "summary": "Tony survives an assassination attempt ordered by his uncle and takes his revenge, having the shooters killed. The FBI arrests Junior in a raid, and the season ends with Tony, wounded but alive, dreaming of the normal life across the street."
+   }
+  ]
  },
  {
   "id": "series-mad-men",
@@ -546,7 +897,58 @@
    "American",
    "2010s"
   ],
-  "tier": 1
+  "tier": 1,
+  "synopsis": "The Duffer Brothers' homage to 1980s horror and Spielbergian adventure is set in Hawkins, Indiana, where the disappearance of twelve-year-old Will Byers uncovers a secret government lab, a telekinetic girl with a shaved head and a number tattoo, and a parallel dimension called the Upside Down. Millie Bobby Brown plays Eleven, the girl who escaped the lab and holds the key to finding Will, while the boys' Dungeons and Dragons campaign turns out to have predicted the monster they are really facing. The show's first season became a phenomenon on its 2016 debut, blending small-town nostalgia, body horror and found-family warmth into a story that keeps expanding, and its kids grew up on screen across five seasons.",
+  "episodes": [
+   {
+    "season": 1,
+    "number": 1,
+    "title": "Chapter One: The Vanishing of Will Byers",
+    "summary": "November 6, 1983: after a night of Dungeons and Dragons, Will Byers vanishes on his way home. Mike, Dustin and Lucas find a strange girl in the woods, while a scientist flees the Hawkins National Laboratory in terror."
+   },
+   {
+    "season": 1,
+    "number": 2,
+    "title": "The Weirdo on Maple Street",
+    "summary": "Mike hides the girl, who answers only to Eleven, in his basement, where she proves she can find people. Joyce wires her house with Christmas lights and hears Will breathing through the wall."
+   },
+   {
+    "season": 1,
+    "number": 3,
+    "title": "Holly, Jolly",
+    "summary": "Joyce builds a wall of lights that Will speaks through, spelling out words one letter at a time. Eleven uses the board to contact Will from the other side, while Barb goes missing from Steve's party."
+   },
+   {
+    "season": 1,
+    "number": 4,
+    "title": "The Body",
+    "summary": "A body is pulled from the quarry and the town mourns Will, but the corpse is a fake staged by the lab. Hopper traces its origins, and Eleven flips a van to save the boys from a gang of bullies."
+   },
+   {
+    "season": 1,
+    "number": 5,
+    "title": "The Flea and the Acrobat",
+    "summary": "The boys explain the Upside Down through the flea and the acrobat: there may be another way in. Hopper breaks into the lab and sees the gate, while Joyce and Hopper cut through the wall of her house."
+   },
+   {
+    "season": 1,
+    "number": 6,
+    "title": "The Monster",
+    "summary": "The creature attacks the Byers house and drags Joyce and Hopper through the gate into the Upside Down. Nancy and Jonathan hunt the monster in the woods, and Eleven's flashes of the lab reveal the truth about her past."
+   },
+   {
+    "season": 1,
+    "number": 7,
+    "title": "The Bathtub",
+    "summary": "The boys build a saltwater tank so Eleven can find Will, and she locates him hiding in the Upside Down. The lab's agents close in as Eleven pushes her powers to the limit."
+   },
+   {
+    "season": 1,
+    "number": 8,
+    "title": "The Upside Down",
+    "summary": "The boys and Joyce pull Will back through the gate, barely alive. Nancy and Jonathan hold off the monster at the Byers house, and Eleven confronts it in the school gym, destroying it and vanishing in the blast. A year later the gang plays D and D again, and a glimpse of the Upside Down promises more."
+   }
+  ]
  },
  {
   "id": "series-the-crown",
@@ -690,7 +1092,88 @@
    "British",
    "2010s"
   ],
-  "tier": 1
+  "tier": 1,
+  "synopsis": "Steven Moffat and Mark Gatiss's modern-day retelling of Arthur Conan Doyle moves Sherlock Holmes to present-day London, where the brilliant, antisocial detective solves crimes with the help of John Watson, a veteran army doctor who blogs about their cases. Benedict Cumberbatch plays Holmes, Andrew Scott his arch-enemy Moriarty, and the four series of ninety-minute episodes trade the original stories' gaslight for text messages, mind palaces and a jump off the roof of St Bart's. The show won a string of BAFTAs and Emmys and turned the pair into global stars.",
+  "episodes": [
+   {
+    "season": 1,
+    "number": 1,
+    "title": "A Study in Pink",
+    "summary": "John Watson returns from Afghanistan and meets Sherlock Holmes, who needs a flatmate and a case. Four suicides turn out to be one serial killer, a cab driver who forces his victims to pick a pill, and Holmes corners him only to learn Moriarty is pulling his strings."
+   },
+   {
+    "season": 1,
+    "number": 2,
+    "title": "The Blind Banker",
+    "summary": "A banker is found dead in a locked room covered in graffiti, and the trail leads to a smuggling ring that communicates in coded symbols. Holmes breaks a cipher tied to a Chinese circus while Watson chases a date, and the pair stop an assassin before she escapes with the ledger."
+   },
+   {
+    "season": 1,
+    "number": 3,
+    "title": "The Great Game",
+    "summary": "A bomber forces Holmes to solve a string of cases in five ticks, from a pool of acid to a priceless painting. The final puzzle leads him to the pool where Moriarty reveals himself, holding Watson hostage in a bomb vest, and the season ends on the pair at gunpoint."
+   },
+   {
+    "season": 2,
+    "number": 1,
+    "title": "A Scandal in Belgravia",
+    "summary": "Holmes is hired by the royals to retrieve compromising photos from Irene Adler, the dominatrix and master of disguise who texts him to prove her superiority. He fakes her death to save her from Moriarty, and she returns the favour by saving his life with a hidden phone."
+   },
+   {
+    "season": 2,
+    "number": 2,
+    "title": "The Hounds of Baskerville",
+    "summary": "A traumatised man begs Holmes to investigate the giant hound that killed his father, and the pair drive to Dartmoor, where Watson faces his own war demons. The beast is a hallucination caused by a gas released at a secret research site."
+   },
+   {
+    "season": 2,
+    "number": 3,
+    "title": "The Reichenbach Fall",
+    "summary": "Moriarty breaks out of the Tower of London and frames Holmes as a fraud, stripping him of his reputation. With the assassin threatening Watson, Lestrade and Mrs Hudson, Holmes stages his own suicide at St Bart's, watched by a devastated Watson."
+   },
+   {
+    "season": 3,
+    "number": 1,
+    "title": "The Empty Hearse",
+    "summary": "Two years after the fall, Watson has moved on and is about to marry Mary, when Holmes returns from hiding and immediately suspects a bomb plot on the underground. The pair reunite as the bomb is defused, and a man with a tattooed face watches them."
+   },
+   {
+    "season": 3,
+    "number": 2,
+    "title": "The Sign of Three",
+    "summary": "At Watson and Mary's wedding Holmes gives a best-man speech that doubles as a murder case, deducing which guest planned to kill the groomsman. He relives the night of the stag night to crack a locked-room killing in the guards' barracks."
+   },
+   {
+    "season": 3,
+    "number": 3,
+    "title": "His Last Vow",
+    "summary": "Holmes infiltrates the den of Charles Augustus Magnussen, a blackmailer who keeps secrets in a mind palace. To force a confession without evidence, Holmes shoots him, and Mycroft has him sent on a mission abroad as punishment."
+   },
+   {
+    "season": 3,
+    "number": 4,
+    "title": "The Abominable Bride",
+    "summary": "A Victorian special: Holmes and Watson investigate a bride who apparently returned from the dead to murder her husband. Inside Holmes's mind palace the case unravels into a confrontation with a female Moriarty, and he wakes on a plane still in danger."
+   },
+   {
+    "season": 4,
+    "number": 1,
+    "title": "The Six Thatchers",
+    "summary": "Mary's past catches up with her when a series of busts of Thatcher are smashed and a mission from her spy days resurfaces. Holmes saves Watson from a sniper but Mary takes the bullet, dying in her husband's arms and leaving Holmes shattered."
+   },
+   {
+    "season": 4,
+    "number": 2,
+    "title": "The Lying Detective",
+    "summary": "Holmes returns to drugs as he hunts Culverton Smith, a celebrity philanthropist and serial killer who has confessed on tape. Smith drugs and frames him, but Watson, Eurus and the sister's hidden influence pull him through the case."
+   },
+   {
+    "season": 4,
+    "number": 3,
+    "title": "The Final Problem",
+    "summary": "Eurus, the third Holmes sibling locked away on an island, escapes and forces the brothers through a series of psychological trials, including a plane full of people and a coffin at Sherrinford. The family survives, Eurus is recaptured, and Holmes tells Watson he is a man who cares."
+   }
+  ]
  },
  {
   "id": "series-fleabag",
@@ -831,7 +1314,64 @@
    "Korean",
    "2020s"
   ],
-  "tier": 1
+  "tier": 1,
+  "synopsis": "Hwang Dong-hyuk's survival drama follows Seong Gi-hun, a debt-ridden gambler who is invited to a mysterious competition where 456 players play childhood games for a prize of 45.6 billion won, with elimination meaning death. The games, from Red Light Green Light to the marble round, expose the desperation of people who chose to risk their lives for money, while the masked Front Man and the VIPs watch from above. The show became Netflix's most-watched series, and its imagery, the green tracksuits, the giant doll, the honeycomb shapes, became global iconography.",
+  "episodes": [
+   {
+    "season": 1,
+    "number": 1,
+    "title": "Red Light, Green Light",
+    "summary": "Gi-hun, drowning in gambling debt, accepts a card and wakes in a dormitory with 455 others. The first game is Red Light Green Light, and when a man flinches the players learn the cost: the doll's sensors shoot the eliminated where they stand."
+   },
+   {
+    "season": 1,
+    "number": 2,
+    "title": "Hell",
+    "summary": "The survivors vote to leave and return to their real lives, but within days most are back, broke and desperate. The games restart, and Gi-hun joins forces with Cho Sang-woo, his old schoolmate, and Oh Il-nam, the old man who loves to play."
+   },
+   {
+    "season": 1,
+    "number": 3,
+    "title": "The Man with the Umbrella",
+    "summary": "Players choose shapes for the second game, honeycomb carving, and Gi-hun's umbrella shape proves the hardest. He licks the honeycomb to free his shape while others are shot for breaking theirs, and learns the guards are all players who survived."
+   },
+   {
+    "season": 1,
+    "number": 4,
+    "title": "Stick to the Team",
+    "summary": "Players form teams of ten for tug of war, and Gi-hun's team is the oldest and weakest. Il-nam reveals he was a factory foreman, and the team uses the old man's trick of forward steps to drag the stronger opposing team over the edge."
+   },
+   {
+    "season": 1,
+    "number": 5,
+    "title": "A Fair World",
+    "summary": "After a night fight leaves players dead, the survivors vote again and the prize is split, with the remaining players given a chance to walk away. Most stay, and a doctor is discovered to have been trading organs with the guards in return for information."
+   },
+   {
+    "season": 1,
+    "number": 6,
+    "title": "Gganbu",
+    "summary": "The marble game pairs players with their closest allies. Gi-hun and Il-nam play marbles together, and when Il-nam lets himself be eliminated, he gives Gi-hun his marbles, revealing the old man's surprising calm about dying."
+   },
+   {
+    "season": 1,
+    "number": 7,
+    "title": "VIPs",
+    "summary": "The masked VIPs arrive to watch the fifth game, a bridge made of glass panels that shatter under the players' weight. A glassmaker survives by tapping panels, but is pushed off by a desperate player, and three of the four survivors cross the bridge."
+   },
+   {
+    "season": 1,
+    "number": 8,
+    "title": "Front Man",
+    "summary": "The final three players are left to fight in the sixth game, but the last one, Jang Deok-su, is killed by the guards when he refuses. Gi-hun and Sang-woo are told they can both leave with the prize, until the Front Man reveals only one can."
+   },
+   {
+    "season": 1,
+    "number": 9,
+    "title": "One Lucky Day",
+    "summary": "Sang-woo stabs himself so Gi-hun can take the prize and use it for his family. A year later Gi-hun finds Il-nam alive, learns the old man created the games, and watches him die of a brain tumour. At the airport Gi-hun turns back to expose the games."
+   }
+  ]
  },
  {
   "id": "series-money-heist",
@@ -876,7 +1416,58 @@
    "American",
    "2010s"
   ],
-  "tier": 1
+  "tier": 1,
+  "synopsis": "Jon Favreau's series was the first live-action Star Wars television show, and it became a cultural event. Pedro Pascal plays the Mandalorian, a lone bounty hunter in the years after the fall of the Empire, a helmeted gunslinger who takes a job that changes his life: the target is a fifty-year-old green child of the same species as Yoda, wanted by Imperial remnants. Instead of delivering the child, he protects him, and the two travel the galaxy as the Empire closes in. The show is a western in space, built from a series of adventures across desert planets, harbor towns and Imperial wrecks, and its refusal to explain too much, the Child's powers, the Mandalorian's code, the mysterious remnant led by Moff Gideon, became part of its charm. The season builds to a foundling story about honor and found family, and it made Baby Yoda, as everyone called him, the most beloved character in the galaxy.",
+  "episodes": [
+   {
+    "season": 1,
+    "number": 1,
+    "title": "Chapter 1: The Mandalorian",
+    "summary": "A lone Mandalorian bounty hunter takes a job from a mysterious client: find a target on a desert planet and bring it in. He tracks the mark to a remote camp, and the target turns out to be a small green child."
+   },
+   {
+    "season": 1,
+    "number": 2,
+    "title": "Chapter 2: The Child",
+    "summary": "Jawas strip the Mandalorian's ship for parts and he must bargain with them to get them back. The Child saves his life by using the Force to stop a mudhorn, and the hunter begins to understand what he is carrying."
+   },
+   {
+    "season": 1,
+    "number": 3,
+    "title": "Chapter 3: The Sin",
+    "summary": "The Mandalorian delivers the Child and is paid in beskar steel, the metal of his people. He has a change of heart, breaks back into the compound, and fights his way out with the Child, helped by his fellow Mandalorians."
+   },
+   {
+    "season": 1,
+    "number": 4,
+    "title": "Chapter 4: Sanctuary",
+    "summary": "Hiding from the hunters, the Mandalorian and the Child land on a quiet farming world, where he helps a village defend itself from raiders with the help of Cara Dune, a former Rebel shock trooper, in a battle against an Imperial war machine."
+   },
+   {
+    "season": 1,
+    "number": 5,
+    "title": "Chapter 5: The Gunslinger",
+    "summary": "The pair stop on Tatooine, where a young bounty hunter named Toro Calican wants to capture the legendary Fennec Shand. The deal goes wrong and the Mandalorian is left with a mess and a new enemy."
+   },
+   {
+    "season": 1,
+    "number": 6,
+    "title": "Chapter 6: The Prisoner",
+    "summary": "The Mandalorian joins a crew of mercenaries for a prison break job that goes exactly as badly as expected. He outwits them, locks them in the cells, and learns that the Client is still hunting the Child."
+   },
+   {
+    "season": 1,
+    "number": 7,
+    "title": "Chapter 7: The Reckoning",
+    "summary": "The Mandalorian teams up with Cara Dune and Greef Karga to lure out the Client, with the Child as bait. The trap is sprung by Moff Gideon, and the group barely escapes with the Child taken."
+   },
+   {
+    "season": 1,
+    "number": 8,
+    "title": "Chapter 8: Redemption",
+    "summary": "Moff Gideon closes in with an army of stormtroopers. The droid IG-11 sacrifices himself to save the group, the Mandalorian's helmet comes off, and he vows to return the Child to his own kind, a foundling's promise that sets up the war to come."
+   }
+  ]
  },
  {
   "id": "series-arcane",
@@ -920,7 +1511,70 @@
    "British",
    "2020s"
   ],
-  "tier": 1
+  "tier": 1,
+  "synopsis": "Jason Sudeikis plays Ted Lasso, an American college football coach hired to manage AFC Richmond, a struggling English Premier League club, despite knowing nothing about soccer. What he does not know is that the club's new owner, Rebecca Welton, hired him specifically to destroy the team and humiliate her ex-husband, its former owner. Ted's unshakable optimism, his folksy aphorisms and his belief sign slowly win over the skeptical players, the cynical press and eventually the audience, but the show never lets the sweetness go unearned: Ted is coping with a failing marriage and panic attacks, and his kindness is a discipline, not a lack of perception. With Hannah Waddingham's Rebecca, Brett Goldstein's Roy Kent and Phil Dunster's Jamie Tartt, the show became a global phenomenon, a comedy about empathy that made everyone feel like they were on the team.",
+  "episodes": [
+   {
+    "season": 1,
+    "number": 1,
+    "title": "Pilot",
+    "summary": "Ted Lasso, an American football coach, is hired to manage AFC Richmond by new owner Rebecca Welton, who secretly wants the club to fail. Ted's folksy optimism confuses the players, the press and the fans alike."
+   },
+   {
+    "season": 1,
+    "number": 2,
+    "title": "Biscuits",
+    "summary": "Ted brings Rebecca biscuits every morning, makes his first tactical errors, and begins to win over the locker room, though the veteran Roy Kent and the young star Jamie Tartt remain unimpressed."
+   },
+   {
+    "season": 1,
+    "number": 3,
+    "title": "Trent Crimm: The Independent",
+    "summary": "A journalist shadows the club and expects to find a laughingstock; Ted's genuine curiosity and warmth instead leave him with nothing bad to write. The team plays its first match of the season."
+   },
+   {
+    "season": 1,
+    "number": 4,
+    "title": "For the Children",
+    "summary": "A charity gala forces the players to auction themselves off, and Ted's speech, honest about failure, upstages the performance. Rebecca's sabotage of the club begins to take real shape."
+   },
+   {
+    "season": 1,
+    "number": 5,
+    "title": "Tan Lines",
+    "summary": "Jamie Tartt's ego grows with a reality show, and the team loses again. Ted's wife Michelle is distant on the phone, and the first cracks in his cheerful armor show."
+   },
+   {
+    "season": 1,
+    "number": 6,
+    "title": "Two Aces",
+    "summary": "Ted suffers a panic attack and begins to hide it, while the club's finances and Rebecca's vendetta tighten around them. The team finds a small victory on the pitch."
+   },
+   {
+    "season": 1,
+    "number": 7,
+    "title": "Make Rebecca Great Again",
+    "summary": "Rebecca's ex-husband Rupert arrives with his young girlfriend, and Ted beats him at darts in the pub with a lesson about curiosity. Rebecca starts to soften toward the club, and toward Ted."
+   },
+   {
+    "season": 1,
+    "number": 8,
+    "title": "The Diamond Dogs",
+    "summary": "The coaching staff forms the Diamond Dogs, a huddle for personal problems, and the players begin to trust each other. The club's relegation fight comes into view."
+   },
+   {
+    "season": 1,
+    "number": 9,
+    "title": "All Apologies",
+    "summary": "The season's pressure peaks: Roy Kent faces his own decline, Jamie's ego costs the team, and an apology tour forces everyone to look honestly at themselves."
+   },
+   {
+    "season": 1,
+    "number": 10,
+    "title": "The Hope That Kills You",
+    "summary": "Richmond's fate is decided on the final day of the season. Rebecca confesses her plot to Ted and he forgives her; the club is relegated but leaves the pitch full of hope, and the Believe sign goes up again."
+   }
+  ]
  },
  {
   "id": "series-the-bear",
@@ -964,7 +1618,70 @@
    "American",
    "2010s"
   ],
-  "tier": 1
+  "tier": 1,
+  "synopsis": "Jesse Armstrong's drama about the Roy family, owners of the global media empire Waystar Royco, is a tragedy wearing a comedy's clothes. Logan Roy, the aging patriarch, built the company from nothing, and his children, Kendall, Roman, Shiv and Connor, circle him like planets, desperate for his approval and for the crown they believe is theirs. Brian Cox plays Logan, Jeremy Strong the tortured Kendall, Kieran Culkin the cruel Roman, Sarah Snook the calculating Shiv, and Matthew Macfadyen the hapless Tom, Shiv's fiancé. The show follows the family through takeovers, weddings, funerals and betrayals, its dialogue crackling with the special cruelty of people raised on money and neglect. It won a shelf of Emmys and is widely regarded as one of the greatest dramas of its era, a portrait of power as inheritance, and of a family that cannot stop destroying itself.",
+  "episodes": [
+   {
+    "season": 1,
+    "number": 1,
+    "title": "Celebration",
+    "summary": "Logan Roy's eightieth birthday: the family gathers at the estate, and Logan announces he has no intention of stepping down as CEO. Kendall, the presumed heir, is blindsided, and the night ends with Logan suffering a stroke."
+   },
+   {
+    "season": 1,
+    "number": 2,
+    "title": "Shit Show at the Fuck Factory",
+    "summary": "Logan lies in the hospital and his children begin to maneuver. Kendall tries to act like a leader, Shiv balances her political career, and Roman toys with his father's empire from the sidelines."
+   },
+   {
+    "season": 1,
+    "number": 3,
+    "title": "Lifeboats",
+    "summary": "Kendall moves for a vote of no confidence and fails to rally the board, learning how little power he actually has. The siblings realize the succession will be a war, not an inheritance."
+   },
+   {
+    "season": 1,
+    "number": 4,
+    "title": "Sad Sack Wasp Trap",
+    "summary": "Logan recovers at home, surrounded by handlers, and the children compete for his attention while the company drifts. Shiv's relationship with Tom is put under the family microscope."
+   },
+   {
+    "season": 1,
+    "number": 5,
+    "title": "I Went to Market",
+    "summary": "Kendall begins a risky deal with the financier Stewy to fund a takeover, and the family learns that an outside force is circling the company. Logan begins to suspect his own children."
+   },
+   {
+    "season": 1,
+    "number": 6,
+    "title": "Which Side Are You On?",
+    "summary": "The bear hug, the takeover play, comes into the open and each Roy must choose a side. Kendall presses his advantage while Logan fights from weakness for the first time."
+   },
+   {
+    "season": 1,
+    "number": 7,
+    "title": "Austerlitz",
+    "summary": "The family convenes for a therapy weekend that goes badly for everyone: Logan's health, Kendall's confidence and Roman's loyalties all surface under the therapist's questions."
+   },
+   {
+    "season": 1,
+    "number": 8,
+    "title": "Prague",
+    "summary": "Tom's bachelor party takes the group to Prague while Shiv and Tom's wedding looms, and the dealmaking behind the family's backs threatens to break the couple apart before the vows."
+   },
+   {
+    "season": 1,
+    "number": 9,
+    "title": "DC",
+    "summary": "The Roys travel to Washington, where Logan is honored and the succession maneuvering continues in public, with each child testing how much of the empire they can claim."
+   },
+   {
+    "season": 1,
+    "number": 10,
+    "title": "Nobody Is Ever Missing",
+    "summary": "Shiv and Tom marry on a luxury ocean liner while Kendall's night unravels: after a car accident that kills a young man, Logan covers it up, and Kendall, broken, signs away his rebellion, ending the season as his father's prisoner."
+   }
+  ]
  },
  {
   "id": "series-the-last-of-us",
@@ -986,7 +1703,64 @@
    "American",
    "2020s"
   ],
-  "tier": 1
+  "tier": 1,
+  "synopsis": "Craig Mazin and Neil Druckmann's adaptation of the 2013 video game follows Joel, a hardened smuggler, as he escorts fourteen-year-old Ellie across a post-apocalyptic United States, twenty years after a cordyceps fungus turned most of humanity into infected. The journey from Boston to a Firefly hospital in Utah tests Joel's ability to care again, and Ellie's immunity to the infection makes her the key to a cure. Pedro Pascal plays Joel and Bella Ramsey plays Ellie, and the series follows the game's story beat for beat while expanding it with episodes devoted to the people they meet.",
+  "episodes": [
+   {
+    "season": 1,
+    "number": 1,
+    "title": "When You're Lost in the Darkness",
+    "summary": "The outbreak begins in 2003 when Joel's daughter Sarah is shot during the evacuation, and twenty years later he runs smuggling jobs in the quarantine zone. A friend asks him to take a teenage girl named Ellie out of the city."
+   },
+   {
+    "season": 1,
+    "number": 2,
+    "title": "Infected",
+    "summary": "Joel, Ellie and Tess cross the city to the statehouse, fighting infected in a museum. Tess is bitten and reveals she knows Ellie is immune, holding off the infected so the pair can escape with the mission intact."
+   },
+   {
+    "season": 1,
+    "number": 3,
+    "title": "Long, Long Time",
+    "summary": "Bill's story: a survivalist who fortifies a town alone until he meets Frank, and the two live together for years. Frank, dying, asks Bill to end it with him, and Bill leaves everything, including his truck, for Joel and Ellie to use."
+   },
+   {
+    "season": 1,
+    "number": 4,
+    "title": "Please Hold to My Hand",
+    "summary": "Joel and Ellie make their way through Kansas City, dodging a group led by Kathleen who is hunting a man named Henry. The pair team up with Henry and his deaf brother Sam, and the four plan an escape through the city."
+   },
+   {
+    "season": 1,
+    "number": 5,
+    "title": "Endure and Survive",
+    "summary": "Kathleen corners the group in a suburb as an army of infected, drawn by noise, overruns the city. Henry kills Kathleen and the group escapes, but Sam is bitten and turns; Henry shoots Sam and then himself rather than live without him."
+   },
+   {
+    "season": 1,
+    "number": 6,
+    "title": "Kin",
+    "summary": "Joel brings Ellie to Wyoming to find his brother Tommy, who has built a community at a dam. The pair learn the Fireflies may be at a hospital in Colorado, and Joel, weakened, collapses on the journey as Ellie cares for him."
+   },
+   {
+    "season": 1,
+    "number": 7,
+    "title": "Left Behind",
+    "summary": "Ellie's backstory: the night she was bitten she and her best friend Riley explored a mall, and Riley revealed she had been recruited by the Fireflies. Both were bitten, Riley turned, and Ellie survived, alone."
+   },
+   {
+    "season": 1,
+    "number": 8,
+    "title": "When We Are in Need",
+    "summary": "Joel, badly hurt, is nursed by a couple, while Ellie hunts for supplies and is captured by a preacher, David, who wants to eat her. Ellie escapes and kills David, and Joel, recovered, finds her shaken but alive."
+   },
+   {
+    "season": 1,
+    "number": 9,
+    "title": "Look for the Light",
+    "summary": "The Fireflies plan to extract the fungus from Ellie's brain to make a cure, a surgery that will kill her. Joel kills the surgeon and the soldiers to take her back, and when she wakes he lies, telling her they found others like her who were immune."
+   }
+  ]
  },
  {
   "id": "series-wednesday",
@@ -1009,7 +1783,58 @@
    "American",
    "2020s"
   ],
-  "tier": 1
+  "tier": 1,
+  "synopsis": "Tim Burton's comedy-horror reimagines Wednesday Addams as a teenager at Nevermore Academy, a school for outcasts where werewolves, vampires and sirens study alongside normies. Jenna Ortega plays the deadpan heroine who investigates a monster killing the town's students, uncovering a conspiracy tied to her own family and her parents' past. The show's goth humour, Ortega's deadpan delivery and the viral dance scene made it Netflix's most-watched series at launch, and it was renewed for a second season.",
+  "episodes": [
+   {
+    "season": 1,
+    "number": 1,
+    "title": "Wednesday's Child Is Full of Woe",
+    "summary": "Wednesday is expelled from her high school after releasing piranhas into the pool, and her parents send her to Nevermore Academy. A monster kills a student in the woods, and Wednesday's visions show her the attack in detail."
+   },
+   {
+    "season": 1,
+    "number": 2,
+    "title": "Woe Is the Loneliest Number",
+    "summary": "Wednesday joins the school's outcast clubs and meets her roommate Enid, the stalker Xavier and the scheming Bianca. Another student is killed, and Wednesday uses her psychic visions to hunt the monster, called the Hyde."
+   },
+   {
+    "season": 1,
+    "number": 3,
+    "title": "Friend or Woe",
+    "summary": "Wednesday investigates the town's Pilgrim Day festival and the history of the outcasts' persecution. The monster attacks during the festival, and Wednesday's visions link it to her ancestor Goody Addams and the original feud."
+   },
+   {
+    "season": 1,
+    "number": 4,
+    "title": "Woe What a Night",
+    "summary": "Wednesday attends the school's Raven dance and performs the now-famous dance, while the monster attacks the mayor's fundraiser. Tyler, the town barista, reveals a secret connection to the sheriff's investigation."
+   },
+   {
+    "season": 1,
+    "number": 5,
+    "title": "You Reap What You Woe",
+    "summary": "Wednesday breaks into the sheriff's files and learns her father was a suspect in an old murder case. She uses her visions to reopen the investigation, and her uncle Fester arrives for a visit with advice about her powers."
+   },
+   {
+    "season": 1,
+    "number": 6,
+    "title": "Quid Pro Woe",
+    "summary": "The Hyde's victims pile up, and Wednesday's visions show her that the monster is controlled by someone at the school. She suspects the principal, then the therapist, while her romantic tension with Xavier and Tyler grows."
+   },
+   {
+    "season": 1,
+    "number": 7,
+    "title": "If You Don't Woe Me by Now",
+    "summary": "Wednesday uncovers the conspiracy of Laurel Gates, who has been using Tyler as her Hyde. Her visions reveal the truth about her father's case, and she races to stop the monster before it kills again."
+   },
+   {
+    "season": 1,
+    "number": 8,
+    "title": "A Murder of Woes",
+    "summary": "Wednesday confronts Laurel, who is resurrecting the original monster to destroy Nevermore. With the school under siege, Wednesday uses her ancestor's powers to defeat the Hyde, and a dramatic twist reveals a family secret about her mother."
+   }
+  ]
  },
  {
   "id": "series-one-piece-live-action",
@@ -1210,7 +2035,58 @@
    "American",
    "2010s"
   ],
-  "tier": 1
+  "tier": 1,
+  "synopsis": "Nic Pizzolatto's anthology series reinvented the detective show, and its first season became a phenomenon. Matthew McConaughey plays Rust Cohle, a philosophical, world-weary detective who sees through everything, and Woody Harrelson plays Marty Hart, the married, conventional partner who cannot understand him. In 1995 Louisiana, the two investigate the murder of a woman posed with antlers in a cane field, a case that pulls them into a web of secret churches, corrupt families and a decades-old cult, and the show cuts between the original investigation and 2012, when a new murder forces the estranged partners back together. With its swampy atmosphere, its spiraling obsession with the occult, and Cohle's bleak monologues, the season felt like a novel, not a procedural, and its ending, in which the horror finally has a face, remains one of the most debated finales in television.",
+  "episodes": [
+   {
+    "season": 1,
+    "number": 1,
+    "title": "The Long Bright Dark",
+    "summary": "In 2012, detectives Rust Cohle and Marty Hart are interviewed about a case from 1995: the murder of a woman posed with antlers in a Louisiana cane field. The two old partners are barely speaking, and the story they tell is only the beginning."
+   },
+   {
+    "season": 1,
+    "number": 2,
+    "title": "Seeing Things",
+    "summary": "The 1995 investigation digs into the dead woman's church and the strange spiral painted on her back. Cohle's past as an undercover narcotics agent comes out, and the case begins to look less like a murder and more like a ritual."
+   },
+   {
+    "season": 1,
+    "number": 3,
+    "title": "The Locked Room",
+    "summary": "The detectives trace the victim's letters and the church's pastor, and the clues keep circling the same families. Hart's marriage strains while Cohle pushes the case past the point his superiors want."
+   },
+   {
+    "season": 1,
+    "number": 4,
+    "title": "Who Goes There",
+    "summary": "The killer seems to be watching, and the case explodes: a raid on a meth lab leads to a shootout and the arrest of Reggie Ledoux, the man the evidence points to, and the spiral seems to end."
+   },
+   {
+    "season": 1,
+    "number": 5,
+    "title": "The Secret Fate of All Life",
+    "summary": "The raid goes wrong and Cohle and Hart kill Ledoux's cousin in the woods. The case is closed with Ledoux behind bars, and the two men think it is over, though the spiral keeps turning."
+   },
+   {
+    "season": 1,
+    "number": 6,
+    "title": "Haunted Houses",
+    "summary": "Years later a new body with the same markings is found, and the case is alive again. Hart's affair has destroyed his marriage, Cohle is alone with his obsession, and the two partners are drifting apart."
+   },
+   {
+    "season": 1,
+    "number": 7,
+    "title": "After You've Gone",
+    "summary": "In 2012 the two men are dragged back together to reopen the case, and the name of the Yellow King surfaces. They follow the spiral through the Tuttle family's history toward the truth they missed."
+   },
+   {
+    "season": 1,
+    "number": 8,
+    "title": "Form and Void",
+    "summary": "The truth is Errol Childress, the killer they overlooked for years. Cohle and Hart corner him in the ruins of Carcosa and barely survive, and in the hospital, looking at the stars, Cohle admits the light is winning after all."
+   }
+  ]
  },
  {
   "id": "series-mindhunter",
@@ -1409,7 +2285,64 @@
    "American",
    "2020s"
   ],
-  "tier": 1
+  "tier": 1,
+  "synopsis": "Dan Erickson's workplace thriller imagines Lumon Industries, where employees undergo a surgical procedure that severs their memories, so the work self, their innie, exists only inside the office and knows nothing of the life outside. Adam Scott plays Mark, who leads a team of refiners sorting numbers on screens, until a new hire and a mysterious colleague begin to suspect the company's true purpose. The show's sterile corridors, cult-like rituals and the question of what the numbers mean made it a slow-burn hit that won the Emmy for best drama.",
+  "episodes": [
+   {
+    "season": 1,
+    "number": 1,
+    "title": "Good News About Hell",
+    "summary": "Mark, recently severed, starts work at Lumon's macrodata refinement floor, guided by manager Harmony Cobel. A former colleague, Petey, appears outside the building and tells Mark he has reintegrated, before collapsing and being taken away."
+   },
+   {
+    "season": 1,
+    "number": 2,
+    "title": "Half Loop",
+    "summary": "Mark's outie mourns his wife, while his innie investigates Petey's disappearance. The new hire Helly tries repeatedly to resign, and Mark finds Petey hiding in his basement, where Petey explains he can feel both lives at once."
+   },
+   {
+    "season": 1,
+    "number": 3,
+    "title": "In Perpetuity",
+    "summary": "Petey dies of reintegration sickness, and Mark's innie digs through his old friend's notes. Helly attempts a violent escape that lands her in the hospital, and the team learns the break room is where insubordination is punished."
+   },
+   {
+    "season": 1,
+    "number": 4,
+    "title": "The You You Are",
+    "summary": "The team finds a book in the break room written by a mysterious CEO, and Helly meets her outie's fiancé, who is actually a Lumon employee sent to keep her in line. Mark discovers his outie lives next door to his boss, Cobel."
+   },
+   {
+    "season": 1,
+    "number": 5,
+    "title": "The Grim Barbarity of Optics and Design",
+    "summary": "The refiners meet the staff of another severed department, Optics and Design, and learn the two floors have been kept apart. Mark finds a hidden area with a goat, and the team grows closer as they plan their escape."
+   },
+   {
+    "season": 1,
+    "number": 6,
+    "title": "Hide and Seek",
+    "summary": "Cobel keeps an eye on Mark's outie after a visit to his wife's grave, while the refiners devise the overtime contingency, a way to wake their innies outside work. Irving's outie paints the black hallway over and over."
+   },
+   {
+    "season": 1,
+    "number": 7,
+    "title": "Defiant Jazz",
+    "summary": "The team plans to use the overtime contingency to expose Lumon from the outside. Helly records a message to her outie, Irving begins to distrust Burt, and the refiners agree to flip the switch despite the risk."
+   },
+   {
+    "season": 1,
+    "number": 8,
+    "title": "What's for Dinner?",
+    "summary": "The overtime contingency fires: Mark's innie wakes at a party, Irving's innie follows the painting to Burt's house and to the mysterious hallway, and Helly's innie wakes at her own outie's event and delivers a devastating speech."
+   },
+   {
+    "season": 1,
+    "number": 9,
+    "title": "The We We Are",
+    "summary": "The innies use their stolen minutes to spread the truth: Helly exposes the severed floor, Irving finds the exports hall, and Mark follows the sound of a baby and his wife's voice to find her alive in Lumon's basement, just as the switch is cut."
+   }
+  ]
  },
  {
   "id": "series-better-call-saul",

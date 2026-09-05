@@ -92,6 +92,14 @@ app/src/main/java/com/curio/app/
 
 ### UI
 - **User design preferences (decided, durable):** light mode background/surface is **Soft Cream `#F7F0E4`** (deliberately less-white/creamy, not dark); the **category-tint background wash** is applied on the **Spin page, Topic Reveal, the Save/Capture screen, and the Cabinet (which uses the active filter chip's tint; "All" keeps the plain background)** — so every category-aware screen wears the same color story. The wash is **theme-aware via `CurioCategory.categoryBackgroundWash()`** (in `ui/theme/CategoryInk.kt`): deep accent at 20% over cream in light mode, but the light 300-level twin at ~16% over midnight in dark mode (deep accents look muddy on dark — amber turns brownish, teal grey-green).    Container steps are deepened so cards/sheets stay distinct on the cream surface. See `ui/theme/CurioColors.kt` + `CurioTheme.kt`.
+- **No close buttons in bottom sheets (user):** bottom sheets dismiss by
+  swipe-down/back only — NEVER put a cross/close icon in one (the category
+  picker + album sheets are the model; the book/series notes sheets had
+  theirs removed in v355).
+- **No filler hint copy (user):** never annotate an obvious affordance with
+  hint text — "tap a chapter to read its notes", "Rating hidden · tap the
+  book to show it" and "keyless Google Books rating" are all gone; if a
+  control is self-evident, add no caption.
 - **Torn heroes on WIDE windows scroll away (user, tablet redesign verdict):** the tablet is the MOBILE design (torn heroes, phone layouts, single-column lists — the editorial "no tear" tablet redesign was fully reverted). The one wide-only deviation: a torn hero is **NOT sticky on wide windows** (>=600dp — landscape tablet). Every screen whose torn banner used to pin over its scrolling list (Settings family + ShareHub + Recents + Recycle Bin + Manage Categories + Quests + Support + Promo Mode + Updates + Outfit Shop + Pet Designer, plus Topic Database and Cabinet with their search/filter UI) now renders the hero as the **first item of the scroll content** on wide (`top = if (wide) 0.dp else SettingsHeroTotalHeight` + an `if (wide) item(key = "hero")` at the list head + the pinned overlay wrapped in `if (!wide)`), so the tear rides away with the rows and landscape regains the full viewport height. In-list heroes pass `glassBackdrop = null` (opaque pills — nothing pinned behind to refract), and wide disables the list's `layerBackdrop` + inner-pill liquid glass where the hero is inside the captured node (no self-sample). Phone paths are untouched (sticky torn hero + reserved `SettingsHeroTotalHeight`). Shared helpers: settings-family screens use `SettingsHeroHeader`; Topic Database/Cabinet keep their own heroes but follow the same placement rule. Pet Designer's floating studio toolbar stays pinned (it already floats above the scrolling hero).
 - **M3 theme system (v185, Settings → Appearance):** ONE opt-in toggle, default OFF (the current Curio look is the default — nothing changes until it's on). **"Material theme"** (`AppPreferences.materialThemeState`) redoes the COLOR system per M3 guidelines: the whole `ColorScheme` becomes `materialColorScheme()` (dynamic Material You on Android 12+, seeded brand-coral baseline fallback — `ui/theme/MaterialColorSchemes.kt`), and the 36 lane accents collapse to **6 muted hue families** (`MaterialFamilies.kt`: every family resolves to tonal tones of its own hue — T40/T80 fills, on-fill ink, T45/T80 text ink; v198 removed the earlier rose→scheme.secondary / green→scheme.tertiary role branches that painted buttons/chips off-hue, see v198) — M3's multi-color guideline is restraint: neutral surfaces, ONE primary, muted accents, never a rainbow per lane. The category choke points (`themedAccent()`, `categoryInk()`, `onAccent()`, `headerAccent()`, `categoryBackgroundWash()` → neutral background, `categorySurface()/categoryChipSurface()` → neutral containers, `CurioGradients.cardGradient/heroBlendGradient`, `CurioMixedDeck.*`) all gate on `materialThemeOn` so every screen repaints. The v185 **"Material guidelines" + "Material chrome"** options (M3 typography/shapes/spacing, the M3 `NavigationBar` swap, the Changa One drop from nav labels) were REMOVED (user verdict: not good) — `MaterialGuidelines.kt`, the `materialGuidelinesState` / `materialChromeFullState` prefs and their Appearance rows are deleted; `CurioTheme` always uses `CurioTypography`/`CurioShapes` and `CurioBottomNav` always renders the floating pill bar with Changa One labels. v190 refinements: material card fills are pastel-aware; mixed decks collapse to the scheme primary; light-mode heroes wear the rich family banner with dark ink (`materialHeaderAccent` light + `materialHeroInk`); the nav chrome uses pure M3 roles under Material (surfaceContainer + secondaryContainer indicator). The v78-era AMOLED/Material STYLES are long gone — do not resurrect them; the v185 toggle is the only Material system.
 - **Always-on companions & onboarding setup (v23):** the floating pet, the pet brain, and auto-open landed topic have NO Settings toggles — they are always on (their Appearance toggles were removed; the `AppPreferences` APIs remain, defaults ON). Custom reaction lines are permanently off (no toggle; the reactions editor is unreachable). The explore-bubble opt-in row in the Explore dialog is hidden by default — a Notifications toggle (`AppPreferences.showBubbleOptInDialogState`) re-shows it as a single text line (no subtext). Onboarding includes a dedicated Search step that picks the explore search engine (`AppPreferences.searchEngineState`; changeable anytime in Settings) and the bubble opt-in row inside the "Display over other apps" permission card.
@@ -409,6 +417,338 @@ app/src/main/java/com/curio/app/
   `drop(1)`) to new `KEY_PICKER_PAGE0_SCROLL` / `KEY_PICKER_PAGE1_SCROLL`
   ("index:offset") behind `AppPreferences.PickerScrollPos`
   get/set helpers — survives closing the picker AND app restarts.
+- **v355 — book/series notes sheets: no close button, no hint copy, rating
+  below the author, tick-free read state.** User: "never add cross close
+  button in a bottom sheet… remove it from the book synopsis sheet… remove
+  the your rating row and just put the rating just below author name and
+  use a different icon for rating… remove that tap a chapter to read its
+  note hint… don't add useless notes… remove that arrow icon from chapter
+  chips… when i tap read the read status is really bad, i don't like the
+  active state with the tick icon… when expanded to read in dark mode it's
+  a little bad, fix it".
+  - **No cross close:** the ✕ button is GONE from the book + series notes
+    sheets (swipe-down/back dismisses) — the category-picker and album
+    sheets were already the no-close model.
+  - **Rating below the author:** the "REVIEWS & YOUR RATING" card is
+    REMOVED; the sheet header shows the fetched Google Books average AND
+    the user's own rating ("4.2 · yours 4 / 5") just below the author
+    name, under ONE award-ribbon glyph (`CurioIcons.WorkspacePremium`,
+    which also replaced the ★ on the reveal hero chip + synopsis-card
+    chip). `BookRatingPicker`/`BookGlyph` were deleted with the card; the
+    `bookRatingVisibleState` pref API stays dormant.
+  - **No hint copy:** the "tap a chapter/episode to read its notes" suffix
+    is gone from the progress rail (just "N chapters"); the "keyless
+    Google Books rating" and "Rating hidden · tap the book to show it"
+    labels are gone too.
+  - **Read state, no tick:** the leading chip always shows the
+    chapter/episode NUMBER — a read/watched row tints the disc softly in
+    the accent (18% fill + accent number + accent ring) instead of the
+    loud ✓; the row keeps its solid-accent border + surfaceAlt fill. The
+    Mark-read FoldedCorner toggle is a SOLID accent disc + onAccent icon
+    in EVERY state — the old open+read flip to an onAccent disc read as a
+    hole punched in the accent row in dark mode (fixed).
+  - **No chevron:** the ▼/▲ expand arrow is removed from the
+    chapter/episode rows (rows still expand on tap).
+- **v356 — book-cover providers: iTunes FIRST + LibraryThing (keyed).**
+  User: "add i tunes provider for books and make that first and then
+  fallback other, and also add librarything too".
+  - `BookCoverProvider` enum reordered BEST-FIRST: **ITUNES →
+    GOOGLE_BOOKS → OPEN_LIBRARY → LIBRARY_THING**;
+    `AppPreferences.getBookCoverProvider` default is now `ITUNES` (fresh
+    installs / unknown stored values).
+  - **iTunes** (`itunesThumbnail`): keyless
+    `itunes.apple.com/search?term=…&entity=ebook`, upscales the 100px
+    artwork token to 600px, picks the best title+author match via the
+    shared `matchScore` heuristic (same as the album resolver).
+  - **LibraryThing** (`libraryThingCover`): ISBN-gated + key-gated —
+    resolves the ISBN via a keyless Google Books volume search
+    (`industryIdentifiers`), then
+    `covers.librarything.com/devkey/{key}/large/isbn/{isbn}`; needs
+    `LIBRARY_THING_API_KEY` (optional BuildConfig via env/secret,
+    `.env.example` + `android.yml` wired). No key = the hub row is hidden
+    and lookups fall through to the keyless providers.
+  - **Reveal poster live fallback** now cascades iTunes → Google Books →
+    LibraryThing (only when keyed) instead of Google Books alone.
+  - Hub provider picker follows the enum order (iTunes first); a stored
+    LIBRARY_THING pick with no key configured silently falls back to
+    iTunes.
+- **v357 — album LISTEN pill: Apple Music deep-links to the REAL album.**
+  User: "for album open links in apple music it's searching only… but for
+  song it perfectly opens the song inside the album, so can't we do the
+  same for albums too, and maybe for other services too".
+  - The album sheet's LISTEN → Apple Music entry now resolves the album via
+    `resolveAppleMusicItemUrl(topic)` (iTunes lookup, entity=album →
+    `collectionViewUrl` → `music://…/album/{id}` — the same native deep
+    link songs already use) and falls back to the search link only when
+    the lookup misses. Runs off a `rememberCoroutineScope` in
+    `AlbumNotesSheet`.
+  - Other services stay search deep links: Spotify needs OAuth
+    (client-credentials), Deezer now requires login/app registration, and
+    YouTube Music / Amazon Music expose no keyless album-ID lookup — there
+    is no keyless album deep link for them. (Spotify album deep links
+    could be added behind optional CLIENT_ID/CLIENT_SECRET secrets if ever
+    wanted.)
+- **v358 — Spotify deep links (optional keys).** User: "yes app spotify deep
+  links too" (follow-up to v357). `resolveSpotifyItemUrl(topic)` in
+  ExploreSearch.kt runs the Spotify client-credentials flow — POST
+  `accounts.spotify.com/api/token` with Basic `id:secret` → access token,
+  then `api.spotify.com/v1/search?q=…&type=album|track|artist` — and
+  returns `https://open.spotify.com/{type}/{id}` for the best title+artist
+  match. Requires optional `SPOTIFY_CLIENT_ID` + `SPOTIFY_CLIENT_SECRET`
+  BuildConfig values (env/secret, `.env.example` + `android.yml` wired);
+  unset = null → callers keep the search link. Wired into BOTH the album
+  sheet's LISTEN pill (Spotify entry) and the Explore "Listen in" flow for
+  Spotify (albums/tracks/artists).
+- **v359 — share-card favorite-tracks strip: Minimal rule moves with the
+  fact; Collage + Signature strip tokens + placement fixed.** User: "for the
+  minimal card style there's a line above the quick fact or custom fact
+  which should move along with the move, also the favorite tracks box isn't
+  matching in collage, and signature styles so fix it, and properly place
+  them so that they don't overlap".
+  - **Minimal fact group:** the thick accent rule above the quick/custom
+    fact is now INSIDE the same `moveFact(move)` group as the gap + fact
+    text (one `Column`), so the rule travels with the box on drag and stays
+    glued while the box resizes — it can no longer desync and float where
+    the fact used to be.
+  - **Collage strip:** the bottom is a dark band under the torn seam, so
+    the strip is now a translucent DARK slip (black 34% + white hairline
+    border + white serif type + gold-tape heart) instead of the
+    warm-white tone box that clashed with the band; reads on the band AND
+    anywhere the user drags it.
+  - **Signature/Custom strip:** backgrounds vary per category (paper-white
+    and dark scenes alike), so the strip is a dark stamp pill (black 55% +
+    white border + white type + accent heart) instead of a tone-palette box
+    that clashed with the card's own colors.
+  - **Placement:** Collage and Signature/Custom strips raised from
+    ~40/58dp to **bottom 80dp (classic 84dp)** so they clear the collage's
+    torn-seam footer wave and the signature footer line — still movable via
+    the editor's F-handle.
+- **v360 — share-card meta row moves edge-to-edge; book-cover fetch
+  verifies real covers, skips covered, survives exit; series data batch
+  2.** User: "during card editing the author year etc that info move is
+  bad… the separate one is bad like it have restriction to move to too much
+  to the sides while others don't so fix it, also i don't see the new
+  series synopsis style layout inside, also then the book fetching in
+  experiment fix so when i tap fetch it fetches from the start when the
+  books already have the cover and when i exit the page during fetch it
+  cancels and restart from start, also many book covers are not getting
+  fetched like a handful of dust, a perfect spy and many more".
+  - **Meta row clamp (share card):** the author/year info row used a padded
+    clamp (`mPad = 18f`) that kept it ~18px off every card edge while
+    title/fact/badge/cover could travel to the true edges. It now clamps
+    edge-to-edge exactly like the other elements (base-rect clamp, so the
+    range never shrinks as the row travels); the magnet/alignment helpers
+    unchanged.
+  - **Book-cover fetch — placeholder-aware verification:** the bulk fetch
+    now VERIFIES a cover decodes to a real image (>= 40px short edge)
+    instead of trusting "it loaded". Open Library serves a 1x1 GIF with
+    HTTP 200 for missing covers, so dead authored URLs ("A Handful of
+    Dust", "A Perfect Spy" and many more — every one of the 796 books has
+    an authored imageUrl that short-circuited the providers) silently
+    counted as successes. `fetchAll` now builds candidate URLs per book
+    (stored-verified first, then authored, then the provider cascade:
+    chosen provider first, then iTunes → Google Books → Open Library →
+    LibraryThing) and the first candidate that decodes at real size wins
+    and is remembered via `setBookCoverUrl`.
+  - **Skip covered + resume:** new persisted `bookCoverDoneState` (book
+    names whose covers VERIFIED) — "Fetch all covers" skips those and only
+    runs the remaining/failed books, so re-tapping resumes where the last
+    run stopped instead of restarting at book #1.
+  - **Survives leaving the page:** the fetch job + progress state moved out
+    of the screen into `BookCoverFetchSession` (a process-lifetime
+    `CoroutineScope` in BookCoverFetch.kt). Leaving the hub no longer
+    cancels the run; re-entering shows the live progress and Cancel still
+    works. Hub + per-row retry route through the session.
+  - **Reveal poster:** `BookCoverPoster` also skips tiny/placeholder
+    successes (its `onSuccess` checks decoded size, bumping the candidate
+    index like a 404 would) and its candidate order is now verified-first,
+    so a hub-fetched real cover beats a dead authored URL on the reveal
+    too. `coverCandidates` ordering updated the same way (verified stored
+    URL first; authored second; Open Library title guess last).
+  - **Series data batch 2** (`tools/enrich_series_batch2.py`, mirrors
+    batch 1): synopsis + full episode lists added for **Sherlock, Squid
+    Game, The Last of Us, Severance, Wednesday** — the reveal's series card
+    (poster + synopsis preview + episode-list sheet) previously only
+    rendered for the 5 batch-1 shows; now 10 shows carry the layout.
+- **v361 — keyed defaults + Clear-covers button; CI fix for the reveal
+  poster.** User: "fix it, and also i added spotify key and library thing
+  api as well… does the api is used in the apk build from pr, use that by
+  default, also in book fetching add a button to clear all book covers so
+  testing other provider is easy" (the CI failure was the v360 reveal
+  poster's Coil listener using the wrong signature).
+  - **CI fix:** `BookCoverPoster`'s `AsyncImage.onSuccess` used Coil 2.7's
+    (request, result) lambda; 2.7's AsyncImage callback takes a single
+    `AsyncImagePainter.State.Success` (drawable lives on `state.result`).
+    Fixed — placeholder skip works again and the build compiles.
+  - **Keyed providers are used by default (yes, in PR builds too):** the
+    GitHub Actions workflow already passes `LIBRARY_THING_API_KEY`,
+    `SPOTIFY_CLIENT_ID`/`SPOTIFY_CLIENT_SECRET` (and GOOGLE_BOOKS_API_KEY)
+    as env into the PR/push build step, which bakes them into BuildConfig
+    — so the APK built from a PR includes them (note: fork PRs don't get
+    secrets; same-repo PRs and pushes do). New default: when the
+    LibraryThing key is configured and no provider was ever picked,
+    `getBookCoverProvider` now returns LIBRARY_THING instead of ITUNES, so
+    a keyed install gets the highest-quality ISBN covers immediately.
+    Spotify deep links were already on-by-default when the keys are set
+    (resolveSpotifyItemUrl returns non-null → deep link; null → search).
+  - **Clear all covers (hub):** new "Clear all covers" button in the
+    Book-covers hub with a confirm dialog — `BookCoverFetch.clearAllCovers`
+    wipes the stored/verified/failed cover records
+    (`AppPreferences.clearBookCovers`) AND clears the shared Coil disk
+    cache, so the next "Fetch all covers" re-resolves every book from
+    scratch (the old provider's verified URLs would otherwise keep winning
+    the candidate order). Ratings are preserved. Enabled only when there is
+    something to clear.
+- **v362 — personal chapter notes; chapter roadmap logged.** User: "the
+  chapter like have no use, so any suggestion? what can we do" → chose
+  **personal chapter notes** for now + logged the bigger chapter ideas in
+  ANALYSIS.md (which is now gitignored — it's a local working doc, not
+  committed/pushed). Album-link year-matching was explicitly declined
+  ("nah keep it like that now") and the iTunes-API-key question answered
+  (see below).
+  - **Personal chapter notes:** the expanded chapter panel in the
+    book-notes sheet gains a quiet one-line note field (edit_note glyph,
+    "Add a note…" placeholder) that saves as you type — blank text
+    removes the note. Stored per book → chapter number in
+    `AppPreferences.bookChapterNotesState`
+    (KEY_BOOK_CHAPTER_NOTES: JSON object of objects), so notes survive
+    re-grouping and restarts; reactive, so the field reflects the saved
+    note instantly. Capped at 240 chars. Styled for both the open (accent
+    wash) and closed (surface) chapter panels.
+  - **Chapter roadmap (ANALYSIS.md §10):** Chapter → related topics
+    (per-chapter `relatedTopics` schema field + chip row; data batch after
+    schema) and synopsis enrichment ("some books synopsis doesn't feel
+    like synopsis" — rewrite pass over books.json) are planned; chapter
+    search / continue-where-you-left-off / share-a-chapter are later ideas.
+  - **iTunes API key answer:** the iTunes Search API is already KEYLESS and
+    free (rate-limited ~20 calls/min per Apple's docs) — there is no free
+    API key to add. The only keyed Apple option is the paid Apple Music API
+    (MusicKit, $99/yr Apple Developer Program) which is overkill for album
+    deep links. So album links stay keyless; no BuildConfig plumbing
+    needed.
+- **v367 — book synopsis QUALITY pass (connected prose).** User: "analyse
+  the books properly i feel some synopsis doesnt feel connected like i
+  ont know, proper synopsis". Audit of the 60 rewritten synopses found
+  the problem: the non-fiction ones were LISTY, sentences of the form
+  "he shows X; he explores Y; he examines Z" with colon-catalogues of
+  topics (Predictably Irrational, Nudge, Ego Is the Enemy, Stillness Is
+  the Key, The Tipping Point, Algorithms to Live By, The 48 Laws of
+  Power, So Good They Can't Ignore You), and the shortest pre-existing
+  synopses in the catalog (320-494 chars) had the same disconnected
+  feel. `tools/enrich_book_synopses_quality1.py` rewrote 32 synopses as
+  flowing, connected prose: each opens with a human hook (Ariely's
+  bandage-burn story, Duckworth's classroom question, Tolle's night of
+  despair), develops the argument through natural transitions instead of
+  catalogues, and closes by tying the whole together. 8 of my own
+  listy rewrites + 24 of the worst short ones (The Dispossessed, The
+  Princess Bride, The Jungle, Sister Carrie, Uncle Tom's Cabin, Love in
+  the Time of Cholera, Gideon the Ninth, The Souls of Black Folk, Ball
+  Lightning, The Tale of Genji, The Four Agreements, 12 Rules for Life,
+  The Dark Forest, Solaris, The Lion the Witch and the Wardrobe, The
+  Last Unicorn, The Power of Now, The Prophet, Homo Deus, The Art of
+  War, Outliers, Grit, The Midnight Library, Quiet). 92 books total now
+  carry quality synopses; the quality bar going forward is connected
+  prose, never topic catalogues.
+- **v366 — book synopsis batch 2 + series batch 4.** Continuation of
+  v365 (user: "yup go ahead"). `tools/enrich_book_synopses_batch2.py`
+  rewrote the next 30 shortest synopses (Up from Slavery, Influence,
+  Little House on the Prairie, Freakonomics, The Ocean at the End of the
+  Lane, My Antonia, The Awakening, The 48 Laws of Power, Watership Down,
+  The Republic, The Tombs of Atuan, Lessons in Chemistry, Ethan Frome,
+  The Tipping Point, Pedro Paramo, Tom Sawyer, Assassin's Apprentice, All
+  Systems Red, Sapiens, Of Mice and Men, Rendezvous with Rama, etc.) into
+  detailed web-verified synopses (1073-1327 chars, no em/en dashes),
+  60 books now enriched. `tools/enrich_series_batch4.py` added synopsis
+  + first-season episodes to The Good Place (13), Ted Lasso (10), The
+  Mandalorian (8), Succession (10) and True Detective (8), titles
+  verified against episode guides, 20 shows now carry episode data. Also
+  fixed the CI failure from v364: the album resolver's three new block-
+  body helpers (resolveArtistId, bestAlbumFromCatalog,
+  bestAlbumFromSearch) ended in a bare expression (null / bestUrl)
+  instead of an explicit `return`, which fails Kotlin compilation
+  ("Missing return statement").
+- **v365 — book synopsis enrichment batch 1 + series enrichment batch 3.**
+  User: "after that do series enrichment and before that do the book
+  synopsis fix as many books dont have proper synopsis and start with 30
+  per bath proper web searched sunopsis detailed. no need to ask me
+  anything first". All 796 books had synopses, but the shortest were thin
+  one-paragraph blurbs ("doesn't feel like a synopsis").
+  - **Books (batch 1 of 30):** `tools/enrich_book_synopses_batch1.py`
+    rewrote the 30 shortest synopses (Nudge, Predictably Irrational,
+    Meditations, A Suitable Boy, The Graveyard Book, Small Gods, Wild,
+    Our Town, The Invention of Morel, Tarzan of the Apes, The Elegant
+    Universe, etc.) into detailed, web-verified synopses in the house
+    style (author + context, then a real plot/content walkthrough,
+    1003-1317 chars, no em/en dashes). Episode-level data was verified
+    against live searches (e.g. A Suitable Boy's four families and
+    suitors; Our Town's three acts; Anxious People's cashless-bank
+    setup; The Wire's S1 title order). Diff is exactly 30 synopsis
+    fields (books.json is 2-space indent, no trailing newline; the tool
+    matches that format).
+  - **Series (batch 3):** `tools/enrich_series_batch3.py` added
+    synopsis + first-season episodes to Breaking Bad (7), Stranger
+    Things (8), Game of Thrones (10), The Wire (13) and The Sopranos
+    (13), titles verified against episode guides. 15 shows now carry
+    episode data; batches 1 (Chernobyl, Band of Brothers, The Queen's
+    Gambit, Watchmen, Fleabag, Freaks and Geeks) and 2 (Sherlock,
+    Squid Game, The Last of Us, Severance, Wednesday) were earlier.
+    More batches can follow (Seinfeld, Twin Peaks, The X-Files, Lost,
+    The Office, Friends, etc.).
+- **v364 — album deep links resolve through the ARTIST'S REAL catalog.**
+  User: "the direct albumn open links are not accurate and it gives no
+  result like oens blank apple music, so any way to fix". Root cause
+  (verified live against the iTunes API): `resolveAppleMusicItemUrl` took
+  `results[0]` from a `limit=1` album search with NO relevance check, and
+  the search API's ranking is unreliable for famous catalogs — the real
+  "Nevermind" (Nirvana) and "The Dark Side of the Moon" (Pink Floyd)
+  don't appear in the top 25 hits AT ALL, so deep links opened tribute
+  albums, same-title singles by other artists, or a different album
+  entirely ("The Wall"), which reads as a wrong or blank page.
+  - **New album path (ExploreSearch.kt):** resolve the ARTIST ID via a
+    `entity=musicArtist` search (exact name match), pull the artist's OWN
+    album catalog (`/lookup?id={artistId}&entity=album&limit=200`), and
+    pick the best title match with a strict score gate
+    (`appleAlbumScore`: 35 = exact title + exact artist, 30 = exact
+    title, 25 = containment-fuzzy + exact artist; reject < 25),
+    preferring `trackCount > 0` (a trackless preorder renders as a blank
+    page). Verified: Nevermind 35 ✓, Dark Side of the Moon 35 ✓, Sgt.
+    Pepper 35 ✓, Led Zeppelin IV → "(Remastered)" 25 ✓.
+  - **Fallback:** a SCORED search (`limit=10`, same >= 25 gate) replaces
+    blind `results[0]` for albums whose artist name differs from the
+    byline; when nothing clears the gate the resolver returns null and
+    the caller falls back to the plain SEARCH link — a search is always
+    better than a wrong album. Song/artist paths are untouched (songs
+    were verified working; the song `trackViewUrl` route is preserved).
+    Both the reveal's "Listen in" and the album sheet's LISTEN pill use
+    this resolver, so both are fixed.
+  - **Spotify (same build):** the query is now field-scoped and quoted
+    (`album:"..." artist:"..."` / `track:"..."` / `artist:"..."`) and
+    the match gate rises from score > 0 to >= 2 (reject weak fuzzy-only
+    hits → search fallback), so a same-title item by another artist can't
+    win.
+- **v363 — fetch is provider-EXCLUSIVE; Clear also wipes memory cache.**
+  User: "the clear all covers doesnt work … i feel like the fetching of
+  covers is still uses the old api … when i select the provider and tap
+  fetch then it should only fetch from that for the fetch button not for
+  the fallbacks." Two root causes, both in `BookCoverFetch`:
+  - **Provider-only fetch:** `resolveVerifiedCoverUrl` (used by the bulk
+    fetch) previously built candidates as stored-URL → authored imageUrl
+    → chosen provider → cascade of ALL providers. So the fetch button was
+    never a pure provider test — books with real authored covers kept
+    their identical image no matter which provider was selected (authored
+    always won first), which is exactly why everything looked "the same
+    old API" after clearing + re-fetching with a new provider. Now the
+    fetch considers ONLY the chosen provider's resolved URL(s) (iTunes
+    search / Google Books search / Open Library title URL / LibraryThing
+    ISBN URL); a book that provider can't serve is marked failed.
+    Verification (`loadsRealImage`, 40px-min short edge) still applies,
+    and the reveal poster / share card / hub tiles keep their own
+    authored-first fallback via `coverCandidates` (the "auto loading" the
+    user said is fine).
+  - **Clear now clears BOTH Coil caches:** `clearAllCovers` also calls
+    `memoryCache?.clear()` — disk-only clearing left the decoded covers
+    serving instantly from memory, so the hub's strip looked unchanged and
+    "Clear" seemed broken.
 - **v323 — picker hold actions become a gooey RADIAL menu; share-card
   Tone tool + 6 new tones; pet shop toys/games; quest fixes.** (1)
   **Radial hold menu** (`features/picker/RadialHoldMenu.kt`): the old

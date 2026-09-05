@@ -807,10 +807,13 @@ fun TopicShareCard(
                 // is suppressed (below) so the album strip owns that corner.
                 ShareCardStyle.VINYL, ShareCardStyle.PAPER -> Alignment.BottomStart to
                     PaddingValues(start = if (aspect == ShareCardAspect.CLASSIC) 14.dp else 18.dp, bottom = if (aspect == ShareCardAspect.CLASSIC) 28.dp else 26.dp)
+                // v359 — raised clear of the collage's torn-seam footer wave
+                // and the signature footer line (the strip is still movable,
+                // so these are safe no-overlap defaults).
                 ShareCardStyle.COLLAGE -> Alignment.BottomStart to
-                    PaddingValues(start = 22.dp, bottom = if (aspect == ShareCardAspect.CLASSIC) 40.dp else 36.dp)
+                    PaddingValues(start = 22.dp, bottom = if (aspect == ShareCardAspect.CLASSIC) 84.dp else 80.dp)
                 ShareCardStyle.SIGNATURE, ShareCardStyle.CUSTOM -> Alignment.BottomStart to
-                    PaddingValues(start = if (aspect == ShareCardAspect.CLASSIC) 18.dp else 22.dp, bottom = if (aspect == ShareCardAspect.CLASSIC) 62.dp else 58.dp)
+                    PaddingValues(start = if (aspect == ShareCardAspect.CLASSIC) 18.dp else 22.dp, bottom = if (aspect == ShareCardAspect.CLASSIC) 84.dp else 80.dp)
             }
             FavoriteTracksBadge(
                 tracks = albumFavTracks,
@@ -1250,11 +1253,15 @@ private fun BoxedFavStrip(
             heart = Color(0xFFD4A0A0), serifBody = true, capsSpacing = true,
             radius = 7.dp, alpha = 0.92f, glyph = FavGlyph.VINYL
         )
+        // v359 — the collage's bottom is a dark band under the torn seam, so
+        // the strip is a translucent DARK slip with white serif type and the
+        // polaroid's gold-tape notes — it reads on the band AND anywhere the
+        // user drags it (a dark plate over any paper).
         ShareCardStyle.COLLAGE -> FavStripTokens(
-            bg = Color(0xFFFFFDF6), border = Color(0xFFD9BE8A).copy(alpha = 0.55f),
-            labelInk = Color(0xFF3A2A20).copy(alpha = 0.72f), bodyInk = Color(0xFF3A2A20).copy(alpha = 0.80f),
-            heart = palette.accentDark, serifBody = true, capsSpacing = false,
-            radius = 3.dp, alpha = 0.97f, glyph = FavGlyph.NOTE
+            bg = Color.Black.copy(alpha = 0.34f), border = Color.White.copy(alpha = 0.22f),
+            labelInk = Color.White.copy(alpha = 0.82f), bodyInk = Color.White.copy(alpha = 0.90f),
+            heart = Color(0xFFD9BE8A), serifBody = true, capsSpacing = false,
+            radius = 3.dp, alpha = 1f, glyph = FavGlyph.NOTE
         )
         ShareCardStyle.NEUMORPHIC -> FavStripTokens(
             bg = Color.Black.copy(alpha = 0.62f), border = Color.White.copy(alpha = 0.16f),
@@ -1262,12 +1269,15 @@ private fun BoxedFavStrip(
             heart = palette.accent.copy(alpha = 0.9f), serifBody = false, capsSpacing = true,
             radius = 50.dp, alpha = 1f, glyph = FavGlyph.EQ
         )
-        // Signature + Custom wear the tone palette like their category slugs.
+        // v359 — Signature/Custom backgrounds vary per category (paper-white
+        // and dark scenes alike), so the strip is a dark stamp pill: white
+        // type + accent notes read on ANY signature background instead of a
+        // tone-palette box that clashed with the card's own colors.
         else -> FavStripTokens(
-            bg = palette.bgBase, border = palette.accent.copy(alpha = 0.40f),
-            labelInk = palette.ink.copy(alpha = 0.82f), bodyInk = palette.ink.copy(alpha = 0.84f),
-            heart = palette.accentDark, serifBody = true, capsSpacing = false,
-            radius = 8.dp, alpha = 0.97f, glyph = FavGlyph.NOTE
+            bg = Color.Black.copy(alpha = 0.55f), border = Color.White.copy(alpha = 0.28f),
+            labelInk = Color.White.copy(alpha = 0.85f), bodyInk = Color.White.copy(alpha = 0.92f),
+            heart = palette.accent, serifBody = true, capsSpacing = false,
+            radius = 8.dp, alpha = 1f, glyph = FavGlyph.NOTE
         )
     }
     Surface(
@@ -2312,49 +2322,52 @@ private fun MinimalCard(
 
             Spacer(Modifier.weight(1f))
 
-            // Thick accent rule above the body block — v316b: rides the fact
-            // box when the F handle drags (belongs to the quick-fact block).
-            Box(Modifier.width(56.dp).height(4.dp).background(accent).factShift(move))
-            Spacer(Modifier.height(16.dp))
-
             // Body — serif, bottom-anchored
             val bodySize = when { body.length > 350 -> 8.5.sp; body.length > 260 -> 9.5.sp; body.length > 180 -> 10.5.sp; else -> 11.5.sp }
             val factStyle = factBodyStyle(TextStyle(
                 fontFamily = LoraFontFamily, fontSize = (bodySize.value * bodyScale).sp,
                 lineHeight = (bodySize.value * 1.50f * bodyScale).sp, color = inkDark.copy(alpha = 0.78f)
             ), move)
-            // v329 — Reading-progress content draws the chapter widget
-            // (accent bar on the white page) instead of the prose.
-            // v335 — a custom fact stacks UNDER the progress widget.
-            if (chapterProgress != null) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.moveFact(move).onGloballyPositioned {
-                        callbacks.onFact(it.boundsInWindow())
-                        callbacks.onFactStyle(factStyle)
-                    }
-                ) {
-                    ChapterProgressBlock(
-                        progress = chapterProgress,
-                        fill = accent,
-                        track = inkDark.copy(alpha = 0.12f),
-                        ink = inkDark.copy(alpha = 0.78f)
-                    )
-                    if (chapterFact.isNotBlank()) {
-                        Text(
-                            chapterFact, style = factStyle,
-                            color = inkDark.copy(alpha = 0.78f),
-                            maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale),
-                            overflow = TextOverflow.Ellipsis
+            // v359 — the accent rule, the gap and the fact text are ONE move
+            // group: the rule above the quick/custom fact travels with the
+            // box on drag (and stays glued while the box resizes) instead of
+            // floating where the fact used to be.
+            Column(modifier = Modifier.moveFact(move)) {
+                Box(Modifier.width(56.dp).height(4.dp).background(accent))
+                Spacer(Modifier.height(16.dp))
+                // v329 — Reading-progress content draws the chapter widget
+                // (accent bar on the white page) instead of the prose.
+                // v335 — a custom fact stacks UNDER the progress widget.
+                if (chapterProgress != null) {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.onGloballyPositioned {
+                            callbacks.onFact(it.boundsInWindow())
+                            callbacks.onFactStyle(factStyle)
+                        }
+                    ) {
+                        ChapterProgressBlock(
+                            progress = chapterProgress,
+                            fill = accent,
+                            track = inkDark.copy(alpha = 0.12f),
+                            ink = inkDark.copy(alpha = 0.78f)
                         )
+                        if (chapterFact.isNotBlank()) {
+                            Text(
+                                chapterFact, style = factStyle,
+                                color = inkDark.copy(alpha = 0.78f),
+                                maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale),
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
+                } else {
+                    Text(body, style = factStyle, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale), overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.onGloballyPositioned {
+                            callbacks.onFact(it.boundsInWindow())
+                            callbacks.onFactStyle(factStyle)
+                        })
                 }
-            } else {
-                Text(body, style = factStyle, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale), overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.moveFact(move).onGloballyPositioned {
-                        callbacks.onFact(it.boundsInWindow())
-                        callbacks.onFactStyle(factStyle)
-                    })
             }
 
             if (ratingStars != null && ratingStars > 0) {
@@ -5526,7 +5539,6 @@ private fun ArrangeableCard(
                 // AUTHOR / YEAR info rows — tap the row to select, grip only
                 // when selected. The row's box spans its reported bounds.
                 val m = rMeta
-                val mPad = 18f
                 if (m.width > 0f && m.height > 0f) {
                     val isSel = sel == ShareCardResizeTarget.META
                     Box(
@@ -5542,25 +5554,23 @@ private fun ArrangeableCard(
                     )
                     if (isSel) {
                         MoveHandle(
-                            x = (m.right + mPad).coerceAtMost(cw - 16f).dp,
+                            // v360 — the grip parks just past the row's right
+                            // edge (same as every other handle sits on its box).
+                            x = (m.right + 18f).coerceAtMost(cw - 16f).dp,
                             y = m.bottom.dp.coerceAtMost((ch - 16f).dp),
                             onDelta = { dx, dy ->
-                                // v340 — base-rect clamp: keep the row at least
-                                // [mPad] inside the card, computed from the
-                                // UNMOVED rect so the range never shrinks as
-                                // the row travels (see the title handle).
-                                // v341 — the row's own padded clamp range feeds
-                                // the magnet helper (centre-line snaps still
-                                // work; the edge snaps are out of range here,
-                                // so the row keeps its padding).
+                                // v360 — the info row clamps like EVERY other
+                                // element now (edge to edge): the old 18f
+                                // padding box kept author/year off the card's
+                                // sides while title/fact/badge/cover could
+                                // travel to the true edges. Base-rect clamp so
+                                // the range never shrinks as the row travels.
                                 val bx = m.left - move.metaDx
                                 val by = m.top - move.metaDy
-                                val maxX = (cw - bx - m.width - mPad).coerceAtLeast(-bx + mPad)
-                                val maxY = (ch - by - m.height - mPad).coerceAtLeast(-by + mPad)
                                 // v342 - cross-element alignment (see title).
                                 val othersM = alignOthers(m)
-                                val xs = magnetAxis(bx, m.width, cw, -bx + mPad, maxX, (move.metaDx + dx).coerceIn(-bx + mPad, maxX), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersM, bx, m.width))
-                                val ys = magnetAxis(by, m.height, ch, -by + mPad, maxY, (move.metaDy + dy).coerceIn(-by + mPad, maxY), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersM, by, m.height))
+                                val xs = magnetAxis(bx, m.width, cw, -bx, cw - bx - m.width, (move.metaDx + dx).coerceIn(-bx, cw - bx - m.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersM, bx, m.width))
+                                val ys = magnetAxis(by, m.height, ch, -by, ch - by - m.height, (move.metaDy + dy).coerceIn(-by, ch - by - m.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersM, by, m.height))
                                 dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
                                 onMove(move.copy(metaDx = xs.offset, metaDy = ys.offset))
                             },

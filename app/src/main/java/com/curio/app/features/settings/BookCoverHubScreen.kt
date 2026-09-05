@@ -24,18 +24,18 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.layout.width
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,8 +50,6 @@ import com.curio.app.data.CurioTopic
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 
 /**
  * v320 — the BOOK COVERS & RATINGS HUB: pick a cover provider (Open Library
@@ -63,18 +61,26 @@ import kotlinx.coroutines.launch
 @Composable
 fun BookCoverHubScreen(navController: NavController) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     var providerName by remember { mutableStateOf(AppPreferences.bookCoverProviderState) }
+    // v356 — iTunes is the default source. LibraryThing only applies when its
+    // free key is configured (BuildConfig.LIBRARY_THING_API_KEY); without a
+    // key a stored LIBRARY_THING pick silently falls back to iTunes.
     val provider = runCatching { BookCoverFetch.BookCoverProvider.valueOf(providerName) }
-        .getOrDefault(BookCoverFetch.BookCoverProvider.OPEN_LIBRARY)
+        .getOrDefault(BookCoverFetch.BookCoverProvider.ITUNES)
+        .let { p ->
+            if (p == BookCoverFetch.BookCoverProvider.LIBRARY_THING &&
+                com.curio.app.BuildConfig.LIBRARY_THING_API_KEY.isBlank()
+            ) BookCoverFetch.BookCoverProvider.ITUNES else p
+        }
 
-    // Fetch engine state.
-    var job by remember { mutableStateOf<Job?>(null) }
-    var busy by remember { mutableStateOf(false) }
-    var jobLabel by remember { mutableStateOf("") } // "Fetching covers…" / "Fetching ratings…"
-    var done by remember { mutableIntStateOf(0) }
-    var total by remember { mutableIntStateOf(0) }
-    var failed by remember { mutableIntStateOf(0) }
+    // v360 — fetch state lives in BookCoverFetchSession (a process-lifetime
+    // scope), NOT here: leaving the hub page no longer cancels the run, and
+    // re-entering shows the live progress. The screen only starts/cancels it.
+    val busy = BookCoverFetchSession.busy
+    val jobLabel = BookCoverFetchSession.label
+    val done = BookCoverFetchSession.done
+    val total = BookCoverFetchSession.total
+    val failed = BookCoverFetchSession.failed
 
     // TopicJsonLoader.load is suspend — load the count off the main thread.
     val books by produceState(initialValue = emptyList<CurioTopic>()) {
@@ -85,42 +91,13 @@ fun BookCoverHubScreen(navController: NavController) {
     val failedList = AppPreferences.bookCoverFailedState
     val ratedCount = AppPreferences.bookRatingsState.size
     val ratingCounts = AppPreferences.bookRatingsCountState
+    // v361 — Clear-covers confirm dialog.
+    var showClearConfirm by remember { mutableStateOf(false) }
 
     fun start(kind: String) {
         // v320b — fetching is OPT-OUT by default: nothing downloads until
         // the user flips the toggle below.
-        if (busy || !AppPreferences.bookFetchEnabledState) return
-        job = scope.launch {
-            busy = true
-            done = 0; total = 0; failed = 0
-            try {
-                when (kind) {
-                    "covers" -> {
-                        jobLabel = "Fetching covers…"
-                        BookCoverFetch.fetchAll(context, provider) { d, t, f ->
-                            done = d; total = t; failed = f
-                        }
-                    }
-                    "failed" -> {
-                        jobLabel = "Retrying failed covers…"
-                        BookCoverFetch.fetchAll(context, provider, onlyFailed = true) { d, t, f ->
-                            done = d; total = t; failed = f
-                        }
-                    }
-                    "ratings" -> {
-                        jobLabel = "Fetching ratings…"
-                        BookCoverFetch.fetchRatings(context) { d, t ->
-                            done = d; total = t
-                        }
-                    }
-                }
-            } catch (_: kotlinx.coroutines.CancellationException) {
-                // Cancelled — whatever was cached stays.
-            } finally {
-                busy = false
-                job = null
-            }
-        }
+        BookCoverFetchSession.start(context, provider, kind, AppPreferences.bookFetchEnabledState)
     }
 
     Column(
@@ -222,7 +199,14 @@ fun BookCoverHubScreen(navController: NavController) {
                 )
                 Spacer(Modifier.height(8.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    BookCoverFetch.BookCoverProvider.entries.forEach { p ->
+                    // v356 — LibraryThing needs its free key (BuildConfig);
+                    // without one the row is hidden rather than failing every
+                    // fetch. iTunes is listed first (the default source).
+                    val providers = BookCoverFetch.BookCoverProvider.entries.filter { p ->
+                        p != BookCoverFetch.BookCoverProvider.LIBRARY_THING ||
+                            com.curio.app.BuildConfig.LIBRARY_THING_API_KEY.isNotBlank()
+                    }
+                    providers.forEach { p ->
                         val selected = p == provider
                         Surface(
                             onClick = {
@@ -320,6 +304,18 @@ fun BookCoverHubScreen(navController: NavController) {
                         enabled = fetchOn && !busy,
                         onClick = { start("ratings") }
                     )
+                    // v361 — clear every stored/verified/failed cover record AND
+                    // the disk cache so the next fetch starts fresh: makes A/B
+                    // testing providers easy (the old provider's verified URLs
+                    // would otherwise keep winning the candidate order).
+                    HubButton(
+                        label = "Clear all covers",
+                        glyph = CurioIcons.Delete,
+                        emphasize = false,
+                        enabled = !busy && (AppPreferences.bookCoverUrlsState.isNotEmpty() ||
+                            failedList.isNotEmpty() || AppPreferences.bookCoverDoneState.isNotEmpty()),
+                        onClick = { showClearConfirm = true }
+                    )
                     if (!fetchOn) {
                         Text(
                             "Fetching is off. Turn the switch above on to download covers and ratings.",
@@ -350,7 +346,7 @@ fun BookCoverHubScreen(navController: NavController) {
                                     modifier = Modifier.weight(1f)
                                 )
                                 Surface(
-                                    onClick = { job?.cancel() },
+                                    onClick = { BookCoverFetchSession.cancel() },
                                     shape = RoundedCornerShape(50),
                                     color = MaterialTheme.colorScheme.surfaceContainerHighest
                                 ) {
@@ -416,23 +412,12 @@ fun BookCoverHubScreen(navController: NavController) {
                             if (!busy && AppPreferences.bookFetchEnabledState) {
                                 Surface(
                                     onClick = {
-                                        job = scope.launch {
-                                            busy = true
-                                            // v320b — per-row retry also respects the opt-out.
-                                            if (!AppPreferences.bookFetchEnabledState) {
-                                                busy = false
-                                                job = null
-                                                return@launch
-                                            }
-                                            try {
-                                                BookCoverFetch.fetchAll(context, provider, onlyFailed = true) { d, t, f ->
-                                                    done = d; total = t; failed = f
-                                                }
-                                            } finally {
-                                                busy = false
-                                                job = null
-                                            }
-                                        }
+                                        // v360 — per-row retry runs through the
+                                        // shared session (survives leaving the page).
+                                        BookCoverFetchSession.start(
+                                            context, provider, "failed",
+                                            AppPreferences.bookFetchEnabledState
+                                        )
                                     },
                                     shape = RoundedCornerShape(50),
                                     color = MaterialTheme.colorScheme.primary
@@ -490,6 +475,31 @@ fun BookCoverHubScreen(navController: NavController) {
                     }
                 }
             }
+        }
+
+        // v361 — Clear-covers confirm: wiping stored URLs + the disk cache is
+        // irreversible, so it always asks first.
+        if (showClearConfirm) {
+            AlertDialog(
+                onDismissRequest = { showClearConfirm = false },
+                title = { Text("Clear all book covers?") },
+                text = {
+                    Text(
+                        "Removes every stored/verified cover, the failed list and " +
+                        "the downloaded cover images, so the next Fetch starts " +
+                        "fresh (useful when comparing providers). Ratings are kept."
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showClearConfirm = false
+                        BookCoverFetch.clearAllCovers(context)
+                    }) { Text("Clear") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showClearConfirm = false }) { Text("Cancel") }
+                }
+            )
         }
     }
 }
