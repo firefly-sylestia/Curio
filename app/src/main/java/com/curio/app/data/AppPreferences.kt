@@ -218,6 +218,8 @@ object AppPreferences {
     // "Fetch all covers" so a re-tap resumes where the last run left off
     // instead of restarting from book #1.
     private const val KEY_BOOK_COVER_DONE = "book_cover_done"
+    // v362 — per-chapter PERSONAL notes (book name → chapter number → text).
+    private const val KEY_BOOK_CHAPTER_NOTES = "book_chapter_notes"
     private const val KEY_BOOK_RATINGS = "book_ratings"               // JSON object name->avg rating
     private const val KEY_BOOK_RATINGS_COUNT = "book_ratings_count"    // JSON object name->ratings count
     // v328 — per-book reading progress: JSON object book name -> number of
@@ -405,6 +407,49 @@ object AppPreferences {
         prefs(context).edit().putString(KEY_BOOK_CHAPTER_LIKES, obj.toString()).apply()
         bookChapterLikesState = cur
         return added
+    }
+
+    // ── Book chapter PERSONAL notes (v362) ──────────────────────────────
+    // One text note per chapter (book name → chapter number → text), written
+    // from the book-notes sheet's expanded chapter panel. Empty text removes
+    // the note; keyed by chapter NUMBER (stable across re-groupings).
+    fun getBookChapterNotes(context: Context): Map<String, Map<Int, String>> {
+        val raw = prefs(context).getString(KEY_BOOK_CHAPTER_NOTES, null) ?: return emptyMap()
+        return runCatching {
+            val obj = org.json.JSONObject(raw)
+            val out = LinkedHashMap<String, Map<Int, String>>()
+            val keys = obj.keys()
+            while (keys.hasNext()) {
+                val k = keys.next()
+                val inner = obj.optJSONObject(k) ?: continue
+                val notes = LinkedHashMap<Int, String>()
+                val inKeys = inner.keys()
+                while (inKeys.hasNext()) {
+                    val num = inKeys.next().toIntOrNull() ?: continue
+                    val text = inner.optString(num.toString()).takeIf { it.isNotBlank() }
+                    if (text != null) notes[num] = text
+                }
+                if (notes.isNotEmpty()) out[k] = notes
+            }
+            out
+        }.getOrDefault(emptyMap())
+    }
+
+    /** Save (or clear, when [text] is blank) the personal note for
+     *  [chapterNumber] of [bookName]. */
+    fun setBookChapterNote(context: Context, bookName: String, chapterNumber: Int, text: String) {
+        val cur = getBookChapterNotes(context).toMutableMap()
+        val notes = (cur[bookName] ?: emptyMap()).toMutableMap()
+        if (text.isBlank()) notes.remove(chapterNumber) else notes[chapterNumber] = text
+        if (notes.isEmpty()) cur.remove(bookName) else cur[bookName] = notes
+        val obj = org.json.JSONObject()
+        cur.forEach { (name, map) ->
+            val inner = org.json.JSONObject()
+            map.forEach { (num, t) -> inner.put(num.toString(), t) }
+            obj.put(name, inner)
+        }
+        prefs(context).edit().putString(KEY_BOOK_CHAPTER_NOTES, obj.toString()).apply()
+        bookChapterNotesState = cur
     }
 
     // ── Series episode likes (v352 — per-episode heart picks) ────────────
@@ -851,6 +896,10 @@ object AppPreferences {
         internal set
     // v352 — per-chapter heart picks: book name → set of liked chapter numbers.
     var bookChapterLikesState by mutableStateOf<Map<String, Set<Int>>>(emptyMap())
+        internal set
+    // v362 — personal text notes per chapter (book name → chapter number →
+    // text). Reactive so the sheet's note field updates immediately.
+    var bookChapterNotesState by mutableStateOf<Map<String, Map<Int, String>>>(emptyMap())
         internal set
     // v352 — per-episode heart picks: show name → set of liked "S1E3" keys.
     var seriesEpisodeLikesState by mutableStateOf<Map<String, Set<String>>>(emptyMap())
@@ -1348,6 +1397,7 @@ object AppPreferences {
         bookRatingsCountState = getBookRatingsCount(context)
         bookReadingProgressState = getBookReadingProgress(context)
         bookChapterLikesState = getBookChapterLikes(context)
+        bookChapterNotesState = getBookChapterNotes(context)
         seriesEpisodeLikesState = getSeriesEpisodeLikes(context)
         bookCustomRatingsState = getBookCustomRatings(context)
         bookCoverUrlsState = getBookCoverUrls(context)

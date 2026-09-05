@@ -31,6 +31,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -96,6 +97,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -2993,6 +2995,8 @@ private fun BookNotesSheet(
     val chaptersDone = AppPreferences.bookReadingProgressState[bookName] ?: 0
     // v352 — per-chapter Like hearts (book name → liked chapter numbers).
     val chapterLikes = AppPreferences.bookChapterLikesState[bookName].orEmpty()
+    // v362 — per-chapter personal notes (book name → chapter number → text).
+    val chapterNotes = AppPreferences.bookChapterNotesState[bookName].orEmpty()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val listState = rememberLazyListState()
     // v352 — chapter switching no longer lags: the seed chapter drives an
@@ -3386,6 +3390,23 @@ private fun BookNotesSheet(
                                             style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 25.sp),
                                             color = if (isOpen) onAccent else onSurface
                                         )
+                                        // v362 — personal note per chapter:
+                                        // a quiet one-line field that saves as
+                                        // you type (blank text removes it).
+                                        // Lives in the expanded panel below the
+                                        // summary so readers can jot thoughts.
+                                        ChapterNoteField(
+                                            initial = chapterNotes[ch.number].orEmpty(),
+                                            accent = accent,
+                                            onAccent = onAccent,
+                                            ink = ink,
+                                            isOpen = isOpen,
+                                            onSave = { text ->
+                                                AppPreferences.setBookChapterNote(
+                                                    context, bookName, ch.number, text
+                                                )
+                                            }
+                                        )
                                         // v352 — the Mark-read toggle + Like
                                         // heart moved OUT of the expanded panel
                                         // onto the row (chips above); the
@@ -3398,6 +3419,67 @@ private fun BookNotesSheet(
                 }
             }
         }
+    }
+}
+
+/**
+ * v362 — the chapter's PERSONAL note field: a single-line text input that
+ * saves on every change (blank = clears the note). Styled to sit quietly on
+ * both the open (accent) and closed (surface) chapter panels. The field is
+ * keyed by chapter number so notes survive re-grouping of the chapter data.
+ */
+@Composable
+private fun ChapterNoteField(
+    initial: String,
+    accent: Color,
+    onAccent: Color,
+    ink: Color,
+    isOpen: Boolean,
+    onSave: (String) -> Unit
+) {
+    var value by rememberSaveable(initial) { mutableStateOf(initial) }
+    androidx.compose.foundation.layout.Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                if (isOpen) onAccent.copy(alpha = 0.12f)
+                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+                RoundedCornerShape(12.dp)
+            )
+            .padding(horizontal = 10.dp, vertical = 8.dp)
+    ) {
+        val scheme = MaterialTheme.colorScheme
+        CurioIcon(
+            CurioIcons.Note,
+            if (value.isBlank()) "Add a note" else "Chapter note",
+            tint = if (isOpen) onAccent.copy(alpha = 0.75f) else scheme.onSurfaceVariant.copy(alpha = 0.8f),
+            size = 15.dp
+        )
+        BasicTextField(
+            value = value,
+            onValueChange = { new ->
+                value = new.take(240)
+                onSave(value)
+            },
+            singleLine = true,
+            textStyle = MaterialTheme.typography.bodySmall.copy(
+                color = if (isOpen) onAccent else scheme.onSurface
+            ),
+            cursorBrush = SolidColor(accent),
+            decorationBox = { inner ->
+                if (value.isBlank()) {
+                    Text(
+                        "Add a note…",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = (if (isOpen) onAccent else scheme.onSurfaceVariant).copy(alpha = 0.6f)
+                    )
+                }
+                inner()
+            },
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 

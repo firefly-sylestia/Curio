@@ -69,3 +69,7 @@ __pycache__/
 
 # Generated UI-texts reference (extraction tool: tools/extract_app_texts.py)
 /app-texts.md
+
+# Working analysis / product roadmap doc — intentionally NOT committed or
+# pushed (see the header of ANALYSIS.md itself). Kept on disk for local work.
+/ANALYSIS.md

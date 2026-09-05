@@ -1,3 +1,4 @@
+ADD: Book notes — each chapter now has a personal note field in its expanded panel (a quiet "Add a note…" line that saves as you type, blank clears it), so you can jot thoughts next to any chapter and they survive restarts.
 ADD: Book covers — a "Clear all covers" button in the book-covers hub (with a confirm prompt) wipes every stored/verified cover and the downloaded images so the next Fetch starts fresh, making it easy to compare cover providers. Ratings are kept.
 FIX: Book covers — the reveal poster no longer gets stuck on a 1x1 placeholder cover (the tiny-image skip now works on the current Coil API), and when a LibraryThing key is configured the hub now picks it as the default cover source on a fresh install.
 ADD: Series notes — synopsis + full episode lists added for Sherlock, Squid Game, The Last of Us, Severance and Wednesday, so the reveal's series card (poster + synopsis preview + episode list sheet) now appears for those shows too.

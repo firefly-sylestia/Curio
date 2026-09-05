@@ -599,6 +599,33 @@ app/src/main/java/com/curio/app/
     scratch (the old provider's verified URLs would otherwise keep winning
     the candidate order). Ratings are preserved. Enabled only when there is
     something to clear.
+- **v362 — personal chapter notes; chapter roadmap logged.** User: "the
+  chapter like have no use, so any suggestion? what can we do" → chose
+  **personal chapter notes** for now + logged the bigger chapter ideas in
+  ANALYSIS.md (which is now gitignored — it's a local working doc, not
+  committed/pushed). Album-link year-matching was explicitly declined
+  ("nah keep it like that now") and the iTunes-API-key question answered
+  (see below).
+  - **Personal chapter notes:** the expanded chapter panel in the
+    book-notes sheet gains a quiet one-line note field (edit_note glyph,
+    "Add a note…" placeholder) that saves as you type — blank text
+    removes the note. Stored per book → chapter number in
+    `AppPreferences.bookChapterNotesState`
+    (KEY_BOOK_CHAPTER_NOTES: JSON object of objects), so notes survive
+    re-grouping and restarts; reactive, so the field reflects the saved
+    note instantly. Capped at 240 chars. Styled for both the open (accent
+    wash) and closed (surface) chapter panels.
+  - **Chapter roadmap (ANALYSIS.md §10):** Chapter → related topics
+    (per-chapter `relatedTopics` schema field + chip row; data batch after
+    schema) and synopsis enrichment ("some books synopsis doesn't feel
+    like synopsis" — rewrite pass over books.json) are planned; chapter
+    search / continue-where-you-left-off / share-a-chapter are later ideas.
+  - **iTunes API key answer:** the iTunes Search API is already KEYLESS and
+    free (rate-limited ~20 calls/min per Apple's docs) — there is no free
+    API key to add. The only keyed Apple option is the paid Apple Music API
+    (MusicKit, $99/yr Apple Developer Program) which is overkill for album
+    deep links. So album links stay keyless; no BuildConfig plumbing
+    needed.
 - **v323 — picker hold actions become a gooey RADIAL menu; share-card
   Tone tool + 6 new tones; pet shop toys/games; quest fixes.** (1)
   **Radial hold menu** (`features/picker/RadialHoldMenu.kt`): the old
