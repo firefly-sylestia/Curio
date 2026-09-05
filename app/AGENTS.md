@@ -626,6 +626,33 @@ app/src/main/java/com/curio/app/
     (MusicKit, $99/yr Apple Developer Program) which is overkill for album
     deep links. So album links stay keyless; no BuildConfig plumbing
     needed.
+- **v365 — book synopsis enrichment batch 1 + series enrichment batch 3.**
+  User: "after that do series enrichment and before that do the book
+  synopsis fix as many books dont have proper synopsis and start with 30
+  per bath proper web searched sunopsis detailed. no need to ask me
+  anything first". All 796 books had synopses, but the shortest were thin
+  one-paragraph blurbs ("doesn't feel like a synopsis").
+  - **Books (batch 1 of 30):** `tools/enrich_book_synopses_batch1.py`
+    rewrote the 30 shortest synopses (Nudge, Predictably Irrational,
+    Meditations, A Suitable Boy, The Graveyard Book, Small Gods, Wild,
+    Our Town, The Invention of Morel, Tarzan of the Apes, The Elegant
+    Universe, etc.) into detailed, web-verified synopses in the house
+    style (author + context, then a real plot/content walkthrough,
+    1003-1317 chars, no em/en dashes). Episode-level data was verified
+    against live searches (e.g. A Suitable Boy's four families and
+    suitors; Our Town's three acts; Anxious People's cashless-bank
+    setup; The Wire's S1 title order). Diff is exactly 30 synopsis
+    fields (books.json is 2-space indent, no trailing newline; the tool
+    matches that format).
+  - **Series (batch 3):** `tools/enrich_series_batch3.py` added
+    synopsis + first-season episodes to Breaking Bad (7), Stranger
+    Things (8), Game of Thrones (10), The Wire (13) and The Sopranos
+    (13), titles verified against episode guides. 15 shows now carry
+    episode data; batches 1 (Chernobyl, Band of Brothers, The Queen's
+    Gambit, Watchmen, Fleabag, Freaks and Geeks) and 2 (Sherlock,
+    Squid Game, The Last of Us, Severance, Wednesday) were earlier.
+    More batches can follow (Seinfeld, Twin Peaks, The X-Files, Lost,
+    The Office, Friends, etc.).
 - **v364 — album deep links resolve through the ARTIST'S REAL catalog.**
   User: "the direct albumn open links are not accurate and it gives no
   result like oens blank apple music, so any way to fix". Root cause
