@@ -2206,7 +2206,7 @@ private fun HeroCard(
                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 CurioIcon(
-                                    name = CurioIcons.Star,
+                                    name = CurioIcons.WorkspacePremium,
                                     contentDescription = null,
                                     tint = Color(0xFFF6B23B),
                                     size = 13.dp
@@ -2489,7 +2489,7 @@ private fun BookSynopsisCard(
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                         ) {
                             CurioIcon(
-                                name = CurioIcons.Star,
+                                name = CurioIcons.WorkspacePremium,
                                 contentDescription = null,
                                 tint = Color(0xFFF6B23B),
                                 size = 12.dp
@@ -3054,24 +3054,33 @@ private fun BookNotesSheet(
                             overflow = TextOverflow.Ellipsis
                         )
                     }
-                    // v320 — the fetched keyless rating rides under the
-                    // author in the sheet header.
+                    // v355 — the rating sits just below the author name: the
+                    // fetched Google Books average AND the user's own rating
+                    // together under the award-ribbon glyph (the old Reviews +
+                    // Your-rating card is gone).
                     val fetchedRating = AppPreferences.bookRatingsState[topic.name]
-                    if (fetchedRating != null && fetchedRating > 0.0) {
+                    val myRating = AppPreferences.bookCustomRatingsState[topic.name] ?: 0.0
+                    if ((fetchedRating != null && fetchedRating > 0.0) || myRating > 0.0) {
                         Spacer(Modifier.height(3.dp))
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             CurioIcon(
-                                name = CurioIcons.Star,
+                                name = CurioIcons.WorkspacePremium,
                                 contentDescription = null,
                                 tint = Color(0xFFF6B23B),
                                 size = 13.dp
                             )
                             Text(
-                                text = String.format("%.1f", fetchedRating) +
-                                    " · keyless Google Books rating",
+                                text = buildString {
+                                    if (fetchedRating != null && fetchedRating > 0.0) {
+                                        append(String.format("%.1f", fetchedRating))
+                                        if (myRating > 0.0) append(" · yours ${myRating.toInt()} / 5")
+                                    } else if (myRating > 0.0) {
+                                        append("yours ${myRating.toInt()} / 5")
+                                    }
+                                },
                                 style = MaterialTheme.typography.labelSmall,
                                 color = onSurfaceVariant
                             )
@@ -3103,19 +3112,6 @@ private fun BookNotesSheet(
                             )
                         }
                     }
-                    Surface(
-                        onClick = onDismiss,
-                        shape = CircleShape,
-                        color = surface.copy(alpha = 0.6f)
-                    ) {
-                        CurioIcon(
-                            CurioIcons.Close,
-                            "Close book notes",
-                            tint = onSurfaceVariant,
-                            size = 20.dp,
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    }
                 }
             }
 
@@ -3124,7 +3120,7 @@ private fun BookNotesSheet(
                 Spacer(Modifier.height(12.dp))
                 val progressLabel = if (chaptersDone > 0)
                     "$chaptersDone of ${chapters.size} chapters read"
-                else "${chapters.size} chapters · tap a chapter to read its notes"
+                else "${chapters.size} chapters"
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -3168,137 +3164,6 @@ private fun BookNotesSheet(
                 }
                 Spacer(Modifier.height(12.dp))
             }
-
-            // ── Reviews & your rating (v352/v354) — compact, pinned under
-            // the progress rail: the fetched Google Books average (small) and
-            // the user's OWN book-glyph rating. The user rating row is its
-            // OWN toggleable element (like reading progress, but separate):
-            // a book icon in the header hides it without clearing the pick.
-            val fetchedRating = AppPreferences.bookRatingsState[bookName]?.takeIf { it > 0.0 }
-            val fetchedCount = AppPreferences.bookRatingsCountState[bookName] ?: 0
-            val customRating = AppPreferences.bookCustomRatingsState[bookName] ?: 0.0
-            val ratingVisible = AppPreferences.bookRatingVisibleState
-            Spacer(Modifier.height(10.dp))
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = surface.copy(alpha = 0.65f),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(14.dp),
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
-                ) {
-                    if (fetchedRating != null) {
-                        Column {
-                            Text(
-                                "REVIEWS",
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.ExtraBold,
-                                    letterSpacing = 1.sp
-                                ),
-                                color = ink
-                            )
-                            Spacer(Modifier.height(2.dp))
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                CurioIcon(
-                                    CurioIcons.Star,
-                                    null,
-                                    tint = Color(0xFFF6B23B),
-                                    size = 14.dp
-                                )
-                                Text(
-                                    text = String.format("%.1f", fetchedRating) +
-                                        if (fetchedCount > 0) " · ${compactCount(fetchedCount)} ratings" else "",
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = onSurface
-                                )
-                            }
-                        }
-                        Box(
-                            modifier = Modifier
-                                .width(1.dp)
-                                .height(30.dp)
-                                .background(onSurfaceVariant.copy(alpha = 0.25f))
-                        )
-                    }
-                    Column(modifier = Modifier.weight(1f)) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Text(
-                                "YOUR RATING",
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.ExtraBold,
-                                    letterSpacing = 1.sp
-                                ),
-                                color = ink,
-                                modifier = Modifier.weight(1f)
-                            )
-                            // v354 — hide/show the whole picker row (the
-                            // rating itself is never cleared by hiding).
-                            Surface(
-                                onClick = {
-                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                    AppPreferences.setBookRatingVisible(context, !ratingVisible)
-                                },
-                                shape = CircleShape,
-                                color = if (ratingVisible)
-                                    accent.copy(alpha = 0.18f)
-                                else surfaceHigh
-                            ) {
-                                BookGlyph(
-                                    color = if (ratingVisible) ink else onSurfaceVariant,
-                                    iconSize = 14.dp,
-                                    filled = ratingVisible,
-                                    modifier = Modifier.padding(5.dp)
-                                )
-                            }
-                        }
-                        Spacer(Modifier.height(2.dp))
-                        if (ratingVisible) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(2.dp)
-                            ) {
-                                BookRatingPicker(
-                                    value = customRating,
-                                    tint = accent,
-                                    onSurfaceVariant = onSurfaceVariant,
-                                    onRate = { n ->
-                                        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                                        AppPreferences.setBookCustomRating(
-                                            context, bookName,
-                                            if (customRating.toInt() == n) 0.0 else n.toDouble()
-                                        )
-                                    }
-                                )
-                                if (customRating > 0.0) {
-                                    Spacer(Modifier.width(6.dp))
-                                    Text(
-                                        "${customRating.toInt()} / 5",
-                                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                        color = onSurfaceVariant
-                                    )
-                                }
-                            }
-                        } else {
-                            Text(
-                                "Rating hidden · tap the book to show it",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-            }
-            Spacer(Modifier.height(10.dp))
 
             // ── One scroll: synopsis accordion, then the chapter list ─────
             LazyColumn(
@@ -3347,9 +3212,10 @@ private fun BookNotesSheet(
                                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
                                 ) {
-                                    // Leading chip: a ✓ when the chapter is
-                                    // read — SOLID fill + rim (v354) so the
-                                    // read state reads cleanly on any palette.
+                                    // Leading chip: the chapter number always
+                                    // shows — a READ chapter tints the disc
+                                    // softly in the accent (fill + number +
+                                    // rim) instead of a loud ✓ (v355).
                                     Box(
                                         modifier = Modifier
                                             .size(30.dp)
@@ -3357,35 +3223,30 @@ private fun BookNotesSheet(
                                             .background(
                                                 when {
                                                     isOpen -> onAccent
-                                                    isRead -> accent
+                                                    isRead -> accent.copy(alpha = 0.18f)
                                                     else -> surfaceHigh
                                                 }
                                             )
                                             .border(
                                                 1.dp,
                                                 when {
-                                                    isRead -> onAccent.copy(alpha = 0.7f)
                                                     isOpen -> accent.copy(alpha = 0.5f)
+                                                    isRead -> accent.copy(alpha = 0.55f)
                                                     else -> onSurfaceVariant.copy(alpha = 0.25f)
                                                 },
                                                 CircleShape
                                             ),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        if (isRead) {
-                                            CurioIcon(
-                                                CurioIcons.Check,
-                                                null,
-                                                tint = if (isOpen) accent else onAccent,
-                                                size = 15.dp
-                                            )
-                                        } else {
-                                            Text(
-                                                "${ch.number}",
-                                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                                                color = if (isOpen) accent else onSurfaceVariant
-                                            )
-                                        }
+                                        Text(
+                                            "${ch.number}",
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                            color = when {
+                                                isOpen -> accent
+                                                isRead -> accent
+                                                else -> onSurfaceVariant
+                                            }
+                                        )
                                     }
                                     Text(
                                         text = ch.title,
@@ -3429,34 +3290,29 @@ private fun BookNotesSheet(
                                     Surface(
                                         onClick = { toggleChapterRead(ch) },
                                         shape = CircleShape,
-                                        // v354 — solid + rim so the done state
-                                        // reads clearly (was a washed-out disc).
+                                        // Read = SOLID accent fill + rim in
+                                        // EVERY state (the old open+read flip
+                                        // to an onAccent disc read as a hole
+                                        // punched in the accent row in dark
+                                        // mode — v355).
                                         color = if (chDone)
-                                            if (isOpen) onAccent else accent
+                                            accent
                                             else surface.copy(alpha = 0.7f),
                                         border = BorderStroke(
                                             1.dp,
                                             if (chDone)
-                                                if (isOpen) accent.copy(alpha = 0.5f) else onAccent.copy(alpha = 0.7f)
+                                                onAccent.copy(alpha = 0.7f)
                                                 else onSurfaceVariant.copy(alpha = 0.25f)
                                         )
                                     ) {
                                         CurioIcon(
                                             CurioIcons.FoldedCorner,
                                             if (chDone) "Mark chapter unread" else "Mark chapter read",
-                                            tint = if (chDone)
-                                                if (isOpen) accent else onAccent
-                                                else onSurfaceVariant,
+                                            tint = if (chDone) onAccent else onSurfaceVariant,
                                             size = 16.dp,
                                             modifier = Modifier.padding(6.dp)
                                         )
                                     }
-                                    CurioIcon(
-                                        if (isOpen) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
-                                        if (isOpen) "Collapse chapter" else "Expand chapter",
-                                        tint = if (isOpen) onAccent.copy(alpha = 0.9f) else onSurfaceVariant,
-                                        size = 20.dp
-                                    )
                                 }
                                 // v354 — expand/collapse: height + fade together
                                 // (the old fade-only pop read glitchy).
@@ -4755,19 +4611,6 @@ private fun EpisodeNotesSheet(
                             )
                         }
                     }
-                    Surface(
-                        onClick = onDismiss,
-                        shape = CircleShape,
-                        color = surface.copy(alpha = 0.6f)
-                    ) {
-                        CurioIcon(
-                            CurioIcons.Close,
-                            "Close series notes",
-                            tint = onSurfaceVariant,
-                            size = 20.dp,
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    }
                 }
             }
 
@@ -4775,7 +4618,7 @@ private fun EpisodeNotesSheet(
             Spacer(Modifier.height(12.dp))
             val progressLabel = if (watchedTotal > 0)
                 "$watchedTotal of ${episodes.size} episodes watched"
-            else "${episodes.size} episodes · tap an episode to read its notes"
+            else "${episodes.size} episodes"
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -4891,8 +4734,11 @@ private fun EpisodeNotesSheet(
                                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
                                 ) {
-                                    // Leading chip: a ✓ when watched — SOLID
-                                    // fill + rim (v354, mirrors the book sheet).
+                                    // Leading chip: the episode number always
+                                    // shows — a WATCHED episode tints the disc
+                                    // softly in the accent (fill + number +
+                                    // rim) instead of a loud ✓ (v355, mirrors
+                                    // the book sheet).
                                     Box(
                                         modifier = Modifier
                                             .size(30.dp)
@@ -4900,35 +4746,30 @@ private fun EpisodeNotesSheet(
                                             .background(
                                                 when {
                                                     isOpen -> onAccent
-                                                    isWatched -> accent
+                                                    isWatched -> accent.copy(alpha = 0.18f)
                                                     else -> surfaceHigh
                                                 }
                                             )
                                             .border(
                                                 1.dp,
                                                 when {
-                                                    isWatched -> onAccent.copy(alpha = 0.7f)
                                                     isOpen -> accent.copy(alpha = 0.5f)
+                                                    isWatched -> accent.copy(alpha = 0.55f)
                                                     else -> onSurfaceVariant.copy(alpha = 0.25f)
                                                 },
                                                 CircleShape
                                             ),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        if (isWatched) {
-                                            CurioIcon(
-                                                CurioIcons.Check,
-                                                null,
-                                                tint = if (isOpen) accent else onAccent,
-                                                size = 15.dp
-                                            )
-                                        } else {
-                                            Text(
-                                                "${ep.number}",
-                                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                                                color = if (isOpen) accent else onSurfaceVariant
-                                            )
-                                        }
+                                        Text(
+                                            "${ep.number}",
+                                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                            color = when {
+                                                isOpen -> accent
+                                                isWatched -> accent
+                                                else -> onSurfaceVariant
+                                            }
+                                        )
                                     }
                                     Text(
                                         text = ep.title,
@@ -4969,34 +4810,29 @@ private fun EpisodeNotesSheet(
                                     Surface(
                                         onClick = { toggleWatched(ep) },
                                         shape = CircleShape,
-                                        // v354 — solid + rim (fixed the
-                                        // washed-out watched disc).
+                                        // Watched = SOLID accent fill + rim in
+                                        // EVERY state (the old open+watched
+                                        // flip to an onAccent disc read as a
+                                        // hole in the accent row in dark mode
+                                        // — v355, mirrors the book sheet).
                                         color = if (isWatched)
-                                            if (isOpen) onAccent else accent
+                                            accent
                                             else surface.copy(alpha = 0.7f),
                                         border = BorderStroke(
                                             1.dp,
                                             if (isWatched)
-                                                if (isOpen) accent.copy(alpha = 0.5f) else onAccent.copy(alpha = 0.7f)
+                                                onAccent.copy(alpha = 0.7f)
                                                 else onSurfaceVariant.copy(alpha = 0.25f)
                                         )
                                     ) {
                                         CurioIcon(
                                             CurioIcons.FoldedCorner,
                                             if (isWatched) "Mark episode unwatched" else "Mark episode watched",
-                                            tint = if (isWatched)
-                                                if (isOpen) accent else onAccent
-                                                else onSurfaceVariant,
+                                            tint = if (isWatched) onAccent else onSurfaceVariant,
                                             size = 16.dp,
                                             modifier = Modifier.padding(6.dp)
                                         )
                                     }
-                                    CurioIcon(
-                                        if (isOpen) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
-                                        if (isOpen) "Collapse episode" else "Expand episode",
-                                        tint = if (isOpen) onAccent.copy(alpha = 0.9f) else onSurfaceVariant,
-                                        size = 20.dp
-                                    )
                                 }
                                 // v354 — expand/collapse: height + fade together
                                 // (the old fade-only pop read glitchy).
@@ -5180,86 +5016,6 @@ private fun HeartGlyph(
     }
 }
 
-/** v354 — BOOK rating: five open-book glyphs (the user asked for a book
- *  instead of the fountain-pen nibs). Tapping book N sets N; tapping the
- *  current value again clears the pick. */
-@Composable
-private fun BookRatingPicker(
-    value: Double,
-    tint: Color,
-    onSurfaceVariant: Color,
-    onRate: (Int) -> Unit,
-    iconSize: Dp = 18.dp,
-    modifier: Modifier = Modifier
-) {
-    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-        for (i in 1..5) {
-            val filled = value >= i
-            Box(
-                modifier = Modifier
-                    .size(iconSize + 8.dp)
-                    .clip(CircleShape)
-                    .clickable { onRate(i) },
-                contentAlignment = Alignment.Center
-            ) {
-                BookGlyph(
-                    color = if (filled) tint else onSurfaceVariant.copy(alpha = 0.55f),
-                    iconSize = iconSize,
-                    filled = filled
-                )
-            }
-        }
-    }
-}
-
-/** A single open-book silhouette: two page planes from a centre spine
- *  (filled = solid ink pages, outline = empty). */
-@Composable
-private fun BookGlyph(
-    color: Color,
-    iconSize: Dp,
-    filled: Boolean,
-    modifier: Modifier = Modifier
-) {
-    Canvas(modifier.size(iconSize)) {
-        val w = this.size.width
-        val h = this.size.height
-        val sp = h * 0.5f          // spine height (book stands ~2:1.3)
-        val thickness = w * 0.07f  // page block depth
-        val left = Path().apply {
-            moveTo(w * 0.50f, h * 0.16f)
-            quadraticBezierTo(w * 0.36f, h * 0.10f, w * 0.12f, h * 0.14f)
-            lineTo(w * 0.10f, h * 0.84f)
-            quadraticBezierTo(w * 0.34f, h * 0.80f, w * 0.50f, h * 0.88f)
-            close()
-        }
-        val right = Path().apply {
-            moveTo(w * 0.50f, h * 0.16f)
-            quadraticBezierTo(w * 0.64f, h * 0.10f, w * 0.88f, h * 0.14f)
-            lineTo(w * 0.90f, h * 0.84f)
-            quadraticBezierTo(w * 0.66f, h * 0.80f, w * 0.50f, h * 0.88f)
-            close()
-        }
-        val spine = Path().apply {
-            moveTo(w * 0.50f, h * 0.16f)
-            lineTo(w * 0.50f, h * 0.88f)
-        }
-        if (filled) {
-            drawPath(left, color)
-            drawPath(right, color)
-            drawPath(spine, color.copy(alpha = 0.45f), style = Stroke(width = thickness))
-        } else {
-            drawPath(left, color, style = Stroke(width = w * 0.09f))
-            drawPath(right, color, style = Stroke(width = w * 0.09f))
-            drawLine(
-                color = color.copy(alpha = 0.55f),
-                start = Offset(w * 0.50f, h * 0.20f),
-                end = Offset(w * 0.50f, h * 0.84f),
-                strokeWidth = w * 0.08f
-            )
-        }
-    }
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Tags row — directly below the hero (v132, restored to the scroll body)

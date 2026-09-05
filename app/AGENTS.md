@@ -92,6 +92,14 @@ app/src/main/java/com/curio/app/
 
 ### UI
 - **User design preferences (decided, durable):** light mode background/surface is **Soft Cream `#F7F0E4`** (deliberately less-white/creamy, not dark); the **category-tint background wash** is applied on the **Spin page, Topic Reveal, the Save/Capture screen, and the Cabinet (which uses the active filter chip's tint; "All" keeps the plain background)** — so every category-aware screen wears the same color story. The wash is **theme-aware via `CurioCategory.categoryBackgroundWash()`** (in `ui/theme/CategoryInk.kt`): deep accent at 20% over cream in light mode, but the light 300-level twin at ~16% over midnight in dark mode (deep accents look muddy on dark — amber turns brownish, teal grey-green).    Container steps are deepened so cards/sheets stay distinct on the cream surface. See `ui/theme/CurioColors.kt` + `CurioTheme.kt`.
+- **No close buttons in bottom sheets (user):** bottom sheets dismiss by
+  swipe-down/back only — NEVER put a cross/close icon in one (the category
+  picker + album sheets are the model; the book/series notes sheets had
+  theirs removed in v355).
+- **No filler hint copy (user):** never annotate an obvious affordance with
+  hint text — "tap a chapter to read its notes", "Rating hidden · tap the
+  book to show it" and "keyless Google Books rating" are all gone; if a
+  control is self-evident, add no caption.
 - **Torn heroes on WIDE windows scroll away (user, tablet redesign verdict):** the tablet is the MOBILE design (torn heroes, phone layouts, single-column lists — the editorial "no tear" tablet redesign was fully reverted). The one wide-only deviation: a torn hero is **NOT sticky on wide windows** (>=600dp — landscape tablet). Every screen whose torn banner used to pin over its scrolling list (Settings family + ShareHub + Recents + Recycle Bin + Manage Categories + Quests + Support + Promo Mode + Updates + Outfit Shop + Pet Designer, plus Topic Database and Cabinet with their search/filter UI) now renders the hero as the **first item of the scroll content** on wide (`top = if (wide) 0.dp else SettingsHeroTotalHeight` + an `if (wide) item(key = "hero")` at the list head + the pinned overlay wrapped in `if (!wide)`), so the tear rides away with the rows and landscape regains the full viewport height. In-list heroes pass `glassBackdrop = null` (opaque pills — nothing pinned behind to refract), and wide disables the list's `layerBackdrop` + inner-pill liquid glass where the hero is inside the captured node (no self-sample). Phone paths are untouched (sticky torn hero + reserved `SettingsHeroTotalHeight`). Shared helpers: settings-family screens use `SettingsHeroHeader`; Topic Database/Cabinet keep their own heroes but follow the same placement rule. Pet Designer's floating studio toolbar stays pinned (it already floats above the scrolling hero).
 - **M3 theme system (v185, Settings → Appearance):** ONE opt-in toggle, default OFF (the current Curio look is the default — nothing changes until it's on). **"Material theme"** (`AppPreferences.materialThemeState`) redoes the COLOR system per M3 guidelines: the whole `ColorScheme` becomes `materialColorScheme()` (dynamic Material You on Android 12+, seeded brand-coral baseline fallback — `ui/theme/MaterialColorSchemes.kt`), and the 36 lane accents collapse to **6 muted hue families** (`MaterialFamilies.kt`: every family resolves to tonal tones of its own hue — T40/T80 fills, on-fill ink, T45/T80 text ink; v198 removed the earlier rose→scheme.secondary / green→scheme.tertiary role branches that painted buttons/chips off-hue, see v198) — M3's multi-color guideline is restraint: neutral surfaces, ONE primary, muted accents, never a rainbow per lane. The category choke points (`themedAccent()`, `categoryInk()`, `onAccent()`, `headerAccent()`, `categoryBackgroundWash()` → neutral background, `categorySurface()/categoryChipSurface()` → neutral containers, `CurioGradients.cardGradient/heroBlendGradient`, `CurioMixedDeck.*`) all gate on `materialThemeOn` so every screen repaints. The v185 **"Material guidelines" + "Material chrome"** options (M3 typography/shapes/spacing, the M3 `NavigationBar` swap, the Changa One drop from nav labels) were REMOVED (user verdict: not good) — `MaterialGuidelines.kt`, the `materialGuidelinesState` / `materialChromeFullState` prefs and their Appearance rows are deleted; `CurioTheme` always uses `CurioTypography`/`CurioShapes` and `CurioBottomNav` always renders the floating pill bar with Changa One labels. v190 refinements: material card fills are pastel-aware; mixed decks collapse to the scheme primary; light-mode heroes wear the rich family banner with dark ink (`materialHeaderAccent` light + `materialHeroInk`); the nav chrome uses pure M3 roles under Material (surfaceContainer + secondaryContainer indicator). The v78-era AMOLED/Material STYLES are long gone — do not resurrect them; the v185 toggle is the only Material system.
 - **Always-on companions & onboarding setup (v23):** the floating pet, the pet brain, and auto-open landed topic have NO Settings toggles — they are always on (their Appearance toggles were removed; the `AppPreferences` APIs remain, defaults ON). Custom reaction lines are permanently off (no toggle; the reactions editor is unreachable). The explore-bubble opt-in row in the Explore dialog is hidden by default — a Notifications toggle (`AppPreferences.showBubbleOptInDialogState`) re-shows it as a single text line (no subtext). Onboarding includes a dedicated Search step that picks the explore search engine (`AppPreferences.searchEngineState`; changeable anytime in Settings) and the bubble opt-in row inside the "Display over other apps" permission card.
@@ -409,6 +417,38 @@ app/src/main/java/com/curio/app/
   `drop(1)`) to new `KEY_PICKER_PAGE0_SCROLL` / `KEY_PICKER_PAGE1_SCROLL`
   ("index:offset") behind `AppPreferences.PickerScrollPos`
   get/set helpers — survives closing the picker AND app restarts.
+- **v355 — book/series notes sheets: no close button, no hint copy, rating
+  below the author, tick-free read state.** User: "never add cross close
+  button in a bottom sheet… remove it from the book synopsis sheet… remove
+  the your rating row and just put the rating just below author name and
+  use a different icon for rating… remove that tap a chapter to read its
+  note hint… don't add useless notes… remove that arrow icon from chapter
+  chips… when i tap read the read status is really bad, i don't like the
+  active state with the tick icon… when expanded to read in dark mode it's
+  a little bad, fix it".
+  - **No cross close:** the ✕ button is GONE from the book + series notes
+    sheets (swipe-down/back dismisses) — the category-picker and album
+    sheets were already the no-close model.
+  - **Rating below the author:** the "REVIEWS & YOUR RATING" card is
+    REMOVED; the sheet header shows the fetched Google Books average AND
+    the user's own rating ("4.2 · yours 4 / 5") just below the author
+    name, under ONE award-ribbon glyph (`CurioIcons.WorkspacePremium`,
+    which also replaced the ★ on the reveal hero chip + synopsis-card
+    chip). `BookRatingPicker`/`BookGlyph` were deleted with the card; the
+    `bookRatingVisibleState` pref API stays dormant.
+  - **No hint copy:** the "tap a chapter/episode to read its notes" suffix
+    is gone from the progress rail (just "N chapters"); the "keyless
+    Google Books rating" and "Rating hidden · tap the book to show it"
+    labels are gone too.
+  - **Read state, no tick:** the leading chip always shows the
+    chapter/episode NUMBER — a read/watched row tints the disc softly in
+    the accent (18% fill + accent number + accent ring) instead of the
+    loud ✓; the row keeps its solid-accent border + surfaceAlt fill. The
+    Mark-read FoldedCorner toggle is a SOLID accent disc + onAccent icon
+    in EVERY state — the old open+read flip to an onAccent disc read as a
+    hole punched in the accent row in dark mode (fixed).
+  - **No chevron:** the ▼/▲ expand arrow is removed from the
+    chapter/episode rows (rows still expand on tap).
 - **v323 — picker hold actions become a gooey RADIAL menu; share-card
   Tone tool + 6 new tones; pet shop toys/games; quest fixes.** (1)
   **Radial hold menu** (`features/picker/RadialHoldMenu.kt`): the old
