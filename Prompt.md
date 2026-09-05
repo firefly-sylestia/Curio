@@ -46,7 +46,36 @@ after pushing: ask the user for a testing review.
   per share); "Edit text" pill shows for custom fact even under progress.
 - Auto-fit toggle switch in the Text-size panel (default ON).
 
-## Docs
-- fastlane changelog 20260921.txt: bullets at top after this lands.
-- app/AGENTS.md: v369 entry.
-- Prompt.md: this log.
+## Fact formats — IMPLEMENTATION (TopicShareCard.kt)
+
+Action carried out in this session: render three new fact-body formats per
+style via central `renderFact(prefix, body, ...)` + the already-existing
+Editorial drop-cap machinery.
+
+**Decisions**
+- STANDARD: same body, but now always `ParagraphStyle.lineSpacing = -4.sp`
+  (word spacing unchanged). Text stays wrapped to full card width.
+- BOOK PAGE: two columns. Columns are sized by ON-SCREEN width, not px
+  imports (so export and preview both pick full card width = the card's
+  own width at 4f density; no µornMagnifier needed). Hand-wrap split at
+  the ON-SCREEN middle into `prefixText | middleColumn | restText`.
+- EDITORIAL: if empty or " STANDARD". else the existing EditorialCard
+  `editorialFact(...)` block (drop cap or first-word-big) replacing the
+  usual body block.
+
+**Renders**
+- Renders exactly on paragraph content, not on topic title.
+- Renders on request show (share preview) but adapte to text length on
+  quick fact.
+- Uses inline field only (no toolbar text box) after pushing.
+
+## Pending
+
+- Audiobook-only cover add-on: poster beside title + author, placed only
+  when the cover is placed (books/albums/series); no compiler in env.
+- Smart auto-adjust variations toggle (per style).
+
+## Followup after push
+
+After pushing: ask the user for a testing review (previous commit) and
+fix without stopping.

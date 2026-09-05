@@ -162,6 +162,23 @@ enum class ShareCardAspect(val label: String, val widthDp: Int, val heightDp: In
     CLASSIC("3:4", 450, 600)
 }
 
+/** v370 — quick-fact TEXT LAYOUT modes (offered by the Format tool when the
+ *  fact box is selected, on EVERY card style). */
+enum class ShareCardFactFormat(val label: String) {
+    STANDARD("Standard"),
+    CONDENSED("Condensed"),
+    BOOK("Book page"),
+    EDITORIAL("Editorial")
+}
+
+/** v370 — EDITORIAL drop-cap variant (only read when the fact layout is
+ *  [ShareCardFactFormat.EDITORIAL]). */
+enum class ShareCardFactDropCap(val label: String) {
+    NONE("No cap"),
+    LETTER("Big first letter"),
+    WORD("Big first word")
+}
+
 data class ShareCardContent(
     val id: String,
     val label: String,
@@ -442,27 +459,55 @@ private fun quickFactFontSize34(length: Int): TextUnit = when {
  *  the grown box stays on the card. Identity = no adjustment. */
 private class ShareAutoFitDelta(val heightFrac: Float = 1f, val dy: Float = 0f)
 
+/** v370 — smart auto-fit INTENSITY presets (offered in the Size tool while
+ *  the fact box is selected, per style). Each shifts how aggressively long
+ *  text grows its box + lifts the title. 0 = Balanced (the classic curve). */
+private fun autoFitCurve(intensity: Int, len: Int): Float = when (intensity) {
+    // Compact — tighter: needs noticeably more text before it grows, and
+    // grows less per step so short facts keep the style's natural box.
+    1 -> when {
+        len > 520 -> 2.2f
+        len > 400 -> 1.8f
+        len > 300 -> 1.45f
+        len > 220 -> 1.2f
+        else -> 1f
+    }
+    // Airy — looser: starts growing sooner and grows more, so long facts
+    // get generous breathing room on tall cards.
+    2 -> when {
+        len > 420 -> 3.6f
+        len > 300 -> 2.8f
+        len > 210 -> 2.2f
+        len > 140 -> 1.7f
+        len > 80 -> 1.35f
+        else -> 1f
+    }
+    // Balanced (0 / default) — the original curve.
+    else -> when {
+        len > 500 -> 3.0f
+        len > 380 -> 2.4f
+        len > 280 -> 1.9f
+        len > 200 -> 1.5f
+        len > 130 -> 1.25f
+        else -> 1f
+    }
+}
+
 /**
- * v369 — computes the smart auto-fit adjustment for a long quick fact.
+ * v369/v370 — computes the smart auto-fit adjustment for a long quick fact.
  * Default ON ([AppPreferences.shareAutoFitState]); once the user has moved
  * OR resized the fact box themselves ("manual edits win"), auto-fit hands
  * the box over entirely and returns identity. The font side of auto-fit
  * (long text shrinking to fit) already lives per-style inside each card;
- * this adds the box growth + the up-nudge.
+ * this adds the box growth + the up-nudge. The per-style INTENSITY preset
+ * ([ShareCardMove.autoFitIntensity]) picks which growth curve to follow.
  */
 private fun shareAutoFitDelta(move: ShareCardMove, factLength: Int): ShareAutoFitDelta {
     if (!AppPreferences.shareAutoFitState) return ShareAutoFitDelta()
     val touched = move.factDx != 0f || move.factDy != 0f ||
         move.factWidthFrac != 1f || move.factHeightFrac != 1f
     if (touched) return ShareAutoFitDelta()
-    val h = when {
-        factLength > 500 -> 3.0f
-        factLength > 380 -> 2.4f
-        factLength > 280 -> 1.9f
-        factLength > 200 -> 1.5f
-        factLength > 130 -> 1.25f
-        else -> 1f
-    }
+    val h = autoFitCurve(move.autoFitIntensity, factLength)
     if (h <= 1f) return ShareAutoFitDelta()
     // ~16dp of upward travel per extra "unit" of box height keeps the grown
     // text clear of the footer and title while staying on the card.
@@ -963,6 +1008,10 @@ fun TopicShareCard(
                 style = style,
                 palette = palette,
                 classic = aspect == ShareCardAspect.CLASSIC,
+                // v370 — the strip's box-size fractions ride on the move so
+                // each style keeps its own width/height edits.
+                widthFrac = effectiveMove.favWidthFrac,
+                heightFrac = effectiveMove.favHeightFrac,
                 // v353 — the strip is a movable element like the cover: its
                 // offset comes from [move.favDx]/[move.favDy] and it reports
                 // its bounds so the editor can select + drag it.
@@ -1376,16 +1425,22 @@ private fun FavoriteTracksBadge(
     style: ShareCardStyle,
     palette: ShareCardPalette,
     classic: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // v370 — the strip's own box-size fractions (the fav box width/height
+    // sliders): width scales the strip's natural max width, height scales
+    // how many track rows show (1f = the default 3).
+    widthFrac: Float = 1f,
+    heightFrac: Float = 1f
 ) {
     // v353 — the strip is no longer the same sticker on every card: the
     // boxless designs (Editorial, Minimal) render the favorites as plain
     // type with no surface, everything else keeps its (now style-true)
     // badge.
+    val rows = kotlin.math.round(3f * heightFrac).toInt().coerceIn(1, tracks.size.coerceAtLeast(1))
     when (style) {
-        ShareCardStyle.EDITORIAL -> EditorialFavStrip(tracks, palette, classic, modifier)
-        ShareCardStyle.MINIMAL -> MinimalFavStrip(tracks, palette, classic, modifier)
-        else -> BoxedFavStrip(tracks, style, palette, classic, modifier)
+        ShareCardStyle.EDITORIAL -> EditorialFavStrip(tracks, palette, classic, modifier, widthFrac, rows)
+        ShareCardStyle.MINIMAL -> MinimalFavStrip(tracks, palette, classic, modifier, widthFrac, rows)
+        else -> BoxedFavStrip(tracks, style, palette, classic, modifier, widthFrac, rows)
     }
 }
 
@@ -1398,9 +1453,13 @@ private fun BoxedFavStrip(
     style: ShareCardStyle,
     palette: ShareCardPalette,
     classic: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // v370 — fav-box fractions (see FavoriteTracksBadge): widthFrac scales
+    // the natural max width, rows caps how many tracks render.
+    widthFrac: Float = 1f,
+    rows: Int = 3
 ) {
-    val shownFavs = tracks.take(3)
+    val shownFavs = tracks.take(rows)
     val extra = tracks.size - shownFavs.size
     // v340 — per-style tokens: colors, borders, type and radius match the
     // design underneath so the strip belongs to the card it sits on.
@@ -1454,7 +1513,7 @@ private fun BoxedFavStrip(
         // [modifier] carries the caller's BoxScope alignment + per-style
         // corner inset; each design clears its own footer below.
         modifier = modifier
-            .widthIn(max = if (classic) 168.dp else 210.dp)
+            .widthIn(max = (if (classic) 168.dp else 210.dp) * widthFrac)
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(if (tok.serifBody) 2.dp else 1.dp),
@@ -1532,14 +1591,16 @@ private fun EditorialFavStrip(
     tracks: List<String>,
     palette: ShareCardPalette,
     classic: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    widthFrac: Float = 1f,
+    rows: Int = 3
 ) {
     val ink = Color(0xFF1C1814)
-    val shownFavs = tracks.take(3)
+    val shownFavs = tracks.take(rows)
     val extra = tracks.size - shownFavs.size
     Column(
         verticalArrangement = Arrangement.spacedBy(if (classic) 2.dp else 3.dp),
-        modifier = modifier.widthIn(max = if (classic) 230.dp else 290.dp)
+        modifier = modifier.widthIn(max = (if (classic) 230.dp else 290.dp) * widthFrac)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -1611,14 +1672,16 @@ private fun MinimalFavStrip(
     tracks: List<String>,
     palette: ShareCardPalette,
     classic: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    widthFrac: Float = 1f,
+    rows: Int = 3
 ) {
     val ink = Color(0xFF1A1A1A)
-    val shownFavs = tracks.take(3)
+    val shownFavs = tracks.take(rows)
     val extra = tracks.size - shownFavs.size
     Column(
         verticalArrangement = Arrangement.spacedBy(2.dp),
-        modifier = modifier.widthIn(max = if (classic) 250.dp else 330.dp)
+        modifier = modifier.widthIn(max = (if (classic) 250.dp else 330.dp) * widthFrac)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -6292,7 +6355,19 @@ fun TopicShareSheet(
                 factHeightFrac = o.optDouble("factHeightFrac", 1.0).toFloat(),
                 metaWidthFrac = o.optDouble("metaWidthFrac", 1.0).toFloat(),
                 metaHeightFrac = o.optDouble("metaHeightFrac", 1.0).toFloat(),
-                titleScale = o.optDouble("titleScale", 1.0).toFloat()
+                titleScale = o.optDouble("titleScale", 1.0).toFloat(),
+                favWidthFrac = o.optDouble("favWidthFrac", 1.0).toFloat(),
+                favHeightFrac = o.optDouble("favHeightFrac", 1.0).toFloat(),
+                autoFitIntensity = o.optInt("autoFitIntensity", 0),
+                // v370 — the fact LAYOUT (condensed / book page / editorial
+                // + drop cap) restores by name; unknown names keep the
+                // style's default.
+                factFormat = ShareCardFactFormat.entries.firstOrNull {
+                    it.name == o.optString("factFormat", "")
+                } ?: ShareCardFactFormat.STANDARD,
+                factDropCap = ShareCardFactDropCap.entries.firstOrNull {
+                    it.name == o.optString("factDropCap", "")
+                } ?: ShareCardFactDropCap.NONE
             )
             val loaded = mutableMapOf<ShareCardStyle, ShareCardMove>()
             saved.optJSONObject("moves")?.let { mv ->
@@ -6585,10 +6660,13 @@ fun TopicShareSheet(
                 put("badgeDx", m.badgeDx); put("badgeDy", m.badgeDy)
                 put("coverDx", m.coverDx); put("coverDy", m.coverDy)
                 put("favDx", m.favDx); put("favDy", m.favDy)
+                put("favWidthFrac", m.favWidthFrac); put("favHeightFrac", m.favHeightFrac)
                 put("titleWidthFrac", m.titleWidthFrac); put("titleHeightFrac", m.titleHeightFrac)
                 put("factWidthFrac", m.factWidthFrac); put("factHeightFrac", m.factHeightFrac)
                 put("metaWidthFrac", m.metaWidthFrac); put("metaHeightFrac", m.metaHeightFrac)
                 put("titleScale", m.titleScale)
+                put("factFormat", m.factFormat.name); put("factDropCap", m.factDropCap.name)
+                put("autoFitIntensity", m.autoFitIntensity)
             }
             movesObj.put(style.name, o)
         }
@@ -6827,7 +6905,12 @@ fun TopicShareSheet(
                 val isTitle = sel == ShareCardResizeTarget.TITLE
                 val isFact = sel == ShareCardResizeTarget.FACT
                 val isMeta = sel == ShareCardResizeTarget.META
-                val isSizable = isTitle || isFact || isMeta
+                val isFav = sel == ShareCardResizeTarget.FAVTRACKS
+                // Box sliders act on title / fact / meta / fav strips; the
+                // TEXT-size slider stays title / fact / meta only (a fav
+                // strip sizes as a box, not as type).
+                val isSizable = isTitle || isFact || isMeta || isFav
+                val isTextSizable = isTitle || isFact || isMeta
                 val selName = when (sel) {
                     ShareCardResizeTarget.TITLE -> "Title"
                     ShareCardResizeTarget.FACT -> "Quick fact"
@@ -7032,7 +7115,7 @@ fun TopicShareSheet(
                         // text went from too small to cut off with no middle
                         // ground). Continuous 1% steps with a haptic tick per
                         // step and a live × readout.
-                        "size" -> if (isSizable) {
+                        "size" -> if (isTextSizable) {
                             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                 Text("$selName size", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 val cur = if (isTitle) move.titleScale else bodyScale
@@ -7075,6 +7158,21 @@ fun TopicShareSheet(
                                             onCheckedChange = { AppPreferences.setShareAutoFitEnabled(context, it) }
                                         )
                                     }
+                                    // v370 — auto-fit INTENSITY presets (per
+                                    // style, saved with the move): how much a
+                                    // long fact grows its box + lifts the
+                                    // title. Manual box edits still win.
+                                    Text("Auto-fit intensity", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp, color = MaterialTheme.colorScheme.onSurfaceVariant))
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Pill("Balanced", "tune", move.autoFitIntensity == 0) { updateMove(move.copy(autoFitIntensity = 0)) }
+                                        Pill("Compact", "tune", move.autoFitIntensity == 1) { updateMove(move.copy(autoFitIntensity = 1)) }
+                                        Pill("Airy", "tune", move.autoFitIntensity == 2) { updateMove(move.copy(autoFitIntensity = 2)) }
+                                    }
+                                    Text(
+                                        "Balanced = the default curve · Compact grows later / less · Airy grows sooner / more. Each style keeps its own pick.",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
                             }
                         } else {
@@ -7100,6 +7198,12 @@ fun TopicShareSheet(
                                     // fact far past the old 2.5x cap.
                                     SizeSliderColumn("Fact height", move.factHeightFrac, { updateMove(move.copy(factHeightFrac = it)) }, 0.35f..5f, steps = 46, modifier = Modifier.fillMaxWidth())
                                     SizeSliderColumn("Whole box", move.factHeightFrac, { v -> updateMove(move.copy(factHeightFrac = v, factWidthFrac = minOf(1f, v))) }, 0.35f..5f, steps = 46, modifier = Modifier.fillMaxWidth())
+                                } else if (isFav) {
+                                    // v370 — ALBUM favorite-tracks strip box:
+                                    // width is a fill fraction of its natural
+                                    // max width; height scales the track rows.
+                                    SizeSliderColumn("Strip width", move.favWidthFrac, { updateMove(move.copy(favWidthFrac = it)) }, 0.3f..1.2f, steps = 89, modifier = Modifier.fillMaxWidth())
+                                    SizeSliderColumn("Strip rows", move.favHeightFrac, { updateMove(move.copy(favHeightFrac = it)) }, 0.35f..3f, steps = 26, modifier = Modifier.fillMaxWidth())
                                 } else {
                                     SizeSliderColumn("Info width", move.metaWidthFrac, { updateMove(move.copy(metaWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
                                     SizeSliderColumn("Info lines", move.metaHeightFrac, { updateMove(move.copy(metaHeightFrac = it)) }, 0.5f..1f, steps = 4, modifier = Modifier.fillMaxWidth())
@@ -7183,6 +7287,36 @@ fun TopicShareSheet(
                                 }
                                 Pill("Italic", CurioIcons.FormatItalic, elementItalic) {
                                     setElementItalic(!elementItalic)
+                                }
+                            }
+                            // v370 — FACT TEXT LAYOUT presets (only the quick
+                            // fact): Standard / Condensed / Book page /
+                            // Editorial. Each recomposes how the fact body is
+                            // set on every card style.
+                            if (isFact) {
+                                Text("Fact layout", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp, color = MaterialTheme.colorScheme.onSurfaceVariant))
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState())
+                                ) {
+                                    ShareCardFactFormat.entries.forEach { f ->
+                                        Pill(f.label, "notes", move.factFormat == f) {
+                                            updateMove(move.copy(factFormat = f))
+                                        }
+                                    }
+                                }
+                                // Editorial-only: the drop-cap variant. Only
+                                // visible when the fact layout is Editorial so
+                                // the option doesn't clutter other layouts.
+                                if (move.factFormat == ShareCardFactFormat.EDITORIAL) {
+                                    Text("Drop cap", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp, color = MaterialTheme.colorScheme.onSurfaceVariant))
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        ShareCardFactDropCap.entries.forEach { c ->
+                                            Pill(c.label, "title", move.factDropCap == c) {
+                                                updateMove(move.copy(factDropCap = c))
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
