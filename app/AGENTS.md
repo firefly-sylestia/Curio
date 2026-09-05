@@ -488,6 +488,17 @@ app/src/main/java/com/curio/app/
     is no keyless album deep link for them. (Spotify album deep links
     could be added behind optional CLIENT_ID/CLIENT_SECRET secrets if ever
     wanted.)
+- **v358 — Spotify deep links (optional keys).** User: "yes app spotify deep
+  links too" (follow-up to v357). `resolveSpotifyItemUrl(topic)` in
+  ExploreSearch.kt runs the Spotify client-credentials flow — POST
+  `accounts.spotify.com/api/token` with Basic `id:secret` → access token,
+  then `api.spotify.com/v1/search?q=…&type=album|track|artist` — and
+  returns `https://open.spotify.com/{type}/{id}` for the best title+artist
+  match. Requires optional `SPOTIFY_CLIENT_ID` + `SPOTIFY_CLIENT_SECRET`
+  BuildConfig values (env/secret, `.env.example` + `android.yml` wired);
+  unset = null → callers keep the search link. Wired into BOTH the album
+  sheet's LISTEN pill (Spotify entry) and the Explore "Listen in" flow for
+  Spotify (albums/tracks/artists).
 - **v323 — picker hold actions become a gooey RADIAL menu; share-card
   Tone tool + 6 new tones; pet shop toys/games; quest fixes.** (1)
   **Radial hold menu** (`features/picker/RadialHoldMenu.kt`): the old

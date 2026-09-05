@@ -74,6 +74,12 @@ jobs:
           # the LibraryThing cover source; unset hides it (keyless providers
           # keep working).
           LIBRARY_THING_API_KEY: ${{ secrets.LIBRARY_THING_API_KEY }}
+          # v358 — optional: Spotify developer credentials. When present they
+          # are baked into BuildConfig and music topics deep-link to real
+          # open.spotify.com items (client-credentials flow); unset keeps the
+          # search links.
+          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
         run: |
           # Bundle the source catalogs as Android assets. The app imports these
           # JSON files into its user database on first launch (and retries for

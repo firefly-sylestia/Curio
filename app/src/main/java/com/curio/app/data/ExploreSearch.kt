@@ -176,6 +176,111 @@ suspend fun resolveAppleMusicItemUrl(topic: CurioTopic): String? = withContext(D
 }
 
 /**
+ * v358 — resolves a music topic to a REAL Spotify catalog item via the
+ * client-credentials flow (app-level token, no user auth). Needs the
+ * optional SPOTIFY_CLIENT_ID + SPOTIFY_CLIENT_SECRET BuildConfig values
+ * (see .env.example); without them — or when the lookup misses — it returns
+ * null and the caller falls back to the search link. Returns the native
+ * `https://open.spotify.com/{album|track|artist}/{id}` deep link, which
+ * hands off into the installed Spotify app (or the web player).
+ */
+suspend fun resolveSpotifyItemUrl(topic: CurioTopic): String? = withContext(Dispatchers.IO) {
+    val clientId = com.curio.app.BuildConfig.SPOTIFY_CLIENT_ID.takeIf { it.isNotBlank() }
+        ?: return@withContext null
+    val clientSecret = com.curio.app.BuildConfig.SPOTIFY_CLIENT_SECRET.takeIf { it.isNotBlank() }
+        ?: return@withContext null
+    val token = runCatching { spotifyAppToken(clientId, clientSecret) }.getOrNull()
+        ?: return@withContext null
+    val type = when {
+        topic.subtype.equals("Album", ignoreCase = true) -> "album"
+        topic.subtype.equals("Artist", ignoreCase = true) -> "artist"
+        else -> "track"
+    }
+    val byline = topic.byline.takeIf { it.isNotBlank() }
+        ?: if (topic.subtype.equals("Album", ignoreCase = true)) extractArtist(topic.teaser) else null
+    val title = topic.name.replace(TRAILING_YEAR_IN_PARENS, "").trim()
+    val query = Uri.encode(listOfNotNull(byline, title).joinToString(" "))
+    runCatching {
+        val conn = URL("https://api.spotify.com/v1/search?q=$query&type=$type&limit=5")
+            .openConnection() as HttpURLConnection
+        conn.connectTimeout = 8000
+        conn.readTimeout = 8000
+        conn.setRequestProperty("Authorization", "Bearer $token")
+        try {
+            if (conn.responseCode != HttpURLConnection.HTTP_OK) return@runCatching null
+            val raw = conn.inputStream.bufferedReader().use { it.readText() }
+            val items = JSONObject(raw).optJSONObject("${type}s")?.optJSONArray("items")
+                ?: return@runCatching null
+            var bestId: String? = null
+            var bestScore = 0
+            for (i in 0 until items.length()) {
+                val item = items.optJSONObject(i) ?: continue
+                val id = item.optString("id")
+                if (id.isBlank()) continue
+                val score = spotifyMatchScore(
+                    item.optString("name"),
+                    title,
+                    item.optJSONArray("artists")?.optJSONObject(0)?.optString("name").orEmpty(),
+                    byline
+                )
+                if (score > bestScore) {
+                    bestScore = score
+                    bestId = id
+                }
+                if (score >= 3) break
+            }
+            bestId?.let { "https://open.spotify.com/$type/$it" }
+        } finally {
+            conn.disconnect()
+        }
+    }.getOrNull()
+}
+
+/** Client-credentials token (app-level, no user auth): POST Basic auth with
+ *  `id:secret` → `access_token` (valid ~1h; fetched per lookup). */
+private fun spotifyAppToken(clientId: String, clientSecret: String): String? = runCatching {
+    val conn = URL("https://accounts.spotify.com/api/token").openConnection() as HttpURLConnection
+    conn.requestMethod = "POST"
+    conn.connectTimeout = 8000
+    conn.readTimeout = 8000
+    conn.doOutput = true
+    conn.setRequestProperty(
+        "Authorization",
+        "Basic " + android.util.Base64.encodeToString(
+            "$clientId:$clientSecret".toByteArray(Charsets.UTF_8),
+            android.util.Base64.NO_WRAP
+        )
+    )
+    conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+    try {
+        conn.outputStream.use { it.write("grant_type=client_credentials".toByteArray(Charsets.UTF_8)) }
+        if (conn.responseCode != HttpURLConnection.HTTP_OK) return@runCatching null
+        val raw = conn.inputStream.bufferedReader().use { it.readText() }
+        JSONObject(raw).optString("access_token").takeIf { it.isNotBlank() }
+    } finally {
+        conn.disconnect()
+    }
+}.getOrNull()
+
+/** Rough relevance: 3 = exact title + artist, 2 = exact title (or fuzzy
+ *  title + exact artist), 1 = fuzzy containment, 0 = no match. */
+private fun spotifyMatchScore(name: String, wantName: String, artist: String, wantArtist: String?): Int {
+    val n = name.trim()
+    val w = wantName.trim()
+    val titleExact = n.equals(w, ignoreCase = true)
+    val titleFuzzy = !w.isBlank() && (n.contains(w, ignoreCase = true) || w.contains(n, ignoreCase = true))
+    val artistExact = !wantArtist.isNullOrBlank() &&
+        artist.trim().equals(wantArtist.trim(), ignoreCase = true)
+    return when {
+        titleExact && artistExact -> 3
+        titleExact -> 2
+        titleFuzzy && artistExact -> 2
+        titleFuzzy -> 1
+        else -> 0
+    }
+}
+
+/**
  * v52 — launches [url] with a graceful fallback for Apple Music's custom
  * scheme. `music://` has no handler when the Apple Music app isn't
  * installed (a bare custom-scheme launch would throw

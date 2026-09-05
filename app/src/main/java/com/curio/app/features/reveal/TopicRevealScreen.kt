@@ -161,6 +161,7 @@ import com.curio.app.data.CoverSwatches
 import com.curio.app.data.fetchCoverSwatches
 import com.curio.app.data.openSearchUrl
 import com.curio.app.data.resolveAppleMusicItemUrl
+import com.curio.app.data.resolveSpotifyItemUrl
 import com.curio.app.infrastructure.ExploreSessionService
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.SentimentPillHost
@@ -1486,17 +1487,26 @@ fun TopicRevealScreen(
                             }
                             // v27s — music topics open the chosen music
                             // service; everything else searches YouTube.
-                            // v52b — Apple Music only opens ITEM pages
+                            // v52b/v358 — Apple Music only opens ITEM pages
                             // natively (search links show an in-app browser
-                            // banner), so resolve the topic to a real
-                            // catalog item first and fall back to the search
-                            // link when the lookup fails.
-                            if (musicTopic && watchService == MusicService.APPLE_MUSIC) {
+                            // banner) and Spotify needs a real album/track
+                            // id for a deep link, so resolve the topic to a
+                            // real catalog item first (Spotify only when its
+                            // optional client id+secret are configured) and
+                            // fall back to the search link when the lookup
+                            // fails.
+                            if (musicTopic &&
+                                (watchService == MusicService.APPLE_MUSIC ||
+                                    watchService == MusicService.SPOTIFY)
+                            ) {
                                 revealScope.launch {
+                                    val deep = if (watchService == MusicService.APPLE_MUSIC)
+                                        resolveAppleMusicItemUrl(topic)
+                                    else
+                                        resolveSpotifyItemUrl(topic)
                                     startExploreSession(
                                         topic,
-                                        resolveAppleMusicItemUrl(topic)
-                                            ?: buildMusicServiceSearchUrl(topic, watchService)
+                                        deep ?: buildMusicServiceSearchUrl(topic, watchService)
                                     )
                                 }
                             } else {
@@ -4101,16 +4111,21 @@ private fun AlbumNotesSheet(
                                 onClick = {
                                     listenMenuOpen = false
                                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                    // v357 — Apple Music opens the REAL album:
-                                    // an iTunes lookup resolves the album page
-                                    // (the same native deep link songs use),
-                                    // falling back to a search on a miss. The
-                                    // other services have no keyless album-ID
-                                    // lookup, so they keep the search link.
-                                    if (srv.id == "apple") {
+                                    // v357/v358 — Apple Music and Spotify open
+                                    // the REAL album: an iTunes / Spotify API
+                                    // lookup resolves the album page (the same
+                                    // native deep link songs use), falling back
+                                    // to a search on a miss. Spotify needs the
+                                    // optional client id+secret; the remaining
+                                    // services have no keyless album-ID lookup
+                                    // and keep the search link.
+                                    if (srv.id == "apple" || srv.id == "spotify") {
                                         scope.launch {
-                                            val url = resolveAppleMusicItemUrl(topic)
-                                                ?: albumListenUrl(topic, srv.id)
+                                            val deep = if (srv.id == "apple")
+                                                resolveAppleMusicItemUrl(topic)
+                                            else
+                                                resolveSpotifyItemUrl(topic)
+                                            val url = deep ?: albumListenUrl(topic, srv.id)
                                             if (url.isNotBlank()) openSearchUrl(context, url)
                                         }
                                     } else {

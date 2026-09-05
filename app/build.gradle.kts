@@ -59,6 +59,21 @@ val ltkEscaped: String = envLibraryThingApiKey
     ?.replace("\"", "\\\"")
     .orEmpty()
 
+// v358 — OPTIONAL Spotify developer credentials (free): the client-credentials
+// flow resolves albums/tracks/artists to real open.spotify.com deep links.
+// Unset = Spotify keeps using search links everywhere.
+// https://developer.spotify.com/documentation/web-api/concepts/apps
+val envSpotifyClientId: String? = System.getenv("SPOTIFY_CLIENT_ID")?.trim()?.takeIf { it.isNotEmpty() }
+val spotifyIdEscaped: String = envSpotifyClientId
+    ?.replace("\\", "\\\\")
+    ?.replace("\"", "\\\"")
+    .orEmpty()
+val envSpotifyClientSecret: String? = System.getenv("SPOTIFY_CLIENT_SECRET")?.trim()?.takeIf { it.isNotEmpty() }
+val spotifySecretEscaped: String = envSpotifyClientSecret
+    ?.replace("\\", "\\\\")
+    ?.replace("\"", "\\\"")
+    .orEmpty()
+
 // Only create release signing if ALL four secrets are present and non-empty.
 // GitHub Actions exports missing secrets as empty strings, so .takeIf { it.isNotEmpty() }
 // converts them back to null. Without this guard, AGP would create a signing config
@@ -93,6 +108,12 @@ android {
         // v356 — optional LibraryThing key: enables the LibraryThing cover
         // provider in the hub (hidden without a key); empty string otherwise.
         buildConfigField("String", "LIBRARY_THING_API_KEY", "\"$ltkEscaped\"")
+
+        // v358 — optional Spotify developer credentials: when set, music
+        // topics deep-link to real open.spotify.com items (client-credentials
+        // flow); empty strings keep the search links.
+        buildConfigField("String", "SPOTIFY_CLIENT_ID", "\"$spotifyIdEscaped\"")
+        buildConfigField("String", "SPOTIFY_CLIENT_SECRET", "\"$spotifySecretEscaped\"")
 
         // Only include English locale — saves ~5-8 MB of APK size.
         // Curio ships as a single-language app. Add others as needed.
