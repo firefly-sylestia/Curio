@@ -1,0 +1,89 @@
+# Share-card adapt prompts — capture + completion analysis
+
+## Prompt 1 — Advance share-card adapt system
+
+> the book chapter add note feature is kinda bad, like also add ability to share that note as chapter review in share card from the already existed logic, also for cover fetching and adding in cards, so this is how the cover ill be places, so it will be places just like its in the synopsis page cover then title and author alongisde and the below the quick fact, same for albumns and series only hen i add similir to books, and that layout of books along side the title the title being to the left side of the book, that adapst when i turn on the toggle, and now for a new format, a condenced one with less spacing between lines but not much less beteen words, and then a new format like book style you kno, one paragrapph then another paragrph, breaking in the middle properly wide, the paragrph continue in the other side if no space remainng, implement it properly the inline editor stays, also add the editorial paragrph style as an option too, and for editorial add formats to hnage from the first only large letter too, another first one large maybe, and in other styles too. and remeber the default view should not overlap anything etc, by default the smart layout should properly ork, so the user dont  have to manually edit that good adjuments i want in the smart adjustments, considering everyhting and thorughly not missin gout on anything. also for the albumn fav box add height and width adjustments, and then after pushing everything use ask user, also complete the previous request too it not completed. also the auto smart adjument layout, give it multiple variation smart adjustment per style and with toggle too. i know this is huge but we will achive this without stopping and again if the previous request isnt completed finish it by asking me again and in the edn after pushing everything use ask user for my previous commit tesing of the app respince so you can fix without stopping.
+
+### Completion analysis (against shipped code, commit 861ea605 on Alpha)
+
+- **Book chapter note → share as chapter review**: NOT SHIPPED. The editor already has a Chapter review content (chapter chip + review text, inline). Book Notes note text is NOT wired into the chapter-review share yet. Status: open.
+- **Cover placement "like the synopsis page" (cover + title + author alongside, below the quick fact)**: PARTIAL. In this session the cover was moved LEFT of title + author per style and taken out of the Collage polaroid. The "below the quick fact" synopsis-page arrangement and an explicit user toggle for that layout were NOT implemented. Status: partially done.
+- **Books layout: title to the left of the book, adapts when toggle is on**: NOT SHIPPED. No cover-as-left-of-title toggle exists yet; the current cover is already to the left of title+author without a toggle. Status: open.
+- **Condensed fact format (less line spacing, not much less between words)**: SHIPPED. `ShareCardFactFormat.CONDENSED` exists and is applied per style via `factBodyStyle`; the line-spacing tightening rides in the render path (STANDARD now uses `lineSpacing = -4.sp` in Prompt.md's notes, and CONDENSED is offered as a fact-layout pill). Status: done.
+- **Book-page format (paragraph breaks mid-width, continues on the other side)**: SHIPPED. `ShareCardFactFormat.BOOK` ("Book page") is offered as a fact-layout pill and renders a two-column split on the fact body. Status: done.
+- **Editorial paragraph style as an option**: SHIPPED. `ShareCardFactFormat.EDITORIAL` exists and the Editorial drop-cap machinery (big first letter / first word) is wired. Status: done.
+- **Editorial drop-cap variants (first letter large, another first-one-large, etc.)**: SHIPPED. `ShareCardFactDropCap` enum (NONE / LETTER / WORD) is offered when the fact layout is Editorial. Status: done.
+- **Default view should not overlap; smart layout works by default so user doesn't have to manually edit**: PARTIAL. Smart layout (v370) is now always-on with manual-wins and fixes overlap on long facts. A per-style "smart adjustment variation" toggle/multiple-variation system was NOT added. Status: partially done.
+- **Album fav box height + width adjustments**: SHIPPED. `ShareCardMove.favWidthFrac`/`favHeightFrac` exist and the Box-size panel offers Strip width + Strip rows sliders for FAVTRACKS. Status: done.
+- **Auto smart adjustment layout: multiple variations per style + toggle**: NOT SHIPPED. Only one always-on smart layout with manual-wins exists; no per-style variation toggle. Status: open.
+- **Push + ask_user for previous commit testing review**: DONE for the share-card work (861ea605 was pushed and the ask flow was initiated). The book-notes/cover item itself is not yet in a pushed commit. Status: done for the prior share-card commit; the book-notes/cover piece is still open.
+
+## Prompt 2 — (the earlier big share-card adapt request, already shipped)
+
+> the color extraction and applying in the buttom sheet of series books and albumn synopsis are not very accurate and also that top style like a glow that doesnt chnage color too. so can u fix it, in app
+
+### Completion analysis
+
+- **Color extraction + sheet wash accuracy for series/albums/books**: SHIPPED in prior commits — the tone/sheet wash follows the cover hue; minimal/BW covers fall back to category tint; the top-glow accent now tracks the sheet tone instead of staying the category color. Status: done.
+- **Top glow / top style color now changes with the sheet**: SHIPPED (the accent glow under the drag handle and top glow now follow the sheet tone). Status: done.
+
+## Prompt 3 — (not yet received)
+
+Status: empty — waiting for you to send it. Will be appended here when it arrives; analysis added after.
+
+---
+
+# Completion analysis — Original request A (item-by-item)
+
+- **Long texts / quick fact auto-adjust**: DONE — `shareAutoFitDelta` grows the fact box + lifts the title for long facts, default ON (`AppPreferences.shareAutoFitState`, true by default).
+- **Fact box height can go way more on 9:16 (expand more than before)**: DONE — fact height slider is now 0.35..5 (was ~2.5), `lines`/`fitLines` caps raised, inline field maxLines 60.
+- **Whole-box size adjustment from the corner (width+height together, shape kept)**: DONE — `CornerResizeHandle` on title/fact/meta scales width AND height together from the corner; the Whole-box slider was removed from the tools.
+- **Smart auto-adjust default ON**: DONE — `shareAutoFitState` default true.
+- **Author/year moves with title, but also movable separately**: DONE — `titleShift` makes the info row follow the title drag; the M handle still nudges meta independently.
+- **Quick fact + title + info: when fact moves up, title + info follow**: DONE — grouped move: dragging the fact now moves title + meta (+ badge) with it via raw finger delta; each still has its own grip.
+- **More darker color variants, all available**: DONE — 6 new dark tones (Onyx, Noir, Wine, Deep Sea, Cocoa, Forest Night, Plum, Graphite) added, all immediately available (no level gate).
+- **Text color auto-adjusts for dark backgrounds**: DONE — dark tones ship with light ink/pre-derived ink so text reads on dark backgrounds.
+- **Saturation + contrast only on background, not text/polaroid/cover**: DONE — sat/contrast now applies to the background layer of each style only; text, polaroid and cover are unfiltered.
+- **Fix handle not working when overlapping another box**: DONE — all handles drawn LAST in the overlay so a handle wins touch over an overlapping box.
+- **Inline editor (not toolbar text box) for custom fact / chapter progress / chapter review**: DONE — custom fact and chapter review type inline on the card; the toolbar text box is removed.
+- **Chapter review: editable chapter title too, chip can stay at custom fact box position**: DONE — chapter title override field added next to the chapter picker (persisted); chip stays above the review text at the fact-box position.
+- **Push + ask_user for testing review after**: DONE — commit 861ea605 pushed; the ask flow was initiated.
+
+### Request A verdict: SHIPPED (fully, except the book-notes→review wiring is not in this request A, it's in request B).
+
+---
+
+# Completion analysis — Original request B (item-by-item)
+
+- **Book chapter note feature is bad**: PARTIAL — Book Notes note field exists per chapter; the note text is NOT yet shared as a chapter review from the existing logic (open).
+- **Share that note as chapter review from existing logic**: OPEN — editor already has Chapter review content; Book Notes note → chapter review share not wired yet.
+- **Cover fetch + add in cards, placed like the synopsis page (cover + title + author alongside, below the quick fact)**: PARTIAL — cover now placed LEFT of title + author per style and taken out of Collage polaroid; the "below the quick fact" synopsis-page arrangement + explicit toggle NOT done.
+- **Albums + series: same as books (cover added similarly)**: PARTIAL — cover fetch/add works for book topics; album/series cover placement in the share card is not yet a shipped path the same way.
+- **Books layout: title to the left of the book, adapts when toggle is on**: OPEN — no cover-as-left-of-title toggle; cover is already left of title+author without a toggle.
+- **Condensed format (less line spacing, not much less between words)**: DONE — `ShareCardFactFormat.CONDENSED` offered as a fact-layout pill.
+- **Book-page format (paragraph breaks mid-width, continues on other side)**: DONE — `ShareCardFactFormat.BOOK` renders two-column split on the fact body.
+- **Editorial paragraph style as an option**: DONE — `ShareCardFactFormat.EDITORIAL` + drop-cap machinery.
+- **Editorial drop-cap variants (first letter large, another first-one-large, etc.)**: DONE — `ShareCardFactDropCap` NONE/LETTER/WORD.
+- **Default view should not overlap; smart layout works by default so user doesn't manually edit**: PARTIAL — always-on smart layout (v370) fixes overlap on long facts; but no per-style variation toggle yet.
+- **Album fav box height + width adjustments**: DONE — favWidthFrac/favHeightFrac + Strip width/Strip rows sliders.
+- **Auto smart adjustment layout: multiple variations per style + toggle**: OPEN — only one always-on smart layout; no per-style variation toggle.
+- **Push + ask_user after pushing everything**: NOT YET for this request B — not yet pushed (book-notes/cover piece still open).
+
+### Request B verdict: PARTIAL — most of the share-card format/layout pieces shipped (condensed/book/editorial/drop-cap/fav-sizing/smart-layout), but the book-notes→chapter-review share, the synopsis-page cover arrangement + toggle, and the per-style smart-layout variation toggle are still open.
+
+---
+
+# Original share-card requests (recaptured verbatim from this session)
+
+## Original request A (advance share-card adapt system)
+
+> now lets add a advance share card adapt system, when user adds long texts or the quic fact itself is long, the share card texts automativally adjusts itselfand maybe automatically the box size also incrases and it moves up too, and also the custom fact quick fact box itself its height can still be alot more in the 9:12 but it doesnt extend more so let me exoand more, also at the end corner add box size adjustment, i know i can adjust width and height but not that the whole box size itself not shape, add that which can be done from the ocrner, and also the smart auto adjust should be default on, also just like the author year info moving along with title but also avalable to move separately is great and similiar for the quick fact and the tittle and info so when i move the quick fact box up the title also move along with that, also the color option, add more color variants darker and all and the text color should be adjusted itself also the saturation and contrast that should only work on the backgroud but not on the text nor the polaroid, also fix this issue when 2 box are overlapping, not always most of the time its really great detection of the box so not the touch switch to focus the other box but to move with the handle so when the handle and the box is overlapping sometimes the handle doesnt work so fix that, also for the custom fact chapter progress or anything use the inline editor not a text box in the tool bar also for the chapter review let me edit the chater title too, and the chater title eit can stay for the custom fact box postion, and after ompleting this and pushing, youve to use ask user for my testing review, for the previous commit, so start and remeber to use ask user after pushing
+
+## Original request B (book notes / cover / formats / smart layout variations)
+
+> the book chapter add note feature is kinda bad, like also add ability to share that note as chapter review in share card from the already existed logic, also for cover fetching and adding in cards, so this is how the cover ill be places, so it will be places just like its in the synopsis page cover then title and author alongisde and the below the quick fact, same for albumns and series only hen i add similir to books, and that layout of books along side the title the title being to the left side of the book, that adapst when i turn on the toggle, and now for a new format, a condenced one with less spacing between lines but not much less beteen words, and then a new format like book style you kno, one paragrapph then another paragrph, breaking in the middle properly wide, the paragrph continue in the other side if no space remainng, implement it properly the inline editor stays, also add the editorial paragrph style as an option too, and for editorial add formats to hnage from the first only large letter too, another first one large maybe, and in other styles too. and remeber the default view should not overlap anything etc, by default the smart layout should properly ork, so the user dont  have to manually edit that good adjuments i want in the smart adjustments, considering everyhting and thorughly not missin gout on anything. also for the albumn fav box add height and width adjustments, and then after pushing everything use ask user, also complete the previous request too it not completed. also the auto smart adjument layout, give it multiple variation smart adjustment per style and with toggle too. i know this is huge but we will achive this without stopping and again if the previous request isnt completed finish it by asking me again and in the edn after pushing everything use ask user for my previous commit tesing of the app respince so you can fix without stopping.
+
+---
+
+# Completion analysis — Original request A
+
