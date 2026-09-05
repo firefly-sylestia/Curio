@@ -626,6 +626,24 @@ app/src/main/java/com/curio/app/
     (MusicKit, $99/yr Apple Developer Program) which is overkill for album
     deep links. So album links stay keyless; no BuildConfig plumbing
     needed.
+- **v366 — book synopsis batch 2 + series batch 4.** Continuation of
+  v365 (user: "yup go ahead"). `tools/enrich_book_synopses_batch2.py`
+  rewrote the next 30 shortest synopses (Up from Slavery, Influence,
+  Little House on the Prairie, Freakonomics, The Ocean at the End of the
+  Lane, My Antonia, The Awakening, The 48 Laws of Power, Watership Down,
+  The Republic, The Tombs of Atuan, Lessons in Chemistry, Ethan Frome,
+  The Tipping Point, Pedro Paramo, Tom Sawyer, Assassin's Apprentice, All
+  Systems Red, Sapiens, Of Mice and Men, Rendezvous with Rama, etc.) into
+  detailed web-verified synopses (1073-1327 chars, no em/en dashes),
+  60 books now enriched. `tools/enrich_series_batch4.py` added synopsis
+  + first-season episodes to The Good Place (13), Ted Lasso (10), The
+  Mandalorian (8), Succession (10) and True Detective (8), titles
+  verified against episode guides, 20 shows now carry episode data. Also
+  fixed the CI failure from v364: the album resolver's three new block-
+  body helpers (resolveArtistId, bestAlbumFromCatalog,
+  bestAlbumFromSearch) ended in a bare expression (null / bestUrl)
+  instead of an explicit `return`, which fails Kotlin compilation
+  ("Missing return statement").
 - **v365 — book synopsis enrichment batch 1 + series enrichment batch 3.**
   User: "after that do series enrichment and before that do the book
   synopsis fix as many books dont have proper synopsis and start with 30
