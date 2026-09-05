@@ -99,6 +99,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -373,6 +374,193 @@ private val curatedTones = listOf(
         name = "Graphite"
     )
 )
+
+/** v370 — SMART LAYOUT: an always-on, manual-wins adjustment that keeps
+ *  the card's elements from overlapping or leaving the card when the quick
+ *  fact is long. It runs at render (so the export matches) and only nudges
+ *  things the user has NOT already touched per-box. The adjustments are
+ *  conditional on the fact being long AND on the style's layout actually
+ *  having the overlap risk (e.g. COLAGUE's title/middle gap, NEUMORPHIC's
+ *  title floating over the plate, EDITORIAL's oversized headline).
+ *
+ *  When a BOOK/ALBUM/SERIES cover is placed, the cover sits to the LEFT of
+ *  the title + author (per style), and the title can shrink + its box can
+ *  narrow so the cover + title + author all fit without the title leaving the
+ *  card. The cover is taken OUT of the Collage polaroid (there it would
+ *  double up with the photo slot).
+ *
+ *  Manual wins: if the user moved/resized the title or the fact box, the
+ *  smart overlay does NOT touch that box's position/size (it only adjusts the
+ *  OTHER elements relative to it). The category icon (badge) moves WITH the
+ *  grouped move on the fact drag so it stays attached to the fact block.
+ *
+ *  The helper returns the additional deltas/scales to apply on top of the
+ *  user's move. Identity = no adjustment.
+ *
+ *  CARD-BOUND safety: every element's final offset is clamped so its reported
+ *  box stays within the card frame (the user can still deliberately push a box
+ *  to the edge for style, but the auto layer never shoves an element off-card).
+ */
+private object SmartLayout {
+    /** Identity — no adjustment. */
+    val Identity = SmartLayoutDelta()
+
+    /** v370 — the smart-layout adjustments applied on top of the user's move
+     *  (manual wins per touched element). Computed from the card's geometry
+     *  (width/height in dp), the fact length, the style, whether a cover is
+     *  placed (so title shrinks + fact narrows when the cover sits left), and
+     *  whether each element has already been touched by the user.
+     *
+     *  The card's design content region is approximated from the aspect's
+     *  width/height (the card's own frame, minus the style's typical padding).
+     *  This is an approximation by design: the adjustments are gentle nudges,
+     *  not pixel-perfect reflows, and they only kick in when there's real
+     *  overlap/overlong risk (long fact on astronomy-style long facts, etc.).
+     */
+    fun adjust(
+        style: ShareCardStyle,
+        aspect: ShareCardAspect,
+        factLen: Int,
+        coverPlaced: Boolean,
+        // User-touch state per element: if true, the auto layer does NOT
+        // touch that element's size/position (manual wins).
+        titleTouched: Boolean,
+        factTouched: Boolean,
+        metaTouched: Boolean,
+        // Current effective move (post auto-fit).
+        move: ShareCardMove,
+        // The card's content frame in dp (approximate, for clamping).
+        cw: Float, ch: Float
+    ): SmartLayoutDelta {
+        // Long fact threshold: only adjust when the quick fact is genuinely
+        // long (the astronomy long-fact example: lots of prose in the quick
+        // fact box). Short facts keep the style's natural layout.
+        val long = factLen > 120
+        if (!long && !coverPlaced) return Identity
+
+        var out = SmartLayoutDelta()
+
+        // 1) TITLE: when a cover sits to the left, the title box narrows so
+        //    the title + author + cover all fit. Also, on EDITORIAL the
+        //    headline is oversized (30-32sp Bungee) — for long facts the
+        //    title auto-shrinks a touch and its box caps so it doesn't
+        //    dominate / overlap the fact. Manual title edits win.
+        if (!titleTouched) {
+            if (coverPlaced) {
+                // Narrow the title box to leave room for the cover on the left.
+                out = out.copy(titleWidthFrac = 0.62f.coerceAtMost(move.titleWidthFrac))
+            }
+            if (style == ShareCardStyle.EDITORIAL && long) {
+                // Editorial headline is large by design; for long facts, shrink
+                // it a little so the title + fact stay in balance (title never
+                // overlaps the fact). Manual title scale wins.
+                val ts = move.titleScale.coerceAtMost(0.82f)
+                out = out.copy(titleScale = ts)
+            }
+            // Keep the title (its reported box) inside the card frame.
+            val tDx = move.titleDx.coerceIn(-cw * 0.05f, cw * 0.05f)
+            val tDy = move.titleDy.coerceIn(-ch * 0.02f, ch * 0.18f)
+            if (tDx != move.titleDx || tDy != move.titleDy) {
+                out = out.copy(titleDx = tDx - move.titleDx, titleDy = tDy - move.titleDy)
+            }
+        }
+
+        // 2) FACT: keep it on the card and, when a cover is present, narrow
+        //    it a touch so the fact block doesn't run under the cover. Manual
+        //    fact edits win.
+        if (!factTouched) {
+            if (coverPlaced) {
+                out = out.copy(factWidthFrac = 0.80f.coerceAtMost(move.factWidthFrac))
+            }
+            // Keep the fact box inside the card frame (bottom especially).
+            val fDy = move.factDy.coerceIn(-ch * 0.02f, ch * 0.62f)
+            if (fDy != move.factDy) {
+                out = out.copy(factDy = fDy - move.factDy)
+            }
+        }
+
+        // 3) META (author/year): when the fact is long AND the grouped move
+        //    put the info row near the fact, keep it above the footer and
+        //    below the fact. Manual meta edits win.
+        if (!metaTouched) {
+            val mDy = move.metaDy.coerceIn(-ch * 0.02f, ch * 0.70f)
+            if (mDy != move.metaDy) {
+                out = out.copy(metaDy = mDy - move.metaDy)
+            }
+        }
+
+        // 4) BADGE (category icon): when the fact drag triggers a grouped
+        //    move, the badge travels WITH the fact block (like the meta row
+        //    follows the title). Manual badge edits win. The badge isn't
+        //    forced to a position here — it follows the grouped move in the
+        //    dispatch (see ArrangeableCard.FACT handle).
+
+        // 5) COLAGUE-specific: the middle section (category pill + fact) sits
+        //    BELOW the polaroid/title block; for long facts, increase the gap
+        //    so the pill isn't crushed against the title. We express that as a
+        //    small upward nudge of the fact block (it pulls away from the title
+        //    area) — applied only when the fact box hasn't been manually placed.
+        if (!factTouched && style == ShareCardStyle.COLLAGE && long) {
+            // Pull the fact block down a touch so the middle section breathes
+            // under the top (polaroid + title) block.
+            val gapNudge = ch * 0.03f
+            val fDy = (move.factDy + gapNudge).coerceIn(-ch * 0.02f, ch * 0.62f)
+            out = out.copy(factDy = fDy - move.factDy)
+        }
+
+        // 6) NEUMORPHIC-specific: the title floats at center-start on the dark
+        //    plate; for long facts, keep the title from drifting down into the
+        //    fact area.
+        if (!titleTouched && style == ShareCardStyle.NEUMORPHIC && long) {
+            val tDy = move.titleDy.coerceAtMost(ch * 0.20f)
+            if (tDy != move.titleDy) {
+                out = out.copy(titleDy = tDy - move.titleDy)
+            }
+        }
+
+        return out
+    }
+}
+
+/** v370 — the smart-layout deltas applied on top of the user's move (manual
+ *  wins per element). The auto layer only adjusts things the user hasn't
+ *  touched.
+ *
+ *  NOTE: deltas here are OFFSETS to ADD to the existing move fields (e.g.
+ *  titleDx delta = amount to ADD to move.titleDx). A null/zero value means
+ *  "no change to this field".
+ */
+private data class SmartLayoutDelta(
+    val titleDx: Float = 0f,
+    val titleDy: Float = 0f,
+    val titleWidthFrac: Float = 1f,
+    val titleHeightFrac: Float = 1f,
+    val titleScale: Float = 1f,
+    val factDx: Float = 0f,
+    val factDy: Float = 0f,
+    val factWidthFrac: Float = 1f,
+    val factHeightFrac: Float = 1f,
+    val metaDx: Float = 0f,
+    val metaDy: Float = 0f,
+    val metaWidthFrac: Float = 1f,
+    val metaHeightFrac: Float = 1f
+) {
+    fun compose(base: ShareCardMove): ShareCardMove = base.copy(
+        titleDx = if (titleDx != 0f) base.titleDx + titleDx else base.titleDx,
+        titleDy = if (titleDy != 0f) base.titleDy + titleDy else base.titleDy,
+        titleWidthFrac = if (titleWidthFrac != 1f) titleWidthFrac else base.titleWidthFrac,
+        titleHeightFrac = if (titleHeightFrac != 1f) titleHeightFrac else base.titleHeightFrac,
+        titleScale = if (titleScale != 1f) titleScale else base.titleScale,
+        factDx = if (factDx != 0f) base.factDx + factDx else base.factDx,
+        factDy = if (factDy != 0f) base.factDy + factDy else base.factDy,
+        factWidthFrac = if (factWidthFrac != 1f) factWidthFrac else base.factWidthFrac,
+        factHeightFrac = if (factHeightFrac != 1f) factHeightFrac else base.factHeightFrac,
+        metaDx = if (metaDx != 0f) base.metaDx + metaDx else base.metaDx,
+        metaDy = if (metaDy != 0f) base.metaDy + metaDy else base.metaDy,
+        metaWidthFrac = if (metaWidthFrac != 1f) metaWidthFrac else base.metaWidthFrac,
+        metaHeightFrac = if (metaHeightFrac != 1f) metaHeightFrac else base.metaHeightFrac
+    )
+}
 
 /** How many tones the player may use at [level]: always-available tones
  *  (null [ShareCardPalette.unlockLevel]) + every premium tone whose reward
@@ -913,6 +1101,27 @@ fun TopicShareCard(
         titleDy = move.titleDy + autoFit.dy,
         metaDy = move.metaDy + autoFit.dy
     )
+    // v370 — SMART LAYOUT (always-on, manual-wins): keeps elements from
+    // overlapping or leaving the card when the quick fact is long, and when a
+    // BOOK/ALBUM/SERIES cover is placed, narrows the title box + fact box so
+    // the cover (to the LEFT of title + author) + title + author all fit
+    // without the title leaving the card. The card's content frame is
+    // approximated from the card's own measured size (wm) so the adjustments
+    // are card-relative, not card-design-relative.
+    val wm = androidx.compose.ui.platform.LocalDensity.current
+    val cw = with(wm) { (aspect.widthDp.toFloat()).toDp().value }
+    val ch = with(wm) { (aspect.heightDp.toFloat()).toDp().value }
+    // Per-element "touched" flags: if the user moved/resized an element,
+    // smart layout does NOT override that element (manual wins).
+    val titleTouched = effectiveMove.titleDx != 0f || effectiveMove.titleDy != 0f ||
+        effectiveMove.titleWidthFrac != 1f || effectiveMove.titleHeightFrac != 1f || effectiveMove.titleScale != 1f
+    val factTouched = effectiveMove.factDx != 0f || effectiveMove.factDy != 0f ||
+        effectiveMove.factWidthFrac != 1f || effectiveMove.factHeightFrac != 1f
+    val metaTouched = effectiveMove.metaDx != 0f || effectiveMove.metaDy != 0f ||
+        effectiveMove.metaWidthFrac != 1f || effectiveMove.metaHeightFrac != 1f
+    val coverPlaced = bookCover != null && style != ShareCardStyle.COLLAGE
+    val smart = if (factLen > 120 || coverPlaced) SmartLayout.adjust(style, aspect, factLen, coverPlaced, titleTouched, factTouched, metaTouched, effectiveMove, cw, ch) else SmartLayout.Identity
+    val displayMove = smart.compose(effectiveMove)
     val display = topicName.substringBeforeLast(" (")
     // Extract year from trailing parentheses — "Appetite for Destruction (1987)" → "1987"
     val year = topicName.substringAfterLast("(").substringBeforeLast(")").takeIf { it.all { c -> c.isDigit() } && it.length == 4 }
@@ -928,43 +1137,80 @@ fun TopicShareCard(
     val albumFavTracks = AppPreferences.albumFavTracksState[topicName].orEmpty()
     Box {
         when (style) {
-            ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, effectiveMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, effectiveMove, chapterProgress, chapterFact, hideTypedFavSong = albumFavTracks.isNotEmpty() && AppPreferences.albumFavStripVisibleState, bgFilter)
-            ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto ?: bookCover, byline, year, polaroidCaption, onPhotoTap, bodyScale, callbacks, effectiveMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, effectiveMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, effectiveMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, effectiveMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, bodyScale, callbacks, effectiveMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.CUSTOM -> CustomCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, effectiveMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, displayMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, displayMove, chapterProgress, chapterFact, hideTypedFavSong = albumFavTracks.isNotEmpty() && AppPreferences.albumFavStripVisibleState, bgFilter)
+            // v370 — Collage does NOT merge the book cover into its polaroid
+            // photo slot (that's the user photo only). The book cover, when
+            // placed, renders as a separate left badge from the dispatch block
+            // above (only when explicitly placed). Passing `userPhoto` alone
+            // keeps the polaroid clean.
+            ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto, byline, year, polaroidCaption, onPhotoTap, bodyScale, callbacks, displayMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, displayMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, displayMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, displayMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, bodyScale, callbacks, displayMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.CUSTOM -> CustomCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, displayMove, chapterProgress, chapterFact, bgFilter)
         }
-        // v334 — the cover badge rides on top of every style EXCEPT Collage
-        // (there it feeds the polaroid photo slot above).
-        // v335 — the jacket is a movable element like the badge: its offset
-        // comes from [move.coverDx]/[move.coverDy] and it reports its bounds
-        // so the editor's chrome can select + drag it.
-        // v340 — the DEFAULT pocket is per-style: each design anchors the
-        // jacket where ITS top-right art (or headline/crest) leaves a gap,
-        // so a fresh cover lands in that style's natural spot instead of
-        // always overlapping the same corner decoration. The user can still
-        // drag it anywhere (move offsets apply on top).
+        // v370 — COVER PLACEMENT: the BOOK/ALBUM/SERIES cover sits to the
+        // LEFT of the title + author (per style), NOT in a corner badge and
+        // NOT in the Collage polaroid (there it would double up with the
+        // photo slot). The cover is taken OUT of the Collage polaroid
+        // entirely — Collage keeps its photo slot only.
+        //
+        // Per category, the cover lands in that style's corner POCKET where
+        // the design leaves a natural gap (so a fresh cover sits cleanly
+        // beside the title/author without overlapping the headline). The
+        // default pocket is LEFT-aligned near the title by default; the user
+        // can still drag it anywhere (move.coverDx/coverDy apply on top).
+        //
+        // When the cover is present, the smart layer already narrows the title
+        // box + fact box (see SmartLayout) so the title + author + cover all
+        // fit on the card without the title leaving the card.
         if (bookCover != null && style != ShareCardStyle.COLLAGE) {
+            // LEFT pocket — beside the title + author block. Each style uses a
+            // slightly different left/vertical anchor so the cover lands in the
+            // design's natural gap (e.g. PAPER's top-left column, EDITORIAL's
+            // masthead left, etc.).
             val coverSlot = when (style) {
-                ShareCardStyle.PAPER -> Alignment.TopEnd to PaddingValues(top = 64.dp, end = 16.dp)
-                ShareCardStyle.VINYL -> Alignment.TopEnd to PaddingValues(top = 70.dp, end = 18.dp)
-                // Clean wears a huge rotated glyph top-right: drop the jacket
-                // BELOW it instead of over the category art.
-                ShareCardStyle.NEUMORPHIC -> Alignment.TopEnd to PaddingValues(top = 186.dp, end = 20.dp)
-                // Editorial: masthead rules + headline own the top; the
-                // bottom-right sits beside the colophon's left-aligned slug.
-                ShareCardStyle.EDITORIAL -> Alignment.BottomEnd to PaddingValues(bottom = 26.dp, end = 18.dp)
-                ShareCardStyle.MINIMAL -> Alignment.TopEnd to PaddingValues(top = 48.dp, end = 16.dp)
-                // Signature/Custom: small crest at top-right — the jacket
-                // parks just below it.
-                ShareCardStyle.SIGNATURE, ShareCardStyle.CUSTOM -> Alignment.TopEnd to PaddingValues(top = 56.dp, end = 16.dp)
-                ShareCardStyle.COLLAGE -> Alignment.TopEnd to PaddingValues(top = 34.dp, end = 14.dp)
+                // PAPER: title sits top-left; the cover goes just RIGHT of the
+                // title column, top-anchored, so the author line + cover read
+                // alongside.
+                ShareCardStyle.PAPER -> Alignment.TopStart to PaddingValues(top = 64.dp, start = 22.dp)
+                // VINYL: artist/title top-left; cover sits to the right of the
+                // title block, top-ish.
+                ShareCardStyle.VINYL -> Alignment.TopStart to PaddingValues(top = 70.dp, start = 26.dp)
+                // Clean: huge rotated glyph top-right; the title is center-start.
+                // The cover goes to the LEFT of the title block, mid-top.
+                ShareCardStyle.NEUMORPHIC -> Alignment.TopStart to PaddingValues(top = 120.dp, start = 16.dp)
+                // Editorial: masthead rules + headline own the top-LEFT; the
+                // cover sits just BELOW the masthead, left-aligned, above the
+                // body. (Not in the corner — the masthead is where the art is.)
+                ShareCardStyle.EDITORIAL -> Alignment.TopStart to PaddingValues(top = 132.dp, start = 26.dp)
+                // Minimal: title top-left; cover sits to the left of the title
+                // block, top.
+                ShareCardStyle.MINIMAL -> Alignment.TopStart to PaddingValues(top = 48.dp, start = 30.dp)
+                // Signature/Custom: small crest top-right; title top-left.
+                // Cover sits to the LEFT of the title block, top.
+                ShareCardStyle.SIGNATURE, ShareCardStyle.CUSTOM -> Alignment.TopStart to PaddingValues(top = 56.dp, start = 30.dp)
+                // Collage: the cover does NOT go in the polaroid photo slot
+                // (that's the user photo). If a book cover exists on a Collage
+                // card, we still render it as a small LEFT badge so the card
+                // can carry a cover without double-up — but only when the user
+                // explicitly placed it (move.coverDx != 0 or coverDy != 0), so
+                // a fresh Collage card never carries a surprise book cover.
+                ShareCardStyle.COLLAGE -> {
+                    if (move.coverDx != 0f || move.coverDy != 0f)
+                        Alignment.TopStart to PaddingValues(top = 34.dp, start = 14.dp)
+                    else Alignment.TopEnd to PaddingValues(top = 34.dp, end = 14.dp)
+                }
             }
+            // v370 — beside-title poster thumbnail: ~60×90dp, so the cover
+            // reads as a real poster next to the title + author (not just a
+            // corner stamp). The corner-pocket anchor already places it to the
+            // LEFT of the title block.
             BookCoverBadge(
                 cover = bookCover,
+                coverSize = DpSize(60.dp, 90.dp),
                 modifier = Modifier
                     .align(coverSlot.first)
                     .offset(x = move.coverDx.dp, y = move.coverDy.dp)
@@ -1031,12 +1277,16 @@ fun TopicShareCard(
 private fun BookCoverBadge(
     cover: androidx.compose.ui.graphics.ImageBitmap,
     modifier: Modifier = Modifier,
+    // v370 — the cover can render as a small corner jacket OR a beside-title
+    // poster thumbnail. The default (corner) is the small badge; the
+    // beside-title layout passes a larger size so the cover reads as a real
+    // poster thumbnail next to the title + author.
+    coverSize: DpSize = DpSize(44.dp, 66.dp),
     callbacks: EditBoundsCallbacks = EditBoundsCallbacks()
 ) {
     Box(
         modifier = modifier
-            .width(44.dp)
-            .height(66.dp)
+            .size(coverSize)
             .shadow(3.dp, RoundedCornerShape(3.dp))
             .clip(RoundedCornerShape(3.dp))
             .background(Color.White)
@@ -5784,17 +6034,36 @@ private fun ArrangeableCard(
                             }
                         }
                     )
-                    // Tap-to-select layer: while text editing is OFF the field is
-                    // inert, so an invisible box on top selects the fact for moving
-                    // (grip appears) without popping the keyboard. Text editing
-                    // starts only via the explicit "Edit text" tool.
+                    // v370 — Tap-to-select + double-tap-to-edit layer: while text
+                    // editing is OFF the field is inert, so an invisible box on
+                    // top SELECTS the fact for moving (grip appears) on a SINGLE
+                    // tap, and enters edit mode (the bigger floating edit box
+                    // opens + keyboard) on a QUICK DOUBLE tap — so the user can
+                    // start typing with two fast taps on the card. We use a
+                    // single detectTapGestures with both onTap (select) and
+                    // onDoubleTap (edit) so the disambiguation is done inside one
+                    // gesture detector (a double-tap fires onDoubleTap, not two
+                    // onTaps). The explicit Edit text tool also arms it.
+                    // v370 — this double-tap also works for the custom fact and
+                    // the chapter review (same on-card field), so both editable
+                    // facts can be started with two fast taps.
                     if (!factEditMode) {
                         Box(
                             modifier = Modifier
                                 .offset(f.left.dp, f.top.dp)
                                 .width(f.width.dp)
                                 .height(f.height.dp)
-                                .clickable { onSelectResizeTarget(ShareCardResizeTarget.FACT) }
+                                .pointerInput(Unit) {
+                                    detectTapGestures(
+                                        onTap = { onSelectResizeTarget(ShareCardResizeTarget.FACT) },
+                                        onDoubleTap = {
+                                            // Quick double tap → enter edit mode on the
+                                            // box (the floating edit box opens from
+                                            // factEditMode in the sheet).
+                                            factEditMode = true
+                                        }
+                                    )
+                                }
                         )
                     }
                     // When the "Edit text" tool arms the field, focus it so the
@@ -5944,6 +6213,8 @@ private fun ArrangeableCard(
                     ShareCardResizeTarget.FACT -> {
                         val mRect = rMeta
                         val f = rFact
+                        val tRect = rTitle
+                        val bRect = rBadge
                         if (f.width > 0f && f.height > 0f) {
                             MoveHandle(
                                 x = f.left.dp,
@@ -5959,12 +6230,17 @@ private fun ArrangeableCard(
                                     // rows travel WITH the fact (like the info
                                     // row follows the title), while each stays
                                     // separately draggable via its own grip.
+                                    // v370 — the category BADGE also travels WITH
+                                    // the fact block on a grouped drag (so the
+                                    // icon stays attached to the fact block),
+                                    // and the badge still has its own grip for
+                                    // separate nudges.
                                     // v369/v370 — proportional grouped move: title +
-                                    // author/info rows travel WITH the fact, but
-                                    // only while the quick fact is being dragged.
-                                    // Use the RAW finger delta (not the
-                                    // magnet helper's snap offset) so the title
-                                    // and info rows follow the fact precisely
+                                    // author/info rows + badge travel WITH the
+                                    // fact, but only while the quick fact is being
+                                    // dragged. Use the RAW finger delta (not the
+                                    // magnet helper's snap offset) so the title,
+                                    // info and badge follow the fact precisely
                                     // without overshooting, and clamp their
                                     // position to the card so nothing leaves the
                                     // card. When a manual edit has been made
@@ -5972,14 +6248,23 @@ private fun ArrangeableCard(
                                     // group still moves so the fact track is
                                     // consistent.
                                     val rawDx = dx; val rawDy = dy
-                                    val newTitleDx = (move.titleDx + rawDx).coerceIn(-(t.width / 2f), cw - t.width / 2f)
-                                    val newTitleDy = (move.titleDy + rawDy).coerceIn(-t.height / 2f, ch - t.height / 2f)
-                                    val newMetaDx = (move.metaDx + rawDx).coerceIn(-mRect.width / 2f, cw - mRect.width / 2f).coerceAtLeast(-mRect.width * 0.2f)
-                                    val newMetaDy = (move.metaDy + rawDy).coerceIn(-mRect.height / 2f, ch - mRect.height / 2f)
+                                    val titleClampTop = -(tRect.height / 2f)
+                                    val titleClampBottom = ch - tRect.height / 2f
+                                    val newTitleDx = if (tRect.width > 0f) (move.titleDx + rawDx).coerceIn(-(tRect.width / 2f), cw - (tRect.width / 2f)) else move.titleDx
+                                    val newTitleDy = if (tRect.height > 0f) (move.titleDy + rawDy).coerceIn(titleClampTop, titleClampBottom) else move.titleDy
+                                    val newMetaDx = if (mRect.width > 0f) (move.metaDx + rawDx).coerceIn(-mRect.width / 2f, cw - mRect.width / 2f).coerceAtLeast(-mRect.width * 0.2f) else move.metaDx
+                                    val newMetaDy = if (mRect.height > 0f) (move.metaDy + rawDy).coerceIn(-mRect.height / 2f, ch - mRect.height / 2f) else move.metaDy
+                                    val newBadgeDx = if (bRect.width > 0f) {
+                                        val badgeMinX = -(bRect.width / 2f).coerceAtLeast(0f)
+                                        val badgeMaxX = cw - (bRect.width / 2f).coerceAtLeast(0f)
+                                        (move.badgeDx + rawDx).coerceIn(badgeMinX, badgeMaxX)
+                                    } else move.badgeDx
+                                    val newBadgeDy = if (bRect.height > 0f) (move.badgeDy + rawDy).coerceIn(-bRect.height / 2f, ch - bRect.height / 2f) else move.badgeDy
                                     onMove(move.copy(
                                         factDx = xs.offset, factDy = ys.offset,
                                         titleDx = newTitleDx, titleDy = newTitleDy,
-                                        metaDx = newMetaDx, metaDy = newMetaDy
+                                        metaDx = newMetaDx, metaDy = newMetaDy,
+                                        badgeDx = newBadgeDx, badgeDy = newBadgeDy
                                     ))
                                 },
                                 onDragStart = {
@@ -6145,6 +6430,64 @@ private fun ArrangeableCard(
                         dragGuides.vx?.let { guide(true, it, 0.30f, 0.95f, 1f) }
                         dragGuides.hy?.let { guide(false, it, 0.30f, 0.95f, 1f) }
                     }
+                }
+            }
+        }
+    }
+
+    // v370 — BIGGER FLOATING EDIT BOX: when the Edit text tool has armed the
+    // field (factEditMode) and the selected fact is an editable fact (custom
+    // fact, chapter review, or the quick fact without reading progress), the
+    // on-card field still owns the caret seat, BUT a bigger floating box is
+    // shown ABOVE the card (no dark overlay — it floats on the sheet's own
+    // surface) so long texts are comfortable to type. The floating box binds
+    // the SAME editFact / customText / review text so typing here is identical
+    // to typing on the card; the keyboard opens here too (the on-card field
+    // is still the caret seat for alignment). When the selected fact is not
+    // editable (e.g. reading-progress caption) the floating box stays hidden
+    // and the on-card field remains inert.
+    val isEditableFactForFloating = factEditMode && (activeId == CUSTOM_FACT_ID || activeId == "chapter_review" || (activeId == QUICK_FACT_ID && progressForCard == null))
+    if (isEditableFactForFloating) {
+        // The floating box sits just above the card preview (sheet side margin
+        // 20.dp matches the Column padding; its width is the card's preview
+        // width, so it reads as a larger version of the same field).
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 4.dp)
+                .align(Alignment.CenterHorizontally)
+        ) {
+            Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                shadowElevation = 6.dp,
+                modifier = Modifier.weight(1f)
+            ) {
+                Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
+                    Text(
+                        when (activeId) {
+                            CUSTOM_FACT_ID -> "Custom fact"
+                            "chapter_review" -> "Chapter review"
+                            else -> "Quick fact"
+                        },
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    BasicTextField(
+                        value = editFact,
+                        onValueChange = onFactChange,
+                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface, lineHeight = 22.sp),
+                        cursorBrush = SolidColor(CoffeeChromeDeep),
+                        singleLine = false,
+                        maxLines = 8,
+                        decorationBox = { inner ->
+                            Box(Modifier.fillMaxWidth()) {
+                                if (editFact.isBlank()) Text(factFieldPlaceholder, style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
+                                inner()
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }
@@ -7019,12 +7362,19 @@ fun TopicShareSheet(
                             .horizontalScroll(androidx.compose.foundation.rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        // v330 — Edit-text moved back into the toolbar row:
-                        // the floating cluster over the card is gone (the
-                        // bottom bar now owns Reset + Done + the content
-                        // selector). Only the quick fact can be typed, so the
-                        // pill appears just when the fact is selected.
-                        if (isFact && progressForCard == null) {
+                        // v370 — Edit-text tool: opens a BIGGER floating edit
+                        // box ABOVE the card (no dark overlay — it floats on
+                        // the sheet's own surface). The box is taller than
+                        // the on-card field so long custom facts / chapter
+                        // reviews are comfortable to type. The Edit-text pill
+                        // stays in the toolbar (single tap on the box still
+                        // only SELECTS — double tap enters edit mode).
+                        // v370 — the Edit-text pill shows for the quick fact,
+                        // the custom fact and the chapter review (even when
+                        // stacked under reading progress), so every editable
+                        // fact can be typed in the bigger floating box.
+                        val isEditableFact = isFact && (activeId == CUSTOM_FACT_ID || activeId == "chapter_review" || (activeId == QUICK_FACT_ID && progressForCard == null))
+                        if (isEditableFact) {
                             EditToolPill(
                                 glyph = CurioIcons.Edit,
                                 description = "Edit text",
@@ -7469,11 +7819,14 @@ fun TopicShareSheet(
                                     )
                                 }
                             }
-                            // v369 — custom fact / chapter review text is typed
-                            // INLINE on the card (tap the box, then Edit text) —
-                            // the old toolbar text box is gone so the caret
-                            // always sits on the visible glyphs.
-                            if (activeId == CUSTOM_FACT_ID) {
+                            // v370 — custom fact / chapter review text is typed
+                            // in the bigger FLOATING edit box opened from the
+                            // Edit-text tool above (the on-card field is the
+                            // select/move target + inline caret seat). The
+                            // chapter review also stays editable here even when
+                            // stacked under reading progress (the floating box
+                            // binds customText, same as the custom fact).
+                            if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") {
                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                     CurioIcon(
                                         name = CurioIcons.Edit,
@@ -7482,7 +7835,10 @@ fun TopicShareSheet(
                                         size = 15.dp
                                     )
                                     Text(
-                                        "Select the box on the card and tap Edit text to type it inline.",
+                                        when (activeId) {
+                                            CUSTOM_FACT_ID -> "Select the box on the card and tap Edit text to type it in the bigger floating box."
+                                            else -> "Select the review box on the card and tap Edit text to type your review in the bigger floating box."
+                                        },
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )

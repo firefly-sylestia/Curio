@@ -998,6 +998,42 @@ app/src/main/java/com/curio/app/
   row's solid "Mix · N" capsule is HIDDEN while mixing on the CLASSIC
   page (`!mixing || pagerState.currentPage != 0`) — it stays on the new
   page so apply-from-there still works.
+- **v370 — share-card editor: floating edit box, double-tap-to-edit,
+  smart layout (always-on, manual-wins), grouped move with badge, cover
+  placement LEFT of title+author.** (1) **Floating edit box**: a bigger
+  edit box (no dark overlay) opens ABOVE the card from the Edit-text tool
+  for the quick fact / custom fact / chapter review (even stacked under
+  reading progress); the on-card field is still the caret seat, and the
+  floating box binds the same `editFact`/`customText` so typing here is
+  identical. (2) **Double-tap to edit**: on the on-card fact box, a SINGLE
+  tap selects it for moving (grip appears), a QUICK DOUBLE tap enters edit
+  mode (floating box + keyboard); implemented with one
+  `detectTapGestures(onTap, onDoubleTap)` on the select layer (the field
+  stays inert until armed by the Edit-text tool). (3) **Smart layout**:
+  `SmartLayout.adjust(...)` runs at render and is always-on with manual-wins
+  (no per-style toggle): when the quick fact is long (>120 chars) OR a
+  cover is placed, it keeps elements from overlapping/leaving the card —
+  COLAGUE gap between the title block and middle section, NEUMORPHIC title
+  kept off the fact area, EDITORIAL headline auto-shrunk (titleScale 0.82)
+  for long facts, title/meta/fact clamped inside the card frame. When a
+  BOOK/ALBUM/SERIES cover is placed, titleWidthFrac→0.62 and
+  factWidthFrac→0.80 so the cover + title + author fit without the title
+  leaving the card. (4) **Cover placement**: BOOK/ALBUM/SERIES cover sits
+  to the LEFT of the title + author per style (per category corner pocket),
+  taken OUT of the Collage polaroid (that slot is the user photo only);
+  renders as a 60×90dp poster thumbnail beside the title/author. Collage
+  only shows a cover when the user explicitly placed it. Manual moves of the
+  title/fact still win over the smart overlay per element. (5) **Grouped
+  move — badge**: the FACT handle now also moves the category BADGE with the
+  fact block (title + meta + badge travel together on a fact drag), while
+  each still has its own grip; the followers use the RAW finger delta so
+  they don't overshoot. (6) **Whole-box corner grip**: the corner grip scales
+  width AND height together (photo-editor style); the Whole-box slider was
+  removed from the Box-size tools (it lives only as the corner grip now).
+  (7) **Custom fact / chapter review re-editable**: the source-panel hint
+  points to the floating box; the custom fact is editable alone AND stacked
+  under reading progress; the chapter review text is editable in the floating
+  box too (binds `customText`).
 - **v313 — Topic Browser revamp, pick 1: category-filtered search, dynamic
   chips, one-category browse.** User: "in topic browser let user change
   category and act that category as filters for the search, so it doesn't
