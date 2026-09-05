@@ -626,6 +626,29 @@ app/src/main/java/com/curio/app/
     (MusicKit, $99/yr Apple Developer Program) which is overkill for album
     deep links. So album links stay keyless; no BuildConfig plumbing
     needed.
+- **v363 — fetch is provider-EXCLUSIVE; Clear also wipes memory cache.**
+  User: "the clear all covers doesnt work … i feel like the fetching of
+  covers is still uses the old api … when i select the provider and tap
+  fetch then it should only fetch from that for the fetch button not for
+  the fallbacks." Two root causes, both in `BookCoverFetch`:
+  - **Provider-only fetch:** `resolveVerifiedCoverUrl` (used by the bulk
+    fetch) previously built candidates as stored-URL → authored imageUrl
+    → chosen provider → cascade of ALL providers. So the fetch button was
+    never a pure provider test — books with real authored covers kept
+    their identical image no matter which provider was selected (authored
+    always won first), which is exactly why everything looked "the same
+    old API" after clearing + re-fetching with a new provider. Now the
+    fetch considers ONLY the chosen provider's resolved URL(s) (iTunes
+    search / Google Books search / Open Library title URL / LibraryThing
+    ISBN URL); a book that provider can't serve is marked failed.
+    Verification (`loadsRealImage`, 40px-min short edge) still applies,
+    and the reveal poster / share card / hub tiles keep their own
+    authored-first fallback via `coverCandidates` (the "auto loading" the
+    user said is fine).
+  - **Clear now clears BOTH Coil caches:** `clearAllCovers` also calls
+    `memoryCache?.clear()` — disk-only clearing left the decoded covers
+    serving instantly from memory, so the hub's strip looked unchanged and
+    "Clear" seemed broken.
 - **v323 — picker hold actions become a gooey RADIAL menu; share-card
   Tone tool + 6 new tones; pet shop toys/games; quest fixes.** (1)
   **Radial hold menu** (`features/picker/RadialHoldMenu.kt`): the old

@@ -307,14 +307,18 @@ object BookCoverFetch {
     }
 
     /**
-     * v360 — resolve ONE book's cover and VERIFY it decodes to a real
-     * image. Candidate URLs, in order: the hub's last VERIFIED/stored URL,
-     * the authored imageUrl, then the provider cascade (the chosen provider
-     * first, then the rest best-first: iTunes, Google Books, Open Library,
-     * LibraryThing). The first candidate that loads at a real size wins and
-     * is remembered for the reveal + share card. Open Library's missing-cover
+     * v362b — resolve ONE book's cover using ONLY the chosen provider and
+     * VERIFY it decodes to a real image. The bulk-fetch button is a PURE
+     * provider test: no stored URL, no authored imageUrl, no fallback
+     * cascade — only the selected provider's artwork is considered, so
+     * switching the hub's provider and re-fetching (after Clear) actually
+     * shows that provider's covers instead of the old source silently
+     * winning. The first candidate that loads at a real size wins and is
+     * remembered for the reveal + share card. Open Library's missing-cover
      * placeholder is a 1x1 GIF served with HTTP 200, so "loaded" alone is
-     * not enough — the decoded dimensions decide.
+     * not enough — the decoded dimensions decide. (The reveal poster and
+     * share card keep their own authored-first fallback list via
+     * [coverCandidates]; only the fetch path is provider-exclusive.)
      */
     private suspend fun resolveVerifiedCoverUrl(
         context: Context,
@@ -323,17 +327,12 @@ object BookCoverFetch {
         preferred: BookCoverProvider
     ): String? = withContext(Dispatchers.IO) {
         val candidates = LinkedHashSet<String>()
-        AppPreferences.bookCoverUrlsState[book.name]?.takeIf { it.isNotBlank() }?.let { candidates.add(it) }
-        book.imageUrl.takeIf { it.isNotBlank() }?.let { candidates.add(it) }
-        val cascade = listOf(preferred) + BookCoverProvider.entries.filter { it != preferred }
-        for (p in cascade) {
-            when (p) {
-                BookCoverProvider.ITUNES -> itunesThumbnail(book.name, book.byline)?.let { candidates.add(it) }
-                BookCoverProvider.GOOGLE_BOOKS -> googleThumbnail(book.name, book.byline)?.let { candidates.add(it) }
-                BookCoverProvider.OPEN_LIBRARY ->
-                    candidates.add("https://covers.openlibrary.org/b/title/${Uri.encode(book.name)}-M.jpg")
-                BookCoverProvider.LIBRARY_THING -> libraryThingCover(book.name, book.byline)?.let { candidates.add(it) }
-            }
+        when (preferred) {
+            BookCoverProvider.ITUNES -> itunesThumbnail(book.name, book.byline)?.let { candidates.add(it) }
+            BookCoverProvider.GOOGLE_BOOKS -> googleThumbnail(book.name, book.byline)?.let { candidates.add(it) }
+            BookCoverProvider.OPEN_LIBRARY ->
+                candidates.add("https://covers.openlibrary.org/b/title/${Uri.encode(book.name)}-M.jpg")
+            BookCoverProvider.LIBRARY_THING -> libraryThingCover(book.name, book.byline)?.let { candidates.add(it) }
         }
         for (url in candidates) {
             if (loadsRealImage(context, loader, url)) {
@@ -475,14 +474,19 @@ object BookCoverFetch {
             }.getOrNull()
         }
 
-    /** v361 — wipe every stored cover record AND the shared Coil disk cache
-     *  so the next "Fetch all covers" re-resolves every book from scratch.
-     *  Used by the hub's Clear-covers action to make provider A/B testing
-     *  easy (the old provider's verified URLs would otherwise keep winning
-     *  the candidate order). */
+    /** v361 — wipe every stored cover record AND the shared Coil caches
+     *  (memory + disk) so the next "Fetch all covers" re-resolves every
+     *  book from scratch. v362b — the MEMORY cache is cleared too: without
+     *  it, decoded covers kept rendering instantly after a clear, so the
+     *  hub's strip looked unchanged and "Clear" seemed broken. Used by the
+     *  hub's Clear-covers action to make provider A/B testing easy (the old
+     *  provider's verified URLs would otherwise keep winning, and the fetch
+     *  now only consults the chosen provider anyway). */
     fun clearAllCovers(context: Context) {
         AppPreferences.clearBookCovers(context)
-        runCatching { Coil.imageLoader(context).diskCache?.clear() }
+        val loader = Coil.imageLoader(context)
+        runCatching { loader.memoryCache?.clear() }
+        runCatching { loader.diskCache?.clear() }
     }
 
     /** Minimal keyless GET — 8s timeout, best-effort. */
