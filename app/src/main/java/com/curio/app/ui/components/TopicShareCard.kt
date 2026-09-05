@@ -6059,8 +6059,9 @@ private fun ArrangeableCard(
                                         onDoubleTap = {
                                             // Quick double tap → enter edit mode on the
                                             // box (the floating edit box opens from
-                                            // factEditMode in the sheet).
-                                            factEditMode = true
+                                            // factEditMode in the sheet). Route through the
+                                            // callback so the sheet arms factEditMode.
+                                            onFactEditModeChange(true)
                                         }
                                     )
                                 }
@@ -6430,64 +6431,6 @@ private fun ArrangeableCard(
                         dragGuides.vx?.let { guide(true, it, 0.30f, 0.95f, 1f) }
                         dragGuides.hy?.let { guide(false, it, 0.30f, 0.95f, 1f) }
                     }
-                }
-            }
-        }
-    }
-
-    // v370 — BIGGER FLOATING EDIT BOX: when the Edit text tool has armed the
-    // field (factEditMode) and the selected fact is an editable fact (custom
-    // fact, chapter review, or the quick fact without reading progress), the
-    // on-card field still owns the caret seat, BUT a bigger floating box is
-    // shown ABOVE the card (no dark overlay — it floats on the sheet's own
-    // surface) so long texts are comfortable to type. The floating box binds
-    // the SAME editFact / customText / review text so typing here is identical
-    // to typing on the card; the keyboard opens here too (the on-card field
-    // is still the caret seat for alignment). When the selected fact is not
-    // editable (e.g. reading-progress caption) the floating box stays hidden
-    // and the on-card field remains inert.
-    val isEditableFactForFloating = factEditMode && (activeId == CUSTOM_FACT_ID || activeId == "chapter_review" || (activeId == QUICK_FACT_ID && progressForCard == null))
-    if (isEditableFactForFloating) {
-        // The floating box sits just above the card preview (sheet side margin
-        // 20.dp matches the Column padding; its width is the card's preview
-        // width, so it reads as a larger version of the same field).
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 4.dp)
-                .align(Alignment.CenterHorizontally)
-        ) {
-            Surface(
-                shape = RoundedCornerShape(14.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                shadowElevation = 6.dp,
-                modifier = Modifier.weight(1f)
-            ) {
-                Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
-                    Text(
-                        when (activeId) {
-                            CUSTOM_FACT_ID -> "Custom fact"
-                            "chapter_review" -> "Chapter review"
-                            else -> "Quick fact"
-                        },
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    BasicTextField(
-                        value = editFact,
-                        onValueChange = onFactChange,
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface, lineHeight = 22.sp),
-                        cursorBrush = SolidColor(CoffeeChromeDeep),
-                        singleLine = false,
-                        maxLines = 8,
-                        decorationBox = { inner ->
-                            Box(Modifier.fillMaxWidth()) {
-                                if (editFact.isBlank()) Text(factFieldPlaceholder, style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
-                                inner()
-                            }
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
                 }
             }
         }
@@ -7218,6 +7161,51 @@ fun TopicShareSheet(
                         ) { cb ->
                             TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, callbacks = cb)
                         }
+                    }
+                }             }
+
+            // v370 — BIGGER FLOATING EDIT BOX: when the Edit text tool has
+            // armed the field (factEditMode, only meaningful while editing)
+            // and the selected fact is an editable fact (custom fact, chapter
+            // review, or the quick fact without reading progress), a bigger
+            // floating box is shown ABOVE the card preview (no dark overlay —
+            // it floats on the sheet's own surface) so long texts are
+            // comfortable to type. The card's on-card field is still the caret
+            // seat; this box binds the SAME editFact / customText so typing
+            // here is identical. When the selected fact is not editable (e.g.
+            // reading-progress caption) the floating box stays hidden.
+            if (editMode && factEditMode && (activeId == CUSTOM_FACT_ID || activeId == "chapter_review" || (activeId == QUICK_FACT_ID && progressForCard == null))) {
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    shadowElevation = 6.dp,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp)
+                ) {
+                    Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
+                        Text(
+                            when (activeId) {
+                                CUSTOM_FACT_ID -> "Custom fact"
+                                "chapter_review" -> "Chapter review"
+                                else -> "Quick fact"
+                            },
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        BasicTextField(
+                            value = editFact,
+                            onValueChange = onFactChange,
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface, lineHeight = 22.sp),
+                            cursorBrush = SolidColor(CoffeeChromeDeep),
+                            singleLine = false,
+                            maxLines = 8,
+                            decorationBox = { inner ->
+                                Box(Modifier.fillMaxWidth()) {
+                                    if (editFact.isBlank()) Text(factFieldPlaceholder, style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
+                                    inner()
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
             }
