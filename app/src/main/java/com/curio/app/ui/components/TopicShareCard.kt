@@ -4790,7 +4790,7 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             footerSpacer = 8.dp, footerFont = PatrickHandFontFamily, footerColor = Color(0xFFC9B8E0).copy(alpha = 0.65f),
             layout = SignatureLayout.SIDE
         )
-        // ═══ MANGA — speedlines, ChangaOne title ═══
+        // ══�� MANGA — speedlines, ChangaOne title ═══
         cat == "MANGA" -> SignatureDesign(
             bg = Color(0xFF0E0E12), cornerRadius = 8f,
             drawBackground = { w, h ->
@@ -7192,19 +7192,23 @@ fun TopicShareSheet(
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         )
                         Spacer(Modifier.height(6.dp))
-                        BasicTextField(
+                        OutlinedTextField(
                             value = factFieldText,
                             onValueChange = routeFactChange,
-                            textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface, lineHeight = 22.sp),
-                            cursorBrush = SolidColor(CoffeeChromeDeep),
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                                color = MaterialTheme.colorScheme.onSurface,
+                                lineHeight = 22.sp
+                            ),
+                            placeholder = {
+                                Text(
+                                    factFieldPlaceholder,
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    )
+                                )
+                            },
                             singleLine = false,
                             maxLines = 8,
-                            decorationBox = { inner ->
-                                Box(Modifier.fillMaxWidth()) {
-                                    if (factFieldText.isBlank()) Text(factFieldPlaceholder, style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
-                                    inner()
-                                }
-                            },
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
