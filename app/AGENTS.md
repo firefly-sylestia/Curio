@@ -570,6 +570,35 @@ app/src/main/java/com/curio/app/
     Game, The Last of Us, Severance, Wednesday** — the reveal's series card
     (poster + synopsis preview + episode-list sheet) previously only
     rendered for the 5 batch-1 shows; now 10 shows carry the layout.
+- **v361 — keyed defaults + Clear-covers button; CI fix for the reveal
+  poster.** User: "fix it, and also i added spotify key and library thing
+  api as well… does the api is used in the apk build from pr, use that by
+  default, also in book fetching add a button to clear all book covers so
+  testing other provider is easy" (the CI failure was the v360 reveal
+  poster's Coil listener using the wrong signature).
+  - **CI fix:** `BookCoverPoster`'s `AsyncImage.onSuccess` used Coil 2.7's
+    (request, result) lambda; 2.7's AsyncImage callback takes a single
+    `AsyncImagePainter.State.Success` (drawable lives on `state.result`).
+    Fixed — placeholder skip works again and the build compiles.
+  - **Keyed providers are used by default (yes, in PR builds too):** the
+    GitHub Actions workflow already passes `LIBRARY_THING_API_KEY`,
+    `SPOTIFY_CLIENT_ID`/`SPOTIFY_CLIENT_SECRET` (and GOOGLE_BOOKS_API_KEY)
+    as env into the PR/push build step, which bakes them into BuildConfig
+    — so the APK built from a PR includes them (note: fork PRs don't get
+    secrets; same-repo PRs and pushes do). New default: when the
+    LibraryThing key is configured and no provider was ever picked,
+    `getBookCoverProvider` now returns LIBRARY_THING instead of ITUNES, so
+    a keyed install gets the highest-quality ISBN covers immediately.
+    Spotify deep links were already on-by-default when the keys are set
+    (resolveSpotifyItemUrl returns non-null → deep link; null → search).
+  - **Clear all covers (hub):** new "Clear all covers" button in the
+    Book-covers hub with a confirm dialog — `BookCoverFetch.clearAllCovers`
+    wipes the stored/verified/failed cover records
+    (`AppPreferences.clearBookCovers`) AND clears the shared Coil disk
+    cache, so the next "Fetch all covers" re-resolves every book from
+    scratch (the old provider's verified URLs would otherwise keep winning
+    the candidate order). Ratings are preserved. Enabled only when there is
+    something to clear.
 - **v323 — picker hold actions become a gooey RADIAL menu; share-card
   Tone tool + 6 new tones; pet shop toys/games; quest fixes.** (1)
   **Radial hold menu** (`features/picker/RadialHoldMenu.kt`): the old

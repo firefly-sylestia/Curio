@@ -2885,10 +2885,11 @@ private fun BookCoverPoster(
                 // A successfully-decoded image that is tiny (a placeholder) is
                 // skipped exactly like a 404, so the poster falls through to
                 // the hub-verified cover / provider cascade.
-                onSuccess = { _, result ->
-                    val d = (result as? coil.request.SuccessResult)?.drawable
-                    val w = d?.intrinsicWidth ?: 0
-                    val h = d?.intrinsicHeight ?: 0
+                // Coil 2.7's AsyncImage onSuccess receives a single
+                // State.Success; its result carries the decoded drawable.
+                onSuccess = { state ->
+                    val w = state.result.drawable.intrinsicWidth
+                    val h = state.result.drawable.intrinsicHeight
                     if (w < 40 || h < 40) coverIndex += 1
                 },
                 onError = { coverIndex += 1 },

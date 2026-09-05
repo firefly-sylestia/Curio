@@ -2826,9 +2826,17 @@ object AppPreferences {
     }
 
     /** The selected cover provider (a BookCoverProvider enum name). v356 —
-     *  defaults to ITUNES (the keyless first-choice source). */
-    fun getBookCoverProvider(context: Context): String =
-        prefs(context).getString(KEY_BOOK_COVER_PROVIDER, "ITUNES") ?: "ITUNES"
+     *  defaults to ITUNES (the keyless first-choice source). v361 — when the
+     *  free LibraryThing key is configured (BuildConfig) and no provider was
+     *  ever picked, LIBRARY_THING is the default: a fresh install with the
+     *  key set gets the highest-quality ISBN covers immediately instead of
+     *  the keyless fallback. */
+    fun getBookCoverProvider(context: Context): String {
+        val stored = prefs(context).getString(KEY_BOOK_COVER_PROVIDER, null)
+        if (!stored.isNullOrBlank()) return stored
+        return if (com.curio.app.BuildConfig.LIBRARY_THING_API_KEY.isNotBlank())
+            "LIBRARY_THING" else "ITUNES"
+    }
 
     fun setBookCoverProvider(context: Context, name: String) {
         prefs(context).edit().putString(KEY_BOOK_COVER_PROVIDER, name).apply()
@@ -2863,6 +2871,21 @@ object AppPreferences {
     fun setBookCoverDone(context: Context, names: List<String>) {
         prefs(context).edit().putString(KEY_BOOK_COVER_DONE, org.json.JSONArray(names).toString()).apply()
         bookCoverDoneState = names
+    }
+
+    /** v361 — wipe EVERY book-cover record (resolved URLs, verified-done
+     *  set, failed list) so the hub's "Clear all covers" starts a provider
+     *  test from a blank slate. The Coil disk cache is cleared by the caller
+     *  (BookCoverFetch.clearAllCovers) so old artwork doesn't linger. */
+    fun clearBookCovers(context: Context) {
+        prefs(context).edit()
+            .remove(KEY_BOOK_COVER_URLS)
+            .remove(KEY_BOOK_COVER_DONE)
+            .remove(KEY_BOOK_COVER_FAILED)
+            .apply()
+        bookCoverUrlsState = emptyMap()
+        bookCoverDoneState = emptyList()
+        bookCoverFailedState = emptyList()
     }
 
     /** The keyless-fetched average ratings: book name → Google Books average. */

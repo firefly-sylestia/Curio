@@ -24,11 +24,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.layout.width
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -89,6 +91,8 @@ fun BookCoverHubScreen(navController: NavController) {
     val failedList = AppPreferences.bookCoverFailedState
     val ratedCount = AppPreferences.bookRatingsState.size
     val ratingCounts = AppPreferences.bookRatingsCountState
+    // v361 — Clear-covers confirm dialog.
+    var showClearConfirm by remember { mutableStateOf(false) }
 
     fun start(kind: String) {
         // v320b — fetching is OPT-OUT by default: nothing downloads until
@@ -300,6 +304,18 @@ fun BookCoverHubScreen(navController: NavController) {
                         enabled = fetchOn && !busy,
                         onClick = { start("ratings") }
                     )
+                    // v361 — clear every stored/verified/failed cover record AND
+                    // the disk cache so the next fetch starts fresh: makes A/B
+                    // testing providers easy (the old provider's verified URLs
+                    // would otherwise keep winning the candidate order).
+                    HubButton(
+                        label = "Clear all covers",
+                        glyph = CurioIcons.Delete,
+                        emphasize = false,
+                        enabled = !busy && (AppPreferences.bookCoverUrlsState.isNotEmpty() ||
+                            failedList.isNotEmpty() || AppPreferences.bookCoverDoneState.isNotEmpty()),
+                        onClick = { showClearConfirm = true }
+                    )
                     if (!fetchOn) {
                         Text(
                             "Fetching is off. Turn the switch above on to download covers and ratings.",
@@ -459,6 +475,31 @@ fun BookCoverHubScreen(navController: NavController) {
                     }
                 }
             }
+        }
+
+        // v361 — Clear-covers confirm: wiping stored URLs + the disk cache is
+        // irreversible, so it always asks first.
+        if (showClearConfirm) {
+            AlertDialog(
+                onDismissRequest = { showClearConfirm = false },
+                title = { Text("Clear all book covers?") },
+                text = {
+                    Text(
+                        "Removes every stored/verified cover, the failed list and " +
+                        "the downloaded cover images, so the next Fetch starts " +
+                        "fresh (useful when comparing providers). Ratings are kept."
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showClearConfirm = false
+                        BookCoverFetch.clearAllCovers(context)
+                    }) { Text("Clear") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showClearConfirm = false }) { Text("Cancel") }
+                }
+            )
         }
     }
 }

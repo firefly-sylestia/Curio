@@ -1,67 +1,52 @@
-# Request Log — meta-row move clamp, series synopsis data, book-cover fetch fixes
+# Request Log — CI fix for reveal poster, keyed-provider defaults, Clear-covers button
 
 ## Status: implementation complete — committing & pushing (CI will validate)
 
 ## The request (user)
-"during card editing the auhor year etc that info move is bad, like its
-good it can be moved with the title and then separate too but the separate
-one is bad like it have restriction to move to too much to the sides while
-others dont so fix it, also i dont see the new series synopsis style
-layout inside, also then the book fetching in experiment fix so when i tap
-fetch it fetches fromt the start when the books already have the cover and
-when i exit the page during fetch it cancels,and resrt from star, also
-many book covers are not getting fetchd, like heaven a handful of dusts, a
-perfect spy and many more so can we fix it"
+"fix it" (the v360 push failed CI) + "also i added spotify key and library
+thing api as well alaso does the api is used in the apk build from pr, use
+that by default, also in book fetching add a button to clear all book
+covers so testing other provider is easy"
 
-## Answers / decisions (asked user)
-1. Series synopsis: **Enrich series data** (author synopsis + episodes for
-   a batch of popular series so the layout appears for them).
-2. Book fetch: **Skip covered + survive exit** (already-covered books are
-   skipped; the fetch keeps running if you leave the page; re-tapping
-   resumes where it left off).
+## CI failure (root cause)
+`TopicRevealScreen.kt:2888` — `AsyncImage.onSuccess` was written as a
+(request, result) lambda, but Coil 2.7's AsyncImage callback takes ONE
+param, `AsyncImagePainter.State.Success` (the drawable lives on
+`state.result.drawable`). This was the v360 placeholder-skip addition.
 
 ## What was done
-### TopicShareCard.kt
-- META handle clamp: removed the `mPad = 18f` padding restriction — the
-  author/year row now clamps edge-to-edge (`-bx, cw - bx - m.width`)
-  exactly like title/fact/badge/cover; base-rect clamp preserved.
+### TopicRevealScreen.kt (CI fix)
+- `onSuccess = { state -> ... }` using `state.result.drawable.intrinsicWidth
+  /Height` — the 1x1-placeholder skip works again and the build compiles.
 
-### BookCoverFetch.kt + BookCoverHubScreen.kt + AppPreferences.kt
-- **Root cause found:** ALL 796 books carry an authored `imageUrl`, so
-  `resolveCoverUrl` short-circuited to it and the providers never ran; and
-  Open Library serves a 1x1 GIF (HTTP 200) for missing covers, so dead
-  URLs (A Handful of Dust, A Perfect Spy...) counted as "success".
-- New `resolveVerifiedCoverUrl` + `loadsRealImage` (Coil decode, >= 40px
-  short edge): per-book candidates = stored-verified → authored →
-  provider cascade (chosen first, then iTunes → Google Books → Open
-  Library → LibraryThing); first real cover wins + remembered.
-- New persisted `bookCoverDoneState` (KEY_BOOK_COVER_DONE): "Fetch all
-  covers" skips verified books; re-tap resumes, not restarts.
-- New `BookCoverFetchSession` object: process-lifetime scope + Compose
-  progress state. Hub no longer uses rememberCoroutineScope — leaving the
-  page doesn't cancel; re-entry shows live progress; Cancel works.
-- Hub "Retry failed" per-row also routes through the session.
+### Keyed providers used by default (yes, in PR builds)
+- Verified `.github/workflows/android.yml`: `LIBRARY_THING_API_KEY`,
+  `SPOTIFY_CLIENT_ID`/`SPOTIFY_CLIENT_SECRET`, `GOOGLE_BOOKS_API_KEY` are
+  passed as env into the PR/push build step and baked into BuildConfig, so
+  the APK built from a same-repo PR includes the user's keys. Caveat: fork
+  PRs don't get secrets (GitHub restriction); same-repo PRs + pushes do.
+- `AppPreferences.getBookCoverProvider`: when the LibraryThing key is set
+  and NO provider was ever picked, the default is now **LIBRARY_THING**
+  (was always ITUNES) — a keyed install immediately uses the best-quality
+  ISBN covers. Spotify deep links were already on-by-default whenever the
+  keys are set (resolveSpotifyItemUrl non-null → deep link).
 
-### TopicRevealScreen.kt
-- `BookCoverPoster.onSuccess` now checks decoded size: tiny/placeholder
-  successes bump the candidate index like a 404 (Open Library 1x1 GIF
-  previously won with no onError). Candidate order is verified-first to
-  match `coverCandidates`.
-
-### Series data batch 2 (tools/enrich_series_batch2.py)
-- Synopsis + full episode lists for **Sherlock (13), Squid Game (9), The
-  Last of Us (9), Severance (9), Wednesday (8)** — 10 series total now
-  render the reveal series card + episode-list sheet (was 5).
-- No em/en dashes; episode entries validated (season/number/title/summary).
+### Clear all covers (BookCoverHubScreen + BookCoverFetch + AppPreferences)
+- New hub button "Clear all covers" (trash glyph, confirm AlertDialog):
+  `BookCoverFetch.clearAllCovers(context)` → `AppPreferences.clearBookCovers`
+  (removes KEY_BOOK_COVER_URLS / KEY_BOOK_COVER_DONE / KEY_BOOK_COVER_FAILED,
+  resets the three reactive states) + `Coil.imageLoader(context).diskCache
+  ?.clear()`. Enabled only when there is something to clear; ratings kept.
+  Purpose: A/B-testing providers — the old provider's verified URLs would
+  otherwise keep winning `coverCandidates`' first slot.
 
 ### Docs
-- app/AGENTS.md: **v360** entry.
+- app/AGENTS.md: **v361** entry.
 - fastlane changelog 20260921.txt: FIX/ADD bullets at the top.
 - Prompt.md: this log.
 
 ## Verification
-- Braces/parens balanced (TopicShareCard + TopicRevealScreen +1 paren
-  deltas are pre-existing at HEAD — verified via git stash).
-- series.json parsed + episode schema validated; 10 series with data.
-- `coil.ImageLoader` type confirmed against MainActivity usage. CI will
-  validate the real compile.
+- Braces/parens balanced (TopicRevealScreen +1 paren is pre-existing at
+  HEAD). `bookCoverUrlsState` has `internal set` — settable inside
+  AppPreferences. CI will validate the real compile (this push fixes the
+  exact line that failed last time).

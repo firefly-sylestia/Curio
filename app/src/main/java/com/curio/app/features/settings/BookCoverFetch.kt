@@ -475,6 +475,16 @@ object BookCoverFetch {
             }.getOrNull()
         }
 
+    /** v361 — wipe every stored cover record AND the shared Coil disk cache
+     *  so the next "Fetch all covers" re-resolves every book from scratch.
+     *  Used by the hub's Clear-covers action to make provider A/B testing
+     *  easy (the old provider's verified URLs would otherwise keep winning
+     *  the candidate order). */
+    fun clearAllCovers(context: Context) {
+        AppPreferences.clearBookCovers(context)
+        runCatching { Coil.imageLoader(context).diskCache?.clear() }
+    }
+
     /** Minimal keyless GET — 8s timeout, best-effort. */
     private fun httpGet(urlString: String): String? = runCatching {
         val conn = URL(urlString).openConnection() as HttpURLConnection
