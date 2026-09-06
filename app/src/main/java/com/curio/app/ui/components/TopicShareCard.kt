@@ -67,6 +67,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.focus.onFocusChanged
@@ -3880,7 +3881,7 @@ private fun SignatureCard(
         }
 
         when (sig.layout) {
-            // ═══ STANDARD — badge top, title, spacer, body bottom, footer ═══
+            // ═══ STANDARD — badge top, title, spacer, body bottom, footer ���══
             SignatureLayout.STANDARD -> {
                 Column(modifier = Modifier.fillMaxSize().padding(sig.padding)) {
                     CategoryBadge()
