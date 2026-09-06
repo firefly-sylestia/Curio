@@ -1120,6 +1120,29 @@ app/src/main/java/com/curio/app/
       `lift = 0`) so the title freezes exactly where the finger left it
       with no snap; Reset layout clears the flag (back to automatic).
       Old saves parse `titlePlaced` as false → unchanged behaviour.
+- **v381 — pill 9:16 flip reads bigger; opaque sparkle pill; Collage dark
+  tones + blended bottom.** (Pill ask answers + collage fixes; Signature
+  default-with-cover deferred — open question with the user.)
+  - The pill's tall plan (3:4 box-capped → 9:16) now commits a LONGER
+    fact box + LARGER text too (`heightFrac ≈ tallBudget×1.4 in
+    [1.6,3.2]`, `factScale 1.18`) so the flip buys readability; the old
+    flip kept the 3:4 box/text on the tall canvas (wasted height).
+  - `AutoLayoutPill` is now an OPAQUE surface with a 1dp ring and NO
+    shadow elevation — the translucent fill + elevation painted a soft
+    dark halo over busy cards ("solid fill glitch").
+  - **Collage dark-tone pass.** On dark premium palettes (Midnight,
+    Ember…) the collage used the LIGHT accent raw for the lower field →
+    the lightest colour sat at the card's bottom and the white fact text
+    vanished on it. New `darkTone` (bgBase luminance < 0.55) branch:
+    field/band/pill = accent/accentDark LERPED TOWARD BLACK (0.58–0.62)
+    then muted so layers always darken top→bottom; `tornEdge` pulls
+    toward the accent so the seam reads against near-black paper;
+    polaroid caption = fixed warm-dark ink (palette.ink is near-white on
+    dark tones → invisible on the white polaroid). Light tones unchanged.
+  - Collage bottom tear blended: the sin-edged band + solid footer wedge
+    became ONE feathered zone — low-amplitude wave path + vertical
+    gradient whose top starts TRANSPARENT (no hard line) and a footer
+    wave filled with a transparent→deep gradient (soft melt).
 - **v377 — share-card editor declutter: design switching via the card,
   tool captions, No-fact eye-cross, fact layout under Align.** User: "the
   style button should only show when signature style is active and tapping

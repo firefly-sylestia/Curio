@@ -652,7 +652,19 @@ private fun autoLayoutPlan(
             else ShareCardFactFormat.EDITORIAL
         )
         else -> when {
-            aspect == ShareCardAspect.CLASSIC && capped -> ShareAutoLayoutPlan(tall = true)
+            // v380 — a 9:16 flip must buy READABILITY, not just length: hand
+            // the taller canvas a LONGER fact box AND a bigger text (factScale
+            // > 1 rides the Size slider's own channel, so the card renders and
+            // exports exactly what the slider would show) — the old flip kept
+            // the 3:4 box/text on the tall card, wasting the extra height.
+            aspect == ShareCardAspect.CLASSIC && capped -> {
+                val (tallMaxH, _) = factFitBudget(style, ShareCardAspect.PORTRAIT)
+                ShareAutoLayoutPlan(
+                    tall = true,
+                    heightFrac = (tallMaxH * 1.4f).coerceIn(1.6f, 3.2f),
+                    textScale = 1.18f
+                )
+            }
             currentFormat != ShareCardFactFormat.STANDARD ->
                 ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale, format = ShareCardFactFormat.STANDARD)
             else -> ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale)
@@ -660,16 +672,20 @@ private fun autoLayoutPlan(
     }
 }
 
-/** v379d — the floating sparkle pill: translucent round button at the card's
- *  top-end corner. Shows on BOTH the resting preview and the edit mode; tap
- *  = run the next auto-layout attempt (see [autoLayoutPlan]). */
+/** v379d — the floating sparkle pill: round button at the card's top-end
+ *  corner. Shows on BOTH the resting preview and the edit mode; tap = run
+ *  the next auto-layout attempt (see [autoLayoutPlan]). v380 — the old
+ *  TRANSLUCENT surface + shadow elevation painted a soft dark halo that
+ *  read as a "solid fill glitch" over busy cards (translucent fills bleed
+ *  elevation shadows); it is now a fully OPAQUE pill with a hairline ring
+ *  and no shadow — crisp over any card, and the same size it always was. */
 @Composable
 private fun AutoLayoutPill(onTap: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
         onClick = onTap,
         shape = CircleShape,
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
-        shadowElevation = 4.dp,
+        color = MaterialTheme.colorScheme.surface,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)),
         modifier = modifier.size(38.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
@@ -2651,11 +2667,31 @@ private fun CollageCard(
     // toward muted pastels (hue + lightness kept) so the collage keeps its
     // soft scrapbook feel while still wearing the picked tone.
     val topCream = palette.bgBase
-    val bottomSage = collageMute(palette.accent, 0.42f)
-    val bottomDark = collageMute(palette.accentDark, 0.30f)
+    // v380 — DARK-tone aware field colours. On dark premium tones (Midnight /
+    // Ember / …) the palette's ACCENT is a LIGHT contrast colour (silver-moon,
+    // molten orange) and bgBase is the dark paper — using the accent raw for
+    // the lower "sage" field put the LIGHTEST colour at the BOTTOM of the
+    // card (inverted, garish) and left the white fact text unreadable on it.
+    // The collage now CRUSHES the accent's lightness on dark tones so the
+    // layers always darken top → bottom (paper → field → band → footer) and
+    // the white body text keeps contrast. Light tones are untouched.
+    val bgLuma = palette.bgBase.red * 0.299f + palette.bgBase.green * 0.587f + palette.bgBase.blue * 0.114f
+    val darkTone = bgLuma < 0.55f
+    val bottomSage = if (!darkTone) collageMute(palette.accent, 0.42f)
+    else collageMute(androidx.compose.ui.graphics.lerp(palette.accent, Color.Black, 0.62f), 0.55f)
+    val bottomDark = if (!darkTone) collageMute(palette.accentDark, 0.30f)
+    else collageMute(androidx.compose.ui.graphics.lerp(palette.accentDark, Color.Black, 0.58f), 0.55f)
     val inkDark = palette.ink
-    val tornEdge = palette.bgMid
-    val sagePill = collageMute(palette.accentDark, 0.55f)
+    val tornEdge = if (!darkTone) palette.bgMid
+    // The seam must READ against the dark paper (a near-black bgMid on a
+    // near-black paper is invisible): pull it slightly toward the accent hue.
+    else androidx.compose.ui.graphics.lerp(palette.bgMid, palette.accent, 0.22f)
+    val sagePill = if (!darkTone) collageMute(palette.accentDark, 0.55f)
+    else collageMute(androidx.compose.ui.graphics.lerp(palette.accentDark, Color.Black, 0.42f), 0.60f)
+    // The polaroid is always WHITE paper, so its handwritten caption must be a
+    // fixed warm dark ink — palette.ink on dark tones is near-WHITE (invisible
+    // on the white polaroid).
+    val captionInk = Color(0xFF40301F)
 
     Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp))) {
         // v369 — background layer (paper + botanical field + watermark) wears
@@ -2671,20 +2707,33 @@ private fun CollageCard(
             val w = size.width; val h = size.height
             val tearY = h * 0.42f
             drawRect(bottomSage, Offset.Zero, Size(w, h))
-            // Bottom-dark gradient band — wavy top edge (not a straight line)
-            // so it blends naturally with the torn seam above.
-            val darkPath = Path().apply {
-                val bandY = h * 0.70f
+            // Bottom zone — v380 BLENDED: the old two hard wavy paths (a sin-
+            // edged dark band + a solid footer wedge with a cut-off top) met in
+            // a busy, high-contrast seam that read as "weird". It is now ONE
+            // soft zone: the field deepens into the band and footer through a
+            // single vertical gradient whose top edge FADES IN (starts
+            // transparent, so there is no line at all), and the footer wave
+            // survives only as a subtle darker shade with a feathered top.
+            val bandY = h * 0.72f
+            val bandPath = Path().apply {
                 moveTo(0f, bandY)
                 var x = 0f
                 while (x <= w) {
-                    val y = bandY + kotlin.math.sin(x * 0.03f + 1.5f) * 6f + kotlin.math.sin(x * 0.08f) * 3f
+                    // Low-amplitude soft undulation (no hard cut).
+                    val y = bandY + kotlin.math.sin(x * 0.025f + 1.5f) * 3.5f + kotlin.math.sin(x * 0.06f) * 2f
                     lineTo(x, y); x += w / 40f
                 }
                 lineTo(w, h); lineTo(0f, h); close()
             }
-            drawPath(darkPath, Brush.verticalGradient(listOf(bottomSage, bottomDark), startY = h * 0.70f, endY = h))
+            drawPath(
+                bandPath,
+                Brush.verticalGradient(
+                    listOf(bottomSage.copy(alpha = 0f), bottomSage.copy(alpha = 0.55f), bottomSage, bottomDark),
+                    startY = bandY - 26f, endY = h
+                )
+            )
             drawNaturalTearPanel(tearY = tearY, top = topCream, edge = tornEdge, shadow = bottomDark.copy(alpha = 0.22f))
+            // Footer wave — feathered top so it melts into the zone above.
             val footerY = h * 0.86f
             drawPath(
                 Path().apply {
@@ -2693,7 +2742,10 @@ private fun CollageCard(
                     cubicTo(w * 0.78f, footerY - 24f, w * 0.90f, footerY + 2f, w, footerY - 14f)
                     lineTo(w, h); lineTo(0f, h); close()
                 },
-                bottomDark.copy(alpha = 0.82f)
+                Brush.verticalGradient(
+                    listOf(bottomDark.copy(alpha = 0f), bottomDark.copy(alpha = 0.38f), bottomDark.copy(alpha = 0.9f)),
+                    startY = footerY - 34f, endY = h
+                )
             )
         }
 
@@ -2785,7 +2837,7 @@ private fun CollageCard(
                 val capFont = (pW * 0.065f).coerceIn(11f, 15f)
                 Text(polaroidLabel, style = TextStyle(
                     fontFamily = PatrickHandFontFamily, fontWeight = FontWeight.Normal,
-                    fontSize = capFont.sp, color = inkDark,
+                    fontSize = capFont.sp, color = captionInk,
                     lineHeight = (capFont * 1.2f).sp
                 ), maxLines = 1, overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.offset(8.dp, (pH * 0.78f).dp).width((pW - 16).dp))
