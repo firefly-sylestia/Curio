@@ -7694,7 +7694,7 @@ fun TopicShareSheet(
                                                 } else {
                                                     // Font
                                                     Text("Font", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
-                                                    Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(horizontal = 12.dp)) {
+                                                    Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(12.dp)) {
                                                         shareFonts.forEach { f ->
                                                             val selF = if (fsIsTitle) move.titleFont == f.family else move.factFont == f.family
                                                             Pill(f.label, CurioIcons.FormatText, selF) {
@@ -7715,7 +7715,7 @@ fun TopicShareSheet(
                                                     val fsItalic = if (fsIsTitle) move.titleItalic else move.factItalic
                                                     val fsUnder = if (fsIsTitle) move.titleUnderline else move.factUnderline
                                                     val fsHighlight = if (fsIsTitle) move.titleHighlight else move.factHighlight
-                                                    Row(Modifier.padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                                                    Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                                                         Pill("B", CurioIcons.FormatBold, fsBold) {
                                                             updateMove(if (fsIsTitle) move.copy(titleBold = !fsBold) else move.copy(factBold = !fsBold))
                                                         }
@@ -7740,7 +7740,7 @@ fun TopicShareSheet(
                                                         }
                                                     }
                                                     // Align
-                                                    Row(Modifier.padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                                                    Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                                                         Text("Align", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                                         val curAlign = if (fsIsTitle) move.titleAlign else move.factAlign
                                                         listOf("Left" to TextAlign.Start, "Center" to TextAlign.Center, "Right" to TextAlign.End).forEach { (label, ta) ->
@@ -7760,7 +7760,7 @@ fun TopicShareSheet(
                                                             }
                                                         }
                                                         if (move.factFormat == ShareCardFactFormat.EDITORIAL) {
-                                                            Row(Modifier.padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                                            Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                                                 ShareCardFactDropCap.entries.forEach { dc ->
                                                                     Pill(dc.label, CurioIcons.FormatText, move.factDropCap == dc) {
                                                                         updateMove(move.copy(factDropCap = dc))
@@ -8233,7 +8233,7 @@ fun TopicShareSheet(
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                                     if (isBookTopic) {
                                         Surface(onClick = { coverPickerLauncher.launch("image/*") }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(40.dp)) {
-                                            Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                            Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                                 CurioIcon(name = CurioIcons.PhotoLibrary, tint = if (bookCover != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
                                                 Text(if (bookCover != null) "Change" else "Gallery", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (bookCover != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
                                             }
@@ -8255,7 +8255,7 @@ fun TopicShareSheet(
                                         contentColor = MaterialTheme.colorScheme.onPrimary,
                                         modifier = Modifier.height(40.dp)
                                     ) {
-                                        Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                             CurioIcon(
                                                 name = CurioIcons.Refresh,
                                                 tint = MaterialTheme.colorScheme.onPrimary,
@@ -8276,7 +8276,7 @@ fun TopicShareSheet(
                                         // v335 — removing the cover also disarms the fetch so a
                                         // later tap reads as a fresh "Fetch" again.
                                         Surface(onClick = { bookCover = null; coverLoadFailed = false; coverFetchRequested = false }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(40.dp)) {
-                                            Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                            Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                                 CurioIcon(name = CurioIcons.Close, tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
                                                 Text("Remove", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
                                             }
@@ -8289,7 +8289,7 @@ fun TopicShareSheet(
                             } else if (currentStyle == ShareCardStyle.COLLAGE) {
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                                     Surface(onClick = { photoPickerLauncher.launch("image/*") }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(40.dp)) {
-                                        Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                             CurioIcon(name = CurioIcons.PhotoLibrary, tint = if (userPhoto != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
                                             Text(if (userPhoto != null) "Change" else "Photo", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (userPhoto != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
                                         }
