@@ -540,15 +540,37 @@ private fun factFitBudget(style: ShareCardStyle, aspect: ShareCardAspect): Pair<
 }
 
 /**
- * v374 — computes the smart auto-fit adjustment for a long quick or custom
- * fact. Default ON ([AppPreferences.shareAutoFitState]); once the user has
- * moved or resized the fact box themselves ("manual edits win"), auto-fit
- * hands the box over entirely and returns identity. The fit CONSIDERS THE
- * WHOLE CARD: the box only grows as far as the design's collision budget
- * allows ([factFitBudget]) and the fact TEXT shrinks through the same
- * bodyScale channel the Size slider drives when even the budget isn't
- * enough — the title, info rows and footer are never moved or shrunk, and
- * nothing ever leaves the card.
+ * v374/v379e — SHARED auto-fit SIZING for a long quick/custom fact: how
+ * much the text shrinks and the box grows, from the length curve + the
+ * design's collision budget alone. v379e is TEXT-FIRST: by default the
+ * fact box KEEPS ITS FULL HEIGHT and the TEXT shrinks inversely with the
+ * length (a 1.3×-long fact renders at ~0.77× in the same footprint). Only
+ * when that shrink would pass the design's text floor does the BOX grow to
+ * absorb the remainder — and only up to the budget's height cap, past
+ * which the floor holds. One continuous curve, no hidden per-style logic.
+ */
+private fun autoFitShape(style: ShareCardStyle, aspect: ShareCardAspect, len: Int): ShareAutoFitDelta {
+    val (maxHeightFrac, minTextScale) = factFitBudget(style, aspect)
+    val grow = autoFitGrow(len)
+    if (grow <= 1f) return ShareAutoFitDelta()
+    val inv = 1f / grow
+    if (inv >= minTextScale) {
+        // The text can absorb the whole length at the box's natural height.
+        return ShareAutoFitDelta(heightFrac = 1f, widthFrac = 1f, textScale = inv)
+    }
+    // Text floor reached → grow the box just enough (capped by the budget).
+    return ShareAutoFitDelta(
+        heightFrac = (grow * minTextScale).coerceIn(1f, maxHeightFrac),
+        widthFrac = 1f,
+        textScale = minTextScale
+    )
+}
+
+/**
+ * v374 — the RENDER-TIME smart fit: [autoFitShape] gated by the Smart fit
+ * toggle and the "manual edits win" rule. v379e — the Fit toggle turning
+ * ON clears a previously manual box (see the Fit panel), so the fit can
+ * always "fix the box" again after the user has resized it.
  */
 private fun smartAutoFitDelta(
     move: ShareCardMove,
@@ -561,16 +583,23 @@ private fun smartAutoFitDelta(
         move.factWidthFrac != 1f || move.factHeightFrac != 1f ||
         move.factScale != 1f || move.factBoxScale != 1f
     if (touched) return ShareAutoFitDelta()
-    val grow = autoFitGrow(factLength)
-    if (grow <= 1f) return ShareAutoFitDelta()
-    val (maxHeightFrac, minTextScale) = factFitBudget(style, aspect)
-    val heightFrac = minOf(grow, maxHeightFrac)
-    // Past the collision cap the box stops growing and the TEXT size (the
-    // bodyScale channel) is lowered by exactly the overflow ratio — one
-    // continuous scale, no hidden per-style font floors.
-    val textScale = if (grow > maxHeightFrac)
-        (maxHeightFrac / grow).coerceIn(minTextScale, 1f) else 1f
-    return ShareAutoFitDelta(heightFrac = heightFrac, widthFrac = 1f, textScale = textScale)
+    return autoFitShape(style, aspect, factLength)
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+/** v379e — ink that actually READS on Paper's quick-fact pane. The pane is
+ *  the palette background blended with FrostPane's translucent white (35%),
+ *  so on a DARK premium tone (Onyx / Midnight / Wine …) the effective pane
+ *  is still dark — text must go near-WHITE there; on the light paper tones
+ *  the pane is light and text stays near-black. Never the theme colour, and
+ *  never a palette ink that fights the blend (Paper's background follows
+ *  the palette, so the old theme-onSurface text rendered BLACK on the dark
+ *  premium tones and the palette ink was tuned for the raw background, not
+ *  the blended pane). */
+private fun ShareCardPalette.frostInk(): Color {
+    val pane = androidx.compose.ui.graphics.lerp(bgMid, Color.White, 0.35f)
+    val l = pane.red * 0.299f + pane.green * 0.587f + pane.blue * 0.114f
+    return if (l < 0.5f) Color(0xFFFBF6EF) else Color(0xFF241D14)
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -584,14 +613,6 @@ private fun smartAutoFitDelta(
 // drags (title/fact/cover offsets) are never overwritten — the plan only
 // touches the box/text channels and the aspect when it must.
 // ═══════════════════════════════════════════════════════════════════════
-private fun autoFitSizing(style: ShareCardStyle, aspect: ShareCardAspect, len: Int): Pair<Float, Float> {
-    val (maxHeightFrac, minTextScale) = factFitBudget(style, aspect)
-    val grow = autoFitGrow(len)
-    val heightFrac = minOf(grow, maxHeightFrac)
-    val textScale = if (grow > maxHeightFrac) (maxHeightFrac / grow).coerceIn(minTextScale, 1f) else 1f
-    return heightFrac to textScale
-}
-
 /** One auto-layout candidate: what the pill commits for a given attempt.
  *  Zero fields mean "leave that channel alone". */
 private data class ShareAutoLayoutPlan(
@@ -603,12 +624,13 @@ private data class ShareAutoLayoutPlan(
     val tall: Boolean = false
 )
 
-/** v379d — the pill's attempt → plan table. Every attempt re-fits from the
- *  CURRENT text length on the CURRENT aspect, then layers a layout idea on
- *  top (attempt 0 = pure fit; 1 = CONDENSED lines; 2 = BOOK columns for
- *  long facts; 3 = tall card, or a plain STANDARD fit when already tall).
- *  The caller skips attempts that would not change anything, so every tap
- *  that CAN change the card does. */
+/** v379e — the pill's attempt → plan table, layered over the TEXT-FIRST
+ *  [autoFitShape]: 0 = the plain fit itself; 1 = the same fit with
+ *  CONDENSED lines; 2 = maximal space (box grown to the budget cap + text
+ *  at the floor, BOOK columns when the fact is long enough to use them);
+ *  3 = the one remaining lever, a TALL 9:16 card — offered only when a 3:4
+ *  card is genuinely box-capped (a short fact that already fits returns
+ *  identity and the caller's skip logic makes the tap a no-op). */
 private fun autoLayoutPlan(
     style: ShareCardStyle,
     aspect: ShareCardAspect,
@@ -616,22 +638,24 @@ private fun autoLayoutPlan(
     attempt: Int,
     currentFormat: ShareCardFactFormat
 ): ShareAutoLayoutPlan {
-    val (h, t) = autoFitSizing(style, aspect, len)
+    val shape = autoFitShape(style, aspect, len)
+    if (shape.heightFrac == 0f) return ShareAutoLayoutPlan()
+    val (maxHeightFrac, minTextScale) = factFitBudget(style, aspect)
+    val capped = shape.heightFrac >= maxHeightFrac - 0.01f && shape.heightFrac > 1f
     return when ((attempt % 4 + 4) % 4) {
-        0 -> ShareAutoLayoutPlan(heightFrac = h, textScale = t)
-        1 -> ShareAutoLayoutPlan(heightFrac = h, textScale = t, format = ShareCardFactFormat.CONDENSED)
+        0 -> ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale)
+        1 -> ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale, format = ShareCardFactFormat.CONDENSED)
         2 -> ShareAutoLayoutPlan(
-            heightFrac = h, textScale = t,
+            heightFrac = maxHeightFrac,
+            textScale = minTextScale,
             format = if (len >= 150) ShareCardFactFormat.BOOK
             else ShareCardFactFormat.EDITORIAL
         )
-        else -> if (aspect == ShareCardAspect.CLASSIC && currentFormat != ShareCardFactFormat.STANDARD) {
-            ShareAutoLayoutPlan(heightFrac = h, textScale = t, format = ShareCardFactFormat.STANDARD)
-        } else if (aspect == ShareCardAspect.CLASSIC) {
-            // The one thing left that can still buy space is a taller card.
-            ShareAutoLayoutPlan(tall = true)
-        } else {
-            ShareAutoLayoutPlan(heightFrac = h, textScale = t, format = ShareCardFactFormat.STANDARD)
+        else -> when {
+            aspect == ShareCardAspect.CLASSIC && capped -> ShareAutoLayoutPlan(tall = true)
+            currentFormat != ShareCardFactFormat.STANDARD ->
+                ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale, format = ShareCardFactFormat.STANDARD)
+            else -> ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale)
         }
     }
 }
@@ -6068,16 +6092,13 @@ private fun MiddleContent(
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (quoteText != null) {
             CurioIcon(name = CurioIcons.FormatQuote, tint = palette.ink.copy(alpha = 0.20f), size = 32.dp)
-            // v379d — the quote + frost body MUST carry an explicit palette ink:
-            // they used to copy MaterialTheme.typography (whose colour resolves
-            // to the APP theme's onSurface), so in dark mode the text went
-            // light-on-cream and on a DARK premium tone (Paper's background
-            // follows the palette) it rendered dark-on-dark. palette.ink is
-            // dark on the light paper tones and light on the dark premium
-            // tones, so the card always reads regardless of the app theme.
+            // v379d/e — the quote + frost body MUST carry an explicit ink that
+            // reads on Paper's blended pane (see [frostInk]): they used to
+            // inherit the APP theme's onSurface, which went dark-on-dark on
+            // dark premium tones and wrong in dark mode.
             val qStyle = factBodyStyle(MaterialTheme.typography.titleLarge.copy(
                 fontFamily = LoraFontFamily, fontSize = qSize,
-                lineHeight = (qSize.value * 1.28f).sp, color = palette.ink
+                lineHeight = (qSize.value * 1.28f).sp, color = palette.frostInk()
             ), move)
             FactBody(text = quoteText, style = qStyle, format = move.factFormat, dropCap = move.factDropCap, gutterFrac = move.factGutter, spans = factSpans, aspect = aspect, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 8, move.factHeightFrac), modifier = Modifier.moveFact(move).onGloballyPositioned {
                 callbacks.onFact(it.boundsInWindow())
@@ -6142,9 +6163,9 @@ private fun MiddleContent(
             val frostStyle = factBodyStyle(MaterialTheme.typography.bodySmall.copy(
                 fontFamily = LoraFontFamily, fontSize = qfsScaled,
                 lineHeight = (qfsScaled.value * 1.4f).sp,
-                // v379d — see the quote above: explicit palette ink so the
-                // fact never inherits the app theme's onSurface colour.
-                color = palette.ink.copy(alpha = 0.92f)
+                // v379d/e — see the quote above: explicit ink matched to the
+                // pane's blended luminance (white on dark premium tones).
+                color = palette.frostInk()
             ), move)
             FrostPane(palette, Modifier.moveFact(move)) {
                 // v329 — Reading-progress content draws the visual chapter
@@ -6590,6 +6611,11 @@ private fun ArrangeableCard(
                 // (the "crazy glitchy" title-above-fact jitter). Lifting only
                 // ever happens for FACT-driven growth, never a title grab.
                 var titleGrabbed by remember { mutableStateOf(false) }
+                // v379e — same guard for the FACT handle: while the box itself
+                // is being dragged its live push (titleDx/Dy) already keeps the
+                // title clear, so the measured lift must not fight it (that
+                // double channel was the "bouncy up-and-down" jitter).
+                var factGrabbed by remember { mutableStateOf(false) }
 
                 // v376 — AUTO-LIFT (measured collision): while editing, if the
                 // quick-fact box (grown by the height / width / whole-box
@@ -6606,27 +6632,37 @@ private fun ArrangeableCard(
                     androidx.compose.runtime.LaunchedEffect(
                         titleRect.value, factRect.value,
                         move.factHeightFrac, move.factWidthFrac, move.factBoxScale,
-                        move.titleLift, titleGrabbed
+                        move.titleLift, titleGrabbed, factGrabbed
                     ) {
-                        // v378 — never recompute while the title itself is the
-                        // thing being dragged (see [titleGrabbed]): collision
-                        // pushes belong to the FACT box growing into a parked
-                        // title, not to free title placement.
-                        if (titleGrabbed) return@LaunchedEffect
+                        // v378/v379e — never recompute while the title OR the
+                        // fact box is being dragged: collision pushes belong
+                        // to slider-grown boxes meeting a parked title.
+                        if (titleGrabbed || factGrabbed) return@LaunchedEffect
                         val t = rTitle
                         val f = rFact
                         if (t.width <= 0f || t.height <= 0f || f.width <= 0f || f.height <= 0f) return@LaunchedEffect
-                        val gap = with(editDensity) { 6.dp.toPx() }
+                        // v379e — [titleLift] is stored in DP (moveTitle applies
+                        // it as `(titleDy - titleLift).dp`), but the measured
+                        // rects are PX. The old code stored the px overlap
+                        // directly, so on a 3× screen the title was shoved ~3×
+                        // too far, slammed into the max-lift clamp, bounced back
+                        // and forth — the "glitchy up-and-down" collision.
+                        // Convert the px overlap to DP before writing.
+                        val gapDp = 6f
+                        val toDp = { px: Float -> with(editDensity) { px.toDp().value } }
                         // The measured title already includes any applied lift;
                         // add it back to get the natural (un-lifted) bottom.
-                        val baseBottom = t.bottom + move.titleLift
-                        val need = (baseBottom + gap - f.top).coerceAtLeast(0f)
+                        val baseBottomDp = toDp(t.bottom) + move.titleLift
+                        val fTopDp = toDp(f.top)
+                        val need = (baseBottomDp + gapDp - fTopDp).coerceAtLeast(0f)
                         // The title may never lift above the card's top edge
                         // (leave a hairline of breathing room).
-                        val baseTop = t.top + move.titleLift
-                        val maxLift = (baseTop - with(editDensity) { 2.dp.toPx() }).coerceAtLeast(0f)
+                        val baseTopDp = toDp(t.top) + move.titleLift
+                        val maxLift = (baseTopDp - 2f).coerceAtLeast(0f)
                         val lift = need.coerceAtMost(maxLift)
-                        if (kotlin.math.abs(lift - move.titleLift) > 0.1f) {
+                        // Hysteresis: a hair of dead-zone so layout rounding can
+                        // never ping-pong the title around a 0.1dp boundary.
+                        if (kotlin.math.abs(lift - move.titleLift) > 0.5f) {
                             onMove(move.copy(titleLift = lift))
                         }
                     }
@@ -7077,6 +7113,7 @@ private fun ArrangeableCard(
                                 },
                                 onDragStart = {
                                     dragActive = true
+                                    factGrabbed = true
                                     // v369 — seed the smart auto-fit nudge into
                                     // the manual move on the first grab so the
                                     // box doesn't jump when auto-fit hands off
@@ -7098,7 +7135,7 @@ private fun ArrangeableCard(
                                         ))
                                     }
                                 },
-                                onDragEnd = { dragActive = false; dragGuides = DragGuides() }
+                                onDragEnd = { dragActive = false; factGrabbed = false; dragGuides = DragGuides() }
                             )
                             // v378 — the CORNER whole-box scale grip is GONE:
                             // the corner icon duplicated the Crop tool's
@@ -7924,6 +7961,10 @@ fun TopicShareSheet(
         // the lookahead so the next tap starts one past where we stopped.
         autoLayoutIdx = autoLayoutIdx + 1
     }
+    // v379e — the displayed title (edited or the topic name, year stripped):
+    // whether the Crop/Box tool shows the Title-height slider (it only means
+    // something once the title can wrap to 2+ lines).
+    val editedTitleOrDisplay = (editedTitle ?: topicName.substringBeforeLast(" (")).trim()
     // v378 — DOUBLE-TAP a fact arms inline editing: the default quick fact
     // converts into a custom fact (so the typed text sticks), the box is
     // selected, and the transparent inline field takes focus. Mirrors the
@@ -8896,16 +8937,24 @@ fun TopicShareSheet(
                                                             }
                                                         }
                                                     }
-                                                    // v373 — BOX SIZE editor in full
-                                                    // screen (the sheet's Crop tool):
-                                                    // width / height / whole-box
-                                                    // sliders for the selected box.
+                                                    // v373/v379e — BOX SIZE editor in
+                                                    // full screen (the sheet's Crop
+                                                    // tool): width / height sliders
+                                                    // only — the Whole-box scale is
+                                                    // gone from the UI (its v373 role
+                                                    // is covered by Smart fit and the
+                                                    // auto-layout pill).
                                                     Text("Box size", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
                                                     Column(Modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
                                                         if (fsIsTitle) {
                                                             SizeSliderColumn("Title width", move.titleWidthFrac, { updateMove(move.copy(titleWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
-                                                            SizeSliderColumn("Title height", move.titleHeightFrac, { updateMove(move.copy(titleHeightFrac = it)) }, 0.35f..2.5f, steps = 26, modifier = Modifier.fillMaxWidth())
-                                                            SizeSliderColumn("Whole box", move.titleBoxScale, { updateMove(move.copy(titleBoxScale = it)) }, 0.35f..5f, steps = 46, modifier = Modifier.fillMaxWidth())
+                                                            // v379e — Title height caps wrapped
+                                                            // lines, so it hides for short
+                                                            // one-line titles (see the sheet's
+                                                            // Crop tool for the rationale).
+                                                            if (editedTitleOrDisplay.length > 22) {
+                                                                SizeSliderColumn("Title height", move.titleHeightFrac, { updateMove(move.copy(titleHeightFrac = it)) }, 0.35f..2.5f, steps = 26, modifier = Modifier.fillMaxWidth())
+                                                            }
                                                         } else {
                                                             SizeSliderColumn("Fact width", move.factWidthFrac, { updateMove(move.copy(factWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
                                                             // v379d — folded height thumb (see the sheet's Crop tool for the
@@ -8921,7 +8970,6 @@ fun TopicShareSheet(
                                                                 { v -> updateMove(move.copy(factHeightFrac = (v / fsFitH).coerceIn(0.35f, 6f))) },
                                                                 0.35f..6f, steps = 56, modifier = Modifier.fillMaxWidth()
                                                             )
-                                                            SizeSliderColumn("Whole box", move.factBoxScale, { updateMove(move.copy(factBoxScale = it)) }, 0.35f..6f, steps = 56, modifier = Modifier.fillMaxWidth())
                                                         }
                                                     }
                                                 }
@@ -9107,23 +9155,20 @@ fun TopicShareSheet(
                                 Text("$selName box", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 if (isTitle) {
                                     SizeSliderColumn("Title width", move.titleWidthFrac, { updateMove(move.copy(titleWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
-                                    SizeSliderColumn("Title height", move.titleHeightFrac, { updateMove(move.copy(titleHeightFrac = it)) }, 0.35f..2.5f, steps = 26, modifier = Modifier.fillMaxWidth())
-                                    // v373 — WHOLE-BOX scale is now INDEPENDENT:
-                                    // its own value on the move multiplies both
-                                    // the width and height fractions, so moving
-                                    // the width or height sliders no longer
-                                    // yanks the Whole-box thumb around (the old
-                                    // slider reused the height fraction as its
-                                    // backing value). Width still can't exceed
-                                    // the card edge, so it clamps at 100%.
-                                    SizeSliderColumn("Whole box", move.titleBoxScale, { v -> updateMove(move.copy(titleBoxScale = v)) }, 0.35f..5f, steps = 46, modifier = Modifier.fillMaxWidth())
+                                    // v379e — the Title-height slider only means
+                                    // something once the title can wrap (it caps
+                                    // how many lines show); hidden for short
+                                    // one-line titles so it never reads as a dead
+                                    // control (long titles: nudge it to allow /
+                                    // ellipsize more wrapped lines).
+                                    if (editedTitleOrDisplay.length > 22) {
+                                        SizeSliderColumn("Title height", move.titleHeightFrac, { updateMove(move.copy(titleHeightFrac = it)) }, 0.35f..2.5f, steps = 26, modifier = Modifier.fillMaxWidth())
+                                    }
                                 } else if (isFact) {
                                     SizeSliderColumn("Fact width", move.factWidthFrac, { updateMove(move.copy(factWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
                                     // v369/v370 — the fact box height range runs
                                     // to 6x so tall 9:16 cards can expand a long
-                                    // fact far past the old 2.5x cap (the corner
-                                    // grip expands to 8x; the slider matches its
-                                    // whole-box scale as a precise control).
+                                    // fact far past the old 2.5x cap.
                                     // v379d — the thumb shows the smart-fit GROWN
                                     // height (like the text thumb): while smart
                                     // fit is engaged the box renders at
@@ -9142,18 +9187,12 @@ fun TopicShareSheet(
                                         { v -> updateMove(move.copy(factHeightFrac = (v / fitH).coerceIn(0.35f, 6f))) },
                                         0.35f..6f, steps = 56, modifier = Modifier.fillMaxWidth()
                                     )
-                                    // v373 — independent whole-box scale (see
-                                    // the title case above).
-                                    SizeSliderColumn("Whole box", move.factBoxScale, { v -> updateMove(move.copy(factBoxScale = v)) }, 0.35f..6f, steps = 56, modifier = Modifier.fillMaxWidth())
                                 } else if (isFav) {
                                     // v370 — ALBUM favorite-tracks strip box:
                                     // width is a fill fraction of its natural
                                     // max width; height scales the track rows.
                                     SizeSliderColumn("Strip width", move.favWidthFrac, { updateMove(move.copy(favWidthFrac = it)) }, 0.3f..1.2f, steps = 89, modifier = Modifier.fillMaxWidth())
                                     SizeSliderColumn("Strip rows", move.favHeightFrac, { updateMove(move.copy(favHeightFrac = it)) }, 0.35f..3f, steps = 26, modifier = Modifier.fillMaxWidth())
-                                    // v373 — independent whole-box scale for
-                                    // the strip (see the title case above).
-                                    SizeSliderColumn("Whole box", move.favBoxScale, { v -> updateMove(move.copy(favBoxScale = v)) }, 0.35f..3f, steps = 26, modifier = Modifier.fillMaxWidth())
                                 } else {
                                     SizeSliderColumn("Info width", move.metaWidthFrac, { updateMove(move.copy(metaWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
                                     SizeSliderColumn("Info lines", move.metaHeightFrac, { updateMove(move.copy(metaHeightFrac = it)) }, 0.5f..1f, steps = 4, modifier = Modifier.fillMaxWidth())
@@ -9173,11 +9212,27 @@ fun TopicShareSheet(
                             ) {
                                 Column(Modifier.weight(1f)) {
                                     Text("Smart fit", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface)
-                                    Text("Long facts grow their box and shrink their text to fit the whole card.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    // v379e — TEXT-FIRST wording: the box keeps
+                                    // its full height and the text size shrinks
+                                    // with the length; the box only grows when
+                                    // the text can't shrink any further.
+                                    Text("Long facts shrink their text to fit (the box keeps its height) — the box grows only when the text can't shrink more. Turning this back ON re-fits the box even after you resized it.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                                 Switch(
                                     checked = AppPreferences.shareAutoFitState,
-                                    onCheckedChange = { AppPreferences.setShareAutoFitEnabled(context, it) }
+                                    onCheckedChange = { on ->
+                                        AppPreferences.setShareAutoFitEnabled(context, on)
+                                        // v379e — switching ON again re-fits the
+                                        // box: clear any manual box + fit-seed so
+                                        // the render-time fit re-engages ("it
+                                        // fixes the box"). Manual position stays.
+                                        if (on) updateMove(move.copy(
+                                            factWidthFrac = 1f,
+                                            factHeightFrac = 1f,
+                                            factScale = 1f,
+                                            factBoxScale = 1f
+                                        ))
+                                    }
                                 )
                             }
                         }

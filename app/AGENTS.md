@@ -1061,11 +1061,53 @@ app/src/main/java/com/curio/app/
       per-style move — box height + whole-fact text ride the SAME
       channels the sliders drive (`factHeightFrac`, `factScale`, format),
       so the export matches and Reset Layout clears it. Attempts cycle
-      standard fit → condensed → book columns (long facts) → tall 9:16
-      when a 3:4 card overflows a fully-fitted budget; attempts that
-      would change nothing are auto-skipped so every tap does something
-      visible. Manual title/fact/cover position drags are never
-      overwritten.
+      standard fit →      condensed → book columns (long facts) → tall 9:16 when a 3:4 card
+      overflows a fully-fitted budget; attempts that would change nothing
+      are auto-skipped so every tap does something visible. Manual
+      title/fact/cover position drags are never overwritten.
+    - **v379e — text-first fit, re-fit toggle, lift unit fix, dead-title-
+      height, Whole-box slider gone.** User: "the whole box slider is
+      still showing, remove it; by default the fact height should be
+      100% and the text size shrinks by length; toggling smart fit ON
+      again should fix the box after manual edits; the title still
+      glitches up and down against the quick-fact box; hide Title height
+      when the title fits one line; the quick-fact lines look different
+      between full screen and the sheet…"
+      - `autoFitShape()` replaces the box-first fit: TEXT-FIRST — the
+        fact box stays at its full height and `textScale` shrinks
+        inversely with the length curve; the box grows only when that
+        shrink passes the design's text floor (then capped by the
+        budget). `smartAutoFitDelta` is the toggle/touched gate around
+        it; `autoLayoutPlan` layers the pill attempts on it.
+      - The Smart-fit switch now CLEARS a manual box on re-enable
+        (`factWidthFrac/factHeightFrac/factScale/factBoxScale → 1`, the
+        position drags stay) so the fit can "fix the box" after manual
+        edits; panel copy rewritten.
+      - **titleLift unit bug**: the collision lift was computed in PX
+        (boundsInWindow rects) but applied as DP in `moveTitle`
+        (`(titleDy - titleLift).dp`) — on a 3× screen the title was
+        shoved ~3× too far, clamped against the card top, and bounced
+        back (the "glitchy up and down"). The lift effect now converts
+        the measured px overlap to DP before writing, adds a 0.5dp
+        dead-zone, and is guarded by BOTH `titleGrabbed` and a new
+        `factGrabbed` (the fact handle's live push owns the drag; the
+        measured lift must not fight it).
+      - Whole-box sliders removed from the Crop tool and the full-screen
+        Box section (title/fact/fav rows + their v373 comments); the
+        scales stay on the model for Reset/persistence but the UI is
+        width/height only.
+      - Title-height slider renders only when the displayed title
+        (`editedTitleOrDisplay`) exceeds ~22 chars — it caps wrapped
+        lines, so it is hidden for short one-line titles instead of
+        reading as a dead control.
+      - **frostInk auto-contrast.** User: "the text colours for dark
+        background cards are all black now, use white so they don't look
+        bad". `ShareCardPalette.frostInk()` returns near-white when the
+        fact pane's BLENDED colour is dark (bgMid lerped 35% toward
+        FrostPane's white overlay — the effective backdrop on premium
+        dark tones) and near-black when it's light; Paper's quote +
+        frost styles now use it instead of palette.ink/theme onSurface.
+        Title/meta already used palette.ink (light on the dark tones).
 - **v377 — share-card editor declutter: design switching via the card,
   tool captions, No-fact eye-cross, fact layout under Align.** User: "the
   style button should only show when signature style is active and tapping
