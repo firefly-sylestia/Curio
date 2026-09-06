@@ -40,6 +40,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -93,7 +94,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
-import androidx.compose.ui.text.style.ParagraphStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
@@ -835,10 +835,11 @@ private fun factBodyStyle(base: TextStyle, m: ShareCardMove): TextStyle {
     if (m.factBold) s = s.copy(fontWeight = FontWeight.Bold)
     if (m.factItalic) s = s.copy(fontStyle = FontStyle.Italic)
     if (m.factFormat == ShareCardFactFormat.CONDENSED) {
+        // v371 — this Compose version has no TextStyle.paragraphStyle /
+        // lineSpacing params (they landed in a later release), so the
+        // tight spacing is done purely via the line-height factor.
         val lh = s.lineHeight
-        if (lh.isSp) s = s.copy(lineHeight = (lh.value * 0.82f).sp)
-        val ps = (s.paragraphStyle ?: ParagraphStyle())
-        s = s.copy(paragraphStyle = ps.copy(lineSpacing = (-2).sp))
+        if (lh.isSp) s = s.copy(lineHeight = (lh.value * 0.80f).sp)
     }
     return s
 }
@@ -862,7 +863,9 @@ private fun FactBody(
 ) {
     when (format) {
         ShareCardFactFormat.BOOK -> BookPageText(text, style, modifier, maxLines)
-        ShareCardFactFormat.EDITORIAL -> EditorialDropCapBlock(text, style, dropCap, modifier, maxLines)
+        ShareCardFactFormat.EDITORIAL -> EditorialDropCapBlock(
+            text, style, dropCap, modifier = modifier, maxLines = maxLines
+        )
         else -> Text(text, style = style, maxLines = maxLines, overflow = TextOverflow.Ellipsis, modifier = modifier)
     }
 }

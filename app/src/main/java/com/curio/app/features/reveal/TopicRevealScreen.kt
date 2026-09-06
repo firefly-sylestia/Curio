@@ -315,6 +315,13 @@ fun TopicRevealScreen(
     var selectedAlbumTrack by remember { mutableStateOf<AlbumTrack?>(null) }
     // v350 — the series episode-list sheet (album-style) for SERIES topics.
     var showSeriesSheet by rememberSaveable { mutableStateOf(false) }
+    // v371 — the topic SHARE sheet + chapter-note sharing live at FUNCTION
+    // level: the Book Notes sheet (rendered later in this composable) opens
+    // the share card hosted in the floating-bar block, so both states must
+    // be visible to BOTH blocks (declaring them inside the floating-pill
+    // block scoped them out of the notes sheet's reach).
+    var showShareSheet by remember { mutableStateOf(false) }
+    var pendingChapterShare by remember { mutableStateOf<Pair<Int, String>?>(null) }
     // v315 — the book/album sections compose only AFTER the shared-element
     // morph settles (~380ms), so heavy content (poster Coil decode, chapter
     // LazyRow, album track list) never competes with the card expansion
@@ -1042,16 +1049,9 @@ fun TopicRevealScreen(
         // away on scroll-down, back on scroll-up. Now also visible in
         // Browse-Topics so users can favorite/share from the topic browser.
         val floatingTopic = resolved
-        // v371 — a chapter note shared from the Book Notes sheet: the reveal
-        // opens the share card with that note pre-seeded as the Chapter
-        // review (text + chapter number). Declared here (above the Book
-        // Notes sheet block, which also writes it) and consumed by the
-        // TopicShareSheet inside the floating-topic block; cleared once used.
-        var pendingChapterShare by remember { mutableStateOf<Pair<Int, String>?>(null) }
         if (floatingTopic != null) {
             // v292 — TOPIC SHARE: tapping the Share pill in the floating
             // bar opens the customizable topic share card sheet.
-            var showShareSheet by remember { mutableStateOf(false) }
             SideEffect {
                 SentimentPillHost.content = {
                     AnimatedVisibility(
