@@ -741,6 +741,47 @@ app/src/main/java/com/curio/app/
     aspect; the Text dropdown gained a Box size section (width / height /
     whole-box `SizeSliderColumn`s for the selected title or fact) and the
     menu Column is now vertically scrollable.
+- **v374 — smart fit rework (whole-card, slider channels only) + auto-tone
+  fix + quick-fact-under-progress.** User: "why have you placed the smart
+  auto fit in there [the size tool] and also the auto fit densities remove
+  them … the smart fit should be differnt toggle … consideres the entire
+  share card no just the quick fact box … it should use the sliders size
+  etc for adjustments not its own differnt size logic … it will use the
+  quick fact text size and decrase it and it will incrase the fact height
+  and fact wiidth … smart collide detection so in automatic defult card
+  desotn go outsite of the card … the auto colors … when the level unlocked
+  color is availabe the auto color is picking that which should not happen
+  … make quick fact work in the same way [as custom fact under progress]"
+  - **Smart fit = own toggle, slider channels only.** The old
+    `ShareAutoFitDelta` (dy/titleDy/titleScale/factScale + the intensity
+    presets + hidden `autoFactScale`/`autoTitleScale` floors) is GONE. The
+    new delta is `heightFrac` / `widthFrac` / `textScale` — applied through
+    the SAME channels the user's sliders drive: `effectiveMove
+    .factHeightFrac`/`.factWidthFrac` and `effectiveBodyScale` (the
+    bodyScale the Size slider sets). `autoFitGrow(len)` is ONE length curve
+    (no presets; `autoFitIntensity` removed from `ShareCardMove` +
+    persist/parse) and `factFitBudget(style, aspect)` is the WHOLE-CARD
+    collision budget — max box-height × + min text-scale per design
+    (Collage's fixed band barely grows; Editorial's byline→colophon slot a
+    little; bottom-anchored Clean/Minimal grow up into the free middle;
+    Paper/Vinyl/Signature/Custom mid-flow). Past the cap the box stops
+    growing and the TEXT shrinks by exactly the overflow ratio (clamped to
+    the style floor) — nothing else on the card is moved or shrunk, so
+    nothing leaves the card. Manual box edits still win; the first-grab
+    seed captures the fit's textScale into `move.factScale` so the handoff
+    doesn't pop.
+  - **UI:** the Smart auto-fit switch + intensity pills are REMOVED from
+    the Size tool; Smart fit is its own toolbar tool (glyph
+    `photo_size_select_large`, verified in the bundled icon font) whose
+    panel holds just the on/off switch.
+  - **Auto-tone fix:** `paletteFor`'s automatic rotation now cycles ONLY
+    the always-available base tones (`unlockLevel == null`); a level-locked
+    premium tone never appears automatically — only when explicitly picked
+    in the Tone tool (the override index still maps into the unlocked pool).
+  - **Quick fact under Reading progress:** `chapterFactForCard` now returns
+    `editedFact ?: quick.text` when the quick fact is active with progress
+    on (same stacking as the custom fact), and the content pills keep
+    progress ON when picking the Quick fact instead of turning it off.
 - **v361 — keyed defaults + Clear-covers button; CI fix for the reveal
   poster.** User: "fix it, and also i added spotify key and library thing
   api as well… does the api is used in the apk build from pr, use that by

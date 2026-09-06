@@ -391,15 +391,19 @@ private fun availableTones(): List<ShareCardPalette> {
 }
 
 private fun paletteFor(accent: Color, toneOverride: Int? = null): ShareCardPalette {
-    // v323 — an explicit pick from the Tone tool wins; otherwise cycle
-    // through the player's AVAILABLE tones using the accent hash. Premium
-    // tones only join the rotation once their level reward lands, so
-    // unlocking one visibly changes the share-card look.
-    val pool = availableTones()
-    if (pool.isEmpty()) return curatedTones.first()
-    val idx = toneOverride?.takeIf { it in pool.indices }
-        ?: Math.abs(accent.hashCode()) % pool.size
-    return pool[idx]
+    // v323 — an explicit pick from the Tone tool wins (an index into the
+    // player's available tones, so a level-unlocked premium tone CAN be
+    // picked by hand).
+    // v374 — the AUTOMATIC per-category rotation only ever cycles the
+    // always-available BASE tones: a level-locked premium tone must not
+    // show up on a card the user never asked for (it only appears when
+    // explicitly picked in the Tone tool).
+    val all = availableTones()
+    if (all.isEmpty()) return curatedTones.first()
+    if (toneOverride != null && toneOverride in all.indices) return all[toneOverride]
+    val base = curatedTones.filter { it.unlockLevel == null }
+    if (base.isEmpty()) return curatedTones.first()
+    return base[Math.abs(accent.hashCode()) % base.size]
 }
 
 // ─── Family → available styles mapping ─────────────────────────────────
@@ -457,80 +461,71 @@ private fun quickFactFontSize34(length: Int): TextUnit = when {
     else -> 9.5.sp
 }
 
-/** v369 — smart auto-fit delta: the extra fact-box HEIGHT (frac multiplier),
- *  the fact UP-nudge (dy, negative dp, applied to the fact + the info rows
- *  that travel with it), the TITLE nudge (titleDy) and the long-title font
- *  shrink (titleScale) — each clamped per style so the grown box stays on
- *  the card without covering the category pill, the byline/year row or the
- *  masthead rules. Identity = no adjustment. */
+/** v374 — smart auto-fit delta: how a long quick/custom fact is made to fit
+ *  the WHOLE card. Every adjustment rides the SAME channel a slider drives —
+ *  [heightFrac] multiplies the fact-box HEIGHT (the Fact-height slider),
+ *  [widthFrac] multiplies the fact-box WIDTH (the Fact-width slider) and
+ *  [textScale] multiplies the quick-fact TEXT size (the bodyScale the Size
+ *  slider sets) — so there is NO hidden size adjuster: the fit simply
+ *  nudges the same values the user's own sliders would. Identity = none. */
 private class ShareAutoFitDelta(
     val heightFrac: Float = 1f,
-    val dy: Float = 0f,
-    val titleDy: Float = 0f,
-    val titleScale: Float = 1f,
-    // v371 — the FACT font shrink: the auto-adjuster scales the fact text
-    // down a little as it grows (per-style floor, see [autoFactScale]), so
-    // a long quick/custom fact reads smaller instead of only getting a
-    // taller line budget. 1f = full size.
-    val factScale: Float = 1f
+    val widthFrac: Float = 1f,
+    val textScale: Float = 1f
 )
 
-/** v370 — smart auto-fit INTENSITY presets (offered in the Size tool while
- *  the fact box is selected, per style). Each shifts how aggressively long
- *  text grows its box + lifts the title. 0 = Balanced (the classic curve). */
-private fun autoFitCurve(intensity: Int, len: Int): Float = when (intensity) {
-    // Compact — tighter: needs noticeably more text before it grows, and
-    // grows less per step so short facts keep the style's natural box.
-    1 -> when {
-        len > 520 -> 2.2f
-        len > 400 -> 1.8f
-        len > 300 -> 1.45f
-        len > 220 -> 1.2f
-        else -> 1f
-    }
-    // Airy — looser: starts growing sooner and grows more, so long facts
-    // get generous breathing room on tall cards.
-    2 -> when {
-        len > 420 -> 3.6f
-        len > 300 -> 2.8f
-        len > 210 -> 2.2f
-        len > 140 -> 1.7f
-        len > 80 -> 1.35f
-        else -> 1f
-    }
-    // Balanced (0 / default) — the original curve, with the low end lowered
-    // (v371) so medium facts (90–150 chars) start getting a little room
-    // instead of waiting for 130+.
-    else -> when {
-        len > 520 -> 3.0f
-        len > 400 -> 2.5f
-        len > 300 -> 2.0f
-        len > 220 -> 1.6f
-        len > 150 -> 1.3f
-        len > 90 -> 1.15f
-        else -> 1f
+/** v374 — how much a long fact grows its box, by length alone (one curve,
+ *  no presets). The collision budget ([factFitBudget]) then clamps it per
+ *  style so the grown box stays on the card. */
+private fun autoFitGrow(len: Int): Float = when {
+    len > 520 -> 2.4f
+    len > 400 -> 2.0f
+    len > 300 -> 1.7f
+    len > 220 -> 1.45f
+    len > 150 -> 1.25f
+    len > 90 -> 1.12f
+    else -> 1f
+}
+
+/** v374 — WHOLE-CARD collision budget per design: (max fact-box height ×,
+ *  min fact-text scale). The max height is how far the fact box may grow
+ *  before it hits the title above, the info rows/footer below or the card
+ *  edge on that style — derived from each layout's real room (Collage's
+ *  fixed band barely grows; Editorial's byline→colophon slot a little;
+ *  bottom-anchored Clean/Minimal grow up into the free middle; Paper/Vinyl/
+ *  Signature/Custom sit mid-flow with modest slack). Past the cap the fit
+ *  stops growing the box and shrinks the TEXT via the bodyScale channel
+ *  down to [minTextScale] instead of letting anything leave the card. */
+private fun factFitBudget(style: ShareCardStyle, aspect: ShareCardAspect): Pair<Float, Float> {
+    val tall = aspect == ShareCardAspect.PORTRAIT
+    return when (style) {
+        // The fact lives inside a fixed dark band under the category pill.
+        ShareCardStyle.COLLAGE -> if (tall) 1.3f to 0.85f else 1.25f to 0.88f
+        // Runs between the byline and the colophon — grows a little, then
+        // the text shrinks.
+        ShareCardStyle.EDITORIAL -> if (tall) 1.4f to 0.82f else 1.3f to 0.85f
+        // Bottom-anchored facts grow UP into the free middle of the card.
+        ShareCardStyle.NEUMORPHIC -> if (tall) 1.7f to 0.80f else 1.5f to 0.83f
+        ShareCardStyle.MINIMAL -> if (tall) 1.6f to 0.82f else 1.45f to 0.85f
+        // Mid-flow facts between the header/title and the footer.
+        else -> if (tall) 1.5f to 0.80f else 1.4f to 0.83f
     }
 }
 
 /**
- * v369/v370 — computes the smart auto-fit adjustment for a long quick or
- * custom fact. Default ON ([AppPreferences.shareAutoFitState]); once the
- * user has moved OR resized the fact box themselves ("manual edits win"),
- * auto-fit hands the box over entirely and returns identity. A manually
- * placed title keeps its spot (no auto lift / shrink).
- *
- * The per-style INTENSITY preset ([ShareCardMove.autoFitIntensity]) picks
- * the growth curve; the per-style CLAMPS below come from each design's real
- * layout — the category pill sits directly above the Collage fact, the
- * masthead rules + byline cap the Editorial title/fact, and the
- * bottom-anchored Clean/Minimal facts grow up into the room the lifted
- * title frees — so the grown box never covers the pill, the byline/year
- * row or the masthead, and the title never crosses the card edge.
+ * v374 — computes the smart auto-fit adjustment for a long quick or custom
+ * fact. Default ON ([AppPreferences.shareAutoFitState]); once the user has
+ * moved or resized the fact box themselves ("manual edits win"), auto-fit
+ * hands the box over entirely and returns identity. The fit CONSIDERS THE
+ * WHOLE CARD: the box only grows as far as the design's collision budget
+ * allows ([factFitBudget]) and the fact TEXT shrinks through the same
+ * bodyScale channel the Size slider drives when even the budget isn't
+ * enough — the title, info rows and footer are never moved or shrunk, and
+ * nothing ever leaves the card.
  */
 private fun smartAutoFitDelta(
     move: ShareCardMove,
     factLength: Int,
-    titleLength: Int,
     style: ShareCardStyle,
     aspect: ShareCardAspect
 ): ShareAutoFitDelta {
@@ -539,99 +534,16 @@ private fun smartAutoFitDelta(
         move.factWidthFrac != 1f || move.factHeightFrac != 1f ||
         move.factScale != 1f || move.factZoom != 1f || move.factBoxScale != 1f
     if (touched) return ShareAutoFitDelta()
-    val h = autoFitCurve(move.autoFitIntensity, factLength)
-    if (h <= 1f) return ShareAutoFitDelta()
-    val tall = aspect == ShareCardAspect.PORTRAIT
-    val titleTouched = move.titleDx != 0f || move.titleDy != 0f ||
-        move.titleWidthFrac != 1f || move.titleHeightFrac != 1f ||
-        move.titleScale != 1f || move.titleBoxScale != 1f
-    // ── How far each design lets the fact rise and the title rise (dp). A
-    // 0 cap means "no room" — the fact or title sits right under something
-    // (pill / masthead / card edge) and must NOT be shoved into it.
-    val (factUpMax, titleUpMax) = when (style) {
-        // Collage: the category pill is directly above the fact and the
-        // title already hugs the top edge — neither can rise (the old blind
-        // nudge shoved the fact INTO the pill and the title off the card).
-        ShareCardStyle.COLLAGE -> 0f to 0f
-        // Clean: the fact is bottom-anchored and grows up naturally; the
-        // centred title has air above it, so it lifts to clear the fact.
-        ShareCardStyle.NEUMORPHIC -> if (tall) 0f to 28f else 0f to 24f
-        // Editorial: the masthead rules cap the title and the byline caps
-        // the fact — neither rises; the fact grows down to the colophon.
-        ShareCardStyle.EDITORIAL -> 0f to 0f
-        // Minimal: bottom-anchored fact grows up; the title lifts a little
-        // (it sits below the badge row, which must stay clear).
-        ShareCardStyle.MINIMAL -> if (tall) 0f to 22f else 0f to 18f
-        // Paper / Vinyl / Signature / Custom — mid-flow facts: a modest
-        // rise for both, clamped so nothing crosses the header or the edge.
-        else -> if (tall) 14f to 14f else 12f to 12f
-    }
-    val factUp = -kotlin.math.min((h - 1f) * 16f, factUpMax)
-    val titleUp = if (titleTouched) 0f else -kotlin.math.min((h - 1f) * 14f, titleUpMax)
-    val titleScale = if (titleTouched) 1f else autoTitleScale(style, titleLength)
-    // v371 — the FACT font shrink rides the same growth: once the text is
-    // long enough that the box alone would have to swallow the whole card,
-    // the fact text scales down a little too (per-style floor).
-    val factScale = autoFactScale(style, factLength)
-    return ShareAutoFitDelta(
-        heightFrac = h, dy = factUp, titleDy = titleUp, titleScale = titleScale,
-        factScale = factScale
-    )
-}
-
-/** v371 — FACT-font auto-shrink: as the fact text grows past what the box
- *  alone can hold comfortably, the auto-adjuster scales the FACT font down
- *  a little per style (never below each design's floor, so long facts stay
- *  readable). Complements each style's built-in length curve (which only
- *  kicks in at 180–350+ chars): this starts earlier (~150 chars) and works
- *  together with the box growth. 1f = no shrink. */
-private fun autoFactScale(style: ShareCardStyle, len: Int): Float {
-    val floor = when (style) {
-        // Paper already bottoms its own curve at 7.5sp — don't double-kill it.
-        ShareCardStyle.PAPER -> 0.90f
-        ShareCardStyle.VINYL, ShareCardStyle.EDITORIAL,
-        ShareCardStyle.NEUMORPHIC, ShareCardStyle.MINIMAL -> 0.86f
-        // Collage / Signature / Custom keep a slightly milder floor.
-        else -> 0.88f
-    }
-    return when {
-        len > 520 -> floor
-        len > 400 -> floor + 0.03f
-        len > 300 -> floor + 0.06f
-        len > 220 -> floor + 0.09f
-        len > 150 -> 0.97f
-        else -> 1f
-    }
-}
-
-/** v370 — long-title shrink: when the fact grows (auto-fit active) a title
- *  that would crowd its slot or leave the card scales down per style so it
- *  keeps its place. Never shrinks short titles; a manually placed/resized
- *  title skips auto-fit entirely ("manual wins"). */
-private fun autoTitleScale(style: ShareCardStyle, titleLength: Int): Float {
-    if (titleLength <= 18) return 1f
-    return when (style) {
-        ShareCardStyle.EDITORIAL -> when {
-            titleLength > 40 -> 0.70f; titleLength > 30 -> 0.78f
-            titleLength > 24 -> 0.85f; else -> 0.92f
-        }
-        ShareCardStyle.NEUMORPHIC -> when {
-            titleLength > 42 -> 0.70f; titleLength > 32 -> 0.78f
-            titleLength > 24 -> 0.86f; else -> 0.93f
-        }
-        ShareCardStyle.MINIMAL -> when {
-            titleLength > 40 -> 0.72f; titleLength > 30 -> 0.80f
-            titleLength > 22 -> 0.88f; else -> 0.94f
-        }
-        ShareCardStyle.COLLAGE -> when {
-            titleLength > 40 -> 0.72f; titleLength > 30 -> 0.80f
-            titleLength > 22 -> 0.90f; else -> 0.95f
-        }
-        else -> when {
-            titleLength > 36 -> 0.80f; titleLength > 26 -> 0.88f
-            titleLength > 20 -> 0.95f; else -> 1f
-        }
-    }
+    val grow = autoFitGrow(factLength)
+    if (grow <= 1f) return ShareAutoFitDelta()
+    val (maxHeightFrac, minTextScale) = factFitBudget(style, aspect)
+    val heightFrac = minOf(grow, maxHeightFrac)
+    // Past the collision cap the box stops growing and the TEXT size (the
+    // bodyScale channel) is lowered by exactly the overflow ratio — one
+    // continuous scale, no hidden per-style font floors.
+    val textScale = if (grow > maxHeightFrac)
+        (maxHeightFrac / grow).coerceIn(minTextScale, 1f) else 1f
+    return ShareAutoFitDelta(heightFrac = heightFrac, widthFrac = 1f, textScale = textScale)
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -726,10 +638,6 @@ data class ShareCardMove(
      *  letter enlarges, WORD = the first word enlarges. Only read when
      *  [factFormat] is EDITORIAL (harmless otherwise). */
     val factDropCap: ShareCardFactDropCap = ShareCardFactDropCap.NONE,
-    /** v370 — smart auto-fit INTENSITY (see [smartAutoFitDelta]): how much a
-     *  long fact grows its box and lifts the title. Overrides the global
-     *  pref when non-default. */
-    val autoFitIntensity: Int = 0,
     /** v371 — the auto-adjuster's FACT-font shrink, captured into the move on
      *  the first manual grab (the same handoff that seeds the box height) so
      *  handing auto-fit off doesn't make the text jump back to full size and
@@ -1256,17 +1164,14 @@ fun TopicShareCard(
     // the fact needs the space. Manual edits of the fact box hand it over
     // entirely ("manual wins"); a manually placed title keeps its spot.
     val factLen = maxOf((editedFact ?: factText).length, chapterFact.length)
-    val titleLen = (editedTitle ?: display).length
-    val autoFit = smartAutoFitDelta(move, factLen, titleLen, style, aspect)
-    val effectiveMove = if (autoFit.heightFrac == 1f && autoFit.dy == 0f &&
-        autoFit.titleDy == 0f && autoFit.titleScale == 1f
-    ) move
+    val autoFit = smartAutoFitDelta(move, factLen, style, aspect)
+    // v374 — the smart fit adjusts ONLY the fact box (height + width) and
+    // the fact TEXT (bodyScale) — the same channels the box/size sliders
+    // drive — so there is no hidden nudge or font multiplier.
+    val effectiveMove = if (autoFit.heightFrac == 1f && autoFit.widthFrac == 1f) move
     else move.copy(
         factHeightFrac = move.factHeightFrac * autoFit.heightFrac,
-        factDy = move.factDy + autoFit.dy,
-        titleDy = move.titleDy + autoFit.titleDy,
-        titleScale = move.titleScale * autoFit.titleScale,
-        metaDy = move.metaDy + autoFit.dy
+        factWidthFrac = (move.factWidthFrac * autoFit.widthFrac).coerceIn(0.2f, 1f)
     )
     // v373 — the INDEPENDENT whole-box scale multiplies BOTH dimensions on
     // top of the width/height fractions (and any auto-fit growth), so the
@@ -1299,12 +1204,13 @@ fun TopicShareCard(
         titleWidthFrac = (boxScaledMove.titleWidthFrac * coverTitleWidthFactor).coerceIn(0.2f, 1f),
         titleScale = boxScaledMove.titleScale * coverTitleScale
     ) else boxScaledMove
-    // v371 — the auto-adjuster's FACT-font shrink applies on top of the
-    // user's body-size setting: every style renders its fact text at
-    // (style base × bodyScale × autoFit.factScale). Once the user grabs
-    // the fact, the shrink is captured into move.factScale (see the
-    // first-grab seed) so the handoff doesn't make the text jump or clip.
-    val effectiveBodyScale = bodyScale * autoFit.factScale * move.factScale * move.factZoom
+    // v374 — the smart fit's text shrink applies on top of the user's
+    // body-size setting THROUGH the same bodyScale channel (there is no
+    // separate font adjuster): every style renders its fact text at
+    // (style base × bodyScale × fit.textScale). Once the user grabs the
+    // fact, the shrink is captured into move.factScale (see the first-grab
+    // seed) so the handoff doesn't make the text jump or clip.
+    val effectiveBodyScale = bodyScale * autoFit.textScale * move.factScale * move.factZoom
     // Extract year from trailing parentheses — "Appetite for Destruction (1987)" → "1987"
     val year = topicName.substringAfterLast("(").substringBeforeLast(")").takeIf { it.all { c -> c.isDigit() } && it.length == 4 }
     val palette = paletteFor(accent, toneIndex)
@@ -6319,20 +6225,17 @@ private fun ArrangeableCard(
                                     val untouched = move.factDx == 0f && move.factDy == 0f &&
                                         move.factWidthFrac == 1f && move.factHeightFrac == 1f &&
                                         move.factScale == 1f
-                                    if (untouched && (autoFitDelta.heightFrac != 1f || autoFitDelta.titleScale != 1f ||
-                                        autoFitDelta.factScale != 1f)
+                                    if (untouched && (autoFitDelta.heightFrac != 1f || autoFitDelta.widthFrac != 1f ||
+                                        autoFitDelta.textScale != 1f)
                                     ) {
                                         onMove(move.copy(
                                             factHeightFrac = autoFitDelta.heightFrac,
-                                            factDy = autoFitDelta.dy,
-                                            titleDy = move.titleDy + autoFitDelta.titleDy,
-                                            titleScale = move.titleScale * autoFitDelta.titleScale,
-                                            metaDy = move.metaDy + autoFitDelta.dy,
-                                            // v371 — carry the fact-font shrink into the
-                                            // move so the text doesn't pop back to full
-                                            // size (and clip) the moment auto-fit hands
-                                            // over.
-                                            factScale = move.factScale * autoFitDelta.factScale
+                                            factWidthFrac = (move.factWidthFrac * autoFitDelta.widthFrac).coerceIn(0.2f, 1f),
+                                            // v371/v374 — carry the smart fit's text
+                                            // shrink into the move so the text doesn't
+                                            // pop back to full size (and clip) the
+                                            // moment auto-fit hands over.
+                                            factScale = move.factScale * autoFitDelta.textScale
                                         ))
                                     }
                                 },
@@ -6782,7 +6685,6 @@ fun TopicShareSheet(
                 titleBoxScale = o.optDouble("titleBoxScale", 1.0).toFloat(),
                 factBoxScale = o.optDouble("factBoxScale", 1.0).toFloat(),
                 favBoxScale = o.optDouble("favBoxScale", 1.0).toFloat(),
-                autoFitIntensity = o.optInt("autoFitIntensity", 0),
                 factScale = o.optDouble("factScale", 1.0).toFloat(),
                 factZoom = o.optDouble("factZoom", 1.0).toFloat(),
                 factUnderline = o.optBoolean("factUnderline", false),
@@ -7040,11 +6942,16 @@ fun TopicShareSheet(
     val progressForCard = if (showChapterProgress && hasBookChapters)
         ChapterProgressUi(chaptersRead, bookChapters.size)
     else null
-    // v335 — the prose stacked BELOW the progress bar: only the live Custom
-    // fact text. Reading progress itself carries its own caption inside the
-    // widget, so nothing else ever prints under the bar.
-    val chapterFactForCard =
-        if (activeId == CUSTOM_FACT_ID && progressForCard != null) customText else ""
+    // v335 — the prose stacked BELOW the progress bar. Reading progress
+    // itself carries its own caption inside the widget.
+    // v374 — the QUICK fact stacks under the bar exactly like the custom
+    // fact: with Reading progress on, picking the Quick fact (or the
+    // default) shows the progress widget with the quick-fact text beneath it.
+    val chapterFactForCard = if (progressForCard != null) when (activeId) {
+        CUSTOM_FACT_ID -> customText
+        QUICK_FACT_ID -> editedFact ?: quick.text
+        else -> ""
+    } else ""
     // v334 — what the CARD renders (unified for every TopicShareCard call):
     // custom facts + chapter reviews always render the LIVE customText (empty
     // stays empty — no placeholder bleeding onto the card); everything else
@@ -7122,7 +7029,6 @@ fun TopicShareSheet(
                 put("titleBoxScale", m.titleBoxScale); put("factBoxScale", m.factBoxScale); put("favBoxScale", m.favBoxScale)
                 put("titleScale", m.titleScale)
                 put("factFormat", m.factFormat.name); put("factDropCap", m.factDropCap.name)
-                put("autoFitIntensity", m.autoFitIntensity)
                 put("factScale", m.factScale)
                 put("factZoom", m.factZoom)
                 put("factUnderline", m.factUnderline)
@@ -7249,7 +7155,7 @@ fun TopicShareSheet(
                                 move = pageMove,
                                 onMove = { movesByStyle = movesByStyle + (styles[page] to it) },
                                 factFieldStyle = factFieldStyle,
-                                autoFitDelta = smartAutoFitDelta(pageMove, maxOf(factFieldText.length, chapterFactForCard.length), (editedTitle ?: topicName.substringBeforeLast(" (")).length, styles[page], aspect),
+                                autoFitDelta = smartAutoFitDelta(pageMove, maxOf(factFieldText.length, chapterFactForCard.length), styles[page], aspect),
                                 factFieldChipShift = activeId == "chapter_review",
                                 factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…"
                             ) { cb ->
@@ -7313,7 +7219,7 @@ fun TopicShareSheet(
                             move = move,
                             onMove = { updateMove(it) },
                             factFieldStyle = factFieldStyle,
-                            autoFitDelta = smartAutoFitDelta(move, maxOf(factFieldText.length, chapterFactForCard.length), (editedTitle ?: topicName.substringBeforeLast(" (")).length, currentStyle, aspect),
+                            autoFitDelta = smartAutoFitDelta(move, maxOf(factFieldText.length, chapterFactForCard.length), currentStyle, aspect),
                             factFieldChipShift = activeId == "chapter_review",
                             factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…"
                         ) { cb ->
@@ -7541,6 +7447,17 @@ fun TopicShareSheet(
                             description = "Box size",
                             active = toolOpen == "box",
                             onClick = { toolOpen = if (toolOpen == "box") null else "box" }
+                        )
+                        // v374 — Smart fit moved OUT of the Size tool into its
+                        // own toggle: long facts grow their box and shrink
+                        // their text (through the same sliders) so they fit
+                        // the whole card, and the toggle is a separate switch
+                        // instead of a Size-tool extra.
+                        EditToolPill(
+                            glyph = CurioIcons.PhotoSizeSelectLarge,
+                            description = "Smart fit",
+                            active = toolOpen == "smartfit",
+                            onClick = { toolOpen = if (toolOpen == "smartfit") null else "smartfit" }
                         )
                         EditToolPill(
                             glyph = "title",
@@ -7922,7 +7839,7 @@ fun TopicShareSheet(
                                             move = move,
                                             onMove = { updateMove(it) },
                                             factFieldStyle = factFieldStyle,
-                                            autoFitDelta = smartAutoFitDelta(move, maxOf(factFieldText.length, chapterFactForCard.length), (editedTitle ?: topicName.substringBeforeLast(" (")).length, currentStyle, aspect),
+                                            autoFitDelta = smartAutoFitDelta(move, maxOf(factFieldText.length, chapterFactForCard.length), currentStyle, aspect),
                                             factFieldChipShift = activeId == "chapter_review",
                                             factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…"
                                         ) { cb ->
@@ -7986,40 +7903,6 @@ fun TopicShareSheet(
                                         modifier = Modifier.weight(1f)
                                     )
                                 }
-                                // v369 — smart auto-fit ON/OFF (default ON):
-                                // long facts grow their box + nudge the title
-                                // up automatically. Manual edits still win.
-                                if (isFact) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                        modifier = Modifier.fillMaxWidth()
-                                    ) {
-                                        Column(Modifier.weight(1f)) {
-                                            Text("Smart auto-fit", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface)
-                                            Text("Grows the fact box and lifts the title automatically for long text. Off = the box stays exactly as you set it.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                        }
-                                        Switch(
-                                            checked = AppPreferences.shareAutoFitState,
-                                            onCheckedChange = { AppPreferences.setShareAutoFitEnabled(context, it) }
-                                        )
-                                    }
-                                    // v370 — auto-fit INTENSITY presets (per
-                                    // style, saved with the move): how much a
-                                    // long fact grows its box + lifts the
-                                    // title. Manual box edits still win.
-                                    Text("Auto-fit intensity", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp, color = MaterialTheme.colorScheme.onSurfaceVariant))
-                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        Pill("Balanced", "tune", move.autoFitIntensity == 0) { updateMove(move.copy(autoFitIntensity = 0)) }
-                                        Pill("Compact", "tune", move.autoFitIntensity == 1) { updateMove(move.copy(autoFitIntensity = 1)) }
-                                        Pill("Airy", "tune", move.autoFitIntensity == 2) { updateMove(move.copy(autoFitIntensity = 2)) }
-                                    }
-                                    Text(
-                                        "Balanced = the default curve · Compact grows later / less · Airy grows sooner / more. Each style keeps its own pick.",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
                             }
                         } else {
                             Text("Tap a thing on the card first", style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
@@ -8066,6 +7949,25 @@ fun TopicShareSheet(
                             }
                         } else {
                             Text("Tap a thing on the card first", style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
+                        }
+                        // v374 — Smart fit's OWN toggle (moved out of the Size
+                        // tool): a single switch, no intensity presets. It
+                        // applies to the quick/custom fact on every style.
+                        "smartfit" -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Column(Modifier.weight(1f)) {
+                                    Text("Smart fit", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface)
+                                    Text("Long facts automatically grow their box and shrink their text size (the same sliders) so they fit the whole card. Off = the box stays exactly as you set it.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                Switch(
+                                    checked = AppPreferences.shareAutoFitState,
+                                    onCheckedChange = { AppPreferences.setShareAutoFitEnabled(context, it) }
+                                )
+                            }
                         }
                         "font" -> Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             Text("$selName font", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -8203,7 +8105,11 @@ fun TopicShareSheet(
                                                     showChapterProgress = true
                                                     selectedId = opt.id
                                                 }
-                                                CUSTOM_FACT_ID -> {
+                                                // v374 — the custom fact AND the
+                                                // quick fact both stack under the
+                                                // Reading-progress bar, so picking
+                                                // either keeps the bar on.
+                                                CUSTOM_FACT_ID, QUICK_FACT_ID -> {
                                                     selectedId = opt.id
                                                 }
                                                 else -> {
