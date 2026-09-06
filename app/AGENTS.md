@@ -883,6 +883,94 @@ app/src/main/java/com/curio/app/
     (0 = none). Lowering the box drops the needed lift → the title settles
     back. The TITLE drag handle's clamp math adds the lift back so the
     natural base stays correct.
+- **v378 — notes-sheet polish + share-editor collision/fit/zoom fixes.**
+  User (big mixed batch): "in book buttom sheet of synopsis still the
+  number text and the read icon isnt looking right and also the enlarge
+  icon. also remove that big divider and the 2 out of 4 chapter read show
+  progress in that devider and make the Chapter 1st letter capital. and in
+  albumn buttom seet remove the cross buttom. and during card editing when
+  i move the title and make it or try to put it above the quik fact it
+  starts to glitchy and crazy glitchy repeated so fix it, that collison
+  logic only works when i move the quick fact not the title also in full
+  screen editor add a reset button to reset the layout and yes the reset
+  button only resets the layout not the texts chnages also by default the
+  book colors are that darkmidnight color can u fix it it should use its
+  own ategory tint auto color the golden color maybe. also that weird
+  glitchy animationhappens when i try to close the buttom sheet of share
+  card during editing… and the smart fit still isnt usin the tool text
+  adjustments but rather uses its own coz hen i check the text size its
+  still at 1. and also in collage the quick fact box can be move a little
+  up in smart auto fit and making its text smaller too. so fix it too, and
+  in paper the text gets too much small even though the height can be
+  expanded to fit the text… and in the full screen editor the preview of
+  the card is still not accurate now it look sa little more zommed and cut
+  from below… and also the bold option sometimes doesnt show in card and
+  the boxes outline is having a glithin in full screen editor fix it it
+  looks inaccurate, and to edit the text add the double tap to edi tin
+  inline mode. and also remove that whole box adjuster and its icon from
+  the orner too".
+  - **Book/album notes sheets.** The book sheet's `NotesSheetTopHairline`
+    accent rule under the drag handle is GONE; the reading-progress rail
+    is ONE capitalized label ("2 of 4 Chapters read" / "4 Chapters") —
+    the 4dp progress bar and duplicate "N / M" counter are removed.
+    Chapter row titles render with `replaceFirstChar` caps; on the
+    accent-tinted OPEN rows the number disc (read rows), the Mark-read
+    FoldedCorner toggle and the note Enlarge chip switch to the sheet INK
+    (accent-on-accent washed out). The album sheet's ✕ close `Surface` is
+    removed (v355 no-close model, like book/series).
+  - **Title drags never auto-lift.** New `titleGrabbed` state in
+    `ArrangeableCard`: while the TITLE handle drags, the v376 auto-lift
+    `LaunchedEffect` returns early (and it's a key, so a pending run
+    cancels). The lift exists ONLY for fact-box growth — a title dragged
+    over/above the fact follows the finger; the old effect recomputed a
+    counter-lift every frame and fought the drag ("crazy glitchy").
+  - **Full-screen Reset Layout.** `ShareCardMove.resetLayout()` extension
+    zeroes positions / width·height fractions / whole-box scales /
+    `titleLift` but PRESERVES every text edit (fonts, aligns,
+    bold/italic/underline/highlight, `titleScale`/`factScale`/
+    `factZoom`, fact format + drop cap). A "Layout" pill in the
+    full-screen top bar calls `updateMove(move.resetLayout())`.
+  - **Auto tone matches the topic.** `paletteFor(accent, null)` no longer
+    does `accent.hashCode() % size` over ALL always-available tones
+    (which included the dark Onyx/Noir/Wine/Deep Sea/Cocoa variants — the
+    unexplained "midnight" default). Auto picks the closest of the four
+    LIGHT base tones (Warm Rose / Soft Sage / Golden Ochre / Deep Indigo)
+    by RGB distance to the topic accent, so books' golden accent lands on
+    Golden Ochre. Explicit Tone picks unchanged.
+  - **Sheet gestures off while editing.** `ModalBottomSheet` now passes
+    `sheetGesturesEnabled = !editMode`: while customising, the sheet
+    cannot be dragged at all (no blocked-dismiss spring-back that froze
+    the tools/swipes); Done/back drops edit mode and normal swipe-close
+    returns. `confirmValueChange` + `onDismissRequest` guards stay.
+  - **Smart fit visible in the size slider.** The quick-fact Size slider
+    (sheet panel + full screen) now shows `bodyScale × fit.textScale ×
+    factScale × factZoom` — the RENDERED size — instead of raw `bodyScale`
+    (which read 1× while the card sat at 0.8×). Dragging writes the base
+    back through the fit (WYSIWYG); Reset restores base 1× + factScale/
+    factZoom 1.
+  - **Fit budgets.** PAPER gets its own `factFitBudget` arm (portrait 2.0
+    height cap / 0.96 text floor) so long facts EXPAND the box instead of
+    shrinking type to 0.8×; COLLAGE keeps a small cap but its text floor
+    drops to 0.70–0.75 so long facts shrink inside the band.
+  - **Full-screen preview zoom bug.** The density trick multiplied BOTH
+    density AND fontScale by the zoom → sp text scaled TWICE (zoom²),
+    reading oversized and cutting off below. The provider now scales
+    DENSITY only (`Density(density * zoom, fontScale)`), so dp AND sp
+    scale once and the preview matches the 280dp sheet card exactly. This
+    also explains the "bold doesn't show / glitchy box" reports: the
+    chrome and the bar lived in the over-zoomed coordinate space.
+  - **Corner whole-box grip removed.** `CornerResizeHandle` (the
+    bottom-right corner icon that scaled the whole box) is deleted along
+    with its four call sites (title/fact/meta/fav) — the Crop tool's
+    width/height/whole-box sliders own sizing, and the stray corner icon
+    is what read as a "box outline glitch" in full screen. `factZoom` /
+    whole-box scales stay (persisted + slider-driven).
+  - **Double-tap inline editing.** A `combinedClickable` on the fact
+    tap-to-select layer fires `onRequestInlineFactEdit` (new
+    `ArrangeableCard` param) on DOUBLE-TAP; the sheet's
+    `requestFactInlineEdit()` arms the transparent field exactly like the
+    Edit-text tool (auto-converting the default quick fact to a custom
+    fact), so editing is a double-tap away in the sheet and full screen.
 - **v377 — share-card editor declutter: design switching via the card,
   tool captions, No-fact eye-cross, fact layout under Align.** User: "the
   style button should only show when signature style is active and tapping

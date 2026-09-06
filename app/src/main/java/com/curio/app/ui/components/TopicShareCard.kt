@@ -3,6 +3,7 @@ package com.curio.app.ui.components
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.text.BasicTextField
@@ -400,9 +401,26 @@ private fun paletteFor(accent: Color, toneOverride: Int? = null): ShareCardPalet
     val all = availableTones()
     if (all.isEmpty()) return curatedTones.first()
     if (toneOverride != null && toneOverride in all.indices) return all[toneOverride]
-    val base = curatedTones.filter { it.unlockLevel == null }
-    if (base.isEmpty()) return curatedTones.first()
-    return base[Math.abs(accent.hashCode()) % base.size]
+    // v378 — AUTO matches the tone to the TOPIC: among the light base
+    // quartet (Warm Rose / Soft Sage / Golden Ochre / Deep Indigo) pick the
+    // one whose accent is CLOSEST to the topic's own category accent, so a
+    // book (golden category accent) always Auto-lands on Golden Ochre — the
+    // old accent.hashCode() % size rotation could drop a book onto a dark
+    // premium tone (Onyx / Noir / Deep Sea …) and read as an unexplained
+    // "midnight" default. Explicit premium picks are untouched.
+    val light = curatedTones.take(4)
+    if (light.isEmpty()) return curatedTones.first()
+    val ca = accent.toArgb()
+    val cr = (ca shr 16) and 0xFF
+    val cg = (ca shr 8) and 0xFF
+    val cb = ca and 0xFF
+    return light.minByOrNull { p ->
+        val pa = p.accent.toArgb()
+        val dr = ((pa shr 16) and 0xFF) - cr
+        val dg = ((pa shr 8) and 0xFF) - cg
+        val db = (pa and 0xFF) - cb
+        dr * dr + dg * dg + db * db
+    } ?: light.first()
 }
 
 // ─── Family → available styles mapping ─────────────────────────────────
@@ -498,15 +516,25 @@ private fun autoFitGrow(len: Int): Float = when {
 private fun factFitBudget(style: ShareCardStyle, aspect: ShareCardAspect): Pair<Float, Float> {
     val tall = aspect == ShareCardAspect.PORTRAIT
     return when (style) {
-        // The fact lives inside a fixed dark band under the category pill.
-        ShareCardStyle.COLLAGE -> if (tall) 1.3f to 0.85f else 1.25f to 0.88f
+        // The fact lives inside a fixed dark band under the category pill —
+        // v378 it shrinks the TEXT more eagerly (down to 0.7×) so a long
+        // fact stays inside the band instead of ballooning its box down over
+        // the footer decoration ("box higher + text smaller" collage fit).
+        ShareCardStyle.COLLAGE -> if (tall) 1.3f to 0.70f else 1.25f to 0.75f
         // Runs between the byline and the colophon — grows a little, then
         // the text shrinks.
         ShareCardStyle.EDITORIAL -> if (tall) 1.4f to 0.82f else 1.3f to 0.85f
         // Bottom-anchored facts grow UP into the free middle of the card.
         ShareCardStyle.NEUMORPHIC -> if (tall) 1.7f to 0.80f else 1.5f to 0.83f
         ShareCardStyle.MINIMAL -> if (tall) 1.6f to 0.82f else 1.45f to 0.85f
-        // Mid-flow facts between the header/title and the footer.
+        // v378 — PAPER gets its own budget: its mid-flow body has room to
+        // EXPAND (the frost pane can take more lines), so the fit favours
+        // growing the box and barely touches the text (0.96× floor) — the
+        // old shared mid-flow budget shrank Paper's type to 0.8× while the
+        // height could have absorbed the text.
+        ShareCardStyle.PAPER -> if (tall) 2.0f to 0.96f else 1.8f to 0.96f
+        // Mid-flow facts between the header/title and the footer (Vinyl /
+        // Signature / Custom).
         else -> if (tall) 1.5f to 0.80f else 1.4f to 0.83f
     }
 }
@@ -661,6 +689,25 @@ data class ShareCardMove(
      *  one-way shove). The glued cover sits inside the title block, so it
      *  rides the lift automatically. 0f = no push. */
     val titleLift: Float = 0f
+)
+
+/** v378 — layout-only reset for [ShareCardMove]: zeroes every POSITION
+ *  (drags), box DIMENSION (width/height fractions + whole-box scales) and
+ *  the auto LIFT — the stuff the Customise chrome moves/resizes — while
+ *  KEEPING every text edit (fonts, aligns, bold/italic/underline/
+ *  highlight, text scales, fact layout/drop cap), so "Reset layout" never
+ *  undoes the user's typography. */
+private fun ShareCardMove.resetLayout(): ShareCardMove = ShareCardMove(
+    titleFont = titleFont, factFont = factFont, metaFont = metaFont, badgeFont = badgeFont,
+    titleAlign = titleAlign, factAlign = factAlign,
+    titleBold = titleBold, titleItalic = titleItalic,
+    factBold = factBold, factItalic = factItalic,
+    metaBold = metaBold, metaItalic = metaItalic,
+    badgeBold = badgeBold, badgeItalic = badgeItalic,
+    titleUnderline = titleUnderline, titleHighlight = titleHighlight,
+    factUnderline = factUnderline, factHighlight = factHighlight,
+    titleScale = titleScale, factScale = factScale, factZoom = factZoom,
+    factFormat = factFormat, factDropCap = factDropCap
 )
 
 /** Modifier that shifts a card's TITLE by the move offset + box size + scale and
@@ -6234,6 +6281,11 @@ private fun ArrangeableCard(
     // inert until the "Edit text" tool turns this on (see the overlay below).
     factEditMode: Boolean = false,
     onFactEditModeChange: (Boolean) -> Unit = {},
+    // v378 — DOUBLE-TAP the fact text arms inline editing directly (the
+    // same path the "Edit text" tool uses): no tool-dance for a quick
+    // typo fix. The sheet decides what "edit this" means (it converts the
+    // default quick fact into a custom fact so the typed text sticks).
+    onRequestInlineFactEdit: () -> Unit = {},
     onToggleEdit: () -> Unit,
     onSelectResizeTarget: (ShareCardResizeTarget) -> Unit = {},
     selectedResizeTarget: ShareCardResizeTarget = ShareCardResizeTarget.NONE,
@@ -6404,6 +6456,13 @@ private fun ArrangeableCard(
 
                 var dragGuides by remember { mutableStateOf(DragGuides()) }
                 var dragActive by remember { mutableStateOf(false) }
+                // v378 — set while the TITLE handle is being dragged. The
+                // auto-lift (below) stays OFF during a title drag so the title
+                // follows the finger exactly — the old effect fought a title
+                // dragged down over the fact with a counter-lift every frame
+                // (the "crazy glitchy" title-above-fact jitter). Lifting only
+                // ever happens for FACT-driven growth, never a title grab.
+                var titleGrabbed by remember { mutableStateOf(false) }
 
                 // v376 — AUTO-LIFT (measured collision): while editing, if the
                 // quick-fact box (grown by the height / width / whole-box
@@ -6420,8 +6479,13 @@ private fun ArrangeableCard(
                     androidx.compose.runtime.LaunchedEffect(
                         titleRect.value, factRect.value,
                         move.factHeightFrac, move.factWidthFrac, move.factBoxScale, move.factZoom,
-                        move.titleLift
+                        move.titleLift, titleGrabbed
                     ) {
+                        // v378 — never recompute while the title itself is the
+                        // thing being dragged (see [titleGrabbed]): collision
+                        // pushes belong to the FACT box growing into a parked
+                        // title, not to free title placement.
+                        if (titleGrabbed) return@LaunchedEffect
                         val t = rTitle
                         val f = rFact
                         if (t.width <= 0f || t.height <= 0f || f.width <= 0f || f.height <= 0f) return@LaunchedEffect
@@ -6586,14 +6650,25 @@ private fun ArrangeableCard(
                     // Tap-to-select layer: while text editing is OFF the field is
                     // inert, so an invisible box on top selects the fact for moving
                     // (grip appears) without popping the keyboard. Text editing
-                    // starts only via the explicit "Edit text" tool.
+                    // starts only via the explicit "Edit text" tool — or a
+                    // DOUBLE-TAP (v378), which arms the inline field directly.
                     if (!factEditMode) {
                         Box(
                             modifier = Modifier
                                 .offset(f.left.dp, f.top.dp)
                                 .width(f.width.dp)
                                 .height(f.height.dp)
-                                .clickable { onSelectResizeTarget(ShareCardResizeTarget.FACT) }
+                                .combinedClickable(
+                                    interactionSource = remember {
+                                        androidx.compose.foundation.interaction.MutableInteractionSource()
+                                    },
+                                    indication = null,
+                                    onClick = { onSelectResizeTarget(ShareCardResizeTarget.FACT) },
+                                    onDoubleClick = {
+                                        onSelectResizeTarget(ShareCardResizeTarget.FACT)
+                                        onRequestInlineFactEdit()
+                                    }
+                                )
                         )
                     }
                     // When the "Edit text" tool arms the field, focus it so the
@@ -6805,26 +6880,8 @@ private fun ArrangeableCard(
                                     dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
                                     onMove(move.copy(titleDx = xs.offset, titleDy = ys.offset))
                                 },
-                                onDragStart = { dragActive = true },
-                                onDragEnd = { dragActive = false; dragGuides = DragGuides() }
-                            )
-                            CornerResizeHandle(
-                                x = (t.right - 26f).coerceIn(0f, (cw - 26f).coerceAtLeast(0f)).dp,
-                                y = (t.bottom - 26f).coerceIn(0f, (ch - 26f).coerceAtLeast(0f)).dp,
-                                onDelta = { dx, dy ->
-                                    // v373 — the rendered box already includes
-                                    // the whole-box scale, so divide by it too
-                                    // to recover the true natural size.
-                                    val baseW = t.width / (move.titleWidthFrac * move.titleBoxScale).coerceAtLeast(0.2f)
-                                    val baseH = t.height / (move.titleHeightFrac * move.titleBoxScale).coerceAtLeast(0.2f)
-                                    val factor = maxOf(1f + dx / baseW, 1f + dy / baseH).coerceIn(0.2f, 6f)
-                                    onMove(move.copy(
-                                        titleWidthFrac = (move.titleWidthFrac * factor).coerceIn(0.2f, 1f),
-                                        titleHeightFrac = (move.titleHeightFrac * factor).coerceIn(0.2f, 6f)
-                                    ))
-                                },
-                                onDragStart = { dragActive = true },
-                                onDragEnd = { dragActive = false; dragGuides = DragGuides() }
+                                onDragStart = { dragActive = true; titleGrabbed = true },
+                                onDragEnd = { dragActive = false; titleGrabbed = false; dragGuides = DragGuides() }
                             )
                         }
                     }
@@ -6896,31 +6953,11 @@ private fun ArrangeableCard(
                                 },
                                 onDragEnd = { dragActive = false; dragGuides = DragGuides() }
                             )
-                            // v369 — CORNER scale: drags scale the WHOLE box
-                            // (width + height together, shape kept) so the box
-                            // can grow from its corner instead of only via the
-                            // width/height sliders.
-                            CornerResizeHandle(
-                                x = (f.right - 26f).coerceIn(0f, (cw - 26f).coerceAtLeast(0f)).dp,
-                                y = (f.bottom - 26f).coerceIn(0f, (ch - 26f).coerceAtLeast(0f)).dp,
-                                onDelta = { dx, dy ->
-                                    // v373 — see the title grip: the rendered
-                                    // box includes the whole-box scale.
-                                    val baseW = f.width / (move.factWidthFrac * move.factBoxScale).coerceAtLeast(0.2f)
-                                    val baseH = f.height / (move.factHeightFrac * move.factBoxScale).coerceAtLeast(0.2f)
-                                    val factor = maxOf(1f + dx / baseW, 1f + dy / baseH).coerceIn(0.2f, 6f)
-                                    onMove(move.copy(
-                                        factWidthFrac = (move.factWidthFrac * factor).coerceIn(0.2f, 1f),
-                                        factHeightFrac = (move.factHeightFrac * factor).coerceIn(0.2f, 8f),
-                                        // v371 — WHOLE-BOX ZOOM: the fact font
-                                        // scales with the box (photo-zoom), so
-                                        // the corner expands box AND text.
-                                        factZoom = (move.factZoom * factor).coerceIn(0.5f, 4f)
-                                    ))
-                                },
-                                onDragStart = { dragActive = true },
-                                onDragEnd = { dragActive = false; dragGuides = DragGuides() }
-                            )
+                            // v378 — the CORNER whole-box scale grip is GONE:
+                            // the corner icon duplicated the Crop tool's
+                            // width/height sliders and its outline read as a
+                            // box glitch in full screen. Resizing happens via
+                            // the sliders only.
                         }
                     }
                     ShareCardResizeTarget.META -> {
@@ -6943,25 +6980,8 @@ private fun ArrangeableCard(
                                 onDragStart = { dragActive = true },
                                 onDragEnd = { dragActive = false; dragGuides = DragGuides() }
                             )
-                            // v370 — the info row also gets the WHOLE-BOX
-                            // corner grip (width crop + line count), so every
-                            // sizable element scales from the corner, not
-                            // only via the sliders.
-                            CornerResizeHandle(
-                                x = (m.right - 26f).coerceIn(0f, (cw - 26f).coerceAtLeast(0f)).dp,
-                                y = (m.bottom - 26f).coerceIn(0f, (ch - 26f).coerceAtLeast(0f)).dp,
-                                onDelta = { dx, dy ->
-                                    val baseW = m.width / move.metaWidthFrac.coerceAtLeast(0.2f)
-                                    val baseH = m.height / move.metaHeightFrac.coerceAtLeast(0.5f)
-                                    val factor = maxOf(1f + dx / baseW, 1f + dy / baseH).coerceIn(0.5f, 4f)
-                                    onMove(move.copy(
-                                        metaWidthFrac = (move.metaWidthFrac * factor).coerceIn(0.2f, 1f),
-                                        metaHeightFrac = (move.metaHeightFrac * factor).coerceIn(0.5f, 1f)
-                                    ))
-                                },
-                                onDragStart = { dragActive = true },
-                                onDragEnd = { dragActive = false; dragGuides = DragGuides() }
-                            )
+                            // v378 — corner scale grip removed (see the fact
+                            // branch): the Crop tool's sliders own sizing.
                         }
                     }
                     ShareCardResizeTarget.BADGE -> {
@@ -7022,25 +7042,8 @@ private fun ArrangeableCard(
                                 onDragStart = { dragActive = true },
                                 onDragEnd = { dragActive = false; dragGuides = DragGuides() }
                             )
-                            // v370 — the favorite-tracks strip also scales
-                            // from the corner (width fill + track rows).
-                            CornerResizeHandle(
-                                x = (rf.right - 26f).coerceIn(0f, (cw - 26f).coerceAtLeast(0f)).dp,
-                                y = (rf.bottom - 26f).coerceIn(0f, (ch - 26f).coerceAtLeast(0f)).dp,
-                                onDelta = { dx, dy ->
-                                    // v373 — see the title grip: the rendered
-                                    // strip includes the whole-box scale.
-                                    val baseW = rf.width / (move.favWidthFrac * move.favBoxScale).coerceAtLeast(0.3f)
-                                    val baseH = rf.height / (move.favHeightFrac * move.favBoxScale).coerceAtLeast(0.35f)
-                                    val factor = maxOf(1f + dx / baseW, 1f + dy / baseH).coerceIn(0.35f, 3f)
-                                    onMove(move.copy(
-                                        favWidthFrac = (move.favWidthFrac * factor).coerceIn(0.3f, 1.2f),
-                                        favHeightFrac = (move.favHeightFrac * factor).coerceIn(0.35f, 3f)
-                                    ))
-                                },
-                                onDragStart = { dragActive = true },
-                                onDragEnd = { dragActive = false; dragGuides = DragGuides() }
-                            )
+                            // v378 — corner scale grip removed (see the fact
+                            // branch): the Crop tool's sliders own sizing.
                         }
                     }
                     ShareCardResizeTarget.NONE -> {}
@@ -7721,6 +7724,20 @@ fun TopicShareSheet(
     fun updateMove(m: ShareCardMove) {
         movesByStyle = movesByStyle + (currentStyle to m)
     }
+    // v378 — DOUBLE-TAP a fact arms inline editing: the default quick fact
+    // converts into a custom fact (so the typed text sticks), the box is
+    // selected, and the transparent inline field takes focus. Mirrors the
+    // "Edit text" tool exactly; unused contents (quotes, the progress
+    // caption alone) simply select the box as a single tap would.
+    fun requestFactInlineEdit() {
+        if (activeId != CUSTOM_FACT_ID && activeId != "chapter_review" && progressForCard == null) {
+            selectedId = CUSTOM_FACT_ID
+            customText = activeSource.text
+            editedFact = null
+        }
+        selectedResizeTarget = ShareCardResizeTarget.FACT
+        factEditMode = true
+    }
     // Inline-edit / Customise helpers
     val sourceOptions = available.filter { !isQuotes || it.id != QUICK_FACT_ID }
     // The transparent quick-fact typing field must lay out with the SAME
@@ -7797,7 +7814,13 @@ fun TopicShareSheet(
     // are ignored while editing (the swipe path is blocked via the sheet
     // state's confirmValueChange above). v325 — dismissal persists the edits
     // first, so exiting by mistake resumes where you left off.
-    ModalBottomSheet(onDismissRequest = { if (!editMode) { persistEdits(); onDismiss() } }, sheetState = sheetState, containerColor = MaterialTheme.colorScheme.surface, dragHandle = { BottomSheetDefaults.DragHandle() }) {
+    // v378 — while editing, sheet DRAG GESTURES are disabled entirely: the
+    // old state only blocked the collapse target, so a swipe-down still
+    // launched the sheet's drag animation and snapped back (the jumpy,
+    // tool-freezing glitch). With gestures off the sheet simply never moves
+    // until Done/back drops edit mode (then normal swipe-dismiss returns);
+    // content scrolling and the card carousel keep working throughout.
+    ModalBottomSheet(onDismissRequest = { if (!editMode) { persistEdits(); onDismiss() } }, sheetState = sheetState, sheetGesturesEnabled = !editMode, containerColor = MaterialTheme.colorScheme.surface, dragHandle = { BottomSheetDefaults.DragHandle() }) {
         // v325 — BACK cancels the Customise editor first, then (on a second
         // press) exits the sheet — it was previously swallowed while editing.
         BackHandler(enabled = editMode) {
@@ -7866,6 +7889,7 @@ fun TopicShareSheet(
                                 onFactChange = { routeFactChange(it) },
                                 factEditMode = factEditMode,
                                 onFactEditModeChange = { factEditMode = it },
+                                onRequestInlineFactEdit = { requestFactInlineEdit() },
                                 onToggleEdit = {
                                     editMode = !editMode
                                     toolOpen = null
@@ -7931,6 +7955,7 @@ fun TopicShareSheet(
                             onFactChange = { routeFactChange(it) },
                             factEditMode = factEditMode,
                             onFactEditModeChange = { factEditMode = it },
+                            onRequestInlineFactEdit = { requestFactInlineEdit() },
                             onToggleEdit = {
                                 editMode = !editMode
                                 toolOpen = null
@@ -8449,6 +8474,25 @@ fun TopicShareSheet(
                                                 Text(aspect.label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
                                             }
                                         }
+                                        // v378 — RESET LAYOUT (full screen only): a
+                                        // one-tap layout-only reset — positions /
+                                        // box crops / auto-lift return to the
+                                        // design defaults while every text edit
+                                        // (fonts, sizes, formats, colours) stays.
+                                        Surface(
+                                            onClick = {
+                                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                updateMove(move.resetLayout())
+                                            },
+                                            shape = RoundedCornerShape(50),
+                                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                                            shadowElevation = 4.dp
+                                        ) {
+                                            Row(Modifier.padding(horizontal = 12.dp, vertical = 9.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                                CurioIcon(name = CurioIcons.Refresh, contentDescription = "Reset layout (keeps text edits)", tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 15.dp)
+                                                Text("Layout", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            }
+                                        }
                                         Surface(
                                             onClick = { fsToolsOpen = !fsToolsOpen },
                                             shape = RoundedCornerShape(50),
@@ -8506,12 +8550,25 @@ fun TopicShareSheet(
                                                             }
                                                         }
                                                     }
-                                                    // Size
+                                                    // Size — v378 the FACT thumb
+                                                    // shows the rendered size with
+                                                    // smart fit folded in (same as
+                                                    // the sheet's Size tool).
                                                     Box(Modifier.padding(horizontal = 12.dp)) {
+                                                        val fsFit = if (!fsIsTitle) smartAutoFitDelta(
+                                                            move,
+                                                            maxOf(factFieldText.length, chapterFactForCard.length),
+                                                            currentStyle, aspect
+                                                        ) else null
+                                                        val fsCur = if (fsIsTitle) move.titleScale
+                                                            else (bodyScale * fsFit!!.textScale * move.factScale * move.factZoom).coerceIn(0.5f, 2f)
                                                         TextSizeSliderColumn(
                                                             label = if (fsIsTitle) "Title size" else "Fact size",
-                                                            value = if (fsIsTitle) move.titleScale else bodyScale,
-                                                            onValueChange = { v -> if (fsIsTitle) updateMove(move.copy(titleScale = v)) else bodyScale = v }
+                                                            value = fsCur,
+                                                            onValueChange = { v ->
+                                                                if (fsIsTitle) updateMove(move.copy(titleScale = v))
+                                                                else bodyScale = (v / (fsFit!!.textScale * move.factScale * move.factZoom)).coerceIn(0.5f, 2f)
+                                                            }
                                                         )
                                                     }
                                                     // Bold / Italic / Underline / Highlight
@@ -8613,7 +8670,13 @@ fun TopicShareSheet(
                                     val availH = (maxHeight.value - 20f).coerceAtLeast(120f)
                                     val zoom = minOf(availW / baseW, availH / baseH)
                                     val sheetDensity = androidx.compose.ui.platform.LocalDensity.current
-                                    val cardDensity = androidx.compose.ui.unit.Density(sheetDensity.density * zoom, sheetDensity.fontScale * zoom)
+                                    // v378 — the zoom lives in the DENSITY ONLY
+                                    // (fontScale stays untouched): dp and sp both
+                                    // scale through density, so multiplying
+                                    // fontScale too made sp TEXT zoom twice and
+                                    // read as oversized — the "zoomed and cut
+                                    // from below" preview bug.
+                                    val cardDensity = androidx.compose.ui.unit.Density(sheetDensity.density * zoom, sheetDensity.fontScale)
                                     androidx.compose.runtime.CompositionLocalProvider(androidx.compose.ui.platform.LocalDensity provides cardDensity) {
                                         Box(
                                             Modifier
@@ -8630,6 +8693,7 @@ fun TopicShareSheet(
                                             onFactChange = { routeFactChange(it) },
                                             factEditMode = factEditMode,
                                             onFactEditModeChange = { factEditMode = it },
+                                            onRequestInlineFactEdit = { requestFactInlineEdit() },
                                             onToggleEdit = {},
                                             onSelectResizeTarget = { target ->
                                                 if (target == ShareCardResizeTarget.FACT &&
@@ -8683,23 +8747,58 @@ fun TopicShareSheet(
                         "size" -> if (isTextSizable) {
                             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                 Text("$selName size", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                val cur = if (isTitle) move.titleScale else bodyScale
+                                // v378 — the quick-fact slider shows (and
+                                // drives) the size the CARD ACTUALLY RENDERS:
+                                // smart fit's shrink is folded into the thumb
+                                // (bodyScale × fit.textScale × …), so checking
+                                // the size never reads 1× while the text sits
+                                // at 0.8×. Dragging writes the base back
+                                // through the fit (WYSIWYG) — the fit itself
+                                // stays engaged and keeps clipping-safe.
+                                val sizeFit = if (!isTitle) smartAutoFitDelta(
+                                    move,
+                                    maxOf(factFieldText.length, chapterFactForCard.length),
+                                    currentStyle, aspect
+                                ) else null
+                                val cur = when {
+                                    isTitle -> move.titleScale
+                                    isFact -> (bodyScale * sizeFit!!.textScale * move.factScale * move.factZoom).coerceIn(0.5f, 2f)
+                                    else -> bodyScale
+                                }
                                 TextSizeSliderColumn(
-                                    label = if (isTitle) "Title text" else "Quick-fact text",
+                                    label = when {
+                                        isTitle -> "Title text"
+                                        isFact -> "Quick-fact text"
+                                        else -> "Text size"
+                                    },
                                     value = cur,
-                                    onValueChange = { s -> if (isTitle) updateMove(move.copy(titleScale = s)) else bodyScale = s }
+                                    onValueChange = { s ->
+                                        when {
+                                            isTitle -> updateMove(move.copy(titleScale = s))
+                                            isFact -> bodyScale = (s / (sizeFit!!.textScale * move.factScale * move.factZoom)).coerceIn(0.5f, 2f)
+                                            else -> bodyScale = s
+                                        }
+                                    }
                                 )
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Pill("Reset to 1\u00d7", CurioIcons.Refresh, cur == 1f) {
-                                        if (isTitle) updateMove(move.copy(titleScale = 1f)) else bodyScale = 1f
+                                    // Reset restores the BASE slider to 1×; when
+                                    // smart fit is shrinking long text the thumb
+                                    // stays at the fitted size (no hidden state).
+                                    val baseAt1 = if (isTitle) move.titleScale == 1f
+                                        else bodyScale == 1f && move.factScale == 1f && move.factZoom == 1f
+                                    Pill("Reset to 1\u00d7", CurioIcons.Refresh, baseAt1) {
+                                        if (isTitle) updateMove(move.copy(titleScale = 1f)) else {
+                                            bodyScale = 1f
+                                            updateMove(move.copy(factScale = 1f, factZoom = 1f))
+                                        }
                                     }
                                     Text(
                                         if (isTitle) "Longer titles auto-fit their box — this scales the type precisely."
-                                        else "Longer facts auto-shrink to fit — this overrides the auto size by exactly the amount you set.",
+                                        else "The shown size is what the card renders — smart fit folds its auto size into this thumb.",
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         modifier = Modifier.weight(1f)
@@ -9402,57 +9501,6 @@ private fun BoxScope.MoveHandle(
         CurioIcon(
             name = CurioIcons.DragHandle,
             contentDescription = "Move",
-            tint = Color.White,
-            size = if (dragging) 11.dp else 13.dp
-        )
-    }
-}
-
-/**
- * v369 — the CORNER scale grip: a small bracket in the box's bottom-right
- * corner that scales the WHOLE box (width AND height together, shape kept)
- * from the corner — the "whole box size, not shape" adjustment done by
- * dragging instead of only the width/height sliders. Same drag contract as
- * [MoveHandle]: px deltas converted to dp and fed back via onDelta.
- */
-@Composable
-private fun BoxScope.CornerResizeHandle(
-    x: Dp, y: Dp,
-    onDelta: (dx: Float, dy: Float) -> Unit,
-    onDragStart: () -> Unit = {},
-    onDragEnd: () -> Unit = {}
-) {
-    val density = androidx.compose.ui.platform.LocalDensity.current
-    val latestDelta by rememberUpdatedState(onDelta)
-    val latestStart by rememberUpdatedState(onDragStart)
-    val latestEnd by rememberUpdatedState(onDragEnd)
-    var dragging by remember { mutableStateOf(false) }
-    Box(
-        modifier = Modifier
-            .offset(x = x, y = y)
-            .size(22.dp)
-            .graphicsLayer {
-                shadowElevation = 2.dp.toPx(); shape = CircleShape; clip = false
-                alpha = if (dragging) 0.55f else 1f
-            }
-            .background(Color(0xFF3E2723), CircleShape)
-            .border(1.dp, Color.White.copy(alpha = 0.45f), CircleShape)
-            .pointerInput(Unit) {
-                detectDragGestures(
-                    onDragStart = { dragging = true; latestStart() },
-                    onDragEnd = { dragging = false; latestEnd() },
-                    onDragCancel = { dragging = false; latestEnd() }
-                ) { _, dragAmount ->
-                    val dx = with(density) { dragAmount.x.toDp().value }
-                    val dy = with(density) { dragAmount.y.toDp().value }
-                    latestDelta(dx, dy)
-                }
-            },
-        contentAlignment = Alignment.Center
-    ) {
-        CurioIcon(
-            name = CurioIcons.Fullscreen,
-            contentDescription = "Resize box from corner",
             tint = Color.White,
             size = if (dragging) 11.dp else 13.dp
         )

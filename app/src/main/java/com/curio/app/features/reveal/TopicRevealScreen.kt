@@ -3114,10 +3114,8 @@ private fun BookNotesSheet(
                 .fillMaxHeight(0.92f)
                 .padding(bottom = 20.dp)
         ) {
-            // ── Top hairline — soft accent rule under the drag handle ─────
-            NotesSheetTopHairline(accent)
-            Spacer(Modifier.height(10.dp))
-            // ── Header — cover + title/author + heart + close ────────────
+            // ── Header — cover + title/author + heart ───────────────────
+            Spacer(Modifier.height(8.dp))
             Row(
                 verticalAlignment = Alignment.Top,
                 horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -3219,12 +3217,13 @@ private fun BookNotesSheet(
                 }
             }
 
-            // ── Pinned reading-progress rail (v328) — stays above the list ─
+            // ── v378 — progress as ONE clean rail label (no divider bar, no
+            // duplicate "N / M") — reading progress lives in the words only.
             if (hasChapters) {
-                Spacer(Modifier.height(12.dp))
-                val progressLabel = if (chaptersDone > 0)
+                Spacer(Modifier.height(14.dp))
+                val progressLabel = (if (chaptersDone > 0)
                     "$chaptersDone of ${chapters.size} chapters read"
-                else "${chapters.size} chapters"
+                else "${chapters.size} chapters").replaceFirstChar { it.uppercase() }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -3240,33 +3239,8 @@ private fun BookNotesSheet(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
-                    Text(
-                        "$chaptersDone / ${chapters.size}",
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                        color = accent
-                    )
                 }
-                Spacer(Modifier.height(6.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp)
-                        .height(4.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(surfaceHigh)
-                ) {
-                    val frac = if (chapters.size > 0)
-                        (chaptersDone.toFloat() / chapters.size).coerceIn(0f, 1f) else 0f
-                    if (frac > 0f) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(frac)
-                                .height(4.dp)
-                                .background(accent, RoundedCornerShape(50))
-                        )
-                    }
-                }
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(10.dp))
             }
 
             // ── One scroll: synopsis accordion, then the chapter list ─────
@@ -3331,7 +3305,11 @@ private fun BookNotesSheet(
                                     // Leading chip: the chapter number always
                                     // shows — a READ chapter tints the disc
                                     // softly in the accent (fill + number +
-                                    // rim) instead of a loud ✓ (v355).
+                                    // rim) instead of a loud ✓ (v355). v378 —
+                                    // the number's INK on tinted discs and the
+                                    // read tint is deeper so the count stays
+                                    // legible on the accent-tinted open row
+                                    // (accent-on-accent washed out).
                                     Box(
                                         modifier = Modifier
                                             .size(30.dp)
@@ -3343,7 +3321,7 @@ private fun BookNotesSheet(
                                                     // row keeps its accent pop
                                                     // on the number).
                                                     isOpen -> accent
-                                                    isRead -> accent.copy(alpha = 0.18f)
+                                                    isRead -> accent.copy(alpha = 0.30f)
                                                     else -> surfaceHigh
                                                 }
                                             )
@@ -3351,7 +3329,7 @@ private fun BookNotesSheet(
                                                 1.dp,
                                                 when {
                                                     isOpen -> accent.copy(alpha = 0.5f)
-                                                    isRead -> accent.copy(alpha = 0.55f)
+                                                    isRead -> accent.copy(alpha = 0.65f)
                                                     else -> onSurfaceVariant.copy(alpha = 0.25f)
                                                 },
                                                 CircleShape
@@ -3363,13 +3341,13 @@ private fun BookNotesSheet(
                                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
                                             color = when {
                                                 isOpen -> onAccent
-                                                isRead -> accent
+                                                isRead -> ink
                                                 else -> onSurfaceVariant
                                             }
                                         )
                                     }
                                     Text(
-                                        text = ch.title,
+                                        text = ch.title.replaceFirstChar { it.uppercase() },
                                         style = MaterialTheme.typography.bodyLarge.copy(
                                             fontWeight = if (isOpen || isRead) FontWeight.Bold else FontWeight.Normal
                                         ),
@@ -3426,13 +3404,15 @@ private fun BookNotesSheet(
                                             1.dp,
                                             if (chDone)
                                                 onAccent.copy(alpha = 0.7f)
-                                                else onSurfaceVariant.copy(alpha = 0.25f)
+                                                else if (isOpen) ink.copy(alpha = 0.35f)
+                                                else onSurfaceVariant.copy(alpha = 0.3f)
                                         )
                                     ) {
                                         CurioIcon(
                                             CurioIcons.FoldedCorner,
                                             if (chDone) "Mark chapter unread" else "Mark chapter read",
-                                            tint = if (chDone) onAccent else onSurfaceVariant,
+                                            tint = if (chDone) onAccent
+                                                else if (isOpen) ink else onSurfaceVariant,
                                             size = 16.dp,
                                             modifier = Modifier.padding(6.dp)
                                         )
@@ -3689,16 +3669,17 @@ private fun ChapterNoteField(
             modifier = Modifier.weight(1f)
         )
         // v371 — EXPAND: opens the full writing sheet (long notes, no more
-        // tiny single-line box).
+        // tiny single-line box). v378 — on the accent-tinted OPEN row the
+        // chip uses the sheet INK (accent-on-accent washed the glyph out).
         Surface(
             onClick = onExpand,
             shape = CircleShape,
-            color = if (isOpen) accent.copy(alpha = 0.18f) else scheme.surfaceVariant
+            color = if (isOpen) ink.copy(alpha = 0.16f) else scheme.surfaceVariant
         ) {
             CurioIcon(
                 CurioIcons.Fullscreen,
                 "Expand note",
-                tint = if (isOpen) accent else scheme.onSurfaceVariant,
+                tint = if (isOpen) ink else scheme.onSurfaceVariant,
                 size = 15.dp,
                 modifier = Modifier.padding(7.dp)
             )
@@ -4418,19 +4399,8 @@ private fun AlbumNotesSheet(
                         color = ink
                     )
                 }
-                Surface(
-                    onClick = onDismiss,
-                    shape = CircleShape,
-                    color = surface.copy(alpha = 0.6f)
-                ) {
-                    CurioIcon(
-                        CurioIcons.Close,
-                        "Close track list",
-                        tint = onSurfaceVariant,
-                        size = 20.dp,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
+                // v355/v378 — NO cross close button (swipe-down dismisses),
+                // matching the book + series sheets' no-close model.
             }
 
             // ── v336 — Listen actions row: a LISTEN pill (always present)
