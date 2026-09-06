@@ -642,14 +642,26 @@ private fun autoLayoutPlan(
     aspect: ShareCardAspect,
     len: Int,
     attempt: Int,
-    currentFormat: ShareCardFactFormat
+    currentFormat: ShareCardFactFormat,
+    move: ShareCardMove
     ): ShareAutoLayoutPlan {
     val shape = autoFitShape(style, aspect, len)
     // A grown fact box consumes the vertical gap above it. Keep the title
     // out of that collision as part of the same atomic auto-layout commit.
-    val titleLift = ((shape.heightFrac - 1f) * 28f).coerceIn(0f, 56f)
+    val sizeLift = ((shape.heightFrac - 1f) * 28f).coerceIn(0f, 56f)
+    // Manual dragging is allowed to create an overlap. The sparkle action is
+    // the explicit repair gesture: estimate the shared vertical collision
+    // from both offsets and move the title clear of the fact in one commit.
+    // This deliberately ignores titlePlaced because the user asked for the
+    // sparkle action to repair intentional overlap, not dragging itself.
+    val manualOverlapLift = (
+        (move.factDy + 18f).let { if (it < 0f) -it else 0f } +
+            move.titleDy.coerceAtLeast(0f)
+        ).coerceIn(0f, 72f)
+    val titleLift = maxOf(sizeLift, manualOverlapLift)
 
-    if (shape.heightFrac == 0f) return ShareAutoLayoutPlan()
+    if (shape.heightFrac == 0f && titleLift == 0f) return ShareAutoLayoutPlan()
+
     val (maxHeightFrac, minTextScale) = factFitBudget(style, aspect)
     val capped = shape.heightFrac >= maxHeightFrac - 0.01f && shape.heightFrac > 1f
     return (when ((attempt % 4 + 4) % 4) {
@@ -8150,18 +8162,20 @@ fun TopicShareSheet(
         if (len == 0 && chapterFactForCard.isBlank() && progressForCard == null) return
         var attempt = autoLayoutIdx + 1
         repeat(6) {
-            val plan = autoLayoutPlan(currentStyle, aspect, len, attempt, move.factFormat)
+            val plan = autoLayoutPlan(currentStyle, aspect, len, attempt, move.factFormat, move)
             val wantsTall = plan.tall && aspect == ShareCardAspect.CLASSIC
             val h = plan.heightFrac
             val s = plan.textScale
             val hChanges = h > 0f && kotlin.math.abs(h - move.factHeightFrac) > 0.02f
             val sChanges = s > 0f && kotlin.math.abs(s - move.factScale) > 0.02f
             val fmtChanges = plan.format != null && plan.format != move.factFormat
-            if (wantsTall || hChanges || sChanges || fmtChanges) {
+            val titleLiftChanges = kotlin.math.abs(plan.titleLift - move.titleLift) > 1f
+            if (wantsTall || hChanges || sChanges || fmtChanges || titleLiftChanges) {
                 updateMove(move.copy(
                     factHeightFrac = if (h > 0f) h.coerceIn(0.35f, 6f) else move.factHeightFrac,
                     factScale = if (s > 0f) s.coerceIn(0.5f, 2f) else move.factScale,
-                    factFormat = plan.format ?: move.factFormat
+                    factFormat = plan.format ?: move.factFormat,
+                    titleLift = plan.titleLift.coerceIn(0f, 96f)
                 ))
                 // A 3:4 card that still overflows fully-fitted gets the tall
                 // 9:16 canvas (the one remaining way to add room).
