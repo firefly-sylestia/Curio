@@ -640,6 +640,17 @@ app/src/main/java/com/curio/app/
     dropped GOOGLE_BOOKS everywhere (hub picker, reveal live-fallback,
     share-sheet cascade) — books now fall back iTunes → Open Library;
     the keyless Google Books RATINGS + ISBN lookups stay untouched.
+  - **Fact-font auto-shrink (`ShareAutoFitDelta.factScale`):** the
+    auto-adjuster now scales the FACT font down as the text grows
+    (`autoFactScale`, per-style floors 0.86–0.90, starts ~150 chars) on
+    top of each style's built-in length curve (which alone only kicks in
+    at 180–350+ chars). Applied via `effectiveBodyScale = bodyScale *
+    autoFit.factScale * move.factScale` in TopicShareCard, so the export
+    and the inline typing field (which follows `liveFactStyle`) match.
+    The Balanced growth curve's low end was lowered (starts at 90 chars
+    with 1.15×) so medium facts get room earlier. `factScale` is captured
+    into `ShareCardMove` on the first grab (seed) and counts as "touched",
+    so the handoff doesn't make the text jump back to full size or clip.
 - **v361 — keyed defaults + Clear-covers button; CI fix for the reveal
   poster.** User: "fix it, and also i added spotify key and library thing
   api as well… does the api is used in the apk build from pr, use that by

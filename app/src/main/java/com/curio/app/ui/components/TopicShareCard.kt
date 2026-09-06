@@ -465,7 +465,12 @@ private class ShareAutoFitDelta(
     val heightFrac: Float = 1f,
     val dy: Float = 0f,
     val titleDy: Float = 0f,
-    val titleScale: Float = 1f
+    val titleScale: Float = 1f,
+    // v371 — the FACT font shrink: the auto-adjuster scales the fact text
+    // down a little as it grows (per-style floor, see [autoFactScale]), so
+    // a long quick/custom fact reads smaller instead of only getting a
+    // taller line budget. 1f = full size.
+    val factScale: Float = 1f
 )
 
 /** v370 — smart auto-fit INTENSITY presets (offered in the Size tool while
@@ -491,13 +496,16 @@ private fun autoFitCurve(intensity: Int, len: Int): Float = when (intensity) {
         len > 80 -> 1.35f
         else -> 1f
     }
-    // Balanced (0 / default) — the original curve.
+    // Balanced (0 / default) — the original curve, with the low end lowered
+    // (v371) so medium facts (90–150 chars) start getting a little room
+    // instead of waiting for 130+.
     else -> when {
-        len > 500 -> 3.0f
-        len > 380 -> 2.4f
-        len > 280 -> 1.9f
-        len > 200 -> 1.5f
-        len > 130 -> 1.25f
+        len > 520 -> 3.0f
+        len > 400 -> 2.5f
+        len > 300 -> 2.0f
+        len > 220 -> 1.6f
+        len > 150 -> 1.3f
+        len > 90 -> 1.15f
         else -> 1f
     }
 }
@@ -526,7 +534,7 @@ private fun smartAutoFitDelta(
 ): ShareAutoFitDelta {
     if (!AppPreferences.shareAutoFitState) return ShareAutoFitDelta()
     val touched = move.factDx != 0f || move.factDy != 0f ||
-        move.factWidthFrac != 1f || move.factHeightFrac != 1f
+        move.factWidthFrac != 1f || move.factHeightFrac != 1f || move.factScale != 1f
     if (touched) return ShareAutoFitDelta()
     val h = autoFitCurve(move.autoFitIntensity, factLength)
     if (h <= 1f) return ShareAutoFitDelta()
@@ -557,9 +565,39 @@ private fun smartAutoFitDelta(
     val factUp = -kotlin.math.min((h - 1f) * 16f, factUpMax)
     val titleUp = if (titleTouched) 0f else -kotlin.math.min((h - 1f) * 14f, titleUpMax)
     val titleScale = if (titleTouched) 1f else autoTitleScale(style, titleLength)
+    // v371 — the FACT font shrink rides the same growth: once the text is
+    // long enough that the box alone would have to swallow the whole card,
+    // the fact text scales down a little too (per-style floor).
+    val factScale = autoFactScale(style, factLength)
     return ShareAutoFitDelta(
-        heightFrac = h, dy = factUp, titleDy = titleUp, titleScale = titleScale
+        heightFrac = h, dy = factUp, titleDy = titleUp, titleScale = titleScale,
+        factScale = factScale
     )
+}
+
+/** v371 — FACT-font auto-shrink: as the fact text grows past what the box
+ *  alone can hold comfortably, the auto-adjuster scales the FACT font down
+ *  a little per style (never below each design's floor, so long facts stay
+ *  readable). Complements each style's built-in length curve (which only
+ *  kicks in at 180–350+ chars): this starts earlier (~150 chars) and works
+ *  together with the box growth. 1f = no shrink. */
+private fun autoFactScale(style: ShareCardStyle, len: Int): Float {
+    val floor = when (style) {
+        // Paper already bottoms its own curve at 7.5sp — don't double-kill it.
+        ShareCardStyle.PAPER -> 0.90f
+        ShareCardStyle.VINYL, ShareCardStyle.EDITORIAL,
+        ShareCardStyle.NEUMORPHIC, ShareCardStyle.MINIMAL -> 0.86f
+        // Collage / Signature / Custom keep a slightly milder floor.
+        else -> 0.88f
+    }
+    return when {
+        len > 520 -> floor
+        len > 400 -> floor + 0.03f
+        len > 300 -> floor + 0.06f
+        len > 220 -> floor + 0.09f
+        len > 150 -> 0.97f
+        else -> 1f
+    }
 }
 
 /** v370 — long-title shrink: when the fact grows (auto-fit active) a title
@@ -678,7 +716,12 @@ data class ShareCardMove(
     /** v370 — smart auto-fit INTENSITY (see [smartAutoFitDelta]): how much a
      *  long fact grows its box and lifts the title. Overrides the global
      *  pref when non-default. */
-    val autoFitIntensity: Int = 0
+    val autoFitIntensity: Int = 0,
+    /** v371 — the auto-adjuster's FACT-font shrink, captured into the move on
+     *  the first manual grab (the same handoff that seeds the box height) so
+     *  handing auto-fit off doesn't make the text jump back to full size and
+     *  clip mid-drag. 1f = full size. */
+    val factScale: Float = 1f
 )
 
 /** Modifier that shifts a card's TITLE by the move offset + box size + scale and
@@ -1196,6 +1239,12 @@ fun TopicShareCard(
         titleWidthFrac = (effectiveMove.titleWidthFrac * 0.74f).coerceIn(0.2f, 1f),
         titleScale = effectiveMove.titleScale * 0.9f
     ) else effectiveMove
+    // v371 — the auto-adjuster's FACT-font shrink applies on top of the
+    // user's body-size setting: every style renders its fact text at
+    // (style base × bodyScale × autoFit.factScale). Once the user grabs
+    // the fact, the shrink is captured into move.factScale (see the
+    // first-grab seed) so the handoff doesn't make the text jump or clip.
+    val effectiveBodyScale = bodyScale * autoFit.factScale * move.factScale
     // Extract year from trailing parentheses — "Appetite for Destruction (1987)" → "1987"
     val year = topicName.substringAfterLast("(").substringBeforeLast(")").takeIf { it.all { c -> c.isDigit() } && it.length == 4 }
     val palette = paletteFor(accent, toneIndex)
@@ -1210,14 +1259,14 @@ fun TopicShareCard(
     val albumFavTracks = AppPreferences.albumFavTracksState[topicName].orEmpty()
     Box {
         when (style) {
-            ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, layoutMove, chapterProgress, chapterFact, hideTypedFavSong = albumFavTracks.isNotEmpty() && AppPreferences.albumFavStripVisibleState, bgFilter)
-            ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto ?: bookCover, byline, year, polaroidCaption, onPhotoTap, bodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, bodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.CUSTOM -> CustomCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, hideTypedFavSong = albumFavTracks.isNotEmpty() && AppPreferences.albumFavStripVisibleState, bgFilter)
+            ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto ?: bookCover, byline, year, polaroidCaption, onPhotoTap, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.CUSTOM -> CustomCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
         }
         // v334 — the cover badge rides on top of every style EXCEPT Collage
         // (there it feeds the polaroid photo slot above).
@@ -6193,14 +6242,22 @@ private fun ArrangeableCard(
                                     // box doesn't jump when auto-fit hands off
                                     // (manual edits start where auto-fit left).
                                     val untouched = move.factDx == 0f && move.factDy == 0f &&
-                                        move.factWidthFrac == 1f && move.factHeightFrac == 1f
-                                    if (untouched && (autoFitDelta.heightFrac != 1f || autoFitDelta.titleScale != 1f)) {
+                                        move.factWidthFrac == 1f && move.factHeightFrac == 1f &&
+                                        move.factScale == 1f
+                                    if (untouched && (autoFitDelta.heightFrac != 1f || autoFitDelta.titleScale != 1f ||
+                                        autoFitDelta.factScale != 1f)
+                                    ) {
                                         onMove(move.copy(
                                             factHeightFrac = autoFitDelta.heightFrac,
                                             factDy = autoFitDelta.dy,
                                             titleDy = move.titleDy + autoFitDelta.titleDy,
                                             titleScale = move.titleScale * autoFitDelta.titleScale,
-                                            metaDy = move.metaDy + autoFitDelta.dy
+                                            metaDy = move.metaDy + autoFitDelta.dy,
+                                            // v371 — carry the fact-font shrink into the
+                                            // move so the text doesn't pop back to full
+                                            // size (and clip) the moment auto-fit hands
+                                            // over.
+                                            factScale = move.factScale * autoFitDelta.factScale
                                         ))
                                     }
                                 },
@@ -6637,6 +6694,7 @@ fun TopicShareSheet(
                 favWidthFrac = o.optDouble("favWidthFrac", 1.0).toFloat(),
                 favHeightFrac = o.optDouble("favHeightFrac", 1.0).toFloat(),
                 autoFitIntensity = o.optInt("autoFitIntensity", 0),
+                factScale = o.optDouble("factScale", 1.0).toFloat(),
                 // v370 — the fact LAYOUT (condensed / book page / editorial
                 // + drop cap) restores by name; unknown names keep the
                 // style's default.
@@ -6970,6 +7028,7 @@ fun TopicShareSheet(
                 put("titleScale", m.titleScale)
                 put("factFormat", m.factFormat.name); put("factDropCap", m.factDropCap.name)
                 put("autoFitIntensity", m.autoFitIntensity)
+                put("factScale", m.factScale)
             }
             movesObj.put(style.name, o)
         }

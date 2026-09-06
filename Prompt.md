@@ -44,6 +44,19 @@ inaccurate, expanded chapter color is bad, note box too small with expand."
    share cascade) — books fall back iTunes → Open Library; ratings/ISBN
    lookups keep Google Books keyless.
 
+## Follow-up: "does the auto-adjuster expand the box / shrink text?" (fixed)
+
+Checked: it DID expand (line budget) but only past ~130 chars, and the fact
+font never shrank via auto-fit (each style's built-in length curve only
+kicks in at 180–350+ chars). Fixed in `TopicShareCard.kt`: the Balanced
+growth curve now starts at 90 chars (1.15×) and a new `factScale`
+(`autoFactScale`, per-style floors 0.86–0.90, starts ~150 chars) shrinks
+the FACT font on top of the built-in curves, applied via
+`effectiveBodyScale = bodyScale * autoFit.factScale * move.factScale` so
+preview/export/typing-field stay in sync. `factScale` is seeded into
+`ShareCardMove` (persisted, counts as touched) so the manual-grab handoff
+doesn't pop the text back or clip it; Reset restores full size.
+
 ## Notes for the next request
 
 - Changelog (fastlane `20260921.txt`) + app/AGENTS.md v371 bullet updated.
