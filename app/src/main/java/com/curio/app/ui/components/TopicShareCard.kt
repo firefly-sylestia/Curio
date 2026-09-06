@@ -672,9 +672,9 @@ private fun autoLayoutPlan(
 
   if (shape.heightFrac == 0f && titleLift == 0f && collisionFactLift == 0f) return ShareAutoLayoutPlan()
 
-    val (maxHeightFrac, minTextScale) = factFitBudget(style, aspect)
-    val capped = shape.heightFrac >= maxHeightFrac - 0.01f && shape.heightFrac > 1f
-    return (when ((attempt % 4 + 4) % 4) {
+  val (maxHeightFrac, minTextScale) = factFitBudget(style, aspect)
+  val capped = shape.heightFrac >= maxHeightFrac - 0.01f && shape.heightFrac > 1f
+  return (when ((attempt % 4 + 4) % 4) {
         0 -> ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale)
         1 -> ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale, format = ShareCardFactFormat.CONDENSED)
         2 -> ShareAutoLayoutPlan(
@@ -7259,8 +7259,14 @@ private fun ArrangeableCard(
                                     val bx = t.left - move.titleDx
                                     val by = t.top - move.titleDy + move.titleLift
                                     val othersT = alignOthers(t)
-                                    val xs = magnetAxis(bx, t.width, cw, -bx, cw - bx - t.width, (move.titleDx + dx).coerceIn(-bx, cw - bx - t.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersT, bx, t.width))
-                                    val ys = magnetAxis(by, t.height, ch, -by, ch - by - t.height, (move.titleDy + dy).coerceIn(-by, ch - by - t.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersT, by, t.height))
+                                    val xs = magnetAxis(bx, t.width, cw, -bx, cw - bx - t.width, (move.titleDx + dx).coerceIn(
+                                        minOf(-bx, cw - bx - t.width),
+                                        maxOf(-bx, cw - bx - t.width)
+                                    ), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersT, bx, t.width))
+                                    val ys = magnetAxis(by, t.height, ch, -by, ch - by - t.height, (move.titleDy + dy).coerceIn(
+                                        minOf(-by, ch - by - t.height),
+                                        maxOf(-by, ch - by - t.height)
+                                    ), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersT, by, t.height))
                                     dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
                                     onMove(move.copy(titleDx = xs.offset, titleDy = ys.offset))
                                 },
@@ -7301,8 +7307,14 @@ private fun ArrangeableCard(
                                     val bx = f.left - move.factDx
                                     val by = f.top - move.factDy
                                     val othersF = alignOthers(f)
-                                    val xs = magnetAxis(bx, f.width, cw, -bx, cw - bx - f.width, (move.factDx + dx).coerceIn(-bx, cw - bx - f.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersF, bx, f.width))
-                                    val ys = magnetAxis(by, f.height, ch, -by, ch - by - f.height, (move.factDy + dy).coerceIn(-by, ch - by - f.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersF, by, f.height))
+                                    val xs = magnetAxis(bx, f.width, cw, -bx, cw - bx - f.width, (move.factDx + dx).coerceIn(
+                                        minOf(-bx, cw - bx - f.width),
+                                        maxOf(-bx, cw - bx - f.width)
+                                    ), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersF, bx, f.width))
+                                    val ys = magnetAxis(by, f.height, ch, -by, ch - by - f.height, (move.factDy + dy).coerceIn(
+                                        minOf(-by, ch - by - f.height),
+                                        maxOf(-by, ch - by - f.height)
+                                    ), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersF, by, f.height))
                                     dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
                                     // v371 — COLLISION-PUSH (replaces the old
                                     // always-grouped move): the title + info
