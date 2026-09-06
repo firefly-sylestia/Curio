@@ -1143,6 +1143,27 @@ app/src/main/java/com/curio/app/
     became ONE feathered zone — low-amplitude wave path + vertical
     gradient whose top starts TRANSPARENT (no hard line) and a footer
     wave filled with a transparent→deep gradient (soft melt).
+- **v383 — Link share + fact box grows past the design column.** Two
+  user asks: (1) "when sharing the topic add a deep link style share": the
+  share sheet's actions row gained a **Link** pill that opens a small
+  caption editor (pre-seeded with the topic name); posting it shares an
+  ACTION_SEND text = your message + the URL. The URL comes from
+  `com.curio.app.data.shareLinkForTopic`: albums/artists/songs build the
+  search URL of the music service picked in Settings (re-read at share
+  time), everything else the topic's Google search. Callers (reveal,
+  entry detail, Share Hub) pass it via the new `TopicShareSheet.shareLinkUrl`
+  param; the caption dialog shows the link being sent, then dismisses the
+  sheet. (2) "the box width can be expanded": the Fact-width slider now
+  runs 0.3x–1.2x (was capped 1.0). `moveFact` renders through a custom
+  layout: at <= 1x it measures exactly like the old fillMaxWidth (child
+  wraps naturally, placed at 0) so no card changes; past 1x it measures
+  the pane at columnWidth × frac and recentres the overhang, letting the
+  box eat the design's side gutters that used to sit empty. Render-path
+  caps in `effectiveMove`/`boxScaledMove` rose 1f → 1.2f so the setting
+  survives smart-fit/box-scale folding; the untouched auto-fit seed still
+  clamps at 1x. Also folded in: the v382 CI compile fix (Signature SIDE
+  centred its cover with `Modifier.align` inside a nested Box, which the
+  compiler rejected — now `Box(contentAlignment = Alignment.Center)`).
 - **v382 — Signature covers are GLUED (no more cover over the badge/title).**
   User: "the signature styles are bad with the cover — it overlaps the
   badge/title". Signature joined the glued-cover set (`glueCoverStyle` + the

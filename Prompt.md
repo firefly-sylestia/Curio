@@ -1,32 +1,44 @@
 # Prompt Log — current request
 
-## Request (2026-09-06, active → v380/v381 pushed, v382 committing)
+## Request (2026-09-06, active → v383 committing)
 
-Share-card editor refinement cycle.
+Share-card refinement cycle — continuing from v379d–v382 (all pushed):
+smart-fit honesty, auto-layout sparkle pill, title-ownership (overlap
+freedom), Signature glued covers. This round added two brand-new asks on
+top plus a CI fix for v382.
 
-- ✅ v380 (`8f8bef52`): hand-placed title owns its spot — drag anywhere
-  incl. over/into the quick-fact box, no bounce-back (new persisted
-  `titlePlaced`; drag-end folds the auto lift into titleDy).
-- ✅ v381 (`3c32ed7c`): pill 9:16 flip = longer box + bigger text
-  (factScale 1.18, height ≈ tall budget ×1.4); sparkle pill opaque with
-  hairline ring (shadow halo gone); Collage dark-tone-aware layers
-  (field/band/pill crushed toward black on Midnight/Ember so light accent
-  no longer floods the bottom), torn seam visible on dark paper,
-  polaroid caption fixed warm-dark ink, bottom band/footer blended via
-  feathered gradients.
-- ✅ v382 (THIS COMMIT): **Signature covers are glued.** User confirmed the
-  cover "overlaps the badge/title". Signature joined `glueCoverStyle` and
-  dropped the generic overlay: `SignatureCard` now receives `coverArt`/
-  `coverW`/`coverH` and renders the jacket INSIDE its title block per
-  layout (`TitleAndMeta(centered)`; `TitleText`/`MetaText` gained a
-  `glued` flag; SIDE stacks the cover centred above the title in the
-  narrow left panel; no-cover paths pixel-identical). Cover rides title
-  drags/collisions/lift via `glueTitleMove` like Paper/Clean/Editorial/
-  Minimal. Only Custom still uses the overlay pocket.
-
-### Next (user-declared)
-- Signature BACKGROUND treatment round (user: "then we will do the
-  background of signature card styles") — separate upcoming pass, likely
-  needs the design direction discussed.
-- Watch for any CI result after these pushes (user said earlier "no need
-  to watch the cl" — CI still runs on push).
+- ✅ v379d–v382 pushed (`3fcfa4fa` … `aad184ba`): pill + smart-fit text-first
+  + reset restores fit + factZoom removed + whole-box sliders removed +
+  title-height hides for short titles + dark-text frostInk + Paper quote
+  ink + fact-line parity, hand-placed title owns its spot (no bounce),
+  pill 9:16 bigger text, Collage dark-tone + blended tear, Signature
+  covers glued.
+- ✅ v383 (THIS COMMIT): **Link share + fact-width > 100% + v382 CI fix.**
+  1. **Link share** (user: \"deep link style share — open it and it opens the
+     topic; I choose the text\"; answered: albums+artists+songs → music
+     service, others → Google; URL + editable caption). `ExploreSearch.kt`
+     gained `shareLinkForTopic(topic)` (re-reads the Settings MusicService
+     at share time). `TopicShareSheet` gained `shareLinkUrl: (() -> String)?`
+     + a Link pill in the actions row (link icon, opens a caption dialog
+     seeded with the topic name, shows the tap-to-open URL in a preview
+     chip, Share posts ACTION_SEND of caption+URL and dismisses). Wired all
+     three callers: TopicRevealScreen (`floatingTopic`), EntryDetailScreen
+     (`resolvedEntry.topic`), ShareHubScreen (`topic`).
+  2. **Fact width past 100%** (user: \"box looks small, side space unused,
+     width caps at default\"; asked where → \"paper mainly then others\").
+     Fact-width sliders (full-screen + sheet Crop) now run 0.3x–1.2x
+     (steps 89). `moveFact` uses a custom layout: ≤1x = identical to old
+     fillMaxWidth (natural wrap, place 0 — zero pixel change for existing
+     cards); >1x = measure pane at columnWidth×frac and recentre the
+     overhang so the box eats the design's side gutters. Render-path
+     `effectiveMove`/`boxScaledMove` width clamps raised 1f → 1.2f; the
+     untouched auto-fit seed stays ≤1x. Note: a phantom \"+1 brace\" scare
+     was a scanner artifact from a nested-quote `${topicName...\" (\"...}`
+     template (line ~10024) — replaced with a precomputed `displayTopic`
+     val (cleaner Kotlin, file verified balanced with a real stack scan).
+  3. **CI fix for v382**: Signature SIDE layout used
+     `Modifier.align(Alignment.CenterHorizontally)` inside a nested
+     Box — compile error \"cannot be called in this context with an implicit
+     receiver\". Fixed with `Box(contentAlignment = Alignment.Center)`.
+- NEXT UP (user-declared): the dedicated Signature background treatment
+  round.

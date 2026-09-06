@@ -1115,6 +1115,9 @@ fun TopicRevealScreen(
                     // TVMaze → iTunes posters, same as the reveal posters).
                     isAlbumTopic = cat.id == CategoryId.ALBUMS,
                     isSeriesTopic = cat.id == CategoryId.SERIES,
+                    // v383 — LINK share: albums/artists/songs post the music
+                    // service the user picked; everything else posts Google.
+                    shareLinkUrl = { com.curio.app.data.shareLinkForTopic(floatingTopic) },
                     // v328 — BOOK share cards: hand the chapters so the
                     // editor can offer Reading progress / Chapter review.
                     bookChapters = if (cat.id == CategoryId.BOOKS) floatingTopic.chapters.orEmpty()

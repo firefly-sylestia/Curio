@@ -453,6 +453,9 @@ fun ShareHubScreen(navController: NavController) {
                 // / TVMaze → iTunes, same as the reveal posters).
                 isAlbumTopic = resolvedCat.id == CategoryId.ALBUMS,
                 isSeriesTopic = resolvedCat.id == CategoryId.SERIES,
+                // v383 — LINK share: albums/artists/songs post the music
+                // service the user picked; everything else posts Google.
+                shareLinkUrl = { com.curio.app.data.shareLinkForTopic(topic) },
                 initialStyle = styleIndex,
                 initialClassicSignature = design.classic
             )

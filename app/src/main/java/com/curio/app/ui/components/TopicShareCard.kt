@@ -884,7 +884,36 @@ private fun Modifier.moveTitle(m: ShareCardMove): Modifier {
 private fun Modifier.moveFact(m: ShareCardMove): Modifier {
     var mod = this
     if (m.factDx != 0f || m.factDy != 0f) mod = mod.offset(x = m.factDx.dp, y = m.factDy.dp)
-    mod = mod.fillMaxWidth(m.factWidthFrac.coerceIn(0.2f, 1f))
+    // v383 — the fact can grow PAST the design's content column: the Fact-width
+    // slider now runs to 1.2x. fillMaxWidth caps at the column width, so past
+    // 1.0 the body is measured at columnWidth x frac inside a custom layout and
+    // recentred — the pane eats the side gutters that used to sit empty. At
+    // <= 1.0 the layout is exactly the old fillMaxWidth behaviour (measured
+    // against a maxWidth of target, child wraps naturally, placed at 0), so
+    // every existing card renders pixel-for-pixel as before.
+    val w = m.factWidthFrac.coerceIn(0.2f, 1.2f)
+    mod = mod.layout { measurable, constraints ->
+        val maxW = constraints.maxWidth
+        val target = (maxW * w).roundToInt()
+        if (target <= maxW) {
+            val placeable = measurable.measure(
+                androidx.compose.ui.unit.Constraints(
+                    minWidth = 0, maxWidth = target,
+                    minHeight = 0, maxHeight = constraints.maxHeight
+                )
+            )
+            layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+        } else {
+            val placeable = measurable.measure(
+                androidx.compose.ui.unit.Constraints(
+                    minWidth = target, maxWidth = target,
+                    minHeight = 0, maxHeight = constraints.maxHeight
+                )
+            )
+            val over = (target - maxW) / 2
+            layout(target, placeable.height) { placeable.place(-over, 0) }
+        }
+    }
     return mod
 }
 
@@ -1558,16 +1587,20 @@ fun TopicShareCard(
     val effectiveMove = if (autoFit.heightFrac == 1f && autoFit.widthFrac == 1f) move
     else move.copy(
         factHeightFrac = move.factHeightFrac * autoFit.heightFrac,
-        factWidthFrac = (move.factWidthFrac * autoFit.widthFrac).coerceIn(0.2f, 1f)
+        // v383 — the width cap rises to 1.2 so a manual Fact-width setting
+        // survives smart-fit growth (auto growth itself stays <= 1, and the
+        // untouched-fact seed below still clamps at 1).
+        factWidthFrac = (move.factWidthFrac * autoFit.widthFrac).coerceIn(0.2f, 1.2f)
     )
     // v373 — the INDEPENDENT whole-box scale multiplies BOTH dimensions on
     // top of the width/height fractions (and any auto-fit growth), so the
     // Whole-box slider scales the box as one without re-reading the width
-    // or height values. Width still clamps at the card edge (full width).
+    // or height values. v383 — width now clamps at the new 1.2x cap (the
+    // Fact-width slider runs past the design column into the side gutters).
     val boxScaledMove = effectiveMove.copy(
         titleWidthFrac = (effectiveMove.titleWidthFrac * move.titleBoxScale).coerceIn(0.2f, 1f),
         titleHeightFrac = effectiveMove.titleHeightFrac * move.titleBoxScale,
-        factWidthFrac = (effectiveMove.factWidthFrac * move.factBoxScale).coerceIn(0.2f, 1f),
+        factWidthFrac = (effectiveMove.factWidthFrac * move.factBoxScale).coerceIn(0.2f, 1.2f),
         factHeightFrac = effectiveMove.factHeightFrac * move.factBoxScale,
         favWidthFrac = (effectiveMove.favWidthFrac * move.favBoxScale).coerceIn(0.3f, 1.2f),
         favHeightFrac = effectiveMove.favHeightFrac * move.favBoxScale
@@ -3911,8 +3944,8 @@ private fun SignatureCard(
                         CategoryBadge()
                         Spacer(Modifier.height(sig.titleTopSpacer))
                         if (coverArt != null) {
-                            Box(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
-                                GluedCover(coverArt, coverW, coverH, move, callbacks, modifier = Modifier.align(Alignment.CenterHorizontally))
+                            Box(Modifier.fillMaxWidth().padding(vertical = 6.dp), contentAlignment = Alignment.Center) {
+                                GluedCover(coverArt, coverW, coverH, move, callbacks)
                             }
                         }
                         TitleText()
@@ -7573,7 +7606,17 @@ fun TopicShareSheet(
     // get it). When set, the caller supplies its own payload (the detail view
     // sends the entry's decorated text); otherwise the sheet builds a default
     // topic + fact payload from its own params.
-    shareAsText: (() -> String)? = null
+    shareAsText: (() -> String)? = null,
+    // v383 — LINK share: the caller supplies the URL a Link share posts (see
+    // [com.curio.app.data.shareLinkForTopic]: music topics → the music
+    // service the user picked in Settings; everything else → Google search
+    // of the topic). Evaluated at share time so the current service wins.
+    // When null the sheet falls back to a plain Google search of the topic
+    // name. The Link share opens a small caption editor: the user types the
+    // message words and the link rides at the end — receiving apps show the
+    // URL as the tap-to-open link (the OS can't hide a URL behind custom
+    // text; the caption is what the sender controls).
+    shareLinkUrl: (() -> String)? = null
 ) {
     // Per-share state — plain remember (not Bundle-saveable): the modal
     // resets these each time it opens, and enums/ImageBitmap aren't Bundle-
@@ -7599,6 +7642,11 @@ fun TopicShareSheet(
     // Share Hub can open the sheet on the picked design.
     var styleIdx by remember { mutableIntStateOf(initialStyle) }
     var classicDesign by remember { mutableStateOf(initialClassicSignature) }
+    // v383 — LINK share: the caption editor dialog + the user's message.
+    // rememberSaveable so the typed words survive a rotation while the sheet
+    // is open (same convention as [customText]).
+    var showLinkDialog by remember { mutableStateOf(false) }
+    var linkCaption by rememberSaveable { mutableStateOf("") }
     // Inline edit mode (Paper) — per-share only; resets when the sheet closes.
     // Plain remember: edits are a per-share tweak (not Bundle-saveable) and the
     // modal resets them each time, so they should not survive a rotation.
@@ -9095,7 +9143,7 @@ fun TopicShareSheet(
                                                                 SizeSliderColumn("Title height", move.titleHeightFrac, { updateMove(move.copy(titleHeightFrac = it)) }, 0.35f..2.5f, steps = 26, modifier = Modifier.fillMaxWidth())
                                                             }
                                                         } else {
-                                                            SizeSliderColumn("Fact width", move.factWidthFrac, { updateMove(move.copy(factWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
+                                                            SizeSliderColumn("Fact width", move.factWidthFrac, { updateMove(move.copy(factWidthFrac = it)) }, 0.3f..1.2f, steps = 89, modifier = Modifier.fillMaxWidth())
                                                             // v379d — folded height thumb (see the sheet's Crop tool for the
                                                             // rationale): shows the smart-fit-grown height, writes the base.
                                                             val fsFitH = smartAutoFitDelta(
@@ -9304,7 +9352,7 @@ fun TopicShareSheet(
                                         SizeSliderColumn("Title height", move.titleHeightFrac, { updateMove(move.copy(titleHeightFrac = it)) }, 0.35f..2.5f, steps = 26, modifier = Modifier.fillMaxWidth())
                                     }
                                 } else if (isFact) {
-                                    SizeSliderColumn("Fact width", move.factWidthFrac, { updateMove(move.copy(factWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
+                                    SizeSliderColumn("Fact width", move.factWidthFrac, { updateMove(move.copy(factWidthFrac = it)) }, 0.3f..1.2f, steps = 89, modifier = Modifier.fillMaxWidth())
                                     // v369/v370 — the fact box height range runs
                                     // to 6x so tall 9:16 cards can expand a long
                                     // fact far past the old 2.5x cap.
@@ -9965,7 +10013,111 @@ fun TopicShareSheet(
                         Text("Text", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
+                // v383 — LINK share: opens a tiny caption editor, then posts
+                // your words + the topic's link (Google search — or, for
+                // albums/songs/artists, the music service you picked in
+                // Settings). Receiving apps render the URL as the tap-to-open
+                // link at the end of your message.
+                Surface(onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                    if (linkCaption.isBlank()) {
+                        linkCaption = topicName.substringBeforeLast(" (").trim()
+                    }
+                    showLinkDialog = true
+                }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(44.dp)) {
+                    Row(Modifier.padding(horizontal = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        CurioIcon(name = "link", tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 16.dp)
+                        Text("Link", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
             }
+            }
+            // v383 — the Link caption editor (a separate window; placed here so
+            // it dismisses cleanly above the sheet, like the Enlarge editor).
+            if (showLinkDialog) {
+                // Evaluated on open so the CURRENT Settings choice wins.
+                val linkUrl = shareLinkUrl?.invoke()
+                    ?: ("https://www.google.com/search?q=" + android.net.Uri.encode(topicName.substringBeforeLast(" (").trim()))
+                // Display name without the trailing " (author)" note, reused below so
+                // the message template carries no nested-quote escapes.
+                val displayTopic = topicName.substringBeforeLast(" (").trim()
+                androidx.compose.ui.window.Dialog(
+                    onDismissRequest = { showLinkDialog = false },
+                    properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = true)
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(28.dp),
+                        color = MaterialTheme.colorScheme.surface,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(Modifier.fillMaxWidth().padding(20.dp)) {
+                            Text("Share a link", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold), color = MaterialTheme.colorScheme.onSurface)
+                            Spacer(Modifier.height(6.dp))
+                            Text(
+                                "Say something about $displayTopic — the link rides at the end of your message.",
+                                style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
+                                maxLines = 2, overflow = TextOverflow.Ellipsis
+                            )
+                            Spacer(Modifier.height(12.dp))
+                            OutlinedTextField(
+                                value = linkCaption,
+                                onValueChange = { linkCaption = it },
+                                label = { Text("Your message") },
+                                placeholder = { Text("e.g. Loved this one — you should check it out") },
+                                minLines = 2, maxLines = 5,
+                                textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                                shape = RoundedCornerShape(14.dp),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            // Link preview — the tap-to-open URL that rides along.
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)).padding(horizontal = 10.dp, vertical = 8.dp)
+                            ) {
+                                CurioIcon(name = "link", tint = MaterialTheme.colorScheme.primary, size = 14.dp)
+                                Text(
+                                    linkUrl,
+                                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.primary),
+                                    maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f)
+                                )
+                            }
+                            Spacer(Modifier.height(16.dp))
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                                TextButton(onClick = { showLinkDialog = false }) {
+                                    Text("Cancel", fontWeight = FontWeight.Bold)
+                                }
+                                Spacer(Modifier.width(8.dp))
+                                Button(
+                                    onClick = {
+                                        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                                        val body = buildString {
+                                            val c = linkCaption.trim()
+                                            if (c.isNotEmpty()) {
+                                                append(c)
+                                                append("\n\n")
+                                            }
+                                            append(linkUrl)
+                                        }
+                                        val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                            type = "text/plain"
+                                            putExtra(android.content.Intent.EXTRA_SUBJECT, topicName)
+                                            putExtra(android.content.Intent.EXTRA_TEXT, body)
+                                        }
+                                        context.startActivity(android.content.Intent.createChooser(intent, "Share link"))
+                                        showLinkDialog = false
+                                        onDismiss()
+                                    },
+                                    shape = RoundedCornerShape(50),
+                                    colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimary)
+                                ) {
+                                    Text("Share link", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold))
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

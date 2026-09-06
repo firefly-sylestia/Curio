@@ -1511,6 +1511,9 @@ private fun BoxScope.DetailStickyBar(
                 // share editor too (same keyless resolvers as the reveal).
                 isAlbumTopic = resolvedEntry.topic.categoryId == com.curio.app.data.CategoryId.ALBUMS,
                 isSeriesTopic = resolvedEntry.topic.categoryId == com.curio.app.data.CategoryId.SERIES,
+                // v383 — LINK share: albums/artists/songs post the music
+                // service the user picked; everything else posts Google.
+                shareLinkUrl = { com.curio.app.data.shareLinkForTopic(resolvedEntry.topic) },
                 // Detail's plain-text payload stays the entry-aware one —
                 // quote mode sends just the quote + author.
                 shareAsText = { entryShareText(resolvedEntry, category, isQuote = detailIsQuotes) }
