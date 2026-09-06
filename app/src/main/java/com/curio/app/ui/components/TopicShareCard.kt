@@ -819,7 +819,6 @@ private fun factBodyStyle(base: TextStyle, m: ShareCardMove): TextStyle {
  *  EDITORIAL as a drop-cap paragraph (see [EditorialDropCapBlock]). The
  *  caller's modifier (moveFact + bounds reporting) rides the same node so
  *  the preview and the exported image match. */
-@Composable
 // v375 — translucent amber marker for span HIGHLIGHTS on the card's fact
 // text (Save-your-take's paper-amber highlighter idea, tuned a touch deeper
 // so it reads over the cream card surfaces too).
@@ -899,6 +898,7 @@ private fun spansFromJson(arr: org.json.JSONArray?): List<TextSpan> {
     }
 }
 
+@Composable
 private fun FactBody(
     text: String,
     style: TextStyle,
@@ -6302,7 +6302,7 @@ private fun ArrangeableCard(
     // Re-seed only when the sheet pushes DIFFERENT text (e.g. switching the
     // active content) — typing echoes back the same text so the selection /
     // caret survive every keystroke (the RichTextEditor pattern).
-    LaunchedEffect(editFact, richFactTools) {
+    androidx.compose.runtime.LaunchedEffect(editFact, richFactTools) {
         if (richFactTools && richFactTfv.text != editFact) {
             richFactTfv = androidx.compose.ui.text.input.TextFieldValue(
                 editFact,
