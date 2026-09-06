@@ -616,14 +616,19 @@ private fun ShareCardPalette.frostInk(): Color {
 // ═══════════════════════════════════════════════════════════════════════
 /** One auto-layout candidate: what the pill commits for a given attempt.
  *  Zero fields mean "leave that channel alone". */
-private data class ShareAutoLayoutPlan(
+    private data class ShareAutoLayoutPlan(
     val heightFrac: Float = 0f,
     val textScale: Float = 0f,
+    val titleLift: Float = 0f,
     val format: ShareCardFactFormat? = null,
+
     // true → switch the CARD itself to 9:16 (only offered when the current
     // aspect is 3:4 and the text still overflows a fully-fitted 3:4 card).
     val tall: Boolean = false
 )
+
+private fun ShareAutoLayoutPlan.withTitleLift(lift: Float): ShareAutoLayoutPlan =
+    if (lift <= 0f) this else copy(titleLift = lift)
 
 /** v379e — the pill's attempt → plan table, layered over the TEXT-FIRST
  *  [autoFitShape]: 0 = the plain fit itself; 1 = the same fit with
@@ -638,12 +643,16 @@ private fun autoLayoutPlan(
     len: Int,
     attempt: Int,
     currentFormat: ShareCardFactFormat
-): ShareAutoLayoutPlan {
+    ): ShareAutoLayoutPlan {
     val shape = autoFitShape(style, aspect, len)
+    // A grown fact box consumes the vertical gap above it. Keep the title
+    // out of that collision as part of the same atomic auto-layout commit.
+    val titleLift = ((shape.heightFrac - 1f) * 28f).coerceIn(0f, 56f)
+
     if (shape.heightFrac == 0f) return ShareAutoLayoutPlan()
     val (maxHeightFrac, minTextScale) = factFitBudget(style, aspect)
     val capped = shape.heightFrac >= maxHeightFrac - 0.01f && shape.heightFrac > 1f
-    return when ((attempt % 4 + 4) % 4) {
+    return (when ((attempt % 4 + 4) % 4) {
         0 -> ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale)
         1 -> ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale, format = ShareCardFactFormat.CONDENSED)
         2 -> ShareAutoLayoutPlan(
@@ -670,7 +679,7 @@ private fun autoLayoutPlan(
                 ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale, format = ShareCardFactFormat.STANDARD)
             else -> ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale)
         }
-    }
+    }).withTitleLift(titleLift)
 }
 
 /** v379d — the floating sparkle pill: round button at the card's top-end
@@ -5422,7 +5431,7 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             footerSpacer = 8.dp, footerFont = AntonFontFamily, footerColor = Color(0xFFE8A5A0).copy(alpha = 0.65f),
             layout = SignatureLayout.POSTER
         )
-        // ═══ FOOD — table, Corben title ═══
+        // ══�� FOOD — table, Corben title ═══
         cat == "FOOD" -> SignatureDesign(
             bg = Color(0xFF1A140E), cornerRadius = 8f,
             drawBackground = { w, h ->
@@ -9986,7 +9995,7 @@ fun TopicShareSheet(
                 // Share button
                 Button(onClick = {
                     haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                    shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
+                    shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, shareText = shareLinkUrl?.invoke(), card = {
                         TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, factSpans = if (isQuotes) emptyList() else cardFactRenderSpans)
                     })
                         persistEdits()
