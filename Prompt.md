@@ -16,6 +16,8 @@ already has, ALL text tools in ONE menu).
 
 ## Implemented (this turn, commit pending)
 
+5. **CI compile fix** — Removed the duplicate `modifier` named argument from the two full-screen text-tool rows in `TopicShareCard`; the padding now belongs in each row's modifier chain.
+
 1. **Corner drag = true ZOOM** — `ShareCardMove.factZoom` (0.5–4×): the
    fact's corner grip scales the box AND the fact font together
    (photo-zoom); `effectiveBodyScale` includes `move.factZoom` so preview,

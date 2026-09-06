@@ -2344,7 +2344,7 @@ private fun CollageCard(
                     drawRect(sheen, Offset(5f, 5f), Size(pws - 10f, phs * 0.68f))
                 }
 
-                // Handwritten name below photo — constrained width + lineHeight
+                // Handwritten name below photo �� constrained width + lineHeight
                 // >= fontSize so long captions ellipsize (not clip) and never squish.
                 val capFont = (pW * 0.065f).coerceIn(11f, 15f)
                 Text(polaroidLabel, style = TextStyle(
@@ -7694,7 +7694,7 @@ fun TopicShareSheet(
                                                 } else {
                                                     // Font
                                                     Text("Font", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
-                                                    Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(12.dp)) {
+                                                    Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()).padding(12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                                         shareFonts.forEach { f ->
                                                             val selF = if (fsIsTitle) move.titleFont == f.family else move.factFont == f.family
                                                             Pill(f.label, CurioIcons.FormatText, selF) {
@@ -7752,7 +7752,7 @@ fun TopicShareSheet(
                                                     // Fact format (quick/custom fact only)
                                                     if (fsIsFact) {
                                                         Text("Fact format", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
-                                                        Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(12.dp)) {
+                                                        Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()).padding(12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                                             ShareCardFactFormat.entries.forEach { fmt ->
                                                                 Pill(fmt.label, CurioIcons.FormatText, move.factFormat == fmt) {
                                                                     updateMove(move.copy(factFormat = fmt))
