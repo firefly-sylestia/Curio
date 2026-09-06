@@ -6750,21 +6750,26 @@ private fun ArrangeableCard(
                                             horizontalArrangement = Arrangement.spacedBy(2.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
+                                            // v379b — the bar's visibility gate is
+                                            // now `format != null || underline !=
+                                            // null`, so the format callback is NO
+                                            // longer smart-cast here: safe-invoke +
+                                            // per-button enable like the U button.
                                             FormatToolButton(
                                                 icon = CurioIcons.FormatBold,
                                                 label = "Bold",
                                                 active = spansFullyCovered(factSpans, s, e, RichFlag.BOLD),
                                                 accent = MaterialTheme.colorScheme.primary,
-                                                enabled = true,
-                                                onClick = { onFormatFactSelection(s, e, RichFlag.BOLD) }
+                                                enabled = onFormatFactSelection != null,
+                                                onClick = { onFormatFactSelection?.invoke(s, e, RichFlag.BOLD) }
                                             )
                                             FormatToolButton(
                                                 icon = CurioIcons.FormatItalic,
                                                 label = "Italic",
                                                 active = spansFullyCovered(factSpans, s, e, RichFlag.ITALIC),
                                                 accent = MaterialTheme.colorScheme.primary,
-                                                enabled = true,
-                                                onClick = { onFormatFactSelection(s, e, RichFlag.ITALIC) }
+                                                enabled = onFormatFactSelection != null,
+                                                onClick = { onFormatFactSelection?.invoke(s, e, RichFlag.ITALIC) }
                                             )
                                             // v379 — UNDERLINE rides the same
                                             // floating bar, toggling its own
@@ -6783,8 +6788,8 @@ private fun ArrangeableCard(
                                                 label = "Highlight",
                                                 active = spansFullyCovered(factSpans, s, e, RichFlag.HIGHLIGHT),
                                                 accent = MaterialTheme.colorScheme.primary,
-                                                enabled = true,
-                                                onClick = { onFormatFactSelection(s, e, RichFlag.HIGHLIGHT) }
+                                                enabled = onFormatFactSelection != null,
+                                                onClick = { onFormatFactSelection?.invoke(s, e, RichFlag.HIGHLIGHT) }
                                             )
                                         }
                                     }
