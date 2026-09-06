@@ -221,6 +221,8 @@ object AppPreferences {
     private const val KEY_BOOK_COVER_DONE = "book_cover_done"
     // v362 — per-chapter PERSONAL notes (book name → chapter number → text).
     private const val KEY_BOOK_CHAPTER_NOTES = "book_chapter_notes"
+    // v375 — rich runs per chapter note (mirrors KEY_BOOK_CHAPTER_NOTES).
+    private const val KEY_BOOK_CHAPTER_NOTE_SPANS = "book_chapter_note_spans"
     private const val KEY_BOOK_RATINGS = "book_ratings"               // JSON object name->avg rating
     private const val KEY_BOOK_RATINGS_COUNT = "book_ratings_count"    // JSON object name->ratings count
     // v328 — per-book reading progress: JSON object book name -> number of
@@ -245,6 +247,21 @@ object AppPreferences {
     // share card prefer this over the bare Open Library fallback so
     // hub-fetched covers appear on the reveal instead of a placeholder.
     private const val KEY_BOOK_COVER_URLS = "book_cover_urls"
+    // v375 — NOTES-SHEET palette memory: the cover-art swatches extracted for
+    // a URL are cached per URL (JSON obj url → JSON array of 7 ARGB ints:
+    // vibrant, muted, darkVibrant, darkMuted, lightVibrant, lightMuted,
+    // dominant; 0 = absent). Reopening a notes sheet seeds its palette from
+    // this cache INSTANTLY instead of flashing the category tint and only
+    // switching to the cover palette after the swatch fetch finishes, and
+    // the palette survives restarts.
+    private const val KEY_COVER_SWATCH_CACHE = "cover_swatch_cache"
+    // v375 — the LAST RESOLVED artwork/poster URL per notes sheet (keyed
+    // "album|<name>" / "series|<name>"). Albums and series have no authored
+    // imageUrl, so every open used to re-resolve the art (iTunes / TVMaze)
+    // before the palette could even be looked up — the "switches after a
+    // second" lag. The resolved URL is persisted so a revisit skips the
+    // lookup and goes straight to the (also cached) swatches.
+    private const val KEY_SHEET_ART_URLS = "sheet_art_urls"
     // v8.34 — custom pet design (Pet designer playground): the imported
     // design's full text (palette + body/curled grids). Always-on when
     // saved — the pet sprite renders this instead of the default until the
@@ -453,6 +470,76 @@ object AppPreferences {
         bookChapterNotesState = cur
     }
 
+    // ── Book chapter note RICH SPANS (v375) ─────────────────────────────
+    // Mirrors KEY_BOOK_CHAPTER_NOTES 1:1 (book name → chapter number → runs):
+    // the formatted bold/italic/highlight runs that style a note's text.
+    // Written by the enlarged note editor together with the text so
+    // "Share as Chapter review" carries the formatting onto the share card.
+    fun getBookChapterNoteSpans(context: Context): Map<String, Map<Int, List<TextSpan>>> {
+        val raw = prefs(context).getString(KEY_BOOK_CHAPTER_NOTE_SPANS, null) ?: return emptyMap()
+        return runCatching {
+            val obj = org.json.JSONObject(raw)
+            val out = LinkedHashMap<String, Map<Int, List<TextSpan>>>()
+            val keys = obj.keys()
+            while (keys.hasNext()) {
+                val k = keys.next()
+                val inner = obj.optJSONObject(k) ?: continue
+                val notes = LinkedHashMap<Int, List<TextSpan>>()
+                val inKeys = inner.keys()
+                while (inKeys.hasNext()) {
+                    val num = inKeys.next().toIntOrNull() ?: continue
+                    val arr = inner.optJSONArray(num.toString()) ?: continue
+                    if (arr.length() == 0) continue
+                    val spans = (0 until arr.length()).mapNotNull { i ->
+                        val so = arr.optJSONObject(i) ?: return@mapNotNull null
+                        val s = so.optInt("s", 0)
+                        val e = so.optInt("e", 0)
+                        if (e <= s) null
+                        else TextSpan(
+                            s, e,
+                            so.optBoolean("b", false),
+                            so.optBoolean("i", false),
+                            so.optBoolean("h", false),
+                            so.optDouble("fs", Double.NaN).takeIf { !it.isNaN() }?.toFloat()
+                        )
+                    }
+                    if (spans.isNotEmpty()) notes[num] = spans
+                }
+                if (notes.isNotEmpty()) out[k] = notes
+            }
+            out
+        }.getOrDefault(emptyMap())
+    }
+
+    /** Save (or clear) the rich runs for [chapterNumber] of [bookName]. */
+    fun setBookChapterNoteSpans(context: Context, bookName: String, chapterNumber: Int, spans: List<TextSpan>) {
+        val cur = getBookChapterNoteSpans(context).toMutableMap()
+        val notes = (cur[bookName] ?: emptyMap()).toMutableMap()
+        if (spans.isEmpty()) notes.remove(chapterNumber) else notes[chapterNumber] = spans
+        if (notes.isEmpty()) cur.remove(bookName) else cur[bookName] = notes
+        val obj = org.json.JSONObject()
+        cur.forEach { (name, map) ->
+            val inner = org.json.JSONObject()
+            map.forEach { (num, list) ->
+                val arr = org.json.JSONArray()
+                list.forEach { sp ->
+                    val o = org.json.JSONObject()
+                    o.put("s", sp.start)
+                    o.put("e", sp.end)
+                    if (sp.bold) o.put("b", true)
+                    if (sp.italic) o.put("i", true)
+                    if (sp.highlight) o.put("h", true)
+                    sp.fontSizeSp?.let { o.put("fs", it.toDouble()) }
+                    arr.put(o)
+                }
+                inner.put(num.toString(), arr)
+            }
+            obj.put(name, inner)
+        }
+        prefs(context).edit().putString(KEY_BOOK_CHAPTER_NOTE_SPANS, obj.toString()).apply()
+        bookChapterNoteSpansState = cur
+    }
+
     // ── Series episode likes (v352 — per-episode heart picks) ────────────
     // One heart per EPISODE (multiple per show allowed), keyed by the same
     // "S1E3" identity the watched store uses. Toggled from the episode-list
@@ -549,6 +636,64 @@ object AppPreferences {
         cur[name] = url
         prefs(context).edit().putString(KEY_BOOK_COVER_URLS, org.json.JSONObject(cur).toString()).apply()
         bookCoverUrlsState = cur
+    }
+
+    // ── Notes-sheet cover-swatch cache (v375) ────────────────────────────
+    // See KEY_COVER_SWATCH_CACHE above. Values are 7-ARGB lists (the same
+    // slot order CoverPalette uses) so prefs never touches Compose Color.
+    fun getCoverSwatchCache(context: Context): Map<String, List<Int>> {
+        val raw = prefs(context).getString(KEY_COVER_SWATCH_CACHE, null) ?: return emptyMap()
+        return runCatching {
+            val obj = org.json.JSONObject(raw)
+            val out = LinkedHashMap<String, List<Int>>()
+            val keys = obj.keys()
+            while (keys.hasNext()) {
+                val k = keys.next()
+                val arr = obj.optJSONArray(k) ?: continue
+                if (arr.length() < 7) continue
+                out[k] = (0 until arr.length()).map { arr.optInt(it, 0) }
+            }
+            out
+        }.getOrDefault(emptyMap())
+    }
+
+    /** Persist the extracted swatches (as ARGB ints) for [url]. */
+    fun setCoverSwatchCache(context: Context, url: String, argbs: List<Int>) {
+        if (url.isBlank() || argbs.isEmpty()) return
+        val cur = getCoverSwatchCache(context).toMutableMap()
+        val compact = argbs.take(7)
+        if (cur[url] == compact) return
+        cur[url] = compact
+        val obj = org.json.JSONObject()
+        cur.forEach { (u, list) -> obj.put(u, org.json.JSONArray(list)) }
+        prefs(context).edit().putString(KEY_COVER_SWATCH_CACHE, obj.toString()).apply()
+        coverSwatchCacheState = cur
+    }
+
+    // ── Resolved album/series sheet artwork URLs (v375) ─────────────────
+    // Keyed "album|<topic name>" / "series|<topic name>". See KEY_SHEET_ART_URLS.
+    fun getSheetArtUrls(context: Context): Map<String, String> {
+        val raw = prefs(context).getString(KEY_SHEET_ART_URLS, null) ?: return emptyMap()
+        return runCatching {
+            val obj = org.json.JSONObject(raw)
+            val out = LinkedHashMap<String, String>()
+            val keys = obj.keys()
+            while (keys.hasNext()) {
+                val k = keys.next()
+                out[k] = obj.optString(k)
+            }
+            out
+        }.getOrDefault(emptyMap())
+    }
+
+    /** Remember the resolved artwork URL for a sheet (ignores blanks). */
+    fun setSheetArtUrl(context: Context, key: String, url: String) {
+        if (key.isBlank() || url.isBlank()) return
+        val cur = getSheetArtUrls(context).toMutableMap()
+        if (cur[key] == url) return
+        cur[key] = url
+        prefs(context).edit().putString(KEY_SHEET_ART_URLS, org.json.JSONObject(cur).toString()).apply()
+        sheetArtUrlsState = cur
     }
 
     // ── Album favorite tracks (v336 — heart picks) ───────────────────────
@@ -913,6 +1058,15 @@ object AppPreferences {
         internal set
     // v352 — last resolved cover URL per book (hub provider results).
     var bookCoverUrlsState by mutableStateOf<Map<String, String>>(emptyMap())
+        internal set
+    // v375 — rich runs per chapter note (mirror of bookChapterNotesState).
+    var bookChapterNoteSpansState by mutableStateOf<Map<String, Map<Int, List<TextSpan>>>>(emptyMap())
+        internal set
+    // v375 — cached cover-art swatches per artwork URL (ARGB slot lists).
+    var coverSwatchCacheState by mutableStateOf<Map<String, List<Int>>>(emptyMap())
+        internal set
+    // v375 — last resolved album/series sheet artwork URL per "family|name".
+    var sheetArtUrlsState by mutableStateOf<Map<String, String>>(emptyMap())
         internal set
     // v336 — per-album favorite tracks (heart picks): album name → picked
     // track titles in pick order. Reactive so the sheet hearts + the Vinyl
@@ -1410,9 +1564,12 @@ object AppPreferences {
         bookReadingProgressState = getBookReadingProgress(context)
         bookChapterLikesState = getBookChapterLikes(context)
         bookChapterNotesState = getBookChapterNotes(context)
+        bookChapterNoteSpansState = getBookChapterNoteSpans(context)
         seriesEpisodeLikesState = getSeriesEpisodeLikes(context)
         bookCustomRatingsState = getBookCustomRatings(context)
         bookCoverUrlsState = getBookCoverUrls(context)
+        coverSwatchCacheState = getCoverSwatchCache(context)
+        sheetArtUrlsState = getSheetArtUrls(context)
         bookRatingVisibleState = isBookRatingVisible(context)
         pickerDefaultPageState = getPickerDefaultPage(context)
         pickerPage0ModeState = getPickerPage0Mode(context)

@@ -32,8 +32,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -110,6 +108,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryFamily
+import com.curio.app.data.TextSpan
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.LevelRewards
 import com.curio.app.ui.theme.BungeeFontFamily
@@ -789,6 +788,85 @@ private fun factBodyStyle(base: TextStyle, m: ShareCardMove): TextStyle {
  *  caller's modifier (moveFact + bounds reporting) rides the same node so
  *  the preview and the exported image match. */
 @Composable
+// v375 — translucent amber marker for span HIGHLIGHTS on the card's fact
+// text (Save-your-take's paper-amber highlighter idea, tuned a touch deeper
+// so it reads over the cream card surfaces too).
+private val ShareFactMarker = Color(0x7DF2B70A)
+
+/**
+ * v375 — slices [spans] (offsets into the FULL [text]) down to a substring
+ * piece [from, to) (with [trimStart] leading chars of that slice dropped,
+ * e.g. after a `.trimStart()` split) and rebuilds an AnnotatedString for the
+ * piece. The BOOK two-column and EDITORIAL drop-cap flows split the fact
+ * into separate Texts, so each piece gets the runs that land on it.
+ * Returns null when no span lands on the piece → callers render the plain
+ * substring exactly as before.
+ */
+private fun richSlice(
+    text: String,
+    spans: List<TextSpan>,
+    marker: Color,
+    from: Int,
+    to: Int,
+    trimStart: Int = 0
+): AnnotatedString? {
+    val s = from + trimStart
+    if (s >= to || spans.isEmpty()) return null
+    val shifted = spans.mapNotNull { sp ->
+        val a = maxOf(sp.start, s)
+        val b = minOf(sp.end, to)
+        if (b > a) TextSpan(a - s, b - s, sp.bold, sp.italic, sp.highlight, sp.fontSizeSp) else null
+    }
+    return if (shifted.isEmpty()) null
+    else buildRichAnnotated(text.substring(s, to), shifted, marker)
+}
+
+/** v375 — serializes the share card's fact spans for saveShareCardEdits. */
+private fun spansToJson(spans: List<TextSpan>): org.json.JSONArray {
+    val arr = org.json.JSONArray()
+    spans.forEach { sp ->
+        val o = org.json.JSONObject()
+        o.put("s", sp.start)
+        o.put("e", sp.end)
+        if (sp.bold) o.put("b", true)
+        if (sp.italic) o.put("i", true)
+        if (sp.highlight) o.put("h", true)
+        sp.fontSizeSp?.let { o.put("fs", it.toDouble()) }
+        arr.put(o)
+    }
+    return arr
+}
+
+/**
+ * v375 — shifts span offsets by [delta] (positive → later in the text).
+ * The CARD prepends the "CH n · title" chip line to a chapter review's
+ * text, so the runs the editor wrote against the bare note must move past
+ * that prefix before FactBody renders the full text. 0 → the spans are
+ * returned untouched (no allocation churn on the common no-chip paths).
+ */
+private fun shiftSpans(spans: List<TextSpan>, delta: Int): List<TextSpan> {
+    if (delta == 0 || spans.isEmpty()) return spans
+    return spans.map { it.copy(start = it.start + delta, end = it.end + delta) }
+}
+
+/** v375 — parses the persisted fact spans (null/empty → no spans). */
+private fun spansFromJson(arr: org.json.JSONArray?): List<TextSpan> {
+    if (arr == null) return emptyList()
+    return (0 until arr.length()).mapNotNull { i ->
+        val o = arr.optJSONObject(i) ?: return@mapNotNull null
+        val s = o.optInt("s", 0)
+        val e = o.optInt("e", 0)
+        if (e <= s) null
+        else TextSpan(
+            s, e,
+            o.optBoolean("b", false),
+            o.optBoolean("i", false),
+            o.optBoolean("h", false),
+            o.optDouble("fs", Double.NaN).takeIf { !it.isNaN() }?.toFloat()
+        )
+    }
+}
+
 private fun FactBody(
     text: String,
     style: TextStyle,
@@ -796,14 +874,32 @@ private fun FactBody(
     dropCap: ShareCardFactDropCap,
     aspect: ShareCardAspect,
     maxLines: Int,
+    // v375 — rich-text runs over [text] (bold/italic/highlight). Empty = the
+    // plain paragraph exactly as before; [marker] is the highlighter tone.
+    spans: List<TextSpan> = emptyList(),
+    marker: Color = ShareFactMarker,
     modifier: Modifier = Modifier
 ) {
     when (format) {
-        ShareCardFactFormat.BOOK -> BookPageText(text, style, modifier, maxLines)
+        ShareCardFactFormat.BOOK -> BookPageText(text, spans, marker, style, modifier, maxLines)
         ShareCardFactFormat.EDITORIAL -> EditorialDropCapBlock(
-            text, style, dropCap, modifier = modifier, maxLines = maxLines
+            text, spans, marker, style, dropCap, modifier = modifier, maxLines = maxLines
         )
-        else -> Text(text, style = style, maxLines = maxLines, overflow = TextOverflow.Ellipsis, modifier = modifier)
+        else -> {
+            if (spans.isEmpty()) {
+                Text(text, style = style, maxLines = maxLines, overflow = TextOverflow.Ellipsis, modifier = modifier)
+            } else {
+                // Styled runs render over the same paragraph style — the
+                // preview AND the exported image use this identical path.
+                Text(
+                    buildRichAnnotated(text, spans, marker),
+                    style = style,
+                    maxLines = maxLines,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = modifier
+                )
+            }
+        }
     }
 }
 
@@ -816,6 +912,10 @@ private fun FactBody(
 @Composable
 private fun BookPageText(
     text: String,
+    // v375 — span support: the split pieces re-slice the runs (see
+    // [richSlice]) so bold/italic/highlight survive the two-column flow.
+    spans: List<TextSpan>,
+    marker: Color,
     style: TextStyle,
     modifier: Modifier = Modifier,
     maxLines: Int
@@ -847,18 +947,37 @@ private fun BookPageText(
         )
         val split = left.getLineEnd((left.lineCount - 1).coerceAtLeast(0))
         val leftText = text.take(split)
-        val rightText = text.drop(split).trimStart()
+        val rawRight = text.drop(split)
+        val rightText = rawRight.trimStart()
+        val trimmed = rawRight.length - rightText.length
         Row(Modifier.fillMaxWidth()) {
-            Text(
-                leftText, style = style, maxLines = leftLines,
-                overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f)
-            )
+            val leftAnn = richSlice(text, spans, marker, 0, split)
+            if (leftAnn != null) {
+                Text(
+                    leftAnn, style = style, maxLines = leftLines,
+                    overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f)
+                )
+            } else {
+                Text(
+                    leftText, style = style, maxLines = leftLines,
+                    overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f)
+                )
+            }
             Spacer(Modifier.width(12.dp))
-            Text(
-                rightText, style = style,
-                maxLines = (cap - leftLines).coerceAtLeast(1),
-                overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f)
-            )
+            val rightAnn = richSlice(text, spans, marker, split, text.length, trimStart = trimmed)
+            if (rightAnn != null) {
+                Text(
+                    rightAnn, style = style,
+                    maxLines = (cap - leftLines).coerceAtLeast(1),
+                    overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f)
+                )
+            } else {
+                Text(
+                    rightText, style = style,
+                    maxLines = (cap - leftLines).coerceAtLeast(1),
+                    overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f)
+                )
+            }
         }
     }
 }
@@ -872,6 +991,10 @@ private fun BookPageText(
 @Composable
 private fun EditorialDropCapBlock(
     text: String,
+    // v375 — span support: the wrapped head + tail pieces re-slice the runs
+    // (see [richSlice]) so bold/italic/highlight survive the drop-cap flow.
+    spans: List<TextSpan>,
+    marker: Color,
     bodyStyle: TextStyle,
     dropCap: ShareCardFactDropCap,
     capColor: Color? = null,
@@ -879,7 +1002,14 @@ private fun EditorialDropCapBlock(
     maxLines: Int
 ) {
     if (dropCap == ShareCardFactDropCap.NONE || text.isBlank()) {
-        Text(text, style = bodyStyle, maxLines = maxLines, overflow = TextOverflow.Ellipsis, modifier = modifier)
+        if (spans.isEmpty()) {
+            Text(text, style = bodyStyle, maxLines = maxLines, overflow = TextOverflow.Ellipsis, modifier = modifier)
+        } else {
+            Text(
+                buildRichAnnotated(text, spans, marker),
+                style = bodyStyle, maxLines = maxLines, overflow = TextOverflow.Ellipsis, modifier = modifier
+            )
+        }
         return
     }
     BoxWithConstraints(modifier) {
@@ -893,6 +1023,7 @@ private fun EditorialDropCapBlock(
             else -> text.take(1)
         }
         val bodyRest = text.drop(initial.length)
+        val base = initial.length
         // The drop-cap initial spans 2 body lines. Its lineHeight is set to
         // 2× one body line so the initial column height EXACTLY matches the
         // 2 wrap lines beside it; Top alignment anchors the glyph to the TOP
@@ -938,19 +1069,36 @@ private fun EditorialDropCapBlock(
                     )
                 }
                 if (wrapText.isNotEmpty()) {
-                    Text(wrapText, style = bodyStyle, maxLines = 2,
-                        overflow = TextOverflow.Clip,
-                        modifier = Modifier.weight(1f))
+                    val wrapAnn = richSlice(text, spans, marker, base, base + wrapEnd)
+                    if (wrapAnn != null) {
+                        Text(wrapAnn, style = bodyStyle, maxLines = 2,
+                            overflow = TextOverflow.Clip,
+                            modifier = Modifier.weight(1f))
+                    } else {
+                        Text(wrapText, style = bodyStyle, maxLines = 2,
+                            overflow = TextOverflow.Clip,
+                            modifier = Modifier.weight(1f))
+                    }
                 }
             }
             if (restText.isNotEmpty()) {
                 Spacer(Modifier.height(3.dp))
-                Text(
-                    restText, style = bodyStyle,
-                    maxLines = (cap - 2).coerceAtLeast(1),
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                val restAnn = richSlice(text, spans, marker, base + wrapEnd, text.length)
+                if (restAnn != null) {
+                    Text(
+                        restAnn, style = bodyStyle,
+                        maxLines = (cap - 2).coerceAtLeast(1),
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                } else {
+                    Text(
+                        restText, style = bodyStyle,
+                        maxLines = (cap - 2).coerceAtLeast(1),
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         }
     }
@@ -1143,6 +1291,11 @@ fun TopicShareCard(
     // widget, this carries that text (rendered below the bar by every
     // style). Blank = progress only, no prose under the bar.
     chapterFact: String = "",
+    // v375 — rich-text runs (bold/italic/highlight) over the FACT body:
+    // offsets are into the fact text the card renders ([factText] with any
+    // [editedFact] applied). Empty = plain rendering exactly as before. The
+    // runs render through every style AND the exported image (same path).
+    factSpans: List<TextSpan> = emptyList(),
     callbacks: EditBoundsCallbacks = EditBoundsCallbacks()
 ) {
     // v324/v369 — the Adjust tool's saturation/contrast now applies to the
@@ -1225,14 +1378,14 @@ fun TopicShareCard(
     val albumFavTracks = AppPreferences.albumFavTracksState[topicName].orEmpty()
     Box {
         when (style) {
-            ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, hideTypedFavSong = albumFavTracks.isNotEmpty() && AppPreferences.albumFavStripVisibleState, bgFilter)
-            ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto ?: bookCover, byline, year, polaroidCaption, onPhotoTap, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.CUSTOM -> CustomCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans)
+            ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, hideTypedFavSong = albumFavTracks.isNotEmpty() && AppPreferences.albumFavStripVisibleState, bgFilter, factSpans = factSpans)
+            ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto ?: bookCover, byline, year, polaroidCaption, onPhotoTap, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans)
+            ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans)
+            ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans)
+            ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans)
+            ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans)
+            ShareCardStyle.CUSTOM -> CustomCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans)
         }
         // v334 — the cover badge rides on top of every style EXCEPT Collage
         // (there it feeds the polaroid photo slot above).
@@ -1397,7 +1550,10 @@ private fun PaperCard(
     chapterFact: String = "",
     // v369 — the Adjust tool's sat/contrast, applied to the BACKGROUND layer
     // only (never the text/polaroid/cover above it).
-    bgFilter: ColorFilter? = null
+    bgFilter: ColorFilter? = null,
+    // v375 — rich-text runs over this card's fact body (threaded from
+    // TopicShareCard so FactBody can render the styled runs).
+    factSpans: List<TextSpan> = emptyList()
 ) {
     val qSize = quoteText?.let { quoteFontSize(it.length) } ?: 0.sp
     Box(
@@ -1458,7 +1614,10 @@ private fun VinylCard(
     hideTypedFavSong: Boolean = false,
     // v369 — the Adjust tool's sat/contrast, applied to the BACKGROUND layer
     // only (never the text/polaroid/cover above it).
-    bgFilter: ColorFilter? = null
+    bgFilter: ColorFilter? = null,
+    // v375 — rich-text runs over this card's fact body (threaded from
+    // TopicShareCard so FactBody can render the styled runs).
+    factSpans: List<TextSpan> = emptyList()
 ) {
     val roseBg = Color(0xFFF5E6E0)
     val roseDusty = Color(0xFFD4A0A0)
@@ -1630,13 +1789,13 @@ private fun VinylCard(
                                 ink = inkDark.copy(alpha = 0.88f)
                             )
                             if (chapterFact.isNotBlank()) {
-                                FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(10, move.factHeightFrac, bodyScale))
+                                FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(10, move.factHeightFrac, bodyScale))
                             }
                         }
                     } else {
                         // v335 — line cap tracks the font multiplier so the
                         // fact box keeps its footprint while text resizes.
-                        FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(10, move.factHeightFrac, bodyScale), modifier = Modifier.onGloballyPositioned {
+                        FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(10, move.factHeightFrac, bodyScale), modifier = Modifier.onGloballyPositioned {
                             callbacks.onFact(it.boundsInWindow())
                             callbacks.onFactStyle(factStyle)
                         })
@@ -2154,7 +2313,10 @@ private fun CollageCard(
     chapterFact: String = "",
     // v369 — the Adjust tool's sat/contrast, applied to the BACKGROUND layer
     // only (the polaroid + photo + text stay untouched).
-    bgFilter: ColorFilter? = null
+    bgFilter: ColorFilter? = null,
+    // v375 — rich-text runs over this card's fact body (threaded from
+    // TopicShareCard so FactBody can render the styled runs).
+    factSpans: List<TextSpan> = emptyList()
 ) {
     // v327 — the Collage card wears the picked TONE (the palette used to be
     // ignored here, so the Tone tool had no effect on this style): paper =
@@ -2377,11 +2539,11 @@ private fun CollageCard(
                         ink = Color.White.copy(alpha = 0.92f)
                     )
                     if (chapterFact.isNotBlank()) {
-                        FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(18, move.factHeightFrac, bodyScale))
+                        FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(18, move.factHeightFrac, bodyScale))
                     }
                 }
             } else {
-                FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(18, move.factHeightFrac, bodyScale), modifier = Modifier.moveFact(move).onGloballyPositioned {
+                FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(18, move.factHeightFrac, bodyScale), modifier = Modifier.moveFact(move).onGloballyPositioned {
                     callbacks.onFact(it.boundsInWindow())
                     callbacks.onFactStyle(factStyle)
                 })
@@ -2427,7 +2589,10 @@ private fun NeumorphicCard(
     chapterFact: String = "",
     // v369 — the Adjust tool's sat/contrast, applied to the BACKGROUND layer
     // only (never the text above it).
-    bgFilter: ColorFilter? = null
+    bgFilter: ColorFilter? = null,
+    // v375 — rich-text runs over this card's fact body (threaded from
+    // TopicShareCard so FactBody can render the styled runs).
+    factSpans: List<TextSpan> = emptyList()
 ) {
     val ink = Color(0xFF101010)
     val paper = Color(0xFFF8F6EF)
@@ -2538,11 +2703,11 @@ private fun NeumorphicCard(
                             ink = Color.White.copy(alpha = 0.88f)
                         )
                         if (chapterFact.isNotBlank()) {
-                            FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 8 else 6, move.factHeightFrac, bodyScale))
+                            FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 8 else 6, move.factHeightFrac, bodyScale))
                         }
                     }
                 } else {
-                    FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 8 else 6, move.factHeightFrac, bodyScale), modifier = Modifier.moveFact(move).onGloballyPositioned {
+                    FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 8 else 6, move.factHeightFrac, bodyScale), modifier = Modifier.moveFact(move).onGloballyPositioned {
                         callbacks.onFact(it.boundsInWindow())
                         callbacks.onFactStyle(factStyle)
                     })
@@ -2583,7 +2748,10 @@ private fun EditorialCard(
     chapterFact: String = "",
     // v369 — the Adjust tool's sat/contrast, applied to the BACKGROUND layer
     // only (never the text above it).
-    bgFilter: ColorFilter? = null
+    bgFilter: ColorFilter? = null,
+    // v375 — rich-text runs over this card's fact body (threaded from
+    // TopicShareCard so FactBody can render the styled runs).
+    factSpans: List<TextSpan> = emptyList()
 ) {
     val cream = Color(0xFFFAF7F0)
     val inkDark = Color(0xFF1C1814)
@@ -2691,7 +2859,7 @@ private fun EditorialCard(
                         ink = inkDark.copy(alpha = 0.82f)
                     )
                     if (chapterFact.isNotBlank()) {
-                        FactBody(text = chapterFact, style = bodyStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale))
+                        FactBody(text = chapterFact, style = bodyStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale))
                     }
                 }
             } else if (move.factFormat == ShareCardFactFormat.BOOK ||
@@ -2705,7 +2873,7 @@ private fun EditorialCard(
                 FactBody(
                     text = body, style = bodyStyle,
                     format = move.factFormat, dropCap = move.factDropCap,
-                    aspect = aspect,
+                    spans = factSpans, aspect = aspect,
                     maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale),
                     modifier = Modifier.moveFact(move).onGloballyPositioned {
                         callbacks.onFact(it.boundsInWindow())
@@ -2716,7 +2884,8 @@ private fun EditorialCard(
                 // v370b — the classic Editorial drop cap, hoisted into the
                 // shared block so the cap variant pick applies here too.
                 EditorialDropCapBlock(
-                    text = body, bodyStyle = bodyStyle,
+                    text = body, spans = factSpans, marker = ShareFactMarker,
+                    bodyStyle = bodyStyle,
                     dropCap = if (move.factFormat == ShareCardFactFormat.EDITORIAL) move.factDropCap else ShareCardFactDropCap.LETTER,
                     capColor = accentRule,
                     maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale),
@@ -2771,7 +2940,10 @@ private fun MinimalCard(
     chapterFact: String = "",
     // v369 — the Adjust tool's sat/contrast, applied to the BACKGROUND layer
     // only (never the text above it).
-    bgFilter: ColorFilter? = null
+    bgFilter: ColorFilter? = null,
+    // v375 — rich-text runs over this card's fact body (threaded from
+    // TopicShareCard so FactBody can render the styled runs).
+    factSpans: List<TextSpan> = emptyList()
 ) {
     val bg = Color(0xFFFFFDF9)
     val inkDark = Color(0xFF1A1A1A)
@@ -2871,11 +3043,11 @@ private fun MinimalCard(
                             ink = inkDark.copy(alpha = 0.78f)
                         )
                         if (chapterFact.isNotBlank()) {
-                            FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale))
+                            FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale))
                         }
                     }
                 } else {
-                    FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale), modifier = Modifier.onGloballyPositioned {
+                    FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale), modifier = Modifier.onGloballyPositioned {
                         callbacks.onFact(it.boundsInWindow())
                         callbacks.onFactStyle(factStyle)
                     })
@@ -2919,7 +3091,10 @@ private fun SignatureCard(
     chapterFact: String = "",
     // v369 — the Adjust tool's sat/contrast, applied to the BACKGROUND layer
     // only (never the text/crest above it).
-    bgFilter: ColorFilter? = null
+    bgFilter: ColorFilter? = null,
+    // v375 — rich-text runs over this card's fact body (threaded from
+    // TopicShareCard so FactBody can render the styled runs).
+    factSpans: List<TextSpan> = emptyList()
 ) {
     val body = quoteText ?: factText
     val title = if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display
@@ -3096,7 +3271,7 @@ private fun SignatureCard(
                         ink = sig.bodyColor
                     )
                     if (chapterFact.isNotBlank()) {
-                        FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(bodyMaxLines, move.factHeightFrac, bodyScale))
+                        FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(bodyMaxLines, move.factHeightFrac, bodyScale))
                     }
                 }
                 return
@@ -3104,8 +3279,7 @@ private fun SignatureCard(
             // Book-cover ruled lines BEHIND the text, spaced at the body's own
             // line height so the facts sit exactly on the lines (drawn in the
             // same local space as the text, so they move with the box).
-            val ruleColor = sig.bodyRuleColor
-            FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(bodyMaxLines, move.factHeightFrac, bodyScale),
+            val ruleColor = sig.bodyRuleColor            FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(bodyMaxLines, move.factHeightFrac, bodyScale),
                 modifier = (if (centered) Modifier.fillMaxWidth() else Modifier)
                     .moveFact(move)
                     .then(if (ruleColor != null) Modifier.drawBehind {
@@ -3120,6 +3294,7 @@ private fun SignatureCard(
                     } else Modifier)
                     .onGloballyPositioned {
                         callbacks.onFact(it.boundsInWindow())
+
                         callbacks.onFactStyle(factStyle)
                     })
         }
@@ -5346,7 +5521,10 @@ private fun CustomCard(
     chapterFact: String = "",
     // v369 — the Adjust tool's sat/contrast, applied to the BACKGROUND layer
     // only (never the text above it).
-    bgFilter: ColorFilter? = null
+    bgFilter: ColorFilter? = null,
+    // v375 — rich-text runs over this card's fact body (threaded from
+    // TopicShareCard so FactBody can render the styled runs).
+    factSpans: List<TextSpan> = emptyList()
 ) {
     val body = quoteText ?: factText
     val title = if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display
@@ -5425,11 +5603,11 @@ private fun CustomCard(
                         ink = sig.bodyColor
                     )
                     if (chapterFact.isNotBlank()) {
-                        FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 14 else 10, move.factHeightFrac, bodyScale))
+                        FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 14 else 10, move.factHeightFrac, bodyScale))
                     }
                 }
             } else {
-                FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 14 else 10, move.factHeightFrac, bodyScale), modifier = Modifier.moveFact(move).onGloballyPositioned {
+                FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 14 else 10, move.factHeightFrac, bodyScale), modifier = Modifier.moveFact(move).onGloballyPositioned {
                     callbacks.onFact(it.boundsInWindow())
                     callbacks.onFactStyle(factStyle)
                 })
@@ -5483,7 +5661,7 @@ private fun MiddleContent(
         if (quoteText != null) {
             CurioIcon(name = CurioIcons.FormatQuote, tint = palette.ink.copy(alpha = 0.20f), size = 32.dp)
             val qStyle = factBodyStyle(MaterialTheme.typography.titleLarge.copy(fontFamily = LoraFontFamily, fontSize = qSize, lineHeight = (qSize.value * 1.28f).sp), move)
-            FactBody(text = quoteText, style = qStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 8, move.factHeightFrac), modifier = Modifier.moveFact(move).onGloballyPositioned {
+            FactBody(text = quoteText, style = qStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 8, move.factHeightFrac), modifier = Modifier.moveFact(move).onGloballyPositioned {
                 callbacks.onFact(it.boundsInWindow())
                 callbacks.onFactStyle(qStyle)
             })
@@ -5532,7 +5710,7 @@ private fun MiddleContent(
                             ink = palette.ink
                         )
                         if (chapterFact.isNotBlank()) {
-                            FactBody(text = chapterFact, style = frostStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 20 else 14, move.factHeightFrac, bodyScale))
+                            FactBody(text = chapterFact, style = frostStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 20 else 14, move.factHeightFrac, bodyScale))
                         }
                     }
                 } else {
@@ -5542,7 +5720,7 @@ private fun MiddleContent(
                     // v335 — the cap tracks the font multiplier so the pane
                     // keeps its footprint while the TEXT size changes: smaller
                     // fonts fit more lines, larger fonts fewer.
-                    FactBody(text = factText, style = frostStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 20 else 14, move.factHeightFrac, bodyScale), modifier = Modifier.onGloballyPositioned {
+                    FactBody(text = factText, style = frostStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 20 else 14, move.factHeightFrac, bodyScale), modifier = Modifier.onGloballyPositioned {
                         callbacks.onFact(it.boundsInWindow())
                         callbacks.onFactStyle(frostStyle)
                     })
@@ -5784,6 +5962,14 @@ private fun ArrangeableCard(
     // caret sits on the review glyphs, not the chip.
     factFieldChipShift: Boolean = false,
     factFieldPlaceholder: String = "Edit the quick fact…",
+    // v375 — FULLSCREEN selection formatting (Save-your-take style): when
+    // [onFormatFactSelection] is provided, the inline fact field keeps a real
+    // selection (TextFieldValue) and floats the B / I / highlighter bar over
+    // the selected text; taps call back with the selection + flag so the
+    // sheet can toggle spans. [factSpans] drives the bar's active states.
+    richFactTools: Boolean = false,
+    factSpans: List<TextSpan> = emptyList(),
+    onFormatFactSelection: ((s: Int, e: Int, flag: RichFlag) -> Unit)? = null,
     card: @Composable (EditBoundsCallbacks) -> Unit
 ) {
     // Bounds hub — every style reports where its title / fact / meta text
@@ -5816,6 +6002,27 @@ private fun ArrangeableCard(
     // clear focus (closes the keyboard) before switching the selection.
     val focusManager = LocalFocusManager.current
     val factRequester = remember { FocusRequester() }
+    // v375 — rich-fact editing state for the floating selection bar: the
+    // inline field keeps its own TextFieldValue (so a text selection is
+    // visible + actionable) and reports its text layout so the bar can float
+    // over the selected characters. Only engaged when [richFactTools]; the
+    // sheet previews never use it (plain caret editing stays exactly as
+    // before). The selection survives recompositions because it lives HERE,
+    // not in the sheet — typing echoes text up but the TextFieldValue (and
+    // its selection/caret) is what BasicTextField draws.
+    var richFactTfv by remember { mutableStateOf(androidx.compose.ui.text.input.TextFieldValue("")) }
+    var factTextLayout by remember { mutableStateOf<androidx.compose.ui.text.TextLayoutResult?>(null) }
+    // Re-seed only when the sheet pushes DIFFERENT text (e.g. switching the
+    // active content) — typing echoes back the same text so the selection /
+    // caret survive every keystroke (the RichTextEditor pattern).
+    LaunchedEffect(editFact, richFactTools) {
+        if (richFactTools && richFactTfv.text != editFact) {
+            richFactTfv = androidx.compose.ui.text.input.TextFieldValue(
+                editFact,
+                androidx.compose.ui.text.TextRange(editFact.length)
+            )
+        }
+    }
     Box(
         modifier = Modifier
             .onGloballyPositioned { cardOrigin.value = it.positionInWindow() }
@@ -5973,48 +6180,83 @@ private fun ArrangeableCard(
                 val fOk = f.width > 0f && f.height > 0f
                 if (fOk) {
                     val isSel = sel == ShareCardResizeTarget.FACT
-                    BasicTextField(
-                        value = editFact,
-                        onValueChange = onFactChange,
-                        // v323 — the field is INERT until the "Edit text" tool
-                        // arms it, so a plain tap can never hijack the selection
-                        // into text editing (the overlay below owns taps).
-                        enabled = factEditMode,
-                        // Card-reported style (fallback: the sheet's base Lora
-                        // metrics) with the text transparent — the caret + wrap
-                        // use the card's real font, size and line height.
-                        textStyle = liveFactStyle.value.copy(color = Color.Transparent),
-                        cursorBrush = SolidColor(CoffeeChromeDeep),
-                        singleLine = false,
-                        // v369 — the inline field grows with the box (long
-                        // texts edit in place on the tall card).
-                        maxLines = 60,
-                        modifier = Modifier
-                            .offset(f.left.dp, (f.top + chipShiftPx).dp)
-                            .width(f.width.dp)
-                            .heightIn(min = f.height.dp)
-                            .focusRequester(factRequester)
-                            .onFocusChanged {
-                                if (it.isFocused) {
-                                    onSelectResizeTarget(ShareCardResizeTarget.FACT)
-                                } else {
-                                    // Leaving the field ends text-editing mode, so
-                                    // the next tap selects the box for moving.
-                                    onFactEditModeChange(false)
-                                }
-                            }
-                            // v371 — while typing, the selection chrome hides:
-                            // no outline/highlight around the fact (the caret
-                            // shows where you're typing); it returns when text
-                            // editing ends.
-                            .border(1.dp, if (factEditMode) Color.Transparent else selBorder(isSel), RoundedCornerShape(8.dp)),
-                        decorationBox = { inner ->
-                            Box(Modifier.fillMaxWidth()) {
-                                if (editFact.isBlank()) Text(factFieldPlaceholder, style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
-                                inner()
+                    // v375 — RICH (full-screen) editing keeps a real text
+                    // SELECTION in the transparent field (see [richFactTfv]) so
+                    // the floating B / I / highlighter bar can format exactly
+                    // the selected characters. Plain (bottom-sheet) editing
+                    // stays as-is: a caret-only field that routes raw text.
+                    val fieldModifier = Modifier
+                        .offset(f.left.dp, (f.top + chipShiftPx).dp)
+                        .width(f.width.dp)
+                        .heightIn(min = f.height.dp)
+                        .focusRequester(factRequester)
+                        .onFocusChanged {
+                            if (it.isFocused) {
+                                onSelectResizeTarget(ShareCardResizeTarget.FACT)
+                            } else {
+                                // Leaving the field ends text-editing mode, so
+                                // the next tap selects the box for moving.
+                                onFactEditModeChange(false)
                             }
                         }
-                    )
+                        // v371 — while typing, the selection chrome hides:
+                        // no outline/highlight around the fact (the caret
+                        // shows where you're typing); it returns when text
+                        // editing ends.
+                        .border(1.dp, if (factEditMode) Color.Transparent else selBorder(isSel), RoundedCornerShape(8.dp))
+                    if (richFactTools && onFormatFactSelection != null) {
+                        BasicTextField(
+                            value = richFactTfv,
+                            onValueChange = { nv ->
+                                val prevText = richFactTfv.text
+                                richFactTfv = nv
+                                // Only text edits (not caret/selection moves)
+                                // route up; the sheet rebases the fact spans.
+                                if (nv.text != prevText) onFactChange(nv.text)
+                            },
+                            // v323 — INERT until the "Edit text" tool arms it.
+                            enabled = factEditMode,
+                            textStyle = liveFactStyle.value.copy(color = Color.Transparent),
+                            cursorBrush = SolidColor(CoffeeChromeDeep),
+                            singleLine = false,
+                            maxLines = 60,
+                            // v375 — text layout feeds the floating bar's anchor
+                            // (caret rect of the live selection).
+                            onTextLayout = { factTextLayout = it },
+                            modifier = fieldModifier,
+                            decorationBox = { inner ->
+                                Box(Modifier.fillMaxWidth()) {
+                                    if (richFactTfv.text.isBlank()) Text(factFieldPlaceholder, style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
+                                    inner()
+                                }
+                            }
+                        )
+                    } else {
+                        BasicTextField(
+                            value = editFact,
+                            onValueChange = onFactChange,
+                            // v323 — the field is INERT until the "Edit text" tool
+                            // arms it, so a plain tap can never hijack the selection
+                            // into text editing (the overlay below owns taps).
+                            enabled = factEditMode,
+                            // Card-reported style (fallback: the sheet's base Lora
+                            // metrics) with the text transparent — the caret + wrap
+                            // use the card's real font, size and line height.
+                            textStyle = liveFactStyle.value.copy(color = Color.Transparent),
+                            cursorBrush = SolidColor(CoffeeChromeDeep),
+                            singleLine = false,
+                            // v369 — the inline field grows with the box (long
+                            // texts edit in place on the tall card).
+                            maxLines = 60,
+                            modifier = fieldModifier,
+                            decorationBox = { inner ->
+                                Box(Modifier.fillMaxWidth()) {
+                                    if (editFact.isBlank()) Text(factFieldPlaceholder, style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
+                                    inner()
+                                }
+                            }
+                        )
+                    }
                     // Tap-to-select layer: while text editing is OFF the field is
                     // inert, so an invisible box on top selects the fact for moving
                     // (grip appears) without popping the keyboard. Text editing
@@ -6032,6 +6274,90 @@ private fun ArrangeableCard(
                     // keyboard opens right where the caret should sit.
                     androidx.compose.runtime.LaunchedEffect(factEditMode) {
                         if (factEditMode) factRequester.requestFocus()
+                    }
+                    // v375 — RICH (full-screen) selection editing: while a real
+                    // text selection is live in the transparent field, float the
+                    // Save-your-take format bar (B / I / highlight) just above
+                    // the selected letters. Taps toggle [factSpans] over exactly
+                    // the selection via [onFormatFactSelection], so the format
+                    // applies to the selected characters ONLY — never the whole
+                    // fact (the whole-element toggles in the Text tools panel
+                    // stay for whole-element formatting). Anchored like the
+                    // RichTextEditor's own floating bar: a non-focusable Popup
+                    // at the overlay origin, offset by the field position + the
+                    // live selection caret (both in real px via [editDensity]).
+                    if (richFactTools && onFormatFactSelection != null &&
+                        factEditMode && !richFactTfv.selection.collapsed
+                    ) {
+                        val fsLayout = factTextLayout
+                        val fsSel = richFactTfv.selection
+                        if (fsLayout != null) {
+                            val fsD = editDensity
+                            val fsStartCaret = runCatching { fsLayout.getCursorRect(fsSel.min) }.getOrNull()
+                            val fsEndCaret = runCatching { fsLayout.getCursorRect(fsSel.max) }.getOrNull()
+                            if (fsEndCaret != null) {
+                                val barW = with(fsD) { 132.dp.toPx() }
+                                val barH = with(fsD) { 42.dp.toPx() }
+                                val gap = with(fsD) { 6.dp.toPx() }
+                                val edge = with(fsD) { 6.dp.toPx() }
+                                val fieldX = with(fsD) { f.left.dp.toPx() }
+                                val fieldY = with(fsD) { (f.top + chipShiftPx).dp.toPx() }
+                                // Float ABOVE the selection's first line; drop
+                                // below it when the selection is near the very
+                                // top of the field.
+                                val selTop = fsStartCaret?.top ?: fsEndCaret.top
+                                var fsY = fieldY + selTop - barH - gap
+                                if (fsY < 0f) fsY = fieldY + fsEndCaret.bottom + gap
+                                val fsMaxX = (with(fsD) { cw.dp.toPx() } - barW - edge).coerceAtLeast(edge)
+                                val fsX = (fieldX + (fsStartCaret?.left ?: fsEndCaret.left) - barW / 2f)
+                                    .coerceIn(edge, fsMaxX)
+                                androidx.compose.ui.window.Popup(
+                                    alignment = androidx.compose.ui.Alignment.TopStart,
+                                    offset = androidx.compose.ui.unit.IntOffset(fsX.roundToInt(), fsY.roundToInt()),
+                                    properties = androidx.compose.ui.window.PopupProperties(focusable = false)
+                                ) {
+                                    val s = fsSel.min
+                                    val e = fsSel.max
+                                    Surface(
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                        shadowElevation = 4.dp,
+                                        modifier = Modifier.padding(bottom = 2.dp)
+                                    ) {
+                                        Row(
+                                            modifier = Modifier.padding(horizontal = 3.dp, vertical = 3.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            FormatToolButton(
+                                                icon = CurioIcons.FormatBold,
+                                                label = "Bold",
+                                                active = spansFullyCovered(factSpans, s, e, RichFlag.BOLD),
+                                                accent = MaterialTheme.colorScheme.primary,
+                                                enabled = true,
+                                                onClick = { onFormatFactSelection(s, e, RichFlag.BOLD) }
+                                            )
+                                            FormatToolButton(
+                                                icon = CurioIcons.FormatItalic,
+                                                label = "Italic",
+                                                active = spansFullyCovered(factSpans, s, e, RichFlag.ITALIC),
+                                                accent = MaterialTheme.colorScheme.primary,
+                                                enabled = true,
+                                                onClick = { onFormatFactSelection(s, e, RichFlag.ITALIC) }
+                                            )
+                                            FormatToolButton(
+                                                icon = CurioIcons.FormatHighlight,
+                                                label = "Highlight",
+                                                active = spansFullyCovered(factSpans, s, e, RichFlag.HIGHLIGHT),
+                                                accent = MaterialTheme.colorScheme.primary,
+                                                enabled = true,
+                                                onClick = { onFormatFactSelection(s, e, RichFlag.HIGHLIGHT) }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                     // v369 — the grip + corner scale are drawn LAST (see the
                     // handles section below), so they always win the touch.
@@ -6586,6 +6912,10 @@ fun TopicShareSheet(
     // picks the design and shares.
     seedReviewText: String = "",
     seedReviewChapter: Int = 0,
+    // v375 — the chapter note's rich-text spans ride with [seedReviewText]
+    // so bold/italic/highlight written in the note editor survive onto the
+    // share card's Chapter review (and the export).
+    seedReviewSpans: List<TextSpan> = emptyList(),
     // v229d — "Share as text" lives IN the shared sheet (both reveal + detail
     // get it). When set, the caller supplies its own payload (the detail view
     // sends the entry's decorated text); otherwise the sheet builds a default
@@ -6656,6 +6986,12 @@ fun TopicShareSheet(
     var movesByStyle by remember { mutableStateOf<Map<ShareCardStyle, ShareCardMove>>(emptyMap()) }
     var editedTitle by remember { mutableStateOf<String?>(null) }
     var editedFact by remember { mutableStateOf<String?>(null) }
+    // v375 — rich-text spans (bold/italic/highlight runs) parallel to the
+    // TEXT states above: editedFactSpans styles an edited QUICK fact,
+    // customSpans styles the custom fact / chapter review. The card renders
+    // them through every style + the export (FactBody), empty = plain text.
+    var editedFactSpans by remember { mutableStateOf<List<TextSpan>>(emptyList()) }
+    var customSpans by remember { mutableStateOf<List<TextSpan>>(emptyList()) }
     // Restore saved edits for this topic on first composition
     androidx.compose.runtime.LaunchedEffect(topicName) {
         val saved = AppPreferences.loadShareCardEdits(context, topicName)
@@ -6717,6 +7053,8 @@ fun TopicShareSheet(
             bodyScale = saved.optDouble("bodyScale", 1.0).toFloat()
             editedTitle = saved.optString("editedTitle", null)?.takeIf { it.isNotBlank() }
             editedFact = saved.optString("editedFact", null)?.takeIf { it.isNotBlank() }
+            editedFactSpans = spansFromJson(saved.optJSONArray("editedFactSpans"))
+            if (editedFact == null || editedFact.isNullOrBlank()) editedFactSpans = emptyList()
             // v342 — restore the picked CONTENT and its live text too (custom
             // fact, chapter review + its chip, the reading-progress toggle,
             // collage caption), so Save/Share keeps them exactly like the
@@ -6727,6 +7065,8 @@ fun TopicShareSheet(
             saved.optString("selectedId", null)?.takeIf { it.isNotBlank() }
                 ?.let { selectedId = it }
             customText = saved.optString("customText", "")
+            customSpans = spansFromJson(saved.optJSONArray("customSpans"))
+            if (customText.isBlank()) customSpans = emptyList()
             polaroidCaption = saved.optString("polaroidCaption", "")
             showChapterProgress = saved.optBoolean("showChapterProgress", false)
             reviewChapterNumber = saved.optInt("reviewChapterNumber", 0)
@@ -6737,6 +7077,7 @@ fun TopicShareSheet(
         // content is selected, and the chapter chip tags the note's chapter.
         if (seedReviewText.isNotBlank()) {
             customText = seedReviewText
+            customSpans = seedReviewSpans
             selectedId = "chapter_review"
             showChapterProgress = false
             if (seedReviewChapter > 0) reviewChapterNumber = seedReviewChapter
@@ -6904,6 +7245,23 @@ fun TopicShareSheet(
     // this topic's current contents (the same guard that keeps a stale save
     // from rendering a phantom pick); anything else falls back to the default.
     val activeId = if (selectedId != null && available.any { it.id == selectedId }) selectedId!! else defaultId
+    // v375 — the chapter-review chip line, hoisted OUT of the per-style
+    // build so its LENGTH is known here: the CARD prepends the chip to the
+    // review text, so the note's spans must shift past it before rendering
+    // (see [cardFactRenderSpans] below). Blank when the topic has no
+    // chapters / nothing read — the text then starts at the review itself.
+    val reviewChipText: String = effectiveReviewChapter?.let { num ->
+        val ch = bookChapters.firstOrNull { c -> c.number == num }
+        // v369 — the user's chapter-title override wins; otherwise the
+        // book's authored title. The chip stays at the fact-box position
+        // above the review text.
+        val titlePart = reviewChapterTitle.ifBlank {
+            ch?.title?.takeIf { t -> t.isNotBlank() } ?: ""
+        }
+        "CH $num" + (titlePart.takeIf { t -> t.isNotBlank() }?.let { t -> " · $t" } ?: "")
+    } ?: ""
+    // The chip renders as its own first line, so the prefix is chip + \n.
+    val reviewChipPrefixLen = if (reviewChipText.isNotBlank()) reviewChipText.length + 1 else 0
     // v334 — the card's fact text is ONE source of truth per content type:
     // custom facts + chapter reviews always render the LIVE customText (empty
     // stays empty — no placeholder text bleeding onto the card), the default
@@ -6914,19 +7272,9 @@ fun TopicShareSheet(
         NO_FACT_ID -> noFact
         "chapter_progress" -> progressContent
         "chapter_review" -> {
-            val chip = effectiveReviewChapter?.let { num ->
-                val ch = bookChapters.firstOrNull { c -> c.number == num }
-                // v369 — the user's chapter-title override wins; otherwise the
-                // book's authored title. The chip stays at the fact-box
-                // position above the review text.
-                val titlePart = reviewChapterTitle.ifBlank {
-                    ch?.title?.takeIf { t -> t.isNotBlank() } ?: ""
-                }
-                "CH $num" + (titlePart.takeIf { t -> t.isNotBlank() }?.let { t -> " · $t" } ?: "")
-            }
             reviewContent.copy(
                 text = buildString {
-                    chip?.let { append(it).append("\n") }
+                    if (reviewChipText.isNotBlank()) append(reviewChipText).append("\n")
                     append(customText.ifBlank { "Write your review of this chapter…" })
                 }
             )
@@ -6968,11 +7316,71 @@ fun TopicShareSheet(
         CUSTOM_FACT_ID, "chapter_review" -> customText
         else -> editedFact ?: activeSource.text
     }
+    // v375 — the CARD's span source mirrors [cardFactText]: custom facts +
+    // chapter reviews carry customSpans, everything else editedFactSpans.
+    // These offsets are relative to the FIELD text (customText / the inline
+    // edit) — what the transparent field + the full-screen selection bar
+    // work with.
+    val cardFactSpans = when (activeId) {
+        CUSTOM_FACT_ID, "chapter_review" -> customSpans
+        else -> editedFactSpans
+    }
+    // v375 — the spans as the CARD must render them: for a chapter review
+    // the style's FactBody draws the full text (chip line + note), so the
+    // runs shift past the chip prefix; every other content renders its text
+    // verbatim, so the offsets are already right.
+    val cardFactRenderSpans = when (activeId) {
+        "chapter_review" -> shiftSpans(cardFactSpans, reviewChipPrefixLen)
+        else -> cardFactSpans
+    }
+    // v375 — what the ENLARGE editor binds (mirror of [factFieldText]).
+    val factFieldSpans = when (activeId) {
+        CUSTOM_FACT_ID, "chapter_review" -> customSpans
+        else -> editedFactSpans
+    }
+    // v375 — plain inline typing rebases the existing spans across the edit
+    // (the same common-prefix/suffix logic as Save your take's editor) so
+    // formatting typed around survives; span-free text stays span-free.
     fun routeFactChange(newText: String) {
         when (activeId) {
-            CUSTOM_FACT_ID, "chapter_review" -> customText = newText
-            else -> editedFact = newText
+            CUSTOM_FACT_ID, "chapter_review" -> {
+                customSpans = if (customSpans.isEmpty()) emptyList()
+                else rebaseSpans(customText, newText, customSpans)
+                customText = newText
+            }
+            else -> {
+                editedFactSpans = if (editedFactSpans.isEmpty()) emptyList()
+                else rebaseSpans(editedFact ?: activeSource.text, newText, editedFactSpans)
+                editedFact = newText
+            }
         }
+    }
+    // v375 — RICH edits (the Enlarge editor / selection bar) carry the text
+    // AND its spans together, so formatting lands on the card immediately.
+    fun routeRichFact(newText: String, spans: List<TextSpan>) {
+        when (activeId) {
+            CUSTOM_FACT_ID, "chapter_review" -> {
+                customText = newText
+                customSpans = if (newText.isBlank()) emptyList() else spans
+            }
+            else -> {
+                editedFact = newText
+                editedFactSpans = if (newText.isBlank()) emptyList() else spans
+            }
+        }
+    }
+    // v375 — the FULL-SCREEN selection bar calls this: it toggles [flag]
+    // over exactly [s, e) of the ACTIVE fact's span list (custom fact /
+    // chapter review → customSpans, everything else → editedFactSpans), so
+    // bold / italic / highlight apply ONLY to the selected letters — never
+    // the whole element. Reads the live state each call (the lambda is built
+    // once per composition but must toggle the CURRENT spans).
+    fun toggleFactSelectionFormat(s: Int, e: Int, flag: RichFlag) {
+        if (e <= s) return
+        val cur = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") customSpans else editedFactSpans
+        val add = !spansFullyCovered(cur, s, e, flag)
+        val next = toggleSpanFlag(cur, s, e, flag, add)
+        if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") customSpans = next else editedFactSpans = next
     }
 
     val styles = availableStylesForFamily(categoryFamily, topicName)
@@ -7042,12 +7450,14 @@ fun TopicShareSheet(
         edit.put("bodyScale", bodyScale)
         if (editedTitle != null) edit.put("editedTitle", editedTitle)
         if (editedFact != null) edit.put("editedFact", editedFact)
+        if (editedFactSpans.isNotEmpty()) edit.put("editedFactSpans", spansToJson(editedFactSpans))
         // v342 — the picked content + its live text persist exactly like the
         // moves: which content is shown, the custom-fact / chapter-review
         // text, the review's chapter chip, the reading-progress toggle and
         // the collage caption all come back when the sheet reopens.
         if (selectedId != null) edit.put("selectedId", selectedId)
         edit.put("customText", customText)
+        if (customSpans.isNotEmpty()) edit.put("customSpans", spansToJson(customSpans))
         edit.put("polaroidCaption", polaroidCaption)
         edit.put("showChapterProgress", showChapterProgress)
         edit.put("reviewChapterNumber", reviewChapterNumber)
@@ -7159,7 +7569,7 @@ fun TopicShareSheet(
                                 factFieldChipShift = activeId == "chapter_review",
                                 factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…"
                             ) { cb ->
-                                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = pageMove, chapterProgress = progressForCard, chapterFact = chapterFactForCard, callbacks = cb)
+                                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = pageMove, chapterProgress = progressForCard, chapterFact = chapterFactForCard, factSpans = if (isQuotes) emptyList() else cardFactRenderSpans, callbacks = cb)
                             }
                         }
                     }
@@ -7223,7 +7633,7 @@ fun TopicShareSheet(
                             factFieldChipShift = activeId == "chapter_review",
                             factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…"
                         ) { cb ->
-                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, callbacks = cb)
+                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, factSpans = if (isQuotes) emptyList() else cardFactRenderSpans, callbacks = cb)
                         }
                     }
                 }
@@ -7555,21 +7965,30 @@ fun TopicShareSheet(
                             }
                         }
                     }
-                    // v370b — the ENLARGE sheet: a full white writing surface
-                    // (same state as the compact box — everything stays in
-                    // sync live) with a big multi-line field and a Done.
+                    // v370b — the ENLARGE sheet (same state as the compact
+                    // box — everything stays in sync live). v375 — it hosts
+                    // the Save-your-take rich editor (Format dock) on the
+                    // theme surface; formatting lands on the card + export.
                     if (showWriteSheet) {
                         androidx.compose.ui.window.Dialog(
                             onDismissRequest = { showWriteSheet = false },
                             properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
                         ) {
-                            Box(
-                                Modifier
-                                    .fillMaxSize()
-                                    .background(Color.White)
-                                    .padding(20.dp)
+                            // v375 — the ENLARGE sheet hosts the SAME
+                            // Save-your-take editor as the capture formats: a
+                            // Format dock (bold / italic / highlighter /
+                            // letter size) styles the SELECTION, and the
+                            // styled text lands on the card + export live
+                            // (spans ride the fact state). The old plain
+                            // outlined field had no formatting and its M3
+                            // outline looked foreign. Rendered on the theme
+                            // surface so the editor's dock reads in BOTH
+                            // themes (the old white sheet broke dark mode).
+                            Surface(
+                                Modifier.fillMaxSize(),
+                                color = MaterialTheme.colorScheme.surface
                             ) {
-                                Column(Modifier.fillMaxSize()) {
+                                Column(Modifier.fillMaxSize().padding(20.dp)) {
                                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                                         Text(
                                             when (writeBoxTarget) {
@@ -7577,24 +7996,31 @@ fun TopicShareSheet(
                                                 CUSTOM_FACT_ID -> "Custom fact"
                                                 else -> "Quick fact"
                                             },
-                                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = Color(0xFF1A1A1A)),
+                                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                            color = MaterialTheme.colorScheme.onSurface,
                                             modifier = Modifier.weight(1f)
                                         )
                                         TextButton(onClick = { showWriteSheet = false }) {
-                                            Text("Done", fontWeight = FontWeight.Bold, color = Color(0xFF3E2723))
+                                            Text("Done", fontWeight = FontWeight.Bold)
                                         }
                                     }
                                     Spacer(Modifier.height(10.dp))
-                                    OutlinedTextField(
-                                        value = factFieldText,
-                                        onValueChange = { routeFactChange(it) },
-                                        placeholder = { Text("Start writing…", color = Color(0xFF9A9A9A)) },
-                                        textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFF1A1A1A)),
-                                        shape = RoundedCornerShape(14.dp),
-                                        maxLines = 30,
+                                    // v375 — bold/italic/highlight + size on
+                                    // the selection; every change keeps text
+                                    // AND spans in sync (routeRichFact).
+                                    RichTextEditor(
+                                        text = factFieldText,
+                                        spans = factFieldSpans,
+                                        onRichTextChange = { t, sp -> routeRichFact(t, sp) },
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .weight(1f)
+                                            .weight(1f),
+                                        placeholder = "Start writing…",
+                                        minHeight = 140.dp,
+                                        accent = MaterialTheme.colorScheme.primary,
+                                        ink = MaterialTheme.colorScheme.onSurface,
+                                        surface = MaterialTheme.colorScheme.surfaceVariant,
+                                        showFieldBorder = true
                                     )
                                 }
                             }
@@ -7618,7 +8044,13 @@ fun TopicShareSheet(
                             onDismissRequest = { fullscreenEdit = false },
                             properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
                         ) {
-                            Box(Modifier.fillMaxSize().background(fullBg)) {
+                            // v375 — the Dialog is a COLUMN (top bar, tools
+                            // panel, card area) instead of an overlay row with
+                            // a DropdownMenu popup: the popup measured the
+                            // tools' verticalScroll with unbounded height
+                            // (infinite-constraint crash) and its scrollable
+                            // fought slider/swipe drags.
+                            Column(Modifier.fillMaxSize().background(fullBg)) {
                                 // ── Top bar: Close (left) · Aa pill (right) ─
                                 Row(
                                     Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
@@ -7655,7 +8087,6 @@ fun TopicShareSheet(
                                                 Text(aspect.label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
                                             }
                                         }
-                                        Box {
                                         Surface(
                                             onClick = { fsToolsOpen = !fsToolsOpen },
                                             shape = RoundedCornerShape(50),
@@ -7668,8 +8099,22 @@ fun TopicShareSheet(
                                                 Text("Text", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = if (fsToolsOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
                                             }
                                         }
-                                        DropdownMenu(expanded = fsToolsOpen, onDismissRequest = { fsToolsOpen = false }) {
-                                            Column(Modifier.width(330.dp).verticalScroll(androidx.compose.foundation.rememberScrollState()).padding(vertical = 4.dp)) {
+                                    }
+                                }
+                                // v375 — the text tools render in an INLINE panel
+                                // under the top bar (like the sheet's own tool
+                                // panels): its scroll is bounded (heightIn max)
+                                // so it can never measure with infinite height,
+                                // and sliders drag cleanly without a popup
+                                // scrollable stealing their gestures.
+                                if (fsToolsOpen) {
+                                    Surface(
+                                        shape = RoundedCornerShape(16.dp),
+                                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.97f),
+                                        shadowElevation = 6.dp,
+                                        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)
+                                    ) {
+                                        Column(Modifier.fillMaxWidth().heightIn(max = 300.dp).verticalScroll(androidx.compose.foundation.rememberScrollState()).padding(vertical = 4.dp)) {
                                                 val fsSel = selectedResizeTarget
                                                 val fsIsTitle = fsSel == ShareCardResizeTarget.TITLE
                                                 val fsIsFact = fsSel == ShareCardResizeTarget.FACT
@@ -7786,8 +8231,6 @@ fun TopicShareSheet(
                                             }
                                         }
                                         }
-                                    }
-                                }
                                 // ── The big card, centered ──────────────
                                 // v373 — the card is rendered at the SAME base
                                 // size as the bottom-sheet preview (280dp) and
@@ -7798,12 +8241,14 @@ fun TopicShareSheet(
                                 // the dp layout in a much bigger box: text
                                 // stayed tiny and the SpaceBetween flow
                                 // re-spread the spacing, so it never matched.)
-                                BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                // v375 — the card area is the Column's leftover
+                                // space (weight), below the top bar and panel.
+                                BoxWithConstraints(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                                     val ratio = aspect.widthDp.toFloat() / aspect.heightDp.toFloat()
                                     val baseW = 280f
                                     val baseH = baseW / ratio
                                     val availW = (maxWidth.value - 24f).coerceAtLeast(120f)
-                                    val availH = (maxHeight.value - 140f).coerceAtLeast(120f)
+                                    val availH = (maxHeight.value - 20f).coerceAtLeast(120f)
                                     val zoom = minOf(availW / baseW, availH / baseH)
                                     val sheetDensity = androidx.compose.ui.platform.LocalDensity.current
                                     val cardDensity = androidx.compose.ui.unit.Density(sheetDensity.density * zoom, sheetDensity.fontScale * zoom)
@@ -7841,9 +8286,20 @@ fun TopicShareSheet(
                                             factFieldStyle = factFieldStyle,
                                             autoFitDelta = smartAutoFitDelta(move, maxOf(factFieldText.length, chapterFactForCard.length), currentStyle, aspect),
                                             factFieldChipShift = activeId == "chapter_review",
-                                            factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…"
+                                            factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…",
+                                            // v375 — the full-screen editor keeps a REAL text
+                                            // SELECTION in its transparent fact field and floats
+                                            // the Save-your-take format bar (B / I / highlight)
+                                            // over the selection; taps toggle [cardFactSpans] so
+                                            // the formatting applies ONLY to the selected letters
+                                            // (Quote cards + the chapter-progress caption keep
+                                            // whole-element formatting only — no selection bar).
+                                            richFactTools = true,
+                                            factSpans = if (isQuotes || activeId == "chapter_progress") emptyList() else cardFactSpans,
+                                            onFormatFactSelection = if (isQuotes || activeId == "chapter_progress") null
+                                            else { s, e, flag -> toggleFactSelectionFormat(s, e, flag) }
                                         ) { cb ->
-                                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, callbacks = cb)
+                                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, factSpans = if (isQuotes) emptyList() else cardFactRenderSpans, callbacks = cb)
                                         }
                                     }
                                     }
@@ -8468,7 +8924,7 @@ fun TopicShareSheet(
                     onClick = {
                         haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                         shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard)
+                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, factSpans = if (isQuotes) emptyList() else cardFactRenderSpans)
                         }, saveToGallery = true)
                         persistEdits()
                         onDismiss()
@@ -8487,7 +8943,7 @@ fun TopicShareSheet(
                 Button(onClick = {
                     haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                     shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard)
+                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, factSpans = if (isQuotes) emptyList() else cardFactRenderSpans)
                     })
                         persistEdits()
                         onDismiss()

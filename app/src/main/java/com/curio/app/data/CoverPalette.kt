@@ -2,6 +2,7 @@ package com.curio.app.data
 
 import android.content.Context
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.drawable.toBitmap
 import coil.imageLoader
 import coil.request.CachePolicy
@@ -32,6 +33,51 @@ data class CoverSwatches(
     /** The most "cover-like" swatch for single-colour consumers. */
     val primary: Color?
         get() = dominant ?: vibrant ?: darkVibrant ?: muted ?: darkMuted ?: lightVibrant ?: lightMuted
+}
+
+/** Fixed slot order for the disk cache (see [coverSwatchesToArgbs]). */
+private val CoverSwatchesSlotOrder =
+    listOf(
+        "vibrant", "muted", "darkVibrant", "darkMuted",
+        "lightVibrant", "lightMuted", "dominant"
+    )
+
+/**
+ * v375 — flattens [swatches] into the 7-ARGB slot list the prefs cache
+ * stores (null → 0). Slot order matches [CoverSwatchesSlotOrder]; reusing a
+ * Color from a real cover as a sentinel is impossible because extracted
+ * pixels are always opaque, while Color(0) is fully transparent.
+ */
+fun coverSwatchesToArgbs(swatches: CoverSwatches): List<Int> {
+    val slots = mapOf(
+        "vibrant" to swatches.vibrant,
+        "muted" to swatches.muted,
+        "darkVibrant" to swatches.darkVibrant,
+        "darkMuted" to swatches.darkMuted,
+        "lightVibrant" to swatches.lightVibrant,
+        "lightMuted" to swatches.lightMuted,
+        "dominant" to swatches.dominant
+    )
+    return CoverSwatchesSlotOrder.map { slots[it]?.toArgb() ?: 0 }
+}
+
+/**
+ * v375 — rebuilds [CoverSwatches] from the 7-ARGB cache list (0 = absent).
+ * Returns null when the list is empty/malformed so callers fall back to the
+ * category tint exactly as if nothing were cached.
+ */
+fun coverSwatchesFromArgbs(argbs: List<Int>): CoverSwatches? {
+    if (argbs.size < 7) return null
+    fun c(i: Int): Color? = argbs[i].takeIf { it != 0 }?.let { Color(it) }
+    return CoverSwatches(
+        vibrant = c(0),
+        muted = c(1),
+        darkVibrant = c(2),
+        darkMuted = c(3),
+        lightVibrant = c(4),
+        lightMuted = c(5),
+        dominant = c(6)
+    )
 }
 
 /**

@@ -495,7 +495,14 @@ fun CurioCategory.notesSheetPalette(swatches: CoverSwatches?): CoverSheetPalette
     // When the dominant is near-grey (minimal covers), holding its hue is
     // numerically noisy — the accent's hue reads better, so it wins.
     val h = if (dominantSwatch != null && washHsl.s >= 0.14f) washHsl else toHsl(accentFinal)
-    val onAccent = if (accentFinal.luminance() > 0.5f) Color(0xFF121216) else Color(0xFFF4F4F6)
+    // v375 — onAccent is keyed to HSL LIGHTNESS, not linear luminance: the
+    // old >0.5 luminance gate kept WHITE text on every accent below it,
+    // including the mid-light accents this palette deliberately pulls to
+    // ~0.60 lightness in light mode (their luminance ≈0.3 still reads as
+    // "dark" to the luminance test). White on those pale accents is what
+    // made selected rows' numbers / hearts / icons unreadable on light
+    // covers. Lightness ≥ 0.52 gets dark ink; anything deeper keeps white.
+    val onAccent = if (toHsl(accentFinal).l >= 0.52f) Color(0xFF121216) else Color(0xFFF4F4F6)
     if (isCurioDarkTheme()) {
         // Deep cover-tinted canvas; cards step up through the dark tones and
         // the accent pops against the near-black wash.

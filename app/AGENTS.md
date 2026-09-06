@@ -782,6 +782,55 @@ app/src/main/java/com/curio/app/
     `editedFact ?: quick.text` when the quick fact is active with progress
     on (same stacking as the custom fact), and the content pills keep
     progress ON when picking the Quick fact instead of turning it off.
+- **v375 — notes-sheet palette memory + selected-state contrast + rich-text
+  fact editing (Save-your-take style) + full-screen editor fixes.** User:
+  "in book albumn etc buttom sheet, colors, so the page number albumn number
+  icon isnt visible when selected and also the like button and also the book
+  icon and same for albumns series and when selected its even more bad … and
+  also the color pallete should be remeberstae like even when after resrart
+  it goes back to defakt and switches after a second when it should be
+  instant … the enlarged text box text editing … add the save you text style
+  format text editing with highlights etc which stays when sharing too … in
+  the full screen card editor the highligh bold italic etc are inside the
+  tool box when they should show as floating when selecting the text and
+  only apply to them if text are selected bnot entirely always … same for
+  the full screen text editor too" (+ the crash/glitch report from
+  `11e566a5`: infinite-constraint crash + slider/swipe fight in full
+  screen).
+  - **Palette INSTANT + remembered:** cover swatches cache per artwork URL
+    and albums/series persist their resolved artwork URL
+    (`AppPreferences` `KEY_COVER_SWATCH_CACHE` / `KEY_SHEET_ART_URLS` +
+    `coverSwatchesToArgbs`/`coverSwatchesFromArgbs` in CoverPalette.kt).
+    All three notes sheets seed colors synchronously on first composition
+    (no default-then-switch flash after restart) and only refresh the
+    cache in the background.
+  - **Selected-state contrast:** `notesSheetPalette`'s `onAccent` is keyed
+    to HSL lightness (≥0.52 → dark ink) instead of linear luminance, so
+    pale light-cover accents get readable ink on solid-accent rows/chips;
+    hearts/number chips/icons on open (tinted) rows use the palette ink /
+    full-strength `onAccent` instead of vanishing accent-on-accent.
+  - **Rich-text fact editing:** `TopicShareCard` gained a `factSpans`
+    (`List<TextSpan>`) param threaded through EVERY style → `FactBody`
+    (+ the BOOK two-column + EDITORIAL drop-cap splitters re-slice runs via
+    `richSlice`), rendered via `buildRichAnnotated` with the amber
+    `ShareFactMarker`. Sheet state holds `editedFactSpans`/`customSpans`
+    (persisted via `spansToJson`/`spansFromJson`), `routeFactChange`
+    rebases on inline typing, the ENLARGE dialog and the chapter-note
+    dialog host `RichTextEditor`, and Save/Share exports pass the spans.
+    Chapter-review cards shift spans past the "CH n · title" chip prefix
+    (`reviewChipPrefixLen` + `shiftSpans`) so runs land on the note text.
+  - **Full-screen selection formatting:** the full-screen card's fact field
+    keeps a REAL `TextFieldValue` selection (`richFactTfv`,
+    `richFactTools` on the ArrangeableCard call) and floats a non-focusable
+    `Popup` B / I / highlight bar anchored to the live selection caret;
+    taps toggle `RichFlag`s over exactly [s,e) via `toggleFactSelectionFormat`
+    (`spansFullyCovered`/`toggleSpanFlag` made internal in RichTextEditor.kt).
+    Whole-element toggles remain in the Text panel (keep both).
+  - **Crash/glitch fixes (`11e566a5`):** the full-screen Text dropdown is
+    now an INLINE bounded-height panel (`heightIn(max=300)` + scroll)
+    under the top bar in a Dialog COLUMN layout — no more DropdownMenu
+    verticalScroll under infinite height (the reported crash) and no popup
+    scrollable stealing slider/swipe drags.
 - **v361 — keyed defaults + Clear-covers button; CI fix for the reveal
   poster.** User: "fix it, and also i added spotify key and library thing
   api as well… does the api is used in the apk build from pr, use that by
