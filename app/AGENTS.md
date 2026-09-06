@@ -831,6 +831,58 @@ app/src/main/java/com/curio/app/
     under the top bar in a Dialog COLUMN layout — no more DropdownMenu
     verticalScroll under infinite height (the reported crash) and no popup
     scrollable stealing slider/swipe drags.
+- **v376 — GLUED covers (cover rides the title block on Paper/Vinyl/Clean/
+  Editorial/Minimal) + auto title-lift collision.** User: "the cover
+  position isnt right in share card, in paper design its top left corner
+  and not to the side of the title and author and also the space can be
+  decrase, in vinyls the text quick fact should move a little down and the
+  cover for albumn and the title itself should be a little down too do it
+  doesnt verlap on category pill, in editorial its near perfect, the cover
+  should move a little don matching the title starting point and the title
+  can move a little closer to the cover, same for minimal too … clean a
+  similiar the positioning is good the ittle move closer … the cover and
+  albumn should move together also when the quick fact gets moved along
+  with title the cover should move too by collide logic … in the auto text
+  the collision should work when the height of the quick fact gets tuned
+  manually and the title moves up automatically along with cover if present
+  and it comes don if with the slider it gets lowered and same for width
+  chnages too" — ask answer: "Glue cover to the title block; title drag
+  moves cover too and also the title move during collision moves it too;
+  Saved lift".
+  - **GLUED cover plumbing:** `TopicShareCard` computes `glueCoverStyle`
+    (Paper/Vinyl/Neumorphic/Editorial/Minimal) and passes `gluedCover`
+    (artwork, `coverW`/`coverH`) into those five card styles; the old
+    side-layout overlay + `coverSideShift`/`coverTitleWidthFactor`/
+    `coverTitleScale` layoutMove stays ONLY for Signature/Custom (and the
+    no-cover per-style corner pockets stay for the overlay styles). The new
+    `GluedCover` composable renders `BookCoverBadge` inside the style's own
+    title block as the leading item of a Row that carries the title's move
+    (`glueTitleMove` — drag offset + auto lift only, NEVER font scale/width
+    crop: `titleSize` keeps scale+width on the text), so the jacket always
+    sits exactly beside the title wherever that design's flow puts it, and
+    rides every title drag / collision push / auto lift. The cover keeps
+    its OWN fine-position offset (`coverDx`/`coverDy`) inside the group.
+  - **Per-style placement:** Paper (MiddleContent) → cover | title+author
+    Row beside the headline area with a snug `CoverTitleGap` (12dp);
+    Vinyl → cover | title+byline Row, title block lowered (18dp spacer
+    with cover) so it clears the category pill, quick fact nudged down
+    (14dp spacer); Editorial → cover | headline+deck Row aligned to the
+    headline start (topPad 5); Minimal → cover | title+byline Row (topPad
+    4); Clean/Neumorphic → cover beside the CENTERED title block
+    (`CenterStart`, CenterVertically).
+  - **Auto title-lift collision (`move.titleLift`, dp):** inside
+    `ArrangeableCard`'s edit overlay a `LaunchedEffect` (editMode,
+    non-quote) watches the MEASURED title/fact rects + the fact box
+    fractions; when a manually grown fact box (height/width/whole-box
+    sliders or the corner grip) would draw over the title, it computes the
+    needed lift from the title's UN-lifted base (measured bottom + current
+    lift → converges in one step), clamps to the card's top edge and calls
+    `onMove(move.copy(titleLift = …))`. `moveTitle`/`titleShift`/
+    `glueTitleMove` apply the lift as an upward offset everywhere (sheet
+    preview, export) and `titleLift` is parsed/persisted in the move JSON
+    (0 = none). Lowering the box drops the needed lift → the title settles
+    back. The TITLE drag handle's clamp math adds the lift back so the
+    natural base stays correct.
 - **v361 — keyed defaults + Clear-covers button; CI fix for the reveal
   poster.** User: "fix it, and also i added spotify key and library thing
   api as well… does the api is used in the apk build from pr, use that by

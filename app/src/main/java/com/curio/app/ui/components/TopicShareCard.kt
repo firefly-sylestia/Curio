@@ -651,7 +651,16 @@ data class ShareCardMove(
     val factHighlight: Color? = null,
     /** v371 — whole-title UNDERLINE + HIGHLIGHT. */
     val titleUnderline: Boolean = false,
-    val titleHighlight: Color? = null
+    val titleHighlight: Color? = null,
+    /** v376 — AUTO LIFT (dp): how far the TITLE block is pushed UP so a
+     *  manually grown quick-fact box (height / width / whole-box sliders)
+     *  clears it. Computed from the live measured boxes while editing and
+     *  SAVED with the rest of the move, so the pushed layout persists to the
+     *  sheet preview and the exported image; lowering the box again settles
+     *  the title back down (the value tracks the needed clearance, not a
+     *  one-way shove). The glued cover sits inside the title block, so it
+     *  rides the lift automatically. 0f = no push. */
+    val titleLift: Float = 0f
 )
 
 /** Modifier that shifts a card's TITLE by the move offset + box size + scale and
@@ -660,7 +669,11 @@ data class ShareCardMove(
 private fun Modifier.moveTitle(m: ShareCardMove): Modifier {
     var mod = this
     if (m.titleScale != 1f) mod = mod.graphicsLayer { scaleX = m.titleScale; scaleY = m.titleScale }
-    if (m.titleDx != 0f || m.titleDy != 0f) mod = mod.offset(x = m.titleDx.dp, y = m.titleDy.dp)
+    // v376 — the saved AUTO LIFT rides the title's own offset: the title
+    // block (and any glued cover inside it) moves UP by [titleLift] dp so a
+    // manually grown quick-fact box clears it. Applies everywhere (sheet
+    // preview + export) because it's stored on the move.
+    if (m.titleDx != 0f || m.titleDy != 0f || m.titleLift != 0f) mod = mod.offset(x = m.titleDx.dp, y = (m.titleDy - m.titleLift).dp)
     if (m.titleWidthFrac != 1f) mod = mod.fillMaxWidth(m.titleWidthFrac.coerceIn(0.2f, 1f))
     // Height is NOT applied as a fillMaxHeight clip: that re-measures the
     // layout and physically shoves the text around. Height changes grow/
@@ -747,9 +760,28 @@ private val CoffeeChromeDeep = Color(0xFF3E2723)  // darker coffee — selected 
 
 /** Follows ONLY the title drag (dx/dy): an info row (author / year) sitting
  *  right under the title travels WITH it when the T handle drags — the M
- *  handle still nudges the row on its own afterwards. */
+ *  handle still nudges the row on its own afterwards. v376 — the auto LIFT
+ *  rides too, so the byline stays glued under a lifted title. */
 private fun Modifier.titleShift(m: ShareCardMove): Modifier =
-    if (m.titleDx != 0f || m.titleDy != 0f) this.offset(x = m.titleDx.dp, y = m.titleDy.dp) else this
+    if (m.titleDx != 0f || m.titleDy != 0f || m.titleLift != 0f) this.offset(x = m.titleDx.dp, y = (m.titleDy - m.titleLift).dp) else this
+
+/** v376 — moves a GLUED cover+title ROW: applies ONLY the title drag offset
+ *  and the auto LIFT to the whole group, so the jacket rides the title
+ *  (drag / collision / auto lift) exactly like the user asked. The title
+ *  TEXT's own scale / width crop stay on the text (see [titleSize]) — a
+ *  title font tweak must never stretch the cover with it. */
+private fun Modifier.glueTitleMove(m: ShareCardMove): Modifier =
+    if (m.titleDx != 0f || m.titleDy != 0f || m.titleLift != 0f) this.offset(x = m.titleDx.dp, y = (m.titleDy - m.titleLift).dp) else this
+
+/** v376 — the TITLE TEXT half of the glued title block: font scale + width
+ *  crop only (no offset — the Row owns the movement via [glueTitleMove]).
+ *  Mirrors [moveTitle]'s size behaviour; width is applied unconditionally
+ *  so the crop works inside the weighted Column (see [moveFact]). */
+private fun Modifier.titleSize(m: ShareCardMove): Modifier {
+    var mod = this
+    if (m.titleScale != 1f) mod = mod.graphicsLayer { scaleX = m.titleScale; scaleY = m.titleScale }
+    return mod.fillMaxWidth(m.titleWidthFrac.coerceIn(0.2f, 1f))
+}
 
 /** Follows ONLY the fact drag (dx/dy): the thin rules some styles draw ABOVE
  *  the quick fact slide along with the box instead of floating where the
@@ -1347,12 +1379,22 @@ fun TopicShareCard(
     // v373 — the shift / width crop / title shrink are DERIVED from the
     // cover's real width (44dp book/series jacket, 66dp square album) so a
     // smaller cover hugs the title instead of leaving the old 92dp void.
+    // v376 — GLUED side layout: Paper / Vinyl / Clean / Editorial / Minimal
+    // render the cover INSIDE their own layout as the leading item of the
+    // title block (see [GluedCover] at each style's title area), so the
+    // jacket always sits exactly beside the title wherever the design's flow
+    // puts it — and it rides every title move (drag, collision, auto lift)
+    // automatically. Those styles need no synthetic dx shift here; the
+    // remaining styles (Signature / Custom) still use the overlay shift.
     val coverActive = bookCover != null && style != ShareCardStyle.COLLAGE
+    val glueCoverStyle = style == ShareCardStyle.PAPER || style == ShareCardStyle.VINYL ||
+        style == ShareCardStyle.NEUMORPHIC || style == ShareCardStyle.EDITORIAL ||
+        style == ShareCardStyle.MINIMAL
     val coverSideShift = coverW.value + 16f
     val coverTitleWidthFactor =
         ((aspect.widthDp - coverW.value - 16f) / aspect.widthDp).coerceIn(0.6f, 0.95f)
     val coverTitleScale = (0.90f + (92f - coverW.value) / 92f * 0.06f).coerceIn(0.9f, 0.97f)
-    val layoutMove = if (coverActive) boxScaledMove.copy(
+    val layoutMove = if (coverActive && !glueCoverStyle) boxScaledMove.copy(
         titleDx = boxScaledMove.titleDx + coverSideShift,
         titleWidthFrac = (boxScaledMove.titleWidthFrac * coverTitleWidthFactor).coerceIn(0.2f, 1f),
         titleScale = boxScaledMove.titleScale * coverTitleScale
@@ -1376,14 +1418,19 @@ fun TopicShareCard(
     // the album track-list sheet). Read reactively so the Vinyl card strip
     // updates the moment a heart is toggled; empty for non-album topics.
     val albumFavTracks = AppPreferences.albumFavTracksState[topicName].orEmpty()
+    // v376 — GLUED cover styles receive the cover artwork and render it
+    // INSIDE their title block (see each style's title area): the jacket
+    // then always sits beside the title and rides every title move. The
+    // non-glued styles (Signature/Custom) keep the overlay slot below.
+    val gluedCover = if (coverActive && glueCoverStyle) bookCover else null
     Box {
         when (style) {
-            ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans)
-            ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, hideTypedFavSong = albumFavTracks.isNotEmpty() && AppPreferences.albumFavStripVisibleState, bgFilter, factSpans = factSpans)
+            ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans, coverArt = gluedCover, coverW = coverW, coverH = coverH)
+            ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, hideTypedFavSong = albumFavTracks.isNotEmpty() && AppPreferences.albumFavStripVisibleState, bgFilter, factSpans = factSpans, coverArt = gluedCover, coverW = coverW, coverH = coverH)
             ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto ?: bookCover, byline, year, polaroidCaption, onPhotoTap, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans)
-            ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans)
-            ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans)
-            ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans)
+            ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans, coverArt = gluedCover, coverW = coverW, coverH = coverH)
+            ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans, coverArt = gluedCover, coverW = coverW, coverH = coverH)
+            ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans, coverArt = gluedCover, coverW = coverW, coverH = coverH)
             ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans)
             ShareCardStyle.CUSTOM -> CustomCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans)
         }
@@ -1397,11 +1444,13 @@ fun TopicShareCard(
         // so a fresh cover lands in that style's natural spot instead of
         // always overlapping the same corner decoration. The user can still
         // drag it anywhere (move offsets apply on top).
-        if (bookCover != null && style != ShareCardStyle.COLLAGE) {
+        if (bookCover != null && style != ShareCardStyle.COLLAGE && !glueCoverStyle) {
             // v370b — COVER SIDE LAYOUT (cover present): the cover anchors
             // LEFT, aligned with each design's title block (Clean centres
             // its title, so the cover centres beside it). The default per-
             // style corner pockets only apply when NO cover is on the card.
+            // v376 — only the non-glued styles (Signature / Custom) reach
+            // this overlay now; the glued styles render their own cover.
             val coverSlot = if (coverActive) when (style) {
                 ShareCardStyle.NEUMORPHIC -> Alignment.CenterStart to PaddingValues(start = 18.dp)
                 ShareCardStyle.EDITORIAL -> Alignment.TopStart to PaddingValues(top = 64.dp, start = 18.dp)
@@ -1531,6 +1580,50 @@ private fun BookCoverBadge(
     }
 }
 
+/** v376 — horizontal gap between the glued cover and the title text
+ *  (snug, per the ask: title sits closer to the cover on Paper / Vinyl /
+ *  Clean / Editorial / Minimal). */
+private val CoverTitleGap = 12.dp
+
+/**
+ * v376 — the GLUED cover: rendered INSIDE a style's own layout as the
+ * leading item of the title block, so it always sits exactly beside the
+ * title wherever that design's flow puts it (Paper's centered middle,
+ * Clean's centered column, Editorial/Minimal's top flow, …) — never in a
+ * fixed corner that drifts from the title. The caller wraps its title +
+ * meta in the SAME Row that carries [moveTitle] (see each style), so:
+ *  - dragging the title moves cover + title together,
+ *  - any collision push / auto lift of the title carries the cover too,
+ *  - the cover keeps its OWN fine-position offset ([move.coverDx/coverDy])
+ *    so selecting it and dragging it still nudges just the jacket.
+ */
+@Composable
+private fun GluedCover(
+    coverArt: androidx.compose.ui.graphics.ImageBitmap,
+    coverW: Dp,
+    coverH: Dp,
+    move: ShareCardMove,
+    callbacks: EditBoundsCallbacks,
+    // vertical optical offset: lowers the jacket a touch inside its column
+    // so its top reads level with the title's first glyph line (each title
+    // font carries its own leading).
+    topPad: Dp = 0.dp,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier.width(coverW)) {
+        Spacer(Modifier.height(topPad))
+        BookCoverBadge(
+            cover = coverArt,
+            coverWidth = coverW,
+            coverHeight = coverH,
+            // The cover's own stored drag offset applies INSIDE the glued
+            // group (title drag offsets live on the wrapping Row).
+            modifier = modifier.offset(x = move.coverDx.dp, y = move.coverDy.dp),
+            callbacks = callbacks
+        )
+    }
+}
+
 // ═══════════════════════════════════════════════════════════════════════
 // STYLE 0 — PAPER (main, all categories)
 // Category-tinted parchment + torn bottom + frost pane
@@ -1553,7 +1646,12 @@ private fun PaperCard(
     bgFilter: ColorFilter? = null,
     // v375 — rich-text runs over this card's fact body (threaded from
     // TopicShareCard so FactBody can render the styled runs).
-    factSpans: List<TextSpan> = emptyList()
+    factSpans: List<TextSpan> = emptyList(),
+    // v376 — GLUED cover: artwork rendered inside the title block (see
+    // [GluedCover]). Null = no cover → the layout is exactly as before.
+    coverArt: androidx.compose.ui.graphics.ImageBitmap? = null,
+    coverW: Dp = 44.dp,
+    coverH: Dp = 66.dp
 ) {
     val qSize = quoteText?.let { quoteFontSize(it.length) } ?: 0.sp
     Box(
@@ -1585,7 +1683,7 @@ private fun PaperCard(
         Column(modifier = Modifier.fillMaxSize().padding(28.dp),
             verticalArrangement = Arrangement.SpaceBetween) {
             HeaderRow(categoryName, categoryGlyph, palette, move, callbacks)
-            MiddleContent(display, factText, aspect, palette, ratingStars, quoteText, qSize, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact)
+            MiddleContent(display, factText, aspect, palette, ratingStars, quoteText, qSize, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact, coverArt, coverW, coverH)
             Footer(sharerName, quoteText, quoteAuthor, palette, move, callbacks)
         }
     }
@@ -1617,7 +1715,12 @@ private fun VinylCard(
     bgFilter: ColorFilter? = null,
     // v375 — rich-text runs over this card's fact body (threaded from
     // TopicShareCard so FactBody can render the styled runs).
-    factSpans: List<TextSpan> = emptyList()
+    factSpans: List<TextSpan> = emptyList(),
+    // v376 — GLUED cover: artwork rendered inside the title block (see
+    // [GluedCover]). Null = no cover → the layout is exactly as before.
+    coverArt: androidx.compose.ui.graphics.ImageBitmap? = null,
+    coverW: Dp = 44.dp,
+    coverH: Dp = 66.dp
 ) {
     val roseBg = Color(0xFFF5E6E0)
     val roseDusty = Color(0xFFD4A0A0)
@@ -1720,25 +1823,57 @@ private fun VinylCard(
                 CurioIcon(name = CurioIcons.Lightbulb, tint = roseDusty.copy(alpha = 0.40f), size = 18.dp)
             }
 
-            Spacer(Modifier.height(12.dp))
+            // v376 — title/cover sit a touch lower so neither crowds the
+            // category pill row above.
+            Spacer(Modifier.height(if (coverArt != null) 18.dp else 12.dp))
 
-            // Title — strong serif
-            Text(title, style = titleStyle(TextStyle(
-                fontFamily = ChangaOneFontFamily, fontSize = 28.sp,
-                lineHeight = 32.sp, fontWeight = FontWeight.Normal, color = inkDark
-            ), move), maxLines = lines(2, move.titleHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveTitle(move).onGloballyPositioned { callbacks.onTitle(it.boundsInWindow()) })
-
-            // Artist / byline — info row: movable via M handle, not editable
-            if (quoteText == null && byline.isNotBlank()) {
-                Text(byline, style = metaStyle(TextStyle(
-                    fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
-                    fontSize = 13.sp, color = roseDusty
-                ), move), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
-            } else if (year != null) {
-                Text(year, style = metaStyle(TextStyle(
-                    fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
-                    fontSize = 13.sp, color = roseDusty
-                ), move), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+            // Title — strong serif. v376 — with a cover the title + artist
+            // become a Row (cover | title+byline) that carries the title's
+            // move offsets, so the jacket is glued beside the title and
+            // rides every title drag / collision push / auto lift.
+            val vinylMeta: @Composable () -> Unit = {
+                if (quoteText == null && byline.isNotBlank()) {
+                    Text(byline, style = metaStyle(TextStyle(
+                        fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
+                        fontSize = 13.sp, color = roseDusty
+                    ), move), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .then(if (coverArt == null) Modifier.titleShift(move) else Modifier)
+                            .moveMeta(move)
+                            .onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                } else if (year != null) {
+                    Text(year, style = metaStyle(TextStyle(
+                        fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
+                        fontSize = 13.sp, color = roseDusty
+                    ), move), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .then(if (coverArt == null) Modifier.titleShift(move) else Modifier)
+                            .moveMeta(move)
+                            .onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                }
+            }
+            val vinylTitle: @Composable (Modifier) -> Unit = { titleMod ->
+                Text(title, style = titleStyle(TextStyle(
+                    fontFamily = ChangaOneFontFamily, fontSize = 28.sp,
+                    lineHeight = 32.sp, fontWeight = FontWeight.Normal, color = inkDark
+                ), move), maxLines = lines(2, move.titleHeightFrac), overflow = TextOverflow.Ellipsis,
+                    modifier = titleMod.onGloballyPositioned { callbacks.onTitle(it.boundsInWindow()) })
+            }
+            if (coverArt != null) {
+                Row(
+                    verticalAlignment = Alignment.Top,
+                    modifier = Modifier.glueTitleMove(move)
+                ) {
+                    GluedCover(coverArt, coverW, coverH, move, callbacks, topPad = 6.dp)
+                    Spacer(Modifier.width(CoverTitleGap))
+                    Column(Modifier.weight(1f)) {
+                        vinylTitle(Modifier.titleSize(move))
+                        vinylMeta()
+                    }
+                }
+            } else {
+                vinylTitle(Modifier.moveTitle(move))
+                vinylMeta()
             }
 
             // Accent underline — v316b: belongs to the quick-fact block below,
@@ -1748,7 +1883,8 @@ private fun VinylCard(
                 drawRoundRect(roseDusty, cornerRadius = CornerRadius(1f))
             }
 
-            Spacer(Modifier.height(10.dp))
+            // v376 — a touch more air so the quick fact sits slightly lower.
+            Spacer(Modifier.height(if (coverArt != null) 14.dp else 10.dp))
 
             // Body text — Lora serif, with semi-transparent cream background for readability over vinyl
             val bodySize = when {
@@ -2592,7 +2728,12 @@ private fun NeumorphicCard(
     bgFilter: ColorFilter? = null,
     // v375 — rich-text runs over this card's fact body (threaded from
     // TopicShareCard so FactBody can render the styled runs).
-    factSpans: List<TextSpan> = emptyList()
+    factSpans: List<TextSpan> = emptyList(),
+    // v376 — GLUED cover: artwork rendered inside the title block (see
+    // [GluedCover]). Null = no cover → the layout is exactly as before.
+    coverArt: androidx.compose.ui.graphics.ImageBitmap? = null,
+    coverW: Dp = 44.dp,
+    coverH: Dp = 66.dp
 ) {
     val ink = Color(0xFF101010)
     val paper = Color(0xFFF8F6EF)
@@ -2656,11 +2797,20 @@ private fun NeumorphicCard(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
             }
 
-            Column(Modifier.align(Alignment.CenterStart).padding(start = 4.dp, end = 4.dp, top = 0.dp), horizontalAlignment = Alignment.Start) {
+            // v376 — GLUED cover: the title block becomes a Row (cover |
+            // title+author) carrying [moveTitle], so the jacket sits exactly
+            // beside the title and rides every title move (drag / collision
+            // / auto lift) automatically. Clean centres its title block on
+            // the card, so the Row is center-aligned exactly like the old
+            // cover slot.
+            val ncTitle: @Composable (Modifier) -> Unit = { titleMod ->
                 Text(title, style = titleStyle(TextStyle(
                     fontFamily = ChangaOneFontFamily, fontSize = 31.sp, lineHeight = 33.sp,
                     fontWeight = FontWeight.Normal, color = Color.White
-                ), move), maxLines = lines(5, move.titleHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth(0.90f).moveTitle(move).onGloballyPositioned { callbacks.onTitle(it.boundsInWindow()) })
+                ), move), maxLines = lines(5, move.titleHeightFrac), overflow = TextOverflow.Ellipsis,
+                    modifier = titleMod.onGloballyPositioned { callbacks.onTitle(it.boundsInWindow()) })
+            }
+            val ncMeta: @Composable () -> Unit = {
                 val metaParts = mutableListOf<String>()
                 if (byline.isNotBlank()) metaParts.add(byline.uppercase())
                 if (year != null) metaParts.add(year)
@@ -2669,7 +2819,32 @@ private fun NeumorphicCard(
                     Text(metaParts.joinToString("  /  "), style = metaStyle(TextStyle(
                         fontFamily = GeomFontFamily, fontSize = 9.sp, fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 1.3.sp, color = Color.White.copy(alpha = 0.56f)
-                    ), move), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                    ), move), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .then(if (coverArt == null) Modifier.titleShift(move) else Modifier)
+                            .moveMeta(move)
+                            .onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                }
+            }
+            if (coverArt != null) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .padding(start = 4.dp, end = 4.dp)
+                        .glueTitleMove(move)
+                ) {
+                    GluedCover(coverArt, coverW, coverH, move, callbacks, topPad = 0.dp)
+                    Spacer(Modifier.width(CoverTitleGap))
+                    Column(Modifier.weight(1f)) {
+                        ncTitle(Modifier.titleSize(move))
+                        ncMeta()
+                    }
+                }
+            } else {
+                Column(Modifier.align(Alignment.CenterStart).padding(start = 4.dp, end = 4.dp, top = 0.dp), horizontalAlignment = Alignment.Start) {
+                    ncTitle(Modifier.fillMaxWidth(0.90f).moveTitle(move))
+                    ncMeta()
                 }
             }
 
@@ -2751,7 +2926,12 @@ private fun EditorialCard(
     bgFilter: ColorFilter? = null,
     // v375 — rich-text runs over this card's fact body (threaded from
     // TopicShareCard so FactBody can render the styled runs).
-    factSpans: List<TextSpan> = emptyList()
+    factSpans: List<TextSpan> = emptyList(),
+    // v376 — GLUED cover: artwork rendered inside the title block (see
+    // [GluedCover]). Null = no cover → the layout is exactly as before.
+    coverArt: androidx.compose.ui.graphics.ImageBitmap? = null,
+    coverW: Dp = 44.dp,
+    coverH: Dp = 66.dp
 ) {
     val cream = Color(0xFFFAF7F0)
     val inkDark = Color(0xFF1C1814)
@@ -2796,22 +2976,52 @@ private fun EditorialCard(
 
             Spacer(Modifier.height(16.dp))
 
-            // Headline — retro Bungee, big
-            Text(title, style = titleStyle(TextStyle(
-                fontFamily = BungeeFontFamily, fontSize = 30.sp,
-                lineHeight = 34.sp, color = inkDark
-            ), move), maxLines = lines(4, move.titleHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveTitle(move).onGloballyPositioned { callbacks.onTitle(it.boundsInWindow()) })
-
             // Byline — year deck (info row — movable via the M handle, not editable)
             val metaParts = mutableListOf<String>()
             if (quoteText == null && byline.isNotBlank()) metaParts.add(byline)
             if (year != null) metaParts.add(year)
-            if (metaParts.isNotEmpty()) {
-                Spacer(Modifier.height(7.dp))
-                Text(metaParts.joinToString(" · "), style = metaStyle(TextStyle(
-                    fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
-                    fontSize = 12.sp, color = inkDark.copy(alpha = 0.55f)
-                ), move), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+            val edMetaLine: @Composable () -> Unit = {
+                if (metaParts.isNotEmpty()) {
+                    Spacer(Modifier.height(7.dp))
+                    Text(metaParts.joinToString(" · "), style = metaStyle(TextStyle(
+                        fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
+                        fontSize = 12.sp, color = inkDark.copy(alpha = 0.55f)
+                    ), move), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .then(if (coverArt == null) Modifier.titleShift(move) else Modifier)
+                            .moveMeta(move)
+                            .onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                }
+            }
+            val edTitleLine: @Composable (Modifier) -> Unit = { titleMod ->
+                // Headline — retro Bungee, big
+                Text(title, style = titleStyle(TextStyle(
+                    fontFamily = BungeeFontFamily, fontSize = 30.sp,
+                    lineHeight = 34.sp, color = inkDark
+                ), move), maxLines = lines(4, move.titleHeightFrac), overflow = TextOverflow.Ellipsis,
+                    modifier = titleMod.onGloballyPositioned { callbacks.onTitle(it.boundsInWindow()) })
+            }
+            // v376 — GLUED cover: the jacket is the leading item of the
+            // masthead's title block, so it always sits exactly beside the
+            // headline at its natural flow position and rides every title
+            // move (drag / collision / auto lift) via [glueTitleMove] on the
+            // Row — only the title's own font scale/width crop stays on the
+            // text ([titleSize]), so a size tweak never stretches the jacket.
+            if (coverArt != null) {
+                Row(
+                    verticalAlignment = Alignment.Top,
+                    modifier = Modifier.glueTitleMove(move)
+                ) {
+                    GluedCover(coverArt, coverW, coverH, move, callbacks, topPad = 5.dp)
+                    Spacer(Modifier.width(CoverTitleGap))
+                    Column(Modifier.weight(1f)) {
+                        edTitleLine(Modifier.titleSize(move))
+                        edMetaLine()
+                    }
+                }
+            } else {
+                edTitleLine(Modifier.moveTitle(move))
+                edMetaLine()
             }
 
             Spacer(Modifier.height(15.dp))
@@ -2943,7 +3153,12 @@ private fun MinimalCard(
     bgFilter: ColorFilter? = null,
     // v375 — rich-text runs over this card's fact body (threaded from
     // TopicShareCard so FactBody can render the styled runs).
-    factSpans: List<TextSpan> = emptyList()
+    factSpans: List<TextSpan> = emptyList(),
+    // v376 — GLUED cover: artwork rendered inside the title block (see
+    // [GluedCover]). Null = no cover → the layout is exactly as before.
+    coverArt: androidx.compose.ui.graphics.ImageBitmap? = null,
+    coverW: Dp = 44.dp,
+    coverH: Dp = 66.dp
 ) {
     val bg = Color(0xFFFFFDF9)
     val inkDark = Color(0xFF1A1A1A)
@@ -2991,21 +3206,53 @@ private fun MinimalCard(
 
             Spacer(Modifier.height(26.dp))
 
-            // Title — big retro Bungee
-            Text(title, style = titleStyle(TextStyle(
-                fontFamily = BungeeFontFamily, fontSize = 32.sp, lineHeight = 35.sp, color = inkDark
-            ), move), maxLines = lines(5, move.titleHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveTitle(move).onGloballyPositioned { callbacks.onTitle(it.boundsInWindow()) })
-
             // Byline / year — info row: movable via M handle, not editable
-            if (byline.isNotBlank()) {
-                Spacer(Modifier.height(6.dp))
-                Text(byline, style = metaStyle(TextStyle(
-                    fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
-                    fontSize = 12.sp, color = inkDark.copy(alpha = 0.50f)
-                ), move), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis, modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
-            } else if (year != null) {
-                Spacer(Modifier.height(6.dp))
-                Text(year, style = metaStyle(TextStyle(fontFamily = LoraFontFamily, fontSize = 12.sp, color = inkDark.copy(alpha = 0.40f)), move), maxLines = lines(2, move.metaHeightFrac, max = 2), modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+            val mnMetaLine: @Composable () -> Unit = {
+                if (byline.isNotBlank()) {
+                    Spacer(Modifier.height(6.dp))
+                    Text(byline, style = metaStyle(TextStyle(
+                        fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
+                        fontSize = 12.sp, color = inkDark.copy(alpha = 0.50f)
+                    ), move), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier
+                            .then(if (coverArt == null) Modifier.titleShift(move) else Modifier)
+                            .moveMeta(move)
+                            .onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                } else if (year != null) {
+                    Spacer(Modifier.height(6.dp))
+                    Text(year, style = metaStyle(TextStyle(fontFamily = LoraFontFamily, fontSize = 12.sp, color = inkDark.copy(alpha = 0.40f)), move), maxLines = lines(2, move.metaHeightFrac, max = 2),
+                        modifier = Modifier
+                            .then(if (coverArt == null) Modifier.titleShift(move) else Modifier)
+                            .moveMeta(move)
+                            .onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                }
+            }
+            val mnTitleLine: @Composable (Modifier) -> Unit = { titleMod ->
+                // Title — big retro Bungee
+                Text(title, style = titleStyle(TextStyle(
+                    fontFamily = BungeeFontFamily, fontSize = 32.sp, lineHeight = 35.sp, color = inkDark
+                ), move), maxLines = lines(5, move.titleHeightFrac), overflow = TextOverflow.Ellipsis,
+                    modifier = titleMod.onGloballyPositioned { callbacks.onTitle(it.boundsInWindow()) })
+            }
+            // v376 — GLUED cover: the jacket is the leading item of the title
+            // block so it always sits exactly beside the title and rides every
+            // title move (drag / collision / auto lift) via [glueTitleMove] on
+            // the Row — the author/year column stays next to it.
+            if (coverArt != null) {
+                Row(
+                    verticalAlignment = Alignment.Top,
+                    modifier = Modifier.glueTitleMove(move)
+                ) {
+                    GluedCover(coverArt, coverW, coverH, move, callbacks, topPad = 4.dp)
+                    Spacer(Modifier.width(CoverTitleGap))
+                    Column(Modifier.weight(1f)) {
+                        mnTitleLine(Modifier.titleSize(move))
+                        mnMetaLine()
+                    }
+                }
+            } else {
+                mnTitleLine(Modifier.moveTitle(move))
+                mnMetaLine()
             }
 
             Spacer(Modifier.weight(1f))
@@ -5655,7 +5902,11 @@ private fun MiddleContent(
     move: ShareCardMove = ShareCardMove(),
     chapterProgress: ChapterProgressUi? = null,
     // v335 — a stacked custom fact rendered below the progress widget.
-    chapterFact: String = ""
+    chapterFact: String = "",
+    // v376 — GLUED cover: rendered beside the title in the block below.
+    coverArt: androidx.compose.ui.graphics.ImageBitmap? = null,
+    coverW: Dp = 44.dp,
+    coverH: Dp = 66.dp
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (quoteText != null) {
@@ -5666,20 +5917,56 @@ private fun MiddleContent(
                 callbacks.onFactStyle(qStyle)
             })
         } else {
-            // Title
-            Text(display, style = titleStyle(MaterialTheme.typography.headlineLarge.copy(fontFamily = ChangaOneFontFamily, lineHeight = 40.sp), move), color = palette.ink, maxLines = lines(3, move.titleHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveTitle(move).onGloballyPositioned { callbacks.onTitle(it.boundsInWindow()) })
-            // Metadata line — byline • year (e.g. "GUNS N' ROSES • 1987") — info row: movable, not editable.
-            // v316b — sits right under the title, so it travels with the T drag too.
+            // Metadata (byline • year / author • date) — reused by both the
+            // plain and the glued-cover title layouts below.
             val metaParts = mutableListOf<String>()
             if (byline.isNotBlank()) metaParts.add(byline)
             if (year != null) metaParts.add(year)
-            if (metaParts.isNotEmpty()) {
+            val metaLine: @Composable () -> Unit = {
+                if (metaParts.isNotEmpty()) {
+                    Text(
+                        metaParts.joinToString(" \u2022 "),
+                        style = metaStyle(MaterialTheme.typography.labelSmall.copy(fontFamily = LoraFontFamily, fontWeight = FontWeight.SemiBold), move),
+                        color = palette.ink.copy(alpha = 0.50f), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis,
+                        // v316b — sits right under the title, so it travels
+                        // with the T drag too (in the plain layout via
+                        // [titleShift]; the glued layout is inside the moved
+                        // row so only its own M offset applies).
+                        modifier = Modifier
+                            .then(if (coverArt == null) Modifier.titleShift(move) else Modifier)
+                            .moveMeta(move)
+                            .onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) }
+                    )
+                }
+            }
+            val titleLine: @Composable (Modifier) -> Unit = { titleMod ->
                 Text(
-                    metaParts.joinToString(" \u2022 "),
-                    style = metaStyle(MaterialTheme.typography.labelSmall.copy(fontFamily = LoraFontFamily, fontWeight = FontWeight.SemiBold), move),
-                    color = palette.ink.copy(alpha = 0.50f), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) }
+                    display,
+                    style = titleStyle(MaterialTheme.typography.headlineLarge.copy(fontFamily = ChangaOneFontFamily, lineHeight = 40.sp), move),
+                    color = palette.ink, maxLines = lines(3, move.titleHeightFrac),
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = titleMod.onGloballyPositioned { callbacks.onTitle(it.boundsInWindow()) }
                 )
+            }
+            // v376 — GLUED cover: with a cover the title block becomes a Row
+            // (cover | title+author) whose move offsets apply to the WHOLE
+            // group — the jacket always sits beside the title and rides
+            // every title drag / collision push / auto lift.
+            if (coverArt != null) {
+                Row(
+                    verticalAlignment = Alignment.Top,
+                    modifier = Modifier.glueTitleMove(move)
+                ) {
+                    GluedCover(coverArt, coverW, coverH, move, callbacks, topPad = 6.dp)
+                    Spacer(Modifier.width(CoverTitleGap))
+                    Column(Modifier.weight(1f)) {
+                        titleLine(Modifier.titleSize(move))
+                        metaLine()
+                    }
+                }
+            } else {
+                titleLine(Modifier.moveTitle(move))
+                metaLine()
             }
             if (ratingStars != null && ratingStars > 0) StarRow(ratingStars, palette)
             // v316b — style hoisted so the pane reports it to the editor.
@@ -6115,6 +6402,42 @@ private fun ArrangeableCard(
                 var dragGuides by remember { mutableStateOf(DragGuides()) }
                 var dragActive by remember { mutableStateOf(false) }
 
+                // v376 — AUTO-LIFT (measured collision): while editing, if the
+                // quick-fact box (grown by the height / width / whole-box
+                // sliders or the corner grip) reaches up into the title block,
+                // the title is pushed UP by exactly the overlap (plus a small
+                // gap) so the box never draws over it — and when the box is
+                // lowered again the needed lift drops back to zero and the
+                // title settles down. The lift is SAVED on the move
+                // ([titleLift]) so the sheet preview and the exported image
+                // render the same pushed layout. Computed from the title's
+                // UN-lifted base (measured bottom + current lift), so it
+                // converges in one step instead of chasing itself.
+                if (editMode && !quoteMode) {
+                    androidx.compose.runtime.LaunchedEffect(
+                        titleRect.value, factRect.value,
+                        move.factHeightFrac, move.factWidthFrac, move.factBoxScale, move.factZoom,
+                        move.titleLift
+                    ) {
+                        val t = rTitle
+                        val f = rFact
+                        if (t.width <= 0f || t.height <= 0f || f.width <= 0f || f.height <= 0f) return@LaunchedEffect
+                        val gap = with(editDensity) { 6.dp.toPx() }
+                        // The measured title already includes any applied lift;
+                        // add it back to get the natural (un-lifted) bottom.
+                        val baseBottom = t.bottom + move.titleLift
+                        val need = (baseBottom + gap - f.top).coerceAtLeast(0f)
+                        // The title may never lift above the card's top edge
+                        // (leave a hairline of breathing room).
+                        val baseTop = t.top + move.titleLift
+                        val maxLift = (baseTop - with(editDensity) { 2.dp.toPx() }).coerceAtLeast(0f)
+                        val lift = need.coerceAtMost(maxLift)
+                        if (kotlin.math.abs(lift - move.titleLift) > 0.1f) {
+                            onMove(move.copy(titleLift = lift))
+                        }
+                    }
+                }
+
                 // v3xx — NEW selection model: nothing is shown when edit mode
                 // starts (the user asked: no boxes/grips on hold). Tapping a
                 // thing on the card selects it — the selected box gets the
@@ -6468,8 +6791,11 @@ private fun ArrangeableCard(
                                     // v340 — clamp against the UNMOVED rect
                                     // (base = reported minus current offset).
                                     // v353 — guide-only alignment (no magnet).
+                                    // v376 — the measured rect already includes
+                                    // the auto LIFT, so add it back to recover
+                                    // the true natural top before clamping.
                                     val bx = t.left - move.titleDx
-                                    val by = t.top - move.titleDy
+                                    val by = t.top - move.titleDy + move.titleLift
                                     val othersT = alignOthers(t)
                                     val xs = magnetAxis(bx, t.width, cw, -bx, cw - bx - t.width, (move.titleDx + dx).coerceIn(-bx, cw - bx - t.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersT, bx, t.width))
                                     val ys = magnetAxis(by, t.height, ch, -by, ch - by - t.height, (move.titleDy + dy).coerceIn(-by, ch - by - t.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersT, by, t.height))
@@ -7023,6 +7349,7 @@ fun TopicShareSheet(
                 favBoxScale = o.optDouble("favBoxScale", 1.0).toFloat(),
                 factScale = o.optDouble("factScale", 1.0).toFloat(),
                 factZoom = o.optDouble("factZoom", 1.0).toFloat(),
+                titleLift = o.optDouble("titleLift", 0.0).toFloat(),
                 factUnderline = o.optBoolean("factUnderline", false),
                 factHighlight = o.optInt("factHighlight", 0).takeIf { it != 0 }?.let { Color(it) },
                 titleUnderline = o.optBoolean("titleUnderline", false),
@@ -7439,6 +7766,7 @@ fun TopicShareSheet(
                 put("factFormat", m.factFormat.name); put("factDropCap", m.factDropCap.name)
                 put("factScale", m.factScale)
                 put("factZoom", m.factZoom)
+                if (m.titleLift != 0f) put("titleLift", m.titleLift.toDouble())
                 put("factUnderline", m.factUnderline)
                 m.factHighlight?.let { put("factHighlight", it.toArgb()) }
                 put("titleUnderline", m.titleUnderline)

@@ -2,69 +2,70 @@
 
 ## Request (2026-09-06, active)
 
-"now in book albumn etc buttom sheet, colors, so the page number albumn number
-icon isnt visible when selected and also the like button and also the book
-icon and same for albumns series and when selected its even more bad, the
-colors etc is bad and also the color pallete should be remeberstae like even
-when after resrart it goes back to defakt and switches after a second when it
-should be instant. and then the enlarged text box text editing well it have
-pick outline and that editing so fix that and add the save you text style
-format text editing with highlights etc which stays when sharing too. also in
-the full screen card editor the highligh bold italic etc are inside the tool
-box when they should show as floating when selecting the text and only apply
-to them if text are selected bnot entirely always and use the similiar logic
-from save your take not editing, same for the full screen text editor too."
+"the cover position isnt right in share card, in paper design its top left
+corner and not to the side of the title and author and also the space can be
+decrase, in vinyls the text quick fact should move a little down and the
+cover for albumn and the title itself should be a little down too do it
+doesnt verlap on category pill, in editorial its near perfect, the cover
+should move a little don matching the title starting point and the title can
+move a little closer to the cover, same for minimal too. and for clean a
+similiar the positioning is good the ittle move closer, and then the cover
+and albumn should move together also when the quick fact gets moved along
+with title the cover should move too by collide logic i think while keeping
+the positio with the title, and also in the auto text the collision should
+work when the height of the quick fact gets tuned manually and the title
+moves up automatically along with cover if present and it comes don if with
+the slider it gets lowered and same for width chnages too, so apply it an
+dmak eit more better and smart."
 
-Ask answers: selection formatting for the FACT text only; keep the whole-element
-toggles too ("keep both"); both enlarged dialogs get rich text; and fix the
-crash + slider/swipe/glitch regressions from commit `11e566a5` (the full-screen
-Text dropdown: infinite-constraint crash + its scrollable stealing drags).
+Ask answer: "Glue cover to the title block; title drag moves cover too and
+also the title move during collision moves it too; Saved lift".
 
-## Implemented (v375)
+Also noted by user: watch CI after push (deferred until everything is done).
 
-1. **Notes-sheet palette INSTANT + remembered.** Cover swatches are cached per
-   artwork URL and albums/series persist their resolved artwork URL
-   (`AppPreferences`: `KEY_COVER_SWATCH_CACHE`, `KEY_SHEET_ART_URLS`,
-   `bookChapterNoteSpansState` too; `CoverPalette.kt`:
-   `coverSwatchesToArgbs`/`coverSwatchesFromArgbs`). All three sheets
-   (Book/Album/Episode) seed their palette synchronously on first composition
-   and refresh the cache in the background (keep cached on fetch miss).
-2. **Selected-state contrast on light covers.** `notesSheetPalette.onAccent`
-   now keys on HSL lightness (≥0.52 → dark ink) instead of linear luminance;
-   open/tinted-row hearts use the palette ink, album selected hearts get
-   full-strength `onAccent`.
-3. **Rich-text fact editing that survives sharing.** `TopicShareCard` threads
-   a `factSpans: List<TextSpan>` param through every style → `FactBody`
-   (incl. the BOOK two-column + EDITORIAL drop-cap splitters via `richSlice`)
-   with the translucent amber `ShareFactMarker`. Sheet state:
-   `editedFactSpans`/`customSpans` (persist via `spansToJson`/`spansFromJson`),
-   `routeFactChange` rebases spans on inline typing, `routeRichFact` carries
-   text+spans from the Enlarge dialog, which now hosts `RichTextEditor`
-   (Save-your-take style) — the chapter-note dialog too, and the note spans
-   ride "Share as Chapter review" (`pendingChapterShare` Triple →
-   `seedReviewSpans`). Save/Share exports pass the spans. Chapter-review cards
-   shift spans past the "CH n · title" chip prefix (`reviewChipText` +
-   `reviewChipPrefixLen` + `shiftSpans` → `cardFactRenderSpans`).
-4. **Full-screen selection formatting.** The full-screen card's fact field
-   keeps a REAL `TextFieldValue` (`richFactTfv` + `factTextLayout`,
-   reseeded only on text change) and floats a non-focusable Popup B / I /
-   highlight bar anchored to the live selection caret (field origin + caret
-   rect through `editDensity`). Taps toggle `RichFlag` over exactly [s, e) in
-   the active spans list (`toggleFactSelectionFormat`; `RichFlag`,
-   `spansFullyCovered`, `toggleSpanFlag`, `FormatToolButton` made internal in
-   RichTextEditor.kt). Whole-element toggles stay in the Text panel.
-5. **Crash + glitch fixes (`11e566a5`).** Full-screen Text tools moved from a
-   DropdownMenu (verticalScroll under unbounded height → the reported
-   IllegalStateException, and the popup scrollable stealing slider/swipe
-   drags) into an inline bounded panel (`heightIn(max = 300.dp)` + scroll)
-   below the top bar in the dialog Column.
+## Implemented (v376)
 
-## Notes for next request
+1. **GLUED covers (Paper / Vinyl / Clean / Editorial / Minimal).**
+   `TopicShareCard` now computes `glueCoverStyle` + `gluedCover` and passes
+   the artwork (with natural `coverW`/`coverH` — 44×66 jacket, 66×66 album)
+   into those five style cards. The old side-layout overlay + title-dx shift
+   stays only for Signature/Custom. New `GluedCover` composable renders the
+   jacket INSIDE each style's title block as the leading item of the Row
+   that carries the title's move (`glueTitleMove` = drag offset + auto lift;
+   `titleSize` = font scale + width crop applied to the TEXT ONLY), so the
+   cover sits exactly beside the title at the design's natural flow spot and
+   rides every title drag / collision push / auto lift. The cover keeps its
+   own fine-position offset (`coverDx`/`coverDy`) inside the group.
+2. **Per-style placement pass.**
+   - Paper (MiddleContent): cover | title+author Row beside the headline
+     area, snug `CoverTitleGap` (12dp).
+   - Vinyl: cover | title+byline Row; title block lowered (18dp spacer with
+     cover) so it clears the category pill; quick fact nudged down (14dp
+     spacer with cover).
+   - Editorial: cover | headline+deck Row aligned to the headline start
+     (topPad 5).
+   - Minimal: cover | title+byline Row (topPad 4).
+   - Clean (Neumorphic): cover beside the CENTERED title block
+     (CenterStart, CenterVertically).
+3. **Auto title-lift collision (`move.titleLift`, dp, saved).**
+   In `ArrangeableCard`'s edit overlay, a `LaunchedEffect` (editMode,
+   non-quote) watches measured title/fact rects + fact-box fractions; when a
+   manually grown fact box (height / width / whole-box sliders or the corner
+   grip) would draw over the title, it computes the needed lift from the
+   title's UN-lifted base (measured bottom + current lift → one-step
+   convergence), clamps to the card top, and writes it into the move via
+   `onMove`. `moveTitle`/`titleShift`/`glueTitleMove` apply the lift as an
+   upward offset everywhere (sheet preview + export); `titleLift` is parsed
+   and persisted in the move JSON. Lowering the box drops the needed lift →
+   the title settles back. TITLE drag clamp adds the lift back to keep the
+   natural base correct.
 
-- CI will compile-check (no Gradle here). Riskiest spots: the ArrangeableCard
-  rich branch + Popup geometry (full screen runs under a scaled Density —
-  offsets go through `editDensity`), the shifted `cardFactRenderSpans` for
-  chapter reviews, and the RichTextEditor param sets used in both dialogs.
-- Braces verified balanced in all 6 edited files with a template-aware
-  tokenizer.
-- Changelog (fastlane 20260921.txt) + app/AGENTS.md v375 bullet added.
+## Notes for next request / CI
+
+- CI will compile-check on push (no Gradle in this environment). Watch for
+  the `glueTitleMove`/`titleSize`/`GluedCover` wiring and the
+  `ArrangeableCard` LaunchedEffect (scaled-density rects go through
+  `editDensity`).
+- Braces verified balanced in TopicShareCard.kt with a template-aware
+  tokenizer; per-hunk diff nets all zero.
+- Changelog (fastlane 20260921.txt) + app/AGENTS.md v376 bullet added.
