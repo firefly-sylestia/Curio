@@ -1022,6 +1022,50 @@ app/src/main/java/com/curio/app/
     `format != null || underline != null`, which silently killed Kotlin's
     smart-cast of `onFormatFactSelection`; the B / I / highlight buttons
     now safe-invoke (`?.invoke`) and gate on their own enable state.
+  - **v379d — size-channel cleanup, dark-premium Paper ink, AUTO-LAYOUT
+    pill.** User: "remove the orphaned factZoom… Reset Layout restores
+    smart fit… the smart fit should also use the text box height
+    adjuster… add a spark round pill floating in a card corner to auto
+    smart-fit… nothing gets overlapped, the user's edits stay but it
+    adjusts… if too much text the card can automatically become 9:16…
+    tap again for another arrangement… fixing its colour in dark mode
+    (some share-fact text is still dark)…".
+    - **factZoom deleted.** Nothing wrote it since the v378 corner-grip
+      removal; it only multiplied the render + divided the size-slider
+      write-backs. Parsing now folds a legacy `factZoom` into
+      `factScale` (same channel), and the field + all render/divisor/
+      persistence uses are gone — one invisible factor fewer.
+    - **Reset Layout clears the fit seed.** `resetLayout()` no longer
+      carries `factScale` forward: that field is only ever written by
+      the smart-fit handoff seed or the auto-layout pill (the Size tool
+      drives `bodyScale`), so keeping it left auto-shrunk text on a
+      default box AND permanently disabled smart fit (the seed reads as
+      "manually touched"). Reset now returns natural auto-fit behaviour.
+    - **Box-height thumb is honest.** The sheet Crop tool + full-screen
+      Box section show `factHeightFrac × fit.heightFrac` (the height the
+      card really renders, matching the text thumb since v378) and write
+      the base back through the fit on drag.
+    - **Cover title-shrink folded into the slider.** Signature / Custom
+      cards with a side cover multiply the title by `coverTitleScale`
+      (~0.9–0.97) at render; the Title-size thumbs (sheet + full screen)
+      now display the effective size and write the base back.
+    - **Paper fact/quote ink.** `qStyle`/`frostStyle` in `MiddleContent`
+      copied `MaterialTheme.typography` and therefore inherited the APP
+      theme's `onSurface` — dark-on-dark on dark premium palettes (Paper
+      backgrounds follow the tone) and wrong in dark mode. Both styles
+      now carry explicit `palette.ink`.
+    - **AUTO-LAYOUT sparkle pill.** `AutoLayoutPill` floats at each
+      card's top-end in BOTH modes (resting + editing). Tap calls
+      `runAutoLayout()` in the sheet: `autoLayoutPlan()` (per style /
+      aspect / current text length) commits a whole-card fit into the
+      per-style move — box height + whole-fact text ride the SAME
+      channels the sliders drive (`factHeightFrac`, `factScale`, format),
+      so the export matches and Reset Layout clears it. Attempts cycle
+      standard fit → condensed → book columns (long facts) → tall 9:16
+      when a 3:4 card overflows a fully-fitted budget; attempts that
+      would change nothing are auto-skipped so every tap does something
+      visible. Manual title/fact/cover position drags are never
+      overwritten.
 - **v377 — share-card editor declutter: design switching via the card,
   tool captions, No-fact eye-cross, fact layout under Align.** User: "the
   style button should only show when signature style is active and tapping

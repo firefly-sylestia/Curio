@@ -559,7 +559,7 @@ private fun smartAutoFitDelta(
     if (!AppPreferences.shareAutoFitState) return ShareAutoFitDelta()
     val touched = move.factDx != 0f || move.factDy != 0f ||
         move.factWidthFrac != 1f || move.factHeightFrac != 1f ||
-        move.factScale != 1f || move.factZoom != 1f || move.factBoxScale != 1f
+        move.factScale != 1f || move.factBoxScale != 1f
     if (touched) return ShareAutoFitDelta()
     val grow = autoFitGrow(factLength)
     if (grow <= 1f) return ShareAutoFitDelta()
@@ -571,6 +571,92 @@ private fun smartAutoFitDelta(
     val textScale = if (grow > maxHeightFrac)
         (maxHeightFrac / grow).coerceIn(minTextScale, 1f) else 1f
     return ShareAutoFitDelta(heightFrac = heightFrac, widthFrac = 1f, textScale = textScale)
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// v379d — AUTO-LAYOUT pill: the sparkle button floating over the card
+// re-runs a WHOLE-CARD fit on tap — box growth + text sizing ride the SAME
+// slider channels the smart fit uses (fact-height ×, fact text via
+// [ShareCardMove.factScale]) and commit into the per-style move, so the
+// preview, the saved card and the export all match. Tapping again cycles
+// through alternative ARRANGEMENTS (standard fit → condensed → book page →
+// tall 9:16 when the current aspect can't hold the text). Manual position
+// drags (title/fact/cover offsets) are never overwritten — the plan only
+// touches the box/text channels and the aspect when it must.
+// ═══════════════════════════════════════════════════════════════════════
+private fun autoFitSizing(style: ShareCardStyle, aspect: ShareCardAspect, len: Int): Pair<Float, Float> {
+    val (maxHeightFrac, minTextScale) = factFitBudget(style, aspect)
+    val grow = autoFitGrow(len)
+    val heightFrac = minOf(grow, maxHeightFrac)
+    val textScale = if (grow > maxHeightFrac) (maxHeightFrac / grow).coerceIn(minTextScale, 1f) else 1f
+    return heightFrac to textScale
+}
+
+/** One auto-layout candidate: what the pill commits for a given attempt.
+ *  Zero fields mean "leave that channel alone". */
+private data class ShareAutoLayoutPlan(
+    val heightFrac: Float = 0f,
+    val textScale: Float = 0f,
+    val format: ShareCardFactFormat? = null,
+    // true → switch the CARD itself to 9:16 (only offered when the current
+    // aspect is 3:4 and the text still overflows a fully-fitted 3:4 card).
+    val tall: Boolean = false
+)
+
+/** v379d — the pill's attempt → plan table. Every attempt re-fits from the
+ *  CURRENT text length on the CURRENT aspect, then layers a layout idea on
+ *  top (attempt 0 = pure fit; 1 = CONDENSED lines; 2 = BOOK columns for
+ *  long facts; 3 = tall card, or a plain STANDARD fit when already tall).
+ *  The caller skips attempts that would not change anything, so every tap
+ *  that CAN change the card does. */
+private fun autoLayoutPlan(
+    style: ShareCardStyle,
+    aspect: ShareCardAspect,
+    len: Int,
+    attempt: Int,
+    currentFormat: ShareCardFactFormat
+): ShareAutoLayoutPlan {
+    val (h, t) = autoFitSizing(style, aspect, len)
+    return when ((attempt % 4 + 4) % 4) {
+        0 -> ShareAutoLayoutPlan(heightFrac = h, textScale = t)
+        1 -> ShareAutoLayoutPlan(heightFrac = h, textScale = t, format = ShareCardFactFormat.CONDENSED)
+        2 -> ShareAutoLayoutPlan(
+            heightFrac = h, textScale = t,
+            format = if (len >= 150) ShareCardFactFormat.BOOK
+            else ShareCardFactFormat.EDITORIAL
+        )
+        else -> if (aspect == ShareCardAspect.CLASSIC && currentFormat != ShareCardFactFormat.STANDARD) {
+            ShareAutoLayoutPlan(heightFrac = h, textScale = t, format = ShareCardFactFormat.STANDARD)
+        } else if (aspect == ShareCardAspect.CLASSIC) {
+            // The one thing left that can still buy space is a taller card.
+            ShareAutoLayoutPlan(tall = true)
+        } else {
+            ShareAutoLayoutPlan(heightFrac = h, textScale = t, format = ShareCardFactFormat.STANDARD)
+        }
+    }
+}
+
+/** v379d — the floating sparkle pill: translucent round button at the card's
+ *  top-end corner. Shows on BOTH the resting preview and the edit mode; tap
+ *  = run the next auto-layout attempt (see [autoLayoutPlan]). */
+@Composable
+private fun AutoLayoutPill(onTap: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(
+        onClick = onTap,
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+        shadowElevation = 4.dp,
+        modifier = modifier.size(38.dp)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            CurioIcon(
+                name = "auto_awesome",
+                contentDescription = "Auto layout — tap to fit the card, tap again for another arrangement",
+                size = 18.dp,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -668,12 +754,12 @@ data class ShareCardMove(
     /** v371 — the auto-adjuster's FACT-font shrink, captured into the move on
      *  the first manual grab (the same handoff that seeds the box height) so
      *  handing auto-fit off doesn't make the text jump back to full size and
-     *  clip mid-drag. 1f = full size. */
+     *  clip mid-drag. 1f = full size. v379d — this is now the ONLY whole-fact
+     *  text channel: the old v371 corner-zoom `factZoom` (orphaned since the
+     *  corner grip was removed) was folded into this field on load and
+     *  deleted, so the render multiplier is bodyScale × autoFit × factScale
+     *  — no invisible phantom factor. */
     val factScale: Float = 1f,
-    /** v371 — corner whole-box ZOOM for the fact: dragging the fact's corner
-     *  scales the box AND the fact font TOGETHER (photo-zoom), so the corner
-     *  never feels like a plain height/width slider. 1f = no zoom. */
-    val factZoom: Float = 1f,
     /** v379 — the BOOK-page fact layout's COLUMN GAP multiplier (1f = the
      *  default 12dp gutter between the two columns; 0.3f hugs them, 2.5f
      *  spreads the page). Read only when [factFormat] is BOOK. */
@@ -699,8 +785,14 @@ data class ShareCardMove(
  *  (drags), box DIMENSION (width/height fractions + whole-box scales) and
  *  the auto LIFT — the stuff the Customise chrome moves/resizes — while
  *  KEEPING every text edit (fonts, aligns, bold/italic/underline/
- *  highlight, text scales, fact layout/drop cap), so "Reset layout" never
- *  undoes the user's typography. */
+ *  highlight, title size and fact layout/drop cap), so "Reset layout" never
+ *  undoes the user's typography. v379d — the whole-fact text channel
+ *  [factScale] CLEARS too: it is only ever written by the smart-fit handoff
+ *  seed or the auto-layout pill (never by a user text slider — the Size
+ *  tool drives bodyScale), so keeping it after Reset left the auto-shrunk
+ *  text in place AND permanently disabled future smart fit (the seed reads
+ *  as "manually touched"). Reset now returns the card to natural
+ *  auto-fit behaviour. */
 private fun ShareCardMove.resetLayout(): ShareCardMove = ShareCardMove(
     titleFont = titleFont, factFont = factFont, metaFont = metaFont, badgeFont = badgeFont,
     titleAlign = titleAlign, factAlign = factAlign,
@@ -710,7 +802,7 @@ private fun ShareCardMove.resetLayout(): ShareCardMove = ShareCardMove(
     badgeBold = badgeBold, badgeItalic = badgeItalic,
     titleUnderline = titleUnderline, titleHighlight = titleHighlight,
     factUnderline = factUnderline, factHighlight = factHighlight,
-    titleScale = titleScale, factScale = factScale, factZoom = factZoom,
+    titleScale = titleScale,
     factFormat = factFormat, factDropCap = factDropCap, factGutter = factGutter
 )
 
@@ -1466,7 +1558,8 @@ fun TopicShareCard(
     // (style base × bodyScale × fit.textScale). Once the user grabs the
     // fact, the shrink is captured into move.factScale (see the first-grab
     // seed) so the handoff doesn't make the text jump or clip.
-    val effectiveBodyScale = bodyScale * autoFit.textScale * move.factScale * move.factZoom
+    // v379d — factZoom is gone: whole-fact text = base × fit × factScale.
+    val effectiveBodyScale = bodyScale * autoFit.textScale * move.factScale
     // Extract year from trailing parentheses — "Appetite for Destruction (1987)" → "1987"
     val year = topicName.substringAfterLast("(").substringBeforeLast(")").takeIf { it.all { c -> c.isDigit() } && it.length == 4 }
     val palette = paletteFor(accent, toneIndex)
@@ -5975,7 +6068,17 @@ private fun MiddleContent(
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (quoteText != null) {
             CurioIcon(name = CurioIcons.FormatQuote, tint = palette.ink.copy(alpha = 0.20f), size = 32.dp)
-            val qStyle = factBodyStyle(MaterialTheme.typography.titleLarge.copy(fontFamily = LoraFontFamily, fontSize = qSize, lineHeight = (qSize.value * 1.28f).sp), move)
+            // v379d — the quote + frost body MUST carry an explicit palette ink:
+            // they used to copy MaterialTheme.typography (whose colour resolves
+            // to the APP theme's onSurface), so in dark mode the text went
+            // light-on-cream and on a DARK premium tone (Paper's background
+            // follows the palette) it rendered dark-on-dark. palette.ink is
+            // dark on the light paper tones and light on the dark premium
+            // tones, so the card always reads regardless of the app theme.
+            val qStyle = factBodyStyle(MaterialTheme.typography.titleLarge.copy(
+                fontFamily = LoraFontFamily, fontSize = qSize,
+                lineHeight = (qSize.value * 1.28f).sp, color = palette.ink
+            ), move)
             FactBody(text = quoteText, style = qStyle, format = move.factFormat, dropCap = move.factDropCap, gutterFrac = move.factGutter, spans = factSpans, aspect = aspect, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 8, move.factHeightFrac), modifier = Modifier.moveFact(move).onGloballyPositioned {
                 callbacks.onFact(it.boundsInWindow())
                 callbacks.onFactStyle(qStyle)
@@ -6038,7 +6141,10 @@ private fun MiddleContent(
             val qfsScaled = (qfs.value * bodyScale).sp
             val frostStyle = factBodyStyle(MaterialTheme.typography.bodySmall.copy(
                 fontFamily = LoraFontFamily, fontSize = qfsScaled,
-                lineHeight = (qfsScaled.value * 1.4f).sp
+                lineHeight = (qfsScaled.value * 1.4f).sp,
+                // v379d — see the quote above: explicit palette ink so the
+                // fact never inherits the app theme's onSurface colour.
+                color = palette.ink.copy(alpha = 0.92f)
             ), move)
             FrostPane(palette, Modifier.moveFact(move)) {
                 // v329 — Reading-progress content draws the visual chapter
@@ -6499,7 +6605,7 @@ private fun ArrangeableCard(
                 if (editMode && !quoteMode) {
                     androidx.compose.runtime.LaunchedEffect(
                         titleRect.value, factRect.value,
-                        move.factHeightFrac, move.factWidthFrac, move.factBoxScale, move.factZoom,
+                        move.factHeightFrac, move.factWidthFrac, move.factBoxScale,
                         move.titleLift, titleGrabbed
                     ) {
                         // v378 — never recompute while the title itself is the
@@ -7394,8 +7500,11 @@ fun TopicShareSheet(
                 titleBoxScale = o.optDouble("titleBoxScale", 1.0).toFloat(),
                 factBoxScale = o.optDouble("factBoxScale", 1.0).toFloat(),
                 favBoxScale = o.optDouble("favBoxScale", 1.0).toFloat(),
-                factScale = o.optDouble("factScale", 1.0).toFloat(),
-                factZoom = o.optDouble("factZoom", 1.0).toFloat(),
+                // v379d — the legacy corner-zoom `factZoom` folds into
+                // [factScale] on load (both multiply the same channel; the
+                // field is gone from this version). Old saves keep their
+                // effective size, new saves write factScale only.
+                factScale = (o.optDouble("factScale", 1.0) * o.optDouble("factZoom", 1.0)).toFloat(),
                 factGutter = o.optDouble("factGutter", 1.0).toFloat(),
                 titleLift = o.optDouble("titleLift", 0.0).toFloat(),
                 factUnderline = o.optBoolean("factUnderline", false),
@@ -7775,6 +7884,46 @@ fun TopicShareSheet(
     fun updateMove(m: ShareCardMove) {
         movesByStyle = movesByStyle + (currentStyle to m)
     }
+    // v379d — hoisted here (before [runAutoLayout]) so the auto-layout pill
+    // can tick haptics; the toolbar haptics below reuses the same val.
+    val haptics = LocalHapticFeedback.current
+    // v379d — AUTO-LAYOUT pill state: attempt counter (-1 = never run; each
+    // tap advances). The plan COMMITS into the per-style [move] (box height
+    // + whole-fact text via the same channels the sliders drive), so the
+    // saved card and the exported image match the preview, and Reset Layout
+    // clears it back to natural smart-fit behaviour.
+    var autoLayoutIdx by remember { androidx.compose.runtime.mutableIntStateOf(-1) }
+    fun runAutoLayout() {
+        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        val len = maxOf(factFieldText.length, chapterFactForCard.length)
+        if (len == 0 && chapterFactForCard.isBlank() && progressForCard == null) return
+        var attempt = autoLayoutIdx + 1
+        repeat(6) {
+            val plan = autoLayoutPlan(currentStyle, aspect, len, attempt, move.factFormat)
+            val wantsTall = plan.tall && aspect == ShareCardAspect.CLASSIC
+            val h = plan.heightFrac
+            val s = plan.textScale
+            val hChanges = h > 0f && kotlin.math.abs(h - move.factHeightFrac) > 0.02f
+            val sChanges = s > 0f && kotlin.math.abs(s - move.factScale) > 0.02f
+            val fmtChanges = plan.format != null && plan.format != move.factFormat
+            if (wantsTall || hChanges || sChanges || fmtChanges) {
+                updateMove(move.copy(
+                    factHeightFrac = if (h > 0f) h.coerceIn(0.35f, 6f) else move.factHeightFrac,
+                    factScale = if (s > 0f) s.coerceIn(0.5f, 2f) else move.factScale,
+                    factFormat = plan.format ?: move.factFormat
+                ))
+                // A 3:4 card that still overflows fully-fitted gets the tall
+                // 9:16 canvas (the one remaining way to add room).
+                if (wantsTall) aspect = ShareCardAspect.PORTRAIT
+                autoLayoutIdx = attempt
+                return
+            }
+            attempt += 1
+        }
+        // Nothing could change (e.g. a short fact on a default card) — note
+        // the lookahead so the next tap starts one past where we stopped.
+        autoLayoutIdx = autoLayoutIdx + 1
+    }
     // v378 — DOUBLE-TAP a fact arms inline editing: the default quick fact
     // converts into a custom fact (so the typed text sticks), the box is
     // selected, and the transparent inline field takes focus. Mirrors the
@@ -7807,7 +7956,7 @@ fun TopicShareSheet(
     // style label/dots can read the page and swipes update [styleIdx].
     val pagerState = androidx.compose.foundation.pager.rememberPagerState(initialPage = safeIdx.coerceIn(0, styles.lastIndex)) { styles.size }
     // Satisfying haptics: confirm on Save/Share, light ticks on Reset/Done.
-    val haptics = LocalHapticFeedback.current
+    // (the val itself is declared above, next to [runAutoLayout])
     val focusManager = LocalFocusManager.current
 
     // v325 — persist the CURRENT edits (per-style moves + text + scale) so an
@@ -7833,7 +7982,6 @@ fun TopicShareSheet(
                 put("titleScale", m.titleScale)
                 put("factFormat", m.factFormat.name); put("factDropCap", m.factDropCap.name)
                 put("factScale", m.factScale)
-                put("factZoom", m.factZoom)
                 put("factGutter", m.factGutter)
                 if (m.titleLift != 0f) put("titleLift", m.titleLift.toDouble())
                 put("factUnderline", m.factUnderline)
@@ -7988,6 +8136,14 @@ fun TopicShareSheet(
                             ) { cb ->
                                 TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = pageMove, chapterProgress = progressForCard, chapterFact = chapterFactForCard, factSpans = if (isQuotes) emptyList() else cardFactRenderSpans, callbacks = cb)
                             }
+                            // v379d — AUTO-LAYOUT pill, current page only (it
+                            // must not clutter the peeked neighbours).
+                            if (isCenter) {
+                                AutoLayoutPill(
+                                    onTap = { runAutoLayout() },
+                                    modifier = Modifier.align(Alignment.TopEnd).padding(top = 10.dp, end = 8.dp)
+                                )
+                            }
                         }
                     }
                     // Style dots — hidden while editing.
@@ -8061,6 +8217,13 @@ fun TopicShareSheet(
                         ) { cb ->
                             TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, factSpans = if (isQuotes) emptyList() else cardFactRenderSpans, callbacks = cb)
                         }
+                        // v379d — AUTO-LAYOUT sparkle pill: floats over the
+                        // card top-end in BOTH modes (resting preview + the
+                        // Customise editor) and is never part of the layout.
+                        AutoLayoutPill(
+                            onTap = { runAutoLayout() },
+                            modifier = Modifier.align(Alignment.TopEnd).padding(top = 10.dp, end = 8.dp)
+                        )
                     }
                 }
             }
@@ -8650,14 +8813,21 @@ fun TopicShareSheet(
                                                             maxOf(factFieldText.length, chapterFactForCard.length),
                                                             currentStyle, aspect
                                                         ) else null
-                                                        val fsCur = if (fsIsTitle) move.titleScale
-                                                            else (bodyScale * fsFit!!.textScale * move.factScale * move.factZoom).coerceIn(0.5f, 2f)
+                                                        // v379d — cover title shrink folded
+                                                        // into the thumb (see the sheet's
+                                                        // Size tool for the formula).
+                                                        val fsCw = if (isAlbumTopic) 66f else 44f
+                                                        val fsCoverF = if (bookCover != null &&
+                                                            (currentStyle == ShareCardStyle.SIGNATURE || currentStyle == ShareCardStyle.CUSTOM)
+                                                        ) (0.90f + (92f - fsCw) / 92f * 0.06f).coerceIn(0.9f, 0.97f) else 1f
+                                                        val fsCur = if (fsIsTitle) (move.titleScale * fsCoverF).coerceIn(0.5f, 2f)
+                                                            else (bodyScale * fsFit!!.textScale * move.factScale).coerceIn(0.5f, 2f)
                                                         TextSizeSliderColumn(
                                                             label = if (fsIsTitle) "Title size" else "Fact size",
                                                             value = fsCur,
                                                             onValueChange = { v ->
-                                                                if (fsIsTitle) updateMove(move.copy(titleScale = v))
-                                                                else bodyScale = (v / (fsFit!!.textScale * move.factScale * move.factZoom)).coerceIn(0.5f, 2f)
+                                                                if (fsIsTitle) updateMove(move.copy(titleScale = (v / fsCoverF).coerceIn(0.5f, 2f)))
+                                                                else bodyScale = (v / (fsFit!!.textScale * move.factScale)).coerceIn(0.5f, 2f)
                                                             }
                                                         )
                                                     }
@@ -8738,7 +8908,19 @@ fun TopicShareSheet(
                                                             SizeSliderColumn("Whole box", move.titleBoxScale, { updateMove(move.copy(titleBoxScale = it)) }, 0.35f..5f, steps = 46, modifier = Modifier.fillMaxWidth())
                                                         } else {
                                                             SizeSliderColumn("Fact width", move.factWidthFrac, { updateMove(move.copy(factWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
-                                                            SizeSliderColumn("Fact height", move.factHeightFrac, { updateMove(move.copy(factHeightFrac = it)) }, 0.35f..6f, steps = 56, modifier = Modifier.fillMaxWidth())
+                                                            // v379d — folded height thumb (see the sheet's Crop tool for the
+                                                            // rationale): shows the smart-fit-grown height, writes the base.
+                                                            val fsFitH = smartAutoFitDelta(
+                                                                move,
+                                                                maxOf(factFieldText.length, chapterFactForCard.length),
+                                                                currentStyle, aspect
+                                                            ).heightFrac
+                                                            SizeSliderColumn(
+                                                                "Fact height",
+                                                                (move.factHeightFrac * fsFitH).coerceIn(0.35f, 6f),
+                                                                { v -> updateMove(move.copy(factHeightFrac = (v / fsFitH).coerceIn(0.35f, 6f))) },
+                                                                0.35f..6f, steps = 56, modifier = Modifier.fillMaxWidth()
+                                                            )
                                                             SizeSliderColumn("Whole box", move.factBoxScale, { updateMove(move.copy(factBoxScale = it)) }, 0.35f..6f, steps = 56, modifier = Modifier.fillMaxWidth())
                                                         }
                                                     }
@@ -8858,9 +9040,23 @@ fun TopicShareSheet(
                                     maxOf(factFieldText.length, chapterFactForCard.length),
                                     currentStyle, aspect
                                 ) else null
+                                // v379d — on Signature / Custom cards WITH a
+                                // glued-out cover, the renderer also multiplies
+                                // the title by coverTitleScale (~0.9–0.97) so
+                                // the headline fits beside the jacket. Fold it
+                                // into the thumb (the size shown IS what the
+                                // card renders) and write the base back.
+                                // Only Signature / Custom apply the side-cover
+                                // shrink (the glued designs render the cover
+                                // INSIDE the title block, Collage feeds it into
+                                // the photo).
+                                val cwV = if (isAlbumTopic) 66f else 44f
+                                val coverF = if (bookCover != null &&
+                                    (currentStyle == ShareCardStyle.SIGNATURE || currentStyle == ShareCardStyle.CUSTOM)
+                                ) (0.90f + (92f - cwV) / 92f * 0.06f).coerceIn(0.9f, 0.97f) else 1f
                                 val cur = when {
-                                    isTitle -> move.titleScale
-                                    isFact -> (bodyScale * sizeFit!!.textScale * move.factScale * move.factZoom).coerceIn(0.5f, 2f)
+                                    isTitle -> (move.titleScale * coverF).coerceIn(0.5f, 2f)
+                                    isFact -> (bodyScale * sizeFit!!.textScale * move.factScale).coerceIn(0.5f, 2f)
                                     else -> bodyScale
                                 }
                                 TextSizeSliderColumn(
@@ -8872,8 +9068,8 @@ fun TopicShareSheet(
                                     value = cur,
                                     onValueChange = { s ->
                                         when {
-                                            isTitle -> updateMove(move.copy(titleScale = s))
-                                            isFact -> bodyScale = (s / (sizeFit!!.textScale * move.factScale * move.factZoom)).coerceIn(0.5f, 2f)
+                                            isTitle -> updateMove(move.copy(titleScale = (s / coverF).coerceIn(0.5f, 2f)))
+                                            isFact -> bodyScale = (s / (sizeFit!!.textScale * move.factScale)).coerceIn(0.5f, 2f)
                                             else -> bodyScale = s
                                         }
                                     }
@@ -8887,11 +9083,11 @@ fun TopicShareSheet(
                                     // smart fit is shrinking long text the thumb
                                     // stays at the fitted size (no hidden state).
                                     val baseAt1 = if (isTitle) move.titleScale == 1f
-                                        else bodyScale == 1f && move.factScale == 1f && move.factZoom == 1f
+                                        else bodyScale == 1f && move.factScale == 1f
                                     Pill("Reset to 1\u00d7", CurioIcons.Refresh, baseAt1) {
                                         if (isTitle) updateMove(move.copy(titleScale = 1f)) else {
                                             bodyScale = 1f
-                                            updateMove(move.copy(factScale = 1f, factZoom = 1f))
+                                            updateMove(move.copy(factScale = 1f))
                                         }
                                     }
                                     Text(
@@ -8928,7 +9124,24 @@ fun TopicShareSheet(
                                     // fact far past the old 2.5x cap (the corner
                                     // grip expands to 8x; the slider matches its
                                     // whole-box scale as a precise control).
-                                    SizeSliderColumn("Fact height", move.factHeightFrac, { updateMove(move.copy(factHeightFrac = it)) }, 0.35f..6f, steps = 56, modifier = Modifier.fillMaxWidth())
+                                    // v379d — the thumb shows the smart-fit GROWN
+                                    // height (like the text thumb): while smart
+                                    // fit is engaged the box renders at
+                                    // move.factHeightFrac × fit.heightFrac, so the
+                                    // thumb would otherwise read 1× while the box
+                                    // sat at 2×. Dragging writes the base back
+                                    // through the fit (WYSIWYG + manual wins).
+                                    val fitH = if (isFact) smartAutoFitDelta(
+                                        move,
+                                        maxOf(factFieldText.length, chapterFactForCard.length),
+                                        currentStyle, aspect
+                                    ).heightFrac else 1f
+                                    SizeSliderColumn(
+                                        "Fact height",
+                                        (move.factHeightFrac * fitH).coerceIn(0.35f, 6f),
+                                        { v -> updateMove(move.copy(factHeightFrac = (v / fitH).coerceIn(0.35f, 6f))) },
+                                        0.35f..6f, steps = 56, modifier = Modifier.fillMaxWidth()
+                                    )
                                     // v373 — independent whole-box scale (see
                                     // the title case above).
                                     SizeSliderColumn("Whole box", move.factBoxScale, { v -> updateMove(move.copy(factBoxScale = v)) }, 0.35f..6f, steps = 56, modifier = Modifier.fillMaxWidth())

@@ -1,63 +1,44 @@
 # Prompt Log — current request
 
-## Request (2026-09-06 — v379 line: full-screen text tools + follow-ups)
+## Request (2026-09-06 — v379d: smart-fit transparency, dark-premium Paper
+## ink, and the AUTO-LAYOUT sparkle pill)
 
-User follow-up (after v379 pushed): "no need to watch the cl continue the
-task and at last use ask user". Their ask-user reply picked: floating bar
-in bottom-sheet editing; an explanation of the size-multiplier question
-(and whether smart fit uses its own hidden size system); a
-`ShareCardMove` logic analysis for more refinements; fixing share-fact
-text that still reads dark in dark mode; fixing the failed v379 CI.
+User (ask-user custom reply): implement A (remove orphaned factZoom),
+B (Reset Layout restores smart fit), C (title-height dead slider),
+D (cover title shrink), plus: smart fit should use the box-height
+adjuster too, add a spark round pill floating on the card corner that
+auto-smart-fits (shows even when Customise is off), make it advanced —
+nothing overlaps, user edits stay but it adjusts, box height/width/text
+size adjust, too much text → the card automatically becomes 9:16 — and
+tapping again cycles to another arrangement. Also fix share-fact text
+that is still dark on dark premium tones / in dark mode. No CI watching.
 
 ## Completed
 
-1. **v379 (aa57fb89)** — full-screen text-tool polish: `TextSpan.underline`
-   end-to-end (build/extract/merge/rebase/JSON/richSlice), floating-bar U
-   button, whole-element Underline in the sheet Format tool, icon-only
-   round B/I/U in full screen, Highlight swatch row removed, Justify in
-   the full-screen Align row, Book-page Column-gap slider (sheet Align +
-   full screen), permanent tool captions. Docs + commit + push.
-2. **v379b (68999e7c)** — CI fix: the selection bar's gate
-   (`format != null || underline != null`) killed Kotlin's smart-cast of
-   `onFormatFactSelection`; B/I/highlight now safe-invoke + gate on their
-   own enable state.
-3. **v379c (working)** — bottom-sheet `ArrangeableCard` calls (pager +
-   single-style) now pass `richFactTools = true`, the fact spans and the
-   format/underline channels, so the floating B/I/U/highlight bar works
-   on inline fact selections in the sheet preview too. Stale comments
-   updated. Docs updated. Committed + pushed.
+1. **v379 / v379b / v379c** pushed earlier (aa57fb89, 68999e7c, 1eae8e7b).
+2. **v379d (working tree, next commit):**
+   - **factZoom removed** (parse folds legacy value into factScale; field,
+     render multiplier, slider write-back divisors, persistence gone).
+   - **Reset Layout clears the fit seed** (factScale) so smart fit returns
+     after a reset; resetLayout KDoc rewritten.
+   - **Box-height thumbs honest**: sheet Crop tool + full-screen Box show
+     factHeightFrac × fit.heightFrac and write the base back.
+   - **Cover title-shrink folded** into the Title-size thumbs (sheet +
+     full screen) for Signature/Custom + cover.
+   - **Paper dark-mode fix**: qStyle/frostStyle carry explicit
+     palette.ink (were inheriting the app theme's onSurface → dark-on-dark
+     on dark premium Paper tones).
+   - **AUTO-LAYOUT pill**: AutoLayoutPill UI + autoLayoutPlan /
+     autoFitSizing planners + runAutoLayout() state machine in the sheet,
+     pills over the current card in both the single-style and the pager
+     branches. Commits box/text/format into the per-style move so preview
+     + save + export match; attempts cycle fit → condensed → book →
+     tall 9:16; no-op attempts auto-skip; manual drags untouched.
+3. Docs updated (changelog + AGENTS v379d). Brace/delta checks clean.
 
-## Open items (to finish this turn)
+## Open (closing ask_user)
 
-- Answer the user's size question in prose (see analysis below).
-- Analyse `ShareCardMove` logic for refinements + report.
-- Dark-mode share-fact text: NOT yet reproduced in code — every card
-  style paints fixed palette surfaces/inks (no theme-driven fills), so
-  the exact target must be pinned down with the user (ask_user at end).
-- Final ask_user (user requested it at the end of the task).
-
-## Size-multiplier / smart-fit explanation (verified against code)
-
-Rendered fact text = style base × bodyScale × autoFit.textScale ×
-factScale × factZoom, where:
-
-- `bodyScale` — the Size slider's base (what the user sets).
-- `autoFit.textScale` — smart fit's automatic shrink, active ONLY while
-  the fact is untouched and Smart fit is ON; identity otherwise. It is a
-  multiplier folded into the render, not a separate font engine — but it
-  IS invisible on top of the user's slider base.
-- `factScale` — after the user first grabs/resizes the fact, the fit
-  shrink is seeded into `factScale` ("manual wins", no text pop), and it
-  becomes a normal whole-fact text multiplier.
-- `factZoom` — legacy whole-fact text multiplier (old whole-box zoom),
-  now redundant with `factScale` after the Whole-box slider became
-  independent.
-
-So: smart fit does NOT have its own hidden font-size system — it nudges
-the same bodyScale-type channel the slider drives — but it auto-adjusts
-ON TOP of the slider's base, and three of the four factors are invisible
-to the user. The Size thumb since v378 shows the COMBINED (rendered)
-value; the fact-height slider still shows the RAW base without the fit's
-box growth (an inconsistency worth fixing). Consolidation candidate:
-drop `factZoom` (merge into `factScale`) and make the fit show its hand
-in the sliders.
+- C (title-height dead slider) — deferred: needs a design decision
+  (hide for short titles vs reinterpret). Put to the user.
+- Dark mode: verify the Paper fix covers their sighting; if they saw it
+  on another design, need the style name.
