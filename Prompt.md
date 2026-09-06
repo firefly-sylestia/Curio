@@ -1,36 +1,32 @@
 # Prompt Log — current request
 
-## Request (2026-09-06, active → v380 + v381 pushed, Signature-cover open)
+## Request (2026-09-06, active → v380/v381 pushed, v382 committing)
 
-Share-card editor refinement cycle continues.
+Share-card editor refinement cycle.
 
-- ✅ v380 (`8f8bef52`): hand-placed title owns its spot — drag the title
-  anywhere incl. over/inside the quick-fact box; no bounce-back. New
-  persisted `ShareCardMove.titlePlaced`; drag-end folds any prior auto
-  lift into titleDy (no snap); lift effect skips hand-placed titles but
-  still rescues never-dragged titles when a slider-grown fact reaches
-  them. Reset layout clears the flag.
-- ✅ v381 (THIS COMMIT): sparkle-pill refinements + Collage dark-tone pass.
-  - Pill 9:16 flip: longer box + BIGGER text (factScale 1.18, height ≈
-    tall budget ×1.4 clamped 1.6–3.2) so the tall canvas reads larger.
-  - AutoLayoutPill opaque + hairline ring, shadow gone (translucent +
-    elevation = the "solid fill glitch" halo).
-  - Collage: dark-tone branch — field/band/pill lerp accent/accentDark
-    toward black then mute so layers darken top→bottom on Midnight/Ember
-    (light accent no longer floods the bottom, white fact text readable);
-    tornEdge pulled toward accent so the seam reads on near-black paper;
-    polaroid caption fixed warm-dark ink; bottom band/footer blended via
-    a feathered gradient zone (no hard wavy cuts).
-- Open: **Signature designs with a book/album cover look bad** ("default
-  view of some with the cover") — the generic overlay cover parks at
-  TopStart (18/36) while `layoutMove` shifts the whole title right by
-  coverSideShift and squeezes width; on signature layouts (badge first,
-  centered/overlay variants) this can cover the badge/title/crest zone.
-  NOT YET FIXED — need a screenshot/description or user pick of the fix.
-  User also said the signature BACKGROUND gets its own dedicated round
-  afterwards.
+- ✅ v380 (`8f8bef52`): hand-placed title owns its spot — drag anywhere
+  incl. over/into the quick-fact box, no bounce-back (new persisted
+  `titlePlaced`; drag-end folds the auto lift into titleDy).
+- ✅ v381 (`3c32ed7c`): pill 9:16 flip = longer box + bigger text
+  (factScale 1.18, height ≈ tall budget ×1.4); sparkle pill opaque with
+  hairline ring (shadow halo gone); Collage dark-tone-aware layers
+  (field/band/pill crushed toward black on Midnight/Ember so light accent
+  no longer floods the bottom), torn seam visible on dark paper,
+  polaroid caption fixed warm-dark ink, bottom band/footer blended via
+  feathered gradients.
+- ✅ v382 (THIS COMMIT): **Signature covers are glued.** User confirmed the
+  cover "overlaps the badge/title". Signature joined `glueCoverStyle` and
+  dropped the generic overlay: `SignatureCard` now receives `coverArt`/
+  `coverW`/`coverH` and renders the jacket INSIDE its title block per
+  layout (`TitleAndMeta(centered)`; `TitleText`/`MetaText` gained a
+  `glued` flag; SIDE stacks the cover centred above the title in the
+  narrow left panel; no-cover paths pixel-identical). Cover rides title
+  drags/collisions/lift via `glueTitleMove` like Paper/Clean/Editorial/
+  Minimal. Only Custom still uses the overlay pocket.
 
-### Next steps
-1. Ask the user precisely what is wrong with the Signature + cover default
-   (which look, what overlaps/what looks off) before editing its layout.
-2. Implement; docs; commit; push.
+### Next (user-declared)
+- Signature BACKGROUND treatment round (user: "then we will do the
+  background of signature card styles") — separate upcoming pass, likely
+  needs the design direction discussed.
+- Watch for any CI result after these pushes (user said earlier "no need
+  to watch the cl" — CI still runs on push).

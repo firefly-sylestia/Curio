@@ -1591,7 +1591,7 @@ fun TopicShareCard(
     val coverActive = bookCover != null && style != ShareCardStyle.COLLAGE
     val glueCoverStyle = style == ShareCardStyle.PAPER || style == ShareCardStyle.VINYL ||
         style == ShareCardStyle.NEUMORPHIC || style == ShareCardStyle.EDITORIAL ||
-        style == ShareCardStyle.MINIMAL
+        style == ShareCardStyle.MINIMAL || style == ShareCardStyle.SIGNATURE
     val coverSideShift = coverW.value + 16f
     val coverTitleWidthFactor =
         ((aspect.widthDp - coverW.value - 16f) / aspect.widthDp).coerceIn(0.6f, 0.95f)
@@ -1634,7 +1634,7 @@ fun TopicShareCard(
             ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans, coverArt = gluedCover, coverW = coverW, coverH = coverH)
             ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans, coverArt = gluedCover, coverW = coverW, coverH = coverH)
             ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans, coverArt = gluedCover, coverW = coverW, coverH = coverH)
-            ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans)
+            ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans, coverArt = gluedCover, coverW = coverW, coverH = coverH)
             ShareCardStyle.CUSTOM -> CustomCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans)
         }
         // v334 — the cover badge rides on top of every style EXCEPT Collage
@@ -1658,7 +1658,9 @@ fun TopicShareCard(
                 ShareCardStyle.NEUMORPHIC -> Alignment.CenterStart to PaddingValues(start = 18.dp)
                 ShareCardStyle.EDITORIAL -> Alignment.TopStart to PaddingValues(top = 64.dp, start = 18.dp)
                 ShareCardStyle.MINIMAL -> Alignment.TopStart to PaddingValues(top = 74.dp, start = 18.dp)
-                ShareCardStyle.SIGNATURE, ShareCardStyle.CUSTOM -> Alignment.TopStart to PaddingValues(top = 36.dp, start = 18.dp)
+                // v381 — Signature is GLUED now (the jacket lives in its own
+                // title block per layout); only Custom uses the overlay.
+                ShareCardStyle.CUSTOM -> Alignment.TopStart to PaddingValues(top = 36.dp, start = 18.dp)
                 else -> Alignment.TopStart to PaddingValues(top = 24.dp, start = 18.dp)
             } else when (style) {
                 ShareCardStyle.PAPER -> Alignment.TopEnd to PaddingValues(top = 64.dp, end = 16.dp)
@@ -1670,9 +1672,8 @@ fun TopicShareCard(
                 // bottom-right sits beside the colophon's left-aligned slug.
                 ShareCardStyle.EDITORIAL -> Alignment.BottomEnd to PaddingValues(bottom = 26.dp, end = 18.dp)
                 ShareCardStyle.MINIMAL -> Alignment.TopEnd to PaddingValues(top = 48.dp, end = 16.dp)
-                // Signature/Custom: small crest at top-right — the jacket
-                // parks just below it.
-                ShareCardStyle.SIGNATURE, ShareCardStyle.CUSTOM -> Alignment.TopEnd to PaddingValues(top = 56.dp, end = 16.dp)
+                // Custom keeps the overlay corner pocket (no crest/art there).
+                ShareCardStyle.CUSTOM -> Alignment.TopEnd to PaddingValues(top = 56.dp, end = 16.dp)
                 ShareCardStyle.COLLAGE -> Alignment.TopEnd to PaddingValues(top = 34.dp, end = 14.dp)
             }
             BookCoverBadge(
@@ -3580,7 +3581,16 @@ private fun SignatureCard(
     bgFilter: ColorFilter? = null,
     // v375 — rich-text runs over this card's fact body (threaded from
     // TopicShareCard so FactBody can render the styled runs).
-    factSpans: List<TextSpan> = emptyList()
+    factSpans: List<TextSpan> = emptyList(),
+    // v381 — GLUED cover: the jacket is rendered INSIDE the title block so
+    // it sits exactly beside the title wherever each signature layout flows
+    // (never the floating top-left badge that overlapped the badge/title).
+    // It rides every title move (drag / collision / auto lift) via the same
+    // [glueTitleMove] row the other glued styles use; null = no cover → the
+    // layouts render exactly as before. See [GluedCover].
+    coverArt: androidx.compose.ui.graphics.ImageBitmap? = null,
+    coverW: Dp = 44.dp,
+    coverH: Dp = 66.dp
 ) {
     val body = quoteText ?: factText
     val title = if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display
@@ -3700,19 +3710,25 @@ private fun SignatureCard(
         }
 
         // ── Title (shared) ─────────────────────────────────────
+        // v381 — `glued` = inside the cover Row: the title keeps only its
+        // scale/width crop ([titleSize]); the Row owns the title drag offset
+        // and auto lift ([glueTitleMove]), so the jacket never stretches and
+        // the pair moves together.
         @Composable
-        fun TitleText(centered: Boolean = false) {
+        fun TitleText(centered: Boolean = false, glued: Boolean = false) {
+            val mod = (if (centered) Modifier.fillMaxWidth() else Modifier)
+                .then(if (glued) Modifier.titleSize(move) else Modifier.moveTitle(move))
             Text(title, style = titleStyle(TextStyle(
                 fontFamily = sig.titleFont, fontSize = sig.titleSize,
                 lineHeight = sig.titleLineHeight, color = sig.titleColor
             ), move), maxLines = lines(4, move.titleHeightFrac), overflow = TextOverflow.Ellipsis,
                 textAlign = if (centered) TextAlign.Center else TextAlign.Start,
-                modifier = (if (centered) Modifier.fillMaxWidth() else Modifier).moveTitle(move).onGloballyPositioned { callbacks.onTitle(it.boundsInWindow()) })
+                modifier = mod.onGloballyPositioned { callbacks.onTitle(it.boundsInWindow()) })
         }
 
         // ── Meta (shared) — info row: movable via M handle, not editable ──
         @Composable
-        fun MetaText(centered: Boolean = false) {
+        fun MetaText(centered: Boolean = false, glued: Boolean = false) {
             if (metaParts.isNotEmpty()) {
                 Spacer(Modifier.height(sig.metaSpacer))
                 Text(metaParts.joinToString(sig.metaSeparator), style = metaStyle(TextStyle(
@@ -3720,7 +3736,40 @@ private fun SignatureCard(
                     fontSize = sig.metaSize, color = sig.metaColor
                 ), move), maxLines = lines(2, move.metaHeightFrac, max = 2), overflow = TextOverflow.Ellipsis,
                     textAlign = if (centered) TextAlign.Center else TextAlign.Start,
-                    modifier = (if (centered) Modifier.fillMaxWidth() else Modifier).titleShift(move).moveMeta(move).onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+                    // Glued: the title Row carries the title drag, so the meta
+                    // must not double-shift with [titleShift] (the M handle's
+                    // own fine offset still applies via [moveMeta]).
+                    modifier = (if (centered) Modifier.fillMaxWidth() else Modifier)
+                        .then(if (glued) Modifier else Modifier.titleShift(move))
+                        .moveMeta(move)
+                        .onGloballyPositioned { callbacks.onMeta(it.boundsInWindow()) })
+            }
+        }
+
+        // ── Title + meta, GLUED to the cover when one is on the card ──
+        // v381 — the jacket is the leading item of the title block, so a
+        // book/album cover always sits EXACTLY beside the title wherever the
+        // design's flow puts it (badge below it on STANDARD / centred with the
+        // title on CENTERED / OVERLAY / POSTER) — never floating over the
+        // badge/crest. No cover → identical to the old TitleText()+MetaText()
+        // calls each layout made.
+        @Composable
+        fun TitleAndMeta(centered: Boolean = false) {
+            if (coverArt == null) {
+                TitleText(centered)
+                MetaText(centered)
+            } else {
+                Row(
+                    verticalAlignment = Alignment.Top,
+                    modifier = Modifier.fillMaxWidth().glueTitleMove(move)
+                ) {
+                    GluedCover(coverArt, coverW, coverH, move, callbacks, topPad = 2.dp)
+                    Spacer(Modifier.width(CoverTitleGap))
+                    Column(Modifier.weight(1f)) {
+                        TitleText(centered, glued = true)
+                        MetaText(centered, glued = true)
+                    }
+                }
             }
         }
 
@@ -3803,8 +3852,7 @@ private fun SignatureCard(
                 Column(modifier = Modifier.fillMaxSize().padding(sig.padding)) {
                     CategoryBadge()
                     Spacer(Modifier.height(sig.titleTopSpacer))
-                    TitleText()
-                    MetaText()
+                    TitleAndMeta()
                     Spacer(Modifier.weight(1f))
                     BodyText()
                     if (ratingStars != null && ratingStars > 0) {
@@ -3823,8 +3871,7 @@ private fun SignatureCard(
                     verticalArrangement = Arrangement.Top) {
                     CategoryBadge(centered = true)
                     Spacer(Modifier.height(sig.titleTopSpacer))
-                    TitleText(centered = true)
-                    MetaText(centered = true)
+                    TitleAndMeta(centered = true)
                     Spacer(Modifier.weight(1f))
                     BodyText(centered = true)
                     if (ratingStars != null && ratingStars > 0) {
@@ -3841,9 +3888,7 @@ private fun SignatureCard(
                 Column(modifier = Modifier.fillMaxSize().padding(sig.padding)) {
                     CategoryBadge()
                     Spacer(Modifier.weight(1f))
-                    TitleText()
-                    Spacer(Modifier.height(sig.metaSpacer))
-                    MetaText()
+                    TitleAndMeta()
                     Spacer(Modifier.height(8.dp))
                     BodyText()
                     if (ratingStars != null && ratingStars > 0) {
@@ -3859,10 +3904,17 @@ private fun SignatureCard(
             SignatureLayout.SIDE -> {
                 Row(modifier = Modifier.fillMaxSize().padding(sig.padding),
                     horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                    // Left panel — badge, title, meta, footer
+                    // Left panel — badge, title, meta, footer. The panel is
+                    // too narrow for a side-by-side jacket, so the cover sits
+                    // CENTERED above the title when one is on the card.
                     Column(modifier = Modifier.weight(0.42f).fillMaxHeight()) {
                         CategoryBadge()
                         Spacer(Modifier.height(sig.titleTopSpacer))
+                        if (coverArt != null) {
+                            Box(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+                                GluedCover(coverArt, coverW, coverH, move, callbacks, modifier = Modifier.align(Alignment.CenterHorizontally))
+                            }
+                        }
                         TitleText()
                         MetaText()
                         Spacer(Modifier.weight(1f))
@@ -3885,8 +3937,7 @@ private fun SignatureCard(
                 Column(modifier = Modifier.fillMaxSize().padding(sig.padding)) {
                     CategoryBadge()
                     Spacer(Modifier.weight(1f))
-                    TitleText(centered = true)
-                    MetaText(centered = true)
+                    TitleAndMeta(centered = true)
                     Spacer(Modifier.weight(1f))
                     BodyText()
                     if (ratingStars != null && ratingStars > 0) {
@@ -3904,9 +3955,7 @@ private fun SignatureCard(
                     horizontalAlignment = Alignment.CenterHorizontally) {
                     CategoryBadge(centered = true)
                     Spacer(Modifier.weight(0.6f))
-                    TitleText(centered = true)
-                    Spacer(Modifier.height(2.dp))
-                    MetaText(centered = true)
+                    TitleAndMeta(centered = true)
                     Spacer(Modifier.weight(1f))
                     BodyText()
                     if (ratingStars != null && ratingStars > 0) {

@@ -1143,6 +1143,20 @@ app/src/main/java/com/curio/app/
     became ONE feathered zone — low-amplitude wave path + vertical
     gradient whose top starts TRANSPARENT (no hard line) and a footer
     wave filled with a transparent→deep gradient (soft melt).
+- **v382 — Signature covers are GLUED (no more cover over the badge/title).**
+  User: "the signature styles are bad with the cover — it overlaps the
+  badge/title". Signature joined the glued-cover set (`glueCoverStyle` + the
+  cover flows as `gluedCover` into SignatureCard) and dropped off the
+  generic top-left overlay (`coverSlot` now serves Custom only; Signature
+  no longer gets the synthetic coverSideShift title offset via
+  `layoutMove`). Inside SignatureCard: `TitleText`/`MetaText` gained a
+  `glued` flag (title uses `titleSize`, meta skips `titleShift` — the Row
+  owns the title drag via `glueTitleMove`), and a new `TitleAndMeta(centered)`
+  renders the jacket + title + meta as one Row wherever the design's flow
+  puts the title (STANDARD / BOTTOM left-flow, CENTERED / OVERLAY /
+  POSTER centred; SIDE stacks the cover centred above the title in the
+  narrow left panel). No-cover paths are untouched. Signature background
+  treatment is a separate upcoming user round.
 - **v377 — share-card editor declutter: design switching via the card,
   tool captions, No-fact eye-cross, fact layout under Align.** User: "the
   style button should only show when signature style is active and tapping
