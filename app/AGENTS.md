@@ -597,6 +597,49 @@ app/src/main/java/com/curio/app/
   - **Long-text font floors raised** on Collage (10→10.5–11sp), Clean
     (8→8.5–9.5sp), Editorial (8.5→9–10.5sp) and Minimal (8.5→9–11sp) so
     the expanded box keeps the text readable.
+- **v371 — share-card fact formats + writing box + album/series covers +
+  chapter-note sharing + collision-push + real cover colours.**
+  - **Fact formats (quick AND custom fact, `ShareCardMove.factFormat` /
+    `factDropCap`):** every style's fact renders through `FactBody`;
+    Condensed tightens line-height/word spacing, Book page splits into
+    two justified columns (`BookPageText`, half the text per column,
+    word-boundary breaks) and Editorial sets a large drop-cap initial
+    (first letter or first word, `EditorialDropCapBlock`). Restores by
+    name from saved edits.
+  - **Writing box below the tools** (quick / custom / chapter review) with
+    an **Enlarge** button opening a full white writing sheet — gives the
+    custom fact and chapter review a real input, not just the inline
+    caret. In the Book Notes sheet the chapter-note field got the same
+    treatment: an EXPAND full-white dialog (2000 chars, shares the same
+    AppPreferences slot) and a SHARE button that opens the share card
+    pre-seeded as a Chapter review (`TopicShareSheet.seedReviewText` /
+    `seedReviewChapter`, which WIN over restored edits).
+  - **Album + series covers in the share editor:** `isAlbumTopic` /
+    `isSeriesTopic` flags (wired at all three TopicShareSheet call sites:
+    reveal, Share Hub, entry detail) enable the Fetch / Refetch / Remove
+    row (gallery stays book-only); albums resolve via
+    `AlbumArtFetch.resolveArtworkUrl` (iTunes → MusicBrainz), series via
+    `SeriesPosterFetch.resolvePosterUrl` (TVMaze → iTunes). With a cover
+    present the card switches to COVER-SIDE layout (`COVER_SIDE_SHIFT`):
+    the cover anchors LEFT like the synopsis page, the title shifts right
+    and wraps ~26% narrower and shrinks ~0.9× so nothing overlaps.
+  - **Collision-push fact drag:** dragging the fact box no longer always
+    drags the title + info row along — they move ONLY when the fact
+    actually touches them (within a 4dp gap, `touches()`), so moving the
+    fact away leaves them put and moving it into them pushes them cleanly.
+  - **Real cover colours (`extractCoverSwatches`):** the androidx Palette
+    median-cut guess is replaced by a direct pixel-vote HSL histogram on
+    the decoded artwork — `CoverSwatches.dominant` is the true majority
+    colour and `notesSheetPalette` keys the sheet wash off it (vibrant
+    still drives the accent). Album/series notes sheets now feed the
+    RESOLVED artwork/poster URL into the extractor (they used the empty
+    authored imageUrl, so they always fell back to the category tint).
+    Expanded chapter/episode rows are a soft accent tint + border instead
+    of a solid accent slab.
+  - **Google Books removed as a cover source:** `BookCoverProvider`
+    dropped GOOGLE_BOOKS everywhere (hub picker, reveal live-fallback,
+    share-sheet cascade) — books now fall back iTunes → Open Library;
+    the keyless Google Books RATINGS + ISBN lookups stay untouched.
 - **v361 — keyed defaults + Clear-covers button; CI fix for the reveal
   poster.** User: "fix it, and also i added spotify key and library thing
   api as well… does the api is used in the apk build from pr, use that by

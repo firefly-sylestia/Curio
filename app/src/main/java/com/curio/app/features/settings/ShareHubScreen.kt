@@ -448,6 +448,11 @@ fun ShareHubScreen(navController: NavController) {
                 onDismiss = { hubShareOpen = false },
                 categoryFamily = fam,
                 topicByline = topic.byline,
+                // v371 — album/series topics get the cover-fetch flow in the
+                // share editor too (artwork resolves via iTunes → MusicBrainz
+                // / TVMaze → iTunes, same as the reveal posters).
+                isAlbumTopic = resolvedCat.id == CategoryId.ALBUMS,
+                isSeriesTopic = resolvedCat.id == CategoryId.SERIES,
                 initialStyle = styleIndex,
                 initialClassicSignature = design.classic
             )

@@ -483,12 +483,18 @@ fun CurioCategory.notesSheetPalette(swatches: CoverSwatches?): CoverSheetPalette
         !isCurioDarkTheme() && accentHsl.l > 0.72f -> fromHsl(accentHsl.h, accentHsl.s, 0.60f)
         else -> accent
     }
-    // The wash hue comes from the ACCENT — the cover's hue carrier. The old
-    // recipe keyed off the DARK swatch, which is near-grey on most covers
-    // (its hue is numerically noisy), so even colourful covers washed out to
-    // neutral. The wash also holds MORE saturation now so the cover hue
-    // actually reads on the sheet instead of a whisper of cream.
-    val h = toHsl(accentFinal)
+    // v371 — the wash hue comes from the cover's TRUE DOMINANT colour (the
+    // majority of the artwork's pixels), NOT the accent/vibrant pick: the
+    // vibrant swatch is the loudest pop, which on busy artwork (or covers
+    // with a small vivid sticker) is NOT what the sheet should be tinted
+    // by. The majority colour is what the user sees, so the sheet now wears
+    // it. Falls back to the accent's hue when the dominant is null.
+    val dominantSwatch = swatches.dominant
+    val washSource = dominantSwatch ?: accentFinal
+    val washHsl = toHsl(washSource)
+    // When the dominant is near-grey (minimal covers), holding its hue is
+    // numerically noisy — the accent's hue reads better, so it wins.
+    val h = if (dominantSwatch != null && washHsl.s >= 0.14f) washHsl else toHsl(accentFinal)
     val onAccent = if (accentFinal.luminance() > 0.5f) Color(0xFF121216) else Color(0xFFF4F4F6)
     if (isCurioDarkTheme()) {
         // Deep cover-tinted canvas; cards step up through the dark tones and

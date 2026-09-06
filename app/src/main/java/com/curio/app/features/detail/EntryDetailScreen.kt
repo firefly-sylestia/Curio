@@ -1507,6 +1507,10 @@ private fun BoxScope.DetailStickyBar(
                 onDismiss = { showShareSheet = false },
                 categoryFamily = category.family,
                 topicByline = resolvedEntry.topic.byline,
+                // v371 — album/series topics get the cover-fetch flow in the
+                // share editor too (same keyless resolvers as the reveal).
+                isAlbumTopic = resolvedEntry.topic.categoryId == com.curio.app.data.CategoryId.ALBUMS,
+                isSeriesTopic = resolvedEntry.topic.categoryId == com.curio.app.data.CategoryId.SERIES,
                 // Detail's plain-text payload stays the entry-aware one —
                 // quote mode sends just the quote + author.
                 shareAsText = { entryShareText(resolvedEntry, category, isQuote = detailIsQuotes) }

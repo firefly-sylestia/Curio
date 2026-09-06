@@ -42,12 +42,13 @@ object BookCoverFetch {
     val TITLE = "Book covers & ratings"
 
     /** Cover providers the hub offers, ordered BEST-FIRST (v356): iTunes is
-     *  the default keyless ebook search; Google Books is the keyless volume
-     *  search; Open Library is the pure title-cover fallback; LibraryThing
-     *  needs a free key (LIBRARY_THING_API_KEY) and resolves covers via ISBN. */
+     *  the default keyless ebook search; Open Library is the pure title-cover
+     *  fallback; LibraryThing needs a free key (LIBRARY_THING_API_KEY) and
+     *  resolves covers via ISBN. v371 — Google Books was REMOVED as a cover
+     *  source (its keyless volume search rarely returns a usable thumbnail);
+     *  it still powers the ★ ratings + ISBN lookups in the background. */
     enum class BookCoverProvider(val label: String, val description: String) {
         ITUNES("iTunes", "Keyless ebook search"),
-        GOOGLE_BOOKS("Google Books", "Keyless title+author search"),
         OPEN_LIBRARY("Open Library", "Title covers · keyless"),
         LIBRARY_THING("LibraryThing", "ISBN covers · free key")
     }
@@ -71,8 +72,8 @@ object BookCoverFetch {
 
     /**
      * Resolve ONE book's cover URL with the given provider (the topic's OWN
-     * imageUrl always wins — it's an authored, curated cover). Google Books
-     * needs a look-up; Open Library is the pure title fallback.
+     * imageUrl always wins — it's an authored, curated cover). iTunes needs a
+     * search; Open Library is the pure title fallback.
      */
     suspend fun resolveCoverUrl(
         context: Context,
@@ -84,7 +85,6 @@ object BookCoverFetch {
         val resolved = imageUrl.takeIf { it.isNotBlank() }
             ?: when (provider) {
                 BookCoverProvider.ITUNES -> itunesThumbnail(bookName, author)
-                BookCoverProvider.GOOGLE_BOOKS -> googleThumbnail(bookName, author)
                 BookCoverProvider.OPEN_LIBRARY ->
                     "https://covers.openlibrary.org/b/title/${Uri.encode(bookName)}-M.jpg"
                 BookCoverProvider.LIBRARY_THING -> libraryThingCover(bookName, author)
@@ -329,7 +329,6 @@ object BookCoverFetch {
         val candidates = LinkedHashSet<String>()
         when (preferred) {
             BookCoverProvider.ITUNES -> itunesThumbnail(book.name, book.byline)?.let { candidates.add(it) }
-            BookCoverProvider.GOOGLE_BOOKS -> googleThumbnail(book.name, book.byline)?.let { candidates.add(it) }
             BookCoverProvider.OPEN_LIBRARY ->
                 candidates.add("https://covers.openlibrary.org/b/title/${Uri.encode(book.name)}-M.jpg")
             BookCoverProvider.LIBRARY_THING -> libraryThingCover(book.name, book.byline)?.let { candidates.add(it) }

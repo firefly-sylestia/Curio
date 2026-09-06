@@ -93,6 +93,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.style.ParagraphStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
@@ -757,6 +758,10 @@ private fun badgeStyle(base: TextStyle, m: ShareCardMove): TextStyle {
     return s
 }
 
+/** v370b — how far the title block shifts RIGHT when a cover sits on the
+ *  LEFT of the card (cover ~92dp wide + gap): the synopsis-page layout. */
+private const val COVER_SIDE_SHIFT = 108f
+
 /** v316b — editor chrome: ONE uniform move grip + a darker coffee outline
  *  replace the old per-box letter handles (T/F/M/B) and their tinted
  *  borders. Coffee reads on the cream/white card surfaces. */
@@ -777,14 +782,195 @@ private fun Modifier.factShift(m: ShareCardMove): Modifier =
 
 /** Resolves the fact-text style with the user's format (font + align +
  *  bold/italic). The format is stored on [ShareCardMove] so every style AND
- *  the exported image honor it automatically. */
+ *  the exported image honor it automatically.
+ *  v370b — CONDENSED: tighter spacing BETWEEN LINES (line height ~18% less
+ *  + the lines pulled together slightly), words keep their normal gaps. */
 private fun factBodyStyle(base: TextStyle, m: ShareCardMove): TextStyle {
     var s = base
     if (m.factFont != null) s = s.copy(fontFamily = m.factFont)
     if (m.factAlign != null) s = s.copy(textAlign = m.factAlign)
     if (m.factBold) s = s.copy(fontWeight = FontWeight.Bold)
     if (m.factItalic) s = s.copy(fontStyle = FontStyle.Italic)
+    if (m.factFormat == ShareCardFactFormat.CONDENSED) {
+        val lh = s.lineHeight
+        if (lh.isSp) s = s.copy(lineHeight = (lh.value * 0.82f).sp)
+        val ps = (s.paragraphStyle ?: ParagraphStyle())
+        s = s.copy(paragraphStyle = ps.copy(lineSpacing = (-2).sp))
+    }
     return s
+}
+
+/** v370b — the fact body renderer shared by every style: honors the
+ *  picker's fact LAYOUT. STANDARD/CONDENSED render as a plain paragraph
+ *  (CONDENSED's tighter line spacing already lives in [factBodyStyle]);
+ *  BOOK renders as a two-column book-page flow (see [BookPageText]);
+ *  EDITORIAL as a drop-cap paragraph (see [EditorialDropCapBlock]). The
+ *  caller's modifier (moveFact + bounds reporting) rides the same node so
+ *  the preview and the exported image match. */
+@Composable
+private fun FactBody(
+    text: String,
+    style: TextStyle,
+    format: ShareCardFactFormat,
+    dropCap: ShareCardFactDropCap,
+    aspect: ShareCardAspect,
+    maxLines: Int,
+    modifier: Modifier = Modifier
+) {
+    when (format) {
+        ShareCardFactFormat.BOOK -> BookPageText(text, style, modifier, maxLines)
+        ShareCardFactFormat.EDITORIAL -> EditorialDropCapBlock(text, style, dropCap, modifier, maxLines)
+        else -> Text(text, style = style, maxLines = maxLines, overflow = TextOverflow.Ellipsis, modifier = modifier)
+    }
+}
+
+/** v370b — BOOK PAGE: the fact breaks in the MIDDLE and continues on the
+ *  other side like a book spread — the left column holds the first half of
+ *  the lines, the right column the rest. The split is measured at the real
+ *  column width (on-screen px, so preview + export match), lands on a word
+ *  edge and never overlaps. Both columns share one [maxLines] budget, like
+ *  the plain paragraph. */
+@Composable
+private fun BookPageText(
+    text: String,
+    style: TextStyle,
+    modifier: Modifier = Modifier,
+    maxLines: Int
+) {
+    BoxWithConstraints(modifier) {
+        val density = androidx.compose.ui.platform.LocalDensity.current
+        val measurer = rememberTextMeasurer()
+        val contentW = with(density) { maxWidth.toPx() }
+        val gap = with(density) { 12.dp.toPx() }
+        val colW = ((contentW - gap) / 2f).toInt().coerceAtLeast(1)
+        val cap = maxLines.coerceAtLeast(1)
+        val full = measurer.measure(
+            text = AnnotatedString(text),
+            style = style,
+            softWrap = true,
+            overflow = TextOverflow.Clip,
+            maxLines = cap,
+            constraints = Constraints(maxWidth = colW)
+        )
+        val totalLines = full.lineCount
+        val leftLines = ((totalLines + 1) / 2).coerceIn(1, cap)
+        val left = measurer.measure(
+            text = AnnotatedString(text),
+            style = style,
+            softWrap = true,
+            overflow = TextOverflow.Clip,
+            maxLines = leftLines,
+            constraints = Constraints(maxWidth = colW)
+        )
+        val split = left.getLineEnd((left.lineCount - 1).coerceAtLeast(0))
+        val leftText = text.take(split)
+        val rightText = text.drop(split).trimStart()
+        Row(Modifier.fillMaxWidth()) {
+            Text(
+                leftText, style = style, maxLines = leftLines,
+                overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f)
+            )
+            Spacer(Modifier.width(12.dp))
+            Text(
+                rightText, style = style,
+                maxLines = (cap - leftLines).coerceAtLeast(1),
+                overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+/** v370b — EDITORIAL paragraph: a drop-cap block (big first LETTER or big
+ *  first WORD per [dropCap]; NONE = the plain paragraph) on ANY card style.
+ *  The cap spans two body lines and the text wraps around it; when the
+ *  wrapped block is full the rest continues full-width below (the same
+ *  measured split as the EditorialCard design, hoisted so every style can
+ *  wear it). */
+@Composable
+private fun EditorialDropCapBlock(
+    text: String,
+    bodyStyle: TextStyle,
+    dropCap: ShareCardFactDropCap,
+    capColor: Color? = null,
+    modifier: Modifier = Modifier,
+    maxLines: Int
+) {
+    if (dropCap == ShareCardFactDropCap.NONE || text.isBlank()) {
+        Text(text, style = bodyStyle, maxLines = maxLines, overflow = TextOverflow.Ellipsis, modifier = modifier)
+        return
+    }
+    BoxWithConstraints(modifier) {
+        val density = androidx.compose.ui.platform.LocalDensity.current
+        val measurer = rememberTextMeasurer()
+        val contentW = with(density) { maxWidth.toPx() }
+        val bodyLineH = bodyStyle.lineHeight
+        val bodySize = bodyStyle.fontSize
+        val initial = when (dropCap) {
+            ShareCardFactDropCap.WORD -> text.trimStart().split(" ", limit = 2).firstOrNull() ?: text
+            else -> text.take(1)
+        }
+        val bodyRest = text.drop(initial.length)
+        // The drop-cap initial spans 2 body lines. Its lineHeight is set to
+        // 2× one body line so the initial column height EXACTLY matches the
+        // 2 wrap lines beside it; Top alignment anchors the glyph to the TOP
+        // of its 2-line box (centering would push the letter down).
+        val initialFontMult = if (dropCap == ShareCardFactDropCap.WORD) 1.55f else 2.0f
+        val initialStyle = bodyStyle.copy(
+            fontWeight = FontWeight.Bold,
+            fontSize = (bodySize.value * initialFontMult).sp,
+            lineHeight = (bodyLineH.value * 2f).sp,
+            color = capColor ?: bodyStyle.color,
+            lineHeightStyle = LineHeightStyle(
+                alignment = LineHeightStyle.Alignment.Top,
+                trim = LineHeightStyle.Trim.None
+            )
+        )
+        val initialW = measurer.measure(
+            text = AnnotatedString(initial),
+            style = initialStyle
+        ).size.width.toFloat()
+        val gap = with(density) { 6.dp.toPx() }
+        val narrowW = (contentW - initialW - gap).toInt().coerceAtLeast(1)
+        val wrap = measurer.measure(
+            text = AnnotatedString(bodyRest),
+            style = bodyStyle,
+            overflow = TextOverflow.Clip,
+            softWrap = true,
+            maxLines = 2,
+            constraints = Constraints(maxWidth = narrowW)
+        )
+        val wrapEnd = wrap.getLineEnd((wrap.lineCount - 1).coerceAtLeast(0))
+        val wrapText = bodyRest.take(wrapEnd)
+        val restText = bodyRest.drop(wrapEnd)
+        val initColW = with(density) { (initialW + gap).toDp() }
+        val cap = maxLines.coerceAtLeast(1)
+        Column(Modifier.fillMaxWidth()) {
+            Row(Modifier.fillMaxWidth()) {
+                if (initial.isNotEmpty()) {
+                    Text(
+                        initial, style = initialStyle,
+                        modifier = Modifier
+                            .width(initColW)
+                            .padding(end = 6.dp)
+                    )
+                }
+                if (wrapText.isNotEmpty()) {
+                    Text(wrapText, style = bodyStyle, maxLines = 2,
+                        overflow = TextOverflow.Clip,
+                        modifier = Modifier.weight(1f))
+                }
+            }
+            if (restText.isNotEmpty()) {
+                Spacer(Modifier.height(3.dp))
+                Text(
+                    restText, style = bodyStyle,
+                    maxLines = (cap - 2).coerceAtLeast(1),
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
 }
 
 /**
@@ -998,6 +1184,18 @@ fun TopicShareCard(
         titleScale = move.titleScale * autoFit.titleScale,
         metaDy = move.metaDy + autoFit.dy
     )
+    // v370b — COVER SIDE LAYOUT: when a cover (book / album / series) is on
+    // the card, it sits on the LEFT like the synopsis page — the title (and
+    // the author/year under it, which follows via titleShift) shifts right
+    // into the remaining width, wraps a little narrower and auto-shrinks so
+    // everything aligns without overlap. Removing the cover (or having none)
+    // restores the per-style corner pockets.
+    val coverActive = bookCover != null && style != ShareCardStyle.COLLAGE
+    val layoutMove = if (coverActive) effectiveMove.copy(
+        titleDx = effectiveMove.titleDx + COVER_SIDE_SHIFT,
+        titleWidthFrac = (effectiveMove.titleWidthFrac * 0.74f).coerceIn(0.2f, 1f),
+        titleScale = effectiveMove.titleScale * 0.9f
+    ) else effectiveMove
     // Extract year from trailing parentheses — "Appetite for Destruction (1987)" → "1987"
     val year = topicName.substringAfterLast("(").substringBeforeLast(")").takeIf { it.all { c -> c.isDigit() } && it.length == 4 }
     val palette = paletteFor(accent, toneIndex)
@@ -1012,14 +1210,14 @@ fun TopicShareCard(
     val albumFavTracks = AppPreferences.albumFavTracksState[topicName].orEmpty()
     Box {
         when (style) {
-            ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, effectiveMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, effectiveMove, chapterProgress, chapterFact, hideTypedFavSong = albumFavTracks.isNotEmpty() && AppPreferences.albumFavStripVisibleState, bgFilter)
-            ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto ?: bookCover, byline, year, polaroidCaption, onPhotoTap, bodyScale, callbacks, effectiveMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, effectiveMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, effectiveMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, effectiveMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, bodyScale, callbacks, effectiveMove, chapterProgress, chapterFact, bgFilter)
-            ShareCardStyle.CUSTOM -> CustomCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, effectiveMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, layoutMove, chapterProgress, chapterFact, hideTypedFavSong = albumFavTracks.isNotEmpty() && AppPreferences.albumFavStripVisibleState, bgFilter)
+            ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto ?: bookCover, byline, year, polaroidCaption, onPhotoTap, bodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, bodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.CUSTOM -> CustomCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter)
         }
         // v334 — the cover badge rides on top of every style EXCEPT Collage
         // (there it feeds the polaroid photo slot above).
@@ -1032,7 +1230,17 @@ fun TopicShareCard(
         // always overlapping the same corner decoration. The user can still
         // drag it anywhere (move offsets apply on top).
         if (bookCover != null && style != ShareCardStyle.COLLAGE) {
-            val coverSlot = when (style) {
+            // v370b — COVER SIDE LAYOUT (cover present): the cover anchors
+            // LEFT, aligned with each design's title block (Clean centres
+            // its title, so the cover centres beside it). The default per-
+            // style corner pockets only apply when NO cover is on the card.
+            val coverSlot = if (coverActive) when (style) {
+                ShareCardStyle.NEUMORPHIC -> Alignment.CenterStart to PaddingValues(start = 18.dp)
+                ShareCardStyle.EDITORIAL -> Alignment.TopStart to PaddingValues(top = 64.dp, start = 18.dp)
+                ShareCardStyle.MINIMAL -> Alignment.TopStart to PaddingValues(top = 74.dp, start = 18.dp)
+                ShareCardStyle.SIGNATURE, ShareCardStyle.CUSTOM -> Alignment.TopStart to PaddingValues(top = 36.dp, start = 18.dp)
+                else -> Alignment.TopStart to PaddingValues(top = 24.dp, start = 18.dp)
+            } else when (style) {
                 ShareCardStyle.PAPER -> Alignment.TopEnd to PaddingValues(top = 64.dp, end = 16.dp)
                 ShareCardStyle.VINYL -> Alignment.TopEnd to PaddingValues(top = 70.dp, end = 18.dp)
                 // Clean wears a huge rotated glyph top-right: drop the jacket
@@ -1049,6 +1257,8 @@ fun TopicShareCard(
             }
             BookCoverBadge(
                 cover = bookCover,
+                coverWidth = if (coverActive) 92.dp else 44.dp,
+                coverHeight = if (coverActive) 136.dp else 66.dp,
                 modifier = Modifier
                     .align(coverSlot.first)
                     .offset(x = move.coverDx.dp, y = move.coverDy.dp)
@@ -1109,18 +1319,22 @@ fun TopicShareCard(
     }
 }
 
-/** v334 — small book-jacket badge: the cover at 2:3 with a spine + sheen
- *  overlay so it reads as a real jacket sitting on the card. */
+/** v334 — book-jacket badge: the cover at 2:3 with a spine + sheen overlay
+ *  so it reads as a real jacket sitting on the card. v370b — the size is a
+ *  parameter: the side-layout cover (left of the title) renders LARGE
+ *  (~92×136), the corner pockets keep the small 44×66 badge. */
 @Composable
 private fun BookCoverBadge(
     cover: androidx.compose.ui.graphics.ImageBitmap,
+    coverWidth: Dp = 44.dp,
+    coverHeight: Dp = 66.dp,
     modifier: Modifier = Modifier,
     callbacks: EditBoundsCallbacks = EditBoundsCallbacks()
 ) {
     Box(
         modifier = modifier
-            .width(44.dp)
-            .height(66.dp)
+            .width(coverWidth)
+            .height(coverHeight)
             .shadow(3.dp, RoundedCornerShape(3.dp))
             .clip(RoundedCornerShape(3.dp))
             .background(Color.White)
@@ -1396,26 +1610,16 @@ private fun VinylCard(
                                 ink = inkDark.copy(alpha = 0.88f)
                             )
                             if (chapterFact.isNotBlank()) {
-                                Text(
-                                    chapterFact, style = factStyle,
-                                    color = inkDark.copy(alpha = 0.88f),
-                                    maxLines = fitLines(10, move.factHeightFrac, bodyScale),
-                                    overflow = TextOverflow.Ellipsis
-                                )
+                                FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(10, move.factHeightFrac, bodyScale))
                             }
                         }
                     } else {
                         // v335 — line cap tracks the font multiplier so the
                         // fact box keeps its footprint while text resizes.
-                        Text(
-                            body, style = factStyle,
-                            maxLines = fitLines(10, move.factHeightFrac, bodyScale),
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.onGloballyPositioned {
-                                callbacks.onFact(it.boundsInWindow())
-                                callbacks.onFactStyle(factStyle)
-                            }
-                        )
+                        FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(10, move.factHeightFrac, bodyScale), modifier = Modifier.onGloballyPositioned {
+                            callbacks.onFact(it.boundsInWindow())
+                            callbacks.onFactStyle(factStyle)
+                        })
                     }
                 }
             }
@@ -2153,16 +2357,11 @@ private fun CollageCard(
                         ink = Color.White.copy(alpha = 0.92f)
                     )
                     if (chapterFact.isNotBlank()) {
-                        Text(
-                            chapterFact, style = factStyle,
-                            color = Color.White.copy(alpha = 0.92f),
-                            maxLines = fitLines(18, move.factHeightFrac, bodyScale),
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(18, move.factHeightFrac, bodyScale))
                     }
                 }
             } else {
-                Text(body, style = factStyle, maxLines = fitLines(18, move.factHeightFrac, bodyScale), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned {
+                FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(18, move.factHeightFrac, bodyScale), modifier = Modifier.moveFact(move).onGloballyPositioned {
                     callbacks.onFact(it.boundsInWindow())
                     callbacks.onFactStyle(factStyle)
                 })
@@ -2319,16 +2518,11 @@ private fun NeumorphicCard(
                             ink = Color.White.copy(alpha = 0.88f)
                         )
                         if (chapterFact.isNotBlank()) {
-                            Text(
-                                chapterFact, style = factStyle,
-                                color = Color.White.copy(alpha = 0.88f),
-                                maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 8 else 6, move.factHeightFrac, bodyScale),
-                                overflow = TextOverflow.Ellipsis
-                            )
+                            FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 8 else 6, move.factHeightFrac, bodyScale))
                         }
                     }
                 } else {
-                    Text(body, style = factStyle, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 8 else 6, move.factHeightFrac, bodyScale), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned {
+                    FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 8 else 6, move.factHeightFrac, bodyScale), modifier = Modifier.moveFact(move).onGloballyPositioned {
                         callbacks.onFact(it.boundsInWindow())
                         callbacks.onFactStyle(factStyle)
                     })
@@ -2458,7 +2652,6 @@ private fun EditorialCard(
                 lineHeight = (bodySize.value * 1.45f * bodyScale).sp, color = inkDark.copy(alpha = 0.82f),
                 fontWeight = FontWeight.Medium
             ), move)
-            val initial = body.take(1)
             val bodyRest = if (body.length > 1) body.drop(1) else ""
             // v329 — Reading-progress content draws the chapter widget
             // (accent bar on the cream page) instead of the drop-cap prose.
@@ -2478,109 +2671,40 @@ private fun EditorialCard(
                         ink = inkDark.copy(alpha = 0.82f)
                     )
                     if (chapterFact.isNotBlank()) {
-                        Text(
-                            chapterFact, style = bodyStyle,
-                            color = inkDark.copy(alpha = 0.82f),
-                            maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale),
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        FactBody(text = chapterFact, style = bodyStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale))
                     }
                 }
-            } else if (bodyRest.isEmpty()) {
-                Text(body, style = bodyStyle,
-                    maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale), overflow = TextOverflow.Ellipsis,
+            } else if (move.factFormat == ShareCardFactFormat.BOOK ||
+                move.factFormat == ShareCardFactFormat.CONDENSED ||
+                (move.factFormat == ShareCardFactFormat.EDITORIAL && move.factDropCap == ShareCardFactDropCap.NONE)
+            ) {
+                // v370b — BOOK / CONDENSED / no-cap render as the shared plain
+                // (or two-column) paragraph; the drop-cap block only shows for
+                // the classic Editorial look (STANDARD = big first letter) or
+                // the EDITORIAL format with a cap picked.
+                FactBody(
+                    text = body, style = bodyStyle,
+                    format = move.factFormat, dropCap = move.factDropCap,
+                    aspect = aspect,
+                    maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale),
                     modifier = Modifier.moveFact(move).onGloballyPositioned {
                         callbacks.onFact(it.boundsInWindow())
                         callbacks.onFactStyle(bodyStyle)
-                    })
-            } else {
-                BoxWithConstraints(Modifier.fillMaxWidth().moveFact(move).onGloballyPositioned {
-                    callbacks.onFact(it.boundsInWindow())
-                    callbacks.onFactStyle(bodyStyle)
-                }) {
-                    val density = androidx.compose.ui.platform.LocalDensity.current
-                    val measurer = rememberTextMeasurer()
-                    val contentW = with(density) { maxWidth.toPx() }
-                    // The drop-cap initial spans 2 body lines. Its lineHeight
-                    // is set to 2× one body line so the initial column height
-                    // EXACTLY matches the 2 wrap lines beside it — the old
-                    // baseline alignment left a height mismatch that made the
-                    // full-width rest text overlap the wrapped block.
-                    // LineHeightStyle.Alignment.Top anchors the letter to the TOP
-                    // of its 2-line box so the initial starts at the same
-                    // position as the first text line (a 2× line height alone
-                    // would vertically center the glyph in the box).
-                    val bodyLineH = (bodySize.value * 1.45f * bodyScale).sp
-                    val initialStyle = TextStyle(
-                        fontFamily = LoraFontFamily, fontWeight = FontWeight.Bold,
-                        fontSize = (bodySize.value * 2.0f * bodyScale).sp,
-                        lineHeight = (bodyLineH.value * 2f).sp, color = accentRule,
-                        lineHeightStyle = LineHeightStyle(
-                            alignment = LineHeightStyle.Alignment.Top,
-                            trim = LineHeightStyle.Trim.None
-                        )
-                    )
-                    val initialW = measurer.measure(
-                        text = AnnotatedString(initial),
-                        style = initialStyle
-                    ).size.width.toFloat()
-                    val gap = with(density) { 6.dp.toPx() }
-                    val narrowW = (contentW - initialW - gap).toInt().coerceAtLeast(1)
-                    // How much body text fits in the first 2 lines beside the
-                    // initial. Measure at the NARROW width so the rendered wrap
-                    // matches the split exactly (no overflow / overlap).
-                    val wrap = measurer.measure(
-                        text = AnnotatedString(bodyRest),
-                        style = bodyStyle,
-                        overflow = TextOverflow.Clip,
-                        softWrap = true,
-                        maxLines = 2,
-                        constraints = Constraints(maxWidth = narrowW)
-                    )
-                    val wrapEnd = wrap.getLineEnd((wrap.lineCount - 1).coerceAtLeast(0))
-                    val wrapText = bodyRest.take(wrapEnd)
-                    val restText = bodyRest.drop(wrapEnd)
-                    // Initial column: fixed width = initialW + gap, top-aligned
-                    // so the big letter starts at the top of the block and its
-                    // 2-line height matches the wrap column. Wrap column: the
-                    // narrow width, 2 lines, clipped (never overlapping the
-                    // initial because it's a sibling column, not baseline-
-                    // aligned behind the letter).
-                    //
-                    // The wrap row and the full-width rest text live inside a
-                    // COLUMN: BoxWithConstraints stacks its children at the
-                    // same top-left slot, so a bare Row + Text pair rendered
-                    // the rest text ON TOP of the wrapped block (the "quick
-                    // fact text overlapping itself" bug). A Column lays them
-                    // out top-to-bottom instead.
-                    val initColW = with(density) { (initialW + gap).toDp() }
-                    Column(Modifier.fillMaxWidth()) {
-                        Row(Modifier.fillMaxWidth()) {
-                            if (initial.isNotEmpty()) {
-                                Text(initial, style = initialStyle,
-                                    modifier = Modifier
-                                        .width(initColW)
-                                        .padding(end = 6.dp))
-                            }
-                            if (wrapText.isNotEmpty()) {
-                                Text(wrapText, style = bodyStyle, maxLines = 2,
-                                    overflow = TextOverflow.Clip,
-                                    modifier = Modifier.weight(1f))
-                            }
-                        }
-                        if (restText.isNotEmpty()) {
-                            Spacer(Modifier.height(3.dp))
-                            // v335 — same stable-footprint cap as the plain
-                            // body: the drop-cap rest text scales with the font
-                            // tool, so the line count compensates to keep the
-                            // fact block's height fixed.
-                            Text(restText, style = bodyStyle,
-                                maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale),
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.fillMaxWidth())
-                        }
                     }
-                }
+                )
+            } else {
+                // v370b — the classic Editorial drop cap, hoisted into the
+                // shared block so the cap variant pick applies here too.
+                EditorialDropCapBlock(
+                    text = body, bodyStyle = bodyStyle,
+                    dropCap = if (move.factFormat == ShareCardFactFormat.EDITORIAL) move.factDropCap else ShareCardFactDropCap.LETTER,
+                    capColor = accentRule,
+                    maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale),
+                    modifier = Modifier.moveFact(move).onGloballyPositioned {
+                        callbacks.onFact(it.boundsInWindow())
+                        callbacks.onFactStyle(bodyStyle)
+                    }
+                )
             }
 
             if (ratingStars != null && ratingStars > 0) {
@@ -2727,20 +2851,14 @@ private fun MinimalCard(
                             ink = inkDark.copy(alpha = 0.78f)
                         )
                         if (chapterFact.isNotBlank()) {
-                            Text(
-                                chapterFact, style = factStyle,
-                                color = inkDark.copy(alpha = 0.78f),
-                                maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale),
-                                overflow = TextOverflow.Ellipsis
-                            )
+                            FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale))
                         }
                     }
                 } else {
-                    Text(body, style = factStyle, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale), overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.onGloballyPositioned {
-                            callbacks.onFact(it.boundsInWindow())
-                            callbacks.onFactStyle(factStyle)
-                        })
+                    FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale), modifier = Modifier.onGloballyPositioned {
+                        callbacks.onFact(it.boundsInWindow())
+                        callbacks.onFactStyle(factStyle)
+                    })
                 }
             }
 
@@ -2958,12 +3076,7 @@ private fun SignatureCard(
                         ink = sig.bodyColor
                     )
                     if (chapterFact.isNotBlank()) {
-                        Text(
-                            chapterFact, style = factStyle,
-                            color = sig.bodyColor,
-                            maxLines = fitLines(bodyMaxLines, move.factHeightFrac, bodyScale),
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(bodyMaxLines, move.factHeightFrac, bodyScale))
                     }
                 }
                 return
@@ -2972,7 +3085,7 @@ private fun SignatureCard(
             // line height so the facts sit exactly on the lines (drawn in the
             // same local space as the text, so they move with the box).
             val ruleColor = sig.bodyRuleColor
-            Text(body, style = factStyle, maxLines = fitLines(bodyMaxLines, move.factHeightFrac, bodyScale), overflow = TextOverflow.Ellipsis,
+            FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(bodyMaxLines, move.factHeightFrac, bodyScale),
                 modifier = (if (centered) Modifier.fillMaxWidth() else Modifier)
                     .moveFact(move)
                     .then(if (ruleColor != null) Modifier.drawBehind {
@@ -5292,16 +5405,11 @@ private fun CustomCard(
                         ink = sig.bodyColor
                     )
                     if (chapterFact.isNotBlank()) {
-                        Text(
-                            chapterFact, style = factStyle,
-                            color = sig.bodyColor,
-                            maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 14 else 10, move.factHeightFrac, bodyScale),
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 14 else 10, move.factHeightFrac, bodyScale))
                     }
                 }
             } else {
-                Text(body, style = factStyle, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 14 else 10, move.factHeightFrac, bodyScale), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned {
+                FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 14 else 10, move.factHeightFrac, bodyScale), modifier = Modifier.moveFact(move).onGloballyPositioned {
                     callbacks.onFact(it.boundsInWindow())
                     callbacks.onFactStyle(factStyle)
                 })
@@ -5355,7 +5463,7 @@ private fun MiddleContent(
         if (quoteText != null) {
             CurioIcon(name = CurioIcons.FormatQuote, tint = palette.ink.copy(alpha = 0.20f), size = 32.dp)
             val qStyle = factBodyStyle(MaterialTheme.typography.titleLarge.copy(fontFamily = LoraFontFamily, fontSize = qSize, lineHeight = (qSize.value * 1.28f).sp), move)
-            Text(quoteText, style = qStyle, color = palette.ink, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 8, move.factHeightFrac), overflow = TextOverflow.Ellipsis, modifier = Modifier.moveFact(move).onGloballyPositioned {
+            FactBody(text = quoteText, style = qStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 8, move.factHeightFrac), modifier = Modifier.moveFact(move).onGloballyPositioned {
                 callbacks.onFact(it.boundsInWindow())
                 callbacks.onFactStyle(qStyle)
             })
@@ -5404,11 +5512,7 @@ private fun MiddleContent(
                             ink = palette.ink
                         )
                         if (chapterFact.isNotBlank()) {
-                            Text(
-                                chapterFact, style = frostStyle, color = palette.ink,
-                                maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 20 else 14, move.factHeightFrac, bodyScale),
-                                overflow = TextOverflow.Ellipsis
-                            )
+                            FactBody(text = chapterFact, style = frostStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 20 else 14, move.factHeightFrac, bodyScale))
                         }
                     }
                 } else {
@@ -5418,15 +5522,10 @@ private fun MiddleContent(
                     // v335 — the cap tracks the font multiplier so the pane
                     // keeps its footprint while the TEXT size changes: smaller
                     // fonts fit more lines, larger fonts fewer.
-                    Text(
-                        factText, style = frostStyle, color = palette.ink,
-                        maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 20 else 14, move.factHeightFrac, bodyScale),
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.onGloballyPositioned {
-                            callbacks.onFact(it.boundsInWindow())
-                            callbacks.onFactStyle(frostStyle)
-                        }
-                    )
+                    FactBody(text = factText, style = frostStyle, format = move.factFormat, dropCap = move.factDropCap, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 20 else 14, move.factHeightFrac, bodyScale), modifier = Modifier.onGloballyPositioned {
+                        callbacks.onFact(it.boundsInWindow())
+                        callbacks.onFactStyle(frostStyle)
+                    })
                 }
             }
         }
@@ -5748,6 +5847,18 @@ private fun ArrangeableCard(
                 fun alignOthers(dragged: androidx.compose.ui.geometry.Rect): List<androidx.compose.ui.geometry.Rect> =
                     rAll.filter { it.width > 0f && it.height > 0f && it !== dragged }
 
+                // v371 — COLLISION-PUSH: true when two boxes touch (or nearly
+                // touch, within a small dp gap). The fact drag uses this so
+                // the title / info rows only travel WITH the fact when the
+                // fact actually runs into them — if there's space between,
+                // they stay put.
+                fun touches(a: androidx.compose.ui.geometry.Rect, b: androidx.compose.ui.geometry.Rect): Boolean {
+                    if (a.width <= 0f || a.height <= 0f || b.width <= 0f || b.height <= 0f) return false
+                    val gap = with(editDensity) { 4.dp.toPx() }
+                    return a.left <= b.right + gap && a.right + gap >= b.left &&
+                        a.top <= b.bottom + gap && a.bottom + gap >= b.top
+                }
+
                 // Horizontal candidates: (move offset that lands the dragged
                 // box, card-local guide line) for every other box's left /
                 // centre / right edge.
@@ -6048,16 +6159,31 @@ private fun ArrangeableCard(
                                     val xs = magnetAxis(bx, f.width, cw, -bx, cw - bx - f.width, (move.factDx + dx).coerceIn(-bx, cw - bx - f.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersF, bx, f.width))
                                     val ys = magnetAxis(by, f.height, ch, -by, ch - by - f.height, (move.factDy + dy).coerceIn(-by, ch - by - f.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersF, by, f.height))
                                     dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
-                                    // v369 — GROUPED move: the title + info
-                                    // rows travel WITH the fact (like the info
-                                    // row follows the title), while each stays
-                                    // separately draggable via its own grip.
+                                    // v371 — COLLISION-PUSH (replaces the old
+                                    // always-grouped move): the title + info
+                                    // rows only travel WITH the fact when the
+                                    // fact actually touches them — if there's
+                                    // space in between they stay put, and each
+                                    // stays separately draggable via its own
+                                    // grip. Moving DOWN past the info row
+                                    // leaves the rows behind; moving UP into
+                                    // them pushes them out of the way.
                                     val appliedDx = xs.offset - move.factDx
                                     val appliedDy = ys.offset - move.factDy
+                                    val newFactRect = androidx.compose.ui.geometry.Rect(
+                                        f.left + appliedDx, f.top + appliedDy,
+                                        f.right + appliedDx, f.bottom + appliedDy
+                                    )
+                                    val pushTitle = rTitle.width > 0f && rTitle.height > 0f &&
+                                        touches(newFactRect, rTitle)
+                                    val pushMeta = rMeta.width > 0f && rMeta.height > 0f &&
+                                        touches(newFactRect, rMeta)
                                     onMove(move.copy(
                                         factDx = xs.offset, factDy = ys.offset,
-                                        titleDx = move.titleDx + appliedDx, titleDy = move.titleDy + appliedDy,
-                                        metaDx = move.metaDx + appliedDx, metaDy = move.metaDy + appliedDy
+                                        titleDx = if (pushTitle) move.titleDx + appliedDx else move.titleDx,
+                                        titleDy = if (pushTitle) move.titleDy + appliedDy else move.titleDy,
+                                        metaDx = if (pushMeta) move.metaDx + appliedDx else move.metaDx,
+                                        metaDy = if (pushMeta) move.metaDy + appliedDy else move.metaDy
                                     ))
                                 },
                                 onDragStart = {
@@ -6396,12 +6522,27 @@ fun TopicShareSheet(
     bookImageUrl: String = "",
     bookRating: Double? = null,
     bookRatingCount: Int = 0,
+    // v370b — ALBUM / SERIES share cards: same cover flow as books — the
+    // editor's Content panel offers Fetch (keyless iTunes→MusicBrainz art
+    // for albums, TVMaze→iTunes posters for series), Refetch and Remove,
+    // and the cover renders LEFT of the title like the synopsis page.
+    isAlbumTopic: Boolean = false,
+    isSeriesTopic: Boolean = false,
     // v229d — the sheet can open PRESELECTED: the Share Hub picks a design on
     // the grid and hands its style index + classic-signature flag here, so the
     // sheet opens on exactly the design the user picked (the reveal + detail
     // screens keep the defaults: first style, current signature).
     initialStyle: Int = 0,
     initialClassicSignature: Boolean = false,
+    // v371 — the sheet can open PRE-SEEDED from the Book Notes sheet's
+    // "Share as review" action: the caller hands the review text (the saved
+    // chapter note) and the chapter number it belongs to. These WIN over any
+    // restored edits (the restore effect below applies them first and the
+    // seeds override): the share card opens on the Chapter review content
+    // with the note text + its chapter chip already set, so the user only
+    // picks the design and shares.
+    seedReviewText: String = "",
+    seedReviewChapter: Int = 0,
     // v229d — "Share as text" lives IN the shared sheet (both reveal + detail
     // get it). When set, the caller supplies its own payload (the detail view
     // sends the entry's decorated text); otherwise the sheet builds a default
@@ -6458,6 +6599,10 @@ fun TopicShareSheet(
     var selectedResizeTarget by remember { mutableStateOf(ShareCardResizeTarget.NONE) }
     // Which tool's small overlay panel is open under the toolbar (null = none).
     var toolOpen by remember { mutableStateOf<String?>(null) }
+    // v370b — the ENLARGE writing sheet: a full white writing surface for
+    // the active fact text (quick / custom / chapter review), opened from
+    // the writing box below the tools.
+    var showWriteSheet by remember { mutableStateOf(false) }
     var bodyScale by remember { mutableStateOf(1f) }
     // v330 — every STYLE keeps its OWN move/position edits: dragging the
     // title on Paper must not shove the title on Vinyl too. Keyed by style;
@@ -6533,6 +6678,15 @@ fun TopicShareSheet(
             reviewChapterNumber = saved.optInt("reviewChapterNumber", 0)
             reviewChapterTitle = saved.optString("reviewChapterTitle", "")
         }
+        // v371 — the Book Notes "Share as review" seed WINS over the saved
+        // edits: the note text becomes the chapter-review text, the review
+        // content is selected, and the chapter chip tags the note's chapter.
+        if (seedReviewText.isNotBlank()) {
+            customText = seedReviewText
+            selectedId = "chapter_review"
+            showChapterProgress = false
+            if (seedReviewChapter > 0) reviewChapterNumber = seedReviewChapter
+        }
     }
     val sharer = AppPreferences.getDisplayName(context).ifBlank { "" }
     // Photo picker state — only used for Collage style
@@ -6573,9 +6727,25 @@ fun TopicShareSheet(
     var coverFetchRequested by remember { mutableStateOf(false) }
     val isBookTopic = bookChapters.isNotEmpty() || bookImageUrl.isNotBlank()
     androidx.compose.runtime.LaunchedEffect(coverFetchRequested, coverAttempt, coverLoadFailed) {
-        if (!isBookTopic || !coverFetchRequested || bookCover != null || coverLoadFailed) return@LaunchedEffect
-        val url = if (coverAttempt == 0) bookImageUrl.takeIf { it.isNotBlank() }
-            else com.curio.app.features.settings.BookCoverFetch.coverCandidates(topicName, "").firstOrNull()
+        if (!(isBookTopic || isAlbumTopic || isSeriesTopic) || !coverFetchRequested || bookCover != null || coverLoadFailed) return@LaunchedEffect
+        // v370b — resolve the cover URL per category: books use the authored
+        // cover first then the keyless provider cascade; albums and series
+        // use their own keyless resolvers (iTunes→MusicBrainz / TVMaze→
+        // iTunes). The bitmap load below is shared.
+        val url = when {
+            // v371 — books: authored cover first, then iTunes search
+            // (title+author — the same keyless source the Settings hub uses),
+            // then the Open Library title cover as the last resort. Google
+            // Books was removed as a cover source.
+            isBookTopic -> if (coverAttempt == 0) bookImageUrl.takeIf { it.isNotBlank() }
+                else com.curio.app.features.settings.BookCoverFetch.resolveCoverUrl(
+                    context, topicName, topicByline, "",
+                    com.curio.app.features.settings.BookCoverFetch.BookCoverProvider.ITUNES
+                ) ?: com.curio.app.features.settings.BookCoverFetch.coverCandidates(topicName, "").firstOrNull()
+            isAlbumTopic -> com.curio.app.features.reveal.AlbumArtFetch.resolveArtworkUrl(topicName, topicByline)
+            isSeriesTopic -> com.curio.app.features.reveal.SeriesPosterFetch.resolvePosterUrl(topicName)
+            else -> null
+        }
         if (url.isNullOrBlank()) { coverLoadFailed = true; return@LaunchedEffect }
         val bmp = runCatching {
             suspendCancellableCoroutine<ImageBitmap?> { cont ->
@@ -7222,6 +7392,107 @@ fun TopicShareSheet(
                         // the card is gone.
                     }
 
+                    // v370b — WRITING BOX below the tools: a compact field
+                    // for the ACTIVE text content (quick fact / custom fact /
+                    // chapter review) so typing never needs the tap-the-box /
+                    // Edit-text dance — plus an Enlarge button that opens a
+                    // full white writing sheet for long text. This also gives
+                    // the custom fact (and the review under Reading progress)
+                    // a real input, not just the inline caret.
+                    val writeBoxTarget = when (activeId) {
+                        QUICK_FACT_ID, CUSTOM_FACT_ID, "chapter_review" -> activeId
+                        else -> null
+                    }
+                    if (writeBoxTarget != null) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            OutlinedTextField(
+                                value = factFieldText,
+                                onValueChange = { routeFactChange(it) },
+                                placeholder = {
+                                    Text(
+                                        when (writeBoxTarget) {
+                                            "chapter_review" -> "Write your review…"
+                                            CUSTOM_FACT_ID -> "Custom fact…"
+                                            else -> "Quick fact…"
+                                        },
+                                        style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    )
+                                },
+                                maxLines = 3,
+                                textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                                shape = RoundedCornerShape(14.dp),
+                                modifier = Modifier.weight(1f)
+                            )
+                            Surface(
+                                onClick = {
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    showWriteSheet = true
+                                },
+                                shape = RoundedCornerShape(50),
+                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                modifier = Modifier.height(44.dp)
+                            ) {
+                                Row(
+                                    Modifier.padding(horizontal = 12.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    CurioIcon(name = CurioIcons.Fullscreen, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer, size = 14.dp)
+                                    Text("Enlarge", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSecondaryContainer)
+                                }
+                            }
+                        }
+                    }
+                    // v370b — the ENLARGE sheet: a full white writing surface
+                    // (same state as the compact box — everything stays in
+                    // sync live) with a big multi-line field and a Done.
+                    if (showWriteSheet) {
+                        androidx.compose.ui.window.Dialog(
+                            onDismissRequest = { showWriteSheet = false },
+                            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+                        ) {
+                            Box(
+                                Modifier
+                                    .fillMaxSize()
+                                    .background(Color.White)
+                                    .padding(20.dp)
+                            ) {
+                                Column(Modifier.fillMaxSize()) {
+                                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                                        Text(
+                                            when (writeBoxTarget) {
+                                                "chapter_review" -> "Chapter review"
+                                                CUSTOM_FACT_ID -> "Custom fact"
+                                                else -> "Quick fact"
+                                            },
+                                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = Color(0xFF1A1A1A)),
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        TextButton(onClick = { showWriteSheet = false }) {
+                                            Text("Done", fontWeight = FontWeight.Bold, color = Color(0xFF3E2723))
+                                        }
+                                    }
+                                    Spacer(Modifier.height(10.dp))
+                                    OutlinedTextField(
+                                        value = factFieldText,
+                                        onValueChange = { routeFactChange(it) },
+                                        placeholder = { Text("Start writing…", color = Color(0xFF9A9A9A)) },
+                                        textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFF1A1A1A)),
+                                        shape = RoundedCornerShape(14.dp),
+                                        maxLines = 30,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .weight(1f)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                     // ── One small overlay for the open tool ────────────
                     when (toolOpen) {
                         "style" -> Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -7339,6 +7610,16 @@ fun TopicShareSheet(
                                     // max width; height scales the track rows.
                                     SizeSliderColumn("Strip width", move.favWidthFrac, { updateMove(move.copy(favWidthFrac = it)) }, 0.3f..1.2f, steps = 89, modifier = Modifier.fillMaxWidth())
                                     SizeSliderColumn("Strip rows", move.favHeightFrac, { updateMove(move.copy(favHeightFrac = it)) }, 0.35f..3f, steps = 26, modifier = Modifier.fillMaxWidth())
+                                    // v371 — WHOLE-BOX scale for the strip:
+                                    // grows width AND rows together (same
+                                    // math as the strip's corner grip).
+                                    SizeSliderColumn("Whole box", move.favHeightFrac, { v ->
+                                        val oldH = move.favHeightFrac.coerceAtLeast(0.35f)
+                                        updateMove(move.copy(
+                                            favHeightFrac = v,
+                                            favWidthFrac = (move.favWidthFrac * v / oldH).coerceIn(0.3f, 1.2f)
+                                        ))
+                                    }, 0.35f..3f, steps = 26, modifier = Modifier.fillMaxWidth())
                                 } else {
                                     SizeSliderColumn("Info width", move.metaWidthFrac, { updateMove(move.copy(metaWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
                                     SizeSliderColumn("Info lines", move.metaHeightFrac, { updateMove(move.copy(metaHeightFrac = it)) }, 0.5f..1f, steps = 4, modifier = Modifier.fillMaxWidth())
@@ -7613,12 +7894,18 @@ fun TopicShareSheet(
                             // v335 — the cover only appears when the user taps
                             // Fetch (never on open); the gallery pick and Remove
                             // are still one tap away.
-                            if (isBookTopic) {
+                            // v370b — ALBUMS and SERIES get the same Fetch /
+                            // Refetch / Remove row (the gallery pick stays
+                            // book-only — the cover is fetched artwork, not a
+                            // user photo).
+                            if (isBookTopic || isAlbumTopic || isSeriesTopic) {
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                                    Surface(onClick = { coverPickerLauncher.launch("image/*") }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(40.dp)) {
-                                        Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                            CurioIcon(name = CurioIcons.PhotoLibrary, tint = if (bookCover != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
-                                            Text(if (bookCover != null) "Change" else "Gallery", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (bookCover != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
+                                    if (isBookTopic) {
+                                        Surface(onClick = { coverPickerLauncher.launch("image/*") }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(40.dp)) {
+                                            Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                                CurioIcon(name = CurioIcons.PhotoLibrary, tint = if (bookCover != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
+                                                Text(if (bookCover != null) "Change" else "Gallery", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (bookCover != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
+                                            }
                                         }
                                     }
                                     // Fetch (first time) / Try again (after a

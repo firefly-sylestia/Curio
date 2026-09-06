@@ -71,11 +71,14 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -1039,6 +1042,12 @@ fun TopicRevealScreen(
         // away on scroll-down, back on scroll-up. Now also visible in
         // Browse-Topics so users can favorite/share from the topic browser.
         val floatingTopic = resolved
+        // v371 — a chapter note shared from the Book Notes sheet: the reveal
+        // opens the share card with that note pre-seeded as the Chapter
+        // review (text + chapter number). Declared here (above the Book
+        // Notes sheet block, which also writes it) and consumed by the
+        // TopicShareSheet inside the floating-topic block; cleared once used.
+        var pendingChapterShare by remember { mutableStateOf<Pair<Int, String>?>(null) }
         if (floatingTopic != null) {
             // v292 — TOPIC SHARE: tapping the Share pill in the floating
             // bar opens the customizable topic share card sheet.
@@ -1093,9 +1102,13 @@ fun TopicRevealScreen(
                     quickFact = if (cat.id.name == "QUOTES") floatingTopic.name else floatingTopic.teaser,
                     authority = "${context.packageName}.fileprovider",
                     context = context,
-                    onDismiss = { showShareSheet = false },
                     categoryFamily = cat.family,
                     topicByline = floatingTopic.byline,
+                    // v371 — album/series topics get the cover-fetch flow in
+                    // the share editor too (iTunes → MusicBrainz artwork /
+                    // TVMaze → iTunes posters, same as the reveal posters).
+                    isAlbumTopic = cat.id == CategoryId.ALBUMS,
+                    isSeriesTopic = cat.id == CategoryId.SERIES,
                     // v328 — BOOK share cards: hand the chapters so the
                     // editor can offer Reading progress / Chapter review.
                     bookChapters = if (cat.id == CategoryId.BOOKS) floatingTopic.chapters.orEmpty()
@@ -1105,7 +1118,16 @@ fun TopicRevealScreen(
                     // the editor) and the ★ row without a second lookup.
                     bookImageUrl = if (cat.id == CategoryId.BOOKS) floatingTopic.imageUrl else "",
                     bookRating = AppPreferences.bookRatingsState[floatingTopic.name]?.takeIf { it > 0.0 },
-                    bookRatingCount = AppPreferences.bookRatingsCountState[floatingTopic.name] ?: 0
+                    bookRatingCount = AppPreferences.bookRatingsCountState[floatingTopic.name] ?: 0,
+                    // v371 — the chapter note shared from Book Notes opens the
+                    // card pre-seeded as a Chapter review (text + chapter);
+                    // the seed is one-shot, cleared after the sheet opens.
+                    seedReviewText = pendingChapterShare?.second.orEmpty(),
+                    seedReviewChapter = pendingChapterShare?.first ?: 0,
+                    onDismiss = {
+                        pendingChapterShare = null
+                        showShareSheet = false
+                    }
                 )
             }
         }
@@ -1137,6 +1159,13 @@ fun TopicRevealScreen(
             mode = if (showSynopsisDialog) BookNotesMode.SYNOPSIS else BookNotesMode.CHAPTERS,
             chapter = selectedChapter,
             onSelectChapter = { selectedChapter = it },
+            // v371 — "Share as review": the chapter note opens the topic
+            // share card pre-seeded with that note as the Chapter review
+            // text, tagged with its chapter.
+            onShareNote = { chNum, noteText ->
+                pendingChapterShare = chNum to noteText
+                showShareSheet = true
+            },
             onDismiss = {
                 showSynopsisDialog = false
                 selectedChapter = null
@@ -2817,8 +2846,9 @@ private fun BookCoverPoster(
     // candidate above failed (no authored URL, no hub-resolved cover, and
     // the Open Library guess 404s), the poster LIVE-resolves a cover and
     // persists it. v356 — iTunes is tried FIRST (keyless ebook search), then
-    // Google Books, then LibraryThing (only when its free key is configured),
-    // so the best keyless source wins before the older fallbacks.
+    // LibraryThing (only when its free key is configured); v371 — Google
+    // Books was removed as a cover source (its keyless volume search rarely
+    // returns a usable thumbnail), so the best keyless sources win.
     val context = LocalContext.current
     var liveFallbackDone by remember(bookTitle, imageUrl) { mutableStateOf(false) }
     LaunchedEffect(bookTitle, imageUrl, bookFetchConsent, coverIndex, liveFallbackDone) {
@@ -2828,7 +2858,6 @@ private fun BookCoverPoster(
         if (bookFetchConsent && !liveFallbackDone && exhausted) {
             val providers = listOf(
                 com.curio.app.features.settings.BookCoverFetch.BookCoverProvider.ITUNES,
-                com.curio.app.features.settings.BookCoverFetch.BookCoverProvider.GOOGLE_BOOKS,
                 com.curio.app.features.settings.BookCoverFetch.BookCoverProvider.LIBRARY_THING
             )
             var url: String? = null
@@ -2944,6 +2973,9 @@ private fun BookNotesSheet(
     mode: BookNotesMode,
     chapter: BookChapter?,
     onSelectChapter: (BookChapter) -> Unit,
+    // v371 — "Share as review": opens the topic share card with this
+    // chapter's note pre-seeded as the Chapter review text.
+    onShareNote: (chapterNumber: Int, noteText: String) -> Unit = { _, _ -> },
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -2997,6 +3029,10 @@ private fun BookNotesSheet(
     val chapterLikes = AppPreferences.bookChapterLikesState[bookName].orEmpty()
     // v362 — per-chapter personal notes (book name → chapter number → text).
     val chapterNotes = AppPreferences.bookChapterNotesState[bookName].orEmpty()
+    // v371 — the ENLARGE note sheet: which chapter's note is being written
+    // in the full writing dialog (null = closed). The dialog edits the SAME
+    // AppPreferences slot as the compact field, so both stay in sync live.
+    var noteEditorChapter by remember { mutableStateOf<BookChapter?>(null) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val listState = rememberLazyListState()
     // v352 — chapter switching no longer lags: the seed chapter drives an
@@ -3230,8 +3266,18 @@ private fun BookNotesSheet(
                         Surface(
                             onClick = { toggleChapter(ch) },
                             shape = RoundedCornerShape(14.dp),
+                            // v371 — the OPEN row is a soft accent TINT over
+                            // the surface (not the old solid accent fill):
+                            // the solid fill fought the cover palette on
+                            // every vivid/light cover and read as a loud
+                            // slab. Tinted + accent border keeps the "open"
+                            // state obvious while the sheet stays elegant.
                             color = when {
-                                isOpen -> accent
+                                isOpen -> lerp(
+                                    accent.copy(alpha = 0.80f),
+                                    surface.copy(alpha = 0.55f),
+                                    0.84f
+                                )
                                 isRead -> surfaceAlt
                                 else -> surface
                             },
@@ -3239,9 +3285,11 @@ private fun BookNotesSheet(
                             // in/out on expand (glitchy touch shadow). A read
                             // row gets a solid accent border instead.
                             shadowElevation = 0.dp,
-                            border = if (isRead)
-                                BorderStroke(1.dp, accent.copy(alpha = 0.55f))
-                            else null
+                            border = when {
+                                isOpen -> BorderStroke(1.dp, accent.copy(alpha = 0.65f))
+                                isRead -> BorderStroke(1.dp, accent.copy(alpha = 0.55f))
+                                else -> null
+                            }
                         ) {
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 Row(
@@ -3259,7 +3307,11 @@ private fun BookNotesSheet(
                                             .clip(CircleShape)
                                             .background(
                                                 when {
-                                                    isOpen -> onAccent
+                                                    // v371 — open chip: solid
+                                                    // accent disc (the tinted
+                                                    // row keeps its accent pop
+                                                    // on the number).
+                                                    isOpen -> accent
                                                     isRead -> accent.copy(alpha = 0.18f)
                                                     else -> surfaceHigh
                                                 }
@@ -3279,7 +3331,7 @@ private fun BookNotesSheet(
                                             "${ch.number}",
                                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
                                             color = when {
-                                                isOpen -> accent
+                                                isOpen -> onAccent
                                                 isRead -> accent
                                                 else -> onSurfaceVariant
                                             }
@@ -3290,7 +3342,7 @@ private fun BookNotesSheet(
                                         style = MaterialTheme.typography.bodyLarge.copy(
                                             fontWeight = if (isOpen || isRead) FontWeight.Bold else FontWeight.Normal
                                         ),
-                                        color = if (isOpen) onAccent else onSurface,
+                                        color = if (isOpen) ink else onSurface,
                                         maxLines = 2,
                                         overflow = TextOverflow.Ellipsis,
                                         modifier = Modifier.weight(1f)
@@ -3318,7 +3370,7 @@ private fun BookNotesSheet(
                                         ) {
                                             HeartGlyph(
                                                 color = if (isLiked) Color(0xFFE5484D)
-                                                        else if (isOpen) onAccent.copy(alpha = 0.85f) else onSurfaceVariant,
+                                                        else if (isOpen) accent else onSurfaceVariant,
                                                 iconSize = 16.dp,
                                                 filled = isLiked
                                             )
@@ -3376,19 +3428,19 @@ private fun BookNotesSheet(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .height(1.dp)
-                                                .background(onAccent.copy(alpha = 0.18f))
+                                                .background(accent.copy(alpha = 0.22f))
                                         )
                                         if (ch.pageStart > 0 && ch.pageEnd > 0) {
                                             Text(
                                                 "pp. ${ch.pageStart}–${ch.pageEnd}",
                                                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                                color = if (isOpen) onAccent.copy(alpha = 0.9f) else ink
+                                                color = if (isOpen) accent.copy(alpha = 0.9f) else ink
                                             )
                                         }
                                         Text(
                                             ch.summary.ifBlank { "No summary for this chapter." },
                                             style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 25.sp),
-                                            color = if (isOpen) onAccent else onSurface
+                                            color = if (isOpen) ink else onSurface
                                         )
                                         // v362 — personal note per chapter:
                                         // a quiet one-line field that saves as
@@ -3405,6 +3457,15 @@ private fun BookNotesSheet(
                                                 AppPreferences.setBookChapterNote(
                                                     context, bookName, ch.number, text
                                                 )
+                                            },
+                                            // v371 — the note row carries two
+                                            // actions: EXPAND opens the full
+                                            // writing sheet (long notes), and
+                                            // SHARE seeds the share card with
+                                            // the note as a Chapter review.
+                                            onExpand = { noteEditorChapter = ch },
+                                            onShare = { text ->
+                                                if (text.isNotBlank()) onShareNote(ch.number, text)
                                             }
                                         )
                                         // v352 — the Mark-read toggle + Like
@@ -3420,13 +3481,86 @@ private fun BookNotesSheet(
             }
         }
     }
+    // v371 — the ENLARGE note writing sheet: a full white dialog with a big
+    // multi-line field for the chapter note. Edits the SAME AppPreferences
+    // slot as the compact field (live), so closing it leaves everything in
+    // sync — the compact field reflects the expanded text immediately.
+    noteEditorChapter?.let { editCh ->
+        val editText = chapterNotes[editCh.number].orEmpty()
+        Dialog(
+            onDismissRequest = { noteEditorChapter = null },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.White)
+                    .padding(20.dp)
+            ) {
+                Column(Modifier.fillMaxSize()) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            "Note · CH ${editCh.number}${editCh.title.takeIf { it.isNotBlank() }?.let { " — $it" } ?: ""}",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, color = Color(0xFF1A1A1A)),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f)
+                        )
+                        TextButton(onClick = { noteEditorChapter = null }) {
+                            Text("Done", fontWeight = FontWeight.Bold, color = Color(0xFF3E2723))
+                        }
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    OutlinedTextField(
+                        value = editText,
+                        onValueChange = { newText ->
+                            AppPreferences.setBookChapterNote(context, bookName, editCh.number, newText.take(2000))
+                        },
+                        placeholder = { Text("Write your thoughts on this chapter…", color = Color(0xFF9A9A9A)) },
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFF1A1A1A)),
+                        shape = RoundedCornerShape(14.dp),
+                        maxLines = 30,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    // Share the note straight to the share card as a Chapter
+                    // review — no copy/paste, no re-typing.
+                    Surface(
+                        onClick = {
+                            noteEditorChapter = null
+                            if (editText.isNotBlank()) onShareNote(editCh.number, editText)
+                        },
+                        shape = RoundedCornerShape(50),
+                        color = Color(0xFF3E2723),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(46.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                "Share as Chapter review",
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 /**
- * v362 — the chapter's PERSONAL note field: a single-line text input that
+ * v362 — the chapter's PERSONAL note field: a multi-line text input that
  * saves on every change (blank = clears the note). Styled to sit quietly on
  * both the open (accent) and closed (surface) chapter panels. The field is
  * keyed by chapter number so notes survive re-grouping of the chapter data.
+ *
+ * v371 — the field grew: an EXPAND button opens the full white writing
+ * sheet (long notes), and a SHARE button seeds the share card with the note
+ * as a Chapter review.
  */
 @Composable
 private fun ChapterNoteField(
@@ -3435,26 +3569,30 @@ private fun ChapterNoteField(
     onAccent: Color,
     ink: Color,
     isOpen: Boolean,
-    onSave: (String) -> Unit
+    onSave: (String) -> Unit,
+    // v371 — EXPAND opens the full white writing sheet; SHARE seeds the
+    // share card with the current note as a Chapter review.
+    onExpand: () -> Unit = {},
+    onShare: (String) -> Unit = {}
 ) {
     var value by rememberSaveable(initial) { mutableStateOf(initial) }
+    val scheme = MaterialTheme.colorScheme
     androidx.compose.foundation.layout.Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                if (isOpen) onAccent.copy(alpha = 0.12f)
+                if (isOpen) accent.copy(alpha = 0.12f)
                 else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
                 RoundedCornerShape(12.dp)
             )
             .padding(horizontal = 10.dp, vertical = 8.dp)
     ) {
-        val scheme = MaterialTheme.colorScheme
         CurioIcon(
             CurioIcons.Note,
             if (value.isBlank()) "Add a note" else "Chapter note",
-            tint = if (isOpen) onAccent.copy(alpha = 0.75f) else scheme.onSurfaceVariant.copy(alpha = 0.8f),
+            tint = if (isOpen) accent.copy(alpha = 0.85f) else scheme.onSurfaceVariant.copy(alpha = 0.8f),
             size = 15.dp
         )
         BasicTextField(
@@ -3465,7 +3603,7 @@ private fun ChapterNoteField(
             },
             singleLine = true,
             textStyle = MaterialTheme.typography.bodySmall.copy(
-                color = if (isOpen) onAccent else scheme.onSurface
+                color = if (isOpen) ink else scheme.onSurface
             ),
             cursorBrush = SolidColor(accent),
             decorationBox = { inner ->
@@ -3473,13 +3611,44 @@ private fun ChapterNoteField(
                     Text(
                         "Add a note…",
                         style = MaterialTheme.typography.bodySmall,
-                        color = (if (isOpen) onAccent else scheme.onSurfaceVariant).copy(alpha = 0.6f)
+                        color = (if (isOpen) accent else scheme.onSurfaceVariant).copy(alpha = 0.6f)
                     )
                 }
                 inner()
             },
             modifier = Modifier.weight(1f)
         )
+        // v371 — EXPAND: opens the full writing sheet (long notes, no more
+        // tiny single-line box).
+        Surface(
+            onClick = onExpand,
+            shape = CircleShape,
+            color = if (isOpen) accent.copy(alpha = 0.18f) else scheme.surfaceVariant
+        ) {
+            CurioIcon(
+                CurioIcons.Fullscreen,
+                "Expand note",
+                tint = if (isOpen) accent else scheme.onSurfaceVariant,
+                size = 15.dp,
+                modifier = Modifier.padding(7.dp)
+            )
+        }
+        // v371 — SHARE: the note becomes a Chapter review on the share card.
+        if (value.isNotBlank()) {
+            Surface(
+                onClick = { onShare(value) },
+                shape = CircleShape,
+                color = if (isOpen) accent.copy(alpha = 0.25f) else accent.copy(alpha = 0.12f)
+            ) {
+                CurioIcon(
+                    CurioIcons.Share,
+                    "Share as chapter review",
+                    tint = if (isOpen) onAccent else accent,
+                    size = 15.dp,
+                    modifier = Modifier.padding(7.dp)
+                )
+            }
+        }
     }
 }
 
@@ -4013,11 +4182,23 @@ private fun AlbumNotesSheet(
     // (null swatches → per-element category fallback). v350 — the album
     // cover-fetch toggle gates the lookup like the book/series gates: when
     // OFF, only already-cached art is served, nothing touches the network.
-    var coverSwatches by remember(topic.imageUrl) { mutableStateOf<CoverSwatches?>(null) }
-    LaunchedEffect(topic.imageUrl) {
+    // v371 — the palette must come from the RESOLVED artwork URL, not
+    // topic.imageUrl (albums carry no authored imageUrl, so the old code
+    // always fell back to the category tint and never saw the art). When
+    // the fetch consent is on, resolve the artwork (iTunes → MusicBrainz)
+    // and feed THAT to the swatch extractor; consent off = cached art only.
+    var paletteUrl by remember(topic.imageUrl) { mutableStateOf(topic.imageUrl) }
+    LaunchedEffect(topic.imageUrl, AppPreferences.albumFetchEnabledState) {
+        val resolved = if (AppPreferences.albumFetchEnabledState)
+            AlbumArtFetch.resolveArtworkUrl(topic.name, topic.byline)
+        else null
+        paletteUrl = resolved ?: topic.imageUrl
+    }
+    var coverSwatches by remember(paletteUrl) { mutableStateOf<CoverSwatches?>(null) }
+    LaunchedEffect(paletteUrl) {
         coverSwatches = fetchCoverSwatches(
             context,
-            topic.imageUrl,
+            paletteUrl,
             networkAllowed = AppPreferences.albumFetchEnabledState
         )
     }
@@ -4629,9 +4810,18 @@ private fun EpisodeNotesSheet(
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
     val fetchConsent = AppPreferences.seriesFetchEnabledState
-    var coverSwatches by remember(topic.imageUrl) { mutableStateOf<CoverSwatches?>(null) }
+    // v371 — same resolved-poster fix as the album sheet: the palette must
+    // come from the RESOLVED poster URL (TVMaze → iTunes), not the (usually
+    // empty) authored topic.imageUrl — otherwise the series sheet always
+    // wore the category tint instead of the poster's colours.
+    var paletteUrl by remember(topic.imageUrl) { mutableStateOf(topic.imageUrl) }
     LaunchedEffect(topic.imageUrl, fetchConsent) {
-        coverSwatches = fetchCoverSwatches(context, topic.imageUrl, networkAllowed = fetchConsent)
+        val resolved = if (fetchConsent) SeriesPosterFetch.resolvePosterUrl(topic.name) else null
+        paletteUrl = resolved ?: topic.imageUrl
+    }
+    var coverSwatches by remember(paletteUrl) { mutableStateOf<CoverSwatches?>(null) }
+    LaunchedEffect(paletteUrl, fetchConsent) {
+        coverSwatches = fetchCoverSwatches(context, paletteUrl, networkAllowed = fetchConsent)
     }
     val coverPal = cat.notesSheetPalette(coverSwatches)
     val accent = coverPal?.accent ?: cat.themedAccent()
@@ -4856,17 +5046,26 @@ private fun EpisodeNotesSheet(
                         Surface(
                             onClick = { toggleEpisode(ep) },
                             shape = RoundedCornerShape(14.dp),
+                            // v371 — soft accent TINT over the surface for
+                            // the open episode (mirrors the book chapter
+                            // rows); the solid fill fought the poster palette.
                             color = when {
-                                isOpen -> accent
+                                isOpen -> lerp(
+                                    accent.copy(alpha = 0.80f),
+                                    surface.copy(alpha = 0.55f),
+                                    0.84f
+                                )
                                 isWatched -> surfaceAlt
                                 else -> surface
                             },
                             // v354 — no elevation flip (glitchy touch shadow);
                             // watched rows get a solid accent border instead.
                             shadowElevation = 0.dp,
-                            border = if (isWatched)
-                                BorderStroke(1.dp, accent.copy(alpha = 0.55f))
-                            else null
+                            border = when {
+                                isOpen -> BorderStroke(1.dp, accent.copy(alpha = 0.65f))
+                                isWatched -> BorderStroke(1.dp, accent.copy(alpha = 0.55f))
+                                else -> null
+                            }
                         ) {
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 Row(
@@ -4885,7 +5084,11 @@ private fun EpisodeNotesSheet(
                                             .clip(CircleShape)
                                             .background(
                                                 when {
-                                                    isOpen -> onAccent
+                                                    // v371 — open chip: solid
+                                                    // accent disc (the tinted
+                                                    // row keeps its accent pop
+                                                    // on the number).
+                                                    isOpen -> accent
                                                     isWatched -> accent.copy(alpha = 0.18f)
                                                     else -> surfaceHigh
                                                 }
@@ -4905,7 +5108,7 @@ private fun EpisodeNotesSheet(
                                             "${ep.number}",
                                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
                                             color = when {
-                                                isOpen -> accent
+                                                isOpen -> onAccent
                                                 isWatched -> accent
                                                 else -> onSurfaceVariant
                                             }
@@ -4916,7 +5119,7 @@ private fun EpisodeNotesSheet(
                                         style = MaterialTheme.typography.bodyLarge.copy(
                                             fontWeight = if (isOpen || isWatched) FontWeight.Bold else FontWeight.Normal
                                         ),
-                                        color = if (isOpen) onAccent else onSurface,
+                                        color = if (isOpen) ink else onSurface,
                                         maxLines = 2,
                                         overflow = TextOverflow.Ellipsis,
                                         modifier = Modifier.weight(1f)
@@ -4941,7 +5144,7 @@ private fun EpisodeNotesSheet(
                                         ) {
                                             HeartGlyph(
                                                 color = if (isLiked) Color(0xFFE5484D)
-                                                        else if (isOpen) onAccent.copy(alpha = 0.85f) else onSurfaceVariant,
+                                                        else if (isOpen) accent else onSurfaceVariant,
                                                 iconSize = 16.dp,
                                                 filled = isLiked
                                             )
@@ -4999,17 +5202,17 @@ private fun EpisodeNotesSheet(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .height(1.dp)
-                                                .background(onAccent.copy(alpha = 0.18f))
+                                                .background(accent.copy(alpha = 0.22f))
                                         )
                                         Text(
                                             "Season $season · Episode ${ep.number}",
                                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                            color = if (isOpen) onAccent.copy(alpha = 0.9f) else ink
+                                            color = if (isOpen) accent.copy(alpha = 0.9f) else ink
                                         )
                                         Text(
                                             ep.summary.ifBlank { "No summary for this episode." },
                                             style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 25.sp),
-                                            color = if (isOpen) onAccent else onSurface
+                                            color = if (isOpen) ink else onSurface
                                         )
                                         // v352 — the Watched toggle + Like
                                         // heart moved onto the row (chips
