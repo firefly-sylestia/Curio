@@ -7693,7 +7693,7 @@ fun TopicShareSheet(
                                                     Text("Tap the title or fact on the card first", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
                                                 } else {
                                                     // Font
-                                                    Text("Font", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 12.dp, top = 4.dp, bottom = 4.dp))
+                                                    Text("Font", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
                                                     Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(horizontal = 12.dp)) {
                                                         shareFonts.forEach { f ->
                                                             val selF = if (fsIsTitle) move.titleFont == f.family else move.factFont == f.family
@@ -7751,8 +7751,8 @@ fun TopicShareSheet(
                                                     }
                                                     // Fact format (quick/custom fact only)
                                                     if (fsIsFact) {
-                                                        Text("Fact format", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 12.dp, top = 4.dp))
-                                                        Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(horizontal = 12.dp)) {
+                                                        Text("Fact format", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+                                                        Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(12.dp)) {
                                                             ShareCardFactFormat.entries.forEach { fmt ->
                                                                 Pill(fmt.label, CurioIcons.FormatText, move.factFormat == fmt) {
                                                                     updateMove(move.copy(factFormat = fmt))
