@@ -7751,7 +7751,7 @@ fun TopicShareSheet(
                                                     }
                                                     // Fact format (quick/custom fact only)
                                                     if (fsIsFact) {
-                                                        Text("Fact format", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 12.dp, top = 4.dp))
+                                                        Text("Fact format", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(start = 12.dp, top = 4.dp, end = 12.dp, bottom = 0.dp))
                                                         Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()).padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                                             ShareCardFactFormat.entries.forEach { fmt ->
                                                                 Pill(fmt.label, CurioIcons.FormatText, move.factFormat == fmt) {
