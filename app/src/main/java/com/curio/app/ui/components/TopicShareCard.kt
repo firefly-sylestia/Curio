@@ -802,7 +802,15 @@ data class ShareCardMove(
      *  the title back down (the value tracks the needed clearance, not a
      *  one-way shove). The glued cover sits inside the title block, so it
      *  rides the lift automatically. 0f = no push. */
-    val titleLift: Float = 0f
+    val titleLift: Float = 0f,
+    /** v380 — TRUE once the user has DRAGGED the title by hand. A hand-placed
+     *  title owns its spot: the auto-lift effect never shoves it again, so
+     *  the user may deliberately overlap the quick-fact box and the layout
+     *  stays exactly where they left it (no bounce-back on release). Only a
+     *  drag sets it — the FACT handle pushing the title out of its way while
+     *  travelling does not, so a pushed-but-never-dragged title still gets
+     *  auto-lifted when the fact box grows into it. Reset layout clears it. */
+    val titlePlaced: Boolean = false
 )
 
 /** v378 — layout-only reset for [ShareCardMove]: zeroes every POSITION
@@ -816,7 +824,8 @@ data class ShareCardMove(
  *  tool drives bodyScale), so keeping it after Reset left the auto-shrunk
  *  text in place AND permanently disabled future smart fit (the seed reads
  *  as "manually touched"). Reset now returns the card to natural
- *  auto-fit behaviour. */
+ *  auto-fit behaviour. v380 — the hand-placed-title marker clears too, so
+ *  the title goes back to riding the auto lift for grown fact boxes. */
 private fun ShareCardMove.resetLayout(): ShareCardMove = ShareCardMove(
     titleFont = titleFont, factFont = factFont, metaFont = metaFont, badgeFont = badgeFont,
     titleAlign = titleAlign, factAlign = factAlign,
@@ -6632,12 +6641,20 @@ private fun ArrangeableCard(
                     androidx.compose.runtime.LaunchedEffect(
                         titleRect.value, factRect.value,
                         move.factHeightFrac, move.factWidthFrac, move.factBoxScale,
-                        move.titleLift, titleGrabbed, factGrabbed
+                        move.titleLift, move.titlePlaced, titleGrabbed, factGrabbed
                     ) {
                         // v378/v379e — never recompute while the title OR the
                         // fact box is being dragged: collision pushes belong
                         // to slider-grown boxes meeting a parked title.
-                        if (titleGrabbed || factGrabbed) return@LaunchedEffect
+                        // v380 — and never for a HAND-PLACED title: a drag
+                        // takes ownership of the spot, so the user may
+                        // deliberately park the title over the quick-fact
+                        // box (the drag-end handler folds any prior auto
+                        // lift away, so nothing here is left to clean up).
+                        // Slider-grown fact boxes still lift a title that
+                        // was never dragged (e.g. one nudged aside by the
+                        // fact handle's own collision push).
+                        if (titleGrabbed || factGrabbed || move.titlePlaced) return@LaunchedEffect
                         val t = rTitle
                         val f = rFact
                         if (t.width <= 0f || t.height <= 0f || f.width <= 0f || f.height <= 0f) return@LaunchedEffect
@@ -7064,7 +7081,26 @@ private fun ArrangeableCard(
                                     onMove(move.copy(titleDx = xs.offset, titleDy = ys.offset))
                                 },
                                 onDragStart = { dragActive = true; titleGrabbed = true },
-                                onDragEnd = { dragActive = false; titleGrabbed = false; dragGuides = DragGuides() }
+                                onDragEnd = {
+                                    // v380 — the drag owns the title's spot
+                                    // (overlap freedom): fold any auto lift
+                                    // into the position so the title freezes
+                                    // EXACTLY where the finger left it (no
+                                    // snap), clear the lift, and mark the
+                                    // title hand-placed so the auto-lift
+                                    // effect never shoves it back out of a
+                                    // deliberate overlap.
+                                    onMove(
+                                        move.copy(
+                                            titlePlaced = true,
+                                            titleDy = move.titleDy - move.titleLift,
+                                            titleLift = 0f
+                                        )
+                                    )
+                                    dragActive = false
+                                    titleGrabbed = false
+                                    dragGuides = DragGuides()
+                                }
                             )
                         }
                     }
@@ -7544,6 +7580,7 @@ fun TopicShareSheet(
                 factScale = (o.optDouble("factScale", 1.0) * o.optDouble("factZoom", 1.0)).toFloat(),
                 factGutter = o.optDouble("factGutter", 1.0).toFloat(),
                 titleLift = o.optDouble("titleLift", 0.0).toFloat(),
+                titlePlaced = o.optBoolean("titlePlaced", false),
                 factUnderline = o.optBoolean("factUnderline", false),
                 factHighlight = o.optInt("factHighlight", 0).takeIf { it != 0 }?.let { Color(it) },
                 titleUnderline = o.optBoolean("titleUnderline", false),
@@ -8025,6 +8062,7 @@ fun TopicShareSheet(
                 put("factScale", m.factScale)
                 put("factGutter", m.factGutter)
                 if (m.titleLift != 0f) put("titleLift", m.titleLift.toDouble())
+                if (m.titlePlaced) put("titlePlaced", true)
                 put("factUnderline", m.factUnderline)
                 m.factHighlight?.let { put("factHighlight", it.toArgb()) }
                 put("titleUnderline", m.titleUnderline)

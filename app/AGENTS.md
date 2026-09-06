@@ -1108,6 +1108,18 @@ app/src/main/java/com/curio/app/
         dark tones) and near-black when it's light; Paper's quote +
         frost styles now use it instead of palette.ink/theme onSurface.
         Title/meta already used palette.ink (light on the dark tones).
+    - **v380 — hand-placed title owns its spot (overlap freedom).** User:
+      "the title-fact collision glitch is still there; if I move the title
+      onto/inside the quick-fact box I should be able to, no problem."
+      New persisted `ShareCardMove.titlePlaced` flag: the auto-lift
+      effect (v376/v379e) returns early for a hand-placed title, so a
+      drag that parks the title over the fact stays put — the lift only
+      ever rescues a title that was NEVER dragged (natural or nudged
+      aside by the FACT handle's push), i.e. slider-grown fact boxes. A
+      title drag end FOLDS any prior lift into `titleDy` (`dy -= lift`,
+      `lift = 0`) so the title freezes exactly where the finger left it
+      with no snap; Reset layout clears the flag (back to automatic).
+      Old saves parse `titlePlaced` as false → unchanged behaviour.
 - **v377 — share-card editor declutter: design switching via the card,
   tool captions, No-fact eye-cross, fact layout under Align.** User: "the
   style button should only show when signature style is active and tapping
