@@ -1683,7 +1683,7 @@ private fun PaperCard(
         Column(modifier = Modifier.fillMaxSize().padding(28.dp),
             verticalArrangement = Arrangement.SpaceBetween) {
             HeaderRow(categoryName, categoryGlyph, palette, move, callbacks)
-            MiddleContent(display, factText, aspect, palette, ratingStars, quoteText, qSize, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact, coverArt, coverW, coverH)
+            MiddleContent(display, factText, aspect, palette, ratingStars, quoteText, qSize, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact, coverArt, coverW, coverH, factSpans = factSpans)
             Footer(sharerName, quoteText, quoteAuthor, palette, move, callbacks)
         }
     }
@@ -3526,7 +3526,8 @@ private fun SignatureCard(
             // Book-cover ruled lines BEHIND the text, spaced at the body's own
             // line height so the facts sit exactly on the lines (drawn in the
             // same local space as the text, so they move with the box).
-            val ruleColor = sig.bodyRuleColor            FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(bodyMaxLines, move.factHeightFrac, bodyScale),
+            val ruleColor = sig.bodyRuleColor
+            FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(bodyMaxLines, move.factHeightFrac, bodyScale),
                 modifier = (if (centered) Modifier.fillMaxWidth() else Modifier)
                     .moveFact(move)
                     .then(if (ruleColor != null) Modifier.drawBehind {
@@ -5906,7 +5907,9 @@ private fun MiddleContent(
     // v376 — GLUED cover: rendered beside the title in the block below.
     coverArt: androidx.compose.ui.graphics.ImageBitmap? = null,
     coverW: Dp = 44.dp,
-    coverH: Dp = 66.dp
+    coverH: Dp = 66.dp,
+    // v375 — rich-text runs threaded from PaperCard (the only caller).
+    factSpans: List<TextSpan> = emptyList()
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (quoteText != null) {
