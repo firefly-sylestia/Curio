@@ -971,6 +971,45 @@ app/src/main/java/com/curio/app/
     `requestFactInlineEdit()` arms the transparent field exactly like the
     Edit-text tool (auto-converting the default quick fact to a custom
     fact), so editing is a double-tap away in the sheet and full screen.
+- **v379 — full-screen text-tool polish: icon-only B/I/U, floating-bar
+  Underline, justify + book column-gap, permanent tool captions.** User:
+  "in full scren text editor the icon for b i and underline is weird fix
+  it. also add underline in tool bar too also full screen the highliter in
+  the buttom sheet of that text editor is bad remove it. and also add
+  justify aling format too abd in bok page fact layout add space adjust
+  between that. and also show the hint text for tool nme below always in
+  the tool bar. and fix some more functinal issues properly analyse it…".
+  - **Underline is a first-class rich-text flag.** `TextSpan` gains
+    `underline: Boolean = false` (CaptureData) and every rich-text
+    codec round-trips it: `buildRichAnnotated` renders it as a text
+    decoration, `extractRichSpans` reads it back, `merged()`/
+    `rebaseSpans()` preserve it, the card's JSON `spansToJson`/
+    `spansFromJson` write/read a `"u"` key, and `richSlice` carries it
+    into the two-column book split. A dedicated `toggleSpanUnderline` /
+    `spansUnderlineCovered` pair in RichTextEditor toggles the flag on a
+    selection WITHOUT touching bold/italic/highlight (Save-your-take's
+    dock keeps its RichFlag-only toolbar).
+  - **Floating bar.** The selection bar in `ArrangeableCard` (B / I /
+    highlight) gains a U button driven by the new `onToggleFactUnderline`
+    channel; the bar widened 132→172dp to fit four tools.
+  - **Whole-element format.** The sheet's Format tool shows whole-element
+    Bold / Italic + Underline (title + fact only — meta/badge carry no
+    underline field); the full-screen Text panel's B/I/U became ICON-ONLY
+    round `EditToolPill`s (the old label pills doubled glyph + letter),
+    and the full-screen whole-element Highlight SWATCH ROW is removed
+    (highlight lives only on the floating bar over a live selection).
+  - **Justify.** The full-screen Text panel's Align row adds Justify
+    (the sheet's Align tool already had it).
+  - **Book-page column gap.** `ShareCardMove.factGutter` (multiplier, 1f =
+    12dp) is persisted/parsed/reset alongside the other layout state;
+    `FactBody`/`BookPageText` thread `gutterFrac` through to the
+    12dp·frac Spacer between the two columns. Sliders appear under the
+    fact-layout pickers (BOOK format only) in BOTH the sheet's Align tool
+    and the full-screen Text panel.
+  - **Tool captions are permanent.** `ToolWithCaption` lost its `show`
+    gate — every toolbar pill (Text · Size · Crop · Fit · Font · Color ·
+    Adjust · Align · Format · Content, plus the live ratio / Signature
+    state labels) shows its tiny name under the icon AT ALL TIMES.
 - **v377 — share-card editor declutter: design switching via the card,
   tool captions, No-fact eye-cross, fact layout under Align.** User: "the
   style button should only show when signature style is active and tapping

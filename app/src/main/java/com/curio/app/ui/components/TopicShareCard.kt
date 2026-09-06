@@ -674,6 +674,10 @@ data class ShareCardMove(
      *  scales the box AND the fact font TOGETHER (photo-zoom), so the corner
      *  never feels like a plain height/width slider. 1f = no zoom. */
     val factZoom: Float = 1f,
+    /** v379 — the BOOK-page fact layout's COLUMN GAP multiplier (1f = the
+     *  default 12dp gutter between the two columns; 0.3f hugs them, 2.5f
+     *  spreads the page). Read only when [factFormat] is BOOK. */
+    val factGutter: Float = 1f,
     /** v371 — whole-fact UNDERLINE + HIGHLIGHT (rich-text-lite, per element). */
     val factUnderline: Boolean = false,
     val factHighlight: Color? = null,
@@ -707,7 +711,7 @@ private fun ShareCardMove.resetLayout(): ShareCardMove = ShareCardMove(
     titleUnderline = titleUnderline, titleHighlight = titleHighlight,
     factUnderline = factUnderline, factHighlight = factHighlight,
     titleScale = titleScale, factScale = factScale, factZoom = factZoom,
-    factFormat = factFormat, factDropCap = factDropCap
+    factFormat = factFormat, factDropCap = factDropCap, factGutter = factGutter
 )
 
 /** Modifier that shifts a card's TITLE by the move offset + box size + scale and
@@ -893,7 +897,7 @@ private fun richSlice(
     val shifted = spans.mapNotNull { sp ->
         val a = maxOf(sp.start, s)
         val b = minOf(sp.end, to)
-        if (b > a) TextSpan(a - s, b - s, sp.bold, sp.italic, sp.highlight, sp.fontSizeSp) else null
+        if (b > a) TextSpan(a - s, b - s, sp.bold, sp.italic, sp.highlight, sp.fontSizeSp, sp.underline) else null
     }
     return if (shifted.isEmpty()) null
     else buildRichAnnotated(text.substring(s, to), shifted, marker)
@@ -909,6 +913,7 @@ private fun spansToJson(spans: List<TextSpan>): org.json.JSONArray {
         if (sp.bold) o.put("b", true)
         if (sp.italic) o.put("i", true)
         if (sp.highlight) o.put("h", true)
+        if (sp.underline) o.put("u", true)
         sp.fontSizeSp?.let { o.put("fs", it.toDouble()) }
         arr.put(o)
     }
@@ -940,7 +945,8 @@ private fun spansFromJson(arr: org.json.JSONArray?): List<TextSpan> {
             o.optBoolean("b", false),
             o.optBoolean("i", false),
             o.optBoolean("h", false),
-            o.optDouble("fs", Double.NaN).takeIf { !it.isNaN() }?.toFloat()
+            o.optDouble("fs", Double.NaN).takeIf { !it.isNaN() }?.toFloat(),
+            o.optBoolean("u", false)
         )
     }
 }
@@ -953,14 +959,18 @@ private fun FactBody(
     dropCap: ShareCardFactDropCap,
     aspect: ShareCardAspect,
     maxLines: Int,
-    // v375 — rich-text runs over [text] (bold/italic/highlight). Empty = the
-    // plain paragraph exactly as before; [marker] is the highlighter tone.
+    // v379 — the BOOK-page two-column layout's gutter multiplier (1f = the
+    // default 12dp gap; ignored by every other layout).
+    gutterFrac: Float = 1f,
+    // v375 — rich-text runs over [text] (bold/italic/highlight/underline).
+    // Empty = the plain paragraph exactly as before; [marker] is the
+    // highlighter tone.
     spans: List<TextSpan> = emptyList(),
     marker: Color = ShareFactMarker,
     modifier: Modifier = Modifier
 ) {
     when (format) {
-        ShareCardFactFormat.BOOK -> BookPageText(text, spans, marker, style, modifier, maxLines)
+        ShareCardFactFormat.BOOK -> BookPageText(text, spans, marker, style, gutterFrac, modifier, maxLines)
         ShareCardFactFormat.EDITORIAL -> EditorialDropCapBlock(
             text, spans, marker, style, dropCap, modifier = modifier, maxLines = maxLines
         )
@@ -992,10 +1002,13 @@ private fun FactBody(
 private fun BookPageText(
     text: String,
     // v375 — span support: the split pieces re-slice the runs (see
-    // [richSlice]) so bold/italic/highlight survive the two-column flow.
+    // [richSlice]) so bold/italic/highlight/underline survive the two-column
+    // flow.
     spans: List<TextSpan>,
     marker: Color,
     style: TextStyle,
+    // v379 — column-gap multiplier (1f = the default 12dp gutter).
+    gutterFrac: Float = 1f,
     modifier: Modifier = Modifier,
     maxLines: Int
 ) {
@@ -1003,7 +1016,8 @@ private fun BookPageText(
         val density = androidx.compose.ui.platform.LocalDensity.current
         val measurer = rememberTextMeasurer()
         val contentW = with(density) { maxWidth.toPx() }
-        val gap = with(density) { 12.dp.toPx() }
+        val gapDp = 12.dp * gutterFrac.coerceIn(0.2f, 3f)
+        val gap = with(density) { gapDp.toPx() }
         val colW = ((contentW - gap) / 2f).toInt().coerceAtLeast(1)
         val cap = maxLines.coerceAtLeast(1)
         val full = measurer.measure(
@@ -1042,7 +1056,7 @@ private fun BookPageText(
                     overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f)
                 )
             }
-            Spacer(Modifier.width(12.dp))
+            Spacer(Modifier.width(gapDp))
             val rightAnn = richSlice(text, spans, marker, split, text.length, trimStart = trimmed)
             if (rightAnn != null) {
                 Text(
@@ -1972,13 +1986,13 @@ private fun VinylCard(
                                 ink = inkDark.copy(alpha = 0.88f)
                             )
                             if (chapterFact.isNotBlank()) {
-                                FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(10, move.factHeightFrac, bodyScale))
+                                FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, gutterFrac = move.factGutter, spans = factSpans, aspect = aspect, maxLines = fitLines(10, move.factHeightFrac, bodyScale))
                             }
                         }
                     } else {
                         // v335 — line cap tracks the font multiplier so the
                         // fact box keeps its footprint while text resizes.
-                        FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(10, move.factHeightFrac, bodyScale), modifier = Modifier.onGloballyPositioned {
+                        FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, gutterFrac = move.factGutter, spans = factSpans, aspect = aspect, maxLines = fitLines(10, move.factHeightFrac, bodyScale), modifier = Modifier.onGloballyPositioned {
                             callbacks.onFact(it.boundsInWindow())
                             callbacks.onFactStyle(factStyle)
                         })
@@ -2722,11 +2736,11 @@ private fun CollageCard(
                         ink = Color.White.copy(alpha = 0.92f)
                     )
                     if (chapterFact.isNotBlank()) {
-                        FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(18, move.factHeightFrac, bodyScale))
+                        FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, gutterFrac = move.factGutter, spans = factSpans, aspect = aspect, maxLines = fitLines(18, move.factHeightFrac, bodyScale))
                     }
                 }
             } else {
-                FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(18, move.factHeightFrac, bodyScale), modifier = Modifier.moveFact(move).onGloballyPositioned {
+                FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, gutterFrac = move.factGutter, spans = factSpans, aspect = aspect, maxLines = fitLines(18, move.factHeightFrac, bodyScale), modifier = Modifier.moveFact(move).onGloballyPositioned {
                     callbacks.onFact(it.boundsInWindow())
                     callbacks.onFactStyle(factStyle)
                 })
@@ -2925,11 +2939,11 @@ private fun NeumorphicCard(
                             ink = Color.White.copy(alpha = 0.88f)
                         )
                         if (chapterFact.isNotBlank()) {
-                            FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 8 else 6, move.factHeightFrac, bodyScale))
+                            FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, gutterFrac = move.factGutter, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 8 else 6, move.factHeightFrac, bodyScale))
                         }
                     }
                 } else {
-                    FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 8 else 6, move.factHeightFrac, bodyScale), modifier = Modifier.moveFact(move).onGloballyPositioned {
+                    FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, gutterFrac = move.factGutter, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 8 else 6, move.factHeightFrac, bodyScale), modifier = Modifier.moveFact(move).onGloballyPositioned {
                         callbacks.onFact(it.boundsInWindow())
                         callbacks.onFactStyle(factStyle)
                     })
@@ -3116,7 +3130,7 @@ private fun EditorialCard(
                         ink = inkDark.copy(alpha = 0.82f)
                     )
                     if (chapterFact.isNotBlank()) {
-                        FactBody(text = chapterFact, style = bodyStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale))
+                        FactBody(text = chapterFact, style = bodyStyle, format = move.factFormat, dropCap = move.factDropCap, gutterFrac = move.factGutter, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale))
                     }
                 }
             } else if (move.factFormat == ShareCardFactFormat.BOOK ||
@@ -3129,7 +3143,7 @@ private fun EditorialCard(
                 // the EDITORIAL format with a cap picked.
                 FactBody(
                     text = body, style = bodyStyle,
-                    format = move.factFormat, dropCap = move.factDropCap,
+                    format = move.factFormat, dropCap = move.factDropCap, gutterFrac = move.factGutter,
                     spans = factSpans, aspect = aspect,
                     maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale),
                     modifier = Modifier.moveFact(move).onGloballyPositioned {
@@ -3337,11 +3351,11 @@ private fun MinimalCard(
                             ink = inkDark.copy(alpha = 0.78f)
                         )
                         if (chapterFact.isNotBlank()) {
-                            FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale))
+                            FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, gutterFrac = move.factGutter, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale))
                         }
                     }
                 } else {
-                    FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale), modifier = Modifier.onGloballyPositioned {
+                    FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, gutterFrac = move.factGutter, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 9, move.factHeightFrac, bodyScale), modifier = Modifier.onGloballyPositioned {
                         callbacks.onFact(it.boundsInWindow())
                         callbacks.onFactStyle(factStyle)
                     })
@@ -3565,7 +3579,7 @@ private fun SignatureCard(
                         ink = sig.bodyColor
                     )
                     if (chapterFact.isNotBlank()) {
-                        FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(bodyMaxLines, move.factHeightFrac, bodyScale))
+                        FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, gutterFrac = move.factGutter, spans = factSpans, aspect = aspect, maxLines = fitLines(bodyMaxLines, move.factHeightFrac, bodyScale))
                     }
                 }
                 return
@@ -3574,7 +3588,7 @@ private fun SignatureCard(
             // line height so the facts sit exactly on the lines (drawn in the
             // same local space as the text, so they move with the box).
             val ruleColor = sig.bodyRuleColor
-            FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(bodyMaxLines, move.factHeightFrac, bodyScale),
+            FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, gutterFrac = move.factGutter, spans = factSpans, aspect = aspect, maxLines = fitLines(bodyMaxLines, move.factHeightFrac, bodyScale),
                 modifier = (if (centered) Modifier.fillMaxWidth() else Modifier)
                     .moveFact(move)
                     .then(if (ruleColor != null) Modifier.drawBehind {
@@ -5898,11 +5912,11 @@ private fun CustomCard(
                         ink = sig.bodyColor
                     )
                     if (chapterFact.isNotBlank()) {
-                        FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 14 else 10, move.factHeightFrac, bodyScale))
+                        FactBody(text = chapterFact, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, gutterFrac = move.factGutter, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 14 else 10, move.factHeightFrac, bodyScale))
                     }
                 }
             } else {
-                FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 14 else 10, move.factHeightFrac, bodyScale), modifier = Modifier.moveFact(move).onGloballyPositioned {
+                FactBody(text = body, style = factStyle, format = move.factFormat, dropCap = move.factDropCap, gutterFrac = move.factGutter, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 14 else 10, move.factHeightFrac, bodyScale), modifier = Modifier.moveFact(move).onGloballyPositioned {
                     callbacks.onFact(it.boundsInWindow())
                     callbacks.onFactStyle(factStyle)
                 })
@@ -5962,7 +5976,7 @@ private fun MiddleContent(
         if (quoteText != null) {
             CurioIcon(name = CurioIcons.FormatQuote, tint = palette.ink.copy(alpha = 0.20f), size = 32.dp)
             val qStyle = factBodyStyle(MaterialTheme.typography.titleLarge.copy(fontFamily = LoraFontFamily, fontSize = qSize, lineHeight = (qSize.value * 1.28f).sp), move)
-            FactBody(text = quoteText, style = qStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 8, move.factHeightFrac), modifier = Modifier.moveFact(move).onGloballyPositioned {
+            FactBody(text = quoteText, style = qStyle, format = move.factFormat, dropCap = move.factDropCap, gutterFrac = move.factGutter, spans = factSpans, aspect = aspect, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 8, move.factHeightFrac), modifier = Modifier.moveFact(move).onGloballyPositioned {
                 callbacks.onFact(it.boundsInWindow())
                 callbacks.onFactStyle(qStyle)
             })
@@ -6047,7 +6061,7 @@ private fun MiddleContent(
                             ink = palette.ink
                         )
                         if (chapterFact.isNotBlank()) {
-                            FactBody(text = chapterFact, style = frostStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 20 else 14, move.factHeightFrac, bodyScale))
+                            FactBody(text = chapterFact, style = frostStyle, format = move.factFormat, dropCap = move.factDropCap, gutterFrac = move.factGutter, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 20 else 14, move.factHeightFrac, bodyScale))
                         }
                     }
                 } else {
@@ -6057,7 +6071,7 @@ private fun MiddleContent(
                     // v335 — the cap tracks the font multiplier so the pane
                     // keeps its footprint while the TEXT size changes: smaller
                     // fonts fit more lines, larger fonts fewer.
-                    FactBody(text = factText, style = frostStyle, format = move.factFormat, dropCap = move.factDropCap, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 20 else 14, move.factHeightFrac, bodyScale), modifier = Modifier.onGloballyPositioned {
+                    FactBody(text = factText, style = frostStyle, format = move.factFormat, dropCap = move.factDropCap, gutterFrac = move.factGutter, spans = factSpans, aspect = aspect, maxLines = fitLines(if (aspect == ShareCardAspect.PORTRAIT) 20 else 14, move.factHeightFrac, bodyScale), modifier = Modifier.onGloballyPositioned {
                         callbacks.onFact(it.boundsInWindow())
                         callbacks.onFactStyle(frostStyle)
                     })
@@ -6312,6 +6326,10 @@ private fun ArrangeableCard(
     richFactTools: Boolean = false,
     factSpans: List<TextSpan> = emptyList(),
     onFormatFactSelection: ((s: Int, e: Int, flag: RichFlag) -> Unit)? = null,
+    // v379 — per-letter UNDERLINE: the floating bar's U button uses its own
+    // span channel (see [toggleSpanUnderline]) so the Save-your-take
+    // RichFlag set (bold / italic / highlight) stays untouched.
+    onToggleFactUnderline: ((s: Int, e: Int, add: Boolean) -> Unit)? = null,
     card: @Composable (EditBoundsCallbacks) -> Unit
 ) {
     // Bounds hub — every style reports where its title / fact / meta text
@@ -6687,7 +6705,7 @@ private fun ArrangeableCard(
                     // RichTextEditor's own floating bar: a non-focusable Popup
                     // at the overlay origin, offset by the field position + the
                     // live selection caret (both in real px via [editDensity]).
-                    if (richFactTools && onFormatFactSelection != null &&
+                    if (richFactTools && (onFormatFactSelection != null || onToggleFactUnderline != null) &&
                         factEditMode && !richFactTfv.selection.collapsed
                     ) {
                         val fsLayout = factTextLayout
@@ -6697,7 +6715,9 @@ private fun ArrangeableCard(
                             val fsStartCaret = runCatching { fsLayout.getCursorRect(fsSel.min) }.getOrNull()
                             val fsEndCaret = runCatching { fsLayout.getCursorRect(fsSel.max) }.getOrNull()
                             if (fsEndCaret != null) {
-                                val barW = with(fsD) { 132.dp.toPx() }
+                                // v379 — 4 tools now (B / I / U / highlight):
+                                // the bar grew past the old 132dp width.
+                                val barW = with(fsD) { 172.dp.toPx() }
                                 val barH = with(fsD) { 42.dp.toPx() }
                                 val gap = with(fsD) { 6.dp.toPx() }
                                 val edge = with(fsD) { 6.dp.toPx() }
@@ -6745,6 +6765,18 @@ private fun ArrangeableCard(
                                                 accent = MaterialTheme.colorScheme.primary,
                                                 enabled = true,
                                                 onClick = { onFormatFactSelection(s, e, RichFlag.ITALIC) }
+                                            )
+                                            // v379 — UNDERLINE rides the same
+                                            // floating bar, toggling its own
+                                            // span channel (per selected
+                                            // letters, like B / I / highlight).
+                                            FormatToolButton(
+                                                icon = CurioIcons.FormatUnderline,
+                                                label = "Underline",
+                                                active = spansUnderlineCovered(factSpans, s, e),
+                                                accent = MaterialTheme.colorScheme.primary,
+                                                enabled = onToggleFactUnderline != null,
+                                                onClick = { onToggleFactUnderline?.invoke(s, e, !spansUnderlineCovered(factSpans, s, e)) }
                                             )
                                             FormatToolButton(
                                                 icon = CurioIcons.FormatHighlight,
@@ -7355,6 +7387,7 @@ fun TopicShareSheet(
                 favBoxScale = o.optDouble("favBoxScale", 1.0).toFloat(),
                 factScale = o.optDouble("factScale", 1.0).toFloat(),
                 factZoom = o.optDouble("factZoom", 1.0).toFloat(),
+                factGutter = o.optDouble("factGutter", 1.0).toFloat(),
                 titleLift = o.optDouble("titleLift", 0.0).toFloat(),
                 factUnderline = o.optBoolean("factUnderline", false),
                 factHighlight = o.optInt("factHighlight", 0).takeIf { it != 0 }?.let { Color(it) },
@@ -7715,6 +7748,15 @@ fun TopicShareSheet(
         val next = toggleSpanFlag(cur, s, e, flag, add)
         if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") customSpans = next else editedFactSpans = next
     }
+    // v379 — per-letter UNDERLINE twin (the floating bar's U button): the
+    // card's own underline span channel, mirrored onto the active fact's
+    // span list exactly like the flag toggle above.
+    fun toggleFactSelectionUnderline(s: Int, e: Int, add: Boolean) {
+        if (e <= s) return
+        val cur = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") customSpans else editedFactSpans
+        val next = toggleSpanUnderline(cur, s, e, add)
+        if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") customSpans = next else editedFactSpans = next
+    }
 
     val styles = availableStylesForFamily(categoryFamily, topicName)
     val safeIdx = styleIdx.coerceIn(0, styles.lastIndex)
@@ -7783,6 +7825,7 @@ fun TopicShareSheet(
                 put("factFormat", m.factFormat.name); put("factDropCap", m.factDropCap.name)
                 put("factScale", m.factScale)
                 put("factZoom", m.factZoom)
+                put("factGutter", m.factGutter)
                 if (m.titleLift != 0f) put("titleLift", m.titleLift.toDouble())
                 put("factUnderline", m.factUnderline)
                 m.factHighlight?.let { put("factHighlight", it.toArgb()) }
@@ -8057,10 +8100,13 @@ fun TopicShareSheet(
                     style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
             }
 
-            // ── v3xx/v377 EDIT TOOLBAR — circular icon pills; a tiny caption
-            // under the OPEN pill names its tool (see [ToolWithCaption]). Each
-            // tool opens ONE small overlay panel; the SELECTED element decides
-            // what the size / box / font / align / format tools act on. ──
+            // ── v3xx/v377 EDIT TOOLBAR — circular icon pills; every pill
+            // carries a tiny ALWAYS-VISIBLE name under it (v379: Text · Size ·
+            // Crop · Fit · Font · Color · Adjust · Align · Format · Content
+            // plus the live ratio / Signature labels — see [ToolWithCaption]).
+            // Each tool opens ONE small overlay panel; the SELECTED element
+            // decides what the size / box / font / align / format tools act
+            // on. ──
             if (editMode) {
                 val sel = selectedResizeTarget
                 val isTitle = sel == ShareCardResizeTarget.TITLE
@@ -8113,6 +8159,13 @@ fun TopicShareSheet(
                     ShareCardResizeTarget.FAVTRACKS -> false
                     ShareCardResizeTarget.NONE -> false
                 }
+                // v379 — whole-element UNDERLINE exists for the title + the
+                // fact (meta / badge / cover carry no underline field).
+                val elementUnderline = when (sel) {
+                    ShareCardResizeTarget.TITLE -> move.titleUnderline
+                    ShareCardResizeTarget.FACT -> move.factUnderline
+                    else -> false
+                }
                 val setElementFont: (FontFamily?) -> Unit = { fam ->
                     updateMove(when (sel) {
                         ShareCardResizeTarget.TITLE -> move.copy(titleFont = fam)
@@ -8153,6 +8206,13 @@ fun TopicShareSheet(
                         ShareCardResizeTarget.NONE -> move
                     })
                 }
+                val setElementUnderline: (Boolean) -> Unit = { v ->
+                    updateMove(when (sel) {
+                        ShareCardResizeTarget.TITLE -> move.copy(titleUnderline = v)
+                        ShareCardResizeTarget.FACT -> move.copy(factUnderline = v)
+                        else -> move
+                    })
+                }
 
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                     // ── Tool pills row (scrollable) ────────────────────
@@ -8165,10 +8225,10 @@ fun TopicShareSheet(
                         // v330 — Edit-text lives in the toolbar row (the
                         // bottom bar owns Reset + Done + the content
                         // selector); it appears when the fact is selected.
-                        // v377 — a TINY caption under the engaged tool names
-                        // it while its panel is open (see [ToolWithCaption]).
+                        // v377/v379 — the tool's tiny name sits under its
+                        // pill permanently (see [ToolWithCaption]).
                         if (isFact && progressForCard == null) {
-                            ToolWithCaption(caption = "Text", show = factEditMode) {
+                            ToolWithCaption(caption = "Text") {
                                 EditToolPill(
                                     glyph = CurioIcons.Edit,
                                     description = "Edit text",
@@ -8187,7 +8247,7 @@ fun TopicShareSheet(
                         // a tap flips between the two Signature looks instantly
                         // (no panel). Its caption is the ACTIVE variant.
                         if (currentStyle == ShareCardStyle.SIGNATURE) {
-                            ToolWithCaption(caption = if (classicDesign) "Classic" else "Current", show = true) {
+                            ToolWithCaption(caption = if (classicDesign) "Classic" else "Current") {
                                 EditToolPill(
                                     glyph = ShareCardStyle.SIGNATURE.glyph,
                                     description = if (classicDesign) "Signature \u00b7 Classic — tap for the current design"
@@ -8204,7 +8264,7 @@ fun TopicShareSheet(
                         // between 3:4 and 9:16 instantly. v377 — the ACTIVE
                         // ratio reads under the icon, and the toggle no longer
                         // closes whatever tool panel is open.
-                        ToolWithCaption(caption = aspect.label, show = true) {
+                        ToolWithCaption(caption = aspect.label) {
                             EditToolPill(
                                 glyph = CurioIcons.AspectRatio,
                                 description = "Card dimensions " + aspect.label,
@@ -8215,7 +8275,7 @@ fun TopicShareSheet(
                                 }
                             )
                         }
-                        ToolWithCaption(caption = "Size", show = toolOpen == "size") {
+                        ToolWithCaption(caption = "Size") {
                             EditToolPill(
                                 glyph = "text_increase",
                                 description = "Text size",
@@ -8223,7 +8283,7 @@ fun TopicShareSheet(
                                 onClick = { toolOpen = if (toolOpen == "size") null else "size" }
                             )
                         }
-                        ToolWithCaption(caption = "Crop", show = toolOpen == "box") {
+                        ToolWithCaption(caption = "Crop") {
                             EditToolPill(
                                 glyph = CurioIcons.Crop,
                                 description = "Box size",
@@ -8236,7 +8296,7 @@ fun TopicShareSheet(
                         // their text (through the same sliders) so they fit
                         // the whole card, and the toggle is a separate switch
                         // instead of a Size-tool extra.
-                        ToolWithCaption(caption = "Fit", show = toolOpen == "smartfit") {
+                        ToolWithCaption(caption = "Fit") {
                             EditToolPill(
                                 glyph = CurioIcons.PhotoSizeSelectLarge,
                                 description = "Smart fit",
@@ -8244,7 +8304,7 @@ fun TopicShareSheet(
                                 onClick = { toolOpen = if (toolOpen == "smartfit") null else "smartfit" }
                             )
                         }
-                        ToolWithCaption(caption = "Font", show = toolOpen == "font") {
+                        ToolWithCaption(caption = "Font") {
                             EditToolPill(
                                 glyph = "title",
                                 description = "Font",
@@ -8252,7 +8312,7 @@ fun TopicShareSheet(
                                 onClick = { toolOpen = if (toolOpen == "font") null else "font" }
                             )
                         }
-                        ToolWithCaption(caption = "Color", show = toolOpen == "tone") {
+                        ToolWithCaption(caption = "Color") {
                             EditToolPill(
                                 glyph = CurioIcons.Palette,
                                 description = "Card tone",
@@ -8260,7 +8320,7 @@ fun TopicShareSheet(
                                 onClick = { toolOpen = if (toolOpen == "tone") null else "tone" }
                             )
                         }
-                        ToolWithCaption(caption = "Adjust", show = toolOpen == "adjust") {
+                        ToolWithCaption(caption = "Adjust") {
                             EditToolPill(
                                 glyph = CurioIcons.Contrast,
                                 description = "Saturation / contrast",
@@ -8268,7 +8328,7 @@ fun TopicShareSheet(
                                 onClick = { toolOpen = if (toolOpen == "adjust") null else "adjust" }
                             )
                         }
-                        ToolWithCaption(caption = "Align", show = toolOpen == "align") {
+                        ToolWithCaption(caption = "Align") {
                             EditToolPill(
                                 glyph = "notes",
                                 description = "Alignment + fact layout",
@@ -8276,7 +8336,7 @@ fun TopicShareSheet(
                                 onClick = { toolOpen = if (toolOpen == "align") null else "align" }
                             )
                         }
-                        ToolWithCaption(caption = "Format", show = toolOpen == "format") {
+                        ToolWithCaption(caption = "Format") {
                             EditToolPill(
                                 glyph = CurioIcons.FormatBold,
                                 description = "Bold / italic",
@@ -8284,7 +8344,7 @@ fun TopicShareSheet(
                                 onClick = { toolOpen = if (toolOpen == "format") null else "format" }
                             )
                         }
-                        ToolWithCaption(caption = "Content", show = toolOpen == "source") {
+                        ToolWithCaption(caption = "Content") {
                             EditToolPill(
                                 glyph = CurioIcons.Edit,
                                 description = "Content (source, custom fact, photo)",
@@ -8422,10 +8482,10 @@ fun TopicShareSheet(
                     // so the export matches the full-screen preview exactly.
                     if (fullscreenEdit) {
                         val fullBg = androidx.compose.ui.graphics.lerp(MaterialTheme.colorScheme.surface, accent, 0.12f)
-                        val highlightPresets = listOf(
-                            Color(0xFFFFF59D), Color(0xFFFFCDD2),
-                            Color(0xFFC8E6C9), Color(0xFFB3E5FC), Color(0xFFE1BEE7)
-                        )
+                        // v379 — the whole-element Highlight swatch row is gone
+                        // from the text tools (highlight lives only on the
+                        // floating bar over a live selection), so no presets
+                        // list is kept here.
                         var fsToolsOpen by remember { mutableStateOf(false) }
                         androidx.compose.ui.window.Dialog(
                             onDismissRequest = { fullscreenEdit = false },
@@ -8571,40 +8631,32 @@ fun TopicShareSheet(
                                                             }
                                                         )
                                                     }
-                                                    // Bold / Italic / Underline / Highlight
+                                                    // Bold / Italic / Underline —
+                                                    // v379: ICON-ONLY round toggles
+                                                    // (the old label pills doubled
+                                                    // the glyph with the letter and
+                                                    // looked off), and the whole-
+                                                    // element Highlight swatch row
+                                                    // is gone (highlight now lives
+                                                    // only on the floating bar over
+                                                    // a selection).
                                                     val fsBold = if (fsIsTitle) move.titleBold else move.factBold
                                                     val fsItalic = if (fsIsTitle) move.titleItalic else move.factItalic
                                                     val fsUnder = if (fsIsTitle) move.titleUnderline else move.factUnderline
-                                                    val fsHighlight = if (fsIsTitle) move.titleHighlight else move.factHighlight
-                                                    Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
-                                                        Pill("B", CurioIcons.FormatBold, fsBold) {
-                                                            updateMove(if (fsIsTitle) move.copy(titleBold = !fsBold) else move.copy(factBold = !fsBold))
-                                                        }
-                                                        Pill("I", CurioIcons.FormatItalic, fsItalic) {
-                                                            updateMove(if (fsIsTitle) move.copy(titleItalic = !fsItalic) else move.copy(factItalic = !fsItalic))
-                                                        }
-                                                        Pill("U", CurioIcons.FormatUnderline, fsUnder) {
-                                                            updateMove(if (fsIsTitle) move.copy(titleUnderline = !fsUnder) else move.copy(factUnderline = !fsUnder))
-                                                        }
-                                                        Spacer(Modifier.width(4.dp))
-                                                        Text("Highlight", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                                        highlightPresets.forEach { c ->
-                                                            Surface(
-                                                                onClick = {
-                                                                    updateMove(if (fsIsTitle) move.copy(titleHighlight = if (fsHighlight == c) null else c) else move.copy(factHighlight = if (fsHighlight == c) null else c))
-                                                                },
-                                                                shape = CircleShape,
-                                                                color = c,
-                                                                border = if (fsHighlight == c) BorderStroke(2.dp, MaterialTheme.colorScheme.onSurface) else null,
-                                                                modifier = Modifier.size(24.dp)
-                                                            ) {}
-                                                        }
+                                                    Row(Modifier.padding(horizontal = 12.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                                        Text("Format", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                        Spacer(Modifier.weight(1f))
+                                                        EditToolPill(glyph = CurioIcons.FormatBold, description = "Bold", active = fsBold, onClick = { updateMove(if (fsIsTitle) move.copy(titleBold = !fsBold) else move.copy(factBold = !fsBold)) })
+                                                        EditToolPill(glyph = CurioIcons.FormatItalic, description = "Italic", active = fsItalic, onClick = { updateMove(if (fsIsTitle) move.copy(titleItalic = !fsItalic) else move.copy(factItalic = !fsItalic)) })
+                                                        EditToolPill(glyph = CurioIcons.FormatUnderline, description = "Underline", active = fsUnder, onClick = { updateMove(if (fsIsTitle) move.copy(titleUnderline = !fsUnder) else move.copy(factUnderline = !fsUnder)) })
                                                     }
-                                                    // Align
+                                                    // Align (v379 — Justify joins
+                                                    // Left / Center / Right here,
+                                                    // matching the sheet's Align).
                                                     Row(Modifier.padding(12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                                                         Text("Align", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                                         val curAlign = if (fsIsTitle) move.titleAlign else move.factAlign
-                                                        listOf("Left" to TextAlign.Start, "Center" to TextAlign.Center, "Right" to TextAlign.End).forEach { (label, ta) ->
+                                                        listOf("Left" to TextAlign.Start, "Center" to TextAlign.Center, "Right" to TextAlign.End, "Justify" to TextAlign.Justify).forEach { (label, ta) ->
                                                             Pill(label, CurioIcons.FormatText, curAlign == ta) {
                                                                 updateMove(if (fsIsTitle) move.copy(titleAlign = ta) else move.copy(factAlign = ta))
                                                             }
@@ -8618,6 +8670,20 @@ fun TopicShareSheet(
                                                                 Pill(fmt.label, CurioIcons.FormatText, move.factFormat == fmt) {
                                                                     updateMove(move.copy(factFormat = fmt))
                                                                 }
+                                                            }
+                                                        }
+                                                        // v379 — BOOK-page column-gap
+                                                        // slider (see the sheet's
+                                                        // Align tool for the twin).
+                                                        if (move.factFormat == ShareCardFactFormat.BOOK) {
+                                                            Column(Modifier.padding(horizontal = 12.dp, vertical = 2.dp)) {
+                                                                SizeSliderColumn(
+                                                                    "Column gap",
+                                                                    move.factGutter,
+                                                                    { updateMove(move.copy(factGutter = it)) },
+                                                                    0.3f..2.5f, steps = 21,
+                                                                    modifier = Modifier.fillMaxWidth()
+                                                                )
                                                             }
                                                         }
                                                         if (move.factFormat == ShareCardFactFormat.EDITORIAL) {
@@ -8723,7 +8789,9 @@ fun TopicShareSheet(
                                             richFactTools = true,
                                             factSpans = if (isQuotes || activeId == "chapter_progress") emptyList() else cardFactSpans,
                                             onFormatFactSelection = if (isQuotes || activeId == "chapter_progress") null
-                                            else { s, e, flag -> toggleFactSelectionFormat(s, e, flag) }
+                                            else { s, e, flag -> toggleFactSelectionFormat(s, e, flag) },
+                                            onToggleFactUnderline = if (isQuotes || activeId == "chapter_progress") null
+                                            else { s, e, add -> toggleFactSelectionUnderline(s, e, add) }
                                         ) { cb ->
                                             TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, factSpans = if (isQuotes) emptyList() else cardFactRenderSpans, callbacks = cb)
                                         }
@@ -8949,6 +9017,18 @@ fun TopicShareSheet(
                                             }
                                         }
                                     }
+                                    // v379 — BOOK-page layout: the gap
+                                    // between the two columns is adjustable
+                                    // (hugged to spread like a real page).
+                                    if (move.factFormat == ShareCardFactFormat.BOOK) {
+                                        SizeSliderColumn(
+                                            "Column gap",
+                                            move.factGutter,
+                                            { updateMove(move.copy(factGutter = it)) },
+                                            0.3f..2.5f, steps = 21,
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    }
                                     // Editorial-only: the drop-cap variant,
                                     // visible only while the layout is
                                     // Editorial so it never clutters.
@@ -8975,6 +9055,14 @@ fun TopicShareSheet(
                                 }
                                 Pill("Italic", CurioIcons.FormatItalic, elementItalic) {
                                     setElementItalic(!elementItalic)
+                                }
+                                // v379 — Underline joins the whole-element
+                                // Bold / Italic row (title + fact only; the
+                                // info row / badge have no underline field).
+                                if (isTitle || isFact) {
+                                    Pill("Underline", CurioIcons.FormatUnderline, elementUnderline) {
+                                        setElementUnderline(!elementUnderline)
+                                    }
                                 }
                             }
                         }
@@ -9683,30 +9771,29 @@ private fun adjustColorMatrix(saturation: Float, contrast: Float): ColorMatrix {
 }
 
 /**
- * v377 — a toolbar tool cell: the 44dp icon pill with an optional TINY
- * caption line under it. The caption shows only while that tool's panel is
- * open (so it reads the tool's short name and moves as the user switches
- * tools); the ratio + Signature-variant toggles pass [show] = true so their
- * state label (3:4 / 9:16 · Classic / Current) is always legible.
+ * v377/v379 — a toolbar tool cell: the 44dp icon pill with its TINY tool
+ * name ALWAYS under it (v379: the captions are permanent — Text · Size ·
+ * Crop · Fit · Font · Color · Adjust · Align · Format · Content plus the
+ * live state labels of the ratio + Signature toggles). The caption reads
+ * at a glance and moves with its tool; nothing waits for the panel to be
+ * open.
  */
 @Composable
-private fun ToolWithCaption(caption: String, show: Boolean, content: @Composable () -> Unit) {
+private fun ToolWithCaption(caption: String, content: @Composable () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         content()
-        if (show) {
-            Text(
-                caption,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 8.5.sp,
-                    lineHeight = 9.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 0.1.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                modifier = Modifier.padding(top = 2.dp).widthIn(max = 56.dp)
-            )
-        }
+        Text(
+            caption,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 8.5.sp,
+                lineHeight = 9.sp,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 0.1.sp
+            ),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            modifier = Modifier.padding(top = 2.dp).widthIn(max = 56.dp)
+        )
     }
 }
 
