@@ -6856,7 +6856,15 @@ private fun ArrangeableCard(
                         }
                 )
 
-                // TITLE — tap selects; grip only when selected.
+                // TITLE — tap selects; grip only when selected. When title and
+                // fact overlap, the currently selected box owns the shared hit
+                // region; tapping it toggles to the other box. This preserves
+                // the simple overlapping-box behavior from the pre-magnetic
+                // layout editor while keeping both targets reachable.
+                val titleFactOverlap = !quoteMode &&
+                    rTitle.width > 0f && rTitle.height > 0f &&
+                    rFact.width > 0f && rFact.height > 0f &&
+                    rTitle.overlaps(rFact)
                 if (!quoteMode) {
                     val t = rTitle
                     val tOk = t.width > 0f && t.height > 0f
@@ -6867,11 +6875,15 @@ private fun ArrangeableCard(
                                 .offset(t.left.dp, t.top.dp)
                                 .width(t.width.dp)
                                 .height(t.height.dp)
-                            .clickable {
-                                focusManager.clearFocus()
-                                onSelectResizeTarget(ShareCardResizeTarget.TITLE)
-                            }
-                            .border(1.dp, selBorder(isSel), RoundedCornerShape(8.dp))
+                                .zIndex(if (isSel && titleFactOverlap) 2f else 0f)
+                                .clickable {
+                                    focusManager.clearFocus()
+                                    onSelectResizeTarget(
+                                        if (titleFactOverlap && isSel) ShareCardResizeTarget.FACT
+                                        else ShareCardResizeTarget.TITLE
+                                    )
+                                }
+                                .border(1.dp, selBorder(isSel), RoundedCornerShape(8.dp))
                         )
                         // v369 — the grip + corner scale are drawn LAST (see
                         // the handles section below the element boxes), so a
@@ -6982,12 +6994,18 @@ private fun ArrangeableCard(
                                 .offset(f.left.dp, f.top.dp)
                                 .width(f.width.dp)
                                 .height(f.height.dp)
+                                .zIndex(if (isSel && titleFactOverlap) 2f else 0f)
                                 .combinedClickable(
                                     interactionSource = remember {
                                         androidx.compose.foundation.interaction.MutableInteractionSource()
                                     },
                                     indication = null,
-                                    onClick = { onSelectResizeTarget(ShareCardResizeTarget.FACT) },
+                                    onClick = {
+                                        onSelectResizeTarget(
+                                            if (titleFactOverlap && isSel) ShareCardResizeTarget.TITLE
+                                            else ShareCardResizeTarget.FACT
+                                        )
+                                    },
                                     onDoubleClick = {
                                         onSelectResizeTarget(ShareCardResizeTarget.FACT)
                                         onRequestInlineFactEdit()
