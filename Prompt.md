@@ -1,49 +1,63 @@
 # Prompt Log — current request
 
-## Request (2026-09-06, shipped as v379 — full-screen text-tool polish)
+## Request (2026-09-06 — v379 line: full-screen text tools + follow-ups)
 
-User: "in full scren text editor the icon for b i and underline is weird
-fix it. also add underline in tool bar too also full screen the highliter
-in the buttom sheet of that text editor is bad remove it. and also add
-justify aling format too abd in bok page fact layout add space adjust
-between that. and also show the hint text for tool nme below always in the
-tool bar. and fix some more functinal issues properly analyse it and tell
-me what needs fixinf or missing use ask user and i will tell… and no need
-to watch cl."
+User follow-up (after v379 pushed): "no need to watch the cl continue the
+task and at last use ask user". Their ask-user reply picked: floating bar
+in bottom-sheet editing; an explanation of the size-multiplier question
+(and whether smart fit uses its own hidden size system); a
+`ShareCardMove` logic analysis for more refinements; fixing share-fact
+text that still reads dark in dark mode; fixing the failed v379 CI.
 
-Ask-user answers captured: B/I/U icon-only round toggles; remove the
-full-screen whole-element Highlight swatch row; Justify in the full-screen
-align row; Underline in the floating selection bar; whole-element Bold /
-Italic / Underline in the bottom-sheet Format tool; Book-page column-gap
-slider; always-on toolbar captions; then (after push) deliver a full
-share-card system + logic analysis for the user.
+## Completed
 
-## Completed (v379)
+1. **v379 (aa57fb89)** — full-screen text-tool polish: `TextSpan.underline`
+   end-to-end (build/extract/merge/rebase/JSON/richSlice), floating-bar U
+   button, whole-element Underline in the sheet Format tool, icon-only
+   round B/I/U in full screen, Highlight swatch row removed, Justify in
+   the full-screen Align row, Book-page Column-gap slider (sheet Align +
+   full screen), permanent tool captions. Docs + commit + push.
+2. **v379b (68999e7c)** — CI fix: the selection bar's gate
+   (`format != null || underline != null`) killed Kotlin's smart-cast of
+   `onFormatFactSelection`; B/I/highlight now safe-invoke + gate on their
+   own enable state.
+3. **v379c (working)** — bottom-sheet `ArrangeableCard` calls (pager +
+   single-style) now pass `richFactTools = true`, the fact spans and the
+   format/underline channels, so the floating B/I/U/highlight bar works
+   on inline fact selections in the sheet preview too. Stale comments
+   updated. Docs updated. Committed + pushed.
 
-1. `TextSpan.underline` (CaptureData) + full codec plumbing in
-   RichTextEditor.kt: buildRichAnnotated renders a text decoration,
-   extractRichSpans/merged/rebaseSpans preserve it, `toggleSpanUnderline`
-   + `spansUnderlineCovered` toggle a selection's underline without
-   touching the RichFlag trio. Added the missing TextDecoration import.
-2. Share-card persistence: `spansToJson`/`spansFromJson` write/read a "u"
-   key; `richSlice` (book two-column split) carries underline through.
-3. Floating selection bar in ArrangeableCard gained a U button (new
-   `onToggleFactUnderline` param, sheet wiring mirrors the flag toggle);
-   bar width 132→172dp for the four tools.
-4. Full screen: B/I/U are icon-only round EditToolPills; Highlight swatch
-   row removed (unused `highlightPresets` dropped); Align adds Justify.
-5. Bottom sheet Format tool: whole-element Underline pill (title + fact).
-6. Book-page fact layout: `ShareCardMove.factGutter` persisted/parsed/
-   reset; `FactBody`/`BookPageText` thread gutterFrac to the column
-   spacer; Column-gap slider in the sheet Align tool AND the full-screen
-   Text panel (BOOK format only).
-7. Toolbar: `ToolWithCaption` lost its `show` gate — captions permanent
-   under every pill; stale v377 comments updated.
-8. Docs: changelog top entries, AGENTS.md v379 bullet, Prompt.md.
-9. Commit + push. No CI watch per user request.
+## Open items (to finish this turn)
 
-## Follow-up owed
+- Answer the user's size question in prose (see analysis below).
+- Analyse `ShareCardMove` logic for refinements + report.
+- Dark-mode share-fact text: NOT yet reproduced in code — every card
+  style paints fixed palette surfaces/inks (no theme-driven fills), so
+  the exact target must be pinned down with the user (ask_user at end).
+- Final ask_user (user requested it at the end of the task).
 
-- Full share-card system analysis (what can be improved / what's not
-  right / unexpected behaviour) — to be delivered to the user after the
-  v379 push.
+## Size-multiplier / smart-fit explanation (verified against code)
+
+Rendered fact text = style base × bodyScale × autoFit.textScale ×
+factScale × factZoom, where:
+
+- `bodyScale` — the Size slider's base (what the user sets).
+- `autoFit.textScale` — smart fit's automatic shrink, active ONLY while
+  the fact is untouched and Smart fit is ON; identity otherwise. It is a
+  multiplier folded into the render, not a separate font engine — but it
+  IS invisible on top of the user's slider base.
+- `factScale` — after the user first grabs/resizes the fact, the fit
+  shrink is seeded into `factScale` ("manual wins", no text pop), and it
+  becomes a normal whole-fact text multiplier.
+- `factZoom` — legacy whole-fact text multiplier (old whole-box zoom),
+  now redundant with `factScale` after the Whole-box slider became
+  independent.
+
+So: smart fit does NOT have its own hidden font-size system — it nudges
+the same bodyScale-type channel the slider drives — but it auto-adjusts
+ON TOP of the slider's base, and three of the four factors are invisible
+to the user. The Size thumb since v378 shows the COMBINED (rendered)
+value; the fact-height slider still shows the RAW base without the fit's
+box growth (an inconsistency worth fixing). Consolidation candidate:
+drop `factZoom` (merge into `factScale`) and make the fit show its hand
+in the sliders.

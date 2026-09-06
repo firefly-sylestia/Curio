@@ -1,3 +1,4 @@
+ADD: Share-card editor — the Bold / Italic / Underline / Highlight bar now floats over inline fact editing on the bottom-sheet preview too, not just full screen: select letters right on the card and style only that selection.
 ADD: Share-card editor — full screen: Bold / Italic / Underline are now clean icon-only round toggles, Justify joins the alignment row, and the whole-element highlight swatch row is gone (highlight lives only on the floating bar over a selection).
 ADD: Share-card editor — Underline everywhere: a U floats with the Bold / Italic / Highlight bar and formats only the letters you select, the whole-element format row (title + quick fact) gained its own Underline, and underlines survive on the card when you save or share the image.
 ADD: Share-card editor — the Book page fact layout now has a Column gap slider (hug the two columns or spread them like a real page), in the sheet's Align tool and the full-screen Text panel.

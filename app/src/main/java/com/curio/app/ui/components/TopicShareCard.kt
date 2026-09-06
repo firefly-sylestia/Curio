@@ -6365,11 +6365,14 @@ private fun ArrangeableCard(
     // v375 — rich-fact editing state for the floating selection bar: the
     // inline field keeps its own TextFieldValue (so a text selection is
     // visible + actionable) and reports its text layout so the bar can float
-    // over the selected characters. Only engaged when [richFactTools]; the
-    // sheet previews never use it (plain caret editing stays exactly as
-    // before). The selection survives recompositions because it lives HERE,
-    // not in the sheet — typing echoes text up but the TextFieldValue (and
-    // its selection/caret) is what BasicTextField draws.
+    // over the selected characters. Only engaged when [richFactTools];
+    // v379c — BOTH the bottom-sheet preview and the full-screen dialog pass
+    // richFactTools = true, so a selection gets the floating B / I / U /
+    // highlight bar on every editing surface (quotes + reading progress
+    // carry no spans, so they fall back to plain caret editing). The
+    // selection survives recompositions because it lives HERE, not in the
+    // sheet — typing echoes text up but the TextFieldValue (and its
+    // selection/caret) is what BasicTextField draws.
     var richFactTfv by remember { mutableStateOf(androidx.compose.ui.text.input.TextFieldValue("")) }
     var factTextLayout by remember { mutableStateOf<androidx.compose.ui.text.TextLayoutResult?>(null) }
     // Re-seed only when the sheet pushes DIFFERENT text (e.g. switching the
@@ -6694,10 +6697,11 @@ private fun ArrangeableCard(
                     androidx.compose.runtime.LaunchedEffect(factEditMode) {
                         if (factEditMode) factRequester.requestFocus()
                     }
-                    // v375 — RICH (full-screen) selection editing: while a real
-                    // text selection is live in the transparent field, float the
-                    // Save-your-take format bar (B / I / highlight) just above
-                    // the selected letters. Taps toggle [factSpans] over exactly
+                    // v375/v379c — RICH selection editing (full screen AND the
+                    // bottom-sheet preview): while a real text selection is live
+                    // in the transparent field, float the Save-your-take format
+                    // bar (B / I / U / highlight) just above the selected
+                    // letters. Taps toggle [factSpans] over exactly
                     // the selection via [onFormatFactSelection], so the format
                     // applies to the selected characters ONLY — never the whole
                     // fact (the whole-element toggles in the Text tools panel
@@ -7967,7 +7971,20 @@ fun TopicShareSheet(
                                 factFieldStyle = factFieldStyle,
                                 autoFitDelta = smartAutoFitDelta(pageMove, maxOf(factFieldText.length, chapterFactForCard.length), styles[page], aspect),
                                 factFieldChipShift = activeId == "chapter_review",
-                                factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…"
+                                factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…",
+                                // v379c — the bottom-sheet preview hosts the
+                                // SAME rich selection bar as full screen: when
+                                // a real text selection is live on the card
+                                // (Edit-text tool or double-tap), B / I / U /
+                                // highlight float above the letters and style
+                                // ONLY the selection. Quotes + reading
+                                // progress carry no spans (bar stays dark).
+                                richFactTools = true,
+                                factSpans = if (isQuotes || activeId == "chapter_progress") emptyList() else cardFactSpans,
+                                onFormatFactSelection = if (isQuotes || activeId == "chapter_progress") null
+                                else { s, e, flag -> toggleFactSelectionFormat(s, e, flag) },
+                                onToggleFactUnderline = if (isQuotes || activeId == "chapter_progress") null
+                                else { s, e, add -> toggleFactSelectionUnderline(s, e, add) }
                             ) { cb ->
                                 TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = pageMove, chapterProgress = progressForCard, chapterFact = chapterFactForCard, factSpans = if (isQuotes) emptyList() else cardFactRenderSpans, callbacks = cb)
                             }
@@ -8032,7 +8049,15 @@ fun TopicShareSheet(
                             factFieldStyle = factFieldStyle,
                             autoFitDelta = smartAutoFitDelta(move, maxOf(factFieldText.length, chapterFactForCard.length), currentStyle, aspect),
                             factFieldChipShift = activeId == "chapter_review",
-                            factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…"
+                            factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…",
+                            // v379c — rich selection bar on the sheet preview
+                            // too (see the pager branch for the rationale).
+                            richFactTools = true,
+                            factSpans = if (isQuotes || activeId == "chapter_progress") emptyList() else cardFactSpans,
+                            onFormatFactSelection = if (isQuotes || activeId == "chapter_progress") null
+                            else { s, e, flag -> toggleFactSelectionFormat(s, e, flag) },
+                            onToggleFactUnderline = if (isQuotes || activeId == "chapter_progress") null
+                            else { s, e, add -> toggleFactSelectionUnderline(s, e, add) }
                         ) { cb ->
                             TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, factSpans = if (isQuotes) emptyList() else cardFactRenderSpans, callbacks = cb)
                         }

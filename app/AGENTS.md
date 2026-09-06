@@ -1010,6 +1010,18 @@ app/src/main/java/com/curio/app/
     gate — every toolbar pill (Text · Size · Crop · Fit · Font · Color ·
     Adjust · Align · Format · Content, plus the live ratio / Signature
     state labels) shows its tiny name under the icon AT ALL TIMES.
+  - **v379c — the selection bar lives on every editing surface.** The two
+    bottom-sheet `ArrangeableCard` calls (pager + single-style) now pass
+    `richFactTools = true` + the fact spans + the format/underline toggle
+    channels exactly like the full-screen dialog — so a live text
+    selection on the card floats B / I / U / highlight over the letters
+    in the sheet preview too. Quotes + reading progress stay plain (no
+    spans; the bar's enable states gate on the non-null callbacks). The
+    rich field's seed/comment blocks were updated to match.
+  - **v379b CI fix.** The selection bar's visibility gate became
+    `format != null || underline != null`, which silently killed Kotlin's
+    smart-cast of `onFormatFactSelection`; the B / I / highlight buttons
+    now safe-invoke (`?.invoke`) and gate on their own enable state.
 - **v377 — share-card editor declutter: design switching via the card,
   tool captions, No-fact eye-cross, fact layout under Align.** User: "the
   style button should only show when signature style is active and tapping
