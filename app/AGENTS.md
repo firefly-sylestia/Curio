@@ -570,6 +570,33 @@ app/src/main/java/com/curio/app/
     Game, The Last of Us, Severance, Wednesday** — the reveal's series card
     (poster + synopsis preview + episode-list sheet) previously only
     rendered for the 5 batch-1 shows; now 10 shows carry the layout.
+- **v370 — share-card smart auto-fit + corner whole-box scale (default
+  ON).** `TopicShareCard.kt` auto-grows the fact box for long quick/custom
+  facts and lifts/shrinks the title, per style:
+  - **Smart auto-fit (`smartAutoFitDelta`, was `shareAutoFitDelta`):**
+    default ON (`AppPreferences.shareAutoFitState`); intensity presets
+    Balanced/Compact/Airy per style (`ShareCardMove.autoFitIntensity`);
+    once the user moves/resizes the fact box, auto-fit hands it over
+    ("manual wins") and the first-grab seed carries height/offsets/title
+    scale over so the box never jumps. **Per-style clamps** (this pass):
+    the fact never rises where something sits above it — Collage (pill
+    above fact, title hugs the top edge: no nudge at all), Editorial
+    (masthead rules + byline: neither title nor fact rises; fact grows
+    down to the colophon); Clean/Minimal facts are bottom-anchored and
+    grow up naturally while the title lifts a little (24–28dp) to clear
+    them; Paper/Vinyl/Signature/Custom get a modest ≤14dp clamp. **Long
+    titles shrink** (`autoTitleScale`, per-style thresholds, ~0.70–0.95×)
+    when the fact needs the room — never shrunk if the user placed the
+    title. Auto-fit now watches the CUSTOM fact too
+    (`maxOf(quickLen, chapterFact.length)`).
+  - **Corner whole-box grip (`CornerResizeHandle`):** scales width AND
+    height together from the selected box's bottom-right corner — title
+    and fact already had it, now also on the info row (meta) and the
+    favorite-tracks strip; "Whole box" slider shares the same math and the
+    fact sliders reach 6x (grip to 8x) so tall 9:16 cards can expand.
+  - **Long-text font floors raised** on Collage (10→10.5–11sp), Clean
+    (8→8.5–9.5sp), Editorial (8.5→9–10.5sp) and Minimal (8.5→9–11sp) so
+    the expanded box keeps the text readable.
 - **v361 — keyed defaults + Clear-covers button; CI fix for the reveal
   poster.** User: "fix it, and also i added spotify key and library thing
   api as well… does the api is used in the apk build from pr, use that by
