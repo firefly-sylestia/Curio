@@ -694,6 +694,53 @@ app/src/main/java/com/curio/app/
     applied in `factBodyStyle` / `titleStyle` via `TextDecoration` and
     `background`, persisted with the move (`toArgb` / `Color(it)`). This
     is whole-element formatting (like Bold/Italic), not per-word spans.
+- **v373 — cover shapes + independent Whole-box scale + full-screen fixes.**
+  User: "the size of the book cover was perfect in share card in that
+  commit [ea47f1b] … album covers are square not rectangular and its
+  stretching it to rectangular so fix that … the full screen button it
+  looks transparent and doesnt match the customise button look … keep the
+  full screen button when editing too in customise … inside the full
+  screen edit the share card preview … looks stretched and not accurate
+  of what it was looking before in the bottom sheet … add the dimension
+  change button … add the box size editor … the whole box should not
+  depend on the width or height its separate and independent"
+  (ask answers: keep the side layout with the SMALL cover; album square;
+  series stays 2:3).
+  - **Cover sizes + no album stretch:** `TopicShareCard` gained
+    `isSquareCover` (sheet passes `isAlbumTopic` at ALL call sites incl.
+    the Save/Share export lambdas): books/series render the 2:3 jacket at
+    the old perfect 44×66, albums render square 66×66 — square art is no
+    longer squeezed into the 92×136 rectangle. The v370b side layout
+    STAYS, but the title shift/width-crop/title-shrink are now DERIVED
+    from the cover's real width (`coverW.value + 16f`, aspect-relative
+    width factor, mild title shrink) instead of the fixed 108f/0.74/0.9
+    tuned for the 92dp cover, so the smaller jacket hugs the title.
+  - **Whole-box independence (`titleBoxScale` / `factBoxScale` /
+    `favBoxScale`):** the "Whole box" slider no longer borrows the height
+    fraction as its backing value — each element carries its OWN scale
+    (1f default, persisted/parsed) applied in a new `boxScaledMove` that
+    multiplies BOTH width and height fractions (on top of auto-fit, width
+    still clamps at 1f). Dragging width/height no longer yanks the
+    Whole-box thumb; the corner-grip base math divides by the scale; the
+    scales count as "touched" so smart auto-fit hands over; Reset clears
+    them with the rest of the moves.
+  - **Full screen button:** restyled to MATCH the Customise pill
+    (`surfaceContainerHigh` + `onSurfaceVariant` — the old
+    `secondaryContainer` chip read as transparent) and stays visible
+    while editing (Customise itself still hides mid-edit).
+  - **Full-screen preview = exact zoom of the sheet card:** the card now
+    renders at the sheet's own 280dp base inside a
+    `CompositionLocalProvider(LocalDensity provides Density(density*zoom,
+    fontScale*zoom))` so text sizes, spacing and placements scale
+    TOGETHER (the old approach laid the dp content out in a much bigger
+    box, so text stayed tiny and `SpaceBetween` re-spread the layout).
+    Drag deltas convert through the same scaled density, so persisted
+    offsets stay in card-local dp.
+  - **Full screen tools:** a Dimensions pill (AspectRatio glyph + live
+    `aspect.label` 3:4/9:16) sits next to the Text pill and toggles the
+    aspect; the Text dropdown gained a Box size section (width / height /
+    whole-box `SizeSliderColumn`s for the selected title or fact) and the
+    menu Column is now vertically scrollable.
 - **v361 — keyed defaults + Clear-covers button; CI fix for the reveal
   poster.** User: "fix it, and also i added spotify key and library thing
   api as well… does the api is used in the apk build from pr, use that by

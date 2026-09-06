@@ -537,13 +537,14 @@ private fun smartAutoFitDelta(
     if (!AppPreferences.shareAutoFitState) return ShareAutoFitDelta()
     val touched = move.factDx != 0f || move.factDy != 0f ||
         move.factWidthFrac != 1f || move.factHeightFrac != 1f ||
-        move.factScale != 1f || move.factZoom != 1f
+        move.factScale != 1f || move.factZoom != 1f || move.factBoxScale != 1f
     if (touched) return ShareAutoFitDelta()
     val h = autoFitCurve(move.autoFitIntensity, factLength)
     if (h <= 1f) return ShareAutoFitDelta()
     val tall = aspect == ShareCardAspect.PORTRAIT
     val titleTouched = move.titleDx != 0f || move.titleDy != 0f ||
-        move.titleWidthFrac != 1f || move.titleHeightFrac != 1f || move.titleScale != 1f
+        move.titleWidthFrac != 1f || move.titleHeightFrac != 1f ||
+        move.titleScale != 1f || move.titleBoxScale != 1f
     // ── How far each design lets the fact rise and the title rise (dp). A
     // 0 cap means "no room" — the fact or title sits right under something
     // (pill / masthead / card edge) and must NOT be shoved into it.
@@ -704,6 +705,15 @@ data class ShareCardMove(
      *  many track rows the strip shows. Mirrors the box-size sliders. */
     val favWidthFrac: Float = 1f,
     val favHeightFrac: Float = 1f,
+    /** v373 — INDEPENDENT whole-box scales (1f = unchanged). Each multiplies
+     *  the element's width AND height fractions TOGETHER so the whole box
+     *  grows/shrinks as one, WITHOUT touching the width/height slider
+     *  values — the old "Whole box" slider borrowed the height fraction as
+     *  its backing value, so dragging width or height yanked the Whole-box
+     *  thumb around and the two were never independent. */
+    val titleBoxScale: Float = 1f,
+    val factBoxScale: Float = 1f,
+    val favBoxScale: Float = 1f,
     /** v370 — quick-fact TEXT LAYOUT: how the fact body is composed on the
      *  card. STANDARD = the style's default paragraph. CONDENSED tightens
      *  the line spacing (words keep normal gaps). BOOK = a two-column
@@ -817,8 +827,10 @@ private fun badgeStyle(base: TextStyle, m: ShareCardMove): TextStyle {
 }
 
 /** v370b — how far the title block shifts RIGHT when a cover sits on the
- *  LEFT of the card (cover ~92dp wide + gap): the synopsis-page layout. */
-private const val COVER_SIDE_SHIFT = 108f
+ *  LEFT of the card: the cover width + a small gap, so the title clears the
+ *  jacket exactly (v373 — derived from the cover size instead of the old
+ *  fixed 108f for the 92dp cover, so the smaller book/album jackets sit
+ *  snug instead of leaving a void). */
 
 /** v316b — editor chrome: ONE uniform move grip + a darker coffee outline
  *  replace the old per-box letter handles (T/F/M/B) and their tinted
@@ -1194,6 +1206,11 @@ fun TopicShareCard(
     // small jacket badge at the top-right on every style (Collage feeds it
     // into the polaroid photo slot instead, so the two never double up).
     bookCover: androidx.compose.ui.graphics.ImageBitmap? = null,
+    // v373 — ALBUM covers are SQUARE artwork (1:1) while books/series
+    // posters are 2:3 portraits, so the jacket badge must not stretch them
+    // to the same rectangle: true renders the cover square (66×66), false
+    // keeps the 2:3 book-jacket shape (44×66).
+    isSquareCover: Boolean = false,
     byline: String = "",
     polaroidCaption: String = "",
     classicSignature: Boolean = false,
@@ -1227,6 +1244,10 @@ fun TopicShareCard(
     val bgFilter = if (saturation == 1f && contrast == 1f) null
     else ColorFilter.colorMatrix(adjustColorMatrix(saturation, contrast))
     val display = topicName.substringBeforeLast(" (")
+    // v373 — cover badge size per family: books and series posters are 2:3
+    // portraits (44×66), album art is square (66×66) so it never stretches.
+    val coverW = if (isSquareCover) 66.dp else 44.dp
+    val coverH = 66.dp
     // v369 — SMART AUTO-FIT: long quick/custom fact text auto-shrinks
     // (per-style font steps), auto-GROWS the fact box and nudges it (plus
     // the info rows that travel with it) up so the text fits the tall card.
@@ -1247,18 +1268,37 @@ fun TopicShareCard(
         titleScale = move.titleScale * autoFit.titleScale,
         metaDy = move.metaDy + autoFit.dy
     )
+    // v373 — the INDEPENDENT whole-box scale multiplies BOTH dimensions on
+    // top of the width/height fractions (and any auto-fit growth), so the
+    // Whole-box slider scales the box as one without re-reading the width
+    // or height values. Width still clamps at the card edge (full width).
+    val boxScaledMove = effectiveMove.copy(
+        titleWidthFrac = (effectiveMove.titleWidthFrac * move.titleBoxScale).coerceIn(0.2f, 1f),
+        titleHeightFrac = effectiveMove.titleHeightFrac * move.titleBoxScale,
+        factWidthFrac = (effectiveMove.factWidthFrac * move.factBoxScale).coerceIn(0.2f, 1f),
+        factHeightFrac = effectiveMove.factHeightFrac * move.factBoxScale,
+        favWidthFrac = (effectiveMove.favWidthFrac * move.favBoxScale).coerceIn(0.3f, 1.2f),
+        favHeightFrac = effectiveMove.favHeightFrac * move.favBoxScale
+    )
     // v370b — COVER SIDE LAYOUT: when a cover (book / album / series) is on
     // the card, it sits on the LEFT like the synopsis page — the title (and
     // the author/year under it, which follows via titleShift) shifts right
     // into the remaining width, wraps a little narrower and auto-shrinks so
     // everything aligns without overlap. Removing the cover (or having none)
     // restores the per-style corner pockets.
+    // v373 — the shift / width crop / title shrink are DERIVED from the
+    // cover's real width (44dp book/series jacket, 66dp square album) so a
+    // smaller cover hugs the title instead of leaving the old 92dp void.
     val coverActive = bookCover != null && style != ShareCardStyle.COLLAGE
-    val layoutMove = if (coverActive) effectiveMove.copy(
-        titleDx = effectiveMove.titleDx + COVER_SIDE_SHIFT,
-        titleWidthFrac = (effectiveMove.titleWidthFrac * 0.74f).coerceIn(0.2f, 1f),
-        titleScale = effectiveMove.titleScale * 0.9f
-    ) else effectiveMove
+    val coverSideShift = coverW.value + 16f
+    val coverTitleWidthFactor =
+        ((aspect.widthDp - coverW.value - 16f) / aspect.widthDp).coerceIn(0.6f, 0.95f)
+    val coverTitleScale = (0.90f + (92f - coverW.value) / 92f * 0.06f).coerceIn(0.9f, 0.97f)
+    val layoutMove = if (coverActive) boxScaledMove.copy(
+        titleDx = boxScaledMove.titleDx + coverSideShift,
+        titleWidthFrac = (boxScaledMove.titleWidthFrac * coverTitleWidthFactor).coerceIn(0.2f, 1f),
+        titleScale = boxScaledMove.titleScale * coverTitleScale
+    ) else boxScaledMove
     // v371 — the auto-adjuster's FACT-font shrink applies on top of the
     // user's body-size setting: every style renders its fact text at
     // (style base × bodyScale × autoFit.factScale). Once the user grabs
@@ -1326,8 +1366,11 @@ fun TopicShareCard(
             }
             BookCoverBadge(
                 cover = bookCover,
-                coverWidth = if (coverActive) 92.dp else 44.dp,
-                coverHeight = if (coverActive) 136.dp else 66.dp,
+                // v373 — the cover renders at its natural shape (2:3
+                // book/series jacket, 1:1 album square) instead of the old
+                // 92×136 stretch that distorted square album art.
+                coverWidth = coverW,
+                coverHeight = coverH,
                 modifier = Modifier
                     .align(coverSlot.first)
                     .offset(x = move.coverDx.dp, y = move.coverDy.dp)
@@ -1372,9 +1415,10 @@ fun TopicShareCard(
                 palette = palette,
                 classic = aspect == ShareCardAspect.CLASSIC,
                 // v370 — the strip's box-size fractions ride on the move so
-                // each style keeps its own width/height edits.
-                widthFrac = effectiveMove.favWidthFrac,
-                heightFrac = effectiveMove.favHeightFrac,
+                // each style keeps its own width/height edits; v373 — the
+                // whole-box scale multiplies on top.
+                widthFrac = boxScaledMove.favWidthFrac,
+                heightFrac = boxScaledMove.favHeightFrac,
                 // v353 — the strip is a movable element like the cover: its
                 // offset comes from [move.favDx]/[move.favDy] and it reports
                 // its bounds so the editor can select + drag it.
@@ -1388,10 +1432,11 @@ fun TopicShareCard(
     }
 }
 
-/** v334 — book-jacket badge: the cover at 2:3 with a spine + sheen overlay
- *  so it reads as a real jacket sitting on the card. v370b — the size is a
- *  parameter: the side-layout cover (left of the title) renders LARGE
- *  (~92×136), the corner pockets keep the small 44×66 badge. */
+/** v334 — book-jacket badge: the cover with a spine + sheen overlay so it
+ *  reads as a real jacket sitting on the card. v370b — the size is a
+ *  parameter (the side-layout cover renders beside the title); v373 — the
+ *  sheet passes the cover's NATURAL shape: 44×66 for 2:3 book/series
+ *  posters, 66×66 for square album art (never stretched). */
 @Composable
 private fun BookCoverBadge(
     cover: androidx.compose.ui.graphics.ImageBitmap,
@@ -6206,8 +6251,11 @@ private fun ArrangeableCard(
                                 x = (t.right - 26f).coerceIn(0f, (cw - 26f).coerceAtLeast(0f)).dp,
                                 y = (t.bottom - 26f).coerceIn(0f, (ch - 26f).coerceAtLeast(0f)).dp,
                                 onDelta = { dx, dy ->
-                                    val baseW = t.width / move.titleWidthFrac.coerceAtLeast(0.2f)
-                                    val baseH = t.height / move.titleHeightFrac.coerceAtLeast(0.2f)
+                                    // v373 — the rendered box already includes
+                                    // the whole-box scale, so divide by it too
+                                    // to recover the true natural size.
+                                    val baseW = t.width / (move.titleWidthFrac * move.titleBoxScale).coerceAtLeast(0.2f)
+                                    val baseH = t.height / (move.titleHeightFrac * move.titleBoxScale).coerceAtLeast(0.2f)
                                     val factor = maxOf(1f + dx / baseW, 1f + dy / baseH).coerceIn(0.2f, 6f)
                                     onMove(move.copy(
                                         titleWidthFrac = (move.titleWidthFrac * factor).coerceIn(0.2f, 1f),
@@ -6298,8 +6346,10 @@ private fun ArrangeableCard(
                                 x = (f.right - 26f).coerceIn(0f, (cw - 26f).coerceAtLeast(0f)).dp,
                                 y = (f.bottom - 26f).coerceIn(0f, (ch - 26f).coerceAtLeast(0f)).dp,
                                 onDelta = { dx, dy ->
-                                    val baseW = f.width / move.factWidthFrac.coerceAtLeast(0.2f)
-                                    val baseH = f.height / move.factHeightFrac.coerceAtLeast(0.2f)
+                                    // v373 — see the title grip: the rendered
+                                    // box includes the whole-box scale.
+                                    val baseW = f.width / (move.factWidthFrac * move.factBoxScale).coerceAtLeast(0.2f)
+                                    val baseH = f.height / (move.factHeightFrac * move.factBoxScale).coerceAtLeast(0.2f)
                                     val factor = maxOf(1f + dx / baseW, 1f + dy / baseH).coerceIn(0.2f, 6f)
                                     onMove(move.copy(
                                         factWidthFrac = (move.factWidthFrac * factor).coerceIn(0.2f, 1f),
@@ -6420,8 +6470,10 @@ private fun ArrangeableCard(
                                 x = (rf.right - 26f).coerceIn(0f, (cw - 26f).coerceAtLeast(0f)).dp,
                                 y = (rf.bottom - 26f).coerceIn(0f, (ch - 26f).coerceAtLeast(0f)).dp,
                                 onDelta = { dx, dy ->
-                                    val baseW = rf.width / move.favWidthFrac.coerceAtLeast(0.3f)
-                                    val baseH = rf.height / move.favHeightFrac.coerceAtLeast(0.35f)
+                                    // v373 — see the title grip: the rendered
+                                    // strip includes the whole-box scale.
+                                    val baseW = rf.width / (move.favWidthFrac * move.favBoxScale).coerceAtLeast(0.3f)
+                                    val baseH = rf.height / (move.favHeightFrac * move.favBoxScale).coerceAtLeast(0.35f)
                                     val factor = maxOf(1f + dx / baseW, 1f + dy / baseH).coerceIn(0.35f, 3f)
                                     onMove(move.copy(
                                         favWidthFrac = (move.favWidthFrac * factor).coerceIn(0.3f, 1.2f),
@@ -6727,6 +6779,9 @@ fun TopicShareSheet(
                 titleScale = o.optDouble("titleScale", 1.0).toFloat(),
                 favWidthFrac = o.optDouble("favWidthFrac", 1.0).toFloat(),
                 favHeightFrac = o.optDouble("favHeightFrac", 1.0).toFloat(),
+                titleBoxScale = o.optDouble("titleBoxScale", 1.0).toFloat(),
+                factBoxScale = o.optDouble("factBoxScale", 1.0).toFloat(),
+                favBoxScale = o.optDouble("favBoxScale", 1.0).toFloat(),
                 autoFitIntensity = o.optInt("autoFitIntensity", 0),
                 factScale = o.optDouble("factScale", 1.0).toFloat(),
                 factZoom = o.optDouble("factZoom", 1.0).toFloat(),
@@ -7064,6 +7119,7 @@ fun TopicShareSheet(
                 put("titleWidthFrac", m.titleWidthFrac); put("titleHeightFrac", m.titleHeightFrac)
                 put("factWidthFrac", m.factWidthFrac); put("factHeightFrac", m.factHeightFrac)
                 put("metaWidthFrac", m.metaWidthFrac); put("metaHeightFrac", m.metaHeightFrac)
+                put("titleBoxScale", m.titleBoxScale); put("factBoxScale", m.factBoxScale); put("favBoxScale", m.favBoxScale)
                 put("titleScale", m.titleScale)
                 put("factFormat", m.factFormat.name); put("factDropCap", m.factDropCap.name)
                 put("autoFitIntensity", m.autoFitIntensity)
@@ -7197,7 +7253,7 @@ fun TopicShareSheet(
                                 factFieldChipShift = activeId == "chapter_review",
                                 factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…"
                             ) { cb ->
-                                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = pageMove, chapterProgress = progressForCard, chapterFact = chapterFactForCard, callbacks = cb)
+                                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = pageMove, chapterProgress = progressForCard, chapterFact = chapterFactForCard, callbacks = cb)
                             }
                         }
                     }
@@ -7261,28 +7317,26 @@ fun TopicShareSheet(
                             factFieldChipShift = activeId == "chapter_review",
                             factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…"
                         ) { cb ->
-                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, callbacks = cb)
+                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, callbacks = cb)
                         }
                     }
                 }
             }
 
                 // Floating Customise button — over the card, bottom-right.
-                // v331 — shown ONLY when NOT editing: while editing, the
-                // bottom action bar owns Reset + Done + the content toggle
-                // (the Customise pill must not hover over the card mid-edit;
-                // Done brings the save/share actions back). Tap-and-hold on
-                // the card is the other way in.
-                if (!editMode) {
-                    // v371 — a FULL-SCREEN button joins the Customise pill:
-                    // it opens the card large on the category-tint wash with
-                    // floating text tools (one Aa pill + dropdown), so text
-                    // editing is precise and the layout never changes.
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.align(Alignment.BottomEnd).padding(end = 14.dp, bottom = 6.dp)
-                    ) {
+                // v331 — the Customise pill shows ONLY when NOT editing: while
+                // editing, the bottom action bar owns Reset + Done + the
+                // content toggle (the pill must not hover over the card
+                // mid-edit; Done brings the save/share actions back).
+                // Tap-and-hold on the card is the other way in.
+                // v373 — the FULL-SCREEN pill stays visible in BOTH modes so
+                // the user can jump to the large precise editor mid-customise.
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(end = 14.dp, bottom = 6.dp)
+                ) {
+                    if (!editMode) {
                         Surface(
                             onClick = {
                                 haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -7298,23 +7352,30 @@ fun TopicShareSheet(
                                 Text("Customise", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant))
                             }
                         }
-                        Surface(
-                            onClick = {
-                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                fullscreenEdit = true
-                                // Full screen starts in edit mode so tapping
-                                // the title/fact selects + edits it precisely.
-                                editMode = true
-                                toolOpen = null
-                            },
-                            shape = RoundedCornerShape(50),
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                            shadowElevation = 6.dp
-                        ) {
-                            Row(Modifier.padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                CurioIcon(name = CurioIcons.Fullscreen, tint = MaterialTheme.colorScheme.onSecondaryContainer, size = 14.dp)
-                                Text("Full screen", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSecondaryContainer))
-                            }
+                    }
+                    // v371 — a FULL-SCREEN button joins the Customise pill:
+                    // it opens the card large on the category-tint wash with
+                    // floating text tools (one Aa pill + dropdown), so text
+                    // editing is precise and the layout never changes.
+                    // v373 — restyled to MATCH the Customise pill (same
+                    // surface/ink) so it no longer reads as a transparent
+                    // secondary chip, and stays visible while editing.
+                    Surface(
+                        onClick = {
+                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            fullscreenEdit = true
+                            // Full screen starts in edit mode so tapping
+                            // the title/fact selects + edits it precisely.
+                            editMode = true
+                            toolOpen = null
+                        },
+                        shape = RoundedCornerShape(50),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        shadowElevation = 6.dp
+                    ) {
+                        Row(Modifier.padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            CurioIcon(name = CurioIcons.Fullscreen, tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
+                            Text("Full screen", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant))
                         }
                     }
                 }
@@ -7658,7 +7719,26 @@ fun TopicShareSheet(
                                             Text("Close", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
                                         }
                                     }
-                                    Box {
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        // v373 — DIMENSIONS button: toggles the
+                                        // card aspect (3:4 ↔ 9:16) right from
+                                        // full screen, mirroring the sheet's
+                                        // Aspect tool.
+                                        Surface(
+                                            onClick = {
+                                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                aspect = if (aspect == ShareCardAspect.CLASSIC) ShareCardAspect.PORTRAIT else ShareCardAspect.CLASSIC
+                                            },
+                                            shape = RoundedCornerShape(50),
+                                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                                            shadowElevation = 4.dp
+                                        ) {
+                                            Row(Modifier.padding(horizontal = 14.dp, vertical = 9.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                                CurioIcon(name = CurioIcons.AspectRatio, contentDescription = "Card dimensions", tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 15.dp)
+                                                Text(aspect.label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            }
+                                        }
+                                        Box {
                                         Surface(
                                             onClick = { fsToolsOpen = !fsToolsOpen },
                                             shape = RoundedCornerShape(50),
@@ -7672,7 +7752,7 @@ fun TopicShareSheet(
                                             }
                                         }
                                         DropdownMenu(expanded = fsToolsOpen, onDismissRequest = { fsToolsOpen = false }) {
-                                            Column(Modifier.width(330.dp).padding(vertical = 4.dp)) {
+                                            Column(Modifier.width(330.dp).verticalScroll(androidx.compose.foundation.rememberScrollState()).padding(vertical = 4.dp)) {
                                                 val fsSel = selectedResizeTarget
                                                 val fsIsTitle = fsSel == ShareCardResizeTarget.TITLE
                                                 val fsIsFact = fsSel == ShareCardResizeTarget.FACT
@@ -7769,25 +7849,55 @@ fun TopicShareSheet(
                                                             }
                                                         }
                                                     }
+                                                    // v373 — BOX SIZE editor in full
+                                                    // screen (the sheet's Crop tool):
+                                                    // width / height / whole-box
+                                                    // sliders for the selected box.
+                                                    Text("Box size", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+                                                    Column(Modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
+                                                        if (fsIsTitle) {
+                                                            SizeSliderColumn("Title width", move.titleWidthFrac, { updateMove(move.copy(titleWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
+                                                            SizeSliderColumn("Title height", move.titleHeightFrac, { updateMove(move.copy(titleHeightFrac = it)) }, 0.35f..2.5f, steps = 26, modifier = Modifier.fillMaxWidth())
+                                                            SizeSliderColumn("Whole box", move.titleBoxScale, { updateMove(move.copy(titleBoxScale = it)) }, 0.35f..5f, steps = 46, modifier = Modifier.fillMaxWidth())
+                                                        } else {
+                                                            SizeSliderColumn("Fact width", move.factWidthFrac, { updateMove(move.copy(factWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
+                                                            SizeSliderColumn("Fact height", move.factHeightFrac, { updateMove(move.copy(factHeightFrac = it)) }, 0.35f..6f, steps = 56, modifier = Modifier.fillMaxWidth())
+                                                            SizeSliderColumn("Whole box", move.factBoxScale, { updateMove(move.copy(factBoxScale = it)) }, 0.35f..6f, steps = 56, modifier = Modifier.fillMaxWidth())
+                                                        }
+                                                    }
                                                 }
                                             }
+                                        }
                                         }
                                     }
                                 }
                                 // ── The big card, centered ──────────────
+                                // v373 — the card is rendered at the SAME base
+                                // size as the bottom-sheet preview (280dp) and
+                                // zoomed through a scaled Density, so text
+                                // sizes, spacing and placements scale TOGETHER
+                                // and the full-screen preview is an exact zoom
+                                // of the sheet card. (The old approach rendered
+                                // the dp layout in a much bigger box: text
+                                // stayed tiny and the SpaceBetween flow
+                                // re-spread the spacing, so it never matched.)
                                 BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                     val ratio = aspect.widthDp.toFloat() / aspect.heightDp.toFloat()
-                                    val cardW = minOf(
-                                        maxWidth.value - 24f,
-                                        (maxHeight.value - 150f) * ratio
-                                    ).coerceAtLeast(140f)
-                                    Box(
-                                        Modifier
-                                            .width(cardW.dp)
-                                            .aspectRatio(ratio)
-                                            .shadow(10.dp, RoundedCornerShape(12.dp))
-                                            .clip(RoundedCornerShape(12.dp))
-                                    ) {
+                                    val baseW = 280f
+                                    val baseH = baseW / ratio
+                                    val availW = (maxWidth.value - 24f).coerceAtLeast(120f)
+                                    val availH = (maxHeight.value - 140f).coerceAtLeast(120f)
+                                    val zoom = minOf(availW / baseW, availH / baseH)
+                                    val sheetDensity = androidx.compose.ui.platform.LocalDensity.current
+                                    val cardDensity = androidx.compose.ui.unit.Density(sheetDensity.density * zoom, sheetDensity.fontScale * zoom)
+                                    androidx.compose.runtime.CompositionLocalProvider(androidx.compose.ui.platform.LocalDensity provides cardDensity) {
+                                        Box(
+                                            Modifier
+                                                .width(baseW.dp)
+                                                .aspectRatio(ratio)
+                                                .shadow(4.dp, RoundedCornerShape(6.dp))
+                                                .clip(RoundedCornerShape(6.dp))
+                                        ) {
                                         ArrangeableCard(
                                             active = true,
                                             editMode = true,
@@ -7816,8 +7926,9 @@ fun TopicShareSheet(
                                             factFieldChipShift = activeId == "chapter_review",
                                             factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…"
                                         ) { cb ->
-                                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, callbacks = cb)
+                                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, callbacks = cb)
                                         }
+                                    }
                                     }
                                 }
                             }
@@ -7919,13 +8030,15 @@ fun TopicShareSheet(
                                 if (isTitle) {
                                     SizeSliderColumn("Title width", move.titleWidthFrac, { updateMove(move.copy(titleWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
                                     SizeSliderColumn("Title height", move.titleHeightFrac, { updateMove(move.copy(titleHeightFrac = it)) }, 0.35f..2.5f, steps = 26, modifier = Modifier.fillMaxWidth())
-                                    // v370 — WHOLE-BOX scale: one slider that
-                                    // grows/shrinks the whole box (width AND
-                                    // height together, shape kept) — the same
-                                    // math as the corner grip, as a precise
-                                    // slider. Width can't exceed the card, so
-                                    // it tracks height up to 100%.
-                                    SizeSliderColumn("Whole box", move.titleHeightFrac, { v -> updateMove(move.copy(titleHeightFrac = v, titleWidthFrac = minOf(1f, v))) }, 0.35f..5f, steps = 46, modifier = Modifier.fillMaxWidth())
+                                    // v373 — WHOLE-BOX scale is now INDEPENDENT:
+                                    // its own value on the move multiplies both
+                                    // the width and height fractions, so moving
+                                    // the width or height sliders no longer
+                                    // yanks the Whole-box thumb around (the old
+                                    // slider reused the height fraction as its
+                                    // backing value). Width still can't exceed
+                                    // the card edge, so it clamps at 100%.
+                                    SizeSliderColumn("Whole box", move.titleBoxScale, { v -> updateMove(move.copy(titleBoxScale = v)) }, 0.35f..5f, steps = 46, modifier = Modifier.fillMaxWidth())
                                 } else if (isFact) {
                                     SizeSliderColumn("Fact width", move.factWidthFrac, { updateMove(move.copy(factWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
                                     // v369/v370 — the fact box height range runs
@@ -7934,23 +8047,18 @@ fun TopicShareSheet(
                                     // grip expands to 8x; the slider matches its
                                     // whole-box scale as a precise control).
                                     SizeSliderColumn("Fact height", move.factHeightFrac, { updateMove(move.copy(factHeightFrac = it)) }, 0.35f..6f, steps = 56, modifier = Modifier.fillMaxWidth())
-                                    SizeSliderColumn("Whole box", move.factHeightFrac, { v -> updateMove(move.copy(factHeightFrac = v, factWidthFrac = minOf(1f, v))) }, 0.35f..6f, steps = 56, modifier = Modifier.fillMaxWidth())
+                                    // v373 — independent whole-box scale (see
+                                    // the title case above).
+                                    SizeSliderColumn("Whole box", move.factBoxScale, { v -> updateMove(move.copy(factBoxScale = v)) }, 0.35f..6f, steps = 56, modifier = Modifier.fillMaxWidth())
                                 } else if (isFav) {
                                     // v370 — ALBUM favorite-tracks strip box:
                                     // width is a fill fraction of its natural
                                     // max width; height scales the track rows.
                                     SizeSliderColumn("Strip width", move.favWidthFrac, { updateMove(move.copy(favWidthFrac = it)) }, 0.3f..1.2f, steps = 89, modifier = Modifier.fillMaxWidth())
                                     SizeSliderColumn("Strip rows", move.favHeightFrac, { updateMove(move.copy(favHeightFrac = it)) }, 0.35f..3f, steps = 26, modifier = Modifier.fillMaxWidth())
-                                    // v371 — WHOLE-BOX scale for the strip:
-                                    // grows width AND rows together (same
-                                    // math as the strip's corner grip).
-                                    SizeSliderColumn("Whole box", move.favHeightFrac, { v ->
-                                        val oldH = move.favHeightFrac.coerceAtLeast(0.35f)
-                                        updateMove(move.copy(
-                                            favHeightFrac = v,
-                                            favWidthFrac = (move.favWidthFrac * v / oldH).coerceIn(0.3f, 1.2f)
-                                        ))
-                                    }, 0.35f..3f, steps = 26, modifier = Modifier.fillMaxWidth())
+                                    // v373 — independent whole-box scale for
+                                    // the strip (see the title case above).
+                                    SizeSliderColumn("Whole box", move.favBoxScale, { v -> updateMove(move.copy(favBoxScale = v)) }, 0.35f..3f, steps = 26, modifier = Modifier.fillMaxWidth())
                                 } else {
                                     SizeSliderColumn("Info width", move.metaWidthFrac, { updateMove(move.copy(metaWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
                                     SizeSliderColumn("Info lines", move.metaHeightFrac, { updateMove(move.copy(metaHeightFrac = it)) }, 0.5f..1f, steps = 4, modifier = Modifier.fillMaxWidth())
@@ -8454,7 +8562,7 @@ fun TopicShareSheet(
                     onClick = {
                         haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                         shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard)
+                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard)
                         }, saveToGallery = true)
                         persistEdits()
                         onDismiss()
@@ -8473,7 +8581,7 @@ fun TopicShareSheet(
                 Button(onClick = {
                     haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                     shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
-                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard)
+                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard)
                     })
                         persistEdits()
                         onDismiss()
