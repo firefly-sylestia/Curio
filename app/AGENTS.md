@@ -883,6 +883,53 @@ app/src/main/java/com/curio/app/
     (0 = none). Lowering the box drops the needed lift → the title settles
     back. The TITLE drag handle's clamp math adds the lift back so the
     natural base stays correct.
+- **v377 — share-card editor declutter: design switching via the card,
+  tool captions, No-fact eye-cross, fact layout under Align.** User: "the
+  style button should only show when signature style is active and tapping
+  it should switch between the 2 differnt signature style no need for the
+  design options below in tool bar, the ratio of 3:4 9:12 dimention
+  chnage make it chnage without closing the other tool if its open, and
+  remove that tap a thing to select swipe for another design text, and
+  instead show a small text per tool, like ratio, font, style, crop,
+  color, these hint text below tools when selected, the layout f standard
+  condenced book page etc move them inside the alingment tool, and the
+  content one make the no fact just eye cross icon so it hides the fact
+  box with just icon no text" — ask answers: tool name captions under the
+  OPEN tool only; No-fact eye-cross in the panel AND the bottom toggle;
+  ratio caption always under its icon.
+  - **Design switching = the card carousel only.** The Style/Design tool
+    panel is GONE (`toolOpen == "style"` arm deleted; the now-unused
+    `setStyle` + `scope` removed). Designs change by swiping the
+    HorizontalPager carousel. The toolbar shows a Style toggle ONLY while
+    the current design is SIGNATURE: one tap flips `classicDesign`
+    between the two Signature looks instantly (no panel), and its caption
+    under the icon reads the ACTIVE variant (Current/Classic). The design
+    label + dots above the carousel stay.
+  - **Per-tool captions (`ToolWithCaption`).** Each toolbar pill can carry
+    a TINY name under it while its panel is open (Text / Size / Crop /
+    Fit / Font / Color / Adjust / Align / Format / Content) — the label
+    moves as the user switches tools and nothing shows when nothing is
+    open. The RATIO pill keeps an ALWAYS-ON caption showing the active
+    size (`aspect.label`: "3:4"/"9:16"), and its toggle no longer closes
+    an open tool panel (the old `toolOpen = null` is removed). The "Tap a
+    thing to select · swipe for another design" hint text is deleted.
+  - **Fact LAYOUT presets live under Alignment.** Standard / Condensed /
+    Book page / Editorial + the Editorial-only Drop cap row moved out of
+    the Bold/Italic ("format") tool into the ALIGN tool's panel (rendered
+    when the fact is selected, under the alignment pills); the full-screen
+    editor's adjacent section header renamed "Fact layout" for parity.
+  - **No fact = eye-cross icon only.** New `CurioIcons.VisibilityOff`
+    glyph added to the bundled Material Symbols subset via fontTools rlig
+    surgery ON the existing subset font (+1 rlig ligature name, 0 lost, 0
+    cmap changes, ~300 bytes — the full-font pyftsubset path explodes the
+    glyph closure on Material Symbols' first-letter ligature coverage, so
+    the glyph outline + rlig record were copied straight into the current
+    font). The Content panel's "No fact" option is now an icon-ONLY 38dp
+    `IconPill` (eye-cross, no words) and the bottom content toggle shows
+    just the eye-cross + chevron when No fact is active (the "No fact"
+    text is hidden).
+  - **Copy trims:** the Smart-fit panel's paragraph and the Adjust panel's
+    footer line each shortened to one line.
 - **v361 — keyed defaults + Clear-covers button; CI fix for the reveal
   poster.** User: "fix it, and also i added spotify key and library thing
   api as well… does the api is used in the apk build from pr, use that by

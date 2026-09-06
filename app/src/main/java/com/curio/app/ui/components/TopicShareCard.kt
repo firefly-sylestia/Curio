@@ -7734,16 +7734,13 @@ fun TopicShareSheet(
         lineHeight = 16.5.sp * bodyScale,
         color = Color.Transparent
     )
-    // Hoisted pager state so the Customise panel can switch style via its chips.
+    // v377 — the carousel's HorizontalPager drives design changes (swiping;
+    // the old design-option panel is gone). [pagerState] is hoisted so the
+    // style label/dots can read the page and swipes update [styleIdx].
     val pagerState = androidx.compose.foundation.pager.rememberPagerState(initialPage = safeIdx.coerceIn(0, styles.lastIndex)) { styles.size }
-    val scope = androidx.compose.runtime.rememberCoroutineScope()
     // Satisfying haptics: confirm on Save/Share, light ticks on Reset/Done.
     val haptics = LocalHapticFeedback.current
     val focusManager = LocalFocusManager.current
-    fun setStyle(i: Int) {
-        styleIdx = i.coerceIn(0, styles.lastIndex)
-        if (styles.size > 1) scope.launch { pagerState.animateScrollToPage(styleIdx) }
-    }
 
     // v325 — persist the CURRENT edits (per-style moves + text + scale) so an
     // accidental exit can be resumed by reopening the sheet. Runs on
@@ -8028,18 +8025,16 @@ fun TopicShareSheet(
                 }
             }
 
-            // Edit hint — before editing: "hold"; while editing with nothing
-            // selected: prompts the new tap-to-select model.
+            // Edit hint — before editing: "hold". v377 — the mid-edit hint is
+            // gone: the toolbar's under-icon captions name each open tool.
             if (!editMode) {
                 Text("Hold to edit",
                     style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
-            } else if (selectedResizeTarget == ShareCardResizeTarget.NONE) {
-                Text("Tap a thing to select · swipe for another design",
-                    style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
             }
 
-            // ── v3xx EDIT TOOLBAR — circular icon pills only. Each tool
-            // opens ONE small overlay panel; the SELECTED element decides
+            // ── v3xx/v377 EDIT TOOLBAR — circular icon pills; a tiny caption
+            // under the OPEN pill names its tool (see [ToolWithCaption]). Each
+            // tool opens ONE small overlay panel; the SELECTED element decides
             // what the size / box / font / align / format tools act on. ──
             if (editMode) {
                 val sel = selectedResizeTarget
@@ -8142,100 +8137,136 @@ fun TopicShareSheet(
                             .horizontalScroll(androidx.compose.foundation.rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        // v330 — Edit-text moved back into the toolbar row:
-                        // the floating cluster over the card is gone (the
-                        // bottom bar now owns Reset + Done + the content
-                        // selector). Only the quick fact can be typed, so the
-                        // pill appears just when the fact is selected.
+                        // v330 — Edit-text lives in the toolbar row (the
+                        // bottom bar owns Reset + Done + the content
+                        // selector); it appears when the fact is selected.
+                        // v377 — a TINY caption under the engaged tool names
+                        // it while its panel is open (see [ToolWithCaption]).
                         if (isFact && progressForCard == null) {
+                            ToolWithCaption(caption = "Text", show = factEditMode) {
+                                EditToolPill(
+                                    glyph = CurioIcons.Edit,
+                                    description = "Edit text",
+                                    active = factEditMode,
+                                    onClick = {
+                                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                        factEditMode = !factEditMode
+                                        if (!factEditMode) focusManager.clearFocus()
+                                    }
+                                )
+                            }
+                        }
+                        // v377 — the DESIGN options are gone from the toolbar:
+                        // other designs switch by swiping the card carousel.
+                        // The Style tool exists ONLY on a Signature card, where
+                        // a tap flips between the two Signature looks instantly
+                        // (no panel). Its caption is the ACTIVE variant.
+                        if (currentStyle == ShareCardStyle.SIGNATURE) {
+                            ToolWithCaption(caption = if (classicDesign) "Classic" else "Current", show = true) {
+                                EditToolPill(
+                                    glyph = ShareCardStyle.SIGNATURE.glyph,
+                                    description = if (classicDesign) "Signature \u00b7 Classic — tap for the current design"
+                                    else "Signature \u00b7 Current — tap for the classic design",
+                                    active = false,
+                                    onClick = {
+                                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                        classicDesign = !classicDesign
+                                    }
+                                )
+                            }
+                        }
+                        // Aspect — v3xx: NO options list, tapping toggles
+                        // between 3:4 and 9:16 instantly. v377 — the ACTIVE
+                        // ratio reads under the icon, and the toggle no longer
+                        // closes whatever tool panel is open.
+                        ToolWithCaption(caption = aspect.label, show = true) {
                             EditToolPill(
-                                glyph = CurioIcons.Edit,
-                                description = "Edit text",
-                                active = factEditMode,
+                                glyph = CurioIcons.AspectRatio,
+                                description = "Card dimensions " + aspect.label,
+                                active = false,
                                 onClick = {
                                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                    factEditMode = !factEditMode
-                                    if (!factEditMode) focusManager.clearFocus()
+                                    aspect = if (aspect == ShareCardAspect.CLASSIC) ShareCardAspect.PORTRAIT else ShareCardAspect.CLASSIC
                                 }
                             )
                         }
-                        EditToolPill(
-                            glyph = CurioIcons.AutoAwesome,
-                            description = "Design",
-                            active = toolOpen == "style",
-                            onClick = { toolOpen = if (toolOpen == "style") null else "style" }
-                        )
-                        // Aspect — v3xx: NO options list, tapping toggles
-                        // between 3:4 and 9:16 instantly.
-                        EditToolPill(
-                            glyph = CurioIcons.AspectRatio,
-                            description = "Aspect 3:4 \u2194 9:16",
-                            active = false,
-                            onClick = {
-                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                aspect = if (aspect == ShareCardAspect.CLASSIC) ShareCardAspect.PORTRAIT else ShareCardAspect.CLASSIC
-                                toolOpen = null
-                            }
-                        )
-                        EditToolPill(
-                            glyph = "text_increase",
-                            description = "Text size",
-                            active = toolOpen == "size",
-                            onClick = { toolOpen = if (toolOpen == "size") null else "size" }
-                        )
-                        EditToolPill(
-                            glyph = CurioIcons.Crop,
-                            description = "Box size",
-                            active = toolOpen == "box",
-                            onClick = { toolOpen = if (toolOpen == "box") null else "box" }
-                        )
+                        ToolWithCaption(caption = "Size", show = toolOpen == "size") {
+                            EditToolPill(
+                                glyph = "text_increase",
+                                description = "Text size",
+                                active = toolOpen == "size",
+                                onClick = { toolOpen = if (toolOpen == "size") null else "size" }
+                            )
+                        }
+                        ToolWithCaption(caption = "Crop", show = toolOpen == "box") {
+                            EditToolPill(
+                                glyph = CurioIcons.Crop,
+                                description = "Box size",
+                                active = toolOpen == "box",
+                                onClick = { toolOpen = if (toolOpen == "box") null else "box" }
+                            )
+                        }
                         // v374 — Smart fit moved OUT of the Size tool into its
                         // own toggle: long facts grow their box and shrink
                         // their text (through the same sliders) so they fit
                         // the whole card, and the toggle is a separate switch
                         // instead of a Size-tool extra.
-                        EditToolPill(
-                            glyph = CurioIcons.PhotoSizeSelectLarge,
-                            description = "Smart fit",
-                            active = toolOpen == "smartfit",
-                            onClick = { toolOpen = if (toolOpen == "smartfit") null else "smartfit" }
-                        )
-                        EditToolPill(
-                            glyph = "title",
-                            description = "Font",
-                            active = toolOpen == "font",
-                            onClick = { toolOpen = if (toolOpen == "font") null else "font" }
-                        )
-                        EditToolPill(
-                            glyph = CurioIcons.Palette,
-                            description = "Card tone",
-                            active = toolOpen == "tone",
-                            onClick = { toolOpen = if (toolOpen == "tone") null else "tone" }
-                        )
-                        EditToolPill(
-                            glyph = CurioIcons.Contrast,
-                            description = "Saturation / contrast",
-                            active = toolOpen == "adjust",
-                            onClick = { toolOpen = if (toolOpen == "adjust") null else "adjust" }
-                        )
-                        EditToolPill(
-                            glyph = "notes",
-                            description = "Alignment",
-                            active = toolOpen == "align",
-                            onClick = { toolOpen = if (toolOpen == "align") null else "align" }
-                        )
-                        EditToolPill(
-                            glyph = CurioIcons.FormatBold,
-                            description = "Bold / italic",
-                            active = toolOpen == "format",
-                            onClick = { toolOpen = if (toolOpen == "format") null else "format" }
-                        )
-                        EditToolPill(
-                            glyph = CurioIcons.Edit,
-                            description = "Content (source, custom fact, photo)",
-                            active = toolOpen == "source",
-                            onClick = { toolOpen = if (toolOpen == "source") null else "source" }
-                        )
+                        ToolWithCaption(caption = "Fit", show = toolOpen == "smartfit") {
+                            EditToolPill(
+                                glyph = CurioIcons.PhotoSizeSelectLarge,
+                                description = "Smart fit",
+                                active = toolOpen == "smartfit",
+                                onClick = { toolOpen = if (toolOpen == "smartfit") null else "smartfit" }
+                            )
+                        }
+                        ToolWithCaption(caption = "Font", show = toolOpen == "font") {
+                            EditToolPill(
+                                glyph = "title",
+                                description = "Font",
+                                active = toolOpen == "font",
+                                onClick = { toolOpen = if (toolOpen == "font") null else "font" }
+                            )
+                        }
+                        ToolWithCaption(caption = "Color", show = toolOpen == "tone") {
+                            EditToolPill(
+                                glyph = CurioIcons.Palette,
+                                description = "Card tone",
+                                active = toolOpen == "tone",
+                                onClick = { toolOpen = if (toolOpen == "tone") null else "tone" }
+                            )
+                        }
+                        ToolWithCaption(caption = "Adjust", show = toolOpen == "adjust") {
+                            EditToolPill(
+                                glyph = CurioIcons.Contrast,
+                                description = "Saturation / contrast",
+                                active = toolOpen == "adjust",
+                                onClick = { toolOpen = if (toolOpen == "adjust") null else "adjust" }
+                            )
+                        }
+                        ToolWithCaption(caption = "Align", show = toolOpen == "align") {
+                            EditToolPill(
+                                glyph = "notes",
+                                description = "Alignment + fact layout",
+                                active = toolOpen == "align",
+                                onClick = { toolOpen = if (toolOpen == "align") null else "align" }
+                            )
+                        }
+                        ToolWithCaption(caption = "Format", show = toolOpen == "format") {
+                            EditToolPill(
+                                glyph = CurioIcons.FormatBold,
+                                description = "Bold / italic",
+                                active = toolOpen == "format",
+                                onClick = { toolOpen = if (toolOpen == "format") null else "format" }
+                            )
+                        }
+                        ToolWithCaption(caption = "Content", show = toolOpen == "source") {
+                            EditToolPill(
+                                glyph = CurioIcons.Edit,
+                                description = "Content (source, custom fact, photo)",
+                                active = toolOpen == "source",
+                                onClick = { toolOpen = if (toolOpen == "source") null else "source" }
+                            )
+                        }
                         // v330 — Reset + Done live in the bottom action bar
                         // while editing (see below); the floating cluster over
                         // the card is gone.
@@ -8524,7 +8555,7 @@ fun TopicShareSheet(
                                                     }
                                                     // Fact format (quick/custom fact only)
                                                     if (fsIsFact) {
-                                                        Text("Fact format", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+                                                        Text("Fact layout", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
                                                         Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()).padding(12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                                             ShareCardFactFormat.entries.forEach { fmt ->
                                                                 Pill(fmt.label, CurioIcons.FormatText, move.factFormat == fmt) {
@@ -8640,26 +8671,10 @@ fun TopicShareSheet(
                     }
 
                     // ── One small overlay for the open tool ────────────
+                    // v377 — the "style" panel is GONE: designs switch by
+                    // swiping the card carousel, and a Signature card's two
+                    // looks flip from the toolbar's Style toggle instead.
                     when (toolOpen) {
-                        "style" -> Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text("Design", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState())
-                            ) {
-                                // v323 — panels STAY OPEN while picking options; tap
-                                // the tool icon again to close.
-                                styles.forEachIndexed { i, st ->
-                                    Pill(st.label, CurioIcons.AutoAwesome, st == currentStyle) { setStyle(i) }
-                                }
-                            }
-                            if (currentStyle == ShareCardStyle.SIGNATURE) {
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Pill("Current", CurioIcons.AutoAwesome, !classicDesign) { classicDesign = false }
-                                    Pill("Classic", CurioIcons.AutoAwesome, classicDesign) { classicDesign = true }
-                                }
-                            }
-                        }
                         // v340 — text size is a PRECISE slider now (the old
                         // fixed % buttons jumped 0.15–0.3× at a time, so long
                         // text went from too small to cut off with no middle
@@ -8748,7 +8763,7 @@ fun TopicShareSheet(
                             ) {
                                 Column(Modifier.weight(1f)) {
                                     Text("Smart fit", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface)
-                                    Text("Long facts automatically grow their box and shrink their text size (the same sliders) so they fit the whole card. Off = the box stays exactly as you set it.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text("Long facts grow their box and shrink their text to fit the whole card.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                                 Switch(
                                     checked = AppPreferences.shareAutoFitState,
@@ -8805,7 +8820,7 @@ fun TopicShareSheet(
                             AdjustSliderRow("Saturation", saturation, 0.5f..1.5f) { saturation = it }
                             AdjustSliderRow("Contrast", contrast, 0.5f..1.5f) { contrast = it }
                             Text(
-                                "Fine-tune the card's look. It applies to every style and the saved image.",
+                                "Applies to every style and the saved image.",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -8818,6 +8833,36 @@ fun TopicShareSheet(
                                     Pill("Center", "notes", elementAlign == TextAlign.Center) { setElementAlign(TextAlign.Center) }
                                     Pill("Right", "notes", elementAlign == TextAlign.End) { setElementAlign(TextAlign.End) }
                                     Pill("Justify", "notes", elementAlign == TextAlign.Justify) { setElementAlign(TextAlign.Justify) }
+                                }
+                                // v377 — the FACT TEXT LAYOUT presets moved in
+                                // here from the Format tool (v370's Standard /
+                                // Condensed / Book page / Editorial recompose
+                                // how the fact body is set on every style).
+                                if (isFact) {
+                                    Text("Fact layout", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp, color = MaterialTheme.colorScheme.onSurfaceVariant))
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState())
+                                    ) {
+                                        ShareCardFactFormat.entries.forEach { f ->
+                                            Pill(f.label, "notes", move.factFormat == f) {
+                                                updateMove(move.copy(factFormat = f))
+                                            }
+                                        }
+                                    }
+                                    // Editorial-only: the drop-cap variant,
+                                    // visible only while the layout is
+                                    // Editorial so it never clutters.
+                                    if (move.factFormat == ShareCardFactFormat.EDITORIAL) {
+                                        Text("Drop cap", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp, color = MaterialTheme.colorScheme.onSurfaceVariant))
+                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            ShareCardFactDropCap.entries.forEach { c ->
+                                                Pill(c.label, "title", move.factDropCap == c) {
+                                                    updateMove(move.copy(factDropCap = c))
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         } else {
@@ -8833,36 +8878,6 @@ fun TopicShareSheet(
                                     setElementItalic(!elementItalic)
                                 }
                             }
-                            // v370 — FACT TEXT LAYOUT presets (only the quick
-                            // fact): Standard / Condensed / Book page /
-                            // Editorial. Each recomposes how the fact body is
-                            // set on every card style.
-                            if (isFact) {
-                                Text("Fact layout", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp, color = MaterialTheme.colorScheme.onSurfaceVariant))
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    modifier = Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState())
-                                ) {
-                                    ShareCardFactFormat.entries.forEach { f ->
-                                        Pill(f.label, "notes", move.factFormat == f) {
-                                            updateMove(move.copy(factFormat = f))
-                                        }
-                                    }
-                                }
-                                // Editorial-only: the drop-cap variant. Only
-                                // visible when the fact layout is Editorial so
-                                // the option doesn't clutter other layouts.
-                                if (move.factFormat == ShareCardFactFormat.EDITORIAL) {
-                                    Text("Drop cap", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp, color = MaterialTheme.colorScheme.onSurfaceVariant))
-                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                        ShareCardFactDropCap.entries.forEach { c ->
-                                            Pill(c.label, "title", move.factDropCap == c) {
-                                                updateMove(move.copy(factDropCap = c))
-                                            }
-                                        }
-                                    }
-                                }
-                            }
                         }
                         "source" -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text("Content", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -8876,17 +8891,13 @@ fun TopicShareSheet(
                                     modifier = Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState())
                                 ) {
                                     sourceOptions.forEach { opt ->
-                                        Pill(
-                                            opt.label + (opt.rating?.takeIf { r -> r > 0 }?.let { " · " + "\u2605".repeat(it) } ?: ""),
-                                            if (opt.id == CUSTOM_FACT_ID) CurioIcons.Add else CurioIcons.FormatText,
-                                            // v335 — Reading progress stays shown while a custom
-                                            // fact stacks under it.
-                                            opt.id == activeId || (opt.id == "chapter_progress" && showChapterProgress)
-                                        ) {
-                                            // v335 — the content pills drive the progress bar
-                                            // separately from the fact: Reading progress turns
-                                            // the bar on, Custom fact keeps it on (fact stacks
-                                            // below), anything else turns it off.
+                                        val picked = opt.id == activeId || (opt.id == "chapter_progress" && showChapterProgress)
+                                        // v335 — the content pills drive the progress bar
+                                        // separately from the fact: Reading progress turns
+                                        // the bar on, Custom fact keeps it on (fact stacks
+                                        // below), anything else turns it off.
+                                        val onPick: () -> Unit = {
+                                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                             when (opt.id) {
                                                 "chapter_progress" -> {
                                                     showChapterProgress = true
@@ -8904,6 +8915,23 @@ fun TopicShareSheet(
                                                     selectedId = opt.id
                                                 }
                                             }
+                                        }
+                                        // v377 — "No fact" is an icon-ONLY pill: the
+                                        // eye-cross hides the fact box with no words.
+                                        if (opt.id == NO_FACT_ID) {
+                                            IconPill(
+                                                icon = CurioIcons.VisibilityOff,
+                                                contentDesc = "No fact — hide the fact box",
+                                                selected = picked,
+                                                onClick = onPick
+                                            )
+                                        } else {
+                                            Pill(
+                                                opt.label + (opt.rating?.takeIf { r -> r > 0 }?.let { " · " + "\u2605".repeat(it) } ?: ""),
+                                                if (opt.id == CUSTOM_FACT_ID) CurioIcons.Add else CurioIcons.FormatText,
+                                                picked,
+                                                onClick = onPick
+                                            )
                                         }
                                     }
                                 }
@@ -9201,15 +9229,27 @@ fun TopicShareSheet(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            CurioIcon(name = CurioIcons.FormatText, tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 16.dp)
-                            Text(
-                                activeSource.label,
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f)
+                            // v377 — when No fact is active the toggle shows the
+                            // eye-cross icon alone (no words): it HIDES the fact
+                            // box, and the icon says so.
+                            val noFactActive = activeSource.id == NO_FACT_ID
+                            CurioIcon(
+                                name = if (noFactActive) CurioIcons.VisibilityOff else CurioIcons.FormatText,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                size = 16.dp
                             )
+                            if (noFactActive) {
+                                Spacer(Modifier.weight(1f))
+                            } else {
+                                Text(
+                                    activeSource.label,
+                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
                             CurioIcon(name = CurioIcons.KeyboardArrowDown, tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 16.dp)
                         }
                     }
@@ -9594,7 +9634,36 @@ private fun adjustColorMatrix(saturation: Float, contrast: Float): ColorMatrix {
     return con
 }
 
-/** v3xx — one circular icon tool button in the edit toolbar (icons only). */
+/**
+ * v377 — a toolbar tool cell: the 44dp icon pill with an optional TINY
+ * caption line under it. The caption shows only while that tool's panel is
+ * open (so it reads the tool's short name and moves as the user switches
+ * tools); the ratio + Signature-variant toggles pass [show] = true so their
+ * state label (3:4 / 9:16 · Classic / Current) is always legible.
+ */
+@Composable
+private fun ToolWithCaption(caption: String, show: Boolean, content: @Composable () -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        content()
+        if (show) {
+            Text(
+                caption,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 8.5.sp,
+                    lineHeight = 9.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 0.1.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                modifier = Modifier.padding(top = 2.dp).widthIn(max = 56.dp)
+            )
+        }
+    }
+}
+
+/** v3xx/v377 — one circular icon tool button in the edit toolbar (icons only;
+ *  the [ToolWithCaption] wrapper may add its short name underneath). */
 @Composable
 private fun EditToolPill(
     glyph: String,
@@ -9626,6 +9695,27 @@ private fun Pill(label: String, icon: String, selected: Boolean, onClick: () -> 
         Row(Modifier.padding(horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
             CurioIcon(name = icon, tint = if (selected) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant, size = 15.dp)
             Text(label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = if (selected) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+/** v377 — an icon-ONLY pill (no label) for the Content panel's "No fact"
+ *  option: an eye-crossed glyph hides the fact box with no words. */
+@Composable
+private fun IconPill(icon: String, contentDesc: String, selected: Boolean, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = CircleShape,
+        color = if (selected) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surfaceContainerHigh,
+        modifier = Modifier.size(38.dp)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            CurioIcon(
+                name = icon,
+                contentDescription = contentDesc,
+                size = 18.dp,
+                tint = if (selected) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

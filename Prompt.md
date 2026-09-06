@@ -2,70 +2,74 @@
 
 ## Request (2026-09-06, active)
 
-"the cover position isnt right in share card, in paper design its top left
-corner and not to the side of the title and author and also the space can be
-decrase, in vinyls the text quick fact should move a little down and the
-cover for albumn and the title itself should be a little down too do it
-doesnt verlap on category pill, in editorial its near perfect, the cover
-should move a little don matching the title starting point and the title can
-move a little closer to the cover, same for minimal too. and for clean a
-similiar the positioning is good the ittle move closer, and then the cover
-and albumn should move together also when the quick fact gets moved along
-with title the cover should move too by collide logic i think while keeping
-the positio with the title, and also in the auto text the collision should
-work when the height of the quick fact gets tuned manually and the title
-moves up automatically along with cover if present and it comes don if with
-the slider it gets lowered and same for width chnages too, so apply it an
-dmak eit more better and smart."
+Share-card editor (Customise) UI declutter + structure:
 
-Ask answer: "Glue cover to the title block; title drag moves cover too and
-also the title move during collision moves it too; Saved lift".
+1. "the style button should only show when signature style is active and
+   tapping it should switch between the 2 differnt signature style no need
+   for the design options below in tool bar"
+2. "the ratio of 3:4 9:12 dimention chnage make it chnage without closing
+   the other tool if its open"
+3. "remove that tap a thing to select swipe for another design text, and
+   instead show a small text per tool, like ratio, font, style, crop,
+   color, these hint text below tools when selected"
+4. "the layout f standard condenced book page etc, move them inside the
+   alingment tool"
+5. "the content one make the no fact just eye cross icon so it hides the
+   fact box with just icon no text, and similiar more improvements and
+   usless text remove making the ui clutter free and more beautiful and
+   easy to use"
+6. "you can suggest me more features too"
 
-Also noted by user: watch CI after push (deferred until everything is done).
+Ask answers: (a) tool captions UNDER THE OPEN TOOL ONLY — the label moves
+when you switch tools; (b) No-fact = eye-cross icon pill in the Content
+panel AND the eye-cross replaces the words in the bottom content toggle;
+(c) the ratio icon keeps a tiny always-on caption showing the active size
+("3:4" / "9:16").
 
-## Implemented (v376)
+## Implemented (v377)
 
-1. **GLUED covers (Paper / Vinyl / Clean / Editorial / Minimal).**
-   `TopicShareCard` now computes `glueCoverStyle` + `gluedCover` and passes
-   the artwork (with natural `coverW`/`coverH` — 44×66 jacket, 66×66 album)
-   into those five style cards. The old side-layout overlay + title-dx shift
-   stays only for Signature/Custom. New `GluedCover` composable renders the
-   jacket INSIDE each style's title block as the leading item of the Row
-   that carries the title's move (`glueTitleMove` = drag offset + auto lift;
-   `titleSize` = font scale + width crop applied to the TEXT ONLY), so the
-   cover sits exactly beside the title at the design's natural flow spot and
-   rides every title drag / collision push / auto lift. The cover keeps its
-   own fine-position offset (`coverDx`/`coverDy`) inside the group.
-2. **Per-style placement pass.**
-   - Paper (MiddleContent): cover | title+author Row beside the headline
-     area, snug `CoverTitleGap` (12dp).
-   - Vinyl: cover | title+byline Row; title block lowered (18dp spacer with
-     cover) so it clears the category pill; quick fact nudged down (14dp
-     spacer with cover).
-   - Editorial: cover | headline+deck Row aligned to the headline start
-     (topPad 5).
-   - Minimal: cover | title+byline Row (topPad 4).
-   - Clean (Neumorphic): cover beside the CENTERED title block
-     (CenterStart, CenterVertically).
-3. **Auto title-lift collision (`move.titleLift`, dp, saved).**
-   In `ArrangeableCard`'s edit overlay, a `LaunchedEffect` (editMode,
-   non-quote) watches measured title/fact rects + fact-box fractions; when a
-   manually grown fact box (height / width / whole-box sliders or the corner
-   grip) would draw over the title, it computes the needed lift from the
-   title's UN-lifted base (measured bottom + current lift → one-step
-   convergence), clamps to the card top, and writes it into the move via
-   `onMove`. `moveTitle`/`titleShift`/`glueTitleMove` apply the lift as an
-   upward offset everywhere (sheet preview + export); `titleLift` is parsed
-   and persisted in the move JSON. Lowering the box drops the needed lift →
-   the title settles back. TITLE drag clamp adds the lift back to keep the
-   natural base correct.
+1. **Design options removed; Style tool = Signature-only variant flip.**
+   The `toolOpen == "style"` panel (styles list + Current/Classic rows) is
+   deleted along with the now-unused `setStyle`/`scope`. Designs switch by
+   swiping the card carousel. In the edit toolbar a Style toggle appears
+   ONLY when `currentStyle == SIGNATURE`: one tap flips `classicDesign`
+   (haptic), caption under the icon shows the active variant
+   (Current/Classic). No more design pills/panel under the toolbar.
+2. **Ratio toggle**: `toolOpen = null` removed (changing 3:4 ↔ 9:16 no
+   longer closes an open tool panel) + always-on caption `aspect.label`
+   under the icon.
+3. **Hint text removed**: "Tap a thing to select · swipe for another
+   design" is gone ("Hold to edit" before editing stays). Tool captions:
+   new `ToolWithCaption` wraps every pill — its tiny name (Text / Size /
+   Crop / Fit / Font / Color / Adjust / Align / Format / Content) shows
+   under the pill only while that tool's panel is open.
+4. **Fact layout under Alignment**: Standard / Condensed / Book page /
+   Editorial (+ Editorial-only Drop cap) moved from the Bold/Italic
+   (format) tool into the ALIGN tool panel (fact selected); full-screen
+   editor's adjacent section header renamed "Fact layout" for parity.
+5. **No fact = eye-cross**: new `CurioIcons.VisibilityOff` glyph added to
+   the bundled Material Symbols subset (fontTools rlig surgery on the
+   existing subset: +1 rlig name, 0 lost, no cmap change, ~300 bytes —
+   full-font pyftsubset explodes the glyph closure on Material Symbols'
+   first-letter ligatures, so the glyph outline + rlig record were copied
+   straight into the current font). Content panel's No-fact option is now
+   an icon-only `IconPill`; the bottom content toggle shows just the eye-
+   cross + chevron when No fact is active (no text).
+6. **Copy trims**: Smart-fit panel paragraph and Adjust footer line cut to
+   one line each.
+
+Files touched: TopicShareCard.kt (toolbar/panels/hints/copy +
+ToolWithCaption/IconPill helpers), CurioIcons.kt (VisibilityOff const),
+material_symbols_outlined.ttf (subset +visibility_off), app/AGENTS.md
+(v377), fastlane changelog.
 
 ## Notes for next request / CI
 
-- CI will compile-check on push (no Gradle in this environment). Watch for
-  the `glueTitleMove`/`titleSize`/`GluedCover` wiring and the
-  `ArrangeableCard` LaunchedEffect (scaled-density rects go through
-  `editDensity`).
-- Braces verified balanced in TopicShareCard.kt with a template-aware
-  tokenizer; per-hunk diff nets all zero.
-- Changelog (fastlane 20260921.txt) + app/AGENTS.md v376 bullet added.
+- Braces balanced in all edited Kotlin files (template-aware tokenizer).
+- CI compiles on push (no Gradle here). The font change is runtime-only
+  (glyph ligature verified present after surgery); Kotlin is the compile
+  surface. Watch the new ToolWithCaption/IconPill wiring + removed
+  style-panel references.
+- Feature suggestions offered to the user at close (smart-fit per content
+  type; full-screen editor tool grouping/parity; lock styles to content;
+  presets/favorites for a design).
