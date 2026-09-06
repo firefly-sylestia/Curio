@@ -3048,7 +3048,7 @@ private fun BookNotesSheet(
                 .padding(bottom = 20.dp)
         ) {
             // ── Top hairline — soft accent rule under the drag handle ─────
-            NotesSheetTopHairline(cat)
+            NotesSheetTopHairline(accent)
             Spacer(Modifier.height(10.dp))
             // ── Header — cover + title/author + heart + close ────────────
             Row(
@@ -3575,12 +3575,15 @@ private fun BookSynopsisAccordion(
 
 /**
  * Shared "top hairline" for the full-height NOTES sheets (book notes +
- * album track list): a soft accent rule under the drag handle giving the
- * category-tinted sheet a crisp accent top edge.
+ * album track list + series episodes): a soft accent glow under the drag
+ * handle giving the sheet a crisp accent top edge. Takes the sheet's
+ * RESOLVED accent (cover-derived when the artwork palette is active, the
+ * category accent otherwise) so the glow always matches the sheet's own
+ * color story — it used to hardcode the category accent and stayed a
+ * different color than the cover-tinted sheet.
  */
 @Composable
-private fun NotesSheetTopHairline(cat: com.curio.app.data.CurioCategory) {
-    val accent = cat.themedAccent()
+private fun NotesSheetTopHairline(accent: Color) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -4081,7 +4084,7 @@ private fun AlbumNotesSheet(
                 .padding(bottom = 20.dp)
         ) {
             // ── Top hairline — matches the book sheet ───────────────────
-            NotesSheetTopHairline(cat)
+            NotesSheetTopHairline(accent)
             Spacer(Modifier.height(10.dp))
 
             // ── Header — artwork + album title/artist + close ──────────
@@ -4678,7 +4681,7 @@ private fun EpisodeNotesSheet(
                 .padding(bottom = 20.dp)
         ) {
             // ── Top hairline — soft accent rule under the drag handle ─────
-            NotesSheetTopHairline(cat)
+            NotesSheetTopHairline(accent)
             Spacer(Modifier.height(10.dp))
             // ── Header — poster + title/creator + heart + close ──────────
             Row(

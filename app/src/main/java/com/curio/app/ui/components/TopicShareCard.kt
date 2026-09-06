@@ -31,6 +31,7 @@ import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Switch
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ButtonDefaults
@@ -98,6 +99,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -161,6 +163,23 @@ enum class ShareCardAspect(val label: String, val widthDp: Int, val heightDp: In
     CLASSIC("3:4", 450, 600)
 }
 
+/** v370 — quick-fact TEXT LAYOUT modes (offered by the Format tool when the
+ *  fact box is selected, on EVERY card style). */
+enum class ShareCardFactFormat(val label: String) {
+    STANDARD("Standard"),
+    CONDENSED("Condensed"),
+    BOOK("Book page"),
+    EDITORIAL("Editorial")
+}
+
+/** v370 — EDITORIAL drop-cap variant (only read when the fact layout is
+ *  [ShareCardFactFormat.EDITORIAL]). */
+enum class ShareCardFactDropCap(val label: String) {
+    NONE("No cap"),
+    LETTER("Big first letter"),
+    WORD("Big first word")
+}
+
 data class ShareCardContent(
     val id: String,
     val label: String,
@@ -178,7 +197,12 @@ data class ShareCardPalette(
     val ink: Color,
     val inkFaint: Color,
     // v323 — human name shown by the Tone tool's swatches (Auto = rotation).
-    val name: String = ""
+    val name: String = "",
+    // v369 — level gate for the Tone tool: null = ALWAYS available, an int
+    // = the player level that unlocks it (matches LevelRewards PALETTE
+    // rewards). The always-available set is the 4 base tones + the new dark
+    // variants; premium tones unlock at their reward level.
+    val unlockLevel: Int? = null
 )
 
 // Curated tones — warm, beautiful, NOT derived from category colors.
@@ -220,28 +244,28 @@ private val curatedTones = listOf(
         bgBase = Color(0xFF1E2433), bgLight = Color(0xFF2A3142), bgMid = Color(0xFF171C29),
         accent = Color(0xFF9FB4D8), accentDark = Color(0xFF6E86B3),
         ink = Color(0xFFEDF1F8), inkFaint = Color(0xFF9AA6BE),
-        name = "Midnight"
+        name = "Midnight", unlockLevel = 2
     ),
     // Forest (Level 8) — mossy pine on soft mushroom
     ShareCardPalette(
         bgBase = Color(0xFFEDF1E8), bgLight = Color(0xFFF6F8F2), bgMid = Color(0xFFD9E2D0),
         accent = Color(0xFF4E6E4A), accentDark = Color(0xFF33512F),
         ink = Color(0xFF1B2418), inkFaint = Color(0xFF64755E),
-        name = "Forest"
+        name = "Forest", unlockLevel = 8
     ),
     // Lavender (Level 15) — lilac on cool grey-cream
     ShareCardPalette(
         bgBase = Color(0xFFF3EFF7), bgLight = Color(0xFFFAF7FC), bgMid = Color(0xFFE3DBEF),
         accent = Color(0xFF8B74B8), accentDark = Color(0xFF664F93),
         ink = Color(0xFF221B31), inkFaint = Color(0xFF7C6E96),
-        name = "Lavender"
+        name = "Lavender", unlockLevel = 15
     ),
     // Ember (Level 30) — charcoal with a molten orange accent
     ShareCardPalette(
         bgBase = Color(0xFF26211D), bgLight = Color(0xFF332C26), bgMid = Color(0xFF1C1815),
         accent = Color(0xFFE0853F), accentDark = Color(0xFFB4602A),
         ink = Color(0xFFFAF1E8), inkFaint = Color(0xFFA08E7E),
-        name = "Ember"
+        name = "Ember", unlockLevel = 30
     ),
     // v323 — six more premium tones unlocked by higher levels (see
     // [LevelRewards]): Ocean (12), Rose Gold (18), Moss (25), Storm (35),
@@ -251,58 +275,316 @@ private val curatedTones = listOf(
         bgBase = Color(0xFFEAF2F4), bgLight = Color(0xFFF4FAFB), bgMid = Color(0xFFD3E6EA),
         accent = Color(0xFF2E6E8E), accentDark = Color(0xFF1D4E68),
         ink = Color(0xFF0F242E), inkFaint = Color(0xFF5F7C8A),
-        name = "Ocean"
+        name = "Ocean", unlockLevel = 12
     ),
     // Rose Gold — blush copper on warm cream
     ShareCardPalette(
         bgBase = Color(0xFFFAF1ED), bgLight = Color(0xFFFDF8F5), bgMid = Color(0xFFF0DDD4),
         accent = Color(0xFFC08A7A), accentDark = Color(0xFF9C6353),
         ink = Color(0xFF2B1B16), inkFaint = Color(0xFF8A6F66),
-        name = "Rose Gold"
+        name = "Rose Gold", unlockLevel = 18
     ),
     // Moss — earthy olive on parchment
     ShareCardPalette(
         bgBase = Color(0xFFF4F1E8), bgLight = Color(0xFFFAF8F2), bgMid = Color(0xFFE2DCC8),
         accent = Color(0xFF7A6B3E), accentDark = Color(0xFF57491F),
         ink = Color(0xFF26210F), inkFaint = Color(0xFF7C7158),
-        name = "Moss"
+        name = "Moss", unlockLevel = 25
     ),
     // Storm — slate blue-grey on light mist
     ShareCardPalette(
         bgBase = Color(0xFFEDF0F4), bgLight = Color(0xFFF6F8FA), bgMid = Color(0xFFD5DBE3),
         accent = Color(0xFF5A6B80), accentDark = Color(0xFF3D4C5E),
         ink = Color(0xFF181E26), inkFaint = Color(0xFF667180),
-        name = "Storm"
+        name = "Storm", unlockLevel = 35
     ),
     // Pearl — ivory with a cool silver-lilac accent
     ShareCardPalette(
         bgBase = Color(0xFFF6F2F0), bgLight = Color(0xFFFCFAF9), bgMid = Color(0xFFE5DEDA),
         accent = Color(0xFF9A8FA8), accentDark = Color(0xFF6F647D),
         ink = Color(0xFF241F29), inkFaint = Color(0xFF7C727F),
-        name = "Pearl"
+        name = "Pearl", unlockLevel = 45
     ),
     // Sunburst — warm amber on soft cream
     ShareCardPalette(
         bgBase = Color(0xFFFCF4E2), bgLight = Color(0xFFFFFAF0), bgMid = Color(0xFFF3E2BC),
         accent = Color(0xFFD98E2B), accentDark = Color(0xFFA9641A),
         ink = Color(0xFF2A1D08), inkFaint = Color(0xFF8F7A52),
-        name = "Sunburst"
+        name = "Sunburst", unlockLevel = 50
+    ),
+    // v369 — the dark-variant tones. ALL immediately available (no level
+    // gate) so the tone picker has real range from the start: deep,
+    // moody canvases with light ink auto-derived for contrast (the ink
+    // below is written explicitly but matches the bg luminance so text
+    // always reads).
+    // Onyx — warm near-black charcoal with an amber glow
+    ShareCardPalette(
+        bgBase = Color(0xFF191613), bgLight = Color(0xFF242019), bgMid = Color(0xFF131009),
+        accent = Color(0xFFC9925E), accentDark = Color(0xFFA06A38),
+        ink = Color(0xFFF4EFE8), inkFaint = Color(0xFF9A9186),
+        name = "Onyx"
+    ),
+    // Noir — cool true black with a silver edge
+    ShareCardPalette(
+        bgBase = Color(0xFF0E0E11), bgLight = Color(0xFF1A1A1F), bgMid = Color(0xFF0A0A0C),
+        accent = Color(0xFFC7C9D4), accentDark = Color(0xFF8F93A3),
+        ink = Color(0xFFF2F2F5), inkFaint = Color(0xFF8F8F99),
+        name = "Noir"
+    ),
+    // Wine — deep burgundy with a dusty-rose accent
+    ShareCardPalette(
+        bgBase = Color(0xFF2A1118), bgLight = Color(0xFF3A1821), bgMid = Color(0xFF200B10),
+        accent = Color(0xFFE08A94), accentDark = Color(0xFFB35662),
+        ink = Color(0xFFFAEFF0), inkFaint = Color(0xFFB09097),
+        name = "Wine"
+    ),
+    // Deep Sea — dark teal-navy with an aqua accent
+    ShareCardPalette(
+        bgBase = Color(0xFF0E2228), bgLight = Color(0xFF17333C), bgMid = Color(0xFF091A1F),
+        accent = Color(0xFF6FC3D0), accentDark = Color(0xFF4A97A8),
+        ink = Color(0xFFEEF7F9), inkFaint = Color(0xFF87A9B2),
+        name = "Deep Sea"
+    ),
+    // Cocoa — dark chocolate with a tan accent
+    ShareCardPalette(
+        bgBase = Color(0xFF241710), bgLight = Color(0xFF32221A), bgMid = Color(0xFF1A100A),
+        accent = Color(0xFFD9A87E), accentDark = Color(0xFFB07F54),
+        ink = Color(0xFFFAF3EC), inkFaint = Color(0xFFA8927F),
+        name = "Cocoa"
+    ),
+    // Forest Night — dark pine with a sage accent
+    ShareCardPalette(
+        bgBase = Color(0xFF12201A), bgLight = Color(0xFF1B2F26), bgMid = Color(0xFF0C1612),
+        accent = Color(0xFF8FBF9C), accentDark = Color(0xFF649C74),
+        ink = Color(0xFFF0F7F1), inkFaint = Color(0xFF8FA89A),
+        name = "Forest Night"
+    ),
+    // Plum — dark violet with a lilac accent
+    ShareCardPalette(
+        bgBase = Color(0xFF1F1229), bgLight = Color(0xFF2C1B3A), bgMid = Color(0xFF160B1F),
+        accent = Color(0xFFC3A1E8), accentDark = Color(0xFF9B73C9),
+        ink = Color(0xFFF7F1FC), inkFaint = Color(0xFFA998BE),
+        name = "Plum"
+    ),
+    // Graphite — cool dark grey with a steel-blue accent
+    ShareCardPalette(
+        bgBase = Color(0xFF17181C), bgLight = Color(0xFF23242A), bgMid = Color(0xFF101114),
+        accent = Color(0xFF9FB4C8), accentDark = Color(0xFF7390AA),
+        ink = Color(0xFFF1F2F5), inkFaint = Color(0xFF8F96A3),
+        name = "Graphite"
     )
 )
 
-/** How many tones the player may use at [level] (base 4 + level unlocks). */
-fun unlockedToneCount(level: Int): Int = 4 + LevelRewards.unlockedPaletteCount(level)
+/** v370 — SMART LAYOUT: an always-on, manual-wins adjustment that keeps
+ *  the card's elements from overlapping or leaving the card when the quick
+ *  fact is long. It runs at render (so the export matches) and only nudges
+ *  things the user has NOT already touched per-box. The adjustments are
+ *  conditional on the fact being long AND on the style's layout actually
+ *  having the overlap risk (e.g. COLAGUE's title/middle gap, NEUMORPHIC's
+ *  title floating over the plate, EDITORIAL's oversized headline).
+ *
+ *  When a BOOK/ALBUM/SERIES cover is placed, the cover sits to the LEFT of
+ *  the title + author (per style), and the title can shrink + its box can
+ *  narrow so the cover + title + author all fit without the title leaving the
+ *  card. The cover is taken OUT of the Collage polaroid (there it would
+ *  double up with the photo slot).
+ *
+ *  Manual wins: if the user moved/resized the title or the fact box, the
+ *  smart overlay does NOT touch that box's position/size (it only adjusts the
+ *  OTHER elements relative to it). The category icon (badge) moves WITH the
+ *  grouped move on the fact drag so it stays attached to the fact block.
+ *
+ *  The helper returns the additional deltas/scales to apply on top of the
+ *  user's move. Identity = no adjustment.
+ *
+ *  CARD-BOUND safety: every element's final offset is clamped so its reported
+ *  box stays within the card frame (the user can still deliberately push a box
+ *  to the edge for style, but the auto layer never shoves an element off-card).
+ */
+private object SmartLayout {
+    /** Identity — no adjustment. */
+    val Identity = SmartLayoutDelta()
+
+    /** v370 — the smart-layout adjustments applied on top of the user's move
+     *  (manual wins per touched element). Computed from the card's geometry
+     *  (width/height in dp), the fact length, the style, whether a cover is
+     *  placed (so title shrinks + fact narrows when the cover sits left), and
+     *  whether each element has already been touched by the user.
+     *
+     *  The card's design content region is approximated from the aspect's
+     *  width/height (the card's own frame, minus the style's typical padding).
+     *  This is an approximation by design: the adjustments are gentle nudges,
+     *  not pixel-perfect reflows, and they only kick in when there's real
+     *  overlap/overlong risk (long fact on astronomy-style long facts, etc.).
+     */
+    fun adjust(
+        style: ShareCardStyle,
+        aspect: ShareCardAspect,
+        factLen: Int,
+        coverPlaced: Boolean,
+        // User-touch state per element: if true, the auto layer does NOT
+        // touch that element's size/position (manual wins).
+        titleTouched: Boolean,
+        factTouched: Boolean,
+        metaTouched: Boolean,
+        // Current effective move (post auto-fit).
+        move: ShareCardMove,
+        // The card's content frame in dp (approximate, for clamping).
+        cw: Float, ch: Float
+    ): SmartLayoutDelta {
+        // Long fact threshold: only adjust when the quick fact is genuinely
+        // long (the astronomy long-fact example: lots of prose in the quick
+        // fact box). Short facts keep the style's natural layout.
+        val long = factLen > 120
+        if (!long && !coverPlaced) return Identity
+
+        var out = SmartLayoutDelta()
+
+        // 1) TITLE: when a cover sits to the left, the title box narrows so
+        //    the title + author + cover all fit. Also, on EDITORIAL the
+        //    headline is oversized (30-32sp Bungee) — for long facts the
+        //    title auto-shrinks a touch and its box caps so it doesn't
+        //    dominate / overlap the fact. Manual title edits win.
+        if (!titleTouched) {
+            if (coverPlaced) {
+                // Narrow the title box to leave room for the cover on the left.
+                out = out.copy(titleWidthFrac = 0.62f.coerceAtMost(move.titleWidthFrac))
+            }
+            if (style == ShareCardStyle.EDITORIAL && long) {
+                // Editorial headline is large by design; for long facts, shrink
+                // it a little so the title + fact stay in balance (title never
+                // overlaps the fact). Manual title scale wins.
+                val ts = move.titleScale.coerceAtMost(0.82f)
+                out = out.copy(titleScale = ts)
+            }
+            // Keep the title (its reported box) inside the card frame.
+            val tDx = move.titleDx.coerceIn(-cw * 0.05f, cw * 0.05f)
+            val tDy = move.titleDy.coerceIn(-ch * 0.02f, ch * 0.18f)
+            if (tDx != move.titleDx || tDy != move.titleDy) {
+                out = out.copy(titleDx = tDx - move.titleDx, titleDy = tDy - move.titleDy)
+            }
+        }
+
+        // 2) FACT: keep it on the card and, when a cover is present, narrow
+        //    it a touch so the fact block doesn't run under the cover. Manual
+        //    fact edits win.
+        if (!factTouched) {
+            if (coverPlaced) {
+                out = out.copy(factWidthFrac = 0.80f.coerceAtMost(move.factWidthFrac))
+            }
+            // Keep the fact box inside the card frame (bottom especially).
+            val fDy = move.factDy.coerceIn(-ch * 0.02f, ch * 0.62f)
+            if (fDy != move.factDy) {
+                out = out.copy(factDy = fDy - move.factDy)
+            }
+        }
+
+        // 3) META (author/year): when the fact is long AND the grouped move
+        //    put the info row near the fact, keep it above the footer and
+        //    below the fact. Manual meta edits win.
+        if (!metaTouched) {
+            val mDy = move.metaDy.coerceIn(-ch * 0.02f, ch * 0.70f)
+            if (mDy != move.metaDy) {
+                out = out.copy(metaDy = mDy - move.metaDy)
+            }
+        }
+
+        // 4) BADGE (category icon): when the fact drag triggers a grouped
+        //    move, the badge travels WITH the fact block (like the meta row
+        //    follows the title). Manual badge edits win. The badge isn't
+        //    forced to a position here — it follows the grouped move in the
+        //    dispatch (see ArrangeableCard.FACT handle).
+
+        // 5) COLAGUE-specific: the middle section (category pill + fact) sits
+        //    BELOW the polaroid/title block; for long facts, increase the gap
+        //    so the pill isn't crushed against the title. We express that as a
+        //    small upward nudge of the fact block (it pulls away from the title
+        //    area) — applied only when the fact box hasn't been manually placed.
+        if (!factTouched && style == ShareCardStyle.COLLAGE && long) {
+            // Pull the fact block down a touch so the middle section breathes
+            // under the top (polaroid + title) block.
+            val gapNudge = ch * 0.03f
+            val fDy = (move.factDy + gapNudge).coerceIn(-ch * 0.02f, ch * 0.62f)
+            out = out.copy(factDy = fDy - move.factDy)
+        }
+
+        // 6) NEUMORPHIC-specific: the title floats at center-start on the dark
+        //    plate; for long facts, keep the title from drifting down into the
+        //    fact area.
+        if (!titleTouched && style == ShareCardStyle.NEUMORPHIC && long) {
+            val tDy = move.titleDy.coerceAtMost(ch * 0.20f)
+            if (tDy != move.titleDy) {
+                out = out.copy(titleDy = tDy - move.titleDy)
+            }
+        }
+
+        return out
+    }
+}
+
+/** v370 — the smart-layout deltas applied on top of the user's move (manual
+ *  wins per element). The auto layer only adjusts things the user hasn't
+ *  touched.
+ *
+ *  NOTE: deltas here are OFFSETS to ADD to the existing move fields (e.g.
+ *  titleDx delta = amount to ADD to move.titleDx). A null/zero value means
+ *  "no change to this field".
+ */
+private data class SmartLayoutDelta(
+    val titleDx: Float = 0f,
+    val titleDy: Float = 0f,
+    val titleWidthFrac: Float = 1f,
+    val titleHeightFrac: Float = 1f,
+    val titleScale: Float = 1f,
+    val factDx: Float = 0f,
+    val factDy: Float = 0f,
+    val factWidthFrac: Float = 1f,
+    val factHeightFrac: Float = 1f,
+    val metaDx: Float = 0f,
+    val metaDy: Float = 0f,
+    val metaWidthFrac: Float = 1f,
+    val metaHeightFrac: Float = 1f
+) {
+    fun compose(base: ShareCardMove): ShareCardMove = base.copy(
+        titleDx = if (titleDx != 0f) base.titleDx + titleDx else base.titleDx,
+        titleDy = if (titleDy != 0f) base.titleDy + titleDy else base.titleDy,
+        titleWidthFrac = if (titleWidthFrac != 1f) titleWidthFrac else base.titleWidthFrac,
+        titleHeightFrac = if (titleHeightFrac != 1f) titleHeightFrac else base.titleHeightFrac,
+        titleScale = if (titleScale != 1f) titleScale else base.titleScale,
+        factDx = if (factDx != 0f) base.factDx + factDx else base.factDx,
+        factDy = if (factDy != 0f) base.factDy + factDy else base.factDy,
+        factWidthFrac = if (factWidthFrac != 1f) factWidthFrac else base.factWidthFrac,
+        factHeightFrac = if (factHeightFrac != 1f) factHeightFrac else base.factHeightFrac,
+        metaDx = if (metaDx != 0f) base.metaDx + metaDx else base.metaDx,
+        metaDy = if (metaDy != 0f) base.metaDy + metaDy else base.metaDy,
+        metaWidthFrac = if (metaWidthFrac != 1f) metaWidthFrac else base.metaWidthFrac,
+        metaHeightFrac = if (metaHeightFrac != 1f) metaHeightFrac else base.metaHeightFrac
+    )
+}
+
+/** How many tones the player may use at [level]: always-available tones
+ *  (null [ShareCardPalette.unlockLevel]) + every premium tone whose reward
+ *  level has been reached. */
+fun unlockedToneCount(level: Int): Int =
+    curatedTones.count { it.unlockLevel == null || it.unlockLevel <= level }
+
+/** The tones offered at the player's CURRENT level (used by the Tone tool
+ *  and the automatic per-category rotation alike). */
+private fun availableTones(): List<ShareCardPalette> {
+    val level = CurioQuests.levelForXp(CurioQuests.xpState)
+    return curatedTones.filter { it.unlockLevel == null || it.unlockLevel <= level }
+}
 
 private fun paletteFor(accent: Color, toneOverride: Int? = null): ShareCardPalette {
     // v323 — an explicit pick from the Tone tool wins; otherwise cycle
     // through the player's AVAILABLE tones using the accent hash. Premium
     // tones only join the rotation once their level reward lands, so
     // unlocking one visibly changes the share-card look.
-    val count = unlockedToneCount(CurioQuests.levelForXp(CurioQuests.xpState))
-        .coerceIn(1, curatedTones.size)
-    val idx = toneOverride?.takeIf { it in curatedTones.indices && it < count }
-        ?: Math.abs(accent.hashCode()) % count
-    return curatedTones[idx]
+    val pool = availableTones()
+    if (pool.isEmpty()) return curatedTones.first()
+    val idx = toneOverride?.takeIf { it in pool.indices }
+        ?: Math.abs(accent.hashCode()) % pool.size
+    return pool[idx]
 }
 
 // ─── Family → available styles mapping ─────────────────────────────────
@@ -358,6 +640,66 @@ private fun quickFactFontSize34(length: Int): TextUnit = when {
     length > 100 -> 8.sp
     length > 50 -> 8.5.sp
     else -> 9.5.sp
+}
+
+/** v369 — smart auto-fit delta: the extra fact-box HEIGHT (frac multiplier)
+ *  and the UP-nudge (dy, negative dp) applied to the fact + title + info so
+ *  the grown box stays on the card. Identity = no adjustment. */
+private class ShareAutoFitDelta(val heightFrac: Float = 1f, val dy: Float = 0f)
+
+/** v370 — smart auto-fit INTENSITY presets (offered in the Size tool while
+ *  the fact box is selected, per style). Each shifts how aggressively long
+ *  text grows its box + lifts the title. 0 = Balanced (the classic curve). */
+private fun autoFitCurve(intensity: Int, len: Int): Float = when (intensity) {
+    // Compact — tighter: needs noticeably more text before it grows, and
+    // grows less per step so short facts keep the style's natural box.
+    1 -> when {
+        len > 520 -> 2.2f
+        len > 400 -> 1.8f
+        len > 300 -> 1.45f
+        len > 220 -> 1.2f
+        else -> 1f
+    }
+    // Airy — looser: starts growing sooner and grows more, so long facts
+    // get generous breathing room on tall cards.
+    2 -> when {
+        len > 420 -> 3.6f
+        len > 300 -> 2.8f
+        len > 210 -> 2.2f
+        len > 140 -> 1.7f
+        len > 80 -> 1.35f
+        else -> 1f
+    }
+    // Balanced (0 / default) — the original curve.
+    else -> when {
+        len > 500 -> 3.0f
+        len > 380 -> 2.4f
+        len > 280 -> 1.9f
+        len > 200 -> 1.5f
+        len > 130 -> 1.25f
+        else -> 1f
+    }
+}
+
+/**
+ * v369/v370 — computes the smart auto-fit adjustment for a long quick fact.
+ * Default ON ([AppPreferences.shareAutoFitState]); once the user has moved
+ * OR resized the fact box themselves ("manual edits win"), auto-fit hands
+ * the box over entirely and returns identity. The font side of auto-fit
+ * (long text shrinking to fit) already lives per-style inside each card;
+ * this adds the box growth + the up-nudge. The per-style INTENSITY preset
+ * ([ShareCardMove.autoFitIntensity]) picks which growth curve to follow.
+ */
+private fun shareAutoFitDelta(move: ShareCardMove, factLength: Int): ShareAutoFitDelta {
+    if (!AppPreferences.shareAutoFitState) return ShareAutoFitDelta()
+    val touched = move.factDx != 0f || move.factDy != 0f ||
+        move.factWidthFrac != 1f || move.factHeightFrac != 1f
+    if (touched) return ShareAutoFitDelta()
+    val h = autoFitCurve(move.autoFitIntensity, factLength)
+    if (h <= 1f) return ShareAutoFitDelta()
+    // ~16dp of upward travel per extra "unit" of box height keeps the grown
+    // text clear of the footer and title while staying on the card.
+    return ShareAutoFitDelta(heightFrac = h, dy = -(h - 1f) * 16f)
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -425,7 +767,28 @@ data class ShareCardMove(
      *  can drag it anywhere on the card (mirrors coverDx/coverDy). Persisted
      *  per style with the rest of the move edits. */
     val favDx: Float = 0f,
-    val favDy: Float = 0f
+    val favDy: Float = 0f,
+    /** v370 — ALBUM favorite-tracks strip SIZE (1f = unchanged). Width is a
+     *  fill fraction of the strip's natural max width; height scales how
+     *  many track rows the strip shows. Mirrors the box-size sliders. */
+    val favWidthFrac: Float = 1f,
+    val favHeightFrac: Float = 1f,
+    /** v370 — quick-fact TEXT LAYOUT: how the fact body is composed on the
+     *  card. STANDARD = the style's default paragraph. CONDENSED tightens
+     *  the line spacing (words keep normal gaps). BOOK = a two-column
+     *  book-page flow: the text breaks at the middle and continues on the
+     *  other side. EDITORIAL = paragraph with a drop cap (see
+     *  [factDropCap]). Applied per-style inside each card's fact render.
+     */
+    val factFormat: ShareCardFactFormat = ShareCardFactFormat.STANDARD,
+    /** v370 — EDITORIAL drop-cap variant: NONE = no cap, LETTER = the first
+     *  letter enlarges, WORD = the first word enlarges. Only read when
+     *  [factFormat] is EDITORIAL (harmless otherwise). */
+    val factDropCap: ShareCardFactDropCap = ShareCardFactDropCap.NONE,
+    /** v370 — smart auto-fit INTENSITY (see [shareAutoFitDelta]): how much a
+     *  long fact grows its box and lifts the title. Overrides the global
+     *  pref when non-default. */
+    val autoFitIntensity: Int = 0
 )
 
 /** Modifier that shifts a card's TITLE by the move offset + box size + scale and
@@ -719,12 +1082,46 @@ fun TopicShareCard(
     chapterFact: String = "",
     callbacks: EditBoundsCallbacks = EditBoundsCallbacks()
 ) {
-    // v324 — thread the adjust filter into the card's own modifier chain so
-    // the preview AND the exported image both render the adjusted look.
-    val cardModifier = if (saturation == 1f && contrast == 1f) modifier
-    else modifier.graphicsLayer {
-        colorFilter = ColorFilter.colorMatrix(adjustColorMatrix(saturation, contrast))
-    }
+    // v324/v369 — the Adjust tool's saturation/contrast now applies to the
+    // card's BACKGROUND only (never the text, the polaroid or the book
+    // cover): the matrix is threaded into each style and applied on its
+    // background layer, so the preview AND the exported image match.
+    val bgFilter = if (saturation == 1f && contrast == 1f) null
+    else ColorFilter.colorMatrix(adjustColorMatrix(saturation, contrast))
+    // v369 — SMART AUTO-FIT: long fact text auto-shrinks (per-style font
+    // steps), auto-GROWS the fact box and nudges it (plus the title + info
+    // rows that travel with it) up so the text fits the tall card. Manual
+    // edits of the fact box hand it over entirely ("manual wins").
+    val factLen = (editedFact ?: factText).length
+    val autoFit = shareAutoFitDelta(move, factLen)
+    val effectiveMove = if (autoFit.heightFrac == 1f && autoFit.dy == 0f) move
+    else move.copy(
+        factHeightFrac = move.factHeightFrac * autoFit.heightFrac,
+        factDy = move.factDy + autoFit.dy,
+        titleDy = move.titleDy + autoFit.dy,
+        metaDy = move.metaDy + autoFit.dy
+    )
+    // v370 — SMART LAYOUT (always-on, manual-wins): keeps elements from
+    // overlapping or leaving the card when the quick fact is long, and when a
+    // BOOK/ALBUM/SERIES cover is placed, narrows the title box + fact box so
+    // the cover (to the LEFT of title + author) + title + author all fit
+    // without the title leaving the card. The card's content frame is
+    // approximated from the card's own measured size (wm) so the adjustments
+    // are card-relative, not card-design-relative.
+    val wm = androidx.compose.ui.platform.LocalDensity.current
+    val cw = with(wm) { (aspect.widthDp.toFloat()).toDp().value }
+    val ch = with(wm) { (aspect.heightDp.toFloat()).toDp().value }
+    // Per-element "touched" flags: if the user moved/resized an element,
+    // smart layout does NOT override that element (manual wins).
+    val titleTouched = effectiveMove.titleDx != 0f || effectiveMove.titleDy != 0f ||
+        effectiveMove.titleWidthFrac != 1f || effectiveMove.titleHeightFrac != 1f || effectiveMove.titleScale != 1f
+    val factTouched = effectiveMove.factDx != 0f || effectiveMove.factDy != 0f ||
+        effectiveMove.factWidthFrac != 1f || effectiveMove.factHeightFrac != 1f
+    val metaTouched = effectiveMove.metaDx != 0f || effectiveMove.metaDy != 0f ||
+        effectiveMove.metaWidthFrac != 1f || effectiveMove.metaHeightFrac != 1f
+    val coverPlaced = bookCover != null && style != ShareCardStyle.COLLAGE
+    val smart = if (factLen > 120 || coverPlaced) SmartLayout.adjust(style, aspect, factLen, coverPlaced, titleTouched, factTouched, metaTouched, effectiveMove, cw, ch) else SmartLayout.Identity
+    val displayMove = smart.compose(effectiveMove)
     val display = topicName.substringBeforeLast(" (")
     // Extract year from trailing parentheses — "Appetite for Destruction (1987)" → "1987"
     val year = topicName.substringAfterLast("(").substringBeforeLast(")").takeIf { it.all { c -> c.isDigit() } && it.length == 4 }
@@ -740,43 +1137,80 @@ fun TopicShareCard(
     val albumFavTracks = AppPreferences.albumFavTracksState[topicName].orEmpty()
     Box {
         when (style) {
-            ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact)
-            ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact, hideTypedFavSong = albumFavTracks.isNotEmpty() && AppPreferences.albumFavStripVisibleState)
-            ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto ?: bookCover, byline, year, polaroidCaption, onPhotoTap, bodyScale, callbacks, move, chapterProgress, chapterFact)
-            ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact)
-            ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact)
-            ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact)
-            ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, bodyScale, callbacks, move, chapterProgress, chapterFact)
-            ShareCardStyle.CUSTOM -> CustomCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, cardModifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact)
+            ShareCardStyle.PAPER -> PaperCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, displayMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.VINYL -> VinylCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, displayMove, chapterProgress, chapterFact, hideTypedFavSong = albumFavTracks.isNotEmpty() && AppPreferences.albumFavStripVisibleState, bgFilter)
+            // v370 — Collage does NOT merge the book cover into its polaroid
+            // photo slot (that's the user photo only). The book cover, when
+            // placed, renders as a separate left badge from the dispatch block
+            // above (only when explicitly placed). Passing `userPhoto` alone
+            // keeps the polaroid clean.
+            ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto, byline, year, polaroidCaption, onPhotoTap, bodyScale, callbacks, displayMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, displayMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, displayMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, displayMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, bodyScale, callbacks, displayMove, chapterProgress, chapterFact, bgFilter)
+            ShareCardStyle.CUSTOM -> CustomCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, bodyScale, callbacks, displayMove, chapterProgress, chapterFact, bgFilter)
         }
-        // v334 — the cover badge rides on top of every style EXCEPT Collage
-        // (there it feeds the polaroid photo slot above).
-        // v335 — the jacket is a movable element like the badge: its offset
-        // comes from [move.coverDx]/[move.coverDy] and it reports its bounds
-        // so the editor's chrome can select + drag it.
-        // v340 — the DEFAULT pocket is per-style: each design anchors the
-        // jacket where ITS top-right art (or headline/crest) leaves a gap,
-        // so a fresh cover lands in that style's natural spot instead of
-        // always overlapping the same corner decoration. The user can still
-        // drag it anywhere (move offsets apply on top).
+        // v370 — COVER PLACEMENT: the BOOK/ALBUM/SERIES cover sits to the
+        // LEFT of the title + author (per style), NOT in a corner badge and
+        // NOT in the Collage polaroid (there it would double up with the
+        // photo slot). The cover is taken OUT of the Collage polaroid
+        // entirely — Collage keeps its photo slot only.
+        //
+        // Per category, the cover lands in that style's corner POCKET where
+        // the design leaves a natural gap (so a fresh cover sits cleanly
+        // beside the title/author without overlapping the headline). The
+        // default pocket is LEFT-aligned near the title by default; the user
+        // can still drag it anywhere (move.coverDx/coverDy apply on top).
+        //
+        // When the cover is present, the smart layer already narrows the title
+        // box + fact box (see SmartLayout) so the title + author + cover all
+        // fit on the card without the title leaving the card.
         if (bookCover != null && style != ShareCardStyle.COLLAGE) {
+            // LEFT pocket — beside the title + author block. Each style uses a
+            // slightly different left/vertical anchor so the cover lands in the
+            // design's natural gap (e.g. PAPER's top-left column, EDITORIAL's
+            // masthead left, etc.).
             val coverSlot = when (style) {
-                ShareCardStyle.PAPER -> Alignment.TopEnd to PaddingValues(top = 64.dp, end = 16.dp)
-                ShareCardStyle.VINYL -> Alignment.TopEnd to PaddingValues(top = 70.dp, end = 18.dp)
-                // Clean wears a huge rotated glyph top-right: drop the jacket
-                // BELOW it instead of over the category art.
-                ShareCardStyle.NEUMORPHIC -> Alignment.TopEnd to PaddingValues(top = 186.dp, end = 20.dp)
-                // Editorial: masthead rules + headline own the top; the
-                // bottom-right sits beside the colophon's left-aligned slug.
-                ShareCardStyle.EDITORIAL -> Alignment.BottomEnd to PaddingValues(bottom = 26.dp, end = 18.dp)
-                ShareCardStyle.MINIMAL -> Alignment.TopEnd to PaddingValues(top = 48.dp, end = 16.dp)
-                // Signature/Custom: small crest at top-right — the jacket
-                // parks just below it.
-                ShareCardStyle.SIGNATURE, ShareCardStyle.CUSTOM -> Alignment.TopEnd to PaddingValues(top = 56.dp, end = 16.dp)
-                ShareCardStyle.COLLAGE -> Alignment.TopEnd to PaddingValues(top = 34.dp, end = 14.dp)
+                // PAPER: title sits top-left; the cover goes just RIGHT of the
+                // title column, top-anchored, so the author line + cover read
+                // alongside.
+                ShareCardStyle.PAPER -> Alignment.TopStart to PaddingValues(top = 64.dp, start = 22.dp)
+                // VINYL: artist/title top-left; cover sits to the right of the
+                // title block, top-ish.
+                ShareCardStyle.VINYL -> Alignment.TopStart to PaddingValues(top = 70.dp, start = 26.dp)
+                // Clean: huge rotated glyph top-right; the title is center-start.
+                // The cover goes to the LEFT of the title block, mid-top.
+                ShareCardStyle.NEUMORPHIC -> Alignment.TopStart to PaddingValues(top = 120.dp, start = 16.dp)
+                // Editorial: masthead rules + headline own the top-LEFT; the
+                // cover sits just BELOW the masthead, left-aligned, above the
+                // body. (Not in the corner — the masthead is where the art is.)
+                ShareCardStyle.EDITORIAL -> Alignment.TopStart to PaddingValues(top = 132.dp, start = 26.dp)
+                // Minimal: title top-left; cover sits to the left of the title
+                // block, top.
+                ShareCardStyle.MINIMAL -> Alignment.TopStart to PaddingValues(top = 48.dp, start = 30.dp)
+                // Signature/Custom: small crest top-right; title top-left.
+                // Cover sits to the LEFT of the title block, top.
+                ShareCardStyle.SIGNATURE, ShareCardStyle.CUSTOM -> Alignment.TopStart to PaddingValues(top = 56.dp, start = 30.dp)
+                // Collage: the cover does NOT go in the polaroid photo slot
+                // (that's the user photo). If a book cover exists on a Collage
+                // card, we still render it as a small LEFT badge so the card
+                // can carry a cover without double-up — but only when the user
+                // explicitly placed it (move.coverDx != 0 or coverDy != 0), so
+                // a fresh Collage card never carries a surprise book cover.
+                ShareCardStyle.COLLAGE -> {
+                    if (move.coverDx != 0f || move.coverDy != 0f)
+                        Alignment.TopStart to PaddingValues(top = 34.dp, start = 14.dp)
+                    else Alignment.TopEnd to PaddingValues(top = 34.dp, end = 14.dp)
+                }
             }
+            // v370 — beside-title poster thumbnail: ~60×90dp, so the cover
+            // reads as a real poster next to the title + author (not just a
+            // corner stamp). The corner-pocket anchor already places it to the
+            // LEFT of the title block.
             BookCoverBadge(
                 cover = bookCover,
+                coverSize = DpSize(60.dp, 90.dp),
                 modifier = Modifier
                     .align(coverSlot.first)
                     .offset(x = move.coverDx.dp, y = move.coverDy.dp)
@@ -820,6 +1254,10 @@ fun TopicShareCard(
                 style = style,
                 palette = palette,
                 classic = aspect == ShareCardAspect.CLASSIC,
+                // v370 — the strip's box-size fractions ride on the move so
+                // each style keeps its own width/height edits.
+                widthFrac = effectiveMove.favWidthFrac,
+                heightFrac = effectiveMove.favHeightFrac,
                 // v353 — the strip is a movable element like the cover: its
                 // offset comes from [move.favDx]/[move.favDy] and it reports
                 // its bounds so the editor can select + drag it.
@@ -839,12 +1277,16 @@ fun TopicShareCard(
 private fun BookCoverBadge(
     cover: androidx.compose.ui.graphics.ImageBitmap,
     modifier: Modifier = Modifier,
+    // v370 — the cover can render as a small corner jacket OR a beside-title
+    // poster thumbnail. The default (corner) is the small badge; the
+    // beside-title layout passes a larger size so the cover reads as a real
+    // poster thumbnail next to the title + author.
+    coverSize: DpSize = DpSize(44.dp, 66.dp),
     callbacks: EditBoundsCallbacks = EditBoundsCallbacks()
 ) {
     Box(
         modifier = modifier
-            .width(44.dp)
-            .height(66.dp)
+            .size(coverSize)
             .shadow(3.dp, RoundedCornerShape(3.dp))
             .clip(RoundedCornerShape(3.dp))
             .background(Color.White)
@@ -884,26 +1326,37 @@ private fun PaperCard(
     move: ShareCardMove = ShareCardMove(),
     chapterProgress: ChapterProgressUi? = null,
     // v335 — a stacked custom fact rendered below the progress widget.
-    chapterFact: String = ""
+    chapterFact: String = "",
+    // v369 — the Adjust tool's sat/contrast, applied to the BACKGROUND layer
+    // only (never the text/polaroid/cover above it).
+    bgFilter: ColorFilter? = null
 ) {
     val qSize = quoteText?.let { quoteFontSize(it.length) } ?: 0.sp
     Box(
         modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp))
             .shadow(4.dp, RoundedCornerShape(6.dp))
-            .background(Brush.verticalGradient(listOf(palette.bgLight, palette.bgBase, palette.bgMid)), RoundedCornerShape(6.dp))
     ) {
-        // Rich paper texture layers — visible grain + fiber lines + subtle speckle
-        Canvas(Modifier.fillMaxSize()) { drawPaperTexture(palette) }
-        Canvas(Modifier.fillMaxSize()) { drawPaperFibers(palette) }
-        Canvas(Modifier.fillMaxSize()) { drawTornBottom(palette) }
-        // Subtle inner shadow around edges + faint border highlight for depth
-        Canvas(Modifier.fillMaxSize()) {
-            val w = size.width; val h = size.height
-            drawRect(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.04f), Color.Transparent, Color.Black.copy(alpha = 0.03f))), Offset.Zero, Size(w, h))
-            // Extremely subtle inner border highlight
-            drawRoundRect(Color.White.copy(alpha = 0.12f), Offset.Zero, Size(w, h), CornerRadius(6.dp.toPx()), style = Stroke(0.8f))
+        // v369 — background layer: fill + paper texture + watermark wear the
+        // sat/contrast filter; the content column below is NOT filtered.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer { colorFilter = bgFilter }
+                .background(Brush.verticalGradient(listOf(palette.bgLight, palette.bgBase, palette.bgMid)), RoundedCornerShape(6.dp))
+        ) {
+            // Rich paper texture layers — visible grain + fiber lines + subtle speckle
+            Canvas(Modifier.fillMaxSize()) { drawPaperTexture(palette) }
+            Canvas(Modifier.fillMaxSize()) { drawPaperFibers(palette) }
+            Canvas(Modifier.fillMaxSize()) { drawTornBottom(palette) }
+            // Subtle inner shadow around edges + faint border highlight for depth
+            Canvas(Modifier.fillMaxSize()) {
+                val w = size.width; val h = size.height
+                drawRect(Brush.verticalGradient(listOf(Color.Black.copy(alpha = 0.04f), Color.Transparent, Color.Black.copy(alpha = 0.03f))), Offset.Zero, Size(w, h))
+                // Extremely subtle inner border highlight
+                drawRoundRect(Color.White.copy(alpha = 0.12f), Offset.Zero, Size(w, h), CornerRadius(6.dp.toPx()), style = Stroke(0.8f))
+            }
+            Watermark(family, categoryGlyph, palette.ink.copy(alpha = 0.06f), display.hashCode())
         }
-        Watermark(family, categoryGlyph, palette.ink.copy(alpha = 0.06f), display.hashCode())
 
         Column(modifier = Modifier.fillMaxSize().padding(28.dp),
             verticalArrangement = Arrangement.SpaceBetween) {
@@ -934,7 +1387,10 @@ private fun VinylCard(
     // v341 — hide the typed favorite-song chip when heart-picked album
     // tracks exist: both would fight over the bottom-start corner (the
     // TopicShareCard-level FavoriteTracksBadge owns that spot then).
-    hideTypedFavSong: Boolean = false
+    hideTypedFavSong: Boolean = false,
+    // v369 — the Adjust tool's sat/contrast, applied to the BACKGROUND layer
+    // only (never the text/polaroid/cover above it).
+    bgFilter: ColorFilter? = null
 ) {
     val roseBg = Color(0xFFF5E6E0)
     val roseDusty = Color(0xFFD4A0A0)
@@ -945,7 +1401,16 @@ private fun VinylCard(
     val title = if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display
     val body = quoteText ?: factText
 
-    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(roseBg, RoundedCornerShape(6.dp))) {
+    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp))) {
+        // v369 — background layer (paper fill + textures + vinyl art + faint
+        // watermark) wears the sat/contrast filter; the content column below
+        // is NOT filtered, so text and photos never shift.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer { colorFilter = bgFilter }
+                .background(roseBg, RoundedCornerShape(6.dp))
+        ) {
         // Paper texture
         Canvas(Modifier.fillMaxSize()) { drawPaperTexture(palette) }
 
@@ -1006,9 +1471,10 @@ private fun VinylCard(
 
         // Watermark glyphs
         Watermark(family, categoryGlyph, roseDusty.copy(alpha = 0.04f), display.hashCode())
+        }
 
         // ── Content layout ──
-        Column(modifier = Modifier.fillMaxSize().padding(start = 22.dp, end = 22.dp, top = 16.dp, bottom = 14.dp).zIndex(1f)) {
+        Column(modifier = Modifier.fillMaxSize().padding(start = 22.dp, end = 22.dp, top = 16.dp, bottom = 14.dp)) {
             // Category pill + lightbulb icon. v3xx — ONLY the pill is the
             // movable badge (the decorative bulb stays anchored top-right);
             // the pill reports its own bounds so the B grip tracks the chip.
@@ -1209,16 +1675,22 @@ private fun FavoriteTracksBadge(
     style: ShareCardStyle,
     palette: ShareCardPalette,
     classic: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // v370 — the strip's own box-size fractions (the fav box width/height
+    // sliders): width scales the strip's natural max width, height scales
+    // how many track rows show (1f = the default 3).
+    widthFrac: Float = 1f,
+    heightFrac: Float = 1f
 ) {
     // v353 — the strip is no longer the same sticker on every card: the
     // boxless designs (Editorial, Minimal) render the favorites as plain
     // type with no surface, everything else keeps its (now style-true)
     // badge.
+    val rows = kotlin.math.round(3f * heightFrac).toInt().coerceIn(1, tracks.size.coerceAtLeast(1))
     when (style) {
-        ShareCardStyle.EDITORIAL -> EditorialFavStrip(tracks, palette, classic, modifier)
-        ShareCardStyle.MINIMAL -> MinimalFavStrip(tracks, palette, classic, modifier)
-        else -> BoxedFavStrip(tracks, style, palette, classic, modifier)
+        ShareCardStyle.EDITORIAL -> EditorialFavStrip(tracks, palette, classic, modifier, widthFrac, rows)
+        ShareCardStyle.MINIMAL -> MinimalFavStrip(tracks, palette, classic, modifier, widthFrac, rows)
+        else -> BoxedFavStrip(tracks, style, palette, classic, modifier, widthFrac, rows)
     }
 }
 
@@ -1231,9 +1703,13 @@ private fun BoxedFavStrip(
     style: ShareCardStyle,
     palette: ShareCardPalette,
     classic: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    // v370 — fav-box fractions (see FavoriteTracksBadge): widthFrac scales
+    // the natural max width, rows caps how many tracks render.
+    widthFrac: Float = 1f,
+    rows: Int = 3
 ) {
-    val shownFavs = tracks.take(3)
+    val shownFavs = tracks.take(rows)
     val extra = tracks.size - shownFavs.size
     // v340 — per-style tokens: colors, borders, type and radius match the
     // design underneath so the strip belongs to the card it sits on.
@@ -1287,7 +1763,7 @@ private fun BoxedFavStrip(
         // [modifier] carries the caller's BoxScope alignment + per-style
         // corner inset; each design clears its own footer below.
         modifier = modifier
-            .widthIn(max = if (classic) 168.dp else 210.dp)
+            .widthIn(max = (if (classic) 168.dp else 210.dp) * widthFrac)
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(if (tok.serifBody) 2.dp else 1.dp),
@@ -1365,14 +1841,16 @@ private fun EditorialFavStrip(
     tracks: List<String>,
     palette: ShareCardPalette,
     classic: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    widthFrac: Float = 1f,
+    rows: Int = 3
 ) {
     val ink = Color(0xFF1C1814)
-    val shownFavs = tracks.take(3)
+    val shownFavs = tracks.take(rows)
     val extra = tracks.size - shownFavs.size
     Column(
         verticalArrangement = Arrangement.spacedBy(if (classic) 2.dp else 3.dp),
-        modifier = modifier.widthIn(max = if (classic) 230.dp else 290.dp)
+        modifier = modifier.widthIn(max = (if (classic) 230.dp else 290.dp) * widthFrac)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -1444,14 +1922,16 @@ private fun MinimalFavStrip(
     tracks: List<String>,
     palette: ShareCardPalette,
     classic: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    widthFrac: Float = 1f,
+    rows: Int = 3
 ) {
     val ink = Color(0xFF1A1A1A)
-    val shownFavs = tracks.take(3)
+    val shownFavs = tracks.take(rows)
     val extra = tracks.size - shownFavs.size
     Column(
         verticalArrangement = Arrangement.spacedBy(2.dp),
-        modifier = modifier.widthIn(max = if (classic) 250.dp else 330.dp)
+        modifier = modifier.widthIn(max = (if (classic) 250.dp else 330.dp) * widthFrac)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -1613,7 +2093,10 @@ private fun CollageCard(
     move: ShareCardMove = ShareCardMove(),
     chapterProgress: ChapterProgressUi? = null,
     // v335 — a stacked custom fact rendered below the progress widget.
-    chapterFact: String = ""
+    chapterFact: String = "",
+    // v369 — the Adjust tool's sat/contrast, applied to the BACKGROUND layer
+    // only (the polaroid + photo + text stay untouched).
+    bgFilter: ColorFilter? = null
 ) {
     // v327 — the Collage card wears the picked TONE (the palette used to be
     // ignored here, so the Tone tool had no effect on this style): paper =
@@ -1631,7 +2114,15 @@ private fun CollageCard(
     val tornEdge = palette.bgMid
     val sagePill = collageMute(palette.accentDark, 0.55f)
 
-    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(topCream, RoundedCornerShape(6.dp))) {
+    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp))) {
+        // v369 — background layer (paper + botanical field + watermark) wears
+        // the sat/contrast filter; the polaroid + photo + text stay untouched.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer { colorFilter = bgFilter }
+                .background(topCream, RoundedCornerShape(6.dp))
+        ) {
         // ── Layered paper + botanical lower field with a natural torn seam ──
         Canvas(Modifier.fillMaxSize()) {
             val w = size.width; val h = size.height
@@ -1666,6 +2157,7 @@ private fun CollageCard(
         // Watermark glyphs on both paper and green field so the collage feels intentional.
         Watermark(family, categoryGlyph, inkDark.copy(alpha = 0.045f), display.hashCode())
         Watermark(family, categoryGlyph, Color.White.copy(alpha = 0.045f), display.hashCode() + 17)
+        }
 
         // ── TOP SECTION: title + metadata + quote (left) + polaroid (right) ──
         BoxWithConstraints(Modifier.fillMaxSize().zIndex(2f)) {
@@ -1875,7 +2367,10 @@ private fun NeumorphicCard(
     move: ShareCardMove = ShareCardMove(),
     chapterProgress: ChapterProgressUi? = null,
     // v335 — a stacked custom fact rendered below the progress widget.
-    chapterFact: String = ""
+    chapterFact: String = "",
+    // v369 — the Adjust tool's sat/contrast, applied to the BACKGROUND layer
+    // only (never the text above it).
+    bgFilter: ColorFilter? = null
 ) {
     val ink = Color(0xFF101010)
     val paper = Color(0xFFF8F6EF)
@@ -1885,7 +2380,15 @@ private fun NeumorphicCard(
     // For quote cards, the title is the author/byline — display IS the quote, so showing both duplicates it.
     val title = if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display
 
-    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(categoryDeep, RoundedCornerShape(6.dp))) {
+    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp))) {
+        // v369 — background layer (plate fill + gradient + giant glyph) wears
+        // the sat/contrast filter; the text content below is NOT filtered.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer { colorFilter = bgFilter }
+                .background(categoryDeep, RoundedCornerShape(6.dp))
+        ) {
         Canvas(Modifier.fillMaxSize()) {
             val w = size.width; val h = size.height
             drawRect(Brush.verticalGradient(listOf(categoryGlow.copy(alpha = 0.95f), categoryDeep, ink)))
@@ -1922,8 +2425,9 @@ private fun NeumorphicCard(
             modifier = Modifier.align(Alignment.TopEnd).offset(x = 10.dp, y = 18.dp)
                 .graphicsLayer { rotationZ = -10f }
         )
+        }
 
-        Box(Modifier.fillMaxSize().padding(22.dp).zIndex(1f)) {
+        Box(Modifier.fillMaxSize().padding(22.dp)) {
             Surface(shape = RoundedCornerShape(50), color = Color.Black.copy(alpha = 0.72f), modifier = Modifier.align(Alignment.TopStart).moveBadge(move).onGloballyPositioned { callbacks.onBadge(it.boundsInWindow()) }) {
                 Text(categoryName.uppercase(), style = badgeStyle(TextStyle(fontFamily = GeomFontFamily, fontSize = 8.sp,
                     fontWeight = FontWeight.ExtraBold, letterSpacing = 1.4.sp), move), color = Color.White,
@@ -2021,7 +2525,10 @@ private fun EditorialCard(
     move: ShareCardMove = ShareCardMove(),
     chapterProgress: ChapterProgressUi? = null,
     // v335 — a stacked custom fact rendered below the progress widget.
-    chapterFact: String = ""
+    chapterFact: String = "",
+    // v369 — the Adjust tool's sat/contrast, applied to the BACKGROUND layer
+    // only (never the text above it).
+    bgFilter: ColorFilter? = null
 ) {
     val cream = Color(0xFFFAF7F0)
     val inkDark = Color(0xFF1C1814)
@@ -2029,7 +2536,15 @@ private fun EditorialCard(
     val body = quoteText ?: factText
     val title = if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display
 
-    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(cream, RoundedCornerShape(6.dp))) {
+    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp))) {
+        // v369 — background layer (paper fill + texture speckle) wears the
+        // sat/contrast filter; the masthead + text below are NOT filtered.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer { colorFilter = bgFilter }
+                .background(cream, RoundedCornerShape(6.dp))
+        ) {
         // Subtle texture
         Canvas(Modifier.fillMaxSize()) {
             val w = size.width; val h = size.height; val s = (w * 1000 + h).toInt()
@@ -2038,6 +2553,7 @@ private fun EditorialCard(
                 val y = ((s * (i + 1) * 6271) % 10000) / 10000f * h
                 drawCircle(Color(0xFFD0C8B8).copy(alpha = 0.04f), 1.5f, Offset(x, y))
             }
+        }
         }
 
         // Broadsheet masthead + retro Bungee headline (v... redesign)
@@ -2264,7 +2780,10 @@ private fun MinimalCard(
     move: ShareCardMove = ShareCardMove(),
     chapterProgress: ChapterProgressUi? = null,
     // v335 — a stacked custom fact rendered below the progress widget.
-    chapterFact: String = ""
+    chapterFact: String = "",
+    // v369 — the Adjust tool's sat/contrast, applied to the BACKGROUND layer
+    // only (never the text above it).
+    bgFilter: ColorFilter? = null
 ) {
     val bg = Color(0xFFFFFDF9)
     val inkDark = Color(0xFF1A1A1A)
@@ -2272,7 +2791,15 @@ private fun MinimalCard(
     val body = quoteText ?: factText
     val title = if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display
 
-    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(bg, RoundedCornerShape(6.dp))) {
+    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp))) {
+        // v369 — background layer (fill + hairline frame + faint initial)
+        // wears the sat/contrast filter; the text content below is NOT.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer { colorFilter = bgFilter }
+                .background(bg, RoundedCornerShape(6.dp))
+        ) {
         // Hairline inner frame — structure without clutter
         Canvas(Modifier.fillMaxSize().padding(12.dp)) {
             drawRoundRect(inkDark.copy(alpha = 0.10f), Offset.Zero, Size(size.width, size.height),
@@ -2289,6 +2816,7 @@ private fun MinimalCard(
                 .graphicsLayer { rotationZ = -6f }
                 .offset(y = 18.dp)
                 .padding(end = 6.dp))
+        }
         }
 
         Column(modifier = Modifier.fillMaxSize().padding(start = 30.dp, end = 26.dp, top = 34.dp, bottom = 26.dp)) {
@@ -2404,7 +2932,10 @@ private fun SignatureCard(
     move: ShareCardMove = ShareCardMove(),
     chapterProgress: ChapterProgressUi? = null,
     // v335 — a stacked custom fact rendered below the progress widget.
-    chapterFact: String = ""
+    chapterFact: String = "",
+    // v369 — the Adjust tool's sat/contrast, applied to the BACKGROUND layer
+    // only (never the text/crest above it).
+    bgFilter: ColorFilter? = null
 ) {
     val body = quoteText ?: factText
     val title = if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display
@@ -2416,7 +2947,15 @@ private fun SignatureCard(
         else -> signatureDesign(categoryName, family)
     }
 
-    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(sig.cornerRadius.dp)).background(sig.bg, RoundedCornerShape(sig.cornerRadius.dp))) {
+    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(sig.cornerRadius.dp))) {
+        // v369 — background layer (paper fill + drawn scene + faint watermark
+        // + language words) wears the sat/contrast filter; text is NOT.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer { colorFilter = bgFilter }
+                .background(sig.bg, RoundedCornerShape(sig.cornerRadius.dp))
+        ) {
         // Background pattern/texture
         Canvas(Modifier.fillMaxSize()) {
             val w = size.width; val h = size.height
@@ -2478,6 +3017,7 @@ private fun SignatureCard(
                     .graphicsLayer { rotationZ = 8f }
                     .padding(top = 14.dp, end = 14.dp)
             )
+        }
         }
 
         // Meta parts (byline / year) shared across layouts
@@ -4824,16 +5364,28 @@ private fun CustomCard(
     move: ShareCardMove = ShareCardMove(),
     chapterProgress: ChapterProgressUi? = null,
     // v335 — a stacked custom fact rendered below the progress widget.
-    chapterFact: String = ""
+    chapterFact: String = "",
+    // v369 — the Adjust tool's sat/contrast, applied to the BACKGROUND layer
+    // only (never the text above it).
+    bgFilter: ColorFilter? = null
 ) {
     val body = quoteText ?: factText
     val title = if (quoteText != null) (quoteAuthor?.takeIf { it.isNotBlank() } ?: byline.ifBlank { "Quote" }) else display
     val sig = topicVariant(topicName, family) ?: signatureDesign(categoryName, family)
 
-    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(sig.cornerRadius.dp)).background(sig.bg, RoundedCornerShape(sig.cornerRadius.dp))) {
+    Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(sig.cornerRadius.dp))) {
+        // v369 — background layer (fill + drawn scene) wears the sat/contrast
+        // filter; the content column below is NOT filtered.
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer { colorFilter = bgFilter }
+                .background(sig.bg, RoundedCornerShape(sig.cornerRadius.dp))
+        ) {
         Canvas(Modifier.fillMaxSize()) {
             val w = size.width; val h = size.height
             sig.drawBackground(this, w, h)
+        }
         }
         Column(modifier = Modifier.fillMaxSize().padding(sig.padding)) {
             Surface(shape = RoundedCornerShape(sig.badgeRadius), color = sig.badgeColor, modifier = Modifier.moveBadge(move).onGloballyPositioned { callbacks.onBadge(it.boundsInWindow()) }) {
@@ -5258,6 +5810,15 @@ private fun ArrangeableCard(
     // rendering so the caret sits EXACTLY on the visible text (see the
     // compute in TopicShareSheet).
     factFieldStyle: TextStyle = MaterialTheme.typography.bodyMedium,
+    // v369 — smart auto-fit delta (computed by the sheet from the current
+    // fact length): the fact handle seeds it into the manual move on the
+    // first grab so the box doesn't jump when auto-fit hands off.
+    autoFitDelta: ShareAutoFitDelta = ShareAutoFitDelta(),
+    // v369 — the chapter-review fact box renders a one-line chapter chip
+    // above the review text; the inline field shifts down one line so its
+    // caret sits on the review glyphs, not the chip.
+    factFieldChipShift: Boolean = false,
+    factFieldPlaceholder: String = "Edit the quick fact…",
     card: @Composable (EditBoundsCallbacks) -> Unit
 ) {
     // Bounds hub — every style reports where its title / fact / meta text
@@ -5414,39 +5975,17 @@ private fun ArrangeableCard(
                             }
                             .border(1.dp, selBorder(isSel), RoundedCornerShape(8.dp))
                         )
-                        if (isSel) {
-                            MoveHandle(
-                                x = t.left.dp,
-                                y = t.top.dp,
-                                onDelta = { dx, dy ->
-                                    // v340 — clamp against the UNMOVED rect
-                                    // (base = reported minus current offset).
-                                    // The old bound used the moved rect, so
-                                    // every grab after the first re-clamped
-                                    // against an ever-shrinking range and the
-                                    // element got stuck halfway (title that
-                                    // "wouldn't go high enough" on Clean).
-                                    // v341 — the base-rect clamps feed the
-                                    // magnet helper, so snapping never pushes
-                                    // the box outside the card.
-                                    val bx = t.left - move.titleDx
-                                    val by = t.top - move.titleDy
-                                    // v342 - the box also aligns to the OTHER
-                                    // boxes (edges + centre) via alignOthers /
-                                    // hCands / vCands; magnetAxis picks the
-                                    // nearest candidate inside this clamp.
-                                    val othersT = alignOthers(t)
-                                    val xs = magnetAxis(bx, t.width, cw, -bx, cw - bx - t.width, (move.titleDx + dx).coerceIn(-bx, cw - bx - t.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersT, bx, t.width))
-                                    val ys = magnetAxis(by, t.height, ch, -by, ch - by - t.height, (move.titleDy + dy).coerceIn(-by, ch - by - t.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersT, by, t.height))
-                                    dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
-                                    onMove(move.copy(titleDx = xs.offset, titleDy = ys.offset))
-                                },
-                                onDragStart = { dragActive = true },
-                                onDragEnd = { dragActive = false; dragGuides = DragGuides() }
-                            )
-                        }
+                        // v369 — the grip + corner scale are drawn LAST (see
+                        // the handles section below the element boxes), so a
+                        // handle always wins the touch over a box it overlaps.
                     }
                 }
+
+                // v369 — the chapter-review box renders a one-line chapter
+                // chip ABOVE the review text; the inline field shifts down by
+                // one line so its caret sits on the review glyphs.
+                val chipShiftPx = if (factFieldChipShift)
+                    with(editDensity) { liveFactStyle.value.lineHeight.toDp().value } else 0f
 
                 // Quick-fact — transparent field laid EXACTLY over the card's
                 // own fact text (bounds AND style reported by the card, so the
@@ -5470,9 +6009,11 @@ private fun ArrangeableCard(
                         textStyle = liveFactStyle.value.copy(color = Color.Transparent),
                         cursorBrush = SolidColor(CoffeeChromeDeep),
                         singleLine = false,
-                        maxLines = 24,
+                        // v369 — the inline field grows with the box (long
+                        // texts edit in place on the tall card).
+                        maxLines = 60,
                         modifier = Modifier
-                            .offset(f.left.dp, f.top.dp)
+                            .offset(f.left.dp, (f.top + chipShiftPx).dp)
                             .width(f.width.dp)
                             .heightIn(min = f.height.dp)
                             .focusRequester(factRequester)
@@ -5488,22 +6029,42 @@ private fun ArrangeableCard(
                             .border(1.dp, selBorder(isSel), RoundedCornerShape(8.dp)),
                         decorationBox = { inner ->
                             Box(Modifier.fillMaxWidth()) {
-                                if (editFact.isBlank()) Text("Edit the quick fact…", style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
+                                if (editFact.isBlank()) Text(factFieldPlaceholder, style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
                                 inner()
                             }
                         }
                     )
-                    // Tap-to-select layer: while text editing is OFF the field is
-                    // inert, so an invisible box on top selects the fact for moving
-                    // (grip appears) without popping the keyboard. Text editing
-                    // starts only via the explicit "Edit text" tool.
+                    // v370 — Tap-to-select + double-tap-to-edit layer: while text
+                    // editing is OFF the field is inert, so an invisible box on
+                    // top SELECTS the fact for moving (grip appears) on a SINGLE
+                    // tap, and enters edit mode (the bigger floating edit box
+                    // opens + keyboard) on a QUICK DOUBLE tap — so the user can
+                    // start typing with two fast taps on the card. We use a
+                    // single detectTapGestures with both onTap (select) and
+                    // onDoubleTap (edit) so the disambiguation is done inside one
+                    // gesture detector (a double-tap fires onDoubleTap, not two
+                    // onTaps). The explicit Edit text tool also arms it.
+                    // v370 — this double-tap also works for the custom fact and
+                    // the chapter review (same on-card field), so both editable
+                    // facts can be started with two fast taps.
                     if (!factEditMode) {
                         Box(
                             modifier = Modifier
                                 .offset(f.left.dp, f.top.dp)
                                 .width(f.width.dp)
                                 .height(f.height.dp)
-                                .clickable { onSelectResizeTarget(ShareCardResizeTarget.FACT) }
+                                .pointerInput(Unit) {
+                                    detectTapGestures(
+                                        onTap = { onSelectResizeTarget(ShareCardResizeTarget.FACT) },
+                                        onDoubleTap = {
+                                            // Quick double tap → enter edit mode on the
+                                            // box (the floating edit box opens from
+                                            // factEditMode in the sheet). Route through the
+                                            // callback so the sheet arms factEditMode.
+                                            onFactEditModeChange(true)
+                                        }
+                                    )
+                                }
                         )
                     }
                     // When the "Edit text" tool arms the field, focus it so the
@@ -5511,29 +6072,8 @@ private fun ArrangeableCard(
                     androidx.compose.runtime.LaunchedEffect(factEditMode) {
                         if (factEditMode) factRequester.requestFocus()
                     }
-                    // v330 — while TYPING the quick fact the grip hides
-                    // (it used to hover on top of the letters being typed);
-                    // it reappears the moment text editing ends.
-                    if (isSel && !factEditMode) {
-                        MoveHandle(
-                            x = f.left.dp,
-                            y = f.top.dp,
-                            onDelta = { dx, dy ->
-                                // v340 — base-rect clamp (see the title handle).
-                                // v353 — guide-only alignment (no magnet pull).
-                                val bx = f.left - move.factDx
-                                val by = f.top - move.factDy
-                                // v342 - cross-element alignment (see title).
-                                val othersF = alignOthers(f)
-                                val xs = magnetAxis(bx, f.width, cw, -bx, cw - bx - f.width, (move.factDx + dx).coerceIn(-bx, cw - bx - f.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersF, bx, f.width))
-                                val ys = magnetAxis(by, f.height, ch, -by, ch - by - f.height, (move.factDy + dy).coerceIn(-by, ch - by - f.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersF, by, f.height))
-                                dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
-                                onMove(move.copy(factDx = xs.offset, factDy = ys.offset))
-                            },
-                            onDragStart = { dragActive = true },
-                            onDragEnd = { dragActive = false; dragGuides = DragGuides() }
-                        )
-                    }
+                    // v369 — the grip + corner scale are drawn LAST (see the
+                    // handles section below), so they always win the touch.
                 }
 
                 // AUTHOR / YEAR info rows — tap the row to select, grip only
@@ -5552,32 +6092,8 @@ private fun ArrangeableCard(
                             }
                             .border(1.dp, selBorder(isSel), RoundedCornerShape(8.dp))
                     )
-                    if (isSel) {
-                        MoveHandle(
-                            // v360 — the grip parks just past the row's right
-                            // edge (same as every other handle sits on its box).
-                            x = (m.right + 18f).coerceAtMost(cw - 16f).dp,
-                            y = m.bottom.dp.coerceAtMost((ch - 16f).dp),
-                            onDelta = { dx, dy ->
-                                // v360 — the info row clamps like EVERY other
-                                // element now (edge to edge): the old 18f
-                                // padding box kept author/year off the card's
-                                // sides while title/fact/badge/cover could
-                                // travel to the true edges. Base-rect clamp so
-                                // the range never shrinks as the row travels.
-                                val bx = m.left - move.metaDx
-                                val by = m.top - move.metaDy
-                                // v342 - cross-element alignment (see title).
-                                val othersM = alignOthers(m)
-                                val xs = magnetAxis(bx, m.width, cw, -bx, cw - bx - m.width, (move.metaDx + dx).coerceIn(-bx, cw - bx - m.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersM, bx, m.width))
-                                val ys = magnetAxis(by, m.height, ch, -by, ch - by - m.height, (move.metaDy + dy).coerceIn(-by, ch - by - m.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersM, by, m.height))
-                                dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
-                                onMove(move.copy(metaDx = xs.offset, metaDy = ys.offset))
-                            },
-                            onDragStart = { dragActive = true },
-                            onDragEnd = { dragActive = false; dragGuides = DragGuides() }
-                        )
-                    }
+                    // v369 — the grip + corner scale are drawn LAST (see the
+                    // handles section below), so they always win the touch.
                 }
 
                 // Badge — tap the chip to select, grip only when selected.
@@ -5599,26 +6115,8 @@ private fun ArrangeableCard(
                             }
                             .border(1.dp, selBorder(isSel), RoundedCornerShape(8.dp))
                     )
-                    if (isSel) {
-                        MoveHandle(
-                            x = (b.left - 2f).coerceIn(0f, (cw - 24f).coerceAtLeast(0f)).dp,
-                            y = (b.top - 2f).coerceIn(0f, (ch - 24f).coerceAtLeast(0f)).dp,
-                            onDelta = { dx, dy ->
-                                // v340 — base-rect clamp (see the title handle).
-                                // v353 — guide-only alignment (no magnet pull).
-                                val bx = b.left - move.badgeDx
-                                val by = b.top - move.badgeDy
-                                // v342 - cross-element alignment (see title).
-                                val othersB = alignOthers(b)
-                                val xs = magnetAxis(bx, b.width, cw, -bx - 2f, cw - bx - b.width + 2f, (move.badgeDx + dx).coerceIn(-bx - 2f, cw - bx - b.width + 2f), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersB, bx, b.width))
-                                val ys = magnetAxis(by, b.height, ch, -by - 2f, ch - by - b.height + 2f, (move.badgeDy + dy).coerceIn(-by - 2f, ch - by - b.height + 2f), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersB, by, b.height))
-                                dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
-                                onMove(move.copy(badgeDx = xs.offset, badgeDy = ys.offset))
-                            },
-                            onDragStart = { dragActive = true },
-                            onDragEnd = { dragActive = false; dragGuides = DragGuides() }
-                        )
-                    }
+                    // v369 — the grip is drawn LAST (see the handles section
+                    // below), so it always wins the touch.
                 }
 
                 // Book cover — tap the jacket to select, grip only when
@@ -5640,25 +6138,8 @@ private fun ArrangeableCard(
                             }
                             .border(1.dp, selBorder(isSel), RoundedCornerShape(4.dp))
                     )
-                    if (isSel) {
-                        MoveHandle(
-                            x = (cv.right - 24f).coerceIn(0f, (cw - 24f).coerceAtLeast(0f)).dp,
-                            y = (cv.bottom - 24f).coerceIn(0f, (ch - 24f).coerceAtLeast(0f)).dp,
-                            onDelta = { dx, dy ->
-                                // v340 — base-rect clamp (see the title handle).
-                                // v353 — guide-only (no magnet snap, see below).
-                                val bx = cv.left - move.coverDx
-                                val by = cv.top - move.coverDy
-                                val othersC = alignOthers(cv)
-                                val xs = magnetAxis(bx, cv.width, cw, -bx, cw - bx - cv.width, (move.coverDx + dx).coerceIn(-bx, cw - bx - cv.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersC, bx, cv.width))
-                                val ys = magnetAxis(by, cv.height, ch, -by, ch - by - cv.height, (move.coverDy + dy).coerceIn(-by, ch - by - cv.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersC, by, cv.height))
-                                dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
-                                onMove(move.copy(coverDx = xs.offset, coverDy = ys.offset))
-                            },
-                            onDragStart = { dragActive = true },
-                            onDragEnd = { dragActive = false; dragGuides = DragGuides() }
-                        )
-                    }
+                    // v369 — the grip is drawn LAST (see the handles section
+                    // below), so it always wins the touch.
                 }
 
                 // v353 — the album favorite-tracks strip is a movable element
@@ -5679,23 +6160,237 @@ private fun ArrangeableCard(
                             }
                             .border(1.dp, selBorder(isSel), RoundedCornerShape(6.dp))
                     )
-                    if (isSel) {
-                        MoveHandle(
-                            x = (rf.right - 24f).coerceIn(0f, (cw - 24f).coerceAtLeast(0f)).dp,
-                            y = (rf.bottom - 24f).coerceIn(0f, (ch - 24f).coerceAtLeast(0f)).dp,
-                            onDelta = { dx, dy ->
-                                val bx = rf.left - move.favDx
-                                val by = rf.top - move.favDy
-                                val othersF = alignOthers(rf)
-                                val xs = magnetAxis(bx, rf.width, cw, -bx, cw - bx - rf.width, (move.favDx + dx).coerceIn(-bx, cw - bx - rf.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersF, bx, rf.width))
-                                val ys = magnetAxis(by, rf.height, ch, -by, ch - by - rf.height, (move.favDy + dy).coerceIn(-by, ch - by - rf.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersF, by, rf.height))
-                                dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
-                                onMove(move.copy(favDx = xs.offset, favDy = ys.offset))
-                            },
-                            onDragStart = { dragActive = true },
-                            onDragEnd = { dragActive = false; dragGuides = DragGuides() }
-                        )
+                    // v369 — the grip is drawn LAST (see the handles section
+                    // below), so it always wins the touch.
+                }
+
+                // ── v369 HANDLES (drawn LAST) ────────────────────────────
+                // Every selected element's grip + corner scale render AFTER
+                // all the selectable boxes, so a handle ALWAYS wins the touch
+                // over a box it overlaps (the old inline placement let a
+                // later-drawn selectable box steal the drag from an earlier
+                // handle — the "handle doesn't work" bug).
+                when (sel) {
+                    ShareCardResizeTarget.TITLE -> if (!quoteMode) {
+                        val t = rTitle
+                        if (t.width > 0f && t.height > 0f) {
+                            MoveHandle(
+                                x = t.left.dp,
+                                y = t.top.dp,
+                                onDelta = { dx, dy ->
+                                    // v340 — clamp against the UNMOVED rect
+                                    // (base = reported minus current offset).
+                                    // v353 — guide-only alignment (no magnet).
+                                    val bx = t.left - move.titleDx
+                                    val by = t.top - move.titleDy
+                                    val othersT = alignOthers(t)
+                                    val xs = magnetAxis(bx, t.width, cw, -bx, cw - bx - t.width, (move.titleDx + dx).coerceIn(-bx, cw - bx - t.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersT, bx, t.width))
+                                    val ys = magnetAxis(by, t.height, ch, -by, ch - by - t.height, (move.titleDy + dy).coerceIn(-by, ch - by - t.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersT, by, t.height))
+                                    dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
+                                    onMove(move.copy(titleDx = xs.offset, titleDy = ys.offset))
+                                },
+                                onDragStart = { dragActive = true },
+                                onDragEnd = { dragActive = false; dragGuides = DragGuides() }
+                            )
+                            CornerResizeHandle(
+                                x = (t.right - 26f).dp,
+                                y = (t.bottom - 26f).dp,
+                                onDelta = { dx, dy ->
+                                    val baseW = t.width / move.titleWidthFrac.coerceAtLeast(0.2f)
+                                    val baseH = t.height / move.titleHeightFrac.coerceAtLeast(0.2f)
+                                    val factor = maxOf(1f + dx / baseW, 1f + dy / baseH).coerceIn(0.2f, 6f)
+                                    val nw = (move.titleWidthFrac * factor).coerceIn(0.2f, 1f)
+                                    val nh = (move.titleHeightFrac * factor).coerceIn(0.2f, 6f)
+                                    onMove(move.copy(
+                                        titleWidthFrac = nw,
+                                        titleHeightFrac = nh
+                                    ))
+                                },
+                                onDragStart = { dragActive = true },
+                                onDragEnd = { dragActive = false; dragGuides = DragGuides() }
+                            )
+                        }
                     }
+                    ShareCardResizeTarget.FACT -> {
+                        val mRect = rMeta
+                        val f = rFact
+                        val tRect = rTitle
+                        val bRect = rBadge
+                        if (f.width > 0f && f.height > 0f) {
+                            MoveHandle(
+                                x = f.left.dp,
+                                y = f.top.dp,
+                                onDelta = { dx, dy ->
+                                    val bx = f.left - move.factDx
+                                    val by = f.top - move.factDy
+                                    val othersF = alignOthers(f)
+                                    val xs = magnetAxis(bx, f.width, cw, -bx, cw - bx - f.width, (move.factDx + dx).coerceIn(-bx, cw - bx - f.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersF, bx, f.width))
+                                    val ys = magnetAxis(by, f.height, ch, -by, ch - by - f.height, (move.factDy + dy).coerceIn(-by, ch - by - f.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersF, by, f.height))
+                                    dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
+                                    // v369 — GROUPED move: the title + info
+                                    // rows travel WITH the fact (like the info
+                                    // row follows the title), while each stays
+                                    // separately draggable via its own grip.
+                                    // v370 — the category BADGE also travels WITH
+                                    // the fact block on a grouped drag (so the
+                                    // icon stays attached to the fact block),
+                                    // and the badge still has its own grip for
+                                    // separate nudges.
+                                    // v369/v370 — proportional grouped move: title +
+                                    // author/info rows + badge travel WITH the
+                                    // fact, but only while the quick fact is being
+                                    // dragged. Use the RAW finger delta (not the
+                                    // magnet helper's snap offset) so the title,
+                                    // info and badge follow the fact precisely
+                                    // without overshooting, and clamp their
+                                    // position to the card so nothing leaves the
+                                    // card. When a manual edit has been made
+                                    // (fact already moved/resized), the whole
+                                    // group still moves so the fact track is
+                                    // consistent.
+                                    val rawDx = dx; val rawDy = dy
+                                    val titleClampTop = -(tRect.height / 2f)
+                                    val titleClampBottom = ch - tRect.height / 2f
+                                    val newTitleDx = if (tRect.width > 0f) (move.titleDx + rawDx).coerceIn(-(tRect.width / 2f), cw - (tRect.width / 2f)) else move.titleDx
+                                    val newTitleDy = if (tRect.height > 0f) (move.titleDy + rawDy).coerceIn(titleClampTop, titleClampBottom) else move.titleDy
+                                    val newMetaDx = if (mRect.width > 0f) (move.metaDx + rawDx).coerceIn(-mRect.width / 2f, cw - mRect.width / 2f).coerceAtLeast(-mRect.width * 0.2f) else move.metaDx
+                                    val newMetaDy = if (mRect.height > 0f) (move.metaDy + rawDy).coerceIn(-mRect.height / 2f, ch - mRect.height / 2f) else move.metaDy
+                                    val newBadgeDx = if (bRect.width > 0f) {
+                                        val badgeMinX = -(bRect.width / 2f).coerceAtLeast(0f)
+                                        val badgeMaxX = cw - (bRect.width / 2f).coerceAtLeast(0f)
+                                        (move.badgeDx + rawDx).coerceIn(badgeMinX, badgeMaxX)
+                                    } else move.badgeDx
+                                    val newBadgeDy = if (bRect.height > 0f) (move.badgeDy + rawDy).coerceIn(-bRect.height / 2f, ch - bRect.height / 2f) else move.badgeDy
+                                    onMove(move.copy(
+                                        factDx = xs.offset, factDy = ys.offset,
+                                        titleDx = newTitleDx, titleDy = newTitleDy,
+                                        metaDx = newMetaDx, metaDy = newMetaDy,
+                                        badgeDx = newBadgeDx, badgeDy = newBadgeDy
+                                    ))
+                                },
+                                onDragStart = {
+                                    dragActive = true
+                                    // v369 — seed the smart auto-fit nudge into
+                                    // the manual move on the first grab so the
+                                    // box doesn't jump when auto-fit hands off
+                                    // (manual edits start where auto-fit left).
+                                    val untouched = move.factDx == 0f && move.factDy == 0f &&
+                                        move.factWidthFrac == 1f && move.factHeightFrac == 1f
+                                    if (untouched && autoFitDelta.heightFrac != 1f) {
+                                        onMove(move.copy(
+                                            factHeightFrac = autoFitDelta.heightFrac,
+                                            factDy = autoFitDelta.dy,
+                                            titleDy = move.titleDy + autoFitDelta.dy,
+                                            metaDy = move.metaDy + autoFitDelta.dy
+                                        ))
+                                    }
+                                },
+                                onDragEnd = { dragActive = false; dragGuides = DragGuides() }
+                            )
+                            // v369 — CORNER scale: drags scale the WHOLE box
+                            // (width + height together, shape kept) so the box
+                            // can grow from its corner instead of only via the
+                            // width/height sliders.
+                            CornerResizeHandle(
+                                x = (f.right - 26f).coerceIn(0f, (cw - 26f).coerceAtLeast(0f)).dp,
+                                y = (f.bottom - 26f).coerceIn(0f, (ch - 26f).coerceAtLeast(0f)).dp,
+                                onDelta = { dx, dy ->
+                                    val baseW = f.width / move.factWidthFrac.coerceAtLeast(0.2f)
+                                    val baseH = f.height / move.factHeightFrac.coerceAtLeast(0.2f)
+                                    val factor = maxOf(1f + dx / baseW, 1f + dy / baseH).coerceIn(0.2f, 6f)
+                                    onMove(move.copy(
+                                        factWidthFrac = (move.factWidthFrac * factor).coerceIn(0.2f, 1f),
+                                        factHeightFrac = (move.factHeightFrac * factor).coerceIn(0.2f, 8f)
+                                    ))
+                                },
+                                onDragStart = { dragActive = true },
+                                onDragEnd = { dragActive = false; dragGuides = DragGuides() }
+                            )
+                        }
+                    }
+                    ShareCardResizeTarget.META -> {
+                        val m = rMeta
+                        if (m.width > 0f && m.height > 0f) {
+                            MoveHandle(
+                                // v360 — the grip parks just past the row's
+                                // right edge (same as every other handle).
+                                x = (m.right + 18f).coerceAtMost(cw - 16f).dp,
+                                y = m.bottom.dp.coerceAtMost((ch - 16f).dp),
+                                onDelta = { dx, dy ->
+                                    val bx = m.left - move.metaDx
+                                    val by = m.top - move.metaDy
+                                    val othersM = alignOthers(m)
+                                    val xs = magnetAxis(bx, m.width, cw, -bx, cw - bx - m.width, (move.metaDx + dx).coerceIn(-bx, cw - bx - m.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersM, bx, m.width))
+                                    val ys = magnetAxis(by, m.height, ch, -by, ch - by - m.height, (move.metaDy + dy).coerceIn(-by, ch - by - m.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersM, by, m.height))
+                                    dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
+                                    onMove(move.copy(metaDx = xs.offset, metaDy = ys.offset))
+                                },
+                                onDragStart = { dragActive = true },
+                                onDragEnd = { dragActive = false; dragGuides = DragGuides() }
+                            )
+                        }
+                    }
+                    ShareCardResizeTarget.BADGE -> {
+                        val b = rBadge
+                        if (b.width > 0f && b.height > 0f) {
+                            MoveHandle(
+                                x = (b.left - 2f).coerceIn(0f, (cw - 24f).coerceAtLeast(0f)).dp,
+                                y = (b.top - 2f).coerceIn(0f, (ch - 24f).coerceAtLeast(0f)).dp,
+                                onDelta = { dx, dy ->
+                                    val bx = b.left - move.badgeDx
+                                    val by = b.top - move.badgeDy
+                                    val othersB = alignOthers(b)
+                                    val xs = magnetAxis(bx, b.width, cw, -bx - 2f, cw - bx - b.width + 2f, (move.badgeDx + dx).coerceIn(-bx - 2f, cw - bx - b.width + 2f), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersB, bx, b.width))
+                                    val ys = magnetAxis(by, b.height, ch, -by - 2f, ch - by - b.height + 2f, (move.badgeDy + dy).coerceIn(-by - 2f, ch - by - b.height + 2f), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersB, by, b.height))
+                                    dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
+                                    onMove(move.copy(badgeDx = xs.offset, badgeDy = ys.offset))
+                                },
+                                onDragStart = { dragActive = true },
+                                onDragEnd = { dragActive = false; dragGuides = DragGuides() }
+                            )
+                        }
+                    }
+                    ShareCardResizeTarget.COVER -> {
+                        val cv = rCover
+                        if (cv.width > 0f && cv.height > 0f) {
+                            MoveHandle(
+                                x = (cv.right - 24f).coerceIn(0f, (cw - 24f).coerceAtLeast(0f)).dp,
+                                y = (cv.bottom - 24f).coerceIn(0f, (ch - 24f).coerceAtLeast(0f)).dp,
+                                onDelta = { dx, dy ->
+                                    val bx = cv.left - move.coverDx
+                                    val by = cv.top - move.coverDy
+                                    val othersC = alignOthers(cv)
+                                    val xs = magnetAxis(bx, cv.width, cw, -bx, cw - bx - cv.width, (move.coverDx + dx).coerceIn(-bx, cw - bx - cv.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersC, bx, cv.width))
+                                    val ys = magnetAxis(by, cv.height, ch, -by, ch - by - cv.height, (move.coverDy + dy).coerceIn(-by, ch - by - cv.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersC, by, cv.height))
+                                    dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
+                                    onMove(move.copy(coverDx = xs.offset, coverDy = ys.offset))
+                                },
+                                onDragStart = { dragActive = true },
+                                onDragEnd = { dragActive = false; dragGuides = DragGuides() }
+                            )
+                        }
+                    }
+                    ShareCardResizeTarget.FAVTRACKS -> {
+                        val rf = rFav
+                        if (rf.width > 0f && rf.height > 0f) {
+                            MoveHandle(
+                                x = (rf.right - 24f).coerceIn(0f, (cw - 24f).coerceAtLeast(0f)).dp,
+                                y = (rf.bottom - 24f).coerceIn(0f, (ch - 24f).coerceAtLeast(0f)).dp,
+                                onDelta = { dx, dy ->
+                                    val bx = rf.left - move.favDx
+                                    val by = rf.top - move.favDy
+                                    val othersF = alignOthers(rf)
+                                    val xs = magnetAxis(bx, rf.width, cw, -bx, cw - bx - rf.width, (move.favDx + dx).coerceIn(-bx, cw - bx - rf.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersF, bx, rf.width))
+                                    val ys = magnetAxis(by, rf.height, ch, -by, ch - by - rf.height, (move.favDy + dy).coerceIn(-by, ch - by - rf.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersF, by, rf.height))
+                                    dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
+                                    onMove(move.copy(favDx = xs.offset, favDy = ys.offset))
+                                },
+                                onDragStart = { dragActive = true },
+                                onDragEnd = { dragActive = false; dragGuides = DragGuides() }
+                            )
+                        }
+                    }
+                    ShareCardResizeTarget.NONE -> {}
                 }
 
                 // v341/v342 — PicsArt-style alignment guides. Always composed
@@ -5899,6 +6594,11 @@ fun TopicShareSheet(
     // other sheet state so the restore effect below can seed it (the review
     // text lives in [customText] and persists the same way).
     var reviewChapterNumber by remember { mutableIntStateOf(0) }
+    // v369 — optional chapter-title override for the review chip ("CH 5 · My
+    // Title"): blank keeps the book's authored chapter title. Edited next to
+    // the chapter picker in the Content panel; the chip itself stays above
+    // the review text at the fact-box position.
+    var reviewChapterTitle by remember { mutableStateOf("") }
     // v229d — seeded from [initialStyle] / [initialClassicSignature] so the
     // Share Hub can open the sheet on the picked design.
     var styleIdx by remember { mutableIntStateOf(initialStyle) }
@@ -5959,7 +6659,19 @@ fun TopicShareSheet(
                 factHeightFrac = o.optDouble("factHeightFrac", 1.0).toFloat(),
                 metaWidthFrac = o.optDouble("metaWidthFrac", 1.0).toFloat(),
                 metaHeightFrac = o.optDouble("metaHeightFrac", 1.0).toFloat(),
-                titleScale = o.optDouble("titleScale", 1.0).toFloat()
+                titleScale = o.optDouble("titleScale", 1.0).toFloat(),
+                favWidthFrac = o.optDouble("favWidthFrac", 1.0).toFloat(),
+                favHeightFrac = o.optDouble("favHeightFrac", 1.0).toFloat(),
+                autoFitIntensity = o.optInt("autoFitIntensity", 0),
+                // v370 — the fact LAYOUT (condensed / book page / editorial
+                // + drop cap) restores by name; unknown names keep the
+                // style's default.
+                factFormat = ShareCardFactFormat.entries.firstOrNull {
+                    it.name == o.optString("factFormat", "")
+                } ?: ShareCardFactFormat.STANDARD,
+                factDropCap = ShareCardFactDropCap.entries.firstOrNull {
+                    it.name == o.optString("factDropCap", "")
+                } ?: ShareCardFactDropCap.NONE
             )
             val loaded = mutableMapOf<ShareCardStyle, ShareCardMove>()
             saved.optJSONObject("moves")?.let { mv ->
@@ -5990,6 +6702,7 @@ fun TopicShareSheet(
             polaroidCaption = saved.optString("polaroidCaption", "")
             showChapterProgress = saved.optBoolean("showChapterProgress", false)
             reviewChapterNumber = saved.optInt("reviewChapterNumber", 0)
+            reviewChapterTitle = saved.optString("reviewChapterTitle", "")
         }
     }
     val sharer = AppPreferences.getDisplayName(context).ifBlank { "" }
@@ -6150,7 +6863,13 @@ fun TopicShareSheet(
         "chapter_review" -> {
             val chip = effectiveReviewChapter?.let { num ->
                 val ch = bookChapters.firstOrNull { c -> c.number == num }
-                "CH $num" + (ch?.title?.takeIf { t -> t.isNotBlank() }?.let { t -> " · $t" } ?: "")
+                // v369 — the user's chapter-title override wins; otherwise the
+                // book's authored title. The chip stays at the fact-box
+                // position above the review text.
+                val titlePart = reviewChapterTitle.ifBlank {
+                    ch?.title?.takeIf { t -> t.isNotBlank() } ?: ""
+                }
+                "CH $num" + (titlePart.takeIf { t -> t.isNotBlank() }?.let { t -> " · $t" } ?: "")
             }
             reviewContent.copy(
                 text = buildString {
@@ -6184,8 +6903,13 @@ fun TopicShareSheet(
     // v334 — what the inline field binds to (mirror of [cardFactText] so the
     // caret sits on the visible glyphs) and how its edits are routed: custom
     // facts and chapter reviews write customText, everything else editedFact.
-    val factFieldText = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review")
-        activeSource.text else editedFact ?: activeSource.text
+    // v369 — the chapter-review field binds the REVIEW text ONLY (the chip
+    // is the prefix the CARD renders); the field shifts down one line in
+    // ArrangeableCard so the caret lands on the review glyphs, not the chip.
+    val factFieldText = when (activeId) {
+        CUSTOM_FACT_ID, "chapter_review" -> customText
+        else -> editedFact ?: activeSource.text
+    }
     fun routeFactChange(newText: String) {
         when (activeId) {
             CUSTOM_FACT_ID, "chapter_review" -> customText = newText
@@ -6240,10 +6964,13 @@ fun TopicShareSheet(
                 put("badgeDx", m.badgeDx); put("badgeDy", m.badgeDy)
                 put("coverDx", m.coverDx); put("coverDy", m.coverDy)
                 put("favDx", m.favDx); put("favDy", m.favDy)
+                put("favWidthFrac", m.favWidthFrac); put("favHeightFrac", m.favHeightFrac)
                 put("titleWidthFrac", m.titleWidthFrac); put("titleHeightFrac", m.titleHeightFrac)
                 put("factWidthFrac", m.factWidthFrac); put("factHeightFrac", m.factHeightFrac)
                 put("metaWidthFrac", m.metaWidthFrac); put("metaHeightFrac", m.metaHeightFrac)
                 put("titleScale", m.titleScale)
+                put("factFormat", m.factFormat.name); put("factDropCap", m.factDropCap.name)
+                put("autoFitIntensity", m.autoFitIntensity)
             }
             movesObj.put(style.name, o)
         }
@@ -6260,6 +6987,7 @@ fun TopicShareSheet(
         edit.put("polaroidCaption", polaroidCaption)
         edit.put("showChapterProgress", showChapterProgress)
         edit.put("reviewChapterNumber", reviewChapterNumber)
+        edit.put("reviewChapterTitle", reviewChapterTitle)
         AppPreferences.saveShareCardEdits(context, topicName, edit)
     }
 
@@ -6328,7 +7056,11 @@ fun TopicShareSheet(
                                 active = page == pagerState.currentPage,
                                 editMode = editMode && page == pagerState.currentPage,
                                 quoteMode = isQuotes,
-                                editFact = if (progressForCard != null) progressContent.text else factFieldText,
+                                // v369 — the chapter-progress widget binds its
+                                // own caption; everything else (incl. the
+                                // custom fact stacked under progress) binds the
+                                // LIVE field text so it edits inline.
+                                editFact = if (activeId == "chapter_progress") progressContent.text else factFieldText,
                                 onFactChange = { routeFactChange(it) },
                                 factEditMode = factEditMode,
                                 onFactEditModeChange = { factEditMode = it },
@@ -6358,7 +7090,10 @@ fun TopicShareSheet(
                                 selectedResizeTarget = selectedResizeTarget,
                                 move = pageMove,
                                 onMove = { movesByStyle = movesByStyle + (styles[page] to it) },
-                                factFieldStyle = factFieldStyle
+                                factFieldStyle = factFieldStyle,
+                                autoFitDelta = shareAutoFitDelta(pageMove, factFieldText.length),
+                                factFieldChipShift = activeId == "chapter_review",
+                                factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…"
                             ) { cb ->
                                 TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = pageMove, chapterProgress = progressForCard, chapterFact = chapterFactForCard, callbacks = cb)
                             }
@@ -6388,7 +7123,9 @@ fun TopicShareSheet(
                             active = true,
                             editMode = editMode,
                             quoteMode = isQuotes,
-                            editFact = factFieldText,
+                            // v369 — see the pager branch: chapter-progress
+                            // binds its caption, everything else the live text.
+                            editFact = if (activeId == "chapter_progress") progressContent.text else factFieldText,
                             onFactChange = { routeFactChange(it) },
                             factEditMode = factEditMode,
                             onFactEditModeChange = { factEditMode = it },
@@ -6417,10 +7154,59 @@ fun TopicShareSheet(
                             selectedResizeTarget = selectedResizeTarget,
                             move = move,
                             onMove = { updateMove(it) },
-                            factFieldStyle = factFieldStyle
+                            factFieldStyle = factFieldStyle,
+                            autoFitDelta = shareAutoFitDelta(move, factFieldText.length),
+                            factFieldChipShift = activeId == "chapter_review",
+                            factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…"
                         ) { cb ->
                             TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, callbacks = cb)
                         }
+                    }
+                }             }
+
+            // v370 — BIGGER FLOATING EDIT BOX: when the Edit text tool has
+            // armed the field (factEditMode, only meaningful while editing)
+            // and the selected fact is an editable fact (custom fact, chapter
+            // review, or the quick fact without reading progress), a bigger
+            // floating box is shown ABOVE the card preview (no dark overlay —
+            // it floats on the sheet's own surface) so long texts are
+            // comfortable to type. The card's on-card field is still the caret
+            // seat; this box binds the SAME editFact / customText so typing
+            // here is identical. When the selected fact is not editable (e.g.
+            // reading-progress caption) the floating box stays hidden.
+            val factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…"
+            if (editMode && factEditMode && (activeId == CUSTOM_FACT_ID || activeId == "chapter_review" || (activeId == QUICK_FACT_ID && progressForCard == null))) {
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    shadowElevation = 6.dp,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp)
+                ) {
+                    Column(modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
+                        Text(
+                            when (activeId) {
+                                CUSTOM_FACT_ID -> "Custom fact"
+                                "chapter_review" -> "Chapter review"
+                                else -> "Quick fact"
+                            },
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        BasicTextField(
+                            value = factFieldText,
+                            onValueChange = routeFactChange,
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface, lineHeight = 22.sp),
+                            cursorBrush = SolidColor(CoffeeChromeDeep),
+                            singleLine = false,
+                            maxLines = 8,
+                            decorationBox = { inner ->
+                                Box(Modifier.fillMaxWidth()) {
+                                    if (factFieldText.isBlank()) Text(factFieldPlaceholder, style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
+                                    inner()
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
             }
@@ -6469,7 +7255,12 @@ fun TopicShareSheet(
                 val isTitle = sel == ShareCardResizeTarget.TITLE
                 val isFact = sel == ShareCardResizeTarget.FACT
                 val isMeta = sel == ShareCardResizeTarget.META
-                val isSizable = isTitle || isFact || isMeta
+                val isFav = sel == ShareCardResizeTarget.FAVTRACKS
+                // Box sliders act on title / fact / meta / fav strips; the
+                // TEXT-size slider stays title / fact / meta only (a fav
+                // strip sizes as a box, not as type).
+                val isSizable = isTitle || isFact || isMeta || isFav
+                val isTextSizable = isTitle || isFact || isMeta
                 val selName = when (sel) {
                     ShareCardResizeTarget.TITLE -> "Title"
                     ShareCardResizeTarget.FACT -> "Quick fact"
@@ -6560,12 +7351,19 @@ fun TopicShareSheet(
                             .horizontalScroll(androidx.compose.foundation.rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        // v330 — Edit-text moved back into the toolbar row:
-                        // the floating cluster over the card is gone (the
-                        // bottom bar now owns Reset + Done + the content
-                        // selector). Only the quick fact can be typed, so the
-                        // pill appears just when the fact is selected.
-                        if (isFact && progressForCard == null) {
+                        // v370 — Edit-text tool: opens a BIGGER floating edit
+                        // box ABOVE the card (no dark overlay — it floats on
+                        // the sheet's own surface). The box is taller than
+                        // the on-card field so long custom facts / chapter
+                        // reviews are comfortable to type. The Edit-text pill
+                        // stays in the toolbar (single tap on the box still
+                        // only SELECTS — double tap enters edit mode).
+                        // v370 — the Edit-text pill shows for the quick fact,
+                        // the custom fact and the chapter review (even when
+                        // stacked under reading progress), so every editable
+                        // fact can be typed in the bigger floating box.
+                        val isEditableFact = isFact && (activeId == CUSTOM_FACT_ID || activeId == "chapter_review" || (activeId == QUICK_FACT_ID && progressForCard == null))
+                        if (isEditableFact) {
                             EditToolPill(
                                 glyph = CurioIcons.Edit,
                                 description = "Edit text",
@@ -6674,7 +7472,7 @@ fun TopicShareSheet(
                         // text went from too small to cut off with no middle
                         // ground). Continuous 1% steps with a haptic tick per
                         // step and a live × readout.
-                        "size" -> if (isSizable) {
+                        "size" -> if (isTextSizable) {
                             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                 Text("$selName size", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 val cur = if (isTitle) move.titleScale else bodyScale
@@ -6699,6 +7497,40 @@ fun TopicShareSheet(
                                         modifier = Modifier.weight(1f)
                                     )
                                 }
+                                // v369 — smart auto-fit ON/OFF (default ON):
+                                // long facts grow their box + nudge the title
+                                // up automatically. Manual edits still win.
+                                if (isFact) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Column(Modifier.weight(1f)) {
+                                            Text("Smart auto-fit", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface)
+                                            Text("Grows the fact box and lifts the title automatically for long text. Off = the box stays exactly as you set it.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        }
+                                        Switch(
+                                            checked = AppPreferences.shareAutoFitState,
+                                            onCheckedChange = { AppPreferences.setShareAutoFitEnabled(context, it) }
+                                        )
+                                    }
+                                    // v370 — auto-fit INTENSITY presets (per
+                                    // style, saved with the move): how much a
+                                    // long fact grows its box + lifts the
+                                    // title. Manual box edits still win.
+                                    Text("Auto-fit intensity", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp, color = MaterialTheme.colorScheme.onSurfaceVariant))
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Pill("Balanced", "tune", move.autoFitIntensity == 0) { updateMove(move.copy(autoFitIntensity = 0)) }
+                                        Pill("Compact", "tune", move.autoFitIntensity == 1) { updateMove(move.copy(autoFitIntensity = 1)) }
+                                        Pill("Airy", "tune", move.autoFitIntensity == 2) { updateMove(move.copy(autoFitIntensity = 2)) }
+                                    }
+                                    Text(
+                                        "Balanced = the default curve · Compact grows later / less · Airy grows sooner / more. Each style keeps its own pick.",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         } else {
                             Text("Tap a thing on the card first", style = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
@@ -6707,11 +7539,26 @@ fun TopicShareSheet(
                             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Text("$selName box", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 if (isTitle) {
-                                    SizeSliderColumn("Title width", move.titleWidthFrac, { updateMove(move.copy(titleWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
-                                    SizeSliderColumn("Title height", move.titleHeightFrac, { updateMove(move.copy(titleHeightFrac = it)) }, 0.35f..2.5f, steps = 26, modifier = Modifier.fillMaxWidth())
+                                    // v370 — Title width can shrink below the
+                                    // old 0.3f floor when a cover sits to the
+                                    // left: the title narrows and the cover
+                                    // takes the left side. Height is also a
+                                    // bigger range so tall cards can grow
+                                    // the title block more.
+                                    SizeSliderColumn("Title width", move.titleWidthFrac, { updateMove(move.copy(titleWidthFrac = it)) }, 0.18f..1f, steps = 81, modifier = Modifier.fillMaxWidth())
+                                    SizeSliderColumn("Title height", move.titleHeightFrac, { updateMove(move.copy(titleHeightFrac = it)) }, 0.35f..5f, steps = 46, modifier = Modifier.fillMaxWidth())
                                 } else if (isFact) {
-                                    SizeSliderColumn("Fact width", move.factWidthFrac, { updateMove(move.copy(factWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
-                                    SizeSliderColumn("Fact height", move.factHeightFrac, { updateMove(move.copy(factHeightFrac = it)) }, 0.35f..2.5f, steps = 26, modifier = Modifier.fillMaxWidth())
+                                    SizeSliderColumn("Fact width", move.factWidthFrac, { updateMove(move.copy(factWidthFrac = it)) }, 0.18f..1f, steps = 81, modifier = Modifier.fillMaxWidth())
+                                    // v370 — fact box height: tall 9:16 cards
+                                    // can grow a long fact far past the old
+                                    // 2.5x cap.
+                                    SizeSliderColumn("Fact height", move.factHeightFrac, { updateMove(move.copy(factHeightFrac = it)) }, 0.35f..5f, steps = 46, modifier = Modifier.fillMaxWidth())
+                                } else if (isFav) {
+                                    // v370 — ALBUM favorite-tracks strip box:
+                                    // width is a fill fraction of its natural
+                                    // max width; height scales the track rows.
+                                    SizeSliderColumn("Strip width", move.favWidthFrac, { updateMove(move.copy(favWidthFrac = it)) }, 0.3f..1.2f, steps = 89, modifier = Modifier.fillMaxWidth())
+                                    SizeSliderColumn("Strip rows", move.favHeightFrac, { updateMove(move.copy(favHeightFrac = it)) }, 0.35f..3f, steps = 26, modifier = Modifier.fillMaxWidth())
                                 } else {
                                     SizeSliderColumn("Info width", move.metaWidthFrac, { updateMove(move.copy(metaWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
                                     SizeSliderColumn("Info lines", move.metaHeightFrac, { updateMove(move.copy(metaHeightFrac = it)) }, 0.5f..1f, steps = 4, modifier = Modifier.fillMaxWidth())
@@ -6748,8 +7595,10 @@ fun TopicShareSheet(
                                     ring = MaterialTheme.colorScheme.secondary,
                                     selected = toneIndex < 0
                                 ) { toneIndex = -1 }
-                                val toneCount = unlockedToneCount(CurioQuests.levelForXp(CurioQuests.xpState)).coerceIn(1, curatedTones.size)
-                                curatedTones.take(toneCount).forEachIndexed { i, p ->
+                                // v369 — always-available tones (base + the
+                                // new dark variants) show immediately; the
+                                // premium tones join the row at their level.
+                                availableTones().forEachIndexed { i, p ->
                                     ToneSwatch(
                                         name = p.name,
                                         bg = p.bgBase,
@@ -6793,6 +7642,36 @@ fun TopicShareSheet(
                                 }
                                 Pill("Italic", CurioIcons.FormatItalic, elementItalic) {
                                     setElementItalic(!elementItalic)
+                                }
+                            }
+                            // v370 — FACT TEXT LAYOUT presets (only the quick
+                            // fact): Standard / Condensed / Book page /
+                            // Editorial. Each recomposes how the fact body is
+                            // set on every card style.
+                            if (isFact) {
+                                Text("Fact layout", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp, color = MaterialTheme.colorScheme.onSurfaceVariant))
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    modifier = Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState())
+                                ) {
+                                    ShareCardFactFormat.entries.forEach { f ->
+                                        Pill(f.label, "notes", move.factFormat == f) {
+                                            updateMove(move.copy(factFormat = f))
+                                        }
+                                    }
+                                }
+                                // Editorial-only: the drop-cap variant. Only
+                                // visible when the fact layout is Editorial so
+                                // the option doesn't clutter other layouts.
+                                if (move.factFormat == ShareCardFactFormat.EDITORIAL) {
+                                    Text("Drop cap", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp, color = MaterialTheme.colorScheme.onSurfaceVariant))
+                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        ShareCardFactDropCap.entries.forEach { c ->
+                                            Pill(c.label, "title", move.factDropCap == c) {
+                                                updateMove(move.copy(factDropCap = c))
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -6914,23 +7793,45 @@ fun TopicShareSheet(
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
+                                    // v369 — the chapter TITLE is a separate
+                                    // edit (blank keeps the book's authored
+                                    // title); the review text itself is typed
+                                    // inline on the card, not in a toolbar box.
+                                    OutlinedTextField(
+                                        value = reviewChapterTitle,
+                                        onValueChange = { reviewChapterTitle = it.take(48) },
+                                        placeholder = { Text("Chapter title (blank = the book's own)", style = MaterialTheme.typography.labelMedium) },
+                                        singleLine = true,
+                                        textStyle = MaterialTheme.typography.labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                                        shape = RoundedCornerShape(50),
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
                                 }
                             }
+                            // v370 — custom fact / chapter review text is typed
+                            // in the bigger FLOATING edit box opened from the
+                            // Edit-text tool above (the on-card field is the
+                            // select/move target + inline caret seat). The
+                            // chapter review also stays editable here even when
+                            // stacked under reading progress (the floating box
+                            // binds customText, same as the custom fact).
                             if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") {
-                                OutlinedTextField(
-                                    customText,
-                                    { customText = it },
-                                    placeholder = {
-                                        Text(
-                                            if (activeId == "chapter_review") "Write your review of this chapter…"
-                                            else "Your custom fact",
-                                            style = MaterialTheme.typography.bodyMedium
-                                        )
-                                    },
-                                    minLines = 2,
-                                    maxLines = 4,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    CurioIcon(
+                                        name = CurioIcons.Edit,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        size = 15.dp
+                                    )
+                                    Text(
+                                        when (activeId) {
+                                            CUSTOM_FACT_ID -> "Select the box on the card and tap Edit text to type it in the bigger floating box."
+                                            else -> "Select the review box on the card and tap Edit text to type your review in the bigger floating box."
+                                        },
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                             // v334 — BOOK topics: the cover controls (gallery /
                             // fetch / remove) replace the generic photo row;
@@ -7268,6 +8169,57 @@ private fun BoxScope.MoveHandle(
         CurioIcon(
             name = CurioIcons.DragHandle,
             contentDescription = "Move",
+            tint = Color.White,
+            size = if (dragging) 11.dp else 13.dp
+        )
+    }
+}
+
+/**
+ * v369 — the CORNER scale grip: a small bracket in the box's bottom-right
+ * corner that scales the WHOLE box (width AND height together, shape kept)
+ * from the corner — the "whole box size, not shape" adjustment done by
+ * dragging instead of only the width/height sliders. Same drag contract as
+ * [MoveHandle]: px deltas converted to dp and fed back via onDelta.
+ */
+@Composable
+private fun BoxScope.CornerResizeHandle(
+    x: Dp, y: Dp,
+    onDelta: (dx: Float, dy: Float) -> Unit,
+    onDragStart: () -> Unit = {},
+    onDragEnd: () -> Unit = {}
+) {
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    val latestDelta by rememberUpdatedState(onDelta)
+    val latestStart by rememberUpdatedState(onDragStart)
+    val latestEnd by rememberUpdatedState(onDragEnd)
+    var dragging by remember { mutableStateOf(false) }
+    Box(
+        modifier = Modifier
+            .offset(x = x, y = y)
+            .size(22.dp)
+            .graphicsLayer {
+                shadowElevation = 2.dp.toPx(); shape = CircleShape; clip = false
+                alpha = if (dragging) 0.55f else 1f
+            }
+            .background(Color(0xFF3E2723), CircleShape)
+            .border(1.dp, Color.White.copy(alpha = 0.45f), CircleShape)
+            .pointerInput(Unit) {
+                detectDragGestures(
+                    onDragStart = { dragging = true; latestStart() },
+                    onDragEnd = { dragging = false; latestEnd() },
+                    onDragCancel = { dragging = false; latestEnd() }
+                ) { _, dragAmount ->
+                    val dx = with(density) { dragAmount.x.toDp().value }
+                    val dy = with(density) { dragAmount.y.toDp().value }
+                    latestDelta(dx, dy)
+                }
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        CurioIcon(
+            name = CurioIcons.Fullscreen,
+            contentDescription = "Resize box from corner",
             tint = Color.White,
             size = if (dragging) 11.dp else 13.dp
         )
