@@ -82,6 +82,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
@@ -95,6 +96,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.TextUnit
@@ -534,7 +536,8 @@ private fun smartAutoFitDelta(
 ): ShareAutoFitDelta {
     if (!AppPreferences.shareAutoFitState) return ShareAutoFitDelta()
     val touched = move.factDx != 0f || move.factDy != 0f ||
-        move.factWidthFrac != 1f || move.factHeightFrac != 1f || move.factScale != 1f
+        move.factWidthFrac != 1f || move.factHeightFrac != 1f ||
+        move.factScale != 1f || move.factZoom != 1f
     if (touched) return ShareAutoFitDelta()
     val h = autoFitCurve(move.autoFitIntensity, factLength)
     if (h <= 1f) return ShareAutoFitDelta()
@@ -721,7 +724,17 @@ data class ShareCardMove(
      *  the first manual grab (the same handoff that seeds the box height) so
      *  handing auto-fit off doesn't make the text jump back to full size and
      *  clip mid-drag. 1f = full size. */
-    val factScale: Float = 1f
+    val factScale: Float = 1f,
+    /** v371 — corner whole-box ZOOM for the fact: dragging the fact's corner
+     *  scales the box AND the fact font TOGETHER (photo-zoom), so the corner
+     *  never feels like a plain height/width slider. 1f = no zoom. */
+    val factZoom: Float = 1f,
+    /** v371 — whole-fact UNDERLINE + HIGHLIGHT (rich-text-lite, per element). */
+    val factUnderline: Boolean = false,
+    val factHighlight: Color? = null,
+    /** v371 — whole-title UNDERLINE + HIGHLIGHT. */
+    val titleUnderline: Boolean = false,
+    val titleHighlight: Color? = null
 )
 
 /** Modifier that shifts a card's TITLE by the move offset + box size + scale and
@@ -780,6 +793,8 @@ private fun titleStyle(base: TextStyle, m: ShareCardMove): TextStyle {
     if (m.titleAlign != null) s = s.copy(textAlign = m.titleAlign)
     if (m.titleBold) s = s.copy(fontWeight = FontWeight.Bold)
     if (m.titleItalic) s = s.copy(fontStyle = FontStyle.Italic)
+    if (m.titleUnderline) s = s.copy(textDecoration = TextDecoration.Underline)
+    if (m.titleHighlight != null) s = s.copy(background = m.titleHighlight)
     return s
 }
 
@@ -834,6 +849,8 @@ private fun factBodyStyle(base: TextStyle, m: ShareCardMove): TextStyle {
     if (m.factAlign != null) s = s.copy(textAlign = m.factAlign)
     if (m.factBold) s = s.copy(fontWeight = FontWeight.Bold)
     if (m.factItalic) s = s.copy(fontStyle = FontStyle.Italic)
+    if (m.factUnderline) s = s.copy(textDecoration = TextDecoration.Underline)
+    if (m.factHighlight != null) s = s.copy(background = m.factHighlight)
     if (m.factFormat == ShareCardFactFormat.CONDENSED) {
         // v371 — this Compose version has no TextStyle.paragraphStyle /
         // lineSpacing params (they landed in a later release), so the
@@ -1247,7 +1264,7 @@ fun TopicShareCard(
     // (style base × bodyScale × autoFit.factScale). Once the user grabs
     // the fact, the shrink is captured into move.factScale (see the
     // first-grab seed) so the handoff doesn't make the text jump or clip.
-    val effectiveBodyScale = bodyScale * autoFit.factScale * move.factScale
+    val effectiveBodyScale = bodyScale * autoFit.factScale * move.factScale * move.factZoom
     // Extract year from trailing parentheses — "Appetite for Destruction (1987)" → "1987"
     val year = topicName.substringAfterLast("(").substringBeforeLast(")").takeIf { it.all { c -> c.isDigit() } && it.length == 4 }
     val palette = paletteFor(accent, toneIndex)
@@ -6035,7 +6052,11 @@ private fun ArrangeableCard(
                                     onFactEditModeChange(false)
                                 }
                             }
-                            .border(1.dp, selBorder(isSel), RoundedCornerShape(8.dp)),
+                            // v371 — while typing, the selection chrome hides:
+                            // no outline/highlight around the fact (the caret
+                            // shows where you're typing); it returns when text
+                            // editing ends.
+                            .border(1.dp, if (factEditMode) Color.Transparent else selBorder(isSel), RoundedCornerShape(8.dp)),
                         decorationBox = { inner ->
                             Box(Modifier.fillMaxWidth()) {
                                 if (editFact.isBlank()) Text(factFieldPlaceholder, style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)))
@@ -6198,7 +6219,10 @@ private fun ArrangeableCard(
                             )
                         }
                     }
-                    ShareCardResizeTarget.FACT -> {
+                    ShareCardResizeTarget.FACT -> if (!factEditMode) {
+                        // v371 — while typing, the grip + corner scale hide so
+                        // nothing fights the caret; they return when text
+                        // editing ends (the field itself stays, border-less).
                         val f = rFact
                         if (f.width > 0f && f.height > 0f) {
                             MoveHandle(
@@ -6279,7 +6303,11 @@ private fun ArrangeableCard(
                                     val factor = maxOf(1f + dx / baseW, 1f + dy / baseH).coerceIn(0.2f, 6f)
                                     onMove(move.copy(
                                         factWidthFrac = (move.factWidthFrac * factor).coerceIn(0.2f, 1f),
-                                        factHeightFrac = (move.factHeightFrac * factor).coerceIn(0.2f, 8f)
+                                        factHeightFrac = (move.factHeightFrac * factor).coerceIn(0.2f, 8f),
+                                        // v371 — WHOLE-BOX ZOOM: the fact font
+                                        // scales with the box (photo-zoom), so
+                                        // the corner expands box AND text.
+                                        factZoom = (move.factZoom * factor).coerceIn(0.5f, 4f)
                                     ))
                                 },
                                 onDragStart = { dragActive = true },
@@ -6659,6 +6687,9 @@ fun TopicShareSheet(
     var selectedResizeTarget by remember { mutableStateOf(ShareCardResizeTarget.NONE) }
     // Which tool's small overlay panel is open under the toolbar (null = none).
     var toolOpen by remember { mutableStateOf<String?>(null) }
+    // v371 — the FULL-SCREEN text editor: the card renders large on the
+    // category-tint wash with floating tools (one Aa pill + dropdown).
+    var fullscreenEdit by remember { mutableStateOf(false) }
     // v370b — the ENLARGE writing sheet: a full white writing surface for
     // the active fact text (quick / custom / chapter review), opened from
     // the writing box below the tools.
@@ -6698,6 +6729,11 @@ fun TopicShareSheet(
                 favHeightFrac = o.optDouble("favHeightFrac", 1.0).toFloat(),
                 autoFitIntensity = o.optInt("autoFitIntensity", 0),
                 factScale = o.optDouble("factScale", 1.0).toFloat(),
+                factZoom = o.optDouble("factZoom", 1.0).toFloat(),
+                factUnderline = o.optBoolean("factUnderline", false),
+                factHighlight = o.optInt("factHighlight", 0).takeIf { it != 0 }?.let { Color(it) },
+                titleUnderline = o.optBoolean("titleUnderline", false),
+                titleHighlight = o.optInt("titleHighlight", 0).takeIf { it != 0 }?.let { Color(it) },
                 // v370 — the fact LAYOUT (condensed / book page / editorial
                 // + drop cap) restores by name; unknown names keep the
                 // style's default.
@@ -7032,6 +7068,11 @@ fun TopicShareSheet(
                 put("factFormat", m.factFormat.name); put("factDropCap", m.factDropCap.name)
                 put("autoFitIntensity", m.autoFitIntensity)
                 put("factScale", m.factScale)
+                put("factZoom", m.factZoom)
+                put("factUnderline", m.factUnderline)
+                m.factHighlight?.let { put("factHighlight", it.toArgb()) }
+                put("titleUnderline", m.titleUnderline)
+                m.titleHighlight?.let { put("titleHighlight", it.toArgb()) }
             }
             movesObj.put(style.name, o)
         }
@@ -7233,20 +7274,47 @@ fun TopicShareSheet(
                 // Done brings the save/share actions back). Tap-and-hold on
                 // the card is the other way in.
                 if (!editMode) {
-                    Surface(
-                        onClick = {
-                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            editMode = !editMode
-                            toolOpen = null
-                        },
-                        shape = RoundedCornerShape(50),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        shadowElevation = 6.dp,
+                    // v371 — a FULL-SCREEN button joins the Customise pill:
+                    // it opens the card large on the category-tint wash with
+                    // floating text tools (one Aa pill + dropdown), so text
+                    // editing is precise and the layout never changes.
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.align(Alignment.BottomEnd).padding(end = 14.dp, bottom = 6.dp)
                     ) {
-                        Row(Modifier.padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            CurioIcon(name = CurioIcons.Tune, tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
-                            Text("Customise", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant))
+                        Surface(
+                            onClick = {
+                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                editMode = !editMode
+                                toolOpen = null
+                            },
+                            shape = RoundedCornerShape(50),
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            shadowElevation = 6.dp
+                        ) {
+                            Row(Modifier.padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                CurioIcon(name = CurioIcons.Tune, tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
+                                Text("Customise", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant))
+                            }
+                        }
+                        Surface(
+                            onClick = {
+                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                fullscreenEdit = true
+                                // Full screen starts in edit mode so tapping
+                                // the title/fact selects + edits it precisely.
+                                editMode = true
+                                toolOpen = null
+                            },
+                            shape = RoundedCornerShape(50),
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            shadowElevation = 6.dp
+                        ) {
+                            Row(Modifier.padding(horizontal = 14.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                CurioIcon(name = CurioIcons.Fullscreen, tint = MaterialTheme.colorScheme.onSecondaryContainer, size = 14.dp)
+                                Text("Full screen", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSecondaryContainer))
+                            }
                         }
                     }
                 }
@@ -7550,6 +7618,207 @@ fun TopicShareSheet(
                                             .fillMaxWidth()
                                             .weight(1f)
                                     )
+                                }
+                            }
+                        }
+                    }
+
+                    // v371 — the FULL-SCREEN text editor: the card renders
+                    // LARGE on the category-tint wash, floating tools stay
+                    // minimal (Close left, ONE Aa pill right that opens the
+                    // dropdown with every text tool), and inline editing is
+                    // precise because the card is big. Same TopicShareCard,
+                    // so the export matches the full-screen preview exactly.
+                    if (fullscreenEdit) {
+                        val fullBg = androidx.compose.ui.graphics.lerp(MaterialTheme.colorScheme.surface, accent, 0.12f)
+                        val highlightPresets = listOf(
+                            Color(0xFFFFF59D), Color(0xFFFFCDD2),
+                            Color(0xFFC8E6C9), Color(0xFFB3E5FC), Color(0xFFE1BEE7)
+                        )
+                        var fsToolsOpen by remember { mutableStateOf(false) }
+                        androidx.compose.ui.window.Dialog(
+                            onDismissRequest = { fullscreenEdit = false },
+                            properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
+                        ) {
+                            Box(Modifier.fillMaxSize().background(fullBg)) {
+                                // ── Top bar: Close (left) · Aa pill (right) ─
+                                Row(
+                                    Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Surface(
+                                        onClick = { fullscreenEdit = false },
+                                        shape = RoundedCornerShape(50),
+                                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                                        shadowElevation = 4.dp
+                                    ) {
+                                        Row(Modifier.padding(horizontal = 16.dp, vertical = 9.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                            CurioIcon(name = CurioIcons.Close, contentDescription = "Close full screen", tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 15.dp)
+                                            Text("Close", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        }
+                                    }
+                                    Box {
+                                        Surface(
+                                            onClick = { fsToolsOpen = !fsToolsOpen },
+                                            shape = RoundedCornerShape(50),
+                                            color = if (fsToolsOpen) MaterialTheme.colorScheme.primary
+                                                    else MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                                            shadowElevation = 4.dp
+                                        ) {
+                                            Row(Modifier.padding(horizontal = 18.dp, vertical = 9.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                                CurioIcon(name = CurioIcons.FormatText, contentDescription = "Text tools", tint = if (fsToolsOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, size = 15.dp)
+                                                Text("Text", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = if (fsToolsOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
+                                            }
+                                        }
+                                        DropdownMenu(expanded = fsToolsOpen, onDismissRequest = { fsToolsOpen = false }) {
+                                            Column(Modifier.width(330.dp).padding(vertical = 4.dp)) {
+                                                val fsSel = selectedResizeTarget
+                                                val fsIsTitle = fsSel == ShareCardResizeTarget.TITLE
+                                                val fsIsFact = fsSel == ShareCardResizeTarget.FACT
+                                                val fsIsText = fsIsTitle || fsIsFact
+                                                // Arm precise inline editing (fact).
+                                                Pill("Edit fact text", CurioIcons.Edit, factEditMode) {
+                                                    if (selectedResizeTarget != ShareCardResizeTarget.FACT) {
+                                                        if (activeId != CUSTOM_FACT_ID && activeId != "chapter_review" && progressForCard == null) {
+                                                            selectedId = CUSTOM_FACT_ID
+                                                            customText = activeSource.text
+                                                            editedFact = null
+                                                        }
+                                                        selectedResizeTarget = ShareCardResizeTarget.FACT
+                                                    }
+                                                    factEditMode = true
+                                                }
+                                                if (!fsIsText) {
+                                                    Text("Tap the title or fact on the card first", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
+                                                } else {
+                                                    // Font
+                                                    Text("Font", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 12.dp, top = 4.dp, bottom = 4.dp))
+                                                    Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(horizontal = 12.dp)) {
+                                                        shareFonts.forEach { f ->
+                                                            val selF = if (fsIsTitle) move.titleFont == f.family else move.factFont == f.family
+                                                            Pill(f.label, CurioIcons.FormatText, selF) {
+                                                                updateMove(if (fsIsTitle) move.copy(titleFont = f.family) else move.copy(factFont = f.family))
+                                                            }
+                                                        }
+                                                    }
+                                                    // Size
+                                                    Box(Modifier.padding(horizontal = 12.dp)) {
+                                                        TextSizeSliderColumn(
+                                                            label = if (fsIsTitle) "Title size" else "Fact size",
+                                                            value = if (fsIsTitle) move.titleScale else bodyScale,
+                                                            onValueChange = { v -> if (fsIsTitle) updateMove(move.copy(titleScale = v)) else bodyScale = v }
+                                                        )
+                                                    }
+                                                    // Bold / Italic / Underline / Highlight
+                                                    val fsBold = if (fsIsTitle) move.titleBold else move.factBold
+                                                    val fsItalic = if (fsIsTitle) move.titleItalic else move.factItalic
+                                                    val fsUnder = if (fsIsTitle) move.titleUnderline else move.factUnderline
+                                                    val fsHighlight = if (fsIsTitle) move.titleHighlight else move.factHighlight
+                                                    Row(Modifier.padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                                                        Pill("B", CurioIcons.FormatBold, fsBold) {
+                                                            updateMove(if (fsIsTitle) move.copy(titleBold = !fsBold) else move.copy(factBold = !fsBold))
+                                                        }
+                                                        Pill("I", CurioIcons.FormatItalic, fsItalic) {
+                                                            updateMove(if (fsIsTitle) move.copy(titleItalic = !fsItalic) else move.copy(factItalic = !fsItalic))
+                                                        }
+                                                        Pill("U", CurioIcons.FormatUnderline, fsUnder) {
+                                                            updateMove(if (fsIsTitle) move.copy(titleUnderline = !fsUnder) else move.copy(factUnderline = !fsUnder))
+                                                        }
+                                                        Spacer(Modifier.width(4.dp))
+                                                        Text("Highlight", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                        highlightPresets.forEach { c ->
+                                                            Surface(
+                                                                onClick = {
+                                                                    updateMove(if (fsIsTitle) move.copy(titleHighlight = if (fsHighlight == c) null else c) else move.copy(factHighlight = if (fsHighlight == c) null else c))
+                                                                },
+                                                                shape = CircleShape,
+                                                                color = c,
+                                                                border = if (fsHighlight == c) BorderStroke(2.dp, MaterialTheme.colorScheme.onSurface) else null,
+                                                                modifier = Modifier.size(24.dp)
+                                                            ) {}
+                                                        }
+                                                    }
+                                                    // Align
+                                                    Row(Modifier.padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                                                        Text("Align", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                        val curAlign = if (fsIsTitle) move.titleAlign else move.factAlign
+                                                        listOf("Left" to TextAlign.Start, "Center" to TextAlign.Center, "Right" to TextAlign.End).forEach { (label, ta) ->
+                                                            Pill(label, CurioIcons.FormatText, curAlign == ta) {
+                                                                updateMove(if (fsIsTitle) move.copy(titleAlign = ta) else move.copy(factAlign = ta))
+                                                            }
+                                                        }
+                                                    }
+                                                    // Fact format (quick/custom fact only)
+                                                    if (fsIsFact) {
+                                                        Text("Fact format", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 12.dp, top = 4.dp))
+                                                        Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(horizontal = 12.dp)) {
+                                                            ShareCardFactFormat.entries.forEach { fmt ->
+                                                                Pill(fmt.label, CurioIcons.FormatText, move.factFormat == fmt) {
+                                                                    updateMove(move.copy(factFormat = fmt))
+                                                                }
+                                                            }
+                                                        }
+                                                        if (move.factFormat == ShareCardFactFormat.EDITORIAL) {
+                                                            Row(Modifier.padding(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                                                ShareCardFactDropCap.entries.forEach { dc ->
+                                                                    Pill(dc.label, CurioIcons.FormatText, move.factDropCap == dc) {
+                                                                        updateMove(move.copy(factDropCap = dc))
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                // ── The big card, centered ──────────────
+                                BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    val ratio = aspect.widthDp.toFloat() / aspect.heightDp.toFloat()
+                                    val cardW = minOf(
+                                        maxWidth.value - 24f,
+                                        (maxHeight.value - 150f) * ratio
+                                    ).coerceAtLeast(140f)
+                                    Box(
+                                        Modifier
+                                            .width(cardW.dp)
+                                            .aspectRatio(ratio)
+                                            .shadow(10.dp, RoundedCornerShape(12.dp))
+                                            .clip(RoundedCornerShape(12.dp))
+                                    ) {
+                                        ArrangeableCard(
+                                            active = true,
+                                            editMode = true,
+                                            quoteMode = isQuotes,
+                                            editFact = if (activeId == "chapter_progress") progressContent.text else factFieldText,
+                                            onFactChange = { routeFactChange(it) },
+                                            factEditMode = factEditMode,
+                                            onFactEditModeChange = { factEditMode = it },
+                                            onToggleEdit = {},
+                                            onSelectResizeTarget = { target ->
+                                                if (target == ShareCardResizeTarget.FACT &&
+                                                    activeId != CUSTOM_FACT_ID && activeId != "chapter_review" &&
+                                                    progressForCard == null
+                                                ) {
+                                                    selectedId = CUSTOM_FACT_ID
+                                                    customText = activeSource.text
+                                                    editedFact = null
+                                                }
+                                                selectedResizeTarget = target
+                                            },
+                                            selectedResizeTarget = selectedResizeTarget,
+                                            move = move,
+                                            onMove = { updateMove(it) },
+                                            factFieldStyle = factFieldStyle,
+                                            autoFitDelta = smartAutoFitDelta(move, maxOf(factFieldText.length, chapterFactForCard.length), (editedTitle ?: topicName.substringBeforeLast(" (")).length, currentStyle, aspect),
+                                            factFieldChipShift = activeId == "chapter_review",
+                                            factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…"
+                                        ) { cb ->
+                                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, callbacks = cb)
+                                        }
+                                    }
                                 }
                             }
                         }

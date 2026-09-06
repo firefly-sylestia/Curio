@@ -1,65 +1,56 @@
 # Prompt Log — current request
 
-## Request (2026-09-06)
+## Request (2026-09-06, active)
 
-"finish the previous request that you paused; book chapter add note is bad —
-add ability to share that note as chapter review in the share card (auto
-selects custom fact / chapter), book/album/series covers in share cards with
-fetch, condensed + book-page + editorial fact formats, writing box below the
-tools with enlarge, editorial drop-cap options, album fav box height/width,
-and when moving the quick fact box the title should only move if the fact
-touches it; also: book cover fetch sometimes fails with different providers —
-remove Google Books provider (keep ratings), album color extraction is
-inaccurate, expanded chapter color is bad, note box too small with expand."
+"the corner expand button it doesnt expand the whole box its only behaving
+as the width or hight button not as that enlarge for the whole box along
+with the text, also remove the selected outline when editing in inline the
+handle and that box hihglith, also add a full screen button for the share
+card with just text format and text editing features in full screen with
+only one pill and drop down style… the background color would be category
+tint. analyze the feature and ask me with suggestions what i wanna do"
+(answers: box + text zoom together; hide chrome in TEXT-edit mode only —
+handle + highlight return when exiting; full screen shows the card itself
+large with floating tools, whole-text per-element formatting like the sheet
+already has, ALL text tools in ONE menu).
 
-## Completed (commit `…` pending)
+## Implemented (this turn, commit pending)
 
-1. **Fact formats** — `ShareCardFactFormat` CONDENSED + BOOK_PAGE and
-   `ShareCardFactDropCap` (NONE / FIRST_LETTER / FIRST_WORD) render through a
-   new `FactBody` used by every style's fact + the chapter-fact sites
-   (17 call sites); `BookPageText` splits into two justified columns,
-   `EditorialDropCapBlock` draws the big initial. Formats + drop caps apply
-   to quick AND custom facts.
-2. **Writing box below the tools** (quick/custom/chapter-review) with an
-   Enlarge button → full white writing sheet.
-3. **Album/series cover fetch in the share editor** — `isAlbumTopic` /
-   `isSeriesTopic` wired at all three TopicShareSheet call sites (reveal,
-   Share Hub, entry detail); Fetch/Refetch/Remove row resolves
-   AlbumArtFetch (iTunes→MusicBrainz) / SeriesPosterFetch (TVMaze→iTunes).
-   Cover renders LEFT of title (COVER_SIDE_SHIFT: title shifts right,
-   wraps ~26% narrower, ~0.9× shrink).
-4. **Chapter note → Share as review** — BookNotesSheet chapter note field
-   gained EXPAND (full white dialog, same AppPreferences slot) + SHARE
-   buttons; share opens TopicShareSheet seeded as chapter_review
-   (seedReviewText/Chapter win over restored edits).
-5. **Collision-push fact drag** — title/info row only travel with the fact
-   when the fact actually touches them (4dp gap).
-6. **Album fav box** — Whole-box slider added alongside strip width/rows.
-7. **Cover colours** — `extractCoverSwatches` pixel-vote HSL histogram
-   replaces androidx Palette; `CoverSwatches.dominant` = true majority;
-   notesSheetPalette wash keys off dominant; album/series sheets feed the
-   RESOLVED artwork URL (they previously used the empty authored imageUrl);
-   expanded chapter/episode rows are soft accent tints + borders.
-8. **Google Books removed as cover source** (hub picker, reveal fallback,
-   share cascade) — books fall back iTunes → Open Library; ratings/ISBN
-   lookups keep Google Books keyless.
+1. **Corner drag = true ZOOM** — `ShareCardMove.factZoom` (0.5–4×): the
+   fact's corner grip scales the box AND the fact font together
+   (photo-zoom); `effectiveBodyScale` includes `move.factZoom` so preview,
+   export and typing caret match; persisted per style, cleared by Reset,
+   counts as "touched" so auto-fit hands over.
+2. **Selection chrome hides while typing** — `factEditMode` makes the fact
+   border transparent, skips the tap-to-select layer and the FACT case
+   hides MoveHandle + CornerResizeHandle; chrome returns when editing ends.
+3. **Full-screen editor** — Full screen pill next to Customise opens a
+   full-display `Dialog` on a category-tint wash
+   (`lerp(surface, accent, 0.12f)`); the card renders LARGE centered via
+   the same ArrangeableCard/TopicShareCard pair (export == preview); one
+   Text pill → single DropdownMenu with every text tool: font, size
+   slider, B/I/U + highlight swatches, alignment, fact format + drop-cap.
+4. **Rich-text-lite** — `factUnderline/factHighlight/titleUnderline/
+   titleHighlight` (Color?) applied in factBodyStyle/titleStyle
+   (`TextDecoration`, `background`), persisted with the move.
 
-## Follow-up: "does the auto-adjuster expand the box / shrink text?" (fixed)
+## Earlier in this thread (pushed: 2c2502e0, 66b07a62, 2707bdb3)
 
-Checked: it DID expand (line budget) but only past ~130 chars, and the fact
-font never shrank via auto-fit (each style's built-in length curve only
-kicks in at 180–350+ chars). Fixed in `TopicShareCard.kt`: the Balanced
-growth curve now starts at 90 chars (1.15×) and a new `factScale`
-(`autoFactScale`, per-style floors 0.86–0.90, starts ~150 chars) shrinks
-the FACT font on top of the built-in curves, applied via
-`effectiveBodyScale = bodyScale * autoFit.factScale * move.factScale` so
-preview/export/typing-field stay in sync. `factScale` is seeded into
-`ShareCardMove` (persisted, counts as touched) so the manual-grab handoff
-doesn't pop the text back or clip it; Reset restores full size.
+- Fact formats (Condensed / Book page / Editorial drop-cap) + writing box
+  with Enlarge; album/series cover fetch in the share editor; chapter
+  note → Share as chapter review; collision-push fact drag; album fav
+  Whole-box slider; real cover colours (pixel-vote histogram, dominant
+  wash, resolved artwork URL for albums/series); expanded chapter row
+  tinted; Google Books removed as cover source (ratings/ISBN stay).
+- Auto-adjuster: `factScale` fact-font auto-shrink (~150 chars up),
+  Balanced curve starts at 90 chars, handoff seed, Reset restores.
 
-## Notes for the next request
+## Notes for next request
 
-- Changelog (fastlane `20260921.txt`) + app/AGENTS.md v371 bullet updated.
-- CI will compile-check (no Gradle in this environment). One risk spot:
-  the palette extractor's `while` loop + `best()` calls (pure Kotlin, no
-  API surprises expected), and the new `Dialog` imports in TopicRevealScreen.
+- CI will compile-check (no Gradle here). Riskiest spots this round: the
+  full-screen Dialog block (imports verified: DropdownMenu, BorderStroke,
+  CircleShape, toArgb, TextDecoration; `Color.lerp` corrected to top-level
+  `androidx.compose.ui.graphics.lerp`), the `factZoom` plumbing through
+  parse/persist, and the `factEditMode` chrome gating. Braces verified
+  balanced via a tokenizer (raw-string `"image/*"` breaks naive checkers).
+- Changelog (fastlane 20260921.txt) + app/AGENTS.md v372 bullet updated.

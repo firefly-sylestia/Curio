@@ -651,6 +651,49 @@ app/src/main/java/com/curio/app/
     with 1.15×) so medium facts get room earlier. `factScale` is captured
     into `ShareCardMove` on the first grab (seed) and counts as "touched",
     so the handoff doesn't make the text jump back to full size or clip.
+- **v372 — full-screen text editor + corner whole-box ZOOM + selection
+  chrome hiding + rich-text-lite (underline/highlight).** User: "the
+  corner expand button only behaves as a width/height button not as an
+  enlarge for the whole box along with the text, also remove the selected
+  outline when editing inline, and add a full screen button for the share
+  card with just text format and text editing features in full screen with
+  only one pill and dropdown style… background color would be category
+  tint" (answers: box + text zoom together; hide chrome in TEXT-edit mode
+  only — the handle returns when exiting; full screen shows the card
+  itself large, whole-text per-element tools in ONE menu).
+  - **Corner drag = true ZOOM (`ShareCardMove.factZoom`):** dragging the
+    fact's bottom-right corner now scales the box AND the fact font
+    together (photo-zoom, 0.5–4×) instead of only growing the line budget
+    (which was capped at the card width, so full-width facts visibly did
+    nothing). `effectiveBodyScale` multiplies `move.factZoom` so the
+    preview, export and typing caret all scale together; persisted per
+    style and cleared by Reset. `factZoom != 1f` counts as "touched" so
+    auto-fit hands over.
+  - **Selection chrome hides while typing:** in `ArrangeableCard`, when
+    `factEditMode` is on the fact's border goes transparent, the
+    tap-to-select layer is skipped, and the `FACT` case skips the
+    MoveHandle + CornerResizeHandle entirely — the caret shows where you
+    type and nothing fights the keyboard; all chrome returns when text
+    editing ends. (The edit tool pill toggles `factEditMode` on/off.)
+  - **Full-screen editor (`fullscreenEdit`, `TopicShareSheet`):** a
+    Full screen button (secondary pill, sits next to Customise) opens a
+    `Dialog(usePlatformDefaultWidth = false)` painting the whole display
+    in `lerp(surface, accent, 0.12f)` (category-tint wash). The card is
+    rendered LARGE and centered (`BoxWithConstraints`, aspect preserved)
+    via the SAME `ArrangeableCard`/`TopicShareCard` pair as the sheet
+    pager, so inline text editing is precise and the export matches the
+    full-screen preview exactly. Floating tools are minimal: Close pill
+    (left) + one Text pill (right) opening a single `DropdownMenu` with
+    EVERY text tool in one place — font (13), size slider, B/I/U +
+    highlight swatch row (5 presets, tap again to clear), alignment, and
+    the fact format + drop-cap pickers. The menu reads the current
+    `selectedResizeTarget` (title vs fact) and arms fact editing from the
+    same "Edit fact text" pill as the sheet.
+  - **Rich-text-lite per element:** `ShareCardMove` gained `factUnderline`
+    / `factHighlight` and `titleUnderline` / `titleHighlight` (Color?),
+    applied in `factBodyStyle` / `titleStyle` via `TextDecoration` and
+    `background`, persisted with the move (`toArgb` / `Color(it)`). This
+    is whole-element formatting (like Bold/Italic), not per-word spans.
 - **v361 — keyed defaults + Clear-covers button; CI fix for the reveal
   poster.** User: "fix it, and also i added spotify key and library thing
   api as well… does the api is used in the apk build from pr, use that by
