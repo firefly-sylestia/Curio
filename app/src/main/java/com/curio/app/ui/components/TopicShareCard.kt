@@ -618,17 +618,23 @@ private fun ShareCardPalette.frostInk(): Color {
  *  Zero fields mean "leave that channel alone". */
     private data class ShareAutoLayoutPlan(
     val heightFrac: Float = 0f,
-    val textScale: Float = 0f,
-    val titleLift: Float = 0f,
-    val format: ShareCardFactFormat? = null,
+  val textScale: Float = 0f,
+  val titleLift: Float = 0f,
+  val factLift: Float = 0f,
+  val format: ShareCardFactFormat? = null,
 
     // true → switch the CARD itself to 9:16 (only offered when the current
     // aspect is 3:4 and the text still overflows a fully-fitted 3:4 card).
     val tall: Boolean = false
 )
 
-private fun ShareAutoLayoutPlan.withTitleLift(lift: Float): ShareAutoLayoutPlan =
-    if (lift <= 0f) this else copy(titleLift = lift)
+  private fun ShareAutoLayoutPlan.withCollisionRepair(
+  titleLift: Float,
+  factLift: Float
+  ): ShareAutoLayoutPlan = if (titleLift <= 0f && factLift <= 0f) this else copy(
+  titleLift = titleLift.coerceAtLeast(0f),
+  factLift = factLift.coerceAtLeast(0f)
+  )
 
 /** v379e — the pill's attempt → plan table, layered over the TEXT-FIRST
  *  [autoFitShape]: 0 = the plain fit itself; 1 = the same fit with
@@ -654,13 +660,17 @@ private fun autoLayoutPlan(
     // from both offsets and move the title clear of the fact in one commit.
     // This deliberately ignores titlePlaced because the user asked for the
     // sparkle action to repair intentional overlap, not dragging itself.
-    val manualOverlapLift = (
-        (move.factDy + 18f).let { if (it < 0f) -it else 0f } +
-            move.titleDy.coerceAtLeast(0f)
-        ).coerceIn(0f, 72f)
-    val titleLift = maxOf(sizeLift, manualOverlapLift)
+  // The reference layout keeps the title above the fact. Manual drags can
+  // reverse that relationship: titleDy moves the title down and factDy moves
+  // the fact up. Treat the 18dp natural gap as the collision threshold, then
+  // use the title's 72dp safe travel first and move the fact down only when
+  // the overlap is larger than that safe title travel.
+  val overlap = (move.titleDy - move.factDy - 18f).coerceAtLeast(0f)
+  val collisionTitleLift = overlap.coerceAtMost(72f)
+  val collisionFactLift = (overlap - collisionTitleLift).coerceAtMost(72f)
+  val titleLift = maxOf(sizeLift, collisionTitleLift)
 
-    if (shape.heightFrac == 0f && titleLift == 0f) return ShareAutoLayoutPlan()
+  if (shape.heightFrac == 0f && titleLift == 0f && collisionFactLift == 0f) return ShareAutoLayoutPlan()
 
     val (maxHeightFrac, minTextScale) = factFitBudget(style, aspect)
     val capped = shape.heightFrac >= maxHeightFrac - 0.01f && shape.heightFrac > 1f
@@ -691,8 +701,8 @@ private fun autoLayoutPlan(
                 ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale, format = ShareCardFactFormat.STANDARD)
             else -> ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale)
         }
-    }).withTitleLift(titleLift)
-}
+  }).withCollisionRepair(titleLift, collisionFactLift)
+  }
 
 /** v379d — the floating sparkle pill: round button at the card's top-end
  *  corner. Shows on BOTH the resting preview and the edit mode; tap = run
@@ -2135,7 +2145,7 @@ private fun VinylCard(
                 vinylMeta()
             }
 
-            // Accent underline — v316b: belongs to the quick-fact block below,
+            // Accent underline ��� v316b: belongs to the quick-fact block below,
             // so it slides WITH the fact box when the F handle drags.
             Spacer(Modifier.height(4.dp))
             Canvas(Modifier.size(width = 32.dp, height = 2.dp).factShift(move)) {
@@ -6421,7 +6431,7 @@ private fun Footer(sharerName: String, quoteText: String?, quoteAuthor: String?,
 
 // ═══════════════════════════════════════════════════════════════════════
 // CANVAS DRAWING HELPERS
-// ═══════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════��═════════════════════════════════════
 private fun DrawScope.drawPaperTexture(palette: ShareCardPalette) {
     val w = size.width; val h = size.height; val s = (w * 1000 + h).toInt()
     // Dense grain — many small dots at varying opacity (v... — grain bumped up)
@@ -8170,10 +8180,12 @@ fun TopicShareSheet(
             val sChanges = s > 0f && kotlin.math.abs(s - move.factScale) > 0.02f
             val fmtChanges = plan.format != null && plan.format != move.factFormat
             val titleLiftChanges = kotlin.math.abs(plan.titleLift - move.titleLift) > 1f
-            if (wantsTall || hChanges || sChanges || fmtChanges || titleLiftChanges) {
+            val factLiftChanges = plan.factLift > 0f
+            if (wantsTall || hChanges || sChanges || fmtChanges || titleLiftChanges || factLiftChanges) {
                 updateMove(move.copy(
                     factHeightFrac = if (h > 0f) h.coerceIn(0.35f, 6f) else move.factHeightFrac,
                     factScale = if (s > 0f) s.coerceIn(0.5f, 2f) else move.factScale,
+                    factDy = move.factDy + plan.factLift.coerceIn(0f, 72f),
                     factFormat = plan.format ?: move.factFormat,
                     titleLift = plan.titleLift.coerceIn(0f, 96f)
                 ))
