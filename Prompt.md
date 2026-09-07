@@ -265,9 +265,10 @@ the user said "not yet"; waiting for the user's go-ahead to commit+push.
   request-log updated) stays un-pushed until I approve.
 
 **Status log:**
-- [x] Root AGENTS.md: "Check-after-every-push contract" added.
+- [x] Root AGENTS.md: "Check-after-every-push contract" added (09e6cde7, local).
 - [x] Prompt.md: this end section added (pending prompt + status + slot).
-- [ ] Cabinet v2 polish batch: commit + push — WAITING on user go-ahead.
-- [ ] CI green confirmation for c56403ac (full-screen editor fix) — verify.
+- [x] Cabinet v2 polish batch committed LOCALLY (0c16cae3) — push WAITING on user go-ahead.
+- [ ] CI green confirmation for c56403ac (full-screen editor fix) — verify on next CI run.
+- [x] CI fix chain pushed: ed308041 (Dialog Box/Column restructure) + c56403ac (fully-qualified top-level AnimatedVisibility).
 
 ### Next prompt slot — (empty, waiting for the user's next prompt)
