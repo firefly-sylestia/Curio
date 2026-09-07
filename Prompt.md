@@ -1,44 +1,51 @@
 # Prompt Log — current request
 
-## Request (2026-09-06, active → v383 committing)
+## Request (2026-09-07, active → v384 follow-up committing)
 
-Share-card refinement cycle — continuing from v379d–v382 (all pushed):
-smart-fit honesty, auto-layout sparkle pill, title-ownership (overlap
-freedom), Signature glued covers. This round added two brand-new asks on
-top plus a CI fix for v382.
+Share-card + notes-sheet follow-up on top of the pushed v384 smart-layout
+commit (`644097c9`). Big combined request; asked 3 design questions first
+(answers: count slider in the strip tool; List/Rows toggle = ALL designs;
+no-fact favorites expansion = default, not a toggle).
 
-- ✅ v379d–v382 pushed (`3fcfa4fa` … `aad184ba`): pill + smart-fit text-first
-  + reset restores fit + factZoom removed + whole-box sliders removed +
-  title-height hides for short titles + dark-text frostInk + Paper quote
-  ink + fact-line parity, hand-placed title owns its spot (no bounce),
-  pill 9:16 bigger text, Collage dark-tone + blended tear, Signature
-  covers glued.
-- ✅ v383 (THIS COMMIT): **Link share + fact-width > 100% + v382 CI fix.**
-  1. **Link share** (user: \"deep link style share — open it and it opens the
-     topic; I choose the text\"; answered: albums+artists+songs → music
-     service, others → Google; URL + editable caption). `ExploreSearch.kt`
-     gained `shareLinkForTopic(topic)` (re-reads the Settings MusicService
-     at share time). `TopicShareSheet` gained `shareLinkUrl: (() -> String)?`
-     + a Link pill in the actions row (link icon, opens a caption dialog
-     seeded with the topic name, shows the tap-to-open URL in a preview
-     chip, Share posts ACTION_SEND of caption+URL and dismisses). Wired all
-     three callers: TopicRevealScreen (`floatingTopic`), EntryDetailScreen
-     (`resolvedEntry.topic`), ShareHubScreen (`topic`).
-  2. **Fact width past 100%** (user: \"box looks small, side space unused,
-     width caps at default\"; asked where → \"paper mainly then others\").
-     Fact-width sliders (full-screen + sheet Crop) now run 0.3x–1.2x
-     (steps 89). `moveFact` uses a custom layout: ≤1x = identical to old
-     fillMaxWidth (natural wrap, place 0 — zero pixel change for existing
-     cards); >1x = measure pane at columnWidth×frac and recentre the
-     overhang so the box eats the design's side gutters. Render-path
-     `effectiveMove`/`boxScaledMove` width clamps raised 1f → 1.2f; the
-     untouched auto-fit seed stays ≤1x. Note: a phantom \"+1 brace\" scare
-     was a scanner artifact from a nested-quote `${topicName...\" (\"...}`
-     template (line ~10024) — replaced with a precomputed `displayTopic`
-     val (cleaner Kotlin, file verified balanced with a real stack scan).
-  3. **CI fix for v382**: Signature SIDE layout used
-     `Modifier.align(Alignment.CenterHorizontally)` inside a nested
-     Box — compile error \"cannot be called in this context with an implicit
-     receiver\". Fixed with `Box(contentAlignment = Alignment.Center)`.
-- NEXT UP (user-declared): the dedicated Signature background treatment
-  round.
+**What the user asked + what was done:**
+
+1. **Link share** — remove the Link icon; fold its caption dialog into the
+   DEFAULT Share action. Done: the Share button opens one dialog with the
+   caption field + an "Include a link" switch (link on → your words + the
+   topic's link share as text; link off → the picture shares with the
+   caption attached or none). The old Link pill button is deleted.
+
+2. **Info-row "reappear" fix** — the sparkle's info-row repair didn't work
+   when the fact box covered the rows (offset estimates missed box growth).
+   Done: `ArrangeableCard` reports live card-local bounds (title/fact/meta/
+   fav) via a new `onMeasuredBounds` callback → sheet state →
+   `autoLayoutPlan` now computes REAL overlaps (with horizontal check) and
+   pushes title / fact / info rows / favorites clear (new `favLift` too).
+
+3. **Favorites overhaul** (albums):
+   - Dynamic width: rows hug the longest song title (fillMaxWidth/weight
+     removed in BoxedFavStrip + EditorialFavStrip).
+   - Collage + Signature/Custom: `noBox = true` (plain type in the card's
+     ink, no surface/border). Collage favSlot moved to the free middle
+     (above the category pill + quick fact, below title/info); Signature
+     raised clear of the fact/footer.
+   - Strip tool: SONGS count slider (1..all, `favCount` on the move,
+     persisted/loaded) + LIST/ROWS toggle (global `albumFavRows` pref in
+     AppPreferences, `FlowRow` chips for rows mode).
+   - No-fact: strip auto-expands (all songs, 1.3× type, wider) — `noFact`
+     derived from blank fact at the card level.
+   - Sparkle repair now includes the favorites strip (`favLift` → favDy).
+
+4. **Dark-mode notes sheets** (books/albums/series): `ChapterNoteField` is
+   now fully palette-aware (bg/placeholder/text/Expand chip derive from the
+   sheet ink/accent instead of raw Material scheme colors) — fixes the
+   "Add a note" box in dark mode. Page text + chapter/track/episode numbers
+   already used palette-aware ink/onSurface/onSurfaceVariant vals.
+
+**Out of scope / open:** exact visual placement of the Collage/Signature
+favorites needs device verification (couldn't run the app; CI validates
+compilation only). The album/series sheets' page text + numbers were
+already palette-aware — if still "not fine" on device, the wash/ink recipe
+in `notesSheetPalette` is the next lever. `view_agenda`/`view_module`
+glyphs assumed present in the bundled symbol font (missing glyph = blank
+icon, not a crash).
