@@ -285,6 +285,53 @@ app/src/main/java/com/curio/app/
     Mathematics/Mythology/Painters/Plants/Psychology/Quotes/Scientists/
     Albums/Songs/Series/Games/Sports/Technologies and topic variants)
     keep their existing scene designs.
+- **v3xx8 — share-card stickers + link-share fix + sparkle repair rework +
+  Book browser.** Per user request (combined batch):
+  - **EMOJI STICKERS (full-screen editor only):** the full-screen editor's
+    top bar gains a **Stickers** button (between Layout and Text; the
+    AutoAwesome glyph) that opens an inline panel — a horizontal emoji
+    picker (48 curated emojis in `stickerEmojis`) plus, when a sticker is
+    selected, a size slider, **To front / To back** (z-order) and Delete.
+    Stickers are `ShareSticker(emoji, x, y, sizeFrac)` — positions/sizes
+    are card FRACTIONS so the preview, the sheet and the exported PNG all
+    match. The card's sticker layer renders on TOP of every style inside
+    `TopicShareCard` (new `stickers` param threaded through all 5 call
+    sites in the sheet + exports); the interactive edit layer
+    (`StickerEditOverlay`, drawn over the ArrangeableCard chrome only in
+    full screen while the tool is open) makes each sticker tap-to-select /
+    drag-to-move, clamped inside the card. List order = stacking order
+    (later = on top). Persisted per topic via `saveShareCardEdits` (a
+    `stickers` JSON array; restored on reopen) and cleared by Reset-all.
+  - **LINK-SHARE FIX + Telegram hidden link:** the Share dialog's
+    "Include a link" mode previously posted TEXT ONLY (caption + raw URL)
+    — it now ALSO attaches the card PNG via `shareComposableCard` with
+    `shareText`, so the picture is never lost. The link text uses
+    Telegram's hidden-link syntax `[displayTopic](linkUrl)` (the URL hides
+    behind the topic name, like `[1, 2, 3]` citation links).
+  - **Sparkle repair rework (`autoLayoutPlan`/`runAutoLayout`):** the INFO
+    rows (byline/author/year) now get a SIGNED `metaLift` — a grown/
+    dragged fact covering them lifts the rows UP back between the title
+    and the quick fact (negative lift) instead of dumping them below it;
+    when the lifted rows have no room the TITLE moves up a little for them
+    (`titleForMeta` from the measured title→meta gap). NEW out-of-card
+    clamp: anything whose measured card-local rect hangs off the card
+    (left/top < 0 or right/bottom > card) is pulled back inside on the
+    same tap (never re-centred) via `fixTitleX/Y … fixFavX/Y` deltas
+    applied to each element's own dx/dy. `autoLayoutPlan` gained
+    `cardW`/`cardH` (the 280dp preview box).
+  - **MoveHandle zIndex fix:** the edit-mode grip now sits at `zIndex(10f)`
+    so it ALWAYS wins the touch — a selected box that overlaps its
+    neighbours is drawn at zIndex 2 and used to steal the handle's drags
+    ("the handle doesn't work when boxes overlap"); the tap/drag now
+    always reaches the handle and moves the box.
+  - **Book browser:** the Book covers & ratings hub's horizontal
+    "All covers" LazyRow strip (CoverTile) is REMOVED; a new
+    **Book browser** screen (`features/settings/BookBrowserScreen.kt`,
+    route `SETTINGS_BOOK_BROWSER`, registered in the NavHost) lists every
+    book as a scrollable line-by-line row — cover thumbnail, name,
+    author · year, cached ★ rating + count, chevron — tapping opens the
+    book's reveal. Reached from a new "Book browser" row under
+    Experiments → Content tools, next to "Book covers & ratings".
 - **v3xx5b — picker crash fix (nested lazy grid).** The new picker STILL
   crashed on open (same "infinity maximum height" message) —
   `ContinueExploringSection` rendered a `LazyVerticalGrid` inside a

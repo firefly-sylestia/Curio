@@ -199,6 +199,9 @@ object CurioRoutes {
     const val SETTINGS_RECORDING = "settings/recording"
     const val SETTINGS_DATA = "settings/data"
     const val SETTINGS_BOOK_COVER = "settings/book-cover"
+    // v3xx — the Book browser: every book as a scrollable line-by-line list
+    // (covers, ratings, years) — moved out of the Book covers hub's strip.
+    const val SETTINGS_BOOK_BROWSER = "settings/book-browser"
     const val EXPERIMENTS = "experiments"
     const val USER_EXPERIMENTS = "user_experiments"
     // v264 — the liquid-glass widget test bed (wallpaper + draggable glass shapes).

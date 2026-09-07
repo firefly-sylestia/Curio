@@ -1,51 +1,68 @@
 # Prompt Log — current request
 
-## Request (2026-09-07, active → v384 follow-up committing)
+## Request (2026-09-07, active → v3xx8 committing)
 
-Share-card + notes-sheet follow-up on top of the pushed v384 smart-layout
-commit (`644097c9`). Big combined request; asked 3 design questions first
-(answers: count slider in the strip tool; List/Rows toggle = ALL designs;
-no-fact favorites expansion = default, not a toggle).
+Combined share-card + settings batch on top of the pushed v384b commit.
+No blocking questions needed: every item was a concrete fix or a
+relocation the user explicitly asked for. (The sticker feature is opt-in
+per card by design — a card with no stickers renders exactly as before —
+so no toggleable/always-on ask applied.)
 
 **What the user asked + what was done:**
 
-1. **Link share** — remove the Link icon; fold its caption dialog into the
-   DEFAULT Share action. Done: the Share button opens one dialog with the
-   caption field + an "Include a link" switch (link on → your words + the
-   topic's link share as text; link off → the picture shares with the
-   caption attached or none). The old Link pill button is deleted.
+1. **Emoji stickers in the share card (full-screen editor only).** The
+   full-screen editor's top bar gains a **Stickers** button (between
+   Layout and Text) that opens an inline panel: a 48-emoji picker row +
+   size slider + **To front / To back** (z-order) + Delete for the
+   selected sticker. Stickers are `ShareSticker(emoji, x, y, sizeFrac)`
+   with card-FRACTION positions/sizes so the sheet preview, the full-screen
+   editor and the exported PNG all match. `TopicShareCard` renders the
+   sticker layer on top of every style (new `stickers` param threaded
+   through all 5 call sites incl. both exports); the interactive edit
+   layer (`StickerEditOverlay`, shown only while the sticker tool is open,
+   drawn over the ArrangeableCard chrome) makes each sticker tap-to-select
+   / drag-to-move, clamped inside the card. List order = stacking order.
+   Persisted per topic via `saveShareCardEdits` (`stickers` JSON array),
+   cleared by Reset-all and on full-screen close.
 
-2. **Info-row "reappear" fix** — the sparkle's info-row repair didn't work
-   when the fact box covered the rows (offset estimates missed box growth).
-   Done: `ArrangeableCard` reports live card-local bounds (title/fact/meta/
-   fav) via a new `onMeasuredBounds` callback → sheet state →
-   `autoLayoutPlan` now computes REAL overlaps (with horizontal check) and
-   pushes title / fact / info rows / favorites clear (new `favLift` too).
+2. **Book browser in Settings.** The horizontal "All covers" LazyRow
+   strip (CoverTile) is REMOVED from the Book covers & ratings hub. A new
+   **Book browser** screen (`features/settings/BookBrowserScreen.kt`,
+   route `SETTINGS_BOOK_BROWSER`, NavHost-registered) lists every book as
+   a scrollable line-by-line row — cover thumbnail, name, author · year,
+   cached ★ rating + count, chevron → opens the book's reveal. Reached
+   from a new "Book browser" row in Experiments → Content tools.
 
-3. **Favorites overhaul** (albums):
-   - Dynamic width: rows hug the longest song title (fillMaxWidth/weight
-     removed in BoxedFavStrip + EditorialFavStrip).
-   - Collage + Signature/Custom: `noBox = true` (plain type in the card's
-     ink, no surface/border). Collage favSlot moved to the free middle
-     (above the category pill + quick fact, below title/info); Signature
-     raised clear of the fact/footer.
-   - Strip tool: SONGS count slider (1..all, `favCount` on the move,
-     persisted/loaded) + LIST/ROWS toggle (global `albumFavRows` pref in
-     AppPreferences, `FlowRow` chips for rows mode).
-   - No-fact: strip auto-expands (all songs, 1.3× type, wider) — `noFact`
-     derived from blank fact at the card level.
-   - Sparkle repair now includes the favorites strip (`favLift` → favDy).
+3. **Share-picture fix.** The Share dialog's "Include a link" mode posted
+   TEXT ONLY (caption + raw URL). It now ALSO attaches the card PNG via
+   `shareComposableCard` with `shareText`, so the picture is never lost
+   to a bare link post.
 
-4. **Dark-mode notes sheets** (books/albums/series): `ChapterNoteField` is
-   now fully palette-aware (bg/placeholder/text/Expand chip derive from the
-   sheet ink/accent instead of raw Material scheme colors) — fixes the
-   "Add a note" box in dark mode. Page text + chapter/track/episode numbers
-   already used palette-aware ink/onSurface/onSurfaceVariant vals.
+4. **Telegram hidden-link format.** The link text now uses `[Topic](url)`
+   syntax — Telegram renders the topic name as the tap target with the URL
+   hidden behind it (the format from the user's `[1, 2, 3]` citation
+   example). Applied in the include-link share body; helper copy updated.
 
-**Out of scope / open:** exact visual placement of the Collage/Signature
-favorites needs device verification (couldn't run the app; CI validates
-compilation only). The album/series sheets' page text + numbers were
-already palette-aware — if still "not fine" on device, the wash/ink recipe
-in `notesSheetPalette` is the next lever. `view_agenda`/`view_module`
-glyphs assumed present in the bundled symbol font (missing glyph = blank
-icon, not a crash).
+5. **Sparkle (auto-layout) repair fixes.**
+   - **Info row between title and fact:** `metaLift` is now SIGNED — a
+     grown/dragged quick-fact box covering the author/year rows LIFTS THE
+     ROWS UP back above the fact instead of dumping them below it; when
+     the lifted rows have no room the TITLE moves up a little for them
+     (`titleForMeta` from the measured title→meta gap).
+   - **Out-of-card clamp:** anything whose measured card-local rect hangs
+     off the card (left/top < 0 or right/bottom > card) is pulled back
+     INSIDE on the same tap (never re-centred) via new
+     `fixTitleX/Y … fixFavX/Y` deltas applied to each element's own dx/dy.
+     `autoLayoutPlan` gained `cardW`/`cardH` (the 280dp preview box).
+
+6. **Handle (grip) fix.** `MoveHandle` now sits at `zIndex(10f)`, so it
+   ALWAYS wins the touch: a selected box that overlaps its neighbour is
+   drawn at zIndex 2 and used to steal the handle's drags (the "handle
+   doesn't work when boxes overlap" bug). Tapping/dragging the grip always
+   moves its box now.
+
+**Out of scope / open:** sticker editing is full-screen-only by design
+(the bottom-sheet preview and exports just RENDER the stickers — no
+interaction there); exact on-device sticker sizing (emoji font metrics)
+needs device verification — CI validates compilation only. The web/ and
+desktop/ ports were not touched (Android-only scope).
