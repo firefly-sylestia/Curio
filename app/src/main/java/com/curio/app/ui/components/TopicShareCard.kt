@@ -6,7 +6,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -3306,7 +3313,10 @@ private fun CollageCard(
             val pStyle = move.polaroidStyle.coerceIn(0, 4)
             val pFilter = move.polaroidFilter.coerceIn(0, 4)
             val look = polaroidLooks[pStyle]
-            val basePW = (cw * 0.34f * move.polaroidScale).coerceIn(cw * 0.20f, cw * 0.36f)
+            // v3xx — the upper clamp widened (0.36 → 0.44 of card width) so the
+            // print-size slider has real travel: it used to stop growing at
+            // scale ≈ 1.06, leaving most of the slider dead.
+            val basePW = (cw * 0.34f * move.polaroidScale).coerceIn(cw * 0.20f, cw * 0.44f)
             val capH = basePW * 0.20f
             // Frame adapts to the photo's aspect (landscape → wide/short,
             // portrait → tall); no photo → the classic 1.18 print.
@@ -3315,12 +3325,12 @@ private fun CollageCard(
             if (userPhoto != null && userPhoto.width > 0 && userPhoto.height > 0) {
                 val ar = userPhoto.width.toFloat() / userPhoto.height.toFloat()
                 pH = pW / ar + capH
-                val maxH = ch * 0.46f
+                val maxH = ch * 0.55f
                 if (pH > maxH) {
                     pW = ((maxH - capH) * ar).coerceAtMost(basePW)
                     pH = pW / ar + capH
                 }
-                pW = pW.coerceAtMost(cw * 0.36f)
+                pW = pW.coerceAtMost(cw * 0.44f)
             }
             val photoH = if (userPhoto != null) (pH - capH).coerceAtLeast(pW * 0.4f) else pH * 0.68f
             val pX = (cw * 0.62f + move.polaroidDx).coerceIn(0f, (cw - pW - 6f).coerceAtLeast(0f))
@@ -7746,6 +7756,7 @@ private fun ArrangeableCard(
                 val rpOk = rp.width > 0f && rp.height > 0f
                 if (rpOk) {
                     val isSel = sel == ShareCardResizeTarget.POLAROID
+                    // Tap target = the print's own rect (no border on it).
                     Box(
                         modifier = Modifier
                             .offset(rp.left.dp, rp.top.dp)
@@ -7755,8 +7766,21 @@ private fun ArrangeableCard(
                                 focusManager.clearFocus()
                                 onSelectResizeTarget(ShareCardResizeTarget.POLAROID)
                             }
-                            .border(1.dp, selBorder(isSel), RoundedCornerShape(4.dp))
                     )
+                    // v3xx — the selection OUTLINE floats OUTSIDE the print
+                    // (8dp pad): the old tight border drew straight across the
+                    // tilted frame corners and the tape that peers past the
+                    // top edge, which read as the print being "cut" by its own
+                    // outline box.
+                    if (isSel) {
+                        Box(
+                            modifier = Modifier
+                                .offset((rp.left - 8).dp, (rp.top - 8).dp)
+                                .width((rp.width + 16).dp)
+                                .height((rp.height + 16).dp)
+                                .border(1.dp, selBorder(true), RoundedCornerShape(6.dp))
+                        )
+                    }
                     // v369 — the grip is drawn LAST (see the handles section
                     // below), so it always wins the touch.
                 }
@@ -9710,12 +9734,18 @@ fun TopicShareSheet(
                                         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
                                         shadowElevation = 4.dp
                                     ) {
-                                        Row(Modifier.padding(horizontal = 16.dp, vertical = 9.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                            CurioIcon(name = CurioIcons.Close, contentDescription = "Close full screen", tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 15.dp)
-                                            Text("Close", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        // v3xx — ICON-ONLY top pills: the text labels made the top
+                                        // bar crowd on narrow screens; every button is now a
+                                        // compact circle (desc rides the icon's semantics).
+                                        Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
+                                            CurioIcon(name = CurioIcons.Close, contentDescription = "Close full screen", tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 19.dp)
                                         }
                                     }
-                                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Row(
+                                        modifier = Modifier.horizontalScroll(androidx.compose.foundation.rememberScrollState()),
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
                                         // v373 — DIMENSIONS button: toggles the
                                         // card aspect (3:4 ↔ 9:16) right from
                                         // full screen, mirroring the sheet's
@@ -9729,9 +9759,8 @@ fun TopicShareSheet(
                                             color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
                                             shadowElevation = 4.dp
                                         ) {
-                                            Row(Modifier.padding(horizontal = 14.dp, vertical = 9.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                                CurioIcon(name = CurioIcons.AspectRatio, contentDescription = "Card dimensions", tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 15.dp)
-                                                Text(aspect.label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
+                                                CurioIcon(name = CurioIcons.AspectRatio, contentDescription = "Card dimensions (" + aspect.label + ")", tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 19.dp)
                                             }
                                         }
                                         // v378 — RESET LAYOUT (full screen only): a
@@ -9748,9 +9777,8 @@ fun TopicShareSheet(
                                             color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
                                             shadowElevation = 4.dp
                                         ) {
-                                            Row(Modifier.padding(horizontal = 12.dp, vertical = 9.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                                CurioIcon(name = CurioIcons.Refresh, contentDescription = "Reset layout (keeps text edits)", tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 15.dp)
-                                                Text("Layout", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
+                                                CurioIcon(name = CurioIcons.Refresh, contentDescription = "Reset layout (keeps text edits)", tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 19.dp)
                                             }
                                         }
                                         // v3xx — STICKERS button (full screen
@@ -9769,9 +9797,8 @@ fun TopicShareSheet(
                                                     else MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
                                             shadowElevation = 4.dp
                                         ) {
-                                            Row(Modifier.padding(horizontal = 14.dp, vertical = 9.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                                CurioIcon(name = CurioIcons.AutoAwesome, contentDescription = "Stickers", tint = if (stickerToolsOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, size = 15.dp)
-                                                Text("Stickers", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = if (stickerToolsOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
+                                                CurioIcon(name = CurioIcons.AutoAwesome, contentDescription = "Stickers", tint = if (stickerToolsOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, size = 19.dp)
                                             }
                                         }
                                         // v3xx — POLAROID button (Collage card
@@ -9791,9 +9818,8 @@ fun TopicShareSheet(
                                                         else MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
                                                 shadowElevation = 4.dp
                                             ) {
-                                                Row(Modifier.padding(horizontal = 14.dp, vertical = 9.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                                    CurioIcon(name = CurioIcons.PhotoLibrary, contentDescription = "Polaroid", tint = if (polaroidToolsOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, size = 15.dp)
-                                                    Text("Polaroid", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = if (polaroidToolsOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
+                                                Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
+                                                    CurioIcon(name = CurioIcons.PhotoLibrary, contentDescription = "Polaroid", tint = if (polaroidToolsOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, size = 19.dp)
                                                 }
                                             }
                                         }
@@ -9809,9 +9835,8 @@ fun TopicShareSheet(
                                                     else MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
                                             shadowElevation = 4.dp
                                         ) {
-                                            Row(Modifier.padding(horizontal = 18.dp, vertical = 9.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                                CurioIcon(name = CurioIcons.FormatText, contentDescription = "Text tools", tint = if (fsToolsOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, size = 15.dp)
-                                                Text("Text", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = if (fsToolsOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
+                                                CurioIcon(name = CurioIcons.FormatText, contentDescription = "Text tools", tint = if (fsToolsOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, size = 19.dp)
                                             }
                                         }
                                         // v3xx — text-history pill (top-right of
@@ -9953,7 +9978,11 @@ fun TopicShareSheet(
                                     }
                                     }
                                 }
-                            if (fsToolsOpen) {
+                            AnimatedVisibility(
+                                visible = fsToolsOpen,
+                                enter = fadeIn(tween(170)) + expandVertically(tween(170)),
+                                exit = fadeOut(tween(140)) + shrinkVertically(tween(140))
+                            ) {
                                     Surface(
                                         shape = RoundedCornerShape(16.dp),
                                         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.97f),
@@ -10126,8 +10155,13 @@ fun TopicShareSheet(
                                 // an emoji picker row + the selected sticker's
                                 // size / z-order / delete controls. Rendered
                                 // inline like the text tools so its scroll is
-                                // bounded and sliders drag cleanly.
-                                if (stickerToolsOpen) {
+                                // bounded and sliders drag cleanly. v3xx —
+                                // opens/closes with a smooth fade + slide.
+                                AnimatedVisibility(
+                                    visible = stickerToolsOpen,
+                                    enter = fadeIn(tween(170)) + expandVertically(tween(170)),
+                                    exit = fadeOut(tween(140)) + shrinkVertically(tween(140))
+                                ) {
                                     Surface(
                                         shape = RoundedCornerShape(16.dp),
                                         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.97f),
@@ -10284,8 +10318,13 @@ fun TopicShareSheet(
                                 // v3xx — POLAROID panel (Collage card only):
                                 // the print's STYLE (frame + tape + tilt),
                                 // PHOTO FILTER and SIZE pickers live here; the
-                                // grip on the card moves the print.
-                                if (polaroidToolsOpen) {
+                                // grip on the card moves the print. v3xx —
+                                // opens/closes with a smooth fade + slide.
+                                AnimatedVisibility(
+                                    visible = polaroidToolsOpen,
+                                    enter = fadeIn(tween(170)) + expandVertically(tween(170)),
+                                    exit = fadeOut(tween(140)) + shrinkVertically(tween(140))
+                                ) {
                                     Surface(
                                         shape = RoundedCornerShape(16.dp),
                                         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.97f),
@@ -11319,9 +11358,40 @@ private fun BoxScope.StickerEditOverlay(
 ) {
     if (stickers.isEmpty()) return
     val density = androidx.compose.ui.platform.LocalDensity.current
+    // v3xx — tapping the card OUTSIDE every sticker deselects (the selected
+    // sticker's handles disappear). The tap layer is the FIRST (bottom-most)
+    // child: sibling hit-testing only routes a tap to the top sticker under
+    // the finger, so empty-area taps land here and sticker taps never do.
+    // Only armed while a sticker is selected — with nothing selected the
+    // layer stays fully transparent to the card chrome below.
+    val deselectArmed = selectedIndex in stickers.indices
     BoxWithConstraints(Modifier.matchParentSize()) {
         val cw = maxWidth
         val ch = maxHeight
+        if (deselectArmed) {
+            val tapTargets = stickers.map { st ->
+                val w = st.sizeFrac.coerceIn(0.05f, 0.8f)
+                val imgRatio = st.imagePath?.let { p ->
+                    decodeStickerBitmap(p)?.let { b -> b.height.toFloat() / b.width.toFloat() }
+                }
+                val h = if (imgRatio != null) w * imgRatio * cw.value / ch.value else w * cw.value / ch.value
+                Triple(st.x.coerceIn(0f, 1f), st.y.coerceIn(0f, 1f), w to h)
+            }
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .pointerInput(stickers) {
+                        detectTapGestures { off ->
+                            val fx = off.x / cw.value
+                            val fy = off.y / ch.value
+                            val overSticker = tapTargets.any { (sx, sy, wh) ->
+                                fx >= sx && fx <= sx + wh.first && fy >= sy && fy <= sy + wh.second
+                            }
+                            if (!overSticker) onSelect(-1)
+                        }
+                    }
+            )
+        }
         stickers.forEachIndexed { idx, st ->
             val isSel = idx == selectedIndex
             val px = cw.value * st.sizeFrac.coerceIn(0.05f, 0.8f)

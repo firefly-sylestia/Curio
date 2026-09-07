@@ -450,6 +450,34 @@ app/src/main/java/com/curio/app/
   - TopicShareSheet feeds the FACT text (label by activeId: Custom fact /
     Chapter review / Reading progress / Quote / Quick fact) + the polaroid
     photo caption; Restore routes through `routeFactChange`.
+- **v3xx13 — full-screen editor polish: icon-only top bar, polaroid cut +
+  size fixes, sticker deselect + smooth panels.** Per user request ("icon
+  only … overlapping … polaroid gets cut … size adjuster no length …
+  stickers tapping outside … smooth to open and close"):
+  - **ICON-ONLY top bar:** the full-screen editor's Close · Aspect · Layout ·
+    Stickers · Polaroid · Text buttons dropped their text labels (Close /
+    ratio / Layout / Stickers / Polaroid / Text) for compact 40dp circle
+    icons (descriptions ride the icon semantics) and the right cluster is
+    now `horizontalScroll`-able — the pills no longer crowd/overlap on
+    narrow screens. (Tool panels already live BELOW the card.)
+  - **Polaroid no longer "cut" by its outline:** the editor's POLAROID
+    selection border used to draw tight on the reported frame rect, slicing
+    the tilted corners and the tape that peers past the top. The tap box
+    now carries no border and the SELECTED outline floats OUTSIDE the print
+    (8dp padded rounded rect).
+  - **Print-size slider has real travel:** the render clamp capped the print
+    at 36% of card width (dead past scale ≈ 1.06); widened to 44% (and the
+    tall cap 46% → 55% of card height), so the whole slider range actually
+    grows the print.
+  - **Sticker tap-outside deselect:** while the sticker tool is open and a
+    sticker is selected, tapping the card outside every sticker deselects it
+    (a full-size tap layer sits BOTTOM-most inside `StickerEditOverlay`, so
+    sibling hit-testing still routes sticker taps to the sticker; with
+    nothing selected the layer stays transparent to the card chrome).
+  - **Smooth panels:** the Text / Stickers / Polaroid bottom panels now
+    open/close with a fade + vertical expand (`AnimatedVisibility` +
+    `fadeIn/expandVertically/fadeOut/shrinkVertically`) instead of popping
+    instantly.
 - **v3xx5b — picker crash fix (nested lazy grid).** The new picker STILL
   crashed on open (same "infinity maximum height" message) —
   `ContinueExploringSection` rendered a `LazyVerticalGrid` inside a

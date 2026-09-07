@@ -1,64 +1,42 @@
 # Prompt Log — current request
 
-## Request (2026-09-07, active → v3xx12 committing)
+## Request (2026-09-07, active — full-screen polish shipped; Cabinet v2 next)
 
-Share-card editing continues: the CI failures from the v3xx10 push, the
-broken format-row icons, and a NEW global **text-history** feature the user
-specified in clarifying answers:
+User asked for two things in order:
 
-> "add a history icon … every 10 words it saves a history or when pasted or
-> edited or deleted each one saves a history globally … pill … shows up
-> depending on the field in the share card it shows up top left corner …
-> inside full screen text editor top right … and even in save your entry …
-> text history stays for all fields same it doesn't reset even after reset
-> and it will have pin system too copy and paste etc with icon and preview
-> of the texts with time and date and a full preview too … overlay dialog
-> box in some places and bottom sheet in some … covers every editing field
-> except search or name text boxes"
+### 1) Full-screen editor / polaroid / sticker fixes (DONE — pushing now)
+> "in full screen editor the top aspect ratio layout reset sticker etc have
+> full text i want icon only and the text and polaroid option place them at
+> the bottom they are overlapping each other and also fix the polaroid
+> itself in case its outline box as its getting cut and the size adjuster
+> dont have length too and stickers need the tapping the outside to
+> deselect and also its option make it smooth to open and close"
 
-Clarifications asked + answered:
-- Ship mode: **always-on** (no Settings toggle).
-- Field scope: **whole app** eventually (excludes search/name boxes);
-  this commit wires the share-card editor family.
-- Pill placement: NOT inside the field/textbox — a corner affordance of the
-  sheet/editor screen, opening the whole global history.
-- Capture timing: **pause + events** (stop typing / leave the field, on
-  paste/edit/delete, plus every 10 words).
-- "fix the cl" = fix the CI **workflow run** (compile errors) — done and
-  pushed in `5ee6f232` (v3xx11). Italic "not yet" verified — the italic
-  glyph was already in the font; the actually-broken glyph was UNDERLINE.
+Shipped in v3xx13:
+- **Icon-only top bar** — Close · Aspect · Layout · Stickers · Polaroid ·
+  Text pills dropped their labels (compact 40dp circles), right cluster is
+  horizontally scrollable → no more crowding/overlap. Panels already live
+  BELOW the card in the dialog Column (verified structure).
+- **Polaroid cut fix** — the POLAROID selection border drew tight on the
+  frame rect, slicing the tilted corners + tape that peers past the top;
+  the tap box no longer carries the border and the SELECTED outline floats
+  OUTSIDE the print (8dp padded).
+- **Size-adjuster length** — render clamp capped the print at 36% of card
+  width (dead past scale ≈1.06); widened to 44% width / 55% height cap.
+- **Sticker tap-outside deselects** — bottom-most full-size tap layer inside
+  `StickerEditOverlay` (armed only while a sticker is selected) so
+  sibling hit-testing still routes sticker taps to the sticker.
+- **Smooth open/close** — Text/Stickers/Polaroid bottom panels animate with
+  `AnimatedVisibility` (fade + expand / shrink).
 
-**What was done:**
+### 2) Cabinet v2 (NEXT — not started yet)
+User direction so far: **experimental toggle**; will host **liked books** +
+**saved things**; **no more Save on the home screen**; books/albums/series
+show their **cover in the hero style** of the card (half book, not
+stretched); a **blur/glass text bar** instead of solid; "proper thoughtful
+features and customisation". Also "properly plan its implementation and
+features". Clarifying questions were asked after this push (see below).
 
-1. **v3xx11 (`5ee6f232`, pushed):** CI compile fixes — polaroid filter
-   matrices wrapped in `ColorMatrix`, `photoH.dp.toPx()` (Float has no
-   `toPx`), proper `detectTransformGestures` import for sticker pinch/rotate.
-   Icon fixes — `CurioIcons.FormatUnderline` pointed at `format_underline`
-   (not in the Material Symbols catalog → literal text); now
-   `format_underlined` and the icon font was re-subset with pyftsubset
-   (documented flags: `--no-layout-closure --layout-features=rlig
-   --glyph-names --symbol-cmap --name-IDs='*'`, text = all 284 existing
-   ligature names + glyph-name list so non-PUA glyphs like `visibility_off`
-   survive) to add `format_underlined` + `link`; verified zero icons lost.
-
-2. **v3xx12 (this commit):** `ui/components/TextHistory.kt` — global
-   persistent feed:
-   - `TextHistoryStore`: SharedPreferences JSON (`curio_text_history`),
-     cap 300, dedupe blanks/consecutive repeats.
-   - `rememberTextHistoryCapture(ctx, field, text, resetKey)`: pause ~1.3s
-     debounce (cancelled by keystrokes), immediate at each 10-word bucket,
-     final snapshot on dispose; resetKey = `topic·activeId`.
-   - `TextHistoryPill` + `TextHistoryBrowser`: centered overlay w/ newest-
-     first list, pinned float, field label + time (Just now / Xm / Xh /
-     d MMM · HH:mm), tap for full preview, Pin/Copy/Restore/Delete + two-tap
-     Clear. Restore writes into the active field.
-   - Wired in `TopicShareSheet`: capture for the fact text (label by
-     activeId) + polaroid photo caption; pill at sheet-tools corner, the
-     full-screen editor's top bar and the Enlarge writing sheet header.
-
-**Pending / next:**
-- User verifies italic icon on device (nothing to do unless still wrong).
-- Remaining back-burner asks from earlier batches: multi-select stickers,
-  sparkle info snap "always under title", quick-fact tap-out edit reset.
-- Extend capture to other screens (journal / saved-entry / caption editors)
-  as the user points at them.
+Remaining backlog from earlier batches: multi-select stickers, sparkle
+info-row always snaps, quick-fact tap-out edit reset, wider text-history
+coverage.
