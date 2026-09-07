@@ -2,6 +2,36 @@
 
 ## Request (2026-09-07, active — Cabinet v2 build in progress)
 
+### Completed — sparkle auto-layout vs category pill overlap (2026-09-07)
+
+**Request:** the auto-layout sparkle pill on share cards ignores the category
+pill's position and overlaps it; make the adjuster smarter.
+
+**Fix (TopicShareCard.kt):** the sparkle's measured-bounds collision repair
+only watched title / fact / info rows / fav strip — the category pill
+(badge) was invisible to it, so a grown fact box or a size-lifted title
+could bury the pill. Now:
+1. **Badge measured + threaded:** `onMeasuredBounds` reports a 5th rect
+   (the badge); `measuredBadge` feeds `autoLayoutPlan`.
+2. **Title lift capped at the pill:** the lift stops at the badge's bottom
+   edge (the shortfall falls back to pushing the fact down), so a grown
+   box can never shove the title into the pill.
+3. **Pill joins the pushes:** a badge above the fact/meta/fav pushes those
+   down; a badge dragged down onto the title is lifted back up; a
+   fact/fav grown over it from above pushes it down (signed `badgeLift`,
+   caps 48/64dp).
+4. **Out-of-card clamp for the pill** (`fixBadgeX/Y`) like the other
+   elements; changes persist into the move (`badgeDx/badgeDy`) so preview,
+   saved card and export match; Reset Layout clears it.
+5. **Bounds report in BOTH modes:** the measured-rect wiring only ran
+   inside the edit-mode overlay, so a sparkle tap on the resting preview
+   repaired nothing — the reporting is hoisted out of `editMode`.
+
+Badge-free behavior is byte-identical (all new channels are 0 when no
+badge/rects). Changelog bullet added. No settings toggle (fix of existing
+behavior, per root AGENTS.md).
+
+
 ### Done this session
 - **v3xx11** (`5ee6f232`): CI compile fixes + Underline (`format_underlined`)
   & `link` icon glyphs re-subset into the bundled icon font (zero lost).

@@ -749,6 +749,10 @@ private fun ShareCardPalette.frostInk(): Color {
     val metaLift: Float = 0f,
     /** Favorites strip pushed DOWN by this many dp (always >= 0). */
     val favLift: Float = 0f,
+    /** CATEGORY-PILL lift (SIGNED dp): negative lifts the badge UP when it
+     *  has been dragged down onto the title; positive pushes it DOWN clear
+     *  of a fact/fav that grew over it from above. */
+    val badgeLift: Float = 0f,
     val format: ShareCardFactFormat? = null,
     val factDropCap: ShareCardFactDropCap? = null,
 
@@ -764,6 +768,8 @@ private fun ShareCardPalette.frostInk(): Color {
     val fixMetaY: Float = 0f,
     val fixFavX: Float = 0f,
     val fixFavY: Float = 0f,
+    val fixBadgeX: Float = 0f,
+    val fixBadgeY: Float = 0f,
 
     // true → switch the CARD itself to 9:16 (only offered when the current
     // aspect is 3:4 and the text still overflows a fully-fitted 3:4 card).
@@ -774,15 +780,17 @@ private fun ShareAutoLayoutPlan.withCollisionRepair(
     titleLift: Float,
     factLift: Float,
     metaLift: Float,
-    favLift: Float
-): ShareAutoLayoutPlan = if (titleLift <= 0f && factLift <= 0f && metaLift == 0f && favLift <= 0f) this else copy(
+    favLift: Float,
+    badgeLift: Float
+): ShareAutoLayoutPlan = if (titleLift <= 0f && factLift <= 0f && metaLift == 0f && favLift <= 0f && badgeLift == 0f) this else copy(
     titleLift = titleLift.coerceAtLeast(0f),
     factLift = factLift.coerceAtLeast(0f),
     // v3xx — SIGNED: negative lifts the info rows UP (back between the
     // title and the fact), positive pushes them down clear of a fact that
     // sits above them.
     metaLift = metaLift,
-    favLift = favLift.coerceAtLeast(0f)
+    favLift = favLift.coerceAtLeast(0f),
+    badgeLift = badgeLift
 )
 
 /** v384 — the pill's attempt → plan table, layered over the TEXT-FIRST
@@ -809,6 +817,7 @@ private fun autoLayoutPlan(
     factRect: androidx.compose.ui.geometry.Rect = androidx.compose.ui.geometry.Rect.Zero,
     metaRect: androidx.compose.ui.geometry.Rect = androidx.compose.ui.geometry.Rect.Zero,
     favRect: androidx.compose.ui.geometry.Rect = androidx.compose.ui.geometry.Rect.Zero,
+    badgeRect: androidx.compose.ui.geometry.Rect = androidx.compose.ui.geometry.Rect.Zero,
     // v3xx — the card's dp dimensions (the measured rects are card-local),
     // for clamping anything that drifted OUTSIDE the card back inside.
     cardW: Float = 0f,
@@ -828,7 +837,7 @@ private fun autoLayoutPlan(
     // between the title and the fact when a grown/dragged fact covers them
     // (never dumped below it). When the rects are still empty (not yet
     // measured), fall back to the drag-offset estimates.
-    val t = titleRect; val f = factRect; val m = metaRect; val v = favRect
+    val t = titleRect; val f = factRect; val m = metaRect; val v = favRect; val b = badgeRect
     fun bottomOverlap(upper: androidx.compose.ui.geometry.Rect, lower: androidx.compose.ui.geometry.Rect): Float {
         if (upper.width <= 0f || upper.height <= 0f || lower.width <= 0f || lower.height <= 0f) return 0f
         val hOverlap = minOf(upper.right, lower.right) - maxOf(upper.left, lower.left)
@@ -854,7 +863,6 @@ private fun autoLayoutPlan(
         val gap = (m.top - t.bottom).coerceAtLeast(0f)
         if (gap > 2f) -gap else 0f
     } else 0f
-    val collisionMetaLift = metaSnapLift
     val collisionTitleLift = maxOf(titleFactOverlap, bottomOverlap(t, m)).coerceAtMost(72f)
     // v3xx — a fav strip parked ABOVE the fact (the Collage / Signature top
     // placement) that has grown/dragged INTO the fact pushes the FACT down by
@@ -863,11 +871,45 @@ private fun autoLayoutPlan(
     // order guard also kills the false positives that used to shove the strip
     // around on the bottom-corner styles.
     val favOverFact = pokeAbove(v, f)
-    val collisionFactLift = (maxOf(titleFactOverlap, favOverFact) - collisionTitleLift).coerceAtMost(72f).coerceAtLeast(0f)
+    // v3xx — the CATEGORY PILL is a small floating element that must never
+    // be buried under a grown fact box or a lifted title: a badge sitting
+    // ABOVE the fact/meta/fav pushes those DOWN (same model as the fav
+    // strip), and the TITLE LIFT is capped at the badge's bottom edge so a
+    // size-grown box can never shove the title up into the pill above it
+    // (the shortfall falls back to pushing the fact down instead).
+    val badgeOverFact = pokeAbove(b, f)
+    val badgeOverMeta = pokeAbove(b, m)
+    val titleLiftCap = if (b.width > 0f && b.height > 0f && t.width > 0f && t.height > 0f)
+        (t.top - b.bottom - 4f).coerceAtLeast(0f)
+    else Float.MAX_VALUE
+    // The lift only "spends" itself on the MEASURED title collision — the
+    // size lift is prospective (the new box hasn't grown yet), so it must
+    // not absorb a fav/badge overlap that only a fact push can fix.
+    val titleLift = minOf(maxOf(sizeLift, collisionTitleLift), titleLiftCap)
+    val titleLiftSpent = minOf(collisionTitleLift, titleLift)
+    val collisionFactLift = (maxOf(titleFactOverlap, favOverFact, badgeOverFact) - titleLiftSpent).coerceAtMost(72f).coerceAtLeast(0f)
     val collisionFavLift = maxOf(
-        pokeAbove(t, v), pokeAbove(f, v), pokeAbove(m, v)
+        pokeAbove(t, v), pokeAbove(f, v), pokeAbove(m, v), pokeAbove(b, v)
     ).coerceAtMost(120f)
-    val titleLift = maxOf(sizeLift, collisionTitleLift)
+    // v3xx — the pill itself is movable, so it joins the repair on both
+    // sides: a badge dragged DOWN onto the title is lifted back UP (-), and
+    // a fact/fav grown or dragged OVER it from above pushes the pill down
+    // (+). The badge is small, so the travel is capped tighter than the big
+    // boxes.
+    val badgeAboveTitle = pokeAbove(b, t)
+    val upperOverBadge = maxOf(
+        pokeAbove(t, b), pokeAbove(f, b), pokeAbove(m, b), pokeAbove(v, b)
+    )
+    val collisionBadgeLift = when {
+        badgeAboveTitle > 0f -> -badgeAboveTitle.coerceAtMost(48f)
+        upperOverBadge > 0f -> upperOverBadge.coerceAtMost(64f)
+        else -> 0f
+    }
+    // v3xx — the info rows SNAP back between the title and the quick fact,
+    // but only when no badge overlap is pushing them the other way (a
+    // badge covering the strip wins: it must be pushed clear, never
+    // snapped up INTO the pill).
+    val collisionMetaLift = if (badgeOverMeta > 0f) badgeOverMeta.coerceAtMost(40f) else metaSnapLift
 
     // v3xx — anything that drifted OUTSIDE the card gets pulled back inside
     // on the same tap (never re-centred — just enough to clear the edge).
@@ -891,11 +933,13 @@ private fun autoLayoutPlan(
     val (fixFx, fixFy) = clampIn(f)
     val (fixMx, fixMy) = clampIn(m)
     val (fixVx, fixVy) = clampIn(v)
+    val (fixBx, fixBy) = clampIn(b)
 
     if (shape.heightFrac == 0f && titleLift == 0f && collisionFactLift == 0f &&
-        collisionMetaLift == 0f && collisionFavLift == 0f &&
+        collisionMetaLift == 0f && collisionFavLift == 0f && collisionBadgeLift == 0f &&
         fixTx == 0f && fixTy == 0f && fixFx == 0f && fixFy == 0f &&
-        fixMx == 0f && fixMy == 0f && fixVx == 0f && fixVy == 0f
+        fixMx == 0f && fixMy == 0f && fixVx == 0f && fixVy == 0f &&
+        fixBx == 0f && fixBy == 0f
     ) return ShareAutoLayoutPlan()
 
     val (maxHeightFrac, minTextScale) = factFitBudget(style, aspect)
@@ -938,14 +982,16 @@ private fun autoLayoutPlan(
             format = ShareCardFactFormat.STANDARD,
             factDropCap = ShareCardFactDropCap.NONE
         )
-    }).withCollisionRepair(titleLift, collisionFactLift, collisionMetaLift, collisionFavLift)
+    }).withCollisionRepair(titleLift, collisionFactLift, collisionMetaLift, collisionFavLift, collisionBadgeLift)
     return if (fixTx == 0f && fixTy == 0f && fixFx == 0f && fixFy == 0f &&
-        fixMx == 0f && fixMy == 0f && fixVx == 0f && fixVy == 0f
+        fixMx == 0f && fixMy == 0f && fixVx == 0f && fixVy == 0f &&
+        fixBx == 0f && fixBy == 0f
     ) repaired else repaired.copy(
         fixTitleX = fixTx, fixTitleY = fixTy,
         fixFactX = fixFx, fixFactY = fixFy,
         fixMetaX = fixMx, fixMetaY = fixMy,
-        fixFavX = fixVx, fixFavY = fixVy
+        fixFavX = fixVx, fixFavY = fixVy,
+        fixBadgeX = fixBx, fixBadgeY = fixBy
     )
 }
 
@@ -7206,10 +7252,11 @@ private fun ArrangeableCard(
     // RichFlag set (bold / italic / highlight) stays untouched.
     onToggleFactUnderline: ((s: Int, e: Int, add: Boolean) -> Unit)? = null,
     // v384 — live measured card-local bounds (title / fact / info rows /
-    // favorites strip) reported so the sheet's sparkle can repair REAL
-    // overlaps — a grown fact box covering the info rows is invisible to
-    // offset-based estimates. Rect.Zero = element absent on this card.
-    onMeasuredBounds: ((androidx.compose.ui.geometry.Rect, androidx.compose.ui.geometry.Rect, androidx.compose.ui.geometry.Rect, androidx.compose.ui.geometry.Rect) -> Unit)? = null,
+    // favorites strip / category pill) reported so the sheet's sparkle can
+    // repair REAL overlaps — a grown fact box covering the info rows or the
+    // category pill is invisible to offset-based estimates. Rect.Zero =
+    // element absent on this card.
+    onMeasuredBounds: ((androidx.compose.ui.geometry.Rect, androidx.compose.ui.geometry.Rect, androidx.compose.ui.geometry.Rect, androidx.compose.ui.geometry.Rect, androidx.compose.ui.geometry.Rect) -> Unit)? = null,
     card: @Composable (EditBoundsCallbacks) -> Unit
 ) {
     // Bounds hub — every style reports where its title / fact / meta text
@@ -7278,6 +7325,36 @@ private fun ArrangeableCard(
             }
     ) {
         card(boundsHub)
+        // v3xx — report the live card-local bounds to the sheet's sparkle in
+        // BOTH modes (the old wiring only ran while editing, so a tap on the
+        // resting preview repaired nothing — a size-grown box or a lifted
+        // title could overlap the category pill unseen). The origin is only
+        // known once the card has laid out; until then the sheet keeps its
+        // last rects.
+        val reportDensity = androidx.compose.ui.platform.LocalDensity.current
+        androidx.compose.runtime.LaunchedEffect(
+            titleRect.value, factRect.value, metaRect.value, badgeRect.value, favRect.value, cardOrigin.value
+        ) {
+            val origin = cardOrigin.value
+            if (origin != androidx.compose.ui.geometry.Offset.Zero) {
+                fun local(r: androidx.compose.ui.geometry.Rect): androidx.compose.ui.geometry.Rect =
+                    with(reportDensity) {
+                        androidx.compose.ui.geometry.Rect(
+                            (r.left - origin.x).toDp().value,
+                            (r.top - origin.y).toDp().value,
+                            (r.right - origin.x).toDp().value,
+                            (r.bottom - origin.y).toDp().value
+                        )
+                    }
+                onMeasuredBounds?.invoke(
+                    if (!quoteMode) local(titleRect.value) else androidx.compose.ui.geometry.Rect.Zero,
+                    local(factRect.value),
+                    local(metaRect.value),
+                    local(favRect.value),
+                    local(badgeRect.value)
+                )
+            }
+        }
         if (editMode) {
             BoxWithConstraints(Modifier.fillMaxSize()) {
                 val cw = maxWidth.value; val ch = maxHeight.value
@@ -7315,13 +7392,6 @@ private fun ArrangeableCard(
                 val rFav = local(favRect.value)
                 val rPolaroid = local(polaroidRect.value)
                 val rAll = listOf(rTitle, rFact, rMeta, rBadge, rCover, rFav, rPolaroid)
-
-                // v384 — report the live card-local bounds so the sheet's
-                // sparkle can repair REAL overlaps (a grown fact box covering
-                // the info rows is invisible to offset estimates).
-                androidx.compose.runtime.LaunchedEffect(rTitle, rFact, rMeta, rFav) {
-                    onMeasuredBounds?.invoke(rTitle, rFact, rMeta, rFav)
-                }
 
                 // v342 — the OTHER boxes a live drag can magnet-align to
                 // (excluding the dragged box itself by instance identity).
@@ -8805,6 +8875,11 @@ fun TopicShareSheet(
     var measuredFact by remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
     var measuredMeta by remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
     var measuredFav by remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
+    // v3xx — the CATEGORY PILL's measured card-local bounds: the sparkle now
+    // keeps the lifted title / grown fact clear of it (the old repair only
+    // watched title / fact / info rows / fav strip, so a grown box or a
+    // lifted title could bury the pill at the top of the card).
+    var measuredBadge by remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
     fun runAutoLayout() {
         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         val len = maxOf(factFieldText.length, chapterFactForCard.length)
@@ -8819,7 +8894,7 @@ fun TopicShareSheet(
         val cardW = 280f
         val cardH = 280f * aspect.heightDp / aspect.widthDp
         repeat(12) {
-            val plan = autoLayoutPlan(currentStyle, aspect, len, attempt, move.factFormat, move, measuredTitle, measuredFact, measuredMeta, measuredFav, cardW, cardH)
+            val plan = autoLayoutPlan(currentStyle, aspect, len, attempt, move.factFormat, move, measuredTitle, measuredFact, measuredMeta, measuredFav, measuredBadge, cardW, cardH)
             val wantsTall = plan.tall && aspect == ShareCardAspect.CLASSIC
             val h = plan.heightFrac
             val s = plan.textScale
@@ -8831,14 +8906,20 @@ fun TopicShareSheet(
             val factLiftChanges = plan.factLift > 0f
             val metaLiftChanges = plan.metaLift != 0f
             val favLiftChanges = plan.favLift > 0f
+            // v3xx — the category pill rides the same repair: its signed
+            // lift (back up off a dragged-over title / down clear of a fact
+            // grown over it) counts as a change like the other elements.
+            val badgeLiftChanges = plan.badgeLift != 0f
             // v3xx — out-of-card clamp changes (anything that hung off the
             // card edge is pulled back inside on the same tap).
             val fixChanges = plan.fixTitleX != 0f || plan.fixTitleY != 0f ||
                 plan.fixFactX != 0f || plan.fixFactY != 0f ||
                 plan.fixMetaX != 0f || plan.fixMetaY != 0f ||
-                plan.fixFavX != 0f || plan.fixFavY != 0f
+                plan.fixFavX != 0f || plan.fixFavY != 0f ||
+                plan.fixBadgeX != 0f || plan.fixBadgeY != 0f
             if (wantsTall || hChanges || sChanges || fmtChanges || dropCapChanges ||
-                titleLiftChanges || factLiftChanges || metaLiftChanges || favLiftChanges || fixChanges
+                titleLiftChanges || factLiftChanges || metaLiftChanges || favLiftChanges ||
+                badgeLiftChanges || fixChanges
             ) {
                 updateMove(move.copy(
                     factHeightFrac = if (h > 0f) h.coerceIn(0.35f, 6f) else move.factHeightFrac,
@@ -8864,7 +8945,15 @@ fun TopicShareSheet(
                     // pushed clear of the title / fact / info rows so it never
                     // overlaps by default (and the sparkle fixes it on tap).
                     favDy = move.favDy + plan.favLift.coerceIn(0f, 120f) + plan.fixFavY,
-                    favDx = move.favDx + plan.fixFavX
+                    favDx = move.favDx + plan.fixFavX,
+                    // v3xx — the category pill rides the same repair: its
+                    // signed lift (negative = back up off a title dragged over
+                    // it, positive = clear of a fact grown above it) plus the
+                    // out-of-card clamp, committed into the badge's own move
+                    // offsets so the preview, the saved card and the export
+                    // all match.
+                    badgeDy = move.badgeDy + plan.badgeLift + plan.fixBadgeY,
+                    badgeDx = move.badgeDx + plan.fixBadgeX
                 ))
                 // A 3:4 card that still overflows fully-fitted gets the tall
                 // 9:16 canvas (the one remaining way to add room).
@@ -9120,8 +9209,8 @@ fun TopicShareSheet(
                                 // v384 — the CURRENT (center) page feeds the
                                 // sparkle's measured-bounds repair; neighbours
                                 // stay silent so they can't overwrite it.
-                                onMeasuredBounds = if (isCenter) { t, f, m, v ->
-                                    measuredTitle = t; measuredFact = f; measuredMeta = m; measuredFav = v
+                                onMeasuredBounds = if (isCenter) { t, f, m, v, b ->
+                                    measuredTitle = t; measuredFact = f; measuredMeta = m; measuredFav = v; measuredBadge = b
                                 } else null
                             ) { cb ->
                                 TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = pageMove, chapterProgress = progressForCard, chapterFact = chapterFactForCard, factSpans = if (isQuotes) emptyList() else cardFactRenderSpans, stickers = stickers, callbacks = cb)
@@ -9209,8 +9298,8 @@ fun TopicShareSheet(
                             onToggleFactUnderline = if (isQuotes || activeId == "chapter_progress") null
                             else { s, e, add -> toggleFactSelectionUnderline(s, e, add) },
                             // v384 — feed the sparkle's measured-bounds repair.
-                            onMeasuredBounds = { t, f, m, v ->
-                                measuredTitle = t; measuredFact = f; measuredMeta = m; measuredFav = v
+                            onMeasuredBounds = { t, f, m, v, b ->
+                                measuredTitle = t; measuredFact = f; measuredMeta = m; measuredFav = v; measuredBadge = b
                             }
                         ) { cb ->
                             TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, factSpans = if (isQuotes) emptyList() else cardFactRenderSpans, stickers = stickers, callbacks = cb)
