@@ -4,6 +4,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -57,6 +59,8 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.curio.app.data.AppPreferences
+import com.curio.app.data.CaptureFormat
+import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioEntry
 import com.curio.app.data.CurioRepositoryHolder
@@ -66,7 +70,6 @@ import com.curio.app.features.reveal.AlbumArtFetch
 import com.curio.app.features.reveal.SeriesPosterFetch
 import com.curio.app.features.settings.BookCoverFetch
 import com.curio.app.navigation.CurioRoutes
-import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioEmptyState
@@ -162,6 +165,18 @@ fun CabinetV2Content(navController: NavController) {
                 it.tags.any { tag -> matchesQ(tag) }
         }
     }
+    // ── Capture-format filter (ANALYSIS.md 4.4.5): narrow the saved
+    // captures by format with tiny chips; the chip row only appears when
+    // several formats actually exist among the entries. Tapping the active
+    // chip clears the filter.
+    var formatFilter by rememberSaveable { mutableStateOf<String?>(null) }
+    val availableFormats = remember(entries) {
+        entries.map { it.format }.distinct().sortedBy { it.shortName }
+    }
+    val shownEntries = remember(filteredEntries, formatFilter) {
+        if (formatFilter == null) filteredEntries
+        else filteredEntries.filter { it.format.name == formatFilter }
+    }
     fun filteredLiked(all: List<V2Liked>) = if (searchQuery.isBlank()) all
     else all.filter {
         matchesQ(it.name) || (it.topic?.byline?.let { b -> matchesQ(b) } == true)
@@ -192,7 +207,7 @@ fun CabinetV2Content(navController: NavController) {
     var showBulkDeleteConfirm by rememberSaveable { mutableStateOf(false) }
     // Stable identity for the visible set (a fresh Set each recomposition
     // would restart the prune effect below every frame).
-    val visibleIds = remember(filteredEntries) { filteredEntries.map { it.id }.toSet() }
+    val visibleIds = remember(shownEntries) { shownEntries.map { it.id }.toSet() }
     LaunchedEffect(selectedEntryIds, visibleIds) {
         val kept = selectedEntryIds.intersect(visibleIds)
         if (kept != selectedEntryIds) selectedEntryIds = kept
@@ -200,8 +215,33 @@ fun CabinetV2Content(navController: NavController) {
     }
     val allVisibleSelected = visibleIds.isNotEmpty() && visibleIds.all { it in selectedEntryIds }
 
-    val anyContent = filteredEntries.isNotEmpty() || shownBooks.isNotEmpty() ||
-        shownAlbums.isNotEmpty() || shownSeries.isNotEmpty()
+    // RAW content (before search / format filtering) — decides between the
+    // genuinely-empty Cabinet (suggestions) and a filtered-to-nothing page.
+    val rawContent = entries.isNotEmpty() || books.isNotEmpty() ||
+        albums.isNotEmpty() || series.isNotEmpty()
+    val nothingVisible = shownEntries.isEmpty() && shownBooks.isEmpty() &&
+        shownAlbums.isEmpty() && shownSeries.isEmpty()
+
+    // ── Empty-Cabinet suggestions (ANALYSIS.md 4.4.4): when nothing is
+    // saved or liked yet, surface three random discoveries from the loaded
+    // pools with a Shuffle pill — a real starting point instead of a blank
+    // page. The seed bump re-rolls them.
+    var suggestions by remember { mutableStateOf<List<CurioTopic>>(emptyList()) }
+    var suggestionSeed by remember { mutableIntStateOf(0) }
+    LaunchedEffect(suggestionSeed) {
+        val picked = mutableListOf<CurioTopic>()
+        val seen = mutableSetOf<String>()
+        var guard = 0
+        while (picked.size < 3 && guard < 40) {
+            guard++
+            val t = runCatching { TopicCatalog.randomFor(CategoryId.WILDCARD) }.getOrNull() ?: break
+            if (t.name !in seen) {
+                seen.add(t.name)
+                picked.add(t)
+            }
+        }
+        suggestions = picked
+    }
 
     // ── Shared accents for the toolbar + section headers.
     val pageAccent = MaterialTheme.colorScheme.primary
@@ -245,7 +285,7 @@ fun CabinetV2Content(navController: NavController) {
                 .then(if (glassOn && glassBackdrop != null)
                     Modifier.layerBackdrop(glassBackdrop) else Modifier)
         ) {
-            if (!anyContent) {
+            if (!rawContent) {
                 item(key = "empty", span = { GridItemSpan(maxLineSpan) }) {
                     if (searching) {
                         CurioEmptyState(
@@ -257,23 +297,72 @@ fun CabinetV2Content(navController: NavController) {
                             onCtaClick = { searchQuery = ""; searchActive = false }
                         )
                     } else {
-                        CurioEmptyState(
-                            glyph = CurioIcons.Inventory2,
-                            headline = "Your Cabinet is empty",
-                            subtext = "Every capture you save will live here — and books, series and albums you heart on their pages join your shelves.",
-                            tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
-                            ctaLabel = "Discover something",
-                            onCtaClick = { navController.navigateToTab(CurioRoutes.SPIN) }
+                        V2EmptySuggestions(
+                            suggestions = suggestions,
+                            onShuffle = { suggestionSeed++ },
+                            onOpen = { t ->
+                                navController.navigate(
+                                    CurioRoutes.revealFor(t.categoryId.routeSlug, t.name)
+                                ) { launchSingleTop = true }
+                            }
                         )
                     }
                 }
+            } else if (nothingVisible) {
+                // Content exists but every section was filtered / searched
+                // away — a quiet no-match state with one tap to clear.
+                item(key = "empty-filtered", span = { GridItemSpan(maxLineSpan) }) {
+                    CurioEmptyState(
+                        glyph = CurioIcons.SearchOff,
+                        headline = if (searching) "No matches" else "Nothing matches these filters",
+                        subtext = "Try clearing the search or the format filter.",
+                        tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
+                        ctaLabel = "Clear filters",
+                        onCtaClick = {
+                            searchQuery = ""; searchActive = false; formatFilter = null
+                        }
+                    )
+                }
             }
 
-            if (filteredEntries.isNotEmpty()) {
+            if (shownEntries.isNotEmpty()) {
+                // ── Capture-format filter chips (ANALYSIS.md 4.4.5): shown
+                // when the entries span several formats; tapping the active
+                // chip clears the filter. Clean, no hint text.
+                if (availableFormats.size > 1 || formatFilter != null) {
+                    item(key = "format-chips", span = { GridItemSpan(maxLineSpan) }, contentType = "chips") {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            availableFormats.forEach { fmt ->
+                                val selected = formatFilter == fmt.name
+                                Surface(
+                                    onClick = { formatFilter = if (selected) null else fmt.name },
+                                    shape = RoundedCornerShape(50),
+                                    color = if (selected) pageAccent
+                                        else MaterialTheme.colorScheme.surfaceContainerHigh,
+                                    contentColor = if (selected) MaterialTheme.colorScheme.onPrimary
+                                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.height(30.dp)
+                                ) {
+                                    Text(
+                                        text = fmt.shortName,
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                        maxLines = 1,
+                                        modifier = Modifier.padding(horizontal = 12.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
                 item(key = "h-saved", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
                     V2SectionHeader(
                         title = "Saved",
-                        count = filteredEntries.size,
+                        count = shownEntries.size,
                         glyph = CurioIcons.Inventory2,
                         expanded = expanded("saved"),
                         accent = pageAccent,
@@ -281,7 +370,7 @@ fun CabinetV2Content(navController: NavController) {
                     )
                 }
                 if (expanded("saved")) {
-                    items(filteredEntries, key = { "e|${it.id}" }) { entry ->
+                    items(shownEntries, key = { "e|${it.id}" }) { entry ->
                         CurioEntryCard(
                             entry = entry,
                             modifier = Modifier,
@@ -495,6 +584,78 @@ private data class V2Liked(
 
 private enum class V2Kind { BOOK, ALBUM, SERIES }
 
+/** Best-fitting jacket shape for a suggested topic's lane. */
+private fun topicKind(t: CurioTopic): V2Kind = when (t.categoryId) {
+    CategoryId.BOOKS, CategoryId.AUTHORS -> V2Kind.BOOK
+    CategoryId.SERIES, CategoryId.ANIME, CategoryId.MANGA, CategoryId.MANHWA,
+    CategoryId.FILMS, CategoryId.DIRECTORS, CategoryId.ANIMATED_MOVIES -> V2Kind.SERIES
+    else -> V2Kind.ALBUM
+}
+
+/** ANALYSIS.md 4.4.4 — an empty Cabinet starts with three suggested
+ *  discoveries (re-rolled by the Shuffle pill) instead of a blank page. */
+@Composable
+private fun V2EmptySuggestions(
+    suggestions: List<CurioTopic>,
+    onShuffle: () -> Unit,
+    onOpen: (CurioTopic) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = "Your Cabinet is empty",
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(16.dp))
+        if (suggestions.isEmpty()) {
+            // Pools still loading — keep the frame steady.
+            repeat(3) {
+                Surface(
+                    shape = RoundedCornerShape(18.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
+                    modifier = Modifier.fillMaxWidth().height(72.dp)
+                )
+                Spacer(Modifier.height(10.dp))
+            }
+        } else {
+            suggestions.forEach { t ->
+                V2LikedRow(
+                    item = V2Liked(t.name, topicKind(t), t),
+                    onClick = { onOpen(t) }
+                )
+                Spacer(Modifier.height(10.dp))
+            }
+        }
+        Spacer(Modifier.height(6.dp))
+        Surface(
+            onClick = onShuffle,
+            shape = RoundedCornerShape(50),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.13f),
+            contentColor = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.height(38.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.padding(horizontal = 16.dp)
+            ) {
+                CurioIcon(
+                    name = CurioIcons.Shuffle,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    size = 17.dp
+                )
+                Text(
+                    text = "Shuffle suggestions",
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
+}
+
 /** One section header: glyph chip + title + count + collapse chevron. */
 @Composable
 private fun V2SectionHeader(
@@ -693,19 +854,28 @@ private fun V2JacketArt(item: V2Liked, accent: Color, modifier: Modifier = Modif
     val stored = if (item.kind == V2Kind.BOOK) {
         AppPreferences.bookCoverUrlsState[item.name]?.takeIf { it.isNotBlank() }
     } else null
+    // Albums / series: the artwork the reveal sheets ALREADY resolved and
+    // persisted (sheetArtUrlsState keyed "album|<name>" / "series|<name>") —
+    // real covers appear instantly after a sheet visit, no re-fetch.
+    val sheetArt = if (item.kind != V2Kind.BOOK) {
+        AppPreferences.sheetArtUrlsState["${item.kind.name.lowercase()}|${item.name}"]
+            ?.takeIf { it.isNotBlank() }
+    } else null
     val authored = topic?.imageUrl?.takeIf { it.isNotBlank() }
     val consent = when (item.kind) {
         V2Kind.BOOK -> AppPreferences.bookFetchEnabledState
         V2Kind.ALBUM -> AppPreferences.albumFetchEnabledState
         V2Kind.SERIES -> AppPreferences.seriesFetchEnabledState
     }
-    // Static candidates — books also carry the keyless Open Library title
-    // guess (same fallback the reveal poster uses); albums/series resolve
-    // keylessly below when their fetch toggle is on.
-    val candidates = remember(item.name, topic, stored, authored) {
+    // Static candidates — the verified sheet art first (albums/series),
+    // then the authored imageUrl; books also carry the keyless Open Library
+    // title guess (same fallback the reveal poster uses); albums/series
+    // resolve keylessly below when their fetch toggle is on.
+    val candidates = remember(item.name, topic, stored, sheetArt, authored) {
         val list = mutableListOf<String>()
         if (!stored.isNullOrBlank()) list.add(stored)
-        if (!authored.isNullOrBlank() && authored != stored) list.add(authored)
+        if (!sheetArt.isNullOrBlank() && sheetArt != stored) list.add(sheetArt)
+        if (!authored.isNullOrBlank() && authored != stored && authored != sheetArt) list.add(authored)
         if (item.kind == V2Kind.BOOK) {
             list.add(BookCoverFetch.coverUrlFor(item.name, ""))
         }
