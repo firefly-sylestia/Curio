@@ -32,10 +32,25 @@ permission to be taken after pushing the fixes.
 discoveries + Surprise-me-again CTA, 4.4.5 filter by capture format, 5.1
 collection cards + pin-from-reveal (bigger bet).
 
-**Next (awaiting user permission):** album covers in v2 (use the persisted
-`sheetArtUrlsState["album|…"]` / `["series|…"]` resolved-artwork so liked
-albums/series show the artwork immediately) + a selected Cabinet v2
-polish/QoL batch from ANALYSIS.md (clean, no hint-text spam).
+**In progress (implemented, NOT yet pushed — awaiting user go-ahead):**
+the approved v2 polish batch:
+1. Resolved album/series art — `V2JacketArt` now reads
+   `sheetArtUrlsState["album|…"]` / `["series|…"]` (the artwork the
+   reveal sheets already resolve+persist) ahead of the authored URL, so
+   liked albums/series show real covers instantly.
+2. Empty-state suggestions (ANALYSIS.md 4.4.4) — a genuinely empty
+   Cabinet shows three random discoveries (TopicCatalog.randomFor, re-
+   rolled by a Shuffle pill) instead of a blank page; searching/filtering
+   to nothing shows a quiet no-match state with a one-tap Clear.
+3. Format filter chips (ANALYSIS.md 4.4.5) — saved captures filter by
+   CaptureFormat.shortName chips (shown only when 2+ formats exist),
+   tapping the active chip clears.
+
+CI on this batch: full-screen editor fixed + pushed earlier (ed308041 +
+c56403ac — Dialog Box/Column restructure + fully-qualified top-level
+AnimatedVisibility; brace balance verified). Polaroid on non-Collage
+styles is now opt-in ("Show on card" switch, default off, per card) —
+user confirmed "opt in hidden by default as u shipped".
 
 ### Completed — Cabinet v2 slices 2–4 + Minimal favorites fix (2026-09-07)
 
@@ -207,3 +222,52 @@ Implementation slices (planned order):
 
 Backlog: multi-select stickers, sparkle info snap, quick-fact tap-out reset,
 wider text-history coverage.
+
+---
+
+## 📥 User prompts — CHECK HERE AFTER EVERY PUSH (never clear this section)
+
+**Contract (user directive, 2026-09-07):** after EVERY push, read the top
+of THIS section for a pending prompt. If one is present, follow it properly
+(rephrasing for clarity is fine — never silently drop parts); when done,
+update its status and move it into the request log above. If this section
+holds no pending prompt, the push closes the task. The section itself is
+never cleared — the empty slot at the bottom is where the next prompt goes.
+The rules for working each prompt (research, quality check, plan, review,
+premium-minimal design, no useless hint texts, liquid-glass-ready, ask
+before adding researched extras) live in root `AGENTS.md` →
+"Check-after-every-push contract".
+
+### PENDING — 2026-09-07 (in progress)
+**Status:** INSTRUCTIONS UPDATED (this section + root AGENTS.md contract).
+The Cabinet v2 polish batch is implemented locally but **NOT pushed** —
+the user said "not yet"; waiting for the user's go-ahead to commit+push.
+
+**Rephrased directive from the user:**
+- From now on the workflow is prompt-driven: after every push, check the
+  LAST section of Prompt.md for new prompts; if none, the task is done; if
+  one exists, follow it properly.
+- For each prompt: thorough research + quality check + a proper plan;
+  review every visual / big-logic / UX change for what I may have missed
+  but is necessary.
+- No useless hint texts; keep it premium and minimal; design-consistent;
+  make new surfaces liquid-glass-ready.
+- Exceed expectations: proper beautiful animations and clean close
+  interactions.
+- Do your own research; ask me for confirmation before adding what you
+  researched and think is missing.
+- Review logic properly — persistence, state, performance (never slow the
+  app).
+- Update all agent instructions with this workflow; add this section at
+  the END of Prompt.md; keep the next-prompt slot; never clear it.
+- The pending Cabinet v2 batch (resolved album/series art, empty-state
+  suggestions + Shuffle, capture-format filter chips; changelog +
+  request-log updated) stays un-pushed until I approve.
+
+**Status log:**
+- [x] Root AGENTS.md: "Check-after-every-push contract" added.
+- [x] Prompt.md: this end section added (pending prompt + status + slot).
+- [ ] Cabinet v2 polish batch: commit + push — WAITING on user go-ahead.
+- [ ] CI green confirmation for c56403ac (full-screen editor fix) — verify.
+
+### Next prompt slot — (empty, waiting for the user's next prompt)

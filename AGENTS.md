@@ -206,6 +206,37 @@ applies to settings-gated experiments.
 - A request is interrupted or half-done (capture progress, remaining work, decisions)
 - A request is completed (add completion summary)
 
+### 📥 CHECK-AFTER-EVERY-PUSH CONTRACT (user directive, 2026-09-07)
+
+The LAST section of Prompt.md — the "User prompts" section at the END of
+Prompt.md — is where the user drops new instructions. It is NEVER cleared
+(see Prompt.md for its own layout: the pending prompt + its status at the
+top of that section, then an empty slot for the next prompt).
+
+1. **After EVERY push, read that section before ending the task.** If a
+   pending prompt is present, follow it properly (you may rephrase it in
+   Prompt.md for clarity — never silently drop parts). When the prompt is
+   done, update its status and move it into the request log above.
+2. **No pending prompt = task complete.** If the section is empty, the
+   push closes the task — do not invent follow-up work.
+3. **Per-change discipline** (every prompt, and every visual / big-logic /
+   UX change): do thorough research, run a quality check, and make a
+   proper plan BEFORE implementing. Review each change for what the user
+   may have missed but is necessary.
+4. **Design rules**: never add useless hint texts; keep everything premium
+   and minimal; stay design-consistent with the surface you touch; make
+   new surfaces liquid-glass-ready; exceed expectations with proper,
+   beautiful animations and clean close interactions.
+5. **Research + confirm**: do your own research; when you find something
+   the user missed and think should be added, ASK for confirmation before
+   adding it (ask_user).
+6. **Logic/performance review**: check persistence, state, and hot paths —
+   never make the app slow.
+
+### How to update this contract
+If the user refines this workflow, update this section AND the Prompt.md
+"User prompts" section's own rules together — they are one contract.
+
 ## General Workflow
 
 0. **git pull FIRST** — run `git pull` before starting any work in a
