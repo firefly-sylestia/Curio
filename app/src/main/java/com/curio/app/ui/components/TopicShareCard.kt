@@ -616,14 +616,25 @@ private fun ShareCardPalette.frostInk(): Color {
 // ═══════════════════════════════════════════════════════════════════════
 /** One auto-layout candidate: what the pill commits for a given attempt.
  *  Zero fields mean "leave that channel alone". */
-private data class ShareAutoLayoutPlan(
+    private data class ShareAutoLayoutPlan(
     val heightFrac: Float = 0f,
-    val textScale: Float = 0f,
-    val format: ShareCardFactFormat? = null,
+  val textScale: Float = 0f,
+  val titleLift: Float = 0f,
+  val factLift: Float = 0f,
+  val format: ShareCardFactFormat? = null,
+
     // true → switch the CARD itself to 9:16 (only offered when the current
     // aspect is 3:4 and the text still overflows a fully-fitted 3:4 card).
     val tall: Boolean = false
 )
+
+  private fun ShareAutoLayoutPlan.withCollisionRepair(
+  titleLift: Float,
+  factLift: Float
+  ): ShareAutoLayoutPlan = if (titleLift <= 0f && factLift <= 0f) this else copy(
+  titleLift = titleLift.coerceAtLeast(0f),
+  factLift = factLift.coerceAtLeast(0f)
+  )
 
 /** v379e — the pill's attempt → plan table, layered over the TEXT-FIRST
  *  [autoFitShape]: 0 = the plain fit itself; 1 = the same fit with
@@ -637,13 +648,33 @@ private fun autoLayoutPlan(
     aspect: ShareCardAspect,
     len: Int,
     attempt: Int,
-    currentFormat: ShareCardFactFormat
-): ShareAutoLayoutPlan {
+    currentFormat: ShareCardFactFormat,
+    move: ShareCardMove
+    ): ShareAutoLayoutPlan {
     val shape = autoFitShape(style, aspect, len)
-    if (shape.heightFrac == 0f) return ShareAutoLayoutPlan()
-    val (maxHeightFrac, minTextScale) = factFitBudget(style, aspect)
-    val capped = shape.heightFrac >= maxHeightFrac - 0.01f && shape.heightFrac > 1f
-    return when ((attempt % 4 + 4) % 4) {
+    // A grown fact box consumes the vertical gap above it. Keep the title
+    // out of that collision as part of the same atomic auto-layout commit.
+    val sizeLift = ((shape.heightFrac - 1f) * 28f).coerceIn(0f, 56f)
+    // Manual dragging is allowed to create an overlap. The sparkle action is
+    // the explicit repair gesture: estimate the shared vertical collision
+    // from both offsets and move the title clear of the fact in one commit.
+    // This deliberately ignores titlePlaced because the user asked for the
+    // sparkle action to repair intentional overlap, not dragging itself.
+  // The reference layout keeps the title above the fact. Manual drags can
+  // reverse that relationship: titleDy moves the title down and factDy moves
+  // the fact up. Treat the 18dp natural gap as the collision threshold, then
+  // use the title's 72dp safe travel first and move the fact down only when
+  // the overlap is larger than that safe title travel.
+  val overlap = (move.titleDy - move.factDy - 18f).coerceAtLeast(0f)
+  val collisionTitleLift = overlap.coerceAtMost(72f)
+  val collisionFactLift = (overlap - collisionTitleLift).coerceAtMost(72f)
+  val titleLift = maxOf(sizeLift, collisionTitleLift)
+
+  if (shape.heightFrac == 0f && titleLift == 0f && collisionFactLift == 0f) return ShareAutoLayoutPlan()
+
+  val (maxHeightFrac, minTextScale) = factFitBudget(style, aspect)
+  val capped = shape.heightFrac >= maxHeightFrac - 0.01f && shape.heightFrac > 1f
+  return (when ((attempt % 4 + 4) % 4) {
         0 -> ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale)
         1 -> ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale, format = ShareCardFactFormat.CONDENSED)
         2 -> ShareAutoLayoutPlan(
@@ -670,8 +701,8 @@ private fun autoLayoutPlan(
                 ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale, format = ShareCardFactFormat.STANDARD)
             else -> ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale)
         }
-    }
-}
+  }).withCollisionRepair(titleLift, collisionFactLift)
+  }
 
 /** v379d — the floating sparkle pill: round button at the card's top-end
  *  corner. Shows on BOTH the resting preview and the edit mode; tap = run
@@ -2114,7 +2145,7 @@ private fun VinylCard(
                 vinylMeta()
             }
 
-            // Accent underline — v316b: belongs to the quick-fact block below,
+            // Accent underline ��� v316b: belongs to the quick-fact block below,
             // so it slides WITH the fact box when the F handle drags.
             Spacer(Modifier.height(4.dp))
             Canvas(Modifier.size(width = 32.dp, height = 2.dp).factShift(move)) {
@@ -5422,7 +5453,7 @@ private fun signatureDesign(categoryName: String, family: CategoryFamily): Signa
             footerSpacer = 8.dp, footerFont = AntonFontFamily, footerColor = Color(0xFFE8A5A0).copy(alpha = 0.65f),
             layout = SignatureLayout.POSTER
         )
-        // ═══ FOOD — table, Corben title ═══
+        // ══�� FOOD — table, Corben title ═══
         cat == "FOOD" -> SignatureDesign(
             bg = Color(0xFF1A140E), cornerRadius = 8f,
             drawBackground = { w, h ->
@@ -6400,7 +6431,7 @@ private fun Footer(sharerName: String, quoteText: String?, quoteAuthor: String?,
 
 // ═══════════════════════════════════════════════════════════════════════
 // CANVAS DRAWING HELPERS
-// ═══════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════��═════════════════════════════════════
 private fun DrawScope.drawPaperTexture(palette: ShareCardPalette) {
     val w = size.width; val h = size.height; val s = (w * 1000 + h).toInt()
     // Dense grain — many small dots at varying opacity (v... — grain bumped up)
@@ -6847,7 +6878,15 @@ private fun ArrangeableCard(
                         }
                 )
 
-                // TITLE — tap selects; grip only when selected.
+                // TITLE — tap selects; grip only when selected. When title and
+                // fact overlap, the currently selected box owns the shared hit
+                // region; tapping it toggles to the other box. This preserves
+                // the simple overlapping-box behavior from the pre-magnetic
+                // layout editor while keeping both targets reachable.
+                val titleFactOverlap = !quoteMode &&
+                    rTitle.width > 0f && rTitle.height > 0f &&
+                    rFact.width > 0f && rFact.height > 0f &&
+                    rTitle.overlaps(rFact)
                 if (!quoteMode) {
                     val t = rTitle
                     val tOk = t.width > 0f && t.height > 0f
@@ -6858,11 +6897,15 @@ private fun ArrangeableCard(
                                 .offset(t.left.dp, t.top.dp)
                                 .width(t.width.dp)
                                 .height(t.height.dp)
-                            .clickable {
-                                focusManager.clearFocus()
-                                onSelectResizeTarget(ShareCardResizeTarget.TITLE)
-                            }
-                            .border(1.dp, selBorder(isSel), RoundedCornerShape(8.dp))
+                                .zIndex(if (isSel && titleFactOverlap) 2f else 0f)
+                                .clickable {
+                                    focusManager.clearFocus()
+                                    onSelectResizeTarget(
+                                        if (titleFactOverlap && isSel) ShareCardResizeTarget.FACT
+                                        else ShareCardResizeTarget.TITLE
+                                    )
+                                }
+                                .border(1.dp, selBorder(isSel), RoundedCornerShape(8.dp))
                         )
                         // v369 — the grip + corner scale are drawn LAST (see
                         // the handles section below the element boxes), so a
@@ -6973,12 +7016,18 @@ private fun ArrangeableCard(
                                 .offset(f.left.dp, f.top.dp)
                                 .width(f.width.dp)
                                 .height(f.height.dp)
+                                .zIndex(if (isSel && titleFactOverlap) 2f else 0f)
                                 .combinedClickable(
                                     interactionSource = remember {
                                         androidx.compose.foundation.interaction.MutableInteractionSource()
                                     },
                                     indication = null,
-                                    onClick = { onSelectResizeTarget(ShareCardResizeTarget.FACT) },
+                                    onClick = {
+                                        onSelectResizeTarget(
+                                            if (titleFactOverlap && isSel) ShareCardResizeTarget.TITLE
+                                            else ShareCardResizeTarget.FACT
+                                        )
+                                    },
                                     onDoubleClick = {
                                         onSelectResizeTarget(ShareCardResizeTarget.FACT)
                                         onRequestInlineFactEdit()
@@ -7210,8 +7259,14 @@ private fun ArrangeableCard(
                                     val bx = t.left - move.titleDx
                                     val by = t.top - move.titleDy + move.titleLift
                                     val othersT = alignOthers(t)
-                                    val xs = magnetAxis(bx, t.width, cw, -bx, cw - bx - t.width, (move.titleDx + dx).coerceIn(-bx, cw - bx - t.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersT, bx, t.width))
-                                    val ys = magnetAxis(by, t.height, ch, -by, ch - by - t.height, (move.titleDy + dy).coerceIn(-by, ch - by - t.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersT, by, t.height))
+                                    val xs = magnetAxis(bx, t.width, cw, -bx, cw - bx - t.width, (move.titleDx + dx).coerceIn(
+                                        minOf(-bx, cw - bx - t.width),
+                                        maxOf(-bx, cw - bx - t.width)
+                                    ), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersT, bx, t.width))
+                                    val ys = magnetAxis(by, t.height, ch, -by, ch - by - t.height, (move.titleDy + dy).coerceIn(
+                                        minOf(-by, ch - by - t.height),
+                                        maxOf(-by, ch - by - t.height)
+                                    ), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersT, by, t.height))
                                     dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
                                     onMove(move.copy(titleDx = xs.offset, titleDy = ys.offset))
                                 },
@@ -7252,8 +7307,14 @@ private fun ArrangeableCard(
                                     val bx = f.left - move.factDx
                                     val by = f.top - move.factDy
                                     val othersF = alignOthers(f)
-                                    val xs = magnetAxis(bx, f.width, cw, -bx, cw - bx - f.width, (move.factDx + dx).coerceIn(-bx, cw - bx - f.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersF, bx, f.width))
-                                    val ys = magnetAxis(by, f.height, ch, -by, ch - by - f.height, (move.factDy + dy).coerceIn(-by, ch - by - f.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersF, by, f.height))
+                                    val xs = magnetAxis(bx, f.width, cw, -bx, cw - bx - f.width, (move.factDx + dx).coerceIn(
+                                        minOf(-bx, cw - bx - f.width),
+                                        maxOf(-bx, cw - bx - f.width)
+                                    ), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersF, bx, f.width))
+                                    val ys = magnetAxis(by, f.height, ch, -by, ch - by - f.height, (move.factDy + dy).coerceIn(
+                                        minOf(-by, ch - by - f.height),
+                                        maxOf(-by, ch - by - f.height)
+                                    ), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersF, by, f.height))
                                     dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
                                     // v371 — COLLISION-PUSH (replaces the old
                                     // always-grouped move): the title + info
@@ -8123,18 +8184,22 @@ fun TopicShareSheet(
         if (len == 0 && chapterFactForCard.isBlank() && progressForCard == null) return
         var attempt = autoLayoutIdx + 1
         repeat(6) {
-            val plan = autoLayoutPlan(currentStyle, aspect, len, attempt, move.factFormat)
+            val plan = autoLayoutPlan(currentStyle, aspect, len, attempt, move.factFormat, move)
             val wantsTall = plan.tall && aspect == ShareCardAspect.CLASSIC
             val h = plan.heightFrac
             val s = plan.textScale
             val hChanges = h > 0f && kotlin.math.abs(h - move.factHeightFrac) > 0.02f
             val sChanges = s > 0f && kotlin.math.abs(s - move.factScale) > 0.02f
             val fmtChanges = plan.format != null && plan.format != move.factFormat
-            if (wantsTall || hChanges || sChanges || fmtChanges) {
+            val titleLiftChanges = kotlin.math.abs(plan.titleLift - move.titleLift) > 1f
+            val factLiftChanges = plan.factLift > 0f
+            if (wantsTall || hChanges || sChanges || fmtChanges || titleLiftChanges || factLiftChanges) {
                 updateMove(move.copy(
                     factHeightFrac = if (h > 0f) h.coerceIn(0.35f, 6f) else move.factHeightFrac,
                     factScale = if (s > 0f) s.coerceIn(0.5f, 2f) else move.factScale,
-                    factFormat = plan.format ?: move.factFormat
+                    factDy = move.factDy + plan.factLift.coerceIn(0f, 72f),
+                    factFormat = plan.format ?: move.factFormat,
+                    titleLift = plan.titleLift.coerceIn(0f, 96f)
                 ))
                 // A 3:4 card that still overflows fully-fitted gets the tall
                 // 9:16 canvas (the one remaining way to add room).
@@ -9986,7 +10051,7 @@ fun TopicShareSheet(
                 // Share button
                 Button(onClick = {
                     haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                    shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, card = {
+                    shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, shareText = shareLinkUrl?.invoke(), card = {
                         TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, factSpans = if (isQuotes) emptyList() else cardFactRenderSpans)
                     })
                         persistEdits()
