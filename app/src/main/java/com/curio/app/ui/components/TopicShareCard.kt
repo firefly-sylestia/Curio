@@ -9858,13 +9858,25 @@ fun TopicShareSheet(
                                 onClick = { toolOpen = if (toolOpen == "source") null else "source" }
                             )
                         }
-                        // v3xx — POLAROID tool in the bottom-sheet toolbar
-                        // (frame style / photo filter / print size) — it used
-                        // to live full-screen only. Shown whenever the print
-                        // can appear: always on Collage, on every other style
-                        // once a user photo is on the card.
-                        if (currentStyle == ShareCardStyle.COLLAGE || userPhoto != null) {
-                            ToolWithCaption(caption = "Polaroid") {
+                        // v3xx — PHOTO is a dedicated editor action so the
+                        // image can be imported without opening Content first.
+                        // It remains visible even before a photo exists.
+                        ToolWithCaption(caption = if (userPhoto == null) "Photo" else "Change") {
+                            EditToolPill(
+                                glyph = CurioIcons.PhotoLibrary,
+                                description = if (userPhoto == null) "Import a photo" else "Change photo",
+                                active = false,
+                                onClick = {
+                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    photoPickerLauncher.launch("image/*")
+                                }
+                            )
+                        }
+                        // v3xx — POLAROID tool in the bottom-sheet toolbar.
+                        // It is always visible so the Show on card switch is
+                        // discoverable before a photo is imported; the panel
+                        // keeps the existing style / filter / size controls.
+                        ToolWithCaption(caption = "Polaroid") {
                                 EditToolPill(
                                     glyph = CurioIcons.PhotoLibrary,
                                     description = "Polaroid style / filter / size",
@@ -9872,7 +9884,6 @@ fun TopicShareSheet(
                                     onClick = { toolOpen = if (toolOpen == "polaroid") null else "polaroid" }
                                 )
                             }
-                        }
                         // v330 — Reset + Done live in the bottom action bar
                         // while editing (see below); the floating cluster over
                         // the card is gone.
