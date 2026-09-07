@@ -468,7 +468,15 @@ data class ShareSticker(
     /** Card-local y as a fraction of the card height (0..1, top-left). */
     val y: Float = 0.5f,
     /** Emoji font size as a fraction of the card width (e.g. 0.22 = 22%). */
-    val sizeFrac: Float = 0.22f
+    val sizeFrac: Float = 0.22f,
+    // v3xx — IMPORTED image cutout: when set, the sticker renders the PNG at
+    // [imagePath] (an absolute path under the app's files/stickers dir) instead
+    // of the [emoji] glyph — sized by [sizeFrac] × card width, aspect-preserving,
+    // transparency kept (a real PNG cutout with a see-through background).
+    // Persisted by path; the renderer decodes + caches it per path.
+    val imagePath: String? = null,
+    /** v3xx — rotation in degrees (clockwise). Pinch-rotate or the slider. */
+    val rotation: Float = 0f
 )
 
 /** v3xx — one COLLAGE polaroid look (index = [ShareCardMove.polaroidStyle]):
@@ -495,6 +503,46 @@ private val polaroidLooks = listOf(
 // into [polaroidLooks] / the filter switch in CollageCard).
 private val polaroidStyleNames = listOf("Classic", "Retro", "Sunglow", "Vintage", "Dashed")
 private val polaroidFilterNames = listOf("None", "Noise", "Nostalgia", "B&W", "Warm")
+
+// v3xx — normalizes an angle to -180..180 (used by pinch-rotate so the
+// sticker rotation slider's range stays valid).
+private fun normDegrees(r: Float): Float = ((r + 180f) % 360f + 360f) % 360f - 180f
+
+// v3xx — imported sticker PNGs decode once per path (they live in the app's
+// own files/stickers dir and can't change under us). Downscaled on decode so
+// a huge gallery PNG doesn't sit in memory at full res.
+private val stickerBitmapCache = java.util.concurrent.ConcurrentHashMap<String, androidx.compose.ui.graphics.ImageBitmap>()
+
+private fun decodeStickerBitmap(path: String): androidx.compose.ui.graphics.ImageBitmap? {
+    stickerBitmapCache[path]?.let { return it }
+    val bmp = runCatching {
+        val opts = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        android.graphics.BitmapFactory.decodeFile(path, opts)
+        var sample = 1
+        while (opts.outWidth / (sample * 2) >= 512 && opts.outHeight / (sample * 2) >= 512) sample *= 2
+        val full = android.graphics.BitmapFactory.Options().apply { inSampleSize = sample }
+        android.graphics.BitmapFactory.decodeFile(path, full)
+    }.getOrNull() ?: return null
+    val img = bmp.asImageBitmap()
+    stickerBitmapCache[path] = img
+    return img
+}
+
+/** v3xx — copies a picked gallery image into the app's stickers dir as a PNG
+ *  (re-encode strips any weird source format and guarantees transparency is
+ *  preserved for cutouts) and returns the new absolute path. */
+private fun importStickerPng(context: android.content.Context, uri: android.net.Uri): String? = runCatching {
+    val dir = java.io.File(context.filesDir, "stickers").apply { mkdirs() }
+    val file = java.io.File(dir, "sticker_${System.currentTimeMillis()}.png")
+    val src = context.contentResolver.openInputStream(uri) ?: return@runCatching null
+    val bmp = android.graphics.BitmapFactory.decodeStream(src)
+    src.close()
+    if (bmp == null) return@runCatching null
+    java.io.FileOutputStream(file).use { out ->
+        bmp.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out)
+    }
+    file.absolutePath
+}.getOrNull()
 
 // v3xx — polaroid PHOTO filters (color matrices for Nostalgia / B&W / Warm).
 private val sepiaMatrix = floatArrayOf(
@@ -787,26 +835,19 @@ private fun autoLayoutPlan(
     fun pokeAbove(upper: androidx.compose.ui.geometry.Rect, lower: androidx.compose.ui.geometry.Rect): Float =
         if (upper.top < lower.top) bottomOverlap(upper, lower) else 0f
     val titleFactOverlap = bottomOverlap(t, f)
-    // v3xx — the info rows belong BETWEEN the title and the quick fact: a
-    // grown/dragged fact that actually TOUCHES them lifts the rows UP
-    // (negative lift) back above the fact; only when the fact sits ABOVE
-    // the rows (a hand-dragged arrangement) do they push DOWN to clear it.
-    // [bottomOverlap] can't be reused here: it assumes the FIRST box is
-    // above the second, and in the real flow the info rows sit ABOVE the
-    // fact — so compute the TRUE vertical overlap between the two rects
-    // instead (facing edges only, zero when they don't touch).
-    val factMetaOverlap = if (f.width > 0f && f.height > 0f && m.width > 0f && m.height > 0f &&
-        f.top < m.bottom && m.top < f.bottom
-    ) minOf(f.bottom, m.bottom) - maxOf(f.top, m.top) else 0f
-    val metaUp = if (factMetaOverlap > 0f && f.top >= m.top) factMetaOverlap.coerceAtMost(72f) else 0f
-    val metaDown = if (factMetaOverlap > 0f && f.top < m.top) factMetaOverlap.coerceAtMost(72f) else 0f
-    val collisionMetaLift = if (metaUp > 0f) -metaUp else metaDown
-    // When the lifted rows have no room under the title, the TITLE moves up
-    // a little to make space for them ("title lifts for the info box").
-    val titleMetaGap = if (t.width > 0f && t.height > 0f && m.width > 0f && m.height > 0f)
-        (m.top - t.bottom).coerceAtLeast(0f) else Float.MAX_VALUE
-    val titleForMeta = if (metaUp > 0f && titleMetaGap < metaUp) (metaUp - titleMetaGap).coerceAtMost(72f) else 0f
-    val collisionTitleLift = maxOf(titleFactOverlap, bottomOverlap(t, m), titleForMeta).coerceAtMost(72f)
+    // v3xx — the info rows SNAP back between the title and the quick fact
+    // on the sparkle tap, TOUCHING the title: whatever pushed them down (a
+    // grown or hand-dragged fact, an earlier nudge) is undone by lifting
+    // the strip up so its top meets the title's bottom — the natural
+    // title → info → fact flow. The fact may sit anywhere below; the strip
+    // always ends up ABOVE it (="between"). Only fires when both rects
+    // exist and the gap is real (> 2dp).
+    val metaSnapLift = if (t.width > 0f && t.height > 0f && m.width > 0f && m.height > 0f) {
+        val gap = (m.top - t.bottom).coerceAtLeast(0f)
+        if (gap > 2f) -gap else 0f
+    } else 0f
+    val collisionMetaLift = metaSnapLift
+    val collisionTitleLift = maxOf(titleFactOverlap, bottomOverlap(t, m)).coerceAtMost(72f)
     // v3xx — a fav strip parked ABOVE the fact (the Collage / Signature top
     // placement) that has grown/dragged INTO the fact pushes the FACT down by
     // the overlap — never the strip down into it (adding it to the fav lift
@@ -2054,24 +2095,46 @@ fun TopicShareCard(
                     .onGloballyPositioned { callbacks.onFavTrack(it.boundsInWindow()) }
             )
         }
-        // v3xx — EMOJI STICKER layer: drawn LAST so stickers always sit on
-        // top of the card content, the cover badge and the favorites strip.
-        // Positions/sizes are card fractions, so the sheet preview and the
-        // exported PNG render them identically at any resolution.
+        // v3xx — EMOJI / IMAGE STICKER layer: drawn LAST so stickers always
+        // sit on top of the card content, the cover badge and the favorites
+        // strip. Positions/sizes are card fractions, so the sheet preview and
+        // the exported PNG render them identically at any resolution. v3xx —
+        // an imported PNG cutout renders as an aspect-preserving image
+        // (width = sizeFrac × card width, transparency kept) instead of the
+        // emoji glyph, and every sticker wears its [ShareSticker.rotation].
         if (stickers.isNotEmpty()) {
             BoxWithConstraints(Modifier.matchParentSize()) {
                 val cw = maxWidth
                 val ch = maxHeight
                 stickers.forEach { st ->
-                    Text(
-                        st.emoji,
-                        fontSize = (cw.value * st.sizeFrac.coerceIn(0.05f, 0.8f)).sp,
-                        softWrap = false,
-                        modifier = Modifier.offset(
-                            x = cw * st.x.coerceIn(0f, 1f),
-                            y = ch * st.y.coerceIn(0f, 1f)
+                    val px = cw.value * st.sizeFrac.coerceIn(0.05f, 0.8f)
+                    val rot = st.rotation
+                    val img = st.imagePath?.let { p ->
+                        // Decoded once per path (files under the app's own
+                        // stickers dir can't change under us).
+                        androidx.compose.runtime.remember(p) { decodeStickerBitmap(p) }
+                    }
+                    if (img != null) {
+                        val ratio = img.height.toFloat() / img.width.toFloat()
+                        androidx.compose.foundation.Image(
+                            bitmap = img,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .offset(x = cw * st.x.coerceIn(0f, 1f), y = ch * st.y.coerceIn(0f, 1f))
+                                .width(px.dp)
+                                .height((px * ratio).dp)
+                                .graphicsLayer { rotationZ = rot }
                         )
-                    )
+                    } else {
+                        Text(
+                            st.emoji,
+                            fontSize = px.sp,
+                            softWrap = false,
+                            modifier = Modifier
+                                .offset(x = cw * st.x.coerceIn(0f, 1f), y = ch * st.y.coerceIn(0f, 1f))
+                                .graphicsLayer { rotationZ = rot }
+                        )
+                    }
                 }
             }
         }
@@ -8327,7 +8390,9 @@ fun TopicShareSheet(
                         emoji = o.optString("emoji"),
                         x = o.optDouble("x", 0.5).toFloat(),
                         y = o.optDouble("y", 0.5).toFloat(),
-                        sizeFrac = o.optDouble("sizeFrac", 0.22).toFloat()
+                        sizeFrac = o.optDouble("sizeFrac", 0.22).toFloat(),
+                        imagePath = o.optString("imagePath", null)?.takeIf { it.isNotBlank() },
+                        rotation = o.optDouble("rotation", 0.0).toFloat()
                     )
                 }
             } ?: emptyList()
@@ -8452,6 +8517,20 @@ fun TopicShareSheet(
                     coverLoadFailed = false
                 }
             } catch (_: Exception) { }
+        }
+    }
+    // v3xx — IMPORTED STICKER cutouts: the picked PNG (transparent cutout)
+    // is copied into the app's stickers dir and added as an image sticker,
+    // so the emoji picker is no longer the only sticker source.
+    val stickerPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let {
+            val path = importStickerPng(context, it)
+            if (path != null) {
+                stickers = stickers + ShareSticker(emoji = "", imagePath = path, x = 0.30f, y = 0.28f)
+                selectedSticker = stickers.lastIndex
+            }
         }
     }
 
@@ -8722,11 +8801,14 @@ fun TopicShareSheet(
                     titleDx = move.titleDx + plan.fixTitleX,
                     titleDy = move.titleDy + plan.fixTitleY,
                     // v3xx — SIGNED info-rows repair: negative lifts the
-                    // author/year rows UP back between the title and the
-                    // quick fact (a grown/dragged fact covering them), while
-                    // positive still pushes them down clear of a fact that
-                    // sits above them. The out-of-card clamp rides along.
-                    metaDy = move.metaDy + plan.metaLift.coerceIn(-72f, 72f) + plan.fixMetaY,
+                    // author/year rows UP to touch the title (the snap-to-
+                    // title behaviour — the strip can drift FAR below the
+                    // fact, so the negative travel is widened so ONE sparkle
+                    // tap brings it all the way back between the title and
+                    // the quick fact); positive still pushes them down clear
+                    // of a fact that sits above them. The out-of-card clamp
+                    // rides along.
+                    metaDy = move.metaDy + plan.metaLift.coerceIn(-240f, 72f) + plan.fixMetaY,
                     metaDx = move.metaDx + plan.fixMetaX,
                     // v384 — the favorites strip rides the same repair: it is
                     // pushed clear of the title / fact / info rows so it never
@@ -8845,9 +8927,11 @@ fun TopicShareSheet(
             stickers.forEach { st ->
                 val o = org.json.JSONObject()
                 o.put("emoji", st.emoji)
+                st.imagePath?.let { o.put("imagePath", it) }
                 o.put("x", st.x.toDouble())
                 o.put("y", st.y.toDouble())
                 o.put("sizeFrac", st.sizeFrac.toDouble())
+                o.put("rotation", st.rotation.toDouble())
                 arr.put(o)
             }
             edit.put("stickers", arr)
@@ -8957,6 +9041,11 @@ fun TopicShareSheet(
                                         editedFact = null
                                     }
                                     selectedResizeTarget = target
+                                    // v3xx — selecting the favorites strip
+                                    // auto-opens its Crop tool (strip width /
+                                    // songs / List-Rows) so the user lands
+                                    // straight in the sizing controls.
+                                    if (target == ShareCardResizeTarget.FAVTRACKS) toolOpen = "box"
                                 },
                                 selectedResizeTarget = selectedResizeTarget,
                                 move = pageMove,
@@ -9049,6 +9138,10 @@ fun TopicShareSheet(
                                     editedFact = null
                                 }
                                 selectedResizeTarget = target
+                                // v3xx — selecting the favorites strip
+                                // auto-opens its Crop tool (see the pager
+                                // branch above).
+                                if (target == ShareCardResizeTarget.FAVTRACKS) toolOpen = "box"
                             },
                             selectedResizeTarget = selectedResizeTarget,
                             move = move,
@@ -9686,13 +9779,141 @@ fun TopicShareSheet(
                                         }
                                     }
                                 }
-                                // v375 — the text tools render in an INLINE panel
-                                // under the top bar (like the sheet's own tool
-                                // panels): its scroll is bounded (heightIn max)
-                                // so it can never measure with infinite height,
-                                // and sliders drag cleanly without a popup
-                                // scrollable stealing their gestures.
-                                if (fsToolsOpen) {
+                                // v3xx — the full-screen tool panels (Text /
+                                // Stickers / Polaroid) render BELOW the card,
+                                // at the bottom of the editor (see after the
+                                // card area) so the tools sit under the thumb.
+                                // ── The big card, centered ──────────────
+                                // v373 — the card is rendered at the SAME base
+                                // size as the bottom-sheet preview (280dp) and
+                                // zoomed through a scaled Density, so text
+                                // sizes, spacing and placements scale TOGETHER
+                                // and the full-screen preview is an exact zoom
+                                // of the sheet card. (The old approach rendered
+                                // the dp layout in a much bigger box: text
+                                // stayed tiny and the SpaceBetween flow
+                                // re-spread the spacing, so it never matched.)
+                                // v375 — the card area is the Column's leftover
+                                // space (weight), below the top bar and panel.
+                                BoxWithConstraints(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                    val ratio = aspect.widthDp.toFloat() / aspect.heightDp.toFloat()
+                                    val baseW = 280f
+                                    val baseH = baseW / ratio
+                                    val availW = (maxWidth.value - 24f).coerceAtLeast(120f)
+                                    val availH = (maxHeight.value - 20f).coerceAtLeast(120f)
+                                    val zoom = minOf(availW / baseW, availH / baseH)
+                                    val sheetDensity = androidx.compose.ui.platform.LocalDensity.current
+                                    // v378 — the zoom lives in the DENSITY ONLY
+                                    // (fontScale stays untouched): dp and sp both
+                                    // scale through density, so multiplying
+                                    // fontScale too made sp TEXT zoom twice and
+                                    // read as oversized — the "zoomed and cut
+                                    // from below" preview bug.
+                                    val cardDensity = androidx.compose.ui.unit.Density(sheetDensity.density * zoom, sheetDensity.fontScale)
+                                    androidx.compose.runtime.CompositionLocalProvider(androidx.compose.ui.platform.LocalDensity provides cardDensity) {
+                                        Box(
+                                            Modifier
+                                                .width(baseW.dp)
+                                                .aspectRatio(ratio)
+                                                .shadow(4.dp, RoundedCornerShape(6.dp))
+                                                .clip(RoundedCornerShape(6.dp))
+                                        ) {
+                                        ArrangeableCard(
+                                            active = true,
+                                            editMode = true,
+                                            quoteMode = isQuotes,
+                                            editFact = if (activeId == "chapter_progress") progressContent.text else factFieldText,
+                                            onFactChange = { routeFactChange(it) },
+                                            factEditMode = factEditMode,
+                                            onFactEditModeChange = { factEditMode = it },
+                                            onRequestInlineFactEdit = { requestFactInlineEdit() },
+                                            onToggleEdit = {},
+                                            onSelectResizeTarget = { target ->
+                                                if (target == ShareCardResizeTarget.FACT &&
+                                                    activeId != CUSTOM_FACT_ID && activeId != "chapter_review" &&
+                                                    progressForCard == null
+                                                ) {
+                                                    selectedId = CUSTOM_FACT_ID
+                                                    customText = activeSource.text
+                                                    editedFact = null
+                                                }
+                                                selectedResizeTarget = target
+                                            },
+                                            selectedResizeTarget = selectedResizeTarget,
+                                            move = move,
+                                            onMove = { updateMove(it) },
+                                            factFieldStyle = factFieldStyle,
+                                            autoFitDelta = smartAutoFitDelta(move, maxOf(factFieldText.length, chapterFactForCard.length), currentStyle, aspect),
+                                            factFieldChipShift = activeId == "chapter_review",
+                                            factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…",
+                                            // v375 — the full-screen editor keeps a REAL text
+                                            // SELECTION in its transparent fact field and floats
+                                            // the Save-your-take format bar (B / I / highlight)
+                                            // over the selection; taps toggle [cardFactSpans] so
+                                            // the formatting applies ONLY to the selected letters
+                                            // (Quote cards + the chapter-progress caption keep
+                                            // whole-element formatting only — no selection bar).
+                                            richFactTools = true,
+                                            factSpans = if (isQuotes || activeId == "chapter_progress") emptyList() else cardFactSpans,
+                                            onFormatFactSelection = if (isQuotes || activeId == "chapter_progress") null
+                                            else { s, e, flag -> toggleFactSelectionFormat(s, e, flag) },
+                                            onToggleFactUnderline = if (isQuotes || activeId == "chapter_progress") null
+                                            else { s, e, add -> toggleFactSelectionUnderline(s, e, add) }
+                                        ) { cb ->
+                                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, factSpans = if (isQuotes) emptyList() else cardFactRenderSpans, stickers = stickers, callbacks = cb)
+                                        }
+                                        // v3xx — the STICKER edit layer (full
+                                        // screen only): while the sticker tool
+                                        // is open, every sticker is tappable /
+                                        // draggable and the selected one wears
+                                        // the coffee chrome. Drawn OVER the
+                                        // ArrangeableCard chrome, so a drag
+                                        // here belongs to the sticker.
+                                        if (stickerToolsOpen) {
+                                            StickerEditOverlay(
+                                                stickers = stickers,
+                                                selectedIndex = selectedSticker,
+                                                onSelect = { selectedSticker = it },
+                                                onMove = { idx, dxFrac, dyFrac ->
+                                                    val lst = stickers.toMutableList()
+                                                    val st = lst[idx]
+                                                    lst[idx] = st.copy(
+                                                        x = (st.x + dxFrac).coerceIn(0f, (1f - st.sizeFrac).coerceAtLeast(0f)),
+                                                        y = (st.y + dyFrac).coerceIn(0f, (1f - st.sizeFrac).coerceAtLeast(0f))
+                                                    )
+                                                    stickers = lst
+                                                },
+                                                // v3xx — pinch scales the emoji
+                                                // (the Size slider stays for fine
+                                                // control).
+                                                onResize = { idx, zoom ->
+                                                    val lst = stickers.toMutableList()
+                                                    val st = lst[idx]
+                                                    lst[idx] = st.copy(
+                                                        sizeFrac = (st.sizeFrac * zoom).coerceIn(0.08f, 0.6f)
+                                                    )
+                                                    stickers = lst
+                                                },
+                                                // v3xx — two-finger twist turns
+                                                // the sticker (the Rotation
+                                                // slider stays for fine control;
+                                                // the angle normalizes to
+                                                // -180..180 so the slider thumb
+                                                // stays valid).
+                                                onRotate = { idx, deg ->
+                                                    val lst = stickers.toMutableList()
+                                                    val st = lst[idx]
+                                                    lst[idx] = st.copy(
+                                                        rotation = normDegrees(st.rotation + deg)
+                                                    )
+                                                    stickers = lst
+                                                }
+                                            )
+                                        }
+                                    }
+                                    }
+                                }
+                            if (fsToolsOpen) {
                                     Surface(
                                         shape = RoundedCornerShape(16.dp),
                                         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.97f),
@@ -9897,9 +10118,25 @@ fun TopicShareSheet(
                                                     }
                                                 }
                                             }
+                                            // v3xx — IMPORT your own PNG cutout
+                                            // (transparent sticker image): copied
+                                            // into the app's stickers dir and
+                                            // dropped on the card like an emoji.
+                                            Spacer(Modifier.height(10.dp))
+                                            Surface(
+                                                onClick = { stickerPickerLauncher.launch("image/*") },
+                                                shape = RoundedCornerShape(50),
+                                                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                                modifier = Modifier.height(38.dp)
+                                            ) {
+                                                Row(Modifier.padding(horizontal = 14.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                                                    CurioIcon(name = CurioIcons.Image, tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 15.dp)
+                                                    Text("Import PNG cutout", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                }
+                                            }
                                             if (stickers.isNotEmpty()) {
                                                 Spacer(Modifier.height(12.dp))
-                                                Text("Tap a sticker on the card to select it, drag to move, pinch to resize", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                Text("Tap a sticker on the card to select it, drag to move, pinch to resize and twist to rotate", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                                 Spacer(Modifier.height(8.dp))
                                             }
                                             if (selectedSticker in stickers.indices) {
@@ -9919,6 +10156,30 @@ fun TopicShareSheet(
                                                     steps = 52,
                                                     modifier = Modifier.fillMaxWidth()
                                                 )
+                                                Spacer(Modifier.height(6.dp))
+                                                // v3xx — ROTATION: fine control via the
+                                                // slider (a two-finger twist on the
+                                                // card also turns it).
+                                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                                                    Text("Rotation", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                    Slider(
+                                                        value = selSt.rotation,
+                                                        onValueChange = { v ->
+                                                            stickers = stickers.toMutableList().also { lst ->
+                                                                lst[sel] = lst[sel].copy(rotation = v)
+                                                            }
+                                                        },
+                                                        valueRange = -180f..180f,
+                                                        steps = 34,
+                                                        modifier = Modifier.weight(1f)
+                                                    )
+                                                    Text("${selSt.rotation.roundToInt()}°", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary))
+                                                    Pill("0°", CurioIcons.Refresh, selSt.rotation == 0f) {
+                                                        stickers = stickers.toMutableList().also { lst ->
+                                                            lst[sel] = lst[sel].copy(rotation = 0f)
+                                                        }
+                                                    }
+                                                }
                                                 Spacer(Modifier.height(6.dp))
                                                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                                                     // Z-order: to front (end of the list = drawn on top)
@@ -10030,124 +10291,7 @@ fun TopicShareSheet(
                                             )
                                         }
                                     }
-                                }
-                                // ── The big card, centered ──────────────
-                                // v373 — the card is rendered at the SAME base
-                                // size as the bottom-sheet preview (280dp) and
-                                // zoomed through a scaled Density, so text
-                                // sizes, spacing and placements scale TOGETHER
-                                // and the full-screen preview is an exact zoom
-                                // of the sheet card. (The old approach rendered
-                                // the dp layout in a much bigger box: text
-                                // stayed tiny and the SpaceBetween flow
-                                // re-spread the spacing, so it never matched.)
-                                // v375 — the card area is the Column's leftover
-                                // space (weight), below the top bar and panel.
-                                BoxWithConstraints(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                                    val ratio = aspect.widthDp.toFloat() / aspect.heightDp.toFloat()
-                                    val baseW = 280f
-                                    val baseH = baseW / ratio
-                                    val availW = (maxWidth.value - 24f).coerceAtLeast(120f)
-                                    val availH = (maxHeight.value - 20f).coerceAtLeast(120f)
-                                    val zoom = minOf(availW / baseW, availH / baseH)
-                                    val sheetDensity = androidx.compose.ui.platform.LocalDensity.current
-                                    // v378 — the zoom lives in the DENSITY ONLY
-                                    // (fontScale stays untouched): dp and sp both
-                                    // scale through density, so multiplying
-                                    // fontScale too made sp TEXT zoom twice and
-                                    // read as oversized — the "zoomed and cut
-                                    // from below" preview bug.
-                                    val cardDensity = androidx.compose.ui.unit.Density(sheetDensity.density * zoom, sheetDensity.fontScale)
-                                    androidx.compose.runtime.CompositionLocalProvider(androidx.compose.ui.platform.LocalDensity provides cardDensity) {
-                                        Box(
-                                            Modifier
-                                                .width(baseW.dp)
-                                                .aspectRatio(ratio)
-                                                .shadow(4.dp, RoundedCornerShape(6.dp))
-                                                .clip(RoundedCornerShape(6.dp))
-                                        ) {
-                                        ArrangeableCard(
-                                            active = true,
-                                            editMode = true,
-                                            quoteMode = isQuotes,
-                                            editFact = if (activeId == "chapter_progress") progressContent.text else factFieldText,
-                                            onFactChange = { routeFactChange(it) },
-                                            factEditMode = factEditMode,
-                                            onFactEditModeChange = { factEditMode = it },
-                                            onRequestInlineFactEdit = { requestFactInlineEdit() },
-                                            onToggleEdit = {},
-                                            onSelectResizeTarget = { target ->
-                                                if (target == ShareCardResizeTarget.FACT &&
-                                                    activeId != CUSTOM_FACT_ID && activeId != "chapter_review" &&
-                                                    progressForCard == null
-                                                ) {
-                                                    selectedId = CUSTOM_FACT_ID
-                                                    customText = activeSource.text
-                                                    editedFact = null
-                                                }
-                                                selectedResizeTarget = target
-                                            },
-                                            selectedResizeTarget = selectedResizeTarget,
-                                            move = move,
-                                            onMove = { updateMove(it) },
-                                            factFieldStyle = factFieldStyle,
-                                            autoFitDelta = smartAutoFitDelta(move, maxOf(factFieldText.length, chapterFactForCard.length), currentStyle, aspect),
-                                            factFieldChipShift = activeId == "chapter_review",
-                                            factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…",
-                                            // v375 — the full-screen editor keeps a REAL text
-                                            // SELECTION in its transparent fact field and floats
-                                            // the Save-your-take format bar (B / I / highlight)
-                                            // over the selection; taps toggle [cardFactSpans] so
-                                            // the formatting applies ONLY to the selected letters
-                                            // (Quote cards + the chapter-progress caption keep
-                                            // whole-element formatting only — no selection bar).
-                                            richFactTools = true,
-                                            factSpans = if (isQuotes || activeId == "chapter_progress") emptyList() else cardFactSpans,
-                                            onFormatFactSelection = if (isQuotes || activeId == "chapter_progress") null
-                                            else { s, e, flag -> toggleFactSelectionFormat(s, e, flag) },
-                                            onToggleFactUnderline = if (isQuotes || activeId == "chapter_progress") null
-                                            else { s, e, add -> toggleFactSelectionUnderline(s, e, add) }
-                                        ) { cb ->
-                                            TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, factSpans = if (isQuotes) emptyList() else cardFactRenderSpans, stickers = stickers, callbacks = cb)
-                                        }
-                                        // v3xx — the STICKER edit layer (full
-                                        // screen only): while the sticker tool
-                                        // is open, every sticker is tappable /
-                                        // draggable and the selected one wears
-                                        // the coffee chrome. Drawn OVER the
-                                        // ArrangeableCard chrome, so a drag
-                                        // here belongs to the sticker.
-                                        if (stickerToolsOpen) {
-                                            StickerEditOverlay(
-                                                stickers = stickers,
-                                                selectedIndex = selectedSticker,
-                                                onSelect = { selectedSticker = it },
-                                                onMove = { idx, dxFrac, dyFrac ->
-                                                    val lst = stickers.toMutableList()
-                                                    val st = lst[idx]
-                                                    lst[idx] = st.copy(
-                                                        x = (st.x + dxFrac).coerceIn(0f, (1f - st.sizeFrac).coerceAtLeast(0f)),
-                                                        y = (st.y + dyFrac).coerceIn(0f, (1f - st.sizeFrac).coerceAtLeast(0f))
-                                                    )
-                                                    stickers = lst
-                                                },
-                                                // v3xx — pinch scales the emoji
-                                                // (the Size slider stays for fine
-                                                // control).
-                                                onResize = { idx, zoom ->
-                                                    val lst = stickers.toMutableList()
-                                                    val st = lst[idx]
-                                                    lst[idx] = st.copy(
-                                                        sizeFrac = (st.sizeFrac * zoom).coerceIn(0.08f, 0.6f)
-                                                    )
-                                                    stickers = lst
-                                                }
-                                            )
-                                        }
-                                    }
-                                    }
-                                }
-                            }
+                                }}
                         }
                     }
 
@@ -10319,13 +10463,16 @@ fun TopicShareSheet(
                                         Text("Layout", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
                                         Surface(onClick = { AppPreferences.setAlbumFavRows(context, false) }, shape = RoundedCornerShape(50), color = if (!favRows) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(32.dp)) {
                                             Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                                CurioIcon(name = "view_agenda", tint = if (!favRows) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, size = 13.dp)
+                                                // v3xx — drag_handle (three stacked lines) = LIST, grid_view = ROWS: the old
+                                                // raw view_agenda/view_module strings aren't in the bundled icon subset, so they
+                                                // rendered as literal text ("view_agenda") next to the label.
+                                                CurioIcon(name = CurioIcons.DragHandle, tint = if (!favRows) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, size = 13.dp)
                                                 Text("List", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (!favRows) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
                                             }
                                         }
                                         Surface(onClick = { AppPreferences.setAlbumFavRows(context, true) }, shape = RoundedCornerShape(50), color = if (favRows) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(32.dp)) {
                                             Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                                CurioIcon(name = "view_module", tint = if (favRows) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, size = 13.dp)
+                                                CurioIcon(name = CurioIcons.GridView, tint = if (favRows) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, size = 13.dp)
                                                 Text("Rows", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (favRows) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
                                             }
                                         }
@@ -11124,9 +11271,11 @@ private fun BoxScope.StickerEditOverlay(
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
     onMove: (index: Int, dxFrac: Float, dyFrac: Float) -> Unit,
-    // v3xx — PINCH-to-resize: the transform gesture reports a zoom factor;
-    // the caller scales the sticker's sizeFrac (see the wiring).
-    onResize: (index: Int, zoom: Float) -> Unit
+    // v3xx — PINCH-to-resize + rotate: the transform gesture reports a zoom
+    // factor AND a rotation delta; the caller scales the sticker's sizeFrac /
+    // turns its rotation (see the wiring).
+    onResize: (index: Int, zoom: Float) -> Unit,
+    onRotate: (index: Int, degrees: Float) -> Unit
 ) {
     if (stickers.isEmpty()) return
     val density = androidx.compose.ui.platform.LocalDensity.current
@@ -11135,22 +11284,32 @@ private fun BoxScope.StickerEditOverlay(
         val ch = maxHeight
         stickers.forEachIndexed { idx, st ->
             val isSel = idx == selectedIndex
-            val emojiSize = (cw.value * st.sizeFrac.coerceIn(0.05f, 0.8f)).sp
+            val px = cw.value * st.sizeFrac.coerceIn(0.05f, 0.8f)
+            val img = st.imagePath?.let { p ->
+                androidx.compose.runtime.remember(p) { decodeStickerBitmap(p) }
+            }
+            val sizeMod = if (img != null) {
+                val ratio = img.height.toFloat() / img.width.toFloat()
+                Modifier.width(px.dp).height((px * ratio).dp)
+            } else Modifier
             Box(
                 modifier = Modifier
                     .offset(x = cw * st.x.coerceIn(0f, 1f), y = ch * st.y.coerceIn(0f, 1f))
+                    .then(sizeMod)
+                    .graphicsLayer { rotationZ = st.rotation }
                     .border(
                         if (isSel) 1.5.dp else 0.dp,
                         if (isSel) CoffeeChromeDeep else Color.Transparent,
                         RoundedCornerShape(8.dp)
                     )
                     // v3xx — ONE transform recognizer handles tap (select),
-                    // drag (move) AND pinch (resize): the gesture reports a
-                    // centroid pan + a zoom factor, so a two-finger pinch
-                    // scales the emoji while a one-finger drag still moves it
-                    // (and a plain tap selects).
+                    // drag (move), pinch (resize) AND two-finger rotation: the
+                    // gesture reports a centroid pan, a zoom factor and a
+                    // rotation delta, so a one-finger drag still moves the
+                    // sticker, a pinch scales it and a two-finger twist turns
+                    // it (a plain tap selects).
                     .pointerInput(idx) {
-                        androidx.compose.foundation.gestures.detectTransformGestures { _, pan, zoom, _ ->
+                        androidx.compose.foundation.gestures.detectTransformGestures { _, pan, zoom, rot ->
                             onSelect(idx)
                             if (cw.value > 0f && ch.value > 0f) {
                                 val dx = with(density) { pan.x.toDp().value }
@@ -11158,10 +11317,15 @@ private fun BoxScope.StickerEditOverlay(
                                 if (dx != 0f || dy != 0f) onMove(idx, dx / cw.value, dy / ch.value)
                             }
                             if (zoom != 1f) onResize(idx, zoom)
+                            if (rot != 0f) onRotate(idx, rot)
                         }
                     }
             ) {
-                Text(st.emoji, fontSize = emojiSize, softWrap = false)
+                if (img != null) {
+                    androidx.compose.foundation.Image(bitmap = img, contentDescription = null, modifier = Modifier.fillMaxSize())
+                } else {
+                    Text(st.emoji, fontSize = px.sp, softWrap = false)
+                }
             }
         }
     }
@@ -11406,30 +11570,15 @@ private fun adjustColorMatrix(saturation: Float, contrast: Float): ColorMatrix {
 }
 
 /**
- * v377/v379 — a toolbar tool cell: the 44dp icon pill with its TINY tool
- * name ALWAYS under it (v379: the captions are permanent — Text · Size ·
- * Crop · Fit · Font · Color · Adjust · Align · Format · Content plus the
- * live state labels of the ratio + Signature toggles). The caption reads
- * at a glance and moves with its tool; nothing waits for the panel to be
- * open.
+ * v377/v379 — a toolbar tool cell: the 44dp icon pill. v3xx — the caption
+ * text is GONE (user direction: icon-only pills, no text under the icon);
+ * the caller still passes a caption only to satisfy the API — the pill's
+ * contentDescription (passed through to EditToolPill) keeps the tool
+ * discoverable for accessibility.
  */
 @Composable
 private fun ToolWithCaption(caption: String, content: @Composable () -> Unit) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        content()
-        Text(
-            caption,
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontSize = 8.5.sp,
-                lineHeight = 9.sp,
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = 0.1.sp
-            ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            modifier = Modifier.padding(top = 2.dp).widthIn(max = 56.dp)
-        )
-    }
+    content()
 }
 
 /** v3xx/v377 — one circular icon tool button in the edit toolbar (icons only;

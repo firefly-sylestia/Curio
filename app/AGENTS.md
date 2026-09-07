@@ -381,6 +381,41 @@ app/src/main/java/com/curio/app/
     moves, and a two-finger PINCH scales the emoji (new `onResize`
     wiring clamps 0.08–0.6 width-fraction; the Size slider stays for fine
     control). Hint texts updated.
+- **v3xx10 — sticker imports + rotation, bottom tool panels, icon-only
+  toolbar, sparkle info-row snap, fav tweaks.** Per user request:
+  - **IMPORT PNG cutouts:** the sticker panel gains an **Import PNG
+    cutout** button (`stickerPickerLauncher`, GetContent) — the picked
+    image is re-encoded to PNG under `context.filesDir/stickers` via
+    `importStickerPng` (transparency preserved) and dropped on the card
+    as an image sticker. `ShareSticker` gained `imagePath: String?` and
+    `rotation: Float`; the card layer + `StickerEditOverlay` render an
+    image sticker as an aspect-preserving bitmap (width = sizeFrac ×
+    card width, decoded once per path through `decodeStickerBitmap` + a
+    `ConcurrentHashMap` cache, downscaled to ≤1024px) instead of the
+    emoji glyph. Both fields persist in the stickers JSON.
+  - **STICKER ROTATION:** a Rotation slider (−180°..180°, 0° reset pill)
+    in the panel AND two-finger twist on the card (the transform
+    recognizer's rotation delta, normalized via `normDegrees`).
+  - **Tool panels at the BOTTOM:** the full-screen editor's Text /
+    Stickers / Polaroid panels moved from under the top bar to BELOW the
+    card (bottom of the dialog Column) — the tools sit under the thumb.
+  - **Icon-only toolbar:** `ToolWithCaption` no longer renders its tiny
+    caption text — the edit toolbar is pure icon pills (Text · Size ·
+    Crop · Fit · Font · Color · Adjust · Align · Format · Content have
+    no text under the icons).
+  - **Sparkle info-row SNAP:** the meta collision logic is replaced by a
+    snap-to-title: on the sparkle tap the info rows lift so their top
+    meets the title's bottom (gap ≤ 2dp), guaranteeing they sit BETWEEN
+    the title and the quick fact and TOUCHING the title — no more
+    author/year below the fact. `runAutoLayout`'s negative meta travel
+    widened (−240dp) so one tap brings a far-drifted strip all the way
+    up.
+  - **Fav List/Rows icons fixed:** the raw `view_agenda` / `view_module`
+    strings aren't in the bundled icon subset (they rendered as literal
+    text); swapped to the verified `drag_handle` (List) and `grid_view`
+    (Rows) glyphs.
+  - **Fav auto-crop:** selecting the favorites strip (FAVTRACKS) now
+    auto-opens the Crop (box) tool in the sheet's edit toolbar.
 - **v3xx5b — picker crash fix (nested lazy grid).** The new picker STILL
   crashed on open (same "infinity maximum height" message) —
   `ContinueExploringSection` rendered a `LazyVerticalGrid` inside a

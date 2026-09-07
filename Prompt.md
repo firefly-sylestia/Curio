@@ -1,68 +1,62 @@
 # Prompt Log — current request
 
-## Request (2026-09-07, active → v3xx9 committing)
+## Request (2026-09-07, active → v3xx10 committing)
 
-Second share-card batch on top of the pushed v3xx8 commit: favorites
-color/placement/collision fixes, collage cleanup, the polaroid rework,
-and sticker pinch-to-resize.
+Third share-card batch on top of the pushed v3xx9 commit: sticker
+imports/rotation, tool placement, sparkle info-row snap, fav tweaks.
 
 **What the user asked + what was done:**
 
-1. **Signature favorites text colour + overlap.** The plain-type strip on
-   Signature wore the TONE's palette.ink, which clashes with signature
-   scenes (near-black on Mario's red / Pikachu's yellow). It now wears
-   the DESIGN's own body ink — `sigFavInk` = `signatureDesign(...).bodyColor`
-   computed in the shared favorites block, threaded through
-   `FavoriteTracksBadge` → `BoxedFavStrip` via a new `inkOverride` param
-   (null = palette ink for Custom/others). The Signature slot ALSO moved
-   from the bottom corner (where it overlapped the bottom-anchored quick
-   fact) up to just below the title/author block (TopStart 138/130dp).
+1. **\"Why is it only selected sticker / limited stickers\" + import PNG
+   cutouts.** The emoji picker was the only sticker source. The sticker
+   panel now has an **Import PNG cutout** button (`stickerPickerLauncher`
+   via GetContent): the picked image is re-encoded to PNG under
+   `context.filesDir/stickers/` (`importStickerPng` — transparency
+   preserved) and dropped on the card. `ShareSticker` gained
+   `imagePath: String?` + `rotation: Float`; the card layer and
+   `StickerEditOverlay` render an image sticker as an aspect-preserving
+   bitmap (width = sizeFrac × card width, decoded once per path via
+   `decodeStickerBitmap` + a `ConcurrentHashMap` cache, downscaled to
+   ≤1024px) instead of the emoji glyph. Both fields persist in the
+   stickers JSON. Imported stickers drag / resize / re-stack / delete /
+   save exactly like emoji stickers and ride onto the exported PNG.
 
-2. **Collage favorites colour + placement.** Raised the slot a little
-   more (112/98dp) so the strip parks just under the title/author rows,
-   fully on the cream top paper (clear of the tear seam + the pill/fact),
-   and bumped the plain-type alphas (label 0.66, body 0.92, heart 0.95).
+2. **Rotate stickers.** A Rotation slider (−180°..180° with a 0° reset
+   pill) in the sticker panel AND a two-finger twist on the card (the
+   `detectTransformGestures` rotation delta, normalized via
+   `normDegrees` so the slider thumb stays valid). Rotation renders in
+   the sheet preview, the full-screen editor and the export.
 
-3. **Favorites collision direction fix.** `bottomOverlap(upper, lower)`
-   ASSUMES the first box is above the second; the old fav/fact calls fed
-   boxes in the wrong order per style and produced giant false positives
-   that shoved the strip/fact around on sparkle taps. New order-guarded
-   `pokeAbove` helper; `favOverFact` (fav above fact, Collage/Signature
-   placement) now pushes the FACT down, and the fav-only lift is
-   order-guarded so the bottom-corner styles (Paper/Vinyl) never
-   false-trigger.
+3. **Text editing at the bottom.** The full-screen editor's Text /
+   Stickers / Polaroid panels moved from under the top bar to BELOW the
+   card (bottom of the dialog Column) — tools sit under the thumb. (Pure
+   relocation of the existing panel blocks, verified with a brace check.)
 
-4. **Big category icon removed from the middle of the Collage card.** The
-   80dp center glyph in `Watermark` is now optional (`center` param,
-   default true); the Collage card passes `center = false` (corner set
-   stays).
+4. **Icon-only toolbar pills.** `ToolWithCaption` no longer renders the
+   tiny caption text — the edit toolbar is pure 44dp icon pills.
 
-5. **Polaroid rework (Collage).**
-   - Movable: new `ShareCardResizeTarget.POLAROID` + `onPolaroid` bounds
-     callback + selectable box + MoveHandle grip in the ArrangeableCard
-     chrome (mirrors cover/fav).
-   - New move fields `polaroidDx/Dy/Scale/Style/Filter` persisted per
-     style (Reset layout clears position + scale, keeps style/filter).
-   - 5 STYLES (`PolaroidLook`: Classic · Retro · Sunglow · Vintage ·
-     Dashed — frame/tape/tilt/finish, Dashed wears a dotted hairline) and
-     5 PHOTO FILTERS (None · Noise grain · Nostalgia sepia · B&W · Warm
-     with overlays/vignette via sepiaMatrix / grayscaleMatrix / warmMatrix).
-   - New full-screen **Polaroid** button (Collage card only) + panel
-     (style chips, filter chips, Print-size slider); the sheet's Box tool
-     also gained a Polaroid-size slider when the polaroid is selected.
-   - Tape now PEERS out past the white frame (offset y = −5dp) and is
-     drawn LAST (sits ON the photo) — real washi-sticker look.
-   - Frame ADAPTS to the photo's aspect (landscape = wide/short, portrait
-     = tall, capped at 46% of card height; no photo = classic 1.18 print);
-     the photo contain-fits the window.
+5. **Sparkle still put the info below the fact → real snap fix.** The
+   meta collision logic is REPLACED by a snap-to-title: on the sparkle
+   tap the info rows lift so their top meets the title's bottom (gap ≤
+   2dp), so they always end up between the title and the quick fact,
+   touching the title. `runAutoLayout`'s negative meta travel widened to
+   −240dp so ONE tap brings a far-drifted strip all the way up.
 
-6. **Sticker pinch-to-resize.** `StickerEditOverlay` now uses ONE
-   `detectTransformGestures` recognizer per sticker — tap selects, drag
-   moves, two-finger pinch scales (new `onResize` wiring clamps
-   0.08–0.6 width-fraction; the Size slider stays for fine control).
+6. **Fav List/Rows icons wrong.** The raw `view_agenda` / `view_module`
+   strings are NOT in the bundled icon subset (verified: 0 occurrences
+   in the font) so they rendered as literal text. Swapped to the
+   verified `drag_handle` (List) and `grid_view` (Rows) glyphs.
 
-**Notes / out of scope:** no build possible in this env (CI validates).
-web/ and desktop/ untouched. The fav-above-fact sparkle math changed
-order semantics — worth a quick on-device look at Paper/Vinyl sparkle
-(should be unchanged) and Collage/Signature (fact pushed down, not the
-strip). Sticker pinch + polaroid gesture feel need device verification.
+7. **Tap favorites → auto-open its crop tool.** Selecting FAVTRACKS in
+   the sheet's edit mode now sets `toolOpen = \"box\"` so the strip's
+   sizing controls (width / songs / List-Rows) open automatically (both
+   pager + single-style ArrangeableCard handlers).
+
+**Notes / out of scope:** no build possible here (CI validates). The
+imported-sticker decode + rotation are device-verify candidates; the
+panels' move is layout-only. web/ and desktop/ untouched.
+
+**Open question for the user (ask at end):** whether \"limited stickers\"
+also means wanting a bigger emoji set / multi-select, and whether the
+sparkle's new snap-to-title should also apply when the user deliberately
+hand-placed the info row lower.
