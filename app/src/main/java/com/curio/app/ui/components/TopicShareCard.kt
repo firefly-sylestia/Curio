@@ -10325,7 +10325,13 @@ fun TopicShareSheet(
                                 }
                                 }
                                 }
-                            AnimatedVisibility(
+                            // Fully-qualified: an enclosing ColumnScope
+                            // elsewhere in the sheet would otherwise hijack
+                            // these calls into ColumnScope.AnimatedVisibility
+                            // ("cannot be called with an implicit receiver") —
+                            // the panels are Box children, so the TOP-LEVEL
+                            // animation function is the one we want.
+                            androidx.compose.animation.AnimatedVisibility(
                                 visible = fsToolsOpen,
                                 modifier = Modifier.align(Alignment.BottomCenter),
                                 enter = fadeIn(tween(170)) + expandVertically(tween(170)),
@@ -10505,7 +10511,7 @@ fun TopicShareSheet(
                                 // inline like the text tools so its scroll is
                                 // bounded and sliders drag cleanly. v3xx —
                                 // opens/closes with a smooth fade + slide.
-                                AnimatedVisibility(
+                                androidx.compose.animation.AnimatedVisibility(
                                     visible = stickerToolsOpen,
                                     modifier = Modifier.align(Alignment.BottomCenter),
                                     enter = fadeIn(tween(170)) + expandVertically(tween(170)),
@@ -10671,7 +10677,7 @@ fun TopicShareSheet(
                                 // the print. Opens/closes with a smooth fade +
                                 // slide, and now FLOATS over the card (it no
                                 // longer shrinks the preview).
-                                AnimatedVisibility(
+                                androidx.compose.animation.AnimatedVisibility(
                                     visible = polaroidToolsOpen,
                                     modifier = Modifier.align(Alignment.BottomCenter),
                                     enter = fadeIn(tween(170)) + expandVertically(tween(170)),
