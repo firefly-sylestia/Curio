@@ -332,6 +332,55 @@ app/src/main/java/com/curio/app/
     author · year, cached ★ rating + count, chevron — tapping opens the
     book's reveal. Reached from a new "Book browser" row under
     Experiments → Content tools, next to "Book covers & ratings".
+- **v3xx9 — favorites fixes + collage polaroid rework + sticker pinch.**
+  Per user request:
+  - **SIGNATURE favorites ink + placement:** the plain-type strip on
+    Signature now wears the DESIGN's own body ink (`sigFavInk` —
+    `signatureDesign(...).bodyColor` computed in the shared favorites
+    block and threaded via a new `inkOverride` param on
+    `FavoriteTracksBadge`/`BoxedFavStrip`), so the tone's palette.ink can
+    never clash with a signature scene (near-black ink on Mario's red was
+    unreadable). The Signature slot ALSO moved from the bottom corner
+    (where it overlapped the bottom-anchored quick fact) UP to just below
+    the title/author block (TopStart 138/130dp). Custom keeps its bottom
+    pocket.
+  - **COLLAGE favorites:** raised a little more (112/98dp) so the strip
+    parks just under the title/author rows fully on the cream top paper
+    (clear of the tear seam), with stronger alphas (label 0.66, body
+    0.92, heart 0.95).
+  - **Favorites collision direction fix:** `bottomOverlap(upper, lower)`
+    ASSUMES the first box is above the second — the old fav/fact calls
+    fed boxes in the wrong order and produced giant false positives that
+    shoved the strip/fact around on sparkle taps. New `pokeAbove` guard
+    (order-checked) + `favOverFact` now pushes the FACT down when a
+    top-placed strip (Collage/Signature) grows into it, and the fav-only
+    lift is order-guarded so the bottom-corner styles (Paper/Vinyl)
+    never false-trigger.
+  - **Collage center watermark removed:** `Watermark` gained `center =
+    false` and the Collage card passes it — the 80dp category glyph that
+    floated in the middle of the card is gone (corner set stays).
+  - **POLAROID rework (Collage):** the instant-print is now a movable /
+    scalable element — new `ShareCardResizeTarget.POLAROID` + `onPolaroid`
+    bounds callback + selectable box + MoveHandle grip in the
+    ArrangeableCard chrome (mirrors cover/fav). New move fields
+    `polaroidDx/Dy/Scale/Style/Filter` (persisted in the per-style move
+    JSON; Reset layout clears position+scale, keeps style/filter). The
+    frame ADAPTS to the photo's aspect (landscape print = wide/short,
+    portrait = tall, capped at 46% of card height; no photo = classic
+    1.18 print), the tape PEERS out past the white frame (drawn last, so
+    it sits ON the photo), and 5 STYLES (`PolaroidLook`: Classic · Retro
+    · Sunglow · Vintage · Dashed — frame/tape/tilt/finish, Dashed wears a
+    dotted hairline) + 5 PHOTO FILTERS (None · Noise grain · Nostalgia
+    sepia · B&W · Warm with overlays/vignette via `sepiaMatrix` /
+    `grayscaleMatrix` / `warmMatrix`) are picked from a new full-screen
+    **Polaroid** button (Collage card only) panel, plus a Print-size
+    slider (also wired into the sheet's Box tool when the polaroid is
+    selected).
+  - **Sticker pinch-to-resize:** `StickerEditOverlay` now uses ONE
+    `detectTransformGestures` recognizer per sticker — tap selects, drag
+    moves, and a two-finger PINCH scales the emoji (new `onResize`
+    wiring clamps 0.08–0.6 width-fraction; the Size slider stays for fine
+    control). Hint texts updated.
 - **v3xx5b — picker crash fix (nested lazy grid).** The new picker STILL
   crashed on open (same "infinity maximum height" message) —
   `ContinueExploringSection` rendered a `LazyVerticalGrid` inside a

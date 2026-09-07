@@ -450,7 +450,7 @@ const val NO_FACT_ID = "no_fact"
 
 // v3xx — every selectable element on the card: NONE = nothing selected
 // (the edit chrome is hidden until the user taps a thing).
-enum class ShareCardResizeTarget { NONE, TITLE, FACT, META, BADGE, COVER, FAVTRACKS }
+enum class ShareCardResizeTarget { NONE, TITLE, FACT, META, BADGE, COVER, FAVTRACKS, POLAROID }
 
 /**
  * v3xx — an EMOJI STICKER placed on the share card by the full-screen
@@ -469,6 +469,51 @@ data class ShareSticker(
     val y: Float = 0.5f,
     /** Emoji font size as a fraction of the card width (e.g. 0.22 = 22%). */
     val sizeFrac: Float = 0.22f
+)
+
+/** v3xx — one COLLAGE polaroid look (index = [ShareCardMove.polaroidStyle]):
+ *  the frame + tape colours, the print's tilt and the hairline finish.
+ *  0 Classic (white + gold tape) · 1 Retro (aged cream) · 2 Sunglow
+ *  (butter-yellow) · 3 Vintage (faded beige) · 4 Dashed (white + cool tape,
+ *  dotted hairline). */
+private data class PolaroidLook(
+    val frame: Color,
+    val tape: Color,
+    val tilt: Float,
+    val finish: Color
+)
+
+private val polaroidLooks = listOf(
+    PolaroidLook(Color.White, Color(0xFFD9BE8A), -3f, Color(0xFF70543A)),
+    PolaroidLook(Color(0xFFF3EAD9), Color(0xFFC9A97C), -5f, Color(0xFF6B5638)),
+    PolaroidLook(Color(0xFFF7D98B), Color(0xFFE8B878), 4f, Color(0xFF8A6A28)),
+    PolaroidLook(Color(0xFFDCD2C0), Color(0xFFB0986E), 6f, Color(0xFF4A3B28)),
+    PolaroidLook(Color.White, Color(0xFFB8C4D8), -2f, Color(0xFF5A6A80))
+)
+
+// v3xx — the Polaroid panel's style + filter pickers (indices map straight
+// into [polaroidLooks] / the filter switch in CollageCard).
+private val polaroidStyleNames = listOf("Classic", "Retro", "Sunglow", "Vintage", "Dashed")
+private val polaroidFilterNames = listOf("None", "Noise", "Nostalgia", "B&W", "Warm")
+
+// v3xx — polaroid PHOTO filters (color matrices for Nostalgia / B&W / Warm).
+private val sepiaMatrix = floatArrayOf(
+    0.393f, 0.769f, 0.189f, 0f, 0f,
+    0.349f, 0.686f, 0.168f, 0f, 0f,
+    0.272f, 0.534f, 0.131f, 0f, 0f,
+    0f, 0f, 0f, 1f, 0f
+)
+private val grayscaleMatrix = floatArrayOf(
+    0.2126f, 0.7152f, 0.0722f, 0f, 0f,
+    0.2126f, 0.7152f, 0.0722f, 0f, 0f,
+    0.2126f, 0.7152f, 0.0722f, 0f, 0f,
+    0f, 0f, 0f, 1f, 0f
+)
+private val warmMatrix = floatArrayOf(
+    1.06f, 0f, 0f, 0f, 0.02f,
+    0f, 1.02f, 0f, 0f, 0.01f,
+    0f, 0f, 0.92f, 0f, 0f,
+    0f, 0f, 0f, 1f, 0f
 )
 
 private fun quoteFontSize(length: Int): TextUnit = when {
@@ -734,6 +779,13 @@ private fun autoLayoutPlan(
         if (hOverlap <= 0f) return 0f
         return (upper.bottom - lower.top).coerceAtLeast(0f)
     }
+    // v3xx — [bottomOverlap] ASSUMES the first box sits ABOVE the second;
+    // calling it on a box that is actually BELOW produces a giant false
+    // positive (lower.bottom - upper.top ≈ the whole gap). The strip vs the
+    // fact flips order per style (bottom corner on Paper/Vinyl, top-middle on
+    // Collage/Signature), so guard each pair by the real vertical order.
+    fun pokeAbove(upper: androidx.compose.ui.geometry.Rect, lower: androidx.compose.ui.geometry.Rect): Float =
+        if (upper.top < lower.top) bottomOverlap(upper, lower) else 0f
     val titleFactOverlap = bottomOverlap(t, f)
     // v3xx — the info rows belong BETWEEN the title and the quick fact: a
     // grown/dragged fact that actually TOUCHES them lifts the rows UP
@@ -755,12 +807,16 @@ private fun autoLayoutPlan(
         (m.top - t.bottom).coerceAtLeast(0f) else Float.MAX_VALUE
     val titleForMeta = if (metaUp > 0f && titleMetaGap < metaUp) (metaUp - titleMetaGap).coerceAtMost(72f) else 0f
     val collisionTitleLift = maxOf(titleFactOverlap, bottomOverlap(t, m), titleForMeta).coerceAtMost(72f)
-    val collisionFactLift = (titleFactOverlap - collisionTitleLift).coerceAtMost(72f).coerceAtLeast(0f)
+    // v3xx — a fav strip parked ABOVE the fact (the Collage / Signature top
+    // placement) that has grown/dragged INTO the fact pushes the FACT down by
+    // the overlap — never the strip down into it (adding it to the fav lift
+    // made the overlap worse: it shoved the strip INTO the box below). The
+    // order guard also kills the false positives that used to shove the strip
+    // around on the bottom-corner styles.
+    val favOverFact = pokeAbove(v, f)
+    val collisionFactLift = (maxOf(titleFactOverlap, favOverFact) - collisionTitleLift).coerceAtMost(72f).coerceAtLeast(0f)
     val collisionFavLift = maxOf(
-        bottomOverlap(t, v), bottomOverlap(f, v), bottomOverlap(m, v),
-        // fav above the fact (collage/signature placement): separate by
-        // pushing the fact down instead of the strip up into the pill.
-        bottomOverlap(v, f)
+        pokeAbove(t, v), pokeAbove(f, v), pokeAbove(m, v)
     ).coerceAtMost(120f)
     val titleLift = maxOf(sizeLift, collisionTitleLift)
 
@@ -954,6 +1010,20 @@ data class ShareCardMove(
     val titleBoxScale: Float = 1f,
     val factBoxScale: Float = 1f,
     val favBoxScale: Float = 1f,
+    /** v3xx — POLAROID (Collage card only): the instant-print is a movable,
+     *  scalable element like the cover / favorites strip. The grip drags it
+     *  via [polaroidDx]/[polaroidDy] (card-local dp), [polaroidScale] grows /
+     *  shrinks the whole print (1f = the design default), [polaroidStyle]
+     *  picks the frame + tape + tilt look (0 Classic · 1 Retro · 2 Sunglow ·
+     *  3 Vintage · 4 Dashed) and [polaroidFilter] picks the photo treatment
+     *  (0 None · 1 Noise · 2 Nostalgia · 3 B&W · 4 Warm). Persisted per style
+     *  with the rest of the move edits; Reset layout clears the position +
+     *  scale but keeps the style/filter choices. */
+    val polaroidDx: Float = 0f,
+    val polaroidDy: Float = 0f,
+    val polaroidScale: Float = 1f,
+    val polaroidStyle: Int = 0,
+    val polaroidFilter: Int = 0,
     /** v370 — quick-fact TEXT LAYOUT: how the fact body is composed on the
      *  card. STANDARD = the style's default paragraph. CONDENSED tightens
      *  the line spacing (words keep normal gaps). BOOK = a two-column
@@ -1559,6 +1629,9 @@ class EditBoundsCallbacks(
     // v353 — the album favorite-tracks strip reports its bounds so the
     // editor can select + drag it like the cover/jacket.
     val onFavTrack: (androidx.compose.ui.geometry.Rect) -> Unit = {},
+    // v3xx — the COLLAGE polaroid reports its bounds so the editor can
+    // select + drag it like the cover/jacket.
+    val onPolaroid: (androidx.compose.ui.geometry.Rect) -> Unit = {},
     // v316b — the ACTUAL TextStyle the card used for its quick fact, so the
     // invisible typing field above it lays out with identical metrics
     // (family, size, line height) and the caret never drifts off the text.
@@ -1926,16 +1999,34 @@ fun TopicShareCard(
                 ShareCardStyle.VINYL, ShareCardStyle.PAPER -> Alignment.BottomStart to
                     PaddingValues(start = if (aspect == ShareCardAspect.CLASSIC) 14.dp else 18.dp, bottom = if (aspect == ShareCardAspect.CLASSIC) 28.dp else 26.dp)
                 // v384 — COLLAGE favorites moved OUT of the dark bottom band
-                // into the free middle: above the category pill + quick fact,
-                // below the title/info block (top-left, under the meta rows).
+                // into the free middle. v3xx — raised a touch more, so the
+                // strip parks JUST below the title/author rows (fully on the
+                // cream top paper, clear of the tear seam + the category pill
+                // / quick fact below it).
                 ShareCardStyle.COLLAGE -> Alignment.TopStart to
-                    PaddingValues(start = 22.dp, top = if (aspect == ShareCardAspect.CLASSIC) 158.dp else 128.dp)
-                // v384 — Signature raised clear of the quick fact / footer so
-                // the plain-type strip reads clean (still movable; the
-                // sparkle repairs any residual overlap on tap).
-                ShareCardStyle.SIGNATURE, ShareCardStyle.CUSTOM -> Alignment.BottomStart to
+                    PaddingValues(start = 22.dp, top = if (aspect == ShareCardAspect.CLASSIC) 112.dp else 98.dp)
+                // v3xx — SIGNATURE favorites moved from the bottom corner
+                // (where they overlapped the bottom-anchored quick fact) up
+                // to just below the title/author block — the strip now reads
+                // as part of the headline group instead of fighting the body
+                // text. Still movable; the sparkle repairs any residual
+                // overlap on tap.
+                ShareCardStyle.SIGNATURE -> Alignment.TopStart to
+                    PaddingValues(start = 22.dp, top = if (aspect == ShareCardAspect.CLASSIC) 138.dp else 130.dp)
+                // Custom keeps the bottom corner pocket (its own tone-following
+                // ink + layout; only Signature moved up).
+                ShareCardStyle.CUSTOM -> Alignment.BottomStart to
                     PaddingValues(start = if (aspect == ShareCardAspect.CLASSIC) 18.dp else 22.dp, bottom = if (aspect == ShareCardAspect.CLASSIC) 98.dp else 94.dp)
             }
+            // v3xx — SIGNATURE favorites wear the design's OWN body ink
+            // (each signature scene tunes its text colour for its background;
+            // the tone's palette.ink can clash — e.g. near-black ink on
+            // Mario's red or Pikachu's yellow). Collage keeps the tone ink
+            // (it now parks on the cream top paper) with stronger alphas.
+            val sigFavInk = if (style == ShareCardStyle.SIGNATURE) {
+                (if (classicSignature) signatureDesignClassic(categoryName, categoryFamily)
+                else signatureDesign(categoryName, categoryFamily)).bodyColor
+            } else null
             FavoriteTracksBadge(
                 tracks = albumFavTracks,
                 style = style,
@@ -1945,12 +2036,14 @@ fun TopicShareCard(
                 // each style keeps its own width/height edits; v373 — the
                 // whole-box scale multiplies on top. v384 — the explicit song
                 // count (0 = auto), the no-fact expansion flag and the global
-                // list/rows mode ride along too.
+                // list/rows mode ride along too. v3xx — the signature ink
+                // override rides along (null = palette ink, as before).
                 widthFrac = boxScaledMove.favWidthFrac,
                 heightFrac = boxScaledMove.favHeightFrac,
                 count = move.favCount,
                 noFact = shownFact.isBlank() && shownQuote == null,
                 rowsMode = AppPreferences.albumFavRowsState,
+                inkOverride = sigFavInk,
                 // v353 — the strip is a movable element like the cover: its
                 // offset comes from [move.favDx]/[move.favDy] and it reports
                 // its bounds so the editor can select + drag it.
@@ -2488,7 +2581,11 @@ private fun FavoriteTracksBadge(
     // and the ROWS (chip) layout mode (global preference).
     count: Int = 0,
     noFact: Boolean = false,
-    rowsMode: Boolean = false
+    rowsMode: Boolean = false,
+    // v3xx — SIGNATURE ink override: the strip wears the signature design's
+    // OWN body ink instead of the tone's palette.ink (which can clash with a
+    // signature scene's background). Null = palette ink as before.
+    inkOverride: Color? = null
 ) {
     // v353 — the strip is no longer the same sticker on every card: the
     // boxless designs (Editorial, Minimal) render the favorites as plain
@@ -2500,7 +2597,7 @@ private fun FavoriteTracksBadge(
     when (style) {
         ShareCardStyle.EDITORIAL -> EditorialFavStrip(tracks, palette, classic, modifier, widthFrac, rows, noFact, rowsMode)
         ShareCardStyle.MINIMAL -> MinimalFavStrip(tracks, palette, classic, modifier, widthFrac, rows, noFact, rowsMode)
-        else -> BoxedFavStrip(tracks, style, palette, classic, modifier, widthFrac, rows, noFact, rowsMode)
+        else -> BoxedFavStrip(tracks, style, palette, classic, modifier, widthFrac, rows, noFact, rowsMode, inkOverride)
     }
 }
 
@@ -2521,7 +2618,9 @@ private fun BoxedFavStrip(
     // v384 — no-fact expansion: when the fact is hidden the strip renders
     // LARGER type (it takes over the freed fact space).
     noFact: Boolean = false,
-    rowsMode: Boolean = false
+    rowsMode: Boolean = false,
+    // v3xx — signature ink override (see FavoriteTracksBadge).
+    inkOverride: Color? = null
 ) {
     val shownFavs = tracks.take(rows)
     val extra = tracks.size - shownFavs.size
@@ -2553,11 +2652,13 @@ private fun BoxedFavStrip(
         // strip wears the card's own ink so it reads as part of the paper
         // instead of a sticker. It also moved out of the dark bottom band
         // into the free middle (see the favSlot pass), above the category
-        // pill + quick fact and below the title/info.
+        // pill + quick fact and below the title/info. v3xx — stronger alphas
+        // now that it parks on the cream top paper, so the label + rows stay
+        // legible next to the Bungee title.
         ShareCardStyle.COLLAGE -> FavStripTokens(
             bg = Color.Transparent, border = null,
-            labelInk = palette.ink.copy(alpha = 0.58f), bodyInk = palette.ink.copy(alpha = 0.85f),
-            heart = palette.accent.copy(alpha = 0.9f), serifBody = true, capsSpacing = false,
+            labelInk = palette.ink.copy(alpha = 0.66f), bodyInk = palette.ink.copy(alpha = 0.92f),
+            heart = palette.accent.copy(alpha = 0.95f), serifBody = true, capsSpacing = false,
             radius = 3.dp, alpha = 1f, glyph = FavGlyph.NOTE, noBox = true
         )
         ShareCardStyle.NEUMORPHIC -> FavStripTokens(
@@ -2567,13 +2668,15 @@ private fun BoxedFavStrip(
             radius = 50.dp, alpha = 1f, glyph = FavGlyph.EQ
         )
         // v384 — Signature/Custom favorites are PLAIN TYPE too: no stamp
-        // pill, no border — the strip wears the signature's own ink (each
-        // design's palette ink is tuned to read on its scene), so it never
-        // clashes with the card and overlaps read as intentional text.
+        // pill, no border — the strip wears the card's own ink. v3xx — on
+        // SIGNATURE the ink override is the DESIGN's body colour (tuned to
+        // each scene); Custom keeps the tone's palette ink.
         else -> FavStripTokens(
             bg = Color.Transparent, border = null,
-            labelInk = palette.ink.copy(alpha = 0.60f), bodyInk = palette.ink.copy(alpha = 0.88f),
-            heart = palette.accent, serifBody = true, capsSpacing = false,
+            labelInk = (inkOverride ?: palette.ink).copy(alpha = 0.62f),
+            bodyInk = (inkOverride ?: palette.ink).copy(alpha = 0.90f),
+            heart = if (inkOverride != null) inkOverride.copy(alpha = 0.85f) else palette.accent,
+            serifBody = true, capsSpacing = false,
             radius = 8.dp, alpha = 1f, glyph = FavGlyph.NOTE, noBox = true
         )
     }
@@ -3116,50 +3219,116 @@ private fun CollageCard(
             )
         }
 
-        // Watermark glyphs on both paper and green field so the collage feels intentional.
-        Watermark(family, categoryGlyph, inkDark.copy(alpha = 0.045f), display.hashCode())
-        Watermark(family, categoryGlyph, Color.White.copy(alpha = 0.045f), display.hashCode() + 17)
+        // Watermark glyphs on both paper and green field so the collage feels
+        // intentional. v3xx — the CENTER glyph is dropped on the collage: the
+        // 80dp category icon floating in the middle read as clutter over the
+        // photo/field (the corner set stays).
+        Watermark(family, categoryGlyph, inkDark.copy(alpha = 0.045f), display.hashCode(), center = false)
+        Watermark(family, categoryGlyph, Color.White.copy(alpha = 0.045f), display.hashCode() + 17, center = false)
         }
 
         // ── TOP SECTION: title + metadata + quote (left) + polaroid (right) ──
         BoxWithConstraints(Modifier.fillMaxSize().zIndex(2f)) {
             val cw = maxWidth.value; val ch = maxHeight.value
 
-            // Polaroid — right side, tilted, with tape + handwritten name
-            val pW = cw * 0.34f; val pH = pW * 1.18f
-            val pX = cw * 0.62f; val pY = ch * 0.035f
+            // v3xx — POLAROID rework: the instant-print is now a movable /
+            // scalable element (grip drag + size slider in the editor), wears
+            // a pickable STYLE (frame + tape + tilt: Classic · Retro ·
+            // Sunglow · Vintage · Dashed) and its photo takes a FILTER
+            // (None · Noise · Nostalgia · B&W · Warm). The tape PEERS out
+            // past the white frame (drawn LAST, so it sits ON the photo) and
+            // the frame ADAPTS to the photo's aspect — a landscape print is
+            // wide and short, a portrait one tall, like a real instant-print.
+            val pStyle = move.polaroidStyle.coerceIn(0, 4)
+            val pFilter = move.polaroidFilter.coerceIn(0, 4)
+            val look = polaroidLooks[pStyle]
+            val basePW = (cw * 0.34f * move.polaroidScale).coerceIn(cw * 0.20f, cw * 0.36f)
+            val capH = basePW * 0.20f
+            // Frame adapts to the photo's aspect (landscape → wide/short,
+            // portrait → tall); no photo → the classic 1.18 print.
+            var pW = basePW
+            var pH = basePW * 1.18f
+            if (userPhoto != null && userPhoto.width > 0 && userPhoto.height > 0) {
+                val ar = userPhoto.width.toFloat() / userPhoto.height.toFloat()
+                pH = pW / ar + capH
+                val maxH = ch * 0.46f
+                if (pH > maxH) {
+                    pW = ((maxH - capH) * ar).coerceAtMost(basePW)
+                    pH = pW / ar + capH
+                }
+                pW = pW.coerceAtMost(cw * 0.36f)
+            }
+            val photoH = if (userPhoto != null) (pH - capH).coerceAtLeast(pW * 0.4f) else pH * 0.68f
+            val pX = (cw * 0.62f + move.polaroidDx).coerceIn(0f, (cw - pW - 6f).coerceAtLeast(0f))
+            val pY = (ch * 0.035f + move.polaroidDy).coerceIn(0f, (ch - pH - 6f).coerceAtLeast(0f))
             val polaroidLabel = polaroidCaption.ifBlank {
                 if (sharerName.isNotBlank()) "$sharerName · via Curio" else "via Curio"
             }
 
             Box(Modifier.offset(pX.dp, pY.dp).size(pW.dp, pH.dp)
                 .graphicsLayer {
-                    rotationZ = -3f
+                    rotationZ = look.tilt
                     shadowElevation = 6f
                     shape = RoundedCornerShape(3.dp)
                     clip = false
                 }
-                .background(Color.White, RoundedCornerShape(3.dp))
+                .background(look.frame, RoundedCornerShape(3.dp))
                 .clickable(enabled = onPhotoTap != null && userPhoto == null) { onPhotoTap?.invoke() }
+                // v3xx — report the print's bounds so the editor can select
+                // and drag it like the cover/jacket.
+                .onGloballyPositioned { callbacks.onPolaroid(it.boundsInWindow()) }
             ) {
-                // Tape on top
-                Canvas(Modifier.offset((pW * 0.23f).dp, 1.dp).size((pW * 0.46f).dp, 12.dp)) {
-                    drawRoundRect(Color(0xFFD9BE8A).copy(alpha = 0.55f), Offset.Zero, Size(size.width, size.height), CornerRadius(2.dp.toPx()))
-                }
-                // Photo area — tappable when empty
-                Canvas(Modifier.offset(5.dp, 5.dp).size((pW - 10).dp, (pH * 0.68f).dp)) {
+                // Photo area — the print's film window (tappable when empty)
+                Canvas(Modifier.offset(5.dp, 5.dp).size((pW - 10).dp, photoH.dp)) {
+                    val zw = size.width; val zh = size.height
                     if (userPhoto != null) {
-                        drawImage(userPhoto,
-                            dstOffset = androidx.compose.ui.unit.IntOffset(0, 0),
-                            dstSize = androidx.compose.ui.unit.IntSize(size.width.toInt(), size.height.toInt()))
+                        // Contain-fit the photo inside the window (the window
+                        // already matches the photo's aspect, so this fills it
+                        // edge-to-edge without cropping or stretching).
+                        val ar = userPhoto.width.toFloat() / userPhoto.height.toFloat()
+                        val zA = zw / zh
+                        val (dW, dH) = if (ar > zA) zw to zw / ar else zh * ar to zh
+                        val dx = (zw - dW) / 2f; val dy = (zh - dH) / 2f
+                        drawImage(
+                            userPhoto,
+                            dstOffset = androidx.compose.ui.unit.IntOffset(dx.roundToInt(), dy.roundToInt()),
+                            dstSize = androidx.compose.ui.unit.IntSize(dW.roundToInt(), dH.roundToInt()),
+                            colorFilter = when (pFilter) {
+                                2 -> ColorFilter.colorMatrix(sepiaMatrix)
+                                3 -> ColorFilter.colorMatrix(grayscaleMatrix)
+                                4 -> ColorFilter.colorMatrix(warmMatrix)
+                                else -> null
+                            }
+                        )
+                        // v3xx — FILTER overlays: grain for Noise, a soft
+                        // warm cast + vignette for Nostalgia / Warm.
+                        if (pFilter == 1) {
+                            val rnd = java.util.Random((zw * 131 + zh * 17).toLong())
+                            repeat(240) {
+                                drawCircle(
+                                    if (it % 2 == 0) Color.White.copy(alpha = rnd.nextFloat() * 0.09f)
+                                    else Color.Black.copy(alpha = rnd.nextFloat() * 0.09f),
+                                    rnd.nextFloat() * 1.1f + 0.3f,
+                                    Offset(rnd.nextFloat() * zw, rnd.nextFloat() * zh)
+                                )
+                            }
+                        }
+                        if (pFilter == 2) drawRect(Color(0xFFE8C58A).copy(alpha = 0.10f))
+                        if (pFilter == 4) drawRect(Color(0xFFF0B060).copy(alpha = 0.15f))
+                        if (pFilter == 2 || pFilter == 4) {
+                            drawRect(Brush.radialGradient(
+                                listOf(Color.Transparent, Color.Transparent, Color(0xFF3A2410).copy(alpha = 0.20f)),
+                                center = Offset(zw / 2f, zh / 2f), radius = zw * 0.78f
+                            ))
+                        }
                         drawRect(Color(0xFFD4A574).copy(alpha = 0.10f))
                     } else {
-                        drawRoundRect(Color(0xFFE0D8CC), Offset.Zero, Size(size.width, size.height), CornerRadius(2.dp.toPx()))
+                        drawRoundRect(Color(0xFFE0D8CC), Offset.Zero, Size(zw, zh), CornerRadius(2.dp.toPx()))
                         // Hint — camera icon + text when no photo
-                        val cx = size.width / 2f
-                        val cy = size.height / 2f
+                        val cx = zw / 2f
+                        val cy = zh / 2f
                         // Camera body
-                        val camW = size.width * 0.30f
+                        val camW = zw * 0.30f
                         val camH = camW * 0.70f
                         drawRoundRect(
                             Color(0xFFB0A898).copy(alpha = 0.35f),
@@ -3175,8 +3344,8 @@ private fun CollageCard(
                 if (userPhoto == null) {
                     Column(
                         modifier = Modifier
-                            .offset(5.dp, (pH * 0.52f).dp)
-                            .size((pW - 10).dp, (pH * 0.16f).dp),
+                            .offset(5.dp, (photoH * 0.42f).dp)
+                            .size((pW - 10).dp, (photoH * 0.30f).dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
@@ -3187,19 +3356,44 @@ private fun CollageCard(
                         ))
                     }
                 }
-                // Polaroid finish — inner hairline frame + a glassy sheen band
-                // over the photo so it reads as a real instant-print (v...)
+                // Polaroid finish — hairline frame around the film window +
+                // a glassy sheen over the photo (the Dashed style wears a
+                // dotted hairline instead of the solid one).
                 Canvas(Modifier.fillMaxSize()) {
-                    val pws = size.width; val phs = size.height
-                    drawRoundRect(Color(0xFF70543A).copy(alpha = 0.30f), Offset(5f, 5f), Size(pws - 10f, phs - 10f), CornerRadius(2.dp.toPx()), style = Stroke(1.3.dp.toPx()))
+                    val pws = size.width
+                    val winH = photoH.toPx()
+                    val fw = pws - 10f
+                    val finish = look.finish.copy(alpha = 0.30f)
+                    if (pStyle == 4) {
+                        drawRoundRect(
+                            finish, Offset(5f, 5f), Size(fw, winH), CornerRadius(2.dp.toPx()),
+                            style = Stroke(1.3.dp.toPx(), pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(6f, 4f)))
+                        )
+                    } else {
+                        drawRoundRect(finish, Offset(5f, 5f), Size(fw, winH), CornerRadius(2.dp.toPx()), style = Stroke(1.3.dp.toPx()))
+                    }
                     val sheen = Brush.verticalGradient(
-                        listOf(Color.White.copy(alpha = 0.0f), Color.White.copy(alpha = 0.30f), Color.White.copy(alpha = 0.0f)),
-                        startY = 5f, endY = phs * 0.68f
+                        listOf(Color.White.copy(alpha = 0.0f), Color.White.copy(alpha = 0.28f), Color.White.copy(alpha = 0.0f)),
+                        startY = 5f, endY = winH
                     )
-                    drawRect(sheen, Offset(5f, 5f), Size(pws - 10f, phs * 0.68f))
+                    drawRect(sheen, Offset(5f, 5f), Size(fw, winH))
+                }
+                // v3xx — TAPE: drawn LAST (sits ON the photo) and PEERING out
+                // past the top edge of the white frame (offset y = -5dp), so it
+                // reads as real washi tape sticking the print to the paper —
+                // never boxed in by the outline.
+                Canvas(
+                    Modifier
+                        .offset((pW * 0.24f).dp, (-5).dp)
+                        .size((pW * 0.52f).dp, 14.dp)
+                        .graphicsLayer { rotationZ = 2f }
+                ) {
+                    drawRect(look.tape.copy(alpha = 0.72f))
+                    // Subtle lighter core so the tape reads as translucent.
+                    drawRect(Color.White.copy(alpha = 0.10f), Offset.Zero, Size(size.width, size.height * 0.42f))
                 }
 
-                // Handwritten name below photo �� constrained width + lineHeight
+                // Handwritten name below photo — constrained width + lineHeight
                 // >= fontSize so long captions ellipsize (not clip) and never squish.
                 val capFont = (pW * 0.065f).coerceIn(11f, 15f)
                 Text(polaroidLabel, style = TextStyle(
@@ -3207,7 +3401,7 @@ private fun CollageCard(
                     fontSize = capFont.sp, color = captionInk,
                     lineHeight = (capFont * 1.2f).sp
                 ), maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.offset(8.dp, (pH * 0.78f).dp).width((pW - 16).dp))
+                    modifier = Modifier.offset(8.dp, (photoH + 6f).dp).width((pW - 16).dp))
             }
 
             // Title — retro Bungee, dark green, top-left (v... — retro face +
@@ -6854,7 +7048,7 @@ private fun DrawScope.drawVinylPartial(labelColor: Color) {
 // WATERMARK
 // ═══════════════════════════════════════════════════════════════════════
 @Composable
-private fun Watermark(family: CategoryFamily, glyph: String, tint: Color, seed: Int) {
+private fun Watermark(family: CategoryFamily, glyph: String, tint: Color, seed: Int, center: Boolean = true) {
     val symbols = CurioIcons.heroWatermarkSymbols(family)
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val w = maxWidth.value; val h = maxHeight.value
@@ -6866,10 +7060,14 @@ private fun Watermark(family: CategoryFamily, glyph: String, tint: Color, seed: 
                 modifier = Modifier.offset((w * x - half).dp, (h * y - half).dp)
                     .graphicsLayer { rotationZ = tilts[i % tilts.size] })
         }
-        // Center watermark — fainter, larger, with its own tilt
-        CurioIcon(name = symbols[seed.mod(symbols.size)], tint = tint.copy(alpha = tint.alpha * 0.5f), size = 80.dp,
-            modifier = Modifier.offset((w * 0.5f - 40).dp, (h * 0.5f - 40).dp)
-                .graphicsLayer { rotationZ = -7f })
+        // Center watermark — fainter, larger, with its own tilt. v3xx —
+        // optional: the Collage card turns it OFF (its "big category icon in
+        // the middle" read as clutter over the photo/field).
+        if (center) {
+            CurioIcon(name = symbols[seed.mod(symbols.size)], tint = tint.copy(alpha = tint.alpha * 0.5f), size = 80.dp,
+                modifier = Modifier.offset((w * 0.5f - 40).dp, (h * 0.5f - 40).dp)
+                    .graphicsLayer { rotationZ = -7f })
+        }
     }
 }
 
@@ -6952,6 +7150,8 @@ private fun ArrangeableCard(
     val coverRect = androidx.compose.runtime.remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
     // v353 — the album favorite-tracks strip's bounds (0 while hidden).
     val favRect = androidx.compose.runtime.remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
+    // v3xx — the COLLAGE polaroid's bounds (0 until a polaroid exists).
+    val polaroidRect = androidx.compose.runtime.remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
     // v316b — the card reports the ACTUAL style its fact renders with, so the
     // invisible field above it uses identical metrics (family/size/line).
     val liveFactStyle = androidx.compose.runtime.remember { mutableStateOf(factFieldStyle) }
@@ -6963,6 +7163,7 @@ private fun ArrangeableCard(
             onBadge = { r -> badgeRect.value = r },
             onCover = { r -> coverRect.value = r },
             onFavTrack = { r -> favRect.value = r },
+            onPolaroid = { r -> polaroidRect.value = r },
             onFactStyle = { s -> liveFactStyle.value = s }
         )
     }
@@ -7038,7 +7239,8 @@ private fun ArrangeableCard(
                 val rBadge = local(badgeRect.value)
                 val rCover = local(coverRect.value)
                 val rFav = local(favRect.value)
-                val rAll = listOf(rTitle, rFact, rMeta, rBadge, rCover, rFav)
+                val rPolaroid = local(polaroidRect.value)
+                val rAll = listOf(rTitle, rFact, rMeta, rBadge, rCover, rFav, rPolaroid)
 
                 // v384 — report the live card-local bounds so the sheet's
                 // sparkle can repair REAL overlaps (a grown fact box covering
@@ -7472,6 +7674,29 @@ private fun ArrangeableCard(
                     // below), so it always wins the touch.
                 }
 
+                // v3xx — the COLLAGE polaroid is a movable element too: tap
+                // to select, then a single grip drags the print around the
+                // card (mirrors the cover/jacket block above). Its scale +
+                // style + filter live in the full-screen Polaroid panel.
+                val rp = rPolaroid
+                val rpOk = rp.width > 0f && rp.height > 0f
+                if (rpOk) {
+                    val isSel = sel == ShareCardResizeTarget.POLAROID
+                    Box(
+                        modifier = Modifier
+                            .offset(rp.left.dp, rp.top.dp)
+                            .width(rp.width.dp)
+                            .height(rp.height.dp)
+                            .clickable {
+                                focusManager.clearFocus()
+                                onSelectResizeTarget(ShareCardResizeTarget.POLAROID)
+                            }
+                            .border(1.dp, selBorder(isSel), RoundedCornerShape(4.dp))
+                    )
+                    // v369 — the grip is drawn LAST (see the handles section
+                    // below), so it always wins the touch.
+                }
+
                 // ── v369 HANDLES (drawn LAST) ────────────────────────────
                 // Every selected element's grip + corner scale render AFTER
                 // all the selectable boxes, so a handle ALWAYS wins the touch
@@ -7669,6 +7894,26 @@ private fun ArrangeableCard(
                             )
                             // v378 — corner scale grip removed (see the fact
                             // branch): the Crop tool's sliders own sizing.
+                        }
+                    }
+                    ShareCardResizeTarget.POLAROID -> {
+                        val rp = rPolaroid
+                        if (rp.width > 0f && rp.height > 0f) {
+                            MoveHandle(
+                                x = (rp.right - 24f).coerceIn(0f, (cw - 24f).coerceAtLeast(0f)).dp,
+                                y = (rp.bottom - 24f).coerceIn(0f, (ch - 24f).coerceAtLeast(0f)).dp,
+                                onDelta = { dx, dy ->
+                                    val bx = rp.left - move.polaroidDx
+                                    val by = rp.top - move.polaroidDy
+                                    val othersP = alignOthers(rp)
+                                    val xs = magnetAxis(bx, rp.width, cw, -bx, cw - bx - rp.width, (move.polaroidDx + dx).coerceIn(-bx, cw - bx - rp.width), snap = SNAP_REACH, hint = HINT_REACH, extra = hCands(othersP, bx, rp.width))
+                                    val ys = magnetAxis(by, rp.height, ch, -by, ch - by - rp.height, (move.polaroidDy + dy).coerceIn(-by, ch - by - rp.height), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersP, by, rp.height))
+                                    dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
+                                    onMove(move.copy(polaroidDx = xs.offset, polaroidDy = ys.offset))
+                                },
+                                onDragStart = { dragActive = true },
+                                onDragEnd = { dragActive = false; dragGuides = DragGuides() }
+                            )
                         }
                     }
                     ShareCardResizeTarget.NONE -> {}
@@ -7979,6 +8224,10 @@ fun TopicShareSheet(
     // v3xx — which sticker the full-screen editor has selected (index into
     // [stickers]; -1 = none).
     var selectedSticker by remember { mutableIntStateOf(-1) }
+    // v3xx — the full-screen editor's POLAROID tool (Collage card only):
+    // the panel picks the print's style / photo filter / size; the grip on
+    // the card moves it.
+    var polaroidToolsOpen by remember { mutableStateOf(false) }
     // Restore saved edits for this topic on first composition
     androidx.compose.runtime.LaunchedEffect(topicName) {
         val saved = AppPreferences.loadShareCardEdits(context, topicName)
@@ -7997,6 +8246,11 @@ fun TopicShareSheet(
                 favDx = o.optDouble("favDx", 0.0).toFloat(),
                 favDy = o.optDouble("favDy", 0.0).toFloat(),
                 favCount = o.optInt("favCount", 0),
+                polaroidDx = o.optDouble("polaroidDx", 0.0).toFloat(),
+                polaroidDy = o.optDouble("polaroidDy", 0.0).toFloat(),
+                polaroidScale = o.optDouble("polaroidScale", 1.0).toFloat(),
+                polaroidStyle = o.optInt("polaroidStyle", 0),
+                polaroidFilter = o.optInt("polaroidFilter", 0),
                 titleWidthFrac = o.optDouble("titleWidthFrac", 1.0).toFloat(),
                 titleHeightFrac = o.optDouble("titleHeightFrac", 1.0).toFloat(),
                 factWidthFrac = o.optDouble("factWidthFrac", 1.0).toFloat(),
@@ -8547,6 +8801,10 @@ fun TopicShareSheet(
                 put("coverDx", m.coverDx); put("coverDy", m.coverDy)
                 put("favDx", m.favDx); put("favDy", m.favDy)
                 put("favWidthFrac", m.favWidthFrac); put("favHeightFrac", m.favHeightFrac)
+                put("polaroidDx", m.polaroidDx); put("polaroidDy", m.polaroidDy)
+                put("polaroidScale", m.polaroidScale)
+                put("polaroidStyle", m.polaroidStyle)
+                put("polaroidFilter", m.polaroidFilter)
                 if (m.favCount > 0) put("favCount", m.favCount)
                 put("titleWidthFrac", m.titleWidthFrac); put("titleHeightFrac", m.titleHeightFrac)
                 put("factWidthFrac", m.factWidthFrac); put("factHeightFrac", m.factHeightFrac)
@@ -8903,10 +9161,11 @@ fun TopicShareSheet(
                 val isFact = sel == ShareCardResizeTarget.FACT
                 val isMeta = sel == ShareCardResizeTarget.META
                 val isFav = sel == ShareCardResizeTarget.FAVTRACKS
-                // Box sliders act on title / fact / meta / fav strips; the
-                // TEXT-size slider stays title / fact / meta only (a fav
-                // strip sizes as a box, not as type).
-                val isSizable = isTitle || isFact || isMeta || isFav
+                val isPolaroid = sel == ShareCardResizeTarget.POLAROID
+                // Box sliders act on title / fact / meta / fav strips / the
+                // polaroid; the TEXT-size slider stays title / fact / meta
+                // only (a fav strip or polaroid sizes as a box, not as type).
+                val isSizable = isTitle || isFact || isMeta || isFav || isPolaroid
                 val isTextSizable = isTitle || isFact || isMeta
                 val selName = when (sel) {
                     ShareCardResizeTarget.TITLE -> "Title"
@@ -8915,6 +9174,7 @@ fun TopicShareSheet(
                     ShareCardResizeTarget.BADGE -> "Category chip"
                     ShareCardResizeTarget.COVER -> "Book cover"
                     ShareCardResizeTarget.FAVTRACKS -> "Favorite tracks"
+                    ShareCardResizeTarget.POLAROID -> "Polaroid"
                     ShareCardResizeTarget.NONE -> "Nothing selected"
                 }
                 val elementFont = when (sel) {
@@ -8924,6 +9184,7 @@ fun TopicShareSheet(
                     ShareCardResizeTarget.BADGE -> move.badgeFont
                     ShareCardResizeTarget.COVER -> null
                     ShareCardResizeTarget.FAVTRACKS -> null
+                    ShareCardResizeTarget.POLAROID -> null
                     ShareCardResizeTarget.NONE -> null
                 }
                 val elementAlign = when (sel) {
@@ -8938,6 +9199,7 @@ fun TopicShareSheet(
                     ShareCardResizeTarget.BADGE -> move.badgeBold
                     ShareCardResizeTarget.COVER -> false
                     ShareCardResizeTarget.FAVTRACKS -> false
+                    ShareCardResizeTarget.POLAROID -> false
                     ShareCardResizeTarget.NONE -> false
                 }
                 val elementItalic = when (sel) {
@@ -8947,6 +9209,7 @@ fun TopicShareSheet(
                     ShareCardResizeTarget.BADGE -> move.badgeItalic
                     ShareCardResizeTarget.COVER -> false
                     ShareCardResizeTarget.FAVTRACKS -> false
+                    ShareCardResizeTarget.POLAROID -> false
                     ShareCardResizeTarget.NONE -> false
                 }
                 // v379 — whole-element UNDERLINE exists for the title + the
@@ -8964,6 +9227,7 @@ fun TopicShareSheet(
                         ShareCardResizeTarget.BADGE -> move.copy(badgeFont = fam)
                         ShareCardResizeTarget.COVER -> move
                         ShareCardResizeTarget.FAVTRACKS -> move
+                        ShareCardResizeTarget.POLAROID -> move
                         ShareCardResizeTarget.NONE -> move
                     })
                 }
@@ -8982,6 +9246,7 @@ fun TopicShareSheet(
                         ShareCardResizeTarget.BADGE -> move.copy(badgeBold = v)
                         ShareCardResizeTarget.COVER -> move
                         ShareCardResizeTarget.FAVTRACKS -> move
+                        ShareCardResizeTarget.POLAROID -> move
                         ShareCardResizeTarget.NONE -> move
                     })
                 }
@@ -8993,6 +9258,7 @@ fun TopicShareSheet(
                         ShareCardResizeTarget.BADGE -> move.copy(badgeItalic = v)
                         ShareCardResizeTarget.COVER -> move
                         ShareCardResizeTarget.FAVTRACKS -> move
+                        ShareCardResizeTarget.POLAROID -> move
                         ShareCardResizeTarget.NONE -> move
                     })
                 }
@@ -9280,9 +9546,11 @@ fun TopicShareSheet(
                         androidx.compose.ui.window.Dialog(
                             onDismissRequest = {
                                 fullscreenEdit = false
-                                // v3xx — the sticker tool resets with the editor.
+                                // v3xx — the sticker + polaroid tools reset with
+                                // the editor.
                                 stickerToolsOpen = false
                                 selectedSticker = -1
+                                polaroidToolsOpen = false
                             },
                             properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)
                         ) {
@@ -9302,10 +9570,11 @@ fun TopicShareSheet(
                                     Surface(
                                         onClick = {
                                             fullscreenEdit = false
-                                            // v3xx — the sticker tool resets with
-                                            // the editor.
+                                            // v3xx — the sticker + polaroid tools
+                                            // reset with the editor.
                                             stickerToolsOpen = false
                                             selectedSticker = -1
+                                            polaroidToolsOpen = false
                                         },
                                         shape = RoundedCornerShape(50),
                                         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
@@ -9363,6 +9632,7 @@ fun TopicShareSheet(
                                                 haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                                 stickerToolsOpen = !stickerToolsOpen
                                                 fsToolsOpen = false
+                                                polaroidToolsOpen = false
                                             },
                                             shape = RoundedCornerShape(50),
                                             color = if (stickerToolsOpen) MaterialTheme.colorScheme.primary
@@ -9374,11 +9644,35 @@ fun TopicShareSheet(
                                                 Text("Stickers", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = if (stickerToolsOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
                                             }
                                         }
+                                        // v3xx — POLAROID button (Collage card
+                                        // only): opens the print's style /
+                                        // filter / size panel; the grip on the
+                                        // card moves it.
+                                        if (currentStyle == ShareCardStyle.COLLAGE) {
+                                            Surface(
+                                                onClick = {
+                                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                    polaroidToolsOpen = !polaroidToolsOpen
+                                                    stickerToolsOpen = false
+                                                    fsToolsOpen = false
+                                                },
+                                                shape = RoundedCornerShape(50),
+                                                color = if (polaroidToolsOpen) MaterialTheme.colorScheme.primary
+                                                        else MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                                                shadowElevation = 4.dp
+                                            ) {
+                                                Row(Modifier.padding(horizontal = 14.dp, vertical = 9.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                                    CurioIcon(name = CurioIcons.PhotoLibrary, contentDescription = "Polaroid", tint = if (polaroidToolsOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, size = 15.dp)
+                                                    Text("Polaroid", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = if (polaroidToolsOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
+                                                }
+                                            }
+                                        }
                                         Surface(
                                             onClick = {
                                                 haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                                 fsToolsOpen = !fsToolsOpen
                                                 stickerToolsOpen = false
+                                                polaroidToolsOpen = false
                                             },
                                             shape = RoundedCornerShape(50),
                                             color = if (fsToolsOpen) MaterialTheme.colorScheme.primary
@@ -9583,6 +9877,7 @@ fun TopicShareSheet(
                                             Text("Stickers", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                                             Spacer(Modifier.height(8.dp))
                                             Text("Tap a sticker to add it, then drag it anywhere on the card", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Text("Pinch it on the card to resize", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                             Spacer(Modifier.height(8.dp))
                                             Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                                 stickerEmojis.forEach { emoji ->
@@ -9604,7 +9899,7 @@ fun TopicShareSheet(
                                             }
                                             if (stickers.isNotEmpty()) {
                                                 Spacer(Modifier.height(12.dp))
-                                                Text("Tap a sticker on the card to select it, then drag to move", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                Text("Tap a sticker on the card to select it, drag to move, pinch to resize", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                                 Spacer(Modifier.height(8.dp))
                                             }
                                             if (selectedSticker in stickers.indices) {
@@ -9682,6 +9977,57 @@ fun TopicShareSheet(
                                                     }
                                                 }
                                             }
+                                        }
+                                    }
+                                }
+                                // v3xx — POLAROID panel (Collage card only):
+                                // the print's STYLE (frame + tape + tilt),
+                                // PHOTO FILTER and SIZE pickers live here; the
+                                // grip on the card moves the print.
+                                if (polaroidToolsOpen) {
+                                    Surface(
+                                        shape = RoundedCornerShape(16.dp),
+                                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.97f),
+                                        shadowElevation = 6.dp,
+                                        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)
+                                    ) {
+                                        Column(Modifier.fillMaxWidth().heightIn(max = 300.dp).verticalScroll(androidx.compose.foundation.rememberScrollState()).padding(vertical = 10.dp, horizontal = 12.dp)) {
+                                            Text("Polaroid", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Spacer(Modifier.height(8.dp))
+                                            Text("Pick a frame style, a photo filter and the print size. Tap the polaroid on the card and drag its grip to move it — the frame hugs your photo's shape.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Spacer(Modifier.height(12.dp))
+                                            Text("Style", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Spacer(Modifier.height(6.dp))
+                                            Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                                polaroidStyleNames.forEachIndexed { i, name ->
+                                                    Pill(name, CurioIcons.Palette, move.polaroidStyle == i) {
+                                                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                        updateMove(move.copy(polaroidStyle = i))
+                                                    }
+                                                }
+                                            }
+                                            Spacer(Modifier.height(12.dp))
+                                            Text("Photo filter", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                            Spacer(Modifier.height(6.dp))
+                                            Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                                polaroidFilterNames.forEachIndexed { i, name ->
+                                                    Pill(name, CurioIcons.PhotoSizeSelectLarge, move.polaroidFilter == i) {
+                                                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                        updateMove(move.copy(polaroidFilter = i))
+                                                    }
+                                                }
+                                            }
+                                            Spacer(Modifier.height(12.dp))
+                                            SizeSliderColumn(
+                                                label = "Print size",
+                                                value = move.polaroidScale,
+                                                onValueChange = { v ->
+                                                    updateMove(move.copy(polaroidScale = v.coerceIn(0.6f, 1.6f)))
+                                                },
+                                                range = 0.6f..1.6f,
+                                                steps = 20,
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
                                         }
                                     }
                                 }
@@ -9782,6 +10128,17 @@ fun TopicShareSheet(
                                                     lst[idx] = st.copy(
                                                         x = (st.x + dxFrac).coerceIn(0f, (1f - st.sizeFrac).coerceAtLeast(0f)),
                                                         y = (st.y + dyFrac).coerceIn(0f, (1f - st.sizeFrac).coerceAtLeast(0f))
+                                                    )
+                                                    stickers = lst
+                                                },
+                                                // v3xx — pinch scales the emoji
+                                                // (the Size slider stays for fine
+                                                // control).
+                                                onResize = { idx, zoom ->
+                                                    val lst = stickers.toMutableList()
+                                                    val st = lst[idx]
+                                                    lst[idx] = st.copy(
+                                                        sizeFrac = (st.sizeFrac * zoom).coerceIn(0.08f, 0.6f)
                                                     )
                                                     stickers = lst
                                                 }
@@ -9918,6 +10275,16 @@ fun TopicShareSheet(
                                         (move.factHeightFrac * fitH).coerceIn(0.35f, 6f),
                                         { v -> updateMove(move.copy(factHeightFrac = (v / fitH).coerceIn(0.35f, 6f))) },
                                         0.35f..6f, steps = 56, modifier = Modifier.fillMaxWidth()
+                                    )
+                                } else if (isPolaroid) {
+                                    // v3xx — COLLAGE polaroid: the SIZE slider
+                                    // scales the whole print (frame + photo +
+                                    // caption) as one.
+                                    SizeSliderColumn(
+                                        "Polaroid size",
+                                        move.polaroidScale,
+                                        { v -> updateMove(move.copy(polaroidScale = v.coerceIn(0.6f, 1.6f))) },
+                                        0.6f..1.6f, steps = 20, modifier = Modifier.fillMaxWidth()
                                     )
                                 } else if (isFav) {
                                     // v370/v384 — ALBUM favorite-tracks strip:
@@ -10756,7 +11123,10 @@ private fun BoxScope.StickerEditOverlay(
     stickers: List<ShareSticker>,
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
-    onMove: (index: Int, dxFrac: Float, dyFrac: Float) -> Unit
+    onMove: (index: Int, dxFrac: Float, dyFrac: Float) -> Unit,
+    // v3xx — PINCH-to-resize: the transform gesture reports a zoom factor;
+    // the caller scales the sticker's sizeFrac (see the wiring).
+    onResize: (index: Int, zoom: Float) -> Unit
 ) {
     if (stickers.isEmpty()) return
     val density = androidx.compose.ui.platform.LocalDensity.current
@@ -10774,21 +11144,20 @@ private fun BoxScope.StickerEditOverlay(
                         if (isSel) CoffeeChromeDeep else Color.Transparent,
                         RoundedCornerShape(8.dp)
                     )
+                    // v3xx — ONE transform recognizer handles tap (select),
+                    // drag (move) AND pinch (resize): the gesture reports a
+                    // centroid pan + a zoom factor, so a two-finger pinch
+                    // scales the emoji while a one-finger drag still moves it
+                    // (and a plain tap selects).
                     .pointerInput(idx) {
-                        detectTapGestures(onTap = { onSelect(idx) })
-                    }
-                    .pointerInput(idx) {
-                        detectDragGestures(
-                            onDragStart = { onSelect(idx) },
-                            onDragEnd = {},
-                            onDragCancel = {}
-                        ) { change, amount ->
-                            change.consume()
+                        androidx.compose.foundation.gestures.detectTransformGestures { _, pan, zoom, _ ->
+                            onSelect(idx)
                             if (cw.value > 0f && ch.value > 0f) {
-                                val dx = with(density) { amount.x.toDp().value }
-                                val dy = with(density) { amount.y.toDp().value }
-                                onMove(idx, dx / cw.value, dy / ch.value)
+                                val dx = with(density) { pan.x.toDp().value }
+                                val dy = with(density) { pan.y.toDp().value }
+                                if (dx != 0f || dy != 0f) onMove(idx, dx / cw.value, dy / ch.value)
                             }
+                            if (zoom != 1f) onResize(idx, zoom)
                         }
                     }
             ) {
