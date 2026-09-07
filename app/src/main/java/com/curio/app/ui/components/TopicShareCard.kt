@@ -2225,7 +2225,16 @@ fun TopicShareCard(
             ShareCardStyle.COLLAGE -> CollageCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, userPhoto ?: bookCover, byline, year, polaroidCaption, onPhotoTap, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans)
             ShareCardStyle.NEUMORPHIC -> NeumorphicCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans, coverArt = gluedCover, coverW = coverW, coverH = coverH)
             ShareCardStyle.EDITORIAL -> EditorialCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans, coverArt = gluedCover, coverW = coverW, coverH = coverH)
-            ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans, coverArt = gluedCover, coverW = coverW, coverH = coverH)
+            ShareCardStyle.MINIMAL -> MinimalCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans, coverArt = gluedCover, coverW = coverW, coverH = coverH,
+                // v3xx — FAVORITES ROOM: when the (visible) album favorites
+                // strip is on this card, its bottom-left slot reserves space
+                // under the fact so the list-style strip never overlaps the
+                // fact's lower lines (smart fit + default fit both render
+                // clear by construction). Chips mode is taller than the list,
+                // so it reserves a little more.
+                favReserveDp = if (style == ShareCardStyle.MINIMAL &&
+                    albumFavTracks.isNotEmpty() && AppPreferences.albumFavStripVisibleState
+                ) (if (AppPreferences.albumFavRowsState) 96.dp else 76.dp) else 0.dp)
             ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans, coverArt = gluedCover, coverW = coverW, coverH = coverH)
             ShareCardStyle.CUSTOM -> CustomCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans)
         }
@@ -3358,15 +3367,34 @@ private fun MinimalFavStrip(
                 typeScale = typeScale
             )
         } else {
-            Text(
-                shownFavs.joinToString("  \u00b7  "),
-                style = TextStyle(
-                    fontFamily = GeomFontFamily,
-                    fontSize = (if (classic) 6.5.sp else 8.sp) * typeScale, lineHeight = (if (classic) 8.sp else 10.sp) * typeScale,
-                    fontWeight = FontWeight.SemiBold, color = ink.copy(alpha = 0.72f)
-                ),
-                maxLines = 1, overflow = TextOverflow.Ellipsis
-            )
+            // v3xx — LIST look: one quiet track per line with a dot, so the
+            // favorites read as a real list instead of one dot-joined line
+            // that hid the track names. The design keeps its no-box, no-row-
+            // icon language (caps label + type only).
+            shownFavs.forEach { track ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    ShareMusicGlyph(
+                        variant = FavGlyph.DOT,
+                        color = palette.accent.copy(alpha = 0.85f),
+                        iconSize = if (classic) 4.dp else 5.dp
+                    )
+                    Text(
+                        track,
+                        style = TextStyle(
+                            fontFamily = GeomFontFamily,
+                            fontSize = (if (classic) 6.5.sp else 8.sp) * typeScale,
+                            lineHeight = (if (classic) 8.sp else 10.sp) * typeScale,
+                            fontWeight = FontWeight.SemiBold, color = ink.copy(alpha = 0.72f)
+                        ),
+                        maxLines = 1, overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
         }
         if (extra > 0) {
             Text(
@@ -4213,7 +4241,14 @@ private fun MinimalCard(
     // [GluedCover]). Null = no cover → the layout is exactly as before.
     coverArt: androidx.compose.ui.graphics.ImageBitmap? = null,
     coverW: Dp = 44.dp,
-    coverH: Dp = 66.dp
+    coverH: Dp = 66.dp,
+    // v3xx — FAVORITES ROOM: when the album favorites strip is on this
+    // card (its bottom-left slot), the fact box's bottom edge reserves this
+    // much extra space so the strip — a real LIST now, taller than the old
+    // one-line strip — never sits over the fact's lower lines. Structural:
+    // the default smart fit AND the sparkle both render clear of the strip
+    // with no extra collision math. 0.dp = favorites off → layout unchanged.
+    favReserveDp: Dp = 0.dp
 ) {
     val bg = Color(0xFFFFFDF9)
     val inkDark = Color(0xFF1A1A1A)
@@ -4355,6 +4390,11 @@ private fun MinimalCard(
                     })
                 }
             }
+
+            // v3xx — FAVORITES ROOM: reserve the strip's slot below the
+            // fact (see [favReserveDp]) so the bottom-anchored fact can
+            // never grow over the list-strip in the bottom-left corner.
+            if (favReserveDp > 0.dp) Spacer(Modifier.height(favReserveDp))
 
             if (ratingStars != null && ratingStars > 0) {
                 Spacer(Modifier.height(8.dp))

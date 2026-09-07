@@ -2,6 +2,49 @@
 
 ## Request (2026-09-07, active — Cabinet v2 build in progress)
 
+### Completed — Cabinet v2 slices 2–4 + Minimal favorites fix (2026-09-07)
+
+**Request:** do all of the remaining Cabinet v2 slices from the plan
+(slices 2–4: view gating, the collections screen, and the thoughtful
+features) plus a Minimal-card favorites fix: "the favorite doesn't have a
+list look and it doesn't consider smart fit / default smart fit either —
+fix so it doesn't overlap."
+
+**Implemented:**
+1. **View gating** — `CabinetScreen` now checks `cabinetV2EnabledState`
+   first and renders `CabinetV2Content` when ON (classic grid untouched
+   when OFF). Every `CABINET` navigation — including Home's Cabinet
+   shortcut — lands in the same route, so the repoint is automatic.
+2. **CabinetV2Content** (`features/cabinet/CabinetV2Content.kt`, new) —
+   one grouped page: SAVED captures (classic CurioEntryCard grid with
+   long-press multi-select + batch move-to-recycle-bin via
+   `CurioTwoStepDeleteDialog`), LIKED BOOKS / LIKED SERIES / LIKED
+   ALBUMS rows with CONTAIN-FIT jacket art (book = half-book w/ spine +
+   sheen, album = square, series = poster — never stretched). Cover
+   sources mirror the reveal: stored/hub URL → authored imageUrl →
+   keyless resolver (iTunes/OL / iTunes / TVMaze) gated on each fetch
+   toggle; live fallback fires once (no retry loop). Rows tap through to
+   the reveal page (where the hearts live).
+3. **Thoughtful features** — glass toolbar (real `liquidGlassCapsule`
+   refraction over a LOCAL `layerBackdrop` capture when Liquid glass is
+   on, faux-glass below Android 12 / toggle-off, plain translucent
+   otherwise); search filters every section; sections collapse in place
+   (rememberSaveable); multi-select batch delete for entries.
+4. **Minimal favorites** (`TopicShareCard.kt`) — `MinimalFavStrip`
+   renders a real LIST (one track per line with the quiet dot glyph)
+   instead of one dot-joined line; `MinimalCard` gains `favReserveDp`
+   (spacer under the fact body) so the bottom-anchored fact box always
+   clears the strip — the default smart fit AND the sparkle render clear
+   by construction (76dp list / 96dp chips reserve, only when the strip
+   is visible on MINIMAL; 0 otherwise → layout unchanged).
+
+**Not done:** customisation (reorder/hide sections beyond collapse) was
+left for a user direction pass per the plan's "prioritise with the user"
+note. Backlog unchanged (multi-select stickers, sparkle info snap, quick-
+fact tap-out reset, wider text-history coverage).
+
+### Completed — share-editor batch: polaroid everywhere, sparkle solver, editor fixes (2026-09-07)
+
 ### Completed — share-editor batch: polaroid everywhere, sparkle solver, editor fixes (2026-09-07)
 
 **Request (10 items):** polaroid editing in the bottom sheet + auto-open;

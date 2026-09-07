@@ -150,6 +150,17 @@ private object CabinetSessionToken
 
 @Composable
 fun CabinetScreen(navController: NavController) {
+    // v3xx — CABINET v2 experiment gate: while the toggle is ON the Cabinet
+    // route renders the collections view (saved captures + liked books /
+    // series / albums with jacket-art covers, glass toolbar, search,
+    // multi-select batch) instead of the classic grid. Home's Cabinet
+    // shortcut and every other CABINET navigation land here, so the
+    // repoint is automatic — flipping the toggle off restores this classic
+    // screen untouched.
+    if (AppPreferences.cabinetV2EnabledState) {
+        CabinetV2Content(navController = navController)
+        return
+    }
     // Satisfying haptics: a light tick when an entry is opened / actioned.
     val haptics = LocalHapticFeedback.current
     // Wide windows (tablet / landscape) spread the grid into more columns.
