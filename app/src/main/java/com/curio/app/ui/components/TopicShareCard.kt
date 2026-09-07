@@ -490,8 +490,10 @@ data class ShareSticker(
 /** v3xx — one COLLAGE polaroid look (index = [ShareCardMove.polaroidStyle]):
  *  the frame + tape colours, the print's tilt and the hairline finish.
  *  0 Classic (white + gold tape) · 1 Retro (aged cream) · 2 Sunglow
- *  (butter-yellow) · 3 Vintage (faded beige) · 4 Dashed (white + cool tape,
- *  dotted hairline). */
+ *  (sun-warmed ivory + honey tape, replacing the old flat butter-yellow
+ *  that read as a cheap sticker) · 3 Vintage (faded beige) · 4 Dashed
+ *  (white + cool tape, dotted hairline) · 5 Candy (rose-tinted white +
+ *  blush tape) · 6 Noir (deep charcoal + silver tape). */
 private data class PolaroidLook(
     val frame: Color,
     val tape: Color,
@@ -502,15 +504,189 @@ private data class PolaroidLook(
 private val polaroidLooks = listOf(
     PolaroidLook(Color.White, Color(0xFFD9BE8A), -3f, Color(0xFF70543A)),
     PolaroidLook(Color(0xFFF3EAD9), Color(0xFFC9A97C), -5f, Color(0xFF6B5638)),
-    PolaroidLook(Color(0xFFF7D98B), Color(0xFFE8B878), 4f, Color(0xFF8A6A28)),
+    // v3xx — SUNGLOW rework: the old flat #F7D98B butter fill looked like a
+    // cheap sticker and the gold tape vanished into it. The new look keeps
+    // the sunny idea but reads like a real print: warm ivory paper, a honey
+    // tape that actually contrasts, a soft golden sheen finish.
+    PolaroidLook(Color(0xFFFDF3DC), Color(0xFFE3A93E), 4f, Color(0xFFB57B1E)),
     PolaroidLook(Color(0xFFDCD2C0), Color(0xFFB0986E), 6f, Color(0xFF4A3B28)),
-    PolaroidLook(Color.White, Color(0xFFB8C4D8), -2f, Color(0xFF5A6A80))
+    PolaroidLook(Color.White, Color(0xFFB8C4D8), -2f, Color(0xFF5A6A80)),
+    // v3xx — CANDY: rose-tinted paper + blush tape (soft feminine look).
+    PolaroidLook(Color(0xFFFFF1F3), Color(0xFFF2A7B3), -4f, Color(0xFFC26A78)),
+    // v3xx — NOIR: dark charcoal print + silver tape (moody, film-noir look;
+    // the caption ink stays warm so it still reads on the dark frame).
+    PolaroidLook(Color(0xFF2B2B2E), Color(0xFF9AA0A6), 3f, Color(0xFFD8DCE0))
 )
 
 // v3xx — the Polaroid panel's style + filter pickers (indices map straight
 // into [polaroidLooks] / the filter switch in CollageCard).
-private val polaroidStyleNames = listOf("Classic", "Retro", "Sunglow", "Vintage", "Dashed")
+private val polaroidStyleNames = listOf("Classic", "Retro", "Sunglow", "Vintage", "Dashed", "Candy", "Noir")
 private val polaroidFilterNames = listOf("None", "Noise", "Nostalgia", "B&W", "Warm")
+
+/**
+ * v3xx — the polaroid PRINT (frame + film window + photo filters + tape +
+ * caption), extracted from CollageCard so EVERY style can wear it: Collage
+ * calls it inline as part of its scrapbook design, and TopicShareCard
+ * renders it as a shared overlay on the other styles once a user photo is
+ * on the card (same style / filter / size / drag controls everywhere). All
+ * geometry (position + size) is computed by the caller from the card's dp
+ * dimensions — the print only draws itself at [pX]/[pY].
+ */
+@Composable
+private fun PolaroidPrint(
+    pW: Float,
+    pH: Float,
+    pX: Float,
+    pY: Float,
+    photoH: Float,
+    look: PolaroidLook,
+    pStyle: Int,
+    pFilter: Int,
+    userPhoto: androidx.compose.ui.graphics.ImageBitmap?,
+    caption: String,
+    captionInk: Color,
+    onPhotoTap: (() -> Unit)?,
+    callbacks: EditBoundsCallbacks
+) {
+    Box(Modifier.offset(pX.dp, pY.dp).size(pW.dp, pH.dp)
+        .graphicsLayer {
+            rotationZ = look.tilt
+            shadowElevation = 6f
+            shape = RoundedCornerShape(3.dp)
+            clip = false
+        }
+        .background(look.frame, RoundedCornerShape(3.dp))
+        .clickable(enabled = onPhotoTap != null && userPhoto == null) { onPhotoTap?.invoke() }
+        // v3xx — report the print's bounds so the editor can select
+        // and drag it like the cover/jacket.
+        .onGloballyPositioned { callbacks.onPolaroid(it.boundsInWindow()) }
+    ) {
+        // Photo area — the print's film window (tappable when empty)
+        Canvas(Modifier.offset(5.dp, 5.dp).size((pW - 10).dp, photoH.dp)) {
+            val zw = size.width; val zh = size.height
+            if (userPhoto != null) {
+                // Contain-fit the photo inside the window (the window
+                // already matches the photo's aspect, so this fills it
+                // edge-to-edge without cropping or stretching).
+                val ar = userPhoto.width.toFloat() / userPhoto.height.toFloat()
+                val zA = zw / zh
+                val (dW, dH) = if (ar > zA) zw to zw / ar else zh * ar to zh
+                val dx = (zw - dW) / 2f; val dy = (zh - dH) / 2f
+                drawImage(
+                    userPhoto,
+                    dstOffset = androidx.compose.ui.unit.IntOffset(dx.roundToInt(), dy.roundToInt()),
+                    dstSize = androidx.compose.ui.unit.IntSize(dW.roundToInt(), dH.roundToInt()),
+                    colorFilter = when (pFilter) {
+                        2 -> ColorFilter.colorMatrix(sepiaMatrix)
+                        3 -> ColorFilter.colorMatrix(grayscaleMatrix)
+                        4 -> ColorFilter.colorMatrix(warmMatrix)
+                        else -> null
+                    }
+                )
+                // v3xx — FILTER overlays: grain for Noise, a soft
+                // warm cast + vignette for Nostalgia / Warm.
+                if (pFilter == 1) {
+                    val rnd = java.util.Random((zw * 131 + zh * 17).toLong())
+                    repeat(240) {
+                        drawCircle(
+                            if (it % 2 == 0) Color.White.copy(alpha = rnd.nextFloat() * 0.09f)
+                            else Color.Black.copy(alpha = rnd.nextFloat() * 0.09f),
+                            rnd.nextFloat() * 1.1f + 0.3f,
+                            Offset(rnd.nextFloat() * zw, rnd.nextFloat() * zh)
+                        )
+                    }
+                }
+                if (pFilter == 2) drawRect(Color(0xFFE8C58A).copy(alpha = 0.10f))
+                if (pFilter == 4) drawRect(Color(0xFFF0B060).copy(alpha = 0.15f))
+                if (pFilter == 2 || pFilter == 4) {
+                    drawRect(Brush.radialGradient(
+                        listOf(Color.Transparent, Color.Transparent, Color(0xFF3A2410).copy(alpha = 0.20f)),
+                        center = Offset(zw / 2f, zh / 2f), radius = zw * 0.78f
+                    ))
+                }
+                drawRect(Color(0xFFD4A574).copy(alpha = 0.10f))
+            } else {
+                drawRoundRect(Color(0xFFE0D8CC), Offset.Zero, Size(zw, zh), CornerRadius(2.dp.toPx()))
+                // Hint — camera icon + text when no photo
+                val cx = zw / 2f
+                val cy = zh / 2f
+                // Camera body
+                val camW = zw * 0.30f
+                val camH = camW * 0.70f
+                drawRoundRect(
+                    Color(0xFFB0A898).copy(alpha = 0.35f),
+                    Offset(cx - camW / 2f, cy - camH / 2f - 6f),
+                    Size(camW, camH),
+                    CornerRadius(4f)
+                )
+                // Lens circle
+                drawCircle(Color(0xFFB0A898).copy(alpha = 0.30f), camW * 0.22f, Offset(cx, cy - 6f))
+            }
+        }
+        // Hint text overlay when no photo
+        if (userPhoto == null) {
+            Column(
+                modifier = Modifier
+                    .offset(5.dp, (photoH * 0.42f).dp)
+                    .size((pW - 10).dp, (photoH * 0.30f).dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CurioIcon(name = "photo_camera", tint = Color(0xFFB0A898).copy(alpha = 0.50f), size = 14.dp)
+                Text("Tap to add photo", style = TextStyle(
+                    fontFamily = LoraFontFamily, fontSize = 7.sp,
+                    color = Color(0xFFB0A898).copy(alpha = 0.60f)
+                ))
+            }
+        }
+        // Polaroid finish — hairline frame around the film window +
+        // a glassy sheen over the photo (the Dashed style wears a
+        // dotted hairline instead of the solid one).
+        Canvas(Modifier.fillMaxSize()) {
+            val pws = size.width
+            val winH = photoH.dp.toPx()
+            val fw = pws - 10f
+            val finish = look.finish.copy(alpha = 0.30f)
+            if (pStyle == 4) {
+                drawRoundRect(
+                    finish, Offset(5f, 5f), Size(fw, winH), CornerRadius(2.dp.toPx()),
+                    style = Stroke(1.3.dp.toPx(), pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(6f, 4f)))
+                )
+            } else {
+                drawRoundRect(finish, Offset(5f, 5f), Size(fw, winH), CornerRadius(2.dp.toPx()), style = Stroke(1.3.dp.toPx()))
+            }
+            val sheen = Brush.verticalGradient(
+                listOf(Color.White.copy(alpha = 0.0f), Color.White.copy(alpha = 0.28f), Color.White.copy(alpha = 0.0f)),
+                startY = 5f, endY = winH
+            )
+            drawRect(sheen, Offset(5f, 5f), Size(fw, winH))
+        }
+        // v3xx — TAPE: drawn LAST (sits ON the photo) and PEERING out
+        // past the top edge of the white frame (offset y = -5dp), so it
+        // reads as real washi tape sticking the print to the paper —
+        // never boxed in by the outline.
+        Canvas(
+            Modifier
+                .offset((pW * 0.24f).dp, (-5).dp)
+                .size((pW * 0.52f).dp, 14.dp)
+                .graphicsLayer { rotationZ = 2f }
+        ) {
+            drawRect(look.tape.copy(alpha = 0.72f))
+            // Subtle lighter core so the tape reads as translucent.
+            drawRect(Color.White.copy(alpha = 0.10f), Offset.Zero, Size(size.width, size.height * 0.42f))
+        }
+
+        // Handwritten name below photo — constrained width + lineHeight
+        // >= fontSize so long captions ellipsize (not clip) and never squish.
+        val capFont = (pW * 0.065f).coerceIn(11f, 15f)
+        Text(caption, style = TextStyle(
+            fontFamily = PatrickHandFontFamily, fontWeight = FontWeight.Normal,
+            fontSize = capFont.sp, color = captionInk,
+            lineHeight = (capFont * 1.2f).sp
+        ), maxLines = 1, overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.offset(8.dp, (photoH + 6f).dp).width((pW - 16).dp))
+    }
+}
 
 // v3xx — normalizes an angle to -180..180 (used by pinch-rotate so the
 // sticker rotation slider's range stays valid).
@@ -652,11 +828,15 @@ private fun factFitBudget(style: ShareCardStyle, aspect: ShareCardAspect): Pair<
         // EXPAND (the frost pane can take more lines), so the fit favours
         // growing the box and barely touches the text (0.96× floor) — the
         // old shared mid-flow budget shrank Paper's type to 0.8× while the
-        // height could have absorbed the text.
-        ShareCardStyle.PAPER -> if (tall) 2.0f to 0.96f else 1.8f to 0.96f
+        // height could have absorbed the text. v3xx — the cap nudges up a
+        // touch (2.0/1.8 → 2.2/2.0) so long facts on Paper expand further
+        // before the sparkle has to shrink the box.
+        ShareCardStyle.PAPER -> if (tall) 2.2f to 0.96f else 2.0f to 0.96f
         // Mid-flow facts between the header/title and the footer (Vinyl /
-        // Signature / Custom).
-        else -> if (tall) 1.5f to 0.80f else 1.4f to 0.83f
+        // Signature / Custom). v3xx — +0.1 height cap (1.5/1.4 → 1.6/1.5)
+        // so the mid-flow designs absorb a bit more length before the text
+        // floor kicks in.
+        else -> if (tall) 1.6f to 0.80f else 1.5f to 0.83f
     }
 }
 
@@ -743,6 +923,12 @@ private fun ShareCardPalette.frostInk(): Color {
     val titleLift: Float = 0f,
     /** Fact box pushed DOWN by this many dp (always >= 0). */
     val factLift: Float = 0f,
+    /** v3xx — ADVANCED solver: when the title can't lift any further (the
+     *  category pill / card edge above it) and the fact can't be pushed down
+     *  any further (the card bottom), the RESIDUAL overlap is resolved by
+     *  SHRINKING the fact box by this many dp (applied to factHeightFrac, so
+     *  the preview + export match). 0f = no shrink needed. */
+    val factShrinkDp: Float = 0f,
     /** INFO-ROWS lift (SIGNED dp): negative lifts the author/year rows UP
      *  back between the title and the quick fact; positive pushes them DOWN
      *  clear of a fact that sits above them. */
@@ -887,7 +1073,20 @@ private fun autoLayoutPlan(
     // not absorb a fav/badge overlap that only a fact push can fix.
     val titleLift = minOf(maxOf(sizeLift, collisionTitleLift), titleLiftCap)
     val titleLiftSpent = minOf(collisionTitleLift, titleLift)
-    val collisionFactLift = (maxOf(titleFactOverlap, favOverFact, badgeOverFact) - titleLiftSpent).coerceAtMost(72f).coerceAtLeast(0f)
+    // v3xx — ADVANCED overlap solver: the collision is resolved in THREE
+    // steps, in order of preference — (1) the title lifts (capped by the
+    // pill / card edge), (2) the fact pushes DOWN but never past the card's
+    // bottom edge, (3) whatever is still overlapping SHRINKS the fact box.
+    // The old two-step solver (lift + push, both hard-capped) could leave a
+    // residual overlap on very tall grown boxes and then declared the tap
+    // "done" — the overlap the user kept seeing.
+    val totalCollision = maxOf(titleFactOverlap, favOverFact, badgeOverFact)
+    val spaceBelow = if (f.width > 0f && f.height > 0f) (cardH - f.bottom - 2f).coerceAtLeast(0f) else 0f
+    val collisionFactLift = (totalCollision - titleLiftSpent).coerceIn(0f, spaceBelow.coerceAtMost(72f))
+    val residualCollision = (totalCollision - titleLiftSpent - collisionFactLift).coerceAtLeast(0f)
+    // Shrink the box by the residual (capped at 40% of its height so a
+    // monstrous fact is reduced, never obliterated).
+    val factShrinkDp = if (f.height > 0f) residualCollision.coerceAtMost(f.height * 0.40f) else 0f
     val collisionFavLift = maxOf(
         pokeAbove(t, v), pokeAbove(f, v), pokeAbove(m, v), pokeAbove(b, v)
     ).coerceAtMost(120f)
@@ -937,6 +1136,7 @@ private fun autoLayoutPlan(
 
     if (shape.heightFrac == 0f && titleLift == 0f && collisionFactLift == 0f &&
         collisionMetaLift == 0f && collisionFavLift == 0f && collisionBadgeLift == 0f &&
+        factShrinkDp == 0f &&
         fixTx == 0f && fixTy == 0f && fixFx == 0f && fixFy == 0f &&
         fixMx == 0f && fixMy == 0f && fixVx == 0f && fixVy == 0f &&
         fixBx == 0f && fixBy == 0f
@@ -983,10 +1183,11 @@ private fun autoLayoutPlan(
             factDropCap = ShareCardFactDropCap.NONE
         )
     }).withCollisionRepair(titleLift, collisionFactLift, collisionMetaLift, collisionFavLift, collisionBadgeLift)
+    val withShrink = if (factShrinkDp > 0f) repaired.copy(factShrinkDp = factShrinkDp) else repaired
     return if (fixTx == 0f && fixTy == 0f && fixFx == 0f && fixFy == 0f &&
         fixMx == 0f && fixMy == 0f && fixVx == 0f && fixVy == 0f &&
         fixBx == 0f && fixBy == 0f
-    ) repaired else repaired.copy(
+    ) withShrink else withShrink.copy(
         fixTitleX = fixTx, fixTitleY = fixTy,
         fixFactX = fixFx, fixFactY = fixFy,
         fixMetaX = fixMx, fixMetaY = fixMy,
@@ -1246,12 +1447,23 @@ private fun Modifier.moveFact(m: ShareCardMove): Modifier {
         } else {
             val placeable = measurable.measure(
                 androidx.compose.ui.unit.Constraints(
-                    minWidth = target, maxWidth = target,
+                    // v3xx — minWidth DROPPED (was = target): forcing the child
+                    // to the full target width made a SHORT fact measure the
+                    // whole wide box, so its one line hugged the box's left
+                    // edge with a big gap on the right ("the text shifts left").
+                    // The child now measures at its natural wrap width and is
+                    // CENTERED inside the widened box below.
+                    minWidth = 0, maxWidth = target,
                     minHeight = 0, maxHeight = constraints.maxHeight
                 )
             )
             val over = (target - maxW) / 2
-            layout(target, placeable.height) { placeable.place(-over, 0) }
+            // v3xx — center the CHILD within the widened box (the box itself
+            // is already centred on the card): a short fact stays centred
+            // instead of hugging the left; a full-width paragraph fills the
+            // box exactly as before.
+            val childShift = ((target - placeable.width) / 2f).roundToInt()
+            layout(target, placeable.height) { placeable.place(-over + childShift, 0) }
         }
     }
     return mod
@@ -2017,6 +2229,49 @@ fun TopicShareCard(
             ShareCardStyle.SIGNATURE -> SignatureCard(shownDisplay, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, classicSignature, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans, coverArt = gluedCover, coverW = coverW, coverH = coverH)
             ShareCardStyle.CUSTOM -> CustomCard(shownDisplay, topicName, categoryName, categoryGlyph, palette, shownFact, sharerName, aspect, modifier, ratingStars, categoryFamily, shownQuote, quoteAuthor, byline, year, effectiveBodyScale, callbacks, layoutMove, chapterProgress, chapterFact, bgFilter, factSpans = factSpans)
         }
+        // v3xx — the POLAROID on every style: Collage draws its own inline
+        // print (part of the scrapbook design); the other styles wear the
+        // SAME movable print once a user photo is on the card — style /
+        // filter / size / drag controls work everywhere, so the print is
+        // available on any design, not just the collage. Defaults to the
+        // right side, upper-middle (Collage parks it higher; here the
+        // top-right usually holds the cover pocket or headline art).
+        if (style != ShareCardStyle.COLLAGE && userPhoto != null) {
+            BoxWithConstraints(Modifier.matchParentSize()) {
+                val cwV = maxWidth.value; val chV = maxHeight.value
+                if (cwV <= 0f || chV <= 0f) return@BoxWithConstraints
+                val pStyleV = move.polaroidStyle.coerceIn(0, polaroidLooks.lastIndex)
+                val pFilterV = move.polaroidFilter.coerceIn(0, 4)
+                val lookV = polaroidLooks[pStyleV]
+                val basePW = (cwV * 0.34f * move.polaroidScale).coerceIn(cwV * 0.20f, cwV * 0.44f)
+                val capH = basePW * 0.20f
+                var pW = basePW
+                var pH = basePW * 1.18f
+                if (userPhoto.width > 0 && userPhoto.height > 0) {
+                    val ar = userPhoto.width.toFloat() / userPhoto.height.toFloat()
+                    pH = pW / ar + capH
+                    val maxH = chV * 0.55f
+                    if (pH > maxH) {
+                        pW = ((maxH - capH) * ar).coerceAtMost(basePW)
+                        pH = pW / ar + capH
+                    }
+                    pW = pW.coerceAtMost(cwV * 0.44f)
+                }
+                val photoH = (pH - capH).coerceAtLeast(pW * 0.4f)
+                val pX = (cwV * 0.60f + move.polaroidDx).coerceIn(0f, (cwV - pW - 6f).coerceAtLeast(0f))
+                val pY = (chV * 0.30f + move.polaroidDy).coerceIn(0f, (chV - pH - 6f).coerceAtLeast(0f))
+                PolaroidPrint(
+                    pW = pW, pH = pH, pX = pX, pY = pY, photoH = photoH,
+                    look = lookV, pStyle = pStyleV, pFilter = pFilterV,
+                    userPhoto = userPhoto,
+                    caption = polaroidCaption.ifBlank {
+                        if (sharerName.isNotBlank()) "$sharerName · via Curio" else "via Curio"
+                    },
+                    captionInk = if (pStyleV == polaroidLooks.lastIndex) Color(0xFFF0ECE4) else Color(0xFF40301F),
+                    onPhotoTap = onPhotoTap, callbacks = callbacks
+                )
+            }
+        }
         // v334 — the cover badge rides on top of every style EXCEPT Collage
         // (there it feeds the polaroid photo slot above).
         // v335 — the jacket is a movable element like the badge: its offset
@@ -2095,11 +2350,14 @@ fun TopicShareCard(
                     PaddingValues(start = if (aspect == ShareCardAspect.CLASSIC) 14.dp else 18.dp, bottom = if (aspect == ShareCardAspect.CLASSIC) 28.dp else 26.dp)
                 // v384 — COLLAGE favorites moved OUT of the dark bottom band
                 // into the free middle. v3xx — raised a touch more, so the
-                // strip parks JUST below the title/author rows (fully on the
-                // cream top paper, clear of the tear seam + the category pill
-                // / quick fact below it).
+                // strip parks just below the title/author rows and its LAST
+                // track row no longer slides over the torn seam into the dark
+                // band (the old 112dp top put the strip's bottom right ON the
+                // seam on 3:4 cards, splitting the dark text over the two
+                // collage tones — "divided"): fully on the cream top paper
+                // now, clear of the seam + the category pill below.
                 ShareCardStyle.COLLAGE -> Alignment.TopStart to
-                    PaddingValues(start = 22.dp, top = if (aspect == ShareCardAspect.CLASSIC) 112.dp else 98.dp)
+                    PaddingValues(start = 22.dp, top = if (aspect == ShareCardAspect.CLASSIC) 100.dp else 98.dp)
                 // v3xx — SIGNATURE favorites moved from the bottom corner
                 // (where they overlapped the bottom-anchored quick fact) up
                 // to just below the title/author block — the strip now reads
@@ -2335,7 +2593,12 @@ private fun PaperCard(
             Watermark(family, categoryGlyph, palette.ink.copy(alpha = 0.06f), display.hashCode())
         }
 
-        Column(modifier = Modifier.fillMaxSize().padding(28.dp),
+        // v3xx — the bottom padding deepens (28 → 46dp) so the footer clears
+        // the torn bottom strip (drawn at ~12% up the card): the old 28dp
+        // sat the credit text INSIDE the tear zone, so it read as hidden
+        // behind the bottom decoration (and a grown fact box could shove it
+        // past the card edge).
+        Column(modifier = Modifier.fillMaxSize().padding(start = 28.dp, end = 28.dp, top = 28.dp, bottom = 46.dp),
             verticalArrangement = Arrangement.SpaceBetween) {
             HeaderRow(categoryName, categoryGlyph, palette, move, callbacks)
             MiddleContent(display, factText, aspect, palette, ratingStars, quoteText, qSize, quoteAuthor, byline, year, bodyScale, callbacks, move, chapterProgress, chapterFact, coverArt, coverW, coverH, factSpans = factSpans)
@@ -3277,8 +3540,9 @@ private fun CollageCard(
     else collageMute(androidx.compose.ui.graphics.lerp(palette.accentDark, Color.Black, 0.42f), 0.60f)
     // The polaroid is always WHITE paper, so its handwritten caption must be a
     // fixed warm dark ink — palette.ink on dark tones is near-WHITE (invisible
-    // on the white polaroid).
-    val captionInk = Color(0xFF40301F)
+    // on the white polaroid). The NOIR print is the exception: its dark frame
+    // needs the near-white ink instead.
+    val captionInk = if (move.polaroidStyle == 6) Color(0xFFF0ECE4) else Color(0xFF40301F)
 
     Box(modifier = modifier.fillMaxSize().clip(RoundedCornerShape(6.dp))) {
         // v369 — background layer (paper + botanical field + watermark) wears
@@ -3292,7 +3556,10 @@ private fun CollageCard(
         // ── Layered paper + botanical lower field with a natural torn seam ──
         Canvas(Modifier.fillMaxSize()) {
             val w = size.width; val h = size.height
-            val tearY = h * 0.42f
+            // v3xx — the torn seam rises a touch (0.42 → 0.40) so the dark
+            // band owns a little more of the card and the favorites strip
+            // (parked above the seam) reads cleanly on the cream paper.
+            val tearY = h * 0.40f
             drawRect(bottomSage, Offset.Zero, Size(w, h))
             // Bottom zone — v380 BLENDED: the old two hard wavy paths (a sin-
             // edged dark band + a solid footer wedge with a cut-off top) met in
@@ -3356,7 +3623,7 @@ private fun CollageCard(
             // past the white frame (drawn LAST, so it sits ON the photo) and
             // the frame ADAPTS to the photo's aspect — a landscape print is
             // wide and short, a portrait one tall, like a real instant-print.
-            val pStyle = move.polaroidStyle.coerceIn(0, 4)
+            val pStyle = move.polaroidStyle.coerceIn(0, polaroidLooks.lastIndex)
             val pFilter = move.polaroidFilter.coerceIn(0, 4)
             val look = polaroidLooks[pStyle]
             // v3xx — the upper clamp widened (0.36 → 0.44 of card width) so the
@@ -3385,144 +3652,12 @@ private fun CollageCard(
                 if (sharerName.isNotBlank()) "$sharerName · via Curio" else "via Curio"
             }
 
-            Box(Modifier.offset(pX.dp, pY.dp).size(pW.dp, pH.dp)
-                .graphicsLayer {
-                    rotationZ = look.tilt
-                    shadowElevation = 6f
-                    shape = RoundedCornerShape(3.dp)
-                    clip = false
-                }
-                .background(look.frame, RoundedCornerShape(3.dp))
-                .clickable(enabled = onPhotoTap != null && userPhoto == null) { onPhotoTap?.invoke() }
-                // v3xx — report the print's bounds so the editor can select
-                // and drag it like the cover/jacket.
-                .onGloballyPositioned { callbacks.onPolaroid(it.boundsInWindow()) }
-            ) {
-                // Photo area — the print's film window (tappable when empty)
-                Canvas(Modifier.offset(5.dp, 5.dp).size((pW - 10).dp, photoH.dp)) {
-                    val zw = size.width; val zh = size.height
-                    if (userPhoto != null) {
-                        // Contain-fit the photo inside the window (the window
-                        // already matches the photo's aspect, so this fills it
-                        // edge-to-edge without cropping or stretching).
-                        val ar = userPhoto.width.toFloat() / userPhoto.height.toFloat()
-                        val zA = zw / zh
-                        val (dW, dH) = if (ar > zA) zw to zw / ar else zh * ar to zh
-                        val dx = (zw - dW) / 2f; val dy = (zh - dH) / 2f
-                        drawImage(
-                            userPhoto,
-                            dstOffset = androidx.compose.ui.unit.IntOffset(dx.roundToInt(), dy.roundToInt()),
-                            dstSize = androidx.compose.ui.unit.IntSize(dW.roundToInt(), dH.roundToInt()),
-                            colorFilter = when (pFilter) {
-                                2 -> ColorFilter.colorMatrix(sepiaMatrix)
-                                3 -> ColorFilter.colorMatrix(grayscaleMatrix)
-                                4 -> ColorFilter.colorMatrix(warmMatrix)
-                                else -> null
-                            }
-                        )
-                        // v3xx — FILTER overlays: grain for Noise, a soft
-                        // warm cast + vignette for Nostalgia / Warm.
-                        if (pFilter == 1) {
-                            val rnd = java.util.Random((zw * 131 + zh * 17).toLong())
-                            repeat(240) {
-                                drawCircle(
-                                    if (it % 2 == 0) Color.White.copy(alpha = rnd.nextFloat() * 0.09f)
-                                    else Color.Black.copy(alpha = rnd.nextFloat() * 0.09f),
-                                    rnd.nextFloat() * 1.1f + 0.3f,
-                                    Offset(rnd.nextFloat() * zw, rnd.nextFloat() * zh)
-                                )
-                            }
-                        }
-                        if (pFilter == 2) drawRect(Color(0xFFE8C58A).copy(alpha = 0.10f))
-                        if (pFilter == 4) drawRect(Color(0xFFF0B060).copy(alpha = 0.15f))
-                        if (pFilter == 2 || pFilter == 4) {
-                            drawRect(Brush.radialGradient(
-                                listOf(Color.Transparent, Color.Transparent, Color(0xFF3A2410).copy(alpha = 0.20f)),
-                                center = Offset(zw / 2f, zh / 2f), radius = zw * 0.78f
-                            ))
-                        }
-                        drawRect(Color(0xFFD4A574).copy(alpha = 0.10f))
-                    } else {
-                        drawRoundRect(Color(0xFFE0D8CC), Offset.Zero, Size(zw, zh), CornerRadius(2.dp.toPx()))
-                        // Hint — camera icon + text when no photo
-                        val cx = zw / 2f
-                        val cy = zh / 2f
-                        // Camera body
-                        val camW = zw * 0.30f
-                        val camH = camW * 0.70f
-                        drawRoundRect(
-                            Color(0xFFB0A898).copy(alpha = 0.35f),
-                            Offset(cx - camW / 2f, cy - camH / 2f - 6f),
-                            Size(camW, camH),
-                            CornerRadius(4f)
-                        )
-                        // Lens circle
-                        drawCircle(Color(0xFFB0A898).copy(alpha = 0.30f), camW * 0.22f, Offset(cx, cy - 6f))
-                    }
-                }
-                // Hint text overlay when no photo
-                if (userPhoto == null) {
-                    Column(
-                        modifier = Modifier
-                            .offset(5.dp, (photoH * 0.42f).dp)
-                            .size((pW - 10).dp, (photoH * 0.30f).dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        CurioIcon(name = "photo_camera", tint = Color(0xFFB0A898).copy(alpha = 0.50f), size = 14.dp)
-                        Text("Tap to add photo", style = TextStyle(
-                            fontFamily = LoraFontFamily, fontSize = 7.sp,
-                            color = Color(0xFFB0A898).copy(alpha = 0.60f)
-                        ))
-                    }
-                }
-                // Polaroid finish — hairline frame around the film window +
-                // a glassy sheen over the photo (the Dashed style wears a
-                // dotted hairline instead of the solid one).
-                Canvas(Modifier.fillMaxSize()) {
-                    val pws = size.width
-                    val winH = photoH.dp.toPx()
-                    val fw = pws - 10f
-                    val finish = look.finish.copy(alpha = 0.30f)
-                    if (pStyle == 4) {
-                        drawRoundRect(
-                            finish, Offset(5f, 5f), Size(fw, winH), CornerRadius(2.dp.toPx()),
-                            style = Stroke(1.3.dp.toPx(), pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(6f, 4f)))
-                        )
-                    } else {
-                        drawRoundRect(finish, Offset(5f, 5f), Size(fw, winH), CornerRadius(2.dp.toPx()), style = Stroke(1.3.dp.toPx()))
-                    }
-                    val sheen = Brush.verticalGradient(
-                        listOf(Color.White.copy(alpha = 0.0f), Color.White.copy(alpha = 0.28f), Color.White.copy(alpha = 0.0f)),
-                        startY = 5f, endY = winH
-                    )
-                    drawRect(sheen, Offset(5f, 5f), Size(fw, winH))
-                }
-                // v3xx — TAPE: drawn LAST (sits ON the photo) and PEERING out
-                // past the top edge of the white frame (offset y = -5dp), so it
-                // reads as real washi tape sticking the print to the paper —
-                // never boxed in by the outline.
-                Canvas(
-                    Modifier
-                        .offset((pW * 0.24f).dp, (-5).dp)
-                        .size((pW * 0.52f).dp, 14.dp)
-                        .graphicsLayer { rotationZ = 2f }
-                ) {
-                    drawRect(look.tape.copy(alpha = 0.72f))
-                    // Subtle lighter core so the tape reads as translucent.
-                    drawRect(Color.White.copy(alpha = 0.10f), Offset.Zero, Size(size.width, size.height * 0.42f))
-                }
-
-                // Handwritten name below photo — constrained width + lineHeight
-                // >= fontSize so long captions ellipsize (not clip) and never squish.
-                val capFont = (pW * 0.065f).coerceIn(11f, 15f)
-                Text(polaroidLabel, style = TextStyle(
-                    fontFamily = PatrickHandFontFamily, fontWeight = FontWeight.Normal,
-                    fontSize = capFont.sp, color = captionInk,
-                    lineHeight = (capFont * 1.2f).sp
-                ), maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.offset(8.dp, (photoH + 6f).dp).width((pW - 16).dp))
-            }
+            PolaroidPrint(
+                pW = pW, pH = pH, pX = pX, pY = pY, photoH = photoH,
+                look = look, pStyle = pStyle, pFilter = pFilter,
+                userPhoto = userPhoto, caption = polaroidLabel, captionInk = captionInk,
+                onPhotoTap = onPhotoTap, callbacks = callbacks
+            )
 
             // Title — retro Bungee, dark green, top-left (v... — retro face +
             // tighter leading so long names like "Curious Explorer" never clip)
@@ -7028,18 +7163,22 @@ private fun StarRow(rating: Int, palette: ShareCardPalette) {
 private fun Footer(sharerName: String, quoteText: String?, quoteAuthor: String?, palette: ShareCardPalette, move: ShareCardMove = ShareCardMove(), callbacks: EditBoundsCallbacks = EditBoundsCallbacks()) {
     // FIXED footer: only the author/year row (MiddleContent's meta line)
     // reports bounds and follows the M handle — the footer never moves.
+    // v3xx — SMALLER: the icon, quote-author line and credit all dropped a
+    // size, so the footer is a quiet caption that fits in the space above
+    // the torn bottom strip instead of crowding it (or being pushed past
+    // the card edge by a grown fact box).
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-        CurioIcon(name = CurioIcons.Lightbulb, tint = palette.ink.copy(alpha = 0.30f), size = 14.dp)
-        Spacer(Modifier.height(3.dp))
+        CurioIcon(name = CurioIcons.Lightbulb, tint = palette.ink.copy(alpha = 0.26f), size = 12.dp)
+        Spacer(Modifier.height(2.dp))
         if (quoteText != null && !quoteAuthor.isNullOrBlank()) {
-            Text("$quoteAuthor", style = MaterialTheme.typography.labelMedium.copy(fontFamily = LoraFontFamily, fontWeight = FontWeight.SemiBold), color = palette.ink.copy(alpha = 0.70f), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.End)
+            Text("$quoteAuthor", style = MaterialTheme.typography.labelSmall.copy(fontFamily = LoraFontFamily, fontWeight = FontWeight.SemiBold, fontSize = 9.sp), color = palette.ink.copy(alpha = 0.65f), maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.End)
             Spacer(Modifier.height(2.dp))
         }
         Text(
             if (quoteText != null) { if (sharerName.isNotBlank()) "$sharerName · Stay curious" else "Stay curious" }
             else { if (sharerName.isNotBlank()) "$sharerName · via Curio" else "via Curio" },
-            style = MaterialTheme.typography.labelSmall.copy(fontFamily = GeomFontFamily, fontWeight = FontWeight.SemiBold),
-            color = palette.ink.copy(alpha = 0.60f), maxLines = 1, overflow = TextOverflow.Ellipsis
+            style = MaterialTheme.typography.labelSmall.copy(fontFamily = GeomFontFamily, fontWeight = FontWeight.SemiBold, fontSize = 9.sp),
+            color = palette.ink.copy(alpha = 0.55f), maxLines = 1, overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -7480,7 +7619,15 @@ private fun ArrangeableCard(
                                 .width(t.width.dp)
                                 .height(t.height.dp)
                                 .zIndex(if (isSel && titleFactOverlap) 2f else 0f)
-                                .clickable {
+                                // v3xx — no ripple/indication: selecting (and
+                                // toggling between overlapping boxes) was slow
+                                // and flashy because every tap painted a press
+                                // ripple on a selection tap — instant, clean
+                                // selection now, like the fact's own layer.
+                                .clickable(
+                                    interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                                    indication = null
+                                ) {
                                     focusManager.clearFocus()
                                     onSelectResizeTarget(
                                         if (titleFactOverlap && isSel) ShareCardResizeTarget.FACT
@@ -8910,6 +9057,10 @@ fun TopicShareSheet(
             // lift (back up off a dragged-over title / down clear of a fact
             // grown over it) counts as a change like the other elements.
             val badgeLiftChanges = plan.badgeLift != 0f
+            // v3xx — ADVANCED solver: a residual overlap (title can't lift
+            // past the pill, fact can't push past the card bottom) shrinks
+            // the fact BOX, so the tap always resolves the collision.
+            val shrinkChanges = plan.factShrinkDp > 0f
             // v3xx — out-of-card clamp changes (anything that hung off the
             // card edge is pulled back inside on the same tap).
             val fixChanges = plan.fixTitleX != 0f || plan.fixTitleY != 0f ||
@@ -8919,10 +9070,15 @@ fun TopicShareSheet(
                 plan.fixBadgeX != 0f || plan.fixBadgeY != 0f
             if (wantsTall || hChanges || sChanges || fmtChanges || dropCapChanges ||
                 titleLiftChanges || factLiftChanges || metaLiftChanges || favLiftChanges ||
-                badgeLiftChanges || fixChanges
+                badgeLiftChanges || shrinkChanges || fixChanges
             ) {
                 updateMove(move.copy(
-                    factHeightFrac = if (h > 0f) h.coerceIn(0.35f, 6f) else move.factHeightFrac,
+                    // v3xx — a residual overlap shrinks the fact box on the
+                    // same tap (heightFrac scales with the shrink so the
+                    // preview and the exported image match).
+                    factHeightFrac = (if (h > 0f) h.coerceIn(0.35f, 6f) else move.factHeightFrac) *
+                        (if (shrinkChanges && measuredFact.height > 0f)
+                            (1f - (plan.factShrinkDp / measuredFact.height).coerceIn(0f, 0.4f)) else 1f),
                     factScale = if (s > 0f) s.coerceIn(0.5f, 2f) else move.factScale,
                     factDy = move.factDy + plan.factLift.coerceIn(0f, 72f) + plan.fixFactY,
                     factDx = move.factDx + plan.fixFactX,
@@ -9185,6 +9341,11 @@ fun TopicShareSheet(
                                     // songs / List-Rows) so the user lands
                                     // straight in the sizing controls.
                                     if (target == ShareCardResizeTarget.FAVTRACKS) toolOpen = "box"
+                                    // v3xx — selecting the polaroid auto-opens
+                                    // its customisation panel (style / filter /
+                                    // size), mirroring the favorites strip's
+                                    // tap-to-Crop flow.
+                                    if (target == ShareCardResizeTarget.POLAROID) toolOpen = "polaroid"
                                 },
                                 selectedResizeTarget = selectedResizeTarget,
                                 move = pageMove,
@@ -9646,6 +9807,21 @@ fun TopicShareSheet(
                                 onClick = { toolOpen = if (toolOpen == "source") null else "source" }
                             )
                         }
+                        // v3xx — POLAROID tool in the bottom-sheet toolbar
+                        // (frame style / photo filter / print size) — it used
+                        // to live full-screen only. Shown whenever the print
+                        // can appear: always on Collage, on every other style
+                        // once a user photo is on the card.
+                        if (currentStyle == ShareCardStyle.COLLAGE || userPhoto != null) {
+                            ToolWithCaption(caption = "Polaroid") {
+                                EditToolPill(
+                                    glyph = CurioIcons.PhotoLibrary,
+                                    description = "Polaroid style / filter / size",
+                                    active = toolOpen == "polaroid",
+                                    onClick = { toolOpen = if (toolOpen == "polaroid") null else "polaroid" }
+                                )
+                            }
+                        }
                         // v330 — Reset + Done live in the bottom action bar
                         // while editing (see below); the floating cluster over
                         // the card is gone.
@@ -9890,11 +10066,14 @@ fun TopicShareSheet(
                                                 CurioIcon(name = CurioIcons.AutoAwesome, contentDescription = "Stickers", tint = if (stickerToolsOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, size = 19.dp)
                                             }
                                         }
-                                        // v3xx — POLAROID button (Collage card
-                                        // only): opens the print's style /
-                                        // filter / size panel; the grip on the
-                                        // card moves it.
-                                        if (currentStyle == ShareCardStyle.COLLAGE) {
+                                        // v3xx — POLAROID button (every style
+                                        // the print can appear on): opens the
+                                        // print's style / filter / size panel;
+                                        // the grip on the card moves it. The
+                                        // polaroid renders on Collage always
+                                        // and on other styles once a user photo
+                                        // is on the card.
+                                        if (currentStyle == ShareCardStyle.COLLAGE || userPhoto != null) {
                                             Surface(
                                                 onClick = {
                                                     haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -9949,7 +10128,16 @@ fun TopicShareSheet(
                                 // re-spread the spacing, so it never matched.)
                                 // v375 — the card area is the Column's leftover
                                 // space (weight), below the top bar and panel.
-                                BoxWithConstraints(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                // v3xx — the tool panels (Text / Stickers /
+                                // Polaroid) now FLOAT OVER the card instead of
+                                // pushing it: the card's BoxWithConstraints
+                                // keeps the FULL leftover height (fillMaxSize
+                                // inside a weight(1f) Box), so opening a panel
+                                // never shrinks the preview, re-wraps its text
+                                // or changes its look — the old in-flow panels
+                                // ate the card's height and re-zoomed it.
+                                Box(Modifier.weight(1f)) {
+                                BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                     val ratio = aspect.widthDp.toFloat() / aspect.heightDp.toFloat()
                                     val baseW = 280f
                                     val baseH = baseW / ratio
@@ -9981,18 +10169,20 @@ fun TopicShareSheet(
                                             factEditMode = factEditMode,
                                             onFactEditModeChange = { factEditMode = it },
                                             onRequestInlineFactEdit = { requestFactInlineEdit() },
-                                            onToggleEdit = {},
-                                            onSelectResizeTarget = { target ->
-                                                if (target == ShareCardResizeTarget.FACT &&
-                                                    activeId != CUSTOM_FACT_ID && activeId != "chapter_review" &&
-                                                    progressForCard == null
-                                                ) {
-                                                    selectedId = CUSTOM_FACT_ID
-                                                    customText = activeSource.text
-                                                    editedFact = null
-                                                }
-                                                selectedResizeTarget = target
-                                            },
+                                            onToggleEdit = {},                            onSelectResizeTarget = { target ->
+                                if (target == ShareCardResizeTarget.FACT &&
+                                    activeId != CUSTOM_FACT_ID && activeId != "chapter_review" &&
+                                    progressForCard == null
+                                ) {
+                                    selectedId = CUSTOM_FACT_ID
+                                    customText = activeSource.text
+                                    editedFact = null
+                                }
+                                selectedResizeTarget = target
+                                // v3xx — selecting the polaroid auto-opens its
+                                // full-screen customisation panel.
+                                if (target == ShareCardResizeTarget.POLAROID) polaroidToolsOpen = true
+                            },
                                             selectedResizeTarget = selectedResizeTarget,
                                             move = move,
                                             onMove = { updateMove(it) },
@@ -10017,13 +10207,18 @@ fun TopicShareSheet(
                                             TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, factSpans = if (isQuotes) emptyList() else cardFactRenderSpans, stickers = stickers, callbacks = cb)
                                         }
                                         // v3xx — the STICKER edit layer (full
-                                        // screen only): while the sticker tool
-                                        // is open, every sticker is tappable /
-                                        // draggable and the selected one wears
-                                        // the coffee chrome. Drawn OVER the
-                                        // ArrangeableCard chrome, so a drag
-                                        // here belongs to the sticker.
-                                        if (stickerToolsOpen) {
+                                        // screen only): every sticker is
+                                        // tappable / draggable and the selected
+                                        // one wears the coffee chrome. Drawn
+                                        // OVER the ArrangeableCard chrome, so a
+                                        // drag here belongs to the sticker.
+                                        // v3xx — always live while stickers
+                                        // exist (the old gate on the panel
+                                        // being OPEN left a placed emoji stuck:
+                                        // closing the panel made it untappable,
+                                        // so an emoji overlapping a box could
+                                        // never be selected again).
+                                        if (stickers.isNotEmpty()) {
                                             StickerEditOverlay(
                                                 stickers = stickers,
                                                 selectedIndex = selectedSticker,
@@ -10067,8 +10262,10 @@ fun TopicShareSheet(
                                     }
                                     }
                                 }
+                                }
                             AnimatedVisibility(
                                 visible = fsToolsOpen,
+                                modifier = Modifier.align(Alignment.BottomCenter),
                                 enter = fadeIn(tween(170)) + expandVertically(tween(170)),
                                 exit = fadeOut(tween(140)) + shrinkVertically(tween(140))
                             ) {
@@ -10248,6 +10445,7 @@ fun TopicShareSheet(
                                 // opens/closes with a smooth fade + slide.
                                 AnimatedVisibility(
                                     visible = stickerToolsOpen,
+                                    modifier = Modifier.align(Alignment.BottomCenter),
                                     enter = fadeIn(tween(170)) + expandVertically(tween(170)),
                                     exit = fadeOut(tween(140)) + shrinkVertically(tween(140))
                                 ) {
@@ -10404,13 +10602,16 @@ fun TopicShareSheet(
                                         }
                                     }
                                 }
-                                // v3xx — POLAROID panel (Collage card only):
-                                // the print's STYLE (frame + tape + tilt),
-                                // PHOTO FILTER and SIZE pickers live here; the
-                                // grip on the card moves the print. v3xx —
-                                // opens/closes with a smooth fade + slide.
+                                // v3xx — POLAROID panel (every style the
+                                // print can appear on): the print's STYLE
+                                // (frame + tape + tilt), PHOTO FILTER and SIZE
+                                // pickers live here; the grip on the card moves
+                                // the print. Opens/closes with a smooth fade +
+                                // slide, and now FLOATS over the card (it no
+                                // longer shrinks the preview).
                                 AnimatedVisibility(
                                     visible = polaroidToolsOpen,
+                                    modifier = Modifier.align(Alignment.BottomCenter),
                                     enter = fadeIn(tween(170)) + expandVertically(tween(170)),
                                     exit = fadeOut(tween(140)) + shrinkVertically(tween(140))
                                 ) {
@@ -11133,6 +11334,42 @@ fun TopicShareSheet(
                                     }
                                 }
                             }
+                        }
+                        // v3xx — POLAROID customisation in the bottom sheet
+                        // (was full-screen only): frame style / photo filter /
+                        // print size, mirroring the full-screen panel. Opens
+                        // automatically when the polaroid on the card is
+                        // selected (or via the toolbar's Polaroid pill).
+                        "polaroid" -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text("Polaroid", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("Pick a frame style, a photo filter and the print size. Tap the polaroid on the card and drag its grip to move it — the frame hugs your photo's shape.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                polaroidStyleNames.forEachIndexed { i, name ->
+                                    Pill(name, CurioIcons.Palette, move.polaroidStyle == i) {
+                                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                        updateMove(move.copy(polaroidStyle = i))
+                                    }
+                                }
+                            }
+                            Text("Photo filter", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                polaroidFilterNames.forEachIndexed { i, name ->
+                                    Pill(name, CurioIcons.PhotoSizeSelectLarge, move.polaroidFilter == i) {
+                                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                        updateMove(move.copy(polaroidFilter = i))
+                                    }
+                                }
+                            }
+                            SizeSliderColumn(
+                                label = "Print size",
+                                value = move.polaroidScale,
+                                onValueChange = { v ->
+                                    updateMove(move.copy(polaroidScale = v.coerceIn(0.6f, 1.6f)))
+                                },
+                                range = 0.6f..1.6f,
+                                steps = 20,
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
                     }
                 }

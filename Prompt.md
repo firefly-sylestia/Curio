@@ -2,6 +2,54 @@
 
 ## Request (2026-09-07, active — Cabinet v2 build in progress)
 
+### Completed — share-editor batch: polaroid everywhere, sparkle solver, editor fixes (2026-09-07)
+
+**Request (10 items):** polaroid editing in the bottom sheet + auto-open;
+fix the Sunglow polaroid style + add more; polaroid on other styles; the
+sparkle's title↔fact overlap fix sometimes doesn't fix ("use an advanced
+system, research it, extend smart fit"); laggy/buggy title↔fact selection
+switching; emoji overlapping a box can't be tapped to select; full-screen
+preview shrinks when a panel opens below; fact text shifts left when the
+box is widened; Collage favorites split over the two tones (raise the
+tear); Paper footer hidden behind the bottom design / off-screen.
+
+**All in `TopicShareCard.kt` (+ changelog):**
+1. **Polaroid in the bottom sheet:** new `toolOpen == "polaroid"` panel
+   (style/filter/size), toolbar pill, and tapping the print auto-opens it
+   (both modes); the full-screen Polaroid button is no longer Collage-only.
+2. **Polaroid styles:** Sunglow reworked (warm ivory + honey tape, the old
+   flat butter-yellow read as a cheap sticker); added CANDY (rose + blush)
+   and NOIR (charcoal + silver, light caption ink) — 7 looks total.
+3. **Polaroid on other styles:** extracted the print into `PolaroidPrint`
+   (Collage still calls it inline); TopicShareCard renders it as a shared
+   overlay on non-Collage styles when a user photo is on the card (so
+   default cards stay clean). Defaults right side, upper-middle.
+4. **Advanced sparkle solver:** title lift (capped at pill/edge) → fact
+   push (capped at the card bottom) → residual overlap SHRINKS the fact
+   box (`factShrinkDp` on the plan, applied to factHeightFrac). Smart fit
+   budgets bumped: Paper 2.0/1.8 → 2.2/2.0, mid-flow 1.5/1.4 → 1.6/1.5.
+5. **Selection switching:** title tap box no longer paints a ripple
+   (instant selection toggle on overlapping boxes).
+6. **Emoji tap:** StickerEditOverlay is now live whenever stickers exist
+   (was gated on the panel being OPEN — a placed emoji overlapping a box
+   could never be selected again).
+7. **Full-screen preview stability:** the card area is now a weight(1f)
+   Box with the card at fillMaxSize; the Text/Stickers/Polaroid panels
+   float over it (align BottomCenter) instead of shrinking it.
+8. **Fact width centering:** `moveFact` widened branch no longer forces
+   minWidth = target; the child measures naturally and is centered in the
+   widened box (short facts stay centered).
+9. **Collage fav strip:** top 112 → 100dp so its last row clears the torn
+   seam (the "divided" look); the tear itself rises 0.42 → 0.40.
+10. **Paper footer:** smaller (12dp icon, 9sp type) + Column bottom
+    padding 28 → 46dp so it clears the torn bottom strip.
+
+**Not done / needs device:** the "collage preview glitched from the
+sides" report couldn't be reproduced from code (likely the asymmetric
+footer-wave ends or rounded-corner clip of the tear teeth at certain
+aspect ratios) — left untouched to avoid a visual regression; the
+overlapping title/fact switching jank may need on-device reproduction.
+
 ### Completed — sparkle auto-layout vs category pill overlap (2026-09-07)
 
 **Request:** the auto-layout sparkle pill on share cards ignores the category
