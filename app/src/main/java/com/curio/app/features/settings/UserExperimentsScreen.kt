@@ -225,6 +225,19 @@ fun UserExperimentsScreen(navController: NavController) {
                             }
                         }
                     )
+                    // v3xx — the Book browser moved OUT of the hub's horizontal
+                    // cover strip into its own scrollable line-by-line list.
+                    CurioSettingsDivider()
+                    CurioSettingsRow(
+                        CurioIcons.MenuBook,
+                        "Book browser",
+                        "Every book line by line — covers, ratings and years, scrollable",
+                        onClick = {
+                            navController.navigate(com.curio.app.navigation.CurioRoutes.SETTINGS_BOOK_BROWSER) {
+                                launchSingleTop = true
+                            }
+                        }
+                    )
                 }
             }
 

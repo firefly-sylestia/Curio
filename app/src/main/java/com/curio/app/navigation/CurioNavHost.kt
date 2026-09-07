@@ -887,6 +887,9 @@ fun CurioNavHost(
             composable(CurioRoutes.SETTINGS_BOOK_COVER) {
                 BookCoverHubScreen(navController = navController)
             }
+            composable(CurioRoutes.SETTINGS_BOOK_BROWSER) {
+                com.curio.app.features.settings.BookBrowserScreen(navController = navController)
+            }
             composable(CurioRoutes.SHARE_HUB) {
                 ShareHubScreen(navController = navController)
             }

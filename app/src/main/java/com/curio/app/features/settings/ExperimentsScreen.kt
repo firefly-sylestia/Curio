@@ -145,6 +145,22 @@ fun ExperimentsScreen(navController: NavController) {
                 }
                 }
             }
+            // v3xx — CABINET v2 experiment (default OFF): the saved-entries +
+            // liked-books surfaces render as collections with jacket-art
+            // covers, and Home's Save shortcut repoints into the new view —
+            // only while this toggle is on (see the AppPreferences state).
+            item { CurioSectionLabel("Cabinet v2") }
+            item {
+                CurioSettingsCard(shadowElevation = 0.dp) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        ExperimentSwitchRow(
+                            "Cabinet v2 collections",
+                            "Experimental: saved discoveries and liked books / series live in a new collections view with jacket-art covers (books half-book, albums square, series poster — never stretched). While on, Home's Save shortcut leads here; the old view returns when you turn it off.",
+                            AppPreferences.cabinetV2EnabledState
+                        ) { wanted -> AppPreferences.setCabinetV2Enabled(context, wanted) }
+                    }
+                }
+            }
             item { CurioSectionLabel("Appearance experiments") }
             item {
                 CurioSettingsCard(shadowElevation = 0.dp) {

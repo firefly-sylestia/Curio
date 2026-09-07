@@ -1,51 +1,51 @@
 # Prompt Log — current request
 
-## Request (2026-09-07, active → v384 follow-up committing)
+## Request (2026-09-07, active — Cabinet v2 build in progress)
 
-Share-card + notes-sheet follow-up on top of the pushed v384 smart-layout
-commit (`644097c9`). Big combined request; asked 3 design questions first
-(answers: count slider in the strip tool; List/Rows toggle = ALL designs;
-no-fact favorites expansion = default, not a toggle).
+### Done this session
+- **v3xx11** (`5ee6f232`): CI compile fixes + Underline (`format_underlined`)
+  & `link` icon glyphs re-subset into the bundled icon font (zero lost).
+- **v3xx12** (`4684b1a7`): global persistent **text history** (TextHistory.kt)
+  — pause / every-10-words / editor-close capture; pill + browser w/ pin,
+  copy, restore-into-active-field, delete; wired into the share sheet,
+  full-screen editor and Enlarge writing sheet.
+- **v3xx13** (`05cf3271`): full-screen editor polish — ICON-ONLY top pills
+  (Close/Aspect/Layout/Stickers/Polaroid/Text, scrollable cluster), panels
+  confirmed below the card, polaroid no longer sliced by its selection
+  outline (floating 8dp padded outline), print-size slider real travel
+  (36→44% width, 46→55% height caps), sticker tap-outside deselect, smooth
+  AnimatedVisibility panel open/close.
 
-**What the user asked + what was done:**
+### Cabinet v2 — plan (user answers recorded)
+User answers: experimental toggle **Settings → Experiments, default OFF**;
+Home Save is **moved not deleted, only while the toggle is on** (old view
+returns when off); sources = **liked + saved entries**; covers = **jacket
+art, contain-fit** (books half-book w/ spine+sheen, albums square, series
+poster — never stretched).
 
-1. **Link share** — remove the Link icon; fold its caption dialog into the
-   DEFAULT Share action. Done: the Share button opens one dialog with the
-   caption field + an "Include a link" switch (link on → your words + the
-   topic's link share as text; link off → the picture shares with the
-   caption attached or none). The old Link pill button is deleted.
+Grounded findings: liked books = `KEY_BOOK_FAVORITES` set in AppPreferences
+(`getBookFavorites/toggleBookFavorite`); series = `KEY_SERIES_FAVORITES`;
+covers = `KEY_BOOK_COVER_URLS` map + share-card cover fetch; saved things =
+the Cabinet screen (`features/cabinet/CabinetScreen.kt`, 1631 lines) opened
+with `screen = "cabinet"` from Home/other nav; experiments list =
+`features/settings/ExperimentsScreen.kt` (CurioSectionLabel +
+CurioSettingsCard + ExperimentSwitchRow); reactive boolean prefs pattern =
+`XState by mutableStateOf` + KEY const + isX/setX + sync line.
 
-2. **Info-row "reappear" fix** — the sparkle's info-row repair didn't work
-   when the fact box covered the rows (offset estimates missed box growth).
-   Done: `ArrangeableCard` reports live card-local bounds (title/fact/meta/
-   fav) via a new `onMeasuredBounds` callback → sheet state →
-   `autoLayoutPlan` now computes REAL overlaps (with horizontal check) and
-   pushes title / fact / info rows / favorites clear (new `favLift` too).
+Implementation slices (planned order):
+1. ✅ **Toggle foundation** (this commit): `cabinetV2EnabledState` (default
+   false) + `KEY_CABINET_V2`, is/set + sync; Experiments row under a new
+   "Cabinet v2" section.
+2. **View gating**: read the pref in the Home save/Cabinet affordances and
+   the Cabinet screen — when ON show the v2 view (and repoint Home Save),
+   when OFF current behaviour.
+3. **Cabinet v2 screen** (`CabinetV2` route or mode inside CabinetScreen):
+   collections of saved entries + liked books/series/albums; rows/cards with
+   jacket-art cover component (contain-fit: book = half-book jacket w/ spine
+   + sheen, album = square, series = poster) — reuse/abstract the share-card
+   cover art renderer.
+4. **Thoughtful features**: blur/glass toolbar, search/grouping, multi-select
+   batch, customisation — to be prioritised with the user as slices land.
 
-3. **Favorites overhaul** (albums):
-   - Dynamic width: rows hug the longest song title (fillMaxWidth/weight
-     removed in BoxedFavStrip + EditorialFavStrip).
-   - Collage + Signature/Custom: `noBox = true` (plain type in the card's
-     ink, no surface/border). Collage favSlot moved to the free middle
-     (above the category pill + quick fact, below title/info); Signature
-     raised clear of the fact/footer.
-   - Strip tool: SONGS count slider (1..all, `favCount` on the move,
-     persisted/loaded) + LIST/ROWS toggle (global `albumFavRows` pref in
-     AppPreferences, `FlowRow` chips for rows mode).
-   - No-fact: strip auto-expands (all songs, 1.3× type, wider) — `noFact`
-     derived from blank fact at the card level.
-   - Sparkle repair now includes the favorites strip (`favLift` → favDy).
-
-4. **Dark-mode notes sheets** (books/albums/series): `ChapterNoteField` is
-   now fully palette-aware (bg/placeholder/text/Expand chip derive from the
-   sheet ink/accent instead of raw Material scheme colors) — fixes the
-   "Add a note" box in dark mode. Page text + chapter/track/episode numbers
-   already used palette-aware ink/onSurface/onSurfaceVariant vals.
-
-**Out of scope / open:** exact visual placement of the Collage/Signature
-favorites needs device verification (couldn't run the app; CI validates
-compilation only). The album/series sheets' page text + numbers were
-already palette-aware — if still "not fine" on device, the wash/ink recipe
-in `notesSheetPalette` is the next lever. `view_agenda`/`view_module`
-glyphs assumed present in the bundled symbol font (missing glyph = blank
-icon, not a crash).
+Backlog: multi-select stickers, sparkle info snap, quick-fact tap-out reset,
+wider text-history coverage.

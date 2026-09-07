@@ -285,6 +285,199 @@ app/src/main/java/com/curio/app/
     Mathematics/Mythology/Painters/Plants/Psychology/Quotes/Scientists/
     Albums/Songs/Series/Games/Sports/Technologies and topic variants)
     keep their existing scene designs.
+- **v3xx8 — share-card stickers + link-share fix + sparkle repair rework +
+  Book browser.** Per user request (combined batch):
+  - **EMOJI STICKERS (full-screen editor only):** the full-screen editor's
+    top bar gains a **Stickers** button (between Layout and Text; the
+    AutoAwesome glyph) that opens an inline panel — a horizontal emoji
+    picker (48 curated emojis in `stickerEmojis`) plus, when a sticker is
+    selected, a size slider, **To front / To back** (z-order) and Delete.
+    Stickers are `ShareSticker(emoji, x, y, sizeFrac)` — positions/sizes
+    are card FRACTIONS so the preview, the sheet and the exported PNG all
+    match. The card's sticker layer renders on TOP of every style inside
+    `TopicShareCard` (new `stickers` param threaded through all 5 call
+    sites in the sheet + exports); the interactive edit layer
+    (`StickerEditOverlay`, drawn over the ArrangeableCard chrome only in
+    full screen while the tool is open) makes each sticker tap-to-select /
+    drag-to-move, clamped inside the card. List order = stacking order
+    (later = on top). Persisted per topic via `saveShareCardEdits` (a
+    `stickers` JSON array; restored on reopen) and cleared by Reset-all.
+  - **LINK-SHARE FIX + Telegram hidden link:** the Share dialog's
+    "Include a link" mode previously posted TEXT ONLY (caption + raw URL)
+    — it now ALSO attaches the card PNG via `shareComposableCard` with
+    `shareText`, so the picture is never lost. The link text uses
+    Telegram's hidden-link syntax `[displayTopic](linkUrl)` (the URL hides
+    behind the topic name, like `[1, 2, 3]` citation links).
+  - **Sparkle repair rework (`autoLayoutPlan`/`runAutoLayout`):** the INFO
+    rows (byline/author/year) now get a SIGNED `metaLift` — a grown/
+    dragged fact covering them lifts the rows UP back between the title
+    and the quick fact (negative lift) instead of dumping them below it;
+    when the lifted rows have no room the TITLE moves up a little for them
+    (`titleForMeta` from the measured title→meta gap). NEW out-of-card
+    clamp: anything whose measured card-local rect hangs off the card
+    (left/top < 0 or right/bottom > card) is pulled back inside on the
+    same tap (never re-centred) via `fixTitleX/Y … fixFavX/Y` deltas
+    applied to each element's own dx/dy. `autoLayoutPlan` gained
+    `cardW`/`cardH` (the 280dp preview box).
+  - **MoveHandle zIndex fix:** the edit-mode grip now sits at `zIndex(10f)`
+    so it ALWAYS wins the touch — a selected box that overlaps its
+    neighbours is drawn at zIndex 2 and used to steal the handle's drags
+    ("the handle doesn't work when boxes overlap"); the tap/drag now
+    always reaches the handle and moves the box.
+  - **Book browser:** the Book covers & ratings hub's horizontal
+    "All covers" LazyRow strip (CoverTile) is REMOVED; a new
+    **Book browser** screen (`features/settings/BookBrowserScreen.kt`,
+    route `SETTINGS_BOOK_BROWSER`, registered in the NavHost) lists every
+    book as a scrollable line-by-line row — cover thumbnail, name,
+    author · year, cached ★ rating + count, chevron — tapping opens the
+    book's reveal. Reached from a new "Book browser" row under
+    Experiments → Content tools, next to "Book covers & ratings".
+- **v3xx9 — favorites fixes + collage polaroid rework + sticker pinch.**
+  Per user request:
+  - **SIGNATURE favorites ink + placement:** the plain-type strip on
+    Signature now wears the DESIGN's own body ink (`sigFavInk` —
+    `signatureDesign(...).bodyColor` computed in the shared favorites
+    block and threaded via a new `inkOverride` param on
+    `FavoriteTracksBadge`/`BoxedFavStrip`), so the tone's palette.ink can
+    never clash with a signature scene (near-black ink on Mario's red was
+    unreadable). The Signature slot ALSO moved from the bottom corner
+    (where it overlapped the bottom-anchored quick fact) UP to just below
+    the title/author block (TopStart 138/130dp). Custom keeps its bottom
+    pocket.
+  - **COLLAGE favorites:** raised a little more (112/98dp) so the strip
+    parks just under the title/author rows fully on the cream top paper
+    (clear of the tear seam), with stronger alphas (label 0.66, body
+    0.92, heart 0.95).
+  - **Favorites collision direction fix:** `bottomOverlap(upper, lower)`
+    ASSUMES the first box is above the second — the old fav/fact calls
+    fed boxes in the wrong order and produced giant false positives that
+    shoved the strip/fact around on sparkle taps. New `pokeAbove` guard
+    (order-checked) + `favOverFact` now pushes the FACT down when a
+    top-placed strip (Collage/Signature) grows into it, and the fav-only
+    lift is order-guarded so the bottom-corner styles (Paper/Vinyl)
+    never false-trigger.
+  - **Collage center watermark removed:** `Watermark` gained `center =
+    false` and the Collage card passes it — the 80dp category glyph that
+    floated in the middle of the card is gone (corner set stays).
+  - **POLAROID rework (Collage):** the instant-print is now a movable /
+    scalable element — new `ShareCardResizeTarget.POLAROID` + `onPolaroid`
+    bounds callback + selectable box + MoveHandle grip in the
+    ArrangeableCard chrome (mirrors cover/fav). New move fields
+    `polaroidDx/Dy/Scale/Style/Filter` (persisted in the per-style move
+    JSON; Reset layout clears position+scale, keeps style/filter). The
+    frame ADAPTS to the photo's aspect (landscape print = wide/short,
+    portrait = tall, capped at 46% of card height; no photo = classic
+    1.18 print), the tape PEERS out past the white frame (drawn last, so
+    it sits ON the photo), and 5 STYLES (`PolaroidLook`: Classic · Retro
+    · Sunglow · Vintage · Dashed — frame/tape/tilt/finish, Dashed wears a
+    dotted hairline) + 5 PHOTO FILTERS (None · Noise grain · Nostalgia
+    sepia · B&W · Warm with overlays/vignette via `sepiaMatrix` /
+    `grayscaleMatrix` / `warmMatrix`) are picked from a new full-screen
+    **Polaroid** button (Collage card only) panel, plus a Print-size
+    slider (also wired into the sheet's Box tool when the polaroid is
+    selected).
+  - **Sticker pinch-to-resize:** `StickerEditOverlay` now uses ONE
+    `detectTransformGestures` recognizer per sticker — tap selects, drag
+    moves, and a two-finger PINCH scales the emoji (new `onResize`
+    wiring clamps 0.08–0.6 width-fraction; the Size slider stays for fine
+    control). Hint texts updated.
+- **v3xx10 — sticker imports + rotation, bottom tool panels, icon-only
+  toolbar, sparkle info-row snap, fav tweaks.** Per user request:
+  - **IMPORT PNG cutouts:** the sticker panel gains an **Import PNG
+    cutout** button (`stickerPickerLauncher`, GetContent) — the picked
+    image is re-encoded to PNG under `context.filesDir/stickers` via
+    `importStickerPng` (transparency preserved) and dropped on the card
+    as an image sticker. `ShareSticker` gained `imagePath: String?` and
+    `rotation: Float`; the card layer + `StickerEditOverlay` render an
+    image sticker as an aspect-preserving bitmap (width = sizeFrac ×
+    card width, decoded once per path through `decodeStickerBitmap` + a
+    `ConcurrentHashMap` cache, downscaled to ≤1024px) instead of the
+    emoji glyph. Both fields persist in the stickers JSON.
+  - **STICKER ROTATION:** a Rotation slider (−180°..180°, 0° reset pill)
+    in the panel AND two-finger twist on the card (the transform
+    recognizer's rotation delta, normalized via `normDegrees`).
+  - **Tool panels at the BOTTOM:** the full-screen editor's Text /
+    Stickers / Polaroid panels moved from under the top bar to BELOW the
+    card (bottom of the dialog Column) — the tools sit under the thumb.
+  - **Icon-only toolbar:** `ToolWithCaption` no longer renders its tiny
+    caption text — the edit toolbar is pure icon pills (Text · Size ·
+    Crop · Fit · Font · Color · Adjust · Align · Format · Content have
+    no text under the icons).
+  - **Sparkle info-row SNAP:** the meta collision logic is replaced by a
+    snap-to-title: on the sparkle tap the info rows lift so their top
+    meets the title's bottom (gap ≤ 2dp), guaranteeing they sit BETWEEN
+    the title and the quick fact and TOUCHING the title — no more
+    author/year below the fact. `runAutoLayout`'s negative meta travel
+    widened (−240dp) so one tap brings a far-drifted strip all the way
+    up.
+  - **Fav List/Rows icons fixed:** the raw `view_agenda` / `view_module`
+    strings aren't in the bundled icon subset (they rendered as literal
+    text); swapped to the verified `drag_handle` (List) and `grid_view`
+    (Rows) glyphs.
+  -    **Fav auto-crop:** selecting the favorites strip (FAVTRACKS) now
+    auto-opens the Crop (box) tool in the sheet's edit toolbar.
+- **v3xx11 — CI compile fixes + icon-glyph repairs.** The v3xx10 push broke
+  CI in three spots: the polaroid photo-filter matrices were raw
+  `FloatArray`s (now wrapped in `androidx.compose.ui.graphics.ColorMatrix`),
+  a `photoH.toPx()` call on a Float (now `photoH.dp.toPx()`), and
+  `detectTransformGestures` was referenced fully-qualified without an
+  import (now imported + called unqualified). Icon fixes: the Underline
+  pill's glyph name `format_underline` doesn't exist in the Material
+  Symbols catalog (it rendered as literal text) — `CurioIcons.Format-
+  Underline` now points at the real `format_underlined`, and the bundled
+  icon font was re-subset (pyftsubset, layout-features=rlig) to ADD
+  `format_underlined` + `link` (the share-link-preview icon) with ZERO
+  icons lost (verified by ligature-set diff).
+- **v3xx12 — TEXT HISTORY (global, persistent, survives reset).** Per user
+  request: every text edit in the share-card editor family now feeds a
+  GLOBAL text-history feed that is never cleared by Reset layout, field
+  switches, or leaving the topic. New file `ui/components/TextHistory.kt`:
+  - `TextHistoryStore` — SharedPreferences-backed JSON (`curio_text_history`,
+    cap 300, dedupe consecutive repeats + blanks) with `record / snapshot /
+    setPinned / delete / clearAll`.
+  - `rememberTextHistoryCapture(ctx, field, text, resetKey)` — captures when
+    typing PAUSES (~1.3s debounce cancelled by the next keystroke), at every
+    10th word boundary (immediate), and on editor dispose (final state);
+    resetKey (topic·activeId) resets memory across cards/fields so content
+    switching never snapshots itself.
+  - `TextHistoryPill` + `TextHistoryBrowser` — the same corner pill and
+    centered overlay everywhere: sheet tools column (top-right), the
+    full-screen editor's top bar and the Enlarge writing sheet. The browser
+    lists newest-first with pinned floats, per-entry field label + time
+    (Just now / Xm / Xh / d MMM · HH:mm), preview (tap = full selectable
+    view), and Pin / Copy / Restore-into-active-field / Delete actions with
+    a two-tap Clear.
+  - TopicShareSheet feeds the FACT text (label by activeId: Custom fact /
+    Chapter review / Reading progress / Quote / Quick fact) + the polaroid
+    photo caption; Restore routes through `routeFactChange`.
+- **v3xx13 — full-screen editor polish: icon-only top bar, polaroid cut +
+  size fixes, sticker deselect + smooth panels.** Per user request ("icon
+  only … overlapping … polaroid gets cut … size adjuster no length …
+  stickers tapping outside … smooth to open and close"):
+  - **ICON-ONLY top bar:** the full-screen editor's Close · Aspect · Layout ·
+    Stickers · Polaroid · Text buttons dropped their text labels (Close /
+    ratio / Layout / Stickers / Polaroid / Text) for compact 40dp circle
+    icons (descriptions ride the icon semantics) and the right cluster is
+    now `horizontalScroll`-able — the pills no longer crowd/overlap on
+    narrow screens. (Tool panels already live BELOW the card.)
+  - **Polaroid no longer "cut" by its outline:** the editor's POLAROID
+    selection border used to draw tight on the reported frame rect, slicing
+    the tilted corners and the tape that peers past the top. The tap box
+    now carries no border and the SELECTED outline floats OUTSIDE the print
+    (8dp padded rounded rect).
+  - **Print-size slider has real travel:** the render clamp capped the print
+    at 36% of card width (dead past scale ≈ 1.06); widened to 44% (and the
+    tall cap 46% → 55% of card height), so the whole slider range actually
+    grows the print.
+  - **Sticker tap-outside deselect:** while the sticker tool is open and a
+    sticker is selected, tapping the card outside every sticker deselects it
+    (a full-size tap layer sits BOTTOM-most inside `StickerEditOverlay`, so
+    sibling hit-testing still routes sticker taps to the sticker; with
+    nothing selected the layer stays transparent to the card chrome).
+  - **Smooth panels:** the Text / Stickers / Polaroid bottom panels now
+    open/close with a fade + vertical expand (`AnimatedVisibility` +
+    `fadeIn/expandVertically/fadeOut/shrinkVertically`) instead of popping
+    instantly.
 - **v3xx5b — picker crash fix (nested lazy grid).** The new picker STILL
   crashed on open (same "infinity maximum height" message) —
   `ContinueExploringSection` rendered a `LazyVerticalGrid` inside a
