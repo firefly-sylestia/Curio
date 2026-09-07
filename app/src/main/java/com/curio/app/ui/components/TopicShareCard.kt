@@ -622,6 +622,7 @@ private fun ShareCardPalette.frostInk(): Color {
     val titleLift: Float = 0f,
     val factLift: Float = 0f,
     val metaLift: Float = 0f,
+    val favLift: Float = 0f,
     val format: ShareCardFactFormat? = null,
     val factDropCap: ShareCardFactDropCap? = null,
 
@@ -633,11 +634,13 @@ private fun ShareCardPalette.frostInk(): Color {
 private fun ShareAutoLayoutPlan.withCollisionRepair(
     titleLift: Float,
     factLift: Float,
-    metaLift: Float
-): ShareAutoLayoutPlan = if (titleLift <= 0f && factLift <= 0f && metaLift <= 0f) this else copy(
+    metaLift: Float,
+    favLift: Float
+): ShareAutoLayoutPlan = if (titleLift <= 0f && factLift <= 0f && metaLift <= 0f && favLift <= 0f) this else copy(
     titleLift = titleLift.coerceAtLeast(0f),
     factLift = factLift.coerceAtLeast(0f),
-    metaLift = metaLift.coerceAtLeast(0f)
+    metaLift = metaLift.coerceAtLeast(0f),
+    favLift = favLift.coerceAtLeast(0f)
 )
 
 /** v384 — the pill's attempt → plan table, layered over the TEXT-FIRST
@@ -656,29 +659,49 @@ private fun autoLayoutPlan(
     len: Int,
     attempt: Int,
     currentFormat: ShareCardFactFormat,
-    move: ShareCardMove
+    move: ShareCardMove,
+    // v384 — live measured card-local bounds of the current card. Zero rects
+    // = element absent; the repair compares REAL boxes, so a grown fact box
+    // covering the info rows (invisible to offset estimates) is caught too.
+    titleRect: androidx.compose.ui.geometry.Rect = androidx.compose.ui.geometry.Rect.Zero,
+    factRect: androidx.compose.ui.geometry.Rect = androidx.compose.ui.geometry.Rect.Zero,
+    metaRect: androidx.compose.ui.geometry.Rect = androidx.compose.ui.geometry.Rect.Zero,
+    favRect: androidx.compose.ui.geometry.Rect = androidx.compose.ui.geometry.Rect.Zero
 ): ShareAutoLayoutPlan {
     val shape = autoFitShape(style, aspect, len)
     // A grown fact box consumes the vertical gap above it. Keep the title
     // clear of that collision as part of the same atomic auto-layout commit.
     val sizeLift = ((shape.heightFrac - 1f) * 28f).coerceIn(0f, 56f)
     // Manual dragging is allowed to create an overlap — the sparkle tap is
-    // the explicit repair gesture. The reference layout stacks TITLE → FACT
-    // → INFO rows (author/year) top to bottom, so each shared collision is
-    // estimated from the drag offsets: how far the title was pulled DOWN over
-    // the fact, and how far the fact was pulled DOWN over the info rows (or
-    // the rows pulled up into it). Lift the title first (up to 72dp), then
-    // push the fact down, then push the info rows down. The natural title↔
-    // fact gap is 18dp and the fact↔info gap is 12dp.
-    val titleFactOverlap = (move.titleDy - move.factDy - 18f).coerceAtLeast(0f)
+    // the explicit repair gesture. The reference flow stacks TITLE → FACT →
+    // INFO rows → FAVORITES (though a style may re-order them), so each
+    // shared collision is read off the MEASURED boxes: how far a box's bottom
+    // sits below the box beneath it. A lower box is pushed DOWN by exactly
+    // the overlap (capped), and the title is lifted up instead of the fact
+    // being shoved when the two overlap (reads better). When the rects are
+    // still empty (not yet measured), fall back to the drag-offset estimates.
+    val t = titleRect; val f = factRect; val m = metaRect; val v = favRect
+    fun bottomOverlap(upper: androidx.compose.ui.geometry.Rect, lower: androidx.compose.ui.geometry.Rect): Float {
+        if (upper.width <= 0f || upper.height <= 0f || lower.width <= 0f || lower.height <= 0f) return 0f
+        val hOverlap = minOf(upper.right, lower.right) - maxOf(upper.left, lower.left)
+        if (hOverlap <= 0f) return 0f
+        return (upper.bottom - lower.top).coerceAtLeast(0f)
+    }
+    val titleFactOverlap = bottomOverlap(t, f)
     val collisionTitleLift = titleFactOverlap.coerceAtMost(72f)
-    val collisionFactLift = (titleFactOverlap - collisionTitleLift).coerceAtMost(72f)
-    val factMetaOverlap = (move.factDy - move.metaDy - 12f).coerceAtLeast(0f)
-    val collisionMetaLift = factMetaOverlap.coerceAtMost(72f)
+    val collisionFactLift = (titleFactOverlap - collisionTitleLift).coerceAtMost(72f).coerceAtLeast(0f)
+    val collisionMetaLift = maxOf(bottomOverlap(f, m), bottomOverlap(t, m)).coerceAtMost(72f)
+    val collisionFavLift = maxOf(
+        bottomOverlap(t, v), bottomOverlap(f, v), bottomOverlap(m, v),
+        // fav above the fact (collage/signature placement): separate by
+        // pushing the fact down instead of the strip up into the pill.
+        bottomOverlap(v, f)
+    ).coerceAtMost(120f)
     val titleLift = maxOf(sizeLift, collisionTitleLift)
 
-    if (shape.heightFrac == 0f && titleLift == 0f && collisionFactLift == 0f && collisionMetaLift == 0f)
-        return ShareAutoLayoutPlan()
+    if (shape.heightFrac == 0f && titleLift == 0f && collisionFactLift == 0f &&
+        collisionMetaLift == 0f && collisionFavLift == 0f
+    ) return ShareAutoLayoutPlan()
 
     val (maxHeightFrac, minTextScale) = factFitBudget(style, aspect)
     val capped = shape.heightFrac >= maxHeightFrac - 0.01f && shape.heightFrac > 1f
@@ -720,7 +743,7 @@ private fun autoLayoutPlan(
             format = ShareCardFactFormat.STANDARD,
             factDropCap = ShareCardFactDropCap.NONE
         )
-    }).withCollisionRepair(titleLift, collisionFactLift, collisionMetaLift)
+    }).withCollisionRepair(titleLift, collisionFactLift, collisionMetaLift, collisionFavLift)
 }
 
 /** v379d — the floating sparkle pill: round button at the card's top-end
@@ -816,6 +839,9 @@ data class ShareCardMove(
      *  per style with the rest of the move edits. */
     val favDx: Float = 0f,
     val favDy: Float = 0f,
+    /** v384 — how many favorite tracks the strip shows (0 = auto: the
+     *  default 3, or ALL tracks when No fact expands the strip). */
+    val favCount: Int = 0,
     /** v370 — ALBUM favorite-tracks strip SIZE (1f = unchanged). Width is a
      *  fill fraction of the strip's natural max width; height scales how
      *  many track rows the strip shows. Mirrors the box-size sliders. */
@@ -1797,13 +1823,16 @@ fun TopicShareCard(
                 // is suppressed (below) so the album strip owns that corner.
                 ShareCardStyle.VINYL, ShareCardStyle.PAPER -> Alignment.BottomStart to
                     PaddingValues(start = if (aspect == ShareCardAspect.CLASSIC) 14.dp else 18.dp, bottom = if (aspect == ShareCardAspect.CLASSIC) 28.dp else 26.dp)
-                // v359 — raised clear of the collage's torn-seam footer wave
-                // and the signature footer line (the strip is still movable,
-                // so these are safe no-overlap defaults).
-                ShareCardStyle.COLLAGE -> Alignment.BottomStart to
-                    PaddingValues(start = 22.dp, bottom = if (aspect == ShareCardAspect.CLASSIC) 84.dp else 80.dp)
+                // v384 — COLLAGE favorites moved OUT of the dark bottom band
+                // into the free middle: above the category pill + quick fact,
+                // below the title/info block (top-left, under the meta rows).
+                ShareCardStyle.COLLAGE -> Alignment.TopStart to
+                    PaddingValues(start = 22.dp, top = if (aspect == ShareCardAspect.CLASSIC) 158.dp else 128.dp)
+                // v384 — Signature raised clear of the quick fact / footer so
+                // the plain-type strip reads clean (still movable; the
+                // sparkle repairs any residual overlap on tap).
                 ShareCardStyle.SIGNATURE, ShareCardStyle.CUSTOM -> Alignment.BottomStart to
-                    PaddingValues(start = if (aspect == ShareCardAspect.CLASSIC) 18.dp else 22.dp, bottom = if (aspect == ShareCardAspect.CLASSIC) 84.dp else 80.dp)
+                    PaddingValues(start = if (aspect == ShareCardAspect.CLASSIC) 18.dp else 22.dp, bottom = if (aspect == ShareCardAspect.CLASSIC) 98.dp else 94.dp)
             }
             FavoriteTracksBadge(
                 tracks = albumFavTracks,
@@ -1812,9 +1841,14 @@ fun TopicShareCard(
                 classic = aspect == ShareCardAspect.CLASSIC,
                 // v370 — the strip's box-size fractions ride on the move so
                 // each style keeps its own width/height edits; v373 — the
-                // whole-box scale multiplies on top.
+                // whole-box scale multiplies on top. v384 — the explicit song
+                // count (0 = auto), the no-fact expansion flag and the global
+                // list/rows mode ride along too.
                 widthFrac = boxScaledMove.favWidthFrac,
                 heightFrac = boxScaledMove.favHeightFrac,
+                count = move.favCount,
+                noFact = shownFact.isBlank() && shownQuote == null,
+                rowsMode = AppPreferences.albumFavRowsState,
                 // v353 — the strip is a movable element like the cover: its
                 // offset comes from [move.favDx]/[move.favDy] and it reports
                 // its bounds so the editor can select + drag it.
@@ -2307,7 +2341,11 @@ private data class FavStripTokens(
     val capsSpacing: Boolean,
     val radius: Dp,
     val alpha: Float,
-    val glyph: FavGlyph = FavGlyph.NOTE
+    val glyph: FavGlyph = FavGlyph.NOTE,
+    // v384 — TRUE renders the strip as PLAIN TYPE (no surface, no border):
+    // the favorites read as part of the card's own ink instead of a sticker.
+    // Used by Collage and Signature/Custom.
+    val noBox: Boolean = false
 )
 
 @Composable
@@ -2321,17 +2359,25 @@ private fun FavoriteTracksBadge(
     // sliders): width scales the strip's natural max width, height scales
     // how many track rows show (1f = the default 3).
     widthFrac: Float = 1f,
-    heightFrac: Float = 1f
+    heightFrac: Float = 1f,
+    // v384 — explicit song count (0 = auto: the default 3 rows, or ALL
+    // tracks when [noFact] expands the strip into the freed fact space),
+    // and the ROWS (chip) layout mode (global preference).
+    count: Int = 0,
+    noFact: Boolean = false,
+    rowsMode: Boolean = false
 ) {
     // v353 — the strip is no longer the same sticker on every card: the
     // boxless designs (Editorial, Minimal) render the favorites as plain
     // type with no surface, everything else keeps its (now style-true)
-    // badge.
-    val rows = kotlin.math.round(3f * heightFrac).toInt().coerceIn(1, tracks.size.coerceAtLeast(1))
+    // badge. v384 — Collage/Signature/Custom join the plain-type family.
+    val autoRows = if (noFact) tracks.size.coerceAtLeast(1)
+    else kotlin.math.round(3f * heightFrac).toInt().coerceIn(1, tracks.size.coerceAtLeast(1))
+    val rows = if (count > 0) count.coerceIn(1, tracks.size.coerceAtLeast(1)) else autoRows
     when (style) {
-        ShareCardStyle.EDITORIAL -> EditorialFavStrip(tracks, palette, classic, modifier, widthFrac, rows)
-        ShareCardStyle.MINIMAL -> MinimalFavStrip(tracks, palette, classic, modifier, widthFrac, rows)
-        else -> BoxedFavStrip(tracks, style, palette, classic, modifier, widthFrac, rows)
+        ShareCardStyle.EDITORIAL -> EditorialFavStrip(tracks, palette, classic, modifier, widthFrac, rows, noFact, rowsMode)
+        ShareCardStyle.MINIMAL -> MinimalFavStrip(tracks, palette, classic, modifier, widthFrac, rows, noFact, rowsMode)
+        else -> BoxedFavStrip(tracks, style, palette, classic, modifier, widthFrac, rows, noFact, rowsMode)
     }
 }
 
@@ -2348,10 +2394,16 @@ private fun BoxedFavStrip(
     // v370 — fav-box fractions (see FavoriteTracksBadge): widthFrac scales
     // the natural max width, rows caps how many tracks render.
     widthFrac: Float = 1f,
-    rows: Int = 3
+    rows: Int = 3,
+    // v384 — no-fact expansion: when the fact is hidden the strip renders
+    // LARGER type (it takes over the freed fact space).
+    noFact: Boolean = false,
+    rowsMode: Boolean = false
 ) {
     val shownFavs = tracks.take(rows)
     val extra = tracks.size - shownFavs.size
+    // v384 — larger type + room when the fact is hidden.
+    val typeScale = if (noFact) 1.3f else 1f
     // v340 — per-style tokens: colors, borders, type and radius match the
     // design underneath so the strip belongs to the card it sits on.
     // v353 — each style's leading glyph: Paper a music note, Vinyl a tiny
@@ -2374,11 +2426,16 @@ private fun BoxedFavStrip(
         // the strip is a translucent DARK slip with white serif type and the
         // polaroid's gold-tape notes — it reads on the band AND anywhere the
         // user drags it (a dark plate over any paper).
+        // v384 — COLLAGE favorites are PLAIN TYPE now (no dark slip): the
+        // strip wears the card's own ink so it reads as part of the paper
+        // instead of a sticker. It also moved out of the dark bottom band
+        // into the free middle (see the favSlot pass), above the category
+        // pill + quick fact and below the title/info.
         ShareCardStyle.COLLAGE -> FavStripTokens(
-            bg = Color.Black.copy(alpha = 0.34f), border = Color.White.copy(alpha = 0.22f),
-            labelInk = Color.White.copy(alpha = 0.82f), bodyInk = Color.White.copy(alpha = 0.90f),
-            heart = Color(0xFFD9BE8A), serifBody = true, capsSpacing = false,
-            radius = 3.dp, alpha = 1f, glyph = FavGlyph.NOTE
+            bg = Color.Transparent, border = null,
+            labelInk = palette.ink.copy(alpha = 0.58f), bodyInk = palette.ink.copy(alpha = 0.85f),
+            heart = palette.accent.copy(alpha = 0.9f), serifBody = true, capsSpacing = false,
+            radius = 3.dp, alpha = 1f, glyph = FavGlyph.NOTE, noBox = true
         )
         ShareCardStyle.NEUMORPHIC -> FavStripTokens(
             bg = Color.Black.copy(alpha = 0.62f), border = Color.White.copy(alpha = 0.16f),
@@ -2386,29 +2443,23 @@ private fun BoxedFavStrip(
             heart = palette.accent.copy(alpha = 0.9f), serifBody = false, capsSpacing = true,
             radius = 50.dp, alpha = 1f, glyph = FavGlyph.EQ
         )
-        // v359 — Signature/Custom backgrounds vary per category (paper-white
-        // and dark scenes alike), so the strip is a dark stamp pill: white
-        // type + accent notes read on ANY signature background instead of a
-        // tone-palette box that clashed with the card's own colors.
+        // v384 — Signature/Custom favorites are PLAIN TYPE too: no stamp
+        // pill, no border — the strip wears the signature's own ink (each
+        // design's palette ink is tuned to read on its scene), so it never
+        // clashes with the card and overlaps read as intentional text.
         else -> FavStripTokens(
-            bg = Color.Black.copy(alpha = 0.55f), border = Color.White.copy(alpha = 0.28f),
-            labelInk = Color.White.copy(alpha = 0.85f), bodyInk = Color.White.copy(alpha = 0.92f),
+            bg = Color.Transparent, border = null,
+            labelInk = palette.ink.copy(alpha = 0.60f), bodyInk = palette.ink.copy(alpha = 0.88f),
             heart = palette.accent, serifBody = true, capsSpacing = false,
-            radius = 8.dp, alpha = 1f, glyph = FavGlyph.NOTE
+            radius = 8.dp, alpha = 1f, glyph = FavGlyph.NOTE, noBox = true
         )
     }
-    Surface(
-        shape = RoundedCornerShape(tok.radius),
-        color = tok.bg.copy(alpha = tok.alpha),
-        border = tok.border?.let { BorderStroke(0.8.dp, it) },
-        // [modifier] carries the caller's BoxScope alignment + per-style
-        // corner inset; each design clears its own footer below.
-        modifier = modifier
-            .widthIn(max = (if (classic) 168.dp else 210.dp) * widthFrac)
-    ) {
+    val widthMod = modifier
+        .widthIn(max = (if (classic) 168.dp else 210.dp) * widthFrac * if (noFact) 1.35f else 1f)
+    val strip: @Composable (Modifier) -> Unit = { inner ->
         Column(
             verticalArrangement = Arrangement.spacedBy(if (tok.serifBody) 2.dp else 1.dp),
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
+            modifier = inner.padding(if (tok.noBox) PaddingValues(0.dp) else PaddingValues(horizontal = 8.dp, vertical = 6.dp))
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -2423,38 +2474,50 @@ private fun BoxedFavStrip(
                     "FAVORITE TRACKS",
                     style = TextStyle(
                         fontFamily = if (tok.capsSpacing) GeomFontFamily else LoraFontFamily,
-                        fontSize = if (classic) 5.sp else 6.sp,
+                        fontSize = (if (classic) 5.sp else 6.sp) * typeScale,
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = if (tok.capsSpacing) 1.1.sp else 0.6.sp,
                         color = tok.labelInk
                     )
                 )
             }
-            shownFavs.forEach { t ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    ShareMusicGlyph(
-                        variant = tok.glyph,
-                        color = tok.heart.copy(alpha = 0.95f),
-                        iconSize = if (classic) 5.5.dp else 7.dp
-                    )
-                    Text(
-                        t,
-                        style = if (tok.serifBody) TextStyle(
-                            fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
-                            fontSize = if (classic) 6.5.sp else 8.sp, lineHeight = if (classic) 8.sp else 10.sp,
-                            color = tok.bodyInk
-                        ) else TextStyle(
-                            fontFamily = GeomFontFamily,
-                            fontSize = if (classic) 6.sp else 7.5.sp, lineHeight = if (classic) 7.5.sp else 9.sp,
-                            fontWeight = FontWeight.SemiBold, color = tok.bodyInk
-                        ),
-                        maxLines = 1, overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
+            if (rowsMode) {
+                FavTrackChips(
+                    tracks = shownFavs,
+                    classic = classic,
+                    ink = tok.bodyInk,
+                    accent = tok.heart,
+                    serif = tok.serifBody,
+                    noBox = tok.noBox,
+                    typeScale = typeScale
+                )
+            } else {
+                // v384 — the rows HUG the longest track title (no
+                // fillMaxWidth/weight): short titles make a short strip.
+                shownFavs.forEach { t ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        ShareMusicGlyph(
+                            variant = tok.glyph,
+                            color = tok.heart.copy(alpha = 0.95f),
+                            iconSize = if (classic) 5.5.dp else 7.dp
+                        )
+                        Text(
+                            t,
+                            style = if (tok.serifBody) TextStyle(
+                                fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
+                                fontSize = (if (classic) 6.5.sp else 8.sp) * typeScale, lineHeight = (if (classic) 8.sp else 10.sp) * typeScale,
+                                color = tok.bodyInk
+                            ) else TextStyle(
+                                fontFamily = GeomFontFamily,
+                                fontSize = (if (classic) 6.sp else 7.5.sp) * typeScale, lineHeight = (if (classic) 7.5.sp else 9.sp) * typeScale,
+                                fontWeight = FontWeight.SemiBold, color = tok.bodyInk
+                            ),
+                            maxLines = 1, overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
             if (extra > 0) {
@@ -2462,10 +2525,77 @@ private fun BoxedFavStrip(
                     "+$extra more",
                     style = if (tok.serifBody) TextStyle(
                         fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
-                        fontSize = if (classic) 6.sp else 7.5.sp, color = tok.heart
+                        fontSize = (if (classic) 6.sp else 7.5.sp) * typeScale, color = tok.heart
                     ) else TextStyle(
                         fontFamily = GeomFontFamily, fontWeight = FontWeight.Bold,
-                        fontSize = if (classic) 6.sp else 7.5.sp, color = tok.heart
+                        fontSize = (if (classic) 6.sp else 7.5.sp) * typeScale, color = tok.heart
+                    ),
+                    maxLines = 1, overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+    // v384 — plain-type styles (Collage / Signature / Custom) skip the
+    // Surface entirely: the strip is just text in the card's own ink.
+    if (tok.noBox) {
+        strip(widthMod)
+    } else {
+        Surface(
+            shape = RoundedCornerShape(tok.radius),
+            color = tok.bg.copy(alpha = tok.alpha),
+            border = tok.border?.let { BorderStroke(0.8.dp, it) },
+            modifier = widthMod
+        ) {
+            strip(Modifier)
+        }
+    }
+}
+
+/** v384 — ROWS layout for the favorites strip: the tracks render as
+ *  side-by-side chips that wrap, instead of one per line. [noBox] styles
+ *  keep the chips borderless — plain text in the card's ink. */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+private fun FavTrackChips(
+    tracks: List<String>,
+    classic: Boolean,
+    ink: Color,
+    accent: Color,
+    serif: Boolean,
+    noBox: Boolean,
+    typeScale: Float = 1f
+) {
+    androidx.compose.foundation.layout.FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier.widthIn(max = (if (classic) 200.dp else 250.dp) * typeScale)
+    ) {
+        tracks.forEach { t ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(3.dp),
+                modifier = if (noBox) {
+                    Modifier.padding(horizontal = 2.dp, vertical = 1.dp)
+                } else {
+                    Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(ink.copy(alpha = 0.10f))
+                        .padding(horizontal = 7.dp, vertical = 3.dp)
+                }
+            ) {
+                ShareMusicGlyph(
+                    variant = FavGlyph.NOTE,
+                    color = accent.copy(alpha = 0.9f),
+                    iconSize = if (classic) 5.dp else 6.dp
+                )
+                Text(
+                    t,
+                    style = TextStyle(
+                        fontFamily = if (serif) LoraFontFamily else GeomFontFamily,
+                        fontStyle = if (serif) FontStyle.Italic else FontStyle.Normal,
+                        fontSize = (if (classic) 6.sp else 7.5.sp) * typeScale,
+                        fontWeight = if (serif) FontWeight.Normal else FontWeight.SemiBold,
+                        color = ink
                     ),
                     maxLines = 1, overflow = TextOverflow.Ellipsis
                 )
@@ -2484,14 +2614,17 @@ private fun EditorialFavStrip(
     classic: Boolean,
     modifier: Modifier = Modifier,
     widthFrac: Float = 1f,
-    rows: Int = 3
+    rows: Int = 3,
+    noFact: Boolean = false,
+    rowsMode: Boolean = false
 ) {
     val ink = Color(0xFF1C1814)
     val shownFavs = tracks.take(rows)
     val extra = tracks.size - shownFavs.size
+    val typeScale = if (noFact) 1.3f else 1f
     Column(
         verticalArrangement = Arrangement.spacedBy(if (classic) 2.dp else 3.dp),
-        modifier = modifier.widthIn(max = (if (classic) 230.dp else 290.dp) * widthFrac)
+        modifier = modifier.widthIn(max = (if (classic) 230.dp else 290.dp) * widthFrac * if (noFact) 1.35f else 1f)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -2512,34 +2645,45 @@ private fun EditorialFavStrip(
                 "FAVORITE TRACKS",
                 style = TextStyle(
                     fontFamily = LoraFontFamily,
-                    fontSize = if (classic) 5.5.sp else 6.5.sp,
+                    fontSize = (if (classic) 5.5.sp else 6.5.sp) * typeScale,
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 1.2.sp,
                     color = ink.copy(alpha = 0.85f)
                 )
             )
         }
-        shownFavs.forEach { t ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                ShareMusicGlyph(
-                    variant = FavGlyph.NOTE,
-                    color = palette.accent.copy(alpha = 0.70f),
-                    iconSize = if (classic) 5.dp else 6.5.dp
-                )
-                Text(
-                    t,
-                    style = TextStyle(
-                        fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
-                        fontSize = if (classic) 7.5.sp else 9.sp, lineHeight = if (classic) 9.sp else 11.sp,
-                        color = ink.copy(alpha = 0.82f)
-                    ),
-                    maxLines = 1, overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
+        if (rowsMode) {
+            FavTrackChips(
+                tracks = shownFavs,
+                classic = classic,
+                ink = ink.copy(alpha = 0.85f),
+                accent = palette.accent.copy(alpha = 0.9f),
+                serif = true,
+                noBox = true,
+                typeScale = typeScale
+            )
+        } else {
+            // v384 — dynamic width: the rows hug the longest track title.
+            shownFavs.forEach { t ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    ShareMusicGlyph(
+                        variant = FavGlyph.NOTE,
+                        color = palette.accent.copy(alpha = 0.70f),
+                        iconSize = if (classic) 5.dp else 6.5.dp
+                    )
+                    Text(
+                        t,
+                        style = TextStyle(
+                            fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
+                            fontSize = (if (classic) 7.5.sp else 9.sp) * typeScale, lineHeight = (if (classic) 9.sp else 11.sp) * typeScale,
+                            color = ink.copy(alpha = 0.82f)
+                        ),
+                        maxLines = 1, overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
         }
         if (extra > 0) {
@@ -2547,7 +2691,7 @@ private fun EditorialFavStrip(
                 "+$extra more",
                 style = TextStyle(
                     fontFamily = LoraFontFamily, fontStyle = FontStyle.Italic,
-                    fontSize = if (classic) 6.5.sp else 8.sp, color = palette.accent.copy(alpha = 0.95f)
+                    fontSize = (if (classic) 6.5.sp else 8.sp) * typeScale, color = palette.accent.copy(alpha = 0.95f)
                 ),
                 maxLines = 1, overflow = TextOverflow.Ellipsis
             )
@@ -2565,14 +2709,17 @@ private fun MinimalFavStrip(
     classic: Boolean,
     modifier: Modifier = Modifier,
     widthFrac: Float = 1f,
-    rows: Int = 3
+    rows: Int = 3,
+    noFact: Boolean = false,
+    rowsMode: Boolean = false
 ) {
     val ink = Color(0xFF1A1A1A)
     val shownFavs = tracks.take(rows)
     val extra = tracks.size - shownFavs.size
+    val typeScale = if (noFact) 1.3f else 1f
     Column(
         verticalArrangement = Arrangement.spacedBy(2.dp),
-        modifier = modifier.widthIn(max = (if (classic) 250.dp else 330.dp) * widthFrac)
+        modifier = modifier.widthIn(max = (if (classic) 250.dp else 330.dp) * widthFrac * if (noFact) 1.35f else 1f)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -2587,28 +2734,40 @@ private fun MinimalFavStrip(
                 "FAVORITES",
                 style = TextStyle(
                     fontFamily = GeomFontFamily,
-                    fontSize = if (classic) 5.5.sp else 6.5.sp,
+                    fontSize = (if (classic) 5.5.sp else 6.5.sp) * typeScale,
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 1.4.sp,
                     color = ink.copy(alpha = 0.72f)
                 )
             )
         }
-        Text(
-            shownFavs.joinToString("  \u00b7  "),
-            style = TextStyle(
-                fontFamily = GeomFontFamily,
-                fontSize = if (classic) 6.5.sp else 8.sp, lineHeight = if (classic) 8.sp else 10.sp,
-                fontWeight = FontWeight.SemiBold, color = ink.copy(alpha = 0.72f)
-            ),
-            maxLines = 1, overflow = TextOverflow.Ellipsis
-        )
+        if (rowsMode) {
+            FavTrackChips(
+                tracks = shownFavs,
+                classic = classic,
+                ink = ink.copy(alpha = 0.80f),
+                accent = palette.accent.copy(alpha = 0.9f),
+                serif = false,
+                noBox = true,
+                typeScale = typeScale
+            )
+        } else {
+            Text(
+                shownFavs.joinToString("  \u00b7  "),
+                style = TextStyle(
+                    fontFamily = GeomFontFamily,
+                    fontSize = (if (classic) 6.5.sp else 8.sp) * typeScale, lineHeight = (if (classic) 8.sp else 10.sp) * typeScale,
+                    fontWeight = FontWeight.SemiBold, color = ink.copy(alpha = 0.72f)
+                ),
+                maxLines = 1, overflow = TextOverflow.Ellipsis
+            )
+        }
         if (extra > 0) {
             Text(
                 "+$extra more",
                 style = TextStyle(
                     fontFamily = GeomFontFamily, fontWeight = FontWeight.Bold,
-                    fontSize = if (classic) 5.5.sp else 7.sp, color = palette.accent.copy(alpha = 0.9f)
+                    fontSize = (if (classic) 5.5.sp else 7.sp) * typeScale, color = palette.accent.copy(alpha = 0.9f)
                 ),
                 maxLines = 1, overflow = TextOverflow.Ellipsis
             )
@@ -6651,6 +6810,11 @@ private fun ArrangeableCard(
     // span channel (see [toggleSpanUnderline]) so the Save-your-take
     // RichFlag set (bold / italic / highlight) stays untouched.
     onToggleFactUnderline: ((s: Int, e: Int, add: Boolean) -> Unit)? = null,
+    // v384 — live measured card-local bounds (title / fact / info rows /
+    // favorites strip) reported so the sheet's sparkle can repair REAL
+    // overlaps — a grown fact box covering the info rows is invisible to
+    // offset-based estimates. Rect.Zero = element absent on this card.
+    onMeasuredBounds: ((androidx.compose.ui.geometry.Rect, androidx.compose.ui.geometry.Rect, androidx.compose.ui.geometry.Rect, androidx.compose.ui.geometry.Rect) -> Unit)? = null,
     card: @Composable (EditBoundsCallbacks) -> Unit
 ) {
     // Bounds hub — every style reports where its title / fact / meta text
@@ -6752,6 +6916,13 @@ private fun ArrangeableCard(
                 val rCover = local(coverRect.value)
                 val rFav = local(favRect.value)
                 val rAll = listOf(rTitle, rFact, rMeta, rBadge, rCover, rFav)
+
+                // v384 — report the live card-local bounds so the sheet's
+                // sparkle can repair REAL overlaps (a grown fact box covering
+                // the info rows is invisible to offset estimates).
+                androidx.compose.runtime.LaunchedEffect(rTitle, rFact, rMeta, rFav) {
+                    onMeasuredBounds?.invoke(rTitle, rFact, rMeta, rFav)
+                }
 
                 // v342 — the OTHER boxes a live drag can magnet-align to
                 // (excluding the dragged box itself by instance identity).
@@ -7624,6 +7795,10 @@ fun TopicShareSheet(
     // is open (same convention as [customText]).
     var showLinkDialog by remember { mutableStateOf(false) }
     var linkCaption by rememberSaveable { mutableStateOf("") }
+    // v384 — the link option moved INTO the default Share dialog: a switch
+    // (on = post your words + the topic's link as text; off = just share the
+    // picture, optionally with the caption attached).
+    var includeLink by remember { mutableStateOf(false) }
     // Inline edit mode (Paper) — per-share only; resets when the sheet closes.
     // Plain remember: edits are a per-share tweak (not Bundle-saveable) and the
     // modal resets them each time, so they should not survive a rotation.
@@ -7687,6 +7862,7 @@ fun TopicShareSheet(
                 coverDy = o.optDouble("coverDy", 0.0).toFloat(),
                 favDx = o.optDouble("favDx", 0.0).toFloat(),
                 favDy = o.optDouble("favDy", 0.0).toFloat(),
+                favCount = o.optInt("favCount", 0),
                 titleWidthFrac = o.optDouble("titleWidthFrac", 1.0).toFloat(),
                 titleHeightFrac = o.optDouble("titleHeightFrac", 1.0).toFloat(),
                 factWidthFrac = o.optDouble("factWidthFrac", 1.0).toFloat(),
@@ -8093,6 +8269,13 @@ fun TopicShareSheet(
     // saved card and the exported image match the preview, and Reset Layout
     // clears it back to natural smart-fit behaviour.
     var autoLayoutIdx by remember { androidx.compose.runtime.mutableIntStateOf(-1) }
+    // v384 — live measured card-local bounds of the CURRENT card (title /
+    // fact / info rows / favorites strip), fed by ArrangeableCard so the
+    // sparkle repairs REAL overlaps instead of guessing from drag offsets.
+    var measuredTitle by remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
+    var measuredFact by remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
+    var measuredMeta by remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
+    var measuredFav by remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
     fun runAutoLayout() {
         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         val len = maxOf(factFieldText.length, chapterFactForCard.length)
@@ -8102,7 +8285,7 @@ fun TopicShareSheet(
         // wide enough to always land on a change (attempts that alter nothing
         // are skipped, so every effective tap advances the card).
         repeat(12) {
-            val plan = autoLayoutPlan(currentStyle, aspect, len, attempt, move.factFormat, move)
+            val plan = autoLayoutPlan(currentStyle, aspect, len, attempt, move.factFormat, move, measuredTitle, measuredFact, measuredMeta, measuredFav)
             val wantsTall = plan.tall && aspect == ShareCardAspect.CLASSIC
             val h = plan.heightFrac
             val s = plan.textScale
@@ -8113,8 +8296,9 @@ fun TopicShareSheet(
             val titleLiftChanges = kotlin.math.abs(plan.titleLift - move.titleLift) > 1f
             val factLiftChanges = plan.factLift > 0f
             val metaLiftChanges = plan.metaLift > 0f
+            val favLiftChanges = plan.favLift > 0f
             if (wantsTall || hChanges || sChanges || fmtChanges || dropCapChanges ||
-                titleLiftChanges || factLiftChanges || metaLiftChanges
+                titleLiftChanges || factLiftChanges || metaLiftChanges || favLiftChanges
             ) {
                 updateMove(move.copy(
                     factHeightFrac = if (h > 0f) h.coerceIn(0.35f, 6f) else move.factHeightFrac,
@@ -8124,9 +8308,13 @@ fun TopicShareSheet(
                     factDropCap = plan.factDropCap ?: move.factDropCap,
                     titleLift = plan.titleLift.coerceIn(0f, 96f),
                     // v384 — the info rows are part of the sparkle repair too:
-                    // if a manual drag has pushed the fact over the author/
-                    // year rows, the repair pushes them back down.
-                    metaDy = move.metaDy + plan.metaLift.coerceIn(0f, 72f)
+                    // if the fact box covers the author/year rows (grown or
+                    // dragged), the repair pushes them back down out of it.
+                    metaDy = move.metaDy + plan.metaLift.coerceIn(0f, 72f),
+                    // v384 — the favorites strip rides the same repair: it is
+                    // pushed clear of the title / fact / info rows so it never
+                    // overlaps by default (and the sparkle fixes it on tap).
+                    favDy = move.favDy + plan.favLift.coerceIn(0f, 120f)
                 ))
                 // A 3:4 card that still overflows fully-fitted gets the tall
                 // 9:16 canvas (the one remaining way to add room).
@@ -8195,6 +8383,7 @@ fun TopicShareSheet(
                 put("coverDx", m.coverDx); put("coverDy", m.coverDy)
                 put("favDx", m.favDx); put("favDy", m.favDy)
                 put("favWidthFrac", m.favWidthFrac); put("favHeightFrac", m.favHeightFrac)
+                if (m.favCount > 0) put("favCount", m.favCount)
                 put("titleWidthFrac", m.titleWidthFrac); put("titleHeightFrac", m.titleHeightFrac)
                 put("factWidthFrac", m.factWidthFrac); put("factHeightFrac", m.factHeightFrac)
                 put("metaWidthFrac", m.metaWidthFrac); put("metaHeightFrac", m.metaHeightFrac)
@@ -8353,7 +8542,13 @@ fun TopicShareSheet(
                                 onFormatFactSelection = if (isQuotes || activeId == "chapter_progress") null
                                 else { s, e, flag -> toggleFactSelectionFormat(s, e, flag) },
                                 onToggleFactUnderline = if (isQuotes || activeId == "chapter_progress") null
-                                else { s, e, add -> toggleFactSelectionUnderline(s, e, add) }
+                                else { s, e, add -> toggleFactSelectionUnderline(s, e, add) },
+                                // v384 — the CURRENT (center) page feeds the
+                                // sparkle's measured-bounds repair; neighbours
+                                // stay silent so they can't overwrite it.
+                                onMeasuredBounds = if (isCenter) { t, f, m, v ->
+                                    measuredTitle = t; measuredFact = f; measuredMeta = m; measuredFav = v
+                                } else null
                             ) { cb ->
                                 TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = styles[page], ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = pageMove, chapterProgress = progressForCard, chapterFact = chapterFactForCard, factSpans = if (isQuotes) emptyList() else cardFactRenderSpans, callbacks = cb)
                             }
@@ -8434,7 +8629,11 @@ fun TopicShareSheet(
                             onFormatFactSelection = if (isQuotes || activeId == "chapter_progress") null
                             else { s, e, flag -> toggleFactSelectionFormat(s, e, flag) },
                             onToggleFactUnderline = if (isQuotes || activeId == "chapter_progress") null
-                            else { s, e, add -> toggleFactSelectionUnderline(s, e, add) }
+                            else { s, e, add -> toggleFactSelectionUnderline(s, e, add) },
+                            // v384 — feed the sparkle's measured-bounds repair.
+                            onMeasuredBounds = { t, f, m, v ->
+                                measuredTitle = t; measuredFact = f; measuredMeta = m; measuredFav = v
+                            }
                         ) { cb ->
                             TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, onPhotoTap = { photoPickerLauncher.launch("image/*") }, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, factSpans = if (isQuotes) emptyList() else cardFactRenderSpans, callbacks = cb)
                         }
@@ -9368,11 +9567,49 @@ fun TopicShareSheet(
                                         0.35f..6f, steps = 56, modifier = Modifier.fillMaxWidth()
                                     )
                                 } else if (isFav) {
-                                    // v370 — ALBUM favorite-tracks strip box:
-                                    // width is a fill fraction of its natural
-                                    // max width; height scales the track rows.
+                                    // v370/v384 — ALBUM favorite-tracks strip:
+                                    // width scales the strip's max width; the
+                                    // SONGS slider picks how many tracks show
+                                    // (1..all; auto = the default 3, or ALL
+                                    // when No fact expands the strip).
                                     SizeSliderColumn("Strip width", move.favWidthFrac, { updateMove(move.copy(favWidthFrac = it)) }, 0.3f..1.2f, steps = 89, modifier = Modifier.fillMaxWidth())
-                                    SizeSliderColumn("Strip rows", move.favHeightFrac, { updateMove(move.copy(favHeightFrac = it)) }, 0.35f..3f, steps = 26, modifier = Modifier.fillMaxWidth())
+                                    val favTotal = AppPreferences.albumFavTracksState[topicName].orEmpty().size.coerceAtLeast(1)
+                                    val favNoFact = activeSource.id == NO_FACT_ID
+                                    val favAuto = if (favNoFact) favTotal else 3
+                                    val favShown = (if (move.favCount > 0) move.favCount else favAuto).coerceIn(1, favTotal)
+                                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                                        Text("Songs shown", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        Text("$favShown", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary))
+                                    }
+                                    Slider(
+                                        value = favShown.toFloat(),
+                                        onValueChange = { updateMove(move.copy(favCount = it.roundToInt().coerceIn(1, favTotal))) },
+                                        valueRange = 1f..favTotal.toFloat(),
+                                        steps = (favTotal - 1).coerceAtLeast(0),
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                    // v384 — LIST vs ROWS (chips) layout,
+                                    // global across every design.
+                                    val favRows = AppPreferences.albumFavRowsState
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Text("Layout", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
+                                        Surface(onClick = { AppPreferences.setAlbumFavRows(context, false) }, shape = RoundedCornerShape(50), color = if (!favRows) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(32.dp)) {
+                                            Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                                CurioIcon(name = "view_agenda", tint = if (!favRows) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, size = 13.dp)
+                                                Text("List", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (!favRows) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
+                                            }
+                                        }
+                                        Surface(onClick = { AppPreferences.setAlbumFavRows(context, true) }, shape = RoundedCornerShape(50), color = if (favRows) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(32.dp)) {
+                                            Row(Modifier.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                                CurioIcon(name = "view_module", tint = if (favRows) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant, size = 13.dp)
+                                                Text("Rows", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = if (favRows) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
+                                            }
+                                        }
+                                    }
                                 } else {
                                     SizeSliderColumn("Info width", move.metaWidthFrac, { updateMove(move.copy(metaWidthFrac = it)) }, 0.3f..1f, steps = 69, modifier = Modifier.fillMaxWidth())
                                     SizeSliderColumn("Info lines", move.metaHeightFrac, { updateMove(move.copy(metaHeightFrac = it)) }, 0.5f..1f, steps = 4, modifier = Modifier.fillMaxWidth())
@@ -9975,14 +10212,15 @@ fun TopicShareSheet(
                         Text("Save", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold))
                     }
                 }
-                // Share button
+                // Share button — opens the share dialog (v384): pick whether
+                // to ride a link + message, or just share the picture (with a
+                // caption or none).
                 Button(onClick = {
                     haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                    shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, shareText = shareLinkUrl?.invoke(), card = {
-                        TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, factSpans = if (isQuotes) emptyList() else cardFactRenderSpans)
-                    })
-                        persistEdits()
-                        onDismiss()
+                    if (linkCaption.isBlank()) {
+                        linkCaption = topicName.substringBeforeLast(" (").trim()
+                    }
+                    showLinkDialog = true
                 }, shape = RoundedCornerShape(50), colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimary), modifier = Modifier.weight(1f).height(44.dp)) {
                     Text("Share", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold))
                 }
@@ -10006,27 +10244,13 @@ fun TopicShareSheet(
                         Text("Text", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
-                // v383 — LINK share: opens a tiny caption editor, then posts
-                // your words + the topic's link (Google search — or, for
-                // albums/songs/artists, the music service you picked in
-                // Settings). Receiving apps render the URL as the tap-to-open
-                // link at the end of your message.
-                Surface(onClick = {
-                    haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                    if (linkCaption.isBlank()) {
-                        linkCaption = topicName.substringBeforeLast(" (").trim()
-                    }
-                    showLinkDialog = true
-                }, shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surfaceContainerHigh, modifier = Modifier.height(44.dp)) {
-                    Row(Modifier.padding(horizontal = 10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                        CurioIcon(name = "link", tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 16.dp)
-                        Text("Link", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                }
             }
             }
-            // v383 — the Link caption editor (a separate window; placed here so
-            // it dismisses cleanly above the sheet, like the Enlarge editor).
+            // v384 — the SHARE dialog (a separate window; placed here so it
+            // dismisses cleanly above the sheet, like the Enlarge editor). It
+            // replaces the old Link pill: every Share tap lands here, and the
+            // user chooses whether to ride the topic's link + message (text
+            // share) or just share the picture (with the caption or none).
             if (showLinkDialog) {
                 // Evaluated on open so the CURRENT Settings choice wins.
                 val linkUrl = shareLinkUrl?.invoke()
@@ -10044,10 +10268,10 @@ fun TopicShareSheet(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(Modifier.fillMaxWidth().padding(20.dp)) {
-                            Text("Share a link", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold), color = MaterialTheme.colorScheme.onSurface)
+                            Text("Share", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold), color = MaterialTheme.colorScheme.onSurface)
                             Spacer(Modifier.height(6.dp))
                             Text(
-                                "Say something about $displayTopic — the link rides at the end of your message.",
+                                "Say something about $displayTopic — your words ride with the picture, or with the topic's link if you turn it on.",
                                 style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
                                 maxLines = 2, overflow = TextOverflow.Ellipsis
                             )
@@ -10055,26 +10279,47 @@ fun TopicShareSheet(
                             OutlinedTextField(
                                 value = linkCaption,
                                 onValueChange = { linkCaption = it },
-                                label = { Text("Your message") },
+                                label = { Text("Your message (optional)") },
                                 placeholder = { Text("e.g. Loved this one — you should check it out") },
                                 minLines = 2, maxLines = 5,
                                 textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                                 shape = RoundedCornerShape(14.dp),
                                 modifier = Modifier.fillMaxWidth()
                             )
-                            Spacer(Modifier.height(8.dp))
-                            // Link preview — the tap-to-open URL that rides along.
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)).padding(horizontal = 10.dp, vertical = 8.dp)
-                            ) {
-                                CurioIcon(name = "link", tint = MaterialTheme.colorScheme.primary, size = 14.dp)
-                                Text(
-                                    linkUrl,
-                                    style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.primary),
-                                    maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f)
-                                )
+                            // v384 — the include-link switch: on = your words +
+                            // the topic's link post as a text message; off = just
+                            // the picture (with the caption attached or none).
+                            if (shareLinkUrl != null) {
+                                Spacer(Modifier.height(10.dp))
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)).padding(horizontal = 12.dp, vertical = 2.dp)
+                                ) {
+                                    Column(Modifier.weight(1f)) {
+                                        Text("Include a link", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface)
+                                        Text("Google search — or your music service for songs", style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    }
+                                    Switch(
+                                        checked = includeLink,
+                                        onCheckedChange = { includeLink = it }
+                                    )
+                                }
+                                if (includeLink) {
+                                    Spacer(Modifier.height(8.dp))
+                                    // Link preview — the tap-to-open URL that rides along.
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)).padding(horizontal = 10.dp, vertical = 8.dp)
+                                    ) {
+                                        CurioIcon(name = "link", tint = MaterialTheme.colorScheme.primary, size = 14.dp)
+                                        Text(
+                                            linkUrl,
+                                            style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.primary),
+                                            maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f)
+                                        )
+                                    }
+                                }
                             }
                             Spacer(Modifier.height(16.dp))
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
@@ -10085,27 +10330,36 @@ fun TopicShareSheet(
                                 Button(
                                     onClick = {
                                         haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                                        val body = buildString {
-                                            val c = linkCaption.trim()
-                                            if (c.isNotEmpty()) {
-                                                append(c)
-                                                append("\n\n")
+                                        val caption = linkCaption.trim()
+                                        if (includeLink) {
+                                            // Link share: your words + the topic's link as text.
+                                            val body = buildString {
+                                                if (caption.isNotEmpty()) {
+                                                    append(caption)
+                                                    append("\n\n")
+                                                }
+                                                append(linkUrl)
                                             }
-                                            append(linkUrl)
+                                            val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                                type = "text/plain"
+                                                putExtra(android.content.Intent.EXTRA_SUBJECT, topicName)
+                                                putExtra(android.content.Intent.EXTRA_TEXT, body)
+                                            }
+                                            context.startActivity(android.content.Intent.createChooser(intent, "Share link"))
+                                        } else {
+                                            // Plain share: the picture, with the caption attached (or none).
+                                            shareComposableCard(context = context, cardSize = androidx.compose.ui.unit.DpSize(pw, eh), authority = authority, exportDensity = 4f, shareText = caption.ifBlank { null }, card = {
+                                                TopicShareCard(topicName = topicName, categoryName = categoryName, categoryGlyph = categoryGlyph, accent = accent, factText = cardFactText, sharerName = sharer, aspect = aspect, style = currentStyle, ratingStars = activeSource.rating, categoryFamily = categoryFamily, quoteText = if (activeSource.id == "quote") activeSource.text else null, quoteAuthor = if (activeSource.id == "quote") topicByline.ifBlank { null } else null, userPhoto = userPhoto, bookCover = bookCover, isSquareCover = isAlbumTopic, byline = topicByline, polaroidCaption = polaroidCaption,                        classicSignature = classicDesign, toneIndex = toneIndex.takeIf { it >= 0 }, saturation = saturation, contrast = contrast, bodyScale = bodyScale, editedTitle = editedTitle, editedFact = if (activeId == CUSTOM_FACT_ID || activeId == "chapter_review") null else editedFact, move = move, chapterProgress = progressForCard, chapterFact = chapterFactForCard, factSpans = if (isQuotes) emptyList() else cardFactRenderSpans)
+                                            })
                                         }
-                                        val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                                            type = "text/plain"
-                                            putExtra(android.content.Intent.EXTRA_SUBJECT, topicName)
-                                            putExtra(android.content.Intent.EXTRA_TEXT, body)
-                                        }
-                                        context.startActivity(android.content.Intent.createChooser(intent, "Share link"))
+                                        persistEdits()
                                         showLinkDialog = false
                                         onDismiss()
                                     },
                                     shape = RoundedCornerShape(50),
                                     colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimary)
                                 ) {
-                                    Text("Share link", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold))
+                                    Text("Share", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold))
                                 }
                             }
                         }

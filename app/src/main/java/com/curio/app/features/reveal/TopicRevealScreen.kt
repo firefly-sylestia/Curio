@@ -3629,15 +3629,20 @@ private fun ChapterNoteField(
     onShare: (String) -> Unit = {}
 ) {
     var value by rememberSaveable(initial) { mutableStateOf(initial) }
-    val scheme = MaterialTheme.colorScheme
+    // v384 — the note box is fully palette-aware: the old closed-state
+    // colours came from the raw Material scheme (surfaceVariant / onSurface /
+    // onSurfaceVariant), which clashed with the cover-tinted sheet in dark
+    // mode (a flat gray box with dim gray text on the coloured wash). Every
+    // tone now derives from the sheet's [ink]/[accent] so the box reads
+    // cleanly on light AND dark cover palettes.
     androidx.compose.foundation.layout.Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                if (isOpen) accent.copy(alpha = 0.12f)
-                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+                if (isOpen) accent.copy(alpha = 0.14f)
+                else ink.copy(alpha = 0.08f),
                 RoundedCornerShape(12.dp)
             )
             .padding(horizontal = 10.dp, vertical = 8.dp)
@@ -3645,7 +3650,7 @@ private fun ChapterNoteField(
         CurioIcon(
             CurioIcons.Note,
             if (value.isBlank()) "Add a note" else "Chapter note",
-            tint = if (isOpen) accent.copy(alpha = 0.85f) else scheme.onSurfaceVariant.copy(alpha = 0.8f),
+            tint = if (isOpen) accent.copy(alpha = 0.9f) else ink.copy(alpha = 0.55f),
             size = 15.dp
         )
         BasicTextField(
@@ -3656,7 +3661,7 @@ private fun ChapterNoteField(
             },
             singleLine = true,
             textStyle = MaterialTheme.typography.bodySmall.copy(
-                color = if (isOpen) ink else scheme.onSurface
+                color = if (isOpen) ink else ink.copy(alpha = 0.9f)
             ),
             cursorBrush = SolidColor(accent),
             decorationBox = { inner ->
@@ -3664,7 +3669,7 @@ private fun ChapterNoteField(
                     Text(
                         "Add a note…",
                         style = MaterialTheme.typography.bodySmall,
-                        color = (if (isOpen) accent else scheme.onSurfaceVariant).copy(alpha = 0.6f)
+                        color = (if (isOpen) accent else ink).copy(alpha = 0.55f)
                     )
                 }
                 inner()
@@ -3672,17 +3677,16 @@ private fun ChapterNoteField(
             modifier = Modifier.weight(1f)
         )
         // v371 — EXPAND: opens the full writing sheet (long notes, no more
-        // tiny single-line box). v378 — on the accent-tinted OPEN row the
-        // chip uses the sheet INK (accent-on-accent washed the glyph out).
+        // tiny single-line box). v384 — palette-ink chip in every state.
         Surface(
             onClick = onExpand,
             shape = CircleShape,
-            color = if (isOpen) ink.copy(alpha = 0.16f) else scheme.surfaceVariant
+            color = if (isOpen) ink.copy(alpha = 0.16f) else ink.copy(alpha = 0.10f)
         ) {
             CurioIcon(
                 CurioIcons.Fullscreen,
                 "Expand note",
-                tint = if (isOpen) ink else scheme.onSurfaceVariant,
+                tint = if (isOpen) ink else ink.copy(alpha = 0.8f),
                 size = 15.dp,
                 modifier = Modifier.padding(7.dp)
             )

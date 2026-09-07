@@ -58,6 +58,9 @@ object AppPreferences {
     // v353 — whether the heart-picked favorite-tracks strip renders on the
     // album share card (default ON; the share editor can hide it).
     private const val KEY_ALBUM_FAV_STRIP_VISIBLE = "album_fav_strip_visible"
+    // v384 — album favorite-tracks strip LAYOUT: false = list rows (default),
+    // true = side-by-side ROWS (chips). Global across every card design.
+    private const val KEY_ALBUM_FAV_ROWS = "album_fav_rows"
     private const val KEY_BOOK_FAVORITES = "book_favorites"
     // v350 — per-category cover-fetch consent: ALBUMS and SERIES get their
     // own toggles alongside books (opt-OUT by default like books), so the
@@ -752,6 +755,17 @@ object AppPreferences {
         albumFavStripVisibleState = visible
     }
 
+    // ── Album favorite-tracks strip layout: list vs rows (v384) ──────────
+    // The share editor's strip tool flips the strip between LIST rows and
+    // side-by-side ROWS (chips). Global so every design follows.
+    fun isAlbumFavRows(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_ALBUM_FAV_ROWS, false)
+
+    fun setAlbumFavRows(context: Context, rows: Boolean) {
+        prefs(context).edit().putBoolean(KEY_ALBUM_FAV_ROWS, rows).apply()
+        albumFavRowsState = rows
+    }
+
     // ── Custom streak tagline (v53) ──────────────────────────────────
     // The Profile hero tagline: a user-set line replaces the automatic
     // streak-based tagline; empty = use the automatic one again.
@@ -1075,6 +1089,9 @@ object AppPreferences {
         internal set
     // v353 — heart-picked favorite-tracks strip visible on share cards.
     var albumFavStripVisibleState by mutableStateOf(true)
+        internal set
+    // v384 — favorite-tracks strip layout: list rows vs side-by-side chips.
+    var albumFavRowsState by mutableStateOf(false)
         internal set
     var profileAvatarPathState by mutableStateOf("")
         internal set
@@ -1508,6 +1525,7 @@ object AppPreferences {
         seriesWatchedState = getSeriesWatched(context)
         albumFavTracksState = getAlbumFavoriteTracks(context)
         albumFavStripVisibleState = isAlbumFavStripVisible(context)
+        albumFavRowsState = isAlbumFavRows(context)
         profileAvatarPathState = getProfileAvatarPath(context)
         customBlurEngineState = isCustomBlurEngineEnabled(context)
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
