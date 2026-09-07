@@ -570,6 +570,661 @@ app/src/main/java/com/curio/app/
     Game, The Last of Us, Severance, Wednesday** — the reveal's series card
     (poster + synopsis preview + episode-list sheet) previously only
     rendered for the 5 batch-1 shows; now 10 shows carry the layout.
+- **v370 — share-card smart auto-fit + corner whole-box scale (default
+  ON).** `TopicShareCard.kt` auto-grows the fact box for long quick/custom
+  facts and lifts/shrinks the title, per style:
+  - **Smart auto-fit (`smartAutoFitDelta`, was `shareAutoFitDelta`):**
+    default ON (`AppPreferences.shareAutoFitState`); intensity presets
+    Balanced/Compact/Airy per style (`ShareCardMove.autoFitIntensity`);
+    once the user moves/resizes the fact box, auto-fit hands it over
+    ("manual wins") and the first-grab seed carries height/offsets/title
+    scale over so the box never jumps. **Per-style clamps** (this pass):
+    the fact never rises where something sits above it — Collage (pill
+    above fact, title hugs the top edge: no nudge at all), Editorial
+    (masthead rules + byline: neither title nor fact rises; fact grows
+    down to the colophon); Clean/Minimal facts are bottom-anchored and
+    grow up naturally while the title lifts a little (24–28dp) to clear
+    them; Paper/Vinyl/Signature/Custom get a modest ≤14dp clamp. **Long
+    titles shrink** (`autoTitleScale`, per-style thresholds, ~0.70–0.95×)
+    when the fact needs the room — never shrunk if the user placed the
+    title. Auto-fit now watches the CUSTOM fact too
+    (`maxOf(quickLen, chapterFact.length)`).
+  - **Corner whole-box grip (`CornerResizeHandle`):** scales width AND
+    height together from the selected box's bottom-right corner — title
+    and fact already had it, now also on the info row (meta) and the
+    favorite-tracks strip; "Whole box" slider shares the same math and the
+    fact sliders reach 6x (grip to 8x) so tall 9:16 cards can expand.
+  - **Long-text font floors raised** on Collage (10→10.5–11sp), Clean
+    (8→8.5–9.5sp), Editorial (8.5→9–10.5sp) and Minimal (8.5→9–11sp) so
+    the expanded box keeps the text readable.
+- **v371 — share-card fact formats + writing box + album/series covers +
+  chapter-note sharing + collision-push + real cover colours.**
+  - **Fact formats (quick AND custom fact, `ShareCardMove.factFormat` /
+    `factDropCap`):** every style's fact renders through `FactBody`;
+    Condensed tightens line-height/word spacing, Book page splits into
+    two justified columns (`BookPageText`, half the text per column,
+    word-boundary breaks) and Editorial sets a large drop-cap initial
+    (first letter or first word, `EditorialDropCapBlock`). Restores by
+    name from saved edits.
+  - **Writing box below the tools** (quick / custom / chapter review) with
+    an **Enlarge** button opening a full white writing sheet — gives the
+    custom fact and chapter review a real input, not just the inline
+    caret. In the Book Notes sheet the chapter-note field got the same
+    treatment: an EXPAND full-white dialog (2000 chars, shares the same
+    AppPreferences slot) and a SHARE button that opens the share card
+    pre-seeded as a Chapter review (`TopicShareSheet.seedReviewText` /
+    `seedReviewChapter`, which WIN over restored edits).
+  - **Album + series covers in the share editor:** `isAlbumTopic` /
+    `isSeriesTopic` flags (wired at all three TopicShareSheet call sites:
+    reveal, Share Hub, entry detail) enable the Fetch / Refetch / Remove
+    row (gallery stays book-only); albums resolve via
+    `AlbumArtFetch.resolveArtworkUrl` (iTunes → MusicBrainz), series via
+    `SeriesPosterFetch.resolvePosterUrl` (TVMaze → iTunes). With a cover
+    present the card switches to COVER-SIDE layout (`COVER_SIDE_SHIFT`):
+    the cover anchors LEFT like the synopsis page, the title shifts right
+    and wraps ~26% narrower and shrinks ~0.9× so nothing overlaps.
+  - **Collision-push fact drag:** dragging the fact box no longer always
+    drags the title + info row along — they move ONLY when the fact
+    actually touches them (within a 4dp gap, `touches()`), so moving the
+    fact away leaves them put and moving it into them pushes them cleanly.
+  - **Real cover colours (`extractCoverSwatches`):** the androidx Palette
+    median-cut guess is replaced by a direct pixel-vote HSL histogram on
+    the decoded artwork — `CoverSwatches.dominant` is the true majority
+    colour and `notesSheetPalette` keys the sheet wash off it (vibrant
+    still drives the accent). Album/series notes sheets now feed the
+    RESOLVED artwork/poster URL into the extractor (they used the empty
+    authored imageUrl, so they always fell back to the category tint).
+    Expanded chapter/episode rows are a soft accent tint + border instead
+    of a solid accent slab.
+  - **Google Books removed as a cover source:** `BookCoverProvider`
+    dropped GOOGLE_BOOKS everywhere (hub picker, reveal live-fallback,
+    share-sheet cascade) — books now fall back iTunes → Open Library;
+    the keyless Google Books RATINGS + ISBN lookups stay untouched.
+  - **Fact-font auto-shrink (`ShareAutoFitDelta.factScale`):** the
+    auto-adjuster now scales the FACT font down as the text grows
+    (`autoFactScale`, per-style floors 0.86–0.90, starts ~150 chars) on
+    top of each style's built-in length curve (which alone only kicks in
+    at 180–350+ chars). Applied via `effectiveBodyScale = bodyScale *
+    autoFit.factScale * move.factScale` in TopicShareCard, so the export
+    and the inline typing field (which follows `liveFactStyle`) match.
+    The Balanced growth curve's low end was lowered (starts at 90 chars
+    with 1.15×) so medium facts get room earlier. `factScale` is captured
+    into `ShareCardMove` on the first grab (seed) and counts as "touched",
+    so the handoff doesn't make the text jump back to full size or clip.
+- **v372 — full-screen text editor + corner whole-box ZOOM + selection
+  chrome hiding + rich-text-lite (underline/highlight).** User: "the
+  corner expand button only behaves as a width/height button not as an
+  enlarge for the whole box along with the text, also remove the selected
+  outline when editing inline, and add a full screen button for the share
+  card with just text format and text editing features in full screen with
+  only one pill and dropdown style… background color would be category
+  tint" (answers: box + text zoom together; hide chrome in TEXT-edit mode
+  only — the handle returns when exiting; full screen shows the card
+  itself large, whole-text per-element tools in ONE menu).
+  - **Corner drag = true ZOOM (`ShareCardMove.factZoom`):** dragging the
+    fact's bottom-right corner now scales the box AND the fact font
+    together (photo-zoom, 0.5–4×) instead of only growing the line budget
+    (which was capped at the card width, so full-width facts visibly did
+    nothing). `effectiveBodyScale` multiplies `move.factZoom` so the
+    preview, export and typing caret all scale together; persisted per
+    style and cleared by Reset. `factZoom != 1f` counts as "touched" so
+    auto-fit hands over.
+  - **Selection chrome hides while typing:** in `ArrangeableCard`, when
+    `factEditMode` is on the fact's border goes transparent, the
+    tap-to-select layer is skipped, and the `FACT` case skips the
+    MoveHandle + CornerResizeHandle entirely — the caret shows where you
+    type and nothing fights the keyboard; all chrome returns when text
+    editing ends. (The edit tool pill toggles `factEditMode` on/off.)
+  - **Full-screen editor (`fullscreenEdit`, `TopicShareSheet`):** a
+    Full screen button (secondary pill, sits next to Customise) opens a
+    `Dialog(usePlatformDefaultWidth = false)` painting the whole display
+    in `lerp(surface, accent, 0.12f)` (category-tint wash). The card is
+    rendered LARGE and centered (`BoxWithConstraints`, aspect preserved)
+    via the SAME `ArrangeableCard`/`TopicShareCard` pair as the sheet
+    pager, so inline text editing is precise and the export matches the
+    full-screen preview exactly. Floating tools are minimal: Close pill
+    (left) + one Text pill (right) opening a single `DropdownMenu` with
+    EVERY text tool in one place — font (13), size slider, B/I/U +
+    highlight swatch row (5 presets, tap again to clear), alignment, and
+    the fact format + drop-cap pickers. The menu reads the current
+    `selectedResizeTarget` (title vs fact) and arms fact editing from the
+    same "Edit fact text" pill as the sheet.
+  - **Rich-text-lite per element:** `ShareCardMove` gained `factUnderline`
+    / `factHighlight` and `titleUnderline` / `titleHighlight` (Color?),
+    applied in `factBodyStyle` / `titleStyle` via `TextDecoration` and
+    `background`, persisted with the move (`toArgb` / `Color(it)`). This
+    is whole-element formatting (like Bold/Italic), not per-word spans.
+- **v373 — cover shapes + independent Whole-box scale + full-screen fixes.**
+  User: "the size of the book cover was perfect in share card in that
+  commit [ea47f1b] … album covers are square not rectangular and its
+  stretching it to rectangular so fix that … the full screen button it
+  looks transparent and doesnt match the customise button look … keep the
+  full screen button when editing too in customise … inside the full
+  screen edit the share card preview … looks stretched and not accurate
+  of what it was looking before in the bottom sheet … add the dimension
+  change button … add the box size editor … the whole box should not
+  depend on the width or height its separate and independent"
+  (ask answers: keep the side layout with the SMALL cover; album square;
+  series stays 2:3).
+  - **Cover sizes + no album stretch:** `TopicShareCard` gained
+    `isSquareCover` (sheet passes `isAlbumTopic` at ALL call sites incl.
+    the Save/Share export lambdas): books/series render the 2:3 jacket at
+    the old perfect 44×66, albums render square 66×66 — square art is no
+    longer squeezed into the 92×136 rectangle. The v370b side layout
+    STAYS, but the title shift/width-crop/title-shrink are now DERIVED
+    from the cover's real width (`coverW.value + 16f`, aspect-relative
+    width factor, mild title shrink) instead of the fixed 108f/0.74/0.9
+    tuned for the 92dp cover, so the smaller jacket hugs the title.
+  - **Whole-box independence (`titleBoxScale` / `factBoxScale` /
+    `favBoxScale`):** the "Whole box" slider no longer borrows the height
+    fraction as its backing value — each element carries its OWN scale
+    (1f default, persisted/parsed) applied in a new `boxScaledMove` that
+    multiplies BOTH width and height fractions (on top of auto-fit, width
+    still clamps at 1f). Dragging width/height no longer yanks the
+    Whole-box thumb; the corner-grip base math divides by the scale; the
+    scales count as "touched" so smart auto-fit hands over; Reset clears
+    them with the rest of the moves.
+  - **Full screen button:** restyled to MATCH the Customise pill
+    (`surfaceContainerHigh` + `onSurfaceVariant` — the old
+    `secondaryContainer` chip read as transparent) and stays visible
+    while editing (Customise itself still hides mid-edit).
+  - **Full-screen preview = exact zoom of the sheet card:** the card now
+    renders at the sheet's own 280dp base inside a
+    `CompositionLocalProvider(LocalDensity provides Density(density*zoom,
+    fontScale*zoom))` so text sizes, spacing and placements scale
+    TOGETHER (the old approach laid the dp content out in a much bigger
+    box, so text stayed tiny and `SpaceBetween` re-spread the layout).
+    Drag deltas convert through the same scaled density, so persisted
+    offsets stay in card-local dp.
+  - **Full screen tools:** a Dimensions pill (AspectRatio glyph + live
+    `aspect.label` 3:4/9:16) sits next to the Text pill and toggles the
+    aspect; the Text dropdown gained a Box size section (width / height /
+    whole-box `SizeSliderColumn`s for the selected title or fact) and the
+    menu Column is now vertically scrollable.
+- **v374 — smart fit rework (whole-card, slider channels only) + auto-tone
+  fix + quick-fact-under-progress.** User: "why have you placed the smart
+  auto fit in there [the size tool] and also the auto fit densities remove
+  them … the smart fit should be differnt toggle … consideres the entire
+  share card no just the quick fact box … it should use the sliders size
+  etc for adjustments not its own differnt size logic … it will use the
+  quick fact text size and decrase it and it will incrase the fact height
+  and fact wiidth … smart collide detection so in automatic defult card
+  desotn go outsite of the card … the auto colors … when the level unlocked
+  color is availabe the auto color is picking that which should not happen
+  … make quick fact work in the same way [as custom fact under progress]"
+  - **Smart fit = own toggle, slider channels only.** The old
+    `ShareAutoFitDelta` (dy/titleDy/titleScale/factScale + the intensity
+    presets + hidden `autoFactScale`/`autoTitleScale` floors) is GONE. The
+    new delta is `heightFrac` / `widthFrac` / `textScale` — applied through
+    the SAME channels the user's sliders drive: `effectiveMove
+    .factHeightFrac`/`.factWidthFrac` and `effectiveBodyScale` (the
+    bodyScale the Size slider sets). `autoFitGrow(len)` is ONE length curve
+    (no presets; `autoFitIntensity` removed from `ShareCardMove` +
+    persist/parse) and `factFitBudget(style, aspect)` is the WHOLE-CARD
+    collision budget — max box-height × + min text-scale per design
+    (Collage's fixed band barely grows; Editorial's byline→colophon slot a
+    little; bottom-anchored Clean/Minimal grow up into the free middle;
+    Paper/Vinyl/Signature/Custom mid-flow). Past the cap the box stops
+    growing and the TEXT shrinks by exactly the overflow ratio (clamped to
+    the style floor) — nothing else on the card is moved or shrunk, so
+    nothing leaves the card. Manual box edits still win; the first-grab
+    seed captures the fit's textScale into `move.factScale` so the handoff
+    doesn't pop.
+  - **UI:** the Smart auto-fit switch + intensity pills are REMOVED from
+    the Size tool; Smart fit is its own toolbar tool (glyph
+    `photo_size_select_large`, verified in the bundled icon font) whose
+    panel holds just the on/off switch.
+  - **Auto-tone fix:** `paletteFor`'s automatic rotation now cycles ONLY
+    the always-available base tones (`unlockLevel == null`); a level-locked
+    premium tone never appears automatically — only when explicitly picked
+    in the Tone tool (the override index still maps into the unlocked pool).
+  - **Quick fact under Reading progress:** `chapterFactForCard` now returns
+    `editedFact ?: quick.text` when the quick fact is active with progress
+    on (same stacking as the custom fact), and the content pills keep
+    progress ON when picking the Quick fact instead of turning it off.
+- **v375 — notes-sheet palette memory + selected-state contrast + rich-text
+  fact editing (Save-your-take style) + full-screen editor fixes.** User:
+  "in book albumn etc buttom sheet, colors, so the page number albumn number
+  icon isnt visible when selected and also the like button and also the book
+  icon and same for albumns series and when selected its even more bad … and
+  also the color pallete should be remeberstae like even when after resrart
+  it goes back to defakt and switches after a second when it should be
+  instant … the enlarged text box text editing … add the save you text style
+  format text editing with highlights etc which stays when sharing too … in
+  the full screen card editor the highligh bold italic etc are inside the
+  tool box when they should show as floating when selecting the text and
+  only apply to them if text are selected bnot entirely always … same for
+  the full screen text editor too" (+ the crash/glitch report from
+  `11e566a5`: infinite-constraint crash + slider/swipe fight in full
+  screen).
+  - **Palette INSTANT + remembered:** cover swatches cache per artwork URL
+    and albums/series persist their resolved artwork URL
+    (`AppPreferences` `KEY_COVER_SWATCH_CACHE` / `KEY_SHEET_ART_URLS` +
+    `coverSwatchesToArgbs`/`coverSwatchesFromArgbs` in CoverPalette.kt).
+    All three notes sheets seed colors synchronously on first composition
+    (no default-then-switch flash after restart) and only refresh the
+    cache in the background.
+  - **Selected-state contrast:** `notesSheetPalette`'s `onAccent` is keyed
+    to HSL lightness (≥0.52 → dark ink) instead of linear luminance, so
+    pale light-cover accents get readable ink on solid-accent rows/chips;
+    hearts/number chips/icons on open (tinted) rows use the palette ink /
+    full-strength `onAccent` instead of vanishing accent-on-accent.
+  - **Rich-text fact editing:** `TopicShareCard` gained a `factSpans`
+    (`List<TextSpan>`) param threaded through EVERY style → `FactBody`
+    (+ the BOOK two-column + EDITORIAL drop-cap splitters re-slice runs via
+    `richSlice`), rendered via `buildRichAnnotated` with the amber
+    `ShareFactMarker`. Sheet state holds `editedFactSpans`/`customSpans`
+    (persisted via `spansToJson`/`spansFromJson`), `routeFactChange`
+    rebases on inline typing, the ENLARGE dialog and the chapter-note
+    dialog host `RichTextEditor`, and Save/Share exports pass the spans.
+    Chapter-review cards shift spans past the "CH n · title" chip prefix
+    (`reviewChipPrefixLen` + `shiftSpans`) so runs land on the note text.
+  - **Full-screen selection formatting:** the full-screen card's fact field
+    keeps a REAL `TextFieldValue` selection (`richFactTfv`,
+    `richFactTools` on the ArrangeableCard call) and floats a non-focusable
+    `Popup` B / I / highlight bar anchored to the live selection caret;
+    taps toggle `RichFlag`s over exactly [s,e) via `toggleFactSelectionFormat`
+    (`spansFullyCovered`/`toggleSpanFlag` made internal in RichTextEditor.kt).
+    Whole-element toggles remain in the Text panel (keep both).
+  - **Crash/glitch fixes (`11e566a5`):** the full-screen Text dropdown is
+    now an INLINE bounded-height panel (`heightIn(max=300)` + scroll)
+    under the top bar in a Dialog COLUMN layout — no more DropdownMenu
+    verticalScroll under infinite height (the reported crash) and no popup
+    scrollable stealing slider/swipe drags.
+- **v376 — GLUED covers (cover rides the title block on Paper/Vinyl/Clean/
+  Editorial/Minimal) + auto title-lift collision.** User: "the cover
+  position isnt right in share card, in paper design its top left corner
+  and not to the side of the title and author and also the space can be
+  decrase, in vinyls the text quick fact should move a little down and the
+  cover for albumn and the title itself should be a little down too do it
+  doesnt verlap on category pill, in editorial its near perfect, the cover
+  should move a little don matching the title starting point and the title
+  can move a little closer to the cover, same for minimal too … clean a
+  similiar the positioning is good the ittle move closer … the cover and
+  albumn should move together also when the quick fact gets moved along
+  with title the cover should move too by collide logic … in the auto text
+  the collision should work when the height of the quick fact gets tuned
+  manually and the title moves up automatically along with cover if present
+  and it comes don if with the slider it gets lowered and same for width
+  chnages too" — ask answer: "Glue cover to the title block; title drag
+  moves cover too and also the title move during collision moves it too;
+  Saved lift".
+  - **GLUED cover plumbing:** `TopicShareCard` computes `glueCoverStyle`
+    (Paper/Vinyl/Neumorphic/Editorial/Minimal) and passes `gluedCover`
+    (artwork, `coverW`/`coverH`) into those five card styles; the old
+    side-layout overlay + `coverSideShift`/`coverTitleWidthFactor`/
+    `coverTitleScale` layoutMove stays ONLY for Signature/Custom (and the
+    no-cover per-style corner pockets stay for the overlay styles). The new
+    `GluedCover` composable renders `BookCoverBadge` inside the style's own
+    title block as the leading item of a Row that carries the title's move
+    (`glueTitleMove` — drag offset + auto lift only, NEVER font scale/width
+    crop: `titleSize` keeps scale+width on the text), so the jacket always
+    sits exactly beside the title wherever that design's flow puts it, and
+    rides every title drag / collision push / auto lift. The cover keeps
+    its OWN fine-position offset (`coverDx`/`coverDy`) inside the group.
+  - **Per-style placement:** Paper (MiddleContent) → cover | title+author
+    Row beside the headline area with a snug `CoverTitleGap` (12dp);
+    Vinyl → cover | title+byline Row, title block lowered (18dp spacer
+    with cover) so it clears the category pill, quick fact nudged down
+    (14dp spacer); Editorial → cover | headline+deck Row aligned to the
+    headline start (topPad 5); Minimal → cover | title+byline Row (topPad
+    4); Clean/Neumorphic → cover beside the CENTERED title block
+    (`CenterStart`, CenterVertically).
+  - **Auto title-lift collision (`move.titleLift`, dp):** inside
+    `ArrangeableCard`'s edit overlay a `LaunchedEffect` (editMode,
+    non-quote) watches the MEASURED title/fact rects + the fact box
+    fractions; when a manually grown fact box (height/width/whole-box
+    sliders or the corner grip) would draw over the title, it computes the
+    needed lift from the title's UN-lifted base (measured bottom + current
+    lift → converges in one step), clamps to the card's top edge and calls
+    `onMove(move.copy(titleLift = …))`. `moveTitle`/`titleShift`/
+    `glueTitleMove` apply the lift as an upward offset everywhere (sheet
+    preview, export) and `titleLift` is parsed/persisted in the move JSON
+    (0 = none). Lowering the box drops the needed lift → the title settles
+    back. The TITLE drag handle's clamp math adds the lift back so the
+    natural base stays correct.
+- **v378 — notes-sheet polish + share-editor collision/fit/zoom fixes.**
+  User (big mixed batch): "in book buttom sheet of synopsis still the
+  number text and the read icon isnt looking right and also the enlarge
+  icon. also remove that big divider and the 2 out of 4 chapter read show
+  progress in that devider and make the Chapter 1st letter capital. and in
+  albumn buttom seet remove the cross buttom. and during card editing when
+  i move the title and make it or try to put it above the quik fact it
+  starts to glitchy and crazy glitchy repeated so fix it, that collison
+  logic only works when i move the quick fact not the title also in full
+  screen editor add a reset button to reset the layout and yes the reset
+  button only resets the layout not the texts chnages also by default the
+  book colors are that darkmidnight color can u fix it it should use its
+  own ategory tint auto color the golden color maybe. also that weird
+  glitchy animationhappens when i try to close the buttom sheet of share
+  card during editing… and the smart fit still isnt usin the tool text
+  adjustments but rather uses its own coz hen i check the text size its
+  still at 1. and also in collage the quick fact box can be move a little
+  up in smart auto fit and making its text smaller too. so fix it too, and
+  in paper the text gets too much small even though the height can be
+  expanded to fit the text… and in the full screen editor the preview of
+  the card is still not accurate now it look sa little more zommed and cut
+  from below… and also the bold option sometimes doesnt show in card and
+  the boxes outline is having a glithin in full screen editor fix it it
+  looks inaccurate, and to edit the text add the double tap to edi tin
+  inline mode. and also remove that whole box adjuster and its icon from
+  the orner too".
+  - **Book/album notes sheets.** The book sheet's `NotesSheetTopHairline`
+    accent rule under the drag handle is GONE; the reading-progress rail
+    is ONE capitalized label ("2 of 4 Chapters read" / "4 Chapters") —
+    the 4dp progress bar and duplicate "N / M" counter are removed.
+    Chapter row titles render with `replaceFirstChar` caps; on the
+    accent-tinted OPEN rows the number disc (read rows), the Mark-read
+    FoldedCorner toggle and the note Enlarge chip switch to the sheet INK
+    (accent-on-accent washed out). The album sheet's ✕ close `Surface` is
+    removed (v355 no-close model, like book/series).
+  - **Title drags never auto-lift.** New `titleGrabbed` state in
+    `ArrangeableCard`: while the TITLE handle drags, the v376 auto-lift
+    `LaunchedEffect` returns early (and it's a key, so a pending run
+    cancels). The lift exists ONLY for fact-box growth — a title dragged
+    over/above the fact follows the finger; the old effect recomputed a
+    counter-lift every frame and fought the drag ("crazy glitchy").
+  - **Full-screen Reset Layout.** `ShareCardMove.resetLayout()` extension
+    zeroes positions / width·height fractions / whole-box scales /
+    `titleLift` but PRESERVES every text edit (fonts, aligns,
+    bold/italic/underline/highlight, `titleScale`/`factScale`/
+    `factZoom`, fact format + drop cap). A "Layout" pill in the
+    full-screen top bar calls `updateMove(move.resetLayout())`.
+  - **Auto tone matches the topic.** `paletteFor(accent, null)` no longer
+    does `accent.hashCode() % size` over ALL always-available tones
+    (which included the dark Onyx/Noir/Wine/Deep Sea/Cocoa variants — the
+    unexplained "midnight" default). Auto picks the closest of the four
+    LIGHT base tones (Warm Rose / Soft Sage / Golden Ochre / Deep Indigo)
+    by RGB distance to the topic accent, so books' golden accent lands on
+    Golden Ochre. Explicit Tone picks unchanged.
+  - **Sheet gestures off while editing.** `ModalBottomSheet` now passes
+    `sheetGesturesEnabled = !editMode`: while customising, the sheet
+    cannot be dragged at all (no blocked-dismiss spring-back that froze
+    the tools/swipes); Done/back drops edit mode and normal swipe-close
+    returns. `confirmValueChange` + `onDismissRequest` guards stay.
+  - **Smart fit visible in the size slider.** The quick-fact Size slider
+    (sheet panel + full screen) now shows `bodyScale × fit.textScale ×
+    factScale × factZoom` — the RENDERED size — instead of raw `bodyScale`
+    (which read 1× while the card sat at 0.8×). Dragging writes the base
+    back through the fit (WYSIWYG); Reset restores base 1× + factScale/
+    factZoom 1.
+  - **Fit budgets.** PAPER gets its own `factFitBudget` arm (portrait 2.0
+    height cap / 0.96 text floor) so long facts EXPAND the box instead of
+    shrinking type to 0.8×; COLLAGE keeps a small cap but its text floor
+    drops to 0.70–0.75 so long facts shrink inside the band.
+  - **Full-screen preview zoom bug.** The density trick multiplied BOTH
+    density AND fontScale by the zoom → sp text scaled TWICE (zoom²),
+    reading oversized and cutting off below. The provider now scales
+    DENSITY only (`Density(density * zoom, fontScale)`), so dp AND sp
+    scale once and the preview matches the 280dp sheet card exactly. This
+    also explains the "bold doesn't show / glitchy box" reports: the
+    chrome and the bar lived in the over-zoomed coordinate space.
+  - **Corner whole-box grip removed.** `CornerResizeHandle` (the
+    bottom-right corner icon that scaled the whole box) is deleted along
+    with its four call sites (title/fact/meta/fav) — the Crop tool's
+    width/height/whole-box sliders own sizing, and the stray corner icon
+    is what read as a "box outline glitch" in full screen. `factZoom` /
+    whole-box scales stay (persisted + slider-driven).
+  - **Double-tap inline editing.** A `combinedClickable` on the fact
+    tap-to-select layer fires `onRequestInlineFactEdit` (new
+    `ArrangeableCard` param) on DOUBLE-TAP; the sheet's
+    `requestFactInlineEdit()` arms the transparent field exactly like the
+    Edit-text tool (auto-converting the default quick fact to a custom
+    fact), so editing is a double-tap away in the sheet and full screen.
+- **v379 — full-screen text-tool polish: icon-only B/I/U, floating-bar
+  Underline, justify + book column-gap, permanent tool captions.** User:
+  "in full scren text editor the icon for b i and underline is weird fix
+  it. also add underline in tool bar too also full screen the highliter in
+  the buttom sheet of that text editor is bad remove it. and also add
+  justify aling format too abd in bok page fact layout add space adjust
+  between that. and also show the hint text for tool nme below always in
+  the tool bar. and fix some more functinal issues properly analyse it…".
+  - **Underline is a first-class rich-text flag.** `TextSpan` gains
+    `underline: Boolean = false` (CaptureData) and every rich-text
+    codec round-trips it: `buildRichAnnotated` renders it as a text
+    decoration, `extractRichSpans` reads it back, `merged()`/
+    `rebaseSpans()` preserve it, the card's JSON `spansToJson`/
+    `spansFromJson` write/read a `"u"` key, and `richSlice` carries it
+    into the two-column book split. A dedicated `toggleSpanUnderline` /
+    `spansUnderlineCovered` pair in RichTextEditor toggles the flag on a
+    selection WITHOUT touching bold/italic/highlight (Save-your-take's
+    dock keeps its RichFlag-only toolbar).
+  - **Floating bar.** The selection bar in `ArrangeableCard` (B / I /
+    highlight) gains a U button driven by the new `onToggleFactUnderline`
+    channel; the bar widened 132→172dp to fit four tools.
+  - **Whole-element format.** The sheet's Format tool shows whole-element
+    Bold / Italic + Underline (title + fact only — meta/badge carry no
+    underline field); the full-screen Text panel's B/I/U became ICON-ONLY
+    round `EditToolPill`s (the old label pills doubled glyph + letter),
+    and the full-screen whole-element Highlight SWATCH ROW is removed
+    (highlight lives only on the floating bar over a live selection).
+  - **Justify.** The full-screen Text panel's Align row adds Justify
+    (the sheet's Align tool already had it).
+  - **Book-page column gap.** `ShareCardMove.factGutter` (multiplier, 1f =
+    12dp) is persisted/parsed/reset alongside the other layout state;
+    `FactBody`/`BookPageText` thread `gutterFrac` through to the
+    12dp·frac Spacer between the two columns. Sliders appear under the
+    fact-layout pickers (BOOK format only) in BOTH the sheet's Align tool
+    and the full-screen Text panel.
+  - **Tool captions are permanent.** `ToolWithCaption` lost its `show`
+    gate — every toolbar pill (Text · Size · Crop · Fit · Font · Color ·
+    Adjust · Align · Format · Content, plus the live ratio / Signature
+    state labels) shows its tiny name under the icon AT ALL TIMES.
+  - **v379c — the selection bar lives on every editing surface.** The two
+    bottom-sheet `ArrangeableCard` calls (pager + single-style) now pass
+    `richFactTools = true` + the fact spans + the format/underline toggle
+    channels exactly like the full-screen dialog — so a live text
+    selection on the card floats B / I / U / highlight over the letters
+    in the sheet preview too. Quotes + reading progress stay plain (no
+    spans; the bar's enable states gate on the non-null callbacks). The
+    rich field's seed/comment blocks were updated to match.
+  - **v379b CI fix.** The selection bar's visibility gate became
+    `format != null || underline != null`, which silently killed Kotlin's
+    smart-cast of `onFormatFactSelection`; the B / I / highlight buttons
+    now safe-invoke (`?.invoke`) and gate on their own enable state.
+  - **v379d — size-channel cleanup, dark-premium Paper ink, AUTO-LAYOUT
+    pill.** User: "remove the orphaned factZoom… Reset Layout restores
+    smart fit… the smart fit should also use the text box height
+    adjuster… add a spark round pill floating in a card corner to auto
+    smart-fit… nothing gets overlapped, the user's edits stay but it
+    adjusts… if too much text the card can automatically become 9:16…
+    tap again for another arrangement… fixing its colour in dark mode
+    (some share-fact text is still dark)…".
+    - **factZoom deleted.** Nothing wrote it since the v378 corner-grip
+      removal; it only multiplied the render + divided the size-slider
+      write-backs. Parsing now folds a legacy `factZoom` into
+      `factScale` (same channel), and the field + all render/divisor/
+      persistence uses are gone — one invisible factor fewer.
+    - **Reset Layout clears the fit seed.** `resetLayout()` no longer
+      carries `factScale` forward: that field is only ever written by
+      the smart-fit handoff seed or the auto-layout pill (the Size tool
+      drives `bodyScale`), so keeping it left auto-shrunk text on a
+      default box AND permanently disabled smart fit (the seed reads as
+      "manually touched"). Reset now returns natural auto-fit behaviour.
+    - **Box-height thumb is honest.** The sheet Crop tool + full-screen
+      Box section show `factHeightFrac × fit.heightFrac` (the height the
+      card really renders, matching the text thumb since v378) and write
+      the base back through the fit on drag.
+    - **Cover title-shrink folded into the slider.** Signature / Custom
+      cards with a side cover multiply the title by `coverTitleScale`
+      (~0.9–0.97) at render; the Title-size thumbs (sheet + full screen)
+      now display the effective size and write the base back.
+    - **Paper fact/quote ink.** `qStyle`/`frostStyle` in `MiddleContent`
+      copied `MaterialTheme.typography` and therefore inherited the APP
+      theme's `onSurface` — dark-on-dark on dark premium palettes (Paper
+      backgrounds follow the tone) and wrong in dark mode. Both styles
+      now carry explicit `palette.ink`.
+    - **AUTO-LAYOUT sparkle pill.** `AutoLayoutPill` floats at each
+      card's top-end in BOTH modes (resting + editing). Tap calls
+      `runAutoLayout()` in the sheet: `autoLayoutPlan()` (per style /
+      aspect / current text length) commits a whole-card fit into the
+      per-style move — box height + whole-fact text ride the SAME
+      channels the sliders drive (`factHeightFrac`, `factScale`, format),
+      so the export matches and Reset Layout clears it. Attempts cycle
+      standard fit →      condensed → book columns (long facts) → tall 9:16 when a 3:4 card
+      overflows a fully-fitted budget; attempts that would change nothing
+      are auto-skipped so every tap does something visible. Manual
+      title/fact/cover position drags are never overwritten.
+    - **v379e — text-first fit, re-fit toggle, lift unit fix, dead-title-
+      height, Whole-box slider gone.** User: "the whole box slider is
+      still showing, remove it; by default the fact height should be
+      100% and the text size shrinks by length; toggling smart fit ON
+      again should fix the box after manual edits; the title still
+      glitches up and down against the quick-fact box; hide Title height
+      when the title fits one line; the quick-fact lines look different
+      between full screen and the sheet…"
+      - `autoFitShape()` replaces the box-first fit: TEXT-FIRST — the
+        fact box stays at its full height and `textScale` shrinks
+        inversely with the length curve; the box grows only when that
+        shrink passes the design's text floor (then capped by the
+        budget). `smartAutoFitDelta` is the toggle/touched gate around
+        it; `autoLayoutPlan` layers the pill attempts on it.
+      - The Smart-fit switch now CLEARS a manual box on re-enable
+        (`factWidthFrac/factHeightFrac/factScale/factBoxScale → 1`, the
+        position drags stay) so the fit can "fix the box" after manual
+        edits; panel copy rewritten.
+      - **titleLift unit bug**: the collision lift was computed in PX
+        (boundsInWindow rects) but applied as DP in `moveTitle`
+        (`(titleDy - titleLift).dp`) — on a 3× screen the title was
+        shoved ~3× too far, clamped against the card top, and bounced
+        back (the "glitchy up and down"). The lift effect now converts
+        the measured px overlap to DP before writing, adds a 0.5dp
+        dead-zone, and is guarded by BOTH `titleGrabbed` and a new
+        `factGrabbed` (the fact handle's live push owns the drag; the
+        measured lift must not fight it).
+      - Whole-box sliders removed from the Crop tool and the full-screen
+        Box section (title/fact/fav rows + their v373 comments); the
+        scales stay on the model for Reset/persistence but the UI is
+        width/height only.
+      - Title-height slider renders only when the displayed title
+        (`editedTitleOrDisplay`) exceeds ~22 chars — it caps wrapped
+        lines, so it is hidden for short one-line titles instead of
+        reading as a dead control.
+      - **frostInk auto-contrast.** User: "the text colours for dark
+        background cards are all black now, use white so they don't look
+        bad". `ShareCardPalette.frostInk()` returns near-white when the
+        fact pane's BLENDED colour is dark (bgMid lerped 35% toward
+        FrostPane's white overlay — the effective backdrop on premium
+        dark tones) and near-black when it's light; Paper's quote +
+        frost styles now use it instead of palette.ink/theme onSurface.
+        Title/meta already used palette.ink (light on the dark tones).
+    - **v380 — hand-placed title owns its spot (overlap freedom).** User:
+      "the title-fact collision glitch is still there; if I move the title
+      onto/inside the quick-fact box I should be able to, no problem."
+      New persisted `ShareCardMove.titlePlaced` flag: the auto-lift
+      effect (v376/v379e) returns early for a hand-placed title, so a
+      drag that parks the title over the fact stays put — the lift only
+      ever rescues a title that was NEVER dragged (natural or nudged
+      aside by the FACT handle's push), i.e. slider-grown fact boxes. A
+      title drag end FOLDS any prior lift into `titleDy` (`dy -= lift`,
+      `lift = 0`) so the title freezes exactly where the finger left it
+      with no snap; Reset layout clears the flag (back to automatic).
+      Old saves parse `titlePlaced` as false → unchanged behaviour.
+- **v381 — pill 9:16 flip reads bigger; opaque sparkle pill; Collage dark
+  tones + blended bottom.** (Pill ask answers + collage fixes; Signature
+  default-with-cover deferred — open question with the user.)
+  - The pill's tall plan (3:4 box-capped → 9:16) now commits a LONGER
+    fact box + LARGER text too (`heightFrac ≈ tallBudget×1.4 in
+    [1.6,3.2]`, `factScale 1.18`) so the flip buys readability; the old
+    flip kept the 3:4 box/text on the tall canvas (wasted height).
+  - `AutoLayoutPill` is now an OPAQUE surface with a 1dp ring and NO
+    shadow elevation — the translucent fill + elevation painted a soft
+    dark halo over busy cards ("solid fill glitch").
+  - **Collage dark-tone pass.** On dark premium palettes (Midnight,
+    Ember…) the collage used the LIGHT accent raw for the lower field →
+    the lightest colour sat at the card's bottom and the white fact text
+    vanished on it. New `darkTone` (bgBase luminance < 0.55) branch:
+    field/band/pill = accent/accentDark LERPED TOWARD BLACK (0.58–0.62)
+    then muted so layers always darken top→bottom; `tornEdge` pulls
+    toward the accent so the seam reads against near-black paper;
+    polaroid caption = fixed warm-dark ink (palette.ink is near-white on
+    dark tones → invisible on the white polaroid). Light tones unchanged.
+  - Collage bottom tear blended: the sin-edged band + solid footer wedge
+    became ONE feathered zone — low-amplitude wave path + vertical
+    gradient whose top starts TRANSPARENT (no hard line) and a footer
+    wave filled with a transparent→deep gradient (soft melt).
+- **v383 — Link share + fact box grows past the design column.** Two
+  user asks: (1) "when sharing the topic add a deep link style share": the
+  share sheet's actions row gained a **Link** pill that opens a small
+  caption editor (pre-seeded with the topic name); posting it shares an
+  ACTION_SEND text = your message + the URL. The URL comes from
+  `com.curio.app.data.shareLinkForTopic`: albums/artists/songs build the
+  search URL of the music service picked in Settings (re-read at share
+  time), everything else the topic's Google search. Callers (reveal,
+  entry detail, Share Hub) pass it via the new `TopicShareSheet.shareLinkUrl`
+  param; the caption dialog shows the link being sent, then dismisses the
+  sheet. (2) "the box width can be expanded": the Fact-width slider now
+  runs 0.3x–1.2x (was capped 1.0). `moveFact` renders through a custom
+  layout: at <= 1x it measures exactly like the old fillMaxWidth (child
+  wraps naturally, placed at 0) so no card changes; past 1x it measures
+  the pane at columnWidth × frac and recentres the overhang, letting the
+  box eat the design's side gutters that used to sit empty. Render-path
+  caps in `effectiveMove`/`boxScaledMove` rose 1f → 1.2f so the setting
+  survives smart-fit/box-scale folding; the untouched auto-fit seed still
+  clamps at 1x. Also folded in: the v382 CI compile fix (Signature SIDE
+  centred its cover with `Modifier.align` inside a nested Box, which the
+  compiler rejected — now `Box(contentAlignment = Alignment.Center)`).
+- **v382 — Signature covers are GLUED (no more cover over the badge/title).**
+  User: "the signature styles are bad with the cover — it overlaps the
+  badge/title". Signature joined the glued-cover set (`glueCoverStyle` + the
+  cover flows as `gluedCover` into SignatureCard) and dropped off the
+  generic top-left overlay (`coverSlot` now serves Custom only; Signature
+  no longer gets the synthetic coverSideShift title offset via
+  `layoutMove`). Inside SignatureCard: `TitleText`/`MetaText` gained a
+  `glued` flag (title uses `titleSize`, meta skips `titleShift` — the Row
+  owns the title drag via `glueTitleMove`), and a new `TitleAndMeta(centered)`
+  renders the jacket + title + meta as one Row wherever the design's flow
+  puts the title (STANDARD / BOTTOM left-flow, CENTERED / OVERLAY /
+  POSTER centred; SIDE stacks the cover centred above the title in the
+  narrow left panel). No-cover paths are untouched. Signature background
+  treatment is a separate upcoming user round.
+- **v377 — share-card editor declutter: design switching via the card,
+  tool captions, No-fact eye-cross, fact layout under Align.** User: "the
+  style button should only show when signature style is active and tapping
+  it should switch between the 2 differnt signature style no need for the
+  design options below in tool bar, the ratio of 3:4 9:12 dimention
+  chnage make it chnage without closing the other tool if its open, and
+  remove that tap a thing to select swipe for another design text, and
+  instead show a small text per tool, like ratio, font, style, crop,
+  color, these hint text below tools when selected, the layout f standard
+  condenced book page etc move them inside the alingment tool, and the
+  content one make the no fact just eye cross icon so it hides the fact
+  box with just icon no text" — ask answers: tool name captions under the
+  OPEN tool only; No-fact eye-cross in the panel AND the bottom toggle;
+  ratio caption always under its icon.
+  - **Design switching = the card carousel only.** The Style/Design tool
+    panel is GONE (`toolOpen == "style"` arm deleted; the now-unused
+    `setStyle` + `scope` removed). Designs change by swiping the
+    HorizontalPager carousel. The toolbar shows a Style toggle ONLY while
+    the current design is SIGNATURE: one tap flips `classicDesign`
+    between the two Signature looks instantly (no panel), and its caption
+    under the icon reads the ACTIVE variant (Current/Classic). The design
+    label + dots above the carousel stay.
+  - **Per-tool captions (`ToolWithCaption`).** Each toolbar pill can carry
+    a TINY name under it while its panel is open (Text / Size / Crop /
+    Fit / Font / Color / Adjust / Align / Format / Content) — the label
+    moves as the user switches tools and nothing shows when nothing is
+    open. The RATIO pill keeps an ALWAYS-ON caption showing the active
+    size (`aspect.label`: "3:4"/"9:16"), and its toggle no longer closes
+    an open tool panel (the old `toolOpen = null` is removed). The "Tap a
+    thing to select · swipe for another design" hint text is deleted.
+  - **Fact LAYOUT presets live under Alignment.** Standard / Condensed /
+    Book page / Editorial + the Editorial-only Drop cap row moved out of
+    the Bold/Italic ("format") tool into the ALIGN tool's panel (rendered
+    when the fact is selected, under the alignment pills); the full-screen
+    editor's adjacent section header renamed "Fact layout" for parity.
+  - **No fact = eye-cross icon only.** New `CurioIcons.VisibilityOff`
+    glyph added to the bundled Material Symbols subset via fontTools rlig
+    surgery ON the existing subset font (+1 rlig ligature name, 0 lost, 0
+    cmap changes, ~300 bytes — the full-font pyftsubset path explodes the
+    glyph closure on Material Symbols' first-letter ligature coverage, so
+    the glyph outline + rlig record were copied straight into the current
+    font). The Content panel's "No fact" option is now an icon-ONLY 38dp
+    `IconPill` (eye-cross, no words) and the bottom content toggle shows
+    just the eye-cross + chevron when No fact is active (the "No fact"
+    text is hidden).
+  - **Copy trims:** the Smart-fit panel's paragraph and the Adjust panel's
+    footer line each shortened to one line.
 - **v361 — keyed defaults + Clear-covers button; CI fix for the reveal
   poster.** User: "fix it, and also i added spotify key and library thing
   api as well… does the api is used in the apk build from pr, use that by
@@ -998,42 +1653,6 @@ app/src/main/java/com/curio/app/
   row's solid "Mix · N" capsule is HIDDEN while mixing on the CLASSIC
   page (`!mixing || pagerState.currentPage != 0`) — it stays on the new
   page so apply-from-there still works.
-- **v370 — share-card editor: floating edit box, double-tap-to-edit,
-  smart layout (always-on, manual-wins), grouped move with badge, cover
-  placement LEFT of title+author.** (1) **Floating edit box**: a bigger
-  edit box (no dark overlay) opens ABOVE the card from the Edit-text tool
-  for the quick fact / custom fact / chapter review (even stacked under
-  reading progress); the on-card field is still the caret seat, and the
-  floating box binds the same `editFact`/`customText` so typing here is
-  identical. (2) **Double-tap to edit**: on the on-card fact box, a SINGLE
-  tap selects it for moving (grip appears), a QUICK DOUBLE tap enters edit
-  mode (floating box + keyboard); implemented with one
-  `detectTapGestures(onTap, onDoubleTap)` on the select layer (the field
-  stays inert until armed by the Edit-text tool). (3) **Smart layout**:
-  `SmartLayout.adjust(...)` runs at render and is always-on with manual-wins
-  (no per-style toggle): when the quick fact is long (>120 chars) OR a
-  cover is placed, it keeps elements from overlapping/leaving the card —
-  COLAGUE gap between the title block and middle section, NEUMORPHIC title
-  kept off the fact area, EDITORIAL headline auto-shrunk (titleScale 0.82)
-  for long facts, title/meta/fact clamped inside the card frame. When a
-  BOOK/ALBUM/SERIES cover is placed, titleWidthFrac→0.62 and
-  factWidthFrac→0.80 so the cover + title + author fit without the title
-  leaving the card. (4) **Cover placement**: BOOK/ALBUM/SERIES cover sits
-  to the LEFT of the title + author per style (per category corner pocket),
-  taken OUT of the Collage polaroid (that slot is the user photo only);
-  renders as a 60×90dp poster thumbnail beside the title/author. Collage
-  only shows a cover when the user explicitly placed it. Manual moves of the
-  title/fact still win over the smart overlay per element. (5) **Grouped
-  move — badge**: the FACT handle now also moves the category BADGE with the
-  fact block (title + meta + badge travel together on a fact drag), while
-  each still has its own grip; the followers use the RAW finger delta so
-  they don't overshoot. (6) **Whole-box corner grip**: the corner grip scales
-  width AND height together (photo-editor style); the Whole-box slider was
-  removed from the Box-size tools (it lives only as the corner grip now).
-  (7) **Custom fact / chapter review re-editable**: the source-panel hint
-  points to the floating box; the custom fact is editable alone AND stacked
-  under reading progress; the chapter review text is editable in the floating
-  box too (binds `customText`).
 - **v313 — Topic Browser revamp, pick 1: category-filtered search, dynamic
   chips, one-category browse.** User: "in topic browser let user change
   category and act that category as filters for the search, so it doesn't

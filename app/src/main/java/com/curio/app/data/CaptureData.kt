@@ -122,7 +122,12 @@ data class TextSpan(
     // its default size. null = inherit the field's bodyLarge size. Stored as
     // a plain Float (not TextUnit) so Gson serializes it cleanly in saved
     // entries; legacy entries omit it → null.
-    val fontSizeSp: Float? = null
+    val fontSizeSp: Float? = null,
+    // v379 — per-letter UNDERLINE (the share card's full-screen selection
+    // bar toggles it on the fact text; Save-your-take's dock doesn't expose
+    // it, so legacy runs stay underline-free). Rendered as a text decoration
+    // by [buildRichAnnotated], persisted like the other flags.
+    val underline: Boolean = false
 )
 
 /** Structured FieldMind provenance preserved on a restored observation or note. */

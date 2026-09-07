@@ -448,6 +448,14 @@ fun ShareHubScreen(navController: NavController) {
                 onDismiss = { hubShareOpen = false },
                 categoryFamily = fam,
                 topicByline = topic.byline,
+                // v371 — album/series topics get the cover-fetch flow in the
+                // share editor too (artwork resolves via iTunes → MusicBrainz
+                // / TVMaze → iTunes, same as the reveal posters).
+                isAlbumTopic = resolvedCat.id == CategoryId.ALBUMS,
+                isSeriesTopic = resolvedCat.id == CategoryId.SERIES,
+                // v383 — LINK share: albums/artists/songs post the music
+                // service the user picked; everything else posts Google.
+                shareLinkUrl = { com.curio.app.data.shareLinkForTopic(topic) },
                 initialStyle = styleIndex,
                 initialClassicSignature = design.classic
             )

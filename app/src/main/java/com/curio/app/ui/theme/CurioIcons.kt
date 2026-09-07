@@ -97,6 +97,10 @@ object CurioIcons {
     const val Shuffle     = "shuffle"
     const val GridView    = "grid_view"
     const val Apps        = "apps"
+    // v377 — share-card editor "No fact": eye crossed out — added to the
+    // bundled Material Symbols subset via fontTools (verified ligature;
+    // pure rlig glyph, no cmap codepoint change).
+    const val VisibilityOff = "visibility_off"
     const val PushPin     = "push_pin"
     // v115 — the avatar crop editor badge (glyph verified in the bundled
     // Material Symbols subset).

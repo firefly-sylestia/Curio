@@ -1,121 +1,44 @@
-# Request Log — advance share-card adapt system
+# Prompt Log — current request
 
-## Status: implementation completed (pushed)
+## Request (2026-09-06, active → v383 committing)
 
-## The request (user)
-Long list for the share-card editor: smart auto-adjust for long texts
-(box grows + moves up, default ON), fact box height must expand much more
-on the tall card, corner-drag whole-box resize, grouped move (fact drags
-title+info along, each still separately draggable), more (darker) color
-tones, auto text color, sat/contrast must only hit the background (never
-text/polaroid), fix handles that stop working when overlapping another
-box, inline editing for custom fact / chapter progress / chapter review
-(no toolbar text box), editable chapter title for chapter review, and
-after pushing: ask the user for a testing review.
+Share-card refinement cycle — continuing from v379d–v382 (all pushed):
+smart-fit honesty, auto-layout sparkle pill, title-ownership (overlap
+freedom), Signature glued covers. This round added two brand-new asks on
+top plus a CI fix for v382.
 
-## User decisions (ask_user)
-1. Dark tones: **available immediately** (no level gate).
-2. Chapter review title: **separate edit field** next to the chapter
-   picker (chip stays above the review; review text edited inline).
-3. Auto-fit vs manual edits: **manual edits win** — once the user moves
-   or resizes a box, auto-fit stops adjusting that box.
-4. (v370) Floating edit box opens from the Edit-text TOOL (not auto on
-   tap); single tap on the box selects it; quick double-tap enters edit
-   mode; keep the Edit-text pill; custom fact + chapter review editable
-   alone AND stacked under reading progress.
-5. (v370) Smart layout: **always-on, manual-wins** — no per-style toggle.
-
-## Implementation map (TopicShareCard.kt + AppPreferences)
-- `AppPreferences.shareAutoFitState` (default true) + getter/setter.
-- Auto-fit computed INSIDE TopicShareCard at render (so export matches):
-  length → autoHeightFrac + autoDy (negative), applied to fact box; autoDy
-  also nudges title + meta (consistent with the grouped-move request).
-  Disabled per fact box once the user manually moved/resized it.
-- Fact height: slider 0.35f..5f (was ..2.5f), `lines` max 28→64,
-  `fitLines` max 48→80, inline field maxLines 24→60.
-- Corner resize: new corner grip on the selected title/fact/meta box that
-  scales width+height together; "Whole box" slider in the Box-size panel.
-- Grouped move: the fact MoveHandle adds its applied delta to title + meta
-  offsets too (title→meta grouping already exists).
-- Tones: add `unlockLevel: Int?` to ShareCardPalette (null = always);
-  pool = tones with null level or <= current level; ~8 new dark tones
-  (null level) with auto-derived light ink.
-- Sat/contrast: remove whole-card colorFilter; thread the matrix into each
-  style and apply it to the BACKGROUND layers only.
-- Handles: collect all MoveHandle/corner specs, draw them LAST in the
-  overlay so a handle always wins touch over an overlapping box.
-- Inline editing: chapter_review field binds customText only (chip is the
-  prefix in the rendered text) + field shifted down one line to sit on the
-  review text; remove the toolbar OutlinedTextField for custom/review;
-  add a "Chapter title" override field in the Content panel (persisted
-  per share); "Edit text" pill shows for custom fact even under progress.
-- Auto-fit toggle switch in the Text-size panel (default ON).
-
-## v370 — Floating edit box + double-tap + smart layout + cover-placement
-
-- Floating edit box: bigger box above the card (no dark overlay), opened
-  from the Edit-text TOOL when factEditMode is true AND the selected fact
-  is editable (custom fact / chapter review / quick fact without progress).
-  The on-card field is still the caret seat; the floating box binds the
-  same editFact / customText so typing here is identical.
-- Double-tap to edit: on the on-card fact box, a SINGLE tap selects it for
-  moving (grip appears), a QUICK DOUBLE tap enters edit mode (floating box
-  opens + keyboard). Implemented with one `detectTapGestures(onTap,
-  onDoubleTap)` on the select layer (the field stays inert until armed).
-- Edit-text pill stays in the toolbar; shows for quick fact, custom fact AND
-  chapter review (even under progress).
-- Custom fact / chapter review re-editable: the source panel hint now points
-  to the floating box; the custom fact is editable alone AND stacked under
-  reading progress; the chapter review text is editable in the floating box
-  too (binds customText).
-- Smart layout (always-on, manual-wins): `SmartLayout.adjust(...)` runs at
-  render and nudges elements when the fact is long (>120 chars) OR a cover
-  is placed. Fixes: COLAGUE gap between title block and middle section;
-  NEUMORPHIC title kept off the fact area; EDITORIAL headline auto-shrunk
-  (titleScale 0.82) for long facts; title/meta/fact clamped inside the card
-  frame; when a cover is placed, titleWidthFrac → 0.62 and factWidthFrac
-  → 0.80 so the cover (LEFT of title+author) + title + author fit without
-  the title leaving the card.
-- Cover placement (v370): BOOK/ALBUM/SERIES cover sits to the LEFT of the
-  title + author per style (per category corner pocket), taken OUT of the
-  Collage polaroid (that slot is the user photo only). Cover renders as a
-  60×90dp poster thumbnail beside the title/author. When placed, the smart
-  layer narrows the title + fact boxes so nothing goes off-card. Collage
-  only shows a placed cover (move.coverDx != 0) as a separate left badge.
-- Grouped move — badge: the FACT handle now also moves the category BADGE
-  with the fact block (title + meta + badge travel together); badge still
-  has its own grip.
-
-## Fact formats — IMPLEMENTATION (TopicShareCard.kt)
-
-Action carried out in this session: render three new fact-body formats per
-style via central `renderFact(prefix, body, ...)` + the already-existing
-Editorial drop-cap machinery.
-
-**Decisions**
-- STANDARD: same body, but now always `ParagraphStyle.lineSpacing = -4.sp`
-  (word spacing unchanged). Text stays wrapped to full card width.
-- BOOK PAGE: two columns. Columns are sized by ON-SCREEN width, not px
-  imports (so export and preview both pick full card width = the card's
-  own width at 4f density; no µornMagnifier needed). Hand-wrap split at
-  the ON-SCREEN middle into `prefixText | middleColumn | restText`.
-- EDITORIAL: if empty or " STANDARD". else the existing EditorialCard
-  `editorialFact(...)` block (drop cap or first-word-big) replacing the
-  usual body block.
-
-**Renders**
-- Renders exactly on paragraph content, not on topic title.
-- Renders on request show (share preview) but adapte to text length on
-  quick fact.
-- Uses inline field only (no toolbar text box) after pushing.
-
-## Pending
-
-- Smart auto-adjust variations toggle (per style) — user asked for "multiple
-  variation smart adjustment per style with toggle"; deferred until the
-  always-on smart layout is reviewed.
-
-## Followup after push
-
-After pushing: ask the user for a testing review (previous commit) and
-fix without stopping.
+- ✅ v379d–v382 pushed (`3fcfa4fa` … `aad184ba`): pill + smart-fit text-first
+  + reset restores fit + factZoom removed + whole-box sliders removed +
+  title-height hides for short titles + dark-text frostInk + Paper quote
+  ink + fact-line parity, hand-placed title owns its spot (no bounce),
+  pill 9:16 bigger text, Collage dark-tone + blended tear, Signature
+  covers glued.
+- ✅ v383 (THIS COMMIT): **Link share + fact-width > 100% + v382 CI fix.**
+  1. **Link share** (user: \"deep link style share — open it and it opens the
+     topic; I choose the text\"; answered: albums+artists+songs → music
+     service, others → Google; URL + editable caption). `ExploreSearch.kt`
+     gained `shareLinkForTopic(topic)` (re-reads the Settings MusicService
+     at share time). `TopicShareSheet` gained `shareLinkUrl: (() -> String)?`
+     + a Link pill in the actions row (link icon, opens a caption dialog
+     seeded with the topic name, shows the tap-to-open URL in a preview
+     chip, Share posts ACTION_SEND of caption+URL and dismisses). Wired all
+     three callers: TopicRevealScreen (`floatingTopic`), EntryDetailScreen
+     (`resolvedEntry.topic`), ShareHubScreen (`topic`).
+  2. **Fact width past 100%** (user: \"box looks small, side space unused,
+     width caps at default\"; asked where → \"paper mainly then others\").
+     Fact-width sliders (full-screen + sheet Crop) now run 0.3x–1.2x
+     (steps 89). `moveFact` uses a custom layout: ≤1x = identical to old
+     fillMaxWidth (natural wrap, place 0 — zero pixel change for existing
+     cards); >1x = measure pane at columnWidth×frac and recentre the
+     overhang so the box eats the design's side gutters. Render-path
+     `effectiveMove`/`boxScaledMove` width clamps raised 1f → 1.2f; the
+     untouched auto-fit seed stays ≤1x. Note: a phantom \"+1 brace\" scare
+     was a scanner artifact from a nested-quote `${topicName...\" (\"...}`
+     template (line ~10024) — replaced with a precomputed `displayTopic`
+     val (cleaner Kotlin, file verified balanced with a real stack scan).
+  3. **CI fix for v382**: Signature SIDE layout used
+     `Modifier.align(Alignment.CenterHorizontally)` inside a nested
+     Box — compile error \"cannot be called in this context with an implicit
+     receiver\". Fixed with `Box(contentAlignment = Alignment.Center)`.
+- NEXT UP (user-declared): the dedicated Signature background treatment
+  round.

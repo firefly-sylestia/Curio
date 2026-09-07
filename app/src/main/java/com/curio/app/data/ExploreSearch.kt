@@ -509,6 +509,17 @@ fun CurioTopic.isMusicTopic(): Boolean =
         subtype.equals("Song", ignoreCase = true)
 
 /**
+ * v383 — the topic's SHAREABLE LINK for the share-card sheet's Link share:
+ * music topics (Album / Artist / Song) post the deep link of the music
+ * service the user picked in Settings ([MusicService], re-read reactively
+ * so a Settings change shows the moment the sheet opens), and everything
+ * else posts the topic's Google search link. Called at share time.
+ */
+fun shareLinkForTopic(topic: CurioTopic): String =
+    if (topic.isMusicTopic()) buildMusicServiceSearchUrl(topic)
+    else buildGoogleSearchUrl(topic)
+
+/**
  * v19 — the search URL for [engine] (the selected engine by default, read
  * reactively from [AppPreferences.searchEngineState] so the Explore dialog
  * reopens the right engine the moment the user changes it in Settings).

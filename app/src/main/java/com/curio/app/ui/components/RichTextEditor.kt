@@ -52,6 +52,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
@@ -79,7 +80,9 @@ import com.curio.app.ui.theme.PatrickHandFontFamily
  * The rich-text flags the toolbar can apply. [TextSpan] stores each as a
  * boolean so saved captures stay plain data + offsets.
  */
-private enum class RichFlag { BOLD, ITALIC, HIGHLIGHT }
+// v375 — made internal so the share card's full-screen selection bar can
+// reuse the same span toggles as Save your take's editor.
+internal enum class RichFlag { BOLD, ITALIC, HIGHLIGHT }
 
 // Fixed letter-size options offered by the A+/A− dropdown — 2sp steps
 // above/below the field's default bodyLarge size (16sp), clamped to a
@@ -135,7 +138,11 @@ fun buildRichAnnotated(text: String, spans: List<TextSpan>, highlightColor: Colo
                         fontSynthesis = FontSynthesis.All,
                         // Non-null Color in this Compose version — the "no
                         // highlight" sentinel is Color.Unspecified.
-                        background = if (sp.highlight) highlightColor else Color.Unspecified
+                        background = if (sp.highlight) highlightColor else Color.Unspecified,
+                        // v379 — per-letter UNDERLINE (the share card's
+                        // full-screen selection bar): rendered as a text
+                        // decoration so card text (and the export) carry it.
+                        textDecoration = if (sp.underline) TextDecoration.Underline else null
                     ),
                     s, e
                 )
@@ -175,10 +182,12 @@ fun extractRichSpans(annotated: AnnotatedString): List<TextSpan> =
         val bold = range.item.fontWeight == FontWeight.Bold
         val italic = range.item.fontStyle == FontStyle.Italic
         val highlight = range.item.background != Color.Unspecified
+        // v379 — underline survives AnnotatedString round-trips too.
+        val underline = range.item.textDecoration == TextDecoration.Underline
         val size = range.item.fontSize
         val sizeSp = if (size.isSpecified) size.value else null
-        if (!bold && !italic && !highlight && sizeSp == null) null
-        else TextSpan(range.start, range.end, bold, italic, highlight, sizeSp)
+        if (!bold && !italic && !highlight && !underline && sizeSp == null) null
+        else TextSpan(range.start, range.end, bold, italic, highlight, sizeSp, underline)
     }.merged()
 
 /** Sorts and merges adjacent/overlapping spans with identical flags. */
@@ -190,7 +199,8 @@ private fun List<TextSpan>.merged(): List<TextSpan> {
         val last = out.lastOrNull()
         if (last != null && last.end >= sp.start &&
             last.bold == sp.bold && last.italic == sp.italic &&
-            last.highlight == sp.highlight && last.fontSizeSp == sp.fontSizeSp
+            last.highlight == sp.highlight && last.fontSizeSp == sp.fontSizeSp &&
+            last.underline == sp.underline
         ) {
             out[out.size - 1] = last.copy(end = maxOf(last.end, sp.end))
         } else {
@@ -207,7 +217,7 @@ private fun TextSpan.has(flag: RichFlag): Boolean = when (flag) {
 }
 
 /** True when every character of [s, e) is covered by a span carrying [flag]. */
-private fun spansFullyCovered(spans: List<TextSpan>, s: Int, e: Int, flag: RichFlag): Boolean {
+internal fun spansFullyCovered(spans: List<TextSpan>, s: Int, e: Int, flag: RichFlag): Boolean {
     var pos = s
     // Only flag-carrying spans can cover the flag — a size-only span (which
     // coexists with flag spans after an A+/A− resize) must not make the
@@ -253,7 +263,9 @@ private fun findInsertedRange(oldText: String, newText: String): IntRange? {
  * own reported AnnotatedString is NOT used because it can silently drop the
  * styles we set programmatically.
  */
-private fun rebaseSpans(oldText: String, newText: String, spans: List<TextSpan>): List<TextSpan> {
+// v375 — internal: the share-card inline fact field rebases its spans on
+// plain-text edits exactly like the Save-your-take editor.
+internal fun rebaseSpans(oldText: String, newText: String, spans: List<TextSpan>): List<TextSpan> {
     if (spans.isEmpty()) return emptyList()
     if (oldText == newText) return spans
     var prefix = 0
@@ -276,13 +288,13 @@ private fun rebaseSpans(oldText: String, newText: String, spans: List<TextSpan>)
             e <= prefix -> out.add(sp)
             // Fully after the changed region — shift by the length delta.
             s >= oldEnd -> out.add(
-                TextSpan(s + delta, e + delta, sp.bold, sp.italic, sp.highlight, sp.fontSizeSp)
+                TextSpan(s + delta, e + delta, sp.bold, sp.italic, sp.highlight, sp.fontSizeSp, sp.underline)
             )
             // Overlaps the changed region — keep only the untouched parts.
             else -> {
-                if (s < prefix) out.add(TextSpan(s, prefix, sp.bold, sp.italic, sp.highlight, sp.fontSizeSp))
+                if (s < prefix) out.add(TextSpan(s, prefix, sp.bold, sp.italic, sp.highlight, sp.fontSizeSp, sp.underline))
                 if (e > oldEnd) out.add(
-                    TextSpan(maxOf(s, oldEnd) + delta, e + delta, sp.bold, sp.italic, sp.highlight, sp.fontSizeSp)
+                    TextSpan(maxOf(s, oldEnd) + delta, e + delta, sp.bold, sp.italic, sp.highlight, sp.fontSizeSp, sp.underline)
                 )
             }
         }
@@ -295,7 +307,8 @@ private fun rebaseSpans(oldText: String, newText: String, spans: List<TextSpan>)
  * splits every overlapping span so the un-styled middle drops its flag while
  * the parts outside the selection keep theirs.
  */
-private fun toggleSpanFlag(spans: List<TextSpan>, s: Int, e: Int, flag: RichFlag, add: Boolean): List<TextSpan> {
+// v375 — internal: shared with the share card's floating selection bar.
+internal fun toggleSpanFlag(spans: List<TextSpan>, s: Int, e: Int, flag: RichFlag, add: Boolean): List<TextSpan> {
     if (add) {
         return (spans + TextSpan(
             start = s,
@@ -325,6 +338,47 @@ private fun toggleSpanFlag(spans: List<TextSpan>, s: Int, e: Int, flag: RichFlag
         if (sp.end > e) out.add(sp.copy(start = e))
     }
     return out.merged()
+}
+
+/**
+ * v379 — UNDERLINE twin of [toggleSpanFlag]: the share card's full-screen
+ * selection bar toggles a per-letter underline over [s, e) WITHOUT touching
+ * the bold / italic / highlight flags (Save-your-take's dock has no U
+ * button, so its toolbar keeps its own RichFlag-driven code). Mirrors the
+ * add / split-remove shape exactly so underline runs coexist with every
+ * other style.
+ */
+internal fun toggleSpanUnderline(spans: List<TextSpan>, s: Int, e: Int, add: Boolean): List<TextSpan> {
+    if (e <= s) return spans
+    if (add) {
+        return (spans + TextSpan(start = s, end = e, underline = true)).merged()
+    }
+    val out = mutableListOf<TextSpan>()
+    for (sp in spans) {
+        if (sp.end <= s || sp.start >= e) {
+            out.add(sp)
+            continue
+        }
+        if (sp.start < s) out.add(sp.copy(end = s))
+        val midStart = maxOf(sp.start, s)
+        val midEnd = minOf(sp.end, e)
+        val mid = sp.copy(start = midStart, end = midEnd, underline = false)
+        if (mid.bold || mid.italic || mid.highlight || mid.underline) out.add(mid)
+        if (sp.end > e) out.add(sp.copy(start = e))
+    }
+    return out.merged()
+}
+
+/** v379 — true when every character of [s, e) sits inside an underline span
+ *  (the selection bar's U active state). */
+internal fun spansUnderlineCovered(spans: List<TextSpan>, s: Int, e: Int): Boolean {
+    var pos = s
+    for (sp in spans.filter { it.end > s && it.start < e && it.underline }.sortedBy { it.start }) {
+        if (sp.start > pos) return false
+        pos = maxOf(pos, sp.end)
+        if (pos >= e) return true
+    }
+    return pos >= e
 }
 
 /**
@@ -1006,7 +1060,9 @@ fun RichTextEditor(
  * in a compact floating chip so formatting existing text is discoverable.
  */
 @Composable
-private fun SelectionFormatBar(
+// v375 — internal so the full-screen card editor can float the same
+// selection-local formatting bar over its inline fact field.
+internal fun SelectionFormatBar(
     boldActive: Boolean,
     italicActive: Boolean,
     highlightActive: Boolean,
@@ -1158,7 +1214,8 @@ private fun ToolToggleButton(
 }
 
 @Composable
-private fun FormatToolButton(
+// v375 — internal for the share card's floating bar buttons.
+internal fun FormatToolButton(
     icon: String,
     label: String,
     active: Boolean,

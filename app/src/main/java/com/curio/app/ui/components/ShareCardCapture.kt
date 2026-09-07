@@ -48,6 +48,7 @@ import java.io.FileOutputStream
  * @param authority FileProvider authority string (usually `package.fileprovider`).
  * @param card      @Composable lambda that renders the self-contained share card.
  * @param onShared  Optional callback invoked after the chooser is launched.
+ * @param shareText Optional text/link sent alongside the captured image.
  * @param saveToGallery When true, writes the PNG to the gallery (MediaStore on
  *                      API 29+, Pictures/Curio otherwise) instead of launching
  *                      the share chooser.
@@ -59,7 +60,8 @@ fun shareComposableCard(
     card: @Composable () -> Unit,
     onShared: () -> Unit = {},
     exportDensity: Float? = null,
-    saveToGallery: Boolean = false
+    saveToGallery: Boolean = false,
+    shareText: String? = null
 ) {
     val density = exportDensity
         ?.coerceAtLeast(1f)
@@ -136,6 +138,9 @@ fun shareComposableCard(
                 val intent = Intent(Intent.ACTION_SEND).apply {
                     type = "image/png"
                     putExtra(Intent.EXTRA_STREAM, uri)
+                    shareText?.takeIf { it.isNotBlank() }?.let {
+                        putExtra(Intent.EXTRA_TEXT, it)
+                    }
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
                 context.startActivity(Intent.createChooser(intent, "Share your Curio card"))
