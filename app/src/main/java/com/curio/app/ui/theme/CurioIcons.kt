@@ -120,7 +120,7 @@ object CurioIcons {
     // ── Rich-text formatting (Marginalia journal/quotes + format fields)
     const val FormatBold = "format_bold"           // B — bold
     const val FormatItalic = "format_italic"       // I — italic
-    const val FormatUnderline = "format_underline" // U — underline
+    const val FormatUnderline = "format_underlined" // U — underline (glyph added to the subset font; "format_underline" doesn't exist in the Material Symbols catalog and rendered as text)
     const val FormatHighlight = "format_color_fill" // highlighter marker
     const val FormatText = "text_fields"           // small toggle for other fields
     const val TextIncrease = "text_increase"       // A+ — enlarge selection

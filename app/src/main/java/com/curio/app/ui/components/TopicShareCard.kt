@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -545,24 +546,24 @@ private fun importStickerPng(context: android.content.Context, uri: android.net.
 }.getOrNull()
 
 // v3xx — polaroid PHOTO filters (color matrices for Nostalgia / B&W / Warm).
-private val sepiaMatrix = floatArrayOf(
+private val sepiaMatrix = ColorMatrix(floatArrayOf(
     0.393f, 0.769f, 0.189f, 0f, 0f,
     0.349f, 0.686f, 0.168f, 0f, 0f,
     0.272f, 0.534f, 0.131f, 0f, 0f,
     0f, 0f, 0f, 1f, 0f
-)
-private val grayscaleMatrix = floatArrayOf(
+))
+private val grayscaleMatrix = ColorMatrix(floatArrayOf(
     0.2126f, 0.7152f, 0.0722f, 0f, 0f,
     0.2126f, 0.7152f, 0.0722f, 0f, 0f,
     0.2126f, 0.7152f, 0.0722f, 0f, 0f,
     0f, 0f, 0f, 1f, 0f
-)
-private val warmMatrix = floatArrayOf(
+))
+private val warmMatrix = ColorMatrix(floatArrayOf(
     1.06f, 0f, 0f, 0f, 0.02f,
     0f, 1.02f, 0f, 0f, 0.01f,
     0f, 0f, 0.92f, 0f, 0f,
     0f, 0f, 0f, 1f, 0f
-)
+))
 
 private fun quoteFontSize(length: Int): TextUnit = when {
     length > 900 -> 15.sp; length > 650 -> 17.sp; length > 420 -> 19.sp
@@ -3424,7 +3425,7 @@ private fun CollageCard(
                 // dotted hairline instead of the solid one).
                 Canvas(Modifier.fillMaxSize()) {
                     val pws = size.width
-                    val winH = photoH.toPx()
+                    val winH = photoH.dp.toPx()
                     val fw = pws - 10f
                     val finish = look.finish.copy(alpha = 0.30f)
                     if (pStyle == 4) {
@@ -11309,7 +11310,7 @@ private fun BoxScope.StickerEditOverlay(
                     // sticker, a pinch scales it and a two-finger twist turns
                     // it (a plain tap selects).
                     .pointerInput(idx) {
-                        androidx.compose.foundation.gestures.detectTransformGestures { _, pan, zoom, rot ->
+                        detectTransformGestures { _, pan, zoom, rot ->
                             onSelect(idx)
                             if (cw.value > 0f && ch.value > 0f) {
                                 val dx = with(density) { pan.x.toDp().value }
