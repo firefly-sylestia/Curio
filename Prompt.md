@@ -2,6 +2,43 @@
 
 ## Request (2026-09-07, active — Cabinet v2 build in progress)
 
+### Completed — CI compile fix + polaroid opt-in (2026-09-07)
+
+**Request:** fix the CI build (3 compile errors from the previous push),
+confirm the polaroid-on-every-style behaviour ("is it always on? I don't
+want it always on — let the user hide it too"), and read docs/ANALYSIS.md
+for Cabinet v2 polish direction. Album covers in v2 approved "yes", but
+permission to be taken after pushing the fixes.
+
+**Implemented:**
+1. **CI compile fix** — the full-screen editor's Dialog was restructured
+   into a Column in the polaroid commit, but the three tool panels (Text /
+   Stickers / Polaroid) kept `Modifier.align(Alignment.BottomCenter)`
+   which only exists in a Box scope ("actual type is 'Alignment', but
+   'Alignment.Horizontal' was expected" ×3). The Dialog root is now a BOX
+   with an inner page Column: the panels are Box children again, so they
+   truly FLOAT over the card bottom (the v3xx intent — no preview shrink)
+   and the file compiles (brace balance verified, net-zero diff).
+2. **Polaroid opt-in** — new `move.polaroidOnCard` (default FALSE,
+   persisted per style/topic, restored in parseMove, saved in the moves
+   JSON, cleared by Reset layout like the other polaroid fields): the
+   shared print on non-Collage styles only renders while it's on. Both
+   Polaroid panels (sheet + full screen) gained a "Show on card" switch
+   (Collage unaffected — its print is part of the design). The print is
+   never always-on; users show/hide it per card.
+
+**ANALYSIS.md read** — Cabinet-relevant ideas: 4.4.2 batch select (done),
+4.4.3 export entry (md/JSON), 4.4.4 empty state with 3 suggested
+discoveries + Surprise-me-again CTA, 4.4.5 filter by capture format, 5.1
+collection cards + pin-from-reveal (bigger bet).
+
+**Next (awaiting user permission):** album covers in v2 (use the persisted
+`sheetArtUrlsState["album|…"]` / `["series|…"]` resolved-artwork so liked
+albums/series show the artwork immediately) + a selected Cabinet v2
+polish/QoL batch from ANALYSIS.md (clean, no hint-text spam).
+
+### Completed — Cabinet v2 slices 2–4 + Minimal favorites fix (2026-09-07)
+
 ### Completed — Cabinet v2 slices 2–4 + Minimal favorites fix (2026-09-07)
 
 **Request:** do all of the remaining Cabinet v2 slices from the plan

@@ -1367,7 +1367,14 @@ data class ShareCardMove(
      *  drag sets it — the FACT handle pushing the title out of its way while
      *  travelling does not, so a pushed-but-never-dragged title still gets
      *  auto-lifted when the fact box grows into it. Reset layout clears it. */
-    val titlePlaced: Boolean = false
+    val titlePlaced: Boolean = false,
+    /** v3xx — POLAROID OPT-IN (non-Collage styles): the shared print on
+     *  other styles only renders while this is TRUE (default FALSE — never
+     *  always-on; the user turns it on per card in the Polaroid panel, and
+     *  turns it off the same way to hide the print). Collage always renders
+     *  its own inline print (part of the design, unaffected). Persisted with
+     *  the move; Reset layout returns to the default (no print). */
+    val polaroidOnCard: Boolean = false
 )
 
 /** v378 — layout-only reset for [ShareCardMove]: zeroes every POSITION
@@ -2240,12 +2247,14 @@ fun TopicShareCard(
         }
         // v3xx — the POLAROID on every style: Collage draws its own inline
         // print (part of the scrapbook design); the other styles wear the
-        // SAME movable print once a user photo is on the card — style /
-        // filter / size / drag controls work everywhere, so the print is
-        // available on any design, not just the collage. Defaults to the
-        // right side, upper-middle (Collage parks it higher; here the
-        // top-right usually holds the cover pocket or headline art).
-        if (style != ShareCardStyle.COLLAGE && userPhoto != null) {
+        // SAME movable print once a user photo is on the card AND the user
+        // has turned it on for this card (move.polaroidOnCard — default
+        // FALSE, so the print is never always-on; the Polaroid panel's
+        // "Show on card" switch shows/hides it). Style / filter / size /
+        // drag controls work everywhere. Defaults to the right side,
+        // upper-middle (Collage parks it higher; here the top-right usually
+        // holds the cover pocket or headline art).
+        if (style != ShareCardStyle.COLLAGE && userPhoto != null && move.polaroidOnCard) {
             BoxWithConstraints(Modifier.matchParentSize()) {
                 val cwV = maxWidth.value; val chV = maxHeight.value
                 if (cwV <= 0f || chV <= 0f) return@BoxWithConstraints
@@ -8620,6 +8629,7 @@ fun TopicShareSheet(
                 factHighlight = o.optInt("factHighlight", 0).takeIf { it != 0 }?.let { Color(it) },
                 titleUnderline = o.optBoolean("titleUnderline", false),
                 titleHighlight = o.optInt("titleHighlight", 0).takeIf { it != 0 }?.let { Color(it) },
+                polaroidOnCard = o.optBoolean("polaroidOnCard", false),
                 // v370 — the fact LAYOUT (condensed / book page / editorial
                 // + drop cap) restores by name; unknown names keep the
                 // style's default.
@@ -9222,6 +9232,7 @@ fun TopicShareSheet(
                 put("polaroidScale", m.polaroidScale)
                 put("polaroidStyle", m.polaroidStyle)
                 put("polaroidFilter", m.polaroidFilter)
+                if (m.polaroidOnCard) put("polaroidOnCard", true)
                 if (m.favCount > 0) put("favCount", m.favCount)
                 put("titleWidthFrac", m.titleWidthFrac); put("titleHeightFrac", m.titleHeightFrac)
                 put("factWidthFrac", m.factWidthFrac); put("factHeightFrac", m.factHeightFrac)
@@ -10019,7 +10030,15 @@ fun TopicShareSheet(
                             // tools' verticalScroll with unbounded height
                             // (infinite-constraint crash) and its scrollable
                             // fought slider/swipe drags.
-                            Column(Modifier.fillMaxSize().background(fullBg)) {
+                            // v3xx-CI — the Dialog root is a BOX with an inner
+                            // page Column: the tool panels (Text / Stickers /
+                            // Polaroid) live as Box children so they truly
+                            // FLOAT over the bottom of the card (align
+                            // BottomCenter) instead of joining the Column flow
+                            // — where their height would re-shrink the
+                            // weight(1f) card area and re-zoom the preview.
+                            Box(Modifier.fillMaxSize().background(fullBg)) {
+                            Column(Modifier.fillMaxSize()) {
                                 // ── Top bar: Close (left) · Aa pill (right) ─
                                 Row(
                                     Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
@@ -10110,9 +10129,11 @@ fun TopicShareSheet(
                                         // the print can appear on): opens the
                                         // print's style / filter / size panel;
                                         // the grip on the card moves it. The
-                                        // polaroid renders on Collage always
-                                        // and on other styles once a user photo
-                                        // is on the card.
+                                        // polaroid renders on Collage always;
+                                        // on other styles it is OPT-IN — the
+                                        // panel's "Show on card" switch turns
+                                        // the print on per card (available
+                                        // once a user photo is on the card).
                                         if (currentStyle == ShareCardStyle.COLLAGE || userPhoto != null) {
                                             Surface(
                                                 onClick = {
@@ -10301,6 +10322,7 @@ fun TopicShareSheet(
                                         }
                                     }
                                     }
+                                }
                                 }
                                 }
                             AnimatedVisibility(
@@ -10664,8 +10686,23 @@ fun TopicShareSheet(
                                         Column(Modifier.fillMaxWidth().heightIn(max = 300.dp).verticalScroll(androidx.compose.foundation.rememberScrollState()).padding(vertical = 10.dp, horizontal = 12.dp)) {
                                             Text("Polaroid", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                                             Spacer(Modifier.height(8.dp))
-                                            Text("Pick a frame style, a photo filter and the print size. Tap the polaroid on the card and drag its grip to move it — the frame hugs your photo's shape.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                            Spacer(Modifier.height(12.dp))
+                                            // v3xx — OPT-IN: on non-Collage styles
+                                            // the print only renders while this
+                                            // switch is on (never always-on).
+                                            if (currentStyle != ShareCardStyle.COLLAGE) {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                                    modifier = Modifier.fillMaxWidth()
+                                                ) {
+                                                    Text("Show on card", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
+                                                    Switch(
+                                                        checked = move.polaroidOnCard,
+                                                        onCheckedChange = { on -> updateMove(move.copy(polaroidOnCard = on)) }
+                                                    )
+                                                }
+                                                Spacer(Modifier.height(12.dp))
+                                            }
                                             Text("Style", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
                                             Spacer(Modifier.height(6.dp))
                                             Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -11382,7 +11419,22 @@ fun TopicShareSheet(
                         // selected (or via the toolbar's Polaroid pill).
                         "polaroid" -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text("Polaroid", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.4.sp), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text("Pick a frame style, a photo filter and the print size. Tap the polaroid on the card and drag its grip to move it — the frame hugs your photo's shape.", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            // v3xx — OPT-IN: on non-Collage styles the print
+                            // only renders while this switch is on (never
+                            // always-on); Collage always wears its own print.
+                            if (currentStyle != ShareCardStyle.COLLAGE) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text("Show on card", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
+                                    Switch(
+                                        checked = move.polaroidOnCard,
+                                        onCheckedChange = { on -> updateMove(move.copy(polaroidOnCard = on)) }
+                                    )
+                                }
+                            }
                             Row(Modifier.fillMaxWidth().horizontalScroll(androidx.compose.foundation.rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 polaroidStyleNames.forEachIndexed { i, name ->
                                     Pill(name, CurioIcons.Palette, move.polaroidStyle == i) {
