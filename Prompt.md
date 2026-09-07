@@ -1,62 +1,64 @@
 # Prompt Log — current request
 
-## Request (2026-09-07, active → v3xx10 committing)
+## Request (2026-09-07, active → v3xx12 committing)
 
-Third share-card batch on top of the pushed v3xx9 commit: sticker
-imports/rotation, tool placement, sparkle info-row snap, fav tweaks.
+Share-card editing continues: the CI failures from the v3xx10 push, the
+broken format-row icons, and a NEW global **text-history** feature the user
+specified in clarifying answers:
 
-**What the user asked + what was done:**
+> "add a history icon … every 10 words it saves a history or when pasted or
+> edited or deleted each one saves a history globally … pill … shows up
+> depending on the field in the share card it shows up top left corner …
+> inside full screen text editor top right … and even in save your entry …
+> text history stays for all fields same it doesn't reset even after reset
+> and it will have pin system too copy and paste etc with icon and preview
+> of the texts with time and date and a full preview too … overlay dialog
+> box in some places and bottom sheet in some … covers every editing field
+> except search or name text boxes"
 
-1. **\"Why is it only selected sticker / limited stickers\" + import PNG
-   cutouts.** The emoji picker was the only sticker source. The sticker
-   panel now has an **Import PNG cutout** button (`stickerPickerLauncher`
-   via GetContent): the picked image is re-encoded to PNG under
-   `context.filesDir/stickers/` (`importStickerPng` — transparency
-   preserved) and dropped on the card. `ShareSticker` gained
-   `imagePath: String?` + `rotation: Float`; the card layer and
-   `StickerEditOverlay` render an image sticker as an aspect-preserving
-   bitmap (width = sizeFrac × card width, decoded once per path via
-   `decodeStickerBitmap` + a `ConcurrentHashMap` cache, downscaled to
-   ≤1024px) instead of the emoji glyph. Both fields persist in the
-   stickers JSON. Imported stickers drag / resize / re-stack / delete /
-   save exactly like emoji stickers and ride onto the exported PNG.
+Clarifications asked + answered:
+- Ship mode: **always-on** (no Settings toggle).
+- Field scope: **whole app** eventually (excludes search/name boxes);
+  this commit wires the share-card editor family.
+- Pill placement: NOT inside the field/textbox — a corner affordance of the
+  sheet/editor screen, opening the whole global history.
+- Capture timing: **pause + events** (stop typing / leave the field, on
+  paste/edit/delete, plus every 10 words).
+- "fix the cl" = fix the CI **workflow run** (compile errors) — done and
+  pushed in `5ee6f232` (v3xx11). Italic "not yet" verified — the italic
+  glyph was already in the font; the actually-broken glyph was UNDERLINE.
 
-2. **Rotate stickers.** A Rotation slider (−180°..180° with a 0° reset
-   pill) in the sticker panel AND a two-finger twist on the card (the
-   `detectTransformGestures` rotation delta, normalized via
-   `normDegrees` so the slider thumb stays valid). Rotation renders in
-   the sheet preview, the full-screen editor and the export.
+**What was done:**
 
-3. **Text editing at the bottom.** The full-screen editor's Text /
-   Stickers / Polaroid panels moved from under the top bar to BELOW the
-   card (bottom of the dialog Column) — tools sit under the thumb. (Pure
-   relocation of the existing panel blocks, verified with a brace check.)
+1. **v3xx11 (`5ee6f232`, pushed):** CI compile fixes — polaroid filter
+   matrices wrapped in `ColorMatrix`, `photoH.dp.toPx()` (Float has no
+   `toPx`), proper `detectTransformGestures` import for sticker pinch/rotate.
+   Icon fixes — `CurioIcons.FormatUnderline` pointed at `format_underline`
+   (not in the Material Symbols catalog → literal text); now
+   `format_underlined` and the icon font was re-subset with pyftsubset
+   (documented flags: `--no-layout-closure --layout-features=rlig
+   --glyph-names --symbol-cmap --name-IDs='*'`, text = all 284 existing
+   ligature names + glyph-name list so non-PUA glyphs like `visibility_off`
+   survive) to add `format_underlined` + `link`; verified zero icons lost.
 
-4. **Icon-only toolbar pills.** `ToolWithCaption` no longer renders the
-   tiny caption text — the edit toolbar is pure 44dp icon pills.
+2. **v3xx12 (this commit):** `ui/components/TextHistory.kt` — global
+   persistent feed:
+   - `TextHistoryStore`: SharedPreferences JSON (`curio_text_history`),
+     cap 300, dedupe blanks/consecutive repeats.
+   - `rememberTextHistoryCapture(ctx, field, text, resetKey)`: pause ~1.3s
+     debounce (cancelled by keystrokes), immediate at each 10-word bucket,
+     final snapshot on dispose; resetKey = `topic·activeId`.
+   - `TextHistoryPill` + `TextHistoryBrowser`: centered overlay w/ newest-
+     first list, pinned float, field label + time (Just now / Xm / Xh /
+     d MMM · HH:mm), tap for full preview, Pin/Copy/Restore/Delete + two-tap
+     Clear. Restore writes into the active field.
+   - Wired in `TopicShareSheet`: capture for the fact text (label by
+     activeId) + polaroid photo caption; pill at sheet-tools corner, the
+     full-screen editor's top bar and the Enlarge writing sheet header.
 
-5. **Sparkle still put the info below the fact → real snap fix.** The
-   meta collision logic is REPLACED by a snap-to-title: on the sparkle
-   tap the info rows lift so their top meets the title's bottom (gap ≤
-   2dp), so they always end up between the title and the quick fact,
-   touching the title. `runAutoLayout`'s negative meta travel widened to
-   −240dp so ONE tap brings a far-drifted strip all the way up.
-
-6. **Fav List/Rows icons wrong.** The raw `view_agenda` / `view_module`
-   strings are NOT in the bundled icon subset (verified: 0 occurrences
-   in the font) so they rendered as literal text. Swapped to the
-   verified `drag_handle` (List) and `grid_view` (Rows) glyphs.
-
-7. **Tap favorites → auto-open its crop tool.** Selecting FAVTRACKS in
-   the sheet's edit mode now sets `toolOpen = \"box\"` so the strip's
-   sizing controls (width / songs / List-Rows) open automatically (both
-   pager + single-style ArrangeableCard handlers).
-
-**Notes / out of scope:** no build possible here (CI validates). The
-imported-sticker decode + rotation are device-verify candidates; the
-panels' move is layout-only. web/ and desktop/ untouched.
-
-**Open question for the user (ask at end):** whether \"limited stickers\"
-also means wanting a bigger emoji set / multi-select, and whether the
-sparkle's new snap-to-title should also apply when the user deliberately
-hand-placed the info row lower.
+**Pending / next:**
+- User verifies italic icon on device (nothing to do unless still wrong).
+- Remaining back-burner asks from earlier batches: multi-select stickers,
+  sparkle info snap "always under title", quick-fact tap-out edit reset.
+- Extend capture to other screens (journal / saved-entry / caption editors)
+  as the user points at them.

@@ -414,8 +414,42 @@ app/src/main/java/com/curio/app/
     strings aren't in the bundled icon subset (they rendered as literal
     text); swapped to the verified `drag_handle` (List) and `grid_view`
     (Rows) glyphs.
-  - **Fav auto-crop:** selecting the favorites strip (FAVTRACKS) now
+  -    **Fav auto-crop:** selecting the favorites strip (FAVTRACKS) now
     auto-opens the Crop (box) tool in the sheet's edit toolbar.
+- **v3xx11 — CI compile fixes + icon-glyph repairs.** The v3xx10 push broke
+  CI in three spots: the polaroid photo-filter matrices were raw
+  `FloatArray`s (now wrapped in `androidx.compose.ui.graphics.ColorMatrix`),
+  a `photoH.toPx()` call on a Float (now `photoH.dp.toPx()`), and
+  `detectTransformGestures` was referenced fully-qualified without an
+  import (now imported + called unqualified). Icon fixes: the Underline
+  pill's glyph name `format_underline` doesn't exist in the Material
+  Symbols catalog (it rendered as literal text) — `CurioIcons.Format-
+  Underline` now points at the real `format_underlined`, and the bundled
+  icon font was re-subset (pyftsubset, layout-features=rlig) to ADD
+  `format_underlined` + `link` (the share-link-preview icon) with ZERO
+  icons lost (verified by ligature-set diff).
+- **v3xx12 — TEXT HISTORY (global, persistent, survives reset).** Per user
+  request: every text edit in the share-card editor family now feeds a
+  GLOBAL text-history feed that is never cleared by Reset layout, field
+  switches, or leaving the topic. New file `ui/components/TextHistory.kt`:
+  - `TextHistoryStore` — SharedPreferences-backed JSON (`curio_text_history`,
+    cap 300, dedupe consecutive repeats + blanks) with `record / snapshot /
+    setPinned / delete / clearAll`.
+  - `rememberTextHistoryCapture(ctx, field, text, resetKey)` — captures when
+    typing PAUSES (~1.3s debounce cancelled by the next keystroke), at every
+    10th word boundary (immediate), and on editor dispose (final state);
+    resetKey (topic·activeId) resets memory across cards/fields so content
+    switching never snapshots itself.
+  - `TextHistoryPill` + `TextHistoryBrowser` — the same corner pill and
+    centered overlay everywhere: sheet tools column (top-right), the
+    full-screen editor's top bar and the Enlarge writing sheet. The browser
+    lists newest-first with pinned floats, per-entry field label + time
+    (Just now / Xm / Xh / d MMM · HH:mm), preview (tap = full selectable
+    view), and Pin / Copy / Restore-into-active-field / Delete actions with
+    a two-tap Clear.
+  - TopicShareSheet feeds the FACT text (label by activeId: Custom fact /
+    Chapter review / Reading progress / Quote / Quick fact) + the polaroid
+    photo caption; Restore routes through `routeFactChange`.
 - **v3xx5b — picker crash fix (nested lazy grid).** The new picker STILL
   crashed on open (same "infinity maximum height" message) —
   `ContinueExploringSection` rendered a `LazyVerticalGrid` inside a

@@ -8695,6 +8695,31 @@ fun TopicShareSheet(
             }
         }
     }
+    // v3xx — TEXT HISTORY (see TextHistory.kt): a GLOBAL, persistent feed of
+    // every text snapshot. Captures fire when typing pauses, at every 10th
+    // word, and when the editor leaves the screen; the feed lives outside the
+    // card edits so Reset Layout / a new topic never clears it. The pill opens
+    // the same browser from the sheet tools corner, the full-screen editor's
+    // top bar and the Enlarge writing sheet — Restore writes the picked
+    // snapshot back into the ACTIVE field via [routeFactChange].
+    val historyField = when (activeId) {
+        CUSTOM_FACT_ID -> "Custom fact"
+        "chapter_review" -> "Chapter review"
+        "chapter_progress" -> "Reading progress"
+        "quote" -> "Quote"
+        else -> "Quick fact"
+    }
+    var historyOpen by remember { mutableStateOf(false) }
+    rememberTextHistoryCapture(context, historyField, factFieldText, "$topicName\u00b7$activeId")
+    rememberTextHistoryCapture(context, "Photo caption", polaroidCaption, topicName)
+    if (historyOpen) {
+        TextHistoryBrowser(
+            ctx = context,
+            activeField = historyField,
+            onRestore = { routeFactChange(it) },
+            onDismiss = { historyOpen = false }
+        )
+    }
     // v375 — RICH edits (the Enlarge editor / selection bar) carry the text
     // AND its spans together, so formatting lands on the card immediately.
     fun routeRichFact(newText: String, spans: List<TextSpan>) {
@@ -9365,6 +9390,12 @@ fun TopicShareSheet(
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                    // v3xx — the TEXT-HISTORY pill sits at the sheet corner
+                    // (top-right of the tools) and opens the global browser;
+                    // see the block near routeFactChange above.
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                        TextHistoryPill(onClick = { historyOpen = true })
+                    }
                     // ── Tool pills row (scrollable) ────────────────────
                     Row(
                         modifier = Modifier
@@ -9597,6 +9628,11 @@ fun TopicShareSheet(
                                             color = MaterialTheme.colorScheme.onSurface,
                                             modifier = Modifier.weight(1f)
                                         )
+                                        // v3xx — history pill in the writing
+                                        // sheet's corner (restore writes into
+                                        // this same field).
+                                        TextHistoryPill(onClick = { historyOpen = true })
+                                        Spacer(Modifier.width(10.dp))
                                         TextButton(onClick = { showWriteSheet = false }) {
                                             Text("Done", fontWeight = FontWeight.Bold)
                                         }
@@ -9778,6 +9814,9 @@ fun TopicShareSheet(
                                                 Text("Text", style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = if (fsToolsOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant)
                                             }
                                         }
+                                        // v3xx — text-history pill (top-right of
+                                        // the full-screen editor).
+                                        TextHistoryPill(onClick = { historyOpen = true })
                                     }
                                 }
                                 // v3xx — the full-screen tool panels (Text /
