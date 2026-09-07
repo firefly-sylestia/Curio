@@ -618,31 +618,38 @@ private fun ShareCardPalette.frostInk(): Color {
  *  Zero fields mean "leave that channel alone". */
     private data class ShareAutoLayoutPlan(
     val heightFrac: Float = 0f,
-  val textScale: Float = 0f,
-  val titleLift: Float = 0f,
-  val factLift: Float = 0f,
-  val format: ShareCardFactFormat? = null,
+    val textScale: Float = 0f,
+    val titleLift: Float = 0f,
+    val factLift: Float = 0f,
+    val metaLift: Float = 0f,
+    val format: ShareCardFactFormat? = null,
+    val factDropCap: ShareCardFactDropCap? = null,
 
     // true → switch the CARD itself to 9:16 (only offered when the current
     // aspect is 3:4 and the text still overflows a fully-fitted 3:4 card).
     val tall: Boolean = false
 )
 
-  private fun ShareAutoLayoutPlan.withCollisionRepair(
-  titleLift: Float,
-  factLift: Float
-  ): ShareAutoLayoutPlan = if (titleLift <= 0f && factLift <= 0f) this else copy(
-  titleLift = titleLift.coerceAtLeast(0f),
-  factLift = factLift.coerceAtLeast(0f)
-  )
+private fun ShareAutoLayoutPlan.withCollisionRepair(
+    titleLift: Float,
+    factLift: Float,
+    metaLift: Float
+): ShareAutoLayoutPlan = if (titleLift <= 0f && factLift <= 0f && metaLift <= 0f) this else copy(
+    titleLift = titleLift.coerceAtLeast(0f),
+    factLift = factLift.coerceAtLeast(0f),
+    metaLift = metaLift.coerceAtLeast(0f)
+)
 
-/** v379e — the pill's attempt → plan table, layered over the TEXT-FIRST
- *  [autoFitShape]: 0 = the plain fit itself; 1 = the same fit with
- *  CONDENSED lines; 2 = maximal space (box grown to the budget cap + text
- *  at the floor, BOOK columns when the fact is long enough to use them);
- *  3 = the one remaining lever, a TALL 9:16 card — offered only when a 3:4
- *  card is genuinely box-capped (a short fact that already fits returns
- *  identity and the caller's skip logic makes the tap a no-op). */
+/** v384 — the pill's attempt → plan table, layered over the TEXT-FIRST
+ *  [autoFitShape]. Every attempt re-fits from the CURRENT text length on the
+ *  CURRENT aspect, then layers a layout idea on top:
+ *  0 = plain fit; 1 = CONDENSED lines; 2 = BOOK columns; 3 = EDITORIAL drop
+ *  cap; 4 = maximal space (box to the budget cap + text at the floor);
+ *  5 = a TALL 9:16 card (only when a 3:4 card is box-capped); 6 = back to
+ *  the STANDARD paragraph. The caller skips attempts that would not change
+ *  anything, so every effective tap advances the card. The whole plan rides
+ *  through [withCollisionRepair], so an overlap created by manual dragging
+ *  (title/fact/info rows) is repaired on the SAME tap that fits the box. */
 private fun autoLayoutPlan(
     style: ShareCardStyle,
     aspect: ShareCardAspect,
@@ -650,40 +657,49 @@ private fun autoLayoutPlan(
     attempt: Int,
     currentFormat: ShareCardFactFormat,
     move: ShareCardMove
-    ): ShareAutoLayoutPlan {
+): ShareAutoLayoutPlan {
     val shape = autoFitShape(style, aspect, len)
     // A grown fact box consumes the vertical gap above it. Keep the title
-    // out of that collision as part of the same atomic auto-layout commit.
+    // clear of that collision as part of the same atomic auto-layout commit.
     val sizeLift = ((shape.heightFrac - 1f) * 28f).coerceIn(0f, 56f)
-    // Manual dragging is allowed to create an overlap. The sparkle action is
-    // the explicit repair gesture: estimate the shared vertical collision
-    // from both offsets and move the title clear of the fact in one commit.
-    // This deliberately ignores titlePlaced because the user asked for the
-    // sparkle action to repair intentional overlap, not dragging itself.
-  // The reference layout keeps the title above the fact. Manual drags can
-  // reverse that relationship: titleDy moves the title down and factDy moves
-  // the fact up. Treat the 18dp natural gap as the collision threshold, then
-  // use the title's 72dp safe travel first and move the fact down only when
-  // the overlap is larger than that safe title travel.
-  val overlap = (move.titleDy - move.factDy - 18f).coerceAtLeast(0f)
-  val collisionTitleLift = overlap.coerceAtMost(72f)
-  val collisionFactLift = (overlap - collisionTitleLift).coerceAtMost(72f)
-  val titleLift = maxOf(sizeLift, collisionTitleLift)
+    // Manual dragging is allowed to create an overlap — the sparkle tap is
+    // the explicit repair gesture. The reference layout stacks TITLE → FACT
+    // → INFO rows (author/year) top to bottom, so each shared collision is
+    // estimated from the drag offsets: how far the title was pulled DOWN over
+    // the fact, and how far the fact was pulled DOWN over the info rows (or
+    // the rows pulled up into it). Lift the title first (up to 72dp), then
+    // push the fact down, then push the info rows down. The natural title↔
+    // fact gap is 18dp and the fact↔info gap is 12dp.
+    val titleFactOverlap = (move.titleDy - move.factDy - 18f).coerceAtLeast(0f)
+    val collisionTitleLift = titleFactOverlap.coerceAtMost(72f)
+    val collisionFactLift = (titleFactOverlap - collisionTitleLift).coerceAtMost(72f)
+    val factMetaOverlap = (move.factDy - move.metaDy - 12f).coerceAtLeast(0f)
+    val collisionMetaLift = factMetaOverlap.coerceAtMost(72f)
+    val titleLift = maxOf(sizeLift, collisionTitleLift)
 
-  if (shape.heightFrac == 0f && titleLift == 0f && collisionFactLift == 0f) return ShareAutoLayoutPlan()
+    if (shape.heightFrac == 0f && titleLift == 0f && collisionFactLift == 0f && collisionMetaLift == 0f)
+        return ShareAutoLayoutPlan()
 
-  val (maxHeightFrac, minTextScale) = factFitBudget(style, aspect)
-  val capped = shape.heightFrac >= maxHeightFrac - 0.01f && shape.heightFrac > 1f
-  return (when ((attempt % 4 + 4) % 4) {
+    val (maxHeightFrac, minTextScale) = factFitBudget(style, aspect)
+    val capped = shape.heightFrac >= maxHeightFrac - 0.01f && shape.heightFrac > 1f
+    return (when ((attempt % 7 + 7) % 7) {
         0 -> ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale)
         1 -> ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale, format = ShareCardFactFormat.CONDENSED)
         2 -> ShareAutoLayoutPlan(
+            heightFrac = shape.heightFrac, textScale = shape.textScale,
+            format = if (len >= 150) ShareCardFactFormat.BOOK else ShareCardFactFormat.STANDARD
+        )
+        3 -> ShareAutoLayoutPlan(
+            heightFrac = shape.heightFrac, textScale = shape.textScale,
+            format = ShareCardFactFormat.EDITORIAL,
+            factDropCap = ShareCardFactDropCap.LETTER
+        )
+        4 -> ShareAutoLayoutPlan(
             heightFrac = maxHeightFrac,
             textScale = minTextScale,
-            format = if (len >= 150) ShareCardFactFormat.BOOK
-            else ShareCardFactFormat.EDITORIAL
+            format = if (len >= 150) ShareCardFactFormat.BOOK else ShareCardFactFormat.EDITORIAL
         )
-        else -> when {
+        5 -> when {
             // v380 — a 9:16 flip must buy READABILITY, not just length: hand
             // the taller canvas a LONGER fact box AND a bigger text (factScale
             // > 1 rides the Size slider's own channel, so the card renders and
@@ -697,12 +713,15 @@ private fun autoLayoutPlan(
                     textScale = 1.18f
                 )
             }
-            currentFormat != ShareCardFactFormat.STANDARD ->
-                ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale, format = ShareCardFactFormat.STANDARD)
             else -> ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale)
         }
-  }).withCollisionRepair(titleLift, collisionFactLift)
-  }
+        else -> ShareAutoLayoutPlan(
+            heightFrac = shape.heightFrac, textScale = shape.textScale,
+            format = ShareCardFactFormat.STANDARD,
+            factDropCap = ShareCardFactDropCap.NONE
+        )
+    }).withCollisionRepair(titleLift, collisionFactLift, collisionMetaLift)
+}
 
 /** v379d — the floating sparkle pill: round button at the card's top-end
  *  corner. Shows on BOTH the resting preview and the edit mode; tap = run
@@ -6739,18 +6758,6 @@ private fun ArrangeableCard(
                 fun alignOthers(dragged: androidx.compose.ui.geometry.Rect): List<androidx.compose.ui.geometry.Rect> =
                     rAll.filter { it.width > 0f && it.height > 0f && it !== dragged }
 
-                // v371 — COLLISION-PUSH: true when two boxes touch (or nearly
-                // touch, within a small dp gap). The fact drag uses this so
-                // the title / info rows only travel WITH the fact when the
-                // fact actually runs into them — if there's space between,
-                // they stay put.
-                fun touches(a: androidx.compose.ui.geometry.Rect, b: androidx.compose.ui.geometry.Rect): Boolean {
-                    if (a.width <= 0f || a.height <= 0f || b.width <= 0f || b.height <= 0f) return false
-                    val gap = with(editDensity) { 4.dp.toPx() }
-                    return a.left <= b.right + gap && a.right + gap >= b.left &&
-                        a.top <= b.bottom + gap && a.bottom + gap >= b.top
-                }
-
                 // Horizontal candidates: (move offset that lands the dragged
                 // box, card-local guide line) for every other box's left /
                 // centre / right edge.
@@ -6779,77 +6786,12 @@ private fun ArrangeableCard(
 
                 var dragGuides by remember { mutableStateOf(DragGuides()) }
                 var dragActive by remember { mutableStateOf(false) }
-                // v378 — set while the TITLE handle is being dragged. The
-                // auto-lift (below) stays OFF during a title drag so the title
-                // follows the finger exactly — the old effect fought a title
-                // dragged down over the fact with a counter-lift every frame
-                // (the "crazy glitchy" title-above-fact jitter). Lifting only
-                // ever happens for FACT-driven growth, never a title grab.
-                var titleGrabbed by remember { mutableStateOf(false) }
-                // v379e — same guard for the FACT handle: while the box itself
-                // is being dragged its live push (titleDx/Dy) already keeps the
-                // title clear, so the measured lift must not fight it (that
-                // double channel was the "bouncy up-and-down" jitter).
-                var factGrabbed by remember { mutableStateOf(false) }
-
-                // v376 — AUTO-LIFT (measured collision): while editing, if the
-                // quick-fact box (grown by the height / width / whole-box
-                // sliders or the corner grip) reaches up into the title block,
-                // the title is pushed UP by exactly the overlap (plus a small
-                // gap) so the box never draws over it — and when the box is
-                // lowered again the needed lift drops back to zero and the
-                // title settles down. The lift is SAVED on the move
-                // ([titleLift]) so the sheet preview and the exported image
-                // render the same pushed layout. Computed from the title's
-                // UN-lifted base (measured bottom + current lift), so it
-                // converges in one step instead of chasing itself.
-                if (editMode && !quoteMode) {
-                    androidx.compose.runtime.LaunchedEffect(
-                        titleRect.value, factRect.value,
-                        move.factHeightFrac, move.factWidthFrac, move.factBoxScale,
-                        move.titleLift, move.titlePlaced, titleGrabbed, factGrabbed
-                    ) {
-                        // v378/v379e — never recompute while the title OR the
-                        // fact box is being dragged: collision pushes belong
-                        // to slider-grown boxes meeting a parked title.
-                        // v380 — and never for a HAND-PLACED title: a drag
-                        // takes ownership of the spot, so the user may
-                        // deliberately park the title over the quick-fact
-                        // box (the drag-end handler folds any prior auto
-                        // lift away, so nothing here is left to clean up).
-                        // Slider-grown fact boxes still lift a title that
-                        // was never dragged (e.g. one nudged aside by the
-                        // fact handle's own collision push).
-                        if (titleGrabbed || factGrabbed || move.titlePlaced) return@LaunchedEffect
-                        val t = rTitle
-                        val f = rFact
-                        if (t.width <= 0f || t.height <= 0f || f.width <= 0f || f.height <= 0f) return@LaunchedEffect
-                        // v379e — [titleLift] is stored in DP (moveTitle applies
-                        // it as `(titleDy - titleLift).dp`), but the measured
-                        // rects are PX. The old code stored the px overlap
-                        // directly, so on a 3× screen the title was shoved ~3×
-                        // too far, slammed into the max-lift clamp, bounced back
-                        // and forth — the "glitchy up-and-down" collision.
-                        // Convert the px overlap to DP before writing.
-                        val gapDp = 6f
-                        val toDp = { px: Float -> with(editDensity) { px.toDp().value } }
-                        // The measured title already includes any applied lift;
-                        // add it back to get the natural (un-lifted) bottom.
-                        val baseBottomDp = toDp(t.bottom) + move.titleLift
-                        val fTopDp = toDp(f.top)
-                        val need = (baseBottomDp + gapDp - fTopDp).coerceAtLeast(0f)
-                        // The title may never lift above the card's top edge
-                        // (leave a hairline of breathing room).
-                        val baseTopDp = toDp(t.top) + move.titleLift
-                        val maxLift = (baseTopDp - 2f).coerceAtLeast(0f)
-                        val lift = need.coerceAtMost(maxLift)
-                        // Hysteresis: a hair of dead-zone so layout rounding can
-                        // never ping-pong the title around a 0.1dp boundary.
-                        if (kotlin.math.abs(lift - move.titleLift) > 0.5f) {
-                            onMove(move.copy(titleLift = lift))
-                        }
-                    }
-                }
+                // v384 — the auto-lift and the drag collision-push are GONE:
+                // manual placement may freely overlap the title, the fact box
+                // and the info rows (whatever the user does wins). Only the
+                // sparkle pill repairs an overlap now — it estimates the
+                // collisions from the drag offsets and moves the title / fact
+                // / info rows clear in one commit.
 
                 // v3xx — NEW selection model: nothing is shown when edit mode
                 // starts (the user asked: no boxes/grips on hold). Tapping a
@@ -7270,16 +7212,12 @@ private fun ArrangeableCard(
                                     dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
                                     onMove(move.copy(titleDx = xs.offset, titleDy = ys.offset))
                                 },
-                                onDragStart = { dragActive = true; titleGrabbed = true },
+                                onDragStart = { dragActive = true },
                                 onDragEnd = {
                                     // v380 — the drag owns the title's spot
-                                    // (overlap freedom): fold any auto lift
-                                    // into the position so the title freezes
-                                    // EXACTLY where the finger left it (no
-                                    // snap), clear the lift, and mark the
-                                    // title hand-placed so the auto-lift
-                                    // effect never shoves it back out of a
-                                    // deliberate overlap.
+                                    // (overlap freedom): fold any prior sparkle
+                                    // lift into the position so the title
+                                    // freezes EXACTLY where the finger left it.
                                     onMove(
                                         move.copy(
                                             titlePlaced = true,
@@ -7288,7 +7226,6 @@ private fun ArrangeableCard(
                                         )
                                     )
                                     dragActive = false
-                                    titleGrabbed = false
                                     dragGuides = DragGuides()
                                 }
                             )
@@ -7316,36 +7253,14 @@ private fun ArrangeableCard(
                                         maxOf(-by, ch - by - f.height)
                                     ), snap = SNAP_REACH, hint = HINT_REACH, extra = vCands(othersF, by, f.height))
                                     dragGuides = DragGuides(vx = xs.snapLine, hy = ys.snapLine, hintVx = xs.hintLine, hintHy = ys.hintLine)
-                                    // v371 — COLLISION-PUSH (replaces the old
-                                    // always-grouped move): the title + info
-                                    // rows only travel WITH the fact when the
-                                    // fact actually touches them — if there's
-                                    // space in between they stay put, and each
-                                    // stays separately draggable via its own
-                                    // grip. Moving DOWN past the info row
-                                    // leaves the rows behind; moving UP into
-                                    // them pushes them out of the way.
-                                    val appliedDx = xs.offset - move.factDx
-                                    val appliedDy = ys.offset - move.factDy
-                                    val newFactRect = androidx.compose.ui.geometry.Rect(
-                                        f.left + appliedDx, f.top + appliedDy,
-                                        f.right + appliedDx, f.bottom + appliedDy
-                                    )
-                                    val pushTitle = rTitle.width > 0f && rTitle.height > 0f &&
-                                        touches(newFactRect, rTitle)
-                                    val pushMeta = rMeta.width > 0f && rMeta.height > 0f &&
-                                        touches(newFactRect, rMeta)
-                                    onMove(move.copy(
-                                        factDx = xs.offset, factDy = ys.offset,
-                                        titleDx = if (pushTitle) move.titleDx + appliedDx else move.titleDx,
-                                        titleDy = if (pushTitle) move.titleDy + appliedDy else move.titleDy,
-                                        metaDx = if (pushMeta) move.metaDx + appliedDx else move.metaDx,
-                                        metaDy = if (pushMeta) move.metaDy + appliedDy else move.metaDy
-                                    ))
+                                    // v384 — the COLLISION-PUSH is gone: dragging
+                                    // the fact box may freely overlap the title
+                                    // and the info rows — manual placement wins.
+                                    // The sparkle pill is the only repair now.
+                                    onMove(move.copy(factDx = xs.offset, factDy = ys.offset))
                                 },
                                 onDragStart = {
                                     dragActive = true
-                                    factGrabbed = true
                                     // v369 — seed the smart auto-fit nudge into
                                     // the manual move on the first grab so the
                                     // box doesn't jump when auto-fit hands off
@@ -7367,7 +7282,7 @@ private fun ArrangeableCard(
                                         ))
                                     }
                                 },
-                                onDragEnd = { dragActive = false; factGrabbed = false; dragGuides = DragGuides() }
+                                onDragEnd = { dragActive = false; dragGuides = DragGuides() }
                             )
                             // v378 — the CORNER whole-box scale grip is GONE:
                             // the corner icon duplicated the Crop tool's
@@ -8183,7 +8098,10 @@ fun TopicShareSheet(
         val len = maxOf(factFieldText.length, chapterFactForCard.length)
         if (len == 0 && chapterFactForCard.isBlank() && progressForCard == null) return
         var attempt = autoLayoutIdx + 1
-        repeat(6) {
+        // v384 — seven arrangements + the collision repairs; the lookahead is
+        // wide enough to always land on a change (attempts that alter nothing
+        // are skipped, so every effective tap advances the card).
+        repeat(12) {
             val plan = autoLayoutPlan(currentStyle, aspect, len, attempt, move.factFormat, move)
             val wantsTall = plan.tall && aspect == ShareCardAspect.CLASSIC
             val h = plan.heightFrac
@@ -8191,15 +8109,24 @@ fun TopicShareSheet(
             val hChanges = h > 0f && kotlin.math.abs(h - move.factHeightFrac) > 0.02f
             val sChanges = s > 0f && kotlin.math.abs(s - move.factScale) > 0.02f
             val fmtChanges = plan.format != null && plan.format != move.factFormat
+            val dropCapChanges = plan.factDropCap != null && plan.factDropCap != move.factDropCap
             val titleLiftChanges = kotlin.math.abs(plan.titleLift - move.titleLift) > 1f
             val factLiftChanges = plan.factLift > 0f
-            if (wantsTall || hChanges || sChanges || fmtChanges || titleLiftChanges || factLiftChanges) {
+            val metaLiftChanges = plan.metaLift > 0f
+            if (wantsTall || hChanges || sChanges || fmtChanges || dropCapChanges ||
+                titleLiftChanges || factLiftChanges || metaLiftChanges
+            ) {
                 updateMove(move.copy(
                     factHeightFrac = if (h > 0f) h.coerceIn(0.35f, 6f) else move.factHeightFrac,
                     factScale = if (s > 0f) s.coerceIn(0.5f, 2f) else move.factScale,
                     factDy = move.factDy + plan.factLift.coerceIn(0f, 72f),
                     factFormat = plan.format ?: move.factFormat,
-                    titleLift = plan.titleLift.coerceIn(0f, 96f)
+                    factDropCap = plan.factDropCap ?: move.factDropCap,
+                    titleLift = plan.titleLift.coerceIn(0f, 96f),
+                    // v384 — the info rows are part of the sparkle repair too:
+                    // if a manual drag has pushed the fact over the author/
+                    // year rows, the repair pushes them back down.
+                    metaDy = move.metaDy + plan.metaLift.coerceIn(0f, 72f)
                 ))
                 // A 3:4 card that still overflows fully-fitted gets the tall
                 // 9:16 canvas (the one remaining way to add room).

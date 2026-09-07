@@ -1,44 +1,37 @@
 # Prompt Log — current request
 
-## Request (2026-09-06, active → v383 committing)
+## Request (2026-09-07, active → v384 committing)
 
-Share-card refinement cycle — continuing from v379d–v382 (all pushed):
-smart-fit honesty, auto-layout sparkle pill, title-ownership (overlap
-freedom), Signature glued covers. This round added two brand-new asks on
-top plus a CI fix for v382.
+Share-card editor refinement — the smart/auto-layout (sparkle) pill.
 
-- ✅ v379d–v382 pushed (`3fcfa4fa` … `aad184ba`): pill + smart-fit text-first
-  + reset restores fit + factZoom removed + whole-box sliders removed +
-  title-height hides for short titles + dark-text frostInk + Paper quote
-  ink + fact-line parity, hand-placed title owns its spot (no bounce),
-  pill 9:16 bigger text, Collage dark-tone + blended tear, Signature
-  covers glued.
-- ✅ v383 (THIS COMMIT): **Link share + fact-width > 100% + v382 CI fix.**
-  1. **Link share** (user: \"deep link style share — open it and it opens the
-     topic; I choose the text\"; answered: albums+artists+songs → music
-     service, others → Google; URL + editable caption). `ExploreSearch.kt`
-     gained `shareLinkForTopic(topic)` (re-reads the Settings MusicService
-     at share time). `TopicShareSheet` gained `shareLinkUrl: (() -> String)?`
-     + a Link pill in the actions row (link icon, opens a caption dialog
-     seeded with the topic name, shows the tap-to-open URL in a preview
-     chip, Share posts ACTION_SEND of caption+URL and dismisses). Wired all
-     three callers: TopicRevealScreen (`floatingTopic`), EntryDetailScreen
-     (`resolvedEntry.topic`), ShareHubScreen (`topic`).
-  2. **Fact width past 100%** (user: \"box looks small, side space unused,
-     width caps at default\"; asked where → \"paper mainly then others\").
-     Fact-width sliders (full-screen + sheet Crop) now run 0.3x–1.2x
-     (steps 89). `moveFact` uses a custom layout: ≤1x = identical to old
-     fillMaxWidth (natural wrap, place 0 — zero pixel change for existing
-     cards); >1x = measure pane at columnWidth×frac and recentre the
-     overhang so the box eats the design's side gutters. Render-path
-     `effectiveMove`/`boxScaledMove` width clamps raised 1f → 1.2f; the
-     untouched auto-fit seed stays ≤1x. Note: a phantom \"+1 brace\" scare
-     was a scanner artifact from a nested-quote `${topicName...\" (\"...}`
-     template (line ~10024) — replaced with a precomputed `displayTopic`
-     val (cleaner Kotlin, file verified balanced with a real stack scan).
-  3. **CI fix for v382**: Signature SIDE layout used
-     `Modifier.align(Alignment.CenterHorizontally)` inside a nested
-     Box — compile error \"cannot be called in this context with an implicit
-     receiver\". Fixed with `Box(contentAlignment = Alignment.Center)`.
-- NEXT UP (user-declared): the dedicated Signature background treatment
-  round.
+**What the user asked:**
+1. The sparkle ("smart") should ALSO fit/fix the **info rows (author/year)**
+   when manual edits leave them overlapped — not just title + fact.
+2. They believed commit `05b501c` (PR #94) had MORE smart-layout
+   arrangements and a merge decreased them; restore it. (Checked: that
+   merge only changed an import + a comment; the pill had always cycled 4
+   arrangements. User answered: **add MORE arrangements**.)
+3. Title/quick-fact overlapping still behaved "magnetic" (auto-fixed) in
+   manual edit. Wanted: **let it overlap when done manually; only fix on
+   sparkle tap** (user confirmed: turn off BOTH the drag collision-push AND
+   the slider auto-lift).
+
+**Changes (all in `TopicShareCard.kt`, versioned v384):**
+- `ShareAutoLayoutPlan` gained `metaLift` (info-row repair) + `factDropCap`.
+- `autoLayoutPlan` now repairs THREE overlaps from drag offsets — lift the
+  title (≤72dp), push the fact down (≤72dp), push the info rows down
+  (≤72dp) — and cycles **7 arrangements** (fit → condensed → book columns →
+  editorial drop cap → maximal space → tall 9:16 → standard) via
+  `attempt % 7`.
+- `runAutoLayout`: applies `metaDy += metaLift`, `factDropCap`, gates on
+  `dropCapChanges`/`metaLiftChanges`, lookahead widened to `repeat(12)`.
+- Removed the slider **auto-lift** `LaunchedEffect` and the
+  **collision-push** in the fact drag (free manual overlap — only the
+  sparkle repairs). Dropped now-dead `titleGrabbed`/`factGrabbed`/`touches`.
+- Changelog updated (`fastlane/.../changelogs/20260921.txt`).
+
+**Out of scope / open:** web/desktop untouched (scope: Android only). The
+meta repair is offset-estimated like the existing title/fact repair (does
+not cover a grown fact box extending down over the info rows on
+bottom-anchored styles — that would need measured bounds; noted for a
+follow-up if the user hits it).
