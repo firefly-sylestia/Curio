@@ -980,6 +980,12 @@ object AppPreferences {
     // default (gentler glass edge + a glow that hugs the pill's top); the
     // toggle restores the fuller glow for comparison.
     var pillGlowSubtleState by mutableStateOf(true)
+    // v3xx — CABINET v2 experiment (Settings → Experiments → Cabinet v2,
+    // default OFF): while enabled, the saved-entries + liked-books surfaces
+    // render as the new collections view with jacket-art covers and Home's
+    // Save shortcut repoints into it. When the experiment settles the toggle
+    // is removed and the winning view ships always-on.
+    var cabinetV2EnabledState by mutableStateOf(false)
     var paperStatTearState by mutableStateOf(false)
         private set
     // v108 — torn heroes wear ONLY their bottom tear by default; the white
@@ -1535,6 +1541,7 @@ object AppPreferences {
         navIndicatorColorState = getNavIndicatorColor(context)
         navIndicatorOpacityState = getNavIndicatorOpacity(context)
         glassClarityState = isGlassClarityEnabled(context)
+        cabinetV2EnabledState = isCabinetV2Enabled(context)
         glassBlurScaleState = getGlassBlurScale(context)
         glassRefractionScaleState = getGlassRefractionScale(context)
         glassReflectionScaleState = getGlassReflectionScale(context)
@@ -1877,6 +1884,7 @@ object AppPreferences {
     private const val KEY_NAV_PILL_BUTTONS = "nav_pill_buttons"
     private const val KEY_STAR_ZOOM_3D = "star_zoom_3d"
     private const val KEY_DRAWER_CONSTELLATION = "drawer_constellation"
+    private const val KEY_CABINET_V2 = "cabinet_v2_experiment"
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
     private const val KEY_FORCE_GLASS = "force_glass_override"
     private const val KEY_LEGACY_GLASS_BLUR = "legacy_glass_blur"
@@ -1992,6 +2000,16 @@ object AppPreferences {
     fun setPaperStatCardsEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_PAPER_STAT_CARDS, enabled).apply()
         paperStatCardsState = enabled
+    }
+
+    /** Whether the Cabinet v2 experiment is on (default OFF; see the state
+     *  comment above). */
+    fun isCabinetV2Enabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_CABINET_V2, false)
+
+    fun setCabinetV2Enabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_CABINET_V2, enabled).apply()
+        cabinetV2EnabledState = enabled
     }
 
     /** Whether the dark-mode pill glow is the subtle top-only version (v101, default ON). */
