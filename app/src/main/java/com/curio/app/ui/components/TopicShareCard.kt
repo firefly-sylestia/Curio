@@ -1306,7 +1306,7 @@ data class ShareCardMove(
     val titleBoxScale: Float = 1f,
     val factBoxScale: Float = 1f,
     val favBoxScale: Float = 1f,
-    /** v3xx — POLAROID (Collage card only): the instant-print is a movable,
+    /** v3xx — POLAROID: the instant-print is a movable,
      *  scalable element like the cover / favorites strip. The grip drags it
      *  via [polaroidDx]/[polaroidDy] (card-local dp), [polaroidScale] grows /
      *  shrinks the whole print (1f = the design default), [polaroidStyle]
@@ -1369,7 +1369,7 @@ data class ShareCardMove(
      *  auto-lifted when the fact box grows into it. Reset layout clears it. */
     val titlePlaced: Boolean = false,
     /** v3xx — POLAROID OPT-IN (non-Collage styles): the shared print on
-     *  other styles only renders while this is TRUE (default FALSE — never
+     *  every non-Collage style renders while this is TRUE (default FALSE — never
      *  always-on; the user turns it on per card in the Polaroid panel, and
      *  turns it off the same way to hide the print). Collage always renders
      *  its own inline print (part of the design, unaffected). Persisted with
@@ -4130,7 +4130,7 @@ private fun EditorialCard(
             // first 2 lines run beside the big letter (top-aligned with it), the
             // rest continues full-width below. Honor the user's fact format
             // (font + align).
-            // v370 — slightly LARGER floors: the fact grows down to the
+            // v370 �� slightly LARGER floors: the fact grows down to the
             // colophon and the title keeps its spot, so long text reads at a
             // comfortable size instead of pinching to 8.5sp.
             val bodySize = when {

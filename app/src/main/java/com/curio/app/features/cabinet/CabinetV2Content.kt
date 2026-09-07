@@ -66,6 +66,7 @@ import com.curio.app.data.CurioEntry
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.TopicCatalog
+import com.curio.app.data.shortName
 import com.curio.app.features.reveal.AlbumArtFetch
 import com.curio.app.features.reveal.SeriesPosterFetch
 import com.curio.app.features.settings.BookCoverFetch
@@ -615,7 +616,7 @@ private fun V2EmptySuggestions(
                     shape = RoundedCornerShape(18.dp),
                     color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
                     modifier = Modifier.fillMaxWidth().height(72.dp)
-                )
+                ) {}
                 Spacer(Modifier.height(10.dp))
             }
         } else {
