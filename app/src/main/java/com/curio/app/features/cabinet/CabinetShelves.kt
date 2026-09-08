@@ -32,7 +32,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
@@ -207,116 +206,121 @@ fun V2ShelfCard(
         shape = RoundedCornerShape(22.dp),
         color = tone.fill()
     ) {
-        Box(Modifier.fillMaxSize()) {
-            // v3xx — the card CARRIES ITS ART: the drawn scene fills the
-            // whole card as a whisper-alpha background ("the box designs
-            // itself… background of the card… drawn elements not the icon")
-            // while the content sits on top.
-            V2ShelfArt(
-                art = art,
-                dark = dark,
-                modifier = Modifier.fillMaxSize().alpha(0.22f)
-            )
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 15.dp, end = 15.dp, top = 13.dp, bottom = 0.dp)
+        // v3xx — the JSX "CollectionCard" layout is back (the full-card
+        // whisper-alpha art read as INVISIBLE on the cards — the user could
+        // only see the designs in the create-collection sheet previews).
+        // Tone fill + frosted icon tile + title/count, with the REDRAWN art
+        // as a VISIBLE foot strip (the same responsive scenes, full alpha).
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 15.dp, end = 15.dp, top = 13.dp, bottom = 0.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(RoundedCornerShape(13.dp))
+                        .background(
+                            if (dark) Color.White.copy(alpha = 0.16f)
+                            else Color.White.copy(alpha = 0.40f)
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(RoundedCornerShape(13.dp))
-                            .background(
-                                if (dark) Color.White.copy(alpha = 0.16f)
-                                else Color.White.copy(alpha = 0.40f)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CurioIcon(
-                            name = icon,
-                            contentDescription = null,
-                            tint = ink,
-                            size = 20.dp
-                        )
-                    }
-                    Spacer(Modifier.weight(1f))
-                    if (hasMenu) {
-                        // v3xx — the ⋮ is an ANCHORED DropdownMenu (renamed /
-                        // deleted from the dots themselves) instead of the old
-                        // centre-screen CurioHoldPill overlay.
-                        Box {
-                            Box(
-                                modifier = Modifier
-                                    .size(34.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .combinedClickable(
-                                        onClick = { moreOpen = true },
-                                        onLongClick = { moreOpen = true }
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CurioIcon(
-                                    name = CurioIcons.MoreVert,
-                                    contentDescription = "Rename or delete",
-                                    tint = ink.copy(alpha = 0.66f),
-                                    size = 20.dp
+                    CurioIcon(
+                        name = icon,
+                        contentDescription = null,
+                        tint = ink,
+                        size = 20.dp
+                    )
+                }
+                Spacer(Modifier.weight(1f))
+                if (hasMenu) {
+                    // v3xx — the ⋮ is an ANCHORED DropdownMenu (renamed /
+                    // deleted from the dots themselves) instead of the old
+                    // centre-screen CurioHoldPill overlay.
+                    Box {
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .combinedClickable(
+                                    onClick = { moreOpen = true },
+                                    onLongClick = { moreOpen = true }
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.MoreVert,
+                                contentDescription = "Rename or delete",
+                                tint = ink.copy(alpha = 0.66f),
+                                size = 20.dp
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = moreOpen,
+                            onDismissRequest = { moreOpen = false }
+                        ) {
+                            if (onRename != null) {
+                                DropdownMenuItem(
+                                    text = { Text("Rename", fontWeight = FontWeight.SemiBold) },
+                                    leadingIcon = {
+                                        CurioIcon(name = CurioIcons.Edit, contentDescription = null, tint = ink, size = 17.dp)
+                                    },
+                                    onClick = { moreOpen = false; onRename() }
                                 )
                             }
-                            DropdownMenu(
-                                expanded = moreOpen,
-                                onDismissRequest = { moreOpen = false }
-                            ) {
-                                if (onRename != null) {
-                                    DropdownMenuItem(
-                                        text = { Text("Rename", fontWeight = FontWeight.SemiBold) },
-                                        leadingIcon = {
-                                            CurioIcon(name = CurioIcons.Edit, contentDescription = null, tint = ink, size = 17.dp)
-                                        },
-                                        onClick = { moreOpen = false; onRename() }
-                                    )
-                                }
-                                if (onDelete != null) {
-                                    DropdownMenuItem(
-                                        text = { Text("Delete collection", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold) },
-                                        leadingIcon = {
-                                            CurioIcon(name = CurioIcons.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error, size = 17.dp)
-                                        },
-                                        onClick = { moreOpen = false; onDelete() }
-                                    )
-                                }
+                            if (onDelete != null) {
+                                DropdownMenuItem(
+                                    text = { Text("Delete collection", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold) },
+                                    leadingIcon = {
+                                        CurioIcon(name = CurioIcons.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error, size = 17.dp)
+                                    },
+                                    onClick = { moreOpen = false; onDelete() }
+                                )
                             }
                         }
                     }
                 }
-                Spacer(Modifier.height(13.dp))
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        lineHeight = 19.sp
-                    ),
-                    color = ink,
-                    maxLines = 2,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                )
-                Text(
-                    text = "$count item${if (count == 1) "" else "s"}",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = muted,
-                    maxLines = 1
-                )
             }
+            Spacer(Modifier.height(13.dp))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    lineHeight = 19.sp
+                ),
+                color = ink,
+                maxLines = 2,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+            )
+            Text(
+                text = "$count item${if (count == 1) "" else "s"}",
+                style = MaterialTheme.typography.labelMedium,
+                color = muted,
+                maxLines = 1
+            )
+            Spacer(Modifier.height(8.dp))
+            // v3xx — the REDRAWN scene, back as a VISIBLE foot strip (the
+            // responsive scenes scale down to the strip exactly like the old
+            // ones did — full alpha so the design actually shows on the card).
+            V2ShelfArt(
+                art = art,
+                dark = dark,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(86.dp)
+            )
         }
     }
 }
 // ────────────────────────────────────────────────────────────────────────
 // Shelf art — v3xx RESPONSIVE CARD SCENES: every scene is drawn with
-// proportional Canvas geometry, so the SAME art scales from a foot strip
-// to the full-card background each shelf card carries. The classic
+// proportional Canvas geometry, so the SAME art scales from the card's
+// foot strip to the create-collection sheet's preview tiles. The classic
 // favourites (star, open book, spines, mountain, notes, window, photos)
 // were refined with more detail, Completed got a FULL redesign (PEAK:
 // sun-arc summit + planted flag), and the four MINIMAL_* scenes borrow

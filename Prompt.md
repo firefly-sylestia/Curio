@@ -1014,5 +1014,30 @@ via PlayfairDisplayFontFamily). Search results + the tablet two-pane
 still use the underlying row model untouched; the Appearance card keeps
 the PetLandmark.
 
-**Held (no push):** committed only — the user explicitly asked not to
-push the settings work.
+**Pushed** on the next instruction (`450f6a9d`).
+
+## Request (2026-09-08, completed + pushed — Cabinet card style REVERT: art redrawn, not redesigned)
+
+**Request (direct):** "why did you change the design for the collections
+— I asked you to redraw the background not redesign them, I liked that
+style, bring it back and remember the prompt and do it again properly",
+then "wait, I CAN see some design but in the cabinet collection view why
+are they not showing up — like they show up properly in that commit — I
+can see the design while creating the collection".
+
+**Root cause found:** v3xx27 drew the redrawn art as a whisper-faint
+FULL-CARD background (alpha 0.22) — invisible on the cards — while the
+create-collection sheet's previews draw it at alpha 0.6 (hence "I can
+see the design only while creating the collection").
+
+**Fix (`V2ShelfCard` restored):** the JSX "CollectionCard" layout the
+user liked — tone fill + frosted icon tile + title/item count, with the
+REDRAWN art as a VISIBLE foot strip (86dp, full alpha; the responsive
+scenes scale to the strip like the old ones). Kept from v3xx27 (explicit
+parts of the original prompt): the redrawn scenes incl. PEAK + MINIMAL_*,
+the anchored ⋮ DropdownMenu (onRename/onDelete — "proper dropdown not
+overlay in the middle"), and the create-collection style picker. The
+`.alpha` import is gone from CabinetShelves.kt.
+
+## next prompt
+(empty — no pending prompt)

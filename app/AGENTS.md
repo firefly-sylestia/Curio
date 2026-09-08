@@ -812,6 +812,19 @@ app/src/main/java/com/curio/app/
   `shadowElevation` blur behind the TILTED cream print read as a
   "background showing behind the strip" (preview AND export); the tape +
   tilt keep the scrapbook depth. Other styles keep the shadow.
+- **v3xx30 — Cabinet card style REVERT (user follow-up 2026-09-08).**
+  The user's original request was to REDRAW the collection card art, not
+  redesign the cards — the v3xx27 full-card whisper-alpha art read as
+  INVISIBLE on the cards ("I can see the design only while creating the
+  collection"), so `V2ShelfCard` is back to the JSX "CollectionCard"
+  layout the user liked: tone fill + frosted icon tile + title/item
+  count, with the REDRAWN art as a VISIBLE foot strip (86dp, full
+  alpha — the responsive scenes scale down to the strip exactly like the
+  old ones). Kept from v3xx27: the redrawn scenes (incl. PEAK +
+  MINIMAL_*), the anchored ⋮ DropdownMenu (onRename/onDelete — the user
+  asked for a real dropdown, not the centre overlay), and the
+  create-collection style picker. The `.alpha` import is gone from
+  CabinetShelves.kt.
 - **v3xx29 — Settings hub REDESIGN (user follow-up 2026-09-08; the
   CurioSettings_Redesign-3.jsx look — committed, NOT pushed per user
   instruction).** The phone hub (`SettingsHubScreen.kt`) is rebuilt to
