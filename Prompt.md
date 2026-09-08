@@ -851,120 +851,37 @@ the request-log entry above for the full breakdown). The four ask_user
 answers were followed: replace v2 behind the same toggle; smart shelves
 (Favorites/Saved entries/Notes live, four starter shelves seeded once);
 app's torn rose hero kept; "Add something new" navigates to Spin.
+## Request (2026-09-08, completed — TextHistory CI fix, pushed `3d9b9d94`)
+
+**Pending-prompt slot (verbatim):** pasted compileDebug/ReleaseKotlin
+failure — TextHistory.kt:406 and :424 `None of the following candidates
+is applicable` for `PaddingValues` (the tree + list contentPadding used
+`PaddingValues(horizontal = …, vertical = …, bottom = …)`; horizontal/
+vertical and bottom belong to different constructor families, so
+`bottom` did not resolve).
+
+**Fix:** explicit `PaddingValues(start = 12.dp, top = 4.dp, end = 12.dp,
+bottom = 16.dp)` in both the tree-mode and list-mode LazyColumn
+contentPadding. Pushed alone; CI validates on the push.
 
 ## next prompt
-fix this cl error Task :app:compileReleaseKotlin
-> Task :app:compileDebugKotlin
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/ui/components/TextHistory.kt:406:38 None of the following candidates is applicable:
 
-
-> Task :app:compileDebugKotlin FAILED
-fun PaddingValues(all: Dp): PaddingValues:
-
-  No parameter with name 'horizontal' found.
-> Task :app:compileReleaseKotlin FAILED
-  No parameter with name 'vertical' found.
-  No parameter with name 'bottom' found.
-  No value passed for parameter 'all'.
-
-fun PaddingValues(horizontal: Dp = ..., vertical: Dp = ...): PaddingValues:
-  No parameter with name 'bottom' found.
-
-fun PaddingValues(start: Dp = ..., top: Dp = ..., end: Dp = ..., bottom: Dp = ...): PaddingValues:
-  No parameter with name 'horizontal' found.
-  No parameter with name 'vertical' found.
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/ui/components/TextHistory.kt:424:38 None of the following candidates is applicable:
-
-fun PaddingValues(all: Dp): PaddingValues:
-  No parameter with name 'horizontal' found.
-  No parameter with name 'vertical' found.
-  No parameter with name 'bottom' found.
-  No value passed for parameter 'all'.
-
-fun PaddingValues(horizontal: Dp = ..., vertical: Dp = ...): PaddingValues:
-  No parameter with name 'bottom' found.
-
-fun PaddingValues(start: Dp = ..., top: Dp = ..., end: Dp = ..., bottom: Dp = ...): PaddingValues:
-  No parameter with name 'horizontal' found.
-  No parameter with name 'vertical' found.
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/ui/components/TextHistory.kt:406:38 None of the following candidates is applicable:
-
-fun PaddingValues(all: Dp): PaddingValues:
-  No parameter with name 'horizontal' found.
-  No parameter with name 'vertical' found.
-  No parameter with name 'bottom' found.
-  No value passed for parameter 'all'.
-
-fun PaddingValues(horizontal: Dp = ..., vertical: Dp = ...): PaddingValues:
-  No parameter with name 'bottom' found.
-
-fun PaddingValues(start: Dp = ..., top: Dp = ..., end: Dp = ..., bottom: Dp = ...): PaddingValues:
-  No parameter with name 'horizontal' found.
-  No parameter with name 'vertical' found.
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/ui/components/TextHistory.kt:424:38 None of the following candidates is applicable:
-
-fun PaddingValues(all: Dp): PaddingValues:
-  No parameter with name 'horizontal' found.
-  No parameter with name 'vertical' found.
-  No parameter with name 'bottom' found.
-  No value passed for parameter 'all'.
-
-fun PaddingValues(horizontal: Dp = ..., vertical: Dp = ...): PaddingValues:
-  No parameter with name 'bottom' found.
-
-fun PaddingValues(start: Dp = ..., top: Dp = ..., end: Dp = ..., bottom: Dp = ...): PaddingValues:
-  No parameter with name 'horizontal' found.
-  No parameter with name 'vertical' found.
-
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1788858388686.json
-FAILURE: Build completed with 2 failures.
-
-1: Task failed with an exception.
------------
-* What went wrong:
-Execution failed for task ':app:compileDebugKotlin'.
-> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
-   > Compilation error. See log for more details
-
-* Try:
-> Run with --info or --debug option to get more log output.
-> Run with --scan to get full insights from a Build Scan (powered by Develocity).
-> Get more help at https://help.gradle.org.
-
-* Exception is:
-org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':app:compileDebugKotlin'.
-	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.lambda$executeIfValid$1(ExecuteActionsTaskExecuter.java:135)
-	at org.gradle.internal.Try$Failure.ifSuccessfulOrElse(Try.java:288)
-	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:133)
-	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.execute(ExecuteActionsTaskExecuter.java:121)
-	at org.gradle.api.internal.tasks.execution.ProblemsTaskPathTrackingTaskExecuter.execute(ProblemsTaskPathTrackingTaskExecuter.java:41)
-	at org.gradle.api.internal.tasks.execution.ResolveTaskExecutionModeExecuter.execute(ResolveTaskExecutionModeExecuter.java:51)
-	at org.gradle.api.internal.tasks.execution.FinalizePropertiesTaskExecuter.execute(FinalizePropertiesTaskExecuter.java:46)
-	at org.gradle.api.internal.tasks.execution.SkipTaskWithNoActionsExecuter.execute(SkipTaskWithNoActionsExecuter.java:57)
-	at org.gradle.api.internal.tasks.execution.SkipOnlyIfTaskExecuter.execute(SkipOnlyIfTaskExecuter.java:74)
-	at org.gradle.api.internal.tasks.execution.CatchExceptionTaskExecuter.execute(CatchExceptionTaskExecuter.java:36)
-	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.executeTask(EventFiringTaskExecuter.java:77)
-	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:55)
-	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:52)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
-	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter.execute(EventFiringTaskExecuter.java:52)
-	at org.gradle.execution.plan.DefaultNodeExecutor.executeLocalTaskNode(DefaultNodeExecutor.java:55)
-	at org.gradle.execution.plan.DefaultNodeExecutor.execute(DefaultNodeExecutor.java:34)
-	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:355)
-	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:343)
-	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.lambda$execute$0(DefaultTaskExecutionGraph.java:339)
-	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:84)
-	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:339)
-	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:328)
-	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
-	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
-	at org.gradle.execution.plan.DefaultPlanExecutor.process(DefaultPlanExecutor.java:111)
-	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.executeWithServices(DefaultTaskExecutionGraph.java:146)
-	at org.gradle.execution.taskgraph
-   also the smart fit is better the spark pill one, but again it doesnt consider of the catgory icon and it places it over it sometimes also similiar to the title fix add one for the quick fact box as well it auto moves to a proper place and also make its height maximum always too when longer text etc. not just text size decreae but also height incarse in according ot the buttom area also theres a glitch with height even when therese plenty of space below the height still doesnt expand in smaller texts when i want it to expand more which it definenitly can and also the texts too it definely can properly expand so fix it and the footer and the box always have plency of space yet footers moved down even thoguh the quick fact box is nowhere near i meant the texts so fix that too and mak eth footers even smaller and let them overlapp and stays at their place. the footer text and then the inline editor is inaccurate again the curosr and the text positon is wrong and misleading same for the full screen editor too full screen card editor. and sometimes the box outline mislead too so fi xit too. 
+**Pending — share-card smart fit refinements (user, 2026-09-08):**
+1. The spark-pill smart fit is better, but it still doesn't consider the
+   CATEGORY ICON — it sometimes places [the title] over it. Give it the
+   same treatment as the title fix.
+2. Same for the QUICK FACT box: auto-move it to a proper place.
+3. Quick-fact box height should be at its MAXIMUM with longer text — not
+   just text-size decrease but HEIGHT increase, in accordance with the
+   bottom area.
+4. Height glitch: even with plenty of space below, the height doesn't
+   expand for smaller texts when the user wants it to expand more (it
+   definitely can — and the text can too) — fix it.
+5. The footer and the box always have plenty of space, yet the footers
+   moved down even though the quick fact box is nowhere near (the user
+   means the texts) — the footers should stay at their place.
+6. Make the footers even smaller and keep them put.
+7. The footer text + the inline editor are inaccurate again: the cursor
+   and the text position are wrong/misleading — same for the full-screen
+   card editor.
+8. Sometimes the box outline misleads too — fix it.
