@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.PaddingValues
@@ -9219,6 +9220,10 @@ fun TopicShareSheet(
     var historyOpen by remember { mutableStateOf(false) }
     rememberTextHistoryCapture(context, historyField, factFieldText, "$topicName\u00b7$activeId")
     rememberTextHistoryCapture(context, "Photo caption", polaroidCaption, topicName)
+    // v3xx — the TITLE joins the feed too, once it's actually edited: the
+    // blank/unedited value is skipped by the store, so an untouched card
+    // never spams "Title" snapshots.
+    rememberTextHistoryCapture(context, "Title", editedTitle ?: "", "$topicName\u00b7title")
     if (historyOpen) {
         TextHistoryBrowser(
             ctx = context,
@@ -10184,7 +10189,11 @@ fun TopicShareSheet(
                                 Modifier.fillMaxSize(),
                                 color = MaterialTheme.colorScheme.surface
                             ) {
-                                Column(Modifier.fillMaxSize().padding(20.dp)) {
+                                // v3xx — imePadding lifts the sheet above the
+                                // keyboard and the editor area scrolls, so a
+                                // long note's text can always be reached and
+                                // selected without closing the keyboard.
+                                Column(Modifier.fillMaxSize().imePadding().padding(20.dp)) {
                                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                                         Text(
                                             when (writeBoxTarget) {
@@ -10209,20 +10218,30 @@ fun TopicShareSheet(
                                     // v375 — bold/italic/highlight + size on
                                     // the selection; every change keeps text
                                     // AND spans in sync (routeRichFact).
-                                    RichTextEditor(
-                                        text = factFieldText,
-                                        spans = factFieldSpans,
-                                        onRichTextChange = { t, sp -> routeRichFact(t, sp) },
-                                        modifier = Modifier
+                                    // v3xx — the editor area scrolls above the
+                                    // keyboard: the weight is on a scrollable
+                                    // wrapper now (weight inside a scrollable
+                                    // Column is illegal), so a long note is
+                                    // always reachable and selectable.
+                                    Column(
+                                        Modifier
+                                            .weight(1f)
                                             .fillMaxWidth()
-                                            .weight(1f),
-                                        placeholder = "Start writing…",
-                                        minHeight = 140.dp,
-                                        accent = MaterialTheme.colorScheme.primary,
-                                        ink = MaterialTheme.colorScheme.onSurface,
-                                        surface = MaterialTheme.colorScheme.surfaceVariant,
-                                        showFieldBorder = true
-                                    )
+                                            .verticalScroll(rememberScrollState())
+                                    ) {
+                                        RichTextEditor(
+                                            text = factFieldText,
+                                            spans = factFieldSpans,
+                                            onRichTextChange = { t, sp -> routeRichFact(t, sp) },
+                                            modifier = Modifier.fillMaxWidth(),
+                                            placeholder = "Start writing…",
+                                            minHeight = 140.dp,
+                                            accent = MaterialTheme.colorScheme.primary,
+                                            ink = MaterialTheme.colorScheme.onSurface,
+                                            surface = MaterialTheme.colorScheme.surfaceVariant,
+                                            showFieldBorder = true
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -10265,7 +10284,12 @@ fun TopicShareSheet(
                             // BottomCenter) instead of joining the Column flow
                             // — where their height would re-shrink the
                             // weight(1f) card area and re-zoom the preview.
-                            Box(Modifier.fillMaxSize().background(fullBg)) {
+                            // v3xx — imePadding lifts the whole editor (top
+                            // bar, card, floating panels) ABOVE the keyboard
+                            // while typing: the card re-zooms into the
+                            // visible space and everything stays reachable
+                            // and selectable without closing the keyboard.
+                            Box(Modifier.fillMaxSize().background(fullBg).imePadding()) {
                             Column(Modifier.fillMaxSize()) {
                                 // ── Top bar: Close (left) · Aa pill (right) ─
                                 Row(

@@ -1798,8 +1798,9 @@ internal fun HoldActionsPill(
     }
 }
 
-/** One circular icon action inside [HoldActionsPill]. */
-internal class HoldAction(
+/** One circular icon action inside [HoldActionsPill]. v3xx — public: Home's
+ *  recents hold menu reuses the same radial action menu. */
+class HoldAction(
     val glyph: String,
     val description: String,
     val background: Color,

@@ -1,5 +1,59 @@
 # Prompt Log — current request
 
+## Request (2026-09-08, committed — text history everywhere + bottom-sheet/tree browser, Home anchored hold, keyboard-aware editors, one-shot tools)
+
+**Request (pending-prompt slot):** "history text history doesn't show up
+everywhere neither saves everywhere; if something's the same don't add a
+duplicate entry but make it show at top; add smart recognition — when the
+paragraphs are the same show small branches with the changes, tree style,
+a new view; make the history screen more like a bottom sheet; the pin
+wasn't working for text history, fix it and its buttons properly; make
+ the pill show everywhere for saving entries too, above the keyboard; fix
+ the home screen tap-to-hold action using a similar one from the new
+category picker with proper positioning; the enlarge/full-screen text
+editor is bad — with the keyboard on it's hard to scroll and select
+things hidden behind it without closing the keyboard, fix it for BOTH the
+share-card enlarge editor and the chapter add-note full screen; tools
+once used stay active even after one selection change, fix that too; but
+BEFORE that fix the CI error and push it, then work on the rest and DON'T
+push it — just push the CI fix and wait after finishing everything"
+(with the pasted compileDebug/ReleaseKotlin failure: CabinetShelves.kt
+`Unresolved reference 'BoxScope'` ×7 + `.align` ×12, and
+TopicRevealScreen.kt:5703 `HeartGlyph` invoking @Composable without the
+annotation).
+
+**CI fix (pushed alone, `d2106596`):** added
+`androidx.compose.foundation.layout.BoxScope` to CabinetShelves.kt (the
+BoxScope-extension shelf arts were missing the import) and restored
+`@Composable` on `HeartGlyph` (the sheetActionIconTone dedupe had eaten
+it). Everything below is COMMITTED but NOT pushed — waiting on the user
+per the prompt.
+
+**What shipped (committed, not pushed):**
+1. **Text history everywhere** — the share-card TITLE joins the captured
+   fields (quick fact / custom fact / chapter review / quote / photo
+   caption / title); the chapter-note Enlarge editor got a history pill +
+   capture + browser restoring into its AppPreferences slot. The pill
+   floats above the keyboard (host editors now imePadding).
+2. **Dedupe + move-to-top** — `TextHistoryStore.record` moves an existing
+   same-text entry to the top instead of stacking a duplicate.
+3. **Tree view** — the browser is a ModalBottomSheet (drag handle) with a
+   List/Tree toggle; Tree groups snapshots sharing opening paragraphs
+   into branches (trunk once, versions show only their changed lines,
+   removed struck through, added highlighted).
+4. **PIN FIX** — the pin button was `enabled = e.pinned`, so it was dead
+   on unpinned entries (only unpin ever worked); now always enabled.
+5. **Home hold** — recents rows attach the category picker's
+   `radialHoldMenu` gesture; the centered CurioHoldPill is replaced by
+   `RadialHoldMenuOverlay` rendered at screen level, anchored at the
+   held spot (Edit / Open-saved-entry / Remove).
+6. **Keyboard-aware editors** — share-card full-screen editor, Enlarge
+   writing sheet and chapter-note Enlarge all imePadding + scrollable
+   text area (weight moved to a verticalScroll wrapper).
+7. **One-shot tools** — RichTextEditor selection applies no longer arm
+   sticky formats (applies to the capture formats too); collapsed-caret
+   taps still arm.
+
 ## Request (2026-09-08, completed — CI fix + dark-mode sheet icons + full series UI)
 
 **Request (pending-prompt slot):** "for chapter add note area and the

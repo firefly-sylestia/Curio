@@ -49,6 +49,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -173,6 +174,9 @@ import com.curio.app.data.coverSwatchesFromArgbs
 import com.curio.app.data.coverSwatchesToArgbs
 import com.curio.app.data.fetchCoverSwatches
 import com.curio.app.ui.components.RichTextEditor
+import com.curio.app.ui.components.TextHistoryBrowser
+import com.curio.app.ui.components.TextHistoryPill
+import com.curio.app.ui.components.rememberTextHistoryCapture
 import com.curio.app.data.openSearchUrl
 import com.curio.app.data.resolveAppleMusicItemUrl
 import com.curio.app.data.resolveSpotifyItemUrl
@@ -3594,6 +3598,12 @@ private fun BookNotesSheet(
     noteEditorChapter?.let { editCh ->
         val editText = chapterNotes[editCh.number].orEmpty()
         val editSpans = chapterNoteSpans[editCh.number].orEmpty()
+        // v3xx — text-history capture + browser inside the enlarged editor:
+        // the pill sits in the header (lifted above the keyboard by the
+        // dialog's imePadding) and restores write straight back into this
+        // chapter's note slot.
+        var noteHistoryOpen by remember { mutableStateOf(false) }
+        rememberTextHistoryCapture(context, "Chapter note", editText, "book|$bookName|ch|${editCh.number}")
         Dialog(
             onDismissRequest = { noteEditorChapter = null },
             properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -3602,7 +3612,10 @@ private fun BookNotesSheet(
                 Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.surface
             ) {
-                Column(Modifier.fillMaxSize().padding(20.dp)) {
+                // v3xx — imePadding lifts the sheet above the keyboard and
+                // the editor area scrolls, so a long note's text is always
+                // reachable and selectable without closing the keyboard.
+                Column(Modifier.fillMaxSize().imePadding().padding(20.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         Text(
                             "Note · CH ${editCh.number}${editCh.title.takeIf { it.isNotBlank() }?.let { " — $it" } ?: ""}",
@@ -3612,6 +3625,8 @@ private fun BookNotesSheet(
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f)
                         )
+                        TextHistoryPill(onClick = { noteHistoryOpen = true })
+                        Spacer(Modifier.width(8.dp))
                         TextButton(onClick = { noteEditorChapter = null }) {
                             Text("Done", fontWeight = FontWeight.Bold)
                         }
@@ -3620,29 +3635,34 @@ private fun BookNotesSheet(
                     // v375 — rich editing: every change saves the text AND its
                     // runs together (blank clears both). The compact field
                     // below reflects the text; its own edits clear the runs.
-                    RichTextEditor(
-                        text = editText,
-                        spans = editSpans,
-                        onRichTextChange = { newText, spans ->
-                            AppPreferences.setBookChapterNote(
-                                context, bookName, editCh.number, newText.take(2000)
-                            )
-                            AppPreferences.setBookChapterNoteSpans(
-                                context, bookName, editCh.number,
-                                if (newText.isBlank()) emptyList() else spans
-                            )
-                        },
-                        modifier = Modifier
+                    Column(
+                        Modifier
+                            .weight(1f)
                             .fillMaxWidth()
-                            .weight(1f),
-                        placeholder = "Write your thoughts on this chapter…",
-                        minHeight = 140.dp,
-                        maxCharacters = 2000,
-                        accent = MaterialTheme.colorScheme.primary,
-                        ink = MaterialTheme.colorScheme.onSurface,
-                        surface = MaterialTheme.colorScheme.surfaceVariant,
-                        showFieldBorder = true
-                    )
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        RichTextEditor(
+                            text = editText,
+                            spans = editSpans,
+                            onRichTextChange = { newText, spans ->
+                                AppPreferences.setBookChapterNote(
+                                    context, bookName, editCh.number, newText.take(2000)
+                                )
+                                AppPreferences.setBookChapterNoteSpans(
+                                    context, bookName, editCh.number,
+                                    if (newText.isBlank()) emptyList() else spans
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = "Write your thoughts on this chapter…",
+                            minHeight = 140.dp,
+                            maxCharacters = 2000,
+                            accent = MaterialTheme.colorScheme.primary,
+                            ink = MaterialTheme.colorScheme.onSurface,
+                            surface = MaterialTheme.colorScheme.surfaceVariant,
+                            showFieldBorder = true
+                        )
+                    }
                     Spacer(Modifier.height(8.dp))
                     // Share the note straight to the share card as a Chapter
                     // review — no copy/paste, no re-typing. v375 — the note's
@@ -3674,6 +3694,24 @@ private fun BookNotesSheet(
                     }
                 }
             }
+        }
+        // v3xx — the text-history browser for this chapter's note: restoring
+        // writes straight back into the same AppPreferences slot (plain text;
+        // rich runs clear so the restored text renders exactly).
+        if (noteHistoryOpen) {
+            TextHistoryBrowser(
+                ctx = context,
+                activeField = "Chapter note",
+                onRestore = { restored ->
+                    AppPreferences.setBookChapterNote(
+                        context, bookName, editCh.number, restored.take(2000)
+                    )
+                    AppPreferences.setBookChapterNoteSpans(
+                        context, bookName, editCh.number, emptyList()
+                    )
+                },
+                onDismiss = { noteHistoryOpen = false }
+            )
         }
     }
 }

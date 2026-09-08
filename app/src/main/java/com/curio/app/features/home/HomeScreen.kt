@@ -139,6 +139,10 @@ import com.curio.app.navigation.navigateToQuestRoute
 import com.curio.app.navigation.navigateToTab
 import com.curio.app.features.recent.RecentFeedItem
 import com.curio.app.features.recent.buildRecentFeed
+import com.curio.app.features.picker.HoldAction
+import com.curio.app.features.picker.HoldSession
+import com.curio.app.features.picker.RadialHoldMenuOverlay
+import com.curio.app.features.picker.radialHoldMenu
 import com.curio.app.ui.adaptive.WideContentMaxWidth
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -146,7 +150,6 @@ import com.curio.app.ui.theme.LocalCurioThemeTransition
 import com.curio.app.ui.theme.switchThemeWithReveal
 import com.curio.app.ui.components.CurioConstellation
 import com.curio.app.ui.components.CurioGlassToolbar
-import com.curio.app.ui.components.CurioHoldPill
 import com.curio.app.ui.components.CurioDrawerState
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioNavTint
@@ -260,8 +263,13 @@ fun HomeScreen(navController: NavController) {
     // Satisfying haptics: confirm on the big spin CTA, light ticks on picks.
     val haptics = LocalHapticFeedback.current
     // v3xx — recents rows: default tap opens the TOPIC (reveal); the hold
-    // pill carries the write / open-entry / remove actions.
+    // opens the ANCHORED radial action menu (the category picker's menu)
+    // right at the held spot, carrying the write / open-entry / remove
+    // actions.
     var recentOption by remember { mutableStateOf<RecentFeedItem?>(null) }
+    var recentOptionAnchor by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
+    var recentCursor by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
+    var recentEnd by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
     // v30 — Appearance "Hero follows Spin lane": the quest hero AND the Home
     // background take the category last picked on Spin (the Cabinet's
     // language) when the toggle is on; otherwise Home stays on the soft
@@ -1197,7 +1205,12 @@ fun HomeScreen(navController: NavController) {
                                                 CurioRoutes.revealFor(explored.categoryId.routeSlug, explored.topicName)
                                             ) { launchSingleTop = true }
                                         },
-                                        onLongClick = { recentOption = item }
+                                        hold = HoldSession(
+                                            onOpen = { pos -> recentOption = item; recentOptionAnchor = pos },
+                                            onMove = { recentCursor = it },
+                                            onEnd = { recentEnd = it },
+                                            onTap = {}
+                                        )
                                     )
                                 }
                                 is RecentFeedItem.Unexplored -> {
@@ -1212,7 +1225,12 @@ fun HomeScreen(navController: NavController) {
                                                 CurioRoutes.revealFor(unexplored.categoryId.routeSlug, unexplored.topicName)
                                             ) { launchSingleTop = true }
                                         },
-                                        onLongClick = { recentOption = item }
+                                        hold = HoldSession(
+                                            onOpen = { pos -> recentOption = item; recentOptionAnchor = pos },
+                                            onMove = { recentCursor = it },
+                                            onEnd = { recentEnd = it },
+                                            onTap = {}
+                                        )
                                     )
                                 }
                                 is RecentFeedItem.SavedEntry -> {
@@ -1223,7 +1241,12 @@ fun HomeScreen(navController: NavController) {
                                                 CurioRoutes.revealFor(item.entry.topic.categoryId.routeSlug, item.entry.topic.name)
                                             ) { launchSingleTop = true }
                                         },
-                                        onLongClick = { recentOption = item }
+                                        hold = HoldSession(
+                                            onOpen = { pos -> recentOption = item; recentOptionAnchor = pos },
+                                            onMove = { recentCursor = it },
+                                            onEnd = { recentEnd = it },
+                                            onTap = {}
+                                        )
                                     )
                                 }
                             }
@@ -1231,51 +1254,11 @@ fun HomeScreen(navController: NavController) {
                     }
                 }
 
-                // v3xx — the recents long-press pill (mirrors the Recents
-                // page): tap = topic; hold = write / open-entry / remove.
-                recentOption?.let { target ->
-                    val actions = buildList<Triple<String, () -> Unit, Boolean>> {
-                        when (target) {
-                            is RecentFeedItem.Explored -> {
-                                add(Triple("Write about it", {
-                                    navController.navigate(
-                                        CurioRoutes.captureFor(target.topic.categoryId.routeSlug, target.topic.topicName)
-                                    ) { launchSingleTop = true }
-                                }, false))
-                                add(Triple("Remove from Recents", {
-                                    ExploreSessionStore.removeExplored(context, target.topic.categoryId, target.topic.topicName)
-                                }, true))
-                            }
-                            is RecentFeedItem.Unexplored -> {
-                                add(Triple("Write about it", {
-                                    navController.navigate(
-                                        CurioRoutes.captureFor(target.topic.categoryId.routeSlug, target.topic.topicName)
-                                    ) { launchSingleTop = true }
-                                }, false))
-                            }
-                            is RecentFeedItem.SavedEntry -> {
-                                add(Triple("Open saved entry", {
-                                    navController.navigate(CurioRoutes.entryDetail(target.entry.id)) { launchSingleTop = true }
-                                }, false))
-                                add(Triple("Write about it", {
-                                    navController.navigate(
-                                        CurioRoutes.captureFor(target.entry.topic.categoryId.routeSlug, target.entry.topic.name)
-                                    ) { launchSingleTop = true }
-                                }, false))
-                            }
-                        }
-                    }
-                    CurioHoldPill(
-                        title = when (target) {
-                            is RecentFeedItem.Explored -> target.topic.topicName
-                            is RecentFeedItem.Unexplored -> target.topic.topicName
-                            is RecentFeedItem.SavedEntry -> target.entry.topic.name
-                        },
-                        actions = actions.map { it.first to it.second },
-                        destructiveIndexes = actions.mapIndexedNotNull { i, t -> if (t.third) i else null }.toSet(),
-                        onDismiss = { recentOption = null }
-                    )
-                }
+                // v3xx — the recents long-press MENU renders at the screen
+                // level (sibling of the page background, below): the picker's
+                // anchored radial menu pops in AT the held spot instead of a
+                // centered dialog. Tap = topic; hold = write / open-entry /
+                // remove.
 
                 // Add breathing room before the bottom card / nav bar
                 Spacer(Modifier.height(12.dp))
@@ -1459,6 +1442,98 @@ fun HomeScreen(navController: NavController) {
                     avatarPath = profileAvatarPath
                 )
             }
+        }
+    }
+
+    // v3xx — the recents long-press MENU (the category picker's anchored
+    // radial menu): renders as a top-level sibling so its full-screen scrim
+    // floats over the page. Built from the held [recentOption]; actions pop
+    // in at the finger position (see the recents rows above).
+    recentOption?.let { target ->
+        val holdActions = buildList {
+            when (target) {
+                is RecentFeedItem.Explored -> {
+                    add(
+                        HoldAction(
+                            CurioIcons.Edit,
+                            "Write about it",
+                            MaterialTheme.colorScheme.secondaryContainer,
+                            MaterialTheme.colorScheme.onSecondaryContainer,
+                            {
+                                navController.navigate(
+                                    CurioRoutes.captureFor(target.topic.categoryId.routeSlug, target.topic.topicName)
+                                ) { launchSingleTop = true }
+                            }
+                        )
+                    )
+                    add(
+                        HoldAction(
+                            CurioIcons.Delete,
+                            "Remove from Recents",
+                            MaterialTheme.colorScheme.errorContainer,
+                            MaterialTheme.colorScheme.onErrorContainer,
+                            {
+                                ExploreSessionStore.removeExplored(context, target.topic.categoryId, target.topic.topicName)
+                            }
+                        )
+                    )
+                }
+                is RecentFeedItem.Unexplored -> {
+                    add(
+                        HoldAction(
+                            CurioIcons.Edit,
+                            "Write about it",
+                            MaterialTheme.colorScheme.secondaryContainer,
+                            MaterialTheme.colorScheme.onSecondaryContainer,
+                            {
+                                navController.navigate(
+                                    CurioRoutes.captureFor(target.topic.categoryId.routeSlug, target.topic.topicName)
+                                ) { launchSingleTop = true }
+                            }
+                        )
+                    )
+                }
+                is RecentFeedItem.SavedEntry -> {
+                    add(
+                        HoldAction(
+                            CurioIcons.OpenInNew,
+                            "Open saved entry",
+                            MaterialTheme.colorScheme.primaryContainer,
+                            MaterialTheme.colorScheme.onPrimaryContainer,
+                            {
+                                navController.navigate(CurioRoutes.entryDetail(target.entry.id)) { launchSingleTop = true }
+                            }
+                        )
+                    )
+                    add(
+                        HoldAction(
+                            CurioIcons.Edit,
+                            "Write about it",
+                            MaterialTheme.colorScheme.secondaryContainer,
+                            MaterialTheme.colorScheme.onSecondaryContainer,
+                            {
+                                navController.navigate(
+                                    CurioRoutes.captureFor(target.entry.topic.categoryId.routeSlug, target.entry.topic.name)
+                                ) { launchSingleTop = true }
+                            }
+                        )
+                    )
+                }
+            }
+        }
+        if (holdActions.isNotEmpty()) {
+            RadialHoldMenuOverlay(
+                anchor = recentOptionAnchor ?: androidx.compose.ui.geometry.Offset.Zero,
+                actions = holdActions,
+                cursor = recentCursor,
+                endPos = recentEnd,
+                onCancel = {
+                    recentOption = null
+                    recentOptionAnchor = null
+                    recentCursor = null
+                    recentEnd = null
+                }
+            )
         }
     }
 
@@ -1869,7 +1944,8 @@ private fun PinnedTopicRow(
 private fun RecentEntryRow(
     entry: CurioEntry,
     onClick: () -> Unit,
-    onLongClick: (() -> Unit)? = null
+    // v3xx — the picker's radial hold session (menu opens at the finger).
+    hold: HoldSession? = null
 ) {
     val cat = CurioCategories.byId(entry.topic.categoryId)
     // Solid category-tinted card in light mode — matches the recents topic
@@ -1883,7 +1959,8 @@ private fun RecentEntryRow(
             // stays at the TOP EDGE only (curioGlassEdge) — the full-pill
             // inner glow is gone.
             .curioGlassEdge(RoundedCornerShape(20.dp))
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+            .radialHoldMenu(hold)
+            .combinedClickable(onClick = onClick),
         shape = RoundedCornerShape(20.dp),
         color = if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerLow else cat.categorySurface(),
         shadowElevation = 2.dp
@@ -3023,7 +3100,8 @@ private fun ExploreTopicRow(
     subtitle: String,
     onClick: () -> Unit,
     tag: String? = null,
-    onLongClick: (() -> Unit)? = null
+    // v3xx — the picker's radial hold session (menu opens at the finger).
+    hold: HoldSession? = null
 ) {
     val accent = category.themedAccent()
     // Solid category-tinted card in light mode — the recents topics wear a
@@ -3039,8 +3117,10 @@ private fun ExploreTopicRow(
             // catch stays at the TOP EDGE only (curioGlassEdge) — the
             // full-pill inner glow is gone.
             .curioGlassEdge(rowShape)
-            // v3xx — hold the row for more actions (write / remove).
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+            // v3xx — hold the row for more actions (write / remove): the
+            // anchored radial menu, opened at the held spot.
+            .radialHoldMenu(hold)
+            .combinedClickable(onClick = onClick),
         shape = rowShape,
         color = if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerLow else category.categorySurface(),
         // v27u — recents rows sit on a soft 2dp lift.

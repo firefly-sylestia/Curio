@@ -718,13 +718,11 @@ fun RichTextEditor(
         )
         tfv = styled
         onRichTextChange(styled.text, extractRichSpans(styled.annotatedString))
-        // Apply the format you just used to the selection to the NEXT text
-        // typed, so "make this bold, then keep typing" works.
-        when (flag) {
-            RichFlag.BOLD -> pendingBold = add
-            RichFlag.ITALIC -> pendingItalic = add
-            RichFlag.HIGHLIGHT -> pendingHighlight = add
-        }
+        // v3xx — applying a format to a SELECTION is one-shot: the tool
+        // turns off afterwards (no sticky arm), so the toolbar never stays
+        // lit after a single change. Tapping a tool with a collapsed caret
+        // still arms it for the next characters typed (see the collapsed
+        // branch above).
     }
 
     /** Applies the picked [targetSp] to the selection (if any) and arms it. */
@@ -744,9 +742,12 @@ fun RichTextEditor(
             )
             tfv = styled
             onRichTextChange(styled.text, extractRichSpans(styled.annotatedString))
+            // v3xx — size applied to a SELECTION is one-shot: no arm, so the
+            // size tool doesn't stay lit after a single change.
+            return
         }
-        // Picking the field default un-arms; any other size stays armed so
-        // the next characters typed carry it (the icon stays lit).
+        // No selection — picking a size arms it for the next typed
+        // characters; picking the field default un-arms.
         pendingSizeSp = if (targetSp == BASE_FONT_SP) null else targetSp
     }
 

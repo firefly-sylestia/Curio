@@ -812,6 +812,48 @@ app/src/main/java/com/curio/app/
   `shadowElevation` blur behind the TILTED cream print read as a
   "background showing behind the strip" (preview AND export); the tape +
   tilt keep the scrapbook depth. Other styles keep the shadow.
+- **v3xx23 — text history everywhere + bottom-sheet/tree browser + pin
+  fix; Home anchored hold menu; keyboard-aware full-screen editors;
+  one-shot rich-text tools (user follow-up 2026-09-08).** (1) **Text
+  history now covers every field** (TextHistory.kt + TopicShareCard.kt):
+  the share-card TITLE joins the captured fields (`editedTitle ?: ""` —
+  blank skips) alongside quick fact / custom fact / chapter review /
+  quote / photo caption; the chapter-note Enlarge editor (TopicRevealScreen
+  `noteEditorChapter`) gained a `TextHistoryPill` in its header +
+  `rememberTextHistoryCapture` + a `TextHistoryBrowser` that restores into
+  the same AppPreferences slot. The pill sits in the host headers which
+  now `imePadding()` above the keyboard. (2) **Dedupe + move-to-top**
+  (`TextHistoryStore.record`): a repeat of an OLDER entry no longer stacks
+  a duplicate — the existing entry MOVES to the top with a fresh ts
+  (pinned rides along); exact repeats of the field's latest snapshot still
+  skip. (3) **Browser = ModalBottomSheet** (was a centered Dialog) with a
+  drag handle + a **List / Tree toggle**: Tree groups snapshots into
+  `HistoryBranch`es keyed on shared opening paragraphs (`splitParagraphs` /
+  `commonPrefixLen`) — the trunk renders once, each version node shows
+  only its CHANGED paragraphs (removed struck through, added in
+  semi-bold) behind a small connector; List mode is the old feed. (4)
+  **PIN FIX** — `HistoryRowAction(e.pinned, e.pinned, …)` disabled the
+  pin on UNPINNED entries (only unpin ever worked): now `enabled = true`
+  so any snapshot can be pinned. (5) **Home hold menu** — the recents
+  rows (`ExploreTopicRow` / `RecentEntryRow`) now take `hold:
+  HoldSession?` and attach `radialHoldMenu` (the category picker's
+  gesture: real press position, scroll-cancel, long-press timer) before
+  `combinedClickable`; the old centered `CurioHoldPill` is replaced by
+  `RadialHoldMenuOverlay` rendered at the SCREEN level (sibling of the
+  page background — a fillMaxSize scrim can't live inside the scroll
+  flow), anchored at the held spot with Edit / Open-saved-entry / Remove
+  HoldActions. `RadialHoldMenuOverlay` + `HoldAction` became public for
+  this. (6) **Keyboard-aware full-screen editors** — the share-card
+  full-screen editor root, the Enlarge writing sheet and the chapter-note
+  Enlarge dialog all got `imePadding()` on their root Column/Box (content
+  lifts above the keyboard; the card re-zooms into the visible space)
+  and the text area is now a `weight(1f).verticalScroll` wrapper around
+  the RichTextEditor (weight inside a scrollable Column is illegal, so
+  the editor itself lost its weight). (7) **One-shot rich-text tools**
+  (RichTextEditor.kt, shared by the capture formats): applying B/I/
+  highlight/size to a SELECTION no longer arms the sticky `pending*`
+  flags (the toolbar never stays lit after one change); tapping a tool
+  with a collapsed caret still arms it for the next typed characters.
 - **v3xx22 — CI fix + dark-mode sheet icons + full series UI (user
   follow-up).** (1) **CI fix** (CabinetShelves.kt — the pasted
   `compileDebug/ReleaseKotlin` failure): the seven shelf-art composables
