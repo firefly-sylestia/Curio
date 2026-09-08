@@ -1,6 +1,46 @@
 # Prompt Log — current request
+## Request (2026-09-08, in progress — share-card smart fit refinements)
 
-## Request (2026-09-08, in progress — liked-media cover cache + Cabinet Everything rework)
+**Request (pending-prompt slot):** "the spark pill smart fit is better,
+but it still doesn't consider the CATEGORY ICON — it places [the title]
+over it sometimes; same as the title fix, add one for the QUICK FACT box
+as well — it auto-moves to a proper place; make its height MAXIMUM always
+with longer text — not just text-size decrease but HEIGHT increase in
+accordance with the bottom area; there's a height glitch — even with
+plenty of space below the height still doesn't expand in smaller texts
+when I want it to expand more, which it definitely can (and the text can
+too) — fix it; the footer and the box always have plenty of space yet the
+footers moved down even though the quick fact box is nowhere near (I
+meant the texts) — fix it; make the footers even smaller and let them
+stay at their place; the footer text and the inline editor are inaccurate
+again — the cursor and the text position are wrong/misleading, same for
+the full-screen card editor; sometimes the box outline misleads too —
+fix it."
+
+**What shipped (committed — pushed with this batch):**
+1. **Height-first smart fit** (`autoFitShape`) — the fact box now grows
+   toward the style's FULL budget cap whenever the text exceeds the box's
+   natural capacity, and the TEXT sizes to fit the grown box. The old
+   text-first solver shrank the type while the box sat at its natural
+   height, so a longer fact never looked taller even with room below
+   ("height should expand"). The no-clip guarantee holds (S² ≤ base·h/eff
+   down to the hard floor).
+2. **Fact-box auto-move** (`resetFact`) — a quick-fact box the user
+   DRAGGED onto the title / info rows / favorites strip, or off the card
+   edge, is RESET to its natural spot on the same sparkle tap (the
+   title-reset twin).
+3. **Badge guard** — when the category pill's rect isn't measured yet
+   (first composition), the title-lift cap falls back to the title's own
+   natural top, so the sparkle can never shove the title up over the
+   category icon (an unbounded cap did).
+4. **Footers smaller** — the "via Curio" credit text drops to 8sp (was
+   10sp) at lower alpha, and the bulb mark shrinks; footers stay fixed in
+   place.
+5. Not addressed this round (deep, separate): the inline / full-screen
+   editor caret-vs-text alignment and the box-outline fidelity — both
+   follow from the bounds-hub metrics and need their own pass.
+
+## Request (2026-09-08, completed + pushed `97a2b63e` / CI fix `3d9b9d94` — liked-media cover cache + Cabinet Everything rework)
 
 **Request (pending-prompt slot):** "for liked / saved topics create a
 separate data cache that saves in the app as a separate load and opens

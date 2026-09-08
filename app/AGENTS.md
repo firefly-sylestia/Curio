@@ -812,6 +812,29 @@ app/src/main/java/com/curio/app/
   `shadowElevation` blur behind the TILTED cream print read as a
   "background showing behind the strip" (preview AND export); the tape +
   tilt keep the scrapbook depth. Other styles keep the shadow.
+- **v3xx25 — share-card smart fit refinements (user follow-up
+  2026-09-08).** (1) **HEIGHT-FIRST fit** (`autoFitShape`) — the fact box
+  now grows toward the style's FULL `factFitBudget` cap whenever
+  `autoFitGrowByWrap` > 1 and the TEXT sizes to fit the grown box
+  (S² ≤ base·h/eff, floored at `FactFitHardFloor`); the old text-first
+  solver kept the box at its natural height and only shrank the type, so
+  a longer fact never LOOKED taller even when the card had room below
+  ("make its height maximum with longer text… height increase in
+  accordance with the bottom area"). The no-clip guarantee holds. (2)
+  **Fact-box auto-move** (`resetFact` on `ShareAutoLayoutPlan` +
+  `runAutoLayout` commit) — a quick-fact box the user manually dragged
+  (`factDx`/`factDy` ≠ 0) ONTO the title / info rows / favorites strip, or
+  off the card edge, is RESET to its natural spot on the sparkle tap
+  (the title-reset twin). (3) **Badge guard** — when the category pill's
+  measured rect is Zero (first composition), `titleLiftCap` falls back to
+  the title's own natural top `(t.top - 4dp)` instead of unbounded, so
+  the sparkle can never shove the title up over the category icon. (4)
+  **Footers smaller** — the "via Curio" credit text drops 10sp → 8sp at
+  lower alpha (both the rose-bulb and white-credit footers) and the bulb
+  mark 12dp → 10dp; the footers stay FIXED (only the author/year info
+  rows move). Not addressed this round: the inline/full-screen editor
+  caret-vs-text alignment and the fact-box outline fidelity (both follow
+  from the bounds-hub metrics — separate pass).
 - **v3xx24 — liked-media cover CACHE + Cabinet Everything rework (user
   direction 2026-09-08).** (1) **`CoverCache.kt`** — a separate,
   always-on cover store for liked books/albums/series: the resolved URL

@@ -950,7 +950,7 @@ private fun factWrapFactor(style: ShareCardStyle): Float = when (style) {
  * logic.
  */
 private fun autoFitShape(style: ShareCardStyle, aspect: ShareCardAspect, wrapLines: Int): ShareAutoFitDelta {
-    val (maxHeightFrac, minTextScale) = factFitBudget(style, aspect)
+    val (maxHeightFrac, _) = factFitBudget(style, aspect)
     val grow = autoFitGrowByWrap(wrapLines)
     if (grow <= 1f) return ShareAutoFitDelta()
     val base = factBoxBaseLines(style, aspect).toFloat()
@@ -963,18 +963,17 @@ private fun autoFitShape(style: ShareCardStyle, aspect: ShareCardAspect, wrapLin
     fun fitScaleFor(h: Float): Float =
         (kotlin.math.sqrt(base * h / eff.coerceAtLeast(1f)) * 0.92f)
             .coerceIn(FactFitHardFloor, 1f)
-    val inv = 1f / grow
-    if (inv >= minTextScale) {
-        // The text can absorb the whole length at the box's natural height
-        // — but never larger than what fits (the curve's buckets overshoot
-        // on narrow panes, so clamp to the real fit scale too).
-        return ShareAutoFitDelta(heightFrac = 1f, widthFrac = 1f, textScale = minOf(inv, fitScaleFor(1f)))
-    }
-    // Text floor reached → grow the box to the budget cap and shrink the
-    // text just enough that the fact ALWAYS fits (no ellipsis), even below
-    // the design floor when the cap can't hold the text at it.
-    val h = (grow * minTextScale).coerceIn(1f, maxHeightFrac)
-    val s = minOf(minTextScale, fitScaleFor(h)).coerceIn(FactFitHardFloor, minTextScale)
+    // v3xx — HEIGHT-FIRST (user direction 2026-09-08): the box grows toward
+    // the style's FULL budget cap whenever the fact exceeds the box's
+    // natural capacity, and the TEXT sizes to fit the grown box. The old
+    // text-first solver shrank the type while the box sat at its natural
+    // height, so a longer fact never LOOKED taller even when the card had
+    // room below ("not just text-size decrease but also height increase in
+    // accordance with the bottom area"; the height wouldn't expand even
+    // with plenty of space below). The fit scale still guarantees the whole
+    // fact fits the grown box (no clip, no overlap), down to the hard floor.
+    val h = grow.coerceIn(1f, maxHeightFrac)
+    val s = fitScaleFor(h)
     return ShareAutoFitDelta(heightFrac = h, widthFrac = 1f, textScale = s)
 }
 
@@ -1116,6 +1115,13 @@ private fun ShareCardPalette.frostInk(): Color {
     // title goes all the way back).
     val resetTitleY: Boolean = false,
 
+    // v3xx — TRUE when the QUICK-FACT BOX was manually dragged onto the
+    // title / info rows / favorites strip, or off the card: the sparkle
+    // RESETS its manual offsets back to the natural spot (the title-reset
+    // twin for the fact) — the box auto-moves to a proper place on the
+    // same tap.
+    val resetFact: Boolean = false,
+
     // true → switch the CARD itself to 9:16 (only offered when the current
     // aspect is 3:4 and the text still overflows a fully-fitted 3:4 card).
     val tall: Boolean = false
@@ -1252,9 +1258,18 @@ private fun autoLayoutPlan(
     // (the shortfall falls back to pushing the fact down instead).
     val badgeOverFact = pokeAbove(b, f)
     val badgeOverMeta = pokeAbove(b, m)
-    val titleLiftCap = if (b.width > 0f && b.height > 0f && t.width > 0f && t.height > 0f)
-        (t.top - b.bottom - 4f).coerceAtLeast(0f)
-    else Float.MAX_VALUE
+    val titleLiftCap = when {
+        b.width > 0f && b.height > 0f && t.width > 0f && t.height > 0f ->
+            (t.top - b.bottom - 4f).coerceAtLeast(0f)
+        // v3xx — the badge rect isn't measured yet (first composition): an
+        // unbounded cap let the sparkle shove the title up over the
+        // category icon on that first tap. The title may never rise above
+        // its own natural top — the badge zone lives above it, so capping
+        // the lift at the title's current top keeps the icon clear and the
+        // shortfall falls back to pushing the fact down instead.
+        t.width > 0f && t.height > 0f -> (t.top - 4f).coerceAtLeast(0f)
+        else -> Float.MAX_VALUE
+    }
     // The lift only "spends" itself on the MEASURED title collision — the
     // size lift is prospective (the new box hasn't grown yet), so it must
     // not absorb a fav/badge overlap that only a fact push can fix.
@@ -1308,6 +1323,23 @@ private fun autoLayoutPlan(
     // badge covering the strip wins: it must be pushed clear, never
     // snapped up INTO the pill).
     val collisionMetaLift = if (badgeOverMeta > 0f) badgeOverMeta.coerceAtMost(40f) else metaSnapLift
+
+    // v3xx — a QUICK-FACT BOX the user DRAGGED onto the title / info rows /
+    // favorites strip, or off the card edge, is reset to its natural spot
+    // on the sparkle tap (the title-reset twin): the manual offsets zero
+    // out and the fit re-sizes the box into that spot. Only fires for a
+    // MANUALLY moved box (the fit never yanks a box the user placed by
+    // choice) and only when there's a real collision to repair.
+    val manualFact = move.factDx != 0f || move.factDy != 0f
+    val factHangsOff = manualFact && f.width > 0f && f.height > 0f &&
+        (f.left < 0f || f.right > cardW || f.bottom > cardH)
+    val factOverTitle = manualFact && t.width > 0f && t.height > 0f &&
+        f.width > 0f && f.height > 0f && pokeAbove(t, f) > 0f
+    val factOverMeta = manualFact && m.width > 0f && m.height > 0f &&
+        f.width > 0f && f.height > 0f && pokeAbove(m, f) > 0f
+    val factOverFav = manualFact && v.width > 0f && v.height > 0f &&
+        f.width > 0f && f.height > 0f && pokeAbove(v, f) > 0f
+    val resetFact = manualFact && (factHangsOff || factOverTitle || factOverMeta || factOverFav)
 
     // v3xx — anything that drifted OUTSIDE the card gets pulled back inside
     // on the same tap (never re-centred — just enough to clear the edge).
@@ -3099,12 +3131,12 @@ private fun VinylCard(
                     drawLine(roseDusty.copy(alpha = 0.20f), Offset.Zero, Offset(size.width, 0f))
                 }
                 Spacer(Modifier.height(4.dp))
-                CurioIcon(name = CurioIcons.Lightbulb, tint = roseDusty.copy(alpha = 0.35f), size = 12.dp)
+                CurioIcon(name = CurioIcons.Lightbulb, tint = roseDusty.copy(alpha = 0.35f), size = 10.dp)
                 Spacer(Modifier.height(2.dp))
                 Text(
                     if (sharerName.isNotBlank()) "$sharerName \u00b7 via Curio" else "via Curio",
-                    style = TextStyle(fontFamily = GeomFontFamily, fontSize = 10.sp,
-                        fontWeight = FontWeight.SemiBold, color = roseDusty.copy(alpha = 0.65f)),
+                    style = TextStyle(fontFamily = GeomFontFamily, fontSize = 8.sp,
+                        fontWeight = FontWeight.SemiBold, color = roseDusty.copy(alpha = 0.55f)),
                     maxLines = 1, overflow = TextOverflow.Ellipsis
                 )
             }
@@ -4007,8 +4039,8 @@ private fun CollageCard(
             // Footer credit — FIXED: does NOT move (only the author/year row moves)
             Text(
                 if (sharerName.isNotBlank()) "$sharerName \u00b7 via Curio" else "via Curio",
-                style = TextStyle(fontFamily = GeomFontFamily, fontSize = 10.sp,
-                    fontWeight = FontWeight.SemiBold, letterSpacing = 0.5.sp, color = Color.White.copy(alpha = 0.66f)),
+                style = TextStyle(fontFamily = GeomFontFamily, fontSize = 8.sp,
+                    fontWeight = FontWeight.SemiBold, letterSpacing = 0.5.sp, color = Color.White.copy(alpha = 0.55f)),
                 maxLines = 1, overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -9339,6 +9371,9 @@ fun TopicShareSheet(
             // v3xx — a dragged-over title is RESET to its natural spot on
             // the same tap (the manual vertical offset is zeroed).
             val resetTitleChanges = plan.resetTitleY
+            // v3xx — a dragged quick-fact BOX is RESET to its natural spot
+            // on the same tap (manual offsets zeroed, like the title reset).
+            val resetFactChanges = plan.resetFact
             // v3xx — out-of-card clamp changes (anything that hung off the
             // card edge is pulled back inside on the same tap).
             val fixChanges = plan.fixTitleX != 0f || plan.fixTitleY != 0f ||
@@ -9348,7 +9383,8 @@ fun TopicShareSheet(
                 plan.fixBadgeX != 0f || plan.fixBadgeY != 0f
             if (wantsTall || hChanges || sChanges || fmtChanges || dropCapChanges ||
                 titleLiftChanges || factLiftChanges || metaLiftChanges || favLiftChanges ||
-                badgeLiftChanges || shrinkChanges || resetTitleChanges || fixChanges
+                badgeLiftChanges || shrinkChanges || resetTitleChanges || resetFactChanges ||
+                fixChanges
             ) {
                 updateMove(move.copy(
                     // v3xx — a residual overlap shrinks the fact box on the
@@ -9358,8 +9394,12 @@ fun TopicShareSheet(
                         (if (shrinkChanges && measuredFact.height > 0f)
                             (1f - (plan.factShrinkDp / measuredFact.height).coerceIn(0f, 0.4f)) else 1f),
                     factScale = if (s > 0f) s.coerceIn(0.5f, 2f) else move.factScale,
-                    factDy = move.factDy + plan.factLift.coerceIn(0f, 72f) + plan.fixFactY,
-                    factDx = move.factDx + plan.fixFactX,
+                    // v3xx — a dragged fact box is RESET to its natural spot
+                    // on the sparkle tap (manual offsets zeroed — the
+                    // title-reset twin).
+                    factDy = if (plan.resetFact) 0f
+                    else move.factDy + plan.factLift.coerceIn(0f, 72f) + plan.fixFactY,
+                    factDx = if (plan.resetFact) 0f else move.factDx + plan.fixFactX,
                     factFormat = plan.format ?: move.factFormat,
                     factDropCap = plan.factDropCap ?: move.factDropCap,
                     titleLift = plan.titleLift.coerceIn(0f, 96f),
