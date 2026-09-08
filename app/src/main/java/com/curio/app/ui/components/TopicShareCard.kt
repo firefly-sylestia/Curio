@@ -2263,7 +2263,15 @@ fun TopicShareCard(
                 val pFilterV = move.polaroidFilter.coerceIn(0, 4)
                 val lookV = polaroidLooks[pStyleV]
                 val basePW = (cwV * 0.34f * move.polaroidScale).coerceIn(cwV * 0.20f, cwV * 0.44f)
-                val capH = basePW * 0.20f
+                // v3xx — the caption band must NEVER clip the handwritten
+                // name: the caption sits 6dp below the photo with a 11–15sp
+                // line (×1.2), so the band is the max of the proportional
+                // look (20% of print width) and that FIXED need (~19–24dp).
+                // The old purely-proportional band shrank on narrow/small
+                // prints and the caption spilled past the print's bottom
+                // edge — "cut from bottom".
+                val capFont = (basePW * 0.065f).coerceIn(11f, 15f)
+                val capH = maxOf(basePW * 0.20f, 6f + capFont * 1.2f)
                 var pW = basePW
                 var pH = basePW * 1.18f
                 if (userPhoto != null && userPhoto.width > 0 && userPhoto.height > 0) {
@@ -2278,7 +2286,10 @@ fun TopicShareCard(
                 }
                 val photoH = (pH - capH).coerceAtLeast(pW * 0.4f)
                 val pX = (cwV * 0.60f + move.polaroidDx).coerceIn(0f, (cwV - pW - 6f).coerceAtLeast(0f))
-                val pY = (chV * 0.30f + move.polaroidDy).coerceIn(0f, (chV - pH - 6f).coerceAtLeast(0f))
+                // v3xx — 5dp top inset: the washi tape pokes 5dp ABOVE the
+                // frame, so a print clamped to y=0 had its tape sliced by
+                // the card's rounded clip (same "cut" family as the caption).
+                val pY = (chV * 0.30f + move.polaroidDy).coerceIn(5f, (chV - pH - 6f).coerceAtLeast(5f))
                 PolaroidPrint(
                     pW = pW, pH = pH, pX = pX, pY = pY, photoH = photoH,
                     look = lookV, pStyle = pStyleV, pFilter = pFilterV,

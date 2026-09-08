@@ -253,11 +253,19 @@ fun EntryDetailScreen(
     val authority = remember { "${context.packageName}.fileprovider" }
     // Observe the repository flow so edits (mood-board re-save) and deletes
     // reflect instantly when this screen regains focus.
+    // v3xx — TARGETED row observer: the old code collected the WHOLE
+    // captures table and linear-scanned for this id on every emission
+    // (plus rebuilding all sample entries on a miss) — a full-table
+    // decode per DB change that lagged opening saved entries. The DAO
+    // now queries the single row by primary key; the sample fallback is
+    // resolved once, before the flow (it never changes while open).
     val entry by produceState<CurioEntry?>(initialValue = null, entryId) {
+        val sampleFallback = runCatching {
+            TopicCatalog.sampleEntries().find { it.id == entryId }
+        }.getOrNull()
         runCatching {
-            CurioRepositoryHolder.repo.observeAll().collect { entries ->
-                value = entries.find { it.id == entryId }
-                    ?: TopicCatalog.sampleEntries().find { it.id == entryId }
+            CurioRepositoryHolder.repo.observeById(entryId).collect { e ->
+                value = e ?: sampleFallback
             }
         }
     }

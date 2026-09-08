@@ -24,6 +24,14 @@ interface CaptureDao {
     @Query("SELECT * FROM captures WHERE id = :id AND deletedAt IS NULL")
     suspend fun getById(id: String): CaptureEntity?
 
+    // v3xx — targeted row observer for the entry-detail screen: the detail
+    // page used to collect the WHOLE table and linear-scan for its id on
+    // every emission (plus rebuilding all sample entries on a miss) — a
+    // full-table decode + scan per DB change. Observing the single row by
+    // primary key keeps the open-edit-reflect cycle O(1).
+    @Query("SELECT * FROM captures WHERE id = :id AND deletedAt IS NULL")
+    fun getByIdFlow(id: String): Flow<CaptureEntity?>
+
     @Query("SELECT * FROM captures WHERE deletedAt IS NULL ORDER BY capturedAtMillis DESC")
     suspend fun getAll(): List<CaptureEntity>
 

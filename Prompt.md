@@ -442,14 +442,30 @@ for the Home glass toolbar).
    so the text colors stay visible, and its height should extend to fit the
    header content.
 
-### PENDING — next prompt (polaroid cut + Cabinet stability/perf + CI log)
-**Status:** the CI part of this prompt is RESOLVED by the experiments-removal
-batch (the missing `mutableStateOf`/`setValue` imports in RecentScreen.kt
-that broke `optionItem`'s `let` + the `when` exhaustive chain, and the
-`scope.launch` for `softDeleteByIds` in CabinetV2Content — all verified in
-the tree). The remaining work — the polaroid cut off the button on other
-card styles, the Cabinet screen's first-open lag/heat, and the saved-entry
-open lag — is the next task after this push.
+### DONE — next prompt (polaroid cut + Cabinet stability/perf + CI log)
+**Status:** COMPLETE — pushed with the 4e6d184c batch (the CI part: missing
+`mutableStateOf`/`setValue` imports in RecentScreen.kt + the existing
+`scope.launch` for `softDeleteByIds`). The three remaining issues were
+fixed in this follow-up commit:
+1. **Polaroid cut off the button/bottom on other styles** — the caption
+   band was proportional to print width (`capH = basePW * 0.20f`) but the
+   handwritten name needs a FIXED ~19–24dp (6dp offset + 11–15sp line ×
+   1.2); on narrow/small prints the caption spilled past the print's
+   bottom edge and the card's rounded clip sliced it. Fix: `capH =
+   maxOf(basePW * 0.20f, 6f + capFont * 1.2f)` + a 5dp top inset so the
+   washi tape (pokes 5dp above the frame) isn't clipped at the card edge.
+2. **Cabinet first-open lag/heat** — `CurioEntryCard`'s
+   `remember(headerGradient)` keyed on a FRESH `List<Color>` instance
+   every recomposition, so the cache never hit and every card re-
+   allocated its Brush per recomposition (grid-settle + scroll churn = the
+   jank/heat). Fix: key the remember on the gradient's two colors (value
+   types) — stable per accent/theme.
+3. **Saved-entry open lag** — `EntryDetailScreen` collected the WHOLE
+   captures table and linear-scanned for its id on every DB emission
+   (plus rebuilding ALL sample entries on a miss). Fix: new
+   `CaptureDao.getByIdFlow(id)` + `CaptureRepository.observeById(id)` —
+   Room observes the single row by primary key; the sample fallback is
+   resolved once before the flow.
 
 **Raw user text (preserved):**
 

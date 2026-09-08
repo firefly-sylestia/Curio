@@ -74,6 +74,17 @@ class CaptureRepository(
     suspend fun getById(id: String): CurioEntry? =
         dao.getById(id)?.toEntry()
 
+    /**
+     * v3xx — observe ONE capture by ID as a reactive [CurioEntry] flow.
+     * The entry-detail screen uses this instead of collecting the whole
+     * table + linear scan, so opening a saved entry (and reflecting edits
+     * while it's open) is O(1) per emission instead of a full-table decode.
+     */
+    fun observeById(id: String): Flow<CurioEntry?> =
+        dao.getByIdFlow(id)
+            .map { it?.toEntry() }
+            .flowOn(Dispatchers.Default)
+
     /** Look up the cached topic data for an entry's topic ID. Returns null
      *  if the topic was never cached (e.g. legacy entries). */
     suspend fun getCachedTopic(topicId: String): CurioTopic? {
