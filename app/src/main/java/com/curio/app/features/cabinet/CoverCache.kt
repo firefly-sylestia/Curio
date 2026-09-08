@@ -103,8 +103,10 @@ object CabinetCoverCache {
                     ((((best shr 4) and 0xF) shl 4) shl 8) or
                     ((best and 0xF) shl 4)
             }
-            return 0xFF000000.toInt() or
-                ((rSum / total) shl 16) or ((gSum / total) shl 8) or (bSum / total)
+            val avgR = (rSum / total).toInt()
+            val avgG = (gSum / total).toInt()
+            val avgB = (bSum / total).toInt()
+            return 0xFF000000.toInt() or (avgR shl 16) or (avgG shl 8) or avgB
         } finally {
             bmp.recycle()
         }

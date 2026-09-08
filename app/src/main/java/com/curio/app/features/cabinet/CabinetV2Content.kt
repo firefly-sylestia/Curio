@@ -1656,13 +1656,16 @@ private fun V2EverythingCard(
                     items(likes, key = { "${it.kind.name}|${it.name}" }) { item ->
                         val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
                         // v3xx — the preview wears each cover's OWN color too
-                        // (dominant color extracted from the cached art).
+                        // (dominant color extracted from the cached art). The
+                        // category fallback is computed OUTSIDE the remember
+                        // (themedAccent is @Composable).
+                        val fallbackAccent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
                         val accent = remember(item.name, item.kind, CabinetCoverCache.version.intValue) {
                             CabinetCoverCache.dominantCoverColor(
                                 context,
                                 CabinetCoverCache.CoverKind.valueOf(item.kind.name),
                                 item.name,
-                                cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+                                fallbackAccent
                             )
                         }
                         Box(
