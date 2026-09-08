@@ -115,7 +115,11 @@ val builtInShelves: List<V2Shelf> = listOf(
     V2Shelf(
         id = V2ShelfId.COMPLETED,
         title = "Completed",
-        icon = CurioIcons.TaskAlt,
+        // v3xx — the old task_alt glyph read squished inside the 20dp frosted
+        // tile (its wide check-circle ink barely filled the box); the plain
+        // Check mark matches the JSX's "completed: icon: check" and renders
+        // crisp at tile size next to the filled sibling glyphs.
+        icon = CurioIcons.Check,
         tone = V2ShelfTone(light = 0xFFCFE4D5, dark = 0xFF385345),
         art = V2ShelfArtType.MOUNTAIN,
         seededCollectionId = "shelf:completed"
@@ -168,7 +172,10 @@ fun V2ShelfCard(
     count: Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onLongPress: (() -> Unit)? = null
+    onLongPress: (() -> Unit)? = null,
+    /** v3xx — the ⋮ now WORKS: tapping it opens the same rename/delete pill
+     *  the long-press opens (the dots used to be a dead ornament). */
+    onMoreClick: (() -> Unit)? = null
 ) {
     val dark = isCurioDarkTheme()
     val ink = if (dark) Color(0xFFF3E9E2) else Color(0xFF553E42)
@@ -205,13 +212,27 @@ fun V2ShelfCard(
                     )
                 }
                 Spacer(Modifier.weight(1f))
-                if (onLongPress != null) {
-                    CurioIcon(
-                        name = CurioIcons.MoreVert,
-                        contentDescription = "Rename or delete",
-                        tint = ink.copy(alpha = 0.66f),
-                        size = 20.dp
-                    )
+                if (onLongPress != null || onMoreClick != null) {
+                    // v3xx — a real button (not a dead glyph): tapping the ⋮
+                    // fires onMoreClick (rename/delete pill) without firing
+                    // the card's own open action.
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .combinedClickable(
+                                onClick = { onMoreClick?.invoke() },
+                                onLongClick = onLongPress
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CurioIcon(
+                            name = CurioIcons.MoreVert,
+                            contentDescription = "Rename or delete",
+                            tint = ink.copy(alpha = 0.66f),
+                            size = 20.dp
+                        )
+                    }
                 }
             }
             Spacer(Modifier.height(13.dp))

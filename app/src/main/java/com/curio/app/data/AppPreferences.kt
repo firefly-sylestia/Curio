@@ -68,6 +68,11 @@ object AppPreferences {
     private const val KEY_ALBUM_FETCH_ENABLED = "album_fetch_enabled"    // bool — opt-out, default false
     private const val KEY_SERIES_FETCH_ENABLED = "series_fetch_enabled"  // bool — opt-out, default false
     private const val KEY_SERIES_FAVORITES = "series_favorites"
+    // v3xx — when a book / album / series was LIKED ("kind|name" → epoch
+    // ms). Feeds the Cabinet Everything "Recent" rail with recently liked
+    // media next to recent captures; no reorder info is derivable from the
+    // favorite SETS (unordered), so the timestamps live in their own map.
+    private const val KEY_LIKED_AT = "liked_at"
     private const val KEY_THEME_MODE = "theme_mode"       // "light", "dark", "system" (v81)
     private const val KEY_CUSTOM_TAGLINE = "custom_streak_tagline"
     private const val KEY_LAST_NOTIFIED_UPDATE = "last_notified_update_version"
@@ -329,6 +334,8 @@ object AppPreferences {
         val added = !cur.remove(bookName)
         if (added) cur.add(bookName)
         persistBookFavorites(context, cur)
+        // v3xx — liked timestamp for the Cabinet Everything "Recent" rail.
+        recordLikedAt(context, "book|$bookName", added)
         return added
     }
 
@@ -336,6 +343,33 @@ object AppPreferences {
         val arr = org.json.JSONArray(cur.toList())
         prefs(context).edit().putString(KEY_BOOK_FAVORITES, arr.toString()).apply()
         bookFavoritesState = cur
+    }
+
+    // ── Liked timestamps (v3xx — Cabinet Everything "Recent" rail) ──────
+    // "kind|name" → epoch ms when the user last liked that book / album /
+    // series. Unliking removes the stamp. Reactive so the Cabinet rail
+    // re-sorts the moment a heart is tapped anywhere.
+    fun getLikedAt(context: Context): Map<String, Long> {
+        val raw = prefs(context).getString(KEY_LIKED_AT, null) ?: return emptyMap()
+        return runCatching {
+            val obj = org.json.JSONObject(raw)
+            val out = LinkedHashMap<String, Long>()
+            val keys = obj.keys()
+            while (keys.hasNext()) {
+                val k = keys.next()
+                out[k] = obj.optLong(k, 0L)
+            }
+            out.filterValues { it > 0L }
+        }.getOrDefault(emptyMap())
+    }
+
+    fun recordLikedAt(context: Context, key: String, liked: Boolean) {
+        val cur = getLikedAt(context).toMutableMap()
+        if (liked) cur[key] = System.currentTimeMillis() else cur.remove(key)
+        val obj = org.json.JSONObject()
+        cur.forEach { (k, v) -> obj.put(k, v) }
+        prefs(context).edit().putString(KEY_LIKED_AT, obj.toString()).apply()
+        likedAtState = cur
     }
 
     // ── Series favorites (v350 — heart pick) ────────────────────────────
@@ -357,6 +391,8 @@ object AppPreferences {
         val arr = org.json.JSONArray(cur.toList())
         prefs(context).edit().putString(KEY_SERIES_FAVORITES, arr.toString()).apply()
         seriesFavoritesState = cur
+        // v3xx — liked timestamp for the Cabinet Everything "Recent" rail.
+        recordLikedAt(context, "series|$showName", added)
         return added
     }
 
@@ -731,6 +767,9 @@ object AppPreferences {
         if (!list.remove(trackTitle)) list.add(trackTitle)
         if (list.isEmpty()) cur.remove(albumName) else cur[albumName] = list
         persistAlbumFavoriteTracks(context, cur)
+        // v3xx — an album is "liked" while it has any favorite track; keep
+        // its liked timestamp in step for the Cabinet Everything "Recent" rail.
+        recordLikedAt(context, "album|$albumName", list.isNotEmpty())
         return cur[albumName] ?: emptyList()
     }
 
@@ -1057,6 +1096,10 @@ object AppPreferences {
     // v350 — favorite series (heart pick): show names, reactive like the
     // book favorites. The episode-list sheet heart updates instantly.
     var seriesFavoritesState by mutableStateOf<Set<String>>(emptySet())
+        internal set
+    // v3xx — liked timestamps ("kind|name" → epoch ms) for the Cabinet
+    // Everything "Recent" rail (recently liked books/albums/series).
+    var likedAtState by mutableStateOf<Map<String, Long>>(emptyMap())
         internal set
     // v350 — watched episodes per show: show name → set of "S1E3" keys.
     // Reactive so the episode sheet's toggles + progress update in place.
@@ -1515,6 +1558,7 @@ object AppPreferences {
         bookFavoritesState = getBookFavorites(context)
         seriesFavoritesState = getSeriesFavorites(context)
         seriesWatchedState = getSeriesWatched(context)
+        likedAtState = getLikedAt(context)
         albumFavTracksState = getAlbumFavoriteTracks(context)
         albumFavStripVisibleState = isAlbumFavStripVisible(context)
         albumFavRowsState = isAlbumFavRows(context)

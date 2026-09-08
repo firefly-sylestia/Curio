@@ -812,6 +812,43 @@ app/src/main/java/com/curio/app/
   `shadowElevation` blur behind the TILTED cream print read as a
   "background showing behind the strip" (preview AND export); the tape +
   tilt keep the scrapbook depth. Other styles keep the shadow.
+- **v3xx24 — liked-media cover CACHE + Cabinet Everything rework (user
+  direction 2026-09-08).** (1) **`CoverCache.kt`** — a separate,
+  always-on cover store for liked books/albums/series: the resolved URL
+  is persisted per topic (reusing `bookCoverUrlsState` /
+  `sheetArtUrlsState` so reveal + cards agree) and the IMAGE BYTES
+  download once to `filesDir/cover_cache/<kind>-<name>.img`. An
+  always-on warmer in `CabinetV2Content` resolves every unwarmed liked
+  item on Cabinet open (throttled to 30/recompose); `V2JacketArt` loads
+  the local file FIRST (keyed on `CoverCache.version` so tiles re-check
+  the moment a cover lands) and its live resolve cascades BOTH
+  providers (books iTunes → Open Library, albums iTunes → MusicBrainz,
+  series TVMaze → iTunes) and persists the winner. The liked-tile ⋮
+  opens `V2CoverSourceSheet` — an explicit provider switch that
+  re-resolves, persists and re-caches ("if you didn't like that one").
+  (2) **AppPreferences likedAt** — `KEY_LIKED_AT` ("kind|name" → epoch
+  ms) written by `toggleBookFavorite` / `toggleSeriesFavorite` /
+  `toggleAlbumFavTrack`, feeding the Everything Recent rail. (3)
+  **Everything preview card** — theme-aware (`surfaceContainerHigh`
+  tokens; the hardcoded cream wash is gone), ONE chevron (the duplicate
+  arrow + the '+' slot are removed), and a horizontally SCROLLABLE cover
+  rail of real cached covers (was a fixed 5-slot row). (4) **Everything
+  page** — always `GridCells.Fixed(3)` on phones (the list/grid toggle
+  is deleted — the grid replaced the list; `viewMode` state and
+  `V2ViewTogglePill` are gone); grouped per-kind sections with distinct
+  tiles: `V2MediaTileCard` (BOOK portrait jacket / ALBUM square + vinyl
+  disc / SERIES poster), `V2ReviewTileCard` (ReelNotes get an OUTLINED
+  card: quote mark, star rating, preview), notes/moodboards keep
+  `CurioEntryCard`. `V2FilterRail` gained `available: Set<String>` and
+  only lists types with content; the Recent rail (`V2RecentCell` sealed
+  Entry/Liked) merges recent captures with recently liked media; media
+  sorts by likedAt (Recent) or name (A–Z). (5) **Back handling** —
+  `BackHandler` walks selection → search → open collection / Everything
+  / virtual shelf before leaving the Cabinet. (6) **Collection ⋮** —
+  `V2ShelfCard` gained `onMoreClick` (a real tappable ⋮ button opening
+  the same rename/delete pill); the Completed shelf icon is
+  `CurioIcons.Check` (the task_alt glyph read squished in the frosted
+  tile).
 - **v3xx23 — text history everywhere + bottom-sheet/tree browser + pin
   fix; Home anchored hold menu; keyboard-aware full-screen editors;
   one-shot rich-text tools (user follow-up 2026-09-08).** (1) **Text

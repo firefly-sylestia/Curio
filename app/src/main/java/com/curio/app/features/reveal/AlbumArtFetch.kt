@@ -37,20 +37,29 @@ object AlbumArtFetch {
     /** Tiny in-process memo: albumName|artist → artwork URL ("" = known miss). */
     private val cache = ConcurrentHashMap<String, String>()
 
+    /** The number of resolvable art providers (0 = iTunes, 1 = MusicBrainz). */
+    const val PROVIDER_COUNT = 2
+
     /**
-     * Resolve an album's artwork URL, best-effort. Returns null when neither
-     * provider finds a match (callers show their fallback tile).
+     * Resolve an album's artwork URL, best-effort (provider 0 = iTunes,
+     * 1 = MusicBrainz — the default call cascades iTunes → MusicBrainz).
+     * Returns null when neither provider finds a match (callers show their
+     * fallback tile).
      *
      * @param albumName Album title (topic name), e.g. "Revolver".
      * @param artist    Album artist (topic byline), e.g. "The Beatles".
+     * @param provider  0 = iTunes Search, 1 = MusicBrainz + Cover Art Archive.
      */
-    suspend fun resolveArtworkUrl(albumName: String, artist: String?): String? =
+    suspend fun resolveArtworkUrl(albumName: String, artist: String?, provider: Int = 0): String? =
         withContext(Dispatchers.IO) {
-            val key = "$albumName|${artist.orEmpty()}"
+            val key = "$albumName|${artist.orEmpty()}|p$provider"
             cache[key]?.let { return@withContext it.ifEmpty { null } }
 
             val resolved = runCatching {
-                itunesArtwork(albumName, artist) ?: musicBrainzArtwork(albumName, artist)
+                when (provider) {
+                    1 -> musicBrainzArtwork(albumName, artist)
+                    else -> itunesArtwork(albumName, artist)
+                }
             }.getOrNull()
 
             cache[key] = resolved.orEmpty()

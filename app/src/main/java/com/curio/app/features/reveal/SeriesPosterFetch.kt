@@ -33,21 +33,28 @@ object SeriesPosterFetch {
     /** Tiny in-process memo: show name (without year) → poster URL ("" = miss). */
     private val cache = ConcurrentHashMap<String, String>()
 
+    /** The number of resolvable poster providers (0 = TVMaze, 1 = iTunes). */
+    const val PROVIDER_COUNT = 2
+
     /**
-     * Resolve a series' poster URL, best-effort. [showName] is the topic name
-     * verbatim (e.g. "Seinfeld (1989)"); the year suffix is stripped for the
-     * queries. Returns null when neither provider finds art.
+     * Resolve a series' poster URL, best-effort (provider 0 = TVMaze,
+     * 1 = iTunes — the default call cascades TVMaze → iTunes). [showName] is
+     * the topic name verbatim (e.g. "Seinfeld (1989)"); the year suffix is
+     * stripped for the queries. Returns null when neither provider finds art.
      */
-    suspend fun resolvePosterUrl(showName: String): String? =
+    suspend fun resolvePosterUrl(showName: String, provider: Int = 0): String? =
         withContext(Dispatchers.IO) {
             val title = showName
                 .replace(Regex("""\s*\(\d{4}\)\s*$"""), "")
                 .trim()
-            val key = title
+            val key = "$title|p$provider"
             cache[key]?.let { return@withContext it.ifEmpty { null } }
 
             val resolved = runCatching {
-                tvmazePoster(title) ?: itunesPoster(title)
+                when (provider) {
+                    1 -> itunesPoster(title)
+                    else -> tvmazePoster(title)
+                }
             }.getOrNull()
 
             cache[key] = resolved.orEmpty()

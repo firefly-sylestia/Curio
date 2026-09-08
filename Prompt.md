@@ -1,5 +1,63 @@
 # Prompt Log — current request
 
+## Request (2026-09-08, in progress — liked-media cover cache + Cabinet Everything rework)
+
+**Request (pending-prompt slot):** "for liked / saved topics create a
+separate data cache that saves in the app as a separate load and opens
+instantly always; also Cabinet refinements: in Everything there are 2
+arrows — remove that + the '+' from the Everything preview; fix the book
+review and album review with their own outlined boxes with proper
+proportions so they don't look odd; there is no proper back handling
+(tapping back goes to Home from the Everything page or from inside
+anything) — fix it; the 3 dots do nothing in Cabinet collections; fix
+the Completed icon; make Everything theme-aware not creamy; add
+scrolling to the Everything preview; inside Everything everything
+follows the same view — bad — use a dynamic per-category view so books
+get their own, albums their own so covers don't look odd; instead of
+list make the grid bigger and replace the list with a 3 grid; at the
+top only show types that exist, not something that doesn't; in all,
+follow a proper view with recents also showing recently liked books etc;
+don't follow a fixed grid — use a dynamic arrangement for a unique view
+per category; books/albums have 2 providers — if one doesn't show in
+the Cabinet show the other, and in the bottom sheet show a switch option
+if the user didn't like that one; and remember the images stay cached."
+
+**What shipped (committed — will push with the user's go-ahead):**
+1. **Liked-media cover CACHE** (`CoverCache.kt` + AppPreferences
+   likedAt) — a separate always-on store: the resolved cover URL is
+   persisted per topic and the IMAGE BYTES download once to
+   `filesDir/cover_cache/<kind>-<name>.img`. An always-on warmer resolves
+   every liked book/album/series cover on Cabinet open; tiles load the
+   local file INSTANTLY on every later visit ("a separate load, opens
+   instantly always", "images stay cached").
+2. **Provider fallback + source switch** — every kind resolves through
+   its full provider cascade (books iTunes → Open Library; albums iTunes
+   → MusicBrainz; series TVMaze → iTunes): if provider 0 misses, the
+   Cabinet shows the other automatically. The ⋮ on every liked tile
+   opens a Cover source bottom sheet that re-resolves, re-persists and
+   re-caches the alternate provider ("if you didn't like that one, show
+   the other").
+3. **Everything preview card** — theme-aware (the hardcoded cream wash
+   is gone), ONE arrow (the duplicate + the '+' slot removed), and a
+   horizontally SCROLLABLE cover rail of real cached covers.
+4. **Everything page rework** — 3-column media grid (list mode deleted:
+   the grid replaced it, so the grid/list toggle is gone too); grouped
+   per-kind sections — Books portrait jackets, Albums square covers with
+   a vinyl-disc hint, Series posters, saved notes keep the entry card,
+   and REVIEWS (ReelNotes) get their own OUTLINED card with quote mark,
+   star rating and a text preview. The filter rail only shows types that
+   actually have content.
+5. **Recents rail** — merges recent captures with recently LIKED
+   books/albums/series (new likedAt timestamps in AppPreferences,
+   written by every favorite toggle), newest first.
+6. **Back handling** — system back now walks selection → search → open
+   collection / Everything / shelf → (Cabinet home) instead of popping
+   to the Home tab.
+7. **Collection ⋮ + Completed icon** — the 3-dot on every collection
+   card is a real button now (rename/delete pill, same as long-press);
+   the Completed shelf icon is the crisp Check (the old task_alt glyph
+   read squished in the small frosted tile).
+
 ## Request (2026-09-08, committed — text history everywhere + bottom-sheet/tree browser, Home anchored hold, keyboard-aware editors, one-shot tools)
 
 **Request (pending-prompt slot):** "history text history doesn't show up
@@ -795,4 +853,118 @@ answers were followed: replace v2 behind the same toggle; smart shelves
 app's torn rose hero kept; "Add something new" navigates to Spin.
 
 ## next prompt
-(empty — the slot is ready for the next directive)
+fix this cl error Task :app:compileReleaseKotlin
+> Task :app:compileDebugKotlin
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/ui/components/TextHistory.kt:406:38 None of the following candidates is applicable:
+
+
+> Task :app:compileDebugKotlin FAILED
+fun PaddingValues(all: Dp): PaddingValues:
+
+  No parameter with name 'horizontal' found.
+> Task :app:compileReleaseKotlin FAILED
+  No parameter with name 'vertical' found.
+  No parameter with name 'bottom' found.
+  No value passed for parameter 'all'.
+
+fun PaddingValues(horizontal: Dp = ..., vertical: Dp = ...): PaddingValues:
+  No parameter with name 'bottom' found.
+
+fun PaddingValues(start: Dp = ..., top: Dp = ..., end: Dp = ..., bottom: Dp = ...): PaddingValues:
+  No parameter with name 'horizontal' found.
+  No parameter with name 'vertical' found.
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/ui/components/TextHistory.kt:424:38 None of the following candidates is applicable:
+
+fun PaddingValues(all: Dp): PaddingValues:
+  No parameter with name 'horizontal' found.
+  No parameter with name 'vertical' found.
+  No parameter with name 'bottom' found.
+  No value passed for parameter 'all'.
+
+fun PaddingValues(horizontal: Dp = ..., vertical: Dp = ...): PaddingValues:
+  No parameter with name 'bottom' found.
+
+fun PaddingValues(start: Dp = ..., top: Dp = ..., end: Dp = ..., bottom: Dp = ...): PaddingValues:
+  No parameter with name 'horizontal' found.
+  No parameter with name 'vertical' found.
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/ui/components/TextHistory.kt:406:38 None of the following candidates is applicable:
+
+fun PaddingValues(all: Dp): PaddingValues:
+  No parameter with name 'horizontal' found.
+  No parameter with name 'vertical' found.
+  No parameter with name 'bottom' found.
+  No value passed for parameter 'all'.
+
+fun PaddingValues(horizontal: Dp = ..., vertical: Dp = ...): PaddingValues:
+  No parameter with name 'bottom' found.
+
+fun PaddingValues(start: Dp = ..., top: Dp = ..., end: Dp = ..., bottom: Dp = ...): PaddingValues:
+  No parameter with name 'horizontal' found.
+  No parameter with name 'vertical' found.
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/ui/components/TextHistory.kt:424:38 None of the following candidates is applicable:
+
+fun PaddingValues(all: Dp): PaddingValues:
+  No parameter with name 'horizontal' found.
+  No parameter with name 'vertical' found.
+  No parameter with name 'bottom' found.
+  No value passed for parameter 'all'.
+
+fun PaddingValues(horizontal: Dp = ..., vertical: Dp = ...): PaddingValues:
+  No parameter with name 'bottom' found.
+
+fun PaddingValues(start: Dp = ..., top: Dp = ..., end: Dp = ..., bottom: Dp = ...): PaddingValues:
+  No parameter with name 'horizontal' found.
+  No parameter with name 'vertical' found.
+
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1788858388686.json
+FAILURE: Build completed with 2 failures.
+
+1: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':app:compileDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
+   > Compilation error. See log for more details
+
+* Try:
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+* Exception is:
+org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':app:compileDebugKotlin'.
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.lambda$executeIfValid$1(ExecuteActionsTaskExecuter.java:135)
+	at org.gradle.internal.Try$Failure.ifSuccessfulOrElse(Try.java:288)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:133)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.execute(ExecuteActionsTaskExecuter.java:121)
+	at org.gradle.api.internal.tasks.execution.ProblemsTaskPathTrackingTaskExecuter.execute(ProblemsTaskPathTrackingTaskExecuter.java:41)
+	at org.gradle.api.internal.tasks.execution.ResolveTaskExecutionModeExecuter.execute(ResolveTaskExecutionModeExecuter.java:51)
+	at org.gradle.api.internal.tasks.execution.FinalizePropertiesTaskExecuter.execute(FinalizePropertiesTaskExecuter.java:46)
+	at org.gradle.api.internal.tasks.execution.SkipTaskWithNoActionsExecuter.execute(SkipTaskWithNoActionsExecuter.java:57)
+	at org.gradle.api.internal.tasks.execution.SkipOnlyIfTaskExecuter.execute(SkipOnlyIfTaskExecuter.java:74)
+	at org.gradle.api.internal.tasks.execution.CatchExceptionTaskExecuter.execute(CatchExceptionTaskExecuter.java:36)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.executeTask(EventFiringTaskExecuter.java:77)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:55)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:52)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter.execute(EventFiringTaskExecuter.java:52)
+	at org.gradle.execution.plan.DefaultNodeExecutor.executeLocalTaskNode(DefaultNodeExecutor.java:55)
+	at org.gradle.execution.plan.DefaultNodeExecutor.execute(DefaultNodeExecutor.java:34)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:355)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:343)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.lambda$execute$0(DefaultTaskExecutionGraph.java:339)
+	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:84)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:339)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:328)
+	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
+	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
+	at org.gradle.execution.plan.DefaultPlanExecutor.process(DefaultPlanExecutor.java:111)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.executeWithServices(DefaultTaskExecutionGraph.java:146)
+	at org.gradle.execution.taskgraph
+   also the smart fit is better the spark pill one, but again it doesnt consider of the catgory icon and it places it over it sometimes also similiar to the title fix add one for the quick fact box as well it auto moves to a proper place and also make its height maximum always too when longer text etc. not just text size decreae but also height incarse in according ot the buttom area also theres a glitch with height even when therese plenty of space below the height still doesnt expand in smaller texts when i want it to expand more which it definenitly can and also the texts too it definely can properly expand so fix it and the footer and the box always have plency of space yet footers moved down even thoguh the quick fact box is nowhere near i meant the texts so fix that too and mak eth footers even smaller and let them overlapp and stays at their place. the footer text and then the inline editor is inaccurate again the curosr and the text positon is wrong and misleading same for the full screen editor too full screen card editor. and sometimes the box outline mislead too so fi xit too. 

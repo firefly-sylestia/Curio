@@ -1,5 +1,6 @@
 package com.curio.app.features.cabinet
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -32,9 +33,11 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -66,6 +69,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -73,6 +77,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.curio.app.data.AppPreferences
+import com.curio.app.data.CaptureData
 import com.curio.app.data.CaptureFormat
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
@@ -186,6 +191,37 @@ fun CabinetV2Content(navController: NavController) {
     }
     val allLikes = remember(books, albums, series) { books + albums + series }
     val noteEntries = remember(entries) { entries.filter { it.format in noteFormats } }
+
+    // v3xx — the COVER CACHE warmer: liked books / albums / series resolve
+    // their cover art ALWAYS (not gated on the Settings fetch toggles — the
+    // cache is the point: URL persisted + image bytes on disk), so the
+    // Cabinet grid fills with real covers on first open and loads them
+    // INSTANTLY from the local file on every later visit. Throttled per
+    // recomposition to a small batch so a big shelf never bursts the pipe.
+    val unwarmedLikes = remember(allLikes) {
+        allLikes.filter {
+            CabinetCoverCache.persistedUrl(
+                context,
+                CabinetCoverCache.CoverKind.valueOf(it.kind.name),
+                it.name
+            ) == null
+        }
+    }
+    LaunchedEffect(unwarmedLikes.size) {
+        if (unwarmedLikes.isEmpty()) return@LaunchedEffect
+        var warmed = 0
+        for (item in unwarmedLikes) {
+            if (warmed >= 30) break
+            CabinetCoverCache.ensureLocalCover(
+                context,
+                CabinetCoverCache.CoverKind.valueOf(item.kind.name),
+                item.name,
+                item.topic?.byline,
+                item.topic?.imageUrl
+            )
+            warmed++
+        }
+    }
     val shelfCounts = remember(allLikes.size, entries.size, noteEntries.size, seededById) {
         mapOf(
             V2ShelfId.FAVORITES to allLikes.size,
@@ -217,11 +253,35 @@ fun CabinetV2Content(navController: NavController) {
         return q.isEmpty() || text.contains(q, ignoreCase = true)
     }
 
-    // ── Everything-level state: type filter (the JSX filter rail), sort,
-    // and the grid/list view toggle.
+    // ── Everything-level state: type filter (the JSX filter rail) + sort.
+    // (v3xx — the old grid/list view toggle is gone: Everything is always
+    // the 3-column media grid, so there is no second view mode to store.)
     var typeFilter by rememberSaveable { mutableStateOf<String?>(null) }
-    var viewMode by rememberSaveable { mutableStateOf("grid") }
     var sortAtoZ by rememberSaveable { mutableStateOf(false) }
+
+    // v3xx — BACK handling: system back now walks OUT of the open pages
+    // instead of popping the whole Cabinet to Home. Order: cancel the
+    // selection → close search → close the open collection / Everything /
+    // virtual shelf → then (openLevel == "") let the system back leave the
+    // Cabinet as usual.
+    BackHandler(enabled = selectionMode || searchActive || openLevel.isNotEmpty()) {
+        when {
+            selectionMode -> {
+                selectionMode = false
+                selectedEntryIds = emptySet()
+            }
+            searchActive -> {
+                searchActive = false
+                searchQuery = ""
+            }
+            else -> {
+                openLevel = ""
+                searchActive = false
+                searchQuery = ""
+                typeFilter = null
+            }
+        }
+    }
 
     // ── Everything-level filters: search + type + sort.
     val filteredEntries = remember(entries, searchQuery) {
@@ -242,17 +302,51 @@ fun CabinetV2Content(navController: NavController) {
         else all.filter {
             matchesQ(it.name) || (it.topic?.byline?.let { b -> matchesQ(b) } == true)
         }
-    val shownBooks = remember(books, searchQuery, typeFilter) {
-        filteredLiked(books).filter { likedShownForType(typeFilter, V2Kind.BOOK) }
+    // v3xx — liked media order by the LIKED timestamp (Recent) or name
+    // (A–Z): the Everything "All" view reads as a proper media library, not
+    // an alphabetical list glued to the sort toggle.
+    val likedAtMap = AppPreferences.likedAtState
+    fun likedAtFor(item: V2Liked): Long =
+        likedAtMap["${item.kind.name.lowercase()}|${item.name}"] ?: 0L
+    val shownBooks = remember(books, searchQuery, typeFilter, sortAtoZ, likedAtMap) {
+        val base = filteredLiked(books).filter { likedShownForType(typeFilter, V2Kind.BOOK) }
+        if (sortAtoZ) base.sortedBy { it.name.lowercase() }
+        else base.sortedByDescending { likedAtFor(it) }
     }
-    val shownAlbums = remember(albums, searchQuery, typeFilter) {
-        filteredLiked(albums).filter { likedShownForType(typeFilter, V2Kind.ALBUM) }
+    val shownAlbums = remember(albums, searchQuery, typeFilter, sortAtoZ, likedAtMap) {
+        val base = filteredLiked(albums).filter { likedShownForType(typeFilter, V2Kind.ALBUM) }
+        if (sortAtoZ) base.sortedBy { it.name.lowercase() }
+        else base.sortedByDescending { likedAtFor(it) }
     }
-    val shownSeries = remember(series, searchQuery, typeFilter) {
-        filteredLiked(series).filter { likedShownForType(typeFilter, V2Kind.SERIES) }
+    val shownSeries = remember(series, searchQuery, typeFilter, sortAtoZ, likedAtMap) {
+        val base = filteredLiked(series).filter { likedShownForType(typeFilter, V2Kind.SERIES) }
+        if (sortAtoZ) base.sortedBy { it.name.lowercase() }
+        else base.sortedByDescending { likedAtFor(it) }
     }
-    val recents = remember(entries) {
-        entries.sortedByDescending { it.capturedAtMillis }.take(6)
+
+    // ── v3xx — the Recent rail mixes recent saves with recent LIKES. The
+    // liked-at stamps live in AppPreferences (kind|name → epoch ms); entries
+    // carry capturedAtMillis. One merged, newest-first feed renders both.
+    val recentFeed = remember(entries, books, albums, series, likedAtMap) {
+        val cells = mutableListOf<V2RecentCell>()
+        entries.forEach { cells.add(V2RecentCell.Entry(it)) }
+        (books + albums + series).forEach { item ->
+            val ts = likedAtFor(item)
+            if (ts > 0L) cells.add(V2RecentCell.Liked(item, ts))
+        }
+        cells.sortedByDescending { it.ts }.take(10)
+    }
+
+    // ── v3xx — the rail only lists types that actually hold content.
+    val railAvailable = remember(books, albums, series, noteEntries, entries) {
+        buildSet {
+            if (books.isNotEmpty()) add("books")
+            if (albums.isNotEmpty()) add("albums")
+            if (series.isNotEmpty()) add("series")
+            if (noteEntries.isNotEmpty()) add("notes")
+            if (entries.any { it.format == CaptureFormat.GalleryWall }) add("moodboard")
+            if (entries.any { it.format == CaptureFormat.ReelNotes }) add("review")
+        }
     }
 
     // ── Home-level filter: shelf + collection names.
@@ -317,6 +411,9 @@ fun CabinetV2Content(navController: NavController) {
     var deleteTarget by rememberSaveable { mutableStateOf<String?>(null) }
     var addTarget by rememberSaveable { mutableStateOf<String?>(null) }
     var pillTarget by remember { mutableStateOf<PillTarget?>(null) }
+    // v3xx — the liked-tile ⋮ target: opens the cover-source sheet where the
+    // user can switch a book/album/series to its OTHER art provider.
+    var coverSourceItem by remember { mutableStateOf<V2Liked?>(null) }
 
     // ── Hero chrome — the SAME torn banner as the classic view.
     val heroTitle = when {
@@ -373,7 +470,12 @@ fun CabinetV2Content(navController: NavController) {
         // ── The scrolling grid — runs UNDER the hero.
         LazyVerticalGrid(
             state = gridState,
-            columns = if (wide) GridCells.Adaptive(minSize = 176.dp) else GridCells.Fixed(2),
+            // v3xx — Everything is a 3-column media grid (the old 2-col + a
+            // separate list toggle are gone: list was replaced by the 3 grid);
+            // every other level keeps its 2-col card grid.
+            columns = if (wide) GridCells.Adaptive(minSize = 176.dp)
+            else if (openLevel == "everything") GridCells.Fixed(3)
+            else GridCells.Fixed(2),
             contentPadding = PaddingValues(
                 start = 16.dp,
                 end = 16.dp,
@@ -500,11 +602,10 @@ fun CabinetV2Content(navController: NavController) {
                     shownBooks = shownBooks,
                     shownAlbums = shownAlbums,
                     shownSeries = shownSeries,
-                    recents = recents,
+                    recentFeed = recentFeed,
+                    railAvailable = railAvailable,
                     typeFilter = typeFilter,
                     onTypeFilter = { typeFilter = it },
-                    viewMode = viewMode,
-                    onViewMode = { viewMode = it },
                     sortAtoZ = sortAtoZ,
                     onSort = { sortAtoZ = it },
                     selectionMode = selectionMode,
@@ -523,6 +624,7 @@ fun CabinetV2Content(navController: NavController) {
                         }
                     },
                     onOpenLiked = { item -> item.open(navController) },
+                    onCoverSource = { coverSourceItem = it },
                     onAddNew = { navController.navigateToTab(CurioRoutes.SPIN) },
                     onClearFilters = { searchQuery = ""; searchActive = false; typeFilter = null },
                     pageAccent = pageAccent
@@ -748,6 +850,17 @@ fun CabinetV2Content(navController: NavController) {
         }
     }
 
+    // ── Liked-item cover source switch (the tile ⋮): pick the OTHER art
+    // provider for this book/album/series — the winner is persisted to the
+    // shared sheet-art store and the cache is redownloaded, so the Cabinet
+    // (and the reveal) show it instantly and forever after.
+    if (coverSourceItem != null) {
+        V2CoverSourceSheet(
+            item = coverSourceItem!!,
+            onDismiss = { coverSourceItem = null }
+        )
+    }
+
     // ── Everything batch delete (two-step confirm like the classic view).
     if (showBulkDeleteConfirm) {
         CurioTwoStepDeleteDialog(
@@ -867,7 +980,8 @@ private fun LazyGridScope.v2HomeItems(
                     art = shelf.art,
                     count = count,
                     onClick = { onOpenShelf(shelf.id) },
-                    onLongPress = if (seededId != null) ({ onCollectionLongPress(seededId) }) else null
+                    onLongPress = if (seededId != null) ({ onCollectionLongPress(seededId) }) else null,
+                    onMoreClick = if (seededId != null) ({ onCollectionLongPress(seededId) }) else null
                 )
             }
         }
@@ -880,7 +994,8 @@ private fun LazyGridScope.v2HomeItems(
                     art = userShelfArts[i % userShelfArts.size],
                     count = c.members.size,
                     onClick = { onOpenCollection(c.id) },
-                    onLongPress = { onCollectionLongPress(c.id) }
+                    onLongPress = { onCollectionLongPress(c.id) },
+                    onMoreClick = { onCollectionLongPress(c.id) }
                 )
             }
         }
@@ -983,20 +1098,23 @@ private fun LazyGridScope.v2DetailItems(
     }
 }
 
-/** EVERYTHING — the JSX library page: toolbar (Filter / Sort / view
- *  toggle), type filter rail, Recent rail, All Items grid/list and the
- *  "Add something new" action. Saved captures keep the classic
- *  [CurioEntryCard] style; liked items render jacket-art tiles. */
+/** EVERYTHING — the JSX library page. v3xx — every kind renders in its OWN
+ *  view (no more one-look-alike grid): the toolbar (Filter / Sort) + a type
+ *  rail that only lists types with real content, a Recent rail that mixes
+ *  recently saved captures WITH recently liked books/albums/series, then a
+ *  3-column grid grouped by kind — Books wear portrait jackets, Albums
+ *  square covers, Series posters, saved notes keep the entry card, and
+ *  REVIEWS (ReelNotes) get their own OUTLINED review card. The old list /
+ *  grid view toggle is gone (the grid replaced the list). */
 private fun LazyGridScope.v2EverythingItems(
     shownEntries: List<CurioEntry>,
     shownBooks: List<V2Liked>,
     shownAlbums: List<V2Liked>,
     shownSeries: List<V2Liked>,
-    recents: List<CurioEntry>,
+    recentFeed: List<V2RecentCell>,
+    railAvailable: Set<String>,
     typeFilter: String?,
     onTypeFilter: (String?) -> Unit,
-    viewMode: String,
-    onViewMode: (String) -> Unit,
     sortAtoZ: Boolean,
     onSort: (Boolean) -> Unit,
     selectionMode: Boolean,
@@ -1004,12 +1122,19 @@ private fun LazyGridScope.v2EverythingItems(
     onEntryLongClick: (String) -> Unit,
     onEntryClick: (String) -> Unit,
     onOpenLiked: (V2Liked) -> Unit,
+    onCoverSource: (V2Liked) -> Unit,
     onAddNew: () -> Unit,
     onClearFilters: () -> Unit,
     pageAccent: Color
 ) {
-    val totalShown = shownEntries.size + shownBooks.size + shownAlbums.size + shownSeries.size
-    val anyContent = totalShown > 0 || recents.isNotEmpty()
+    val reviewEntries = shownEntries.filter { it.format == CaptureFormat.ReelNotes }
+    val moodEntries = shownEntries.filter { it.format == CaptureFormat.GalleryWall }
+    val noteEntriesShown = shownEntries.filterNot {
+        it.format == CaptureFormat.ReelNotes || it.format == CaptureFormat.GalleryWall
+    }
+    val totalShown =
+        shownEntries.size + shownBooks.size + shownAlbums.size + shownSeries.size
+    val anyContent = totalShown > 0 || recentFeed.isNotEmpty()
     if (!anyContent) {
         item(key = "e-empty", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
             CurioEmptyState(
@@ -1024,7 +1149,7 @@ private fun LazyGridScope.v2EverythingItems(
         }
         return
     }
-    if (totalShown == 0 && recents.isNotEmpty()) {
+    if (totalShown == 0 && recentFeed.isNotEmpty()) {
         // Filtered to nothing but the Cabinet still holds items.
         item(key = "e-filtered", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
             CurioEmptyState(
@@ -1043,59 +1168,117 @@ private fun LazyGridScope.v2EverythingItems(
         V2EverythingToolbar(
             typeFilter = typeFilter,
             onTypeFilter = onTypeFilter,
-            viewMode = viewMode,
-            onViewMode = onViewMode,
             sortAtoZ = sortAtoZ,
             onSort = onSort
         )
     }
     item(key = "filter-rail", span = { GridItemSpan(maxLineSpan) }, contentType = "chips") {
-        V2FilterRail(current = typeFilter, onSelect = onTypeFilter, accent = pageAccent)
+        V2FilterRail(
+            current = typeFilter,
+            onSelect = onTypeFilter,
+            accent = pageAccent,
+            available = railAvailable
+        )
     }
 
-    val showRecent = recents.isNotEmpty() && typeFilter == null && !selectionMode
-    if (showRecent) {
+    // ── Recent — recently saved captures + recently LIKED books / albums /
+    // series (the new likedAt timestamps), newest first, in one rail.
+    if (recentFeed.isNotEmpty() && typeFilter == null && !selectionMode) {
         item(key = "h-recent", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
-            V2PageSectionHeader(title = "Recent", subtitle = "Your latest additions")
+            V2PageSectionHeader(title = "Recent", subtitle = "Latest saves & likes")
         }
         item(key = "recent-rail", span = { GridItemSpan(maxLineSpan) }, contentType = "rail") {
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 contentPadding = PaddingValues(vertical = 2.dp)
             ) {
-                items(recents, key = { it.id }) { e ->
-                    CurioEntryCard(
-                        entry = e,
-                        onClick = { onEntryClick(e.id) },
-                        modifier = Modifier.width(150.dp)
-                    )
+                recentFeed.forEach { cell ->
+                    when (cell) {
+                        is V2RecentCell.Entry -> item(key = cell.key) {
+                            CurioEntryCard(
+                                entry = cell.entry,
+                                onClick = { onEntryClick(cell.entry.id) },
+                                modifier = Modifier.width(150.dp)
+                            )
+                        }
+                        is V2RecentCell.Liked -> item(key = cell.key) {
+                            V2RecentMediaCell(
+                                item = cell.item,
+                                onClick = { onOpenLiked(cell.item) }
+                            )
+                        }
+                    }
                 }
             }
         }
     }
 
-    if (totalShown > 0) {
-        item(key = "h-all", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
-            V2PageSectionHeader(
-                title = "All Items",
-                subtitle = "A mix of everything you keep",
-                trailing = "$totalShown shown"
+    // ── v3xx — grouped, per-kind sections (each kind keeps its own tile
+    // language + cover shape). Hidden rails/types never show a section; a
+    // single active filter shows only its kind with no headers.
+    fun sectionHeader(title: String, subtitle: String, n: Int) {
+        if (typeFilter != null) return
+        item(
+            key = "s|$title",
+            span = { GridItemSpan(maxLineSpan) },
+            contentType = "header"
+        ) {
+            V2PageSectionHeader(title = title, subtitle = subtitle, trailing = "$n")
+        }
+    }
+
+    fun mediaGrid(likes: List<V2Liked>, title: String, subtitle: String) {
+        if (likes.isEmpty()) return
+        sectionHeader(title, subtitle, likes.size)
+        items(likes, key = { "l|${it.kind.name}|${it.name}" }) { item ->
+            V2MediaTileCard(
+                item = item,
+                onClick = { onOpenLiked(item) },
+                onMore = { onCoverSource(item) }
             )
         }
-        val listMode = viewMode == "list"
-        v2EntryItems(
-            entries = shownEntries,
-            fullSpan = listMode,
-            selectionMode = selectionMode,
-            selectedEntryIds = selectedEntryIds,
-            onEntryLongClick = onEntryLongClick,
-            onEntryClick = onEntryClick
-        )
-        v2LikedItems(
-            likes = shownBooks + shownAlbums + shownSeries,
-            fullSpan = listMode,
-            onOpenLiked = onOpenLiked
-        )
+    }
+
+    fun entryGrid(list: List<CurioEntry>, title: String, subtitle: String, review: Boolean) {
+        if (list.isEmpty()) return
+        sectionHeader(title, subtitle, list.size)
+        items(list, key = { "x|$title|${it.id}" }) { e ->
+            if (review) {
+                V2ReviewTileCard(
+                    entry = e,
+                    onClick = { onEntryClick(e.id) },
+                    onLongClick = { onEntryLongClick(e.id) },
+                    selected = e.id in selectedEntryIds
+                )
+            } else {
+                CurioEntryCard(
+                    entry = e,
+                    selected = e.id in selectedEntryIds,
+                    onLongClick = { onEntryLongClick(e.id) },
+                    onClick = { onEntryClick(e.id) },
+                    modifier = Modifier
+                )
+            }
+        }
+    }
+
+    if (typeFilter == null || typeFilter == "books") {
+        mediaGrid(shownBooks, "Books", "Your library")
+    }
+    if (typeFilter == null || typeFilter == "albums") {
+        mediaGrid(shownAlbums, "Albums", "On your turntable")
+    }
+    if (typeFilter == null || typeFilter == "series") {
+        mediaGrid(shownSeries, "Series", "On your watchlist")
+    }
+    if (typeFilter == null || typeFilter == "notes") {
+        entryGrid(noteEntriesShown, "Notes", "Captures & journal", review = false)
+    }
+    if (typeFilter == null || typeFilter == "moodboard") {
+        entryGrid(moodEntries, "Moodboards", "Visual collections", review = false)
+    }
+    if (typeFilter == null || typeFilter == "review") {
+        entryGrid(reviewEntries, "Reviews", "Your takes on the things you keep", review = true)
     }
 
     item(key = "add-new", span = { GridItemSpan(maxLineSpan) }, contentType = "action") {
@@ -1329,11 +1512,14 @@ private fun V2EverythingCard(
     onOpen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // v3xx — THEME-AWARE (the old hardcoded cream wash looked wrong in dark
+    // and in the pastel themes): the card wears the theme's surface tokens;
+    // the header icon tile + covers add their own category tints.
     val dark = isCurioDarkTheme()
-    val fill = if (dark) Color(0xFF2C2627) else Color(0xFFF0E3C9)
-    val ink = if (dark) Color(0xFFF3E9E2) else Color(0xFF553E42)
-    val muted = ink.copy(alpha = 0.62f)
-    val railFill = if (dark) Color.White.copy(alpha = 0.10f) else Color.White.copy(alpha = 0.32f)
+    val fill = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.92f)
+    val ink = MaterialTheme.colorScheme.onSurface
+    val muted = MaterialTheme.colorScheme.onSurfaceVariant
+    val tileFill = MaterialTheme.colorScheme.surfaceContainerHighest
     Surface(
         onClick = onOpen,
         shape = RoundedCornerShape(26.dp),
@@ -1346,13 +1532,13 @@ private fun V2EverythingCard(
                     modifier = Modifier
                         .size(44.dp)
                         .clip(RoundedCornerShape(15.dp))
-                        .background(if (dark) Color.White.copy(alpha = 0.14f) else Color.White.copy(alpha = 0.42f)),
+                        .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
                     CurioIcon(
                         name = CurioIcons.Inventory2,
                         contentDescription = null,
-                        tint = ink,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         size = 23.dp
                     )
                 }
@@ -1380,43 +1566,48 @@ private fun V2EverythingCard(
                     modifier = Modifier
                         .size(38.dp)
                         .clip(RoundedCornerShape(50))
-                        .background(ink.copy(alpha = 0.14f)),
+                        .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
                     CurioIcon(
                         name = CurioIcons.ChevronRight,
                         contentDescription = "Open everything",
-                        tint = ink,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         size = 19.dp
                     )
                 }
             }
             Spacer(Modifier.height(14.dp))
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(7.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                // "+" slot first (the JSX's empty tile), then real covers.
+            // v3xx — a horizontally SCROLLABLE cover rail (no fixed 5 slots,
+            // no "+" tile): every saved book/album/series cover is reachable
+            // by swiping, thumbnails stay real and instant from the cache.
+            if (likes.isEmpty()) {
                 Box(
                     modifier = Modifier
-                        .weight(1f)
+                        .fillMaxWidth()
                         .height(88.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(railFill),
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(tileFill.copy(alpha = 0.6f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    CurioIcon(name = CurioIcons.Add, contentDescription = null, tint = muted, size = 20.dp)
+                    Text(
+                        text = "Covers of your liked books, albums and series appear here",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = muted
+                    )
                 }
-                repeat(5) { i ->
-                    val item = likes.getOrNull(i)
-                    if (item != null) {
+            } else {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(vertical = 2.dp)
+                ) {
+                    items(likes, key = { "${it.kind.name}|${it.name}" }) { item ->
                         val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
                         val accent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
                         Box(
                             modifier = Modifier
-                                .weight(1f)
-                                .height(88.dp)
-                                .clip(RoundedCornerShape(12.dp))
+                                .size(width = 64.dp, height = 88.dp)
+                                .clip(RoundedCornerShape(10.dp))
                                 .background(
                                     Brush.verticalGradient(
                                         listOf(
@@ -1432,17 +1623,9 @@ private fun V2EverythingCard(
                             V2JacketArt(
                                 item = item,
                                 accent = accent,
-                                modifier = Modifier.fillMaxSize().padding(4.dp)
+                                modifier = Modifier.fillMaxSize().padding(3.dp)
                             )
                         }
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(88.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(railFill.copy(alpha = 0.6f))
-                        )
                     }
                 }
             }
@@ -1453,26 +1636,19 @@ private fun V2EverythingCard(
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
                     color = ink
                 )
-                Spacer(Modifier.weight(1f))
-                Text(
-                    text = "\u203A",
-                    fontSize = 24.sp,
-                    color = muted,
-                    modifier = Modifier.padding(top = 2.dp)
-                )
             }
         }
     }
 }
 
-/** The Everything library toolbar — Filter + Sort pills (with menus) and
- *  the grid/list view toggle (the JSX's toolbar row). */
+/** The Everything library toolbar — Filter + Sort pills (with menus). The
+ *  old grid/list view toggle is GONE (v3xx): Everything is always the
+ *  3-column media grid — the toggle only offered a second way to show the
+ *  same list-shaped tiles that the grid replaced. */
 @Composable
 private fun V2EverythingToolbar(
     typeFilter: String?,
     onTypeFilter: (String?) -> Unit,
-    viewMode: String,
-    onViewMode: (String) -> Unit,
     sortAtoZ: Boolean,
     onSort: (Boolean) -> Unit
 ) {
@@ -1531,53 +1707,25 @@ private fun V2EverythingToolbar(
             }
         }
         Spacer(Modifier.weight(1f))
-        V2ViewTogglePill(
-            active = viewMode == "grid",
-            glyph = CurioIcons.GridView,
-            contentDescription = "Grid view",
-            onClick = { onViewMode("grid") }
-        )
-        V2ViewTogglePill(
-            active = viewMode == "list",
-            glyph = CurioIcons.DragHandle,
-            contentDescription = "List view",
-            onClick = { onViewMode("list") }
+        Text(
+            text = TYPE_FILTERS.firstOrNull { it.first == typeFilter }?.second ?: "All",
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1
         )
     }
 }
 
-@Composable
-private fun V2ViewTogglePill(
-    active: Boolean,
-    glyph: String,
-    contentDescription: String,
-    onClick: () -> Unit
-) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
-        color = if (active) MaterialTheme.colorScheme.primary
-        else MaterialTheme.colorScheme.surfaceContainerHigh,
-        modifier = Modifier.size(44.dp)
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            CurioIcon(
-                name = glyph,
-                contentDescription = contentDescription,
-                tint = if (active) MaterialTheme.colorScheme.onPrimary
-                else MaterialTheme.colorScheme.onSurfaceVariant,
-                size = 19.dp
-            )
-        }
-    }
-}
-
-/** The JSX filter rail — horizontal type chips (All · Books · Albums …). */
+/** The JSX filter rail — horizontal type chips (All · Books · Albums …).
+ *  v3xx — `available` limits the rail to types that actually hold content:
+ *  a kind with nothing saved never shows an empty chip ("only show what's
+ *  in there, not something that doesn't exist"). All is always present. */
 @Composable
 private fun V2FilterRail(
     current: String?,
     onSelect: (String?) -> Unit,
-    accent: Color
+    accent: Color,
+    available: Set<String>
 ) {
     Row(
         modifier = Modifier
@@ -1586,6 +1734,7 @@ private fun V2FilterRail(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         TYPE_FILTERS.forEach { (key, label, icon) ->
+            if (key != null && key !in available) return@forEach
             val selected = current == key
             Surface(
                 onClick = { onSelect(if (selected) null else key) },
@@ -1670,6 +1819,304 @@ private fun V2AddSomethingButton(onClick: () -> Unit) {
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.55f),
                 size = 22.dp
+            )
+        }
+    }
+}
+
+/** Compact "when" label for the review tile footer (the shared
+ *  formatTimeAgo lives in CurioTopicCard; this file needs its own). */
+private fun v2TimeAgo(daysAgo: Int): String = when {
+    daysAgo <= 0 -> "today"
+    daysAgo == 1 -> "yesterday"
+    daysAgo < 7 -> "$daysAgo days ago"
+    daysAgo < 30 -> "${daysAgo / 7}w ago"
+    else -> "${daysAgo / 30}mo ago"
+}
+
+/** v3xx — one cell of the Everything Recent rail: either a saved capture
+ *  or a recently LIKED book/album/series (carrying its liked-at stamp). */
+private sealed interface V2RecentCell {
+    val key: String
+    val ts: Long
+
+    data class Entry(val entry: CurioEntry) : V2RecentCell {
+        override val key get() = "re|${entry.id}"
+        override val ts get() = entry.capturedAtMillis
+    }
+
+    data class Liked(val item: V2Liked, val likedAt: Long) : V2RecentCell {
+        override val key get() = "rl|${item.kind.name}|${item.name}"
+        override val ts get() = likedAt
+    }
+}
+
+/** A compact liked-media cell for the Recent rail — uniform plate so the
+ *  rail reads level, contain-fit jacket art inside (real cached covers). */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun V2RecentMediaCell(item: V2Liked, onClick: () -> Unit) {
+    val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
+    val accent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(100.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(width = 86.dp, height = 122.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            androidx.compose.ui.graphics.lerp(accent, Color.White, if (isCurioDarkTheme()) 0.14f else 0.5f),
+                            androidx.compose.ui.graphics.lerp(accent, Color.Black, 0.40f)
+                        )
+                    )
+                )
+                .combinedClickable(onClick = onClick)
+        ) {
+            V2JacketArt(
+                item = item,
+                accent = accent,
+                modifier = Modifier.fillMaxSize().padding(3.dp)
+            )
+        }
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = item.name,
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(
+            text = when (item.kind) {
+                V2Kind.BOOK -> "Book"
+                V2Kind.ALBUM -> "Album"
+                V2Kind.SERIES -> "Series"
+            },
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+/** v3xx — a LIKED media tile in the Everything 3-column grid. Every kind
+ *  renders in its OWN shape so nothing shares a look-alike cover box:
+ *  BOOKS wear a portrait jacket (spine + sheen), ALBUMS a square cover
+ *  with a vinyl disc peeking behind, SERIES a poster plate. */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun V2MediaTileCard(
+    item: V2Liked,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    /** v3xx — the JSX's ⋮ on every item: opens the cover-source sheet so a
+     *  liked item can switch providers ("if you didn't like that one"). */
+    onMore: (() -> Unit)? = null
+) {
+    val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
+    val accent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+    val dark = isCurioDarkTheme()
+    Surface(
+        modifier = modifier.combinedClickable(onClick = onClick),
+        shape = RoundedCornerShape(18.dp),
+        color = cat?.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+            ?: MaterialTheme.colorScheme.surfaceContainerHigh
+    ) {
+        Column {
+            val artRatio = when (item.kind) {
+                V2Kind.BOOK -> 0.667f   // portrait jacket
+                V2Kind.ALBUM -> 1f      // square sleeve
+                V2Kind.SERIES -> 0.72f  // poster
+            }
+            val plate = Brush.verticalGradient(
+                listOf(
+                    androidx.compose.ui.graphics.lerp(accent, Color.White, if (dark) 0.16f else 0.5f),
+                    androidx.compose.ui.graphics.lerp(accent, Color.Black, 0.42f)
+                )
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(artRatio)
+                    .padding(8.dp)
+            ) {
+                // Albums get a vinyl disc behind the sleeve — a hint of the
+                // media behind the cover so albums never read as generic
+                // squares.
+                if (item.kind == V2Kind.ALBUM) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(12.dp)
+                            .background(Color.Black.copy(alpha = 0.55f), CircleShape)
+                    )
+                }
+                V2JacketArt(item = item, accent = accent, modifier = Modifier.fillMaxSize())
+                if (onMore != null) {
+                    Surface(
+                        onClick = onMore,
+                        shape = RoundedCornerShape(50),
+                        color = Color.Black.copy(alpha = 0.30f),
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(3.dp)
+                            .size(27.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                            CurioIcon(
+                                name = CurioIcons.MoreVert,
+                                contentDescription = "Cover source",
+                                tint = Color.White,
+                                size = 16.dp
+                            )
+                        }
+                    }
+                }
+            }
+            Column(
+                modifier = Modifier.padding(start = 11.dp, end = 11.dp, bottom = 11.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = item.name,
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    minLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                val byline = item.topic?.byline
+                if (!byline.isNullOrBlank()) {
+                    Text(
+                        text = byline,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(6.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(accent.copy(alpha = 0.85f))
+                    )
+                    Spacer(Modifier.width(5.dp))
+                    Text(
+                        text = when (item.kind) {
+                            V2Kind.BOOK -> "Book"
+                            V2Kind.ALBUM -> "Album"
+                            V2Kind.SERIES -> "Series"
+                        } + (cat?.let { " · ${it.displayName}" } ?: ""),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = cat?.categoryInk() ?: MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** v3xx — a REVIEW (ReelNotes) tile with its OWN OUTLINED box: the saved
+ *  reviews of books/albums/series no longer masquerade as generic capture
+ *  cards — a hairline outline, the quote mark, the star rating and a
+ *  text preview make a review read as a review at a glance. */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun V2ReviewTileCard(
+    entry: CurioEntry,
+    onClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null,
+    selected: Boolean = false
+) {
+    val cat = CurioCategories.byId(entry.topic.categoryId)
+    val accent = cat.themedAccent()
+    val data = entry.captureData as? CaptureData.ReelNotes
+    Surface(
+        modifier = Modifier
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+        shape = RoundedCornerShape(18.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            accent.copy(alpha = if (selected) 1f else 0.45f)
+        )
+    ) {
+        Column(modifier = Modifier.padding(11.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(accent.copy(alpha = 0.16f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CurioIcon(
+                        name = CurioIcons.FormatQuote,
+                        contentDescription = null,
+                        tint = accent,
+                        size = 16.dp
+                    )
+                }
+                Spacer(Modifier.width(7.dp))
+                Text(
+                    text = entry.topic.name,
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+                if (selected) {
+                    CurioIcon(
+                        name = CurioIcons.Check,
+                        contentDescription = "Selected",
+                        tint = MaterialTheme.colorScheme.primary,
+                        size = 18.dp
+                    )
+                }
+            }
+            val rating = data?.rating ?: 0
+            if (rating > 0) {
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(1.dp)) {
+                    repeat(5) { i ->
+                        Text(
+                            text = if (i < rating) "\u2605" else "\u2606",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = if (i < rating) Color(0xFFE8A33D)
+                            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
+                        )
+                    }
+                }
+            }
+            val reviewText = data?.reviewText?.ifBlank { null }
+            if (reviewText != null) {
+                Spacer(Modifier.height(7.dp))
+                Text(
+                    text = reviewText,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 4,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = "Review · ${v2TimeAgo(entry.capturedAtDaysAgo)}",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
             )
         }
     }
@@ -2009,6 +2456,157 @@ private fun V2CollectionNameSheet(
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                                 size = 16.dp
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** v3xx — the liked-item COVER SOURCE sheet: books / albums / series each
+ *  have two art providers; if the current cover isn't right, tapping the
+ *  other one re-resolves, persists, and re-downloads the bytes ("if you
+ *  didn't like that one, show the other"). Images stay in the cover cache. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun V2CoverSourceSheet(
+    item: V2Liked,
+    onDismiss: () -> Unit
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val kind = CabinetCoverCache.CoverKind.valueOf(item.kind.name)
+    val labels = when (kind) {
+        CabinetCoverCache.CoverKind.BOOK -> listOf("iTunes Search", "Open Library")
+        CabinetCoverCache.CoverKind.ALBUM -> listOf("iTunes", "MusicBrainz")
+        CabinetCoverCache.CoverKind.SERIES -> listOf("TVMaze", "iTunes")
+    }
+    val title = when (item.kind) {
+        V2Kind.BOOK -> "Book cover"
+        V2Kind.ALBUM -> "Album artwork"
+        V2Kind.SERIES -> "Series poster"
+    }
+    var busy by remember { mutableStateOf(false) }
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 26.dp)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = item.name,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = "Cover source",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 0.6.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            labels.forEachIndexed { index, label ->
+                Surface(
+                    onClick = {
+                        if (busy) return@Surface
+                        busy = true
+                        scope.launch {
+                            val url = CabinetCoverCache.resolveWithProvider(
+                                context,
+                                kind,
+                                item.name,
+                                item.topic?.byline,
+                                item.topic?.imageUrl,
+                                index
+                            )
+                            if (!url.isNullOrBlank()) {
+                                when (kind) {
+                                    CabinetCoverCache.CoverKind.BOOK ->
+                                        AppPreferences.setBookCoverUrl(context, item.name, url)
+                                    else -> AppPreferences.setSheetArtUrl(
+                                        context,
+                                        "${kind.stateKey}|${item.name}",
+                                        url
+                                    )
+                                }
+                                CabinetCoverCache.ensureLocalCover(
+                                    context,
+                                    kind,
+                                    item.name,
+                                    item.topic?.byline,
+                                    item.topic?.imageUrl,
+                                    redownload = true
+                                )
+                            }
+                            busy = false
+                            onDismiss()
+                        }
+                    },
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(11.dp),
+                        modifier = Modifier.padding(horizontal = 13.dp, vertical = 12.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(30.dp)
+                                .clip(RoundedCornerShape(9.dp))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.13f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CurioIcon(
+                                name = when (index) {
+                                    0 -> CurioIcons.PhotoLibrary
+                                    1 -> CurioIcons.Shuffle
+                                    else -> CurioIcons.AutoAwesome
+                                },
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                size = 16.dp
+                            )
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1
+                            )
+                            Text(
+                                text = if (index == 0) "First choice — usually matches best"
+                                else "Alternate source — try this one if the cover is off",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 2
+                            )
+                        }
+                        if (busy) {
+                            CircularProgressIndicator(
+                                strokeWidth = 2.dp,
+                                modifier = Modifier.size(16.dp)
                             )
                         }
                     }
@@ -2430,6 +3028,20 @@ private fun V2LikedRow(
 private fun V2JacketArt(item: V2Liked, accent: Color, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val topic = item.topic
+    // v3xx — the COVER CACHE's local file first: when the bytes are already
+    // on disk (the warmer or a sheet visit saved them) the cover loads
+    // INSTANTLY — no URL, no Coil miss, no flash of the gradient plate.
+    // Keyed on the cache version so a tile that composed BEFORE its cover
+    // downloaded re-checks the moment the warmer saves the file.
+    var cached by remember(item.name, item.kind, CabinetCoverCache.version.intValue) {
+        mutableStateOf(
+            CabinetCoverCache.localCoverFile(
+                context,
+                CabinetCoverCache.CoverKind.valueOf(item.kind.name),
+                item.name
+            )
+        )
+    }
     val stored = if (item.kind == V2Kind.BOOK) {
         AppPreferences.bookCoverUrlsState[item.name]?.takeIf { it.isNotBlank() }
     } else null
@@ -2441,11 +3053,6 @@ private fun V2JacketArt(item: V2Liked, accent: Color, modifier: Modifier = Modif
             ?.takeIf { it.isNotBlank() }
     } else null
     val authored = topic?.imageUrl?.takeIf { it.isNotBlank() }
-    val consent = when (item.kind) {
-        V2Kind.BOOK -> AppPreferences.bookFetchEnabledState
-        V2Kind.ALBUM -> AppPreferences.albumFetchEnabledState
-        V2Kind.SERIES -> AppPreferences.seriesFetchEnabledState
-    }
     val candidates = remember(item.name, topic, stored, sheetArt, authored) {
         val list = mutableListOf<String>()
         if (!stored.isNullOrBlank()) list.add(stored)
@@ -2459,16 +3066,50 @@ private fun V2JacketArt(item: V2Liked, accent: Color, modifier: Modifier = Modif
     var coverIndex by remember(item.name, candidates) { mutableIntStateOf(0) }
     var resolved by remember(item.name) { mutableStateOf<String?>(null) }
     var liveDone by remember(item.name) { mutableStateOf(false) }
-    LaunchedEffect(item.name, item.kind, consent, coverIndex, liveDone) {
-        if (consent && !liveDone && item.kind != V2Kind.BOOK && coverIndex >= candidates.size) {
-            resolved = when (item.kind) {
-                V2Kind.ALBUM -> AlbumArtFetch.resolveArtworkUrl(item.name, topic?.byline)
-                V2Kind.SERIES -> SeriesPosterFetch.resolvePosterUrl(item.name)
-                else -> null
+    // v3xx — the per-tile live resolve is ALWAYS armed (no Settings consent
+    // gate): the cover cache is always-on by design, so an item liked mid-
+    // session resolves here even before the warmer's next pass. Albums /
+    // series cascade BOTH providers (iTunes then MusicBrainz / TVMaze then
+    // iTunes) — if provider 0 misses, provider 1 fills the gap instead of
+    // leaving a bare gradient plate. The winner is persisted to the same
+    // sheetArt store the reveal reads, so every surface agrees instantly.
+    LaunchedEffect(item.name, item.kind, coverIndex, liveDone) {
+        if (!liveDone && item.kind != V2Kind.BOOK && coverIndex >= candidates.size) {
+            var found: String? = null
+            when (item.kind) {
+                V2Kind.ALBUM -> {
+                    for (p in 0 until AlbumArtFetch.PROVIDER_COUNT) {
+                        val u = AlbumArtFetch.resolveArtworkUrl(item.name, topic?.byline, p)
+                        if (!u.isNullOrBlank()) { found = u; break }
+                    }
+                }
+                V2Kind.SERIES -> {
+                    for (p in 0 until SeriesPosterFetch.PROVIDER_COUNT) {
+                        val u = SeriesPosterFetch.resolvePosterUrl(item.name, p)
+                        if (!u.isNullOrBlank()) { found = u; break }
+                    }
+                }
+                else -> Unit
+            }
+            resolved = found
+            if (!found.isNullOrBlank()) {
+                CabinetCoverCache.ensureLocalCover(
+                    context,
+                    CabinetCoverCache.CoverKind.valueOf(item.kind.name),
+                    item.name,
+                    topic?.byline,
+                    authored
+                )
+                AppPreferences.setSheetArtUrl(
+                    context,
+                    "${item.kind.name.lowercase()}|${item.name}",
+                    found
+                )
             }
             liveDone = true
         }
     }
+    val local = cached?.toURI()?.toString()
     val url = resolved ?: candidates.getOrNull(coverIndex)
     val corner = if (item.kind == V2Kind.ALBUM) 10.dp else 8.dp
     val plate = Brush.verticalGradient(
@@ -2490,10 +3131,28 @@ private fun V2JacketArt(item: V2Liked, accent: Color, modifier: Modifier = Modif
                     V2Kind.SERIES -> CurioIcons.Movies
                 },
                 contentDescription = null,
-                tint = Color.White.copy(alpha = if (url == null) 0.7f else 0f),
+                tint = Color.White.copy(alpha = if (url == null && local == null) 0.7f else 0f),
                 size = 20.dp
             )
-            if (url != null) {
+            // v3xx — the local cache file wins (instant, offline); network
+            // URLs only when the bytes aren't on disk yet.
+            if (local != null) {
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(cached)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "Cover art for ${item.name}",
+                    contentScale = ContentScale.Fit,
+                    onError = {
+                        // A stale local file — drop it and fall back to the
+                        // URL cascade.
+                        runCatching { cached?.delete() }
+                        cached = null
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else if (url != null) {
                 AsyncImage(
                     model = ImageRequest.Builder(context)
                         .data(url)
