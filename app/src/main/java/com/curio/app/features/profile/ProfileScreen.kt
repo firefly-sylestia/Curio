@@ -85,6 +85,7 @@ import com.curio.app.features.settings.heroLaneCategory
 import com.curio.app.features.settings.materialHeroTearsOn
 import com.curio.app.features.settings.settingsCardAccentInk
 import com.curio.app.ui.components.AvatarCropDialog
+import com.curio.app.ui.components.CurioGlassToolbar
 import com.curio.app.ui.components.ProfileAvatarImage
 import java.io.File
 import com.curio.app.features.settings.heroPageBackground
@@ -95,7 +96,6 @@ import com.curio.app.data.CurioQuests
 import com.curio.app.data.LevelRewards
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ExploreSessionStore
-import com.curio.app.data.PromoMode
 import com.curio.app.data.StreakTracker
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.navigation.CurioRoutes
@@ -175,7 +175,14 @@ private val ProfileHeroHeight = 372.dp
 /** Extra layout space reserved for the under-sheet below the torn banner. */
 private val ProfileHeroSheetExtent = 24.dp
 /** Total hero footprint — the torn banner plus its under-sheet extent. */
-private val ProfileHeroTotalHeight = ProfileHeroHeight + ProfileHeroSheetExtent
+/**
+ * v3xx — style-aware reserved height: the torn banner is a fixed
+ * 372dp + sheet; the GLASS toolbar style is content-height (~230dp with
+ * the stats row — the bar grows to fit its content).
+ */
+private val ProfileHeroTotalHeight: Dp
+    get() = if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) 230.dp
+    else ProfileHeroHeight + ProfileHeroSheetExtent
 /** Fixed tear seed — Profile tears in the SAME bold pattern as Home's quest
  *  hero (same seed + personality), so both banners read as one family. */
 private const val PROFILE_TEAR_SEED = 0xC0FEE
@@ -322,17 +329,13 @@ fun ProfileScreen(navController: NavController) {
     val streakDays = StreakTracker.getStreak(context)
     // v7.40 — the level tracker is now the shared XP system (quests/levels):
     // level + progress come from earned XP instead of raw saved counts.
-    // v7.107 — promo/demo-content mode swaps in promotional sample values
-    // (real rank math via the shared quests API, not junk numbers); turning
-    // it off reverts instantly through the reactive state.
-    val promoOn = AppPreferences.promoModeState
-    val displayStreak = if (promoOn) PromoMode.DEMO_STREAK else streakDays
-    val displaySaved = if (promoOn) PromoMode.DEMO_SAVED else totalSaved
-    val displayXp = if (promoOn) PromoMode.DEMO_XP else CurioQuests.xpState
+    val displayStreak = streakDays
+    val displaySaved = totalSaved
+    val displayXp = CurioQuests.xpState
     val level = CurioQuests.levelForXp(displayXp)
     val progress = CurioQuests.xpProgress(displayXp)
     // v53 — the hero tagline (custom pref or the streak-based automatic
-    // line). Reads the DISPLAY streak so promo mode shows its demo line.
+    // line).
     val heroTagline = remember(taglineRevision, displayStreak) {
         AppPreferences.getCustomStreakTagline(context).ifBlank { taglineForStreak(displayStreak) }
     }
@@ -944,6 +947,74 @@ private fun ProfileHero(
     // already resolves per-theme and per spin-lane) instead of forcing the
     // rose, so a lane-colored hero never wears mismatched rose icons.
     val symbolTint = ink
+    // v3xx — GLASS TOOLBAR style: the app-wide "Glass toolbar header"
+    // option swaps Profile's torn banner for the content-height glass bar
+    // — name + tagline, with the avatar riding beside the title and the
+    // Level · Saved · Lanes stats row inside the bar.
+    if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
+        CurioGlassToolbar(
+            title = name,
+            subtitle = tagline,
+            titleTrailing = { toolbarInk ->
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .shadow(2.dp, CircleShape)
+                        .clip(CircleShape)
+                        .background(fill),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (!avatarPath.isNullOrBlank()) {
+                        ProfileAvatarImage(avatarPath, Modifier.fillMaxSize())
+                    } else {
+                        Text(
+                            initial,
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                            color = toolbarInk
+                        )
+                    }
+                }
+            },
+            content = { toolbarInk ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    ProfileHeroStat(
+                        glyph = CurioIcons.WorkspacePremium,
+                        value = "$level",
+                        label = "Level",
+                        ink = toolbarInk,
+                        modifier = Modifier.weight(1f)
+                    )
+                    VerticalDivider(
+                        modifier = Modifier.height(30.dp),
+                        color = toolbarInk.copy(alpha = 0.22f)
+                    )
+                    ProfileHeroStat(
+                        glyph = CurioIcons.Inventory2,
+                        value = "$saved",
+                        label = "Saved",
+                        ink = toolbarInk,
+                        modifier = Modifier.weight(1f)
+                    )
+                    VerticalDivider(
+                        modifier = Modifier.height(30.dp),
+                        color = toolbarInk.copy(alpha = 0.22f)
+                    )
+                    ProfileHeroStat(
+                        glyph = CurioIcons.Palette,
+                        value = "$lanes",
+                        label = "Lanes",
+                        ink = toolbarInk,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        )
+        return
+    }
     Box(
         modifier = Modifier
             .fillMaxWidth()

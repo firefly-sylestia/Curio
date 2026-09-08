@@ -80,7 +80,6 @@ import com.curio.app.data.CurioQuests.QuestChain
 import com.curio.app.data.LevelRewards
 import com.curio.app.data.CurioQuests.QuestStage
 import com.curio.app.data.CurioQuests.WeeklyQuest
-import com.curio.app.data.PromoMode
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToQuestRoute
 import com.curio.app.features.settings.SettingsHeroHeader
@@ -149,10 +148,7 @@ import com.curio.app.features.settings.SettingsHeroTotalHeight
  */
 @Composable
 fun QuestsScreen(navController: NavController) {
-    // v7.107 — promo/demo-content mode shows the promotional sample XP (top
-    // rank, Curio Sovereign) while ON; only the level card is demoed here.
-    val promoOn = AppPreferences.promoModeState
-    val xp = if (promoOn) PromoMode.DEMO_XP else CurioQuests.xpState
+    val xp = CurioQuests.xpState
     val level = CurioQuests.levelForXp(xp)
     val (progress, nextThreshold) = CurioQuests.xpProgress(xp)
     val current = CurioQuests.currentQuest()

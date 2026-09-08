@@ -110,7 +110,6 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.PinnedTopic
-import com.curio.app.data.PromoMode
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.SavedQuote
@@ -146,6 +145,7 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.theme.LocalCurioThemeTransition
 import com.curio.app.ui.theme.switchThemeWithReveal
 import com.curio.app.ui.components.CurioConstellation
+import com.curio.app.ui.components.CurioGlassToolbar
 import com.curio.app.ui.components.CurioHoldPill
 import com.curio.app.ui.components.CurioDrawerState
 import com.curio.app.ui.components.CurioForwardArrow
@@ -377,23 +377,15 @@ fun HomeScreen(navController: NavController) {
     val recentFeed = remember(recentEntries, exploredTopics, unexploredTopics) {
         buildRecentFeed(recentEntries, exploredTopics, unexploredTopics)
     }
-    // v7.107 — promo/demo-content mode (hidden 5-tap unlock in Support):
-    // while ON, the hero stats and the recents feed are replaced with
-    // promotional SAMPLE data — real topics + all six capture formats, so
-    // screenshots look rich. Every row stays tappable; turning the mode
-    // off reverts instantly (all of this keys off the reactive state).
-    val promoOn = AppPreferences.promoModeState
-    val promoEntries by produceState<List<CurioEntry>>(initialValue = emptyList(), promoOn) {
-        value = if (promoOn) PromoMode.demoEntries() else emptyList()
-    }
-    val promoFeed = remember(promoEntries, promoOn) {
-        if (promoOn) {
-            buildRecentFeed(promoEntries, PromoMode.demoExplored(promoEntries), emptyList())
-        } else {
-            emptyList()
-        }
-    }
     var totalSaved by remember { mutableIntStateOf(0) }
+    // v27h — the Topics stat always shows the TRUE catalog total: the
+    // splash warm-cache seeds the first frame, then a lightweight IO count
+    // of the JSON assets refreshes it — so the number never reads 0 just
+    // because the database/catalog hasn't finished loading, and it tracks
+    // content drops. (Hoisted — the glass toolbar stat row reads it too.)
+    val topicsTotal by produceState(initialValue = TopicCatalog.totalTopicCount()) {
+        value = TopicJsonLoader.countCanonicalTopics()
+    }
     LaunchedEffect(Unit) {
         try {
             totalSaved = CurioRepositoryHolder.repo.count()
@@ -481,6 +473,67 @@ fun HomeScreen(navController: NavController) {
             // (shared with the sticky pills); questInk = the readable ink on
             // the active fill, carried through greeting, stat icons + watermark.
 
+            // v3xx — GLASS TOOLBAR style: the app-wide "Glass toolbar
+            // header" option swaps Home's torn quest banner for the
+            // content-height glass bar — greeting + name, with the Streak ·
+            // Cabinet · Topics stat row riding inside the bar (the same
+            // segments the torn banner pins above its tear).
+            if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
+                // v3xx — NO glassBackdrop here: the toolbar is the FIRST
+                // item of the scroll Column, INSIDE the homeGlassBackdrop
+                // capture subtree — sampling it would self-capture (the
+                // v228 RenderThread cycle). The toolbar falls back to the
+                // safe simulated-glass recipe instead (the bar's frosted
+                // tint + sheen still read as glass).
+                CurioGlassToolbar(
+                    title = greetingWordForNow(),
+                    subtitle = displayName,
+                    content = { ink ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            HeroStatSegment(
+                                glyph = "local_fire_department",
+                                value = "$streakDays",
+                                label = "Streak",
+                                tint = ink,
+                                ink = ink,
+                                modifier = Modifier.weight(1f),
+                                onClick = { navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true } }
+                            )
+                            VerticalDivider(
+                                modifier = Modifier.height(34.dp),
+                                color = ink.copy(alpha = 0.22f)
+                            )
+                            HeroStatSegment(
+                                glyph = CurioIcons.Inventory2,
+                                value = "$totalSaved",
+                                label = "Cabinet",
+                                tint = ink,
+                                ink = ink,
+                                modifier = Modifier.weight(1f),
+                                onClick = { navController.navigateToTab(CurioRoutes.CABINET) }
+                            )
+                            VerticalDivider(
+                                modifier = Modifier.height(34.dp),
+                                color = ink.copy(alpha = 0.22f)
+                            )
+                            HeroStatSegment(
+                                glyph = CurioIcons.AutoAwesome,
+                                value = "$topicsTotal",
+                                label = "Topics",
+                                tint = ink,
+                                ink = ink,
+                                modifier = Modifier.weight(1f),
+                                onClick = { navController.navigate(CurioRoutes.DATABASE) { launchSingleTop = true } }
+                            )
+                        }
+                    }
+                )
+            } else {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -643,15 +696,6 @@ fun HomeScreen(navController: NavController) {
                             // blend Profile's stat pane uses).
                             val statGlass = heroFill
                             val paperStatBg = paperStatCardColor(heroFill)
-                            // v27h — the Topics stat always shows the TRUE
-                            // catalog total: the splash warm-cache seeds the
-                            // first frame, then a lightweight IO count of the
-                            // JSON assets refreshes it — so the number never
-                            // reads 0 just because the database/catalog hasn't
-                            // finished loading, and it tracks content drops.
-                            val topicsTotal by produceState(initialValue = TopicCatalog.totalTopicCount()) {
-                                value = TopicJsonLoader.countCanonicalTopics()
-                            }
                             // v27h — torn paper edges (separate experiment):
                             // when on, the paper card wears a real torn-paper
                             // outline — an EXTENDED tear on the top edge and
@@ -732,7 +776,7 @@ fun HomeScreen(navController: NavController) {
                                         // family as the banner text.
                                         HeroStatSegment(
                                             glyph = "local_fire_department",
-                                            value = if (promoOn) PromoMode.DEMO_STREAK.toString() else "$streakDays",
+                                            value = "$streakDays",
                                             label = "Streak",
                                             tint = questInk,
                                             ink = questInk,
@@ -745,7 +789,7 @@ fun HomeScreen(navController: NavController) {
                                         )
                                         HeroStatSegment(
                                             glyph = CurioIcons.Inventory2,
-                                            value = if (promoOn) PromoMode.DEMO_SAVED.toString() else "$totalSaved",
+                                            value = "$totalSaved",
                                             label = "Cabinet",
                                             tint = questInk,
                                             ink = questInk,
@@ -779,6 +823,7 @@ fun HomeScreen(navController: NavController) {
                 // to a scroll-reactive STICKY bar outside the hero (they pop
                 // out of the coral into frosted floating pills on scroll).
             }
+            } // v3xx — end of the torn-hero branch (glass toolbar else)
 
             // Give the quest block a deliberate breathing room below the
             // hero's white sheet so the shuffle deck never feels pinned to
@@ -1005,9 +1050,8 @@ fun HomeScreen(navController: NavController) {
                             color = MaterialTheme.colorScheme.onBackground
                         )
                         // v21 — View all opens Topic History (liked, disliked,
-                        // pinned & day-grouped spins). Promo mode hides it: it
-                        // would lead to the real (empty) history page.
-                        if (!promoOn) {
+                        // pinned & day-grouped spins).
+                        {
                             Surface(
                                 onClick = { navController.navigate(CurioRoutes.TOPIC_HISTORY) { launchSingleTop = true } },
                                 shape = RoundedCornerShape(50),
@@ -1078,8 +1122,7 @@ fun HomeScreen(navController: NavController) {
                         .widthIn(max = if (windowWidthSizeClass().isWide) WideContentMaxWidth else Dp.Infinity)
                         .align(Alignment.CenterHorizontally)
                 ) {
-                // Promo mode swaps in the demo feed; otherwise the real one.
-                val recentPreview = (if (promoOn) promoFeed else recentFeed).take(5)
+                val recentPreview = recentFeed.take(5)
                 Row(
                     Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -1090,9 +1133,7 @@ fun HomeScreen(navController: NavController) {
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = MaterialTheme.colorScheme.onBackground
                     )
-                    // v7.107 — promo mode hides View all: it would lead to
-                    // the real (empty) Recents page, breaking the demo flow.
-                    if (!promoOn && recentPreview.isNotEmpty()) {
+                    if (recentPreview.isNotEmpty()) {
                         Surface(
                             onClick = { navController.navigate(CurioRoutes.RECENTS_ALL) { launchSingleTop = true } },
                             shape = RoundedCornerShape(50),

@@ -1442,9 +1442,8 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
             },
             shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
         ) {
-            // v3xx — the NEW picker is the default; the old glass-pill
-            // picker returns via Settings → Experiments → "Classic category
-            // picker" (AppPreferences.classicPickerEnabledState).
+            // v3xx — the NEW picker is the only picker (the classic
+            // glass-pill picker experiment was fully removed).
             val pickCategory: (CurioCategory) -> Unit = { c ->
                 activeCatIds = listOf(c.id)
                 // v318b — a single-lane deck has no mix name.
@@ -1463,15 +1462,7 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                 }
                 showCategoryPicker = false
             }
-            if (AppPreferences.classicPickerEnabledState) {
-                com.curio.app.features.picker.CategoryPickerContent(
-                    washCat = deckCat,
-                    categories = CurioCategories.visible,
-                    onDismiss = { showCategoryPicker = false },
-                    onCategorySelected = pickCategory,
-                    onCategoriesMixed = mixCategories
-                )
-            } else {
+            {
                 com.curio.app.features.picker.NewCategoryPickerSheet(
                     washCat = deckCat,
                     categories = CurioCategories.visible,

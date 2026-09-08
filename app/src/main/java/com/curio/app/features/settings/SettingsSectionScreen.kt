@@ -410,7 +410,8 @@ private fun PreferencesSection(highlightKey: String? = null) {
     // flags the "Remove overlay permission" trip so the return only refreshes
     // the grant state instead of re-enabling the bubble.
     var overlayRevokeOpened by remember { mutableStateOf(false) }
-    var liveNotificationsEnabled by remember { mutableStateOf(AppPreferences.liveNotificationsEnabledState) }
+    // v3xx — the "Live explore notification" experiment concluded: always
+    // on, no toggle (the local state + row were removed).
     var exploreSessionsEnabled by remember { mutableStateOf(AppPreferences.exploreSessionsEnabledState) }
     // v27 — the daily shuffle reminder + its hour chips moved in from the
     // removed Notifications section.
@@ -430,7 +431,6 @@ private fun PreferencesSection(highlightKey: String? = null) {
             if (event == Lifecycle.Event.ON_RESUME) {
                 overlayEnabled = AppPreferences.isOverlayBubbleEnabled(context)
                 overlayUsable = AppPreferences.overlayActuallyUsable(context)
-                liveNotificationsEnabled = AppPreferences.isLiveNotificationsEnabled(context)
                 exploreSessionsEnabled = AppPreferences.isExploreSessionsEnabled(context)
                 reminderHour = AppPreferences.getReminderHour(context)
                 showBubbleOptInDialogEnabled = AppPreferences.isShowBubbleOptInDialog(context)

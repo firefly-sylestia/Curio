@@ -79,6 +79,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
+import com.curio.app.ui.components.CurioGlassToolbar
 import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.curioSearchFill
@@ -137,7 +138,19 @@ private val SettingsHeroSheetExtent = 24.dp
  *  Public so every settings screen can start its scroll content just below
  *  the hero (the hero overlays the content, letting rows disappear under
  *  the ragged tear as they scroll). */
-val SettingsHeroTotalHeight = SettingsHeroBannerHeight + SettingsHeroSheetExtent
+/**
+ * v3xx — the reserved scroll height under the settings hero. The torn
+ * banner is a fixed 204dp; the GLASS toolbar style is content-height
+ * (status bar + pills row + title/subtitle block ≈ 160dp idle — the
+ * search field morphs in place of the title, so the footprint never
+ * changes and the consumers' fixed reservation stays correct).
+ */
+val SettingsHeroTotalHeight: Dp
+    get() = if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
+        160.dp
+    } else {
+        SettingsHeroBannerHeight + SettingsHeroSheetExtent
+    }
 /** One mirrored hero watermark pair — the left glyph mirrors the right
  *  (the Profile/Home quest hero construction, adapted for Settings). */
 private data class SettingsHeroPair(
@@ -195,6 +208,28 @@ fun SettingsHeroHeader(
     // liquid glass — no self-sample cycle. Null → classic opaque pill.
     glassBackdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null
 ) {
+    // v3xx — GLASS TOOLBAR style: the app-wide "Glass toolbar header"
+    // option swaps the torn paper banner for the content-height glass bar
+    // (the old Cabinet v2 toolbar look, more blurry + its own tint). Every
+    // param maps 1:1; screens that never pass search/trailing just render
+    // the plain title bar.
+    if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
+        CurioGlassToolbar(
+            title = title,
+            subtitle = subtitle,
+            onBack = onBack,
+            trailing = trailing,
+            searchActive = searchActive,
+            searchQuery = searchQuery,
+            onSearchQueryChange = onSearchQueryChange,
+            onCloseSearch = onCloseSearch,
+            searchFocus = searchFocus,
+            searchPlaceholder = searchPlaceholder,
+            titleTrailing = titleTrailing,
+            glassBackdrop = glassBackdrop
+        )
+        return
+    }
     // v31 — the extraRow slot (the Topic Database's Category pill) is gone:
     // that pill now rides its own row BELOW the hero so the banner keeps
     // its original height and the header text never moves down.

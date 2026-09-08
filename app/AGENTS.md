@@ -660,6 +660,56 @@ app/src/main/java/com/curio/app/
   the settings-family torn rose hero (`SettingsHeroHeader` + `SearchOff`
   empty state + `CurioVerticalScrollIndicator` + hero search), matching
   Recents / Manage Categories.
+- **v3xx17 — experiment removals + app-wide header style.** (1) **Classic
+  picker removed** — `CategoryPickerContent`'s route (`CurioRoutes`
+  import + registration in CurioNavHost), the `KEY_CLASSIC_PICKER` pref +
+  `classicPickerEnabledState` + SpinScreen branch are gone; the new picker
+  is the only picker (`CategoryPickerScreen.kt` itself stays — it hosts
+  `PickerMode`, which NewCategoryPicker still uses). (2) **Promo mode
+  removed fully** — `PromoMode.kt`/`PromoModeScreen.kt` deleted, `PROMO`
+  route gone, `KEY_PROMO_MODE`/`promoModeState`/`setPromoModeEnabled` gone,
+  demo branches stripped from Home (stats, recents preview, View-all gate),
+  Profile (streak/saved/xp), Quests (xp), Cabinet (entries + long-press
+  gate); `TopicCatalog.sampleEntries()` stays as the harmless fallback for
+  `sample-*` ids in EntryDetail/SaveCapture. (3) **Blur experiments
+  removed** — `legacyGlassBlurState`/`customBlurEngineState` + their prefs
+  and the `LegacyGlassBlur.kt` + `CurioBlur.kt` files deleted; the
+  NavHost's legacy snapshotter plumbing and LiquidGlassPills' legacy
+  capture import gone; pre-Android-12 pills always serve the static
+  `fauxGlassCapsule` veil and the glass widget always uses system blur
+  (the `getWallpaper` custom-blur path deleted from GlassWidgetProvider).
+  (4) **Glass widget lab removed** — `GlassWidgetLabScreen.kt` +
+  `GLASS_WIDGET_LAB` route + the clock (`AnalogClockWidgetProvider` +
+  `glass_analog_*` res) and streak-circle (`FireWidgetProvider` +
+  `fire_widget_*` res) home-screen widgets deleted from the manifest;
+  the tile widget (`GlassWidgetProvider`) + editor
+  (`GlassWidgetEditorScreen`) stay. (5) **Subtle pill glow hardcoded** —
+  `curioGlassEdge`/`curioInnerGlow` read `subtle = true` directly,
+  `KEY_PILL_GLOW_SUBTLE` + toggle plumbing removed from both experiments
+  screens. (6) **Live explore notification always on** —
+  `isLiveNotificationsEnabled()` now returns `true` (the persistent
+  chronometer notification shows whenever sessions run + permission
+  granted); the toggle rows, `KEY_LIVE_NOTIFICATIONS_ENABLED` and the
+  NavHost's bring-the-bubble-back fallback are gone. (7) **Glass toolbar
+  header style** — new `AppPreferences.HeaderStyle` (TORN default /
+  GLASS), `KEY_HEADER_STYLE` + `get/setHeaderStyle`, toggled from a
+  "Glass toolbar header" switch in BOTH experiments screens (Headers
+  section). The new `CurioGlassToolbar` composable
+  (ui/components/CurioGlassToolbar.kt) is a content-height liquid-glass
+  bar (rose-tinted `lerp(surfaceContainerHigh, settingsRoseAccent)`,
+  1.6× `blurMultiplier` frost, bottom-rounded capsule, own back pill +
+  optional trailing pills / morph-open search / titleTrailing / content
+  slot) and replaces the torn banner in `SettingsHeroHeader`,
+  `CabinetHeroHeader`, `HomeScreen`'s quest hero and `ProfileHero` (Spin
+  untouched). Height reservations became style-aware: `SettingsHeroTotalHeight`
+  (160dp glass), `CabinetHeroBannerHeight`/`Compact`/`SheetExtent`
+  (160/160/0 glass), `ProfileHeroTotalHeight` (230dp glass).
+  **SAFETY:** the Home toolbar deliberately passes NO glassBackdrop — it
+  is the first item of the scroll Column INSIDE `homeGlassBackdrop`'s
+  capture subtree, so sampling it would be the v228 self-capture cycle;
+  it falls back to the simulated-glass recipe. Settings/Cabinet heroes
+  keep real glass via their v263 sibling-overlay capture (hero drawn
+  OUTSIDE the recorded grid).
 - **v355 — book/series notes sheets: no close button, no hint copy, rating
   below the author, tick-free read state.** User: "never add cross close
   button in a bottom sheet… remove it from the book synopsis sheet… remove

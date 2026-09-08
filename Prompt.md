@@ -1,5 +1,77 @@
 # Prompt Log — current request
 
+## Request (2026-09-08, completed — experiments removal + defaults + app-wide header style)
+
+**Request:** remove the concluded experiments fully (classic category picker
+option, promo mode, real blur on older devices + custom blur engine, glass
+widget lab), hardcode the two default winners (subtle pill glow, live
+explore notification), and add an app-wide "Glass toolbar header" style
+option (the previous Cabinet v2 glass toolbar look — more blurry with its
+own tint, content-height) across Settings/Cabinet/Home/Profile (not Spin).
+
+**User answers (ask_user):** promo mode = remove fully (screen/route/flag +
+demo branches); glass widget lab = remove the lab screen + its content, KEEP
+the edit-home-screen one + its tile widget, remove the clock + streak-circle
+home widgets; both defaults = remove toggles fully.
+
+**Implemented (11 items):**
+1. **Classic picker removed** — route, KEY + state + SpinScreen branch gone;
+   `CategoryPickerScreen.kt` STAYS (it hosts `PickerMode`, still used by the
+   kept NewCategoryPicker).
+2. **Promo mode removed fully** — `PromoMode.kt`/`PromoModeScreen.kt`
+   deleted, PROMO route + KEY_PROMO_MODE + state + setter gone; demo
+   branches stripped from Home (hero stats, recents preview, View-all gate),
+   Profile (streak/saved/xp), Quests (xp), Cabinet (entries + multi-select
+   gate). `TopicCatalog.sampleEntries()` stays as the harmless `sample-*`
+   fallback.
+3. **Blur experiments removed** — legacyGlassBlurState +
+   customBlurEngineState + prefs + `LegacyGlassBlur.kt` + `CurioBlur.kt`
+   deleted; NavHost snapshotter plumbing + LiquidGlassPills legacy capture
+   gone; old devices always get the static veil, the widget uses system blur.
+4. **Glass widget lab removed** — `GlassWidgetLabScreen.kt` + GLASS_WIDGET_LAB
+   route + clock (`AnalogClockWidgetProvider` + glass_analog_* res) and
+   streak-circle (`FireWidgetProvider` + fire_widget_* res) home widgets
+   deleted (manifest + layouts + drawables + xml + strings); the tile
+   widget + editor stay.
+5. **Subtle pill glow hardcoded** — `curioGlassEdge`/`curioInnerGlow` use
+   `subtle = true` directly; KEY + toggle rows removed from both
+   experiments screens.
+6. **Live explore notification always on** — `isLiveNotificationsEnabled()`
+   returns `true`; toggle rows + KEY_LIVE_NOTIFICATIONS_ENABLED + the
+   NavHost bring-the-bubble-back fallback removed.
+7. **Glass toolbar header style (the big one)** — new
+   `AppPreferences.HeaderStyle` (TORN default / GLASS) + KEY_HEADER_STYLE +
+   get/setHeaderStyle; a "Glass toolbar header" switch in BOTH experiments
+   screens (new Headers section). New `CurioGlassToolbar` component
+   (ui/components/CurioGlassToolbar.kt): content-height liquid-glass bar,
+   rose-tinted container (`lerp(surfaceContainerHigh, settingsRoseAccent)`),
+   1.6× `blurMultiplier` frost (more blurry), bottom-rounded capsule, own
+   back pill (with its own glass), trailing action pills, morph-open search
+   (AnimatedContent scale/fade in place of the title), titleTrailing +
+   content slots (Home stats / Profile stats ride inside). Replaces the torn
+   banner in `SettingsHeroHeader` + `CabinetHeroHeader` (1:1 param maps),
+   `HomeScreen` quest hero (greeting + name + Streak·Cabinet·Topics row via
+   `HeroStatSegment`) and `ProfileHero` (avatar beside title + Level·Saved·
+   Lanes row). Height reservations style-aware: SettingsHeroTotalHeight
+   (160dp), CabinetHeroBannerHeight/Compact/SheetExtent (160/160/0),
+   ProfileHeroTotalHeight (230dp).
+   **SAFETY (v228):** the Home toolbar passes NO glassBackdrop — it sits
+   INSIDE the `homeGlassBackdrop` capture subtree (first scroll item), so it
+   uses the safe simulated-glass recipe; Settings/Cabinet keep real glass via
+   their v263 sibling-overlay hero captures (hero outside the recorded grid).
+8. **Docs** — changelog (ADD headers + REMOVE experiments), app/AGENTS.md
+   v3xx17 note, Prompt.md.
+
+**Files:** 34 changed — CurioGlassToolbar.kt (new), AppPreferences.kt,
+SettingsHubScreen.kt, CabinetScreen.kt, HomeScreen.kt, ProfileScreen.kt,
+CurioNavHost.kt, CurioRoutes.kt, ExperimentsScreen.kt,
+UserExperimentsScreen.kt, SettingsSectionScreen.kt, SpinScreen.kt,
+NewCategoryPicker.kt, QuestsScreen.kt, LiquidGlassPills.kt,
+CurioGlassEffects.kt, GlassWidgetProvider.kt, AndroidManifest.xml,
+strings.xml + 9 deleted files (PromoMode.kt, PromoModeScreen.kt,
+GlassWidgetLabScreen.kt, AnalogClockWidgetProvider.kt, FireWidgetProvider.kt,
+CurioBlur.kt, LegacyGlassBlur.kt + widget res).
+
 ## Request (2026-09-08, completed — CI fix + Cabinet v2 bug batch + polaroid everywhere)
 
 **Request:** the CI build failed on the Cabinet v2 polish push (3 compile
@@ -351,15 +423,120 @@ commit message for the batch).
 ### Next prompt slot — holds the 2026-09-08 collections prompt (DONE; raw user text preserved below):
 the cabinet v2 screen doesnt match the ui style and also same with book browser so fix th eui consistency, and i also beleive what was the original plan for cabinet v2 isnt properly implemented yet, i thought e will be doing folders as well Turn Cabinet into **collection cards** (3×2 grid of entry covers styled like the share cards) + an "Everything" collection. - Create from a moodboard (it already has a board metaphor); naming, cover pick, reorder. - "Pin discovery directly into collection" from the reveal page (hold → pill → "File to…"). - Impact: turns a list into a keepsake surface; ties into share-card art. and that glass style ig too and also in home screen recetns when i explore something it marks it as explored and whn i open it from recents it either opens the saved entry or the express your save your entry but i want to keep the topic open so apply that too by defaukt opens the topic and then tap an hold action for more 
 
-### next prompt slot 
-experiments removal and default addition
-removals fully 
-- classic category pciker option as the new category picker have both now
-- promo mode
-- real blur older devices and custom blur engine 
-- glass widget lab 
-now the default add no more toggle and default applied 
-+subtle pill glow
-+live explore notification on by default when explore notification on
- also the previous cabinet v2 header style i like it in liquid glass can you give it as a new header style option for all around the app and make the liquid glass of it more blurry and with its ow color tint so that the text colors are visible and its extended height depends on the header content
- also a fix in other style the polaroid is cut from button so fix it 
+### DONE — 2026-09-08 (experiments removal + defaults + header style)
+**Status:** COMPLETE — implemented, committed + pushed this session (see the
+request log entry above for the full breakdown, incl. the v228 safety note
+for the Home glass toolbar).
+
+**Rephrased directive from the user (history):**
+1. **Fully REMOVE these experiments/options** (no toggle left): classic
+   category picker option (the new category picker is the only one now),
+   promo mode, real blur on older devices + the custom blur engine, and
+   the glass widget lab.
+2. **Defaults — no toggle, applied by default:** subtle pill glow, and the
+   live explore notification ON by default when explore notifications are
+   on.
+3. **New header style option app-wide:** the previous Cabinet v2 header
+   style (the glass toolbar + search) as a new header style option across
+   the app; its liquid glass should be MORE blurry with its OWN color tint
+   so the text colors stay visible, and its height should extend to fit the
+   header content.
+
+### PENDING — next prompt (polaroid cut + Cabinet stability/perf + CI log)
+**Status:** the CI part of this prompt is RESOLVED by the experiments-removal
+batch (the missing `mutableStateOf`/`setValue` imports in RecentScreen.kt
+that broke `optionItem`'s `let` + the `when` exhaustive chain, and the
+`scope.launch` for `softDeleteByIds` in CabinetV2Content — all verified in
+the tree). The remaining work — the polaroid cut off the button on other
+card styles, the Cabinet screen's first-open lag/heat, and the saved-entry
+open lag — is the next task after this push.
+
+**Raw user text (preserved):**
+
+ also a fix in other style the polaroid is cut from button so fix it and the cabinet screen itself is very unstable lags when opened first time and heats up too my device just in caboinet screen and no no liquid glass issue its off its the cabinet screen itself also sometimes when opening the saved entry too can u properly fix it, and also the previous cl failed heres the log fix that too  Task :app:kspReleaseKotlin
+> Task :app:compileDebugKotlin
+> Task :app:compileReleaseKotlin
+
+> Task :app:compileDebugKotlin FAILED
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/cabinet/CabinetV2Content.kt:620:23 Unresolved reference 'launch'.
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/cabinet/CabinetV2Content.kt:621:62 Suspend function 'suspend fun softDeleteByIds(ids: Collection<String>): Int' can only be called from a coroutine or another suspend function.
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:146:23 Cannot infer type for type parameter 'T'. Specify it explicitly.
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:146:34 Unresolved reference 'mutableStateOf'.
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:239:21 Cannot infer type for type parameter 'T'. Specify it explicitly.
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:239:21 Cannot infer type for type parameter 'R'. Specify it explicitly.
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/cabinet/CabinetV2Content.kt:620:23 Unresolved reference 'launch'.
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/cabinet/CabinetV2Content.kt:621:62 Suspend function 'suspend fun softDeleteByIds(ids: Collection<String>): Int' can only be called from a coroutine or another suspend function.
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:146:23 Cannot infer type for type parameter 'T'. Specify it explicitly.
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:146:34 Unresolved reference 'mutableStateOf'.
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:239:21 Cannot infer type for type parameter 'T'. Specify it explicitly.
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:239:21 Cannot infer type for type parameter 'R'. Specify it explicitly.
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:239:21 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
+fun <T, R> T.let(block: (T) -> R): R
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:239:27 Cannot infer type for type parameter 'T'. Specify it explicitly.
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:272:29 'when' expression must be exhaustive. Add an 'else' branch.
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:239:21 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
+
+> Task :app:compileReleaseKotlin FAILED
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1788842974660.json
+fun <T, R> T.let(block: (T) -> R): R
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:239:27 Cannot infer type for type parameter 'T'. Specify it explicitly.
+e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:272:29 'when' expression must be exhaustive. Add an 'else' branch.
+
+FAILURE: Build completed with 2 failures.
+
+1: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task ':app:compileDebugKotlin'.
+> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
+   > Compilation error. See log for more details
+
+56 actionable tasks: 56 executed
+* Try:
+Configuration cache entry stored.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+* Exception is:
+org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':app:compileDebugKotlin'.
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.lambda$executeIfValid$1(ExecuteActionsTaskExecuter.java:135)
+	at org.gradle.internal.Try$Failure.ifSuccessfulOrElse(Try.java:288)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:133)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.execute(ExecuteActionsTaskExecuter.java:121)
+	at org.gradle.api.internal.tasks.execution.ProblemsTaskPathTrackingTaskExecuter.execute(ProblemsTaskPathTrackingTaskExecuter.java:41)
+	at org.gradle.api.internal.tasks.execution.ResolveTaskExecutionModeExecuter.execute(ResolveTaskExecutionModeExecuter.java:51)
+	at org.gradle.api.internal.tasks.execution.FinalizePropertiesTaskExecuter.execute(FinalizePropertiesTaskExecuter.java:46)
+	at org.gradle.api.internal.tasks.execution.SkipTaskWithNoActionsExecuter.execute(SkipTaskWithNoActionsExecuter.java:57)
+	at org.gradle.api.internal.tasks.execution.SkipOnlyIfTaskExecuter.execute(SkipOnlyIfTaskExecuter.java:74)
+	at org.gradle.api.internal.tasks.execution.CatchExceptionTaskExecuter.execute(CatchExceptionTaskExecuter.java:36)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.executeTask(EventFiringTaskExecuter.java:77)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:55)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:52)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter.execute(EventFiringTaskExecuter.java:52)
+	at org.gradle.execution.plan.DefaultNodeExecutor.executeLocalTaskNode(DefaultNodeExecutor.java:55)
+	at org.gradle.execution.plan.DefaultNodeExecutor.execute(DefaultNodeExecutor.java:34)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:355)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:343)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.lambda$execute$0(DefaultTaskExecutionGraph.java:339)
+	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:84)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:339)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:328)
+	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
+	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
+	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:47)
+Caused by: org.gradle.workers.internal.DefaultWorkerExecutor$WorkExecutionException: A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
+	at org.gradle.workers.internal.DefaultWorkerExecutor$WorkItemExecution.waitForCompletion(DefaultWorkerExecutor.java:289)
+	at org.gradle.internal.work.DefaultAsyncWorkTracker.lambda$waitForItemsAndGatherFailures$2(DefaultAsyncWorkTracker.java:130)
+	at org.gradle.internal.Factories$1.create(Factories.java:30)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.lambda$withoutLocks$2(DefaultWorkerLeaseService.java:350)
+	at org.gradle.internal.work.ResourceLockStatistics$1.measure(ResourceLockStatistics.java:43)
+	at org.gradle.internal.wo

@@ -161,12 +161,25 @@ fun ExperimentsScreen(navController: NavController) {
                     }
                 }
             }
-            item { CurioSectionLabel("Appearance experiments") }
+            // v3xx — the "Subtle pill glow" experiment concluded: subtle is
+            // the always-on default (toggle removed).
+            // v3xx — the app-wide HEADER STYLE: torn paper banner (default)
+            // or the content-height glass toolbar (the old Cabinet v2 look,
+            // more blurry + its own tint). Applies to every Settings/Cabinet
+            // hero plus Home and Profile (Spin keeps its own chrome).
+            item { CurioSectionLabel("Headers") }
             item {
                 CurioSettingsCard(shadowElevation = 0.dp) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    ExperimentSwitchRow("Subtle pill glow", "Gentler, top-only glow on pills in dark mode", AppPreferences.pillGlowSubtleState) {
-                        AppPreferences.setPillGlowSubtleEnabled(context, it)
+                    ExperimentSwitchRow(
+                        "Glass toolbar header",
+                        "Swap the torn paper banners for a content-height liquid-glass bar (more blur, own tint) across Settings, Cabinet, Home and Profile",
+                        AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS
+                    ) {
+                        AppPreferences.setHeaderStyle(
+                            context,
+                            if (it) AppPreferences.HeaderStyle.GLASS else AppPreferences.HeaderStyle.TORN
+                        )
                     }
                 }
                 }
@@ -180,11 +193,8 @@ fun ExperimentsScreen(navController: NavController) {
                     ExperimentSwitchRow("Voice-to-text", "Live dictation while typing, and transcription of recordings", AppPreferences.voiceToTextEnabledState) {
                         AppPreferences.setVoiceToTextEnabled(context, it)
                     }
-                    CurioSettingsDivider()
-                    // Live explore
-                    ExperimentSwitchRow("Live explore notification", "Ongoing timer with pause and stop", AppPreferences.liveNotificationsEnabledState) {
-                        AppPreferences.setLiveNotificationsEnabled(context, it)
-                    }
+                    // v3xx — the "Live explore notification" experiment
+                    // concluded: always on (toggle removed).
                     CurioSettingsDivider()
                     // Pet outside app
                     ExperimentSwitchRow("Pet outside the app", "Let your pet float over other apps. Long-press to bring it home.", AppPreferences.petOutsideAppState) { wanted ->
@@ -310,20 +320,6 @@ fun ExperimentsScreen(navController: NavController) {
                 }
                 }
             }
-            item { CurioSectionLabel("Promo") }
-            item {
-                CurioSettingsCard(shadowElevation = 0.dp) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    CurioSettingsRow(
-                        CurioIcons.Star,
-                        "Promo mode",
-                        "Demo content for store screenshots"
-                    ) {
-                        navController.navigate(CurioRoutes.PROMO) { launchSingleTop = true }
-                    }
-                }
-                }
-            }
             item { CurioSectionLabel("Constellation") }
             item {
                 CurioSettingsCard(shadowElevation = 0.dp) {
@@ -343,40 +339,13 @@ fun ExperimentsScreen(navController: NavController) {
                     ) {
                         AppPreferences.setGlassClassicIndicatorEnabled(context, it)
                     }
-                    CurioSettingsDivider()
-                    ExperimentSwitchRow(
-                        "Real blur (older devices)",
-                        "Below Android 12: an app-side blur engine draws the REAL content behind the nav bar and Topic Reveal pills as frosted glass instead of a static veil (needs Liquid glass pills)",
-                        AppPreferences.legacyGlassBlurState
-                    ) {
-                        AppPreferences.setLegacyGlassBlurEnabled(context, it)
-                    }
-                    CurioSettingsDivider()
-                    // v280 — custom blur engine: replaces Samsung One UI / system
-                    // blur paths with Curio's own CPU box blur for the glass widget
-                    // and live wallpaper (every launcher gets real blur).
-                    ExperimentSwitchRow(
-                        "Custom blur engine",
-                        "Replace Samsung/system blur with Curio's own blur in glass widgets and live wallpaper (every launcher gets real blur)",
-                        AppPreferences.customBlurEngineState
-                    ) {
-                        AppPreferences.setCustomBlurEngineEnabled(context, it)
-                    }
+                    // v3xx — the "Real blur (older devices)" + custom blur
+                    // engine experiments were fully REMOVED.
                 }
                 }
             }
             item {
                 CurioSettingsCard(shadowElevation = 0.dp) {
-                    // v264 — the glass widget lab: drag REAL refracting widget
-                    // shapes over your actual wallpaper (test bed for a future
-                    // home-screen widget design).
-                    com.curio.app.ui.components.CurioSettingsRow(
-                        CurioIcons.AutoAwesome,
-                        "Glass widget lab",
-                        "Drag real liquid-glass widget shapes over your wallpaper"
-                    ) {
-                        navController.navigate(com.curio.app.navigation.CurioRoutes.GLASS_WIDGET_LAB) { launchSingleTop = true }
-                    }
                     // v281 - in-app editor: works even on launchers without
                     // the long-press Edit flow for reconfigurable widgets.
                     com.curio.app.ui.components.CurioSettingsRow(

@@ -116,8 +116,8 @@ import kotlinx.coroutines.flow.drop
  *    curated "fun to explore" lanes up to 10 (hold → Remove, plus an Add
  *    sheet). Both update LIVE via reactive prefs state.
  *
- * Everything here is gated by `AppPreferences.classicPickerEnabledState`:
- * OFF (default) = this picker; ON restores the old CategoryPickerContent.
+ * v3xx — this is the ONLY picker now (the classic glass-pill picker
+ * experiment was fully removed).
  */
 
 /** Seeds the starter named mixes (from the old quick presets) once. */

@@ -98,6 +98,7 @@ import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioEmptyState
+import com.curio.app.ui.components.CurioGlassToolbar
 import com.curio.app.ui.components.CurioNavTint
 import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.curioSearchFill
@@ -243,21 +244,11 @@ fun CabinetScreen(navController: NavController) {
         }
     }
 
-    // v7.107 — promo/demo-content mode fills the Cabinet with the sample
-    // entries (real topics, all six capture formats) so screenshots look
-    // rich; they stay fully tappable (EntryDetail resolves `sample-*` ids
-    // via TopicCatalog.sampleEntries). Real data returns the instant the
-    // mode is toggled off (keyed on the reactive promo state).
-    val promoOn = AppPreferences.promoModeState
-    val entries by produceState<List<CurioEntry>>(initialValue = emptyList(), promoOn) {
-        if (promoOn) {
-            value = runCatching { TopicCatalog.sampleEntries() }.getOrDefault(emptyList())
-        } else {
-            try {
-                CurioRepositoryHolder.repo.observeAll().collect { value = it }
-            } catch (_: Exception) {
-                value = emptyList()
-            }
+    val entries by produceState<List<CurioEntry>>(initialValue = emptyList()) {
+        try {
+            CurioRepositoryHolder.repo.observeAll().collect { value = it }
+        } catch (_: Exception) {
+            value = emptyList()
         }
     }
 
@@ -766,12 +757,8 @@ fun CabinetScreen(navController: NavController) {
                             modifier = Modifier,
                             selected = entry.id in selectedEntryIds,
                             onLongClick = {
-                                // v7.107 — promo/demo mode disables multi-select:
-                                // bulk delete would no-op on the sample entries.
-                                if (!promoOn) {
-                                    selectionMode = true
-                                    selectedEntryIds = selectedEntryIds + entry.id
-                                }
+                                selectionMode = true
+                                selectedEntryIds = selectedEntryIds + entry.id
                             },
                             onClick = {
                                 if (selectionMode) {
@@ -910,11 +897,20 @@ fun CabinetScreen(navController: NavController) {
  *  v31 — back to the original 180dp: the Category pill no longer lives
  *  inside the hero (it rides its own row below), so the banner no longer
  *  needs the v30 +52dp growth and the header text stays put. */
-internal val CabinetHeroBannerHeight = 180.dp
+/**
+ * v3xx — style-aware Cabinet hero heights: the torn banner keeps its
+ * fixed 180dp; the GLASS toolbar style is content-height (status bar +
+ * pills row + title/subtitle block ≈ 160dp idle — the search field
+ * morphs in place, so the footprint never changes).
+ */
+internal val CabinetHeroBannerHeight: Dp
+    get() = if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) 160.dp else 180.dp
 /** Banner height on wide windows (tablet/landscape). */
-internal val CabinetHeroBannerHeightCompact = 140.dp
+internal val CabinetHeroBannerHeightCompact: Dp
+    get() = if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) 160.dp else 140.dp
 /** Extra layout space reserved for the under-sheet below the torn banner. */
-internal val CabinetHeroSheetExtent = 24.dp
+internal val CabinetHeroSheetExtent: Dp
+    get() = if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) 0.dp else 24.dp
 /** Fixed tear seed — the Cabinet tears in its own bold pattern, never re-rolls. */
 internal const val CABINET_TEAR_SEED = 0xCAB1E
 
@@ -977,6 +973,29 @@ internal fun CabinetHeroHeader(
     // v292h — optional glass backdrop for the sticky-bar cancel pill.
     glassBackdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null
 ) {
+    // v3xx — GLASS TOOLBAR style: the app-wide "Glass toolbar header"
+    // option swaps the torn paper banner for the content-height glass bar
+    // (the old Cabinet v2 toolbar look, more blurry + its own tint). The
+    // trailing pills + search morph map 1:1; screens that never pass them
+    // just render the plain title bar. The Cabinet's trailing slot takes
+    // (ink, backdrop) — the glass bar passes its own tint as the backdrop.
+    if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
+        CurioGlassToolbar(
+            title = title,
+            subtitle = subtitle,
+            trailing = { ink -> trailing(ink, MaterialTheme.colorScheme.surfaceContainerHigh) },
+            searchActive = searchActive,
+            searchQuery = searchQuery,
+            onSearchQueryChange = onSearchQueryChange,
+            onCloseSearch = onCloseSearch,
+            searchFocus = searchFocus,
+            titleTrailing = titleTrailing?.let { tt ->
+                { ink -> tt(ink, MaterialTheme.colorScheme.surfaceContainerHigh) }
+            },
+            glassBackdrop = glassBackdrop
+        )
+        return
+    }
     val bannerHeight = if (compact) CabinetHeroBannerHeightCompact else CabinetHeroBannerHeight
     val totalHeight = bannerHeight + CabinetHeroSheetExtent
     val heroTornShape = remember(CABINET_TEAR_SEED) { SoftTornBottomShape(CABINET_TEAR_SEED, bold = true) }

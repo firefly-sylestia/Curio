@@ -88,7 +88,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.curio.app.features.bugreport.BugReportScreen
 import com.curio.app.features.database.TopicDatabaseScreen
-import com.curio.app.features.support.PromoModeScreen
 import com.curio.app.features.support.SupportScreen
 import com.curio.app.features.updates.UpdatesScreen
 import com.curio.app.features.crash.CurioCrashScreen
@@ -115,7 +114,6 @@ import com.curio.app.features.detail.EntryDetailScreen
 import com.curio.app.features.outfits.OutfitShopScreen
 import com.curio.app.features.petdesigner.PetDesignerScreen
 import com.curio.app.features.picker.CategoryPickerBrowseScreen
-import com.curio.app.features.picker.CategoryPickerScreen
 import com.curio.app.features.reveal.TopicRevealScreen
 import com.curio.app.features.spin.SpinScreen
 import com.curio.app.features.home.HomeDrawerContent
@@ -135,10 +133,6 @@ import com.curio.app.ui.components.curioFloatingNavContainer
 import com.curio.app.ui.components.curioGlassCaptureDraw
 import com.curio.app.ui.components.CurioNavigationRail
 import com.curio.app.ui.components.isLiquidGlassPillsActive
-import com.curio.app.ui.components.liquidglass.CurioLegacyBlur
-import com.curio.app.ui.components.liquidglass.CurioLegacyBlurSnapshotter
-import com.curio.app.ui.components.liquidglass.curioLegacyCapture
-import com.curio.app.ui.components.liquidglass.curioLegacyCaptureGeometry
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.ui.components.CurioWatermarkBackdrop
@@ -370,16 +364,9 @@ fun CurioNavHost(
                     // A background/foreground cycle must not reopen the dialog
                     // already sitting in the cancel-confirm step.
                     confirmSessionCancel = false
-                    // If the user hid the bubble but no other controller
-                    // exists (live notifications off) and the bubble is
-                    // still enabled, bring it back on return — otherwise
-                    // there'd be no visible timer controller at all.
-                    if (resumed != null && resumed.pillHidden &&
-                        !AppPreferences.liveNotificationsEnabledState &&
-                        AppPreferences.isOverlayBubbleEnabled(context)
-                    ) {
-                        ExploreSessionStore.setPillHidden(context, false)
-                    }
+                    // v3xx — the "live notifications off" controller gap is
+                    // gone (live notification is always on), so the
+                    // bring-the-bubble-back fallback was removed.
                     // Re-arm the explore service (live notification + bubble)
                     // after returning to the app — covers permissions granted
                     // mid-session, Settings toggles, and the restore above.
@@ -477,20 +464,9 @@ fun CurioNavHost(
     }
 
     // v264 — LEGACY GLASS BLUR: on pre-Android-12 devices with the opt-in
-    // experiment on, the same pages-only Box is ALSO recorded into our own
-    // Compose GraphicsLayer; a throttled software snapshotter reads it back,
-    // downscales and stack-blurs it, and the nav/reveal pills draw that as a
-    // REAL frosted backdrop (no RenderEffect needed). Same sibling
-    // architecture — the pills never record themselves.
-    val legacyBlurActive = AppPreferences.legacyGlassBlurState &&
-        !CurioLegacyBlur.readbackBroken &&
-        android.os.Build.VERSION.SDK_INT in 26 until 31 &&
-        AppPreferences.liquidGlassPillsState
-    val legacyCaptureLayer = androidx.compose.ui.graphics.rememberGraphicsLayer()
-    if (legacyBlurActive) {
-        CurioLegacyBlurSnapshotter(legacyCaptureLayer)
-    }
-    // v270 — glass parallax tilt experiment REMOVED (sensor + toggle gone).
+    // v3xx — the "Real blur (older devices)" + custom blur engine experiments
+    // were REMOVED (toggles + code paths gone): pre-Android-12 pills use the
+    // static veil, widgets use system blur.
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -531,13 +507,6 @@ fun CurioNavHost(
                     // overlays are SIBLINGS of this Box, so they never
                     // record themselves into their own blurred backdrop.
                     .then(if (isLiquidGlassPillsActive()) Modifier.layerBackdrop(navGlassBackdrop) else Modifier)
-                    .then(
-                        if (legacyBlurActive) {
-                            Modifier
-                                .curioLegacyCapture(legacyCaptureLayer)
-                                .curioLegacyCaptureGeometry()
-                        } else Modifier
-                    )
                     .then(
                         if ((showBottomBar && !wide) || routePrefix in fullBleedBottomRoutePrefixes) Modifier
                         else Modifier.windowInsetsPadding(WindowInsets.navigationBars)
@@ -759,13 +728,9 @@ fun CurioNavHost(
                 route = CurioRoutes.PICKER,
             ) {
                 // v3xx — the NEW category picker (Browse page with bottom
-                // nav) is the default; the old glass-pill picker returns via
-                // Settings → Experiments → "Classic category picker".
-                if (AppPreferences.classicPickerEnabledState) {
-                    CategoryPickerScreen(navController = navController)
-                } else {
-                    CategoryPickerBrowseScreen(navController = navController)
-                }
+                // nav) is the only picker now (the classic glass-pill picker
+                // experiment was fully removed).
+                CategoryPickerBrowseScreen(navController = navController)
             }
             composable(
                 route = CurioRoutes.SPIN_WITH_CATEGORY,
@@ -899,9 +864,6 @@ fun CurioNavHost(
             composable(CurioRoutes.USER_EXPERIMENTS) {
                 UserExperimentsScreen(navController = navController)
             }
-            composable(CurioRoutes.GLASS_WIDGET_LAB) {
-                com.curio.app.features.settings.GlassWidgetLabScreen(navController = navController)
-            }
             composable(CurioRoutes.GLASS_WIDGET_EDITOR) {
                 com.curio.app.features.settings.WidgetEditorScreen(navController = navController)
             }
@@ -928,9 +890,6 @@ fun CurioNavHost(
             }
             composable(CurioRoutes.UPDATES) {
                 UpdatesScreen(navController = navController)
-            }
-            composable(CurioRoutes.PROMO) {
-                PromoModeScreen(navController = navController)
             }
             composable(CurioRoutes.DATABASE) {
                 TopicDatabaseScreen(navController = navController)

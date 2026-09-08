@@ -89,7 +89,6 @@ object AppPreferences {
     // near-black surfaces, so dark mode can draw a soft LIGHT glow shadow
     // (default OFF). The v28 hairline outline option was REMOVED.
     private const val KEY_DARK_GLOW = "dark_glow"
-    private const val KEY_PROMO_MODE = "promo_mode"   // hidden promo/demo-content mode
     // v7.7 — experimental peek-card redesign, four independent toggles so
     // each upgrade can be A/B'd on its own: top-lit gradient fill, tinted
     // hairline, soft shadows, roomier two-line near titles. Each OFF by
@@ -123,7 +122,6 @@ object AppPreferences {
     private const val KEY_SMART_DENSITY_MODE = "smart_density_mode"
     private const val KEY_LEGACY_SMART_DENSITY_LAYOUT = "smart_density_layout"
     private const val KEY_EXPLORE_SESSIONS_ENABLED = "explore_sessions_enabled"
-    private const val KEY_LIVE_NOTIFICATIONS_ENABLED = "live_notifications_enabled"
     private const val KEY_OVERLAY_BUBBLE_ENABLED = "overlay_bubble_enabled"
     // v23 — whether the "Show the explore bubble" opt-in row appears inside
     // the Explore now dialog (default OFF; the Notifications toggle
@@ -187,22 +185,21 @@ object AppPreferences {
     // New category picker ("Category Mix Studio"):
     // - KEY_NAMED_MIXES — the named mixes the user creates/saves (JSON
     //   array of NamedMix). Seeded from the old quick presets once.
-    // - KEY_CLASSIC_PICKER — ON restores the OLD glass-pill picker; the
-    //   new picker is the default (OFF).
+    // - (KEY_CLASSIC_PICKER removed — the old glass-pill picker experiment
+    //   was fully removed; the new picker is the only picker.)
     // - KEY_PICKER_MIXES_SEEDED — the starter mixes were written once, so
     //   deleting every mix doesn't resurrect them.
     private const val KEY_NAMED_MIXES = "named_mixes"               // JSON array of NamedMix
     private const val KEY_CABINET_COLLECTIONS = "cabinet_collections" // JSON array of CurioCollection
     private const val KEY_LAST_MIX_NAME = "last_mix_name"          // String? — the applied deck's mix name
-    private const val KEY_CLASSIC_PICKER = "classic_picker"         // bool — old glass-pill picker
     private const val KEY_PICKER_MIXES_SEEDED = "picker_mixes_seeded" // bool — starter mixes written once
     // v3xx — picker page default + curated suggestions (add/remove):
-    // - KEY_PICKER_DEFAULT_PAGE — 0 = classic picker opens first (default),
-    //   1 = new picker opens first.
+    // - KEY_PICKER_DEFAULT_PAGE — which page of the new picker opens first
+    //   (0 = browse, 1 = mixes).
     // - KEY_PICKER_SUGGESTIONS — a JSON array of CategoryId names the user
     //   curated as the "fun to explore" list below the mixes. Empty/missing
     //   falls back to a curated default list.
-    private const val KEY_PICKER_DEFAULT_PAGE = "picker_default_page"   // int — 0 classic, 1 new
+    private const val KEY_PICKER_DEFAULT_PAGE = "picker_default_page"   // int — 0 browse, 1 mixes
     private const val KEY_PICKER_SUGGESTIONS = "picker_suggestions"     // JSON array of CategoryId
     // v3xx13 — per-page scroll persistence for the sheet's classic/new pager;
     // v3xx14 — page 0 is now per-TAB: the Curio/Knowledge/Mix mode survives
@@ -924,16 +921,9 @@ object AppPreferences {
         private set
 
     // Hidden promo/demo-content mode (v7.107) — OFF by default; v24 it is
-    // reached from the Experiments screen (Settings → Experiments → Promo
-    // mode, or the Version row's five-tap in Support & diagnostics) and its
-    // own page's toggle is the one control. While ON, the app shows promo sample
-    // content everywhere (Home hero stats + recents, Profile level,
-    // Quests level, Cabinet grid) so the user can screenshot the app for
-    // store promotion. Demo data is derived from real topics via
-    // [PromoMode] — no user data is touched. Default OFF.
-    var promoModeState by mutableStateOf(false)
-        private set
-
+    // v3xx — the PROMO MODE experiment was fully REMOVED (screen, route,
+    // flag and all demo-content branches in Home/Profile/Quests/Cabinet
+    // were deleted; the app always shows real data).
     // Peek-deck upgrades (v7.7) — the Spin deck's background peek cards:
     // top-lit gradient fill, category-tinted hairline border, roomier
     // two-line near-card titles. v223 — the experiments CONCLUDED with all
@@ -977,10 +967,9 @@ object AppPreferences {
     // v97 — the Paper stat card experiment PASSED: on by default app-wide
     // (the Experiments toggles stay for comparison).
     var paperStatCardsState by mutableStateOf(true)
-    // v101 — the pill glow (dark mode) is the SUBTLE top-only version by
-    // default (gentler glass edge + a glow that hugs the pill's top); the
-    // toggle restores the fuller glow for comparison.
-    var pillGlowSubtleState by mutableStateOf(true)
+    // v101 — the pill glow (dark mode) is the SUBTLE top-only version
+    // (gentler glass edge + a glow that hugs the pill's top). v3xx — the
+    // experiment concluded: subtle is the always-on default, no toggle.
     // v3xx — CABINET v2 experiment (Settings → Experiments → Cabinet v2,
     // default OFF): while enabled, the saved-entries + liked-books surfaces
     // render as the new collections view with jacket-art covers and Home's
@@ -1009,6 +998,13 @@ object AppPreferences {
     // off restores the exact pre-toggle accent. Watermark glyphs, ink and
     // everything else are untouched — only the banner fill color deepens.
     var headerDeepState by mutableStateOf(true)
+        private set
+    // v3xx — the app-wide header style: TORN (default, the classic torn
+    // paper banner) or GLASS (the Cabinet v2 glass-toolbar look — a
+    // content-height liquid-glass bar with its own tint). Selected in
+    // Settings → Experiments → "Glass toolbar header".
+    enum class HeaderStyle { TORN, GLASS }
+    var headerStyleState by mutableStateOf(HeaderStyle.TORN)
         private set
     // v10 — dual-accent blend gradient toggle (default OFF). When on, the
     // hero card wears a richer multi-accent blend instead of the plain
@@ -1103,13 +1099,6 @@ object AppPreferences {
     var profileAvatarPathState by mutableStateOf("")
         internal set
 
-    // v280 — CUSTOM BLUR ENGINE (experiment, default OFF): when ON, the
-    // glass widget provider and live wallpaper use Curio's own blur
-    // engine instead of the system / Samsung One UI blur path. Gives
-    // consistent blur quality on every launcher.
-    var customBlurEngineState by mutableStateOf(false)
-        private set
-
     // Liquid-glass navigation pills experiment (v227) — OPT-IN (default
     // OFF): the three floating nav-style capsules (bottom tab bar, Topic
     // Reveal category/favorite bar, Pet Designer studio bar) render a
@@ -1118,16 +1107,6 @@ object AppPreferences {
     // instead of the solid elevated fill. Needs Android 12+ (RenderEffect);
     // older devices silently keep the current look.
     var liquidGlassPillsState by mutableStateOf(false)
-        private set
-
-    // v264 — LEGACY GLASS BLUR (experiment, default OFF): below Android 12
-    // there is no RenderEffect, so the real glass recipe can't run. When
-    // this is on, an APP-SIDE blur engine takes over for the bottom nav +
-    // Topic Reveal pills: the page layer is snapshotted in software,
-    // downscaled and stack-blurred (~8 updates/s), and the blurred pixels
-    // are drawn as the pills' real backdrop under the usual sheen/rim —
-    // frosted glass that actually shows the content scrolling behind it.
-    var legacyGlassBlurState by mutableStateOf(false)
         private set
 
     // v248 — CLASSIC ACTIVE INDICATOR (experiment, default OFF): the nav
@@ -1234,12 +1213,8 @@ object AppPreferences {
     var recycleBinExpiryDaysState by mutableStateOf(DEFAULT_RECYCLE_BIN_EXPIRY_DAYS)
         private set
 
-    // Live explore notifications — the persistent chronometer notification
-    // with Pause/Stop controls shown while exploring (like Samsung/Google's
-    // live-updating ongoing notifications). Default ON; off means no ongoing
-    // notification at all — only the end-of-session reminder + bubble.
-    var liveNotificationsEnabledState by mutableStateOf(true)
-        private set
+    // v3xx — the "Live explore notification" experiment concluded: the
+    // persistent chronometer notification is ALWAYS on (no toggle).
 
     // Floating explore bubble — a Messenger-style timer bubble drawn over
     // OTHER apps (the browser) via SYSTEM_ALERT_WINDOW. Default ON; off
@@ -1381,9 +1356,6 @@ object AppPreferences {
      * default picker; ON = the old glass-pill picker. Seeded from prefs
      * in [initThemeMode].
      */
-    var classicPickerEnabledState by mutableStateOf(false)
-        private set
-
     /** Whether the starter named mixes were already written once. */
     var pickerMixesSeededState by mutableStateOf(false)
         private set
@@ -1507,7 +1479,6 @@ object AppPreferences {
         heroBlueState = isHeroBlueEnabled(context)
         heroFollowLaneState = isHeroFollowLaneEnabled(context)
         darkGlowState = isDarkGlowEnabled(context)
-        promoModeState = isPromoModeEnabled(context)
         peekGradientState = isPeekGradientEnabled(context)
         peekHairlineState = isPeekHairlineEnabled(context)
         peekShadowsState = isPeekShadowsEnabled(context)
@@ -1522,8 +1493,8 @@ object AppPreferences {
         paperHoleRingStyleState = getPaperHoleRingStyle(context)
         paperStatCardsState = isPaperStatCardsEnabled(context)
         paperStatTearState = isPaperStatTearEnabled(context)
-        pillGlowSubtleState = isPillGlowSubtleEnabled(context)
         heroTearSheetState = isHeroTearSheetEnabled(context)
+        headerStyleState = getHeaderStyle(context)
         navPillButtonsState = isNavPillButtonsEnabled(context)
         homeTintState = isHomeTintEnabled(context)
         homeHeroTintState = isHomeHeroTintEnabled(context)
@@ -1543,10 +1514,8 @@ object AppPreferences {
         albumFavStripVisibleState = isAlbumFavStripVisible(context)
         albumFavRowsState = isAlbumFavRows(context)
         profileAvatarPathState = getProfileAvatarPath(context)
-        customBlurEngineState = isCustomBlurEngineEnabled(context)
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
         forceGlassEnabled = prefs(context).getBoolean(KEY_FORCE_GLASS, false)
-        legacyGlassBlurState = isLegacyGlassBlurEnabled(context)
         glassClassicIndicatorState = isGlassClassicIndicatorEnabled(context)
         navIndicatorColorState = getNavIndicatorColor(context)
         navIndicatorOpacityState = getNavIndicatorOpacity(context)
@@ -1565,7 +1534,6 @@ object AppPreferences {
         searchEngineState = getSearchEngine(context)
         musicServiceState = getMusicService(context)
         recycleBinExpiryDaysState = getRecycleBinExpiryDays(context)
-        liveNotificationsEnabledState = isLiveNotificationsEnabled(context)
         overlayBubbleEnabledState = isOverlayBubbleEnabled(context)
         showBubbleOptInDialogState = isShowBubbleOptInDialog(context)
         overlayAskDeclinedState = isOverlayAskDeclined(context)
@@ -1586,7 +1554,6 @@ object AppPreferences {
         categoryOrderState = getCategoryOrder(context)
         savedMixesState = getSavedMixes(context)
         collectionsState = getCabinetCollections(context)
-        classicPickerEnabledState = isClassicPickerEnabled(context)
         pickerMixesSeededState = isPickerMixesSeeded(context)
         lastMixNameState = getLastMixName(context)
         bookFetchEnabledState = isBookFetchEnabled(context)
@@ -1727,14 +1694,6 @@ object AppPreferences {
 
     // ── Promo/demo-content mode (v7.107 hidden) ───────────────────────
     /** Whether the hidden promo demo-content mode is on (default off). */
-    fun isPromoModeEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_PROMO_MODE, false)
-
-    fun setPromoModeEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_PROMO_MODE, enabled).apply()
-        promoModeState = enabled
-    }
-
     // ── Peek-deck redesign (v7.7 experimental) ────────────────────────
     /** Whether the top-lit gradient peek-card fill is on (v223 — concluded ON, toggle removed). */
     fun isPeekGradientEnabled(context: Context): Boolean =
@@ -1879,12 +1838,12 @@ object AppPreferences {
     }
 
     // ── Paper & header experiments (v27) ─────────────────────────────
+    private const val KEY_HEADER_STYLE = "header_style"   // "TORN" | "GLASS"
     private const val KEY_PAPER_HEADER_CUTS = "paper_header_cuts"
     private const val KEY_PAPER_HEADER_HOLES = "paper_header_holes"
     private const val KEY_PAPER_HOLE_RINGS = "paper_hole_rings"
     private const val KEY_PAPER_HOLE_RING_STYLE = "paper_hole_ring_style"
     private const val KEY_PAPER_STAT_CARDS = "paper_stat_cards"
-    private const val KEY_PILL_GLOW_SUBTLE = "pill_glow_subtle"
     private const val KEY_HERO_TEAR_SHEET = "hero_tear_sheet"
     private const val KEY_HOME_TINT = "home_tint"
     private const val KEY_HOME_HERO_TINT = "home_hero_tint"
@@ -1898,7 +1857,6 @@ object AppPreferences {
     private const val KEY_CABINET_V2 = "cabinet_v2_experiment"
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
     private const val KEY_FORCE_GLASS = "force_glass_override"
-    private const val KEY_LEGACY_GLASS_BLUR = "legacy_glass_blur"
     private const val KEY_GLASS_LAB_WALLPAPER = "glass_lab_wallpaper"
     private const val KEY_GLASS_CLASSIC_INDICATOR = "glass_classic_indicator"
     private const val KEY_NAV_INDICATOR_COLOR = "nav_indicator_color"
@@ -1908,17 +1866,7 @@ object AppPreferences {
     private const val KEY_GLASS_REFRACTION_SCALE = "glass_refraction_scale"
     private const val KEY_GLASS_REFLECTION_SCALE = "glass_reflection_scale"
     private const val KEY_GLASS_INDICATOR_SHADOW_SCALE = "glass_indicator_shadow_scale"
-    private const val KEY_CUSTOM_BLUR_ENGINE = "custom_blur_engine"
     // v292h — CRASH RECOVERY: tracks consecutive native crashes that
-
-    // ── Custom blur engine (v280 experiment) ────────────────────────
-    fun isCustomBlurEngineEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_CUSTOM_BLUR_ENGINE, false)
-
-    fun setCustomBlurEngineEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_CUSTOM_BLUR_ENGINE, enabled).apply()
-        customBlurEngineState = enabled
-    }
 
     /** Whether the header corner cut-lines + top-right ticks accent is on (experimental, default off). */
     fun isPaperHeaderCutsEnabled(context: Context): Boolean =
@@ -2023,14 +1971,8 @@ object AppPreferences {
         cabinetV2EnabledState = enabled
     }
 
-    /** Whether the dark-mode pill glow is the subtle top-only version (v101, default ON). */
-    fun isPillGlowSubtleEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_PILL_GLOW_SUBTLE, true)
-
-    fun setPillGlowSubtleEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_PILL_GLOW_SUBTLE, enabled).apply()
-        pillGlowSubtleState = enabled
-    }
+    // v3xx — the "Subtle pill glow" experiment concluded: subtle is the
+    // always-on default, toggle + plumbing removed.
 
     /** Whether the stat paper card wears torn paper edges (extended tear on top; experimental, default off). */
     fun isPaperStatTearEnabled(context: Context): Boolean =
@@ -2047,6 +1989,16 @@ object AppPreferences {
      * hero tears straight into the page. Turning it on restores the extra
      * paper layer for comparison (Settings → Experiments → Paper & headers).
      */
+    /** v3xx — the app-wide header style (torn banner default / glass toolbar). */
+    fun getHeaderStyle(context: Context): HeaderStyle =
+        runCatching { HeaderStyle.valueOf(prefs(context).getString(KEY_HEADER_STYLE, null) ?: "TORN") }
+            .getOrDefault(HeaderStyle.TORN)
+
+    fun setHeaderStyle(context: Context, style: HeaderStyle) {
+        prefs(context).edit().putString(KEY_HEADER_STYLE, style.name).apply()
+        headerStyleState = style
+    }
+
     fun isHeroTearSheetEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_HERO_TEAR_SHEET, false)
 
@@ -2134,14 +2086,6 @@ object AppPreferences {
 
     // Legacy glass blur (experiment, default OFF): an app-side blur engine
     // for pre-Android-12 devices (see the state field above).
-    fun isLegacyGlassBlurEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_LEGACY_GLASS_BLUR, false)
-
-    fun setLegacyGlassBlurEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_LEGACY_GLASS_BLUR, enabled).apply()
-        legacyGlassBlurState = enabled
-    }
-
     fun isGlassClassicIndicatorEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_GLASS_CLASSIC_INDICATOR, false)
 
@@ -2334,32 +2278,12 @@ object AppPreferences {
     }
 
     /**
-     * Whether the persistent live explore notification is on. Default ON.
-     * Off = no ongoing notification; the end reminder + bubble stay.
+     * v3xx — the "Live explore notification" experiment concluded: the
+     * persistent live explore notification is ALWAYS on (no toggle). It
+     * shows whenever explore sessions run and the permission is granted;
+     * the end reminder + bubble stay as they are.
      */
-    fun isLiveNotificationsEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_LIVE_NOTIFICATIONS_ENABLED, true)
-
-    fun setLiveNotificationsEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_LIVE_NOTIFICATIONS_ENABLED, enabled).apply()
-        liveNotificationsEnabledState = enabled
-        val session = ExploreSessionStore.getActiveSession(context) ?: return
-        if (enabled) {
-            // Flipped ON mid-session: bring the live notification back for
-            // the currently active session (the bubble stays if wanted).
-            com.curio.app.infrastructure.ExploreSessionService.start(context, session)
-        } else {
-            // Flipped OFF mid-session: drop the chronometer notification.
-            // Keep the service alive when the floating bubble still wants it
-            // (it swaps to the minimal bubble-active notification); otherwise
-            // stop it — the session + reminder survive either way.
-            if (isOverlayBubbleEnabled(context) && overlayActuallyUsable(context)) {
-                com.curio.app.infrastructure.ExploreSessionService.sync(context)
-            } else {
-                com.curio.app.infrastructure.ExploreSessionService.stop(context)
-            }
-        }
-    }
+    fun isLiveNotificationsEnabled(context: Context): Boolean = true
 
     /**
      * v23 — whether the Explore now dialog shows its "Show the explore
@@ -3102,14 +3026,6 @@ object AppPreferences {
      * Classic-picker toggle: false = the NEW picker is the default; true
      * restores the OLD glass-pill picker (the A/B side of the redesign).
      */
-    fun isClassicPickerEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_CLASSIC_PICKER, false)
-
-    fun setClassicPickerEnabled(context: Context, on: Boolean) {
-        prefs(context).edit().putBoolean(KEY_CLASSIC_PICKER, on).apply()
-        classicPickerEnabledState = on
-    }
-
     /** Whether the starter mixes were already written once. */
     fun isPickerMixesSeeded(context: Context): Boolean =
         prefs(context).getBoolean(KEY_PICKER_MIXES_SEEDED, false)
