@@ -27,7 +27,7 @@ FILTER-ADAPTIVE (B&W → gray line, Nostalgia/Warm → warmed line) with a
 per-style stroke (Vintage thinner + fainter, Noir bolder; Dashed keeps its
 dotted hairline — its identifier).
 
-**Status:** fixes implemented, commit + push pending.
+**Status:** COMPLETE — committed + pushed (8a95e921).
 
 ## Request (2026-09-08, completed — experiments removal + defaults + app-wide header style)
 
@@ -470,6 +470,18 @@ for the Home glass toolbar).
    the app; its liquid glass should be MORE blurry with its OWN color tint
    so the text colors stay visible, and its height should extend to fit the
    header content.
+
+### DONE — 2026-09-08 (polaroid outline accuracy + CI compile fix)
+**Status:** COMPLETE — committed + pushed (8a95e921). The failing CI
+(from the experiments-removal batch) was fixed: `kotlinx.coroutines.launch`
+import added to CabinetV2Content (used `scope.launch` without it), and the
+two stray bare `{ }` blocks (lambdas) left by the promo/classic-picker
+removals — Home's "View all" Surface and Spin's NewCategoryPickerSheet —
+were unwrapped so their @Composable calls compile again. The polaroid's
+film-window outline was rebuilt to be accurate (inset hairline hugging the
+window, sheen under it, matching clipped corners), filter-adaptive (B&W →
+gray, Nostalgia/Warm → warmed) and per-style (Vintage thin/faint, Noir
+bold, Dashed keeps its dotted identifier). Full detail in the request log.
 
 ### DONE — next prompt (polaroid cut + Cabinet stability/perf + CI log)
 **Status:** COMPLETE — pushed with the 4e6d184c batch (the CI part: missing
