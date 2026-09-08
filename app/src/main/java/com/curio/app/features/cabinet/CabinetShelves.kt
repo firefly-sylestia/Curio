@@ -481,7 +481,7 @@ private fun BoxScope.ReadingArt(dark: Boolean) {
         drawPath(Path().apply {
             moveTo(w * 0.08f, baseY - bh * 0.55f)
             cubicTo(w * 0.15f, baseY - bh * 0.75f, w * 0.03f, baseY - bh * 0.85f, w * 0.10f, baseY - bh * 1.02f)
-        }, color = steam.copy(alpha = 0.55f), style = androidx.compose.ui.graphics.Stroke(width = 1.6f))
+        }, color = steam.copy(alpha = 0.55f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.6f))
         drawCircle(steam.copy(alpha = 0.5f), radius = w * 0.016f, center = androidx.compose.ui.geometry.Offset(w * 0.10f, baseY - bh * 0.10f))
     }
 }
@@ -605,7 +605,7 @@ private fun BoxScope.WindowArt(dark: Boolean) {
         val x0 = w * 0.70f - ww / 2f; val y0 = h * 0.92f - wh
         drawRoundRect(sky, androidx.compose.ui.geometry.Offset(x0, y0), androidx.compose.ui.geometry.Size(ww, wh), androidx.compose.ui.geometry.CornerRadius(ww * 0.06f))
         drawCircle(Color(0xFFF8E8C8), radius = ww * 0.13f, center = androidx.compose.ui.geometry.Offset(x0 + ww * 0.72f, y0 + wh * 0.28f))
-        drawRoundRect(frame.copy(alpha = 0.6f), androidx.compose.ui.geometry.Offset(x0, y0), androidx.compose.ui.geometry.Size(ww, wh), androidx.compose.ui.geometry.CornerRadius(ww * 0.06f), style = androidx.compose.ui.graphics.Stroke(width = ww * 0.05f))
+        drawRoundRect(frame.copy(alpha = 0.6f), androidx.compose.ui.geometry.Offset(x0, y0), androidx.compose.ui.geometry.Size(ww, wh), androidx.compose.ui.geometry.CornerRadius(ww * 0.06f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = ww * 0.05f))
         drawLine(frame.copy(alpha = 0.6f), androidx.compose.ui.geometry.Offset(x0 + ww / 2f, y0), androidx.compose.ui.geometry.Offset(x0 + ww / 2f, y0 + wh), strokeWidth = ww * 0.035f)
         drawLine(frame.copy(alpha = 0.6f), androidx.compose.ui.geometry.Offset(x0, y0 + wh / 2f), androidx.compose.ui.geometry.Offset(x0 + ww, y0 + wh / 2f), strokeWidth = ww * 0.035f)
         // plant on the sill
@@ -650,7 +650,7 @@ private fun BoxScope.MinimalSunArt(dark: Boolean) {
         val cx = w * 0.72f; val cy = h * 0.34f; val r = w * 0.17f
         drawArc(ink.copy(alpha = 0.85f), startAngle = 180f, sweepAngle = 180f, useCenter = false,
             topLeft = androidx.compose.ui.geometry.Offset(cx - r, cy - r), size = androidx.compose.ui.geometry.Size(r * 2f, r * 2f),
-            style = androidx.compose.ui.graphics.Stroke(width = w * 0.014f))
+            style = androidx.compose.ui.graphics.drawscope.Stroke(width = w * 0.014f))
         drawLine(ink.copy(alpha = 0.5f), androidx.compose.ui.geometry.Offset(w * 0.12f, h * 0.78f), androidx.compose.ui.geometry.Offset(w * 0.88f, h * 0.78f), strokeWidth = w * 0.012f)
         drawCircle(ink, radius = w * 0.02f, center = androidx.compose.ui.geometry.Offset(w * 0.40f, h * 0.60f))
     }
@@ -663,8 +663,8 @@ private fun BoxScope.MinimalRingsArt(dark: Boolean) {
     Canvas(Modifier.fillMaxSize()) {
         val w = size.width; val h = size.height
         val cx = w * 0.68f; val cy = h * 0.50f
-        drawCircle(ink.copy(alpha = 0.30f), radius = w * 0.17f, center = androidx.compose.ui.geometry.Offset(cx, cy), style = androidx.compose.ui.graphics.Stroke(width = w * 0.010f))
-        drawCircle(ink.copy(alpha = 0.55f), radius = w * 0.10f, center = androidx.compose.ui.geometry.Offset(cx, cy), style = androidx.compose.ui.graphics.Stroke(width = w * 0.010f))
+        drawCircle(ink.copy(alpha = 0.30f), radius = w * 0.17f, center = androidx.compose.ui.geometry.Offset(cx, cy), style = androidx.compose.ui.graphics.drawscope.Stroke(width = w * 0.010f))
+        drawCircle(ink.copy(alpha = 0.55f), radius = w * 0.10f, center = androidx.compose.ui.geometry.Offset(cx, cy), style = androidx.compose.ui.graphics.drawscope.Stroke(width = w * 0.010f))
         drawCircle(ink, radius = w * 0.02f, center = androidx.compose.ui.geometry.Offset(w * 0.30f, h * 0.28f))
         drawLine(ink.copy(alpha = 0.40f), androidx.compose.ui.geometry.Offset(w * 0.14f, h * 0.78f), androidx.compose.ui.geometry.Offset(w * 0.86f, h * 0.78f), strokeWidth = w * 0.008f)
     }
@@ -680,7 +680,7 @@ private fun BoxScope.MinimalWaveArt(dark: Boolean) {
             moveTo(0f, h * 0.60f)
             cubicTo(w * 0.20f, h * 0.30f, w * 0.34f, h * 0.86f, w * 0.52f, h * 0.62f)
             cubicTo(w * 0.66f, h * 0.44f, w * 0.80f, h * 0.80f, w, h * 0.52f)
-        }, color = ink.copy(alpha = 0.75f), style = androidx.compose.ui.graphics.Stroke(width = w * 0.013f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
+        }, color = ink.copy(alpha = 0.75f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = w * 0.013f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
         drawCircle(ink, radius = w * 0.018f, center = androidx.compose.ui.geometry.Offset(w * 0.30f, h * 0.22f))
     }
 }
