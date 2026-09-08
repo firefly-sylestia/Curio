@@ -403,7 +403,7 @@ fun TextHistoryBrowser(
                 val branches = buildHistoryBranches(entries)
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth().weight(1f),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp, bottom = 16.dp),
+                    contentPadding = PaddingValues(start = 12.dp, top = 4.dp, end = 12.dp, bottom = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(branches, key = { it.key }) { branch ->
@@ -421,7 +421,7 @@ fun TextHistoryBrowser(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth().weight(1f),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp, bottom = 16.dp),
+                    contentPadding = PaddingValues(start = 12.dp, top = 4.dp, end = 12.dp, bottom = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     items(entries, key = { it.id }) { e ->
