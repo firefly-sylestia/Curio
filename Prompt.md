@@ -1,5 +1,37 @@
 # Prompt Log — current request
 
+## Request (2026-09-08, completed — measured smart fit + sparkle title lift)
+
+**Request:** do the NARROW version of the rejected measurement-first rewrite
+— replace the character-count buckets in `autoFitGrow`/`factFitBudget` with
+a real `TextMeasurer` wrap estimate, keeping everything else intact — AND
+fix the sparkle pill smart fit: "it's still not accurate, it's not taking
+the title out of the quick fact area — properly fit it again".
+
+**What shipped (TopicShareCard.kt):**
+1. **Measured wrap estimate** — new `@Composable rememberFactWrapLines(
+   primary, secondary, aspect)` measures the fact text with a real
+   `TextMeasurer` at the card's content width at scale 1.0 (canonical 11sp
+   Lora body) and returns the actual wrap LINE count; `autoFitGrow(len)`
+   (char buckets) became `autoFitGrowByWrap(wrapLines)` with the same
+   curve keyed on lines (>26→2.4× … >4→1.12×), so a long URL counts by the
+   lines it actually wraps into, not its length. `autoFitShape` /
+   `smartAutoFitDelta` now take `wrapLines`; all 8 call sites (ShareCard
+   render + sheet/fullscreen previews + Size/Crop tool thumbs) and the
+   sparkle (`autoLayoutPlan` gained `wrapLines`, hoisted once in
+   `TopicShareSheet` via `autoLayoutWrapLines`) pass the measured value.
+2. **Sparkle title lift, measured** — the old prospective lift
+   `((heightFrac-1) × 28dp)` under-lifted tall grown boxes on
+   bottom-anchored styles (Clean/Minimal), leaving the title inside the
+   grown quick-fact area until a SECOND tap. Now, when the live measured
+   rects exist, the lift is computed exactly: grownFactTop =
+   factRect.top − (heightFrac−1)×factRect.height (only for the
+   up-growing Clean/Minimal styles; mid-flow styles keep the measured
+   overlap alone), title lifts by titleRect.bottom − grownFactTop, capped
+   96dp; unmeasured rects fall back to the old heuristic.
+
+**Status:** committed + pushed (see git log).
+
 ## Request (2026-09-08, in progress — CI fix + polaroid outline accuracy)
 
 **Request:** (1) fix the failing CI (errors in CabinetV2Content.kt, HomeScreen.kt and SpinScreen.kt); (2) the polaroid has a square dark outline around the image area that is INACCURATE — the Dashed style uses that outline so it's easier to identify, so fix the outline properly and refine/improve the design per style, adapting with filters too.
@@ -508,92 +540,10 @@ fixed in this follow-up commit:
    Room observes the single row by primary key; the sample fallback is
    resolved once before the flow.
 
-**Raw user text (preserved):**
+### DONE — measured smart fit + sparkle title lift (2026-09-08)
+**Status:** the narrow TextMeasurer version + the sparkle-pill title lift
+shipped (this batch — see the request log entry above). The pending
+prompt below (Home/Profile header morph) is next.
 
- also a fix in other style the polaroid is cut from button so fix it and the cabinet screen itself is very unstable lags when opened first time and heats up too my device just in caboinet screen and no no liquid glass issue its off its the cabinet screen itself also sometimes when opening the saved entry too can u properly fix it, and also the previous cl failed heres the log fix that too  Task :app:kspReleaseKotlin
-> Task :app:compileDebugKotlin
-> Task :app:compileReleaseKotlin
-
-> Task :app:compileDebugKotlin FAILED
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/cabinet/CabinetV2Content.kt:620:23 Unresolved reference 'launch'.
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/cabinet/CabinetV2Content.kt:621:62 Suspend function 'suspend fun softDeleteByIds(ids: Collection<String>): Int' can only be called from a coroutine or another suspend function.
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:146:23 Cannot infer type for type parameter 'T'. Specify it explicitly.
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:146:34 Unresolved reference 'mutableStateOf'.
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:239:21 Cannot infer type for type parameter 'T'. Specify it explicitly.
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:239:21 Cannot infer type for type parameter 'R'. Specify it explicitly.
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/cabinet/CabinetV2Content.kt:620:23 Unresolved reference 'launch'.
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/cabinet/CabinetV2Content.kt:621:62 Suspend function 'suspend fun softDeleteByIds(ids: Collection<String>): Int' can only be called from a coroutine or another suspend function.
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:146:23 Cannot infer type for type parameter 'T'. Specify it explicitly.
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:146:34 Unresolved reference 'mutableStateOf'.
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:239:21 Cannot infer type for type parameter 'T'. Specify it explicitly.
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:239:21 Cannot infer type for type parameter 'R'. Specify it explicitly.
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:239:21 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-fun <T, R> T.let(block: (T) -> R): R
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:239:27 Cannot infer type for type parameter 'T'. Specify it explicitly.
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:272:29 'when' expression must be exhaustive. Add an 'else' branch.
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:239:21 Unresolved reference. None of the following candidates is applicable because of a receiver type mismatch:
-
-> Task :app:compileReleaseKotlin FAILED
-gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1788842974660.json
-fun <T, R> T.let(block: (T) -> R): R
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:239:27 Cannot infer type for type parameter 'T'. Specify it explicitly.
-e: file:///home/runner/work/Curio/Curio/app/src/main/java/com/curio/app/features/recent/RecentScreen.kt:272:29 'when' expression must be exhaustive. Add an 'else' branch.
-
-FAILURE: Build completed with 2 failures.
-
-1: Task failed with an exception.
------------
-* What went wrong:
-Execution failed for task ':app:compileDebugKotlin'.
-> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
-   > Compilation error. See log for more details
-
-56 actionable tasks: 56 executed
-* Try:
-Configuration cache entry stored.
-> Run with --info or --debug option to get more log output.
-> Run with --scan to get full insights from a Build Scan (powered by Develocity).
-> Get more help at https://help.gradle.org.
-
-* Exception is:
-org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':app:compileDebugKotlin'.
-	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.lambda$executeIfValid$1(ExecuteActionsTaskExecuter.java:135)
-	at org.gradle.internal.Try$Failure.ifSuccessfulOrElse(Try.java:288)
-	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:133)
-	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.execute(ExecuteActionsTaskExecuter.java:121)
-	at org.gradle.api.internal.tasks.execution.ProblemsTaskPathTrackingTaskExecuter.execute(ProblemsTaskPathTrackingTaskExecuter.java:41)
-	at org.gradle.api.internal.tasks.execution.ResolveTaskExecutionModeExecuter.execute(ResolveTaskExecutionModeExecuter.java:51)
-	at org.gradle.api.internal.tasks.execution.FinalizePropertiesTaskExecuter.execute(FinalizePropertiesTaskExecuter.java:46)
-	at org.gradle.api.internal.tasks.execution.SkipTaskWithNoActionsExecuter.execute(SkipTaskWithNoActionsExecuter.java:57)
-	at org.gradle.api.internal.tasks.execution.SkipOnlyIfTaskExecuter.execute(SkipOnlyIfTaskExecuter.java:74)
-	at org.gradle.api.internal.tasks.execution.CatchExceptionTaskExecuter.execute(CatchExceptionTaskExecuter.java:36)
-	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.executeTask(EventFiringTaskExecuter.java:77)
-	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:55)
-	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:52)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
-	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
-	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter.execute(EventFiringTaskExecuter.java:52)
-	at org.gradle.execution.plan.DefaultNodeExecutor.executeLocalTaskNode(DefaultNodeExecutor.java:55)
-	at org.gradle.execution.plan.DefaultNodeExecutor.execute(DefaultNodeExecutor.java:34)
-	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:355)
-	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:343)
-	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.lambda$execute$0(DefaultTaskExecutionGraph.java:339)
-	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:84)
-	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:339)
-	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:328)
-	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
-	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
-	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
-	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:47)
-Caused by: org.gradle.workers.internal.DefaultWorkerExecutor$WorkExecutionException: A failure occurred while executing org.jetbrains.kotlin.compilerRunner.btapi.BuildToolsApiCompilationWork
-	at org.gradle.workers.internal.DefaultWorkerExecutor$WorkItemExecution.waitForCompletion(DefaultWorkerExecutor.java:289)
-	at org.gradle.internal.work.DefaultAsyncWorkTracker.lambda$waitForItemsAndGatherFailures$2(DefaultAsyncWorkTracker.java:130)
-	at org.gradle.internal.Factories$1.create(Factories.java:30)
-	at org.gradle.internal.work.DefaultWorkerLeaseService.lambda$withoutLocks$2(DefaultWorkerLeaseService.java:350)
-	at org.gradle.internal.work.ResourceLockStatistics$1.measure(ResourceLockStatistics.java:43)
-	at org.gradle.internal.wo
+## next prompt
+the glass toolbar header is beautiful, but the thing is the home screen and the profile screen header they both are really bad, so lets add a morph collape smooth with scrolling, the current size of thats how it will look when scrolled up but the coontent it will show is just the curious explorer with the profile pic and the streak and the edit button as the glass pill, and when its not scollred it will show as the current orn hero is fully shown moreexpanded and shows the stat card properly that show implement it

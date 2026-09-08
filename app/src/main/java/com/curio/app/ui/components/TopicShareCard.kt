@@ -831,16 +831,19 @@ private class ShareAutoFitDelta(
     val textScale: Float = 1f
 )
 
-/** v374 — how much a long fact grows its box, by length alone (one curve,
- *  no presets). The collision budget ([factFitBudget]) then clamps it per
- *  style so the grown box stays on the card. */
-private fun autoFitGrow(len: Int): Float = when {
-    len > 520 -> 2.4f
-    len > 400 -> 2.0f
-    len > 300 -> 1.7f
-    len > 220 -> 1.45f
-    len > 150 -> 1.25f
-    len > 90 -> 1.12f
+/** v3xx — how much a long fact grows its box, by MEASURED wrap lines alone
+ *  (one curve, no presets): [rememberFactWrapLines] reports the fact's REAL
+ *  line count at the design width, so the curve keys on how the text
+ *  actually wraps (a long URL or run of long words counts its many lines,
+ *  short prose its few) instead of a character-count guess. The collision
+ *  budget ([factFitBudget]) then clamps the grown box per style. */
+private fun autoFitGrowByWrap(wrapLines: Int): Float = when {
+    wrapLines > 26 -> 2.4f
+    wrapLines > 20 -> 2.0f
+    wrapLines > 15 -> 1.7f
+    wrapLines > 11 -> 1.45f
+    wrapLines > 7 -> 1.25f
+    wrapLines > 4 -> 1.12f
     else -> 1f
 }
 
@@ -884,18 +887,20 @@ private fun factFitBudget(style: ShareCardStyle, aspect: ShareCardAspect): Pair<
 }
 
 /**
- * v374/v379e — SHARED auto-fit SIZING for a long quick/custom fact: how
- * much the text shrinks and the box grows, from the length curve + the
+ * v374/v379e/v3xx — SHARED auto-fit SIZING for a long quick/custom fact:
+ * how much the text shrinks and the box grows, from the MEASURED wrap-lines
+ * curve ([autoFitGrowByWrap], fed by [rememberFactWrapLines]) + the
  * design's collision budget alone. v379e is TEXT-FIRST: by default the
  * fact box KEEPS ITS FULL HEIGHT and the TEXT shrinks inversely with the
- * length (a 1.3×-long fact renders at ~0.77× in the same footprint). Only
- * when that shrink would pass the design's text floor does the BOX grow to
- * absorb the remainder — and only up to the budget's height cap, past
- * which the floor holds. One continuous curve, no hidden per-style logic.
+ * wrap ratio (a fact that wraps to 1.3× the box's lines renders at ~0.77×
+ * in the same footprint). Only when that shrink would pass the design's
+ * text floor does the BOX grow to absorb the remainder — and only up to
+ * the budget's height cap, past which the floor holds. One continuous
+ * curve, no hidden per-style logic.
  */
-private fun autoFitShape(style: ShareCardStyle, aspect: ShareCardAspect, len: Int): ShareAutoFitDelta {
+private fun autoFitShape(style: ShareCardStyle, aspect: ShareCardAspect, wrapLines: Int): ShareAutoFitDelta {
     val (maxHeightFrac, minTextScale) = factFitBudget(style, aspect)
-    val grow = autoFitGrow(len)
+    val grow = autoFitGrowByWrap(wrapLines)
     if (grow <= 1f) return ShareAutoFitDelta()
     val inv = 1f / grow
     if (inv >= minTextScale) {
@@ -911,14 +916,17 @@ private fun autoFitShape(style: ShareCardStyle, aspect: ShareCardAspect, len: In
 }
 
 /**
- * v374 — the RENDER-TIME smart fit: [autoFitShape] gated by the Smart fit
- * toggle and the "manual edits win" rule. v379e — the Fit toggle turning
- * ON clears a previously manual box (see the Fit panel), so the fit can
- * always "fix the box" again after the user has resized it.
+ * v374/v3xx — the RENDER-TIME smart fit: [autoFitShape] gated by the Smart
+ * fit toggle and the "manual edits win" rule. v3xx — the input is the
+ * MEASURED wrap line count ([rememberFactWrapLines]) instead of a raw
+ * character count, so a long URL counts by the lines it actually wraps
+ * into, not by its length. v379e — the Fit toggle turning ON clears a
+ * previously manual box (see the Fit panel), so the fit can always "fix
+ * the box" again after the user has resized it.
  */
 private fun smartAutoFitDelta(
     move: ShareCardMove,
-    factLength: Int,
+    wrapLines: Int,
     style: ShareCardStyle,
     aspect: ShareCardAspect
 ): ShareAutoFitDelta {
@@ -927,7 +935,45 @@ private fun smartAutoFitDelta(
         move.factWidthFrac != 1f || move.factHeightFrac != 1f ||
         move.factScale != 1f || move.factBoxScale != 1f
     if (touched) return ShareAutoFitDelta()
-    return autoFitShape(style, aspect, factLength)
+    return autoFitShape(style, aspect, wrapLines)
+}
+
+/**
+ * v3xx — the MEASURED wrap estimate that feeds the smart fit. The old
+ * pipeline guessed the fact's footprint from its CHARACTER COUNT; this
+ * measures the fact text with a real [TextMeasurer] at the card's content
+ * width at scale 1.0 (canonical 11sp Lora body — representative of the
+ * per-style fact styles) and returns how many LINES it actually wraps
+ * into. A 60-char URL wraps to several lines; 300 chars of short prose
+ * wraps to few — exactly the case the character buckets got wrong.
+ * [primary] is the fact body ([editedFact] ?: [factText]) and [secondary]
+ * the chapter text; whichever wraps taller drives the fit (mirrors the old
+ * maxOf(length, length) input). Pure (text, width) measurement — no
+ * rendered Rects, one deterministic pass.
+ */
+@Composable
+private fun rememberFactWrapLines(primary: String, secondary: String, aspect: ShareCardAspect): Int {
+    val measurer = rememberTextMeasurer()
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    return remember(primary, secondary, aspect) {
+        fun wrapOf(text: String): Int {
+            if (text.isBlank()) return 0
+            val widthPx = with(density) { ((aspect.widthDp - 28f).dp).toPx() }.toInt().coerceAtLeast(1)
+            val res = measurer.measure(
+                text = AnnotatedString(text),
+                style = androidx.compose.ui.text.TextStyle(
+                    fontFamily = LoraFontFamily,
+                    fontSize = 11.sp,
+                    lineHeight = 15.5.sp
+                ),
+                softWrap = true,
+                overflow = TextOverflow.Clip,
+                constraints = Constraints(maxWidth = widthPx)
+            )
+            return res.lineCount.coerceAtLeast(1)
+        }
+        maxOf(wrapOf(primary), wrapOf(secondary)).coerceAtLeast(1)
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -1050,12 +1096,33 @@ private fun autoLayoutPlan(
     // v3xx — the card's dp dimensions (the measured rects are card-local),
     // for clamping anything that drifted OUTSIDE the card back inside.
     cardW: Float = 0f,
-    cardH: Float = 0f
+    cardH: Float = 0f,
+    // v3xx — the MEASURED wrap line count of the current fact text (see
+    // [rememberFactWrapLines]); the fit sizes from real wraps, not chars.
+    wrapLines: Int = 0
 ): ShareAutoLayoutPlan {
-    val shape = autoFitShape(style, aspect, len)
-    // A grown fact box consumes the vertical gap above it. Keep the title
-    // clear of that collision as part of the same atomic auto-layout commit.
-    val sizeLift = ((shape.heightFrac - 1f) * 28f).coerceIn(0f, 56f)
+    val shape = autoFitShape(style, aspect, wrapLines)
+    // v3xx — PROSPECTIVE title lift, MEASURED: a bottom-anchored fact box
+    // (Clean / Minimal) grows UP into the free middle when smart fit grows
+    // it, so the grown box's top rises by (heightFrac−1)×its height and can
+    // swallow the title on the SAME tap. When the live rects are available,
+    // lift the title by exactly the amount needed to clear the grown fact
+    // top — the old (heightFrac−1)×28dp guess under-lifted tall boxes and
+    // left the title sitting inside the quick-fact area until a SECOND
+    // sparkle tap re-measured the real overlap. Mid-flow styles keep the
+    // fact's top fixed (they grow DOWN), so the measured overlap alone is
+    // their lift. Rects not yet measured → the old heuristic fallback.
+    val growsUp = style == ShareCardStyle.NEUMORPHIC || style == ShareCardStyle.MINIMAL
+    val growthPx = if (growsUp && factRect.height > 0f && shape.heightFrac > 1f)
+        (shape.heightFrac - 1f) * factRect.height else 0f
+    val sizeLift = if (titleRect.width > 0f && titleRect.height > 0f &&
+        factRect.width > 0f && factRect.height > 0f
+    ) {
+        val grownFactTop = (factRect.top - growthPx).coerceAtLeast(0f)
+        (titleRect.bottom - grownFactTop).coerceIn(0f, 96f)
+    } else {
+        ((shape.heightFrac - 1f) * 28f).coerceIn(0f, 56f)
+    }
     // Manual dragging is allowed to create an overlap — the sparkle tap is
     // the explicit repair gesture. The reference flow stacks TITLE → INFO
     // rows → FACT (a style may re-order them), so each shared collision is
@@ -2188,8 +2255,8 @@ fun TopicShareCard(
     // pill, masthead, byline or the card edge) and a long title shrinks when
     // the fact needs the space. Manual edits of the fact box hand it over
     // entirely ("manual wins"); a manually placed title keeps its spot.
-    val factLen = maxOf((editedFact ?: factText).length, chapterFact.length)
-    val autoFit = smartAutoFitDelta(move, factLen, style, aspect)
+    val factWrap = rememberFactWrapLines(editedFact ?: factText, chapterFact, aspect)
+    val autoFit = smartAutoFitDelta(move, factWrap, style, aspect)
     // v374 — the smart fit adjusts ONLY the fact box (height + width) and
     // the fact TEXT (bodyScale) — the same channels the box/size sliders
     // drive — so there is no hidden nudge or font multiplier.
@@ -9132,6 +9199,10 @@ fun TopicShareSheet(
     // watched title / fact / info rows / fav strip, so a grown box or a
     // lifted title could bury the pill at the top of the card).
     var measuredBadge by remember { mutableStateOf(androidx.compose.ui.geometry.Rect.Zero) }
+    // v3xx — the sparkle's smart fit now sizes from the MEASURED wrap lines
+    // of the current fact text (see [rememberFactWrapLines]) instead of a
+    // character count, so a long URL counts by the lines it wraps into.
+    val autoLayoutWrapLines = rememberFactWrapLines(factFieldText, chapterFactForCard, aspect)
     fun runAutoLayout() {
         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         val len = maxOf(factFieldText.length, chapterFactForCard.length)
@@ -9146,7 +9217,7 @@ fun TopicShareSheet(
         val cardW = 280f
         val cardH = 280f * aspect.heightDp / aspect.widthDp
         repeat(12) {
-            val plan = autoLayoutPlan(currentStyle, aspect, len, attempt, move.factFormat, move, measuredTitle, measuredFact, measuredMeta, measuredFav, measuredBadge, cardW, cardH)
+            val plan = autoLayoutPlan(currentStyle, aspect, len, attempt, move.factFormat, move, measuredTitle, measuredFact, measuredMeta, measuredFav, measuredBadge, cardW, cardH, wrapLines = autoLayoutWrapLines)
             val wantsTall = plan.tall && aspect == ShareCardAspect.CLASSIC
             val h = plan.heightFrac
             val s = plan.textScale
@@ -9457,7 +9528,7 @@ fun TopicShareSheet(
                                 move = pageMove,
                                 onMove = { movesByStyle = movesByStyle + (styles[page] to it) },
                                 factFieldStyle = factFieldStyle,
-                                autoFitDelta = smartAutoFitDelta(pageMove, maxOf(factFieldText.length, chapterFactForCard.length), styles[page], aspect),
+                                autoFitDelta = smartAutoFitDelta(pageMove, rememberFactWrapLines(factFieldText, chapterFactForCard, aspect), styles[page], aspect),
                                 factFieldChipShift = activeId == "chapter_review",
                                 factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…",
                                 // v379c — the bottom-sheet preview hosts the
@@ -9553,7 +9624,7 @@ fun TopicShareSheet(
                             move = move,
                             onMove = { updateMove(it) },
                             factFieldStyle = factFieldStyle,
-                            autoFitDelta = smartAutoFitDelta(move, maxOf(factFieldText.length, chapterFactForCard.length), currentStyle, aspect),
+                            autoFitDelta = smartAutoFitDelta(move, rememberFactWrapLines(factFieldText, chapterFactForCard, aspect), currentStyle, aspect),
                             factFieldChipShift = activeId == "chapter_review",
                             factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…",
                             // v379c — rich selection bar on the sheet preview
@@ -10300,7 +10371,7 @@ fun TopicShareSheet(
                                             move = move,
                                             onMove = { updateMove(it) },
                                             factFieldStyle = factFieldStyle,
-                                            autoFitDelta = smartAutoFitDelta(move, maxOf(factFieldText.length, chapterFactForCard.length), currentStyle, aspect),
+                                            autoFitDelta = smartAutoFitDelta(move, rememberFactWrapLines(factFieldText, chapterFactForCard, aspect), currentStyle, aspect),
                                             factFieldChipShift = activeId == "chapter_review",
                                             factFieldPlaceholder = if (activeId == "chapter_review") "Write your review…" else "Edit the quick fact…",
                                             // v375 — the full-screen editor keeps a REAL text
@@ -10432,7 +10503,7 @@ fun TopicShareSheet(
                                                     Box(Modifier.padding(horizontal = 12.dp)) {
                                                         val fsFit = if (!fsIsTitle) smartAutoFitDelta(
                                                             move,
-                                                            maxOf(factFieldText.length, chapterFactForCard.length),
+                                                            rememberFactWrapLines(factFieldText, chapterFactForCard, aspect),
                                                             currentStyle, aspect
                                                         ) else null
                                                         // v379d — cover title shrink folded
@@ -10542,7 +10613,7 @@ fun TopicShareSheet(
                                                             // rationale): shows the smart-fit-grown height, writes the base.
                                                             val fsFitH = smartAutoFitDelta(
                                                                 move,
-                                                                maxOf(factFieldText.length, chapterFactForCard.length),
+                                                                rememberFactWrapLines(factFieldText, chapterFactForCard, aspect),
                                                                 currentStyle, aspect
                                                             ).heightFrac
                                                             SizeSliderColumn(
@@ -10822,7 +10893,7 @@ fun TopicShareSheet(
                                 // stays engaged and keeps clipping-safe.
                                 val sizeFit = if (!isTitle) smartAutoFitDelta(
                                     move,
-                                    maxOf(factFieldText.length, chapterFactForCard.length),
+                                    rememberFactWrapLines(factFieldText, chapterFactForCard, aspect),
                                     currentStyle, aspect
                                 ) else null
                                 // v379d — on Signature / Custom cards WITH a
@@ -10915,7 +10986,7 @@ fun TopicShareSheet(
                                     // through the fit (WYSIWYG + manual wins).
                                     val fitH = if (isFact) smartAutoFitDelta(
                                         move,
-                                        maxOf(factFieldText.length, chapterFactForCard.length),
+                                        rememberFactWrapLines(factFieldText, chapterFactForCard, aspect),
                                         currentStyle, aspect
                                     ).heightFrac else 1f
                                     SizeSliderColumn(
