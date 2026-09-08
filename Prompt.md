@@ -1,5 +1,36 @@
 # Prompt Log — current request
 
+## Request (2026-09-08, completed — Home/Profile glass header morph)
+
+**Request (pending-prompt slot):** "the glass toolbar header is beautiful,
+but the home screen and the profile screen header they both are really
+bad, so let's add a morph collapse smooth with scrolling — the current
+size is how it looks at the top, and when scrolled up the content it
+shows is just the curious explorer with the profile pic."
+
+**What shipped:** new `CurioGlassToolbarMorph` (CurioGlassToolbar.kt) — a
+PINNED collapsing glass header for Home + Profile (glass style only):
+- Full state (progress 0): the content-height glass bar — menu/back pill
+  + greeting/name + avatar + the Streak·Cabinet·Topics (Home) / Level·
+  Saved·Lanes (Profile) stat row.
+- Compact state (progress 1): a 54dp slim bar holding the avatar + the
+  display name ("Curious Explorer" by default).
+- Morph: `Modifier.layout` measures the full column once at its natural
+  height and reports `lerp(full, 54dp, eased)`; the full content fades
+  out + rises (translationY) while the compact row fades in; everything
+  clips inside the rose-tinted glass capsule (1.6× blur). Scrubbed by the
+  finger via the existing 90dp stickyProgress on both screens.
+- Architecture: sibling overlay OUTSIDE the local glass capture
+  (`homeGlassBackdrop` / `profileGlassBackdrop`) → samples the REAL
+  backdrop (Home previously fell back to simulated glass because its
+  toolbar sat inside the capture subtree). Home's floating menu/avatar
+  pills and Profile's pinned Back/Settings pills are hidden in the glass
+  style; the morph bar carries its own (menu→drawer, avatar→Profile,
+  back→popBackStack, settings→Settings hub). The in-flow hero slots
+  became compact-height spacers so content flows beneath the pinned bar.
+
+**Status:** committed + pushed (see git log).
+
 ## Request (2026-09-08, completed — measured smart fit + sparkle title lift)
 
 **Request:** do the NARROW version of the rejected measurement-first rewrite
@@ -540,10 +571,18 @@ fixed in this follow-up commit:
    Room observes the single row by primary key; the sample fallback is
    resolved once before the flow.
 
-### DONE — measured smart fit + sparkle title lift (2026-09-08)
-**Status:** the narrow TextMeasurer version + the sparkle-pill title lift
-shipped (this batch — see the request log entry above). The pending
-prompt below (Home/Profile header morph) is next.
+### DONE — Home/Profile glass header morph (2026-09-08)
+**Status:** the pending prompt shipped (this batch): Home + Profile glass
+headers are now PINNED collapsing headers (`CurioGlassToolbarMorph`). At
+the top = the full glass bar (menu/back + greeting/name + avatar + stat
+row); scrolling collapses it smoothly to a slim bar holding just the
+avatar + display name ("Curious Explorer" — the default display name).
+The old floating menu/avatar pills (Home) and pinned Back/Settings pills
+(Profile) are hidden in the glass style — the morph bar carries its own.
+The morph bar samples the REAL backdrop (sibling overlay, fixing the old
+in-capture simulated-glass fallback on Home). Scroll progress = the
+existing 90dp sticky threshold on both screens.
 
 ## next prompt
-the glass toolbar header is beautiful, but the thing is the home screen and the profile screen header they both are really bad, so lets add a morph collape smooth with scrolling, the current size of thats how it will look when scrolled up but the coontent it will show is just the curious explorer with the profile pic and the streak and the edit button as the glass pill, and when its not scollred it will show as the current orn hero is fully shown moreexpanded and shows the stat card properly that show implement it
+(empty — the slot is ready for the next directive) and the streak and the edit button as the glass pill, and when its not scollred it will show as the current orn hero is fully shown moreexpanded and shows the stat card properly that show implement it
+#

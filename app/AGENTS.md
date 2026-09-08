@@ -710,6 +710,26 @@ app/src/main/java/com/curio/app/
   it falls back to the simulated-glass recipe. Settings/Cabinet heroes
   keep real glass via their v263 sibling-overlay capture (hero drawn
   OUTSIDE the recorded grid).
+- **v3xx18 — Home/Profile glass headers MORPH with scroll.** The Home and
+  Profile glass toolbars are no longer static content-height bars: new
+  `CurioGlassToolbarMorph` (ui/components/CurioGlassToolbar.kt) is a
+  PINNED collapsing header (sibling overlay OUTSIDE the local glass
+  capture — Home's `homeGlassBackdrop`, Profile's `profileGlassBackdrop` —
+  so it samples the REAL backdrop, fixing the old in-capture simulated-
+  glass fallback). At the top it is the full bar (menu/back pill + title
+  + subtitle + avatar + the stat row); scrolling collapses it smoothly
+  (FastOutSlowIn, height lerps from the measured full height down to
+  `HomeCompactHeaderHeight`/`ProfileCompactHeaderHeight` = 54dp, full
+  content fades out rising while the compact row — avatar + display name
+  ("Curious Explorer") — fades in; `Modifier.layout` measures the natural
+  height once and reports the animated height, `clipToBounds` trims).
+  Home's floating menu/avatar pills and Profile's pinned Back/Settings
+  pills are HIDDEN in the glass style (the morph bar carries its own
+  menu/back + avatar/settings pills); `HomeScreen`'s scroll hero slot
+  became a `Spacer(HomeCompactHeaderHeight)` and `ProfileHero`'s glass
+  branch a `Spacer(ProfileCompactHeaderHeight)` for the collapsed-bar
+  clearance (content flows beneath the pinned bar). Scroll progress is
+  the existing `stickyProgress` (90dp threshold) on both screens.
 - **v355 — book/series notes sheets: no close button, no hint copy, rating
   below the author, tick-free read state.** User: "never add cross close
   button in a bottom sheet… remove it from the book synopsis sheet… remove
