@@ -633,6 +633,15 @@ fun ProfileScreen(navController: NavController) {
                 titleTrailing = glassAvatar,
                 trailing = glassSettingsPill,
                 compactAvatar = { glassAvatar(heroInk) },
+                streakCount = displayStreak,
+                onStreakClick = { navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true } },
+                onEditClick = {
+                    nameInput = displayName
+                    // v97 — the tagline field rides the same Edit profile
+                    // dialog now (no separate tagline dialog).
+                    taglineInput = AppPreferences.getCustomStreakTagline(context)
+                    showNameDialog = true
+                },
                 content = { toolbarInk ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),

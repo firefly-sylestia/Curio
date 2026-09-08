@@ -1302,6 +1302,8 @@ fun HomeScreen(navController: NavController) {
                     onMenuClick = { CurioDrawerState.requestOpen() },
                     titleTrailing = glassAvatar,
                     compactAvatar = { glassAvatar(questInk) },
+                    streakCount = streakDays,
+                    onStreakClick = { navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true } },
                     content = { ink ->
                         Row(
                             modifier = Modifier

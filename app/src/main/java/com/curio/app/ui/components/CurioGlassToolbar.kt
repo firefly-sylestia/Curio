@@ -33,8 +33,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
@@ -288,6 +290,13 @@ fun CurioGlassToolbarMorph(
     content: (@Composable (ink: Color) -> Unit)? = null,
     // v3xx — the avatar shown in the compact row beside [compactTitle].
     compactAvatar: (@Composable () -> Unit)? = null,
+    // v3xx19 — the compact bar's glass pills: the streak counter (fire +
+    // days, opens the quests journey) and the Edit action (Profile). They
+    // ride the collapsed bar beside the name so the streak stays visible
+    // and Profile stays editable while the header is shrunk.
+    streakCount: Int? = null,
+    onStreakClick: (() -> Unit)? = null,
+    onEditClick: (() -> Unit)? = null,
     glassBackdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null,
     modifier: Modifier = Modifier
 ) {
@@ -397,7 +406,11 @@ fun CurioGlassToolbarMorph(
             .clipToBounds()
             .then(glassMod)
     ) {
-        // ── FULL state — fades out + rises as the bar collapses.
+        // ── FULL state — fades out + rises as the bar collapses. More
+        // EXPANDED than the plain content bar: the title row breathes and
+        // the stat row sits in a proper rose-gradient stat CARD (glow +
+        // shadow + rounded pane — the torn hero's stat-pane construction),
+        // so the resting glass header reads like the hero it replaces.
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -410,7 +423,7 @@ fun CurioGlassToolbarMorph(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 16.dp, end = 12.dp, top = 10.dp, bottom = 10.dp),
+                    .padding(start = 16.dp, end = 12.dp, top = 14.dp, bottom = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -432,14 +445,40 @@ fun CurioGlassToolbarMorph(
                     )
                 }
                 if (titleTrailing != null) titleTrailing(ink)
+                // v3xx19 — [trailing] rides the FULL bar's top row only
+                // (Profile's Settings pill): the collapsed bar keeps just
+                // the avatar + name + streak + edit per the request.
+                if (trailing != null) trailing(ink)
             }
             if (content != null) {
+                val statPaneShape = RoundedCornerShape(20.dp)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 16.dp, end = 16.dp, bottom = 12.dp)
+                        .padding(start = 16.dp, end = 16.dp, bottom = 14.dp)
                 ) {
-                    content(ink)
+                    // The stat CARD — the torn hero's rose gradient pane
+                    // (opaque theme-aware blend, glow + shadow, 20dp
+                    // rounded), built on the bar's own rose container so
+                    // the pane reads part of the glass.
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .curioDarkGlow(3.dp, statPaneShape)
+                            .shadow(3.dp, statPaneShape, clip = false)
+                            .background(
+                                Brush.verticalGradient(
+                                    listOf(
+                                        lerp(container, Color.White, 0.06f),
+                                        lerp(container, Color.White, 0.26f)
+                                    )
+                                ),
+                                statPaneShape
+                            )
+                            .padding(horizontal = 10.dp, vertical = 8.dp)
+                    ) {
+                        content(ink)
+                    }
                 }
             }
         }
@@ -463,7 +502,81 @@ fun CurioGlassToolbarMorph(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
-            if (trailing != null) trailing(ink)
+            if (streakCount != null && onStreakClick != null) {
+                val pillBg = if (dark) lerp(container, Color.Black, 0.15f)
+                else lerp(container, curioPillTintLift(), 0.38f)
+                // The streak glass pill — fire + days, opens the quests.
+                Surface(
+                    onClick = onStreakClick,
+                    shape = RoundedCornerShape(50),
+                    color = pillBg,
+                    contentColor = ink,
+                    shadowElevation = 3.dp,
+                    disableRipple = true,
+                    modifier = Modifier.then(
+                        if (glassBackdrop != null && isInScreenGlassActive())
+                            Modifier.liquidGlassCapsule(
+                                pillBg,
+                                washAlpha = 0.45f,
+                                backdrop = glassBackdrop,
+                                blurMultiplier = 1.6f
+                            )
+                        else Modifier
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        CurioIcon(
+                            name = "local_fire_department",
+                            contentDescription = "Streak",
+                            size = 15.dp,
+                            tint = ink
+                        )
+                        Text(
+                            "$streakCount",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                            color = ink
+                        )
+                    }
+                }
+            }
+            if (onEditClick != null) {
+                val pillBg = if (dark) lerp(container, Color.Black, 0.15f)
+                else lerp(container, curioPillTintLift(), 0.38f)
+                // The Edit glass pill — opens the profile editor (Profile).
+                Surface(
+                    onClick = onEditClick,
+                    shape = CircleShape,
+                    color = pillBg,
+                    contentColor = ink,
+                    shadowElevation = 3.dp,
+                    disableRipple = true,
+                    modifier = Modifier
+                        .then(
+                            if (glassBackdrop != null && isInScreenGlassActive())
+                                Modifier.liquidGlassCapsule(
+                                    pillBg,
+                                    washAlpha = 0.45f,
+                                    backdrop = glassBackdrop,
+                                    blurMultiplier = 1.6f
+                                )
+                            else Modifier
+                        )
+                        .size(44.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        CurioIcon(
+                            name = CurioIcons.Edit,
+                            contentDescription = "Edit profile",
+                            size = 19.dp,
+                            tint = ink
+                        )
+                    }
+                }
+            }
         }
     }
 }

@@ -571,18 +571,20 @@ fixed in this follow-up commit:
    Room observes the single row by primary key; the sample fallback is
    resolved once before the flow.
 
-### DONE — Home/Profile glass header morph (2026-09-08)
-**Status:** the pending prompt shipped (this batch): Home + Profile glass
-headers are now PINNED collapsing headers (`CurioGlassToolbarMorph`). At
-the top = the full glass bar (menu/back + greeting/name + avatar + stat
-row); scrolling collapses it smoothly to a slim bar holding just the
-avatar + display name ("Curious Explorer" — the default display name).
-The old floating menu/avatar pills (Home) and pinned Back/Settings pills
-(Profile) are hidden in the glass style — the morph bar carries its own.
-The morph bar samples the REAL backdrop (sibling overlay, fixing the old
-in-capture simulated-glass fallback on Home). Scroll progress = the
-existing 90dp sticky threshold on both screens.
+### DONE — Home/Profile glass header morph + refinement (2026-09-08)
+**Status:** the morph header shipped (e1c78420) and the follow-up prompt
+in this batch's slot shipped too: (1) the FULL (not-scrolled) glass bar
+is now MORE EXPANDED and shows the stats as a proper stat CARD (the torn
+hero's rose-gradient pane: curioDarkGlow + shadow + opaque rose blend,
+20dp rounded); (2) the COMPACT bar now carries glass pills beside the
+name — the STREAK pill (fire + days → Quests) and the EDIT pill
+(Profile → opens the Edit-profile dialog) — so the streak and editing
+stay reachable while collapsed. Profile's Settings pill rides the full
+row only. Home + Profile glass headers are PINNED collapsing headers
+(`CurioGlassToolbarMorph`); the old floating menu/avatar pills (Home)
+and pinned Back/Settings pills (Profile) are hidden in the glass style;
+the bar samples the REAL backdrop (sibling overlay). Scroll progress =
+the existing 90dp sticky threshold on both screens.
 
 ## next prompt
-(empty — the slot is ready for the next directive) and the streak and the edit button as the glass pill, and when its not scollred it will show as the current orn hero is fully shown moreexpanded and shows the stat card properly that show implement it
-#
+(empty — the slot is ready for the next directive)

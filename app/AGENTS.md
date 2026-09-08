@@ -730,6 +730,18 @@ app/src/main/java/com/curio/app/
   branch a `Spacer(ProfileCompactHeaderHeight)` for the collapsed-bar
   clearance (content flows beneath the pinned bar). Scroll progress is
   the existing `stickyProgress` (90dp threshold) on both screens.
+- **v3xx19 — morph-header refinement (user follow-up).** (1) The FULL
+  (not-scrolled) state is now MORE EXPANDED and shows the stats as a
+  proper stat CARD — the torn hero's rose-gradient pane (`curioDarkGlow`
+  + `shadow(clip=false)` + opaque `lerp(container, White, 0.06→0.26)`
+  vertical gradient, 20dp rounded) wraps the `content` slot, and the
+  title row breathes (top 14 / bottom 8). (2) The COMPACT bar now carries
+  glass pills beside the name: the STREAK pill (fire + days → opens
+  Quests) and the EDIT pill (Profile only → opens the Edit-profile
+  dialog), built on the same rose pill glass as the leading pill
+  (`streakCount`/`onStreakClick`/`onEditClick` params). `trailing`
+  (Profile's Settings pill) now rides the FULL row only — the collapsed
+  bar keeps avatar + name + streak + edit.
 - **v355 — book/series notes sheets: no close button, no hint copy, rating
   below the author, tick-free read state.** User: "never add cross close
   button in a bottom sheet… remove it from the book synopsis sheet… remove
