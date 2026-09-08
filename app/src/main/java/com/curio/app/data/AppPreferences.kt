@@ -192,6 +192,7 @@ object AppPreferences {
     // - KEY_PICKER_MIXES_SEEDED — the starter mixes were written once, so
     //   deleting every mix doesn't resurrect them.
     private const val KEY_NAMED_MIXES = "named_mixes"               // JSON array of NamedMix
+    private const val KEY_CABINET_COLLECTIONS = "cabinet_collections" // JSON array of CurioCollection
     private const val KEY_LAST_MIX_NAME = "last_mix_name"          // String? — the applied deck's mix name
     private const val KEY_CLASSIC_PICKER = "classic_picker"         // bool — old glass-pill picker
     private const val KEY_PICKER_MIXES_SEEDED = "picker_mixes_seeded" // bool — starter mixes written once
@@ -1367,6 +1368,15 @@ object AppPreferences {
         private set
 
     /**
+     * Reactive Cabinet collections (v3xx — Cabinet v2 folders): named
+     * collections/folders holding pinned topics + saved entries. Seeded
+     * from prefs in [initThemeMode]; updated by [addOrReplaceCollection]
+     * / [deleteCollection].
+     */
+    var collectionsState by mutableStateOf<List<CurioCollection>>(emptyList())
+        private set
+
+    /**
      * Classic-picker toggle for the new category picker: OFF = the new
      * default picker; ON = the old glass-pill picker. Seeded from prefs
      * in [initThemeMode].
@@ -1575,6 +1585,7 @@ object AppPreferences {
         hiddenCategoriesState = getHiddenCategories(context)
         categoryOrderState = getCategoryOrder(context)
         savedMixesState = getSavedMixes(context)
+        collectionsState = getCabinetCollections(context)
         classicPickerEnabledState = isClassicPickerEnabled(context)
         pickerMixesSeededState = isPickerMixesSeeded(context)
         lastMixNameState = getLastMixName(context)
@@ -3009,6 +3020,84 @@ object AppPreferences {
         return updated
     }
 
+    // ── Cabinet collections (v3xx — Cabinet v2 folders) ──────────────
+    /**
+     * All saved Cabinet collections, newest first. Persisted as a JSON
+     * array of [CurioCollection] (id, name, createdAtMillis, members);
+     * members are [CurioCollectionMember] — either a pinned TOPIC
+     * (categoryName = CategoryId.name, refName = topic name) or a saved
+     * ENTRY (refName = the entry's stable id).
+     */
+    fun getCabinetCollections(context: Context): List<CurioCollection> {
+        val raw = prefs(context).getString(KEY_CABINET_COLLECTIONS, null) ?: return emptyList()
+        return try {
+            val arr = JSONArray(raw)
+            List(arr.length()) { i ->
+                val obj = arr.getJSONObject(i)
+                val membersArr = obj.optJSONArray("members") ?: JSONArray()
+                val members = List(membersArr.length()) { j ->
+                    val m = membersArr.getJSONObject(j)
+                    val kind = runCatching {
+                        CurioCollectionMember.MemberKind.valueOf(m.optString("kind", "TOPIC"))
+                    }.getOrDefault(CurioCollectionMember.MemberKind.TOPIC)
+                    CurioCollectionMember(
+                        kind = kind,
+                        categoryName = m.optString("cat", "").takeIf { it.isNotBlank() },
+                        refName = m.optString("ref", "")
+                    )
+                }
+                CurioCollection(
+                    id = obj.optString("id", "").ifBlank { "${obj.optLong("createdAtMillis", System.currentTimeMillis())}" },
+                    name = obj.optString("name", "Collection").ifBlank { "Collection" },
+                    createdAtMillis = obj.optLong("createdAtMillis", System.currentTimeMillis()),
+                    members = members.filter { it.refName.isNotBlank() }
+                )
+            }.filter { it.id.isNotBlank() }
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    fun saveCabinetCollections(context: Context, collections: List<CurioCollection>) {
+        val arr = JSONArray()
+        collections.forEach { c ->
+            val members = JSONArray()
+            c.members.forEach { m ->
+                members.put(
+                    JSONObject()
+                        .put("kind", m.kind.name)
+                        .put("cat", m.categoryName ?: "")
+                        .put("ref", m.refName)
+                )
+            }
+            arr.put(
+                JSONObject()
+                    .put("id", c.id)
+                    .put("name", c.name)
+                    .put("createdAtMillis", c.createdAtMillis)
+                    .put("members", members)
+            )
+        }
+        prefs(context).edit().putString(KEY_CABINET_COLLECTIONS, arr.toString()).apply()
+        collectionsState = collections
+    }
+
+    /** Adds a new collection, or replaces an EXISTING one matched by id. */
+    fun addOrReplaceCollection(context: Context, collection: CurioCollection): List<CurioCollection> {
+        val updated = getCabinetCollections(context).toMutableList().apply {
+            val idx = indexOfFirst { it.id == collection.id }
+            if (idx >= 0) this[idx] = collection else add(0, collection)
+        }
+        saveCabinetCollections(context, updated)
+        return updated
+    }
+
+    fun deleteCollection(context: Context, id: String): List<CurioCollection> {
+        val updated = getCabinetCollections(context).filterNot { it.id == id }
+        saveCabinetCollections(context, updated)
+        return updated
+    }
+
     /**
      * Classic-picker toggle: false = the NEW picker is the default; true
      * restores the OLD glass-pill picker (the A/B side of the redesign).
@@ -3576,6 +3665,31 @@ data class NamedMix(
     val laneIds: List<CategoryId>,
     val createdAtMillis: Long
 )
+
+/**
+ * One named Cabinet collection/folder (v3xx — Cabinet v2 collections): a
+ * keepsake folder holding pinned TOPICS (from the reveal's "File to…") and
+ * saved ENTRY ids (added from the Cabinet). [id] is the stable identity
+ * (UUID string) — rename/reorder keeps it, so collections can be replaced
+ * in place via [AppPreferences.addOrReplaceCollection].
+ */
+data class CurioCollection(
+    val id: String,
+    val name: String,
+    val createdAtMillis: Long,
+    val members: List<CurioCollectionMember>
+)
+
+/** One member of a [CurioCollection]. */
+data class CurioCollectionMember(
+    val kind: MemberKind,
+    /** TOPIC only — the CategoryId.name the topic lives in. */
+    val categoryName: String?,
+    /** TOPIC: the topic name; ENTRY: the entry's stable Room id. */
+    val refName: String
+) {
+    enum class MemberKind { TOPIC, ENTRY }
+}
 
 /**
  * A topic the user pinned on the Topic Reveal screen so they can revisit it

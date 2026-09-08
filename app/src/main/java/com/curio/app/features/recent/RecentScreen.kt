@@ -1,6 +1,8 @@
 package com.curio.app.features.recent
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -48,6 +51,7 @@ import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioEmptyState
 import com.curio.app.ui.components.CurioForwardArrow
+import com.curio.app.ui.components.CurioHoldPill
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
@@ -123,6 +127,7 @@ private fun RecentFeedItem.topicIdentityKey(): String = when (this) {
  */
 @Composable
 fun RecentScreen(navController: NavController) {
+    val context = LocalContext.current
     val entries by produceState<List<CurioEntry>>(initialValue = emptyList()) {
         try {
             CurioRepositoryHolder.repo.observeAll().collect { value = it }
@@ -135,6 +140,10 @@ fun RecentScreen(navController: NavController) {
     val feed = remember(entries, explored, unexplored) {
         buildRecentFeed(entries, explored, unexplored)
     }
+    // v3xx — LONG-PRESS a row for more (default tap opens the TOPIC now):
+    // the option pill offers the alternative actions (write about it, open
+    // the saved entry, remove from Recents).
+    var optionItem by remember { mutableStateOf<RecentFeedItem?>(null) }
     val listState = rememberLazyListState()
 val glassBackdrop = rememberLayerBackdrop()
     // v-tablet — the torn hero is NOT sticky on wide windows (landscape
@@ -202,7 +211,11 @@ val glassBackdrop = rememberLayerBackdrop()
                         }
                     }
                                         items(feed, key = { it.key }) { item ->
-                        RecentFeedRow(item = item, navController = navController)
+                        RecentFeedRow(
+                            item = item,
+                            navController = navController,
+                            onLongPress = { optionItem = item }
+                        )
                     }
                     item { Spacer(Modifier.size(12.dp)) }
                 }
@@ -220,6 +233,54 @@ val glassBackdrop = rememberLayerBackdrop()
                     .padding(top = 10.dp, bottom = 16.dp)
             )
         }
+
+        // v3xx — the long-press option pill: default tap opens the TOPIC;
+        // the hold pill carries the write / open-entry / remove actions.
+        optionItem?.let { target ->
+            // (label, action, destructive)
+            val actions = buildList<Triple<String, () -> Unit, Boolean>> {
+                when (target) {
+                    is RecentFeedItem.Explored -> {
+                        add(Triple("Write about it", {
+                            navController.navigate(
+                                CurioRoutes.captureFor(target.topic.categoryId.routeSlug, target.topic.topicName)
+                            ) { launchSingleTop = true }
+                        }, false))
+                        add(Triple("Remove from Recents", {
+                            ExploreSessionStore.removeExplored(context, target.topic.categoryId, target.topic.topicName)
+                        }, true))
+                    }
+                    is RecentFeedItem.Unexplored -> {
+                        add(Triple("Write about it", {
+                            navController.navigate(
+                                CurioRoutes.captureFor(target.topic.categoryId.routeSlug, target.topic.topicName)
+                            ) { launchSingleTop = true }
+                        }, false))
+                    }
+                    is RecentFeedItem.SavedEntry -> {
+                        add(Triple("Open saved entry", {
+                            navController.navigate(CurioRoutes.entryDetail(target.entry.id)) { launchSingleTop = true }
+                        }, false))
+                        add(Triple("Write about it", {
+                            navController.navigate(
+                                CurioRoutes.captureFor(target.entry.topic.categoryId.routeSlug, target.entry.topic.name)
+                            ) { launchSingleTop = true }
+                        }, false))
+                    }
+                }
+            }
+            val pillTitle = when (target) {
+                is RecentFeedItem.Explored -> target.topic.topicName
+                is RecentFeedItem.Unexplored -> target.topic.topicName
+                is RecentFeedItem.SavedEntry -> target.entry.topic.name
+            }
+            CurioHoldPill(
+                title = pillTitle,
+                actions = actions.map { it.first to it.second },
+                destructiveIndexes = actions.mapIndexedNotNull { i, t -> if (t.third) i else null }.toSet(),
+                onDismiss = { optionItem = null }
+            )
+        }
                 // RESTORED (user request) — STICKY HERO drawn on TOP of the scroll
         // content: rows slide under the ragged tear as they scroll up, and
         // the back pill refracts them through REAL liquid glass.
@@ -233,20 +294,27 @@ val glassBackdrop = rememberLayerBackdrop()
 }
 
 @Composable
-private fun RecentFeedRow(item: RecentFeedItem, navController: NavController) {
+private fun RecentFeedRow(
+    item: RecentFeedItem,
+    navController: NavController,
+    onLongPress: (RecentFeedItem) -> Unit
+) {
     when (item) {
         is RecentFeedItem.Explored -> {
             val topic = item.topic
             RecentTopicRow(
                 categoryId = topic.categoryId,
                 topicName = topic.topicName,
-                label = if (topic.wasUnexplored) "Resumed · tap to write about it" else "Explored · tap to write about it",
+                // v3xx — the default tap now opens the TOPIC (keeps the
+                // discovery open); the write/save flow moved to long-press.
+                label = if (topic.wasUnexplored) "Resumed · tap to open" else "Explored · tap to open",
                 tag = if (topic.wasUnexplored) "Resumed" else null,
                 onClick = {
                     navController.navigate(
-                        CurioRoutes.captureFor(topic.categoryId.routeSlug, topic.topicName)
+                        CurioRoutes.revealFor(topic.categoryId.routeSlug, topic.topicName)
                     ) { launchSingleTop = true }
-                }
+                },
+                onLongClick = { onLongPress(item) }
             )
         }
         is RecentFeedItem.Unexplored -> {
@@ -260,7 +328,8 @@ private fun RecentFeedRow(item: RecentFeedItem, navController: NavController) {
                     navController.navigate(
                         CurioRoutes.revealFor(topic.categoryId.routeSlug, topic.topicName)
                     ) { launchSingleTop = true }
-                }
+                },
+                onLongClick = { onLongPress(item) }
             )
         }
         is RecentFeedItem.SavedEntry -> {
@@ -275,15 +344,21 @@ private fun RecentFeedRow(item: RecentFeedItem, navController: NavController) {
                 "${category.displayName} · ${entry.capturedAtDaysAgoLabel()}"
             }
             Surface(
-                onClick = {
-                    navController.navigate(CurioRoutes.entryDetail(entry.id)) {
-                        launchSingleTop = true
-                    }
-                },
+                // v3xx — default tap opens the TOPIC (the saved entry and
+                // the write flow live behind the long-press pill).
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .combinedClickable(
+                        onClick = {
+                            navController.navigate(
+                                CurioRoutes.revealFor(entry.topic.categoryId.routeSlug, entry.topic.name)
+                            ) { launchSingleTop = true }
+                        },
+                        onLongClick = { onLongPress(item) }
+                    ),
                 shape = RoundedCornerShape(22.dp),
                 color = category.categorySurface(),
-                shadowElevation = 0.dp,
-                modifier = Modifier.fillMaxWidth()
+                shadowElevation = 0.dp
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
@@ -313,7 +388,7 @@ private fun RecentFeedRow(item: RecentFeedItem, navController: NavController) {
                         )
                     }
                     CurioForwardArrow(
-                        contentDescription = "Open capture",
+                        contentDescription = "Open topic",
                         tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
                 }
@@ -322,22 +397,25 @@ private fun RecentFeedRow(item: RecentFeedItem, navController: NavController) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun RecentTopicRow(
     categoryId: CategoryId,
     topicName: String,
     label: String,
     tag: String?,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null
 ) {
     val category = CurioCategories.byId(categoryId)
     val accent = category.themedAccent()
     Surface(
-        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         shape = RoundedCornerShape(22.dp),
         color = category.categorySurface(),
-        shadowElevation = 0.dp,
-        modifier = Modifier.fillMaxWidth()
+        shadowElevation = 0.dp
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),

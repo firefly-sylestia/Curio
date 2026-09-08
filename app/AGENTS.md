@@ -629,6 +629,37 @@ app/src/main/java/com/curio/app/
   available) — the print shows whenever `move.polaroidOnCard` is on, and
   without a photo it renders the designed empty frame (camera hint, tap to
   add photo) exactly like Collage; the sizing block null-guards `userPhoto`.
+- **v3xx16 — Cabinet v2 COLLECTIONS (the 5.1 plan) + UI consistency + Recents
+  tap-to-open.** (1) **Collections data layer** — `AppPreferences` gains
+  `CurioCollection` / `CurioCollectionMember` (kind TOPIC = pinned topic via
+  categoryName=CategoryId.name + refName; ENTRY = saved entry by stable Room
+  id), persisted as a JSON array under `KEY_CABINET_COLLECTIONS`, reactive
+  via `collectionsState`, with `get/saveCabinetCollections`,
+  `addOrReplaceCollection` (upsert by id), `deleteCollection`. (2) **v2
+  restyle** — CabinetV2Content now wears the classic torn Cabinet hero
+  (`CabinetHeroHeader`/`CabinetHeroActionPill`/`CabinetHeroBannerHeight*`
+  made `internal` in CabinetScreen.kt) with liquid-glass pills + hero search;
+  the grid clears the fixed banner (`contentTop`). (3) **Collections home**
+  — an Everything card (3×2 `V2CoverCollage` of `V2Liked` cover plates) +
+  one card per collection + New tile; empty Cabinet shows 3 suggested
+  discoveries + Shuffle (existing v2 behavior). (4) **Collection detail** —
+  members render saved entries as `CurioEntryCard`s and pinned topics as
+  `V2LikedRow`s; long-press a member → `CurioHoldPill` Move up/down/Remove
+  (`moveMember`/`removeMember` — reorder changes the folder's cover); Add
+  multi-select sheet (`V2AddEntriesSheet`); kebab → rename/delete. (5)
+  **Create from moodboard** — the create sheet lists GalleryWall captures;
+  picking one creates a collection pre-filled with that entry. (6) **Reveal
+  File-to** — TopicRevealScreen long-presses the top bar
+  (`detectTapGestures(onLongPress)` on the header Row) → `CurioHoldPill` →
+  `FileToCollectionSheet` (check-marked already-filed collections, create on
+  the spot, no duplicates). (7) **Recents tap-to-open** — RecentScreen +
+  Home preview rows now default-tap into the REVEAL page (topic stays open);
+  the write/save/open-entry actions moved to long-press → `CurioHoldPill`
+  (`optionItem`/`recentOption` state), with `removeExplored` on the
+  destructive action. (8) **Book browser restyle** — BookBrowserScreen wears
+  the settings-family torn rose hero (`SettingsHeroHeader` + `SearchOff`
+  empty state + `CurioVerticalScrollIndicator` + hero search), matching
+  Recents / Manage Categories.
 - **v355 — book/series notes sheets: no close button, no hint copy, rating
   below the author, tick-free read state.** User: "never add cross close
   button in a bottom sheet… remove it from the book synopsis sheet… remove

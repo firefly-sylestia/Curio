@@ -329,5 +329,37 @@ The pending-prompt slot below is empty again.
 - [x] CI fix chain pushed: ed308041 (Dialog Box/Column restructure) + c56403ac (fully-qualified top-level AnimatedVisibility).
 - [x] 2026-09-08 batch (compile fix + liked-item resolution + label contrast + polaroid everywhere) committed and pushed — CI green confirmation pending on the next run.
 
-### Next prompt slot — (empty, waiting for the user's next prompt)
+### DONE — 2026-09-08 batch (collections + UI consistency + Recents)
+**Status:** COMPLETE — implemented, committed + pushed this session (see
+commit message for the batch).
+
+**What shipped:**
+1. **UI consistency** — Cabinet v2 restyled with the classic torn Cabinet
+   hero + liquid-glass pills + hero search; Book browser restyled with the
+   settings-family torn rose hero + search.
+2. **Cabinet v2 collections (the 5.1 plan)** — collection cards home
+   (Everything 3×2 collage card + one card per collection + New tile),
+   collection detail (entries as cards / topics as rows, long-press
+   Move up/down/Remove, Add multi-select sheet, rename/delete), create from
+   a MOODBOARD, and the reveal's hold → pill → "File to collection…" flow
+   (no duplicates; create on the spot). Data persisted via
+   `AppPreferences` JSON (`KEY_CABINET_COLLECTIONS`).
+3. **Recents behavior** — default tap now opens the TOPIC (reveal) on both
+   the Recents page and the Home preview; long-press offers Write / Open
+   saved entry / Remove.
+
+### Next prompt slot — holds the 2026-09-08 collections prompt (DONE; raw user text preserved below):
 the cabinet v2 screen doesnt match the ui style and also same with book browser so fix th eui consistency, and i also beleive what was the original plan for cabinet v2 isnt properly implemented yet, i thought e will be doing folders as well Turn Cabinet into **collection cards** (3×2 grid of entry covers styled like the share cards) + an "Everything" collection. - Create from a moodboard (it already has a board metaphor); naming, cover pick, reorder. - "Pin discovery directly into collection" from the reveal page (hold → pill → "File to…"). - Impact: turns a list into a keepsake surface; ties into share-card art. and that glass style ig too and also in home screen recetns when i explore something it marks it as explored and whn i open it from recents it either opens the saved entry or the express your save your entry but i want to keep the topic open so apply that too by defaukt opens the topic and then tap an hold action for more 
+
+### next prompt slot 
+experiments removal and default addition
+removals fully 
+- classic category pciker option as the new category picker have both now
+- promo mode
+- real blur older devices and custom blur engine 
+- glass widget lab 
+now the default add no more toggle and default applied 
++subtle pill glow
++live explore notification on by default when explore notification on
+ also the previous cabinet v2 header style i like it in liquid glass can you give it as a new header style option for all around the app and make the liquid glass of it more blurry and with its ow color tint so that the text colors are visible and its extended height depends on the header content
+ also a fix in other style the polaroid is cut from button so fix it 

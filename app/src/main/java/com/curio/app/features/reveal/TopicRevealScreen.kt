@@ -31,6 +31,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -97,6 +98,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -134,6 +136,8 @@ import androidx.navigation.NavController
 import com.curio.app.R
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
+import com.curio.app.data.CurioCollection
+import com.curio.app.data.CurioCollectionMember
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioPassport
 import com.curio.app.data.CurioPet
@@ -150,6 +154,7 @@ import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.TourController
 import com.curio.app.data.MusicService
 import com.curio.app.data.TopicCatalog
+import java.util.UUID
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.TopicRepository
 import com.curio.app.data.buildEngineSearchUrl
@@ -182,6 +187,7 @@ import com.curio.app.ui.adaptive.RevealSharedElementKey
 import com.curio.app.ui.adaptive.CurioContentMaxWidth
 import com.curio.app.features.settings.BookCoverFetch
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.CurioHoldPill
 import com.curio.app.ui.components.CurioProgressPill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.curioFloatingNavContainerFor
@@ -319,6 +325,11 @@ fun TopicRevealScreen(
     var selectedAlbumTrack by remember { mutableStateOf<AlbumTrack?>(null) }
     // v350 — the series episode-list sheet (album-style) for SERIES topics.
     var showSeriesSheet by rememberSaveable { mutableStateOf(false) }
+    // v3xx — "File to collection…" (Cabinet 5.1): long-pressing the top bar
+    // surfaces a pill whose action opens the collection picker; the topic
+    // is pinned into the chosen collection.
+    var showFileToPill by remember { mutableStateOf(false) }
+    var showFileToSheet by remember { mutableStateOf(false) }
     // v371 — the topic SHARE sheet + chapter-note sharing live at FUNCTION
     // level: the Book Notes sheet (rendered later in this composable) opens
     // the share card hosted in the floating-bar block, so both states must
@@ -782,11 +793,17 @@ fun TopicRevealScreen(
                 .verticalScroll(revealScroll)
         ) {
         // ── 1. Top bar (category chip + pin bookmark + close ✕) ────────
+        // v3xx — LONG-PRESS the bar's empty space to File the topic into a
+        // Cabinet collection (hold → pill → "File to…", Cabinet 5.1). The
+        // children (year pill / pin / close) keep their own taps.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 0.dp),
+                .padding(horizontal = 16.dp, vertical = 0.dp)
+                .pointerInput(Unit) {
+                    detectTapGestures(onLongPress = { showFileToPill = true })
+                },
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -1217,6 +1234,29 @@ fun TopicRevealScreen(
             cat = cat,
             topic = seriesSheetTopic,
             onDismiss = { showSeriesSheet = false }
+        )
+    }
+
+    // v3xx — "File to collection…" (Cabinet 5.1): the hold pill + the
+    // collection picker. Any topic (resolved or legacy-named) can be filed.
+    if (showFileToPill) {
+        CurioHoldPill(
+            title = resolved?.name ?: topicName,
+            actions = listOf(
+                "File to collection…" to {
+                    showFileToPill = false
+                    showFileToSheet = true
+                }
+            ),
+            onDismiss = { showFileToPill = false }
+        )
+    }
+    if (showFileToSheet) {
+        FileToCollectionSheet(
+            topicName = resolved?.name ?: topicName,
+            categoryId = cat.id,
+            context = context,
+            onDismiss = { showFileToSheet = false }
         )
     }
 
@@ -6087,3 +6127,183 @@ private fun hasNotificationPermission(context: Context): Boolean =
     Build.VERSION.SDK_INT < 33 ||
         ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
         PackageManager.PERMISSION_GRANTED
+
+/**
+ * v3xx — "File to collection…" (Cabinet 5.1): pin [topicName] into a
+ * collection. The sheet lists the user's collections (already-filed ones
+ * wear a check) plus a create-on-the-spot path; no duplicates are ever
+ * written (tapping an already-filed collection just dismisses).
+ */
+@Composable
+private fun FileToCollectionSheet(
+    topicName: String,
+    categoryId: CategoryId,
+    context: Context,
+    onDismiss: () -> Unit
+) {
+    val collections = AppPreferences.collectionsState
+    val haptics = LocalHapticFeedback.current
+    var creating by rememberSaveable { mutableStateOf(false) }
+    var newName by rememberSaveable { mutableStateOf("") }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 24.dp)
+        ) {
+            Text(
+                text = "File to collection",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = topicName,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (creating) {
+                OutlinedTextField(
+                    value = newName,
+                    onValueChange = { newName = it },
+                    singleLine = true,
+                    label = { Text("Collection name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Surface(
+                    onClick = {
+                        val name = newName.trim().ifBlank { "Collection" }
+                        val id = UUID.randomUUID().toString()
+                        AppPreferences.addOrReplaceCollection(
+                            context,
+                            CurioCollection(
+                                id = id,
+                                name = name,
+                                createdAtMillis = System.currentTimeMillis(),
+                                members = listOf(CurioCollectionMember(
+                                    kind = CurioCollectionMember.MemberKind.TOPIC,
+                                    categoryName = categoryId.name,
+                                    refName = topicName
+                                ))
+                            )
+                        )
+                        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                        onDismiss()
+                    },
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.fillMaxWidth().height(46.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "Create & file",
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
+            } else {
+                if (collections.isEmpty()) {
+                    Text(
+                        text = "No collections yet — create one below.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                collections.forEach { c ->
+                    val has = c.members.any {
+                        it.kind == CurioCollectionMember.MemberKind.TOPIC &&
+                            it.categoryName == categoryId.name && it.refName == topicName
+                    }
+                    Surface(
+                        onClick = {
+                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            if (!has) {
+                                AppPreferences.addOrReplaceCollection(
+                                    context,
+                                    c.copy(members = c.members + CurioCollectionMember(
+                                        kind = CurioCollectionMember.MemberKind.TOPIC,
+                                        categoryName = categoryId.name,
+                                        refName = topicName
+                                    ))
+                                )
+                            }
+                            onDismiss()
+                        },
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 11.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Inventory2,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                size = 17.dp
+                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = c.name,
+                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = "${c.members.size} item${if (c.members.size == 1) "" else "s"}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            CurioIcon(
+                                name = if (has) CurioIcons.Check else CurioIcons.ChevronRight,
+                                contentDescription = if (has) "Already in this collection" else null,
+                                tint = if (has) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                size = 18.dp
+                            )
+                        }
+                    }
+                }
+                Surface(
+                    onClick = { creating = true },
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.13f),
+                    modifier = Modifier.fillMaxWidth().height(44.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Add,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                size = 17.dp
+                            )
+                            Text(
+                                text = "New collection…",
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

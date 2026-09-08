@@ -7,15 +7,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
@@ -27,10 +28,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -41,8 +49,21 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.TopicJsonLoader
+import com.curio.app.navigation.CurioRoutes
+import com.curio.app.ui.adaptive.isWide
+import com.curio.app.ui.adaptive.wideContentEdgePadding
+import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.CurioEmptyState
+import com.curio.app.ui.components.CurioVerticalScrollIndicator
+import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.ScreenEntrance
+import com.curio.app.ui.components.isLiquidGlassPillsActive
+import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.isCurioDarkTheme
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
 /**
  * v3xx — the BOOK BROWSER: every catalogued book as a scrollable,
@@ -50,6 +71,11 @@ import com.curio.app.ui.theme.CurioIcons
  * rating) — moved out of the Book covers & ratings hub's horizontal strip
  * so the full catalogue is browsable without a sideways scroll. Tapping a
  * row opens the book's own reveal.
+ *
+ * v3xx2 — UI consistency pass: the plain surface shell was replaced with
+ * the settings-family torn-rose hero (sticky on phones, list-first on
+ * wide windows), real liquid-glass pills and a name search in the hero —
+ * the same chrome Recents / Manage Categories / Topic Database wear.
  */
 @Composable
 fun BookBrowserScreen(navController: NavController) {
@@ -59,79 +85,181 @@ fun BookBrowserScreen(navController: NavController) {
         value = runCatching { TopicJsonLoader.load(CategoryId.BOOKS) }.getOrDefault(emptyList())
     }
     val ratingCounts = AppPreferences.bookRatingsCountState
+    val listState = rememberLazyListState()
+    val glassBackdrop = rememberLayerBackdrop()
+    val wide = windowWidthSizeClass().isWide
 
-    Column(
+    // ── Hero search — filters the list by name / author.
+    var searchActive by rememberSaveable { mutableStateOf(false) }
+    var searchQuery by rememberSaveable { mutableStateOf("") }
+    val searchFocus = remember { FocusRequester() }
+    LaunchedEffect(searchActive) {
+        if (searchActive) searchFocus.requestFocus()
+    }
+    val shownBooks = remember(books, searchQuery) {
+        val q = searchQuery.trim()
+        if (q.isEmpty()) books
+        else books.filter {
+            it.name.contains(q, ignoreCase = true) ||
+                it.byline.contains(q, ignoreCase = true)
+        }
+    }
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-            .statusBarsPadding()
+            .background(heroPageBackground())
     ) {
-        // ── Header ─────────────────────────────────────────────────────
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp)
-        ) {
-            Surface(
-                onClick = { navController.popBackStack() },
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
-            ) {
-                CurioIcon(
-                    CurioIcons.ArrowBack, "Back",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    size = 20.dp,
-                    modifier = Modifier.padding(10.dp)
-                )
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    "Book browser",
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    "Every book, line by line · covers, ratings and years",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+        // Wide windows: the NavHost's full-bleed collage replaces the page's
+        // own backdrop so there is ONE continuous collage, not a double.
+        if (!wide) {
+            CurioWatermarkBackdrop(
+                activeCat = com.curio.app.data.CurioCategories.byId(CategoryId.WILDCARD),
+                modifier = Modifier.fillMaxSize()
+            )
         }
 
-        if (books.isEmpty()) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(
-                    "Loading books…",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            return@Column
-        }
-
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 28.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(books, key = { it.name }) { book ->
-                val rating = AppPreferences.bookRatingsState[book.name]
-                BookBrowserRow(
-                    book = book,
-                    rating = rating,
-                    count = ratingCounts[book.name] ?: 0,
-                    onClick = {
-                        navController.navigate(
-                            com.curio.app.navigation.CurioRoutes.revealForBrowse(
-                                CategoryId.BOOKS.routeSlug,
-                                book.name
-                            )
-                        ) { launchSingleTop = true }
+        ScreenEntrance {
+            if (books.isEmpty()) {
+                Column {
+                    SettingsHeroHeader(
+                        title = "Book browser",
+                        subtitle = "Every book, line by line · covers, ratings and years",
+                        onBack = { navController.popBackStack() }
+                    )
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            "Loading books…",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
-                )
+                }
+            } else {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        start = wideContentEdgePadding(),
+                        end = wideContentEdgePadding(),
+                        top = if (wide) 0.dp else SettingsHeroTotalHeight + (if (searchActive) 56.dp else 0.dp),
+                        bottom = 24.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    if (wide) {
+                        item(key = "hero", contentType = "hero") {
+                            SettingsHeroHeader(
+                                title = "Book browser",
+                                subtitle = "Every book, line by line · covers, ratings and years",
+                                onBack = { navController.popBackStack() },
+                                trailing = { ink -> BookBrowserHeroPills(ink = ink, glassBackdrop = glassBackdrop, onSearch = { searchActive = true }) },
+                                searchActive = searchActive,
+                                searchQuery = searchQuery,
+                                onSearchQueryChange = { searchQuery = it },
+                                onCloseSearch = { searchActive = false; searchQuery = "" },
+                                searchFocus = searchFocus,
+                                searchPlaceholder = "Search books…"
+                            )
+                        }
+                    }
+                    if (shownBooks.isEmpty()) {
+                        item(key = "empty", contentType = "empty") {
+                            CurioEmptyState(
+                                glyph = CurioIcons.SearchOff,
+                                headline = "No books match",
+                                subtext = "Try a different title or author.",
+                                tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
+                                ctaLabel = "Clear search",
+                                onCtaClick = { searchQuery = ""; searchActive = false }
+                            )
+                        }
+                    } else {
+                        items(shownBooks, key = { it.name }) { book ->
+                            val rating = AppPreferences.bookRatingsState[book.name]
+                            BookBrowserRow(
+                                book = book,
+                                rating = rating,
+                                count = ratingCounts[book.name] ?: 0,
+                                onClick = {
+                                    navController.navigate(
+                                        CurioRoutes.revealForBrowse(
+                                            CategoryId.BOOKS.routeSlug,
+                                            book.name
+                                        )
+                                    ) { launchSingleTop = true }
+                                }
+                            )
+                        }
+                    }
+                }
             }
+        }
+
+        if (shownBooks.size > 4) {
+            CurioVerticalScrollIndicator(
+                state = listState.scrollIndicatorState,
+                onScrollBy = { listState.dispatchRawDelta(it) },
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .fillMaxHeight()
+                    .padding(top = 10.dp, bottom = 16.dp)
+            )
+        }
+
+        // STICKY HERO — phone only; wide scrolls the hero as the list's
+        // first item instead.
+        if (!wide && books.isNotEmpty()) {
+            SettingsHeroHeader(
+                title = "Book browser",
+                subtitle = "Every book, line by line · covers, ratings and years",
+                onBack = { navController.popBackStack() },
+                trailing = { ink -> BookBrowserHeroPills(ink = ink, glassBackdrop = glassBackdrop, onSearch = { searchActive = true }) },
+                searchActive = searchActive,
+                searchQuery = searchQuery,
+                onSearchQueryChange = { searchQuery = it },
+                onCloseSearch = { searchActive = false; searchQuery = "" },
+                searchFocus = searchFocus,
+                searchPlaceholder = "Search books…",
+                glassBackdrop = glassBackdrop
+            )
+        }
+    }
+}
+
+/** The hero's action pills — a search pill riding beside the back pill. */
+@Composable
+private fun BookBrowserHeroPills(
+    ink: Color,
+    glassBackdrop: com.kyant.backdrop.backdrops.LayerBackdrop?,
+    onSearch: () -> Unit
+) {
+    val glassMod = if (isLiquidGlassPillsActive() && glassBackdrop != null)
+        Modifier.liquidGlassCapsule(
+            MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+            backdrop = glassBackdrop
+        )
+    else Modifier
+    androidx.compose.foundation.layout.Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Surface(
+            onClick = onSearch,
+            shape = CircleShape,
+            color = androidx.compose.ui.graphics.lerp(
+                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+                Color.White,
+                if (isCurioDarkTheme()) 0.12f else 0.25f
+            ),
+            modifier = glassMod
+        ) {
+            CurioIcon(
+                CurioIcons.Search, "Search books",
+                tint = ink,
+                size = 18.dp,
+                modifier = Modifier.padding(10.dp)
+            )
         }
     }
 }

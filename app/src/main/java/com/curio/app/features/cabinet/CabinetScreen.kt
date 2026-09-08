@@ -910,13 +910,13 @@ fun CabinetScreen(navController: NavController) {
  *  v31 — back to the original 180dp: the Category pill no longer lives
  *  inside the hero (it rides its own row below), so the banner no longer
  *  needs the v30 +52dp growth and the header text stays put. */
-private val CabinetHeroBannerHeight = 180.dp
+internal val CabinetHeroBannerHeight = 180.dp
 /** Banner height on wide windows (tablet/landscape). */
-private val CabinetHeroBannerHeightCompact = 140.dp
+internal val CabinetHeroBannerHeightCompact = 140.dp
 /** Extra layout space reserved for the under-sheet below the torn banner. */
-private val CabinetHeroSheetExtent = 24.dp
+internal val CabinetHeroSheetExtent = 24.dp
 /** Fixed tear seed — the Cabinet tears in its own bold pattern, never re-rolls. */
-private const val CABINET_TEAR_SEED = 0xCAB1E
+internal const val CABINET_TEAR_SEED = 0xCAB1E
 
 // ── Category filter UI (v316) ─────────────────────────────────────────
 // The old sticky every-lane chip bar is gone (mirroring the Topic Database
@@ -953,7 +953,7 @@ private data class CabinetHeroPair(
  * fill and ink MORPH smoothly when the filter changes.
  */
 @Composable
-private fun CabinetHeroHeader(
+internal fun CabinetHeroHeader(
     title: String,
     subtitle: String,
     activeCat: CurioCategory?,
@@ -1541,7 +1541,7 @@ private fun BoxScope.CabinetHeroSymbol(
  *  [emphasized] deepens the fill for the active/primary state;
  *  [destructive] deepens it further for the delete action. */
 @Composable
-private fun CabinetHeroActionPill(
+internal fun CabinetHeroActionPill(
     onClick: () -> Unit,
     ink: Color,
     // v27n — the banner fill behind the pill (the opaque-fill conversion

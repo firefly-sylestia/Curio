@@ -9,9 +9,11 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -144,6 +146,7 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.theme.LocalCurioThemeTransition
 import com.curio.app.ui.theme.switchThemeWithReveal
 import com.curio.app.ui.components.CurioConstellation
+import com.curio.app.ui.components.CurioHoldPill
 import com.curio.app.ui.components.CurioDrawerState
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioNavTint
@@ -256,6 +259,9 @@ fun HomeScreen(navController: NavController) {
     val context = LocalContext.current
     // Satisfying haptics: confirm on the big spin CTA, light ticks on picks.
     val haptics = LocalHapticFeedback.current
+    // v3xx — recents rows: default tap opens the TOPIC (reveal); the hold
+    // pill carries the write / open-entry / remove actions.
+    var recentOption by remember { mutableStateOf<RecentFeedItem?>(null) }
     // v30 — Appearance "Hero follows Spin lane": the quest hero AND the Home
     // background take the category last picked on Spin (the Cabinet's
     // language) when the toggle is on; otherwise Home stays on the soft
@@ -1142,12 +1148,13 @@ fun HomeScreen(navController: NavController) {
                                         category = CurioCategories.byId(explored.categoryId),
                                         topicName = explored.topicName,
                                         tag = if (explored.wasUnexplored) "Resumed" else null,
-                                        subtitle = "Explored · tap to write about it",
+                                        subtitle = "Explored · tap to open",
                                         onClick = {
                                             navController.navigate(
-                                                CurioRoutes.captureFor(explored.categoryId.routeSlug, explored.topicName)
+                                                CurioRoutes.revealFor(explored.categoryId.routeSlug, explored.topicName)
                                             ) { launchSingleTop = true }
-                                        }
+                                        },
+                                        onLongClick = { recentOption = item }
                                     )
                                 }
                                 is RecentFeedItem.Unexplored -> {
@@ -1161,22 +1168,70 @@ fun HomeScreen(navController: NavController) {
                                             navController.navigate(
                                                 CurioRoutes.revealFor(unexplored.categoryId.routeSlug, unexplored.topicName)
                                             ) { launchSingleTop = true }
-                                        }
+                                        },
+                                        onLongClick = { recentOption = item }
                                     )
                                 }
                                 is RecentFeedItem.SavedEntry -> {
                                     RecentEntryRow(
                                         entry = item.entry,
                                         onClick = {
-                                            navController.navigate(CurioRoutes.entryDetail(item.entry.id)) {
-                                                launchSingleTop = true
-                                            }
-                                        }
+                                            navController.navigate(
+                                                CurioRoutes.revealFor(item.entry.topic.categoryId.routeSlug, item.entry.topic.name)
+                                            ) { launchSingleTop = true }
+                                        },
+                                        onLongClick = { recentOption = item }
                                     )
                                 }
                             }
                         }
                     }
+                }
+
+                // v3xx — the recents long-press pill (mirrors the Recents
+                // page): tap = topic; hold = write / open-entry / remove.
+                recentOption?.let { target ->
+                    val actions = buildList<Triple<String, () -> Unit, Boolean>> {
+                        when (target) {
+                            is RecentFeedItem.Explored -> {
+                                add(Triple("Write about it", {
+                                    navController.navigate(
+                                        CurioRoutes.captureFor(target.topic.categoryId.routeSlug, target.topic.topicName)
+                                    ) { launchSingleTop = true }
+                                }, false))
+                                add(Triple("Remove from Recents", {
+                                    ExploreSessionStore.removeExplored(context, target.topic.categoryId, target.topic.topicName)
+                                }, true))
+                            }
+                            is RecentFeedItem.Unexplored -> {
+                                add(Triple("Write about it", {
+                                    navController.navigate(
+                                        CurioRoutes.captureFor(target.topic.categoryId.routeSlug, target.topic.topicName)
+                                    ) { launchSingleTop = true }
+                                }, false))
+                            }
+                            is RecentFeedItem.SavedEntry -> {
+                                add(Triple("Open saved entry", {
+                                    navController.navigate(CurioRoutes.entryDetail(target.entry.id)) { launchSingleTop = true }
+                                }, false))
+                                add(Triple("Write about it", {
+                                    navController.navigate(
+                                        CurioRoutes.captureFor(target.entry.topic.categoryId.routeSlug, target.entry.topic.name)
+                                    ) { launchSingleTop = true }
+                                }, false))
+                            }
+                        }
+                    }
+                    CurioHoldPill(
+                        title = when (target) {
+                            is RecentFeedItem.Explored -> target.topic.topicName
+                            is RecentFeedItem.Unexplored -> target.topic.topicName
+                            is RecentFeedItem.SavedEntry -> target.entry.topic.name
+                        },
+                        actions = actions.map { it.first to it.second },
+                        destructiveIndexes = actions.mapIndexedNotNull { i, t -> if (t.third) i else null }.toSet(),
+                        onDismiss = { recentOption = null }
+                    )
                 }
 
                 // Add breathing room before the bottom card / nav bar
@@ -1762,24 +1817,28 @@ private fun PinnedTopicRow(
 // ═══════════════════════════════════════════════════════════════════════
 
 @Composable
-private fun RecentEntryRow(entry: CurioEntry, onClick: () -> Unit) {
+@OptIn(ExperimentalFoundationApi::class)
+private fun RecentEntryRow(
+    entry: CurioEntry,
+    onClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null
+) {
     val cat = CurioCategories.byId(entry.topic.categoryId)
     // Solid category-tinted card in light mode — matches the recents topic
     // rows. v115 — dark mode: the Home recents go back to plain dark
     // surface cards (the category tint on pitch black was dropped); the
     // recents page (RecentScreen) keeps its tinted rows.
     Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(20.dp),
-        color = if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerLow else cat.categorySurface(),
-        // v27u — recents rows sit on a soft 2dp lift.
-        shadowElevation = 2.dp,
         modifier = Modifier
             .fillMaxWidth()
-            // v98 — dark pill: keep the previous colored fill + the pill
-            // shape; the white catch stays at the TOP EDGE only
-            // (curioGlassEdge) — the full-pill inner glow is gone.
+            // v27u — recents rows sit on a soft 2dp lift; the white catch
+            // stays at the TOP EDGE only (curioGlassEdge) — the full-pill
+            // inner glow is gone.
             .curioGlassEdge(RoundedCornerShape(20.dp))
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+        shape = RoundedCornerShape(20.dp),
+        color = if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerLow else cat.categorySurface(),
+        shadowElevation = 2.dp
     ) {
         Row(
             modifier = Modifier
@@ -2909,12 +2968,14 @@ private fun greetingWordForNow(): String {
 // ═══════════════════════════════════════════════════════════════════════
 
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 private fun ExploreTopicRow(
     category: CurioCategory,
     topicName: String,
     subtitle: String,
     onClick: () -> Unit,
-    tag: String? = null
+    tag: String? = null,
+    onLongClick: (() -> Unit)? = null
 ) {
     val accent = category.themedAccent()
     // Solid category-tinted card in light mode — the recents topics wear a
@@ -2924,17 +2985,18 @@ private fun ExploreTopicRow(
     // category tint on pitch black).
     val rowShape = RoundedCornerShape(20.dp)
     Surface(
-        onClick = onClick,
-        shape = rowShape,
-        color = if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerLow else category.categorySurface(),
-        // v27u — recents rows sit on a soft 2dp lift.
-        shadowElevation = 2.dp,
         modifier = Modifier
             .fillMaxWidth()
             // v98 — dark pill: previous color + pill shape kept; the white
             // catch stays at the TOP EDGE only (curioGlassEdge) — the
             // full-pill inner glow is gone.
             .curioGlassEdge(rowShape)
+            // v3xx — hold the row for more actions (write / remove).
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+        shape = rowShape,
+        color = if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerLow else category.categorySurface(),
+        // v27u — recents rows sit on a soft 2dp lift.
+        shadowElevation = 2.dp
     ) {
         Row(
             modifier = Modifier
