@@ -1082,5 +1082,37 @@ autoLayout attempt 5 now carries the REAL tall fit (autoFitShape on
 PORTRAIT) instead of the 1.4×/1.18× guess. Committed + pushed; CI
 validates.
 
+## Request (2026-09-08, completed + pushed — inline fact-editor caret ACCURACY: the stale-style root cause)
+
+**Request (direct):** "the cursor in the inline editor is still wrong
+when I tap to edit something — it's very inaccurate; I found out it's due
+to the hidden text small — fix it in both full screen and bottom sheet".
+
+**Root cause found (not the metrics — the REPORTING):** the invisible
+typing field's style came from the card's `onFactStyle` report, which
+fired only inside `onGloballyPositioned` — i.e. when the fact box's
+BOUNDS move. The smart fit shrinks the text inside a box that is clipped
+at its maxLines cap — the node's bounds stay put, so the position-driven
+report went STALE: the field kept the old size while the visible glyphs
+rendered smaller ("the hidden text small" — the mismatch), and the caret
+/ tap-to-position landed off the visible letters. Second divergence:
+spans with per-run FONT SIZES (the enlarge editor) made the card wrap
+differently from the plain-text field.
+
+**Fix (TopicShareCard.kt, v3xx32):** (1) every style re-reports its fact
+style on EVERY composition — `LaunchedEffect(style) { callbacks.
+onFactStyle(style) }` after the style val in Vinyl / Collage / Clean /
+Editorial (`bodyStyle`) / Minimal / Signature / Custom / MiddleContent's
+`qStyle` + `frostStyle` — so the field always uses the CURRENT rendered
+family/size/line-height/align. (2) The field's `TextFieldValue` seed now
+carries the SAME annotated runs the card renders
+(`buildRichAnnotated(editFact, unshifted cardFactSpans, ShareFactMarker)`
+— unshifted because the field edits the bare review text, not the
+chapter chip prefix) so bold/italic/highlight and per-run font sizes wrap
+identically in the field; a span-only change (format toggle) refreshes
+the annotation while preserving the live selection. Both surfaces share
+the one ArrangeableCard field, so the bottom-sheet preview and the
+full-screen editor are fixed together. Committed + pushed.
+
 ## next prompt
 (empty — no pending prompt)

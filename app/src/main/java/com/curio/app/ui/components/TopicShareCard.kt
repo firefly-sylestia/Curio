@@ -3183,6 +3183,12 @@ private fun VinylCard(
                 lineHeight = (bodySize.value * 1.50f * bodyScale).sp, color = inkDark.copy(alpha = 0.88f),
                 fontStyle = if (quoteText != null) FontStyle.Italic else FontStyle.Normal
             ), move)
+            // v3xx — re-report the fact style on EVERY composition: the smart
+            // fit can shrink the text while the box is clipped at its maxLines
+            // (the node's bounds don't move), and the old position-driven
+            // report went stale — the inline field kept the old size and the
+            // caret landed off the visible glyphs.
+            androidx.compose.runtime.LaunchedEffect(factStyle) { callbacks.onFactStyle(factStyle) }
             Surface(
                 shape = RoundedCornerShape(4.dp),
                 color = Color(0xFFFDF0EE).copy(alpha = 0.85f),
@@ -4102,6 +4108,11 @@ private fun CollageCard(
                 lineHeight = (bodySize.value * 1.55f * bodyScale).sp, color = Color.White.copy(alpha = 0.92f),
                 fontStyle = if (quoteText != null) FontStyle.Italic else FontStyle.Normal
             ), move)
+            // v3xx — re-report on every composition (see Vinyl's comment): a
+            // clipped box keeps its bounds while the fit shrinks the text, so
+            // the position-driven report would go stale and the inline field's
+            // caret would drift off the visible glyphs.
+            androidx.compose.runtime.LaunchedEffect(factStyle) { callbacks.onFactStyle(factStyle) }
             // v329 — Reading-progress content draws the chapter widget (white
             // on the sage/dark field) instead of the prose.
             // v335 — a custom fact stacks UNDER the progress widget.
@@ -4305,6 +4316,11 @@ private fun NeumorphicCard(
                     color = Color.White.copy(alpha = 0.88f),
                     shadow = Shadow(Color.Black.copy(alpha = 0.62f), Offset(0f, 2f), 5f)
                 ), move)
+                // v3xx — re-report on every composition (see Vinyl's comment):
+                // the fit can shrink the text inside a bounds-fixed clipped
+                // box, leaving the position-driven report stale and the
+                // inline field's caret off the glyphs.
+                androidx.compose.runtime.LaunchedEffect(factStyle) { callbacks.onFactStyle(factStyle) }
                 // v329 — Reading-progress content draws the chapter widget
                 // (white on the dark plate) instead of the prose.
                 // v335 — a custom fact stacks UNDER the progress widget.
@@ -4495,6 +4511,9 @@ private fun EditorialCard(
                 lineHeight = (bodySize.value * 1.45f * bodyScale).sp, color = inkDark.copy(alpha = 0.82f),
                 fontWeight = FontWeight.Medium
             ), move)
+            // v3xx — re-report on every composition (see Vinyl's comment): the
+            // drop-cap flow's box can stay put while the fit shrinks the type.
+            androidx.compose.runtime.LaunchedEffect(bodyStyle) { callbacks.onFactStyle(bodyStyle) }
             val bodyRest = if (body.length > 1) body.drop(1) else ""
             // v329 — Reading-progress content draws the chapter widget
             // (accent bar on the cream page) instead of the drop-cap prose.
@@ -4717,6 +4736,11 @@ private fun MinimalCard(
                 fontFamily = LoraFontFamily, fontSize = (bodySize.value * bodyScale).sp,
                 lineHeight = (bodySize.value * 1.50f * bodyScale).sp, color = inkDark.copy(alpha = 0.78f)
             ), move)
+            // v3xx — re-report on every composition (see Vinyl's comment): the
+            // bottom-anchored box can be clipped at its cap while the fit
+            // shrinks the text further — the old position-driven report went
+            // stale and the inline field's caret drifted off the glyphs.
+            androidx.compose.runtime.LaunchedEffect(factStyle) { callbacks.onFactStyle(factStyle) }
             // v359 — the accent rule, the gap and the fact text are ONE move
             // group: the rule above the quick/custom fact travels with the
             // box on drag (and stays glued while the box resizes) instead of
@@ -5003,6 +5027,10 @@ private fun SignatureCard(
                 lineHeight = (bodySize * sig.bodyLineHeight * bodyScale).sp,
                 color = sig.bodyColor
             ), move).copy(textAlign = align)
+            // v3xx — re-report on every composition (see Vinyl's comment): a
+            // clipped box keeps its bounds while the fit shrinks the type, so
+            // the position-driven report would go stale and the caret drift.
+            androidx.compose.runtime.LaunchedEffect(factStyle) { callbacks.onFactStyle(factStyle) }
             // v329 — Reading-progress content draws the chapter widget in the
             // signature surface's own tones (no ruled lines; the bar wears
             // the rule/badge tone) instead of the prose.
@@ -7337,6 +7365,8 @@ private fun CustomCard(
                 lineHeight = (bodySize * sig.bodyLineHeight).sp,
                 color = sig.bodyColor
             ), move)
+            // v3xx — re-report on every composition (see Vinyl's comment).
+            androidx.compose.runtime.LaunchedEffect(factStyle) { callbacks.onFactStyle(factStyle) }
             // v329 — Reading-progress content draws the chapter widget in the
             // signature colors (bar in the badge tone, caption in body ink)
             // instead of the prose.
@@ -7427,6 +7457,8 @@ private fun MiddleContent(
                 fontFamily = LoraFontFamily, fontSize = qSize,
                 lineHeight = (qSize.value * 1.28f).sp, color = palette.frostInk()
             ), move)
+            // v3xx — re-report on every composition (see Vinyl's comment).
+            androidx.compose.runtime.LaunchedEffect(qStyle) { callbacks.onFactStyle(qStyle) }
             FactBody(text = quoteText, style = qStyle, format = move.factFormat, dropCap = move.factDropCap, gutterFrac = move.factGutter, spans = factSpans, aspect = aspect, maxLines = lines(if (aspect == ShareCardAspect.PORTRAIT) 12 else 8, move.factHeightFrac), modifier = Modifier.moveFact(move).onGloballyPositioned {
                 callbacks.onFact(it.boundsInWindow())
                 callbacks.onFactStyle(qStyle)
@@ -7494,6 +7526,10 @@ private fun MiddleContent(
                 // pane's blended luminance (white on dark premium tones).
                 color = palette.frostInk()
             ), move)
+            // v3xx — re-report on every composition (see Vinyl's comment): the
+            // frost pane clips at its maxLines, so a fit-shrunk text keeps
+            // the same bounds and the position-driven report goes stale.
+            androidx.compose.runtime.LaunchedEffect(frostStyle) { callbacks.onFactStyle(frostStyle) }
             FrostPane(palette, Modifier.moveFact(move)) {
                 // v329 — Reading-progress content draws the visual chapter
                 // widget here (same bounds reporting, so the editor's box +
@@ -7849,11 +7885,28 @@ private fun ArrangeableCard(
     // Re-seed only when the sheet pushes DIFFERENT text (e.g. switching the
     // active content) — typing echoes back the same text so the selection /
     // caret survive every keystroke (the RichTextEditor pattern).
-    androidx.compose.runtime.LaunchedEffect(editFact, richFactTools) {
+    // v3xx — the seed carries the SAME rich runs the card renders
+    // (bold/italic/highlight/underline + per-run font sizes from the
+    // enlarge editor): the card draws those runs at different sizes, and a
+    // plain-text field would wrap differently on those runs — the caret
+    // would sit off the visible glyphs. The field stays transparent; the
+    // annotated string only fixes its METRICS. [factSpans] here are the
+    // un-shifted runs (the field edits the bare review text, without the
+    // chapter chip the card prefixes).
+    androidx.compose.runtime.LaunchedEffect(editFact, richFactTools, factSpans) {
         if (richFactTools && richFactTfv.text != editFact) {
             richFactTfv = androidx.compose.ui.text.input.TextFieldValue(
-                editFact,
+                if (factSpans.isEmpty()) androidx.compose.ui.text.AnnotatedString(editFact)
+                else buildRichAnnotated(editFact, factSpans, ShareFactMarker),
                 androidx.compose.ui.text.TextRange(editFact.length)
+            )
+        } else if (richFactTools && factSpans.isNotEmpty() && richFactTfv.annotatedString.spanStyles != buildRichAnnotated(editFact, factSpans, ShareFactMarker).spanStyles) {
+            // Text unchanged but the RUNS changed (a bold/italic/highlight /
+            // size toggle): refresh the annotation so the field's metrics
+            // follow the card — keeping the user's live selection/caret.
+            richFactTfv = androidx.compose.ui.text.input.TextFieldValue(
+                buildRichAnnotated(editFact, factSpans, ShareFactMarker),
+                richFactTfv.selection
             )
         }
     }

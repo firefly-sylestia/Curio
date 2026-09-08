@@ -814,6 +814,30 @@ app/src/main/java/com/curio/app/
   `shadowElevation` blur behind the TILTED cream print read as a
   "background showing behind the strip" (preview AND export); the tape +
   tilt keep the scrapbook depth. Other styles keep the shadow.
+- **v3xx32 — Inline fact-editor caret ACCURACY (user follow-up 2026-09-08:
+  "the cursor in the inline editor is still wrong when I tap to edit — it's
+  very inaccurate, due to the hidden text small — fix it in both full
+  screen and bottom sheet").** Root cause: the invisible typing field's
+  style came from the card's `onFactStyle` report, which fired only inside
+  `onGloballyPositioned` — i.e. when the fact box's BOUNDS move. When the
+  smart fit shrinks the text inside a box that is clipped at its maxLines
+  cap (the node's bounds stay put), the report went STALE — the field
+  kept the old (bigger) size while the visible glyphs rendered smaller,
+  so the caret and tap-to-position landed off the visible text. Fix:
+  every style now re-reports its fact style on EVERY composition
+  (`LaunchedEffect(style) { callbacks.onFactStyle(style) }` after the
+  style val in Vinyl / Collage / Clean / Editorial (`bodyStyle`) /
+  Minimal / Signature / Custom / MiddleContent's `qStyle` + `frostStyle`)
+  — the field always uses the CURRENT rendered size (family, size, line
+  height, align, format tweaks). Second divergence fixed: the field now
+  seeds its `TextFieldValue` with the SAME annotated runs the card renders
+  (`buildRichAnnotated(factFieldText, unshifted cardFactSpans, marker)`)
+  so bold/italic/highlight and the enlarge-editor's per-run FONT SIZES
+  wrap identically in the field (the caret stays on the glyphs even on
+  sized runs); a span-only change (format toggle) refreshes the annotation
+  while preserving the live selection. Both the bottom-sheet preview and
+  the full-screen editor share the one ArrangeableCard field, so both are
+  fixed by these two changes.
 - **v3xx31 — Share-card smart-fit OVERHAUL (user follow-up 2026-09-08:
   "the spark pill struggles with longer texts — it doesn't increase the
   box height fully / place them properly / shrink the text, especially in
