@@ -5700,6 +5700,7 @@ private fun AlbumSynopsisAccordion(
 private fun sheetActionIconTone(ink: Color, variant: Color, alpha: Float = 1f): Color =
     if (isCurioDarkTheme()) ink else variant.copy(alpha = alpha)
 
+@Composable
 private fun HeartGlyph(
     color: Color,
     iconSize: Dp,
