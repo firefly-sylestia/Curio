@@ -259,30 +259,6 @@ fun CabinetV2Content(navController: NavController) {
     var typeFilter by rememberSaveable { mutableStateOf<String?>(null) }
     var sortAtoZ by rememberSaveable { mutableStateOf(false) }
 
-    // v3xx — BACK handling: system back now walks OUT of the open pages
-    // instead of popping the whole Cabinet to Home. Order: cancel the
-    // selection → close search → close the open collection / Everything /
-    // virtual shelf → then (openLevel == "") let the system back leave the
-    // Cabinet as usual.
-    BackHandler(enabled = selectionMode || searchActive || openLevel.isNotEmpty()) {
-        when {
-            selectionMode -> {
-                selectionMode = false
-                selectedEntryIds = emptySet()
-            }
-            searchActive -> {
-                searchActive = false
-                searchQuery = ""
-            }
-            else -> {
-                openLevel = ""
-                searchActive = false
-                searchQuery = ""
-                typeFilter = null
-            }
-        }
-    }
-
     // ── Everything-level filters: search + type + sort.
     val filteredEntries = remember(entries, searchQuery) {
         val q = searchQuery.trim()
@@ -364,6 +340,30 @@ fun CabinetV2Content(navController: NavController) {
     var selectionMode by rememberSaveable { mutableStateOf(false) }
     var selectedEntryIds by rememberSaveable { mutableStateOf<Set<String>>(emptySet()) }
     var showBulkDeleteConfirm by rememberSaveable { mutableStateOf(false) }
+
+    // v3xx — BACK handling: system back now walks OUT of the open pages
+    // instead of popping the whole Cabinet to Home. Order: cancel the
+    // selection → close search → close the open collection / Everything /
+    // virtual shelf → then (openLevel == "") let the system back leave the
+    // Cabinet as usual. (Declared after the selection state it reads.)
+    BackHandler(enabled = selectionMode || searchActive || openLevel.isNotEmpty()) {
+        when {
+            selectionMode -> {
+                selectionMode = false
+                selectedEntryIds = emptySet()
+            }
+            searchActive -> {
+                searchActive = false
+                searchQuery = ""
+            }
+            else -> {
+                openLevel = ""
+                searchActive = false
+                searchQuery = ""
+                typeFilter = null
+            }
+        }
+    }
     val visibleIds = remember(openLevel, shownEntries, entries, noteEntries) {
         when (openLevel) {
             SHELF_LEVEL_SAVED -> entries.map { it.id }.toSet()
