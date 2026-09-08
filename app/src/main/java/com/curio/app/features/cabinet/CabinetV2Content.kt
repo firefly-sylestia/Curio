@@ -55,6 +55,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -146,7 +147,6 @@ fun CabinetV2Content(navController: NavController) {
     val wide = windowWidthSizeClass().isWide
     val scope = rememberCoroutineScope()
     val haptics = LocalHapticFeedback.current
-    val gridState = rememberLazyGridState()
 
     // ── Glass plumbing: the grid records into a LOCAL backdrop the hero
     // pills blur (sibling overlay outside the captured subtree).
@@ -473,8 +473,13 @@ fun CabinetV2Content(navController: NavController) {
             .background(MaterialTheme.colorScheme.background)
     ) {
         // ── The scrolling grid — runs UNDER the hero.
+        // v3xx — each level owns a FRESH grid state: the single shared
+        // remembered scroll made opening a collection land MID-list and made
+        // page switches visibly jump (the glitch). key(openLevel) recreates
+        // the grid per level, so every level opens from the TOP.
+        key(openLevel) {
         LazyVerticalGrid(
-            state = gridState,
+            state = rememberLazyGridState(),
             // v3xx — Everything is a 3-column media grid (the old 2-col + a
             // separate list toggle are gone: list was replaced by the 3 grid);
             // every other level keeps its 2-col card grid.
@@ -690,6 +695,7 @@ fun CabinetV2Content(navController: NavController) {
                     onClearSearch = { searchQuery = ""; searchActive = false }
                 )
             }
+        }
         }
 
         // ── The torn hero — pinned overlay on phones (wide renders it as
@@ -1560,6 +1566,7 @@ private fun V2EverythingCard(
     // v3xx — THEME-AWARE (the old hardcoded cream wash looked wrong in dark
     // and in the pastel themes): the card wears the theme's surface tokens;
     // the header icon tile + covers add their own category tints.
+    val context = LocalContext.current
     val dark = isCurioDarkTheme()
     val fill = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.92f)
     val ink = MaterialTheme.colorScheme.onSurface
@@ -1648,7 +1655,16 @@ private fun V2EverythingCard(
                 ) {
                     items(likes, key = { "${it.kind.name}|${it.name}" }) { item ->
                         val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
-                        val accent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+                        // v3xx — the preview wears each cover's OWN color too
+                        // (dominant color extracted from the cached art).
+                        val accent = remember(item.name, item.kind, CabinetCoverCache.version.intValue) {
+                            CabinetCoverCache.dominantCoverColor(
+                                context,
+                                CabinetCoverCache.CoverKind.valueOf(item.kind.name),
+                                item.name,
+                                cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+                            )
+                        }
                         Box(
                             modifier = Modifier
                                 .size(width = 64.dp, height = 88.dp)
@@ -1965,14 +1981,30 @@ private fun V2MediaTileCard(
      *  liked item can switch providers ("if you didn't like that one"). */
     onMore: (() -> Unit)? = null
 ) {
+    val context = LocalContext.current
     val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
-    val accent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+    val fallbackAccent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+    // v3xx — the tile wears ITS OWN color: the dominant color extracted from
+    // its cover art (fallback = category accent while the cover is still
+    // downloading). Re-keys when the cover cache warms a file.
+    val accent = remember(item.name, item.kind, CabinetCoverCache.version.intValue) {
+        CabinetCoverCache.dominantCoverColor(
+            context,
+            CabinetCoverCache.CoverKind.valueOf(item.kind.name),
+            item.name,
+            fallbackAccent
+        )
+    }
     val dark = isCurioDarkTheme()
     Surface(
         modifier = modifier.combinedClickable(onClick = onClick),
         shape = RoundedCornerShape(18.dp),
-        color = cat?.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
-            ?: MaterialTheme.colorScheme.surfaceContainerHigh
+        color = androidx.compose.ui.graphics.lerp(
+            cat?.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+                ?: MaterialTheme.colorScheme.surfaceContainerHigh,
+            accent,
+            if (dark) 0.10f else 0.16f
+        )
     ) {
         Column {
             val artRatio = when (item.kind) {
@@ -2072,10 +2104,22 @@ private fun V2MediaTileCard(
     }
 }
 
-/** v3xx — a REVIEW (ReelNotes) tile with its OWN OUTLINED box: the saved
- *  reviews of books/albums/series no longer masquerade as generic capture
- *  cards — a hairline outline, the quote mark, the star rating and a
- *  text preview make a review read as a review at a glance. */
+/** Which cover kind a REVIEW's topic refers to — decided by which art the
+ *  Cabinet already persisted for that name (books key by name, albums /
+ *  series by `album|<name>` / `series|<name>`). Null = no cover yet → the
+ *  review falls back to the category accent. */
+private fun reviewCoverKind(name: String): CabinetCoverCache.CoverKind? {
+    if (!AppPreferences.bookCoverUrlsState[name].isNullOrBlank()) return CabinetCoverCache.CoverKind.BOOK
+    if (!AppPreferences.sheetArtUrlsState["album|$name"].isNullOrBlank()) return CabinetCoverCache.CoverKind.ALBUM
+    if (!AppPreferences.sheetArtUrlsState["series|$name"].isNullOrBlank()) return CabinetCoverCache.CoverKind.SERIES
+    return null
+}
+
+/** v3xx — a REVIEW (ReelNotes) tile with the REVIEWED media's OWN color: the
+ *  saved reviews of books/albums/series no longer masquerade as generic
+ *  capture cards — the dominant color extracted from the reviewed cover
+ *  tints the card (the thick outline is gone), with the quote mark, star
+ *  rating and a text preview making a review read as a review at a glance. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun V2ReviewTileCard(
@@ -2084,17 +2128,29 @@ private fun V2ReviewTileCard(
     onLongClick: (() -> Unit)? = null,
     selected: Boolean = false
 ) {
+    val context = LocalContext.current
     val cat = CurioCategories.byId(entry.topic.categoryId)
-    val accent = cat.themedAccent()
+    val fallbackAccent = cat.themedAccent()
+    val kind = reviewCoverKind(entry.topic.name)
+    // v3xx — the review wears the reviewed media's OWN extracted cover
+    // color (fallback = category accent while the cover is still
+    // downloading). Re-keys when the cover cache warms a file.
+    val accent = if (kind != null) {
+        remember(entry.topic.name, kind, CabinetCoverCache.version.intValue) {
+            CabinetCoverCache.dominantCoverColor(context, kind, entry.topic.name, fallbackAccent)
+        }
+    } else fallbackAccent
     val data = entry.captureData as? CaptureData.ReelNotes
     Surface(
         modifier = Modifier
             .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         shape = RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        border = androidx.compose.foundation.BorderStroke(
-            1.dp,
-            accent.copy(alpha = if (selected) 1f else 0.45f)
+        // v3xx — no more outline: the extracted cover color tints the card
+        // so it keeps its identity without the boxy border.
+        color = androidx.compose.ui.graphics.lerp(
+            MaterialTheme.colorScheme.surfaceContainerHigh,
+            accent,
+            if (isCurioDarkTheme()) 0.08f else 0.14f
         )
     ) {
         Column(modifier = Modifier.padding(11.dp)) {
@@ -2175,13 +2231,29 @@ private fun V2LikedTileCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
-    val accent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+    val fallbackAccent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+    // v3xx — the tile wears ITS OWN color: the dominant color extracted from
+    // its cover art (fallback = category accent while the cover is still
+    // downloading). Re-keys when the cover cache warms a file.
+    val accent = remember(item.name, item.kind, CabinetCoverCache.version.intValue) {
+        CabinetCoverCache.dominantCoverColor(
+            context,
+            CabinetCoverCache.CoverKind.valueOf(item.kind.name),
+            item.name,
+            fallbackAccent
+        )
+    }
     Surface(
         modifier = modifier.combinedClickable(onClick = onClick),
         shape = RoundedCornerShape(18.dp),
-        color = cat?.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
-            ?: MaterialTheme.colorScheme.surfaceContainerHigh
+        color = androidx.compose.ui.graphics.lerp(
+            cat?.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+                ?: MaterialTheme.colorScheme.surfaceContainerHigh,
+            accent,
+            if (isCurioDarkTheme()) 0.10f else 0.16f
+        )
     ) {
         Column {
             Box(
@@ -3196,15 +3268,31 @@ private fun V2LikedRow(
     modifier: Modifier = Modifier,
     onLongClick: (() -> Unit)? = null
 ) {
+    val context = LocalContext.current
     val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
-    val accent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+    val fallbackAccent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+    // v3xx — the row wears ITS OWN color: the dominant color extracted from
+    // its cover art (fallback = category accent while the cover is still
+    // downloading). Re-keys when the cover cache warms a file.
+    val accent = remember(item.name, item.kind, CabinetCoverCache.version.intValue) {
+        CabinetCoverCache.dominantCoverColor(
+            context,
+            CabinetCoverCache.CoverKind.valueOf(item.kind.name),
+            item.name,
+            fallbackAccent
+        )
+    }
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         shape = RoundedCornerShape(18.dp),
-        color = cat?.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
-            ?: MaterialTheme.colorScheme.surfaceContainerHigh
+        color = androidx.compose.ui.graphics.lerp(
+            cat?.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+                ?: MaterialTheme.colorScheme.surfaceContainerHigh,
+            accent,
+            if (isCurioDarkTheme()) 0.10f else 0.16f
+        )
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

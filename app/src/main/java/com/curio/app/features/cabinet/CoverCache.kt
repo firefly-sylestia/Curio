@@ -1,7 +1,9 @@
 package com.curio.app.features.cabinet
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.graphics.Color
 import com.curio.app.data.AppPreferences
 import com.curio.app.features.reveal.AlbumArtFetch
 import com.curio.app.features.reveal.SeriesPosterFetch
@@ -42,6 +44,71 @@ object CabinetCoverCache {
      *  BEFORE their cover landed re-check the local file (reading this
      *  during composition subscribes the caller to the bump). */
     val version = mutableIntStateOf(0)
+
+    /** Extracted-accent cache (`kind|name` → ARGB) — each cover's dominant
+     *  color is computed ONCE and reused by every row/tile/review that asks. */
+    private val dominantColorCache = HashMap<String, Int>()
+
+    /** The DOMINANT COLOR of a cover's cached bytes — downsampled decode +
+     *  bucket quantization, computed once and cached forever. Falls back to
+     *  [fallback] when the bytes aren't on disk yet (or decode fails), so a
+     *  bare tile keeps the category accent until its cover lands. */
+    fun dominantCoverColor(context: Context, kind: CoverKind, name: String, fallback: Color): Color {
+        val key = "${kind.stateKey}|$name"
+        dominantColorCache[key]?.let { return Color(it) }
+        val file = localCoverFile(context, kind, name) ?: return fallback
+        val argb = runCatching { extractDominantArgb(file) }.getOrNull()
+        if (argb != null) dominantColorCache[key] = argb
+        return argb?.let { Color(it) } ?: fallback
+    }
+
+    /** Downsample the image to ~24px, bucket-quantize the RGB (4 bits per
+     *  channel), and return the most frequent bucket as an ARGB int — count
+     *  primary, saturation as the tiebreak so a colorful cover wins over a
+     *  gray edge. */
+    private fun extractDominantArgb(file: File): Int {
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(file.absolutePath, bounds)
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) throw IllegalStateException("no bounds")
+        var sample = 1
+        while (bounds.outWidth / (sample * 2) >= 24 && bounds.outHeight / (sample * 2) >= 24) sample *= 2
+        val opts = BitmapFactory.Options().apply { inSampleSize = sample }
+        val bmp = BitmapFactory.decodeFile(file.absolutePath, opts)
+            ?: throw IllegalStateException("no bitmap")
+        try {
+            val counts = HashMap<Int, Int>()
+            var total = 0L
+            var rSum = 0L; var gSum = 0L; var bSum = 0L
+            for (y in 0 until bmp.height step 2) {
+                for (x in 0 until bmp.width step 2) {
+                    val px = bmp.getPixel(x, y)
+                    val r = (px shr 16) and 0xFF
+                    val g = (px shr 8) and 0xFF
+                    val b = px and 0xFF
+                    rSum += r; gSum += g; bSum += b; total++
+                    val q = ((r shr 4) shl 8) or ((g shr 4) shl 4) or (b shr 4)
+                    counts[q] = (counts[q] ?: 0) + 1
+                }
+            }
+            if (total == 0L) throw IllegalStateException("empty")
+            val best = counts.maxByOrNull { (q, n) ->
+                val r = (q shr 8) shl 4
+                val g = ((q shr 4) and 0xF) shl 4
+                val b = (q and 0xF) shl 4
+                n * 4 + (maxOf(r, g, b) - minOf(r, g, b))
+            }?.key
+            if (best != null) {
+                return 0xFF000000.toInt() or
+                    (((best shr 8) shl 4) shl 16) or
+                    ((((best shr 4) and 0xF) shl 4) shl 8) or
+                    ((best and 0xF) shl 4)
+            }
+            return 0xFF000000.toInt() or
+                ((rSum / total) shl 16) or ((gSum / total) shl 8) or (bSum / total)
+        } finally {
+            bmp.recycle()
+        }
+    }
 
     private fun dir(context: Context): File =
         File(context.applicationContext.filesDir, "cover_cache").apply { mkdirs() }

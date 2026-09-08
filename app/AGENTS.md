@@ -812,6 +812,25 @@ app/src/main/java/com/curio/app/
   `shadowElevation` blur behind the TILTED cream print read as a
   "background showing behind the strip" (preview AND export); the tape +
   tilt keep the scrapbook depth. Other styles keep the shadow.
+- **v3xx28 — Cabinet per-item colors + fresh grid per level (user
+  follow-up 2026-09-08).** (1) **Extracted cover colors** — liked
+  books/albums/series rows, tiles and the Everything preview now use the
+  DOMINANT COLOR of each cover's cached art (not the category accent) for
+  the accent dot/label, the jacket plate gradient and a subtle card
+  surface tint. `CabinetCoverCache.dominantCoverColor(context, kind,
+  name, fallback)` downsamples the cached `.img` (~24px), bucket-
+  quantizes RGB and caches the winner ARGB forever in a static map
+  (`kind|name` key); callers re-key on `version.intValue` so tiles that
+  composed before their cover landed re-extract when the warmer saves
+  the file. Fallback = category accent while bytes aren't on disk.
+  Reviews (`V2ReviewTileCard`) borrow the REVIEWED media's extracted
+  color via `reviewCoverKind(name)` (book/album/series decided by which
+  art store already holds that name) and the 1dp OUTLINE is gone — the
+  color tints the card instead. (2) **Grid per level** — `key(openLevel)`
+  wraps the LazyVerticalGrid and `rememberLazyGridState()` moved inside
+  it: the single shared scroll position was making a collection open
+  MID-list and page switches visibly jump (the glitch); every level now
+  opens from the TOP.
 - **v3xx27 — collection card DESIGN pass (user follow-up
   2026-09-08).** (1) **Shelf cards now carry their art** — the drawn
   scene fills the WHOLE card as a whisper-alpha background, not just a

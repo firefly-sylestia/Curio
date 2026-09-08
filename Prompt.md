@@ -957,8 +957,33 @@ center `CurioHoldPill` collection overlay + `PillTarget.Collection`
 removed; member long-press pill stays). (4) Dead hints removed ("· tap a
 member to open it", "· long-press a member for more").
 
-**Held:** committed on top of `a02a3b38` (also held) — one push sends
-both; CI validates on push.
+**Pushed together** (`a02a3b38` + `2cf3ccc3`) on the next instruction.
+
+## Request (2026-09-08, completed + pushed — Cabinet per-item cover colors, review outline removal, fresh grid per level)
+
+**Request (direct):** "for book row and card it has category accent right
+how about we use the extracted color from the album books etc for their
+own color and also for everything review a similar one and remove the
+thick outlines its bad yk and push everything also fix the switching page
+glitch the cabinet looks glitchy when switching in so fix it too and also
+when opening collections it opens it mid ways not from top so fix it too".
+
+**Implemented (pushed `b40b3c0`-ish):** (1) `CabinetCoverCache` gained
+`dominantCoverColor(context, kind, name, fallback)` — downsampled decode
+(~24px) + bucket quantization, winner ARGB cached forever in a static map
+(`kind|name`); callers re-key on `version.intValue`. V2LikedRow /
+V2MediaTileCard / V2LikedTileCard / the Everything preview rail now use
+the cover's own dominant color for the accent dot, kind label, jacket
+plate gradient and a subtle surface tint (fallback = category accent
+while the cover is downloading). (2) Reviews (`V2ReviewTileCard`) borrow
+the REVIEWED media's extracted color (`reviewCoverKind(name)` decides
+book/album/series from which art store holds the name) and the 1dp
+outline is GONE — the color tints the card. (3) Grid glitch + mid-list
+open: `key(openLevel)` wraps the LazyVerticalGrid and
+`rememberLazyGridState()` moved inside it — every level opens from the
+TOP and page switches no longer jump (was: one shared scroll position
+across all levels).
 
 ## next prompt
-(empty — no pending prompt)
+/workspaces/Curio/CurioSettings_Redesign-3.jsx we will be doing whole settinsg redesign, exacty similiar style and exactly same nav style and also rearrnage existing ones, only appearnnace have new look use it as a refernce for others too and keep it minimal, and the settings itself will be that, data etc gets the book fething etc privacy etc yk here to place what so start the fuull settings revamp just keep the header same or else exactly same as the jsx even the cards design exacty same
+dont push this after finishing and dont stop before finishing
