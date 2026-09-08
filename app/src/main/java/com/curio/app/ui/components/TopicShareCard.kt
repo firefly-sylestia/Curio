@@ -546,12 +546,19 @@ private fun PolaroidPrint(
     caption: String,
     captionInk: Color,
     onPhotoTap: (() -> Unit)?,
-    callbacks: EditBoundsCallbacks
+    callbacks: EditBoundsCallbacks,
+    // v3xx — cast a drop shadow behind the print? The Collage turns it OFF:
+    // the dark blur behind its TILTED cream strip read as a "background
+    // showing behind the strip" (in the preview AND the export); the tilt +
+    // the washi tape already give the print its scrapbook depth. Every
+    // other style keeps the shadow for lift over its busy artwork.
+    shadow: Boolean = true
 ) {
     Box(Modifier.offset(pX.dp, pY.dp).size(pW.dp, pH.dp)
         .graphicsLayer {
             rotationZ = look.tilt
-            shadowElevation = 6f
+            // v3xx — no shadow on the Collage's tilted print (see [shadow]).
+            if (shadow) shadowElevation = 6f
             shape = RoundedCornerShape(3.dp)
             clip = false
         }
@@ -874,16 +881,53 @@ private fun factFitBudget(style: ShareCardStyle, aspect: ShareCardAspect): Pair<
         // EXPAND (the frost pane can take more lines), so the fit favours
         // growing the box and barely touches the text (0.96× floor) — the
         // old shared mid-flow budget shrank Paper's type to 0.8× while the
-        // height could have absorbed the text. v3xx — the cap nudges up a
-        // touch (2.0/1.8 → 2.2/2.0) so long facts on Paper expand further
-        // before the sparkle has to shrink the box.
-        ShareCardStyle.PAPER -> if (tall) 2.2f to 0.96f else 2.0f to 0.96f
+        // height could have absorbed the text. v3xx — the cap stays at the
+        // validated 2.0/1.8: a higher cap let the grown box reach the
+        // bottom-anchored footer on long facts (the user-visible overlap).
+        // Longer text now shrinks below the floor instead (see
+        // [autoFitShape]'s no-clip pass) — never cut, never overlapping.
+        ShareCardStyle.PAPER -> if (tall) 2.0f to 0.96f else 1.8f to 0.96f
         // Mid-flow facts between the header/title and the footer (Vinyl /
-        // Signature / Custom). v3xx — +0.1 height cap (1.5/1.4 → 1.6/1.5)
-        // so the mid-flow designs absorb a bit more length before the text
-        // floor kicks in.
-        else -> if (tall) 1.6f to 0.80f else 1.5f to 0.83f
+        // Signature / Custom). v3xx — the cap holds at the validated
+        // 1.5/1.4 for the same reason as Paper: a taller box on these
+        // styles could reach the footer; the no-clip text pass absorbs the
+        // length instead.
+        else -> if (tall) 1.5f to 0.80f else 1.4f to 0.83f
     }
+}
+
+/** v3xx — the hard floor the no-clip pass may shrink the fact text to.
+ *  Below this the type is unreadable, so the fit never goes further (and
+ *  no realistic fact needs to — the floor covers ~100+ wrapped lines on
+ *  every style's box). The design floors in [factFitBudget] are SOFT
+ *  targets; the no-clip pass may go below them, but never past this. */
+private const val FactFitHardFloor = 0.45f
+
+/** v3xx — each style's natural fact-box LINE capacity (the [fitLines]
+ *  base at heightFrac = 1, per aspect) — what the box holds before any
+ *  fit. The no-clip pass compares this against the measured wrap count so
+ *  it sizes the text to the style's REAL room, not a character guess. */
+private fun factBoxBaseLines(style: ShareCardStyle, aspect: ShareCardAspect): Int = when (style) {
+    ShareCardStyle.COLLAGE -> 18
+    ShareCardStyle.SIGNATURE -> if (aspect == ShareCardAspect.PORTRAIT) 14 else 10
+    ShareCardStyle.CUSTOM -> if (aspect == ShareCardAspect.PORTRAIT) 20 else 14
+    ShareCardStyle.VINYL -> if (aspect == ShareCardAspect.PORTRAIT) 8 else 6
+    ShareCardStyle.NEUMORPHIC -> if (aspect == ShareCardAspect.PORTRAIT) 8 else 6
+    // Paper's frost pane holds 10 lines at rest; Editorial / Minimal sit
+    // between the two.
+    ShareCardStyle.PAPER -> 10
+    else -> if (aspect == ShareCardAspect.PORTRAIT) 12 else 9
+}
+
+/** v3xx — how many MORE lines a style's fact box wraps than the canonical
+ *  [rememberFactWrapLines] measurement (which uses the full card width -
+ *  28dp at 11sp). Only Vinyl's deliberately NARROW pane (max 220dp) wraps
+ *  significantly more (~1.7×); every other style's box is ~full width, so
+ *  their factor is 1.0 and the no-clip safety margin absorbs the small
+ *  differences. */
+private fun factWrapFactor(style: ShareCardStyle): Float = when (style) {
+    ShareCardStyle.VINYL -> 1.7f
+    else -> 1.0f
 }
 
 /**
@@ -895,24 +939,42 @@ private fun factFitBudget(style: ShareCardStyle, aspect: ShareCardAspect): Pair<
  * wrap ratio (a fact that wraps to 1.3× the box's lines renders at ~0.77×
  * in the same footprint). Only when that shrink would pass the design's
  * text floor does the BOX grow to absorb the remainder — and only up to
- * the budget's height cap, past which the floor holds. One continuous
- * curve, no hidden per-style logic.
+ * the budget's height cap. v3xx — NO-CLIP GUARANTEE: past the cap the
+ * TEXT keeps shrinking (below the design floor when necessary, down to
+ * [FactFitHardFloor]) until the WHOLE fact fits the box — a long fact
+ * NEVER ellipsizes or gets cut, and the box never grows past the cap (so
+ * it never reaches the footer / title / card edge). The fit solves
+ * capacity(base × H) ≥ text(effective × S) for S, so the text always
+ * fits the box the user sees. One continuous curve, no hidden per-style
+ * logic.
  */
 private fun autoFitShape(style: ShareCardStyle, aspect: ShareCardAspect, wrapLines: Int): ShareAutoFitDelta {
     val (maxHeightFrac, minTextScale) = factFitBudget(style, aspect)
     val grow = autoFitGrowByWrap(wrapLines)
     if (grow <= 1f) return ShareAutoFitDelta()
+    val base = factBoxBaseLines(style, aspect).toFloat()
+    // The style's REAL wrapped line count (narrow panes wrap more).
+    val eff = wrapLines * factWrapFactor(style)
+    // The largest text scale that still fits the whole fact in a box of
+    // [h]× base lines: capacity(base×h/S) ≥ lines(eff×S) → S² ≤ base·h/eff.
+    // The 0.92 margin absorbs the canonical-vs-real measurement slack so
+    // the guarantee holds even when the style's box differs a little.
+    fun fitScaleFor(h: Float): Float =
+        (kotlin.math.sqrt(base * h / eff.coerceAtLeast(1f)) * 0.92f)
+            .coerceIn(FactFitHardFloor, 1f)
     val inv = 1f / grow
     if (inv >= minTextScale) {
-        // The text can absorb the whole length at the box's natural height.
-        return ShareAutoFitDelta(heightFrac = 1f, widthFrac = 1f, textScale = inv)
+        // The text can absorb the whole length at the box's natural height
+        // — but never larger than what fits (the curve's buckets overshoot
+        // on narrow panes, so clamp to the real fit scale too).
+        return ShareAutoFitDelta(heightFrac = 1f, widthFrac = 1f, textScale = minOf(inv, fitScaleFor(1f)))
     }
-    // Text floor reached → grow the box just enough (capped by the budget).
-    return ShareAutoFitDelta(
-        heightFrac = (grow * minTextScale).coerceIn(1f, maxHeightFrac),
-        widthFrac = 1f,
-        textScale = minTextScale
-    )
+    // Text floor reached → grow the box to the budget cap and shrink the
+    // text just enough that the fact ALWAYS fits (no ellipsis), even below
+    // the design floor when the cap can't hold the text at it.
+    val h = (grow * minTextScale).coerceIn(1f, maxHeightFrac)
+    val s = minOf(minTextScale, fitScaleFor(h)).coerceIn(FactFitHardFloor, minTextScale)
+    return ShareAutoFitDelta(heightFrac = h, widthFrac = 1f, textScale = s)
 }
 
 /**
@@ -1046,6 +1108,13 @@ private fun ShareCardPalette.frostInk(): Color {
     val fixBadgeX: Float = 0f,
     val fixBadgeY: Float = 0f,
 
+    // v3xx — TRUE when the title was MANUALLY dragged to overlap the fact
+    // (or the info rows): the sparkle RESETS the manual vertical offset so
+    // the title returns to its natural spot at the top of the card — the
+    // dragged-over repair the user asked for (no minimal-lift guess, the
+    // title goes all the way back).
+    val resetTitleY: Boolean = false,
+
     // true → switch the CARD itself to 9:16 (only offered when the current
     // aspect is 3:4 and the text still overflows a fully-fitted 3:4 card).
     val tall: Boolean = false
@@ -1160,6 +1229,13 @@ private fun autoLayoutPlan(
         if (gap > 2f) -gap else 0f
     } else 0f
     val collisionTitleLift = maxOf(titleFactOverlap, bottomOverlap(t, m)).coerceAtMost(72f)
+    // v3xx — a title the user DRAGGED into the fact (or the info rows) is
+    // the one repair the fit must not guess at: the sparkle RESETS its
+    // manual vertical offset so it returns to its natural spot at the top.
+    // (The size lift for a fact grown up into the title's natural spot
+    // still applies on top — the reset restores the position, the lift
+    // keeps the fit clear.)
+    val manualTitleOverlap = move.titlePlaced && (titleFactOverlap > 0f || bottomOverlap(t, m) > 0f)
     // v3xx — a fav strip parked ABOVE the fact (the Collage / Signature top
     // placement) that has grown/dragged INTO the fact pushes the FACT down by
     // the overlap — never the strip down into it (adding it to the fav lift
@@ -1181,16 +1257,28 @@ private fun autoLayoutPlan(
     // The lift only "spends" itself on the MEASURED title collision — the
     // size lift is prospective (the new box hasn't grown yet), so it must
     // not absorb a fav/badge overlap that only a fact push can fix.
-    val titleLift = minOf(maxOf(sizeLift, collisionTitleLift), titleLiftCap)
+    // A dragged-over title is RESET to its natural spot, so only the
+    // prospective grown-fact lift applies to it (never the collision lift
+    // — that would shove the title ABOVE where it started).
+    val titleLift = if (manualTitleOverlap)
+        sizeLift.coerceAtMost(titleLiftCap)
+    else minOf(maxOf(sizeLift, collisionTitleLift), titleLiftCap)
     val titleLiftSpent = minOf(collisionTitleLift, titleLift)
     // v3xx — ADVANCED overlap solver: the collision is resolved in THREE
     // steps, in order of preference — (1) the title lifts (capped by the
-    // pill / card edge), (2) the fact pushes DOWN but never past the card's
-    // bottom edge, (3) whatever is still overlapping SHRINKS the fact box.
-    // The old two-step solver (lift + push, both hard-capped) could leave a
-    // residual overlap on very tall grown boxes and then declared the tap
-    // "done" — the overlap the user kept seeing.
-    val totalCollision = maxOf(titleFactOverlap, favOverFact, badgeOverFact)
+    // pill / card edge) or, when the title was dragged over the fact, is
+    // RESET to the top entirely, (2) the fact pushes DOWN but never past
+    // the card's bottom edge, (3) whatever is still overlapping SHRINKS
+    // the fact box. The old two-step solver (lift + push, both
+    // hard-capped) could leave a residual overlap on very tall grown boxes
+    // and then declared the tap "done" — the overlap the user kept seeing.
+    // The title-vs-fact overlap is excluded from the fact push when the
+    // reset resolves it (pushing the fact down for it would shove the box
+    // into the footer).
+    val totalCollision = maxOf(
+        if (manualTitleOverlap) 0f else titleFactOverlap,
+        favOverFact, badgeOverFact
+    )
     val spaceBelow = if (f.width > 0f && f.height > 0f) (cardH - f.bottom - 2f).coerceAtLeast(0f) else 0f
     val collisionFactLift = (totalCollision - titleLiftSpent).coerceIn(0f, spaceBelow.coerceAtMost(72f))
     val residualCollision = (totalCollision - titleLiftSpent - collisionFactLift).coerceAtLeast(0f)
@@ -1246,7 +1334,7 @@ private fun autoLayoutPlan(
 
     if (shape.heightFrac == 0f && titleLift == 0f && collisionFactLift == 0f &&
         collisionMetaLift == 0f && collisionFavLift == 0f && collisionBadgeLift == 0f &&
-        factShrinkDp == 0f &&
+        factShrinkDp == 0f && !manualTitleOverlap &&
         fixTx == 0f && fixTy == 0f && fixFx == 0f && fixFy == 0f &&
         fixMx == 0f && fixMy == 0f && fixVx == 0f && fixVy == 0f &&
         fixBx == 0f && fixBy == 0f
@@ -1293,7 +1381,10 @@ private fun autoLayoutPlan(
             factDropCap = ShareCardFactDropCap.NONE
         )
     }).withCollisionRepair(titleLift, collisionFactLift, collisionMetaLift, collisionFavLift, collisionBadgeLift)
-    val withShrink = if (factShrinkDp > 0f) repaired.copy(factShrinkDp = factShrinkDp) else repaired
+    // v3xx — a dragged-over title carries the RESET flag on the plan so the
+    // commit zeroes its manual vertical offset (back to the natural top).
+    val withReset = if (manualTitleOverlap) repaired.copy(resetTitleY = true) else repaired
+    val withShrink = if (factShrinkDp > 0f) withReset.copy(factShrinkDp = factShrinkDp) else withReset
     return if (fixTx == 0f && fixTy == 0f && fixFx == 0f && fixFy == 0f &&
         fixMx == 0f && fixMy == 0f && fixVx == 0f && fixVy == 0f &&
         fixBx == 0f && fixBy == 0f
@@ -3815,7 +3906,10 @@ private fun CollageCard(
                 pW = pW, pH = pH, pX = pX, pY = pY, photoH = photoH,
                 look = look, pStyle = pStyle, pFilter = pFilter,
                 userPhoto = userPhoto, caption = polaroidLabel, captionInk = captionInk,
-                onPhotoTap = onPhotoTap, callbacks = callbacks
+                onPhotoTap = onPhotoTap, callbacks = callbacks,
+                // v3xx — no dark shadow behind the tilted cream print on the
+                // collage (see [PolaroidPrint.shadow]).
+                shadow = false
             )
 
             // Title — retro Bungee, dark green, top-left (v... — retro face +
@@ -9237,6 +9331,9 @@ fun TopicShareSheet(
             // past the pill, fact can't push past the card bottom) shrinks
             // the fact BOX, so the tap always resolves the collision.
             val shrinkChanges = plan.factShrinkDp > 0f
+            // v3xx — a dragged-over title is RESET to its natural spot on
+            // the same tap (the manual vertical offset is zeroed).
+            val resetTitleChanges = plan.resetTitleY
             // v3xx — out-of-card clamp changes (anything that hung off the
             // card edge is pulled back inside on the same tap).
             val fixChanges = plan.fixTitleX != 0f || plan.fixTitleY != 0f ||
@@ -9246,7 +9343,7 @@ fun TopicShareSheet(
                 plan.fixBadgeX != 0f || plan.fixBadgeY != 0f
             if (wantsTall || hChanges || sChanges || fmtChanges || dropCapChanges ||
                 titleLiftChanges || factLiftChanges || metaLiftChanges || favLiftChanges ||
-                badgeLiftChanges || shrinkChanges || fixChanges
+                badgeLiftChanges || shrinkChanges || resetTitleChanges || fixChanges
             ) {
                 updateMove(move.copy(
                     // v3xx — a residual overlap shrinks the fact box on the
@@ -9261,8 +9358,14 @@ fun TopicShareSheet(
                     factFormat = plan.format ?: move.factFormat,
                     factDropCap = plan.factDropCap ?: move.factDropCap,
                     titleLift = plan.titleLift.coerceIn(0f, 96f),
-                    titleDx = move.titleDx + plan.fixTitleX,
-                    titleDy = move.titleDy + plan.fixTitleY,
+                    // v3xx — a dragged-over title is RESET to its natural
+                    // spot at the top: zero the manual offsets (the lift
+                    // above still clears a fact grown up into that spot).
+                    titleDx = if (plan.resetTitleY) 0f else move.titleDx + plan.fixTitleX,
+                    titleDy = if (plan.resetTitleY) 0f else move.titleDy + plan.fixTitleY,
+                    // The manual-placement flag clears with the reset — the
+                    // title is back to the design position.
+                    titlePlaced = if (plan.resetTitleY) false else move.titlePlaced,
                     // v3xx — SIGNED info-rows repair: negative lifts the
                     // author/year rows UP to touch the title (the snap-to-
                     // title behaviour — the strip can drift FAR below the

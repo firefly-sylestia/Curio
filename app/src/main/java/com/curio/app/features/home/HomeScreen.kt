@@ -145,7 +145,7 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.theme.LocalCurioThemeTransition
 import com.curio.app.ui.theme.switchThemeWithReveal
 import com.curio.app.ui.components.CurioConstellation
-import com.curio.app.ui.components.CurioGlassToolbarMorph
+import com.curio.app.ui.components.CurioGlassToolbar
 import com.curio.app.ui.components.CurioHoldPill
 import com.curio.app.ui.components.CurioDrawerState
 import com.curio.app.ui.components.CurioForwardArrow
@@ -236,9 +236,6 @@ private val HomeQuestSheetExtent = 24.dp
 /** Scroll distance (dp) before the menu + profile pills fully pin as
  *  frosted floating pills. */
 private val StickyBarThreshold = 90.dp
-// v3xx — the collapsed height of the morphing glass header (below the
-// status bar): a slim identity bar holding the menu pill + avatar + name.
-private val HomeCompactHeaderHeight = 54.dp
 /** Fixed tear seed — Home's tear never re-rolls and matches the detail
  *  hero's SoftTorn construction exactly (uniform tear style). */
 // v7.37 — Home's hero tears in its OWN pattern: a different fixed seed
@@ -482,11 +479,64 @@ fun HomeScreen(navController: NavController) {
             // Cabinet · Topics stat row riding inside the bar (the same
             // segments the torn banner pins above its tear).
             if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
-                // v3xx — the MORPHING glass header is now pinned as a
-                // SIBLING overlay of the capture (see the pinned bar below),
-                // so the scroll content only needs to clear the COLLAPSED
-                // identity bar; the hero slot is a slim spacer.
-                Spacer(Modifier.height(HomeCompactHeaderHeight))
+                // v3xx — Home keeps its STATIC content-height glass toolbar
+                // as the first scroll item (user direction 2026-09-08: the
+                // morph collapse belongs to PROFILE only — Home stays as it
+                // was, and the pinned morph bar was covering the pet). NO
+                // glassBackdrop here: the toolbar is the FIRST item of the
+                // scroll Column, INSIDE the homeGlassBackdrop capture
+                // subtree — sampling it would self-capture (the v228
+                // RenderThread cycle). The toolbar falls back to the safe
+                // simulated-glass recipe instead (the bar's frosted tint +
+                // sheen still read as glass).
+                CurioGlassToolbar(
+                    title = greetingWordForNow(),
+                    subtitle = displayName,
+                    content = { ink ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            HeroStatSegment(
+                                glyph = "local_fire_department",
+                                value = "$streakDays",
+                                label = "Streak",
+                                tint = ink,
+                                ink = ink,
+                                modifier = Modifier.weight(1f),
+                                onClick = { navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true } }
+                            )
+                            VerticalDivider(
+                                modifier = Modifier.height(34.dp),
+                                color = ink.copy(alpha = 0.22f)
+                            )
+                            HeroStatSegment(
+                                glyph = CurioIcons.Inventory2,
+                                value = "$totalSaved",
+                                label = "Cabinet",
+                                tint = ink,
+                                ink = ink,
+                                modifier = Modifier.weight(1f),
+                                onClick = { navController.navigateToTab(CurioRoutes.CABINET) }
+                            )
+                            VerticalDivider(
+                                modifier = Modifier.height(34.dp),
+                                color = ink.copy(alpha = 0.22f)
+                            )
+                            HeroStatSegment(
+                                glyph = CurioIcons.AutoAwesome,
+                                value = "$topicsTotal",
+                                label = "Topics",
+                                tint = ink,
+                                ink = ink,
+                                modifier = Modifier.weight(1f),
+                                onClick = { navController.navigate(CurioRoutes.DATABASE) { launchSingleTop = true } }
+                            )
+                        }
+                    }
+                )
             } else {
             Box(
                 modifier = Modifier
@@ -1262,96 +1312,11 @@ fun HomeScreen(navController: NavController) {
             // One scroll-linked clock drives color, scale, lift and shadow.
             // FastOutSlowIn gives the fade a gentle start and finish while
             // keeping it perfectly scrubable with the user's finger.
-            // v3xx — GLASS header style: the pinned MORPHING toolbar replaces
-            // the floating menu/avatar pills (it carries its own menu +
-            // avatar and collapses from the full hero — greeting + name + the
-            // Streak · Cabinet · Topics row — to the compact identity bar
-            // holding just the avatar + display name as the page scrolls).
-            if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
-                // The avatar pill — photo (or the name initial on the hero
-                // fill) — opens Profile from both the full bar and the
-                // compact row.
-                val glassAvatar: @Composable (Color) -> Unit = { _ ->
-                    val avPath = AppPreferences.profileAvatarPathState
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .shadow(2.dp, CircleShape)
-                            .clip(CircleShape)
-                            .background(heroFill)
-                            .clickable { navController.navigate(CurioRoutes.PROFILE) { launchSingleTop = true } },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (!avPath.isNullOrBlank()) {
-                            ProfileAvatarImage(avPath, Modifier.fillMaxSize())
-                        } else {
-                            Text(
-                                displayName.firstOrNull()?.uppercase().orEmpty(),
-                                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                                color = questInk
-                            )
-                        }
-                    }
-                }
-                CurioGlassToolbarMorph(
-                    progress = stickyProgress,
-                    compactHeight = HomeCompactHeaderHeight,
-                    title = greetingWordForNow(),
-                    subtitle = displayName,
-                    compactTitle = displayName,
-                    onMenuClick = { CurioDrawerState.requestOpen() },
-                    titleTrailing = glassAvatar,
-                    compactAvatar = { glassAvatar(questInk) },
-                    streakCount = streakDays,
-                    onStreakClick = { navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true } },
-                    content = { ink ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            HeroStatSegment(
-                                glyph = "local_fire_department",
-                                value = "$streakDays",
-                                label = "Streak",
-                                tint = ink,
-                                ink = ink,
-                                modifier = Modifier.weight(1f),
-                                onClick = { navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true } }
-                            )
-                            VerticalDivider(
-                                modifier = Modifier.height(34.dp),
-                                color = ink.copy(alpha = 0.22f)
-                            )
-                            HeroStatSegment(
-                                glyph = CurioIcons.Inventory2,
-                                value = "$totalSaved",
-                                label = "Cabinet",
-                                tint = ink,
-                                ink = ink,
-                                modifier = Modifier.weight(1f),
-                                onClick = { navController.navigateToTab(CurioRoutes.CABINET) }
-                            )
-                            VerticalDivider(
-                                modifier = Modifier.height(34.dp),
-                                color = ink.copy(alpha = 0.22f)
-                            )
-                            HeroStatSegment(
-                                glyph = CurioIcons.AutoAwesome,
-                                value = "$topicsTotal",
-                                label = "Topics",
-                                tint = ink,
-                                ink = ink,
-                                modifier = Modifier.weight(1f),
-                                onClick = { navController.navigate(CurioRoutes.DATABASE) { launchSingleTop = true } }
-                            )
-                        }
-                    },
-                    glassBackdrop = homeGlassBackdrop,
-                    modifier = Modifier.align(Alignment.TopCenter)
-                )
-            } else {
+            // v3xx — Home ALWAYS shows the floating menu/avatar pills. The
+            // glass style keeps its STATIC scroll-with-content toolbar above
+            // (no pinned morph on Home — user direction 2026-09-08: the
+            // morph belongs to Profile only, and the pinned bar covered the
+            // pet while it wandered).
             val frostShift = FastOutSlowInEasing.transform(stickyProgress)
             val pillScale = androidx.compose.ui.util.lerp(0.97f, 1f, frostShift)
             // v27v — the resting pills follow the HERO TINT (hoisted at the
@@ -1494,7 +1459,6 @@ fun HomeScreen(navController: NavController) {
                     avatarPath = profileAvatarPath
                 )
             }
-            } // v3xx — end of the torn-style floating pills
         }
     }
 

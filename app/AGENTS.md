@@ -780,6 +780,38 @@ app/src/main/java/com/curio/app/
   level-aware (`visibleIds`). Deleted from the old v2: `V2CollectionCard`
   (3×2 collage), `V2CoverCollage`, `V2PlainHeader`, `V2SectionHeader`
   (collapsible sections) and the formatFilter/availableFormats chips.
+- **v3xx21 — Home header revert (morph = Profile-only) + pet fix + share-
+  card NO-overlap / NO-cut fit.** (1) **Home reverted** (user direction
+  2026-09-08: the morph belonged to PROFILE — "why did you implement the
+  profile look in home screen, apply that in profile and keep home as it
+  was"): the pinned `CurioGlassToolbarMorph` is GONE from `HomeScreen`;
+  Home is back to the pre-morph glass state — the STATIC content-height
+  `CurioGlassToolbar` as the first scroll item (glass style) or the torn
+  rose hero, plus the always-floating menu/avatar pills (`stickyProgress`
+  morph). The pinned full-width bar was covering the flower-bed pet while
+  it scrolled — the revert fixes that too. PROFILE keeps the morph
+  (v3xx18/19 unchanged). (2) **Share-card smart fit — no-clip guarantee**
+  (TopicShareCard.kt): `autoFitShape` now sizes the fact TEXT so the
+  WHOLE fact always fits its box — past the design's text floor the type
+  keeps shrinking (down to `FactFitHardFloor` 0.45×) instead of
+  ellipsizing; the box-growth caps were reverted to their validated
+  heights (Paper 2.0/1.8, mid-flow else 1.5/1.4 — the v3xx bumps let a
+  grown box reach the footer, the user-visible overlap) so the box never
+  touches the footer/title/card edge. Fit math is per-style:
+  `factBoxBaseLines(style, aspect)` (each style's natural line capacity)
+  and `factWrapFactor(style)` (Vinyl's narrow 220dp pane wraps ~1.7× the
+  canonical width), with a 0.92 safety margin over the measured wrap
+  count. (3) **Sparkle: dragged-over title returns to the top** — a title
+  the user MANUALLY dragged into the quick fact (or info rows,
+  `move.titlePlaced`) is RESET to its natural spot on the sparkle tap
+  (`resetTitleY` on `ShareAutoLayoutPlan`; commit zeroes `titleDx`/
+  `titleDy` and clears `titlePlaced`) instead of the old minimal-lift
+  guess; only the prospective grown-fact lift applies on top, and the
+  title-vs-fact overlap is excluded from the fact push. (4) **Collage
+  polaroid** — `PolaroidPrint(shadow = false)` on the Collage: the dark
+  `shadowElevation` blur behind the TILTED cream print read as a
+  "background showing behind the strip" (preview AND export); the tape +
+  tilt keep the scrapbook depth. Other styles keep the shadow.
 - **v355 — book/series notes sheets: no close button, no hint copy, rating
   below the author, tick-free read state.** User: "never add cross close
   button in a bottom sheet… remove it from the book synopsis sheet… remove

@@ -1,5 +1,48 @@
 # Prompt Log — current request
 
+## Request (2026-09-08, completed — Home revert + pet fix + share-card no-overlap/no-cut fit)
+
+**Request (pending-prompt slot):** "for the glass toolbar header why did
+you implement the profile look in home screen — I meant you to apply
+that in PROFILE screen and keep the home screen as it was; also the pet
+goes behind the header in home screen with the option, fix it; and for
+the spark auto fit, when I manually move the title inside the quick fact
+to overlap it, why doesn't the smart fit place it back to the top; when
+I add longer texts the default still overlaps the boxes; I don't want
+ANY overlapping elements from the spark pill smart fit OR the default
+smart fit — not a single overlap, proper text adjustments without any
+cutting, properly move things when needed, things should not go out of
+the cards; also the collage upper cream background strip gets tilted
+sometimes in some screen with the background looking behind it — fix it."
+
+**What shipped:**
+1. **Home reverted to pre-morph** (`HomeScreen.kt`) — the pinned
+   `CurioGlassToolbarMorph` bar is removed from Home (it was covering the
+   flower-bed pet while it scrolled): glass style = the static
+   content-height `CurioGlassToolbar` as the first scroll item + the
+   always-floating menu/avatar pills; non-glass = the torn rose hero
+   exactly as before. The morph stays on PROFILE (which already had the
+   avatar + name + streak + Edit glass header).
+2. **Smart fit — no-clip guarantee** (`TopicShareCard.kt` `autoFitShape`):
+   the box-growth caps were reverted to the validated heights (Paper
+   2.0/1.8, mid-flow 1.5/1.4 — the recent bumps let a grown box reach the
+   footer) and the TEXT now keeps shrinking below the design floor (down
+   to 0.45×) until the WHOLE fact fits — long facts never ellipsize and
+   the box never overlaps the footer/title or leaves the card. Fit math is
+   per-style: `factBoxBaseLines` + `factWrapFactor` (Vinyl's narrow pane
+   wraps ~1.7×) + a 0.92 safety margin.
+3. **Sparkle — dragged-over title returns to the top**: a title manually
+   dragged into the quick fact (or info rows) is RESET to its natural
+   spot on the sparkle tap (`resetTitleY` plan flag; commit zeroes
+   titleDx/titleDy and clears `titlePlaced`) — the old minimal-lift guess
+   is gone; only the grown-fact lift applies on top.
+4. **Collage polaroid** — `PolaroidPrint(shadow = false)`: the dark
+   shadowElevation blur behind the TILTED cream print ("background looks
+   behind it", preview + export) is off on the collage; other styles keep
+   the shadow.
+
+**Status:** committed + pushed (see git log).
+
 ## Request (2026-09-08, completed — Cabinet folders: the JSX redesign)
 
 **Request (pending-prompt slot):** "the cabinet folders are not the
