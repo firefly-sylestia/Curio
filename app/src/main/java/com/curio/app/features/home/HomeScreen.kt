@@ -1051,34 +1051,32 @@ fun HomeScreen(navController: NavController) {
                         )
                         // v21 — View all opens Topic History (liked, disliked,
                         // pinned & day-grouped spins).
-                        {
-                            Surface(
-                                onClick = { navController.navigate(CurioRoutes.TOPIC_HISTORY) { launchSingleTop = true } },
-                                shape = RoundedCornerShape(50),
-                                color = MaterialTheme.colorScheme.surfaceContainerLow
+                        Surface(
+                            onClick = { navController.navigate(CurioRoutes.TOPIC_HISTORY) { launchSingleTop = true } },
+                            shape = RoundedCornerShape(50),
+                            color = MaterialTheme.colorScheme.surfaceContainerLow
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(2.dp)
-                                ) {
-                                // v49 — View all reads like the section
-                                // titles (onBackground ink), text + icon the
-                                // same color — the old theme-primary mauve
-                                // washed out against the cream pill in pastel
-                                // light.
-                                Text(
-                                    "View all",
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onBackground
-                                )
-                                CurioIcon(
-                                    CurioIcons.History,
-                                    "Open Topic History",
-                                    tint = MaterialTheme.colorScheme.onBackground,
-                                    size = 14.dp
-                                )
-                                }
+                            // v49 — View all reads like the section
+                            // titles (onBackground ink), text + icon the
+                            // same color — the old theme-primary mauve
+                            // washed out against the cream pill in pastel
+                            // light.
+                            Text(
+                                "View all",
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                            CurioIcon(
+                                CurioIcons.History,
+                                "Open Topic History",
+                                tint = MaterialTheme.colorScheme.onBackground,
+                                size = 14.dp
+                            )
                             }
                         }
                     }

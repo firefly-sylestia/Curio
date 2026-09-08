@@ -1462,19 +1462,17 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
                 }
                 showCategoryPicker = false
             }
-            {
-                com.curio.app.features.picker.NewCategoryPickerSheet(
-                    washCat = deckCat,
-                    categories = CurioCategories.visible,
-                    onDismiss = { showCategoryPicker = false },
-                    onCategorySelected = pickCategory,
-                    onCategoriesMixed = mixCategories,
-                    onBrowse = {
-                        showCategoryPicker = false
-                        navController.navigate(CurioRoutes.PICKER) { launchSingleTop = true }
-                    }
-                )
-            }
+            com.curio.app.features.picker.NewCategoryPickerSheet(
+                washCat = deckCat,
+                categories = CurioCategories.visible,
+                onDismiss = { showCategoryPicker = false },
+                onCategorySelected = pickCategory,
+                onCategoriesMixed = mixCategories,
+                onBrowse = {
+                    showCategoryPicker = false
+                    navController.navigate(CurioRoutes.PICKER) { launchSingleTop = true }
+                }
+            )
         }
     }
 

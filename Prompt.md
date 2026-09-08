@@ -1,5 +1,34 @@
 # Prompt Log — current request
 
+## Request (2026-09-08, in progress — CI fix + polaroid outline accuracy)
+
+**Request:** (1) fix the failing CI (errors in CabinetV2Content.kt, HomeScreen.kt and SpinScreen.kt); (2) the polaroid has a square dark outline around the image area that is INACCURATE — the Dashed style uses that outline so it's easier to identify, so fix the outline properly and refine/improve the design per style, adapting with filters too.
+
+**CI root causes (all from the 4e6d184c experiments-removal batch):**
+1. `CabinetV2Content.kt:620 Unresolved reference 'launch'` — `scope.launch`
+   was used but `kotlinx.coroutines.launch` was NEVER imported (this was in
+   the earlier d825b98c CI log too; only `scope` was verified, not the
+   extension import). Added the import.
+2. `HomeScreen.kt:1047/1054/1055/1058` — the promo removal left a STRAY
+   `{ ... }` (a bare block is a LAMBDA, not a scope) around the "View all"
+   TOPIC_HISTORY Surface — `Surface`/`Text`/`CurioIcon` @Composable calls
+   inside a plain lambda fail. Removed the stray braces.
+3. `SpinScreen.kt:1466` — the classic-picker removal left the same stray
+   `{ ... }` around `NewCategoryPickerSheet`. Removed the stray braces.
+
+**Polaroid outline fix (TopicShareCard.kt `PolaroidPrint`):** the finish
+hairline used to STRADDLE the film-window edge (Stroke centered on the
+rect path, so half the line bled onto the white frame) and the gloss sheen
+was painted AFTER it (washing out the line's inner half → the "broken dark
+square"). Now: the stroke is inset by half its width INSIDE the window,
+the sheen draws FIRST so the hairline stays crisp on top, the photo window
+is clipped to the same 2dp corners as the frame, and the finish is
+FILTER-ADAPTIVE (B&W → gray line, Nostalgia/Warm → warmed line) with a
+per-style stroke (Vintage thinner + fainter, Noir bolder; Dashed keeps its
+dotted hairline — its identifier).
+
+**Status:** fixes implemented, commit + push pending.
+
 ## Request (2026-09-08, completed — experiments removal + defaults + app-wide header style)
 
 **Request:** remove the concluded experiments fully (classic category picker

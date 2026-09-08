@@ -561,8 +561,16 @@ private fun PolaroidPrint(
         // and drag it like the cover/jacket.
         .onGloballyPositioned { callbacks.onPolaroid(it.boundsInWindow()) }
     ) {
-        // Photo area — the print's film window (tappable when empty)
-        Canvas(Modifier.offset(5.dp, 5.dp).size((pW - 10).dp, photoH.dp)) {
+        // Photo area — the print's film window (tappable when empty).
+        // v3xx — the window is CLIPPED to the same 2dp corners as the
+        // finish hairline, so the photo (and the empty-film fill) corners
+        // line up exactly with the outline instead of a square photo under
+        // a rounded frame.
+        Canvas(Modifier
+            .offset(5.dp, 5.dp)
+            .size((pW - 10).dp, photoH.dp)
+            .clip(RoundedCornerShape(2.dp))
+        ) {
             val zw = size.width; val zh = size.height
             if (userPhoto != null) {
                 // Contain-fit the photo inside the window (the window
@@ -639,27 +647,62 @@ private fun PolaroidPrint(
                 ))
             }
         }
-        // Polaroid finish — hairline frame around the film window +
-        // a glassy sheen over the photo (the Dashed style wears a
-        // dotted hairline instead of the solid one).
+        // Polaroid finish — hairline frame tracing the film window +
+        // a glassy sheen over the photo. v3xx — the OUTLINE is now
+        // ACCURATE: it hugs the window from INSIDE (inset by half the
+        // stroke) instead of straddling the edge, and it is drawn AFTER
+        // the sheen so the white gloss never washes the hairline out —
+        // the old order painted the sheen over the line's inner half,
+        // which read as a broken/fuzzy frame ("square dark outline but
+        // inaccurate"). The Dashed style keeps its dotted hairline (it
+        // is the style's identifier), and the finish now ADAPTS to the
+        // photo filter + wears a per-style stroke personality.
         Canvas(Modifier.fillMaxSize()) {
             val pws = size.width
             val winH = photoH.dp.toPx()
             val fw = pws - 10f
-            val finish = look.finish.copy(alpha = 0.30f)
-            if (pStyle == 4) {
-                drawRoundRect(
-                    finish, Offset(5f, 5f), Size(fw, winH), CornerRadius(2.dp.toPx()),
-                    style = Stroke(1.3.dp.toPx(), pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(6f, 4f)))
-                )
-            } else {
-                drawRoundRect(finish, Offset(5f, 5f), Size(fw, winH), CornerRadius(2.dp.toPx()), style = Stroke(1.3.dp.toPx()))
+            // v3xx — per-style stroke: Vintage reads thinner + fainter
+            // (aged print), Noir a touch heavier (bold silver frame),
+            // the rest the standard 1.3dp.
+            val strokeW = when (pStyle) {
+                3 -> 1.0.dp.toPx()      // Vintage
+                6 -> 1.5.dp.toPx()      // Noir
+                else -> 1.3.dp.toPx()
             }
+            val half = strokeW / 2f
+            // The sheen FIRST, so the hairline above it stays crisp.
             val sheen = Brush.verticalGradient(
                 listOf(Color.White.copy(alpha = 0.0f), Color.White.copy(alpha = 0.28f), Color.White.copy(alpha = 0.0f)),
                 startY = 5f, endY = winH
             )
             drawRect(sheen, Offset(5f, 5f), Size(fw, winH))
+            // v3xx — FILTER-ADAPTIVE finish: the hairline follows the
+            // photo treatment (B&W → gray line, Nostalgia/Warm → warmed
+            // line, Noise/None → the style's own finish).
+            val finishBase = look.finish
+            val finish = when (pFilter) {
+                3 -> androidx.compose.ui.graphics.lerp(finishBase, Color.Gray, 0.80f)   // B&W
+                2, 4 -> androidx.compose.ui.graphics.lerp(finishBase, Color(0xFFB07A45), 0.45f) // Nostalgia/Warm
+                else -> finishBase
+            }.copy(alpha = if (pStyle == 3) 0.26f else 0.40f)
+            val corner = 2.dp.toPx()
+            if (pStyle == 4) {
+                drawRoundRect(
+                    finish,
+                    Offset(5f + half, 5f + half),
+                    Size(fw - strokeW, winH - strokeW),
+                    CornerRadius((corner - half).coerceAtLeast(0f)),
+                    style = Stroke(strokeW, pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(6f, 4f)))
+                )
+            } else {
+                drawRoundRect(
+                    finish,
+                    Offset(5f + half, 5f + half),
+                    Size(fw - strokeW, winH - strokeW),
+                    CornerRadius((corner - half).coerceAtLeast(0f)),
+                    style = Stroke(strokeW)
+                )
+            }
         }
         // v3xx — TAPE: drawn LAST (sits ON the photo) and PEERING out
         // past the top edge of the white frame (offset y = -5dp), so it
