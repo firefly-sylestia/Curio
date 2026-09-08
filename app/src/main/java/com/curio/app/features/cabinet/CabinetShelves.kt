@@ -20,12 +20,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
@@ -75,8 +82,15 @@ data class V2Shelf(
     val seededCollectionId: String? = null
 )
 
-/** The JSX decorative art each shelf card wears at its foot. */
-enum class V2ShelfArtType { STAR, READING, BOOKS, MOUNTAIN, NOTES, WINDOW, PHOTOS }
+/** v3xx — the decorative CARD ART each shelf wears. Drawn responsively so
+ *  the same scene scales from a foot strip to a full-card background.
+ *  CONSTELLATION (Favorites' star-map), PEAK (the Completed redesign:
+ *  sun-arc summit scene) and the four MINIMAL_* scenes borrow the Minimal
+ *  share card's sparse line language for plenty of variety. */
+enum class V2ShelfArtType {
+    STAR, CONSTELLATION, READING, BOOKS, MOUNTAIN, PEAK, NOTES, WINDOW, PHOTOS,
+    MINIMAL_SUN, MINIMAL_RINGS, MINIMAL_WAVE, MINIMAL_DOTS
+}
 
 /** The seven built-ins, in the user's requested order. The four seeded
  *  shelves carry a stable `shelf:` collection id; the three virtual ones
@@ -87,7 +101,10 @@ val builtInShelves: List<V2Shelf> = listOf(
         title = "Favorites",
         icon = CurioIcons.Star,
         tone = V2ShelfTone(light = 0xFFD8D1EE, dark = 0xFF4A4164),
-        art = V2ShelfArtType.STAR
+        // v3xx — the star-map scene reads better as a full-card background
+        // than a single star; the classic glowing STAR stays in the variety
+        // pool for user collections.
+        art = V2ShelfArtType.CONSTELLATION
     ),
     V2Shelf(
         id = V2ShelfId.CURRENTLY_READING,
@@ -121,7 +138,9 @@ val builtInShelves: List<V2Shelf> = listOf(
         // crisp at tile size next to the filled sibling glyphs.
         icon = CurioIcons.Check,
         tone = V2ShelfTone(light = 0xFFCFE4D5, dark = 0xFF385345),
-        art = V2ShelfArtType.MOUNTAIN,
+        // v3xx — the FULL Completed redesign: a sun-arc summit scene with a
+        // planted flag (the old plain mountain read as an afterthought).
+        art = V2ShelfArtType.PEAK,
         seededCollectionId = "shelf:completed"
     ),
     V2Shelf(
@@ -172,104 +191,140 @@ fun V2ShelfCard(
     count: Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onLongPress: (() -> Unit)? = null,
-    /** v3xx — the ⋮ now WORKS: tapping it opens the same rename/delete pill
-     *  the long-press opens (the dots used to be a dead ornament). */
-    onMoreClick: (() -> Unit)? = null
+    /** v3xx — the ⋮ opens an ANCHORED dropdown (Rename / Delete) right at
+     *  the dots — no more centre-of-screen overlay. Tapping the card still
+     *  opens the shelf; long-pressing the dots opens the same menu. */
+    onRename: (() -> Unit)? = null,
+    onDelete: (() -> Unit)? = null
 ) {
     val dark = isCurioDarkTheme()
     val ink = if (dark) Color(0xFFF3E9E2) else Color(0xFF553E42)
     val muted = ink.copy(alpha = 0.62f)
+    var moreOpen by remember { mutableStateOf(false) }
+    val hasMenu = onRename != null || onDelete != null
     Surface(
-        modifier = modifier.combinedClickable(onClick = onClick, onLongClick = onLongPress),
+        modifier = modifier.combinedClickable(onClick = onClick, onLongClick = if (hasMenu) ({ moreOpen = true }) else null),
         shape = RoundedCornerShape(22.dp),
         color = tone.fill()
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 15.dp, end = 15.dp, top = 13.dp, bottom = 0.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+        Box(Modifier.fillMaxSize()) {
+            // v3xx — the card CARRIES ITS ART: the drawn scene fills the
+            // whole card as a whisper-alpha background ("the box designs
+            // itself… background of the card… drawn elements not the icon")
+            // while the content sits on top.
+            V2ShelfArt(
+                art = art,
+                dark = dark,
+                modifier = Modifier.fillMaxSize().alpha(0.22f)
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 15.dp, end = 15.dp, top = 13.dp, bottom = 0.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .clip(RoundedCornerShape(13.dp))
-                        .background(
-                            if (dark) Color.White.copy(alpha = 0.16f)
-                            else Color.White.copy(alpha = 0.40f)
-                        ),
-                    contentAlignment = Alignment.Center
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    CurioIcon(
-                        name = icon,
-                        contentDescription = null,
-                        tint = ink,
-                        size = 20.dp
-                    )
-                }
-                Spacer(Modifier.weight(1f))
-                if (onLongPress != null || onMoreClick != null) {
-                    // v3xx — a real button (not a dead glyph): tapping the ⋮
-                    // fires onMoreClick (rename/delete pill) without firing
-                    // the card's own open action.
                     Box(
                         modifier = Modifier
-                            .size(34.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .combinedClickable(
-                                onClick = { onMoreClick?.invoke() },
-                                onLongClick = onLongPress
+                            .size(36.dp)
+                            .clip(RoundedCornerShape(13.dp))
+                            .background(
+                                if (dark) Color.White.copy(alpha = 0.16f)
+                                else Color.White.copy(alpha = 0.40f)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
                         CurioIcon(
-                            name = CurioIcons.MoreVert,
-                            contentDescription = "Rename or delete",
-                            tint = ink.copy(alpha = 0.66f),
+                            name = icon,
+                            contentDescription = null,
+                            tint = ink,
                             size = 20.dp
                         )
                     }
+                    Spacer(Modifier.weight(1f))
+                    if (hasMenu) {
+                        // v3xx — the ⋮ is an ANCHORED DropdownMenu (renamed /
+                        // deleted from the dots themselves) instead of the old
+                        // centre-screen CurioHoldPill overlay.
+                        Box {
+                            Box(
+                                modifier = Modifier
+                                    .size(34.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .combinedClickable(
+                                        onClick = { moreOpen = true },
+                                        onLongClick = { moreOpen = true }
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CurioIcon(
+                                    name = CurioIcons.MoreVert,
+                                    contentDescription = "Rename or delete",
+                                    tint = ink.copy(alpha = 0.66f),
+                                    size = 20.dp
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = moreOpen,
+                                onDismissRequest = { moreOpen = false }
+                            ) {
+                                if (onRename != null) {
+                                    DropdownMenuItem(
+                                        text = { Text("Rename", fontWeight = FontWeight.SemiBold) },
+                                        leadingIcon = {
+                                            CurioIcon(name = CurioIcons.Edit, contentDescription = null, tint = ink, size = 17.dp)
+                                        },
+                                        onClick = { moreOpen = false; onRename() }
+                                    )
+                                }
+                                if (onDelete != null) {
+                                    DropdownMenuItem(
+                                        text = { Text("Delete collection", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold) },
+                                        leadingIcon = {
+                                            CurioIcon(name = CurioIcons.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error, size = 17.dp)
+                                        },
+                                        onClick = { moreOpen = false; onDelete() }
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
+                Spacer(Modifier.height(13.dp))
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        lineHeight = 19.sp
+                    ),
+                    color = ink,
+                    maxLines = 2,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+                Text(
+                    text = "$count item${if (count == 1) "" else "s"}",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = muted,
+                    maxLines = 1
+                )
             }
-            Spacer(Modifier.height(13.dp))
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    lineHeight = 19.sp
-                ),
-                color = ink,
-                maxLines = 2,
-                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-            )
-            Text(
-                text = "$count item${if (count == 1) "" else "s"}",
-                style = MaterialTheme.typography.labelMedium,
-                color = muted,
-                maxLines = 1
-            )
-            Spacer(Modifier.height(8.dp))
-            V2ShelfArt(
-                art = art,
-                dark = dark,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(78.dp)
-            )
         }
     }
 }
-
 // ────────────────────────────────────────────────────────────────────────
-// Shelf art — the JSX decorative foot art, drawn with Canvas + glyphs
+// Shelf art — v3xx RESPONSIVE CARD SCENES: every scene is drawn with
+// proportional Canvas geometry, so the SAME art scales from a foot strip
+// to the full-card background each shelf card carries. The classic
+// favourites (star, open book, spines, mountain, notes, window, photos)
+// were refined with more detail, Completed got a FULL redesign (PEAK:
+// sun-arc summit + planted flag), and the four MINIMAL_* scenes borrow
+// the Minimal share card's sparse line language for plenty of variety.
 // ────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun V2ShelfArt(
+fun V2ShelfArt(
     art: V2ShelfArtType,
     dark: Boolean,
     modifier: Modifier = Modifier
@@ -277,12 +332,18 @@ private fun V2ShelfArt(
     Box(modifier = modifier) {
         when (art) {
             V2ShelfArtType.STAR -> StarArt(dark)
+            V2ShelfArtType.CONSTELLATION -> ConstellationArt(dark)
             V2ShelfArtType.READING -> ReadingArt(dark)
             V2ShelfArtType.BOOKS -> BooksArt(dark)
             V2ShelfArtType.MOUNTAIN -> MountainArt(dark)
+            V2ShelfArtType.PEAK -> PeakArt(dark)
             V2ShelfArtType.NOTES -> NotesArt(dark)
             V2ShelfArtType.WINDOW -> WindowArt(dark)
             V2ShelfArtType.PHOTOS -> PhotosArt(dark)
+            V2ShelfArtType.MINIMAL_SUN -> MinimalSunArt(dark)
+            V2ShelfArtType.MINIMAL_RINGS -> MinimalRingsArt(dark)
+            V2ShelfArtType.MINIMAL_WAVE -> MinimalWaveArt(dark)
+            V2ShelfArtType.MINIMAL_DOTS -> MinimalDotsArt(dark)
         }
     }
 }
@@ -300,277 +361,343 @@ private fun mountainPath(w: Float, h: Float): Path = Path().apply {
     close()
 }
 
+/** A rotated rectangle path (centre-less; rotates about the top-left). */
+private fun rotRect(x: Float, y: Float, w: Float, h: Float, rot: Float): Path = Path().apply {
+    val cos = kotlin.math.cos(rot); val sin = kotlin.math.sin(rot)
+    val pts = listOf(
+        androidx.compose.ui.geometry.Offset(0f, 0f),
+        androidx.compose.ui.geometry.Offset(w, 0f),
+        androidx.compose.ui.geometry.Offset(w, h),
+        androidx.compose.ui.geometry.Offset(0f, h)
+    )
+    val p0 = androidx.compose.ui.geometry.Offset(x, y)
+    pts.forEachIndexed { i, p ->
+        val rx = p.x * cos - p.y * sin
+        val ry = p.x * sin + p.y * cos
+        if (i == 0) moveTo(p0.x + rx, p0.y + ry)
+        else lineTo(p0.x + rx, p0.y + ry)
+    }
+    close()
+}
+
+/** A 5-point star polygon centred at (cx, cy). */
+private fun fiveStar(cx: Float, cy: Float, outer: Float): Path {
+    val inner = outer * 0.42f
+    return Path().apply {
+        for (i in 0 until 10) {
+            val r = if (i % 2 == 0) outer else inner
+            val a = -Math.PI / 2.0 + i * Math.PI / 5.0
+            val x = cx + (r * kotlin.math.cos(a)).toFloat()
+            val y = cy + (r * kotlin.math.sin(a)).toFloat()
+            if (i == 0) moveTo(x, y) else lineTo(x, y)
+        }
+        close()
+    }
+}
+
+/** FAVORITES — a glowing golden star with a soft halo + scattered star
+ *  dust (richer than the old lone star over a mountain). */
 @Composable
 private fun BoxScope.StarArt(dark: Boolean) {
-    val mountain = if (dark) Color(0xFF6F68A8) else Color(0xFF9992D2)
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        drawPath(mountainPath(size.width, size.height), color = mountain)
-    }
-    Text(
-        text = "\u2605",
-        fontSize = 56.sp,
-        color = Color(0xFFF4C768),
-        modifier = Modifier
-            .align(Alignment.BottomEnd)
-            .offset(x = (-6).dp, y = 0.dp)
-    )
-}
-
-@Composable
-private fun BoxScope.ReadingArt(dark: Boolean) {
-    val bookFill = if (dark) Color(0xFFF2E8DA) else Color(0xFFF7EEE1)
-    val leaf = if (dark) Color(0xFF9DB58F) else Color(0xFF769070)
-    // Open book — two page halves with a spine gap.
-    Row(
-        verticalAlignment = Alignment.Bottom,
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-        modifier = Modifier
-            .align(Alignment.BottomStart)
-            .padding(start = 10.dp, bottom = 8.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .width(30.dp)
-                .height(34.dp)
-                .clip(RoundedCornerShape(topStart = 7.dp, topEnd = 3.dp, bottomStart = 7.dp, bottomEnd = 3.dp))
-                .background(bookFill)
-        )
-        Box(
-            modifier = Modifier
-                .width(30.dp)
-                .height(34.dp)
-                .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 7.dp, bottomStart = 3.dp, bottomEnd = 7.dp))
-                .background(bookFill.copy(alpha = 0.82f))
-        )
-    }
-    CurioIcon(
-        name = CurioIcons.LocalCafe,
-        contentDescription = null,
-        tint = if (dark) Color(0xFFE8D3B8) else Color(0xFFA8805F),
-        size = 22.dp,
-        modifier = Modifier.align(Alignment.TopEnd).padding(top = 2.dp, end = 4.dp)
-    )
-    CurioIcon(
-        name = "spa",
-        contentDescription = null,
-        tint = leaf,
-        size = 30.dp,
-        modifier = Modifier.align(Alignment.BottomEnd).padding(end = 8.dp, bottom = 6.dp)
-    )
-}
-
-@Composable
-private fun BoxScope.BooksArt(dark: Boolean) {
-    // Stacked book spines.
-    val spines = if (dark) {
-        listOf(0xFF7A5C4C to 30f, 0xFF9A7560 to 40f, 0xFFC09379 to 52f)
-    } else {
-        listOf(0xFF9C7562 to 30f, 0xFFB98D79 to 40f, 0xFFD39F91 to 52f)
-    }
-    Row(
-        verticalAlignment = Alignment.Bottom,
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
-        modifier = Modifier
-            .align(Alignment.BottomStart)
-            .padding(start = 12.dp, bottom = 9.dp)
-    ) {
-        spines.forEachIndexed { i, (c, h) ->
-            Box(
-                modifier = Modifier
-                    .width((22 + i * 8).dp)
-                    .height(h.dp)
-                    .clip(RoundedCornerShape(topStart = 5.dp, topEnd = 7.dp, bottomStart = 3.dp, bottomEnd = 3.dp))
-                    .background(Color(c))
-                    .rotate(if (i == 1) 0f else if (i == 0) -6f else 5f)
-            )
+    val star = if (dark) Color(0xFFF4C768) else Color(0xFFE8A33D)
+    Canvas(Modifier.fillMaxSize()) {
+        val w = size.width; val h = size.height
+        val cx = w * 0.78f; val cy = h * 0.30f
+        drawCircle(star.copy(alpha = 0.10f), radius = w * 0.46f, center = androidx.compose.ui.geometry.Offset(cx, cy))
+        drawCircle(star.copy(alpha = 0.16f), radius = w * 0.28f, center = androidx.compose.ui.geometry.Offset(cx, cy))
+        drawPath(fiveStar(cx, cy, w * 0.18f), color = star)
+        val dust = listOf(0.08f to 0.16f, 0.24f to 0.62f, 0.55f to 0.82f, 0.32f to 0.36f, 0.90f to 0.74f, 0.05f to 0.88f, 0.62f to 0.14f)
+        dust.forEachIndexed { i, (fx, fy) ->
+            val r = if (i % 3 == 0) w * 0.022f else w * 0.013f
+            drawCircle(star.copy(alpha = 0.55f), radius = r, center = androidx.compose.ui.geometry.Offset(w * fx, h * fy))
         }
     }
-    // Paper note.
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .align(Alignment.TopEnd)
-            .padding(top = 4.dp, end = 6.dp)
-            .rotate(7f)
-            .clip(RoundedCornerShape(6.dp))
-            .background(if (dark) Color(0xFF3A312C) else Color(0xFFF8EAD6))
-            .padding(horizontal = 8.dp, vertical = 5.dp)
-    ) {
-        Text(
-            text = "Someday",
-            fontSize = 10.sp,
-            fontStyle = FontStyle.Italic,
-            color = if (dark) Color(0xFFEADCC9) else Color(0xFF7E5A4E)
-        )
-        Text(
-            text = "\u2661",
-            fontSize = 10.sp,
-            color = if (dark) Color(0xFFE3B7A8) else Color(0xFFB3796A)
-        )
+}
+
+/** FAVORITES (alt) — a star-map constellation: linked dots + one bright
+ *  spark. Reads beautifully as a full-card background. */
+@Composable
+private fun BoxScope.ConstellationArt(dark: Boolean) {
+    val line = if (dark) Color(0xFFA8A2E8) else Color(0xFF7C74C4)
+    val points = listOf(
+        0.10f to 0.82f, 0.28f to 0.42f, 0.50f to 0.60f, 0.44f to 0.22f,
+        0.70f to 0.30f, 0.86f to 0.10f, 0.90f to 0.56f
+    )
+    Canvas(Modifier.fillMaxSize()) {
+        val w = size.width; val h = size.height
+        val pts = points.map { androidx.compose.ui.geometry.Offset(w * it.first, h * it.second) }
+        listOf(0 to 1, 1 to 2, 2 to 3, 3 to 4, 4 to 5, 2 to 6, 4 to 6).forEach { (a, b) ->
+            drawLine(line.copy(alpha = 0.40f), pts[a], pts[b], strokeWidth = 1.1f)
+        }
+        pts.forEachIndexed { i, p ->
+            drawCircle(line, radius = if (i == 5) w * 0.035f else w * 0.015f, center = p)
+        }
+        drawLine(Color.White.copy(alpha = 0.85f), pts[5], pts[5] + androidx.compose.ui.geometry.Offset(w * 0.03f, -h * 0.04f), strokeWidth = 1f)
     }
 }
 
+/** CURRENTLY READING — an open book with page lines, a ribbon bookmark
+ *  and a curl of steam (more detail than the old two-blank-pages). */
+@Composable
+private fun BoxScope.ReadingArt(dark: Boolean) {
+    val page = if (dark) Color(0xFFF2E8DA) else Color(0xFFF9F2E6)
+    val line = if (dark) Color(0xFF9DB58F) else Color(0xFF769070)
+    val steam = if (dark) Color(0xFFE8D3B8) else Color(0xFFA8805F)
+    Canvas(Modifier.fillMaxSize()) {
+        val w = size.width; val h = size.height
+        val baseY = h * 0.94f; val bh = h * 0.50f
+        // left page
+        drawPath(Path().apply {
+            moveTo(w * 0.10f, baseY - bh * 0.12f)
+            lineTo(w * 0.16f, baseY - bh)
+            lineTo(w * 0.42f, baseY - bh)
+            lineTo(w * 0.36f, baseY - bh * 0.12f)
+            close()
+        }, color = page)
+        // right page
+        drawPath(Path().apply {
+            moveTo(w * 0.64f, baseY - bh * 0.12f)
+            lineTo(w * 0.58f, baseY - bh)
+            lineTo(w * 0.84f, baseY - bh)
+            lineTo(w * 0.90f, baseY - bh * 0.12f)
+            close()
+        }, color = page.copy(alpha = 0.85f))
+        // page lines
+        for (i in 1..3) {
+            val y = baseY - bh * 0.80f + i * bh * 0.18f
+            drawLine(line.copy(alpha = 0.5f), androidx.compose.ui.geometry.Offset(w * 0.20f, y), androidx.compose.ui.geometry.Offset(w * 0.37f, y), strokeWidth = 0.9f)
+            drawLine(line.copy(alpha = 0.5f), androidx.compose.ui.geometry.Offset(w * 0.63f, y), androidx.compose.ui.geometry.Offset(w * 0.80f, y), strokeWidth = 0.9f)
+        }
+        // ribbon bookmark
+        drawPath(Path().apply {
+            moveTo(w * 0.47f, baseY - bh)
+            lineTo(w * 0.53f, baseY - bh)
+            lineTo(w * 0.53f, baseY - bh * 0.30f)
+            lineTo(w * 0.50f, baseY - bh * 0.50f)
+            lineTo(w * 0.47f, baseY - bh * 0.30f)
+            close()
+        }, color = if (dark) Color(0xFFC98A6D) else Color(0xFFC07A5A))
+        // steam curls
+        drawPath(Path().apply {
+            moveTo(w * 0.08f, baseY - bh * 0.55f)
+            cubicTo(w * 0.15f, baseY - bh * 0.75f, w * 0.03f, baseY - bh * 0.85f, w * 0.10f, baseY - bh * 1.02f)
+        }, color = steam.copy(alpha = 0.55f), style = androidx.compose.ui.graphics.Stroke(width = 1.6f))
+        drawCircle(steam.copy(alpha = 0.5f), radius = w * 0.016f, center = androidx.compose.ui.geometry.Offset(w * 0.10f, baseY - bh * 0.10f))
+    }
+}
+
+/** WANT TO READ — stacked book spines + a paper "someday" note. */
+@Composable
+private fun BoxScope.BooksArt(dark: Boolean) {
+    val spines = if (dark) listOf(0xFF7A5C4C, 0xFF9A7560, 0xFFC09379)
+    else listOf(0xFF9C7562, 0xFFB98D79, 0xFFD39F91)
+    Canvas(Modifier.fillMaxSize()) {
+        val w = size.width; val h = size.height
+        val baseY = h * 0.94f
+        var x = w * 0.08f
+        spines.forEachIndexed { i, c ->
+            val bw = w * (0.16f + i * 0.05f)
+            val bh = h * (0.34f + i * 0.14f)
+            val rot = when (i) { 0 -> -0.08f; 1 -> 0f; else -> 0.07f }
+            drawPath(rotRect(x, baseY - bh, bw, bh, rot), color = Color(c))
+            x += bw * 0.94f
+        }
+        drawCircle(Color(0xFFF4C768).copy(alpha = 0.8f), radius = w * 0.015f, center = androidx.compose.ui.geometry.Offset(w * 0.90f, h * 0.14f))
+    }
+}
+
+/** MOUNTAIN — layered peak silhouette + a low sun + flower dots. */
 @Composable
 private fun BoxScope.MountainArt(dark: Boolean) {
     val hills = if (dark) Color(0xFF5E7E6C) else Color(0xFF8FB4A0)
     val flowers = if (dark) Color(0xFFE9F2E4) else Color(0xFFFDFEFC)
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        drawPath(mountainPath(size.width, size.height), color = hills)
-        // Small flowers on the lower ridge.
-        val xs = listOf(0.16f, 0.30f, 0.44f, 0.62f, 0.80f)
-        xs.forEachIndexed { i, fx ->
-            val cx = size.width * fx
-            val cy = size.height * (0.86f + 0.03f * (i % 3))
+    Canvas(Modifier.fillMaxSize()) {
+        val w = size.width; val h = size.height
+        drawCircle(Color(0xFFF2B36B).copy(alpha = 0.5f), radius = w * 0.09f, center = androidx.compose.ui.geometry.Offset(w * 0.82f, h * 0.24f))
+        drawPath(mountainPath(w, h), color = hills)
+        listOf(0.16f, 0.30f, 0.44f, 0.62f, 0.80f).forEachIndexed { i, fx ->
+            val cx = w * fx
+            val cy = h * (0.86f + 0.03f * (i % 3))
             drawCircle(color = flowers, radius = 3.2f, center = androidx.compose.ui.geometry.Offset(cx, cy))
         }
     }
 }
 
+/** COMPLETED — the FULL redesign: a rising sun over two ridgelines, a
+ *  flag planted at the summit and a small bird — the "finished" summit
+ *  scene (the old plain mountain read as an afterthought). */
+@Composable
+private fun BoxScope.PeakArt(dark: Boolean) {
+    val far = if (dark) Color(0xFF4A6A5C) else Color(0xFFA9C7B4)
+    val near = if (dark) Color(0xFF5E7E6C) else Color(0xFF8FB4A0)
+    val sun = if (dark) Color(0xFFF4C768) else Color(0xFFF2B36B)
+    val flag = if (dark) Color(0xFFE9F2E4) else Color(0xFFFDFEFC)
+    Canvas(Modifier.fillMaxSize()) {
+        val w = size.width; val h = size.height
+        // rising sun over the far ridge
+        drawCircle(sun.copy(alpha = 0.85f), radius = w * 0.11f, center = androidx.compose.ui.geometry.Offset(w * 0.30f, h * 0.44f))
+        drawCircle(sun.copy(alpha = 0.10f), radius = w * 0.24f, center = androidx.compose.ui.geometry.Offset(w * 0.30f, h * 0.44f))
+        // far ridge
+        drawPath(Path().apply {
+            moveTo(0f, h * 0.64f)
+            lineTo(w * 0.18f, h * 0.30f)
+            lineTo(w * 0.34f, h * 0.54f)
+            lineTo(w * 0.52f, h * 0.26f)
+            lineTo(w * 0.72f, h * 0.62f)
+            lineTo(w, h * 0.44f)
+            lineTo(w, h)
+            close()
+        }, color = far)
+        // near ridge
+        drawPath(Path().apply {
+            moveTo(0f, h * 0.80f)
+            lineTo(w * 0.30f, h * 0.52f)
+            lineTo(w * 0.52f, h * 0.74f)
+            lineTo(w * 0.74f, h * 0.46f)
+            lineTo(w, h * 0.70f)
+            lineTo(w, h)
+            close()
+        }, color = near)
+        // summit flag
+        val fx = w * 0.52f; val fy = h * 0.26f
+        drawLine(if (dark) Color(0xFF3C3A2E) else Color(0xFF6B5A44), androidx.compose.ui.geometry.Offset(fx, fy), androidx.compose.ui.geometry.Offset(fx, fy - h * 0.14f), strokeWidth = 1.6f)
+        drawPath(Path().apply {
+            moveTo(fx, fy - h * 0.14f)
+            lineTo(fx + w * 0.09f, fy - h * 0.10f)
+            lineTo(fx, fy - h * 0.06f)
+            close()
+        }, color = flag)
+        // bird
+        drawLine(flag.copy(alpha = 0.8f), androidx.compose.ui.geometry.Offset(w * 0.82f, h * 0.20f), androidx.compose.ui.geometry.Offset(w * 0.86f, h * 0.16f), strokeWidth = 1.2f)
+        drawLine(flag.copy(alpha = 0.8f), androidx.compose.ui.geometry.Offset(w * 0.86f, h * 0.16f), androidx.compose.ui.geometry.Offset(w * 0.90f, h * 0.20f), strokeWidth = 1.2f)
+    }
+}
+
+/** NOTES — a slip-stack with a pen scribble (more detail than the old
+ *  blank stack). */
 @Composable
 private fun BoxScope.NotesArt(dark: Boolean) {
-    // Paper stack — three rotated slips.
-    val stack = listOf(
-        if (dark) 0xFF8A7BA8 else 0xFFB7A9D7,
-        if (dark) 0xFFA08FC0 else 0xFFD3C6E7,
-        if (dark) 0xFFC9B9D8 else 0xFFF0E1D5
-    )
-    Box(
-        modifier = Modifier
-            .align(Alignment.BottomStart)
-            .padding(start = 18.dp, bottom = 14.dp)
-    ) {
+    val stack = if (dark) listOf(0xFF8A7BA8, 0xFFA08FC0, 0xFFC9B9D8)
+    else listOf(0xFFB7A9D7, 0xFFD3C6E7, 0xFFF0E1D5)
+    Canvas(Modifier.fillMaxSize()) {
+        val w = size.width; val h = size.height
+        val bw = w * 0.30f; val bh = h * 0.36f
+        val baseY = h * 0.92f
         stack.forEachIndexed { i, c ->
-            Box(
-                modifier = Modifier
-                    .offset(x = (i * 10).dp, y = (-i * 2).dp)
-                    .width(46.dp)
-                    .height(30.dp)
-                    .clip(RoundedCornerShape(5.dp))
-                    .background(Color(c))
-                    .rotate((-8 + i * 4).toFloat())
-            )
+            drawPath(rotRect(w * 0.12f + i * w * 0.10f, baseY - bh + i * h * 0.02f, bw, bh, -0.10f + i * 0.05f), color = Color(c))
         }
-    }
-    // Idea note.
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .align(Alignment.BottomEnd)
-            .padding(end = 8.dp, bottom = 12.dp)
-            .rotate(4f)
-            .clip(RoundedCornerShape(6.dp))
-            .background(if (dark) Color(0xFF3A312C) else Color(0xFFF8EAD9))
-            .padding(horizontal = 8.dp, vertical = 5.dp)
-    ) {
-        Text(
-            text = "Ideas",
-            fontSize = 10.sp,
-            fontStyle = FontStyle.Italic,
-            color = if (dark) Color(0xFFEADCC9) else Color(0xFF7E5A4E)
-        )
-        Text(
-            text = "\u2661",
-            fontSize = 10.sp,
-            color = if (dark) Color(0xFFE3B7A8) else Color(0xFFB3796A)
-        )
+        // pen
+        val pen = if (dark) Color(0xFFE3B7A8) else Color(0xFFB3796A)
+        drawLine(pen, androidx.compose.ui.geometry.Offset(w * 0.76f, h * 0.34f), androidx.compose.ui.geometry.Offset(w * 0.92f, h * 0.20f), strokeWidth = 1.8f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+        drawLine(pen.copy(alpha = 0.8f), androidx.compose.ui.geometry.Offset(w * 0.82f, h * 0.24f), androidx.compose.ui.geometry.Offset(w * 0.96f, h * 0.12f), strokeWidth = 1f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
     }
 }
 
+/** PERSONAL — a window with a moon and a plant on the sill. */
 @Composable
 private fun BoxScope.WindowArt(dark: Boolean) {
-    val sky = if (dark) {
-        Brush.verticalGradient(listOf(Color(0xFF8A5F3F), Color(0xFF6E7F6A)))
-    } else {
-        Brush.verticalGradient(listOf(Color(0xFFF3CFA8), Color(0xFFA9B9A2)))
-    }
+    val sky = if (dark) Brush.verticalGradient(listOf(Color(0xFF3E4A5E), Color(0xFF5E7F6E)))
+    else Brush.verticalGradient(listOf(Color(0xFFF3CFA8), Color(0xFFA9B9A2)))
     val frame = if (dark) Color(0xFF3E2E28) else Color(0xFFA87F6B)
-    Box(
-        modifier = Modifier
-            .align(Alignment.BottomEnd)
-            .padding(end = 12.dp, bottom = 8.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .width(64.dp)
-                .height(52.dp)
-                .clip(RoundedCornerShape(9.dp))
-                .background(sky)
-        )
-        // Window frame + cross bars.
-        Box(
-            modifier = Modifier
-                .width(64.dp)
-                .height(52.dp)
-                .border(4.dp, frame.copy(alpha = 0.55f), RoundedCornerShape(9.dp))
-        )
-        Box(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .width(5.dp)
-                .fillMaxHeight()
-                .padding(vertical = 4.dp)
-                .background(frame.copy(alpha = 0.55f))
-        )
-        Box(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .fillMaxWidth()
-                .height(4.dp)
-                .padding(horizontal = 4.dp)
-                .background(frame.copy(alpha = 0.55f))
-        )
+    Canvas(Modifier.fillMaxSize()) {
+        val w = size.width; val h = size.height
+        val ww = w * 0.40f; val wh = h * 0.54f
+        val x0 = w * 0.70f - ww / 2f; val y0 = h * 0.92f - wh
+        drawRoundRect(sky, androidx.compose.ui.geometry.Offset(x0, y0), androidx.compose.ui.geometry.Size(ww, wh), androidx.compose.ui.geometry.CornerRadius(ww * 0.06f))
+        drawCircle(Color(0xFFF8E8C8), radius = ww * 0.13f, center = androidx.compose.ui.geometry.Offset(x0 + ww * 0.72f, y0 + wh * 0.28f))
+        drawRoundRect(frame.copy(alpha = 0.6f), androidx.compose.ui.geometry.Offset(x0, y0), androidx.compose.ui.geometry.Size(ww, wh), androidx.compose.ui.geometry.CornerRadius(ww * 0.06f), style = androidx.compose.ui.graphics.Stroke(width = ww * 0.05f))
+        drawLine(frame.copy(alpha = 0.6f), androidx.compose.ui.geometry.Offset(x0 + ww / 2f, y0), androidx.compose.ui.geometry.Offset(x0 + ww / 2f, y0 + wh), strokeWidth = ww * 0.035f)
+        drawLine(frame.copy(alpha = 0.6f), androidx.compose.ui.geometry.Offset(x0, y0 + wh / 2f), androidx.compose.ui.geometry.Offset(x0 + ww, y0 + wh / 2f), strokeWidth = ww * 0.035f)
+        // plant on the sill
+        val leaf = if (dark) Color(0xFF9DB58F) else Color(0xFF71896A)
+        drawLine(leaf, androidx.compose.ui.geometry.Offset(w * 0.16f, h * 0.90f), androidx.compose.ui.geometry.Offset(w * 0.16f, h * 0.64f), strokeWidth = 1.6f)
+        drawCircle(leaf, radius = w * 0.024f, center = androidx.compose.ui.geometry.Offset(w * 0.13f, h * 0.62f))
+        drawCircle(leaf, radius = w * 0.019f, center = androidx.compose.ui.geometry.Offset(w * 0.19f, h * 0.64f))
+        drawPath(Path().apply {
+            moveTo(w * 0.10f, h * 0.92f)
+            lineTo(w * 0.22f, h * 0.92f)
+            lineTo(w * 0.19f, h * 0.82f)
+            lineTo(w * 0.13f, h * 0.82f)
+            close()
+        }, color = frame.copy(alpha = 0.7f))
     }
-    CurioIcon(
-        name = "spa",
-        contentDescription = null,
-        tint = if (dark) Color(0xFF9DB58F) else Color(0xFF71896A),
-        size = 30.dp,
-        modifier = Modifier.align(Alignment.BottomStart).padding(start = 10.dp, bottom = 6.dp)
-    )
 }
 
+/** SAVED ENTRIES — layered photo tiles with a ♡ and a sun on one print. */
 @Composable
 private fun BoxScope.PhotosArt(dark: Boolean) {
-    // Layered photo tiles with a little ♡ on the front one.
-    val fills = if (dark) {
-        listOf(Color(0xFF46657A), Color(0xFF5A7B8C), Color(0xFF6F92A3))
-    } else {
-        listOf(Color(0xFF9CC3D9), Color(0xFF7FB0CE), Color(0xFF5E9CC2))
-    }
-    Box(
-        modifier = Modifier
-            .align(Alignment.BottomEnd)
-            .padding(end = 14.dp, bottom = 10.dp)
-    ) {
+    val fills = if (dark) listOf(Color(0xFF46657A), Color(0xFF5A7B8C), Color(0xFF6F92A3))
+    else listOf(Color(0xFF9CC3D9), Color(0xFF7FB0CE), Color(0xFF5E9CC2))
+    Canvas(Modifier.fillMaxSize()) {
+        val w = size.width; val h = size.height
+        val tw = w * 0.30f; val th = h * 0.40f
+        val cx = w * 0.78f; val cy = h * 0.76f
         fills.forEachIndexed { i, c ->
-            Box(
-                modifier = Modifier
-                    .offset(x = (-(i * 9)).dp, y = (i * 2).dp)
-                    .width(44.dp)
-                    .height(34.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(c)
-                    .rotate((-6 + i * 6).toFloat())
-            )
+            drawPath(rotRect(cx - i * tw * 0.16f, cy - th + i * th * 0.06f, tw, th, -0.10f + i * 0.06f), color = c)
         }
-        Box(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .rotate(-6f)
-        ) {
-            Text(
-                text = "\u2661",
-                fontSize = 15.sp,
-                color = Color.White.copy(alpha = 0.92f)
-            )
+        drawCircle(Color.White.copy(alpha = 0.9f), radius = w * 0.018f, center = androidx.compose.ui.geometry.Offset(cx + tw * 0.30f, cy - th * 0.64f))
+        drawCircle(Color(0xFFF4C768).copy(alpha = 0.8f), radius = tw * 0.10f, center = androidx.compose.ui.geometry.Offset(cx - tw * 0.66f, cy - th * 0.78f))
+    }
+}
+
+/** MINIMAL — sun arc + horizon + lone dot (the Minimal share card's
+ *  sparse line language). */
+@Composable
+private fun BoxScope.MinimalSunArt(dark: Boolean) {
+    val ink = if (dark) Color(0xFFF3E9E2) else Color(0xFF6B5A52)
+    Canvas(Modifier.fillMaxSize()) {
+        val w = size.width; val h = size.height
+        val cx = w * 0.72f; val cy = h * 0.34f; val r = w * 0.17f
+        drawArc(ink.copy(alpha = 0.85f), startAngle = 180f, sweepAngle = 180f, useCenter = false,
+            topLeft = androidx.compose.ui.geometry.Offset(cx - r, cy - r), size = androidx.compose.ui.geometry.Size(r * 2f, r * 2f),
+            style = androidx.compose.ui.graphics.Stroke(width = w * 0.014f))
+        drawLine(ink.copy(alpha = 0.5f), androidx.compose.ui.geometry.Offset(w * 0.12f, h * 0.78f), androidx.compose.ui.geometry.Offset(w * 0.88f, h * 0.78f), strokeWidth = w * 0.012f)
+        drawCircle(ink, radius = w * 0.02f, center = androidx.compose.ui.geometry.Offset(w * 0.40f, h * 0.60f))
+    }
+}
+
+/** MINIMAL — two thin rings + a dot + a baseline. */
+@Composable
+private fun BoxScope.MinimalRingsArt(dark: Boolean) {
+    val ink = if (dark) Color(0xFFF3E9E2) else Color(0xFF6B5A52)
+    Canvas(Modifier.fillMaxSize()) {
+        val w = size.width; val h = size.height
+        val cx = w * 0.68f; val cy = h * 0.50f
+        drawCircle(ink.copy(alpha = 0.30f), radius = w * 0.17f, center = androidx.compose.ui.geometry.Offset(cx, cy), style = androidx.compose.ui.graphics.Stroke(width = w * 0.010f))
+        drawCircle(ink.copy(alpha = 0.55f), radius = w * 0.10f, center = androidx.compose.ui.geometry.Offset(cx, cy), style = androidx.compose.ui.graphics.Stroke(width = w * 0.010f))
+        drawCircle(ink, radius = w * 0.02f, center = androidx.compose.ui.geometry.Offset(w * 0.30f, h * 0.28f))
+        drawLine(ink.copy(alpha = 0.40f), androidx.compose.ui.geometry.Offset(w * 0.14f, h * 0.78f), androidx.compose.ui.geometry.Offset(w * 0.86f, h * 0.78f), strokeWidth = w * 0.008f)
+    }
+}
+
+/** MINIMAL — one thin wave + a dot. */
+@Composable
+private fun BoxScope.MinimalWaveArt(dark: Boolean) {
+    val ink = if (dark) Color(0xFFF3E9E2) else Color(0xFF6B5A52)
+    Canvas(Modifier.fillMaxSize()) {
+        val w = size.width; val h = size.height
+        drawPath(Path().apply {
+            moveTo(0f, h * 0.60f)
+            cubicTo(w * 0.20f, h * 0.30f, w * 0.34f, h * 0.86f, w * 0.52f, h * 0.62f)
+            cubicTo(w * 0.66f, h * 0.44f, w * 0.80f, h * 0.80f, w, h * 0.52f)
+        }, color = ink.copy(alpha = 0.75f), style = androidx.compose.ui.graphics.Stroke(width = w * 0.013f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
+        drawCircle(ink, radius = w * 0.018f, center = androidx.compose.ui.geometry.Offset(w * 0.30f, h * 0.22f))
+    }
+}
+
+/** MINIMAL — a sparse dot grid. */
+@Composable
+private fun BoxScope.MinimalDotsArt(dark: Boolean) {
+    val ink = if (dark) Color(0xFFF3E9E2) else Color(0xFF6B5A52)
+    Canvas(Modifier.fillMaxSize()) {
+        val w = size.width; val h = size.height
+        val xs = listOf(0.24f, 0.50f, 0.76f)
+        val ys = listOf(0.30f, 0.52f, 0.74f)
+        xs.forEachIndexed { i, fx ->
+            ys.forEachIndexed { j, fy ->
+                val alt = (i + j) % 2 == 0
+                drawCircle(ink.copy(alpha = if (alt) 0.85f else 0.40f), radius = if (alt) w * 0.020f else w * 0.012f, center = androidx.compose.ui.geometry.Offset(w * fx, h * fy))
+            }
         }
     }
-    Text(
-        text = "Shelf",
-        fontSize = 10.sp,
-        fontStyle = FontStyle.Italic,
-        color = if (dark) Color(0xFFD8E6EE) else Color(0xFF4E7A96),
-        textAlign = TextAlign.End,
-        modifier = Modifier.align(Alignment.BottomStart).padding(start = 10.dp, bottom = 12.dp)
-    )
 }

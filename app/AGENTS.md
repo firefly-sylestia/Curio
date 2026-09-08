@@ -812,6 +812,33 @@ app/src/main/java/com/curio/app/
   `shadowElevation` blur behind the TILTED cream print read as a
   "background showing behind the strip" (preview AND export); the tape +
   tilt keep the scrapbook depth. Other styles keep the shadow.
+- **v3xx27 — collection card DESIGN pass (user follow-up
+  2026-09-08).** (1) **Shelf cards now carry their art** — the drawn
+  scene fills the WHOLE card as a whisper-alpha background, not just a
+  foot strip ("the box designs itself… drawn elements not the icon"):
+  Favorites wears the glowing star-map CONSTELLATION, Currently Reading
+  an open-book scene, Want to Read stacked spines, Saved a photo
+  collage, Completed the FULL redesign (sun-arc summit + planted flag +
+  bird — `PEAK`), Notes a slip-stack with a pen scribble, Personal a
+  moonlit window with a sill plant. Plus four MINIMAL_* scenes (sun,
+  rings, wave, dots) borrowing the Minimal share card's sparse line
+  language for plenty of variety. Every scene is drawn with proportional
+  Canvas geometry so it scales from foot strip to full-card background.
+  (2) **New-collection sheet style picker** — the sheet now lets you
+  pick a card style: tone swatches (expanded palette of 9), live art
+  previews (all 13 scenes on their tone fills) and icon chips (12
+  glyphs), each independently optional — left on Auto the card cycles
+  the palette like before; tap a selected option again to reset to
+  Auto. `CurioCollection` gains `tone`/`art`/`icon` (indices into the
+  Cabinet palettes, -1/null = auto; backward-compatible JSON) and the
+  home grid renders each collection's custom style. (3) **⋮ dropdowns
+  are anchored now** — the collection card's ⋮ (V2ShelfCard) and the
+  collection-detail ⋮ (V2DetailHeader) open a DropdownMenu right under
+  the dots (Rename / Add captures / Delete); the old centre-screen
+  `CurioHoldPill` overlay for collections is gone (PillTarget.Collection
+  removed; the member long-press pill stays). (4) **Dead hint text
+  removed** — "· tap a member to open it" (hero subtitle) and "·
+  long-press a member for more" (detail header) are gone.
 - **v3xx26 — editor caret / box-outline accuracy (user follow-up
   2026-09-08; the CI fix rode separately in `3f466b5c`).** The inline
   quick-fact field (ArrangeableCard's transparent BasicTextField — shared

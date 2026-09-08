@@ -3025,7 +3025,12 @@ object AppPreferences {
                     id = obj.optString("id", "").ifBlank { "${obj.optLong("createdAtMillis", System.currentTimeMillis())}" },
                     name = obj.optString("name", "Collection").ifBlank { "Collection" },
                     createdAtMillis = obj.optLong("createdAtMillis", System.currentTimeMillis()),
-                    members = members.filter { it.refName.isNotBlank() }
+                    members = members.filter { it.refName.isNotBlank() },
+                    // v3xx — the custom card style (tone/art/icon), absent
+                    // on legacy collections → -1/null (auto/cycle).
+                    tone = obj.optInt("tone", -1),
+                    art = obj.optInt("art", -1),
+                    icon = obj.optString("icon", "").takeIf { it.isNotBlank() }
                 )
             }.filter { it.id.isNotBlank() }
         } catch (_: Exception) {
@@ -3051,6 +3056,9 @@ object AppPreferences {
                     .put("name", c.name)
                     .put("createdAtMillis", c.createdAtMillis)
                     .put("members", members)
+                    .put("tone", c.tone)
+                    .put("art", c.art)
+                    .put("icon", c.icon ?: "")
             )
         }
         prefs(context).edit().putString(KEY_CABINET_COLLECTIONS, arr.toString()).apply()
@@ -3671,7 +3679,14 @@ data class CurioCollection(
     val id: String,
     val name: String,
     val createdAtMillis: Long,
-    val members: List<CurioCollectionMember>
+    val members: List<CurioCollectionMember>,
+    /** v3xx — CUSTOM CARD STYLE (chosen in the New-collection sheet): the
+     *  index into the Cabinet's tone swatch list (-1 = auto/cycle). */
+    val tone: Int = -1,
+    /** v3xx — the index into the Cabinet's art list (-1 = auto/cycle). */
+    val art: Int = -1,
+    /** v3xx — a custom icon glyph (null = the default sparkle). */
+    val icon: String? = null
 )
 
 /** One member of a [CurioCollection]. */

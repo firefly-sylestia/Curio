@@ -3,6 +3,8 @@ package com.curio.app.features.cabinet
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -32,9 +34,11 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
@@ -60,6 +64,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Brush
@@ -427,7 +432,7 @@ fun CabinetV2Content(navController: NavController) {
     }
     val heroSubtitle = when {
         selectionMode -> "Long-press cards to select"
-        openCollection != null -> "${openCollection.members.size} item${if (openCollection.members.size == 1) "" else "s"} · tap a member to open it"
+        openCollection != null -> "${openCollection.members.size} item${if (openCollection.members.size == 1) "" else "s"}"
         openLevel == SHELF_LEVEL_FAVORITES -> "${allLikes.size} liked books, series & albums"
         openLevel == SHELF_LEVEL_SAVED -> "${entries.size} saved captures"
         openLevel == SHELF_LEVEL_NOTES -> "${noteEntries.size} notes & voice captures"
@@ -529,7 +534,8 @@ fun CabinetV2Content(navController: NavController) {
                     },
                     onMemberLongPress = { index -> pillTarget = PillTarget.Member(openCollection.id, index) },
                     onAdd = { addTarget = openCollection.id },
-                    onKebab = { pillTarget = PillTarget.Collection(openCollection.id) }
+                    onRename = { renameTarget = openCollection.id },
+                    onDelete = { deleteTarget = openCollection.id }
                 )
                 openLevel == SHELF_LEVEL_FAVORITES -> v2VirtualShelfItems(
                     title = "Favorites",
@@ -655,7 +661,10 @@ fun CabinetV2Content(navController: NavController) {
                         }
                     },
                     onOpenCollection = { id -> openLevel = id; searchActive = false; searchQuery = "" },
-                    onCollectionLongPress = { id -> pillTarget = PillTarget.Collection(id) },
+                    // v3xx — the collection cards' ⋮ now drives RENAME / DELETE
+                    // straight from an anchored dropdown (no center overlay).
+                    onRenameCollection = { id -> renameTarget = id },
+                    onDeleteCollection = { id -> deleteTarget = id },
                     onNewCollection = { showCreateSheet = true },
                     suggestions = suggestions,
                     onShuffle = { suggestionSeed++ },
@@ -702,22 +711,9 @@ fun CabinetV2Content(navController: NavController) {
         }
     }
 
-    // ── Long-press option pills (collection card / member / kebab).
+    // ── Long-press option pills (collection member only — the collection
+    // card ⋮ and the detail ⋮ are anchored dropdowns now).
     when (val target = pillTarget) {
-        is PillTarget.Collection -> {
-            val c = collections.firstOrNull { it.id == target.id }
-            if (c != null) {
-                CurioHoldPill(
-                    title = c.name,
-                    actions = listOf(
-                        "Rename" to { renameTarget = c.id; pillTarget = null },
-                        "Delete collection" to { deleteTarget = c.id; pillTarget = null }
-                    ),
-                    destructiveIndexes = setOf(1),
-                    onDismiss = { pillTarget = null }
-                )
-            }
-        }
         is PillTarget.Member -> {
             val c = collections.firstOrNull { it.id == target.collectionId }
             if (c != null && target.index in c.members.indices) {
@@ -750,19 +746,28 @@ fun CabinetV2Content(navController: NavController) {
         val target = renameTarget?.let { id -> collections.firstOrNull { it.id == id } }
         V2CollectionNameSheet(
             initialName = target?.name ?: "",
+            // v3xx — the custom card style travels through the sheet: create
+            // starts on Auto (-1 / null), rename keeps the collection's own.
+            initialTone = target?.tone ?: -1,
+            initialArt = target?.art ?: -1,
+            initialIcon = target?.icon,
             moodboards = if (target == null)
                 entries.filter { it.format == CaptureFormat.GalleryWall } else emptyList(),
             showMoodboards = target == null,
             title = if (target != null) "Rename collection" else "New collection",
             confirmLabel = if (target != null) "Rename" else "Create",
-            onConfirm = { name ->
+            onConfirm = { name, tone, art, icon ->
                 if (target != null) {
                     AppPreferences.addOrReplaceCollection(context, target.copy(name = name))
                 } else {
                     val id = UUID.randomUUID().toString()
                     AppPreferences.addOrReplaceCollection(
                         context,
-                        CurioCollection(id = id, name = name, createdAtMillis = System.currentTimeMillis(), members = emptyList())
+                        CurioCollection(
+                            id = id, name = name, createdAtMillis = System.currentTimeMillis(),
+                            members = emptyList(),
+                            tone = tone, art = art, icon = icon
+                        )
                     )
                     openLevel = id
                 }
@@ -900,7 +905,8 @@ private fun LazyGridScope.v2HomeItems(
     onOpenEverything: () -> Unit,
     onOpenShelf: (V2ShelfId) -> Unit,
     onOpenCollection: (String) -> Unit,
-    onCollectionLongPress: (String) -> Unit,
+    onRenameCollection: (String) -> Unit,
+    onDeleteCollection: (String) -> Unit,
     onNewCollection: () -> Unit,
     suggestions: List<CurioTopic>,
     onShuffle: () -> Unit,
@@ -980,8 +986,9 @@ private fun LazyGridScope.v2HomeItems(
                     art = shelf.art,
                     count = count,
                     onClick = { onOpenShelf(shelf.id) },
-                    onLongPress = if (seededId != null) ({ onCollectionLongPress(seededId) }) else null,
-                    onMoreClick = if (seededId != null) ({ onCollectionLongPress(seededId) }) else null
+                    // v3xx — the card's OWN anchored ⋮ (Rename for the seeded
+                    // starter shelves; the seeded ones stay non-deletable).
+                    onRename = if (seededId != null) ({ onRenameCollection(seededId) }) else null
                 )
             }
         }
@@ -989,13 +996,18 @@ private fun LazyGridScope.v2HomeItems(
             item(key = "c|${c.id}", contentType = "collection") {
                 V2ShelfCard(
                     title = c.name,
-                    icon = CurioIcons.AutoAwesome,
-                    tone = userShelfTones[i % userShelfTones.size],
-                    art = userShelfArts[i % userShelfArts.size],
+                    // v3xx — a user collection renders its CUSTOM card style
+                    // (tone/art/icon chosen in the New-collection sheet) when
+                    // set; otherwise it cycles the palette like before.
+                    icon = c.icon ?: CurioIcons.AutoAwesome,
+                    tone = c.tone.takeIf { it >= 0 && it < userShelfTones.size }
+                        ?.let { userShelfTones[it] } ?: userShelfTones[i % userShelfTones.size],
+                    art = c.art.takeIf { it >= 0 && it < userShelfArts.size }
+                        ?.let { userShelfArts[it] } ?: userShelfArts[i % userShelfArts.size],
                     count = c.members.size,
                     onClick = { onOpenCollection(c.id) },
-                    onLongPress = { onCollectionLongPress(c.id) },
-                    onMoreClick = { onCollectionLongPress(c.id) }
+                    onRename = { onRenameCollection(c.id) },
+                    onDelete = { onDeleteCollection(c.id) }
                 )
             }
         }
@@ -1017,14 +1029,16 @@ private fun LazyGridScope.v2DetailItems(
     onOpenEntry: (String) -> Unit,
     onMemberLongPress: (Int) -> Unit,
     onAdd: () -> Unit,
-    onKebab: () -> Unit
+    onRename: () -> Unit,
+    onDelete: () -> Unit
 ) {
     item(key = "d-head", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
         V2DetailHeader(
             name = collection.name,
             count = collection.members.size,
             onAdd = onAdd,
-            onKebab = onKebab
+            onRename = onRename,
+            onDelete = onDelete
         )
     }
     if (collection.members.isEmpty()) {
@@ -1427,20 +1441,51 @@ private val noteFormats = setOf(
     CaptureFormat.OpenNotebook
 )
 
-/** Tone + art palette for USER collections (built-ins carry their own). */
+/** Tone + art palette for USER collections (built-ins carry their own).
+ *  v3xx — expanded for the New-collection style picker so there's plenty
+ *  of variety; `tone`/`art` on a CurioCollection are INDICES into these
+ *  two lists (-1 = auto/cycle). */
 private val userShelfTones = listOf(
     V2ShelfTone(light = 0xFFE6D7B6, dark = 0xFF4E4534),  // warm sand
     V2ShelfTone(light = 0xFFD6CAE9, dark = 0xFF4A3E63),  // soft lavender
     V2ShelfTone(light = 0xFFC9DDD2, dark = 0xFF3A4F43),  // sage
     V2ShelfTone(light = 0xFFEAC9CF, dark = 0xFF613F4B),  // blush pink
-    V2ShelfTone(light = 0xFFC9DDE9, dark = 0xFF3A5160)   // powder blue
+    V2ShelfTone(light = 0xFFC9DDE9, dark = 0xFF3A5160),  // powder blue
+    V2ShelfTone(light = 0xFFC9E4D8, dark = 0xFF3A5449),  // mint
+    V2ShelfTone(light = 0xFFF2D8C3, dark = 0xFF5E4634),  // peach
+    V2ShelfTone(light = 0xFFC9D4E0, dark = 0xFF3C4A5C),  // slate
+    V2ShelfTone(light = 0xFFF1E3B8, dark = 0xFF54492E)   // butter
 )
 private val userShelfArts = listOf(
     V2ShelfArtType.STAR,
     V2ShelfArtType.NOTES,
     V2ShelfArtType.MOUNTAIN,
     V2ShelfArtType.PHOTOS,
-    V2ShelfArtType.BOOKS
+    V2ShelfArtType.BOOKS,
+    V2ShelfArtType.CONSTELLATION,
+    V2ShelfArtType.READING,
+    V2ShelfArtType.PEAK,
+    V2ShelfArtType.WINDOW,
+    V2ShelfArtType.MINIMAL_SUN,
+    V2ShelfArtType.MINIMAL_RINGS,
+    V2ShelfArtType.MINIMAL_WAVE,
+    V2ShelfArtType.MINIMAL_DOTS
+)
+
+/** Icon glyphs offered in the New-collection sheet's style picker. */
+private val collectionIconOptions = listOf(
+    CurioIcons.AutoAwesome,
+    CurioIcons.Star,
+    CurioIcons.Bookmark,
+    CurioIcons.MenuBook,
+    CurioIcons.MusicNote,
+    CurioIcons.Flag,
+    CurioIcons.Lightbulb,
+    CurioIcons.Brush,
+    CurioIcons.Palette,
+    CurioIcons.EmojiEvents,
+    CurioIcons.Note,
+    CurioIcons.Person
 )
 
 /** Does an entry belong to the given rail type? */
@@ -2304,8 +2349,10 @@ private fun V2DetailHeader(
     name: String,
     count: Int,
     onAdd: () -> Unit,
-    onKebab: () -> Unit
+    onRename: () -> Unit,
+    onDelete: () -> Unit
 ) {
+    var moreOpen by remember { mutableStateOf(false) }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
@@ -2319,7 +2366,7 @@ private fun V2DetailHeader(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = "$count item${if (count == 1) "" else "s"} · long-press a member for more",
+                text = "$count item${if (count == 1) "" else "s"}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1
@@ -2332,11 +2379,41 @@ private fun V2DetailHeader(
             onClick = onAdd
         )
         Spacer(Modifier.width(8.dp))
-        V2ToolbarPill(
-            glyph = CurioIcons.MoreVert,
-            contentDescription = "Rename or delete collection",
-            onClick = onKebab
-        )
+        // v3xx — the collection ⋮ is an ANCHORED dropdown (Rename / Add
+        // captures / Delete) right under the dots — no center-screen overlay.
+        Box {
+            V2ToolbarPill(
+                glyph = CurioIcons.MoreVert,
+                contentDescription = "Rename, add or delete collection",
+                onClick = { moreOpen = true }
+            )
+            DropdownMenu(
+                expanded = moreOpen,
+                onDismissRequest = { moreOpen = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Rename", fontWeight = FontWeight.SemiBold) },
+                    leadingIcon = {
+                        CurioIcon(name = CurioIcons.Edit, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, size = 17.dp)
+                    },
+                    onClick = { moreOpen = false; onRename() }
+                )
+                DropdownMenuItem(
+                    text = { Text("Add captures", fontWeight = FontWeight.SemiBold) },
+                    leadingIcon = {
+                        CurioIcon(name = CurioIcons.Add, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, size = 17.dp)
+                    },
+                    onClick = { moreOpen = false; onAdd() }
+                )
+                DropdownMenuItem(
+                    text = { Text("Delete collection", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.SemiBold) },
+                    leadingIcon = {
+                        CurioIcon(name = CurioIcons.Delete, contentDescription = null, tint = MaterialTheme.colorScheme.error, size = 17.dp)
+                    },
+                    onClick = { moreOpen = false; onDelete() }
+                )
+            }
+        }
     }
 }
 
@@ -2350,15 +2427,23 @@ private fun V2DetailHeader(
 @Composable
 private fun V2CollectionNameSheet(
     initialName: String,
+    initialTone: Int,
+    initialArt: Int,
+    initialIcon: String?,
     moodboards: List<CurioEntry>,
     showMoodboards: Boolean,
     title: String,
     confirmLabel: String,
-    onConfirm: (String) -> Unit,
+    onConfirm: (name: String, tone: Int, art: Int, icon: String?) -> Unit,
     onMoodboard: (CurioEntry) -> Unit,
     onDismiss: () -> Unit
 ) {
     var name by rememberSaveable(initialName) { mutableStateOf(initialName) }
+    // v3xx — custom card style (tone / art / icon): -1 / "" = Auto (the
+    // card cycles the palette); tap a selected option again to reset it.
+    var tone by rememberSaveable(initialTone) { mutableStateOf(initialTone) }
+    var art by rememberSaveable(initialArt) { mutableStateOf(initialArt) }
+    var icon by rememberSaveable(initialIcon ?: "") { mutableStateOf(initialIcon ?: "") }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -2370,6 +2455,7 @@ private fun V2CollectionNameSheet(
             verticalArrangement = Arrangement.spacedBy(14.dp),
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
                 .padding(bottom = 24.dp)
         ) {
@@ -2385,8 +2471,145 @@ private fun V2CollectionNameSheet(
                 label = { Text("Name") },
                 modifier = Modifier.fillMaxWidth()
             )
+
+            // ── Card style — tone swatches, art previews, icon chips. All
+            // optional (left on Auto the card cycles the palette so every
+            // collection still looks hand-picked); tap again to reset.
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = "Card style",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 0.6.sp
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = "Pick a tone, art and icon — tap one again to go back to Auto.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+            )
+
+            // Tone swatches.
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                item(key = "style-t-auto") {
+                    StyleAutoChip(selected = tone < 0) { tone = -1 }
+                }
+                itemsIndexed(userShelfTones) { i, t ->
+                    val selected = tone == i
+                    val dark = isCurioDarkTheme()
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(RoundedCornerShape(21.dp))
+                            .background(if (dark) Color(t.dark) else Color(t.light))
+                            .then(
+                                if (selected)
+                                    Modifier.border(3.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(21.dp))
+                                else Modifier
+                            )
+                            .clickable { tone = if (selected) -1 else i },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (selected) {
+                            CurioIcon(
+                                name = CurioIcons.Check,
+                                contentDescription = null,
+                                tint = if (dark) Color(0xFFEAF3EC) else Color.White,
+                                size = 18.dp
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Art previews (the drawn scene on its tone fill, exactly like
+            // the card wears it).
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                item(key = "style-a-auto") {
+                    StyleAutoChip(selected = art < 0) { art = -1 }
+                }
+                itemsIndexed(userShelfArts) { i, a ->
+                    val selected = art == i
+                    val dark = isCurioDarkTheme()
+                    val t = userShelfTones[i % userShelfTones.size]
+                    Box(
+                        modifier = Modifier
+                            .size(width = 52.dp, height = 60.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(if (dark) Color(t.dark) else Color(t.light))
+                            .then(
+                                if (selected)
+                                    Modifier.border(3.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(14.dp))
+                                else Modifier
+                            )
+                            .clickable { art = if (selected) -1 else i }
+                    ) {
+                        V2ShelfArt(
+                            art = a,
+                            dark = dark,
+                            modifier = Modifier.fillMaxSize().alpha(0.6f)
+                        )
+                        if (selected) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(4.dp)
+                                    .size(18.dp)
+                                    .clip(RoundedCornerShape(9.dp))
+                                    .background(MaterialTheme.colorScheme.primary),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CurioIcon(
+                                    name = CurioIcons.Check,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                    size = 12.dp
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Icon chips.
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                item(key = "style-i-auto") {
+                    StyleAutoChip(selected = icon.isBlank()) { icon = "" }
+                }
+                itemsIndexed(collectionIconOptions) { _, glyph ->
+                    val selected = icon == glyph
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(
+                                if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+                                else MaterialTheme.colorScheme.surfaceContainerHigh
+                            )
+                            .then(
+                                if (selected)
+                                    Modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(14.dp))
+                                else Modifier
+                            )
+                            .clickable { icon = if (selected) "" else glyph },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CurioIcon(
+                            name = glyph,
+                            contentDescription = null,
+                            tint = if (selected) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                            size = 21.dp
+                        )
+                    }
+                }
+            }
+
             Surface(
-                onClick = { onConfirm(name.trim().ifBlank { "Collection" }) },
+                onClick = {
+                    onConfirm(name.trim().ifBlank { "Collection" }, tone, art, icon.ifBlank { null })
+                },
                 shape = RoundedCornerShape(50),
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.fillMaxWidth().height(46.dp)
@@ -2462,6 +2685,39 @@ private fun V2CollectionNameSheet(
                 }
             }
         }
+    }
+}
+
+/** The leading "Auto" chip in each style-picker row — the collection card
+ *  cycles the tone/art/icon palette on its own when Auto is selected. */
+@Composable
+private fun StyleAutoChip(
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .height(44.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(
+                if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)
+                else MaterialTheme.colorScheme.surfaceContainerHigh
+            )
+            .then(
+                if (selected)
+                    Modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(14.dp))
+                else Modifier
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Auto",
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+            color = if (selected) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -2712,7 +2968,6 @@ private fun V2AddEntriesSheet(
 // ────────────────────────────────────────────────────────────────────────
 
 private sealed interface PillTarget {
-    data class Collection(val id: String) : PillTarget
     data class Member(val collectionId: String, val index: Int) : PillTarget
 }
 

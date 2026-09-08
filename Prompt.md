@@ -903,7 +903,7 @@ vertical and bottom belong to different constructor families, so
 **Fix:** explicit `PaddingValues(start = 12.dp, top = 4.dp, end = 12.dp,
 bottom = 16.dp)` in both the tree-mode and list-mode LazyColumn
 contentPadding. Pushed alone; CI validates on the push.
-## Request (2026-09-08, in progress — inline/full-screen editor caret + box-outline accuracy; CI fix pushed `3f466b5c`)
+## Request (2026-09-08, completed — editor caret/box-outline accuracy, committed `a02a3b38` — HELD, not pushed per user instruction)
 
 **Request (pending-prompt slot):** "yes please properly do it but before
 that push the cl fix then do that but don't push that" + pasted CI log
@@ -915,18 +915,50 @@ selection state before its declaration).
 `selectionMode`/`selectedEntryIds` declarations (Kotlin needs declarations
 before use). 
 
-**Editor pass (committed, NOT pushed):** the inline field (bottom-sheet
-preview AND the full-screen card editor — both share ArrangeableCard's
-transparent BasicTextField over the fact) used `heightIn(min = …)` with
-`maxLines = 60`, so it grew past the visible fact box: the caret could sit
-BELOW the visible glyphs and the selection outline extended beyond the
-box ("cursor and text position wrong/misleading", "box outline
-misleads"). The field is now clamped to the measured box height
-(`heightIn(min = max = f.height)`) — the card's smart fit re-measures on
-every keystroke and grows the box, so caret + outline always hug the
-visible text. (Root-cause note: the reported fact style already includes
-the smart-fit text scale — styles render with `effectiveBodyScale` — so
-the caret metrics were otherwise already glyph-exact.)
+**Editor pass (committed `a02a3b38`, NOT pushed — held):** the inline
+field (bottom-sheet preview AND the full-screen card editor — both share
+ArrangeableCard's transparent BasicTextField over the fact) used
+`heightIn(min = …)` with `maxLines = 60`, so it grew past the visible
+fact box: the caret could sit BELOW the visible glyphs and the selection
+outline extended beyond the box ("cursor and text position
+wrong/misleading", "box outline misleads"). The field is now clamped to
+the measured box height (`heightIn(min = max = f.height)`) — the card's
+smart fit re-measures on every keystroke and grows the box, so caret +
+outline always hug the visible text. (Root-cause note: the reported fact
+style already includes the smart-fit text scale — styles render with
+`effectiveBodyScale` — so the caret metrics were otherwise already
+glyph-exact.)
+
+## Request (2026-09-08, completed — collection card DESIGN pass, committed — HELD with `a02a3b38`, not pushed)
+
+**Request (direct):** "now the box designs itself for collections —
+favorites, continue reading, saved entries, completed, notes, personal
+backgrounds of the cards (drawn elements, not the icon) + more minimal
+styles like the Minimal share card + plenty of variety + the New
+collection bottom sheet better with proper customizable style (multiple
+things) + inside collections the 'tap a member to open it' text is bad
+(fix it) + proper dropdown, not the overlay in the middle, for the 3
+dots".
+
+**Implemented:** (1) `V2ShelfCard` now paints its art as a full-card
+whisper-alpha background (every scene redrawn proportional so it scales
+foot-strip → full-card): Favorites = star-map CONSTELLATION, Currently
+Reading = open book, Want to Read = spines, Saved = photo collage,
+Completed = FULL redesign (sun-arc summit + flag + bird, `PEAK`), Notes =
+slip-stack + pen, Personal = moonlit window + plant; four MINIMAL_* scenes
+(sun, rings, wave, dots) in the Minimal share card's sparse line
+language. (2) New-collection sheet style picker — tone swatches
+(9-tone palette), live art previews (all 13 scenes on their tone fills),
+icon chips (12 glyphs); each independent + optional (Auto = cycle); tap
+again to reset. `CurioCollection` gained `tone`/`art`/`icon` (indices,
+backward-compatible JSON) and the home grid renders each collection's
+custom style. (3) ⋮ anchored dropdowns (cards + detail header; the
+center `CurioHoldPill` collection overlay + `PillTarget.Collection`
+removed; member long-press pill stays). (4) Dead hints removed ("· tap a
+member to open it", "· long-press a member for more").
+
+**Held:** committed on top of `a02a3b38` (also held) — one push sends
+both; CI validates on push.
 
 ## next prompt
 (empty — no pending prompt)
