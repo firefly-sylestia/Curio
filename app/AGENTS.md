@@ -812,6 +812,35 @@ app/src/main/java/com/curio/app/
   `shadowElevation` blur behind the TILTED cream print read as a
   "background showing behind the strip" (preview AND export); the tape +
   tilt keep the scrapbook depth. Other styles keep the shadow.
+- **v3xx22 — CI fix + dark-mode sheet icons + full series UI (user
+  follow-up).** (1) **CI fix** (CabinetShelves.kt — the pasted
+  `compileDebug/ReleaseKotlin` failure): the seven shelf-art composables
+  (`StarArt`/`ReadingArt`/`BooksArt`/`MountainArt`/`NotesArt`/
+  `WindowArt`/`PhotosArt`) are now `BoxScope.` extensions — their
+  top-level `.align(...)` calls need the outer Box's scope, and `V2ShelfArt`
+  already wraps them in a `Box(modifier)` — and the book-spine width is
+  `(22 + i * 8).dp` (was `22.dp + i * 8.dp` = Int × Dp mismatch). (2)
+  **Dark-mode sheet action icons** (TopicRevealScreen.kt): new
+  `sheetActionIconTone(ink, variant, alpha)` — in dark mode the
+  unselected sheet actions (favorite hearts on book chapters / album
+  tracks / series episodes, the read/watched toggles, the note chips, the
+  album LISTEN dropdown glyphs) resolve the full-strength cover-ink twin
+  (0.88 lightness) instead of `onSurfaceVariant` + dimmed alphas that
+  vanished into the 0.20–0.27 cover-tinted dark washes; light mode keeps
+  `variant` exactly as before. The chapter "Add a note" field icons
+  (note glyph, Expand chip, Share chip) lift to full alpha in dark mode
+  too. (3) **Series UI — every series topic shows a section**:
+  `SeriesInfoSection` no longer early-returns on an empty episode guide —
+  every SERIES reveal renders the poster + synopsis card (they used to
+  show NOTHING); the count meta, episode-title preview and "View the
+  episode list →" footer are gated on `hasEpisodes`. (4) **Episode
+  chips**: a `SeriesEpisodeChips` row (S1E1 key + title chips, mirroring
+  the album TRACKS chips) jumps the episode-list sheet straight to an
+  episode (`onEpisodeClick` → `selectedSeriesEpisode` +
+  `showSeriesSheet`, the sheet's `episode` param pre-expands it). (5)
+  **Series icons, not books**: the reveal poster card + chips wear
+  `CurioIcons.Movies` (clapperboard) and the series notes accordion its
+  own `CurioIcons.Movie` — a series never wears the book glyph.
 - **v355 — book/series notes sheets: no close button, no hint copy, rating
   below the author, tick-free read state.** User: "never add cross close
   button in a bottom sheet… remove it from the book synopsis sheet… remove

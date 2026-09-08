@@ -1,5 +1,48 @@
 # Prompt Log — current request
 
+## Request (2026-09-08, completed — CI fix + dark-mode sheet icons + full series UI)
+
+**Request (pending-prompt slot):** "for chapter add note area and the
+icons for the bottom sheet and selection of songs for album bottom sheet
+— they are bad colors in dark mode, in dark mode they are using dark
+color which is invisible with the background — fix all of them in dark
+mode only; same for series too; and add proper series UI — I saw many
+aren't showing; also use proper series icons rather than books; fix the
+CI too" (with the pasted `compileDebugKotlin`/`compileReleaseKotlin`
+failure log: CabinetShelves.kt `Unresolved reference 'align'` at 12 sites
++ a `Dp * Int` type mismatch at line 358).
+
+**What shipped:**
+1. **CI fix (CabinetShelves.kt)** — the seven shelf-art composables
+   (`StarArt`/`ReadingArt`/`BooksArt`/`MountainArt`/`NotesArt`/
+   `WindowArt`/`PhotosArt`) are now `BoxScope.` extensions (their
+   top-level `.align(...)` calls need the outer Box's scope; `V2ShelfArt`
+   already wraps them in a Box) and the book-spine width is `(22 + i *
+   8).dp` instead of `22.dp + i * 8.dp` (Int × Dp). CI green after push.
+2. **Dark-mode sheet action icons (TopicRevealScreen.kt)** — a new
+   `sheetActionIconTone(ink, variant, alpha)` helper: in dark mode the
+   unselected sheet actions — the favorite hearts (book chapters / album
+   tracks / series episodes), the read/watched toggles, the note chips
+   and the album LISTEN dropdown glyphs — resolve the full-strength
+   cover-ink twin (0.88 lightness) instead of `onSurfaceVariant`/dimmed
+   alpha versions that read as dark blobs on the 0.20–0.27 cover-tinted
+   dark washes. Light mode unchanged. The chapter "Add a note" field
+   icons (note glyph, expand chip, share chip) lift to full alpha in dark
+   mode too.
+3. **Series UI — every series topic now shows a section** —
+   `SeriesInfoSection` no longer returns early when the topic has no
+   authored episode guide: every SERIES reveal now renders the poster +
+   synopsis card (they used to show NOTHING). The header meta, the
+   episode-title preview and the "View the episode list →" footer are
+   gated on `hasEpisodes`.
+4. **Episode chips on the reveal** — a `SeriesEpisodeChips` row (S1E1
+   key + title chips, mirroring the album TRACKS chips) jumps the
+   episode-list sheet straight to an episode
+   (`onEpisodeClick` → `selectedSeriesEpisode` + `showSeriesSheet`).
+5. **Series icons, not books** — the series notes sheet's accordion
+   already wore its own TV/clapperboard glyph (`CurioIcons.Movie`); the
+   reveal poster card + chips use `CurioIcons.Movies` throughout.
+
 ## Request (2026-09-08, completed — Home revert + pet fix + share-card no-overlap/no-cut fit)
 
 **Request (pending-prompt slot):** "for the glass toolbar header why did

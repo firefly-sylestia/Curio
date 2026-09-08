@@ -279,7 +279,7 @@ private fun mountainPath(w: Float, h: Float): Path = Path().apply {
 }
 
 @Composable
-private fun StarArt(dark: Boolean) {
+private fun BoxScope.StarArt(dark: Boolean) {
     val mountain = if (dark) Color(0xFF6F68A8) else Color(0xFF9992D2)
     Canvas(modifier = Modifier.fillMaxSize()) {
         drawPath(mountainPath(size.width, size.height), color = mountain)
@@ -295,7 +295,7 @@ private fun StarArt(dark: Boolean) {
 }
 
 @Composable
-private fun ReadingArt(dark: Boolean) {
+private fun BoxScope.ReadingArt(dark: Boolean) {
     val bookFill = if (dark) Color(0xFFF2E8DA) else Color(0xFFF7EEE1)
     val leaf = if (dark) Color(0xFF9DB58F) else Color(0xFF769070)
     // Open book — two page halves with a spine gap.
@@ -338,7 +338,7 @@ private fun ReadingArt(dark: Boolean) {
 }
 
 @Composable
-private fun BooksArt(dark: Boolean) {
+private fun BoxScope.BooksArt(dark: Boolean) {
     // Stacked book spines.
     val spines = if (dark) {
         listOf(0xFF7A5C4C to 30f, 0xFF9A7560 to 40f, 0xFFC09379 to 52f)
@@ -355,7 +355,7 @@ private fun BooksArt(dark: Boolean) {
         spines.forEachIndexed { i, (c, h) ->
             Box(
                 modifier = Modifier
-                    .width(22.dp + i * 8.dp)
+                    .width((22 + i * 8).dp)
                     .height(h.dp)
                     .clip(RoundedCornerShape(topStart = 5.dp, topEnd = 7.dp, bottomStart = 3.dp, bottomEnd = 3.dp))
                     .background(Color(c))
@@ -389,7 +389,7 @@ private fun BooksArt(dark: Boolean) {
 }
 
 @Composable
-private fun MountainArt(dark: Boolean) {
+private fun BoxScope.MountainArt(dark: Boolean) {
     val hills = if (dark) Color(0xFF5E7E6C) else Color(0xFF8FB4A0)
     val flowers = if (dark) Color(0xFFE9F2E4) else Color(0xFFFDFEFC)
     Canvas(modifier = Modifier.fillMaxSize()) {
@@ -405,7 +405,7 @@ private fun MountainArt(dark: Boolean) {
 }
 
 @Composable
-private fun NotesArt(dark: Boolean) {
+private fun BoxScope.NotesArt(dark: Boolean) {
     // Paper stack — three rotated slips.
     val stack = listOf(
         if (dark) 0xFF8A7BA8 else 0xFFB7A9D7,
@@ -455,7 +455,7 @@ private fun NotesArt(dark: Boolean) {
 }
 
 @Composable
-private fun WindowArt(dark: Boolean) {
+private fun BoxScope.WindowArt(dark: Boolean) {
     val sky = if (dark) {
         Brush.verticalGradient(listOf(Color(0xFF8A5F3F), Color(0xFF6E7F6A)))
     } else {
@@ -508,7 +508,7 @@ private fun WindowArt(dark: Boolean) {
 }
 
 @Composable
-private fun PhotosArt(dark: Boolean) {
+private fun BoxScope.PhotosArt(dark: Boolean) {
     // Layered photo tiles with a little ♡ on the front one.
     val fills = if (dark) {
         listOf(Color(0xFF46657A), Color(0xFF5A7B8C), Color(0xFF6F92A3))
