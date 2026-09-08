@@ -593,7 +593,6 @@ fun ProfileScreen(navController: NavController) {
                     color = pillBg,
                     contentColor = sInk,
                     shadowElevation = 3.dp,
-                    disableRipple = true,
                     modifier = Modifier
                         .then(
                             if (isInScreenGlassActive())

@@ -345,7 +345,6 @@ fun CurioGlassToolbarMorph(
                 color = pillBg,
                 contentColor = pillInk,
                 shadowElevation = 3.dp,
-                disableRipple = true,
                 modifier = Modifier
                     .then(
                         if (glassBackdrop != null && isInScreenGlassActive())
@@ -401,7 +400,7 @@ fun CurioGlassToolbarMorph(
             .layout { measurable, constraints ->
                 val full = measurable.measure(constraints)
                 val targetH = androidx.compose.ui.util.lerp(full.height.toFloat(), compactH, eased).toInt().coerceAtLeast(1)
-                layout(full.width, targetH) { place(full, 0, 0) }
+                layout(full.width, targetH) { full.place(0, 0) }
             }
             .clipToBounds()
             .then(glassMod)
@@ -512,7 +511,6 @@ fun CurioGlassToolbarMorph(
                     color = pillBg,
                     contentColor = ink,
                     shadowElevation = 3.dp,
-                    disableRipple = true,
                     modifier = Modifier.then(
                         if (glassBackdrop != null && isInScreenGlassActive())
                             Modifier.liquidGlassCapsule(
@@ -553,7 +551,6 @@ fun CurioGlassToolbarMorph(
                     color = pillBg,
                     contentColor = ink,
                     shadowElevation = 3.dp,
-                    disableRipple = true,
                     modifier = Modifier
                         .then(
                             if (glassBackdrop != null && isInScreenGlassActive())
