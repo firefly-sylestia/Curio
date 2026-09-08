@@ -2247,14 +2247,15 @@ fun TopicShareCard(
         }
         // v3xx — the POLAROID on every style: Collage draws its own inline
         // print (part of the scrapbook design); the other styles wear the
-        // SAME movable print once a user photo is on the card AND the user
-        // has turned it on for this card (move.polaroidOnCard — default
-        // FALSE, so the print is never always-on; the Polaroid panel's
-        // "Show on card" switch shows/hides it). Style / filter / size /
-        // drag controls work everywhere. Defaults to the right side,
-        // upper-middle (Collage parks it higher; here the top-right usually
-        // holds the cover pocket or headline art).
-        if (style != ShareCardStyle.COLLAGE && userPhoto != null && move.polaroidOnCard) {
+        // SAME movable print once the user turns it on for this card
+        // (move.polaroidOnCard — default FALSE, so the print is never
+        // always-on; the Polaroid panel's "Show on card" switch shows/hides
+        // it). A photo is NOT required: without one the print renders its
+        // empty frame with a "Tap to add photo" hint, exactly like Collage.
+        // Style / filter / size / drag controls work everywhere. Defaults
+        // to the right side, upper-middle (Collage parks it higher; here
+        // the top-right usually holds the cover pocket or headline art).
+        if (style != ShareCardStyle.COLLAGE && move.polaroidOnCard) {
             BoxWithConstraints(Modifier.matchParentSize()) {
                 val cwV = maxWidth.value; val chV = maxHeight.value
                 if (cwV <= 0f || chV <= 0f) return@BoxWithConstraints
@@ -2265,7 +2266,7 @@ fun TopicShareCard(
                 val capH = basePW * 0.20f
                 var pW = basePW
                 var pH = basePW * 1.18f
-                if (userPhoto.width > 0 && userPhoto.height > 0) {
+                if (userPhoto != null && userPhoto.width > 0 && userPhoto.height > 0) {
                     val ar = userPhoto.width.toFloat() / userPhoto.height.toFloat()
                     pH = pW / ar + capH
                     val maxH = chV * 0.55f
@@ -9860,18 +9861,17 @@ fun TopicShareSheet(
                         }
                         // v3xx — POLAROID tool in the bottom-sheet toolbar
                         // (frame style / photo filter / print size) — it used
-                        // to live full-screen only. Shown whenever the print
-                        // can appear: always on Collage, on every other style
-                        // once a user photo is on the card.
-                        if (currentStyle == ShareCardStyle.COLLAGE || userPhoto != null) {
-                            ToolWithCaption(caption = "Polaroid") {
-                                EditToolPill(
-                                    glyph = CurioIcons.PhotoLibrary,
-                                    description = "Polaroid style / filter / size",
-                                    active = toolOpen == "polaroid",
-                                    onClick = { toolOpen = if (toolOpen == "polaroid") null else "polaroid" }
-                                )
-                            }
+                        // to live full-screen only. Available on EVERY style
+                        // (Collage always wears its print; the other styles
+                        // opt in via the panel's "Show on card" switch — no
+                        // photo needed, the empty frame invites one).
+                        ToolWithCaption(caption = "Polaroid") {
+                            EditToolPill(
+                                glyph = CurioIcons.PhotoLibrary,
+                                description = "Polaroid style / filter / size",
+                                active = toolOpen == "polaroid",
+                                onClick = { toolOpen = if (toolOpen == "polaroid") null else "polaroid" }
+                            )
                         }
                         // v330 — Reset + Done live in the bottom action bar
                         // while editing (see below); the floating cluster over
@@ -10125,31 +10125,29 @@ fun TopicShareSheet(
                                                 CurioIcon(name = CurioIcons.AutoAwesome, contentDescription = "Stickers", tint = if (stickerToolsOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, size = 19.dp)
                                             }
                                         }
-                                        // v3xx — POLAROID button (every style
-                                        // the print can appear on): opens the
-                                        // print's style / filter / size panel;
-                                        // the grip on the card moves it. The
-                                        // polaroid renders on Collage always;
-                                        // on other styles it is OPT-IN — the
-                                        // panel's "Show on card" switch turns
-                                        // the print on per card (available
-                                        // once a user photo is on the card).
-                                        if (currentStyle == ShareCardStyle.COLLAGE || userPhoto != null) {
-                                            Surface(
-                                                onClick = {
-                                                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                                    polaroidToolsOpen = !polaroidToolsOpen
-                                                    stickerToolsOpen = false
-                                                    fsToolsOpen = false
-                                                },
-                                                shape = RoundedCornerShape(50),
-                                                color = if (polaroidToolsOpen) MaterialTheme.colorScheme.primary
-                                                        else MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
-                                                shadowElevation = 4.dp
-                                            ) {
-                                                Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
-                                                    CurioIcon(name = CurioIcons.PhotoLibrary, contentDescription = "Polaroid", tint = if (polaroidToolsOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, size = 19.dp)
-                                                }
+                                        // v3xx — POLAROID button (every style):
+                                        // opens the print's style / filter /
+                                        // size panel; the grip on the card
+                                        // moves it. The polaroid renders on
+                                        // Collage always; on other styles it is
+                                        // OPT-IN — the panel's "Show on card"
+                                        // switch turns the print on per card
+                                        // (no photo required; the empty frame
+                                        // invites one).
+                                        Surface(
+                                            onClick = {
+                                                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                                polaroidToolsOpen = !polaroidToolsOpen
+                                                stickerToolsOpen = false
+                                                fsToolsOpen = false
+                                            },
+                                            shape = RoundedCornerShape(50),
+                                            color = if (polaroidToolsOpen) MaterialTheme.colorScheme.primary
+                                                    else MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+                                            shadowElevation = 4.dp
+                                        ) {
+                                            Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
+                                                CurioIcon(name = CurioIcons.PhotoLibrary, contentDescription = "Polaroid", tint = if (polaroidToolsOpen) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, size = 19.dp)
                                             }
                                         }
                                         Surface(

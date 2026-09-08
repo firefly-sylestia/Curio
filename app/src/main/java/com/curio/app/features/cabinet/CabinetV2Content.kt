@@ -66,6 +66,10 @@ import com.curio.app.data.CurioEntry
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.TopicCatalog
+import com.curio.app.data.TopicJsonLoader
+import com.curio.app.data.matchesSavedName
+import com.curio.app.data.matchesSavedNameStrict
+import com.curio.app.data.shortName
 import com.curio.app.features.reveal.AlbumArtFetch
 import com.curio.app.features.reveal.SeriesPosterFetch
 import com.curio.app.features.settings.BookCoverFetch
@@ -82,6 +86,7 @@ import com.curio.app.ui.components.isLiquidGlassRequested
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.categoryInk
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.themedAccent
@@ -131,18 +136,18 @@ fun CabinetV2Content(navController: NavController) {
     }
     val books = remember(AppPreferences.bookFavoritesState, AppPreferences.bookCoverUrlsState) {
         AppPreferences.getBookFavorites(context)
-            .map { name -> V2Liked(name, V2Kind.BOOK, TopicCatalog.findByName(name)) }
+            .map { name -> V2Liked(name, V2Kind.BOOK, findLikedTopic(V2Kind.BOOK, name)) }
             .sortedBy { it.name.lowercase() }
     }
     val albums = remember(AppPreferences.albumFavTracksState) {
         AppPreferences.albumFavTracksState.keys
             .filter { it.isNotBlank() }
-            .map { name -> V2Liked(name, V2Kind.ALBUM, TopicCatalog.findByName(name)) }
+            .map { name -> V2Liked(name, V2Kind.ALBUM, findLikedTopic(V2Kind.ALBUM, name)) }
             .sortedBy { it.name.lowercase() }
     }
     val series = remember(AppPreferences.seriesFavoritesState) {
         AppPreferences.getSeriesFavorites(context)
-            .map { name -> V2Liked(name, V2Kind.SERIES, TopicCatalog.findByName(name)) }
+            .map { name -> V2Liked(name, V2Kind.SERIES, findLikedTopic(V2Kind.SERIES, name)) }
             .sortedBy { it.name.lowercase() }
     }
 
@@ -567,22 +572,51 @@ fun CabinetV2Content(navController: NavController) {
 
 /** One liked item — books / series / albums all live by NAME (the identity
  *  the reveal heart toggles store). The topic is resolved tolerantly; null
- *  = the name no longer resolves (legacy / renamed) — the row still renders
- *  with a plain plate and no navigation. */
+ *  = the name has not resolved yet (cold start before the lane pools warm)
+ *  or no longer resolves (legacy / renamed) — the row still renders with a
+ *  plain plate and STILL opens via the kind's canonical lane. */
 private data class V2Liked(
     val name: String,
     val kind: V2Kind,
     val topic: CurioTopic?
 ) {
     fun open(navController: NavController) {
-        val t = topic ?: return
+        // The reveal resolves by category (Room-backed), so the target
+        // ALWAYS opens its real page: use the resolved topic's lane when
+        // known, else the canonical lane for the kind (books → books,
+        // albums → albums, series → series — the lane the heart lives on).
+        val t = topic
+        val slug = t?.categoryId?.routeSlug ?: when (kind) {
+            V2Kind.BOOK -> CategoryId.BOOKS.routeSlug
+            V2Kind.ALBUM -> CategoryId.ALBUMS.routeSlug
+            V2Kind.SERIES -> CategoryId.SERIES.routeSlug
+        }
         navController.navigate(
-            CurioRoutes.revealFor(t.categoryId.routeSlug, t.name)
+            CurioRoutes.revealFor(slug, t?.name ?: name)
         ) { launchSingleTop = true }
     }
 }
 
 private enum class V2Kind { BOOK, ALBUM, SERIES }
+
+/** Kind-aware topic resolution for liked rows. Books/series/albums are
+ *  hearted on their CANONICAL lane (BOOKS / SERIES / ALBUMS — that's where
+ *  the heart lives in the reveal sheets), so that lane is searched FIRST: a
+ *  global [TopicCatalog.findByName] walks lanes in enum order and would hand
+ *  "Animal Farm" (the book) to "Animal Farm (1954)" (the animated film)
+ *  because ANIMATED_MOVIES precedes BOOKS. The global search stays as the
+ *  fallback for legacy / renamed names. */
+private fun findLikedTopic(kind: V2Kind, name: String): CurioTopic? {
+    val lane = when (kind) {
+        V2Kind.BOOK -> CategoryId.BOOKS
+        V2Kind.ALBUM -> CategoryId.ALBUMS
+        V2Kind.SERIES -> CategoryId.SERIES
+    }
+    TopicJsonLoader.cached(lane)?.firstOrNull {
+        it.matchesSavedNameStrict(name) || it.matchesSavedName(name)
+    }?.let { return it }
+    return TopicCatalog.findByName(name)
+}
 
 /** Best-fitting jacket shape for a suggested topic's lane. */
 private fun topicKind(t: CurioTopic): V2Kind = when (t.categoryId) {
@@ -611,10 +645,12 @@ private fun V2EmptySuggestions(
         if (suggestions.isEmpty()) {
             // Pools still loading — keep the frame steady.
             repeat(3) {
-                Surface(
-                    shape = RoundedCornerShape(18.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
-                    modifier = Modifier.fillMaxWidth().height(72.dp)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(72.dp)
+                        .clip(RoundedCornerShape(18.dp))
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f))
                 )
                 Spacer(Modifier.height(10.dp))
             }
@@ -824,7 +860,11 @@ private fun V2LikedRow(item: V2Liked, onClick: () -> Unit, modifier: Modifier = 
                             V2Kind.SERIES -> "Series"
                         } + (cat?.let { " · ${it.displayName}" } ?: ""),
                         style = MaterialTheme.typography.labelSmall,
-                        color = accent.copy(alpha = 0.9f),
+                        // The category INK (not the accent): the row wears a
+                        // category-tinted surface, so the raw accent text
+                        // blended into the same hue. categoryInk resolves the
+                        // readable deep/light twin for the active theme.
+                        color = cat?.categoryInk() ?: MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )

@@ -1,6 +1,58 @@
 # Prompt Log — current request
 
-## Request (2026-09-07, active — Cabinet v2 build in progress)
+## Request (2026-09-08, completed — CI fix + Cabinet v2 bug batch + polaroid everywhere)
+
+**Request:** the CI build failed on the Cabinet v2 polish push (3 compile
+errors in CabinetV2Content.kt); plus: the polaroid doesn't show on all
+card styles ("add the polaroid in others too even if the logic is there");
+Cabinet v2 saved entries sometimes don't open after an app restart (only
+from v2); liking a book (e.g. Animal Farm) shows the ANIMATED SERIES book
+instead; and the category-tinted label text in Cabinet v2 blends into the
+background.
+
+**Root causes found (research):**
+1. **Compile errors** — `CaptureFormat.shortName` is a top-level EXTENSION
+   property in `com.curio.app.data` that CabinetV2Content.kt never
+   imported (lines 174 `sortedBy { it.shortName }` → the "cannot infer R"
+   error + 352 `fmt.shortName`), and the empty-state loading skeleton used
+   `Surface(...)` with neither an onClick nor a content lambda (line 614) —
+   matches no M3 Surface overload. Both fixed (import added; skeleton now
+   a clipped Box).
+2. **Wrong-book bug** — `V2Liked` resolved liked names via
+   `TopicCatalog.findByName(name)`, which scans lanes in enum order:
+   ANIMATED_MOVIES precedes BOOKS, so "Animal Farm" (the book in books.json)
+   strict base-name-matched "Animal Farm (1954)" (animated-movies.json)
+   first → the liked BOOK row opened the animated film. Fix: kind-aware
+   resolution (`findLikedTopic`) searches the CANONICAL lane first (BOOKS /
+   ALBUMS / SERIES — where the reveal hearts actually live) before the
+   global fallback.
+3. **"Doesn't open after restart"** — on a cold start the lane pools are
+   still warming, so `TopicCatalog.findByName` returned null → `V2Liked.open()`
+   silently no-opped (tap did nothing), only on v2 (classic Cabinet has no
+   liked rows). Fix: `open()` never no-ops — it falls back to the kind's
+   canonical lane slug + name, and the reveal's Room-backed per-category
+   resolution opens the real topic.
+4. **Label contrast** — the kind/category label used `accent.copy(alpha=0.9f)`
+   (the category accent) ON a `categorySurface` tinted row → same-hue text
+   on tinted fill. Fix: `cat.categoryInk()` (theme-aware deep/light twin),
+   fallback onSurfaceVariant.
+5. **Polaroid not on all styles** — the non-Collage print was gated on
+   `userPhoto != null` (render) AND the Polaroid TOOL BUTTONS were hidden
+   until a photo was on the card (sheet toolbar + full-screen toolbar) — so
+   on a fresh non-Collage card there was no way to even reach the "Show on
+   card" switch. Fix: the tool is always available and the print renders
+   whenever `polaroidOnCard` is on — the empty frame (with its "Tap to add
+   photo" hint + camera icon) is the designed no-photo state, exactly like
+   Collage; null-guarded the sizing block.
+
+**Files:** `app/.../features/cabinet/CabinetV2Content.kt` (imports, Box
+skeleton, `findLikedTopic`, robust `open()`, categoryInk label),
+`app/.../ui/components/TopicShareCard.kt` (3 polaroid gate removals +
+null guard), fastlane changelog, Prompt.md. Committed + pushed.
+
+### Completed — CI compile fix + polaroid opt-in (2026-09-07)
+
+**Request:** fix the CI build (3 compile errors from the previous push),
 
 ### Completed — CI compile fix + polaroid opt-in (2026-09-07)
 
@@ -238,12 +290,16 @@ premium-minimal design, no useless hint texts, liquid-glass-ready, ask
 before adding researched extras) live in root `AGENTS.md` →
 "Check-after-every-push contract".
 
-### PENDING — 2026-09-07 (in progress)
-**Status:** INSTRUCTIONS UPDATED (this section + root AGENTS.md contract).
-The Cabinet v2 polish batch is implemented locally but **NOT pushed** —
-the user said "not yet"; waiting for the user's go-ahead to commit+push.
+### DONE — 2026-09-08 (completed)
+**Status:** the Cabinet v2 polish batch shipped in the 2026-09-08 push
+(0c16cae3 + 8258679f already on origin; this session's batch — the CI
+compile fix, the liked-item resolution fixes, the category-label contrast
+fix and the polaroid-on-every-style fix — committed and pushed on top).
+The pending-prompt slot below is empty again.
 
-**Rephrased directive from the user:**
+**Previous pending directive (kept as history):**
+
+**Rephrased directive from the user (2026-09-07):**
 - From now on the workflow is prompt-driven: after every push, check the
   LAST section of Prompt.md for new prompts; if none, the task is done; if
   one exists, follow it properly.
@@ -262,13 +318,16 @@ the user said "not yet"; waiting for the user's go-ahead to commit+push.
   the END of Prompt.md; keep the next-prompt slot; never clear it.
 - The pending Cabinet v2 batch (resolved album/series art, empty-state
   suggestions + Shuffle, capture-format filter chips; changelog +
-  request-log updated) stays un-pushed until I approve.
+  request-log updated) stays un-pushed until I approve — SUPERSEDED: the
+  batch was pushed (it's the commit CI failed on) and this session fixed
+  the failures.
 
 **Status log:**
-- [x] Root AGENTS.md: "Check-after-every-push contract" added (09e6cde7, local).
+- [x] Root AGENTS.md: "Check-after-every-push contract" added (09e6cde7).
 - [x] Prompt.md: this end section added (pending prompt + status + slot).
-- [x] Cabinet v2 polish batch committed LOCALLY (0c16cae3) — push WAITING on user go-ahead.
-- [ ] CI green confirmation for c56403ac (full-screen editor fix) — verify on next CI run.
+- [x] Cabinet v2 polish batch pushed (0c16cae3) — CI failed on it; fixed this session.
 - [x] CI fix chain pushed: ed308041 (Dialog Box/Column restructure) + c56403ac (fully-qualified top-level AnimatedVisibility).
+- [x] 2026-09-08 batch (compile fix + liked-item resolution + label contrast + polaroid everywhere) committed and pushed — CI green confirmation pending on the next run.
 
 ### Next prompt slot — (empty, waiting for the user's next prompt)
+the cabinet v2 screen doesnt match the ui style and also same with book browser so fix th eui consistency, and i also beleive what was the original plan for cabinet v2 isnt properly implemented yet, i thought e will be doing folders as well Turn Cabinet into **collection cards** (3×2 grid of entry covers styled like the share cards) + an "Everything" collection. - Create from a moodboard (it already has a board metaphor); naming, cover pick, reorder. - "Pin discovery directly into collection" from the reveal page (hold → pill → "File to…"). - Impact: turns a list into a keepsake surface; ties into share-card art. and that glass style ig too and also in home screen recetns when i explore something it marks it as explored and whn i open it from recents it either opens the saved entry or the express your save your entry but i want to keep the topic open so apply that too by defaukt opens the topic and then tap an hold action for more 

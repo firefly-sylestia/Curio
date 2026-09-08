@@ -610,6 +610,25 @@ app/src/main/java/com/curio/app/
   `drop(1)`) to new `KEY_PICKER_PAGE0_SCROLL` / `KEY_PICKER_PAGE1_SCROLL`
   ("index:offset") behind `AppPreferences.PickerScrollPos`
   get/set helpers — survives closing the picker AND app restarts.
+- **v3xx15 — Cabinet v2 liked-row fixes + polaroid on every style, no photo
+  required.** (1) **Kind-aware liked resolution** (`findLikedTopic` in
+  CabinetV2Content.kt): liked books/series/albums search their CANONICAL lane
+  first (BOOKS/ALBUMS/SERIES — where the reveal hearts live) before the
+  global `TopicCatalog.findByName`, which walks lanes in enum order and
+  strict base-name-matched "Animal Farm" (the book) to "Animal Farm (1954)"
+  (the animated film) because ANIMATED_MOVIES precedes BOOKS. (2) **Rows
+  always open:** `V2Liked.open()` no longer silently no-ops when the topic
+  hasn't resolved yet (cold start before the lane pools warm) — it falls
+  back to the kind's canonical lane slug + name, and the reveal's
+  Room-backed per-category resolution finds the real topic. (3) **Label
+  contrast:** the liked-row kind/category label now uses `categoryInk()`
+  (theme-aware deep/light twin) instead of the raw accent, which blended
+  into the `categorySurface`-tinted row. (4) **Polaroid on all styles, no
+  photo needed:** the non-Collage print gate dropped `userPhoto != null`
+  (render + the sheet/full-screen Polaroid TOOL buttons are now always
+  available) — the print shows whenever `move.polaroidOnCard` is on, and
+  without a photo it renders the designed empty frame (camera hint, tap to
+  add photo) exactly like Collage; the sizing block null-guards `userPhoto`.
 - **v355 — book/series notes sheets: no close button, no hint copy, rating
   below the author, tick-free read state.** User: "never add cross close
   button in a bottom sheet… remove it from the book synopsis sheet… remove
