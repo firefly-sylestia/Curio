@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
@@ -34,6 +35,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -87,6 +90,7 @@ import com.curio.app.features.reveal.AlbumArtFetch
 import com.curio.app.features.reveal.SeriesPosterFetch
 import com.curio.app.features.settings.BookCoverFetch
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioEmptyState
@@ -167,8 +171,36 @@ fun CabinetV2Content(navController: NavController) {
     }
     val collections = AppPreferences.collectionsState
 
-    // ── Level: "" = collections home · "everything" = the classic v2 page
-    // · anything else = a collection id (its detail).
+    // ── Seed the four empty starter shelves (Currently Reading / Want to
+    // Read / Completed / Personal) once — they become ordinary, editable
+    // collections (ids prefixed `shelf:`); the virtual shelves (Favorites /
+    // Saved entries / Notes) are computed below and never persisted.
+    LaunchedEffect(Unit) { AppPreferences.seedCabinetShelves(context) }
+
+    // ── Shelf plumbing.
+    val seededById = remember(collections) {
+        collections.filter { it.id in seededShelfIds }.associateBy { it.id }
+    }
+    val userCollections = remember(collections) {
+        collections.filterNot { it.id in seededShelfIds }
+    }
+    val allLikes = remember(books, albums, series) { books + albums + series }
+    val noteEntries = remember(entries) { entries.filter { it.format in noteFormats } }
+    val shelfCounts = remember(allLikes.size, entries.size, noteEntries.size, seededById) {
+        mapOf(
+            V2ShelfId.FAVORITES to allLikes.size,
+            V2ShelfId.CURRENTLY_READING to (seededById["shelf:currently-reading"]?.members?.size ?: 0),
+            V2ShelfId.WANT_TO_READ to (seededById["shelf:want-to-read"]?.members?.size ?: 0),
+            V2ShelfId.SAVED to entries.size,
+            V2ShelfId.COMPLETED to (seededById["shelf:completed"]?.members?.size ?: 0),
+            V2ShelfId.NOTES to noteEntries.size,
+            V2ShelfId.PERSONAL to (seededById["shelf:personal"]?.members?.size ?: 0)
+        )
+    }
+
+    // ── Level: "" = collections home · "everything" = the library page
+    // · "shelf:*" = a virtual shelf detail · anything else = a collection
+    // id (its detail).
     var openLevel by rememberSaveable { mutableStateOf("") }
     val openCollection = collections.firstOrNull { it.id == openLevel }
 
@@ -185,7 +217,13 @@ fun CabinetV2Content(navController: NavController) {
         return q.isEmpty() || text.contains(q, ignoreCase = true)
     }
 
-    // ── Everything-level filters (existing v2 behavior).
+    // ── Everything-level state: type filter (the JSX filter rail), sort,
+    // and the grid/list view toggle.
+    var typeFilter by rememberSaveable { mutableStateOf<String?>(null) }
+    var viewMode by rememberSaveable { mutableStateOf("grid") }
+    var sortAtoZ by rememberSaveable { mutableStateOf(false) }
+
+    // ── Everything-level filters: search + type + sort.
     val filteredEntries = remember(entries, searchQuery) {
         val q = searchQuery.trim()
         if (q.isEmpty()) entries
@@ -194,58 +232,53 @@ fun CabinetV2Content(navController: NavController) {
                 it.tags.any { tag -> matchesQ(tag) }
         }
     }
-    var formatFilter by rememberSaveable { mutableStateOf<String?>(null) }
-    val availableFormats = remember(entries) {
-        entries.map { it.format }.distinct().sortedBy { it.shortName }
+    val shownEntries = remember(filteredEntries, typeFilter, sortAtoZ) {
+        val base = filteredEntries.filter { entryInType(it, typeFilter) }
+        if (sortAtoZ) base.sortedBy { it.topic.name.lowercase() }
+        else base.sortedByDescending { it.capturedAtMillis }
     }
-    val shownEntries = remember(filteredEntries, formatFilter) {
-        if (formatFilter == null) filteredEntries
-        else filteredEntries.filter { it.format.name == formatFilter }
-    }
-    fun filteredLiked(all: List<V2Liked>) = if (searchQuery.isBlank()) all
-    else all.filter {
-        matchesQ(it.name) || (it.topic?.byline?.let { b -> matchesQ(b) } == true)
-    }
-    val shownBooks = filteredLiked(books)
-    val shownAlbums = filteredLiked(albums)
-    val shownSeries = filteredLiked(series)
-
-    // ── Home-level filter: collection names.
-    val shownCollections = remember(collections, searchQuery) {
-        if (searchQuery.isBlank()) collections
-        else collections.filter { matchesQ(it.name) }
-    }
-
-    // ── Everything card source (entries + liked).
-    val everythingItems = remember(entries, books, albums, series) {
-        buildList {
-            addAll(entries.map { V2Liked(it.topic.name, topicKind(it.topic), it.topic) })
-            addAll(books)
-            addAll(albums)
-            addAll(series)
+    fun filteredLiked(all: List<V2Liked>): List<V2Liked> =
+        if (searchQuery.isBlank()) all
+        else all.filter {
+            matchesQ(it.name) || (it.topic?.byline?.let { b -> matchesQ(b) } == true)
         }
+    val shownBooks = remember(books, searchQuery, typeFilter) {
+        filteredLiked(books).filter { likedShownForType(typeFilter, V2Kind.BOOK) }
+    }
+    val shownAlbums = remember(albums, searchQuery, typeFilter) {
+        filteredLiked(albums).filter { likedShownForType(typeFilter, V2Kind.ALBUM) }
+    }
+    val shownSeries = remember(series, searchQuery, typeFilter) {
+        filteredLiked(series).filter { likedShownForType(typeFilter, V2Kind.SERIES) }
+    }
+    val recents = remember(entries) {
+        entries.sortedByDescending { it.capturedAtMillis }.take(6)
     }
 
-    // ── Collapsible sections (Everything) — rememberSaveable comma list.
-    var collapsedNames by rememberSaveable { mutableStateOf("") }
-    val collapsedSet: Set<String> = remember(collapsedNames) {
-        collapsedNames.splitToSequence(',').filter { it.isNotBlank() }.toSet()
+    // ── Home-level filter: shelf + collection names.
+    val visibleShelves = remember(builtInShelves, shelfCounts, searchQuery) {
+        builtInShelves.map { it to shelfCounts[it.id]!! }.filter { matchesQ(it.first.title) }
     }
-    fun toggleCollapsed(key: String) {
-        collapsedNames = if (key in collapsedSet) {
-            (collapsedSet - key).joinToString(",")
-        } else {
-            (collapsedSet + key).joinToString(",")
-        }
+    val shownUserCollections = remember(userCollections, searchQuery) {
+        if (searchQuery.isBlank()) userCollections
+        else userCollections.filter { matchesQ(it.name) }
     }
+
     val searching = searchActive && searchQuery.isNotBlank()
-    fun expanded(key: String) = !searching && key !in collapsedSet
 
     // ── Multi-select batch (Everything entries only).
     var selectionMode by rememberSaveable { mutableStateOf(false) }
     var selectedEntryIds by rememberSaveable { mutableStateOf<Set<String>>(emptySet()) }
     var showBulkDeleteConfirm by rememberSaveable { mutableStateOf(false) }
-    val visibleIds = remember(shownEntries) { shownEntries.map { it.id }.toSet() }
+    val visibleIds = remember(openLevel, shownEntries, entries, noteEntries) {
+        when (openLevel) {
+            SHELF_LEVEL_SAVED -> entries.map { it.id }.toSet()
+            SHELF_LEVEL_NOTES -> noteEntries.map { it.id }.toSet()
+            "everything" -> shownEntries.map { it.id }.toSet()
+            "" -> entries.map { it.id }.toSet() // home Saved-entries section
+            else -> emptySet()
+        }
+    }
     LaunchedEffect(selectedEntryIds, visibleIds) {
         val kept = selectedEntryIds.intersect(visibleIds)
         if (kept != selectedEntryIds) selectedEntryIds = kept
@@ -254,9 +287,11 @@ fun CabinetV2Content(navController: NavController) {
     val allVisibleSelected = visibleIds.isNotEmpty() && visibleIds.all { it in selectedEntryIds }
 
     // ── RAW content — decides between the genuinely-empty Cabinet
-    // (suggestions) and a filtered-to-nothing page.
+    // (suggestions) and a filtered-to-nothing page. The seeded starter
+    // shelves don't count: a fresh Cabinet is still "empty" until the user
+    // saves or likes something.
     val rawContent = entries.isNotEmpty() || books.isNotEmpty() ||
-        albums.isNotEmpty() || series.isNotEmpty() || collections.isNotEmpty()
+        albums.isNotEmpty() || series.isNotEmpty() || userCollections.isNotEmpty()
 
     // ── Empty-Cabinet suggestions (existing v2 behavior).
     var suggestions by remember { mutableStateOf<List<CurioTopic>>(emptyList()) }
@@ -287,13 +322,19 @@ fun CabinetV2Content(navController: NavController) {
     val heroTitle = when {
         selectionMode -> "${selectedEntryIds.size} selected"
         openCollection != null -> openCollection.name
+        openLevel == SHELF_LEVEL_FAVORITES -> "Favorites"
+        openLevel == SHELF_LEVEL_SAVED -> "Saved entries"
+        openLevel == SHELF_LEVEL_NOTES -> "Notes"
         openLevel == "everything" -> "Everything"
         else -> "The Cabinet"
     }
     val heroSubtitle = when {
         selectionMode -> "Long-press cards to select"
         openCollection != null -> "${openCollection.members.size} item${if (openCollection.members.size == 1) "" else "s"} · tap a member to open it"
-        openLevel == "everything" -> "Saved captures · liked books, series & albums"
+        openLevel == SHELF_LEVEL_FAVORITES -> "${allLikes.size} liked books, series & albums"
+        openLevel == SHELF_LEVEL_SAVED -> "${entries.size} saved captures"
+        openLevel == SHELF_LEVEL_NOTES -> "${noteEntries.size} notes & voice captures"
+        openLevel == "everything" -> "Books · albums · saved captures"
         else -> "Collections · Everything · your keepsakes"
     }
     val compactBannerHeight = if (wide) CabinetHeroBannerHeightCompact else CabinetHeroBannerHeight
@@ -388,17 +429,84 @@ fun CabinetV2Content(navController: NavController) {
                     onAdd = { addTarget = openCollection.id },
                     onKebab = { pillTarget = PillTarget.Collection(openCollection.id) }
                 )
-                openLevel == "everything" -> v2EverythingItems(
+                openLevel == SHELF_LEVEL_FAVORITES -> v2VirtualShelfItems(
+                    title = "Favorites",
+                    likes = allLikes,
+                    entries = emptyList(),
+                    searchQuery = searchQuery,
+                    selectedEntryIds = selectedEntryIds,
+                    selectionMode = selectionMode,
+                    onOpenLiked = { item -> item.open(navController) },
+                    onEntryLongClick = { id ->
+                        selectionMode = true
+                        selectedEntryIds = selectedEntryIds + id
+                    },
+                    onEntryClick = { id ->
+                        if (selectionMode) {
+                            selectedEntryIds = if (id in selectedEntryIds) selectedEntryIds - id
+                            else selectedEntryIds + id
+                        } else {
+                            haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
+                            navController.navigate(CurioRoutes.entryDetail(id)) { launchSingleTop = true }
+                        }
+                    }
+                )
+                openLevel == SHELF_LEVEL_SAVED -> v2VirtualShelfItems(
+                    title = "Saved entries",
+                    likes = emptyList(),
                     entries = entries,
+                    searchQuery = searchQuery,
+                    selectedEntryIds = selectedEntryIds,
+                    selectionMode = selectionMode,
+                    onOpenLiked = { item -> item.open(navController) },
+                    onEntryLongClick = { id ->
+                        selectionMode = true
+                        selectedEntryIds = selectedEntryIds + id
+                    },
+                    onEntryClick = { id ->
+                        if (selectionMode) {
+                            selectedEntryIds = if (id in selectedEntryIds) selectedEntryIds - id
+                            else selectedEntryIds + id
+                        } else {
+                            haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
+                            navController.navigate(CurioRoutes.entryDetail(id)) { launchSingleTop = true }
+                        }
+                    }
+                )
+                openLevel == SHELF_LEVEL_NOTES -> v2VirtualShelfItems(
+                    title = "Notes",
+                    likes = emptyList(),
+                    entries = noteEntries,
+                    searchQuery = searchQuery,
+                    selectedEntryIds = selectedEntryIds,
+                    selectionMode = selectionMode,
+                    onOpenLiked = { item -> item.open(navController) },
+                    onEntryLongClick = { id ->
+                        selectionMode = true
+                        selectedEntryIds = selectedEntryIds + id
+                    },
+                    onEntryClick = { id ->
+                        if (selectionMode) {
+                            selectedEntryIds = if (id in selectedEntryIds) selectedEntryIds - id
+                            else selectedEntryIds + id
+                        } else {
+                            haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
+                            navController.navigate(CurioRoutes.entryDetail(id)) { launchSingleTop = true }
+                        }
+                    }
+                )
+                openLevel == "everything" -> v2EverythingItems(
                     shownEntries = shownEntries,
-                    availableFormats = availableFormats,
-                    formatFilter = formatFilter,
-                    onFormatFilter = { formatFilter = it },
-                    books = shownBooks,
-                    albums = shownAlbums,
-                    series = shownSeries,
-                    expanded = ::expanded,
-                    onToggleCollapsed = ::toggleCollapsed,
+                    shownBooks = shownBooks,
+                    shownAlbums = shownAlbums,
+                    shownSeries = shownSeries,
+                    recents = recents,
+                    typeFilter = typeFilter,
+                    onTypeFilter = { typeFilter = it },
+                    viewMode = viewMode,
+                    onViewMode = { viewMode = it },
+                    sortAtoZ = sortAtoZ,
+                    onSort = { sortAtoZ = it },
                     selectionMode = selectionMode,
                     selectedEntryIds = selectedEntryIds,
                     onEntryLongClick = { id ->
@@ -415,14 +523,35 @@ fun CabinetV2Content(navController: NavController) {
                         }
                     },
                     onOpenLiked = { item -> item.open(navController) },
-                    onClearFilters = { searchQuery = ""; searchActive = false; formatFilter = null },
+                    onAddNew = { navController.navigateToTab(CurioRoutes.SPIN) },
+                    onClearFilters = { searchQuery = ""; searchActive = false; typeFilter = null },
                     pageAccent = pageAccent
                 )
                 else -> v2HomeItems(
-                    everythingItems = everythingItems,
-                    collections = shownCollections,
+                    everythingLikes = allLikes,
+                    everythingCount = entries.size + allLikes.size,
+                    savedEntries = entries.sortedByDescending { it.capturedAtMillis },
+                    visibleShelves = visibleShelves,
+                    userCollections = shownUserCollections,
                     searching = searching,
+                    selectionMode = selectionMode,
+                    selectedEntryIds = selectedEntryIds,
                     onOpenEverything = { openLevel = "everything"; searchActive = false; searchQuery = "" },
+                    onOpenShelf = { id ->
+                        openLevel = when (id) {
+                            V2ShelfId.FAVORITES -> SHELF_LEVEL_FAVORITES
+                            V2ShelfId.SAVED -> SHELF_LEVEL_SAVED
+                            V2ShelfId.NOTES -> SHELF_LEVEL_NOTES
+                            else -> {
+                                val seeded = builtInShelves.firstOrNull { it.id == id }?.seededCollectionId
+                                seeded ?: ""
+                            }
+                        }
+                        if (openLevel.isNotEmpty()) {
+                            searchActive = false
+                            searchQuery = ""
+                        }
+                    },
                     onOpenCollection = { id -> openLevel = id; searchActive = false; searchQuery = "" },
                     onCollectionLongPress = { id -> pillTarget = PillTarget.Collection(id) },
                     onNewCollection = { showCreateSheet = true },
@@ -434,7 +563,19 @@ fun CabinetV2Content(navController: NavController) {
                         ) { launchSingleTop = true }
                     },
                     showSuggestions = !rawContent,
-                    entriesById = entriesById,
+                    onEntryLongClick = { id ->
+                        selectionMode = true
+                        selectedEntryIds = selectedEntryIds + id
+                    },
+                    onEntryClick = { id ->
+                        if (selectionMode) {
+                            selectedEntryIds = if (id in selectedEntryIds) selectedEntryIds - id
+                            else selectedEntryIds + id
+                        } else {
+                            haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
+                            navController.navigate(CurioRoutes.entryDetail(id)) { launchSingleTop = true }
+                        }
+                    },
                     onClearSearch = { searchQuery = ""; searchActive = false }
                 )
             }
@@ -632,12 +773,19 @@ fun CabinetV2Content(navController: NavController) {
 // Grid emitters (LazyGridScope extensions — one per level)
 // ────────────────────────────────────────────────────────────────────────
 
-/** Collections HOME — Everything card + one card per collection + New tile. */
+/** Collections HOME — the JSX folders layout: Everything card → Saved
+ *  entries → the shelf grid (built-ins + user collections) → New tile. */
 private fun LazyGridScope.v2HomeItems(
-    everythingItems: List<V2Liked>,
-    collections: List<CurioCollection>,
+    everythingLikes: List<V2Liked>,
+    everythingCount: Int,
+    savedEntries: List<CurioEntry>,
+    visibleShelves: List<Pair<V2Shelf, Int>>,
+    userCollections: List<CurioCollection>,
     searching: Boolean,
+    selectionMode: Boolean,
+    selectedEntryIds: Set<String>,
     onOpenEverything: () -> Unit,
+    onOpenShelf: (V2ShelfId) -> Unit,
     onOpenCollection: (String) -> Unit,
     onCollectionLongPress: (String) -> Unit,
     onNewCollection: () -> Unit,
@@ -645,41 +793,11 @@ private fun LazyGridScope.v2HomeItems(
     onShuffle: () -> Unit,
     onOpenSuggestion: (CurioTopic) -> Unit,
     showSuggestions: Boolean,
-    entriesById: Map<String, CurioEntry>,
+    onEntryLongClick: (String) -> Unit,
+    onEntryClick: (String) -> Unit,
     onClearSearch: () -> Unit
 ) {
-    if (showSuggestions && !searching) {
-        // A genuinely empty Cabinet: three suggested discoveries + a way to
-        // start a collection.
-        item(key = "empty", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
-            V2EmptySuggestions(
-                suggestions = suggestions,
-                onShuffle = onShuffle,
-                onOpen = onOpenSuggestion
-            )
-        }
-        item(key = "new-collection", span = { GridItemSpan(maxLineSpan) }, contentType = "action") {
-            V2NewCollectionTile(onClick = onNewCollection)
-        }
-        return
-    }
-
-    item(key = "everything-card", span = { GridItemSpan(maxLineSpan) }, contentType = "collection") {
-        V2CollectionCard(
-            title = "Everything",
-            count = everythingItems.size,
-            items = everythingItems,
-            onClick = onOpenEverything,
-            onLongClick = null
-        )
-    }
-
-    if (collections.isNotEmpty()) {
-        item(key = "h-collections", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
-            V2PlainHeader(title = "Collections", count = collections.size)
-        }
-    }
-    if (searching && collections.isEmpty()) {
+    if (searching && visibleShelves.isEmpty() && userCollections.isEmpty()) {
         item(key = "no-match", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
             CurioEmptyState(
                 glyph = CurioIcons.SearchOff,
@@ -692,16 +810,79 @@ private fun LazyGridScope.v2HomeItems(
         }
         return
     }
-    collections.forEach { c ->
-        item(key = "c|${c.id}", span = { GridItemSpan(maxLineSpan) }, contentType = "collection") {
-            val members = c.members.mapNotNull { memberLiked(it, entriesById) }
-            V2CollectionCard(
-                title = c.name,
-                count = c.members.size,
-                items = members,
-                onClick = { onOpenCollection(c.id) },
-                onLongClick = { onCollectionLongPress(c.id) }
+
+    if (!searching) {
+        // A genuinely empty Cabinet: three suggested discoveries first, then
+        // the design still shows the shelves + Everything card below.
+        if (showSuggestions) {
+            item(key = "suggestions", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
+                V2EmptySuggestions(
+                    suggestions = suggestions,
+                    onShuffle = onShuffle,
+                    onOpen = onOpenSuggestion
+                )
+            }
+        }
+        item(key = "everything-card", span = { GridItemSpan(maxLineSpan) }, contentType = "collection") {
+            V2EverythingCard(
+                likes = everythingLikes,
+                count = everythingCount,
+                onOpen = onOpenEverything
             )
+        }
+        if (savedEntries.isNotEmpty()) {
+            item(key = "h-saved", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
+                V2PageSectionHeader(
+                    title = "Saved entries",
+                    subtitle = "Your latest additions",
+                    trailing = "${savedEntries.size}"
+                )
+            }
+            v2EntryItems(
+                entries = savedEntries,
+                fullSpan = false,
+                selectionMode = selectionMode,
+                selectedEntryIds = selectedEntryIds,
+                onEntryLongClick = onEntryLongClick,
+                onEntryClick = onEntryClick
+            )
+        }
+    }
+
+    if (visibleShelves.isNotEmpty() || userCollections.isNotEmpty()) {
+        item(key = "h-collections", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
+            V2PageSectionHeader(
+                title = "Collections",
+                subtitle = "Your personal shelves",
+                trailing = if (searching) null else "${visibleShelves.size + userCollections.size}"
+            )
+        }
+        visibleShelves.forEach { (shelf, count) ->
+            val seededId = shelf.seededCollectionId
+            item(key = "s|${shelf.id}", contentType = "collection") {
+                V2ShelfCard(
+                    title = shelf.title,
+                    icon = shelf.icon,
+                    tone = shelf.tone,
+                    art = shelf.art,
+                    count = count,
+                    onClick = { onOpenShelf(shelf.id) },
+                    onLongPress = if (seededId != null) ({ onCollectionLongPress(seededId) }) else null
+                )
+            }
+        }
+        userCollections.forEachIndexed { i, c ->
+            item(key = "c|${c.id}", contentType = "collection") {
+                V2ShelfCard(
+                    title = c.name,
+                    icon = CurioIcons.AutoAwesome,
+                    tone = userShelfTones[i % userShelfTones.size],
+                    art = userShelfArts[i % userShelfArts.size],
+                    count = c.members.size,
+                    onClick = { onOpenCollection(c.id) },
+                    onLongPress = { onCollectionLongPress(c.id) }
+                )
+            }
         }
     }
     if (!searching) {
@@ -802,27 +983,34 @@ private fun LazyGridScope.v2DetailItems(
     }
 }
 
-/** EVERYTHING — the classic v2 page: format chips + saved + liked rows. */
+/** EVERYTHING — the JSX library page: toolbar (Filter / Sort / view
+ *  toggle), type filter rail, Recent rail, All Items grid/list and the
+ *  "Add something new" action. Saved captures keep the classic
+ *  [CurioEntryCard] style; liked items render jacket-art tiles. */
 private fun LazyGridScope.v2EverythingItems(
-    entries: List<CurioEntry>,
     shownEntries: List<CurioEntry>,
-    availableFormats: List<CaptureFormat>,
-    formatFilter: String?,
-    onFormatFilter: (String?) -> Unit,
-    books: List<V2Liked>,
-    albums: List<V2Liked>,
-    series: List<V2Liked>,
-    expanded: (String) -> Boolean,
-    onToggleCollapsed: (String) -> Unit,
+    shownBooks: List<V2Liked>,
+    shownAlbums: List<V2Liked>,
+    shownSeries: List<V2Liked>,
+    recents: List<CurioEntry>,
+    typeFilter: String?,
+    onTypeFilter: (String?) -> Unit,
+    viewMode: String,
+    onViewMode: (String) -> Unit,
+    sortAtoZ: Boolean,
+    onSort: (Boolean) -> Unit,
     selectionMode: Boolean,
     selectedEntryIds: Set<String>,
     onEntryLongClick: (String) -> Unit,
     onEntryClick: (String) -> Unit,
     onOpenLiked: (V2Liked) -> Unit,
+    onAddNew: () -> Unit,
     onClearFilters: () -> Unit,
     pageAccent: Color
 ) {
-    if (entries.isEmpty() && books.isEmpty() && albums.isEmpty() && series.isEmpty()) {
+    val totalShown = shownEntries.size + shownBooks.size + shownAlbums.size + shownSeries.size
+    val anyContent = totalShown > 0 || recents.isNotEmpty()
+    if (!anyContent) {
         item(key = "e-empty", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
             CurioEmptyState(
                 glyph = CurioIcons.Inventory2,
@@ -831,15 +1019,18 @@ private fun LazyGridScope.v2EverythingItems(
                 tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f)
             )
         }
+        item(key = "add-new", span = { GridItemSpan(maxLineSpan) }, contentType = "action") {
+            V2AddSomethingButton(onClick = onAddNew)
+        }
         return
     }
-    val nothingVisible = shownEntries.isEmpty() && books.isEmpty() && albums.isEmpty() && series.isEmpty()
-    if (nothingVisible) {
+    if (totalShown == 0 && recents.isNotEmpty()) {
+        // Filtered to nothing but the Cabinet still holds items.
         item(key = "e-filtered", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
             CurioEmptyState(
                 glyph = CurioIcons.SearchOff,
                 headline = "Nothing matches these filters",
-                subtext = "Try clearing the search or the format filter.",
+                subtext = "Try clearing the search or the type filter.",
                 tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
                 ctaLabel = "Clear filters",
                 onCtaClick = onClearFilters
@@ -848,110 +1039,67 @@ private fun LazyGridScope.v2EverythingItems(
         return
     }
 
-    if (shownEntries.isNotEmpty()) {
-        if (availableFormats.size > 1 || formatFilter != null) {
-            item(key = "format-chips", span = { GridItemSpan(maxLineSpan) }, contentType = "chips") {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    availableFormats.forEach { fmt ->
-                        val selected = formatFilter == fmt.name
-                        Surface(
-                            onClick = { onFormatFilter(if (selected) null else fmt.name) },
-                            shape = RoundedCornerShape(50),
-                            color = if (selected) pageAccent
-                                else MaterialTheme.colorScheme.surfaceContainerHigh,
-                            contentColor = if (selected) MaterialTheme.colorScheme.onPrimary
-                                else MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.height(30.dp)
-                        ) {
-                            Text(
-                                text = fmt.shortName,
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                                maxLines = 1,
-                                modifier = Modifier.padding(horizontal = 12.dp)
-                            )
-                        }
-                    }
+    item(key = "toolbar", span = { GridItemSpan(maxLineSpan) }, contentType = "toolbar") {
+        V2EverythingToolbar(
+            typeFilter = typeFilter,
+            onTypeFilter = onTypeFilter,
+            viewMode = viewMode,
+            onViewMode = onViewMode,
+            sortAtoZ = sortAtoZ,
+            onSort = onSort
+        )
+    }
+    item(key = "filter-rail", span = { GridItemSpan(maxLineSpan) }, contentType = "chips") {
+        V2FilterRail(current = typeFilter, onSelect = onTypeFilter, accent = pageAccent)
+    }
+
+    val showRecent = recents.isNotEmpty() && typeFilter == null && !selectionMode
+    if (showRecent) {
+        item(key = "h-recent", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
+            V2PageSectionHeader(title = "Recent", subtitle = "Your latest additions")
+        }
+        item(key = "recent-rail", span = { GridItemSpan(maxLineSpan) }, contentType = "rail") {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                contentPadding = PaddingValues(vertical = 2.dp)
+            ) {
+                items(recents, key = { it.id }) { e ->
+                    CurioEntryCard(
+                        entry = e,
+                        onClick = { onEntryClick(e.id) },
+                        modifier = Modifier.width(150.dp)
+                    )
                 }
-            }
-        }
-        item(key = "h-saved", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
-            V2SectionHeader(
-                title = "Saved",
-                count = shownEntries.size,
-                glyph = CurioIcons.Inventory2,
-                expanded = expanded("saved"),
-                accent = pageAccent,
-                onToggle = { onToggleCollapsed("saved") }
-            )
-        }
-        if (expanded("saved")) {
-            items(shownEntries, key = { "e|${it.id}" }) { entry ->
-                CurioEntryCard(
-                    entry = entry,
-                    modifier = Modifier,
-                    selected = entry.id in selectedEntryIds,
-                    onLongClick = { onEntryLongClick(entry.id) },
-                    onClick = { onEntryClick(entry.id) }
-                )
             }
         }
     }
 
-    if (books.isNotEmpty()) {
-        item(key = "h-books", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
-            V2SectionHeader(
-                title = "Liked books",
-                count = books.size,
-                glyph = CurioIcons.MenuBook,
-                expanded = expanded("books"),
-                accent = pageAccent,
-                onToggle = { onToggleCollapsed("books") }
+    if (totalShown > 0) {
+        item(key = "h-all", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
+            V2PageSectionHeader(
+                title = "All Items",
+                subtitle = "A mix of everything you keep",
+                trailing = "$totalShown shown"
             )
         }
-        if (expanded("books")) {
-            items(books, key = { "b|${it.name}" }) { item ->
-                V2LikedRow(item = item, onClick = { onOpenLiked(item) })
-            }
-        }
+        val listMode = viewMode == "list"
+        v2EntryItems(
+            entries = shownEntries,
+            fullSpan = listMode,
+            selectionMode = selectionMode,
+            selectedEntryIds = selectedEntryIds,
+            onEntryLongClick = onEntryLongClick,
+            onEntryClick = onEntryClick
+        )
+        v2LikedItems(
+            likes = shownBooks + shownAlbums + shownSeries,
+            fullSpan = listMode,
+            onOpenLiked = onOpenLiked
+        )
     }
-    if (series.isNotEmpty()) {
-        item(key = "h-series", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
-            V2SectionHeader(
-                title = "Liked series",
-                count = series.size,
-                glyph = CurioIcons.Movies,
-                expanded = expanded("series"),
-                accent = pageAccent,
-                onToggle = { onToggleCollapsed("series") }
-            )
-        }
-        if (expanded("series")) {
-            items(series, key = { "s|${it.name}" }) { item ->
-                V2LikedRow(item = item, onClick = { onOpenLiked(item) })
-            }
-        }
-    }
-    if (albums.isNotEmpty()) {
-        item(key = "h-albums", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
-            V2SectionHeader(
-                title = "Liked albums",
-                count = albums.size,
-                glyph = CurioIcons.Album,
-                expanded = expanded("albums"),
-                accent = pageAccent,
-                onToggle = { onToggleCollapsed("albums") }
-            )
-        }
-        if (expanded("albums")) {
-            items(albums, key = { "a|${it.name}" }) { item ->
-                V2LikedRow(item = item, onClick = { onOpenLiked(item) })
-            }
-        }
+
+    item(key = "add-new", span = { GridItemSpan(maxLineSpan) }, contentType = "action") {
+        V2AddSomethingButton(onClick = onAddNew)
     }
 }
 
@@ -1041,97 +1189,6 @@ private fun V2HeroTrailing(
 // Collection cards
 // ────────────────────────────────────────────────────────────────────────
 
-/** A collection card — 3×2 cover collage (share-card style art plates) +
- *  name + count. The cover collage's FIRST member is the collection's cover
- *  (reordering members changes it). */
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun V2CollectionCard(
-    title: String,
-    count: Int,
-    items: List<V2Liked>,
-    onClick: () -> Unit,
-    onLongClick: (() -> Unit)?
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh
-    ) {
-        Column {
-            V2CoverCollage(
-                items = items,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(128.dp)
-                    .padding(start = 10.dp, end = 10.dp, top = 10.dp)
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 14.dp, end = 12.dp, top = 10.dp, bottom = 12.dp)
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-                Text(
-                    text = "$count",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(Modifier.width(6.dp))
-                CurioIcon(
-                    name = CurioIcons.ChevronRight,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                    size = 18.dp
-                )
-            }
-        }
-    }
-}
-
-/** The 3×2 cover collage — six slots filled from [items] (share-card art
- *  plates via [V2JacketArt]), the rest quiet placeholders. */
-@Composable
-private fun V2CoverCollage(items: List<V2Liked>, modifier: Modifier = Modifier) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        repeat(2) { row ->
-            Row(
-                modifier = Modifier.fillMaxWidth().weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                repeat(3) { col ->
-                    val idx = row * 3 + col
-                    val item = items.getOrNull(idx)
-                    Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
-                        if (item != null) {
-                            val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
-                            val accent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
-                            V2JacketArt(item = item, accent = accent, modifier = Modifier.fillMaxSize())
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.55f))
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 /** The "+ New collection" tile at the foot of the collections home. */
 @Composable
 private fun V2NewCollectionTile(onClick: () -> Unit) {
@@ -1161,29 +1218,637 @@ private fun V2NewCollectionTile(onClick: () -> Unit) {
     }
 }
 
-/** A quiet section label (the home's "Collections" row). */
+// ────────────────────────────────────────────────────────────────────────
+// JSX-style home + library components (the Cabinet folders look)
+// ────────────────────────────────────────────────────────────────────────
+
+/** The "type" filter rail options — All + the app's real item kinds
+ *  (liked books/albums/series + capture formats) mapped onto the JSX's
+ *  visual rail. */
+private val TYPE_FILTERS = listOf(
+    Triple<String?, String, String>(null, "All", CurioIcons.Inventory2),
+    Triple<String?, String, String>("books", "Books", CurioIcons.MenuBook),
+    Triple<String?, String, String>("albums", "Albums", CurioIcons.Album),
+    Triple<String?, String, String>("series", "Series", CurioIcons.Movies),
+    Triple<String?, String, String>("notes", "Notes", CurioIcons.Note),
+    Triple<String?, String, String>("moodboard", "Moodboards", CurioIcons.Apps),
+    Triple<String?, String, String>("review", "Reviews", CurioIcons.FormatQuote)
+)
+
+/** Capture formats that read as a personal "note" (voice + journal + field
+ *  + wildcard) — the Notes shelf + the Notes rail chip. */
+private val noteFormats = setOf(
+    CaptureFormat.SoundBite,
+    CaptureFormat.Marginalia,
+    CaptureFormat.FieldNotes,
+    CaptureFormat.OpenNotebook
+)
+
+/** Tone + art palette for USER collections (built-ins carry their own). */
+private val userShelfTones = listOf(
+    V2ShelfTone(light = 0xFFE6D7B6, dark = 0xFF4E4534),  // warm sand
+    V2ShelfTone(light = 0xFFD6CAE9, dark = 0xFF4A3E63),  // soft lavender
+    V2ShelfTone(light = 0xFFC9DDD2, dark = 0xFF3A4F43),  // sage
+    V2ShelfTone(light = 0xFFEAC9CF, dark = 0xFF613F4B),  // blush pink
+    V2ShelfTone(light = 0xFFC9DDE9, dark = 0xFF3A5160)   // powder blue
+)
+private val userShelfArts = listOf(
+    V2ShelfArtType.STAR,
+    V2ShelfArtType.NOTES,
+    V2ShelfArtType.MOUNTAIN,
+    V2ShelfArtType.PHOTOS,
+    V2ShelfArtType.BOOKS
+)
+
+/** Does an entry belong to the given rail type? */
+private fun entryInType(e: CurioEntry, t: String?): Boolean = when (t) {
+    null -> true
+    "notes" -> e.format in noteFormats
+    "moodboard" -> e.format == CaptureFormat.GalleryWall
+    "review" -> e.format == CaptureFormat.ReelNotes
+    else -> false
+}
+
+/** Does a liked item (by kind) belong to the given rail type? */
+private fun likedShownForType(t: String?, kind: V2Kind): Boolean = when (t) {
+    null -> true
+    "books" -> kind == V2Kind.BOOK
+    "albums" -> kind == V2Kind.ALBUM
+    "series" -> kind == V2Kind.SERIES
+    else -> false
+}
+
+/** A section heading — display title + quiet subtitle + trailing count. */
 @Composable
-private fun V2PlainHeader(title: String, count: Int) {
+private fun V2PageSectionHeader(
+    title: String,
+    subtitle: String?,
+    trailing: String? = null,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        verticalAlignment = Alignment.Bottom,
+        modifier = modifier.fillMaxWidth().padding(top = 6.dp, bottom = 2.dp)
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (subtitle != null) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+        if (trailing != null) {
+            Text(
+                text = trailing,
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1
+            )
+        }
+    }
+}
+
+/** The JSX "Everything" card — frosted icon tile + title + circular arrow,
+ *  a media rail of REAL saved jacket art (books/albums/series) + a "+" slot,
+ *  and the running item count. Tap opens the Everything library. */
+@Composable
+private fun V2EverythingCard(
+    likes: List<V2Liked>,
+    count: Int,
+    onOpen: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val dark = isCurioDarkTheme()
+    val fill = if (dark) Color(0xFF2C2627) else Color(0xFFF0E3C9)
+    val ink = if (dark) Color(0xFFF3E9E2) else Color(0xFF553E42)
+    val muted = ink.copy(alpha = 0.62f)
+    val railFill = if (dark) Color.White.copy(alpha = 0.10f) else Color.White.copy(alpha = 0.32f)
+    Surface(
+        onClick = onOpen,
+        shape = RoundedCornerShape(26.dp),
+        color = fill,
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(17.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(15.dp))
+                        .background(if (dark) Color.White.copy(alpha = 0.14f) else Color.White.copy(alpha = 0.42f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CurioIcon(
+                        name = CurioIcons.Inventory2,
+                        contentDescription = null,
+                        tint = ink,
+                        size = 23.dp
+                    )
+                }
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Everything",
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            lineHeight = 24.sp
+                        ),
+                        color = ink,
+                        maxLines = 1
+                    )
+                    Text(
+                        text = "All your books, notes, media and more",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = muted,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                Box(
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(ink.copy(alpha = 0.14f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CurioIcon(
+                        name = CurioIcons.ChevronRight,
+                        contentDescription = "Open everything",
+                        tint = ink,
+                        size = 19.dp
+                    )
+                }
+            }
+            Spacer(Modifier.height(14.dp))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(7.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // "+" slot first (the JSX's empty tile), then real covers.
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(88.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(railFill),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CurioIcon(name = CurioIcons.Add, contentDescription = null, tint = muted, size = 20.dp)
+                }
+                repeat(5) { i ->
+                    val item = likes.getOrNull(i)
+                    if (item != null) {
+                        val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
+                        val accent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(88.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(
+                                    Brush.verticalGradient(
+                                        listOf(
+                                            androidx.compose.ui.graphics.lerp(
+                                                accent, Color.White,
+                                                if (dark) 0.14f else 0.46f
+                                            ),
+                                            androidx.compose.ui.graphics.lerp(accent, Color.Black, 0.40f)
+                                        )
+                                    )
+                                )
+                        ) {
+                            V2JacketArt(
+                                item = item,
+                                accent = accent,
+                                modifier = Modifier.fillMaxSize().padding(4.dp)
+                            )
+                        }
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(88.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(railFill.copy(alpha = 0.6f))
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(11.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "$count item${if (count == 1) "" else "s"}",
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
+                    color = ink
+                )
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text = "\u203A",
+                    fontSize = 24.sp,
+                    color = muted,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
+        }
+    }
+}
+
+/** The Everything library toolbar — Filter + Sort pills (with menus) and
+ *  the grid/list view toggle (the JSX's toolbar row). */
+@Composable
+private fun V2EverythingToolbar(
+    typeFilter: String?,
+    onTypeFilter: (String?) -> Unit,
+    viewMode: String,
+    onViewMode: (String) -> Unit,
+    sortAtoZ: Boolean,
+    onSort: (Boolean) -> Unit
+) {
+    var filterOpen by remember { mutableStateOf(false) }
+    var sortOpen by remember { mutableStateOf(false) }
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Text(
-            text = title.uppercase(),
-            style = MaterialTheme.typography.labelLarge.copy(
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 0.8.sp
-            ),
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            modifier = Modifier.weight(1f)
+        Box {
+            V2ToolbarPill(
+                glyph = CurioIcons.Tune,
+                label = "Filter",
+                emphasized = typeFilter != null,
+                onClick = { filterOpen = true }
+            )
+            DropdownMenu(
+                expanded = filterOpen,
+                onDismissRequest = { filterOpen = false }
+            ) {
+                TYPE_FILTERS.forEach { (key, label, _) ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = label,
+                                fontWeight = if (typeFilter == key) FontWeight.ExtraBold else FontWeight.Normal
+                            )
+                        },
+                        onClick = { onTypeFilter(key); filterOpen = false }
+                    )
+                }
+            }
+        }
+        Box {
+            V2ToolbarPill(
+                glyph = if (sortAtoZ) CurioIcons.ArrowUpward else CurioIcons.ArrowDownward,
+                label = "Sort",
+                onClick = { sortOpen = true }
+            )
+            DropdownMenu(
+                expanded = sortOpen,
+                onDismissRequest = { sortOpen = false }
+            ) {
+                listOf(false to "Recent", true to "A–Z").forEach { (az, label) ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = label,
+                                fontWeight = if (sortAtoZ == az) FontWeight.ExtraBold else FontWeight.Normal
+                            )
+                        },
+                        onClick = { onSort(az); sortOpen = false }
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.weight(1f))
+        V2ViewTogglePill(
+            active = viewMode == "grid",
+            glyph = CurioIcons.GridView,
+            contentDescription = "Grid view",
+            onClick = { onViewMode("grid") }
         )
-        Text(
-            text = "$count",
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+        V2ViewTogglePill(
+            active = viewMode == "list",
+            glyph = CurioIcons.DragHandle,
+            contentDescription = "List view",
+            onClick = { onViewMode("list") }
         )
     }
+}
+
+@Composable
+private fun V2ViewTogglePill(
+    active: Boolean,
+    glyph: String,
+    contentDescription: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        color = if (active) MaterialTheme.colorScheme.primary
+        else MaterialTheme.colorScheme.surfaceContainerHigh,
+        modifier = Modifier.size(44.dp)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            CurioIcon(
+                name = glyph,
+                contentDescription = contentDescription,
+                tint = if (active) MaterialTheme.colorScheme.onPrimary
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 19.dp
+            )
+        }
+    }
+}
+
+/** The JSX filter rail — horizontal type chips (All · Books · Albums …). */
+@Composable
+private fun V2FilterRail(
+    current: String?,
+    onSelect: (String?) -> Unit,
+    accent: Color
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        TYPE_FILTERS.forEach { (key, label, icon) ->
+            val selected = current == key
+            Surface(
+                onClick = { onSelect(if (selected) null else key) },
+                shape = RoundedCornerShape(50),
+                color = if (selected) accent
+                else MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = if (selected) MaterialTheme.colorScheme.onPrimary
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.height(34.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                ) {
+                    CurioIcon(
+                        name = icon,
+                        contentDescription = null,
+                        tint = if (selected) MaterialTheme.colorScheme.onPrimary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        size = 15.dp
+                    )
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                        maxLines = 1
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** The JSX "Add something new" action — dashed hairline + rose circle. */
+@Composable
+private fun V2AddSomethingButton(onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(22.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+        ),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(13.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CurioIcon(
+                    name = CurioIcons.Add,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    size = 24.dp
+                )
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Add something new",
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "Save a book, note, image or anything…",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            CurioIcon(
+                name = CurioIcons.AutoAwesome,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.55f),
+                size = 22.dp
+            )
+        }
+    }
+}
+
+/** A liked item as a grid tile — jacket art plate + name + kind label. */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun V2LikedTileCard(
+    item: V2Liked,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
+    val accent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
+    Surface(
+        modifier = modifier.combinedClickable(onClick = onClick),
+        shape = RoundedCornerShape(18.dp),
+        color = cat?.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+            ?: MaterialTheme.colorScheme.surfaceContainerHigh
+    ) {
+        Column {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .padding(8.dp)
+            ) {
+                V2JacketArt(item = item, accent = accent, modifier = Modifier.fillMaxSize())
+            }
+            Column(modifier = Modifier.padding(start = 11.dp, end = 11.dp, bottom = 11.dp)) {
+                Text(
+                    text = item.name,
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    minLines = 1
+                )
+                Spacer(Modifier.height(3.dp))
+                Text(
+                    text = when (item.kind) {
+                        V2Kind.BOOK -> "Book"
+                        V2Kind.ALBUM -> "Album"
+                        V2Kind.SERIES -> "Series"
+                    } + (cat?.let { " · ${it.displayName}" } ?: ""),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}
+
+/** Emits the saved-capture cards in grid (2-col) or list (full-width) mode. */
+private fun LazyGridScope.v2EntryItems(
+    entries: List<CurioEntry>,
+    fullSpan: Boolean,
+    selectionMode: Boolean,
+    selectedEntryIds: Set<String>,
+    onEntryLongClick: (String) -> Unit,
+    onEntryClick: (String) -> Unit
+) {
+    if (fullSpan) {
+        entries.forEach { e ->
+            item(key = "e|${e.id}", span = { GridItemSpan(maxLineSpan) }, contentType = "entry") {
+                CurioEntryCard(
+                    entry = e,
+                    modifier = Modifier,
+                    selected = e.id in selectedEntryIds,
+                    onLongClick = { onEntryLongClick(e.id) },
+                    onClick = { onEntryClick(e.id) }
+                )
+            }
+        }
+    } else {
+        items(entries, key = { "e|${it.id}" }) { e ->
+            CurioEntryCard(
+                entry = e,
+                modifier = Modifier,
+                selected = e.id in selectedEntryIds,
+                onLongClick = { onEntryLongClick(e.id) },
+                onClick = { onEntryClick(e.id) }
+            )
+        }
+    }
+}
+
+/** Emits liked items — jacket tiles in grid mode, full-width rows in list. */
+private fun LazyGridScope.v2LikedItems(
+    likes: List<V2Liked>,
+    fullSpan: Boolean,
+    onOpenLiked: (V2Liked) -> Unit
+) {
+    if (fullSpan) {
+        likes.forEach { item ->
+            item(key = "l|${item.kind}|${item.name}", span = { GridItemSpan(maxLineSpan) }, contentType = "liked") {
+                V2LikedRow(item = item, onClick = { onOpenLiked(item) })
+            }
+        }
+    } else {
+        items(likes, key = { "l|${it.kind}|${it.name}" }) { item ->
+            V2LikedTileCard(item = item, onClick = { onOpenLiked(item) })
+        }
+    }
+}
+
+/** A VIRTUAL shelf detail (Favorites / Saved entries / Notes) — header +
+ *  liked rows + saved cards, search-filtered like the other levels. */
+private fun LazyGridScope.v2VirtualShelfItems(
+    title: String,
+    likes: List<V2Liked>,
+    entries: List<CurioEntry>,
+    searchQuery: String,
+    selectedEntryIds: Set<String>,
+    selectionMode: Boolean,
+    onOpenLiked: (V2Liked) -> Unit,
+    onEntryLongClick: (String) -> Unit,
+    onEntryClick: (String) -> Unit
+) {
+    val q = searchQuery.trim()
+    fun shown(text: String): Boolean = q.isEmpty() || text.contains(q, ignoreCase = true)
+    val shownLikes = likes.filter { shown(it.name) || it.topic?.byline?.let { b -> shown(b) } == true }
+    val shownEntries = entries.filter {
+        shown(it.topic.name) || it.title?.let { t -> shown(t) } == true || it.tags.any { tag -> shown(tag) }
+    }
+    val total = shownLikes.size + shownEntries.size
+
+    item(key = "v-head", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
+        V2PageSectionHeader(
+            title = title,
+            subtitle = null,
+            trailing = "$total item${if (total == 1) "" else "s"}"
+        )
+    }
+    if (total == 0) {
+        item(key = "v-empty", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)
+            ) {
+                CurioEmptyState(
+                    glyph = CurioIcons.Inventory2,
+                    headline = when {
+                        likes.isEmpty() && entries.isEmpty() -> "Nothing here yet"
+                        else -> "Nothing matches"
+                    },
+                    subtext = when {
+                        likes.isEmpty() && entries.isEmpty() && title == "Favorites" ->
+                            "Like a book, series or album from its page and it lands here."
+                        likes.isEmpty() && entries.isEmpty() && title == "Notes" ->
+                            "Save a voice note, journal or field note and it lands here."
+                        else -> "Try a different search."
+                    },
+                    tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f)
+                )
+            }
+        }
+        return
+    }
+    shownLikes.forEach { item ->
+        item(
+            key = "v-l|${item.kind}|${item.name}",
+            span = { GridItemSpan(maxLineSpan) },
+            contentType = "member"
+        ) {
+            V2LikedRow(item = item, onClick = { onOpenLiked(item) })
+        }
+    }
+    v2EntryItems(
+        entries = shownEntries,
+        fullSpan = false,
+        selectionMode = selectionMode,
+        selectedEntryIds = selectedEntryIds,
+        onEntryLongClick = onEntryLongClick,
+        onEntryClick = onEntryClick
+    )
 }
 
 /** The collection-detail header strip: name + count + Add pill + kebab. */
@@ -1616,68 +2281,6 @@ private fun V2EmptySuggestions(
                     color = MaterialTheme.colorScheme.primary
                 )
             }
-        }
-    }
-}
-
-/** One section header: glyph chip + title + count + collapse chevron. */
-@Composable
-private fun V2SectionHeader(
-    title: String,
-    count: Int,
-    glyph: String,
-    expanded: Boolean,
-    accent: Color,
-    onToggle: () -> Unit
-) {
-    Surface(
-        onClick = onToggle,
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier.padding(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(26.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(accent.copy(alpha = 0.16f)),
-                contentAlignment = Alignment.Center
-            ) {
-                CurioIcon(
-                    name = glyph,
-                    contentDescription = null,
-                    tint = accent,
-                    size = 15.dp
-                )
-            }
-            Spacer(Modifier.width(10.dp))
-            Text(
-                text = title.uppercase(),
-                style = MaterialTheme.typography.labelLarge.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 0.8.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
-            )
-            Text(
-                text = "$count",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.width(6.dp))
-            CurioIcon(
-                name = if (expanded) CurioIcons.KeyboardArrowUp else CurioIcons.KeyboardArrowDown,
-                contentDescription = if (expanded) "Collapse section" else "Expand section",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                size = 18.dp
-            )
         }
     }
 }

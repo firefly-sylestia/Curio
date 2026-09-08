@@ -742,6 +742,44 @@ app/src/main/java/com/curio/app/
   (`streakCount`/`onStreakClick`/`onEditClick` params). `trailing`
   (Profile's Settings pill) now rides the FULL row only — the collapsed
   bar keeps avatar + name + streak + edit.
+- **v3xx20 — Cabinet FOLDERS (the JSX redesign, user-directed).** The
+  experimental Cabinet v2 view is rebuilt to the `Curio_Cabinet_Reimagined.jsx`
+  design (user's ask; scope answered: replace v2 behind the same toggle,
+  keep the torn rose hero, saved entries keep `CurioEntryCard`, "Add
+  something new" → Spin): (1) **Home order** — a JSX-style **Everything
+  card** (frosted icon tile + title + circular arrow + a media rail of the
+  user's REAL liked book/album/series jacket art + a "+" slot + item
+  count; tap → Everything library) → **Saved entries** section (classic
+  `CurioEntryCard` grid, tap opens, long-press multi-select batch delete
+  unchanged) → **Collections** section. (2) **Built-in shelves** — 7
+  JSX-style shelf cards (`features/cabinet/CabinetShelves.kt`, new):
+  `builtInShelves` (Favorites · Currently Reading · Want to Read · Saved
+  entries · Completed · Notes · Personal), each with a pastel tone
+  (light/dark pairs), a glyph, an item count and hand-drawn decorative
+  art (`V2ShelfArt` — star+mountain, open book, stacked books, hills,
+  paper stack, window, photos — Canvas + glyphs, theme-aware). The three
+  VIRTUAL shelves (Favorites = liked books/series/albums, Saved entries =
+  all captures, Notes = note-format captures) are computed live
+  (`shelf:*` levels via `v2VirtualShelfItems`); the four STARTER shelves
+  (Currently Reading / Want to Read / Completed / Personal) are seeded
+  ONCE as ordinary editable `CurioCollection`s (ids `shelf:*`, new
+  `KEY_CABINET_SHELVES_SEEDED` + `seedCabinetShelves` + state sync), so
+  add-captures / reveal File-to / rename / delete all work on them.
+  USER collections cycle a tone+art palette and keep the long-press
+  rename/delete pill. (3) **Everything library rebuilt** — the old
+  collapsible section lists are gone; the page now matches the JSX:
+  Filter + Sort pills (DropdownMenus), a grid/list view toggle, a type
+  filter rail (`TYPE_FILTERS`: All · Books · Albums · Series · Notes ·
+  Moodboards · Reviews, mapped to real kinds/formats via
+  `entryInType`/`likedShownForType`), a Recent rail (newest 6 captures,
+  `LazyRow` of `CurioEntryCard`), an All Items grid/list (entries as
+  `CurioEntryCard`, likes as new `V2LikedTileCard` jacket tiles /
+  `V2LikedRow` in list mode), and an "Add something new" button
+  (`V2AddSomethingButton` → `navigateToTab(SPIN)`). Multi-select batch
+  delete is preserved on the library page; select-all scope is now
+  level-aware (`visibleIds`). Deleted from the old v2: `V2CollectionCard`
+  (3×2 collage), `V2CoverCollage`, `V2PlainHeader`, `V2SectionHeader`
+  (collapsible sections) and the formatFilter/availableFormats chips.
 - **v355 — book/series notes sheets: no close button, no hint copy, rating
   below the author, tick-free read state.** User: "never add cross close
   button in a bottom sheet… remove it from the book synopsis sheet… remove

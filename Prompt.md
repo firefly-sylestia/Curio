@@ -1,5 +1,66 @@
 # Prompt Log — current request
 
+## Request (2026-09-08, completed — Cabinet folders: the JSX redesign)
+
+**Request (pending-prompt slot):** "the cabinet folders are not the
+default view — it shows the old cabinet v2 as everything; make the
+Cabinet the JSX design: an Everything card strip (arrow → opens the
+books + albums saved), below it the saved entries as-is, then a new
+Collections section (Favorites + add button, Currently Reading, Want to
+Read, the saved ones, Completed, the saved entries, Notes, Personal)
+and let the user create their own collections; the collection cards
+EXACTLY like Curio_Cabinet_Reimagined.jsx; similar navigation/search
+look; the JSX entries are placeholders — use real ones in the app; make
+it beautiful; use ask_user properly then start implementing."
+
+**User answers (ask_user):**
+1. **Scope** — replace Cabinet v2 behind the SAME toggle (toggle OFF
+   still shows the classic grid).
+2. **Shelf data** — SMART shelves: Favorites = liked books/series/albums,
+   Saved entries = all captures, Notes = note-format captures (auto-fill);
+   Currently Reading / Want to Read / Completed / Personal = empty starter
+   shelves the user fills.
+3. **Header** — the app's torn rose hero (design-consistent), not the
+   JSX warm cream hero.
+4. **Add button** — "Add something new" → go to Spin to explore then
+   save; keep the saved-entry card style; adapt the JSX look properly to
+   the app; the Everything page should BE the JSX layout (toolbar /
+   filter rail / recent / grid / add), not just its hero or background.
+
+**What shipped:**
+1. **`features/cabinet/CabinetShelves.kt` (new)** — `V2ShelfId` +
+   `builtInShelves` (the 7 shelves with title/glyph/tone/art), the
+   JSX-style `V2ShelfCard` (pastel tone fill with light+dark variants,
+   frosted icon tile, ⋮ when editable, title + "N items", and the
+   hand-drawn decorative art `V2ShelfArt` — star+mountain, open book +
+   ☕ + leaf, stacked books + "Someday ♡" note, hills + flowers, paper
+   stack + "Ideas ♡", window + plant, layered photos — via Canvas +
+   verified glyphs, theme-aware).
+2. **AppPreferences** — `KEY_CABINET_SHELVES_SEEDED` +
+   `cabinetShelvesSeededState` + `seedCabinetShelves` (seeds the four
+   EMPTY starter shelves once as ordinary `CurioCollection`s with stable
+   `shelf:*` ids, so add-captures / reveal File-to / rename / delete all
+   work on them).
+3. **CabinetV2Content.kt** — home rebuilt in the user's order: the JSX
+   **Everything card** (frosted tile + title + circular arrow + a media
+   rail of REAL liked book/album/series jacket art + "+" slot + item
+   count) → **Saved entries** section (classic `CurioEntryCard` grid,
+   multi-select batch delete preserved) → **Collections** section (the 7
+   built-ins + user collections cycling a tone/art palette + New tile).
+   Virtual shelf levels (`shelf:favorites` / `shelf:saved` / `shelf:notes`)
+   via `v2VirtualShelfItems` (liked rows + entry cards, search-filtered).
+   **Everything library** rebuilt to the JSX layout: Filter + Sort pills
+   with menus, grid/list view toggle, type filter rail (All · Books ·
+   Albums · Series · Notes · Moodboards · Reviews mapped to real kinds /
+   formats), Recent rail (newest 6 captures), All Items (entries as
+   `CurioEntryCard`, likes as new `V2LikedTileCard` / `V2LikedRow`), and
+   the "Add something new" button → `navigateToTab(SPIN)`. Select-all
+   scope is now level-aware. Deleted: `V2CollectionCard` (3×2 collage),
+   `V2CoverCollage`, `V2PlainHeader`, `V2SectionHeader` and the old
+   format-filter chips / collapsible sections.
+
+**Status:** committed + pushed (see git log).
+
 ## Request (2026-09-08, completed — Home/Profile glass header morph)
 
 **Request (pending-prompt slot):** "the glass toolbar header is beautiful,
@@ -585,6 +646,13 @@ row only. Home + Profile glass headers are PINNED collapsing headers
 and pinned Back/Settings pills (Profile) are hidden in the glass style;
 the bar samples the REAL backdrop (sibling overlay). Scroll progress =
 the existing 90dp sticky threshold on both screens.
+
+### DONE — 2026-09-08 (Cabinet folders: the JSX redesign)
+**Status:** COMPLETE — implemented, committed + pushed this session (see
+the request-log entry above for the full breakdown). The four ask_user
+answers were followed: replace v2 behind the same toggle; smart shelves
+(Favorites/Saved entries/Notes live, four starter shelves seeded once);
+app's torn rose hero kept; "Add something new" navigates to Spin.
 
 ## next prompt
 (empty — the slot is ready for the next directive)

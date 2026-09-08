@@ -976,6 +976,11 @@ object AppPreferences {
     // Save shortcut repoints into it. When the experiment settles the toggle
     // is removed and the winning view ships always-on.
     var cabinetV2EnabledState by mutableStateOf(false)
+    // v3xx — the four empty starter shelves (Currently Reading / Want to
+    // Read / Completed / Personal) were seeded once into the Cabinet's
+    // collection store; the virtual shelves (Favorites / Saved entries /
+    // Notes) are computed and never persisted.
+    var cabinetShelvesSeededState by mutableStateOf(false)
     var paperStatTearState by mutableStateOf(false)
         private set
     // v108 — torn heroes wear ONLY their bottom tear by default; the white
@@ -1521,6 +1526,7 @@ object AppPreferences {
         navIndicatorOpacityState = getNavIndicatorOpacity(context)
         glassClarityState = isGlassClarityEnabled(context)
         cabinetV2EnabledState = isCabinetV2Enabled(context)
+        cabinetShelvesSeededState = isCabinetShelvesSeeded(context)
         glassBlurScaleState = getGlassBlurScale(context)
         glassRefractionScaleState = getGlassRefractionScale(context)
         glassReflectionScaleState = getGlassReflectionScale(context)
@@ -1855,6 +1861,7 @@ object AppPreferences {
     private const val KEY_STAR_ZOOM_3D = "star_zoom_3d"
     private const val KEY_DRAWER_CONSTELLATION = "drawer_constellation"
     private const val KEY_CABINET_V2 = "cabinet_v2_experiment"
+    private const val KEY_CABINET_SHELVES_SEEDED = "cabinet_shelves_seeded_v2"
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
     private const val KEY_FORCE_GLASS = "force_glass_override"
     private const val KEY_GLASS_LAB_WALLPAPER = "glass_lab_wallpaper"
@@ -3020,6 +3027,33 @@ object AppPreferences {
         val updated = getCabinetCollections(context).filterNot { it.id == id }
         saveCabinetCollections(context, updated)
         return updated
+    }
+
+    // ── Built-in starter shelves (v3xx — Cabinet folders) ──────────────
+    /** Whether the four empty starter shelves were seeded once. */
+    fun isCabinetShelvesSeeded(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_CABINET_SHELVES_SEEDED, false)
+
+    /**
+     * Seeds the four EMPTY starter shelves (Currently Reading / Want to
+     * Read / Completed / Personal) into the collection store — one time.
+     * They are ordinary [CurioCollection]s (ids prefixed `shelf:`), so the
+     * existing add-captures / file-to-collection / rename / delete flows
+     * all work on them. The virtual shelves (Favorites / Saved entries /
+     * Notes) are computed from live data and are NOT persisted here.
+     */
+    fun seedCabinetShelves(context: Context) {
+        if (isCabinetShelvesSeeded(context)) return
+        val now = System.currentTimeMillis()
+        val shelves = listOf(
+            CurioCollection(id = "shelf:currently-reading", name = "Currently Reading", createdAtMillis = now, members = emptyList()),
+            CurioCollection(id = "shelf:want-to-read", name = "Want to Read", createdAtMillis = now, members = emptyList()),
+            CurioCollection(id = "shelf:completed", name = "Completed", createdAtMillis = now, members = emptyList()),
+            CurioCollection(id = "shelf:personal", name = "Personal", createdAtMillis = now, members = emptyList())
+        )
+        saveCabinetCollections(context, getCabinetCollections(context) + shelves)
+        prefs(context).edit().putBoolean(KEY_CABINET_SHELVES_SEEDED, true).apply()
+        cabinetShelvesSeededState = true
     }
 
     /**
