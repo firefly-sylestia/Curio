@@ -984,6 +984,35 @@ open: `key(openLevel)` wraps the LazyVerticalGrid and
 TOP and page switches no longer jump (was: one shared scroll position
 across all levels).
 
-## next prompt
-/workspaces/Curio/CurioSettings_Redesign-3.jsx we will be doing whole settinsg redesign, exacty similiar style and exactly same nav style and also rearrnage existing ones, only appearnnace have new look use it as a refernce for others too and keep it minimal, and the settings itself will be that, data etc gets the book fething etc privacy etc yk here to place what so start the fuull settings revamp just keep the header same or else exactly same as the jsx even the cards design exacty same
-dont push this after finishing and dont stop before finishing
+## Request (2026-09-08, completed — the JSX Settings redesign; COMMITTED, NOT PUSHED per user instruction)
+
+**Request (pending-prompt slot):** "CurioSettings_Redesign-3.jsx — whole
+settings redesign, exactly similar style and exactly same nav style,
+rearrange existing ones, only appearance has the new look (use it as a
+reference for others too), keep it minimal; the settings itself will be
+that — data etc gets the book fetching etc privacy etc 'you know here to
+place what'; keep the header same; even the cards design exactly same as
+the jsx; don't push this after finishing and don't stop before
+finishing".
+
+**Implemented (`SettingsHubScreen.kt`, phone hub — header untouched):**
+(1) **JSX nav rail** — All Settings / Appearance / Pet / Preferences /
+Recording / Categories / History / Share / Experiments / Backup /
+Support as a horizontal chip rail (the desktop sidebar's mobile twin;
+active chip = JSX brown). (2) **JSX search** — rounded white box +
+magnifier + clear; the deep row index still drives results. (3) **Tone
+CARDS** — 5 groups exactly like the JSX (Personalize ✦, How it works ✧,
+Organize your world ≡, Share & explore ◇, Your data & privacy ◈ where
+Backup & restore + Book covers slot in), each card a pastel-gradient
+surface (10 tones incl. dark twins), blob + texture-dot Canvas art,
+frosted icon tile, round arrow, title/subtitle at 72% width, and a
+decorative foot visual (swatches / pet / compass / wave / card stack /
+photos / share / flask / cloud / image) — every card maps to a REAL
+screen. (4) Secondary horizontal cards (Recycle bin, Updates, Help &
+feedback) + the "Same curiosity, new horizons." footer note (Playfair
+via PlayfairDisplayFontFamily). Search results + the tablet two-pane
+still use the underlying row model untouched; the Appearance card keeps
+the PetLandmark.
+
+**Held (no push):** committed only — the user explicitly asked not to
+push the settings work.

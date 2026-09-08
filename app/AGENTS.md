@@ -812,6 +812,33 @@ app/src/main/java/com/curio/app/
   `shadowElevation` blur behind the TILTED cream print read as a
   "background showing behind the strip" (preview AND export); the tape +
   tilt keep the scrapbook depth. Other styles keep the shadow.
+- **v3xx29 — Settings hub REDESIGN (user follow-up 2026-09-08; the
+  CurioSettings_Redesign-3.jsx look — committed, NOT pushed per user
+  instruction).** The phone hub (`SettingsHubScreen.kt`) is rebuilt to
+  match the JSX exactly while the app's own header (SettingsHeroHeader /
+  CurioGlassToolbar) stays untouched: (1) a **nav rail** — All Settings /
+  Appearance / Pet designer / Preferences / Recording / Categories /
+  Topic history / Share hub / Experiments / Backup / Support — as a
+  horizontal chip rail (the JSX desktop sidebar's mobile twin; active
+  chip = JSX brown #815947). (2) A **JSX search box** (rounded white,
+  magnifier + clear); the existing deep row index + search results UI
+  still run underneath. (3) **Tone CARDS in 5 groups** (Personalize ✦,
+  How it works ✧, Organize your world ≡, Share & explore ◇, Your data &
+  privacy ◈ — the last one slots Backup & restore + Book covers where
+  the user said "data etc gets the book fetching etc"): every card is a
+  pastel-gradient surface (10 tones, light pastel + deep dark twin),
+  blob + texture-dot Canvas art, frosted icon tile, round arrow,
+  title/subtitle capped at ~76% width, and a decorative foot visual
+  (swatches / pet / compass / wave / card stack / photos / share /
+  flask / cloud / image). (4) Secondary horizontal cards (Recycle bin,
+  Updates, Help & feedback) + the "Same curiosity, new horizons."
+  footer note in Playfair. Data model: `SettingsDesignGroup/Card`,
+  `SettingsNavEntry`, `settingsToneGradient`, `SettingsCardVisual`,
+  `SettingsDesignCardView`, `SettingsNavRail`, `SettingsJsxSearchField`,
+  `SettingsSecondaryCardView`, `SettingsFooterNote`. The search index +
+  tablet two-pane still consume the underlying row model untouched; the
+  Appearance card keeps its PetLandmark. Removed from the hub face: the
+  flat CurioSettingsRow list (rows live on in search + two-pane).
 - **v3xx28 — Cabinet per-item colors + fresh grid per level (user
   follow-up 2026-09-08).** (1) **Extracted cover colors** — liked
   books/albums/series rows, tiles and the Everything preview now use the
