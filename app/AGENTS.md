@@ -812,6 +812,21 @@ app/src/main/java/com/curio/app/
   `shadowElevation` blur behind the TILTED cream print read as a
   "background showing behind the strip" (preview AND export); the tape +
   tilt keep the scrapbook depth. Other styles keep the shadow.
+- **v3xx26 — editor caret / box-outline accuracy (user follow-up
+  2026-09-08; the CI fix rode separately in `3f466b5c`).** The inline
+  quick-fact field (ArrangeableCard's transparent BasicTextField — shared
+  by the bottom-sheet preview AND the full-screen card editor) used
+  `heightIn(min = f.height.dp)` with `maxLines = 60`, so the field grew
+  past the visible fact box: the caret could sit BELOW the visible
+  glyphs and the selection outline (the `.border` on the fieldModifier)
+  extended past the box ("cursor/text position wrong and misleading",
+  "the box outline misleads"). The field is now clamped to the measured
+  box height (`heightIn(min = max = f.height.dp)`); the smart fit
+  re-measures on every keystroke and grows the box, so caret + outline
+  always hug the visible text. Root-cause note: the reported
+  `onFactStyle` already includes the smart-fit text scale (styles render
+  with `effectiveBodyScale`), so the caret metrics were otherwise
+  glyph-exact — the unbounded height was the mismatch.
 - **v3xx25 — share-card smart fit refinements (user follow-up
   2026-09-08).** (1) **HEIGHT-FIRST fit** (`autoFitShape`) — the fact box
   now grows toward the style's FULL `factFitBudget` cap whenever

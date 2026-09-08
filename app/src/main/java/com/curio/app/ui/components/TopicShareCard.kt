@@ -7963,7 +7963,18 @@ private fun ArrangeableCard(
                     val fieldModifier = Modifier
                         .offset(f.left.dp, (f.top + chipShiftPx).dp)
                         .width(f.width.dp)
-                        .heightIn(min = f.height.dp)
+                        // v3xx — the field is EXACTLY the visible fact box:
+                        // the old heightIn(min = …) let the transparent field
+                        // grow to its 60-line budget while the card clipped
+                        // the text at fitLines, so the caret could sit BELOW
+                        // the visible glyphs and the selection outline grew
+                        // past the box ("the cursor and text position are
+                        // wrong/misleading", "the box outline misleads").
+                        // The card's smart fit re-measures on every
+                        // keystroke and grows the box, so the box and this
+                        // field grow together — the caret stays on the
+                        // glyphs and the outline hugs the box.
+                        .heightIn(min = f.height.dp, max = f.height.dp)
                         .focusRequester(factRequester)
                         .onFocusChanged {
                             if (it.isFocused) {

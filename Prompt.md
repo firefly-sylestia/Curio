@@ -1,5 +1,5 @@
 # Prompt Log — current request
-## Request (2026-09-08, completed + pushed `5c4345f4` — share-card smart fit refinements)
+## Request (2026-09-08, completed + pushed `5c4345f4` / editor pass committed, not pushed — share-card smart fit + editor accuracy)
 
 **Request (pending-prompt slot):** "the spark pill smart fit is better,
 but it still doesn't consider the CATEGORY ICON — it places [the title]
@@ -903,26 +903,30 @@ vertical and bottom belong to different constructor families, so
 **Fix:** explicit `PaddingValues(start = 12.dp, top = 4.dp, end = 12.dp,
 bottom = 16.dp)` in both the tree-mode and list-mode LazyColumn
 contentPadding. Pushed alone; CI validates on the push.
+## Request (2026-09-08, in progress — inline/full-screen editor caret + box-outline accuracy; CI fix pushed `3f466b5c`)
+
+**Request (pending-prompt slot):** "yes please properly do it but before
+that push the cl fix then do that but don't push that" + pasted CI log
+(CabinetV2Content.kt:267/269/270/271 Unresolved reference
+'selectionMode'/'selectedEntryIds' — the new BackHandler read the
+selection state before its declaration).
+
+**CI fix (pushed alone `3f466b5c`):** moved the BackHandler below the
+`selectionMode`/`selectedEntryIds` declarations (Kotlin needs declarations
+before use). 
+
+**Editor pass (committed, NOT pushed):** the inline field (bottom-sheet
+preview AND the full-screen card editor — both share ArrangeableCard's
+transparent BasicTextField over the fact) used `heightIn(min = …)` with
+`maxLines = 60`, so it grew past the visible fact box: the caret could sit
+BELOW the visible glyphs and the selection outline extended beyond the
+box ("cursor and text position wrong/misleading", "box outline
+misleads"). The field is now clamped to the measured box height
+(`heightIn(min = max = f.height)`) — the card's smart fit re-measures on
+every keystroke and grows the box, so caret + outline always hug the
+visible text. (Root-cause note: the reported fact style already includes
+the smart-fit text scale — styles render with `effectiveBodyScale` — so
+the caret metrics were otherwise already glyph-exact.)
 
 ## next prompt
 (empty — no pending prompt)
-
-**Pending — share-card smart fit refinements (user, 2026-09-08):**
-1. The spark-pill smart fit is better, but it still doesn't consider the
-   CATEGORY ICON — it sometimes places [the title] over it. Give it the
-   same treatment as the title fix.
-2. Same for the QUICK FACT box: auto-move it to a proper place.
-3. Quick-fact box height should be at its MAXIMUM with longer text — not
-   just text-size decrease but HEIGHT increase, in accordance with the
-   bottom area.
-4. Height glitch: even with plenty of space below, the height doesn't
-   expand for smaller texts when the user wants it to expand more (it
-   definitely can — and the text can too) — fix it.
-5. The footer and the box always have plenty of space, yet the footers
-   moved down even though the quick fact box is nowhere near (the user
-   means the texts) — the footers should stay at their place.
-6. Make the footers even smaller and keep them put.
-7. The footer text + the inline editor are inaccurate again: the cursor
-   and the text position are wrong/misleading — same for the full-screen
-   card editor.
-8. Sometimes the box outline misleads too — fix it.
