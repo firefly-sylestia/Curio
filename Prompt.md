@@ -1,5 +1,5 @@
 # Prompt Log — current request
-## Request (2026-09-08, in progress — share-card smart fit refinements)
+## Request (2026-09-08, completed + pushed `5c4345f4` — share-card smart fit refinements)
 
 **Request (pending-prompt slot):** "the spark pill smart fit is better,
 but it still doesn't consider the CATEGORY ICON — it places [the title]
@@ -905,6 +905,7 @@ bottom = 16.dp)` in both the tree-mode and list-mode LazyColumn
 contentPadding. Pushed alone; CI validates on the push.
 
 ## next prompt
+(empty — no pending prompt)
 
 **Pending — share-card smart fit refinements (user, 2026-09-08):**
 1. The spark-pill smart fit is better, but it still doesn't consider the
