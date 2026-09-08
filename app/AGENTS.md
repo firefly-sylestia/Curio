@@ -793,15 +793,17 @@ app/src/main/java/com/curio/app/
   (v3xx18/19 unchanged). (2) **Share-card smart fit — no-clip guarantee**
   (TopicShareCard.kt): `autoFitShape` now sizes the fact TEXT so the
   WHOLE fact always fits its box — past the design's text floor the type
-  keeps shrinking (down to `FactFitHardFloor` 0.45×) instead of
+  keeps shrinking (down to `FactFitHardFloor` 0.5×) instead of
   ellipsizing; the box-growth caps were reverted to their validated
-  heights (Paper 2.0/1.8, mid-flow else 1.5/1.4 — the v3xx bumps let a
-  grown box reach the footer, the user-visible overlap) so the box never
-  touches the footer/title/card edge. Fit math is per-style:
+  heights (Paper 1.85/1.8, mid-flow else 1.45/1.4) so the box never
+  touches the footer/title/card edge — v3xx31 later raised the 9:16 caps
+  and added the real geometry bounds (real-width measurement, free-
+  middle clamp, maxLines capacity bound) that supersede these static
+  caps (see v3xx31). Fit math is per-style:
   `factBoxBaseLines(style, aspect)` (each style's natural line capacity)
-  and `factWrapFactor(style)` (Vinyl's narrow 220dp pane wraps ~1.7× the
-  canonical width), with a 0.92 safety margin over the measured wrap
-  count. (3) **Sparkle: dragged-over title returns to the top** — a title
+  and `factWrapFactor(style)` (Vinyl's narrow 220dp pane wraps ~1.15×
+  the canonical 252dp width), with a 0.85 safety margin over the
+  measured wrap count. (3) **Sparkle: dragged-over title returns to the top** — a title
   the user MANUALLY dragged into the quick fact (or info rows,
   `move.titlePlaced`) is RESET to its natural spot on the sparkle tap
   (`resetTitleY` on `ShareAutoLayoutPlan`; commit zeroes `titleDx`/
@@ -812,6 +814,43 @@ app/src/main/java/com/curio/app/
   `shadowElevation` blur behind the TILTED cream print read as a
   "background showing behind the strip" (preview AND export); the tape +
   tilt keep the scrapbook depth. Other styles keep the shadow.
+- **v3xx31 — Share-card smart-fit OVERHAUL (user follow-up 2026-09-08:
+  "the spark pill struggles with longer texts — it doesn't increase the
+  box height fully / place them properly / shrink the text, especially in
+  the Clean layout 9:16; the fit + font-size decrease should happen
+  within the slider, not hidden").** `TopicShareCard.kt` — five concrete
+  bugs fixed + the solver got real geometry: (1) **REAL-WIDTH wrap
+  measurement** — `rememberFactWrapLines` now measures at
+  `FactWrapMeasureWidth` = 252dp (the 280dp-base preview's content
+  width) instead of the DESIGN width (405/450dp): the old measurement
+  under-counted wraps by ~1.5× (previews render at 280dp; Clean's 30/26
+  padding leaves 224dp), so long facts got CUT — worst on Clean 9:16.
+  Vinyl's pane factor drops 1.7× → 1.15× (it was relative to the design
+  width). (2) **FREE-MIDDLE height clamp** — new `factAvailHeightDp` +
+  `factLineHeightDp` per style+aspect bound the grown box's rendered
+  height (realWraps × lineH × scale) to the gap between the header and
+  the footer credit, so the "via Curio" footer can never be pushed or
+  hidden behind the bottom design again; past the hard floor the box
+  simply can't fit that aspect. (3) **maxLines capacity bound** in
+  `fitScaleFor` (base·h ÷ (eff·1.2)): the render's maxLines cap now
+  always ≥ the real wrap count through the mid-range (the plain model +
+  margin still cut by a line or two). (4) **9:16 budgets raised to use
+  the tall canvas** — Clean/NEUMORPHIC 1.7→2.9, Minimal 1.6→2.7, Paper
+  2.0→2.6, Vinyl/Signature/Custom 1.5→2.2, Editorial 1.4→1.8, Collage
+  1.3→1.5 (3:4 caps stay validated; the clamp is the real bound).
+  `autoFitGrowByWrap` top end rises to 3.2×. (5) **Fit visible in the
+  sliders** — `FactFitHardFloor` 0.45→0.5 (the Text-size slider's floor),
+  so the rendered text size is always on the thumb; the Fact-height
+  sliders (sheet Crop + full-screen Box) no longer divide back through
+  the stale fit (that collapsed the box ~2.4×→1× on the first drag tick
+  and popped the text back to full size) — the first tick captures the
+  rendered height AND the fit's text shrink into `move.factScale` (the
+  grip-seed recipe), later ticks map 1:1. (6) **AUTO 9:16 detection** —
+  `runAutoLayout` computes `autoTall`: when even the hard-floor scale
+  can't fit the 3:4 free middle, the very next sparkle tap jumps
+  straight to the tall plan (`attempt = 5`), and attempt 5 now carries
+  the REAL tall fit (`autoFitShape` on PORTRAIT — taller box + correct
+  tall text) instead of the old 1.4×/1.18× guess.
 - **v3xx30 — Cabinet card style REVERT (user follow-up 2026-09-08).**
   The user's original request was to REDRAW the collection card art, not
   redesign the cards — the v3xx27 full-card whisper-alpha art read as

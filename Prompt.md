@@ -1039,5 +1039,48 @@ the anchored ⋮ DropdownMenu (onRename/onDelete — "proper dropdown not
 overlay in the middle"), and the create-collection style picker. The
 `.alpha` import is gone from CabinetShelves.kt.
 
+## Request (2026-09-08, completed + pushed — share-card smart-fit OVERHAUL: long texts finally fit, auto 9:16, fit visible in the sliders)
+
+**Request (direct, continuation):** "the spark pill auto layout still
+struggles with longer texts — it doesn't increase the height of the box
+FULL and properly place them, and doesn't decrease the text size,
+specially in the Clean layout 9:16 — properly analyse and fix, add so
+many proper advance detections (100s of it) so I never face such
+situations again, and the auto fit + font size decrease should happen
+within the slider not hidden".
+
+**Root causes found (four real bugs):** (1) `rememberFactWrapLines`
+measured at the DESIGN width (405/450dp) while both previews render at
+280dp — real wraps were ~1.5× higher than measured (Clean's 30/26
+padding → 224dp content), so the fit under-grew/under-shrunk and long
+facts got CUT, worst on Clean 9:16. (2) The solver had no knowledge of
+the card's real free middle — a very long box could exceed it and push
+/hide the "via Curio" footer. (3) The render's maxLines cap
+(base×frac÷scale) could fall below the real wrap count mid-range — a
+line or two still got cut even with the margin. (4) The Fact-height
+sliders divided the drag back through the STALE fit — writing
+factHeightFrac disengages the fit, so the first tick collapsed the box
+~2.4×→1× and popped the text back to full size (the "fit hidden below
+the slider" experience). Plus the 9:16 budgets were tuned for 3:4 (Clean
+1.7× on a canvas that holds ~2.9×).
+
+**Fix (TopicShareCard.kt, v3xx31):** (1) wrap measurement now uses
+`FactWrapMeasureWidth` = 252dp (the real 280dp-base content width);
+Vinyl's pane factor 1.7→1.15. (2) NEW free-middle geometry —
+`factAvailHeightDp`/`factLineHeightDp` per style+aspect clamp the text
+scale so the grown box always clears the footer; a `maxLines` capacity
+bound (base·h÷(eff·1.2)) in `fitScaleFor` guarantees no cut. (3) 9:16
+budgets raised (Clean 2.9, Minimal 2.7, Paper 2.6, else 2.2) + grow
+curve to 3.2×. (4) `FactFitHardFloor` 0.45→0.5 = the Text-size slider
+floor — the rendered size is always on the thumb; the Fact-height
+sliders (sheet Crop + full-screen Box) now capture the rendered height
+AND the fit's text shrink on the first tick (the grip-seed recipe)
+instead of dividing back through the stale fit. (5) Pill: `autoTall`
+detection — when the 3:4 free middle can't hold the text even at the
+hard floor, the very next tap jumps straight to the 9:16 plan, and
+autoLayout attempt 5 now carries the REAL tall fit (autoFitShape on
+PORTRAIT) instead of the 1.4×/1.18× guess. Committed + pushed; CI
+validates.
+
 ## next prompt
 (empty — no pending prompt)

@@ -841,13 +841,19 @@ private class ShareAutoFitDelta(
 
 /** v3xx — how much a long fact grows its box, by MEASURED wrap lines alone
  *  (one curve, no presets): [rememberFactWrapLines] reports the fact's REAL
- *  line count at the design width, so the curve keys on how the text
+ *  line count at the measurement width, so the curve keys on how the text
  *  actually wraps (a long URL or run of long words counts its many lines,
  *  short prose its few) instead of a character-count guess. The collision
- *  budget ([factFitBudget]) then clamps the grown box per style. */
+ *  budget ([factFitBudget]) then clamps the grown box per style.
+ *  v3xx — the curve's TOP END rises to 3.2×: the free-middle clamp can
+ *  force the text scale down on long facts, and the render's maxLines
+ *  (≈ base×frac÷scale) must stay ≥ the real wrap count — Clean/NEUMORPHIC's
+ *  narrow 224dp content needs frac ≥ ~2.6 on 9:16 for that, which the old
+ *  2.4 cap couldn't give (long Clean facts got cut by a line or two). */
 private fun autoFitGrowByWrap(wrapLines: Int): Float = when {
-    wrapLines > 26 -> 2.4f
-    wrapLines > 20 -> 2.0f
+    wrapLines > 34 -> 3.2f
+    wrapLines > 25 -> 2.8f
+    wrapLines > 20 -> 2.2f
     wrapLines > 15 -> 1.7f
     wrapLines > 11 -> 1.45f
     wrapLines > 7 -> 1.25f
@@ -868,41 +874,102 @@ private fun factFitBudget(style: ShareCardStyle, aspect: ShareCardAspect): Pair<
     val tall = aspect == ShareCardAspect.PORTRAIT
     return when (style) {
         // The fact lives inside a fixed dark band under the category pill —
-        // v378 it shrinks the TEXT more eagerly (down to 0.7×) so a long
-        // fact stays inside the band instead of ballooning its box down over
-        // the footer decoration ("box higher + text smaller" collage fit).
-        ShareCardStyle.COLLAGE -> if (tall) 1.3f to 0.70f else 1.25f to 0.75f
+        // v378 it shrinks the TEXT more eagerly so a long fact stays inside
+        // the band instead of ballooning its box down over the footer
+        // decoration ("box higher + text smaller" collage fit). v3xx — the
+        // 9:16 band is taller, so the tall cap rises a little with it.
+        ShareCardStyle.COLLAGE -> if (tall) 1.5f to 0.62f else 1.3f to 0.75f
         // Runs between the byline and the colophon — grows a little, then
         // the text shrinks.
-        ShareCardStyle.EDITORIAL -> if (tall) 1.4f to 0.82f else 1.3f to 0.85f
+        ShareCardStyle.EDITORIAL -> if (tall) 1.8f to 0.66f else 1.35f to 0.85f
         // Bottom-anchored facts grow UP into the free middle of the card.
-        ShareCardStyle.NEUMORPHIC -> if (tall) 1.7f to 0.80f else 1.5f to 0.83f
-        ShareCardStyle.MINIMAL -> if (tall) 1.6f to 0.82f else 1.45f to 0.85f
+        // v3xx — the 9:16 canvas has ~1.6× the free middle of 3:4, so the
+        // tall cap rises to match (Clean grows to ~2.9× and the text barely
+        // shrinks for long facts — the old 1.7 left the tall card with a
+        // short box AND over-shrunk text; the free-middle clamp below keeps
+        // the grown box clear of the credit regardless). The 3:4 caps stay
+        // at the validated values.
+        ShareCardStyle.NEUMORPHIC -> if (tall) 2.9f to 0.62f else 1.55f to 0.83f
+        ShareCardStyle.MINIMAL -> if (tall) 2.7f to 0.64f else 1.5f to 0.85f
         // v378 — PAPER gets its own budget: its mid-flow body has room to
         // EXPAND (the frost pane can take more lines), so the fit favours
-        // growing the box and barely touches the text (0.96× floor) — the
-        // old shared mid-flow budget shrank Paper's type to 0.8× while the
-        // height could have absorbed the text. v3xx — the cap stays at the
-        // validated 2.0/1.8: a higher cap let the grown box reach the
-        // bottom-anchored footer on long facts (the user-visible overlap).
-        // Longer text now shrinks below the floor instead (see
-        // [autoFitShape]'s no-clip pass) — never cut, never overlapping.
-        ShareCardStyle.PAPER -> if (tall) 2.0f to 0.96f else 1.8f to 0.96f
+        // growing the box and barely touches the text — the old shared
+        // mid-flow budget shrank Paper's type while the height could have
+        // absorbed the text. v3xx — the tall cap rises to use the 9:16
+        // canvas; the free-middle clamp still keeps the box off the footer.
+        ShareCardStyle.PAPER -> if (tall) 2.6f to 0.80f else 1.85f to 0.96f
         // Mid-flow facts between the header/title and the footer (Vinyl /
-        // Signature / Custom). v3xx — the cap holds at the validated
-        // 1.5/1.4 for the same reason as Paper: a taller box on these
-        // styles could reach the footer; the no-clip text pass absorbs the
-        // length instead.
-        else -> if (tall) 1.5f to 0.80f else 1.4f to 0.83f
+        // Signature / Custom). v3xx — the tall cap rises with the taller
+        // canvas; the free-middle clamp keeps the box clear of the footer.
+        else -> if (tall) 2.2f to 0.62f else 1.45f to 0.83f
     }
+}
+
+/** v3xx — the FREE-MIDDLE height each style's fact box may occupy on the
+ *  280dp-base preview (dp): the gap between the fixed header block (badge /
+ *  title / info rows) and the fixed footer block (stars + credit). The fit
+ *  clamps the text scale so the grown box's height (real wraps × line
+ *  height × scale) never exceeds this — the "footer never moves, the box
+ *  never hides behind the bottom design" guarantee. These are ONE-LINE-
+ *  TITLE estimates (a 2-line title costs ~35dp more; the 1.15 safety in
+ *  the clamp absorbs it). The 9:16 canvases are ~1.6× the 3:4 middle —
+ *  this is why the tall budgets above are so much larger. */
+private fun factAvailHeightDp(style: ShareCardStyle, aspect: ShareCardAspect): Float {
+    val tall = aspect == ShareCardAspect.PORTRAIT
+    return when (style) {
+        ShareCardStyle.NEUMORPHIC -> if (tall) 340f else 205f
+        ShareCardStyle.MINIMAL -> if (tall) 320f else 195f
+        ShareCardStyle.PAPER -> if (tall) 300f else 185f
+        ShareCardStyle.VINYL -> if (tall) 250f else 155f
+        ShareCardStyle.SIGNATURE -> if (tall) 290f else 180f
+        ShareCardStyle.CUSTOM -> if (tall) 290f else 180f
+        ShareCardStyle.EDITORIAL -> if (tall) 230f else 140f
+        ShareCardStyle.COLLAGE -> if (tall) 150f else 110f
+    }
+}
+
+/** v3xx — each style's rendered fact LINE HEIGHT at scale 1.0 (dp) on the
+ *  280dp-base preview, from the style's body size ladder × line-height
+ *  multiplier. Used by the free-middle clamp and the auto-9:16 detection
+ *  to convert a wrap count into a rendered height. Rounded UP (the fit
+ *  must never under-estimate height — over-estimating only shrinks text a
+ *  little more). */
+private fun factLineHeightDp(style: ShareCardStyle): Float = when (style) {
+    // Clean: 11sp × 1.40 (falls to ~9sp for the longest facts — the
+    // estimate stays conservative for short-to-mid facts where the box
+    // first approaches the footer).
+    ShareCardStyle.NEUMORPHIC -> 16f
+    // Minimal: 12sp × 1.50
+    ShareCardStyle.MINIMAL -> 18f
+    ShareCardStyle.PAPER -> 16f
+    ShareCardStyle.VINYL -> 16f
+    ShareCardStyle.EDITORIAL -> 17f
+    ShareCardStyle.SIGNATURE -> 17f
+    ShareCardStyle.CUSTOM -> 17f
+    ShareCardStyle.COLLAGE -> 15f
 }
 
 /** v3xx — the hard floor the no-clip pass may shrink the fact text to.
  *  Below this the type is unreadable, so the fit never goes further (and
  *  no realistic fact needs to — the floor covers ~100+ wrapped lines on
  *  every style's box). The design floors in [factFitBudget] are SOFT
- *  targets; the no-clip pass may go below them, but never past this. */
-private const val FactFitHardFloor = 0.45f
+ *  targets; the no-clip pass may go below them, but never past this.
+ *  v3xx — the floor matches the Text-size slider's 0.5× lower bound so
+ *  the smart-fit text size is ALWAYS visible in the slider thumb (the old
+ *  0.45 floor let the card render smaller than the slider could show —
+ *  the "fit hidden below the slider" case). The 9:16 canvases + the
+ *  free-middle clamp keep every realistic fact above it. */
+private const val FactFitHardFloor = 0.5f
+
+/** v3xx — the REAL width the sheet + full-screen previews render the card
+ *  fact at (280dp base minus the canonical 14+14 side padding), used for
+ *  the wrap-count measurement. The OLD measurement used the DESIGN width
+ *  (405/450dp), so a fact that wrapped to ~13 lines on the 280dp preview
+ *  measured ~8.6 — the fit under-grew the box and under-shrunk the text
+ *  by ~1.5× and long facts got CUT (worst on Clean/NEUMORPHIC's 30/26
+ *  padding). Per-style paddings differ by a little (224–252dp); the 0.85
+ *  fit margin absorbs the difference. */
+private const val FactWrapMeasureWidth = 252f
 
 /** v3xx — each style's natural fact-box LINE capacity (the [fitLines]
  *  base at heightFrac = 1, per aspect) — what the box holds before any
@@ -921,13 +988,17 @@ private fun factBoxBaseLines(style: ShareCardStyle, aspect: ShareCardAspect): In
 }
 
 /** v3xx — how many MORE lines a style's fact box wraps than the canonical
- *  [rememberFactWrapLines] measurement (which uses the full card width -
- *  28dp at 11sp). Only Vinyl's deliberately NARROW pane (max 220dp) wraps
- *  significantly more (~1.7×); every other style's box is ~full width, so
- *  their factor is 1.0 and the no-clip safety margin absorbs the small
- *  differences. */
+ *  [rememberFactWrapLines] measurement (now the REAL 280dp-base preview
+ *  content width, 252dp at 11sp — see [FactWrapMeasureWidth]). Only
+ *  Vinyl's deliberately NARROW pane (max 220dp) wraps significantly more
+ *  (252/220 ≈ 1.15×); every other style's box is ~full width (their real
+ *  content is 224–252dp), so their factor is 1.0 and the 0.85 fit margin
+ *  absorbs the small per-style differences. The old 1.7× was tuned against
+ *  the DESIGN-width measurement (377dp) — with the real-width measurement
+ *  it over-counted Vinyl's wraps by ~1.5× and shrank its text for no
+ *  reason. */
 private fun factWrapFactor(style: ShareCardStyle): Float = when (style) {
-    ShareCardStyle.VINYL -> 1.7f
+    ShareCardStyle.VINYL -> 1.15f
     else -> 1.0f
 }
 
@@ -958,11 +1029,24 @@ private fun autoFitShape(style: ShareCardStyle, aspect: ShareCardAspect, wrapLin
     val eff = wrapLines * factWrapFactor(style)
     // The largest text scale that still fits the whole fact in a box of
     // [h]× base lines: capacity(base×h/S) ≥ lines(eff×S) → S² ≤ base·h/eff.
-    // The 0.92 margin absorbs the canonical-vs-real measurement slack so
-    // the guarantee holds even when the style's box differs a little.
-    fun fitScaleFor(h: Float): Float =
-        (kotlin.math.sqrt(base * h / eff.coerceAtLeast(1f)) * 0.92f)
-            .coerceIn(FactFitHardFloor, 1f)
+    // The 0.85 margin absorbs the canonical-vs-real measurement slack (the
+    // real previews render at 224–252dp content vs the 252dp canonical
+    // measurement — up to ~1.13× more wraps) so the guarantee holds even
+    // when the style's box differs a little. (The old 0.92 margin + design-
+    // width measurement together under-counted wraps by ~1.5× and long
+    // facts got CUT.)
+    // v3xx — TWO more bounds ride on top of the capacity model:
+    //  · the render's maxLines cap (≈ base×h÷scale) must stay ≥ the REAL
+    //    wrap count — the width-factor difference (252 measured vs 224
+    //    rendered on Clean) breaks the plain model in the mid-range, so
+    //    the scale is capped at base·h/(eff×1.2) (the 1.2 absorbs every
+    //    style's real-content width);
+    //  · the free-middle height bound below.
+    fun fitScaleFor(h: Float): Float {
+        val capacity = kotlin.math.sqrt(base * h / eff.coerceAtLeast(1f)) * 0.85f
+        val maxLinesBound = base * h / (eff.coerceAtLeast(1f) * 1.2f)
+        return capacity.coerceAtMost(maxLinesBound).coerceIn(FactFitHardFloor, 1f)
+    }
     // v3xx — HEIGHT-FIRST (user direction 2026-09-08): the box grows toward
     // the style's FULL budget cap whenever the fact exceeds the box's
     // natural capacity, and the TEXT sizes to fit the grown box. The old
@@ -973,7 +1057,20 @@ private fun autoFitShape(style: ShareCardStyle, aspect: ShareCardAspect, wrapLin
     // with plenty of space below). The fit scale still guarantees the whole
     // fact fits the grown box (no clip, no overlap), down to the hard floor.
     val h = grow.coerceIn(1f, maxHeightFrac)
-    val s = fitScaleFor(h)
+    var s = fitScaleFor(h)
+    // v3xx — FREE-MIDDLE BOUND (the "footer never moves, box never hides
+    // behind the bottom design" guarantee): the grown box's RENDERED height
+    // is realWraps × lineHeight × scale, and it must stay within the
+    // style's free middle (between the header and the credit/footer). The
+    // capacity model above only guarantees the text fits its own box — it
+    // knows nothing about the footer. Clamp the scale so the box's height
+    // clears the footer even on the LONGEST facts; the 1.15 factor covers
+    // the per-style measurement slack + a 2-line title. Past the floor the
+    // aspect can't hold the text at all — the auto-layout pill detects
+    // exactly that ([autoTall]) and flips the card to 9:16.
+    val maxByRoom = factAvailHeightDp(style, aspect) /
+        (eff.coerceAtLeast(1f) * factLineHeightDp(style) * 1.15f)
+    if (maxByRoom < s) s = maxOf(maxByRoom, FactFitHardFloor).coerceAtMost(s)
     return ShareAutoFitDelta(heightFrac = h, widthFrac = 1f, textScale = s)
 }
 
@@ -1012,15 +1109,21 @@ private fun smartAutoFitDelta(
  * the chapter text; whichever wraps taller drives the fit (mirrors the old
  * maxOf(length, length) input). Pure (text, width) measurement — no
  * rendered Rects, one deterministic pass.
+ * v3xx — the width is the REAL 280dp-base preview content width
+ * ([FactWrapMeasureWidth]), NOT the design width: the sheet + full-screen
+ * previews render the card at 280dp (aspect changes only the HEIGHT), so
+ * a design-width measurement under-counted wraps by ~1.5× and long facts
+ * got cut. The [aspect] param stays for call-site symmetry but no longer
+ * changes the width — 9:16 and 3:4 cards wrap identically wide.
  */
 @Composable
 private fun rememberFactWrapLines(primary: String, secondary: String, aspect: ShareCardAspect): Int {
     val measurer = rememberTextMeasurer()
     val density = androidx.compose.ui.platform.LocalDensity.current
-    return remember(primary, secondary, aspect) {
+    return remember(primary, secondary) {
         fun wrapOf(text: String): Int {
             if (text.isBlank()) return 0
-            val widthPx = with(density) { ((aspect.widthDp - 28f).dp).toPx() }.toInt().coerceAtLeast(1)
+            val widthPx = with(density) { FactWrapMeasureWidth.dp.toPx() }.toInt().coerceAtLeast(1)
             val res = measurer.measure(
                 text = AnnotatedString(text),
                 style = androidx.compose.ui.text.TextStyle(
@@ -1393,17 +1496,18 @@ private fun autoLayoutPlan(
             format = if (len >= 150) ShareCardFactFormat.BOOK else ShareCardFactFormat.EDITORIAL
         )
         5 -> when {
-            // v380 — a 9:16 flip must buy READABILITY, not just length: hand
-            // the taller canvas a LONGER fact box AND a bigger text (factScale
-            // > 1 rides the Size slider's own channel, so the card renders and
-            // exports exactly what the slider would show) — the old flip kept
-            // the 3:4 box/text on the tall card, wasting the extra height.
+            // v380/v3xx — a 9:16 flip must buy READABILITY, not just length:
+            // hand the taller canvas the REAL 9:16 fit (the tall budget cap +
+            // the tall fit's text, both now sized from the measured wraps and
+            // the free-middle clamp) — the old 1.4×/1.18× guess left the
+            // tall card with an arbitrary box and oversized text that still
+            // overflowed on long facts.
             aspect == ShareCardAspect.CLASSIC && capped -> {
-                val (tallMaxH, _) = factFitBudget(style, ShareCardAspect.PORTRAIT)
+                val tallShape = autoFitShape(style, ShareCardAspect.PORTRAIT, wrapLines)
                 ShareAutoLayoutPlan(
                     tall = true,
-                    heightFrac = (tallMaxH * 1.4f).coerceIn(1.6f, 3.2f),
-                    textScale = 1.18f
+                    heightFrac = tallShape.heightFrac.coerceIn(1.6f, 3.2f),
+                    textScale = tallShape.textScale.coerceIn(FactFitHardFloor, 1.18f)
                 )
             }
             else -> ShareAutoLayoutPlan(heightFrac = shape.heightFrac, textScale = shape.textScale)
@@ -9350,6 +9454,17 @@ fun TopicShareSheet(
         val len = maxOf(factFieldText.length, chapterFactForCard.length)
         if (len == 0 && chapterFactForCard.isBlank() && progressForCard == null) return
         var attempt = autoLayoutIdx + 1
+        // v3xx — AUTO 9:16 DETECTION: when the text is so long that even the
+        // hard-floor text scale can't fit the 3:4 free middle (the render
+        // would overflow into the footer — the fit is already clamped there),
+        // the very NEXT tap jumps straight to the tall 9:16 canvas instead
+        // of cycling through the five 3:4 arrangements first. The 1.1 factor
+        // makes the detection slightly eager so the user lands on the tall
+        // card exactly when the text genuinely needs the height.
+        val autoTall = aspect == ShareCardAspect.CLASSIC &&
+            autoLayoutWrapLines * factWrapFactor(currentStyle) * factLineHeightDp(currentStyle) * 1.1f * FactFitHardFloor >
+                factAvailHeightDp(currentStyle, ShareCardAspect.CLASSIC)
+        if (autoTall && attempt < 5) attempt = 5
         // v384 — seven arrangements + the collision repairs; the lookahead is
         // wide enough to always land on a change (attempts that alter nothing
         // are skipped, so every effective tap advances the card).
@@ -10787,17 +10902,34 @@ fun TopicShareSheet(
                                                             }
                                                         } else {
                                                             SizeSliderColumn("Fact width", move.factWidthFrac, { updateMove(move.copy(factWidthFrac = it)) }, 0.3f..1.2f, steps = 89, modifier = Modifier.fillMaxWidth())
-                                                            // v379d — folded height thumb (see the sheet's Crop tool for the
-                                                            // rationale): shows the smart-fit-grown height, writes the base.
+                                                            // v379d/v3xx — folded height thumb: shows the smart-fit-grown
+                                                            // height (WYSIWYG). v3xx — the WRITE captures the rendered value
+                                                            // directly instead of dividing back through the stale fit: the
+                                                            // old (v / fsFitH) collapsed the box (~2.4× → ~1×) on the very
+                                                            // first drag tick, because writing factHeightFrac disengages the
+                                                            // render-time fit (touched) and the divided-back base then
+                                                            // rendered unfitted. The first tick now sets the base to the
+                                                            // thumb position AND captures the fit's text shrink into
+                                                            // factScale (the grip-seed recipe) so the type doesn't pop back
+                            // to full size — the handoff is seamless, later ticks map 1:1.
                                                             val fsFitH = smartAutoFitDelta(
                                                                 move,
                                                                 rememberFactWrapLines(factFieldText, chapterFactForCard, aspect),
                                                                 currentStyle, aspect
                                                             ).heightFrac
+                                                            val fsFitT = smartAutoFitDelta(
+                                                                move,
+                                                                rememberFactWrapLines(factFieldText, chapterFactForCard, aspect),
+                                                                currentStyle, aspect
+                                                            ).textScale
+                                                            val fsUntouched = move.factHeightFrac == 1f && move.factScale == 1f
                                                             SizeSliderColumn(
                                                                 "Fact height",
                                                                 (move.factHeightFrac * fsFitH).coerceIn(0.35f, 6f),
-                                                                { v -> updateMove(move.copy(factHeightFrac = (v / fsFitH).coerceIn(0.35f, 6f))) },
+                                                                { v -> updateMove(move.copy(
+                                                                    factHeightFrac = v.coerceIn(0.35f, 6f),
+                                                                    factScale = if (fsUntouched && fsFitT != 1f) move.factScale * fsFitT else move.factScale
+                                                                )) },
                                                                 0.35f..6f, steps = 56, modifier = Modifier.fillMaxWidth()
                                                             )
                                                         }
@@ -11155,22 +11287,40 @@ fun TopicShareSheet(
                                     // v369/v370 — the fact box height range runs
                                     // to 6x so tall 9:16 cards can expand a long
                                     // fact far past the old 2.5x cap.
-                                    // v379d — the thumb shows the smart-fit GROWN
-                                    // height (like the text thumb): while smart
-                                    // fit is engaged the box renders at
+                                    // v379d/v3xx — the thumb shows the smart-fit
+                                    // GROWN height (like the text thumb): while
+                                    // smart fit is engaged the box renders at
                                     // move.factHeightFrac × fit.heightFrac, so the
                                     // thumb would otherwise read 1× while the box
-                                    // sat at 2×. Dragging writes the base back
-                                    // through the fit (WYSIWYG + manual wins).
+                                    // sat at 2×. v3xx — the WRITE captures the
+                                    // rendered value directly (no ÷ fitH): the old
+                                    // division collapsed the box on the first drag
+                                    // tick because writing factHeightFrac
+                                    // disengages the fit — the base then rendered
+                                    // unfitted and shrank ~2.4× → ~1×. The first
+                                    // tick now sets the base to the thumb position
+                                    // AND captures the fit's text shrink into
+                                    // factScale (the grip-seed recipe) so the type
+                                    // doesn't pop back to full size and clip;
+                                    // later ticks map 1:1.
                                     val fitH = if (isFact) smartAutoFitDelta(
                                         move,
                                         rememberFactWrapLines(factFieldText, chapterFactForCard, aspect),
                                         currentStyle, aspect
                                     ).heightFrac else 1f
+                                    val fitT = if (isFact) smartAutoFitDelta(
+                                        move,
+                                        rememberFactWrapLines(factFieldText, chapterFactForCard, aspect),
+                                        currentStyle, aspect
+                                    ).textScale else 1f
+                                    val fitUntouched = move.factHeightFrac == 1f && move.factScale == 1f
                                     SizeSliderColumn(
                                         "Fact height",
                                         (move.factHeightFrac * fitH).coerceIn(0.35f, 6f),
-                                        { v -> updateMove(move.copy(factHeightFrac = (v / fitH).coerceIn(0.35f, 6f))) },
+                                        { v -> updateMove(move.copy(
+                                            factHeightFrac = v.coerceIn(0.35f, 6f),
+                                            factScale = if (fitUntouched && fitT != 1f) move.factScale * fitT else move.factScale
+                                        )) },
                                         0.35f..6f, steps = 56, modifier = Modifier.fillMaxWidth()
                                     )
                                 } else if (isPolaroid) {
