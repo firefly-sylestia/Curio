@@ -294,10 +294,13 @@ private fun BookBrowserRow(
         .substringAfterLast("(", "")
         .substringBeforeLast(")", "")
         .takeIf { it.all { c -> c.isDigit() } && it.length == 4 }
+    // v3xx — the settings design language: frosted card rows (matching the
+    // settings sub-pages) instead of the flat surface rows.
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = RoundedCornerShape(20.dp),
+        color = if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
+                else Color.White.copy(alpha = 0.68f),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(

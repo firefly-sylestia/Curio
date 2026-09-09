@@ -591,10 +591,16 @@ fun CurioNavHost(
                     isTabSwitch(initialState, targetState) ->
                         fadeIn(animationSpec = tween(CurioMotion.Durations.Standard))
                     // Other forward navigations: slide left + fade
+                    // v3xx — SOFTER page push: less travel (1/6 of the width
+                    // instead of 1/4) and a touch slower (Deliberate, 500ms
+                    // instead of Morph's 450) so the new page glides in
+                    // beside the old one instead of snapping across a
+                    // quarter-screen gap — the settings-family opens feel
+                    // calm instead of quick.
                     else -> slideInHorizontally(
-                        initialOffsetX = { fullWidth -> fullWidth / 4 },
-                        animationSpec = tween(CurioMotion.Durations.Morph, easing = FastOutSlowInEasing)
-                    ) + fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
+                        initialOffsetX = { fullWidth -> fullWidth / 6 },
+                        animationSpec = tween(CurioMotion.Durations.Deliberate, easing = FastOutSlowInEasing)
+                    ) + fadeIn(animationSpec = tween(CurioMotion.Durations.Deliberate))
                 }
             },
             exitTransition = {
@@ -628,9 +634,11 @@ fun CurioNavHost(
                     isTabSwitch(initialState, targetState) ->
                         fadeOut(animationSpec = tween(CurioMotion.Durations.Standard))
                     // Other exits: slide out slightly + fade
+                    // v3xx — mirrors the softer push: the outgoing page drifts
+                    // a touch (1/8) over the same slower slide.
                     else -> slideOutHorizontally(
-                        targetOffsetX = { fullWidth -> -fullWidth / 6 },
-                        animationSpec = tween(CurioMotion.Durations.Morph, easing = FastOutSlowInEasing)
+                        targetOffsetX = { fullWidth -> -fullWidth / 8 },
+                        animationSpec = tween(CurioMotion.Durations.Deliberate, easing = FastOutSlowInEasing)
                     ) + fadeOut(animationSpec = tween(CurioMotion.Durations.Quick))
                 }
             },
@@ -653,10 +661,11 @@ fun CurioNavHost(
                     isTabSwitch(initialState, targetState) ->
                         fadeIn(animationSpec = tween(CurioMotion.Durations.Standard))
                     else -> {
-                        // Back navigation: slide right + fade
+                        // Back navigation: slide right + fade (the softer,
+                        // slower twin of the forward push).
                         slideInHorizontally(
-                            initialOffsetX = { fullWidth -> -fullWidth / 6 },
-                            animationSpec = tween(CurioMotion.Durations.Morph, easing = FastOutSlowInEasing)
+                            initialOffsetX = { fullWidth -> -fullWidth / 8 },
+                            animationSpec = tween(CurioMotion.Durations.Deliberate, easing = FastOutSlowInEasing)
                         ) + fadeIn(animationSpec = tween(CurioMotion.Durations.Quick))
                     }
                 }
@@ -681,10 +690,11 @@ fun CurioNavHost(
                     isTabSwitch(initialState, targetState) ->
                         fadeOut(animationSpec = tween(CurioMotion.Durations.Standard))
                     else -> {
-                        // Pop exit: slide right + fade out
+                        // Pop exit: slide right + fade out (mirrors the
+                        // softer back-slide of the page underneath).
                         slideOutHorizontally(
-                            targetOffsetX = { fullWidth -> fullWidth / 4 },
-                            animationSpec = tween(CurioMotion.Durations.Morph, easing = FastOutSlowInEasing)
+                            targetOffsetX = { fullWidth -> fullWidth / 8 },
+                            animationSpec = tween(CurioMotion.Durations.Deliberate, easing = FastOutSlowInEasing)
                         ) + fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
                     }
                 }

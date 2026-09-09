@@ -63,15 +63,17 @@ import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
@@ -837,6 +839,11 @@ fun SettingsHubScreen(navController: NavController) {
     var query by rememberSaveable { mutableStateOf("") }
     // v3xx — the JSX nav rail's active chip ("all" = the hub itself).
     var activeNav by rememberSaveable { mutableStateOf("all") }
+    // v3xx — returning to the hub from a section restored the LAST clicked
+    // rail chip (rememberSaveable survives the hub leaving composition), so
+    // "All settings" used to show e.g. "Pet designer" highlighted. The hub
+    // is its own page — reset the chip whenever it (re)enters composition.
+    LaunchedEffect(Unit) { activeNav = "all" }
     val needle = query.trim()
     val sections = remember(needle) { filterSettingsSections(SettingsSections, needle) }
     val searchResults = remember(needle) { collectSearchResults(SettingsSections, needle) }
@@ -1614,63 +1621,146 @@ private fun settingsCardInk(dark: Boolean) =
 private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier = Modifier) {
     when (visual) {
         SettingsDesignVisual.SWATCHES -> Box(modifier) {
-            // Four paint swatches, fanned — fully inside the box.
-            val colors = listOf(0xFFE8B0A0, 0xFFB8C9B0, 0xFFB7A9CF, 0xFFD6B1C1)
-            val offsets = listOf(androidx.compose.ui.unit.IntOffset(2, 12), androidx.compose.ui.unit.IntOffset(28, 2), androidx.compose.ui.unit.IntOffset(44, 6), androidx.compose.ui.unit.IntOffset(24, 22))
-            val rots = listOf(-11f, 2f, 12f, -2f)
-            colors.forEachIndexed { i, c ->
-                Box(
-                    modifier = Modifier
-                        .offset { offsets[i] }
-                        .rotate(rots[i])
-                        .size(width = 28.dp, height = 38.dp)
-                        .border(2.5.dp, Color(0xFFFFF9F3).copy(alpha = 0.85f), RoundedCornerShape(5.dp))
-                        .background(Color(c))
-                )
+            // The appearance doodle — a hand-drawn painter's palette with
+            // paint blobs, outline + pastel fill (the Experiments flask
+            // language).
+            Canvas(Modifier.fillMaxSize()) {
+                val w = size.width; val h = size.height
+                val stroke = 2.dp.toPx()
+                // Palette — tilted kidney shape, soft rose fill + outline.
+                val palette = Path().apply {
+                    moveTo(w * 0.08f, h * 0.32f)
+                    quadraticTo(w * 0.28f, h * 0.06f, w * 0.56f, h * 0.20f)
+                    quadraticTo(w * 0.88f, h * 0.34f, w * 0.74f, h * 0.72f)
+                    quadraticTo(w * 0.64f, h * 0.94f, w * 0.38f, h * 0.86f)
+                    quadraticTo(w * 0.02f, h * 0.68f, w * 0.08f, h * 0.32f)
+                    close()
+                }
+                drawPath(palette, Color(0xFFE8B0A0).copy(alpha = 0.55f))
+                drawPath(palette, Color.White.copy(alpha = 0.85f), style = Stroke(width = stroke))
+                // Thumb hole.
+                drawCircle(Color(0xFFE8B0A0).copy(alpha = 0.22f), radius = 3.6.dp.toPx(), center = Offset(w * 0.52f, h * 0.62f))
+                drawCircle(Color.White.copy(alpha = 0.8f), radius = 3.6.dp.toPx(), center = Offset(w * 0.52f, h * 0.62f), style = Stroke(width = stroke * 0.8f))
+                // Paint blobs.
+                listOf(
+                    Offset(w * 0.22f, h * 0.42f) to Color(0xFF8DA993),
+                    Offset(w * 0.36f, h * 0.28f) to Color(0xFFB7A9CF),
+                    Offset(w * 0.64f, h * 0.34f) to Color(0xFFD6B1C1),
+                    Offset(w * 0.70f, h * 0.56f) to Color(0xFFE9C46A)
+                ).forEach { (c, color) ->
+                    drawCircle(color.copy(alpha = 0.9f), radius = 2.2.dp.toPx(), center = c)
+                    drawCircle(Color.White.copy(alpha = 0.7f), radius = 2.2.dp.toPx(), center = c, style = Stroke(width = 1.dp.toPx()))
+                }
             }
+            Text(
+                text = "✦",
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
+                color = Color.White.copy(alpha = 0.85f),
+                modifier = Modifier.offset(x = 80.dp, y = 2.dp)
+            )
+            Text(
+                text = "✧",
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
+                color = Color.White.copy(alpha = 0.7f),
+                modifier = Modifier.offset(x = 4.dp, y = 6.dp)
+            )
         }
         SettingsDesignVisual.PET -> Box(modifier) {
-            // Minimal pet — ears, head, eyes + nose, body; nothing cut.
-            Box(
-                modifier = Modifier.offset(x = 32.dp, y = 6.dp).rotate(20f).size(width = 11.dp, height = 13.dp)
-                    .background(Color(0xFFEEE5D8), RoundedCornerShape(topStart = 4.dp, topEnd = 8.dp, bottomStart = 4.dp, bottomEnd = 6.dp))
+            // The pet-designer doodle — a hand-drawn pet face: round head,
+            // pointy ears, dot eyes, blush and a smile (the Experiments
+            // flask language).
+            Canvas(Modifier.fillMaxSize()) {
+                val w = size.width; val h = size.height
+                val stroke = 2.dp.toPx()
+                val cx = w * 0.46f; val cy = h * 0.54f; val r = w * 0.22f
+                // Ears — rounded triangles peeking past the head.
+                val earL = Path().apply {
+                    moveTo(cx - r * 0.72f, cy - r * 0.45f)
+                    quadraticTo(cx - r * 1.10f, cy - r * 1.20f, cx - r * 0.30f, cy - r * 1.05f)
+                    close()
+                }
+                drawPath(earL, Color(0xFFEEE5D8).copy(alpha = 0.9f))
+                drawPath(earL, Color.White.copy(alpha = 0.85f), style = Stroke(width = stroke * 0.8f))
+                val earR = Path().apply {
+                    moveTo(cx + r * 0.72f, cy - r * 0.45f)
+                    quadraticTo(cx + r * 1.10f, cy - r * 1.20f, cx + r * 0.30f, cy - r * 1.05f)
+                    close()
+                }
+                drawPath(earR, Color(0xFFEEE5D8).copy(alpha = 0.9f))
+                drawPath(earR, Color.White.copy(alpha = 0.85f), style = Stroke(width = stroke * 0.8f))
+                // Head — round, soft cream fill + outline.
+                drawCircle(Color(0xFFF4EEE3).copy(alpha = 0.85f), radius = r, center = Offset(cx, cy))
+                drawCircle(Color.White.copy(alpha = 0.9f), radius = r, center = Offset(cx, cy), style = Stroke(width = stroke))
+                // Eyes + nose.
+                drawCircle(Color(0xFF4B3A35), radius = 1.9.dp.toPx(), center = Offset(cx - r * 0.35f, cy + r * 0.02f))
+                drawCircle(Color(0xFF4B3A35), radius = 1.9.dp.toPx(), center = Offset(cx + r * 0.35f, cy + r * 0.02f))
+                drawCircle(Color(0xFFA36F65), radius = 1.6.dp.toPx(), center = Offset(cx, cy + r * 0.26f))
+                // Blush.
+                drawCircle(Color(0xFFE8A79A).copy(alpha = 0.55f), radius = 2.3.dp.toPx(), center = Offset(cx - r * 0.55f, cy + r * 0.24f))
+                drawCircle(Color(0xFFE8A79A).copy(alpha = 0.55f), radius = 2.3.dp.toPx(), center = Offset(cx + r * 0.55f, cy + r * 0.24f))
+                // Smile.
+                val smile = Path().apply {
+                    moveTo(cx - r * 0.16f, cy + r * 0.40f)
+                    quadraticTo(cx, cy + r * 0.56f, cx + r * 0.16f, cy + r * 0.40f)
+                }
+                drawPath(smile, Color(0xFF4B3A35), style = Stroke(width = 1.4.dp.toPx()))
+            }
+            Text(
+                text = "✦",
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
+                color = Color.White.copy(alpha = 0.85f),
+                modifier = Modifier.offset(x = 80.dp, y = 4.dp)
             )
-            Box(
-                modifier = Modifier.offset(x = 54.dp, y = 6.dp).rotate(-20f).size(width = 11.dp, height = 13.dp)
-                    .background(Color(0xFFEEE5D8), RoundedCornerShape(topStart = 8.dp, topEnd = 4.dp, bottomStart = 6.dp, bottomEnd = 4.dp))
-            )
-            Box(
-                modifier = Modifier.offset(x = 28.dp, y = 20.dp).size(width = 36.dp, height = 24.dp)
-                    .background(Color(0xFFF4EEE3), RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp, bottomStart = 12.dp, bottomEnd = 12.dp))
-            )
-            Box(
-                modifier = Modifier.offset(x = 38.dp, y = 28.dp).size(width = 3.dp, height = 3.dp).background(Color(0xFF4B3A35), CircleShape)
-            )
-            Box(
-                modifier = Modifier.offset(x = 54.dp, y = 28.dp).size(width = 3.dp, height = 3.dp).background(Color(0xFF4B3A35), CircleShape)
-            )
-            Box(
-                modifier = Modifier.offset(x = 45.dp, y = 32.dp).size(width = 2.5.dp, height = 2.5.dp).background(Color(0xFFA36F65), CircleShape)
-            )
-            Box(
-                modifier = Modifier.offset(x = 14.dp, y = 40.dp).size(width = 58.dp, height = 18.dp)
-                    .background(Color(0xFF9C735F).copy(alpha = 0.85f), RoundedCornerShape(topStart = 9.dp, topEnd = 9.dp, bottomStart = 5.dp, bottomEnd = 5.dp))
+            Text(
+                text = "✧",
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
+                color = Color.White.copy(alpha = 0.7f),
+                modifier = Modifier.offset(x = 4.dp, y = 42.dp)
             )
         }
         SettingsDesignVisual.COMPASS -> Box(modifier) {
+            // The preferences doodle — a hand-drawn compass over soft
+            // mountains: outlined ring, tick marks, needle and sparkles.
             Canvas(Modifier.fillMaxSize()) {
                 val w = size.width; val h = size.height
-                // Two soft mountains, bottom-left.
-                drawPath(Path().apply { moveTo(w * 0.00f, h); lineTo(w * 0.30f, h * 0.52f); lineTo(w * 0.58f, h); close() }, color = Color(0xFF46656C).copy(alpha = 0.55f))
-                drawPath(Path().apply { moveTo(w * 0.28f, h); lineTo(w * 0.56f, h * 0.26f); lineTo(w * 0.78f, h); close() }, color = Color(0xFF495E74).copy(alpha = 0.40f))
-                // Compass ring over them, clear of the corner.
-                val cx = w * 0.60f; val cy = h * 0.40f; val r = w * 0.18f
-                drawCircle(Color.White.copy(alpha = 0.45f), radius = r, center = androidx.compose.ui.geometry.Offset(cx, cy))
+                val stroke = 2.dp.toPx()
+                // Two soft mountains, bottom-left, outlined.
+                val m1 = Path().apply { moveTo(w * 0.00f, h); lineTo(w * 0.30f, h * 0.50f); lineTo(w * 0.58f, h); close() }
+                drawPath(m1, Color(0xFF46656C).copy(alpha = 0.45f))
+                drawPath(m1, Color.White.copy(alpha = 0.6f), style = Stroke(width = 1.dp.toPx()))
+                val m2 = Path().apply { moveTo(w * 0.28f, h); lineTo(w * 0.56f, h * 0.24f); lineTo(w * 0.80f, h); close() }
+                drawPath(m2, Color(0xFF495E74).copy(alpha = 0.35f))
+                drawPath(m2, Color.White.copy(alpha = 0.55f), style = Stroke(width = 1.dp.toPx()))
+                // Compass ring — soft fill + clean outline.
+                val cx = w * 0.60f; val cy = h * 0.38f; val r = w * 0.26f
+                drawCircle(Color(0xFFC9D6E8).copy(alpha = 0.40f), radius = r, center = Offset(cx, cy))
+                drawCircle(Color.White.copy(alpha = 0.9f), radius = r, center = Offset(cx, cy), style = Stroke(width = stroke))
+                // Cardinal ticks.
+                listOf(
+                    Offset(cx, cy - r * 0.92f),
+                    Offset(cx, cy + r * 0.92f),
+                    Offset(cx - r * 0.92f, cy),
+                    Offset(cx + r * 0.92f, cy)
+                ).forEach { t ->
+                    drawLine(Color.White.copy(alpha = 0.85f), t, t, strokeWidth = 3.dp.toPx())
+                }
                 // Needle — solid north, pale south, pivot dot.
-                drawPath(Path().apply { moveTo(cx, cy - r * 0.78f); lineTo(cx - r * 0.34f, cy + r * 0.16f); lineTo(cx + r * 0.34f, cy + r * 0.16f); close() }, color = Color(0xFF687A91).copy(alpha = 0.85f))
-                drawPath(Path().apply { moveTo(cx, cy + r * 0.78f); lineTo(cx - r * 0.34f, cy + r * 0.16f); lineTo(cx + r * 0.34f, cy + r * 0.16f); close() }, color = Color(0xFF687A91).copy(alpha = 0.35f))
-                drawCircle(Color(0xFF687A91), radius = 1.6.dp.toPx(), center = androidx.compose.ui.geometry.Offset(cx, cy))
+                drawPath(Path().apply { moveTo(cx, cy - r * 0.72f); lineTo(cx - r * 0.30f, cy + r * 0.14f); lineTo(cx + r * 0.30f, cy + r * 0.14f); close() }, color = Color(0xFF687A91).copy(alpha = 0.9f))
+                drawPath(Path().apply { moveTo(cx, cy + r * 0.72f); lineTo(cx - r * 0.30f, cy + r * 0.14f); lineTo(cx + r * 0.30f, cy + r * 0.14f); close() }, color = Color(0xFF687A91).copy(alpha = 0.35f))
+                drawCircle(Color(0xFF687A91), radius = 1.6.dp.toPx(), center = Offset(cx, cy))
             }
+            Text(
+                text = "✦",
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
+                color = Color.White.copy(alpha = 0.85f),
+                modifier = Modifier.offset(x = 78.dp, y = 6.dp)
+            )
+            Text(
+                text = "✧",
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
+                color = Color.White.copy(alpha = 0.7f),
+                modifier = Modifier.offset(x = 8.dp, y = 42.dp)
+            )
         }
         SettingsDesignVisual.WAVE -> Row(
             verticalAlignment = Alignment.Bottom,
@@ -1687,59 +1777,130 @@ private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier 
             }
         }
         SettingsDesignVisual.CARDS -> Box(modifier) {
-            // Fanned card stack, drawn with proper shapes — fully inside.
-            val colors = listOf(0xFF8DA993, 0xFFD2A87B, 0xFF9EB8C0, 0xFFF4EADC)
-            val offsets = listOf(androidx.compose.ui.unit.IntOffset(2, 32), androidx.compose.ui.unit.IntOffset(20, 26), androidx.compose.ui.unit.IntOffset(32, 20), androidx.compose.ui.unit.IntOffset(48, 12))
-            val rots = listOf(12f, 4f, -4f, -12f)
-            colors.forEachIndexed { i, c ->
-                Box(
-                    modifier = Modifier
-                        .offset { offsets[i] }
-                        .rotate(rots[i])
-                        .size(width = 40.dp, height = 24.dp)
-                        .border(2.dp, Color.White.copy(alpha = 0.75f), RoundedCornerShape(6.dp))
-                        .background(Color(c))
+            // The categories doodle — a fanned stack of hand-drawn cards,
+            // each outlined with a little line glyph (the flask language).
+            Canvas(Modifier.fillMaxSize()) {
+                val w = size.width; val h = size.height
+                val stroke = 2.dp.toPx()
+                val cards = listOf(
+                    Triple(Offset(w * 0.10f, h * 0.52f), 14f, Color(0xFF8DA993)),
+                    Triple(Offset(w * 0.34f, h * 0.38f), 4f, Color(0xFFD2A87B)),
+                    Triple(Offset(w * 0.56f, h * 0.24f), -8f, Color(0xFF9EB8C0))
                 )
+                cards.forEach { (pos, rot, color) ->
+                    val cw = w * 0.34f; val ch = h * 0.36f
+                    rotate(rot, Offset(pos.x + cw / 2, pos.y + ch / 2)) {
+                        val rect = androidx.compose.ui.geometry.Rect(pos.x, pos.y, pos.x + cw, pos.y + ch)
+                        drawRoundRect(color.copy(alpha = 0.8f), topLeft = rect.topLeft, size = rect.size, cornerRadius = CornerRadius(6.dp.toPx()))
+                        drawRoundRect(Color.White.copy(alpha = 0.85f), topLeft = rect.topLeft, size = rect.size, cornerRadius = CornerRadius(6.dp.toPx()), style = Stroke(width = stroke * 0.8f))
+                        // A little title line glyph.
+                        drawRoundRect(Color.White.copy(alpha = 0.9f), topLeft = Offset(rect.left + 4.dp.toPx(), rect.top + 4.dp.toPx()), size = Size(rect.width * 0.55f, 2.dp.toPx()), cornerRadius = CornerRadius(1.dp.toPx()))
+                    }
+                }
             }
+            Text(
+                text = "✦",
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
+                color = Color.White.copy(alpha = 0.85f),
+                modifier = Modifier.offset(x = 80.dp, y = 4.dp)
+            )
+            Text(
+                text = "✧",
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
+                color = Color.White.copy(alpha = 0.7f),
+                modifier = Modifier.offset(x = 6.dp, y = 46.dp)
+            )
         }
         SettingsDesignVisual.PHOTOS -> Box(modifier) {
-            // Three polaroid snaps, fanned — nothing cut.
-            val colors = listOf(0xFF7E9C86, 0xFFC79F86, 0xFF9BB5A1)
-            val offsets = listOf(androidx.compose.ui.unit.IntOffset(2, 28), androidx.compose.ui.unit.IntOffset(26, 18), androidx.compose.ui.unit.IntOffset(50, 8))
-            val rots = listOf(10f, -4f, -14f)
-            colors.forEachIndexed { i, c ->
-                Box(
-                    modifier = Modifier
-                        .offset { offsets[i] }
-                        .rotate(rots[i])
-                        .size(width = 34.dp, height = 26.dp)
-                        .border(2.5.dp, Color(0xFFF8F0E8), RoundedCornerShape(4.dp))
-                        .background(Color(c))
+            // The history doodle — fanned polaroids, each with a hand-drawn
+            // photo window (sun + hill) and an outlined frame.
+            Canvas(Modifier.fillMaxSize()) {
+                val w = size.width; val h = size.height
+                val stroke = 2.dp.toPx()
+                val snaps = listOf(
+                    Triple(Offset(w * 0.06f, h * 0.44f), 9f, Color(0xFF7E9C86)),
+                    Triple(Offset(w * 0.32f, h * 0.32f), -3f, Color(0xFFC79F86)),
+                    Triple(Offset(w * 0.56f, h * 0.20f), -12f, Color(0xFF9BB5A1))
                 )
+                snaps.forEach { (pos, rot, color) ->
+                    val pw = w * 0.34f; val ph = h * 0.42f
+                    rotate(rot, Offset(pos.x + pw / 2, pos.y + ph / 2)) {
+                        // Cream print — fill + outline.
+                        val rect = androidx.compose.ui.geometry.Rect(pos.x, pos.y, pos.x + pw, pos.y + ph)
+                        drawRoundRect(Color(0xFFF8F0E8).copy(alpha = 0.9f), topLeft = rect.topLeft, size = rect.size, cornerRadius = CornerRadius(3.dp.toPx()))
+                        drawRoundRect(Color.White.copy(alpha = 0.85f), topLeft = rect.topLeft, size = rect.size, cornerRadius = CornerRadius(3.dp.toPx()), style = Stroke(width = stroke * 0.8f))
+                        // Photo window.
+                        val inset = 3.5.dp.toPx()
+                        val iw = pw - inset * 2; val ih = ph * 0.58f
+                        val irect = androidx.compose.ui.geometry.Rect(rect.left + inset, rect.top + inset, rect.left + inset + iw, rect.top + inset + ih)
+                        drawRect(color.copy(alpha = 0.85f), topLeft = irect.topLeft, size = irect.size)
+                        // Tiny sun.
+                        drawCircle(Color(0xFFFFD9A0).copy(alpha = 0.95f), radius = 1.8.dp.toPx(), center = Offset(irect.left + irect.width * 0.72f, irect.top + irect.height * 0.28f))
+                        // Tiny hill.
+                        val hill = Path().apply {
+                            moveTo(irect.left, irect.bottom)
+                            lineTo(irect.left + irect.width * 0.45f, irect.top + irect.height * 0.45f)
+                            lineTo(irect.right, irect.bottom)
+                            close()
+                        }
+                        drawPath(hill, Color.White.copy(alpha = 0.75f))
+                    }
+                }
             }
+            Text(
+                text = "✦",
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
+                color = Color.White.copy(alpha = 0.85f),
+                modifier = Modifier.offset(x = 82.dp, y = 2.dp)
+            )
+            Text(
+                text = "✧",
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
+                color = Color.White.copy(alpha = 0.7f),
+                modifier = Modifier.offset(x = 6.dp, y = 50.dp)
+            )
         }
         SettingsDesignVisual.SHARE -> Box(modifier) {
-            // The mini share card only — the floating share bubble is gone.
-            Box(
-                modifier = Modifier
-                    .offset(x = 4.dp, y = 8.dp)
-                    .rotate(-6f)
-                    .size(width = 68.dp, height = 46.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color(0xFFF6E9D5))
-                    .padding(6.dp)
-            ) {
-                Text(
-                    text = "CURIO",
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.5.sp),
-                    color = Color(0xFF6B4F45)
-                )
-                Text(
-                    text = "stay curious",
-                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
-                    color = Color(0xFF6B4F45)
-                )
+            // The share doodle — a tilted mini card with two ink lines and
+            // an upward share arrow (the flask language).
+            Canvas(Modifier.fillMaxSize()) {
+                val w = size.width; val h = size.height
+                val stroke = 2.dp.toPx()
+                // Mini card, tilted.
+                val cw = w * 0.58f; val ch = h * 0.48f
+                val pos = Offset(w * 0.12f, h * 0.38f)
+                rotate(-6f, Offset(pos.x + cw / 2, pos.y + ch / 2)) {
+                    val rect = androidx.compose.ui.geometry.Rect(pos.x, pos.y, pos.x + cw, pos.y + ch)
+                    drawRoundRect(Color(0xFFF6E9D5).copy(alpha = 0.9f), topLeft = rect.topLeft, size = rect.size, cornerRadius = CornerRadius(7.dp.toPx()))
+                    drawRoundRect(Color.White.copy(alpha = 0.85f), topLeft = rect.topLeft, size = rect.size, cornerRadius = CornerRadius(7.dp.toPx()), style = Stroke(width = stroke * 0.8f))
+                    // Two ink lines ("CURIO" + "stay curious").
+                    drawRoundRect(Color(0xFF6B4F45).copy(alpha = 0.55f), topLeft = Offset(rect.left + 5.dp.toPx(), rect.top + 5.dp.toPx()), size = Size(rect.width * 0.42f, 2.4.dp.toPx()), cornerRadius = CornerRadius(1.2.dp.toPx()))
+                    drawRoundRect(Color(0xFF6B4F45).copy(alpha = 0.35f), topLeft = Offset(rect.left + 5.dp.toPx(), rect.top + 9.dp.toPx()), size = Size(rect.width * 0.62f, 2.4.dp.toPx()), cornerRadius = CornerRadius(1.2.dp.toPx()))
+                }
+                // Upward share arrow — stem + head.
+                val ax = w * 0.80f
+                val baseY = h * 0.82f
+                drawLine(Color.White.copy(alpha = 0.9f), Offset(ax, baseY), Offset(ax, baseY - h * 0.40f), strokeWidth = 2.dp.toPx())
+                val head = Path().apply {
+                    moveTo(ax - w * 0.10f, baseY - h * 0.28f)
+                    lineTo(ax, baseY - h * 0.44f)
+                    lineTo(ax + w * 0.10f, baseY - h * 0.28f)
+                    close()
+                }
+                drawPath(head, Color.White.copy(alpha = 0.9f))
             }
+            Text(
+                text = "✦",
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
+                color = Color.White.copy(alpha = 0.85f),
+                modifier = Modifier.offset(x = 68.dp, y = 2.dp)
+            )
+            Text(
+                text = "✧",
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
+                color = Color.White.copy(alpha = 0.7f),
+                modifier = Modifier.offset(x = 4.dp, y = 46.dp)
+            )
         }
         SettingsDesignVisual.FLASK -> Box(modifier) {
             // The experiments flask — a proper drawing: glass flask with
@@ -1796,14 +1957,27 @@ private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier 
             )
         }
         SettingsDesignVisual.CLOUD -> Box(modifier) {
-            // The backup cloud — a soft sun, a cloud, and an upload arrow
-            // (backup = sending your data up).
+            // The backup doodle — a rayed sun behind a hand-drawn cloud
+            // with an outlined upload arrow (the flask language).
             Canvas(Modifier.fillMaxSize()) {
                 val w = size.width
                 val h = size.height
-                // Soft sun behind the cloud.
-                drawCircle(Color(0xFFFFD9A0).copy(alpha = 0.55f), radius = w * 0.15f, center = Offset(w * 0.74f, h * 0.20f))
-                // The cloud — three lobes on a flat base.
+                val stroke = 2.dp.toPx()
+                // Sun behind the cloud — soft fill, outline + little rays.
+                val sunC = Offset(w * 0.76f, h * 0.20f)
+                drawCircle(Color(0xFFFFD9A0).copy(alpha = 0.55f), radius = w * 0.14f, center = sunC)
+                drawCircle(Color.White.copy(alpha = 0.85f), radius = w * 0.14f, center = sunC, style = Stroke(width = stroke * 0.8f))
+                listOf(0f, 45f, 90f, 135f, 180f, 225f, 270f, 315f).forEach { deg ->
+                    val rad = Math.toRadians(deg.toDouble())
+                    val dir = Offset(kotlin.math.cos(rad).toFloat(), kotlin.math.sin(rad).toFloat())
+                    drawLine(
+                        Color.White.copy(alpha = 0.7f),
+                        sunC + dir * (w * 0.17f),
+                        sunC + dir * (w * 0.21f),
+                        strokeWidth = 1.2.dp.toPx()
+                    )
+                }
+                // The cloud — three lobes on a flat base, fill + outline.
                 val baseY = h * 0.74f
                 val cloud = Path().apply {
                     moveTo(w * 0.06f, baseY)
@@ -1814,27 +1988,42 @@ private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier 
                     close()
                 }
                 drawPath(cloud, Color.White.copy(alpha = 0.82f))
-                // Upload arrow — stem + filled head.
+                drawPath(cloud, Color.White.copy(alpha = 0.9f), style = Stroke(width = stroke * 0.8f))
+                // Upload arrow — stem + head, outlined in white.
                 val ax = w * 0.50f
                 val headY = h * 0.52f
-                drawLine(Color(0xFF8490A6).copy(alpha = 0.95f), Offset(ax, h * 0.96f), Offset(ax, headY), strokeWidth = 2.4.dp.toPx())
+                drawLine(Color.White.copy(alpha = 0.95f), Offset(ax, h * 0.96f), Offset(ax, headY), strokeWidth = 2.dp.toPx())
                 val head = Path().apply {
                     moveTo(ax - w * 0.11f, headY + h * 0.16f)
                     lineTo(ax, headY)
                     lineTo(ax + w * 0.11f, headY + h * 0.16f)
                     close()
                 }
-                drawPath(head, Color(0xFF8490A6).copy(alpha = 0.95f))
+                drawPath(head, Color.White.copy(alpha = 0.95f))
             }
+            Text(
+                text = "✦",
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
+                color = Color.White.copy(alpha = 0.85f),
+                modifier = Modifier.offset(x = 78.dp, y = 2.dp)
+            )
+            Text(
+                text = "✧",
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
+                color = Color.White.copy(alpha = 0.7f),
+                modifier = Modifier.offset(x = 4.dp, y = 46.dp)
+            )
         }
         SettingsDesignVisual.IMAGE -> Box(modifier) {
-            // Book covers — an open book whose right page carries a little
-            // cover art (sun over a hill).
+            // The book-covers doodle — an open book whose right page
+            // carries a little outlined cover scene (sun + hill), with
+            // sparkles (the flask language).
             Canvas(Modifier.fillMaxSize()) {
                 val w = size.width
                 val h = size.height
+                val stroke = 2.dp.toPx()
                 val baseY = h * 0.86f
-                // Left page.
+                // Left page — fill + outline.
                 val left = Path().apply {
                     moveTo(w * 0.08f, baseY)
                     lineTo(w * 0.08f, h * 0.22f)
@@ -1843,6 +2032,7 @@ private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier 
                     close()
                 }
                 drawPath(left, Color.White.copy(alpha = 0.85f))
+                drawPath(left, Color.White.copy(alpha = 0.95f), style = Stroke(width = stroke * 0.8f))
                 // Right page.
                 val right = Path().apply {
                     moveTo(w * 0.50f, h * 0.38f)
@@ -1852,8 +2042,10 @@ private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier 
                     close()
                 }
                 drawPath(right, Color.White.copy(alpha = 0.62f))
-                // Cover art on the right page — sun over a hill.
+                drawPath(right, Color.White.copy(alpha = 0.9f), style = Stroke(width = stroke * 0.8f))
+                // Cover art on the right page — sun over a hill, outlined.
                 drawCircle(Color(0xFFFFD9A0).copy(alpha = 0.9f), radius = 4.dp.toPx(), center = Offset(w * 0.70f, h * 0.40f))
+                drawCircle(Color.White.copy(alpha = 0.85f), radius = 4.dp.toPx(), center = Offset(w * 0.70f, h * 0.40f), style = Stroke(width = 1.dp.toPx()))
                 val hill = Path().apply {
                     moveTo(w * 0.58f, h * 0.60f)
                     lineTo(w * 0.70f, h * 0.46f)
@@ -1861,9 +2053,22 @@ private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier 
                     close()
                 }
                 drawPath(hill, Color(0xFF9BB5A1).copy(alpha = 0.95f))
+                drawPath(hill, Color.White.copy(alpha = 0.8f), style = Stroke(width = 1.dp.toPx()))
                 // Spine.
-                drawLine(Color(0xFF6B4F45).copy(alpha = 0.45f), Offset(w * 0.50f, h * 0.38f), Offset(w * 0.50f, baseY), strokeWidth = 1.2.dp.toPx())
+                drawLine(Color(0xFF6B4F45).copy(alpha = 0.5f), Offset(w * 0.50f, h * 0.38f), Offset(w * 0.50f, baseY), strokeWidth = 1.2.dp.toPx())
             }
+            Text(
+                text = "✦",
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
+                color = Color.White.copy(alpha = 0.85f),
+                modifier = Modifier.offset(x = 82.dp, y = 2.dp)
+            )
+            Text(
+                text = "✧",
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
+                color = Color.White.copy(alpha = 0.7f),
+                modifier = Modifier.offset(x = 6.dp, y = 46.dp)
+            )
         }
     }
 }
@@ -2120,12 +2325,12 @@ internal fun SettingsNavRail(
                 }
             }
         }
-        // The active page's quick tools — key deep settings surfaced right
-        // on the rail so a frequent control is one tap away without opening
-        // the page (only when a nav controller is available to open them).
+        // The quick tools — key deep settings surfaced right on the rail so
+        // a frequent control is one tap away without opening the page (only
+        // when a nav controller is available to open them).
         if (navController != null) {
             Spacer(Modifier.height(6.dp))
-            SettingsQuickTools(active = active, navController = navController)
+            SettingsQuickTools(navController = navController)
         }
     }
 }
@@ -2139,40 +2344,42 @@ private data class QuickTool(
     val rowKey: String? = null
 )
 
-/** The rail's quick tools rotate with the ACTIVE page: the page's key deep
- *  settings surface under the nav chips so a frequent control is one tap
- *  away without opening the page. Pages without deep rows (and the hub
- *  itself) fall back to the app's most-reached settings. */
-private fun quickToolsFor(active: String?): List<QuickTool> = when (active) {
-    "appearance" -> listOf(
-        QuickTool(CurioIcons.DarkMode, "Theme", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-theme"),
-        QuickTool(CurioIcons.Palette, "Category tint", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-tint"),
-        QuickTool(CurioIcons.AutoAwesome, "Pastel colors", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-pastel"),
-        QuickTool(CurioIcons.AutoAwesome, "Adaptive Hero", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-hero-lane")
-    )
-    "preferences" -> listOf(
-        QuickTool(CurioIcons.Search, "Search engine", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-search-engine"),
-        QuickTool(CurioIcons.Timer, "Explore sessions", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-sessions"),
-        QuickTool(CurioIcons.Pets, "Pet games", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-pet-games"),
-        QuickTool(CurioIcons.Notifications, "Shuffle reminder", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-reminder")
-    )
-    "recording" -> listOf(
-        QuickTool(CurioIcons.Mic, "Audio quality", CurioRoutes.SETTINGS_RECORDING, SettingsPage.RECORDING, "recording-quality"),
-        QuickTool(CurioIcons.Edit, "Voice-to-text", CurioRoutes.SETTINGS_RECORDING, SettingsPage.RECORDING, "recording-voice"),
-        QuickTool(CurioIcons.Download, "Offline model", CurioRoutes.SETTINGS_RECORDING, SettingsPage.RECORDING, "recording-offline-model")
-    )
-    "backup" -> listOf(
-        QuickTool(CurioIcons.Backup, "Backup tools", CurioRoutes.SETTINGS_DATA),
-        QuickTool(CurioIcons.Delete, "Recycle bin", CurioRoutes.RECYCLE_BIN),
-        QuickTool(CurioIcons.Image, "Book covers", CurioRoutes.SETTINGS_BOOK_COVER),
-        QuickTool(CurioIcons.Download, "Updates", CurioRoutes.UPDATES)
-    )
-    else -> listOf(
-        QuickTool(CurioIcons.DarkMode, "Theme", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-theme"),
-        QuickTool(CurioIcons.Mic, "Audio quality", CurioRoutes.SETTINGS_RECORDING, SettingsPage.RECORDING, "recording-quality"),
-        QuickTool(CurioIcons.Delete, "Recycle bin", CurioRoutes.RECYCLE_BIN),
-        QuickTool(CurioIcons.Download, "Updates", CurioRoutes.UPDATES)
-    )
+/** The quick-tools ROTATION — one curated pool of genuinely useful deep
+ *  settings drawn from EVERY settings sub-page (not just the open page's
+ *  own rows). The rail shows a window of this pool and CYCLES through it
+ *  deterministically: each time a settings screen shows the rail, the
+ *  window advances, so the quick tools are different on every visit while
+ *  staying stable within the screen's lifetime (never random). */
+private val quickToolsRotation = listOf(
+    QuickTool(CurioIcons.DarkMode, "Theme", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-theme"),
+    QuickTool(CurioIcons.Palette, "Category tint", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-tint"),
+    QuickTool(CurioIcons.AutoAwesome, "Pastel colors", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-pastel"),
+    QuickTool(CurioIcons.Search, "Search engine", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-search-engine"),
+    QuickTool(CurioIcons.Timer, "Explore sessions", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-sessions"),
+    QuickTool(CurioIcons.Notifications, "Daily reminder", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-reminder"),
+    QuickTool(CurioIcons.Mic, "Audio quality", CurioRoutes.SETTINGS_RECORDING, SettingsPage.RECORDING, "recording-quality"),
+    QuickTool(CurioIcons.Edit, "Voice-to-text", CurioRoutes.SETTINGS_RECORDING, SettingsPage.RECORDING, "recording-voice"),
+    QuickTool(CurioIcons.Download, "Offline model", CurioRoutes.SETTINGS_RECORDING, SettingsPage.RECORDING, "recording-offline-model"),
+    QuickTool(CurioIcons.Delete, "Recycle bin", CurioRoutes.RECYCLE_BIN),
+    QuickTool(CurioIcons.Image, "Book covers", CurioRoutes.SETTINGS_BOOK_COVER),
+    QuickTool(CurioIcons.Download, "Updates", CurioRoutes.UPDATES)
+)
+
+/** How many quick tools ride one rail window. */
+private const val QuickToolsPerWindow = 4
+
+/** Deterministic cycle pointer — advances one window per rail show. */
+private object QuickToolsCycle { var index = 0 }
+
+/** The next rotation window (4 tools), advancing the cycle by one. */
+private fun nextQuickToolsWindow(): List<QuickTool> {
+    val start = (QuickToolsCycle.index % quickToolsRotation.size + quickToolsRotation.size) % quickToolsRotation.size
+    QuickToolsCycle.index++
+    return buildList {
+        repeat(QuickToolsPerWindow) { i ->
+            add(quickToolsRotation[(start + i) % quickToolsRotation.size])
+        }
+    }
 }
 
 /** The quick-tools chip row under the nav rail — frosted pills, one tap
@@ -2180,10 +2387,12 @@ private fun quickToolsFor(active: String?): List<QuickTool> = when (active) {
  *  sub-section screen). */
 @Composable
 private fun SettingsQuickTools(
-    active: String?,
     navController: NavController
 ) {
-    val tools = quickToolsFor(active)
+    // v3xx — CYCLE: `remember` runs once per composition entry (one rail
+    // show), pulling the next window of the global rotation. Recomposition
+    // reuses the same window, so the chips never flicker mid-screen.
+    val tools = remember { nextQuickToolsWindow() }
     if (tools.isEmpty()) return
     val dark = isCurioDarkTheme()
     Row(verticalAlignment = Alignment.CenterVertically) {

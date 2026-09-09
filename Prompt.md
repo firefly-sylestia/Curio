@@ -1,4 +1,80 @@
 # Prompt Log — current request
+## Request (2026-09-09, completed + pushed — CI smart-cast fix + settings design pass: doodle drawings, quick-tools cycle, rail glitch, page animation, topic history, book covers)
+
+**Request (pending-prompt slot):** "the settings drawings are still not
+very good, i like the experiments drawing it gives that doodles vibe, can
+u do the same for book covers and all just keep the recordings the same
+as of now, and do all others in the doodle style, and then the topic
+history still isnt complementing the design, and the quick settings
+options arent helpful and i need them to be rotated i mean different ones
+each time spread across the settings sub pages, also the book covers
+buttons the fetch all covers etc still doesnt complement the design so do
+it and analyse for more things that doesnt complement the design. also
+theres a glitch of wrong active indicator in the top rail, im in all
+settings but it says pet designer, and also the animation of page opening
+well it can be smoother and better also the book browser need the design
+consistency"
+
+**CI fix first (pushed `9abd7158`):** `CaptureEntityLight.toEntry()`
+passed the nullable `formatDataJsonLight` property straight into
+`CaptureConverters.deserializeCaptureData(String)` inside a `runCatching`
+lambda — the `!= null` check can't smart-cast a property into a lambda,
+so both compileDebug/ReleaseKotlin failed at CaptureEntity.kt:306. Fixed
+by copying to a local `val dataJson` before the lambda.
+
+**User answers (ask_user):** quick tools = CYCLE through a deterministic
+rotation; topic history = settings design language (frosted cards, icon
+tiles, Playfair headings); page-open = softer, slower settings push.
+
+**What shipped (all committed + pushed with this batch):**
+1. **Doodle-style card drawings** (SettingsHubScreen `SettingsCardVisual`)
+   — every hub card visual except Recording (WAVE kept per request) and
+   Experiments (FLASK is the reference) is now hand-drawn in the flask
+   language: white outline strokes + pastel fills + ✦/✧ sparkles.
+   SWATCHES → tilted painter's palette w/ blobs + thumb hole; PET →
+   doodle pet face (ears, dot eyes, blush, smile); COMPASS → outlined
+   ring + cardinal ticks + needle over outlined mountains; CARDS →
+   fanned outlined cards with title-line glyphs; PHOTOS → fanned
+   polaroids each with a sun+hill photo; SHARE → tilted mini card + ink
+   lines + upward arrow; CLOUD → rayed sun behind outlined cloud +
+   white upload arrow; IMAGE → outlined open book with outlined cover
+   scene. All inside the 92×62 box, bottom-right corner clear.
+2. **Quick tools CYCLE** — `quickToolsFor(active)` replaced by a curated
+   `quickToolsRotation` pool drawn from EVERY sub-page (theme, category
+   tint, pastel, search engine, sessions, reminder, audio quality,
+   voice-to-text, offline model, recycle bin, book covers, updates).
+   `remember { nextQuickToolsWindow() }` advances a process-lifetime
+   `QuickToolsCycle` index once per rail show (4 chips per window) —
+   different on every visit, deterministic, stable while on the page.
+3. **Rail indicator glitch fixed** — the hub's `activeNav` was
+   rememberSaveable, so returning from a section restored the LAST
+   clicked chip ("All settings" showing "Pet designer" lit).
+   `LaunchedEffect(Unit) { activeNav = "all" }` resets the hub's own
+   chip whenever the hub (re)enters composition. Sub-pages already pass
+   the correct explicit active.
+4. **Page-open animation** (CurioNavHost) — generic forward push now
+   slides from 1/6 of the width (was 1/4) over `Deliberate` (500ms, was
+   Morph 450) so settings-family opens glide instead of snap; exit drifts
+   -1/8; pop-enter slides from -1/8; pop-exit +1/8 — all mirrored and
+   slower.
+5. **Topic history → settings language** (TopicHistoryScreen) —
+   HistoryRow / SentimentTopicRow / PinnedRow are frosted cards (white
+   0.68 / surfaceContainerHigh 0.55, rounded 20) with 13dp-rounded icon
+   tiles tinted by the lane (`cat.tint` 0.30 light, white 0.09 dark);
+   Favorite / Pinned-for-later / day-group headers are the shared
+   Playfair `SettingsSectionHeading` (glyph + rule, count folded in);
+   the unpin pill is the frosted chip with warm ink.
+6. **Book covers buttons** (BookCoverHubScreen) — `HubButton` is the
+   warm rose family: Fetch all covers = solid rose (`curioRoseInk()` /
+   dark `0xFF815947`) with cream ink; Retry/Ratings/Clear = frosted
+   rose-glass (`curioPillTintLift()`) with rose ink; disabled buttons
+   dim (alpha 0.5); the progress Cancel pill is frosted rose-glass and
+   the per-row Retry pill matches the primary.
+7. **Book browser consistency** (BookBrowserScreen) — rows are frosted
+   cards (rounded 20, same fills) instead of flat `surfaceContainerLow`.
+
+**Changelog:** 20260921.txt gained the matching ADD/FIX bullets.
+
 ## Request (2026-09-08, completed — settings card foot visuals redrawn)
 
 **Request (pending-prompt slot):** the settings cards' decorative drawings
@@ -1328,4 +1404,10 @@ updated in lockstep. Committed + pushed as 47e17d5c, CI green.)
 3. .gitignore: `logcat_recording_*.txt`.
 
 ## next prompt 
-the settings drawings are still not very good, i like the experiments drawing it gives that doodles vibe, can u do the same for book covers and all just keep the recordings the same as of now, and do all others in the doodle style, and then the topic history still isnt complementing the design, and the quick settings options arent helpful and i need them to be rotated i mean different ones each time spread across the settings sub pages, also the book covers buttons the fetch all covers etc still doesnt complement the design so do it and analyse for more things that doesnt complement the design. also theres a glitch of wrong active indicator in the top rail, im in all settings but it says pet designer, and also the animation of page opening well it can be smoother and better also the book browser need the design consistency
+the verything page inside well it needs redesign, the recent and then its getiing devided into category i dont want that wait i will show you what i want
+
+**Status: pending — the user said they will show what they want for the
+Everything-page redesign; do not implement yet (the settings design pass
+that was pending above shipped on 2026-09-09).**
+
+next prompt. (empty — awaiting the user's Everything-page details) 
