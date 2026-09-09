@@ -208,6 +208,33 @@ private val popScreenRoutePrefixes: Set<String> = setOf(
 private fun isPopScreenRoute(entry: NavBackStackEntry): Boolean =
     entry.destination.route?.substringBefore("/") in popScreenRoutePrefixes
 
+/**
+ * Routes that render the shared settings chrome (hero + nav rail) — the
+ * hub, every settings/* sub-page, and the rail destinations (share hub,
+ * topic history, experiments, categories, pet designer, support, recycle
+ * bin, updates). Navigation that STAYS inside this family crossfades
+ * (pure fade, no scale, no slide): the header sits in the same place on
+ * both screens, so a directional slide or scale re-reads as the header
+ * jumping while the content text and lower pages fade — the calm,
+ * stable settings handoff the rail glide was fighting.
+ */
+private val settingsFamilyRoutePrefixes: Set<String> = setOf(
+    CurioRoutes.SETTINGS, // hub + every settings/* page (prefix match)
+    CurioRoutes.EXPERIMENTS,
+    CurioRoutes.USER_EXPERIMENTS,
+    CurioRoutes.MANAGE_CATEGORIES,
+    CurioRoutes.TOPIC_HISTORY,
+    CurioRoutes.SHARE_HUB,
+    CurioRoutes.PET_DESIGNER,
+    CurioRoutes.SUPPORT,
+    CurioRoutes.RECYCLE_BIN,
+    CurioRoutes.UPDATES
+)
+
+/** True when the entry is inside the settings family (shared chrome). */
+private fun isSettingsFamilyRoute(entry: NavBackStackEntry): Boolean =
+    entry.destination.route?.substringBefore("/") in settingsFamilyRoutePrefixes
+
 private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch(
     initialState: NavBackStackEntry,
     targetState: NavBackStackEntry
@@ -549,6 +576,14 @@ fun CurioNavHost(
             // implemented).
             enterTransition = {
                 when {
+                    // Settings-internal switches (hub ⇄ sections ⇄ drill-in
+                    // tools): pure crossfade. Both pages share the same
+                    // chrome (hero + nav rail) in the same place, so the
+                    // fade reads as the header staying put while the content
+                    // text and the lower pages fade out/in — no scale, no
+                    // directional slide.
+                    isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->
+                        fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
                     // Reveal is the continuation of the landed Spin ticket:
                     // fade instead of the generic horizontal page slide — the
                     // shared "reveal-hero" element (Spin ticket → Reveal
@@ -605,6 +640,12 @@ fun CurioNavHost(
             },
             exitTransition = {
                 when {
+                    // Settings-internal switches mirror the calm fade: the
+                    // outgoing page's text + lower content fades out under
+                    // the incoming page's fade-in (the shared chrome reads
+                    // as staying still).
+                    isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->
+                        fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
                     // Leave the Spin ticket in place while Reveal expands:
                     // the fade is paced to the shared-element morph so the
                     // source card stays visible for the whole expansion
@@ -644,6 +685,11 @@ fun CurioNavHost(
             },
             popEnterTransition = {
                 when {
+                    // Popping back inside settings (section → hub, drill-in
+                    // → section): the page underneath fades back in the same
+                    // gentle crossfade as the forward switch.
+                    isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->
+                        fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
                     // Popping back from Topic Reveal: fade only — the shared
                     // element morph reverses the hero into the card, and a
                     // directional slide would fight it.
@@ -672,6 +718,10 @@ fun CurioNavHost(
             },
             popExitTransition = {
                 when {
+                    // Popping back inside settings: the outgoing page fades
+                    // out over the same crossfade.
+                    isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->
+                        fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
                     // Popping Topic Reveal: fade the page out under the
                     // reversing morph instead of sliding it sideways.
                     initialState.destination.route == CurioRoutes.REVEAL ->

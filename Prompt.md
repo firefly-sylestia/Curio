@@ -1443,15 +1443,24 @@ updated in lockstep. Committed + pushed as 47e17d5c, CI green.)
    `dominantColorCache` is a ConcurrentHashMap now.
 3. .gitignore: `logcat_recording_*.txt`.
 
+## request log — settings doodle redraws + stable nav rail (done 2026-09-09, pushed)
+1. Redrew the four disliked hub-card doodles in the flask family with ONE
+   clean subject each (user chose "same family, simpler subjects"):
+   Preferences is now a hand-drawn slider + toggle (was compass + mountains);
+   Backup a single cloud with an up arrow (rayed sun removed); Topic history
+   a clock with a bookmark ribbon (was fanned polaroids); Book covers a
+   small fanned stack of books (was an open book + mini scene). Appearance /
+   Pet / Categories / Share / Experiments / Recording visuals untouched.
+2. Nav rail stable header: the rail no longer animate-scrolls to the active
+   chip on every page open (the glide from index 0 read as a jump) — the
+   LazyRow now composes ALREADY at the active chip via
+   `rememberLazyListState(initialFirstVisibleItemIndex = …)`.
+3. Settings-internal navigation (hub ⇄ sections ⇄ drill-ins — the shared
+   chrome family: settings/*, share hub, topic history, experiments,
+   categories, pet designer, support, recycle bin, updates) now crossfades
+   (pure fade, no scale, no slide) — the header reads as stable while the
+   content text + lower pages fade out/in, per the user's note ("keep the
+   header stable and just smoothly fade out the text and the bottom pages").
+
 ## next prompt 
-love the doodles arts of apperance, per designer, and all other, just not the prefernace, and backup histroy and book covers, so redraw them properly a differnt style, also the auto scroll of the nav rail of the top is glitchy 
-
-**Status: pending (2026-09-09) — the Everything-page masonry + text-history
-browser + Support duplicate-header prompt above shipped in this push; this
-is the next prompt.**
-
-next prompt. Redraw Preferences, Backup/History and Book covers doodles in a
-properly different style (Appearance / Pet designer / all the others stay);
-fix the glitchy auto-scroll of the top nav rail — user detail (2026-09-09):
-keep the header stable and just smoothly fade out the text and the bottom
-pages instead of the rail scrolling — it'll be smoother. 
+(empty — awaiting the next instruction.)

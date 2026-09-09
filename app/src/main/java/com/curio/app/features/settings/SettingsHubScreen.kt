@@ -1719,35 +1719,61 @@ private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier 
             )
         }
         SettingsDesignVisual.COMPASS -> Box(modifier) {
-            // The preferences doodle — a hand-drawn compass over soft
-            // mountains: outlined ring, tick marks, needle and sparkles.
+            // The preferences doodle — a hand-drawn settings slider with a
+            // toggle below (one clean subject, the flask language): tick
+            // row, track + knob, then a pill toggle switched on.
             Canvas(Modifier.fillMaxSize()) {
                 val w = size.width; val h = size.height
                 val stroke = 2.dp.toPx()
-                // Two soft mountains, bottom-left, outlined.
-                val m1 = Path().apply { moveTo(w * 0.00f, h); lineTo(w * 0.30f, h * 0.50f); lineTo(w * 0.58f, h); close() }
-                drawPath(m1, Color(0xFF46656C).copy(alpha = 0.45f))
-                drawPath(m1, Color.White.copy(alpha = 0.6f), style = Stroke(width = 1.dp.toPx()))
-                val m2 = Path().apply { moveTo(w * 0.28f, h); lineTo(w * 0.56f, h * 0.24f); lineTo(w * 0.80f, h); close() }
-                drawPath(m2, Color(0xFF495E74).copy(alpha = 0.35f))
-                drawPath(m2, Color.White.copy(alpha = 0.55f), style = Stroke(width = 1.dp.toPx()))
-                // Compass ring — soft fill + clean outline.
-                val cx = w * 0.60f; val cy = h * 0.38f; val r = w * 0.26f
-                drawCircle(Color(0xFFC9D6E8).copy(alpha = 0.40f), radius = r, center = Offset(cx, cy))
-                drawCircle(Color.White.copy(alpha = 0.9f), radius = r, center = Offset(cx, cy), style = Stroke(width = stroke))
-                // Cardinal ticks.
-                listOf(
-                    Offset(cx, cy - r * 0.92f),
-                    Offset(cx, cy + r * 0.92f),
-                    Offset(cx - r * 0.92f, cy),
-                    Offset(cx + r * 0.92f, cy)
-                ).forEach { t ->
-                    drawLine(Color.White.copy(alpha = 0.85f), t, t, strokeWidth = 3.dp.toPx())
+                val trackX0 = w * 0.16f; val trackX1 = w * 0.84f
+                val trackY = h * 0.34f
+                // Fine-tuning ticks above the track.
+                listOf(0.22f, 0.37f, 0.52f, 0.67f, 0.82f).forEach { fx ->
+                    drawLine(
+                        Color.White.copy(alpha = 0.55f),
+                        Offset(trackX0 + (trackX1 - trackX0) * fx, trackY - 15.dp.toPx()),
+                        Offset(trackX0 + (trackX1 - trackX0) * fx, trackY - 8.dp.toPx()),
+                        strokeWidth = 1.2.dp.toPx()
+                    )
                 }
-                // Needle — solid north, pale south, pivot dot.
-                drawPath(Path().apply { moveTo(cx, cy - r * 0.72f); lineTo(cx - r * 0.30f, cy + r * 0.14f); lineTo(cx + r * 0.30f, cy + r * 0.14f); close() }, color = Color(0xFF687A91).copy(alpha = 0.9f))
-                drawPath(Path().apply { moveTo(cx, cy + r * 0.72f); lineTo(cx - r * 0.30f, cy + r * 0.14f); lineTo(cx + r * 0.30f, cy + r * 0.14f); close() }, color = Color(0xFF687A91).copy(alpha = 0.35f))
-                drawCircle(Color(0xFF687A91), radius = 1.6.dp.toPx(), center = Offset(cx, cy))
+                // Slider track — pale blue fill + clean outline.
+                val trackH = 7.dp.toPx()
+                drawRoundRect(
+                    Color(0xFFAFC2DA).copy(alpha = 0.65f),
+                    topLeft = Offset(trackX0, trackY - trackH / 2),
+                    size = Size(trackX1 - trackX0, trackH),
+                    cornerRadius = CornerRadius(trackH / 2)
+                )
+                drawRoundRect(
+                    Color.White.copy(alpha = 0.9f),
+                    topLeft = Offset(trackX0, trackY - trackH / 2),
+                    size = Size(trackX1 - trackX0, trackH),
+                    cornerRadius = CornerRadius(trackH / 2),
+                    style = Stroke(width = stroke * 0.7f)
+                )
+                // Knob — cream fill, outline, center dot.
+                val knobX = trackX0 + (trackX1 - trackX0) * 0.38f
+                drawCircle(Color(0xFFF4EEE3).copy(alpha = 0.92f), radius = 8.5.dp.toPx(), center = Offset(knobX, trackY))
+                drawCircle(Color.White.copy(alpha = 0.95f), radius = 8.5.dp.toPx(), center = Offset(knobX, trackY), style = Stroke(width = stroke))
+                drawCircle(Color(0xFF687A91).copy(alpha = 0.85f), radius = 1.7.dp.toPx(), center = Offset(knobX, trackY))
+                // Toggle pill below — on (knob to the right), outlined.
+                val pillW = w * 0.30f; val pillH = 15.dp.toPx()
+                val pillX = w * 0.50f - pillW / 2; val pillY = h * 0.66f
+                drawRoundRect(
+                    Color(0xFF8FA9C9).copy(alpha = 0.7f),
+                    topLeft = Offset(pillX, pillY),
+                    size = Size(pillW, pillH),
+                    cornerRadius = CornerRadius(pillH / 2)
+                )
+                drawRoundRect(
+                    Color.White.copy(alpha = 0.9f),
+                    topLeft = Offset(pillX, pillY),
+                    size = Size(pillW, pillH),
+                    cornerRadius = CornerRadius(pillH / 2),
+                    style = Stroke(width = stroke * 0.7f)
+                )
+                drawCircle(Color.White.copy(alpha = 0.96f), radius = pillH * 0.40f, center = Offset(pillX + pillW * 0.74f, pillY + pillH / 2))
+                drawCircle(Color.White.copy(alpha = 0.9f), radius = pillH * 0.40f, center = Offset(pillX + pillW * 0.74f, pillY + pillH / 2), style = Stroke(width = stroke * 0.7f))
             }
             Text(
                 text = "✦",
@@ -1812,40 +1838,52 @@ private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier 
             )
         }
         SettingsDesignVisual.PHOTOS -> Box(modifier) {
-            // The history doodle — fanned polaroids, each with a hand-drawn
-            // photo window (sun + hill) and an outlined frame.
+            // The history doodle — a hand-drawn clock with a bookmark
+            // ribbon tucked behind its top (one clean subject, the flask
+            // language): time + saved.
             Canvas(Modifier.fillMaxSize()) {
                 val w = size.width; val h = size.height
                 val stroke = 2.dp.toPx()
-                val snaps = listOf(
-                    Triple(Offset(w * 0.06f, h * 0.44f), 9f, Color(0xFF7E9C86)),
-                    Triple(Offset(w * 0.32f, h * 0.32f), -3f, Color(0xFFC79F86)),
-                    Triple(Offset(w * 0.56f, h * 0.20f), -12f, Color(0xFF9BB5A1))
-                )
-                snaps.forEach { (pos, rot, color) ->
-                    val pw = w * 0.34f; val ph = h * 0.42f
-                    rotate(rot, Offset(pos.x + pw / 2, pos.y + ph / 2)) {
-                        // Cream print — fill + outline.
-                        val rect = androidx.compose.ui.geometry.Rect(pos.x, pos.y, pos.x + pw, pos.y + ph)
-                        drawRoundRect(Color(0xFFF8F0E8).copy(alpha = 0.9f), topLeft = rect.topLeft, size = rect.size, cornerRadius = CornerRadius(3.dp.toPx()))
-                        drawRoundRect(Color.White.copy(alpha = 0.85f), topLeft = rect.topLeft, size = rect.size, cornerRadius = CornerRadius(3.dp.toPx()), style = Stroke(width = stroke * 0.8f))
-                        // Photo window.
-                        val inset = 3.5.dp.toPx()
-                        val iw = pw - inset * 2; val ih = ph * 0.58f
-                        val irect = androidx.compose.ui.geometry.Rect(rect.left + inset, rect.top + inset, rect.left + inset + iw, rect.top + inset + ih)
-                        drawRect(color.copy(alpha = 0.85f), topLeft = irect.topLeft, size = irect.size)
-                        // Tiny sun.
-                        drawCircle(Color(0xFFFFD9A0).copy(alpha = 0.95f), radius = 1.8.dp.toPx(), center = Offset(irect.left + irect.width * 0.72f, irect.top + irect.height * 0.28f))
-                        // Tiny hill.
-                        val hill = Path().apply {
-                            moveTo(irect.left, irect.bottom)
-                            lineTo(irect.left + irect.width * 0.45f, irect.top + irect.height * 0.45f)
-                            lineTo(irect.right, irect.bottom)
-                            close()
-                        }
-                        drawPath(hill, Color.White.copy(alpha = 0.75f))
-                    }
+                val cx = w * 0.52f; val cy = h * 0.54f; val r = w * 0.28f
+                // Ribbon — peeks above the clock rim, tail hangs inside.
+                val ribbon = Path().apply {
+                    moveTo(cx - w * 0.075f, cy - r * 1.18f)
+                    lineTo(cx + w * 0.075f, cy - r * 1.18f)
+                    lineTo(cx + w * 0.075f, cy - r * 0.10f)
+                    lineTo(cx, cy - r * 0.32f)
+                    lineTo(cx - w * 0.075f, cy - r * 0.10f)
+                    close()
                 }
+                drawPath(ribbon, Color(0xFF9CC3A8).copy(alpha = 0.85f))
+                drawPath(ribbon, Color.White.copy(alpha = 0.9f), style = Stroke(width = stroke * 0.7f))
+                // Clock face — mint fill + outline.
+                drawCircle(Color(0xFFE0ECE4).copy(alpha = 0.9f), radius = r, center = Offset(cx, cy))
+                drawCircle(Color.White.copy(alpha = 0.95f), radius = r, center = Offset(cx, cy), style = Stroke(width = stroke))
+                // Hour ticks — 12 / 3 / 6 / 9.
+                listOf(0f, 90f, 180f, 270f).forEach { deg ->
+                    val rad = Math.toRadians(deg.toDouble())
+                    val dir = Offset(kotlin.math.cos(rad).toFloat(), kotlin.math.sin(rad).toFloat())
+                    drawLine(
+                        Color.White.copy(alpha = 0.85f),
+                        Offset(cx, cy) + dir * (r * 0.80f),
+                        Offset(cx, cy) + dir * (r * 0.92f),
+                        strokeWidth = 2.dp.toPx()
+                    )
+                }
+                // Hands — short hour, long minute, white.
+                drawPath(Path().apply {
+                    moveTo(cx - w * 0.015f, cy - r * 0.02f)
+                    lineTo(cx, cy - r * 0.48f)
+                    lineTo(cx + w * 0.015f, cy - r * 0.02f)
+                    close()
+                }, Color.White.copy(alpha = 0.95f))
+                drawPath(Path().apply {
+                    moveTo(cx - w * 0.015f, cy + r * 0.05f)
+                    lineTo(cx, cy - r * 0.68f)
+                    lineTo(cx + w * 0.015f, cy + r * 0.05f)
+                    close()
+                }, Color.White.copy(alpha = 0.95f))
+                drawCircle(Color.White.copy(alpha = 0.95f), radius = 2.dp.toPx(), center = Offset(cx, cy))
             }
             Text(
                 text = "✦",
@@ -1957,46 +1995,33 @@ private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier 
             )
         }
         SettingsDesignVisual.CLOUD -> Box(modifier) {
-            // The backup doodle — a rayed sun behind a hand-drawn cloud
-            // with an outlined upload arrow (the flask language).
+            // The backup doodle — ONE clean cloud with an up arrow rising
+            // through it (the flask language): soft slate fill, white
+            // outline, no sun behind.
             Canvas(Modifier.fillMaxSize()) {
                 val w = size.width
                 val h = size.height
                 val stroke = 2.dp.toPx()
-                // Sun behind the cloud — soft fill, outline + little rays.
-                val sunC = Offset(w * 0.76f, h * 0.20f)
-                drawCircle(Color(0xFFFFD9A0).copy(alpha = 0.55f), radius = w * 0.14f, center = sunC)
-                drawCircle(Color.White.copy(alpha = 0.85f), radius = w * 0.14f, center = sunC, style = Stroke(width = stroke * 0.8f))
-                listOf(0f, 45f, 90f, 135f, 180f, 225f, 270f, 315f).forEach { deg ->
-                    val rad = Math.toRadians(deg.toDouble())
-                    val dir = Offset(kotlin.math.cos(rad).toFloat(), kotlin.math.sin(rad).toFloat())
-                    drawLine(
-                        Color.White.copy(alpha = 0.7f),
-                        sunC + dir * (w * 0.17f),
-                        sunC + dir * (w * 0.21f),
-                        strokeWidth = 1.2.dp.toPx()
-                    )
-                }
                 // The cloud — three lobes on a flat base, fill + outline.
-                val baseY = h * 0.74f
+                val baseY = h * 0.76f
                 val cloud = Path().apply {
-                    moveTo(w * 0.06f, baseY)
-                    cubicTo(w * 0.03f, baseY - h * 0.26f, w * 0.14f, baseY - h * 0.44f, w * 0.28f, baseY - h * 0.34f)
-                    cubicTo(w * 0.28f, baseY - h * 0.56f, w * 0.46f, baseY - h * 0.62f, w * 0.54f, baseY - h * 0.44f)
-                    cubicTo(w * 0.64f, baseY - h * 0.58f, w * 0.82f, baseY - h * 0.46f, w * 0.82f, baseY - h * 0.28f)
-                    cubicTo(w * 0.96f, baseY - h * 0.22f, w * 0.94f, baseY, w * 0.78f, baseY)
+                    moveTo(w * 0.10f, baseY)
+                    cubicTo(w * 0.06f, baseY - h * 0.24f, w * 0.16f, baseY - h * 0.44f, w * 0.30f, baseY - h * 0.34f)
+                    cubicTo(w * 0.30f, baseY - h * 0.56f, w * 0.46f, baseY - h * 0.62f, w * 0.54f, baseY - h * 0.44f)
+                    cubicTo(w * 0.64f, baseY - h * 0.58f, w * 0.80f, baseY - h * 0.48f, w * 0.82f, baseY - h * 0.30f)
+                    cubicTo(w * 0.94f, baseY - h * 0.24f, w * 0.92f, baseY, w * 0.76f, baseY)
                     close()
                 }
-                drawPath(cloud, Color.White.copy(alpha = 0.82f))
-                drawPath(cloud, Color.White.copy(alpha = 0.9f), style = Stroke(width = stroke * 0.8f))
-                // Upload arrow — stem + head, outlined in white.
+                drawPath(cloud, Color(0xFFDEE6EB).copy(alpha = 0.9f))
+                drawPath(cloud, Color.White.copy(alpha = 0.95f), style = Stroke(width = stroke * 0.8f))
+                // Up arrow inside the cloud — stem + head, white.
                 val ax = w * 0.50f
-                val headY = h * 0.52f
-                drawLine(Color.White.copy(alpha = 0.95f), Offset(ax, h * 0.96f), Offset(ax, headY), strokeWidth = 2.dp.toPx())
+                val headY = h * 0.40f
+                drawLine(Color.White.copy(alpha = 0.95f), Offset(ax, h * 0.72f), Offset(ax, headY), strokeWidth = 2.dp.toPx())
                 val head = Path().apply {
-                    moveTo(ax - w * 0.11f, headY + h * 0.16f)
+                    moveTo(ax - w * 0.10f, headY + h * 0.14f)
                     lineTo(ax, headY)
-                    lineTo(ax + w * 0.11f, headY + h * 0.16f)
+                    lineTo(ax + w * 0.10f, headY + h * 0.14f)
                     close()
                 }
                 drawPath(head, Color.White.copy(alpha = 0.95f))
@@ -2015,47 +2040,29 @@ private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier 
             )
         }
         SettingsDesignVisual.IMAGE -> Box(modifier) {
-            // The book-covers doodle — an open book whose right page
-            // carries a little outlined cover scene (sun + hill), with
-            // sparkles (the flask language).
+            // The book-covers doodle — a small hand-drawn stack of books
+            // (one clean subject, the flask language): three jackets with
+            // title ticks, gently fanned like the categories cards.
             Canvas(Modifier.fillMaxSize()) {
                 val w = size.width
                 val h = size.height
                 val stroke = 2.dp.toPx()
-                val baseY = h * 0.86f
-                // Left page — fill + outline.
-                val left = Path().apply {
-                    moveTo(w * 0.08f, baseY)
-                    lineTo(w * 0.08f, h * 0.22f)
-                    cubicTo(w * 0.28f, h * 0.16f, w * 0.42f, h * 0.28f, w * 0.50f, h * 0.38f)
-                    lineTo(w * 0.50f, baseY)
-                    close()
+                val books = listOf(
+                    Triple(Offset(w * 0.20f, h * 0.66f), 4f, Color(0xFFA9B8C9)),
+                    Triple(Offset(w * 0.30f, h * 0.47f), -6f, Color(0xFFC3CEDB)),
+                    Triple(Offset(w * 0.40f, h * 0.28f), 8f, Color(0xFF8FA3B8))
+                )
+                books.forEach { (pos, rot, color) ->
+                    val bw = w * 0.42f; val bh = h * 0.20f
+                    rotate(rot, Offset(pos.x + bw / 2, pos.y + bh / 2)) {
+                        val rect = androidx.compose.ui.geometry.Rect(pos.x, pos.y, pos.x + bw, pos.y + bh)
+                        drawRoundRect(color.copy(alpha = 0.85f), topLeft = rect.topLeft, size = rect.size, cornerRadius = CornerRadius(4.dp.toPx()))
+                        drawRoundRect(Color.White.copy(alpha = 0.9f), topLeft = rect.topLeft, size = rect.size, cornerRadius = CornerRadius(4.dp.toPx()), style = Stroke(width = stroke * 0.7f))
+                        // Title tick + a small cover mark.
+                        drawRoundRect(Color.White.copy(alpha = 0.9f), topLeft = Offset(rect.left + 6.dp.toPx(), rect.top + rect.height * 0.30f), size = Size(rect.width * 0.45f, 2.4.dp.toPx()), cornerRadius = CornerRadius(1.2.dp.toPx()))
+                        drawCircle(Color.White.copy(alpha = 0.75f), radius = 2.dp.toPx(), center = Offset(rect.left + rect.width * 0.80f, rect.top + rect.height * 0.30f))
+                    }
                 }
-                drawPath(left, Color.White.copy(alpha = 0.85f))
-                drawPath(left, Color.White.copy(alpha = 0.95f), style = Stroke(width = stroke * 0.8f))
-                // Right page.
-                val right = Path().apply {
-                    moveTo(w * 0.50f, h * 0.38f)
-                    cubicTo(w * 0.58f, h * 0.28f, w * 0.72f, h * 0.16f, w * 0.92f, h * 0.22f)
-                    lineTo(w * 0.92f, baseY)
-                    lineTo(w * 0.50f, baseY)
-                    close()
-                }
-                drawPath(right, Color.White.copy(alpha = 0.62f))
-                drawPath(right, Color.White.copy(alpha = 0.9f), style = Stroke(width = stroke * 0.8f))
-                // Cover art on the right page — sun over a hill, outlined.
-                drawCircle(Color(0xFFFFD9A0).copy(alpha = 0.9f), radius = 4.dp.toPx(), center = Offset(w * 0.70f, h * 0.40f))
-                drawCircle(Color.White.copy(alpha = 0.85f), radius = 4.dp.toPx(), center = Offset(w * 0.70f, h * 0.40f), style = Stroke(width = 1.dp.toPx()))
-                val hill = Path().apply {
-                    moveTo(w * 0.58f, h * 0.60f)
-                    lineTo(w * 0.70f, h * 0.46f)
-                    lineTo(w * 0.84f, h * 0.60f)
-                    close()
-                }
-                drawPath(hill, Color(0xFF9BB5A1).copy(alpha = 0.95f))
-                drawPath(hill, Color.White.copy(alpha = 0.8f), style = Stroke(width = 1.dp.toPx()))
-                // Spine.
-                drawLine(Color(0xFF6B4F45).copy(alpha = 0.5f), Offset(w * 0.50f, h * 0.38f), Offset(w * 0.50f, baseY), strokeWidth = 1.2.dp.toPx())
             }
             Text(
                 text = "✦",
@@ -2254,13 +2261,15 @@ private fun SettingsSecondaryCardView(
  * mobile twin). "All Settings" returns to the hub itself.
  *
  * [active] is the currently open rail page: it is highlighted in its
- * NATURAL slot (the rail never reorders) and the row auto-scrolls to
- * reveal it, so the top bar stays where you are instead of jumping back
- * to the start. Pass null on settings-family screens that aren't a rail
- * destination (drill-in tool pages): nothing is highlighted. Shared by
- * the hub AND every settings sub-page; when [navController] is provided
- * the page's QUICK TOOLS (its key deep settings) render under the chips
- * so frequent controls are one tap away without opening the page.
+ * NATURAL slot (the rail never reorders) and the row composes ALREADY at
+ * that chip — the header stays perfectly still across section switches
+ * (the old animated auto-scroll glided the row from index 0 on every
+ * page open, which read as a jump on top of the page fade). Pass null on
+ * settings-family screens that aren't a rail destination (drill-in tool
+ * pages): nothing is highlighted. Shared by the hub AND every settings
+ * sub-page; when [navController] is provided the page's QUICK TOOLS (its
+ * key deep settings) render under the chips so frequent controls are one
+ * tap away without opening the page.
  */
 @Composable
 internal fun SettingsNavRail(
@@ -2271,15 +2280,16 @@ internal fun SettingsNavRail(
 ) {
     val dark = isCurioDarkTheme()
     // v3xx — the rail keeps its FIXED order: the opened page is highlighted
-    // in its NATURAL slot (never rotated next to "All Settings") and the
-    // row scrolls to reveal it, so the rail stays at your place in the list.
-    val listState = rememberLazyListState()
-    val activeIndex = remember(active) {
-        active?.let { id -> settingsNavRail.indexOfFirst { it.id == id }.takeIf { it >= 0 } }
-    }
-    LaunchedEffect(activeIndex) {
-        if (activeIndex != null) listState.animateScrollToItem(activeIndex)
-    }
+    // in its NATURAL slot (never rotated next to "All Settings"). The row
+    // starts AT the active chip via the initial index, so no scroll runs on
+    // composition — the header never glides. (The old animateScrollToItem
+    // re-animated from index 0 on every page open: the rail visibly jumped
+    // on top of the page transition.)
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = active?.let { id ->
+            settingsNavRail.indexOfFirst { it.id == id }.takeIf { it >= 0 }
+        } ?: 0
+    )
     Column(modifier = modifier.fillMaxWidth()) {
         LazyRow(
             state = listState,
