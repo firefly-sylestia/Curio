@@ -303,7 +303,8 @@ fun CaptureEntityLight.toEntry(): CurioEntry {
         episodeCount = episodeCount
     )
     val captureData: CaptureData = if (formatDataJsonLight != null) {
-        runCatching { CaptureConverters.deserializeCaptureData(formatDataJsonLight) }
+        val dataJson = formatDataJsonLight
+        runCatching { CaptureConverters.deserializeCaptureData(dataJson) }
             .getOrNull() ?: CaptureData.Portfolio(emptyList())
     } else {
         CaptureData.Portfolio(emptyList())
