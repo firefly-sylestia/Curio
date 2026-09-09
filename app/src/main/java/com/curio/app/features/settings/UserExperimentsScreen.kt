@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -34,11 +33,7 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
-import com.curio.app.ui.components.CurioSectionLabel
-import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioSettingsDivider
-import com.curio.app.ui.components.CurioSettingsInfoRow
-import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.theme.CurioIcons
 import com.kyant.backdrop.backdrops.layerBackdrop
@@ -122,9 +117,9 @@ fun UserExperimentsScreen(navController: NavController) {
                 )
             }
             // Liquid glass section
-            item { CurioSectionLabel("Liquid glass") }
+            item { SettingsSectionHeading("Liquid glass") }
             item {
-                CurioSettingsCard(shadowElevation = 0.dp) {
+                SettingsOptionCard {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     ExperimentSwitchRow("Liquid glass", "Refracting glass on the nav bar and floating pills. Not supported by all devices, and can be very laggy on lower-end phones", AppPreferences.liquidGlassPillsState) {
                         AppPreferences.setLiquidGlassPillsEnabled(context, it)
@@ -140,7 +135,7 @@ fun UserExperimentsScreen(navController: NavController) {
                         }
                         CurioSettingsDivider()
                         var showGlassTuning by remember { mutableStateOf(false) }
-                        CurioSettingsRow(
+                        SettingsOptionRow(
                             CurioIcons.Tune,
                             "Tune glass",
                             "Reflection, refraction and blur, with a live preview"
@@ -160,9 +155,9 @@ fun UserExperimentsScreen(navController: NavController) {
             // or the content-height glass toolbar (the old Cabinet v2 look,
             // more blurry + its own tint). Applies to every Settings/Cabinet
             // hero plus Home and Profile (Spin keeps its own chrome).
-            item { CurioSectionLabel("Headers") }
+            item { SettingsSectionHeading("Headers") }
             item {
-                CurioSettingsCard(shadowElevation = 0.dp) {
+                SettingsOptionCard {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     ExperimentSwitchRow(
                         "Glass toolbar header",
@@ -182,9 +177,9 @@ fun UserExperimentsScreen(navController: NavController) {
             // (books / albums / series) gets its own toggle so the user can
             // switch poster fetching on per category; they all stay OFF by
             // default (nothing downloads without explicit consent).
-            item { CurioSectionLabel("Cover fetching") }
+            item { SettingsSectionHeading("Cover fetching") }
             item {
-                CurioSettingsCard(shadowElevation = 0.dp) {
+                SettingsOptionCard {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         ExperimentSwitchRow(
                             "Books",
@@ -214,12 +209,12 @@ fun UserExperimentsScreen(navController: NavController) {
             }
 
             // Content tools — non-toggle experiments
-            item { CurioSectionLabel("Content tools") }
+            item { SettingsSectionHeading("Content tools") }
             item {
-                CurioSettingsCard(shadowElevation = 0.dp) {
+                SettingsOptionCard {
                     // v320 — the book-cover fetch is now a HUB of its own
                     // (provider picker, retry-failed, keyless ratings).
-                    CurioSettingsRow(
+                    SettingsOptionRow(
                         CurioIcons.MenuBook,
                         "Book covers & ratings",
                         // v320b — opt-out by default: surface the OFF state so
@@ -236,8 +231,8 @@ fun UserExperimentsScreen(navController: NavController) {
                     )
                     // v3xx — the Book browser moved OUT of the hub's horizontal
                     // cover strip into its own scrollable line-by-line list.
-                    CurioSettingsDivider()
-                    CurioSettingsRow(
+                    SettingsOptionDivider()
+                    SettingsOptionRow(
                         CurioIcons.MenuBook,
                         "Book browser",
                         "Every book line by line — covers, ratings and years, scrollable",
@@ -251,9 +246,9 @@ fun UserExperimentsScreen(navController: NavController) {
             }
 
             // Pet & explore
-            item { CurioSectionLabel("Pet & explore") }
+            item { SettingsSectionHeading("Pet & explore") }
             item {
-                CurioSettingsCard(shadowElevation = 0.dp) {
+                SettingsOptionCard {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     ExperimentSwitchRow("Voice-to-text", "Live dictation while typing, and transcription of recordings", AppPreferences.voiceToTextEnabledState) {
                         AppPreferences.setVoiceToTextEnabled(context, it)
@@ -327,8 +322,8 @@ fun UserExperimentsScreen(navController: NavController) {
             }
 
             item {
-                CurioSettingsCard(shadowElevation = 0.dp) {
-                    CurioSettingsInfoRow(CurioIcons.Info, "About experiments", "These features are experimental and may change or be removed")
+                SettingsOptionCard {
+                    SettingsOptionInfoRow(CurioIcons.Info, "About experiments", "These features are experimental and may change or be removed")
                 }
             }
         }
@@ -347,27 +342,16 @@ fun UserExperimentsScreen(navController: NavController) {
 
 @Composable
 private fun ExperimentSwitchRow(
+    icon: String? = null,
     title: String,
     subtitle: String,
     checked: Boolean,
     enabled: Boolean = true,
     onCheckedChange: (Boolean) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp)
-            .alpha(if (enabled) 1f else 0.45f)
-    ) {
-        androidx.compose.foundation.layout.Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(title, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
-                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            Switch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
-        }
-    }
+    SettingsOptionSwitchRow(
+        icon, title, subtitle, checked, enabled,
+        modifier = Modifier.alpha(if (enabled) 1f else 0.45f),
+        onCheckedChange = onCheckedChange
+    )
 }

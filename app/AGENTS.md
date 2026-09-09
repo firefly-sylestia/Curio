@@ -930,6 +930,47 @@ app/src/main/java/com/curio/app/
   visited-sections stack never grows. The rail is the FIRST scroll item
   below the hero (the hub's exact placement), phones + wide alike; the
   hub itself keeps its rail (active "all").
+- **v3xx31 — settings card foot visuals REDRAWN (user follow-up
+  2026-09-08).** `SettingsCardVisual` + `SettingsDesignCardView` in
+  SettingsHubScreen.kt: (1) the visual now renders BEFORE the text
+  Column, so the art sits BEHIND the title/subtitle (it used to draw on
+  top of long subtitles). (2) Every art is re-laid-out to fit the 92×62
+  visual box with the card's rounded bottom-right corner kept clear
+  (nothing cut): pet redrawn minimal + accurate (ears/head/eyes/nose/
+  body all inside), Manage-categories card stack + Topic-history
+  polaroids are proper fanned shapes that never clip, share bubble icon
+  removed (mini card only), Experiments → the `science` flask glyph,
+  Backup & restore → the `backup` cloud glyph, Book covers → the `image`
+  glyph (icons preferred over extra drawing per user), Preferences
+  compass polished (mountains + smaller ring + solid/pale needle). (3)
+  The visual box nudged closer to the corner (padding 12/8 → 8/7dp).
+  (4) Card texture: the white diagonal sheen drawLine is GONE — replaced
+  with the JSX `cardTexture` bubble-dots style: two outlined circles +
+  a six-dot speckle (white, 0.30).
+- **v3xx32 — settings sub-pages unified via SHARED components (user
+  follow-up 2026-09-08).** New `features/settings/SettingsPageComponents.kt`
+  is the ONE visual language for every settings-family page, mirroring the
+  hub's secondary-card look: `SettingsSectionHeading` (glyph + Playfair
+  serif label + short rule — replaces `CurioSectionLabel` in the settings
+  family), `SettingsOptionCard` (frosted white / raised-dark glass,
+  rounded 20), `SettingsOptionRow` (frosted 40dp icon tile + title +
+  subtitle + chevron), `SettingsOptionSwitchRow`, `SettingsOptionSegmentedRow`,
+  `SettingsOptionInfoRow` and `SettingsOptionDivider` (hairline inset 53dp
+  to the tile column). Applied across the whole family: SettingsSectionScreen
+  (Appearance/Preferences/Recording/Data — the private CompactSwitchRow /
+  CompactSegmentedRow helpers now DELEGATE to the shared rows and gained
+  icon tiles; Theme→dark_mode, tint→palette, pastel→auto_awesome,
+  material→layers, hero-tears→auto_stories, hero→image, adaptive→refresh,
+  curie→pets, sessions→travel_explore, bubble→bubble_chart, reminder→
+  notifications), BackupToolsScreen (incl. the Auto-backup toggle row),
+  ExperimentsScreen + UserExperimentsScreen (labels/cards/rows — the
+  ExperimentSwitchRow wrapper delegates to the shared switch row and keeps
+  its disabled alpha), SupportScreen (Version row became a shared option
+  row), UpdatesScreen (Update-checker toggle became a shared switch row),
+  ShareHubScreen labels, and the hub's own search-results labels/cards/
+  rows. Only verified-in-subset glyphs are used (CurioIcons constants).
+  Custom content (chips, status header, release notes) keeps its own
+  layout inside the glass cards.
 - **v3xx28 — Cabinet per-item colors + fresh grid per level (user
   follow-up 2026-09-08).** (1) **Extracted cover colors** — liked
   books/albums/series rows, tiles and the Everything preview now use the

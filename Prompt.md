@@ -1,4 +1,40 @@
 # Prompt Log — current request
+## Request (2026-09-08, completed — settings card foot visuals redrawn)
+
+**Request (pending-prompt slot):** the settings cards' decorative drawings
+in the bottom-right corner are drawn OVER the text (not behind); the pet
+designer drawing isn't right/accurate (keep it minimal, a little more
+preference/precision too); Manage categories should be fully redrawn with
+proper shapes (nothing gets cut); Topic history has cuts + sits over the
+text; remove the extra icon from the Share hub drawing; change the
+Experiments drawing to something identifying and simple; same for Backup &
+restore and Book covers; push every drawing a little closer to the
+bottom-right corner; don't draw extra things — use bundled icons where
+possible, draw accurately where a drawing is better, then compare/review;
+remove the white line look and use the JSX bubble-dots texture style.
+
+**What shipped (SettingsHubScreen.kt):**
+1. **Behind the text** — `SettingsCardVisual` now renders BEFORE the text
+   Column, so the art sits behind the title/subtitle (it used to draw on
+   top of long subtitles).
+2. **Nothing cut** — every art re-laid-out inside the 92×62 visual box
+   with the card's rounded bottom-right corner kept clear: pet redrawn
+   minimal + accurate (ears/head/eyes/nose/body fully inside — the old
+   head/body overflowed the box and clipped), Manage-categories card
+   stack + Topic-history polaroids are proper fanned shapes that never
+   clip, the Preferences compass ring was overflowing the box (right edge
+   past 92) and is now a smaller clean ring + solid/pale needle over two
+   mountains.
+3. **Icons instead of extra drawing** — Experiments → the `science`
+   flask glyph, Backup & restore → the `backup` cloud glyph, Book covers
+   → the `image` glyph (all bundled CurioIcons).
+4. **Share hub** — the floating share-bubble icon is removed; the mini
+   CURIO card alone (resized so its text fits without clipping).
+5. **Closer to the corner** — visual box padding 12/8 → 8/7dp.
+6. **Texture** — the white diagonal sheen drawLine is gone; the card
+   texture is now the JSX `cardTexture` bubble-dots style (two outlined
+   bubbles + a six-dot white speckle).
+
 ## Request (2026-09-08, completed — settings nav rail on every settings page)
 
 **Request (pending-prompt slot):** "in settings the top nav style to open the
@@ -1144,5 +1180,19 @@ the annotation while preserving the live selection. Both surfaces share
 the one ArrangeableCard field, so the bottom-sheet preview and the
 full-screen editor are fixed together. Committed + pushed.
 
-## next prompt
-(empty — no pending prompt)
+## request log — settings unify (done 2026-09-09, pushed)
+Settings sub-pages fully unified into one shared component style (our own
+look, not a JSX copy) — new `features/settings/SettingsPageComponents.kt`
+with `SettingsSectionHeading` (Playfair + glyph + rule),
+`SettingsOptionCard` (frosted glass), `SettingsOptionRow` /
+`SettingsOptionSwitchRow` / `SettingsOptionSegmentedRow` /
+`SettingsOptionInfoRow` and `SettingsOptionDivider`. Applied across the
+whole family: the 4 core section pages (Appearance rows gained icon
+tiles), Backup & restore, Experiments + User Experiments, Support
+(Version row unified), Updates (checker toggle unified), Share hub
+labels, and the hub's search results — the old paper cards and plain
+labels are gone. Unused imports cleaned; only verified-subset glyphs
+used. Committed + pushed.
+
+## next prompt 
+ no in cabinet the favorites drawing is meh not good doesnt signify its favorites, also the currently reading the design isnt connected and looks random, same for want to read, and completed design is fine just that its not connected all the way to the buttom so it loos disconnected, and also the notes its not note, and also some of the custom ones some are fine but most of them looks disconnected or random drawings use publicly avalable drawing to proper do it and remeber keep it minimal and then the currently reading doesnt update and have no logic so add one in buttom sheet of books and rename reading in cabinet to curiying something, so we can add series etc too, and in noes dont show the entries but just the saved notes all around the app, and in want to read show the saved ones, then the favorites ui inside of its not complementing the style so prper redesign it and also with add buttom, and also the inside of add are just add entires and nothing else so fix that too add a search bar to search topics and add or from favorites etc to add in their. 

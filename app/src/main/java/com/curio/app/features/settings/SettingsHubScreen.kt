@@ -93,13 +93,8 @@ import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioGlassToolbar
-import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.curioSearchFill
-import com.curio.app.ui.components.CurioSettingsCard
-import com.curio.app.ui.components.CurioSectionLabel
-import com.curio.app.ui.components.CurioSettingsDivider
-import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.curioDarkGlow
@@ -915,12 +910,12 @@ fun SettingsHubScreen(navController: NavController) {
                     } else {
                         val grouped = searchResults.groupBy { it.sectionLabel }
                         grouped.forEach { (sectionLabel, results) ->
-                            item(span = { GridItemSpan(maxLineSpan) }) { CurioSectionLabel(sectionLabel) }
+                            item(span = { GridItemSpan(maxLineSpan) }) { SettingsSectionHeading(sectionLabel) }
                             item(span = { GridItemSpan(maxLineSpan) }) {
-                                CurioSettingsCard(shadowElevation = 0.dp) {
+                                SettingsOptionCard {
                                     results.forEachIndexed { index, result ->
-                                        if (index > 0) CurioSettingsDivider()
-                                        CurioSettingsRow(result.row.icon, result.row.title, result.row.subtitle) {
+                                        if (index > 0) SettingsOptionDivider()
+                                        SettingsOptionRow(result.row.icon, result.row.title, result.row.subtitle) {
                                             val deep = result.deep
                                             if (deep != null) {
                                                 // Deep result → hand the exact row
@@ -942,7 +937,7 @@ fun SettingsHubScreen(navController: NavController) {
                     // them underneath).
                     settingsDesignGroups.forEach { group ->
                         item(key = "g|${group.label}", span = { GridItemSpan(maxLineSpan) }) {
-                            SettingsGroupHeading(group)
+                            SettingsSectionHeading(group.label, group.glyph)
                         }
                         group.cards.forEach { card ->
                             item(key = "card|${card.id}") {
@@ -1097,7 +1092,7 @@ private fun SettingsTwoPaneHub(
                         } else {
                             val grouped = searchResults.groupBy { it.sectionLabel }
                             grouped.forEach { (sectionLabel, results) ->
-                                item { CurioSectionLabel(sectionLabel) }
+                                item { SettingsSectionHeading(sectionLabel) }
                                 results.forEach { result ->
                                     item {
                                         SettingsNavRow(
@@ -1112,7 +1107,7 @@ private fun SettingsTwoPaneHub(
                         }
                     } else {
                         sections.forEach { section ->
-                            item { CurioSectionLabel(section.label) }
+                            item { SettingsSectionHeading(section.label) }
                             section.cards.forEach { card ->
                                 card.rows.forEach { row ->
                                     item {
@@ -1164,7 +1159,7 @@ private fun SettingsTwoPaneHub(
                 contentPadding = PaddingValues(start = 28.dp, end = 28.dp, top = 14.dp, bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                item { CurioSectionLabel(selectedPage.title) }
+                item { SettingsSectionHeading(selectedPage.title) }
                 item {
                     SettingsPageContent(selectedPage, navController, paneHighlight)
                 }
@@ -1603,67 +1598,78 @@ private fun settingsToneGradient(tone: SettingsDesignTone, dark: Boolean): Pair<
 private fun settingsCardInk(dark: Boolean) =
     if (dark) Color(0xFFF3EAE2) else Color(0xFF52383C)
 
-/** The JSX decorative foot visual — drawn minimally in Compose. */
+/** The JSX decorative foot visual — drawn minimally in Compose. Every art
+ *  stays inside the 92×62 visual box (nothing is cut by the card's rounded
+ *  corner), keeps the bottom-right corner clear, and prefers a bundled icon
+ *  glyph over extra drawing where one exists. */
 @Composable
 private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier = Modifier) {
     when (visual) {
         SettingsDesignVisual.SWATCHES -> Box(modifier) {
+            // Four paint swatches, fanned — fully inside the box.
             val colors = listOf(0xFFE8B0A0, 0xFFB8C9B0, 0xFFB7A9CF, 0xFFD6B1C1)
-            val offsets = listOf(androidx.compose.ui.unit.IntOffset(0, 16), androidx.compose.ui.unit.IntOffset(26, 6), androidx.compose.ui.unit.IntOffset(56, 20), androidx.compose.ui.unit.IntOffset(24, 38))
-            val rots = listOf(-11f, 1f, 12f, -2f)
+            val offsets = listOf(androidx.compose.ui.unit.IntOffset(2, 12), androidx.compose.ui.unit.IntOffset(28, 2), androidx.compose.ui.unit.IntOffset(44, 6), androidx.compose.ui.unit.IntOffset(24, 22))
+            val rots = listOf(-11f, 2f, 12f, -2f)
             colors.forEachIndexed { i, c ->
                 Box(
                     modifier = Modifier
                         .offset { offsets[i] }
                         .rotate(rots[i])
-                        .size(width = 34.dp, height = 44.dp)
-                        .border(3.dp, Color(0xFFFFF9F3).copy(alpha = 0.85f), RoundedCornerShape(5.dp))
+                        .size(width = 28.dp, height = 38.dp)
+                        .border(2.5.dp, Color(0xFFFFF9F3).copy(alpha = 0.85f), RoundedCornerShape(5.dp))
                         .background(Color(c))
                 )
             }
         }
         SettingsDesignVisual.PET -> Box(modifier) {
+            // Minimal pet — ears, head, eyes + nose, body; nothing cut.
             Box(
-                modifier = Modifier.offset(x = 22.dp, y = 26.dp).rotate(25f).size(width = 18.dp, height = 21.dp)
-                    .background(Color(0xFFEEE5D8), RoundedCornerShape(topStart = 6.dp, topEnd = 12.dp, bottomStart = 6.dp, bottomEnd = 10.dp))
+                modifier = Modifier.offset(x = 32.dp, y = 6.dp).rotate(20f).size(width = 11.dp, height = 13.dp)
+                    .background(Color(0xFFEEE5D8), RoundedCornerShape(topStart = 4.dp, topEnd = 8.dp, bottomStart = 4.dp, bottomEnd = 6.dp))
             )
             Box(
-                modifier = Modifier.offset(x = 40.dp, y = 26.dp).rotate(-25f).size(width = 18.dp, height = 21.dp)
-                    .background(Color(0xFFEEE5D8), RoundedCornerShape(topStart = 12.dp, topEnd = 6.dp, bottomStart = 10.dp, bottomEnd = 6.dp))
+                modifier = Modifier.offset(x = 54.dp, y = 6.dp).rotate(-20f).size(width = 11.dp, height = 13.dp)
+                    .background(Color(0xFFEEE5D8), RoundedCornerShape(topStart = 8.dp, topEnd = 4.dp, bottomStart = 6.dp, bottomEnd = 4.dp))
             )
             Box(
-                modifier = Modifier.offset(x = 26.dp, y = 30.dp).size(width = 46.dp, height = 36.dp)
-                    .background(Color(0xFFF4EEE3), RoundedCornerShape(topStart = 23.dp, topEnd = 23.dp, bottomStart = 19.dp, bottomEnd = 19.dp))
+                modifier = Modifier.offset(x = 28.dp, y = 20.dp).size(width = 36.dp, height = 24.dp)
+                    .background(Color(0xFFF4EEE3), RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp, bottomStart = 12.dp, bottomEnd = 12.dp))
             )
             Box(
-                modifier = Modifier.offset(x = 36.dp, y = 43.dp).size(width = 5.dp, height = 4.dp).background(Color(0xFF4B3A35), CircleShape)
+                modifier = Modifier.offset(x = 38.dp, y = 28.dp).size(width = 3.dp, height = 3.dp).background(Color(0xFF4B3A35), CircleShape)
             )
             Box(
-                modifier = Modifier.offset(x = 50.dp, y = 43.dp).size(width = 5.dp, height = 4.dp).background(Color(0xFF4B3A35), CircleShape)
+                modifier = Modifier.offset(x = 54.dp, y = 28.dp).size(width = 3.dp, height = 3.dp).background(Color(0xFF4B3A35), CircleShape)
             )
             Box(
-                modifier = Modifier.offset(x = 20.dp, y = 50.dp).size(width = 52.dp, height = 26.dp)
-                    .background(Color(0xFF9C735F).copy(alpha = 0.85f), RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp, bottomStart = 9.dp, bottomEnd = 9.dp))
+                modifier = Modifier.offset(x = 45.dp, y = 32.dp).size(width = 2.5.dp, height = 2.5.dp).background(Color(0xFFA36F65), CircleShape)
+            )
+            Box(
+                modifier = Modifier.offset(x = 14.dp, y = 40.dp).size(width = 58.dp, height = 18.dp)
+                    .background(Color(0xFF9C735F).copy(alpha = 0.85f), RoundedCornerShape(topStart = 9.dp, topEnd = 9.dp, bottomStart = 5.dp, bottomEnd = 5.dp))
             )
         }
         SettingsDesignVisual.COMPASS -> Box(modifier) {
             Canvas(Modifier.fillMaxSize()) {
                 val w = size.width; val h = size.height
-                drawPath(Path().apply { moveTo(w * 0.10f, h); lineTo(w * 0.34f, h * 0.38f); lineTo(w * 0.58f, h); close() }, color = Color(0xFF46656C).copy(alpha = 0.55f))
-                drawPath(Path().apply { moveTo(w * 0.40f, h); lineTo(w * 0.72f, h * 0.20f); lineTo(w, h); close() }, color = Color(0xFF495E74).copy(alpha = 0.40f))
-                drawCircle(Color.White.copy(alpha = 0.45f), radius = w * 0.34f, center = androidx.compose.ui.geometry.Offset(w * 0.78f, h * 0.62f))
-                // needle
-                val cx = w * 0.78f; val cy = h * 0.62f
-                drawLine(Color(0xFF687A91).copy(alpha = 0.8f), androidx.compose.ui.geometry.Offset(cx, cy - h * 0.30f), androidx.compose.ui.geometry.Offset(cx, cy + h * 0.30f), strokeWidth = 1.6f)
-                drawPath(Path().apply { moveTo(cx, cy - h * 0.26f); lineTo(cx - w * 0.05f, cy); lineTo(cx + w * 0.05f, cy); close() }, color = Color(0xFF687A91))
+                // Two soft mountains, bottom-left.
+                drawPath(Path().apply { moveTo(w * 0.00f, h); lineTo(w * 0.30f, h * 0.52f); lineTo(w * 0.58f, h); close() }, color = Color(0xFF46656C).copy(alpha = 0.55f))
+                drawPath(Path().apply { moveTo(w * 0.28f, h); lineTo(w * 0.56f, h * 0.26f); lineTo(w * 0.78f, h); close() }, color = Color(0xFF495E74).copy(alpha = 0.40f))
+                // Compass ring over them, clear of the corner.
+                val cx = w * 0.60f; val cy = h * 0.40f; val r = w * 0.18f
+                drawCircle(Color.White.copy(alpha = 0.45f), radius = r, center = androidx.compose.ui.geometry.Offset(cx, cy))
+                // Needle — solid north, pale south, pivot dot.
+                drawPath(Path().apply { moveTo(cx, cy - r * 0.78f); lineTo(cx - r * 0.34f, cy + r * 0.16f); lineTo(cx + r * 0.34f, cy + r * 0.16f); close() }, color = Color(0xFF687A91).copy(alpha = 0.85f))
+                drawPath(Path().apply { moveTo(cx, cy + r * 0.78f); lineTo(cx - r * 0.34f, cy + r * 0.16f); lineTo(cx + r * 0.34f, cy + r * 0.16f); close() }, color = Color(0xFF687A91).copy(alpha = 0.35f))
+                drawCircle(Color(0xFF687A91), radius = 1.6.dp.toPx(), center = androidx.compose.ui.geometry.Offset(cx, cy))
             }
         }
         SettingsDesignVisual.WAVE -> Row(
             verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.spacedBy(3.dp),
+            horizontalArrangement = Arrangement.spacedBy(3.5.dp),
             modifier = modifier
         ) {
-            listOf(10, 18, 32, 24, 40, 18, 30, 14, 36, 22, 28, 16).forEach { h ->
+            listOf(10, 18, 30, 22, 38, 16, 28, 12, 32, 18).forEach { h ->
                 Box(
                     modifier = Modifier
                         .width(4.dp)
@@ -1673,103 +1679,89 @@ private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier 
             }
         }
         SettingsDesignVisual.CARDS -> Box(modifier) {
+            // Fanned card stack, drawn with proper shapes — fully inside.
             val colors = listOf(0xFF8DA993, 0xFFD2A87B, 0xFF9EB8C0, 0xFFF4EADC)
-            val offsets = listOf(androidx.compose.ui.unit.IntOffset(0, 0), androidx.compose.ui.unit.IntOffset(18, 6), androidx.compose.ui.unit.IntOffset(34, 14), androidx.compose.ui.unit.IntOffset(48, 22))
-            val rots = listOf(8f, -3f, -13f, -21f)
+            val offsets = listOf(androidx.compose.ui.unit.IntOffset(2, 32), androidx.compose.ui.unit.IntOffset(20, 26), androidx.compose.ui.unit.IntOffset(32, 20), androidx.compose.ui.unit.IntOffset(48, 12))
+            val rots = listOf(12f, 4f, -4f, -12f)
             colors.forEachIndexed { i, c ->
                 Box(
                     modifier = Modifier
                         .offset { offsets[i] }
                         .rotate(rots[i])
-                        .size(width = 44.dp, height = 30.dp)
+                        .size(width = 40.dp, height = 24.dp)
                         .border(2.dp, Color.White.copy(alpha = 0.75f), RoundedCornerShape(6.dp))
                         .background(Color(c))
                 )
             }
         }
         SettingsDesignVisual.PHOTOS -> Box(modifier) {
+            // Three polaroid snaps, fanned — nothing cut.
             val colors = listOf(0xFF7E9C86, 0xFFC79F86, 0xFF9BB5A1)
-            val offsets = listOf(androidx.compose.ui.unit.IntOffset(0, 0), androidx.compose.ui.unit.IntOffset(22, 8), androidx.compose.ui.unit.IntOffset(42, 16))
-            val rots = listOf(10f, -4f, -15f)
+            val offsets = listOf(androidx.compose.ui.unit.IntOffset(2, 28), androidx.compose.ui.unit.IntOffset(26, 18), androidx.compose.ui.unit.IntOffset(50, 8))
+            val rots = listOf(10f, -4f, -14f)
             colors.forEachIndexed { i, c ->
                 Box(
                     modifier = Modifier
                         .offset { offsets[i] }
                         .rotate(rots[i])
-                        .size(width = 38.dp, height = 30.dp)
-                        .border(3.dp, Color(0xFFF8F0E8), RoundedCornerShape(4.dp))
+                        .size(width = 34.dp, height = 26.dp)
+                        .border(2.5.dp, Color(0xFFF8F0E8), RoundedCornerShape(4.dp))
                         .background(Color(c))
                 )
             }
         }
         SettingsDesignVisual.SHARE -> Box(modifier) {
+            // The mini share card only — the floating share bubble is gone.
             Box(
                 modifier = Modifier
-                    .offset(x = 14.dp, y = 2.dp)
-                    .rotate(-7f)
-                    .size(width = 56.dp, height = 40.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .offset(x = 4.dp, y = 8.dp)
+                    .rotate(-6f)
+                    .size(width = 68.dp, height = 46.dp)
+                    .clip(RoundedCornerShape(10.dp))
                     .background(Color(0xFFF6E9D5))
                     .padding(6.dp)
             ) {
                 Text(
                     text = "CURIO",
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 2.sp),
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = 1.5.sp),
                     color = Color(0xFF6B4F45)
                 )
                 Text(
                     text = "stay curious",
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.Bold),
                     color = Color(0xFF6B4F45)
                 )
             }
-            Box(
-                modifier = Modifier.offset(x = 0.dp, y = 0.dp).size(26.dp).background(Color.White.copy(alpha = 0.45f), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                CurioIcon(name = CurioIcons.Share, contentDescription = null, tint = Color(0xFF6B4F45), size = 13.dp)
-            }
         }
         SettingsDesignVisual.FLASK -> Box(modifier) {
+            // The science flask glyph — identifying and simple.
             CurioIcon(
-                name = CurioIcons.AutoAwesome,
+                name = CurioIcons.Science,
                 contentDescription = null,
-                tint = Color.White.copy(alpha = 0.8f),
-                size = 34.dp,
-                modifier = Modifier.offset(x = 30.dp, y = 8.dp)
-            )
-            CurioIcon(
-                name = CurioIcons.AutoAwesome,
-                contentDescription = null,
-                tint = Color.White.copy(alpha = 0.7f),
-                size = 16.dp,
-                modifier = Modifier.offset(x = 10.dp, y = 2.dp)
+                tint = Color.White.copy(alpha = 0.85f),
+                size = 44.dp,
+                modifier = Modifier.offset(x = 20.dp, y = 8.dp)
             )
         }
         SettingsDesignVisual.CLOUD -> Box(modifier) {
-            Canvas(Modifier.fillMaxSize()) {
-                val w = size.width; val h = size.height
-                val c = Color(0xFF4C5660)
-                drawCircle(c.copy(alpha = 0.55f), radius = w * 0.22f, center = androidx.compose.ui.geometry.Offset(w * 0.32f, h * 0.55f))
-                drawCircle(c.copy(alpha = 0.45f), radius = w * 0.30f, center = androidx.compose.ui.geometry.Offset(w * 0.55f, h * 0.60f))
-                drawCircle(c.copy(alpha = 0.38f), radius = w * 0.20f, center = androidx.compose.ui.geometry.Offset(w * 0.78f, h * 0.62f))
-                drawCircle(c.copy(alpha = 0.32f), radius = w * 0.42f, center = androidx.compose.ui.geometry.Offset(w * 0.55f, h * 0.75f))
-            }
+            // The backup cloud glyph — identifying and simple.
+            CurioIcon(
+                name = CurioIcons.Backup,
+                contentDescription = null,
+                tint = Color.White.copy(alpha = 0.85f),
+                size = 44.dp,
+                modifier = Modifier.offset(x = 22.dp, y = 8.dp)
+            )
         }
         SettingsDesignVisual.IMAGE -> Box(modifier) {
-            val colors = listOf(0xFF9BB3A8, 0xFFF1DFCA, 0xFF9DB7DC)
-            val offsets = listOf(androidx.compose.ui.unit.IntOffset(0, 0), androidx.compose.ui.unit.IntOffset(18, 8), androidx.compose.ui.unit.IntOffset(34, 16))
-            val rots = listOf(-15f, 8f, -9f)
-            colors.forEachIndexed { i, c ->
-                Box(
-                    modifier = Modifier
-                        .offset { offsets[i] }
-                        .rotate(rots[i])
-                        .size(width = 40.dp, height = 26.dp)
-                        .border(2.dp, Color.White.copy(alpha = 0.7f), RoundedCornerShape(5.dp))
-                        .background(Color(c))
-                )
-            }
+            // The image glyph — identifying and simple.
+            CurioIcon(
+                name = CurioIcons.Image,
+                contentDescription = null,
+                tint = Color.White.copy(alpha = 0.85f),
+                size = 44.dp,
+                modifier = Modifier.offset(x = 22.dp, y = 8.dp)
+            )
         }
     }
 }
@@ -1799,22 +1791,31 @@ private fun SettingsDesignCardView(
             val w = size.width; val h = size.height
             drawCircle(Color.White.copy(alpha = 0.20f), radius = w * 0.62f, center = androidx.compose.ui.geometry.Offset(w * 1.08f, h * 0.02f))
             drawCircle(Color.White.copy(alpha = 0.13f), radius = w * 0.55f, center = androidx.compose.ui.geometry.Offset(-w * 0.12f, h * 1.18f))
-            // texture dots (JSX radial-gradient speckle)
-            repeat(5) { i ->
-                drawCircle(
-                    Color.White.copy(alpha = 0.28f),
-                    radius = 1.6.dp.toPx(),
-                    center = androidx.compose.ui.geometry.Offset(w * (0.10f + 0.16f * i), h * 0.80f)
-                )
+            // Bubble dots (JSX .cardTexture) — outlined bubbles + a light
+            // speckle; the diagonal sheen line is gone.
+            drawCircle(Color.White.copy(alpha = 0.16f), radius = w * 0.16f, center = androidx.compose.ui.geometry.Offset(w * 0.94f, h * 0.16f), style = Stroke(width = 1.4.dp.toPx()))
+            drawCircle(Color.White.copy(alpha = 0.13f), radius = w * 0.07f, center = androidx.compose.ui.geometry.Offset(w * 0.34f, h * 0.88f), style = Stroke(width = 1.2.dp.toPx()))
+            listOf(
+                androidx.compose.ui.geometry.Offset(w * 0.12f, h * 0.80f),
+                androidx.compose.ui.geometry.Offset(w * 0.20f, h * 0.88f),
+                androidx.compose.ui.geometry.Offset(w * 0.46f, h * 0.78f),
+                androidx.compose.ui.geometry.Offset(w * 0.60f, h * 0.86f),
+                androidx.compose.ui.geometry.Offset(w * 0.72f, h * 0.70f),
+                androidx.compose.ui.geometry.Offset(w * 0.84f, h * 0.78f)
+            ).forEach { c ->
+                drawCircle(Color.White.copy(alpha = 0.30f), radius = 1.5.dp.toPx(), center = c)
             }
-            // diagonal sheen (JSX linear-gradient band)
-            drawLine(
-                Color.White.copy(alpha = 0.12f),
-                androidx.compose.ui.geometry.Offset(0f, h * 0.68f),
-                androidx.compose.ui.geometry.Offset(w * 0.92f, 0f),
-                strokeWidth = 2.dp.toPx()
-            )
         }
+        // ── Decorative visual, bottom-right — drawn FIRST so it sits BEHIND
+        //    the title/subtitle (the art never covers the text). ──
+        SettingsCardVisual(
+            visual = card.visual,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 8.dp, bottom = 7.dp)
+                .size(width = 92.dp, height = 62.dp)
+                .alpha(0.92f)
+        )
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -1865,15 +1866,6 @@ private fun SettingsDesignCardView(
                 modifier = Modifier.fillMaxWidth(0.80f)
             )
         }
-        // ── Decorative visual, bottom-right ──
-        SettingsCardVisual(
-            visual = card.visual,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 12.dp, bottom = 8.dp)
-                .size(width = 92.dp, height = 62.dp)
-                .alpha(0.92f)
-        )
     }
 }
 
@@ -1937,39 +1929,6 @@ private fun SettingsSecondaryCardView(
     }
 }
 
-/** The JSX group heading — Playfair-ish serif label + thin rule + glyph. */
-@Composable
-private fun SettingsGroupHeading(group: SettingsDesignGroup) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 14.dp, bottom = 10.dp, start = 2.dp, end = 2.dp)
-    ) {
-        Text(
-            text = group.glyph,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f)
-        )
-        Spacer(Modifier.width(7.dp))
-        Text(
-            text = group.label,
-            style = MaterialTheme.typography.titleMedium.copy(
-                fontFamily = PlayfairDisplayFontFamily,
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = (-0.3).sp
-            ),
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Spacer(Modifier.width(11.dp))
-        Box(
-            modifier = Modifier
-                .width(34.dp)
-                .height(1.dp)
-                .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f))
-        )
-    }
-}
 
 /**
  * The JSX nav rail — horizontal chips on phones (the desktop sidebar's
