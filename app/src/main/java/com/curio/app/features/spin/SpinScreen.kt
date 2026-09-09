@@ -598,8 +598,10 @@ fun SpinScreen(categorySlug: String?, navController: NavController) {
     // saving no longer removes it, so an unexplored or explored-but-unsaved
     // topic stays dealable — even as fan/peek cards. Falls back to the full
     // filtered pool when everything is saved so the fan never empties.
+    // v3xx37 — the LIGHT flow: Spin only needs the saved topic ids (the
+    // full flow re-read every payload blob on each emission).
     val savedEntries by produceState<List<CurioEntry>>(initialValue = emptyList()) {
-        runCatching { CurioRepositoryHolder.repo.observeAll().collect { value = it } }
+        runCatching { CurioRepositoryHolder.repo.observeLight().collect { value = it } }
     }
     val savedTopicIds = remember(savedEntries) { savedEntries.map { it.topic.id }.toSet() }
     val deckPool = remember(filteredPool, savedTopicIds) {

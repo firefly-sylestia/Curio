@@ -174,6 +174,62 @@ fun CurioEntry.toEntity(): CaptureEntity = CaptureEntity(
  * the topic is fully reconstructed with all available data, including
  * fallback exploreAction and tags when the cached topic isn't found.
  */
+/** Rebuild a topic for an entry whose catalog topic isn't in the in-memory
+ *  cache yet — a complete fallback with a category-appropriate explore
+ *  action, the stored progress metadata and an empty imageUrl (the reveal
+ *  re-resolves art when the real topic is looked up). Shared by the full
+ *  [CaptureEntity.toEntry] and the light [CaptureEntityLight.toEntry] so
+ *  both list paths reconstruct the exact same topic shape. */
+private fun fallbackTopicFor(
+    topicId: String,
+    categoryId: CategoryId,
+    topicName: String,
+    topicSubtype: String,
+    topicTeaser: String,
+    pageCount: Int?,
+    episodeCount: Int?
+): CurioTopic = CurioTopic(
+    id = topicId,
+    categoryId = categoryId,
+    subtype = topicSubtype,
+    name = topicName,
+    teaser = topicTeaser,
+    imageUrl = "",
+    exploreAction = ExploreAction(
+        verb = when (categoryId) {
+            CategoryId.FILMS, CategoryId.DIRECTORS, CategoryId.ANIMATED_MOVIES,
+            CategoryId.SERIES, CategoryId.ANIME, CategoryId.SPORTS,
+            CategoryId.INTERNET -> "Watch"
+            CategoryId.ALBUMS, CategoryId.ARTISTS, CategoryId.SONGS -> "Listen"
+            CategoryId.BOOKS, CategoryId.AUTHORS, CategoryId.MANGA,
+            CategoryId.MANHWA, CategoryId.MYTHOLOGY -> "Read"
+            CategoryId.PAINTERS, CategoryId.ARTWORKS -> "View"
+            CategoryId.SCIENTISTS, CategoryId.DISCOVERIES -> "Explore"
+            // v27i — the 15 new lanes: the STEM-heavy ones explore,
+            // the wordy ones read.
+            CategoryId.BIOLOGY, CategoryId.CHEMISTRY, CategoryId.ANIMALS,
+            CategoryId.PLANTS, CategoryId.ASTRONOMY, CategoryId.GEOLOGY,
+            CategoryId.MEDICINE, CategoryId.PSYCHOLOGY, CategoryId.MATHEMATICS,
+            CategoryId.OCEANS, CategoryId.TECHNOLOGIES, CategoryId.ENGINEERING -> "Explore"
+            CategoryId.HISTORY, CategoryId.LANGUAGE, CategoryId.ECONOMICS,
+            CategoryId.QUOTES -> "Read"
+            CategoryId.GAMES -> "Watch"
+            CategoryId.FOOD -> "Read"
+            CategoryId.WILDCARD -> "Discover"
+        },
+        targetName = topicName,
+        durationMinutes = 30,
+        instruction = "Revisit this saved topic: $topicName"
+    ),
+    tags = emptyList(),
+    tier = 1,
+    // v7 — restore the progress metadata saved with the capture so the
+    // entry's topic carries pageCount/episodeCount even before the
+    // catalog cache is loaded (the progress line + pill depend on it).
+    pageCount = pageCount,
+    episodeCount = episodeCount
+)
+
 fun CaptureEntity.toEntry(): CurioEntry {
     val categoryId = CategoryId.valueOf(this.categoryId)
     
@@ -183,44 +239,12 @@ fun CaptureEntity.toEntry(): CurioEntry {
     }
     
     // Use cached topic if available, otherwise create a complete fallback
-    val topic = cachedTopic ?: CurioTopic(
-        id = topicId,
+    val topic = cachedTopic ?: fallbackTopicFor(
+        topicId = topicId,
         categoryId = categoryId,
-        subtype = topicSubtype,
-        name = topicName,
-        teaser = topicTeaser,
-        imageUrl = "",
-        exploreAction = ExploreAction(
-            verb = when (categoryId) {
-                CategoryId.FILMS, CategoryId.DIRECTORS, CategoryId.ANIMATED_MOVIES,
-                CategoryId.SERIES, CategoryId.ANIME, CategoryId.SPORTS,
-                CategoryId.INTERNET -> "Watch"
-                CategoryId.ALBUMS, CategoryId.ARTISTS, CategoryId.SONGS -> "Listen"
-                CategoryId.BOOKS, CategoryId.AUTHORS, CategoryId.MANGA,
-                CategoryId.MANHWA, CategoryId.MYTHOLOGY -> "Read"
-                CategoryId.PAINTERS, CategoryId.ARTWORKS -> "View"
-                CategoryId.SCIENTISTS, CategoryId.DISCOVERIES -> "Explore"
-                // v27i — the 15 new lanes: the STEM-heavy ones explore,
-                // the wordy ones read.
-                CategoryId.BIOLOGY, CategoryId.CHEMISTRY, CategoryId.ANIMALS,
-                CategoryId.PLANTS, CategoryId.ASTRONOMY, CategoryId.GEOLOGY,
-                CategoryId.MEDICINE, CategoryId.PSYCHOLOGY, CategoryId.MATHEMATICS,
-                CategoryId.OCEANS, CategoryId.TECHNOLOGIES, CategoryId.ENGINEERING -> "Explore"
-                CategoryId.HISTORY, CategoryId.LANGUAGE, CategoryId.ECONOMICS,
-                CategoryId.QUOTES -> "Read"
-                CategoryId.GAMES -> "Watch"
-                CategoryId.FOOD -> "Read"
-                CategoryId.WILDCARD -> "Discover"
-            },
-            targetName = topicName,
-            durationMinutes = 30,
-            instruction = "Revisit this saved topic: $topicName"
-        ),
-        tags = emptyList(),
-        tier = 1,
-        // v7 — restore the progress metadata saved with the capture so the
-        // entry's topic carries pageCount/episodeCount even before the
-        // catalog cache is loaded (the progress line + pill depend on it).
+        topicName = topicName,
+        topicSubtype = topicSubtype,
+        topicTeaser = topicTeaser,
         pageCount = pageCount,
         episodeCount = episodeCount
     )
@@ -255,6 +279,48 @@ fun CaptureEntity.toEntry(): CurioEntry {
         deletedAt = this.deletedAt,
         sessionNote = this.sessionNote?.takeIf { it.isNotBlank() },
         sessionScreenshots = deserializeStringList(sessionScreenshotsJson)
+    )
+}
+
+/** v3xx37 — the light list mapper: same topic reconstruction as the full
+ *  mapper, but the payload is only decoded for rows that carried it
+ *  ([CaptureEntityLight.formatDataJsonLight] — ReelNotes reviews). Every
+ *  other row gets an EMPTY Portfolio (the grid's badge code treats an empty
+ *  Portfolio exactly like a non-Portfolio capture: single-glyph). Session
+ *  note + screenshots are never needed by the grid, so they stay null. */
+fun CaptureEntityLight.toEntry(): CurioEntry {
+    val categoryId = CategoryId.valueOf(this.categoryId)
+    val cachedTopic = TopicJsonLoader.cached(categoryId)?.find {
+        it.id == topicId || it.name == topicName
+    }
+    val topic = cachedTopic ?: fallbackTopicFor(
+        topicId = topicId,
+        categoryId = categoryId,
+        topicName = topicName,
+        topicSubtype = topicSubtype,
+        topicTeaser = topicTeaser,
+        pageCount = pageCount,
+        episodeCount = episodeCount
+    )
+    val captureData: CaptureData = if (formatDataJsonLight != null) {
+        runCatching { CaptureConverters.deserializeCaptureData(formatDataJsonLight) }
+            .getOrNull() ?: CaptureData.Portfolio(emptyList())
+    } else {
+        CaptureData.Portfolio(emptyList())
+    }
+    return CurioEntry(
+        id = id,
+        topic = topic,
+        format = CaptureFormat.valueOf(format),
+        captureData = captureData,
+        title = title,
+        capturedAtMillis = capturedAtMillis,
+        tags = deserializeTags(tagsJson),
+        isLegacy = isLegacy,
+        sessionTimeMillis = sessionTimeMillis,
+        deletedAt = null,
+        sessionNote = null,
+        sessionScreenshots = emptyList()
     )
 }
 

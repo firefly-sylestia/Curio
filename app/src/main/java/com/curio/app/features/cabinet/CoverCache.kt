@@ -13,6 +13,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * v3xx — the CABINET COVER CACHE: a separate, always-on store for the cover
@@ -42,12 +43,17 @@ object CabinetCoverCache {
 
     /** Bumped after every successful download so grid tiles that composed
      *  BEFORE their cover landed re-check the local file (reading this
-     *  during composition subscribes the caller to the bump). */
+     *  during composition subscribes the caller to the bump). The WARMER
+     *  bumps ONCE per batch (see [ensureLocalCover]'s `bumpVersion`), so a
+     *  big first-open shelf doesn't recompose the whole grid per download. */
     val version = mutableIntStateOf(0)
 
     /** Extracted-accent cache (`kind|name` → ARGB) — each cover's dominant
-     *  color is computed ONCE and reused by every row/tile/review that asks. */
-    private val dominantColorCache = HashMap<String, Int>()
+     *  color is computed ONCE and reused by every row/tile/review that asks.
+     *  v3xx37 — CONCURRENT: the warmer pre-warms colors off the main thread
+     *  while composition reads the cache, so a plain HashMap could corrupt
+     *  under the race. */
+    private val dominantColorCache = ConcurrentHashMap<String, Int>()
 
     /** The DOMINANT COLOR of a cover's cached bytes — downsampled decode +
      *  bucket quantization, computed once and cached forever. Falls back to
@@ -60,6 +66,20 @@ object CabinetCoverCache {
         val argb = runCatching { extractDominantArgb(file) }.getOrNull()
         if (argb != null) dominantColorCache[key] = argb
         return argb?.let { Color(it) } ?: fallback
+    }
+
+    /** v3xx37 — pre-warm a cover's dominant color OFF the main thread (the
+     *  warmer calls this right after saving the bytes). Composition-time
+     *  [dominantCoverColor] calls then hit the cache instead of decoding a
+     *  bitmap on the main thread — the decode still happens exactly once,
+     *  just not on the UI thread. No-op when the bytes aren't on disk yet
+     *  or the color is already cached. */
+    fun warmDominantColor(context: Context, kind: CoverKind, name: String) {
+        val key = "${kind.stateKey}|$name"
+        if (dominantColorCache.containsKey(key)) return
+        val file = localCoverFile(context, kind, name) ?: return
+        val argb = runCatching { extractDominantArgb(file) }.getOrNull() ?: return
+        dominantColorCache[key] = argb
     }
 
     /** Downsample the image to ~24px, bucket-quantize the RGB (4 bits per
@@ -206,7 +226,13 @@ object CabinetCoverCache {
         name: String,
         byline: String?,
         authoredUrl: String?,
-        redownload: Boolean = false
+        redownload: Boolean = false,
+        // v3xx37 — the WARMER batches its downloads and bumps the version
+        // ONCE after the loop (a per-download bump recomposed every
+        // version-keyed tile per save — 30 downloads = 30 grid-wide
+        // recompositions + 30 main-thread dominant-color decodes on first
+        // open). Single saves (the tile live-resolve) keep the bump.
+        bumpVersion: Boolean = true
     ): File? = withContext(Dispatchers.IO) {
         if (!redownload) {
             localCoverFile(context, kind, name)?.let { return@withContext it }
@@ -217,7 +243,7 @@ object CabinetCoverCache {
         val bytes = downloadBytes(url) ?: return@withContext null
         val f = File(dir(context), fileName(kind, name))
         runCatching { f.writeBytes(bytes) }
-        if (f.exists() && f.length() > 0L) version.intValue++
+        if (bumpVersion && f.exists() && f.length() > 0L) version.intValue++
         f.takeIf { it.exists() && it.length() > 0L }
     }
 

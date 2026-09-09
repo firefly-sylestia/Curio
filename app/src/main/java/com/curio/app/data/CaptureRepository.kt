@@ -25,6 +25,11 @@ class CaptureRepository(
     // touched from the flow's (single) collection dispatcher.
     private val decodeCache = HashMap<String, Pair<String, CurioEntry>>()
 
+    // v3xx37 — the light list's own cache (same contract as [decodeCache],
+    // keyed on the light signature so repeated emissions don't re-run the
+    // topic lookups either).
+    private val lightDecodeCache = HashMap<String, Pair<String, CurioEntry>>()
+
     /** Observe all captures as [CurioEntry] flow for reactive UI updates. */
     fun observeAll(): Flow<List<CurioEntry>> =
         // Entity → domain conversion includes Gson decoding and topic lookup;
@@ -45,6 +50,37 @@ class CaptureRepository(
                     } else {
                         val entry = entity.toEntry()
                         decodeCache[entity.id] = sig to entry
+                        entry
+                    }
+                }
+            }
+            .flowOn(Dispatchers.Default)
+
+    /**
+     * v3xx37 — the LIGHT list flow for the Cabinet grids: reads ONLY the
+     * light columns (see [CaptureEntityLight]) so the big payload JSON blobs
+     * are never re-read/allocated on emission — that churn (megabytes of
+     * fresh Strings on every DB write with a large archive) is what made
+     * the Cabinet lag. Entries decode once per signature and are cached,
+     * exactly like [observeAll]'s v38 cache. Detail pages keep using
+     * [observeById] (full payload) and the recycle bin keeps its own flow.
+     */
+    fun observeLight(): Flow<List<CurioEntry>> =
+        dao.getLightFlow()
+            .map { rows ->
+                rows.map { row ->
+                    // Light signature — mirrors the full one minus the heavy
+                    // columns; formatDataJsonLight covers ReelNotes reviews.
+                    val sig = row.id + "|" + row.format + "|" +
+                        row.capturedAtMillis + "|" + row.tagsJson.hashCode() +
+                        "|" + row.title + "|" + row.isLegacy + "|" +
+                        row.sessionTimeMillis + "|" + (row.formatDataJsonLight?.hashCode() ?: 0)
+                    val cached = lightDecodeCache[row.id]
+                    if (cached != null && cached.first == sig) {
+                        cached.second
+                    } else {
+                        val entry = row.toEntry()
+                        lightDecodeCache[row.id] = sig to entry
                         entry
                     }
                 }

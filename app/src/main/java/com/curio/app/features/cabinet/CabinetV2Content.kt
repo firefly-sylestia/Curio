@@ -63,6 +63,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -160,9 +161,15 @@ fun CabinetV2Content(navController: NavController) {
 
     // ── Data: saved entries (repo flow) + liked books/series/albums +
     // user collections.
+    // v3xx37 — the LIGHT flow: the grid only needs light columns (topic,
+    // format, timestamps, tags) — the full flow re-read + re-allocated every
+    // payload JSON blob on every DB emission, which is what made the Cabinet
+    // lag with a large saved-entries archive. Detail pages still use the
+    // full [observeById]; ReelNotes reviews keep their payload via the
+    // light query's ReelNotes-only formatDataJson column.
     val entries by androidx.compose.runtime.produceState<List<CurioEntry>>(initialValue = emptyList()) {
         try {
-            CurioRepositoryHolder.repo.observeAll().collect { value = it }
+            CurioRepositoryHolder.repo.observeLight().collect { value = it }
         } catch (_: Exception) {
             value = emptyList()
         }
@@ -231,20 +238,49 @@ fun CabinetV2Content(navController: NavController) {
             ) == null
         }
     }
-    LaunchedEffect(unwarmedLikes.size) {
-        if (unwarmedLikes.isEmpty()) return@LaunchedEffect
-        var warmed = 0
-        for (item in unwarmedLikes) {
-            if (warmed >= 30) break
-            CabinetCoverCache.ensureLocalCover(
-                context,
-                CabinetCoverCache.CoverKind.valueOf(item.kind.name),
-                item.name,
-                item.topic?.byline,
-                item.topic?.imageUrl
-            )
-            warmed++
+    // v3xx37 — the warmer runs WHOLE on IO: it pre-warms every liked
+    // cover's dominant color (so composition-time [dominantCoverColor]
+    // always hits the cache instead of decoding on the main thread), then
+    // downloads up to 30 missing covers WITHOUT per-download version bumps
+    // and bumps the version ONCE after the batch — the old per-save bump
+    // recomposed every version-keyed tile per download.
+    LaunchedEffect(allLikes.size, unwarmedLikes.size) {
+        var newCovers = 0
+        withContext(kotlinx.coroutines.Dispatchers.IO) {
+            allLikes.forEach { item ->
+                CabinetCoverCache.warmDominantColor(
+                    context,
+                    CabinetCoverCache.CoverKind.valueOf(item.kind.name),
+                    item.name
+                )
+            }
+            for (item in unwarmedLikes) {
+                if (newCovers >= 30) break
+                if (CabinetCoverCache.localCoverFile(
+                        context,
+                        CabinetCoverCache.CoverKind.valueOf(item.kind.name),
+                        item.name
+                    ) != null
+                ) continue
+                val saved = CabinetCoverCache.ensureLocalCover(
+                    context,
+                    CabinetCoverCache.CoverKind.valueOf(item.kind.name),
+                    item.name,
+                    item.topic?.byline,
+                    item.topic?.imageUrl,
+                    bumpVersion = false
+                )
+                if (saved != null) {
+                    CabinetCoverCache.warmDominantColor(
+                        context,
+                        CabinetCoverCache.CoverKind.valueOf(item.kind.name),
+                        item.name
+                    )
+                    newCovers++
+                }
+            }
         }
+        if (newCovers > 0) CabinetCoverCache.version.intValue++
     }
     val shelfCounts = remember(allLikes.size, entries.size, noteEntries.size, seededById) {
         mapOf(
