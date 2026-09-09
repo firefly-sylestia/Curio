@@ -21,8 +21,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -32,12 +30,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -52,14 +48,8 @@ import com.curio.app.data.FieldMindLegacyImport
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
-import com.curio.app.ui.components.CurioSectionLabel
-import com.curio.app.ui.components.CurioSettingsCard
-import com.curio.app.ui.components.CurioSettingsDivider
-import com.curio.app.ui.components.CurioSettingsInfoRow
-import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.theme.CurioDialogShape
-import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
@@ -355,78 +345,56 @@ val glassBackdrop = rememberLayerBackdrop()
                     onSelect = { navigateToSettingsSection(navController, it) }
                 )
             }
-                        item { CurioSectionLabel("Your data") }
+                        item { SettingsSectionHeading("Your data") }
             item {
                 // v115 — the backup rows sit in the shared settings card so
                 // the workspace reads as settings options, not transparent
                 // rows floating on the backdrop.
-                CurioSettingsCard(shadowElevation = 0.dp) {
+                SettingsOptionCard {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    CurioSettingsRow(CurioIcons.Backup, "Back up now", "Save captures, settings + recordings") {
+                    SettingsOptionRow(CurioIcons.Backup, "Back up now", "Save captures, settings + recordings") {
                         backupLauncher.launch(CurioBackupManager.suggestedFileName())
                     }
-                    CurioSettingsDivider()
-                    CurioSettingsRow(CurioIcons.Restore, "Restore from backup", "Replace current data from a file") {
+                    SettingsOptionDivider()
+                    SettingsOptionRow(CurioIcons.Restore, "Restore from backup", "Replace current data from a file") {
                         showRestoreConfirm = true
                     }
-                    CurioSettingsDivider()
+                    SettingsOptionDivider()
                     val backupLabel = if (lastBackupAt > 0L) {
                         SimpleDateFormat("MMM d, yyyy · h:mm a", locale).format(Date(lastBackupAt))
                     } else "Never"
-                    CurioSettingsInfoRow(CurioIcons.History, "Last backup", backupLabel)
+                    SettingsOptionInfoRow(CurioIcons.History, "Last backup", backupLabel)
                 }
                 }
             }
-            item { CurioSectionLabel("Auto backup") }
+            item { SettingsSectionHeading("Auto backup") }
             item {
-                CurioSettingsCard(shadowElevation = 0.dp) {
+                SettingsOptionCard {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     // Toggle row — pick the location the FIRST time it's
                     // switched on; afterwards the saved destination is reused.
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 4.dp, vertical = 13.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        CurioIcon(
-                            CurioIcons.Backup, null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            size = 21.dp
-                        )
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text("Auto backup", style = MaterialTheme.typography.bodyLarge)
-                            Text(
-                                text = if (autoBackupEnabled)
-                                    "Saves to your location " + when (AppPreferences.autoBackupFrequencyDaysState) {
-                                        1 -> "about once a day"
-                                        3 -> "about every 3 days"
-                                        else -> "about once a week"
-                                    }
-                                else "Pick a location once, back up on its own",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                    SettingsOptionSwitchRow(
+                        CurioIcons.Backup,
+                        "Auto backup",
+                        if (autoBackupEnabled)
+                            "Saves to your location " + when (AppPreferences.autoBackupFrequencyDaysState) {
+                                1 -> "about once a day"
+                                3 -> "about every 3 days"
+                                else -> "about once a week"
+                            }
+                        else "Pick a location once, back up on its own",
+                        autoBackupEnabled
+                    ) { enabled ->
+                        if (enabled && autoBackupUriStr.isBlank()) {
+                            // No destination yet — ask where first.
+                            autoBackupLauncher.launch(CurioBackupManager.suggestedFileName())
+                        } else {
+                            AppPreferences.setAutoBackupEnabled(context, enabled)
+                            autoBackupEnabled = enabled
                         }
-                        Switch(
-                            checked = autoBackupEnabled,
-                            onCheckedChange = { enabled ->
-                                if (enabled && autoBackupUriStr.isBlank()) {
-                                    // No destination yet — ask where first.
-                                    autoBackupLauncher.launch(CurioBackupManager.suggestedFileName())
-                                } else {
-                                    AppPreferences.setAutoBackupEnabled(context, enabled)
-                                    autoBackupEnabled = enabled
-                                }
-                            },
-                            colors = SwitchDefaults.colors()
-                        )
                     }
                     if (autoBackupEnabled) {
-                        CurioSettingsDivider()
+                        SettingsOptionDivider()
                         // v227c — HOW OFTEN: Daily / Every 3 days / Weekly.
                         // Selection reads through a solid primary fill with
                         // on-primary ink (the app's selection contract).
@@ -469,7 +437,7 @@ val glassBackdrop = rememberLayerBackdrop()
                             ?.let { runCatching { Uri.parse(it).lastPathSegment }.getOrNull() }
                             ?.substringAfterLast(':')
                             ?.takeIf { it.isNotBlank() }
-                        CurioSettingsRow(
+                        SettingsOptionRow(
                             CurioIcons.Inventory2,
                             "Backup location",
                             locationName ?: "Choose a location"
@@ -480,16 +448,16 @@ val glassBackdrop = rememberLayerBackdrop()
                         val autoLabel = if (lastAutoBackupAt > 0L) {
                             SimpleDateFormat("MMM d, yyyy · h:mm a", locale).format(Date(lastAutoBackupAt))
                         } else "Not yet"
-                        CurioSettingsInfoRow(CurioIcons.History, "Last auto backup", autoLabel)
+                        SettingsOptionInfoRow(CurioIcons.History, "Last auto backup", autoLabel)
                     }
                 }
                 }
             }
-            item { CurioSectionLabel("Legacy import") }
+            item { SettingsSectionHeading("Legacy import") }
             item {
-                CurioSettingsCard(shadowElevation = 0.dp) {
+                SettingsOptionCard {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    CurioSettingsRow(
+                    SettingsOptionRow(
                         CurioIcons.History,
                         "Restore from FieldMind backup",
                         if (legacyBusy) "Reading archive…" else "Import observations, notes + species"
@@ -503,8 +471,8 @@ val glassBackdrop = rememberLayerBackdrop()
                             )
                         )
                     }
-                    CurioSettingsDivider()
-                    CurioSettingsInfoRow(CurioIcons.Info, "Additive import", "Existing Curio captures are never replaced")
+                    SettingsOptionDivider()
+                    SettingsOptionInfoRow(CurioIcons.Info, "Additive import", "Existing Curio captures are never replaced")
                 }
                 }
             }

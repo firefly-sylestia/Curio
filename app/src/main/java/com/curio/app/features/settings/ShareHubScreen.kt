@@ -51,7 +51,6 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioSearchField
-import com.curio.app.ui.components.CurioSectionLabel
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ShareCardAspect
@@ -329,7 +328,7 @@ fun ShareHubScreen(navController: NavController) {
 
             // ── Design grid ─────────────────────────────────────────────
             item(span = { GridItemSpan(maxLineSpan) }) {
-                CurioSectionLabel(
+                SettingsSectionHeading(
                     if (pickedTopic != null) "Designs · ${pickedTopic.name}" else "Designs · preview with any topic"
                 )
             }
@@ -338,7 +337,7 @@ fun ShareHubScreen(navController: NavController) {
                 // styles — show a section label before them.
                 if (i == 9) {
                     item(span = { GridItemSpan(maxLineSpan) }) {
-                        CurioSectionLabel("Per-category signature designs")
+                        SettingsSectionHeading("Per-category signature designs")
                     }
                 }
                 item {

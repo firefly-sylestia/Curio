@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,11 +35,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
-import com.curio.app.ui.components.CurioSectionLabel
-import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioSettingsDivider
-import com.curio.app.ui.components.CurioSettingsInfoRow
-import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
@@ -123,9 +118,9 @@ fun ExperimentsScreen(navController: NavController) {
             // passed), and v24 removed the Layout & input section.
 
             // v293 — LIQUID GLASS + PILL GLOW moved here from Appearance.
-            item { CurioSectionLabel("Liquid glass") }
+            item { SettingsSectionHeading("Liquid glass") }
             item {
-                CurioSettingsCard(shadowElevation = 0.dp) {
+                SettingsOptionCard {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     ExperimentSwitchRow("Liquid glass", "Refracting glass on the nav bar and floating pills (real on Android 12+, simulated on older devices)", AppPreferences.liquidGlassPillsState) {
                         AppPreferences.setLiquidGlassPillsEnabled(context, it)
@@ -141,7 +136,7 @@ fun ExperimentsScreen(navController: NavController) {
                         }
                         CurioSettingsDivider()
                         var showGlassTuning by remember { mutableStateOf(false) }
-                        CurioSettingsRow(
+                        SettingsOptionRow(
                             CurioIcons.Tune,
                             "Tune glass",
                             "Reflection, refraction and blur, with a live preview"
@@ -157,9 +152,9 @@ fun ExperimentsScreen(navController: NavController) {
             // liked-books surfaces render as collections with jacket-art
             // covers, and Home's Save shortcut repoints into the new view —
             // only while this toggle is on (see the AppPreferences state).
-            item { CurioSectionLabel("Cabinet v2") }
+            item { SettingsSectionHeading("Cabinet v2") }
             item {
-                CurioSettingsCard(shadowElevation = 0.dp) {
+                SettingsOptionCard {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         ExperimentSwitchRow(
                             "Cabinet v2 collections",
@@ -175,9 +170,9 @@ fun ExperimentsScreen(navController: NavController) {
             // or the content-height glass toolbar (the old Cabinet v2 look,
             // more blurry + its own tint). Applies to every Settings/Cabinet
             // hero plus Home and Profile (Spin keeps its own chrome).
-            item { CurioSectionLabel("Headers") }
+            item { SettingsSectionHeading("Headers") }
             item {
-                CurioSettingsCard(shadowElevation = 0.dp) {
+                SettingsOptionCard {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     ExperimentSwitchRow(
                         "Glass toolbar header",
@@ -193,9 +188,9 @@ fun ExperimentsScreen(navController: NavController) {
                 }
             }
             // v293 — Pet behavior + explore options moved here from Preferences/Recording.
-            item { CurioSectionLabel("Pet & explore") }
+            item { SettingsSectionHeading("Pet & explore") }
             item {
-                CurioSettingsCard(shadowElevation = 0.dp) {
+                SettingsOptionCard {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     // Voice-to-text
                     ExperimentSwitchRow("Voice-to-text", "Live dictation while typing, and transcription of recordings", AppPreferences.voiceToTextEnabledState) {
@@ -270,9 +265,9 @@ fun ExperimentsScreen(navController: NavController) {
                 }
             }
             // v27 — paper & header experiments, all OFF by default.
-            item { CurioSectionLabel("Paper & headers") }
+            item { SettingsSectionHeading("Paper & headers") }
             item {
-                CurioSettingsCard(shadowElevation = 0.dp) {
+                SettingsOptionCard {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     ExperimentSwitchRow("Title cut lines", "Two short lines under header titles", AppPreferences.paperHeaderCutsState) {
                         AppPreferences.setPaperHeaderCutsEnabled(context, it)
@@ -294,7 +289,7 @@ fun ExperimentsScreen(navController: NavController) {
                             .fillMaxWidth()
                             .alpha(if (ringStyleEnabled) 1f else 0.45f)
                     ) {
-                        CurioSettingsRow(
+                        SettingsOptionRow(
                             CurioIcons.Tune,
                             "Ring style",
                             when (AppPreferences.paperHoleRingStyleState) {
@@ -328,9 +323,9 @@ fun ExperimentsScreen(navController: NavController) {
                 }
                 }
             }
-            item { CurioSectionLabel("Constellation") }
+            item { SettingsSectionHeading("Constellation") }
             item {
-                CurioSettingsCard(shadowElevation = 0.dp) {
+                SettingsOptionCard {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     ExperimentSwitchRow("3D star zoom", "Tap a constellation star for a perspective tilt + glow", AppPreferences.starZoom3dState) {
                         AppPreferences.setStarZoom3dEnabled(context, it)
@@ -353,10 +348,10 @@ fun ExperimentsScreen(navController: NavController) {
                 }
             }
             item {
-                CurioSettingsCard(shadowElevation = 0.dp) {
+                SettingsOptionCard {
                     // v281 - in-app editor: works even on launchers without
                     // the long-press Edit flow for reconfigurable widgets.
-                    com.curio.app.ui.components.CurioSettingsRow(
+                    SettingsOptionRow(
                         CurioIcons.Settings,
                         "Edit home screen widgets",
                         "Change mode, pane and corners of placed widgets in-app"
@@ -366,8 +361,8 @@ fun ExperimentsScreen(navController: NavController) {
                 }
             }
             item {
-                CurioSettingsCard(shadowElevation = 0.dp) {
-                    CurioSettingsInfoRow(CurioIcons.Info, "About experiments", "These controls are temporary and may change")
+                SettingsOptionCard {
+                    SettingsOptionInfoRow(CurioIcons.Info, "About experiments", "These controls are temporary and may change")
                 }
             }
         }
@@ -452,27 +447,15 @@ fun ExperimentsScreen(navController: NavController) {
 
 @Composable
 private fun ExperimentSwitchRow(
+    icon: String? = null,
     title: String,
     subtitle: String,
     checked: Boolean,
     enabled: Boolean = true,
     onCheckedChange: (Boolean) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp)
-            .alpha(if (enabled) 1f else 0.45f)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(title, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
-                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            Switch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
-        }
-    }
+    SettingsOptionSwitchRow(
+        icon, title, subtitle, checked, enabled, onCheckedChange,
+        modifier = Modifier.alpha(if (enabled) 1f else 0.45f)
+    )
 }

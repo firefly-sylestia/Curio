@@ -947,6 +947,30 @@ app/src/main/java/com/curio/app/
   (4) Card texture: the white diagonal sheen drawLine is GONE — replaced
   with the JSX `cardTexture` bubble-dots style: two outlined circles +
   a six-dot speckle (white, 0.30).
+- **v3xx32 — settings sub-pages unified via SHARED components (user
+  follow-up 2026-09-08).** New `features/settings/SettingsPageComponents.kt`
+  is the ONE visual language for every settings-family page, mirroring the
+  hub's secondary-card look: `SettingsSectionHeading` (glyph + Playfair
+  serif label + short rule — replaces `CurioSectionLabel` in the settings
+  family), `SettingsOptionCard` (frosted white / raised-dark glass,
+  rounded 20), `SettingsOptionRow` (frosted 40dp icon tile + title +
+  subtitle + chevron), `SettingsOptionSwitchRow`, `SettingsOptionSegmentedRow`,
+  `SettingsOptionInfoRow` and `SettingsOptionDivider` (hairline inset 53dp
+  to the tile column). Applied across the whole family: SettingsSectionScreen
+  (Appearance/Preferences/Recording/Data — the private CompactSwitchRow /
+  CompactSegmentedRow helpers now DELEGATE to the shared rows and gained
+  icon tiles; Theme→dark_mode, tint→palette, pastel→auto_awesome,
+  material→layers, hero-tears→auto_stories, hero→image, adaptive→refresh,
+  curie→pets, sessions→travel_explore, bubble→bubble_chart, reminder→
+  notifications), BackupToolsScreen (incl. the Auto-backup toggle row),
+  ExperimentsScreen + UserExperimentsScreen (labels/cards/rows — the
+  ExperimentSwitchRow wrapper delegates to the shared switch row and keeps
+  its disabled alpha), SupportScreen (Version row became a shared option
+  row), UpdatesScreen (Update-checker toggle became a shared switch row),
+  ShareHubScreen labels, and the hub's own search-results labels/cards/
+  rows. Only verified-in-subset glyphs are used (CurioIcons constants).
+  Custom content (chips, status header, release notes) keeps its own
+  layout inside the glass cards.
 - **v3xx28 — Cabinet per-item colors + fresh grid per level (user
   follow-up 2026-09-08).** (1) **Extracted cover colors** — liked
   books/albums/series rows, tiles and the Everything preview now use the

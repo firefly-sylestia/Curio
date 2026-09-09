@@ -3,12 +3,10 @@ package com.curio.app.features.support
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -22,10 +20,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.BuildConfig
@@ -34,6 +30,10 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsNavRail
+import com.curio.app.features.settings.SettingsOptionCard
+import com.curio.app.features.settings.SettingsOptionDivider
+import com.curio.app.features.settings.SettingsOptionRow
+import com.curio.app.features.settings.SettingsSectionHeading
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.navigateToSettingsSection
 import com.curio.app.features.settings.settingsRoseAccent
@@ -43,13 +43,8 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.components.CurioCardHeader
-import com.curio.app.ui.components.CurioSectionLabel
-import com.curio.app.ui.components.CurioSettingsCard
-import com.curio.app.ui.components.CurioSettingsDivider
-import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
-import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import kotlinx.coroutines.delay
 import com.kyant.backdrop.backdrops.layerBackdrop
@@ -146,12 +141,12 @@ fun SupportScreen(navController: NavController) {
                         onSelect = { navigateToSettingsSection(navController, it) }
                     )
                 }
-                item { CurioSectionLabel("Feedback") }
+                item { SettingsSectionHeading("Feedback") }
                 item {
-                    CurioSettingsCard(shadowElevation = 0.dp) {
+                    SettingsOptionCard {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         CurioCardHeader(CurioIcons.BugReport, "Reports & crash logs", "Tell us what broke")
-                        CurioSettingsRow(
+                        SettingsOptionRow(
                             CurioIcons.BugReport,
                             "Report a bug",
                             "Opens a pre-filled GitHub issue"
@@ -159,8 +154,8 @@ fun SupportScreen(navController: NavController) {
                             navController.navigate(CurioRoutes.BUG_REPORT) { launchSingleTop = true }
                         }
                         if (crashCount > 0) {
-                            CurioSettingsDivider()
-                            CurioSettingsRow(
+                            SettingsOptionDivider()
+                            SettingsOptionRow(
                                 CurioIcons.History,
                                 "Crash logs",
                                 "$crashCount saved report${if (crashCount == 1) "" else "s"}"
@@ -168,8 +163,8 @@ fun SupportScreen(navController: NavController) {
                                 navController.navigate(CurioRoutes.CRASH) { launchSingleTop = true }
                             }
                         }
-                        CurioSettingsDivider()
-                        CurioSettingsRow(
+                        SettingsOptionDivider()
+                        SettingsOptionRow(
                             CurioIcons.ErrorOutline,
                             "Test crash",
                             "Diagnostic tool"
@@ -180,12 +175,12 @@ fun SupportScreen(navController: NavController) {
                 // ── About Curio — merged here from the old Settings → About
                 //    page (v24): Replay intro + the project link. One page,
                 //    reached from Settings and Profile alike.
-                item { CurioSectionLabel("About Curio") }
+                item { SettingsSectionHeading("About Curio") }
                 item {
-                    CurioSettingsCard(shadowElevation = 0.dp) {
+                    SettingsOptionCard {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         CurioCardHeader(CurioIcons.Info, "About Curio", "The app, the journey, and its source")
-                        CurioSettingsRow(
+                        SettingsOptionRow(
                             CurioIcons.Replay,
                             "Replay intro",
                             "See the welcome screens again"
@@ -193,8 +188,8 @@ fun SupportScreen(navController: NavController) {
                             CurioOnboardingState.reset(context)
                             navController.navigate(CurioRoutes.ONBOARDING) { launchSingleTop = true }
                         }
-                        CurioSettingsDivider()
-                        CurioSettingsRow(
+                        SettingsOptionDivider()
+                        SettingsOptionRow(
                             CurioIcons.Info,
                             "GitHub repository",
                             "Source, releases, and issues"
@@ -208,11 +203,11 @@ fun SupportScreen(navController: NavController) {
                                 )
                             }
                         }
-                        CurioSettingsDivider()
+                        SettingsOptionDivider()
                         // v286 — open-source credit: the liquid-glass
                         // pipeline runs on Kyant0's backdrop library
                         // (drawBackdrop + vibrancy + blur + lens recipe).
-                        CurioSettingsRow(
+                        SettingsOptionRow(
                             CurioIcons.Info,
                             "Liquid glass by Kyant",
                             "github.com/Kyant0/AndroidLiquidGlass"
@@ -233,64 +228,40 @@ fun SupportScreen(navController: NavController) {
                 //    on the dedicated Updates sub-page (Settings → Updates),
                 //    so this keeps only the version readout (five taps →
                 //    Experiments) with no duplicate Updates entry (v116).
-                item { CurioSectionLabel("Updates") }
+                item { SettingsSectionHeading("Updates") }
                 item {
                     // v115 — the support sections sit in the shared settings
                     // card so the page reads as settings options, not
                     // transparent rows floating on the backdrop.
-                    CurioSettingsCard(shadowElevation = 0.dp) {
+                    SettingsOptionCard {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         // v118 — the user asked for an update link right here:
                         // one row that opens the dedicated Updates sub-page.
-                        CurioSettingsRow(
+                        SettingsOptionRow(
                             CurioIcons.Download,
                             "Updates",
                             "Check for updates, release notes & install"
                         ) {
                             navController.navigate(CurioRoutes.UPDATES) { launchSingleTop = true }
                         }
-                        CurioSettingsDivider()
-                        // Version — tappable: five taps TOGGLE promo mode
-                        // (on → off, off → on); the promo page then shows
-                        // the resulting state. Subtitle hints while counting
-                        // and shows the live mode when on.
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    versionTaps++
-                                    if (versionTaps >= 5) {
-                                        versionTaps = 0
-                                        // v24 — the five-tap opens the
-                                        // Dev page (and keeps it
-                                        // open); it no longer toggles promo
-                                        // mode (promo lives in Experiments).
-                                        navController.navigate(CurioRoutes.EXPERIMENTS) { launchSingleTop = true }
-                                    }
-                                }
-                                .padding(horizontal = 4.dp, vertical = 13.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        SettingsOptionDivider()
+                        // Version — tappable: five taps open the Dev page.
+                        SettingsOptionRow(
+                            CurioIcons.Info,
+                            "Version",
+                            when {
+                                versionTaps in 1..4 ->
+                                    "Tap ${5 - versionTaps} more to open Dev page"
+                                else ->
+                                    "${BuildConfig.VERSION_NAME} · build ${BuildConfig.VERSION_CODE}"
+                            }
                         ) {
-                            CurioIcon(
-                                CurioIcons.Info, null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                size = 21.dp
-                            )
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text("Version", style = MaterialTheme.typography.bodyLarge)
-                                Text(
-                                    text = when {
-                                        versionTaps in 1..4 ->
-                                            "Tap ${5 - versionTaps} more to open Dev page"
-                                        else ->
-                                            "${BuildConfig.VERSION_NAME} · build ${BuildConfig.VERSION_CODE}"
-                                    },
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
+                            versionTaps++
+                            if (versionTaps >= 5) {
+                                versionTaps = 0
+                                // v24 — the five-tap opens the Dev page (and
+                                // keeps it open); promo lives in Experiments.
+                                navController.navigate(CurioRoutes.EXPERIMENTS) { launchSingleTop = true }
                             }
                         }
                     }

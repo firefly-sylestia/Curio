@@ -29,13 +29,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.Slider
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -87,12 +82,8 @@ import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
-import com.curio.app.ui.components.CurioSectionLabel
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioSettingsCard
-import com.curio.app.ui.components.CurioSettingsDivider
-import com.curio.app.ui.components.CurioSettingsInfoRow
-import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.formatHour
@@ -132,7 +123,7 @@ internal fun SettingsPageContent(
     // v115 — every sub-page's options sit in the same paper card as the
     // hub rows, so the section screens read as proper settings options
     // instead of transparent rows floating on the backdrop.
-    CurioSettingsCard(shadowElevation = 0.dp) {
+    SettingsOptionCard {
         when (page) {
             SettingsPage.APPEARANCE -> AppearanceSection(highlightKey)
             SettingsPage.PREFERENCES -> PreferencesSection(highlightKey)
@@ -220,7 +211,7 @@ val glassBackdrop = rememberLayerBackdrop()
                     onSelect = { navigateToSettingsSection(navController, it) }
                 )
             }
-                        item { CurioSectionLabel(page.title) }
+                        item { SettingsSectionHeading(page.title) }
             item {
                 SettingsPageContent(page, navController, highlightKey)
             }
@@ -265,6 +256,7 @@ private fun AppearanceSection(highlightKey: String? = null) {
                     .onGloballyPositioned { themeRowBounds = it.boundsInWindow() }
             ) {
                 CompactSegmentedRow(
+                    CurioIcons.DarkMode,
                     "Theme",
                     listOf("Light", "Dark", "System"),
                     when (AppPreferences.themeModeState) {
@@ -287,19 +279,19 @@ private fun AppearanceSection(highlightKey: String? = null) {
                 }
             }
         }
-        CurioSettingsDivider()
+        SettingsOptionDivider()
         SettingsRowPulse(highlightKey == "appearance-tint") {
-            CompactSwitchRow("Category tint", "Colorful page backgrounds", AppPreferences.tintWashEffective()) {
+            CompactSwitchRow(CurioIcons.Palette, "Category tint", "Colorful page backgrounds", AppPreferences.tintWashEffective()) {
                 AppPreferences.setTintWashEnabled(context, it)
             }
         }
-        CurioSettingsDivider()
+        SettingsOptionDivider()
         SettingsRowPulse(highlightKey == "appearance-pastel") {
-            CompactSwitchRow("Pastel colors", "Soft category accents and page tints", AppPreferences.pastelColorsState) {
+            CompactSwitchRow(CurioIcons.AutoAwesome, "Pastel colors", "Soft category accents and page tints", AppPreferences.pastelColorsState) {
                 AppPreferences.setPastelColorsEnabled(context, it)
             }
         }
-        CurioSettingsDivider()
+        SettingsOptionDivider()
         // v185 — the proper M3 Material theme system (opt-in, default OFF —
         // the current app look is untouched). The v185 "Material guidelines"
         // + "Material chrome" options were removed (user verdict: not good).
@@ -316,6 +308,7 @@ private fun AppearanceSection(highlightKey: String? = null) {
                     .onGloballyPositioned { materialRowBounds = it.boundsInWindow() }
             ) {
                 CompactSwitchRow(
+                    CurioIcons.Layers,
                     "Material theme",
                     "Proper Material 3 colors: one primary, neutral surfaces, muted category families",
                     AppPreferences.materialThemeState
@@ -330,7 +323,7 @@ private fun AppearanceSection(highlightKey: String? = null) {
                 }
             }
         }
-        CurioSettingsDivider()
+        SettingsOptionDivider()
         // v223 — one more Material option: the torn shared heroes
         // follow the Material theme (primaryContainer + its ink)
         // instead of the app-default rose/azure. Only meaningful while
@@ -345,6 +338,7 @@ private fun AppearanceSection(highlightKey: String? = null) {
                     .onGloballyPositioned { heroTearRowBounds = it.boundsInWindow() }
             ) {
                 CompactSwitchRow(
+                    CurioIcons.FoldedCorner,
                     "Material hero tears",
                     "Torn heroes wear the theme's container color, not rose",
                     AppPreferences.materialHeroTearsState,
@@ -360,13 +354,14 @@ private fun AppearanceSection(highlightKey: String? = null) {
                 }
             }
         }
-        CurioSettingsDivider()
+        SettingsOptionDivider()
         // v42 — the hero picker is a two-option control (Rose hero / Azure
         // hero), both fully selectable — azure is back and now the DEFAULT.
         // The whole control greys out while Adaptive Hero (below) is active,
         // since the lane then owns the hero color.
         SettingsRowPulse(highlightKey == "appearance-hero") {
             CompactSegmentedRow(
+                CurioIcons.Image,
                 "Hero",
                 listOf("Rose hero", "Azure hero"),
                 if (AppPreferences.heroBlueState) 1 else 0,
@@ -375,21 +370,21 @@ private fun AppearanceSection(highlightKey: String? = null) {
                 AppPreferences.setHeroBlueEnabled(context, index == 1)
             }
         }
-        CurioSettingsDivider()
+        SettingsOptionDivider()
         // v30 — the shared hero AND its page background follow the category
         // last picked on Spin (the Cabinet's language) instead of the
         // rose/azure. Off by default — rose stays. v31 — renamed
         // "Adaptive Hero".
         SettingsRowPulse(highlightKey == "appearance-hero-lane") {
-            CompactSwitchRow("Adaptive Hero", "Shared hero and page take the category you last picked on Spin", AppPreferences.heroFollowLaneState) {
+            CompactSwitchRow(CurioIcons.Refresh, "Adaptive Hero", "Shared hero and page take the category you last picked on Spin", AppPreferences.heroFollowLaneState) {
                 AppPreferences.setHeroFollowLaneEnabled(context, it)
             }
         }
-        CurioSettingsDivider()
+        SettingsOptionDivider()
         // v8.5 — the Curio pet companion (spec §10): pixel pet + rule-based
         // dialogue + passport/discovery on Quests and Home. Default ON.
         SettingsRowPulse(highlightKey == "appearance-pet") {
-            CompactSwitchRow("Curie", "Pixel companion that grows with your XP", AppPreferences.petEnabledState) {
+            CompactSwitchRow(CurioIcons.Pets, "Curie", "Pixel companion that grows with your XP", AppPreferences.petEnabledState) {
                 AppPreferences.setPetEnabled(context, it)
             }
         }
@@ -484,7 +479,7 @@ private fun PreferencesSection(highlightKey: String? = null) {
         // v19 — which search engine the "Explore in browser" button opens.
         // A row that opens the engine picker; the subtitle shows the choice.
         SettingsRowPulse(highlightKey == "pref-search-engine") {
-            CurioSettingsRow(
+            SettingsOptionRow(
                 CurioIcons.Search,
                 "Search engine",
                 "Explore in browser opens ${SearchEngine.fromId(AppPreferences.searchEngineState).displayName}"
@@ -492,11 +487,11 @@ private fun PreferencesSection(highlightKey: String? = null) {
                 showSearchEngineDialog = true
             }
         }
-        CurioSettingsDivider()
+        SettingsOptionDivider()
         // v27s — which music service the "Watch in" explore button opens for
         // albums, artists and songs (next to the search-engine picker).
         SettingsRowPulse(highlightKey == "pref-music-service") {
-            CurioSettingsRow(
+            SettingsOptionRow(
                 CurioIcons.MusicNote,
                 "Music service",
                 "Watch in opens ${MusicService.fromId(AppPreferences.musicServiceState).displayName} for albums, artists & songs"
@@ -504,15 +499,15 @@ private fun PreferencesSection(highlightKey: String? = null) {
                 showMusicServiceDialog = true
             }
         }
-        CurioSettingsDivider()
+        SettingsOptionDivider()
         SettingsRowPulse(highlightKey == "pref-sessions") {
-            CompactSwitchRow("Explore sessions", "Timer, reminder, and done prompt", exploreSessionsEnabled) {
+            CompactSwitchRow(CurioIcons.TravelExplore, "Explore sessions", "Timer, reminder, and done prompt", exploreSessionsEnabled) {
                 exploreSessionsEnabled = it
                 AppPreferences.setExploreSessionsEnabled(context, it)
             }
         }
 
-        CurioSettingsDivider()
+        SettingsOptionDivider()
         // v30 — the floating bubble and the overlay permission are ONE
         // option (the bubble IS the overlay). Enabling without the permission
         // opens the system page to ask for it; the subtitle shows the live
@@ -520,6 +515,7 @@ private fun PreferencesSection(highlightKey: String? = null) {
         // granted, an inline row below offers to remove it.
         SettingsRowPulse(highlightKey == "pref-bubble") {
             CompactSwitchRow(
+                CurioIcons.BubbleChart,
                 "Floating explore bubble",
                 if (overlayUsable) "Timer bubble over other apps · overlay permission granted"
                 else "Timer bubble over other apps · needs the overlay permission",
@@ -548,7 +544,7 @@ private fun PreferencesSection(highlightKey: String? = null) {
         }
         if (!overlayEnabled && overlayUsable) {
             SettingsRowPulse(highlightKey == "pref-bubble-revoke") {
-                CurioSettingsRow(
+                SettingsOptionRow(
                     CurioIcons.Layers,
                     "Remove overlay permission",
                     "Open system settings to revoke the floating bubble's permission"
@@ -574,12 +570,12 @@ private fun PreferencesSection(highlightKey: String? = null) {
             }
         }
 
-        CurioSettingsDivider()
+        SettingsOptionDivider()
         // v27 — the daily shuffle reminder + its hour chips moved in from the
         // removed Notifications section: Preferences is now the one home for
         // notification controls.
         SettingsRowPulse(highlightKey == "pref-reminder") {
-            CompactSwitchRow("Daily shuffle reminder", if (AppPreferences.reminderEnabledState) "Every day at ${formatHour(AppPreferences.getReminderHour(context))}" else "Off", AppPreferences.reminderEnabledState) { enabled ->
+            CompactSwitchRow(CurioIcons.Notifications, "Daily shuffle reminder", if (AppPreferences.reminderEnabledState) "Every day at ${formatHour(AppPreferences.getReminderHour(context))}" else "Off", AppPreferences.reminderEnabledState) { enabled ->
                 if (enabled) enableNotifications { AppPreferences.setReminderEnabled(context, true) } else AppPreferences.setReminderEnabled(context, false)
             }
         }
@@ -616,11 +612,12 @@ private fun PreferencesSection(highlightKey: String? = null) {
                 }
             }
         }
-        CurioSettingsDivider()
+        SettingsOptionDivider()
         // v23 — the explore dialog's bubble opt-in row is hidden by default;
         // this re-shows it there as a single-line choice (no subtext).
         SettingsRowPulse(highlightKey == "pref-bubble-dialog") {
             CompactSwitchRow(
+                CurioIcons.BubbleChart,
                 "Explore bubble option in Explore dialog",
                 "Show the bubble choice as one line when you start an explore",
                 showBubbleOptInDialogEnabled
@@ -684,13 +681,13 @@ private fun RecordingSection(highlightKey: String? = null) {
     }
     Column(modifier = Modifier.fillMaxWidth()) {
         SettingsRowPulse(highlightKey == "recording-quality") {
-            CurioSettingsRow(CurioIcons.Mic, "Audio quality", quality.label) {
+            SettingsOptionRow(CurioIcons.Mic, "Audio quality", quality.label) {
                 showQualityDialog = true
             }
         }
-        CurioSettingsDivider()
+        SettingsOptionDivider()
         SettingsRowPulse(highlightKey == "recording-offline-model") {
-            CurioSettingsRow(CurioIcons.Download, "Offline model", offlineModelSubtitle) {
+            SettingsOptionRow(CurioIcons.Download, "Offline model", offlineModelSubtitle) {
                 showModelDialog = true
             }
         }
@@ -718,19 +715,20 @@ private fun RecordingSection(highlightKey: String? = null) {
 private fun DataSection(navController: NavController, highlightKey: String? = null) {
     Column(modifier = Modifier.fillMaxWidth()) {
         SettingsRowPulse(highlightKey == "data-tools") {
-            CurioSettingsRow(CurioIcons.Backup, "Open backup tools", "Export, restore, or import FieldMind data") {
+            SettingsOptionRow(CurioIcons.Backup, "Open backup tools", "Export, restore, or import FieldMind data") {
                 navController.navigate(CurioRoutes.SETTINGS_DATA) { launchSingleTop = true }
             }
         }
-        CurioSettingsDivider()
+        SettingsOptionDivider()
         SettingsRowPulse(highlightKey == "data-workspace") {
-            CurioSettingsInfoRow(CurioIcons.History, "Backup workspace", "Full backup tools remain in the data workspace")
+            SettingsOptionInfoRow(CurioIcons.History, "Backup workspace", "Full backup tools remain in the data workspace")
         }
     }
 }
 
 @Composable
 private fun CompactSegmentedRow(
+    icon: String? = null,
     title: String,
     labels: List<String>,
     selectedIndex: Int,
@@ -739,51 +737,19 @@ private fun CompactSegmentedRow(
     disabledHint: String? = null,
     onSelected: (Int) -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(title, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
-        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-            labels.forEachIndexed { index, label ->
-                SegmentedButton(
-                    selected = index == selectedIndex,
-                    onClick = { onSelected(index) },
-                    enabled = enabled && index !in disabledIndices,
-                    shape = SegmentedButtonDefaults.itemShape(index = index, count = labels.size)
-                ) { Text(label, style = MaterialTheme.typography.labelSmall) }
-            }
-        }
-        if (disabledHint != null && disabledIndices.isNotEmpty()) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.padding(top = 2.dp, start = 2.dp)
-            ) {
-                CurioIcon(CurioIcons.Schedule, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, size = 14.dp)
-                Text(
-                    disabledHint,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
+    SettingsOptionSegmentedRow(icon, title, labels, selectedIndex, enabled, disabledIndices, disabledHint, onSelected)
 }
 
 @Composable
-private fun CompactSwitchRow(title: String, subtitle: String, checked: Boolean, enabled: Boolean = true, onCheckedChange: (Boolean) -> Unit) {
-    // v78 — light only (the AMOLED switch color override is gone with dark
-    // mode): the scheme's default switch colors.
-    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(title, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold))
-            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        Switch(
-            checked = checked,
-            enabled = enabled,
-            onCheckedChange = onCheckedChange,
-            colors = SwitchDefaults.colors()
-        )
-    }
+private fun CompactSwitchRow(
+    icon: String? = null,
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    enabled: Boolean = true,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    SettingsOptionSwitchRow(icon, title, subtitle, checked, enabled, onCheckedChange)
 }
 
 /** v242 — compact settings slider: label + live value, used by the Liquid

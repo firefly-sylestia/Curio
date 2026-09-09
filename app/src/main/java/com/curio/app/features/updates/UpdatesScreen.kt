@@ -23,8 +23,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,17 +55,18 @@ import com.curio.app.data.UpdateChecker
 import com.curio.app.data.UpdateInfo
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsNavRail
+import com.curio.app.features.settings.SettingsOptionCard
+import com.curio.app.features.settings.SettingsOptionDivider
+import com.curio.app.features.settings.SettingsOptionInfoRow
+import com.curio.app.features.settings.SettingsOptionRow
+import com.curio.app.features.settings.SettingsOptionSwitchRow
+import com.curio.app.features.settings.SettingsSectionHeading
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.navigateToSettingsSection
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
-import com.curio.app.ui.components.CurioSectionLabel
-import com.curio.app.ui.components.CurioSettingsCard
-import com.curio.app.ui.components.CurioSettingsDivider
-import com.curio.app.ui.components.CurioSettingsInfoRow
-import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioColors
@@ -294,13 +293,13 @@ fun UpdatesScreen(navController: NavController) {
                         onSelect = { navigateToSettingsSection(navController, it) }
                     )
                 }
-                item { CurioSectionLabel("Updates") }
+                item { SettingsSectionHeading("Updates") }
                 // ── Status card — current version, check state, the
                 //    update action (when one is available) and the checker
                 //    toggle. The status header gives the page a real
                 //    presence instead of a bare list of rows.
                 item {
-                    CurioSettingsCard(shadowElevation = 0.dp) {
+                    SettingsOptionCard {
                         Column(modifier = Modifier.fillMaxWidth()) {
                             // Status header — accent status dot + headline +
                             // the version chip.
@@ -349,8 +348,8 @@ fun UpdatesScreen(navController: NavController) {
                                     )
                                 }
                             }
-                            CurioSettingsDivider()
-                            CurioSettingsRow(
+                            SettingsOptionDivider()
+                            SettingsOptionRow(
                                 CurioIcons.Download,
                                 "Check for updates",
                                 checkSubtitle,
@@ -361,7 +360,7 @@ fun UpdatesScreen(navController: NavController) {
                             //    Update now CTA (or the download progress /
                             //    retry states) plus the release-page link.
                             if (checkState == UpdateCheckUi.GithubAvailable && updateInfo != null) {
-                                CurioSettingsDivider()
+                                SettingsOptionDivider()
                                 val info = updateInfo
                                 Surface(
                                     shape = RoundedCornerShape(16.dp),
@@ -463,41 +462,19 @@ fun UpdatesScreen(navController: NavController) {
                                     }
                                 }
                             }
-                            CurioSettingsDivider()
+                            SettingsOptionDivider()
                             // Opt-in update checker toggle — off by default
                             // (Curio is offline-first; the background check
                             // costs data).
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 4.dp, vertical = 13.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                CurioIcon(
-                                    CurioIcons.Notifications, null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    size = 21.dp
-                                )
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text("Update checker", style = MaterialTheme.typography.bodyLarge)
-                                    Text(
-                                        text = if (checkerEnabled) "Checks for new versions on app open"
-                                        else "Off · check manually to save data",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                                Switch(
-                                    checked = checkerEnabled,
-                                    onCheckedChange = { enabled ->
-                                        checkerEnabled = enabled
-                                        AppPreferences.setUpdateCheckerEnabled(context, enabled)
-                                    },
-                                    colors = SwitchDefaults.colors()
-                                )
+                            SettingsOptionSwitchRow(
+                                CurioIcons.Notifications,
+                                "Update checker",
+                                if (checkerEnabled) "Checks for new versions on app open"
+                                else "Off · check manually to save data",
+                                checkerEnabled
+                            ) { enabled ->
+                                checkerEnabled = enabled
+                                AppPreferences.setUpdateCheckerEnabled(context, enabled)
                             }
                         }
                     }
@@ -508,9 +485,9 @@ fun UpdatesScreen(navController: NavController) {
                 //    fresh) so the page never re-fetches to show it.
                 val notes = updateInfo?.releaseNotes?.takeIf { it.isNotBlank() }
                 if (resultVisible && notes != null) {
-                    item { CurioSectionLabel("What's new") }
+                    item { SettingsSectionHeading("What's new") }
                     item {
-                        CurioSettingsCard(shadowElevation = 0.dp) {
+                        SettingsOptionCard {
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 Text(
                                     "In ${updateInfo?.tagName ?: "this version"}",
@@ -547,11 +524,11 @@ fun UpdatesScreen(navController: NavController) {
                         }
                     }
                 }
-                item { CurioSectionLabel("Need help?") }
+                item { SettingsSectionHeading("Need help?") }
                 item {
-                    CurioSettingsCard(shadowElevation = 0.dp) {
+                    SettingsOptionCard {
                         Column(modifier = Modifier.fillMaxWidth()) {
-                            CurioSettingsRow(
+                            SettingsOptionRow(
                                 CurioIcons.Info,
                                 "Support & diagnostics",
                                 "Reports, crash logs & app details"
@@ -560,8 +537,8 @@ fun UpdatesScreen(navController: NavController) {
                                     launchSingleTop = true
                                 }
                             }
-                            CurioSettingsDivider()
-                            CurioSettingsInfoRow(
+                            SettingsOptionDivider()
+                            SettingsOptionInfoRow(
                                 CurioIcons.Download,
                                 "How updates work",
                                 "Updates install the latest release from GitHub"

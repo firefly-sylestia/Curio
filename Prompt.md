@@ -1180,5 +1180,19 @@ the annotation while preserving the live selection. Both surfaces share
 the one ArrangeableCard field, so the bottom-sheet preview and the
 full-screen editor are fixed together. Committed + pushed.
 
-## next prompt
-now lets fully unify the sub setting pages as they dont match the feel right, fully unify each of the insides of the settings option spparenace etc to the new style just dont overdo it keep it minimal and not confusing and start, and also you can delete old prompts to keep it small which ae fully done
+## request log — settings unify (done 2026-09-09, pushed)
+Settings sub-pages fully unified into one shared component style (our own
+look, not a JSX copy) — new `features/settings/SettingsPageComponents.kt`
+with `SettingsSectionHeading` (Playfair + glyph + rule),
+`SettingsOptionCard` (frosted glass), `SettingsOptionRow` /
+`SettingsOptionSwitchRow` / `SettingsOptionSegmentedRow` /
+`SettingsOptionInfoRow` and `SettingsOptionDivider`. Applied across the
+whole family: the 4 core section pages (Appearance rows gained icon
+tiles), Backup & restore, Experiments + User Experiments, Support
+(Version row unified), Updates (checker toggle unified), Share hub
+labels, and the hub's search results — the old paper cards and plain
+labels are gone. Unused imports cleaned; only verified-subset glyphs
+used. Committed + pushed.
+
+## next prompt 
+ no in cabinet the favorites drawing is meh not good doesnt signify its favorites, also the currently reading the design isnt connected and looks random, same for want to read, and completed design is fine just that its not connected all the way to the buttom so it loos disconnected, and also the notes its not note, and also some of the custom ones some are fine but most of them looks disconnected or random drawings use publicly avalable drawing to proper do it and remeber keep it minimal and then the currently reading doesnt update and have no logic so add one in buttom sheet of books and rename reading in cabinet to curiying something, so we can add series etc too, and in noes dont show the entries but just the saved notes all around the app, and in want to read show the saved ones, then the favorites ui inside of its not complementing the style so prper redesign it and also with add buttom, and also the inside of add are just add entires and nothing else so fix that too add a search bar to search topics and add or from favorites etc to add in their. 

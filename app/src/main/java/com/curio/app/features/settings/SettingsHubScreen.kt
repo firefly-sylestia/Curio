@@ -93,13 +93,8 @@ import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioGlassToolbar
-import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.curioSearchFill
-import com.curio.app.ui.components.CurioSettingsCard
-import com.curio.app.ui.components.CurioSectionLabel
-import com.curio.app.ui.components.CurioSettingsDivider
-import com.curio.app.ui.components.CurioSettingsRow
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.curioDarkGlow
@@ -915,12 +910,12 @@ fun SettingsHubScreen(navController: NavController) {
                     } else {
                         val grouped = searchResults.groupBy { it.sectionLabel }
                         grouped.forEach { (sectionLabel, results) ->
-                            item(span = { GridItemSpan(maxLineSpan) }) { CurioSectionLabel(sectionLabel) }
+                            item(span = { GridItemSpan(maxLineSpan) }) { SettingsSectionHeading(sectionLabel) }
                             item(span = { GridItemSpan(maxLineSpan) }) {
-                                CurioSettingsCard(shadowElevation = 0.dp) {
+                                SettingsOptionCard {
                                     results.forEachIndexed { index, result ->
-                                        if (index > 0) CurioSettingsDivider()
-                                        CurioSettingsRow(result.row.icon, result.row.title, result.row.subtitle) {
+                                        if (index > 0) SettingsOptionDivider()
+                                        SettingsOptionRow(result.row.icon, result.row.title, result.row.subtitle) {
                                             val deep = result.deep
                                             if (deep != null) {
                                                 // Deep result → hand the exact row
@@ -942,7 +937,7 @@ fun SettingsHubScreen(navController: NavController) {
                     // them underneath).
                     settingsDesignGroups.forEach { group ->
                         item(key = "g|${group.label}", span = { GridItemSpan(maxLineSpan) }) {
-                            SettingsGroupHeading(group)
+                            SettingsSectionHeading(group.label, group.glyph)
                         }
                         group.cards.forEach { card ->
                             item(key = "card|${card.id}") {
@@ -1097,7 +1092,7 @@ private fun SettingsTwoPaneHub(
                         } else {
                             val grouped = searchResults.groupBy { it.sectionLabel }
                             grouped.forEach { (sectionLabel, results) ->
-                                item { CurioSectionLabel(sectionLabel) }
+                                item { SettingsSectionHeading(sectionLabel) }
                                 results.forEach { result ->
                                     item {
                                         SettingsNavRow(
@@ -1112,7 +1107,7 @@ private fun SettingsTwoPaneHub(
                         }
                     } else {
                         sections.forEach { section ->
-                            item { CurioSectionLabel(section.label) }
+                            item { SettingsSectionHeading(section.label) }
                             section.cards.forEach { card ->
                                 card.rows.forEach { row ->
                                     item {
@@ -1164,7 +1159,7 @@ private fun SettingsTwoPaneHub(
                 contentPadding = PaddingValues(start = 28.dp, end = 28.dp, top = 14.dp, bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                item { CurioSectionLabel(selectedPage.title) }
+                item { SettingsSectionHeading(selectedPage.title) }
                 item {
                     SettingsPageContent(selectedPage, navController, paneHighlight)
                 }
@@ -1934,39 +1929,6 @@ private fun SettingsSecondaryCardView(
     }
 }
 
-/** The JSX group heading — Playfair-ish serif label + thin rule + glyph. */
-@Composable
-private fun SettingsGroupHeading(group: SettingsDesignGroup) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 14.dp, bottom = 10.dp, start = 2.dp, end = 2.dp)
-    ) {
-        Text(
-            text = group.glyph,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f)
-        )
-        Spacer(Modifier.width(7.dp))
-        Text(
-            text = group.label,
-            style = MaterialTheme.typography.titleMedium.copy(
-                fontFamily = PlayfairDisplayFontFamily,
-                fontWeight = FontWeight.SemiBold,
-                letterSpacing = (-0.3).sp
-            ),
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Spacer(Modifier.width(11.dp))
-        Box(
-            modifier = Modifier
-                .width(34.dp)
-                .height(1.dp)
-                .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f))
-        )
-    }
-}
 
 /**
  * The JSX nav rail — horizontal chips on phones (the desktop sidebar's
