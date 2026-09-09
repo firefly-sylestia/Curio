@@ -408,6 +408,8 @@ fun GalleryWallFormat(
             onPaperStyleChange = { captionStyle = it },
             paperColor = captionColor,
             onPaperColorChange = { captionColor = it },
+            // v3xx — the caption joins the global text-history feed too.
+            historyField = "Caption",
             // v158 — the dictation mic rides the caption label row too
             // (same shared [DictationMic] flow as every note box).
             trailingAction = {

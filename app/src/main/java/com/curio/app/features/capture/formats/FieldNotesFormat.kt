@@ -190,6 +190,8 @@ fun FieldNotesFormat(
                     observedSpans = newSpans
                 },
                 placeholder = "What did you see, hear, notice?",
+                // v3xx — this section joins the global text-history feed.
+                historyField = "What I observed",
                 toolbarMode = RichTextToolbarMode.TOGGLE,
                 minHeight = 100.dp,
                 ink = paperInk(),
@@ -238,6 +240,8 @@ fun FieldNotesFormat(
                     surprisedSpans = newSpans
                 },
                 placeholder = "What was unexpected or delightful?",
+                // v3xx — this section joins the global text-history feed.
+                historyField = "What surprised me",
                 toolbarMode = RichTextToolbarMode.TOGGLE,
                 minHeight = 100.dp,
                 ink = paperInk(),
@@ -286,6 +290,8 @@ fun FieldNotesFormat(
                     learnNextSpans = newSpans
                 },
                 placeholder = "Where does this lead?",
+                // v3xx — this section joins the global text-history feed.
+                historyField = "What I want to learn next",
                 toolbarMode = RichTextToolbarMode.TOGGLE,
                 minHeight = 100.dp,
                 ink = paperInk(),

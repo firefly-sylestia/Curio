@@ -113,7 +113,8 @@ fun UserExperimentsScreen(navController: NavController) {
             item(key = "settings-nav", contentType = "settings-nav") {
                 SettingsNavRail(
                     active = "experiments",
-                    onSelect = { navigateToSettingsSection(navController, it) }
+                    onSelect = { navigateToSettingsSection(navController, it) },
+                    navController = navController
                 )
             }
             // Liquid glass section

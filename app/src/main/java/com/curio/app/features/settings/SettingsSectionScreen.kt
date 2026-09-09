@@ -208,7 +208,8 @@ val glassBackdrop = rememberLayerBackdrop()
                         SettingsPage.RECORDING -> "recording"
                         SettingsPage.DATA -> "backup"
                     },
-                    onSelect = { navigateToSettingsSection(navController, it) }
+                    onSelect = { navigateToSettingsSection(navController, it) },
+                    navController = navController
                 )
             }
                         item { SettingsSectionHeading(page.title) }

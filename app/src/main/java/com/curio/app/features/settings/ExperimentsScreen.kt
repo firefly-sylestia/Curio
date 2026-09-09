@@ -106,7 +106,8 @@ fun ExperimentsScreen(navController: NavController) {
             item(key = "settings-nav", contentType = "settings-nav") {
                 SettingsNavRail(
                     active = "experiments",
-                    onSelect = { navigateToSettingsSection(navController, it) }
+                    onSelect = { navigateToSettingsSection(navController, it) },
+                    navController = navController
                 )
             }
             // v223 — the "Spin visuals" section is GONE: all five

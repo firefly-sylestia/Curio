@@ -64,6 +64,7 @@ import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsNavRail
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.navigateToSettingsSection
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -76,6 +77,7 @@ import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.PlayfairDisplayFontFamily
 import com.curio.app.ui.theme.categorySurface
 import com.curio.app.ui.theme.curioDialogContainerColor
 import com.curio.app.ui.theme.themedAccent
@@ -182,6 +184,7 @@ fun RecycleBinScreen(navController: NavController) {
                     SettingsNavRail(
                         active = null,
                         onSelect = { navigateToSettingsSection(navController, it) },
+                        navController = navController,
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
                     CurioEmptyState(
@@ -221,7 +224,8 @@ fun RecycleBinScreen(navController: NavController) {
                     item(key = "settings-nav", contentType = "settings-nav") {
                         SettingsNavRail(
                             active = null,
-                            onSelect = { navigateToSettingsSection(navController, it) }
+                            onSelect = { navigateToSettingsSection(navController, it) },
+                            navController = navController
                         )
                     }
                     // ── Summary card ─────────────────────────────────
@@ -241,13 +245,28 @@ fun RecycleBinScreen(navController: NavController) {
                                 .padding(horizontal = 4.dp, vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            // Playfair heading + rule — the settings language.
                             Text(
-                                text = "RECENTLY DELETED",
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 1.sp
+                                text = "\u2726",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f)
+                            )
+                            Spacer(Modifier.width(7.dp))
+                            Text(
+                                text = "Recently deleted",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontFamily = PlayfairDisplayFontFamily,
+                                    fontWeight = FontWeight.SemiBold,
+                                    letterSpacing = (-0.3).sp
                                 ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(Modifier.width(11.dp))
+                            Box(
+                                modifier = Modifier
+                                    .width(34.dp)
+                                    .height(1.dp)
+                                    .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f))
                             )
                             Spacer(Modifier.weight(1f))
                             // Select all
@@ -574,30 +593,34 @@ private fun BinSummaryCard(
     expiryDays: Int,
     onExpiryClick: () -> Unit
 ) {
+    val dark = isCurioDarkTheme()
     Surface(
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shadowElevation = 1.dp,
+        color = if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
+        else Color.White.copy(alpha = 0.68f),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Trash icon
-            Surface(
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.error.copy(alpha = 0.10f),
-                modifier = Modifier.size(44.dp)
+            // Frosted icon tile — the settings row language.
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(13.dp))
+                    .background(
+                        if (dark) Color.White.copy(alpha = 0.09f)
+                        else Color(0xFFF2E8DC)
+                    ),
+                contentAlignment = Alignment.Center
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    CurioIcon(
-                        CurioIcons.Restore,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error,
-                        size = 22.dp
-                    )
-                }
+                CurioIcon(
+                    CurioIcons.Restore,
+                    contentDescription = null,
+                    tint = if (dark) Color(0xFFD7B8A9) else Color(0xFF755647),
+                    size = 20.dp
+                )
             }
             Spacer(Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -646,10 +669,12 @@ private fun TrashedEntryRow(
 ) {
     val category = CurioCategories.byId(entry.topic.categoryId)
     val accent = category.themedAccent()
+    val dark = isCurioDarkTheme()
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
-        else MaterialTheme.colorScheme.surfaceContainerHigh,
+        color = if (selected) MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
+        else if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
+        else Color.White.copy(alpha = 0.68f),
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onToggleSelect() }
@@ -659,20 +684,21 @@ private fun TrashedEntryRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Format icon
-            Surface(
-                shape = CircleShape,
-                color = accent.copy(alpha = 0.12f),
-                modifier = Modifier.size(40.dp)
+            // Format icon tile — the settings tile shape (rounded square),
+            // keeping the category accent tint inside.
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(13.dp))
+                    .background(accent.copy(alpha = if (dark) 0.22f else 0.14f)),
+                contentAlignment = Alignment.Center
             ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    CurioIcon(
-                        name = formatIcon(entry.format),
-                        contentDescription = null,
-                        tint = accent,
-                        size = 20.dp
-                    )
-                }
+                CurioIcon(
+                    name = formatIcon(entry.format),
+                    contentDescription = null,
+                    tint = accent,
+                    size = 20.dp
+                )
             }
             // Info
             Column(modifier = Modifier.weight(1f)) {

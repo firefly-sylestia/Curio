@@ -466,7 +466,9 @@ fun SoundBiteFormat(
             label = "Add a quick title (optional)",
             enabled = recordingState != AudioRecorder.State.RECORDING,
             imeAction = ImeAction.Next,
-            paper = false
+            paper = false,
+            // v3xx — the quick title joins the global text-history feed.
+            historyField = "Quick title"
         )
 
         // Rich-text note — formatting behind a small toggle. The toolbar
@@ -482,6 +484,8 @@ fun SoundBiteFormat(
                 noteSpans = newSpans
             },
             placeholder = "What did this recording capture?",
+            // v3xx — the note joins the global text-history feed.
+            historyField = "Soundbite note",
             toolbarMode = RichTextToolbarMode.TOGGLE,
             minHeight = 96.dp,
             enabled = recordingState != AudioRecorder.State.RECORDING,

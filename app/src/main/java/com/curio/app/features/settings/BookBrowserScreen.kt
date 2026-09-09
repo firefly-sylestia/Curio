@@ -132,6 +132,7 @@ fun BookBrowserScreen(navController: NavController) {
                     SettingsNavRail(
                         active = null,
                         onSelect = { navigateToSettingsSection(navController, it) },
+                        navController = navController,
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -175,7 +176,8 @@ fun BookBrowserScreen(navController: NavController) {
                     item(key = "settings-nav", contentType = "settings-nav") {
                         SettingsNavRail(
                             active = null,
-                            onSelect = { navigateToSettingsSection(navController, it) }
+                            onSelect = { navigateToSettingsSection(navController, it) },
+                            navController = navController
                         )
                     }
                     if (shownBooks.isEmpty()) {

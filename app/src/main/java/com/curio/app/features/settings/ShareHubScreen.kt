@@ -195,7 +195,8 @@ fun ShareHubScreen(navController: NavController) {
             item(key = "settings-nav", span = { GridItemSpan(maxLineSpan) }, contentType = "settings-nav") {
                 SettingsNavRail(
                     active = "share",
-                    onSelect = { navigateToSettingsSection(navController, it) }
+                    onSelect = { navigateToSettingsSection(navController, it) },
+                    navController = navController
                 )
             }
             // ── Topic search ────────────────────────────────────────────

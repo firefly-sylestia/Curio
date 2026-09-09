@@ -1245,5 +1245,53 @@ updated in lockstep. Committed + pushed as 47e17d5c, CI green.)
    spine/sheen gated on an image being present — no more "outline +
    background behind the album" look.
 
+## request log — text history EVERYWHERE + restore modes + tree redesign (done 2026-09-09, pushed)
+1. Every editor joins the global feed: `RichTextEditor` gained `historyField`
+   / `historyResetKey` — self-contained capture + a compact `TextHistoryPill`
+   in the tool dock + its own browser (restore writes back through
+   `onRichTextChange`, rich spans kept for add modes via `rebaseSpans`).
+   Wired into FieldNotes x3 (What I observed / What surprised me / What I
+   want to learn next), Marginalia (My thoughts), ReelNotes (Film review),
+   SoundBite (Soundbite note + Quick title), GalleryWall caption, every
+   Quote card (`PaperLineField.historyField` got the same pill + capture +
+   browser in its label row), and the Save-your-take shared session note
+   (pill in the popup header, restores cap at the 240-char limit).
+2. Restore modes: `TextHistoryBrowser` takes `currentText` + passes a
+   `TextHistoryRestoreMode` (REPLACE / ADD_TOP / ADD_BOTTOM); an empty
+   field restores instantly, a non-empty field opens the settings-style
+   chooser (frosted rows + warm icon tiles: Add above / Add below /
+   Replace).
+3. Tree redesigned: field → session grouping (`buildHistoryTree`, gap > 20
+   min = new session); each field a settings-style card (✦ glyph + Playfair
+   heading + count + rule, frosted 20dp card, hairline-divided sessions),
+   each version a node with dot + connector, time, +/− line badge and the
+   FULL 2-line text; shared `HistoryActionsRow`; list rows re-frosted to
+   match. Existing hosts (TopicShareCard, TopicRevealScreen) updated to
+   the new signature with currentText + mode handling.
+
+## request log — settings polish: hub cards + rail position/quick tools + 3 pages (done 2026-09-09, pushed)
+1. Hub cards (SettingsHubScreen): titles + subtitles moved to the TOP under
+   the corner icon (full width — the old 76%/80% caps cut text), bigTitle
+   flag bumps Appearance + Pet designer to 20sp, and Experiments / Backup /
+   Book covers got real drawings (flask + liquid + bubbles + sparkles,
+   cloud + sun + upload arrow, open book with a cover scene) instead of
+   lone icons.
+2. Nav rail: FIXED order — the open page is highlighted in its natural
+   slot (no more slot-2 rotation) and the row auto-scrolls to it. New
+   QUICK TOOLS row under the chips: per-page deep settings as frosted
+   pills (appearance/preferences/recording/backup sets + a frequent
+   fallback), deep-navigating via SettingsHighlightTarget; all 17 rail
+   call sites pass navController.
+3. Manage categories: lanes now live in ONE frosted SettingsOptionCard
+   with SettingsOptionDivider hairlines (the Recording look), Playfair
+   "Your lanes" heading, frosted reorder-lock notice with the warm icon
+   tile.
+4. Book covers page: the plain header/flat surface became the settings
+   chrome (torn-rose hero + watermark + sticky glass hero); master /
+   providers / stats / progress / failed cards are frosted with warm icon
+   tiles + Playfair headings.
+5. Recycle bin: frosted summary + rows with rounded 13dp accent tiles,
+   Playfair "Recently deleted" heading + rule.
+
 ## next prompt 
- the text histry snt showing up in save your entry notes header i want it everywhere please and it automaticlly should add a text when theres nothing in the not eor text box or give options to replace or add in top or buttom like that and also the tree look isnt good its confusing and it doesnt group properly the similiar texts and modification properly it should be beautifull along with easier to understand. and again inside the journal, etc in express yorself sho the topic histroy pill in the top properly and after pushing use ask user if you cant watch cl
+refine the cabinet everything card and its preview of books and albumns it have backgroud of category tint, and then refine notes drawing, properly extend completed drawing it looks cut from sides, and more refinement to want to read.

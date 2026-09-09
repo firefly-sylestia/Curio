@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -65,7 +66,11 @@ import com.curio.app.ui.components.NotePaperStyleToggle
 import com.curio.app.ui.components.RichTextEditor
 import com.curio.app.ui.components.RichTextToolbarMode
 import com.curio.app.ui.components.QuoteLimits
+import com.curio.app.ui.components.TextHistoryBrowser
+import com.curio.app.ui.components.TextHistoryPill
+import com.curio.app.ui.components.TextHistoryRestoreMode
 import com.curio.app.ui.components.limitQuoteContent
+import com.curio.app.ui.components.rememberTextHistoryCapture
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.CurioMotion
@@ -449,8 +454,19 @@ fun PaperLineField(
      *  renders as a plain rounded input (used by the quick-title field, which
      *  the user asked to strip of paper/tear styling). The paper style/color
      *  controls never render in plain mode regardless of the other params. */
-    paper: Boolean = true
+    paper: Boolean = true,
+    /** v3xx — TEXT HISTORY: when set, this field joins the global text
+     *  history feed and shows a small history pill in its label row; the
+     *  browser restores write straight back into this field. */
+    historyField: String? = null
 ) {
+    // v3xx — text history for single-line paper fields (capture + pill +
+    // browser), same self-contained pattern as [RichTextEditor].
+    val historyContext = LocalContext.current
+    var historyOpen by remember(historyField) { mutableStateOf(false) }
+    if (historyField != null) {
+        rememberTextHistoryCapture(historyContext, historyField, value, historyField)
+    }
     // v58 — track focus so the paper options can reveal only while the
     // user is actually writing in the field.
     var focused by remember { mutableStateOf(false) }
@@ -468,10 +484,15 @@ fun PaperLineField(
                     Text(
                         text = label,
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.weight(1f)
                     )
                 }
                 trailingAction?.invoke()
+                if (historyField != null) {
+                    Spacer(Modifier.width(6.dp))
+                    TextHistoryPill(onClick = { historyOpen = true }, size = 30.dp)
+                }
             }
         }
         // The style chips live on their OWN full-width scrollable row — six
@@ -577,6 +598,26 @@ fun PaperLineField(
                         .onFocusChanged { focused = it.isFocused }
                 )
             }
+        }
+        // The text-history browser for this field — restore writes straight
+        // back into the field (Replace / Add above / Add below).
+        if (historyOpen && historyField != null) {
+            TextHistoryBrowser(
+                ctx = historyContext,
+                activeField = historyField,
+                currentText = value,
+                onRestore = { restored, mode ->
+                    val combined = when (mode) {
+                        TextHistoryRestoreMode.REPLACE -> restored
+                        TextHistoryRestoreMode.ADD_TOP ->
+                            if (value.isBlank()) restored else "$restored\n$value"
+                        TextHistoryRestoreMode.ADD_BOTTOM ->
+                            if (value.isBlank()) restored else "$value\n$restored"
+                    }
+                    onValueChange(combined)
+                },
+                onDismiss = { historyOpen = false }
+            )
         }
     }
 }
@@ -951,6 +992,8 @@ fun QuoteCardEditor(
             spans = state.spans.getOrElse(index) { emptyList() },
             onRichTextChange = { newText, newSpans -> state.setText(index, newText, newSpans) },
             placeholder = placeholder,
+            // v3xx — every quote card joins the global text-history feed.
+            historyField = "Quote card",
             toolbarMode = RichTextToolbarMode.MAIN,
             minHeight = 64.dp,
             maxCharacters = QuoteLimits.MAX_CHARACTERS,

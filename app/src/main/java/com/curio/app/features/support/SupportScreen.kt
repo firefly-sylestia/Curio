@@ -138,7 +138,8 @@ fun SupportScreen(navController: NavController) {
                 item(key = "settings-nav", contentType = "settings-nav") {
                     SettingsNavRail(
                         active = "support",
-                        onSelect = { navigateToSettingsSection(navController, it) }
+                        onSelect = { navigateToSettingsSection(navController, it) },
+                        navController = navController
                     )
                 }
                 item { SettingsSectionHeading("Feedback") }

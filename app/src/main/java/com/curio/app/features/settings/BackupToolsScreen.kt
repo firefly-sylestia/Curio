@@ -342,7 +342,8 @@ val glassBackdrop = rememberLayerBackdrop()
             item(key = "settings-nav", contentType = "settings-nav") {
                 SettingsNavRail(
                     active = "backup",
-                    onSelect = { navigateToSettingsSection(navController, it) }
+                    onSelect = { navigateToSettingsSection(navController, it) },
+                    navController = navController
                 )
             }
                         item { SettingsSectionHeading("Your data") }

@@ -9428,7 +9428,17 @@ fun TopicShareSheet(
         TextHistoryBrowser(
             ctx = context,
             activeField = historyField,
-            onRestore = { routeFactChange(it) },
+            currentText = factFieldText,
+            onRestore = { restored, mode ->
+                val combined = when (mode) {
+                    TextHistoryRestoreMode.REPLACE -> restored
+                    TextHistoryRestoreMode.ADD_TOP ->
+                        if (factFieldText.isBlank()) restored else "$restored\n$factFieldText"
+                    TextHistoryRestoreMode.ADD_BOTTOM ->
+                        if (factFieldText.isBlank()) restored else "$factFieldText\n$restored"
+                }
+                routeFactChange(combined)
+            },
             onDismiss = { historyOpen = false }
         )
     }

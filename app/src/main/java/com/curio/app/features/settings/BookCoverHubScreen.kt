@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -31,17 +31,32 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
+import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioTopic
 import com.curio.app.data.TopicJsonLoader
+import com.curio.app.features.settings.SettingsHeroHeader
+import com.curio.app.features.settings.SettingsHeroTotalHeight
+import com.curio.app.features.settings.SettingsSectionHeading
+import com.curio.app.features.settings.heroPageBackground
+import com.curio.app.ui.adaptive.isWide
+import com.curio.app.ui.adaptive.wideContentEdgePadding
+import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.isCurioDarkTheme
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 
 /**
  * v320 — the BOOK COVERS & RATINGS HUB: pick a cover provider (Open Library
@@ -91,68 +106,59 @@ fun BookCoverHubScreen(navController: NavController) {
         BookCoverFetchSession.start(context, provider, kind, AppPreferences.bookFetchEnabledState)
     }
 
-    Column(
+    // v3xx — the settings-family chrome: torn-rose hero + watermark
+    // backdrop + frosted option cards (was a plain header on a flat surface).
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-            .statusBarsPadding()
+            .background(heroPageBackground())
     ) {
-        // ── Header ─────────────────────────────────────────────────────
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp)
-        ) {
-            Surface(
-                onClick = { navController.popBackStack() },
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
-            ) {
-                CurioIcon(
-                    CurioIcons.ArrowBack, "Back",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    size = 20.dp,
-                    modifier = Modifier.padding(10.dp)
-                )
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    BookCoverFetch.TITLE,
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    "Choose a source · retry failures · fetch ratings",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+        if (!windowWidthSizeClass().isWide) {
+            CurioWatermarkBackdrop(
+                activeCat = CurioCategories.byId(CategoryId.WILDCARD),
+                alphaScale = 0.45f
+            )
         }
-
+        val wide = windowWidthSizeClass().isWide
+        val glassBackdrop = rememberLayerBackdrop()
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .layerBackdrop(glassBackdrop)
+                .fillMaxSize(),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                start = 16.dp, end = 16.dp, top = 6.dp, bottom = 28.dp
+                start = wideContentEdgePadding(),
+                end = wideContentEdgePadding(),
+                top = if (wide) 0.dp else SettingsHeroTotalHeight,
+                bottom = 28.dp
             ),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            if (wide) {
+                item(key = "hero", contentType = "hero") {
+                    SettingsHeroHeader(
+                        title = BookCoverFetch.TITLE,
+                        subtitle = "Choose a source · retry failures · fetch ratings",
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+            }
             // v3xx — the shared settings nav rail: switch sections without
             // going back to the hub (drill-in page — no chip highlighted).
             item(key = "settings-nav", contentType = "settings-nav") {
                 SettingsNavRail(
                     active = null,
-                    onSelect = { navigateToSettingsSection(navController, it) }
+                    onSelect = { navigateToSettingsSection(navController, it) },
+                    navController = navController
                 )
             }
             // ── Opt-in / opt-out master switch (v320b) ─────────────────
             item(key = "master") {
                 val fetchOn = AppPreferences.bookFetchEnabledState
+                val dark = isCurioDarkTheme()
                 Surface(
-                    shape = RoundedCornerShape(18.dp),
-                    color = if (fetchOn) MaterialTheme.colorScheme.secondaryContainer
-                            else MaterialTheme.colorScheme.surfaceContainerHigh,
+                    shape = RoundedCornerShape(20.dp),
+                    color = if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
+                            else Color.White.copy(alpha = 0.68f),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -160,12 +166,23 @@ fun BookCoverHubScreen(navController: NavController) {
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
                     ) {
-                        CurioIcon(
-                            if (fetchOn) CurioIcons.Download else CurioIcons.MenuBook, null,
-                            tint = if (fetchOn) MaterialTheme.colorScheme.onSecondaryContainer
-                                   else MaterialTheme.colorScheme.onSurfaceVariant,
-                            size = 20.dp
-                        )
+                        // Frosted icon tile — the settings row language.
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(13.dp))
+                                .background(
+                                    if (dark) Color.White.copy(alpha = 0.09f)
+                                    else Color(0xFFF2E8DC)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CurioIcon(
+                                if (fetchOn) CurioIcons.Download else CurioIcons.MenuBook, null,
+                                tint = if (dark) Color(0xFFD7B8A9) else Color(0xFF755647),
+                                size = 20.dp
+                            )
+                        }
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 "Book cover fetching",
@@ -191,12 +208,7 @@ fun BookCoverHubScreen(navController: NavController) {
 
             // ── Provider picker ────────────────────────────────────────
             item(key = "provider") {
-                Text(
-                    "Cover source",
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(Modifier.height(8.dp))
+                SettingsSectionHeading("Cover source", "\u2726")
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     // v356 — LibraryThing needs its free key (BuildConfig);
                     // without one the row is hidden rather than failing every
@@ -207,19 +219,21 @@ fun BookCoverHubScreen(navController: NavController) {
                     }
                     providers.forEach { p ->
                         val selected = p == provider
+                        val providerDark = isCurioDarkTheme()
                         Surface(
                             onClick = {
                                 providerName = p.name
                                 AppPreferences.setBookCoverProvider(context, p.name)
                             },
-                            shape = RoundedCornerShape(16.dp),
-                            color = if (selected) MaterialTheme.colorScheme.secondaryContainer
-                                    else MaterialTheme.colorScheme.surfaceContainerHigh,
+                            shape = RoundedCornerShape(20.dp),
+                            color = if (selected) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = if (providerDark) 0.45f else 0.9f)
+                                    else if (providerDark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
+                                    else Color.White.copy(alpha = 0.68f),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
                             ) {
                                 Box(
@@ -260,9 +274,11 @@ fun BookCoverHubScreen(navController: NavController) {
 
             // ── Stats ──────────────────────────────────────────────────
             item(key = "stats") {
+                val statsDark = isCurioDarkTheme()
                 Surface(
-                    shape = RoundedCornerShape(18.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    shape = RoundedCornerShape(20.dp),
+                    color = if (statsDark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
+                            else Color.White.copy(alpha = 0.68f),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -328,9 +344,11 @@ fun BookCoverHubScreen(navController: NavController) {
             // ── Progress / cancel ──────────────────────────────────────
             if (busy) {
                 item(key = "progress") {
+                    val progressDark = isCurioDarkTheme()
                     Surface(
-                        shape = RoundedCornerShape(18.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        shape = RoundedCornerShape(20.dp),
+                        color = if (progressDark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
+                                else Color.White.copy(alpha = 0.68f),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(
@@ -378,16 +396,14 @@ fun BookCoverHubScreen(navController: NavController) {
             // ── Failed list ────────────────────────────────────────────
             if (failedList.isNotEmpty()) {
                 item(key = "failed-header") {
-                    Text(
-                        "Failed covers · tap to retry one",
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    SettingsSectionHeading("Failed covers — tap to retry one", "\u2726")
                 }
                 items(failedList, key = { it }) { name ->
+                    val failedDark = isCurioDarkTheme()
                     Surface(
-                        shape = RoundedCornerShape(14.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerLow,
+                        shape = RoundedCornerShape(16.dp),
+                        color = if (failedDark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
+                                else Color.White.copy(alpha = 0.68f),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(
@@ -461,6 +477,16 @@ fun BookCoverHubScreen(navController: NavController) {
                 dismissButton = {
                     TextButton(onClick = { showClearConfirm = false }) { Text("Cancel") }
                 }
+            )
+        }
+        // Sticky hero — phone-only: wide windows scroll the hero as the
+        // list's first item instead (v-tablet).
+        if (!wide) {
+            SettingsHeroHeader(
+                title = BookCoverFetch.TITLE,
+                subtitle = "Choose a source · retry failures · fetch ratings",
+                onBack = { navController.popBackStack() },
+                glassBackdrop = glassBackdrop
             )
         }
     }

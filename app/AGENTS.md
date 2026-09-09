@@ -971,6 +971,40 @@ app/src/main/java/com/curio/app/
   rows. Only verified-in-subset glyphs are used (CurioIcons constants).
   Custom content (chips, status header, release notes) keeps its own
   layout inside the glass cards.
+- **v3xx35 — settings polish: hub cards, rail position + quick tools,
+  three pages in the design language (user follow-up 2026-09-09).**
+  (1) **Hub cards** — `SettingsDesignCardView`: the title + subtitle now
+  sit at the TOP of the card right under the corner icon (the old
+  `Spacer(weight)` pushed them to the bottom) and run FULL width (the
+  old 76%/80% caps cut long subtitles); a `bigTitle` flag on the card
+  bumps Appearance + Pet designer to titleLarge 20sp (only those two);
+  the Experiments / Backup & restore / Book covers visuals are real
+  drawings now, not lone icons: a glass flask with lavender liquid +
+  bubbles + ✦/✧ sparkles, a cloud under a soft sun with an upload arrow,
+  and an open book whose right page carries a sun-over-hill cover scene.
+  (2) **Nav rail** — `SettingsNavRail` no longer rotates the open page
+  into slot 2: the rail keeps its FIXED order, highlights the page in
+  its natural slot and `animateScrollToItem`s to it (stays where you
+  are). New `navController` param + a `SettingsQuickTools` row under the
+  chips: the ACTIVE page's key deep settings as frosted pills (Theme /
+  Category tint / Pastel / Adaptive Hero on Appearance; Search engine /
+  Sessions / Pet games / Shuffle reminder on Preferences; Audio quality /
+  Voice-to-text / Offline model on Recording; Backup / Recycle bin /
+  Book covers / Updates on Backup; a frequent set everywhere else),
+  navigating via `SettingsHighlightTarget` deep highlight. All 17 rail
+  call sites pass `navController`. (3) **Design-language fixes** —
+  ManageCategoriesScreen: the lanes list is now ONE frosted
+  `SettingsOptionCard` with `SettingsOptionDivider` hairlines (the
+  Recording look; the old flat rows + CurioSettingsDivider are gone),
+  a Playfair "Your lanes" heading, and the reorder-lock notice is a
+  frosted card with the warm settings icon tile. BookCoverHubScreen:
+  the plain header + flat `surface` Column became the settings chrome
+  (torn-rose hero + watermark backdrop + sticky glass hero), cards are
+  frosted (master switch / providers / stats / progress / failed rows)
+  with warm icon tiles + Playfair section headings. RecycleBinScreen:
+  summary + trashed rows are frosted with rounded 13dp accent tiles
+  (settings tile shape), and "RECENTLY DELETED" is a Playfair heading +
+  rule.
 - **v3xx33/34 — Cabinet shelf art REDRAWN, "Curiying now" rename +
   shelf LOGIC, Favorites redesign + redesigned Add sheet (user follow-up
   2026-09-09).** (1) **Shelf art** — the five seeded-shelf arts in
@@ -1184,6 +1218,35 @@ app/src/main/java/com/curio/app/
   highlight/size to a SELECTION no longer arms the sticky `pending*`
   flags (the toolbar never stays lit after one change); tapping a tool
   with a collapsed caret still arms it for the next typed characters.
+- **v3xx2x — text history EVERYWHERE + restore modes + tree redesign
+  (user follow-up 2026-09-09).** (1) **Every editor joins the feed** —
+  `RichTextEditor` gained `historyField` / `historyResetKey` params: when
+  set it runs `rememberTextHistoryCapture` itself, shows a compact
+  `TextHistoryPill` in its tool dock and hosts its own `TextHistoryBrowser`
+  (restore writes back through `onRichTextChange`, rich spans kept for
+  add modes via `rebaseSpans`, cleared for replace). Wired into every
+  capture format: FieldNotes' three sections (What I observed / What
+  surprised me / What I want to learn next), Marginalia journal (My
+  thoughts), ReelNotes (Film review), SoundBite (Soundbite note + Quick
+  title via `PaperLineField.historyField`, which got the same pill +
+  capture + browser in its label row), GalleryWall caption and every
+  Quote card. The Save-your-take shared session note (`SessionNoteFloatingPill`)
+  gained its own pill in the popup header + capture + browser (restores
+  cap at the 240-char note limit). Existing hosts (TopicShareCard,
+  TopicRevealScreen) keep their own pills. (2) **Restore modes** —
+  `TextHistoryBrowser` takes `currentText` and its `onRestore` callback
+  now passes a `TextHistoryRestoreMode` (REPLACE / ADD_TOP / ADD_BOTTOM):
+  an empty field restores instantly; a field with text opens the
+  settings-style chooser (frosted rows with warm icon tiles: Add above /
+  Add below / Replace). (3) **Tree redesign** — the confusing
+  paragraph-branch tree is replaced by field → session grouping
+  (`buildHistoryTree`): snapshots group by FIELD then by EDIT SESSION
+  (gap > 20 min starts a new one); each field is a settings-style card
+  (✦ glyph + Playfair heading + snapshot count + rule, frosted 20dp card
+  with hairline-divided sessions), each version a node with dot +
+  connector, time, a +/− line-change badge and the FULL text (2 lines) —
+  plus the shared `HistoryActionsRow`. List rows + tree cards share the
+  frosted surface language of the Settings sub-pages.
 - **v3xx22 — CI fix + dark-mode sheet icons + full series UI (user
   follow-up).** (1) **CI fix** (CabinetShelves.kt — the pasted
   `compileDebug/ReleaseKotlin` failure): the seven shelf-art composables
