@@ -54,11 +54,24 @@ fun SettingsSectionHeading(
             .fillMaxWidth()
             .padding(top = 14.dp, bottom = 10.dp, start = 2.dp, end = 2.dp)
     ) {
-        Text(
-            text = glyph,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f)
-        )
+        if (glyph.length == 1) {
+            // Single-char glyphs are literal Unicode marks (the default ✦).
+            Text(
+                text = glyph,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f)
+            )
+        } else {
+            // Multi-char values are CurioIcons names (e.g. topic history's
+            // Star / Bookmark) — render the REAL icon so the heading never
+            // prints the literal name.
+            CurioIcon(
+                name = glyph,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                size = 18.dp
+            )
+        }
         Spacer(Modifier.width(7.dp))
         Text(
             text = label,

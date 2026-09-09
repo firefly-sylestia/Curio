@@ -540,12 +540,14 @@ fun CabinetV2Content(navController: NavController) {
         }
 
         key(openLevel) {
-        // ── EVERYTHING — the JSX masonry gallery: a dense STAGGERED grid of
-        // variable-size cards (books tall jackets, albums squares, series
-        // posters, captures cycling narrow/wide) with filter tabs that
-        // smoothly reflow the gallery — every card animates to its new spot
+        // ── EVERYTHING / FAVORITES — the JSX masonry gallery: a dense
+        // STAGGERED grid of covers-only posters (books tall jackets, albums
+        // squares, series posters — no cards, no titles, no boxes, just the
+        // art with a whisper of rounded corners) with filter chips that
+        // smoothly reflow the gallery — every cover animates to its new spot
         // when the category changes (the CurioEverythingGallery concept).
-        if (openLevel == "everything") {
+        // Favorites stores ONLY liked media, so it wears the same gallery.
+        if (openLevel == "everything" || openLevel == SHELF_LEVEL_FAVORITES) {
             LazyVerticalStaggeredGrid(
                 state = rememberLazyStaggeredGridState(),
                 columns = StaggeredGridCells.Fixed(if (wide) 8 else 4),
@@ -578,7 +580,12 @@ fun CabinetV2Content(navController: NavController) {
                     likedAtFor = { likedAtFor(it) },
                     onOpenLiked = { item -> item.open(navController) },
                     onCoverSource = { coverSourceItem = it },
-                    onAddNew = { navController.navigateToTab(CurioRoutes.SPIN) },
+                    // Everything's add-new dives into Spin; Favorites opens
+                    // the add-to-favorites sheet (same as its old Add pill).
+                    onAddNew = if (openLevel == SHELF_LEVEL_FAVORITES)
+                        { addTarget = AddTarget.Favorites }
+                    else
+                        { navController.navigateToTab(CurioRoutes.SPIN) },
                     pageAccent = pageAccent
                 )
             }
@@ -629,30 +636,6 @@ fun CabinetV2Content(navController: NavController) {
                     onAdd = { addTarget = AddTarget.Collection(openCollection) },
                     onRename = { renameTarget = openCollection.id },
                     onDelete = { deleteTarget = openCollection.id }
-                )
-                openLevel == SHELF_LEVEL_FAVORITES -> v2VirtualShelfItems(
-                    title = "Favorites",
-                    likes = allLikes,
-                    entries = emptyList(),
-                    searchQuery = searchQuery,
-                    selectedEntryIds = selectedEntryIds,
-                    selectionMode = selectionMode,
-                    onOpenLiked = { item -> item.open(navController) },
-                    onEntryLongClick = { id ->
-                        selectionMode = true
-                        selectedEntryIds = selectedEntryIds + id
-                    },
-                    onEntryClick = { id ->
-                        if (selectionMode) {
-                            selectedEntryIds = if (id in selectedEntryIds) selectedEntryIds - id
-                            else selectedEntryIds + id
-                        } else {
-                            haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
-                            navController.navigate(CurioRoutes.entryDetail(id)) { launchSingleTop = true }
-                        }
-                    },
-                    onLikedMore = { coverSourceItem = it },
-                    onAdd = { addTarget = AddTarget.Favorites }
                 )
                 openLevel == SHELF_LEVEL_SAVED -> v2VirtualShelfItems(
                     title = "Saved entries",
@@ -3451,7 +3434,13 @@ private fun V2Kind.categoryId(): CategoryId = when (this) {
  *  global [TopicCatalog.findByName] walks lanes in enum order and would hand
  *  "Animal Farm" (the book) to "Animal Farm (1954)" (the animated film)
  *  because ANIMATED_MOVIES precedes BOOKS. The global search stays as the
- *  fallback for legacy / renamed names. */
+ *  fallback for legacy / renamed names — but it is CANONICAL-LANE
+ *  GUARDED: a liked book must NEVER resolve to a series, film, album or
+ *  author that merely shares its name (the "wrong entry opens" bug — the
+ *  saved book opening the wrong lane's reveal). Only a global hit that
+ *  lives on the SAME canonical lane is accepted; anything else falls
+ *  through to the canonical-lane open, which resolves by name within the
+ *  right lane at reveal time. */
 private fun findLikedTopic(kind: V2Kind, name: String): CurioTopic? {
     val lane = when (kind) {
         V2Kind.BOOK -> CategoryId.BOOKS
@@ -3461,7 +3450,7 @@ private fun findLikedTopic(kind: V2Kind, name: String): CurioTopic? {
     TopicJsonLoader.cached(lane)?.firstOrNull {
         it.matchesSavedNameStrict(name) || it.matchesSavedName(name)
     }?.let { return it }
-    return TopicCatalog.findByName(name)
+    return TopicCatalog.findByName(name)?.takeIf { it.categoryId == lane }
 }
 
 /** Best-fitting jacket shape for a suggested topic's lane. */

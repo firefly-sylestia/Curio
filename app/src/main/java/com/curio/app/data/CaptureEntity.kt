@@ -231,7 +231,13 @@ private fun fallbackTopicFor(
 )
 
 fun CaptureEntity.toEntry(): CurioEntry {
-    val categoryId = CategoryId.valueOf(this.categoryId)
+    // v3xx — defensive lane parse: a stale/renamed categoryId on ANY saved
+    // row used to throw here, and because the list flows map the whole
+    // table, ONE bad row blanked the ENTIRE saved-entries list (and its
+    // detail page) on cold start. Unknown lanes degrade to the wildcard
+    // fallback topic so every entry stays available.
+    val categoryId = runCatching { CategoryId.valueOf(this.categoryId) }
+        .getOrDefault(CategoryId.WILDCARD)
     
     // Try to find the full topic data from cache
     val cachedTopic = TopicJsonLoader.cached(categoryId)?.find { 
@@ -249,11 +255,18 @@ fun CaptureEntity.toEntry(): CurioEntry {
         episodeCount = episodeCount
     )
     
+    // v3xx — the format string is parsed ONCE and defensively: a stale /
+    // renamed format on any row must never throw out of the list flows
+    // (ONE bad row blanked the ENTIRE saved-entries list on cold start —
+    // same class of bug as the lane parse above). Unknown formats degrade
+    // to the lightweight ReelNotes shape so every entry stays available.
+    val safeFormat = runCatching { CaptureFormat.valueOf(format) }
+        .getOrDefault(CaptureFormat.ReelNotes)
     val captureData = try {
         CaptureConverters.deserializeCaptureData(formatDataJson)
     } catch (e: Exception) {
-        // Fallback for malformed data - create empty ReelNotes for movies
-        when (CaptureFormat.valueOf(format)) {
+        // Fallback for malformed data - create empty ReelNotes
+        when (safeFormat) {
             CaptureFormat.ReelNotes -> CaptureData.ReelNotes(0, "", 0)
             CaptureFormat.SoundBite -> CaptureData.SoundBite(0, "")
             CaptureFormat.Marginalia -> CaptureData.Marginalia("", emptyList())
@@ -269,7 +282,7 @@ fun CaptureEntity.toEntry(): CurioEntry {
     return CurioEntry(
         id = id,
         topic = topic,
-        format = CaptureFormat.valueOf(format),
+        format = safeFormat,
         captureData = captureData,
         title = title,
         capturedAtMillis = capturedAtMillis,
@@ -289,7 +302,10 @@ fun CaptureEntity.toEntry(): CurioEntry {
  *  Portfolio exactly like a non-Portfolio capture: single-glyph). Session
  *  note + screenshots are never needed by the grid, so they stay null. */
 fun CaptureEntityLight.toEntry(): CurioEntry {
-    val categoryId = CategoryId.valueOf(this.categoryId)
+    // v3xx — same defensive lane parse as [CaptureEntity.toEntry]: one bad
+    // categoryId must never blank the whole light flow on restart.
+    val categoryId = runCatching { CategoryId.valueOf(this.categoryId) }
+        .getOrDefault(CategoryId.WILDCARD)
     val cachedTopic = TopicJsonLoader.cached(categoryId)?.find {
         it.id == topicId || it.name == topicName
     }
@@ -309,10 +325,14 @@ fun CaptureEntityLight.toEntry(): CurioEntry {
     } else {
         CaptureData.Portfolio(emptyList())
     }
+    // Same defensive format parse as the full mapper: a stale format on a
+    // single row must never blank the whole light flow on restart.
+    val safeFormat = runCatching { CaptureFormat.valueOf(format) }
+        .getOrDefault(CaptureFormat.ReelNotes)
     return CurioEntry(
         id = id,
         topic = topic,
-        format = CaptureFormat.valueOf(format),
+        format = safeFormat,
         captureData = captureData,
         title = title,
         capturedAtMillis = capturedAtMillis,

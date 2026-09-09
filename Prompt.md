@@ -1489,5 +1489,45 @@ updated in lockstep. Committed + pushed as 47e17d5c, CI green.)
    `/*` consumed the closer and left the file unterminated at EOF. Fixed
    the wording (pushed separately as 1f42cce4).
 
+## Prompt 2026-09-09 — doodle recording wave, topic-history icons, saved-entry restart blank, detail image viewer, Favorites gallery, wrong-entry opens
+
+STATUS: DONE — pushed as 63f8b159 (working-tree diff reviewed; CI will
+confirm — Gradle can't run in this environment). Changelog SKIPPED per
+user ("skip cl for now").
+
+1. Recording doodle: the WAVE is kept exactly as-is (same 10-bar heights)
+   but restyled in the doodle language — lavender bars with white outline
+   strokes + the little ✦/✧ sparkles, matching the flask family.
+2. Topic history icons: SettingsSectionHeading rendered the glyph as
+   TEXT, so passing CurioIcons.Star / CurioIcons.Bookmark printed the
+   literal names "star"/"bookmark". Now single-char values render as
+   before (the ✦ mark); multi-char values are treated as CurioIcons names
+   and render the REAL icon (18dp, primary tint).
+3. Saved entries blank on restart: `CaptureEntityLight.toEntry()` and
+   `CaptureEntity.toEntry()` both threw on a stale `categoryId` (unknown
+   enum) AND a stale `format` string — the list flows map the WHOLE
+   table, so ONE bad row blanked the ENTIRE saved list + detail on cold
+   start. Both mappers now parse lane defensively (fallback WILDCARD) and
+   format defensively (fallback ReelNotes); capture-data decode already
+   degraded to empty. Every saved entry stays available + opens.
+4. Detail image viewer: AdaptiveImageGallery's in-place zoom passed
+   viewH = the WHOLE gallery's height, so with many images the
+   magnified image centered at gallery-middle — off the visible screen
+   and clipped by the page scroll. Now the gallery reports its WINDOW
+   position (onGloballyPositioned → plain array, no recomposition) and
+   the zoom aims at the VISIBLE SLICE of the window; MoodBoardZoomOverlay
+   gained viewportLeft/Top so it lays out at that slice (defaults 0 =
+   old full-parent behavior for mood boards).
+5. Favorites: now renders the SAME covers-only poster masonry as
+   Everything (Favorites only stores liked books/series/albums). Filter
+   chips + featured-most-recent sizing shared; its Add pill became the
+   add-new button opening the add-to-favorites sheet. The old liked-rows
+   shelf branch removed.
+6. Wrong-entry opens: findLikedTopic's global fallback could hand a
+   liked book to a film/series/author sharing its name (findByName walks
+   lanes in enum order). Now the fallback is CANONICAL-LANE GUARDED
+   (it.categoryId == the kind's lane); misses fall through to the
+   canonical-lane open, which resolves by name in the right lane.
+
 ## next prompt 
 (empty — awaiting the next instruction.)

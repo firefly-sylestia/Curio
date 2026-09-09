@@ -1788,19 +1788,40 @@ private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier 
                 modifier = Modifier.offset(x = 8.dp, y = 42.dp)
             )
         }
-        SettingsDesignVisual.WAVE -> Row(
-            verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.spacedBy(3.5.dp),
-            modifier = modifier
-        ) {
-            listOf(10, 18, 30, 22, 38, 16, 28, 12, 32, 18).forEach { h ->
-                Box(
-                    modifier = Modifier
-                        .width(4.dp)
-                        .height(h.dp)
-                        .background(Color(0xFF6E628E).copy(alpha = 0.7f), RoundedCornerShape(50))
-                )
+        SettingsDesignVisual.WAVE -> Box(modifier) {
+            // The recording doodle — the SAME sound wave, restyled in the
+            // doodle language: soft lavender bars with white outlines (the
+            // flask family's fill + stroke) and the little sparkles.
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.spacedBy(3.5.dp),
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = 6.dp, bottom = 4.dp)
+            ) {
+                listOf(10, 18, 30, 22, 38, 16, 28, 12, 32, 18).forEach { h ->
+                    Box(
+                        modifier = Modifier
+                            .width(5.dp)
+                            .height(h.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(Color(0xFF8D7FB2).copy(alpha = 0.5f))
+                            .border(1.2.dp, Color.White.copy(alpha = 0.85f), RoundedCornerShape(50))
+                    )
+                }
             }
+            Text(
+                text = "✦",
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
+                color = Color.White.copy(alpha = 0.85f),
+                modifier = Modifier.offset(x = 82.dp, y = 4.dp)
+            )
+            Text(
+                text = "✧",
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
+                color = Color.White.copy(alpha = 0.7f),
+                modifier = Modifier.offset(x = 6.dp, y = 46.dp)
+            )
         }
         SettingsDesignVisual.CARDS -> Box(modifier) {
             // The categories doodle — a fanned stack of hand-drawn cards,
