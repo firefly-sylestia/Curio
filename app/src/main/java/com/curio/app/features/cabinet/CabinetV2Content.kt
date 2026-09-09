@@ -1701,11 +1701,6 @@ private fun V2EverythingCard(
     }
 }
 
-/** The Everything library toolbar — Filter + Sort pills (with menus). The
- *  old grid/list view toggle is GONE (v3xx): Everything is always the
- *  3-column media grid — the toggle only offered a second way to show the
- *  same list-shaped tiles that the grid replaced. */
-@Composable
 /** The JSX filter rail — horizontal type chips (All · Books · Albums …).
  *  v3xx — `available` limits the rail to types that actually hold content:
  *  a kind with nothing saved never shows an empty chip ("only show what's
