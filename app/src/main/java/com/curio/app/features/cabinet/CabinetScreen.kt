@@ -244,9 +244,12 @@ fun CabinetScreen(navController: NavController) {
         }
     }
 
+    // v3xx37 — the LIGHT flow: the grid needs light columns only (the full
+    // flow's per-emission re-read of every payload JSON blob is what lagged
+    // the Cabinet on large archives).
     val entries by produceState<List<CurioEntry>>(initialValue = emptyList()) {
         try {
-            CurioRepositoryHolder.repo.observeAll().collect { value = it }
+            CurioRepositoryHolder.repo.observeLight().collect { value = it }
         } catch (_: Exception) {
             value = emptyList()
         }

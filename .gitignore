@@ -13,6 +13,7 @@
 /.idea/navEditor.xml
 /logcat.txt
 /logcat-moodboard.txt
+/logcat_recording_*.txt
 /.idea/assetWizardSettings.xml
 /.idea/shelf/
 .DS_Store

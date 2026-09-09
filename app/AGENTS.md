@@ -1055,6 +1055,22 @@ app/src/main/java/com/curio/app/
   once a cover is on screen), with the book spine/sheen overlays gated on
   an image being present — kills the "background behind the album" look
   on Everything + every shelf grid.
+- **v3xx36 — Everything preview de-tinted + shelf art REFINED (user
+  follow-up 2026-09-09).** (1) **Everything preview de-tint** — the
+  Everything card's horizontally-scrolling cover rail dropped its
+  category-tint gradient plate: covers render edge-to-edge (`V2JacketArt`
+  shows its own accent placeholder only while a cover loads), matching
+  the de-plated shelf grids. (2) **Completed not cut at the sides** —
+  `PeakArt`'s far/near ridge polygons and the ground band now run a
+  little PAST both canvas edges (`-0.08w … 1.08w`) so the scene reads as
+  continuing mountains instead of shapes chopped by the frame (the old
+  polygons had vertical seams at x=0 and x=w). (3) **Notes refined** —
+  `NotesArt` gains a second sheet peeking out bottom-right (notepad
+  stack), a darker dog-ear FLAP triangle under the fold line, a small
+  heart doodle at the sheet's foot, and a proper pencil (thick body +
+  pink eraser cap + dark lead tip). (4) **Want to Read refined** —
+  `BooksArt` gains two title ticks near the top of every spine and a soft
+  grounding shadow oval under the row.
 - **v3xx28 — Cabinet per-item colors + fresh grid per level (user
   follow-up 2026-09-08).** (1) **Extracted cover colors** — liked
   books/albums/series rows, tiles and the Everything preview now use the
@@ -7268,6 +7284,38 @@ app/src/main/java/com/curio/app/
   per save — the GC pauses froze the app. Now only new/changed rows
   decode; the map is only touched from the flow's single collection
   dispatcher.
+- **v3xx37 — Cabinet lag fix: light entry projection + batched cover
+  warmer (user follow-up 2026-09-09, logcat showed repeated 15–52MB
+  GCs + 89/43 skipped frames while viewing the Cabinet).** (1) **Light
+  list flow** — `CaptureDao.getLightFlow()` selects ONLY the light
+  columns (id/topic identity/format/capturedAtMillis/title/tags/legacy/
+  sessionTimeMillis/pageCount/episodeCount) plus a `CASE WHEN format =
+  'ReelNotes' THEN formatDataJson END AS formatDataJsonLight`, and
+  `CaptureRepository.observeLight()` maps rows → `CurioEntry` with its
+  own signature decode cache. The old `SELECT *` re-read + re-allocated
+  every payload JSON blob (`formatDataJson`/`sessionNote`/
+  `sessionScreenshotsJson`) as fresh Strings on EVERY flow emission —
+  megabytes of churn per DB write on a large archive, GC pause after GC
+  pause. The Cabinet screens (CabinetScreen + CabinetV2Content) and
+  Spin's saved-topic-ids collector now use the light flow; detail pages
+  keep the full `observeById`. `CaptureEntityLight.toEntry()` shares
+  `fallbackTopicFor` (extracted from `CaptureEntity.toEntry()`) and
+  keeps full fidelity for ReelNotes reviews (rating + text render from
+  the carried payload). KNOWN TRADEOFF: multi-section Portfolio takes
+  with a non-ReelNotes first section decode to an empty Portfolio in the
+  GRID only, so their card shows the single-glyph badge instead of the
+  stacked one (the payload is never read for those rows — the stacked
+  badge needs it); detail pages are unaffected.
+  (2) **Batched cover warmer** — the Cabinet warmer now runs whole on
+  Dispatchers.IO, pre-warms EVERY liked cover's dominant color (so
+  composition-time `dominantCoverColor` hits the cache instead of
+  decoding a bitmap on the main thread), downloads missing covers with
+  `ensureLocalCover(..., bumpVersion = false)` and bumps
+  `CabinetCoverCache.version` ONCE after the batch — the old per-save
+  bump recomposed every version-keyed tile per download (30 downloads =
+  30 grid-wide recompositions + 30 main-thread decodes on first open).
+  `dominantColorCache` is now a `ConcurrentHashMap` (written by the IO
+  warmer, read by composition).
 - **v38 — onboarding proportions + page-pill indicator + reveal quick-fact revert.**
   (1) **Hero/tear deeper:** the onboarding torn-rose hero deepens 0.70 →
   0.76 of screen height so the tear sits just above the page pills and the

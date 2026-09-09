@@ -1293,5 +1293,39 @@ updated in lockstep. Committed + pushed as 47e17d5c, CI green.)
 5. Recycle bin: frosted summary + rows with rounded 13dp accent tiles,
    Playfair "Recently deleted" heading + rule.
 
+## request log — cabinet Everything preview de-tint + shelf art refined (done 2026-09-09, pushed)
+1. Everything card previews: the cover rail's category-tint gradient plate
+   is gone — covers render edge-to-edge (V2JacketArt's accent placeholder
+   only shows while a cover loads), matching the de-plated shelf grids.
+2. Completed (PeakArt): the far/near ridge polygons + ground band now run
+   a little PAST both canvas edges (-0.08w … 1.08w) so the summit scene
+   reads as continuing mountains — the old polygons had vertical seams at
+   x=0 and x=w that looked chopped.
+3. Notes (NotesArt): second sheet peeking out bottom-right (notepad
+   stack), darker dog-ear FLAP triangle under the fold, a small heart
+   doodle at the sheet's foot, and a proper pencil (thick body + pink
+   eraser cap + dark lead tip).
+4. Want to Read (BooksArt): two title ticks near the top of every spine +
+   a soft grounding shadow oval under the row.
+
+## request log — Cabinet lag fix: light entry flow + batched cover warmer (done 2026-09-09, pushed)
+1. Light projection: `CaptureDao.getLightFlow()` + `CaptureEntityLight` +
+   `CaptureRepository.observeLight()` — the Cabinet list flows (classic +
+   v2) and Spin's saved-ids collector read only the light columns; the old
+   `SELECT *` re-read + re-allocated every payload JSON blob on EVERY DB
+   emission (the logcat showed 15–52MB GC churn + 89/43 skipped frames).
+   ReelNotes rows keep their payload via a CASE-WHEN column so review
+   cards keep rating + text; `CaptureEntityLight.toEntry()` shares the
+   extracted `fallbackTopicFor` builder. TRADEOFF: multi-section Portfolio
+   takes (non-ReelNotes first section) show the single-glyph badge in the
+   grid (payload never read); detail pages unaffected.
+2. Cover warmer batched + off-main: pre-warms every liked cover's dominant
+   color on Dispatchers.IO (composition always hits the cache — no more
+   main-thread bitmap decodes), downloads with `bumpVersion = false` and
+   bumps `CabinetCoverCache.version` ONCE per batch (was: 30 per-save
+   bumps = 30 grid-wide recompositions on first open).
+   `dominantColorCache` is a ConcurrentHashMap now.
+3. .gitignore: `logcat_recording_*.txt`.
+
 ## next prompt 
-refine the cabinet everything card and its preview of books and albumns it have backgroud of category tint, and then refine notes drawing, properly extend completed drawing it looks cut from sides, and more refinement to want to read.
+the settings drawings are still not very good, i like the experiments drawing it gives that doodles vibe, can u do the same for book covers and all just keep the recordings the same as of now, and do all others in the doodle style, and then the topic history still isnt complementing the design, and the quick settings options arent helpful and i need them to be rotated i mean different ones each time spread across the settings sub pages, also the book covers buttons the fetch all covers etc still doesnt complement the design so do it and analyse for more things that doesnt complement the design. also theres a glitch of wrong active indicator in the top rail, im in all settings but it says pet designer, and also the animation of page opening well it can be smoother and better also the book browser need the design consistency

@@ -7,6 +7,41 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * v3xx37 — the LIGHT row projection for the Cabinet list flows: every
+ * column the grid screens need (topic identity, format, timestamps, tags,
+ * legacy flag, progress metadata) WITHOUT the big payload blobs
+ * (`formatDataJson` / `sessionNote` / `sessionScreenshotsJson`). A large
+ * archive's payload JSON was being re-read from SQLite and re-allocated as
+ * fresh Strings on EVERY flow emission (Room materializes every selected
+ * column on every re-query), which is what made the Cabinet lag — GBs of
+ * churn over a session, GC pause after GC pause. Only REELNOTES rows keep
+ * their payload (`formatDataJsonLight`): the Everything review cards render
+ * the rating + review text. Everything else arrives payload-free — the grid
+ * cards never render payload content (title / format / time only), and
+ * multi-section Portfolio takes fall back to the single-glyph badge in the
+ * grid (the payload is only needed for the stacked badge).
+ */
+data class CaptureEntityLight(
+    val id: String,
+    val topicId: String,
+    val categoryId: String,
+    val topicName: String,
+    val topicSubtype: String,
+    val topicTeaser: String,
+    val format: String,          // CaptureFormat enum name
+    val capturedAtMillis: Long,
+    val title: String?,
+    val tagsJson: String,
+    val isLegacy: Boolean,
+    val sessionTimeMillis: Long,
+    val pageCount: Int?,
+    val episodeCount: Int?,
+    /** ReelNotes rows only — the payload of every other row stays in the
+     *  DB (never read). */
+    val formatDataJsonLight: String?
+)
+
 @Dao
 interface CaptureDao {
 
@@ -20,6 +55,18 @@ interface CaptureDao {
     // (`deletedAt IS NULL`); the recycle bin queries handle the rest.
     @Query("SELECT * FROM captures WHERE deletedAt IS NULL ORDER BY capturedAtMillis DESC")
     fun getAllFlow(): Flow<List<CaptureEntity>>
+
+    // v3xx37 — the LIGHT projection: same ordering/filter as [getAllFlow]
+    // but the payload blobs stay unread (only ReelNotes rows carry theirs,
+    // aliased so Room maps it into [CaptureEntityLight.formatDataJsonLight]).
+    @Query(
+        """SELECT id, topicId, categoryId, topicName, topicSubtype, topicTeaser,
+           format, capturedAtMillis, title, tagsJson, isLegacy,
+           sessionTimeMillis, pageCount, episodeCount,
+           CASE WHEN format = 'ReelNotes' THEN formatDataJson ELSE NULL END AS formatDataJsonLight
+           FROM captures WHERE deletedAt IS NULL ORDER BY capturedAtMillis DESC"""
+    )
+    fun getLightFlow(): Flow<List<CaptureEntityLight>>
 
     @Query("SELECT * FROM captures WHERE id = :id AND deletedAt IS NULL")
     suspend fun getById(id: String): CaptureEntity?
