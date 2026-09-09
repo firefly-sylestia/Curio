@@ -210,7 +210,7 @@ private fun isPopScreenRoute(entry: NavBackStackEntry): Boolean =
 
 /**
  * Routes that render the shared settings chrome (hero + nav rail) — the
- * hub, every settings/* sub-page, and the rail destinations (share hub,
+ * hub, every settings sub-page, and the rail destinations (share hub,
  * topic history, experiments, categories, pet designer, support, recycle
  * bin, updates). Navigation that STAYS inside this family crossfades
  * (pure fade, no scale, no slide): the header sits in the same place on
@@ -219,7 +219,7 @@ private fun isPopScreenRoute(entry: NavBackStackEntry): Boolean =
  * stable settings handoff the rail glide was fighting.
  */
 private val settingsFamilyRoutePrefixes: Set<String> = setOf(
-    CurioRoutes.SETTINGS, // hub + every settings/* page (prefix match)
+    CurioRoutes.SETTINGS, // hub + every settings sub-page (prefix match)
     CurioRoutes.EXPERIMENTS,
     CurioRoutes.USER_EXPERIMENTS,
     CurioRoutes.MANAGE_CATEGORIES,
