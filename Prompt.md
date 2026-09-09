@@ -1529,5 +1529,29 @@ user ("skip cl for now").
    (it.categoryId == the kind's lane); misses fall through to the
    canonical-lane open, which resolves by name in the right lane.
 
+## Prompt 2026-09-09 — Cabinet shelf doodles + Everything/Favorites masonry redesign
+
+STATUS: DONE — pushed as 98f9f74a (structural verification only; CI will
+confirm — Gradle can't run in this environment). Store changelog SKIPPED
+per the standing "skip cl for now" on this request.
+
+Ask-user answers locked in: (1) doodles for built-ins AND user
+collections; (2) recency-based size tiers; (3) pure cover art.
+
+1. ALL 13 shelf scenes redrawn in the flask doodle language (white
+   outlines + pastel fills + ✦/✧ sparkles): star, heart, open book,
+   spines, mountain, sun+flag peak, notepad+pencil, window+moon+plant,
+   photo tiles, and the four minimal scenes. Built-in shelves + user
+   collections both wear them (they cycle the same art pool).
+2. Everything/Favorites masonry is now ONE jumbled recency stream:
+   books+albums+series merge and sort by likedAt desc — no category
+   grouping. Sizes tier by recency rank: most recent 2x (aspect ×0.5),
+   then 1.5x / 1x / 0.75x / 0.5x down the wall; neighbours pack around
+   the featured item; reflow still animates per cover.
+3. Cover purity: the fake book spine strip + white gradient wash are
+   GONE — covers render edge-to-edge art with a whisper of rounded
+   corners and nothing else (albums/series too). Unused fillMaxHeight
+   import removed from CabinetV2Content.
+
 ## next prompt 
 (empty — awaiting the next instruction.)

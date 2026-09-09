@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -1206,15 +1205,31 @@ private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
     onAddNew: () -> Unit,
     pageAccent: Color
 ) {
-    val allMedia = shownBooks + shownAlbums + shownSeries
+    // v3xx — JUMBLED recency wall: all liked media merge into ONE
+    // recency-ordered stream (no category grouping — books, albums and
+    // series interleave exactly as they were liked). Staggered-grid spans
+    // only offer FullLine / SingleLane, so every cover takes one lane and
+    // the size variation comes from HEIGHT — the grid's native language.
+    // Sizes step down by recency tier: the most recent runs 2x (featured,
+    // neighbours pack around it), then 1.5x / 1x / 0.75x / 0.5x down the
+    // wall — a magazine-like mix. Smooth reflow: every cover animates to
+    // its new spot when the filter changes (animateItem is a member
+    // extension of the item scope, so it's applied per-item inside each
+    // item {} block).
+    val allMedia = (shownBooks + shownAlbums + shownSeries)
+        .sortedByDescending { likedAtFor(it) }
     val totalShown = allMedia.size
-    // Staggered-grid spans only offer FullLine / SingleLane, so every
-    // cover takes one lane and the size variation comes from HEIGHT — the
-    // grid's native language. The most recently liked item runs a touch
-    // taller (featured) and the rest pack around it. Smooth reflow: every
-    // cover animates to its new spot when the category filter changes
-    // (animateItem is a member extension of the item scope, so it's
-    // applied per-item inside each item {} block).
+
+    // Size tier for a recency rank — a multiplier on the cover's base
+    // aspect (smaller aspect = taller card): rank 0 (most recent) 2x, then
+    // ~1.5x / 1x / 0.75x / 0.5x as the wall ages.
+    fun tierMultiplier(rank: Int): Float = when {
+        rank == 0 -> 0.5f     // 2x — the most recent, featured
+        rank <= 2 -> 0.67f    // ~1.5x
+        rank <= 7 -> 1f       // 1x
+        rank <= 15 -> 1.33f   // ~0.75x
+        else -> 2f            // ~0.5x
+    }
 
     if (totalShown == 0) {
         item(key = "e-empty", span = StaggeredGridItemSpan.FullLine, contentType = "empty") {
@@ -1240,54 +1255,43 @@ private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
         )
     }
 
-    // The most recently liked item — featured a little larger.
-    val featuredKey = allMedia.maxByOrNull { likedAtFor(it) }
-        ?.let { "${it.kind.name}|${it.name}" }
-
-    fun emitMedia(likes: List<V2Liked>) {
-        if (likes.isEmpty()) return
-        likes.forEach { liked ->
-            val isFeatured = "${liked.kind.name}|${liked.name}" == featuredKey
-            item(
-                key = "l|${liked.kind.name}|${liked.name}",
-                contentType = "media"
+    // One jumbled, recency-ranked stream — the tier comes from the rank.
+    allMedia.forEachIndexed { rank, liked ->
+        item(
+            key = "l|${liked.kind.name}|${liked.name}",
+            contentType = "media"
+        ) {
+            val fallbackAccent = liked.topic?.categoryId?.let { CurioCategories.byId(it) }
+                ?.themedAccent() ?: MaterialTheme.colorScheme.primary
+            val baseAspect = when (liked.kind) {
+                V2Kind.BOOK -> 0.667f   // portrait jacket
+                V2Kind.ALBUM -> 1f      // square sleeve
+                V2Kind.SERIES -> 0.72f  // poster
+            }
+            // Tiered size: the recency rank drives how tall the card runs
+            // (2x most recent → 0.5x oldest), neighbours pack around it.
+            val aspect = (baseAspect * tierMultiplier(rank)).coerceIn(0.3f, 2.6f)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(aspect)
+                    .clip(RoundedCornerShape(6.dp))
+                    .then(
+                        Modifier.animateItem(
+                            fadeInSpec = tween(220),
+                            fadeOutSpec = tween(150),
+                            placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                        )
+                    )
+                    .combinedClickable(
+                        onClick = { onOpenLiked(liked) },
+                        onLongClick = { onCoverSource(liked) }
+                    )
             ) {
-                val fallbackAccent = liked.topic?.categoryId?.let { CurioCategories.byId(it) }
-                    ?.themedAccent() ?: MaterialTheme.colorScheme.primary
-                val baseAspect = when (liked.kind) {
-                    V2Kind.BOOK -> 0.667f   // portrait jacket
-                    V2Kind.ALBUM -> 1f      // square sleeve
-                    V2Kind.SERIES -> 0.72f  // poster
-                }
-                // Featured runs ~18% taller — a little larger, neighbours
-                // pack around it.
-                val aspect = if (isFeatured) baseAspect * 0.82f else baseAspect
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(aspect)
-                        .clip(RoundedCornerShape(6.dp))
-                        .then(
-                            Modifier.animateItem(
-                                fadeInSpec = tween(220),
-                                fadeOutSpec = tween(150),
-                                placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
-                            )
-                        )
-                        .combinedClickable(
-                            onClick = { onOpenLiked(liked) },
-                            onLongClick = { onCoverSource(liked) }
-                        )
-                ) {
-                    V2JacketArt(item = liked, accent = fallbackAccent, modifier = Modifier.fillMaxSize())
-                }
+                V2JacketArt(item = liked, accent = fallbackAccent, modifier = Modifier.fillMaxSize())
             }
         }
     }
-
-    if (typeFilter == null || typeFilter == "books") emitMedia(shownBooks)
-    if (typeFilter == null || typeFilter == "albums") emitMedia(shownAlbums)
-    if (typeFilter == null || typeFilter == "series") emitMedia(shownSeries)
 
     item(key = "add-new", span = StaggeredGridItemSpan.FullLine, contentType = "action") {
         V2AddSomethingButton(onClick = onAddNew)
@@ -3861,25 +3865,10 @@ private fun V2JacketArt(item: V2Liked, accent: Color, modifier: Modifier = Modif
                     modifier = Modifier.fillMaxSize()
                 )
             }
-            if (item.kind == V2Kind.BOOK && (url != null || local != null)) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(5.dp)
-                        .background(Color.Black.copy(alpha = 0.20f))
-                )
-                Box(
-                    modifier = Modifier.fillMaxSize().background(
-                        Brush.linearGradient(
-                            listOf(
-                                Color.White.copy(alpha = 0.20f),
-                                Color.White.copy(alpha = 0.02f),
-                                Color.White.copy(alpha = 0f)
-                            )
-                        )
-                    )
-                )
-            }
+            // v3xx — PURE cover art: no fake spine strip, no gradient wash
+            // (the "overlay or background" on book covers). The art renders
+            // edge-to-edge with a whisper of rounded corners and nothing
+            // else on top.
         }
     }
 }
