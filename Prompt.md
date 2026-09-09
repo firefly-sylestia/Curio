@@ -1,4 +1,40 @@
 # Prompt Log — current request
+## Request (2026-09-08, completed — settings card foot visuals redrawn)
+
+**Request (pending-prompt slot):** the settings cards' decorative drawings
+in the bottom-right corner are drawn OVER the text (not behind); the pet
+designer drawing isn't right/accurate (keep it minimal, a little more
+preference/precision too); Manage categories should be fully redrawn with
+proper shapes (nothing gets cut); Topic history has cuts + sits over the
+text; remove the extra icon from the Share hub drawing; change the
+Experiments drawing to something identifying and simple; same for Backup &
+restore and Book covers; push every drawing a little closer to the
+bottom-right corner; don't draw extra things — use bundled icons where
+possible, draw accurately where a drawing is better, then compare/review;
+remove the white line look and use the JSX bubble-dots texture style.
+
+**What shipped (SettingsHubScreen.kt):**
+1. **Behind the text** — `SettingsCardVisual` now renders BEFORE the text
+   Column, so the art sits behind the title/subtitle (it used to draw on
+   top of long subtitles).
+2. **Nothing cut** — every art re-laid-out inside the 92×62 visual box
+   with the card's rounded bottom-right corner kept clear: pet redrawn
+   minimal + accurate (ears/head/eyes/nose/body fully inside — the old
+   head/body overflowed the box and clipped), Manage-categories card
+   stack + Topic-history polaroids are proper fanned shapes that never
+   clip, the Preferences compass ring was overflowing the box (right edge
+   past 92) and is now a smaller clean ring + solid/pale needle over two
+   mountains.
+3. **Icons instead of extra drawing** — Experiments → the `science`
+   flask glyph, Backup & restore → the `backup` cloud glyph, Book covers
+   → the `image` glyph (all bundled CurioIcons).
+4. **Share hub** — the floating share-bubble icon is removed; the mini
+   CURIO card alone (resized so its text fits without clipping).
+5. **Closer to the corner** — visual box padding 12/8 → 8/7dp.
+6. **Texture** — the white diagonal sheen drawLine is gone; the card
+   texture is now the JSX `cardTexture` bubble-dots style (two outlined
+   bubbles + a six-dot white speckle).
+
 ## Request (2026-09-08, completed — settings nav rail on every settings page)
 
 **Request (pending-prompt slot):** "in settings the top nav style to open the
@@ -1145,4 +1181,4 @@ the one ArrangeableCard field, so the bottom-sheet preview and the
 full-screen editor are fixed together. Committed + pushed.
 
 ## next prompt
-(empty — no pending prompt)
+now lets fully unify the sub setting pages as they dont match the feel right, fully unify each of the insides of the settings option spparenace etc to the new style just dont overdo it keep it minimal and not confusing and start, and also you can delete old prompts to keep it small which ae fully done

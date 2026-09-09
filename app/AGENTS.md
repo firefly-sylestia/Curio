@@ -930,6 +930,23 @@ app/src/main/java/com/curio/app/
   visited-sections stack never grows. The rail is the FIRST scroll item
   below the hero (the hub's exact placement), phones + wide alike; the
   hub itself keeps its rail (active "all").
+- **v3xx31 — settings card foot visuals REDRAWN (user follow-up
+  2026-09-08).** `SettingsCardVisual` + `SettingsDesignCardView` in
+  SettingsHubScreen.kt: (1) the visual now renders BEFORE the text
+  Column, so the art sits BEHIND the title/subtitle (it used to draw on
+  top of long subtitles). (2) Every art is re-laid-out to fit the 92×62
+  visual box with the card's rounded bottom-right corner kept clear
+  (nothing cut): pet redrawn minimal + accurate (ears/head/eyes/nose/
+  body all inside), Manage-categories card stack + Topic-history
+  polaroids are proper fanned shapes that never clip, share bubble icon
+  removed (mini card only), Experiments → the `science` flask glyph,
+  Backup & restore → the `backup` cloud glyph, Book covers → the `image`
+  glyph (icons preferred over extra drawing per user), Preferences
+  compass polished (mountains + smaller ring + solid/pale needle). (3)
+  The visual box nudged closer to the corner (padding 12/8 → 8/7dp).
+  (4) Card texture: the white diagonal sheen drawLine is GONE — replaced
+  with the JSX `cardTexture` bubble-dots style: two outlined circles +
+  a six-dot speckle (white, 0.30).
 - **v3xx28 — Cabinet per-item colors + fresh grid per level (user
   follow-up 2026-09-08).** (1) **Extracted cover colors** — liked
   books/albums/series rows, tiles and the Everything preview now use the
