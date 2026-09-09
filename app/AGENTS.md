@@ -1003,6 +1003,24 @@ app/src/main/java/com/curio/app/
   subtitle + `formatGlyph`) computed ONCE in the parent (never the full
   CurioEntry payloads), and the idle capture list is capped at
   `ADD_OPTION_CAP` = 100 rows — search finds the rest.
+- **v3xx35 — pet outfit shop REMOVED + Cabinet liked tiles de-plated (user
+  follow-up 2026-09-09).** (1) **Full pet-shop removal** — the user chose
+  full removal: `OutfitShopScreen.kt` + `PetOutfits.kt` deleted, the
+  `OUTFIT_SHOP` route + NavHost registration + the Profile/Quests entry
+  rows gone, and the whole sparkle economy stripped: `sparklesState` /
+  `addSparkles` / `spendSparkles`, owned/equipped outfit + owned game
+  state + persistence (`KEY_SPARKLES` / `KEY_OWNED_OUTFITS` /
+  `KEY_EQUIPPED_OUTFIT` / `KEY_OWNED_GAMES`), the quest/streak sparkle
+  payouts in CurioQuests, the equipped-outfit overlay in CurioPetSprite,
+  and the OUTFIT/GAME rewards in LevelRewards (RewardKind is now PALETTE
+  + LANE_ORDER only). Quest XP, levels and the palette/lane rewards are
+  untouched; Home's quest toast no longer says "+sparkles". (2) **Liked
+  tiles de-plated** — `V2LikedTileCard` drops the tinted Surface wash and
+  the 8dp frame (art sits edge-to-edge, no outline), and `V2JacketArt`'s
+  accent gradient only renders as the LOADING placeholder (transparent
+  once a cover is on screen), with the book spine/sheen overlays gated on
+  an image being present — kills the "background behind the album" look
+  on Everything + every shelf grid.
 - **v3xx28 — Cabinet per-item colors + fresh grid per level (user
   follow-up 2026-09-08).** (1) **Extracted cover colors** — liked
   books/albums/series rows, tiles and the Everything preview now use the

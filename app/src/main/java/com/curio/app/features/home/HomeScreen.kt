@@ -363,7 +363,7 @@ fun HomeScreen(navController: NavController) {
                             .offset(y = (-6).dp)
                     ) {
                         Text(
-                            text = "Quest done! +sparkles ✨",
+                            text = "Quest done! ✨",
                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)

@@ -2292,22 +2292,20 @@ private fun V2LikedTileCard(
             fallbackAccent
         )
     }
+    // v3xx35 — NO outline + NO background plate behind the art: the tile is
+    // the page surface and the cover art sits edge-to-edge on it (the old
+    // tinted Surface + 8dp frame read as an outline with a wash behind the
+    // album/series tiles).
     Surface(
         modifier = modifier.combinedClickable(onClick = onClick),
         shape = RoundedCornerShape(18.dp),
-        color = androidx.compose.ui.graphics.lerp(
-            cat?.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
-                ?: MaterialTheme.colorScheme.surfaceContainerHigh,
-            accent,
-            if (isCurioDarkTheme()) 0.10f else 0.16f
-        )
+        color = Color.Transparent
     ) {
         Column {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp)
-                    .padding(8.dp)
             ) {
                 V2JacketArt(item = item, accent = accent, modifier = Modifier.fillMaxSize())
             }
@@ -4012,10 +4010,14 @@ private fun V2JacketArt(item: V2Liked, accent: Color, modifier: Modifier = Modif
             androidx.compose.ui.graphics.lerp(accent, Color.Black, 0.42f)
         )
     )
+    // v3xx35 — the accent plate is only the LOADING placeholder now: once a
+    // cover is on screen (local cache or network) the art renders straight
+    // on the page — no colored wash peeking around the fitted image (the
+    // "background behind the album" look).
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(corner))
-            .background(plate)
+            .background(if (url == null && local == null) plate else Color.Transparent)
     ) {
         Box(Modifier.fillMaxSize().clip(RoundedCornerShape(corner))) {
             CurioIcon(
@@ -4061,7 +4063,7 @@ private fun V2JacketArt(item: V2Liked, accent: Color, modifier: Modifier = Modif
                     modifier = Modifier.fillMaxSize()
                 )
             }
-            if (item.kind == V2Kind.BOOK) {
+            if (item.kind == V2Kind.BOOK && (url != null || local != null)) {
                 Box(
                     modifier = Modifier
                         .fillMaxHeight()
