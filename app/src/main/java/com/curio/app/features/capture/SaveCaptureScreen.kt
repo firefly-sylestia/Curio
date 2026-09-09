@@ -100,8 +100,12 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.ConfettiBurst
 import com.curio.app.ui.components.EmberBurst
+import com.curio.app.ui.components.TextHistoryBrowser
+import com.curio.app.ui.components.TextHistoryPill
+import com.curio.app.ui.components.TextHistoryRestoreMode
 import com.curio.app.ui.components.curioDarkGlow
 import com.curio.app.ui.components.formatGlyph
+import com.curio.app.ui.components.rememberTextHistoryCapture
 import com.curio.app.ui.pet.PetLandmark
 import com.curio.app.ui.pet.PetLandmarks
 import com.curio.app.ui.theme.CurioColors
@@ -1415,6 +1419,11 @@ private fun SessionNoteFloatingPill(
     onNoteChange: (String) -> Unit
 ) {
     val accent = cat.themedAccent()
+    // v3xx — the session note joins the global text-history feed (capture +
+    // pill in the popup header + browser with Replace/Add restore modes).
+    val historyContext = LocalContext.current
+    var noteHistoryOpen by remember { mutableStateOf(false) }
+    rememberTextHistoryCapture(historyContext, "Session note", note, "session-note")
     Column(
         modifier = Modifier
             .imePadding()
@@ -1446,11 +1455,16 @@ private fun SessionNoteFloatingPill(
                     modifier = Modifier.padding(12.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Text(
-                        text = "Shared session note",
-                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = paperInkColor.copy(alpha = 0.85f)
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "Shared session note",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                            color = paperInkColor.copy(alpha = 0.85f),
+                            modifier = Modifier.weight(1f)
+                        )
+                        // History pill — restores straight back into this note.
+                        TextHistoryPill(onClick = { noteHistoryOpen = true }, size = 30.dp)
+                    }
                     OutlinedTextField(
                         value = note,
                         onValueChange = { onNoteChange(it.take(240)) },
@@ -1480,6 +1494,26 @@ private fun SessionNoteFloatingPill(
                     )
                 }
             }
+        }
+        // The note's text-history browser — writes back via onNoteChange
+        // (Replace, or Add above/below when the note already has text).
+        if (noteHistoryOpen) {
+            TextHistoryBrowser(
+                ctx = historyContext,
+                activeField = "Session note",
+                currentText = note,
+                onRestore = { restored, mode ->
+                    val combined = when (mode) {
+                        TextHistoryRestoreMode.REPLACE -> restored
+                        TextHistoryRestoreMode.ADD_TOP ->
+                            if (note.isBlank()) restored else "$restored\n$note"
+                        TextHistoryRestoreMode.ADD_BOTTOM ->
+                            if (note.isBlank()) restored else "$note\n$restored"
+                    }
+                    onNoteChange(combined.take(240))
+                },
+                onDismiss = { noteHistoryOpen = false }
+            )
         }
         // ── The floating button itself — accent pill, shows the note ──
         Surface(

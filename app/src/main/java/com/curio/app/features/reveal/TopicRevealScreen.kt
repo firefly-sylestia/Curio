@@ -176,6 +176,7 @@ import com.curio.app.data.fetchCoverSwatches
 import com.curio.app.ui.components.RichTextEditor
 import com.curio.app.ui.components.TextHistoryBrowser
 import com.curio.app.ui.components.TextHistoryPill
+import com.curio.app.ui.components.TextHistoryRestoreMode
 import com.curio.app.ui.components.rememberTextHistoryCapture
 import com.curio.app.data.openSearchUrl
 import com.curio.app.data.resolveAppleMusicItemUrl
@@ -3800,9 +3801,17 @@ private fun BookNotesSheet(
             TextHistoryBrowser(
                 ctx = context,
                 activeField = "Chapter note",
-                onRestore = { restored ->
+                currentText = editText,
+                onRestore = { restored, mode ->
+                    val combined = when (mode) {
+                        TextHistoryRestoreMode.REPLACE -> restored
+                        TextHistoryRestoreMode.ADD_TOP ->
+                            if (editText.isBlank()) restored else "$restored\n$editText"
+                        TextHistoryRestoreMode.ADD_BOTTOM ->
+                            if (editText.isBlank()) restored else "$editText\n$restored"
+                    }
                     AppPreferences.setBookChapterNote(
-                        context, bookName, editCh.number, restored.take(2000)
+                        context, bookName, editCh.number, combined.take(2000)
                     )
                     AppPreferences.setBookChapterNoteSpans(
                         context, bookName, editCh.number, emptyList()

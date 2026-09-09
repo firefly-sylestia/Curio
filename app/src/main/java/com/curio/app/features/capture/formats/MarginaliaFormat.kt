@@ -232,6 +232,8 @@ fun MarginaliaFormat(
                     journalSpans = newSpans
                 },
                 placeholder = "What did this book make you think about?",
+                // v3xx — the journal joins the global text-history feed.
+                historyField = "My thoughts",
                 toolbarMode = RichTextToolbarMode.MAIN,
                 minHeight = 140.dp,
                 ink = paperInk(),

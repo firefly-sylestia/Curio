@@ -1245,5 +1245,31 @@ updated in lockstep. Committed + pushed as 47e17d5c, CI green.)
    spine/sheen gated on an image being present — no more "outline +
    background behind the album" look.
 
+## request log — text history EVERYWHERE + restore modes + tree redesign (done 2026-09-09, pushed)
+1. Every editor joins the global feed: `RichTextEditor` gained `historyField`
+   / `historyResetKey` — self-contained capture + a compact `TextHistoryPill`
+   in the tool dock + its own browser (restore writes back through
+   `onRichTextChange`, rich spans kept for add modes via `rebaseSpans`).
+   Wired into FieldNotes x3 (What I observed / What surprised me / What I
+   want to learn next), Marginalia (My thoughts), ReelNotes (Film review),
+   SoundBite (Soundbite note + Quick title), GalleryWall caption, every
+   Quote card (`PaperLineField.historyField` got the same pill + capture +
+   browser in its label row), and the Save-your-take shared session note
+   (pill in the popup header, restores cap at the 240-char limit).
+2. Restore modes: `TextHistoryBrowser` takes `currentText` + passes a
+   `TextHistoryRestoreMode` (REPLACE / ADD_TOP / ADD_BOTTOM); an empty
+   field restores instantly, a non-empty field opens the settings-style
+   chooser (frosted rows + warm icon tiles: Add above / Add below /
+   Replace).
+3. Tree redesigned: field → session grouping (`buildHistoryTree`, gap > 20
+   min = new session); each field a settings-style card (✦ glyph + Playfair
+   heading + count + rule, frosted 20dp card, hairline-divided sessions),
+   each version a node with dot + connector, time, +/− line badge and the
+   FULL 2-line text; shared `HistoryActionsRow`; list rows re-frosted to
+   match. Existing hosts (TopicShareCard, TopicRevealScreen) updated to
+   the new signature with currentText + mode handling.
+
 ## next prompt 
- the text histry snt showing up in save your entry notes header i want it everywhere please and it automaticlly should add a text when theres nothing in the not eor text box or give options to replace or add in top or buttom like that and also the tree look isnt good its confusing and it doesnt group properly the similiar texts and modification properly it should be beautifull along with easier to understand. and again inside the journal, etc in express yorself sho the topic histroy pill in the top properly and after pushing use ask user if you cant watch cl
+ the settings page cards still needs a little bit of work, see the recordings style how much clean it is and also very good, i want the same quality refinemnet for all others a little more polish as they still feel cut or not good, and for experiments backup restore etc book covers they just have icons now which is bad replace it with a svg drawing but clean and matching, and then move each of the texts to the top side more touching the top corner icon, and a little bigger font for the appearnce pet designer those texts only, and then the all settings and the next one chnaging to what i open so chnage that to is the top rail have it then it shows that and stays in that postion of the place not at first, and also the top rails quick tools chnage and rotate them like more from insides too so its sometimes faster to find without opening pages and then the manage category page doesnt complement the design style so fix it and same with book cover fetching, and also recycle bin page too. they dont complement the design language more. 
+
+ (empty slot for the next prompt) 

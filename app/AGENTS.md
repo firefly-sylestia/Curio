@@ -1184,6 +1184,35 @@ app/src/main/java/com/curio/app/
   highlight/size to a SELECTION no longer arms the sticky `pending*`
   flags (the toolbar never stays lit after one change); tapping a tool
   with a collapsed caret still arms it for the next typed characters.
+- **v3xx2x — text history EVERYWHERE + restore modes + tree redesign
+  (user follow-up 2026-09-09).** (1) **Every editor joins the feed** —
+  `RichTextEditor` gained `historyField` / `historyResetKey` params: when
+  set it runs `rememberTextHistoryCapture` itself, shows a compact
+  `TextHistoryPill` in its tool dock and hosts its own `TextHistoryBrowser`
+  (restore writes back through `onRichTextChange`, rich spans kept for
+  add modes via `rebaseSpans`, cleared for replace). Wired into every
+  capture format: FieldNotes' three sections (What I observed / What
+  surprised me / What I want to learn next), Marginalia journal (My
+  thoughts), ReelNotes (Film review), SoundBite (Soundbite note + Quick
+  title via `PaperLineField.historyField`, which got the same pill +
+  capture + browser in its label row), GalleryWall caption and every
+  Quote card. The Save-your-take shared session note (`SessionNoteFloatingPill`)
+  gained its own pill in the popup header + capture + browser (restores
+  cap at the 240-char note limit). Existing hosts (TopicShareCard,
+  TopicRevealScreen) keep their own pills. (2) **Restore modes** —
+  `TextHistoryBrowser` takes `currentText` and its `onRestore` callback
+  now passes a `TextHistoryRestoreMode` (REPLACE / ADD_TOP / ADD_BOTTOM):
+  an empty field restores instantly; a field with text opens the
+  settings-style chooser (frosted rows with warm icon tiles: Add above /
+  Add below / Replace). (3) **Tree redesign** — the confusing
+  paragraph-branch tree is replaced by field → session grouping
+  (`buildHistoryTree`): snapshots group by FIELD then by EDIT SESSION
+  (gap > 20 min starts a new one); each field is a settings-style card
+  (✦ glyph + Playfair heading + snapshot count + rule, frosted 20dp card
+  with hairline-divided sessions), each version a node with dot +
+  connector, time, a +/− line-change badge and the FULL text (2 lines) —
+  plus the shared `HistoryActionsRow`. List rows + tree cards share the
+  frosted surface language of the Settings sub-pages.
 - **v3xx22 — CI fix + dark-mode sheet icons + full series UI (user
   follow-up).** (1) **CI fix** (CabinetShelves.kt — the pasted
   `compileDebug/ReleaseKotlin` failure): the seven shelf-art composables

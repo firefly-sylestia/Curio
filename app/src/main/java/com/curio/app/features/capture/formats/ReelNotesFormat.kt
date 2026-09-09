@@ -190,6 +190,8 @@ fun ReelNotesFormat(
                 reviewSpans = newSpans
             },
             placeholder = "What did you think of the film?",
+            // v3xx — the review joins the global text-history feed.
+            historyField = "Film review",
             toolbarMode = RichTextToolbarMode.TOGGLE,
             minHeight = 140.dp,
             ink = paperInk(),

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -39,6 +40,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -493,7 +495,17 @@ fun RichTextEditor(
     /** v7.19 — hides the note-paper COLOR swatch picker behind the paper
      *  style toggle (the mood board's quote boxes keep the color tool
      *  hidden while text formatting + paper style stay available). */
-    showColorTool: Boolean = true
+    showColorTool: Boolean = true,
+    /** v3xx — TEXT HISTORY: when set, this editor joins the global text
+     *  history feed (captures on pause / 10-word boundaries / when the
+     *  editor leaves) and shows a small history pill in its tool dock.
+     *  Restoring writes straight back into this field — a field that
+     *  already has text gets the Replace / Add-above / Add-below chooser.
+     *  [historyResetKey] changes whenever the edited subject changes so
+     *  captures never carry across different cards/fields (defaults to the
+     *  field label itself). */
+    historyField: String? = null,
+    historyResetKey: Any? = null
 ) {
     // NOTE: NOT keyed on [text] — the parent echoes our edits back, so a
     // keyed remember would rebuild the field (and drop the cursor) on every
@@ -540,6 +552,15 @@ fun RichTextEditor(
     val effectiveFieldPadding = if (paper) PaddingValues(0.dp) else fieldPadding
     val effectiveAccent = if (paper) paperControlAccent() else accent
     val effectiveInk = if (paper) notePaperInk(paperColor) else ink
+    // v3xx — text history: capture + pill + browser live inside the editor
+    // so every text box (capture formats, journal, quote cards) gets the
+    // global feed without per-caller wiring. Restoring an ADD keeps the
+    // field's rich spans (rebased across the insert); Replace clears them.
+    val historyContext = LocalContext.current
+    var historyOpen by remember(historyField) { mutableStateOf(false) }
+    if (historyField != null) {
+        rememberTextHistoryCapture(historyContext, historyField, text, historyResetKey ?: historyField)
+    }
     LaunchedEffect(text, spans) {
         if (tfv.text != text) {
             tfv = TextFieldValue(buildRichAnnotated(text, spans, effectiveHighlight))
@@ -842,6 +863,10 @@ fun RichTextEditor(
                     )
                     Spacer(Modifier.weight(1f))
                     trailingAction?.invoke()
+                    if (historyField != null) {
+                        Spacer(Modifier.width(2.dp))
+                        TextHistoryPill(onClick = { historyOpen = true }, size = 32.dp)
+                    }
                 }
                 AnimatedVisibility(
                     visible = paper && styleExpanded,
@@ -1051,6 +1076,28 @@ fun RichTextEditor(
             }
         } else {
             fieldBlock()
+        }
+        // The text-history browser for this field — self-contained: pill in
+        // the dock → this sheet → restore straight back into the editor.
+        if (historyOpen && historyField != null) {
+            TextHistoryBrowser(
+                ctx = historyContext,
+                activeField = historyField,
+                currentText = text,
+                onRestore = { restored, mode ->
+                    val combined = when (mode) {
+                        TextHistoryRestoreMode.REPLACE -> restored
+                        TextHistoryRestoreMode.ADD_TOP ->
+                            if (text.isBlank()) restored else "$restored\n$text"
+                        TextHistoryRestoreMode.ADD_BOTTOM ->
+                            if (text.isBlank()) restored else "$text\n$restored"
+                    }
+                    val mergedSpans = if (mode == TextHistoryRestoreMode.REPLACE) emptyList()
+                    else rebaseSpans(text, combined, spans)
+                    onRichTextChange(combined, mergedSpans)
+                },
+                onDismiss = { historyOpen = false }
+            )
         }
     }
 }
