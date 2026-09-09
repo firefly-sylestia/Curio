@@ -444,7 +444,7 @@ val glassBackdrop = rememberLayerBackdrop()
                         ) {
                             autoBackupLauncher.launch(CurioBackupManager.suggestedFileName())
                         }
-                        CurioSettingsDivider()
+                        SettingsOptionDivider()
                         val autoLabel = if (lastAutoBackupAt > 0L) {
                             SimpleDateFormat("MMM d, yyyy · h:mm a", locale).format(Date(lastAutoBackupAt))
                         } else "Not yet"

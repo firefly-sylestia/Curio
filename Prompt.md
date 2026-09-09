@@ -1226,3 +1226,6 @@ updated in lockstep. Committed + pushed as 47e17d5c, CI green.)
 
 ## next prompt 
  remove the pet shop and its explorer staff etc, in the everyhting recenets page the view os the albumn etc looks bad  wit outline and a backgrou dbehind them so fix it too and fix the cl failure 
+
+ next prompt 
+ the text histry snt showing up in save your entry notes header i want it everywhere please and it automaticlly should add a text when theres nothing in the not eor text box or give options to replace or add in top or buttom like that and also the tree look isnt good its confusing and it doesnt group properly the similiar texts and modification properly it should be beautifull along with easier to understand. and again inside the journal, etc in express yorself sho the topic histroy pill in the top properly 

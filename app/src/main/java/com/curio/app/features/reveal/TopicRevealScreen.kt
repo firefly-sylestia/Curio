@@ -3128,6 +3128,7 @@ private fun ShelfToggleChip(
     }
 }
 
+@Composable
 private fun BookNotesSheet(
     cat: com.curio.app.data.CurioCategory,
     topic: CurioTopic,

@@ -78,7 +78,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -2876,10 +2876,6 @@ private fun StyleAutoChip(
     }
 }
 
-/** v3xx — the liked-item COVER SOURCE sheet: books / albums / series each
- *  have two art providers; if the current cover isn't right, tapping the
- *  other one re-resolves, persists, and re-downloads the bytes ("if you
- *  didn't like that one, show the other"). Images stay in the cover cache. */
 /** v3xx33 — the "Curiying now" / "Want to read" shelf toggles for a liked
  *  item (shown in the liked-item sheet — the Cabinet half of the toggle,
  *  the reveal bottom sheets are the other half). */
@@ -2900,7 +2896,7 @@ private fun V2ShelfToggleChips(
     val accent = MaterialTheme.colorScheme.primary
     val onSurface = MaterialTheme.colorScheme.onSurface
     val surface = MaterialTheme.colorScheme.surfaceContainerHigh
-    fun chip(id: String, label: String, icon: String) {
+    @Composable fun chip(id: String, label: String, icon: String) {
         val active = inShelf(id)
         Surface(
             onClick = {
@@ -2938,6 +2934,12 @@ private fun V2ShelfToggleChips(
     }
 }
 
+/** v3xx — the liked-item COVER SOURCE sheet: books / albums / series each
+ *  have two art providers; if the current cover isn't right, tapping the
+ *  other one re-resolves, persists, and re-downloads the bytes ("if you
+ *  didn't like that one, show the other"). Images stay in the cover cache. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 private fun V2CoverSourceSheet(
     item: V2Liked,
     onDismiss: () -> Unit
@@ -3629,6 +3631,15 @@ private data class V2Liked(
 }
 
 private enum class V2Kind { BOOK, ALBUM, SERIES }
+
+/** The canonical lane for a liked kind (the lane where the reveal hearts
+ *  live) — maps liked items to collection TOPIC members and to the
+ *  favorites sets. */
+private fun V2Kind.categoryId(): CategoryId = when (this) {
+    V2Kind.BOOK -> CategoryId.BOOKS
+    V2Kind.ALBUM -> CategoryId.ALBUMS
+    V2Kind.SERIES -> CategoryId.SERIES
+}
 
 /** Kind-aware topic resolution for liked rows. Books/series/albums are
  *  hearted on their CANONICAL lane (BOOKS / SERIES / ALBUMS — that's where
