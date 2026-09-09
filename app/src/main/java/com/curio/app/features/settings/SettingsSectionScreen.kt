@@ -737,7 +737,7 @@ private fun CompactSegmentedRow(
     disabledHint: String? = null,
     onSelected: (Int) -> Unit
 ) {
-    SettingsOptionSegmentedRow(icon, title, labels, selectedIndex, enabled, disabledIndices, disabledHint, onSelected)
+    SettingsOptionSegmentedRow(icon, title, labels, selectedIndex, enabled, disabledIndices, disabledHint, onSelected = onSelected)
 }
 
 @Composable
@@ -749,7 +749,7 @@ private fun CompactSwitchRow(
     enabled: Boolean = true,
     onCheckedChange: (Boolean) -> Unit
 ) {
-    SettingsOptionSwitchRow(icon, title, subtitle, checked, enabled, onCheckedChange)
+    SettingsOptionSwitchRow(icon, title, subtitle, checked, enabled, onCheckedChange = onCheckedChange)
 }
 
 /** v242 — compact settings slider: label + live value, used by the Liquid

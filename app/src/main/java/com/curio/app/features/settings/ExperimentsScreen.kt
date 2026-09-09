@@ -455,7 +455,8 @@ private fun ExperimentSwitchRow(
     onCheckedChange: (Boolean) -> Unit
 ) {
     SettingsOptionSwitchRow(
-        icon, title, subtitle, checked, enabled, onCheckedChange,
-        modifier = Modifier.alpha(if (enabled) 1f else 0.45f)
+        icon, title, subtitle, checked, enabled,
+        modifier = Modifier.alpha(if (enabled) 1f else 0.45f),
+        onCheckedChange = onCheckedChange
     )
 }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
@@ -179,8 +180,8 @@ fun SettingsOptionRow(
     icon: String?,
     title: String,
     subtitle: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
     val dark = isCurioDarkTheme()
     Row(
@@ -211,8 +212,8 @@ fun SettingsOptionSwitchRow(
     subtitle: String,
     checked: Boolean,
     enabled: Boolean = true,
-    onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onCheckedChange: (Boolean) -> Unit
 ) {
     val dark = isCurioDarkTheme()
     Row(
@@ -245,8 +246,8 @@ fun SettingsOptionSegmentedRow(
     enabled: Boolean = true,
     disabledIndices: Set<Int> = emptySet(),
     disabledHint: String? = null,
-    onSelected: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onSelected: (Int) -> Unit
 ) {
     val dark = isCurioDarkTheme()
     Column(
