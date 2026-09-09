@@ -581,10 +581,11 @@ fun CabinetV2Content(navController: NavController) {
                     onCoverSource = { coverSourceItem = it },
                     // Everything's add-new dives into Spin; Favorites opens
                     // the add-to-favorites sheet (same as its old Add pill).
-                    onAddNew = if (openLevel == SHELF_LEVEL_FAVORITES)
+                    onAddNew = if (openLevel == SHELF_LEVEL_FAVORITES) {
                         { addTarget = AddTarget.Favorites }
-                    else
-                        { navController.navigateToTab(CurioRoutes.SPIN) },
+                    } else {
+                        { navController.navigateToTab(CurioRoutes.SPIN) }
+                    },
                     pageAccent = pageAccent
                 )
             }

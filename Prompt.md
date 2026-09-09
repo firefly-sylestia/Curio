@@ -1,4 +1,28 @@
 # Prompt Log — current request
+## Request (2026-09-09, completed + pushed — CI compile fixes for 98f9f74a)
+
+CI broke on the cabinet-doodles + masonry push (98f9f74a): both
+compileDebugKotlin and compileReleaseKotlin failed. Three errors, three
+files, fixed in one pass:
+
+1. **CabinetShelves.kt:789 — drawLine has no `style` param.** The
+   pencil's white highlight line was drawn with `style = Stroke(...)`
+   (a drawPath/drawRoundRect param) on top of the thick pen-colored
+   body line. Dropped the invalid param; carried the stroke's width
+   (`stroke * 0.5f`) into `strokeWidth` so the highlight stays a thin
+   stripe over the body instead of repainting the whole pencil white.
+2. **CabinetV2Content.kt:584 — braced if/else branches typed as Unit.**
+   `onAddNew = if (…) { addTarget = … } else { navController… }` — a
+   brace block whose last statement is an assignment is a Block, not a
+   lambda literal, so the expression evaluated to Unit and the
+   `() -> Unit` param rejected it. Wrapped each branch's lambda in an
+   outer block (`if (…) { { … } } else { { … } }`) so the if/else now
+   yields function values.
+3. **AdaptiveImageGallery.kt:90 — unresolved positionInWindow.** The
+   v3xx-prompt-4 fix used `coords.positionInWindow()` in the gallery's
+   onGloballyPositioned but the import (`androidx.compose.ui.layout.
+   positionInWindow`, a top-level extension) was never added. Added it.
+
 ## Request (2026-09-09, completed + pushed — Everything masonry gallery + text-history browser refinements + Support duplicate header)
 
 **Request (pending-prompt slot):** "the verything page inside well it needs

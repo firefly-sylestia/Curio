@@ -786,7 +786,7 @@ private fun BoxScope.NotesArt(dark: Boolean) {
         val p0x = w * 0.70f; val p0y = h * 0.42f
         val p1x = w * 0.945f; val p1y = h * 0.86f
         drawLine(pen.copy(alpha = 0.9f), androidx.compose.ui.geometry.Offset(p0x, p0y), androidx.compose.ui.geometry.Offset(p1x, p1y), strokeWidth = w * 0.030f)
-        drawLine(Color.White.copy(alpha = 0.8f), androidx.compose.ui.geometry.Offset(p0x, p0y), androidx.compose.ui.geometry.Offset(p1x, p1y), strokeWidth = w * 0.030f, style = Stroke(width = stroke * 0.5f))
+        drawLine(Color.White.copy(alpha = 0.8f), androidx.compose.ui.geometry.Offset(p0x, p0y), androidx.compose.ui.geometry.Offset(p1x, p1y), strokeWidth = stroke * 0.5f)
         drawCircle(eraser, radius = w * 0.017f, center = androidx.compose.ui.geometry.Offset(p0x, p0y))
         drawCircle(lead, radius = w * 0.011f, center = androidx.compose.ui.geometry.Offset(p1x, p1y))
     }
