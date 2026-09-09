@@ -1192,7 +1192,58 @@ tiles), Backup & restore, Experiments + User Experiments, Support
 (Version row unified), Updates (checker toggle unified), Share hub
 labels, and the hub's search results — the old paper cards and plain
 labels are gone. Unused imports cleaned; only verified-subset glyphs
-used. Committed + pushed.
+used. Committed + pushed. (Follow-up 2026-09-09: CI caught the shared
+rows binding trailing lambdas to `modifier` (it sat LAST in the
+signatures) — `modifier` now precedes every callback and the missing
+`weight` import is added; the delegating wrappers in
+SettingsSectionScreen/ExperimentsScreen/UserExperimentsScreen were
+updated in lockstep. Committed + pushed as 47e17d5c, CI green.)
+
+## request log — cabinet shelves: art + Curiying-now logic + add sheet (done 2026-09-09, pushed)
+1. Shelf art redrawn (CabinetShelves.kt): Favorites = warm heart + halo;
+   Curiying now = connected open book (spine + ribbon, bottom-anchored);
+   Want to Read = three upright book spines; Completed = summit + ground
+   band; Notes = cream notepad with folded corner + ruled lines + pencil;
+   minimal arts' baselines dropped to the bottom edge.
+2. "Currently Reading" renamed "CURIYING NOW" (shelf id unchanged; the
+   seed migration renames installed shelves once) — now holds books,
+   series AND albums. Shelf LOGIC added: `AppPreferences.toggleShelfTopic`
+   / `isTopicInShelf`, "Curiying now" / "Want to read" toggle pills in ALL
+   three reveal bottom sheets (book/album/series, TopicRevealScreen) + the
+   Cabinet liked-row ⋮ sheet (V2ShelfToggleChips).
+3. Notes shelf already filters to note-only formats (verified).
+4. Favorites virtual shelf redesigned: collection-detail header (title +
+   count + emphasized Add pill) opening the Add sheet in favorites mode
+   (search topics to save them / tap a favorite to un-save).
+5. Add sheet redesigned: `V2AddToShelfSheet` keyed on sealed `AddTarget`
+   (Collection | Favorites) — frosted search field over favorites + saved
+   captures + one TopicCatalog fallback, "From favorites" one-tap quick-
+   pick, saved-captures multi-pick with format tiles.
+6. Add-sheet LAG fix: lightweight `AddOption` projection (id + name +
+   subtitle + formatGlyph) computed once in the parent — the picker never
+   carries full CurioEntry payloads — and the idle capture list caps at
+   100 rows (search finds the rest).
+
+## request log — pet shop removed + Everything tiles de-plated (done 2026-09-09, pushed)
+1. CI fix first (pushed e7a40694): the Cabinet chips insertion had consumed
+   the @Composable/@OptIn that belonged to BookNotesSheet (reveal) and
+   V2CoverSourceSheet (cabinet) — restored, chip() is now a local
+   @Composable, KeyboardOptions lives in foundation.text in this Compose,
+   V2Kind gained categoryId(), the ExperimentSwitchRow wrappers dropped
+   the icon param call sites never passed, the stray CurioSettingsDivider
+   call became SettingsOptionDivider, and the bogus layout.weight import
+   is gone.
+2. FULL pet-shop removal (user chose full): OutfitShopScreen.kt +
+   PetOutfits.kt deleted; OUTFIT_SHOP route/nav/entries removed; sparkle
+   currency (states + keys + add/spend), owned/equipped outfit + owned
+   game persistence, quest/streak sparkle payouts, the equipped-outfit
+   overlay in CurioPetSprite and the OUTFIT/GAME level rewards all
+   stripped. Quest XP/levels + palette/lane rewards untouched.
+3. Everything/shelf liked tiles de-plated: V2LikedTileCard dropped the
+   tinted Surface wash + 8dp frame, V2JacketArt's accent plate renders
+   only while loading (transparent once a cover is on screen), book
+   spine/sheen gated on an image being present — no more "outline +
+   background behind the album" look.
 
 ## next prompt 
- no in cabinet the favorites drawing is meh not good doesnt signify its favorites, also the currently reading the design isnt connected and looks random, same for want to read, and completed design is fine just that its not connected all the way to the buttom so it loos disconnected, and also the notes its not note, and also some of the custom ones some are fine but most of them looks disconnected or random drawings use publicly avalable drawing to proper do it and remeber keep it minimal and then the currently reading doesnt update and have no logic so add one in buttom sheet of books and rename reading in cabinet to curiying something, so we can add series etc too, and in noes dont show the entries but just the saved notes all around the app, and in want to read show the saved ones, then the favorites ui inside of its not complementing the style so prper redesign it and also with add buttom, and also the inside of add are just add entires and nothing else so fix that too add a search bar to search topics and add or from favorites etc to add in their. 
+ the text histry snt showing up in save your entry notes header i want it everywhere please and it automaticlly should add a text when theres nothing in the not eor text box or give options to replace or add in top or buttom like that and also the tree look isnt good its confusing and it doesnt group properly the similiar texts and modification properly it should be beautifull along with easier to understand. and again inside the journal, etc in express yorself sho the topic histroy pill in the top properly and after pushing use ask user if you cant watch cl

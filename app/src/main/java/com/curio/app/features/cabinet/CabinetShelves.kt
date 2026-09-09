@@ -107,7 +107,10 @@ val builtInShelves: List<V2Shelf> = listOf(
     ),
     V2Shelf(
         id = V2ShelfId.CURRENTLY_READING,
-        title = "Currently Reading",
+        // v3xx33 — the shelf is the Curio verb now: "Curiying now" holds
+        // books, series AND albums (the old "Currently Reading" was
+        // book-only, so series/albums felt out of place).
+        title = "Curiying now",
         icon = CurioIcons.MenuBook,
         tone = V2ShelfTone(light = 0xFFD0DFC7, dark = 0xFF3C5140),
         art = V2ShelfArtType.READING,
@@ -418,95 +421,119 @@ private fun BoxScope.StarArt(dark: Boolean) {
     }
 }
 
-/** FAVORITES (alt) — a star-map constellation: linked dots + one bright
- *  spark. Reads beautifully as a full-card background. */
+/** FAVORITES — a warm heart (the universal favorites symbol) with a soft
+ *  halo and a few sparkles, sitting on the bottom edge. Instantly reads as
+ *  "favorites" — the old star-map constellation read as random dots. */
 @Composable
 private fun BoxScope.ConstellationArt(dark: Boolean) {
-    val line = if (dark) Color(0xFFA8A2E8) else Color(0xFF7C74C4)
-    val points = listOf(
-        0.10f to 0.82f, 0.28f to 0.42f, 0.50f to 0.60f, 0.44f to 0.22f,
-        0.70f to 0.30f, 0.86f to 0.10f, 0.90f to 0.56f
-    )
+    val heart = if (dark) Color(0xFFE8A3B4) else Color(0xFFE05A7C)
+    val spark = if (dark) Color(0xFFF4C768) else Color(0xFFE8A33D)
     Canvas(Modifier.fillMaxSize()) {
         val w = size.width; val h = size.height
-        val pts = points.map { androidx.compose.ui.geometry.Offset(w * it.first, h * it.second) }
-        listOf(0 to 1, 1 to 2, 2 to 3, 3 to 4, 4 to 5, 2 to 6, 4 to 6).forEach { (a, b) ->
-            drawLine(line.copy(alpha = 0.40f), pts[a], pts[b], strokeWidth = 1.1f)
-        }
-        pts.forEachIndexed { i, p ->
-            drawCircle(line, radius = if (i == 5) w * 0.035f else w * 0.015f, center = p)
-        }
-        drawLine(Color.White.copy(alpha = 0.85f), pts[5], pts[5] + androidx.compose.ui.geometry.Offset(w * 0.03f, -h * 0.04f), strokeWidth = 1f)
+        val hx = w * 0.62f; val hy = h * 0.66f; val hs = w * 0.30f
+        // halo
+        drawCircle(heart.copy(alpha = 0.12f), radius = hs * 1.25f, center = androidx.compose.ui.geometry.Offset(hx, hy - hs * 0.15f))
+        // heart — classic two-lobe shape with a pointed tip, bottom-anchored
+        drawPath(Path().apply {
+            moveTo(hx, hy + hs * 0.62f)
+            cubicTo(hx - hs * 0.95f, hy - hs * 0.10f, hx - hs * 0.48f, hy - hs * 0.82f, hx, hy - hs * 0.28f)
+            cubicTo(hx + hs * 0.48f, hy - hs * 0.82f, hx + hs * 0.95f, hy - hs * 0.10f, hx, hy + hs * 0.62f)
+            close()
+        }, color = heart)
+        // sparkles
+        drawCircle(spark, radius = w * 0.022f, center = androidx.compose.ui.geometry.Offset(w * 0.14f, h * 0.30f))
+        drawCircle(spark.copy(alpha = 0.55f), radius = w * 0.013f, center = androidx.compose.ui.geometry.Offset(w * 0.88f, h * 0.20f))
+        drawCircle(spark.copy(alpha = 0.45f), radius = w * 0.011f, center = androidx.compose.ui.geometry.Offset(w * 0.82f, h * 0.52f))
     }
 }
 
-/** CURRENTLY READING — an open book with page lines, a ribbon bookmark
- *  and a curl of steam (more detail than the old two-blank-pages). */
+/** CURIYING NOW — a clean open book: two pages joined at the spine, page
+ *  lines, a ribbon bookmark — everything CONNECTED and sitting on the
+ *  bottom edge (the old steam curl + floating bookmark read as random). */
 @Composable
 private fun BoxScope.ReadingArt(dark: Boolean) {
     val page = if (dark) Color(0xFFF2E8DA) else Color(0xFFF9F2E6)
     val line = if (dark) Color(0xFF9DB58F) else Color(0xFF769070)
-    val steam = if (dark) Color(0xFFE8D3B8) else Color(0xFFA8805F)
+    val spine = if (dark) Color(0xFF7C9688) else Color(0xFF5E7A6C)
+    val ribbon = if (dark) Color(0xFFC98A6D) else Color(0xFFC07A5A)
     Canvas(Modifier.fillMaxSize()) {
         val w = size.width; val h = size.height
-        val baseY = h * 0.94f; val bh = h * 0.50f
-        // left page
+        val baseY = h * 0.97f
+        val cxm = w * 0.50f          // spine
+        val topY = h * 0.26f         // page tops
+        val half = w * 0.34f         // one page width
+        // left page — a quad from the spine up to its top edge, then down to
+        // the bottom, so the book sits ON the strip's bottom edge.
         drawPath(Path().apply {
-            moveTo(w * 0.10f, baseY - bh * 0.12f)
-            lineTo(w * 0.16f, baseY - bh)
-            lineTo(w * 0.42f, baseY - bh)
-            lineTo(w * 0.36f, baseY - bh * 0.12f)
+            moveTo(cxm, baseY)
+            lineTo(cxm, topY + h * 0.10f)
+            lineTo(cxm - half * 0.86f, topY)
+            lineTo(cxm - half, baseY)
             close()
         }, color = page)
-        // right page
+        // right page (mirrored, slightly shaded)
         drawPath(Path().apply {
-            moveTo(w * 0.64f, baseY - bh * 0.12f)
-            lineTo(w * 0.58f, baseY - bh)
-            lineTo(w * 0.84f, baseY - bh)
-            lineTo(w * 0.90f, baseY - bh * 0.12f)
+            moveTo(cxm, baseY)
+            lineTo(cxm, topY + h * 0.10f)
+            lineTo(cxm + half * 0.86f, topY)
+            lineTo(cxm + half, baseY)
             close()
         }, color = page.copy(alpha = 0.85f))
-        // page lines
+        // page lines — three per side, reading left-to-right
         for (i in 1..3) {
-            val y = baseY - bh * 0.80f + i * bh * 0.18f
-            drawLine(line.copy(alpha = 0.5f), androidx.compose.ui.geometry.Offset(w * 0.20f, y), androidx.compose.ui.geometry.Offset(w * 0.37f, y), strokeWidth = 0.9f)
-            drawLine(line.copy(alpha = 0.5f), androidx.compose.ui.geometry.Offset(w * 0.63f, y), androidx.compose.ui.geometry.Offset(w * 0.80f, y), strokeWidth = 0.9f)
+            val ly = topY + h * 0.10f + i * (baseY - topY - h * 0.10f) * 0.20f
+            drawLine(line.copy(alpha = 0.5f), androidx.compose.ui.geometry.Offset(cxm - half * 0.74f, ly), androidx.compose.ui.geometry.Offset(cxm - w * 0.045f, ly), strokeWidth = 0.9f)
+            drawLine(line.copy(alpha = 0.5f), androidx.compose.ui.geometry.Offset(cxm + w * 0.045f, ly), androidx.compose.ui.geometry.Offset(cxm + half * 0.74f, ly), strokeWidth = 0.9f)
         }
-        // ribbon bookmark
+        // spine — the two pages visibly join here
+        drawLine(spine, androidx.compose.ui.geometry.Offset(cxm, topY + h * 0.10f), androidx.compose.ui.geometry.Offset(cxm, baseY), strokeWidth = 1.5f)
+        // ribbon bookmark hanging from the spine top
         drawPath(Path().apply {
-            moveTo(w * 0.47f, baseY - bh)
-            lineTo(w * 0.53f, baseY - bh)
-            lineTo(w * 0.53f, baseY - bh * 0.30f)
-            lineTo(w * 0.50f, baseY - bh * 0.50f)
-            lineTo(w * 0.47f, baseY - bh * 0.30f)
+            moveTo(cxm - w * 0.028f, topY + h * 0.02f)
+            lineTo(cxm + w * 0.028f, topY + h * 0.02f)
+            lineTo(cxm + w * 0.028f, topY + h * 0.22f)
+            lineTo(cxm, topY + h * 0.15f)
+            lineTo(cxm - w * 0.028f, topY + h * 0.22f)
             close()
-        }, color = if (dark) Color(0xFFC98A6D) else Color(0xFFC07A5A))
-        // steam curls
-        drawPath(Path().apply {
-            moveTo(w * 0.08f, baseY - bh * 0.55f)
-            cubicTo(w * 0.15f, baseY - bh * 0.75f, w * 0.03f, baseY - bh * 0.85f, w * 0.10f, baseY - bh * 1.02f)
-        }, color = steam.copy(alpha = 0.55f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.6f))
-        drawCircle(steam.copy(alpha = 0.5f), radius = w * 0.016f, center = androidx.compose.ui.geometry.Offset(w * 0.10f, baseY - bh * 0.10f))
+        }, color = ribbon)
     }
 }
 
-/** WANT TO READ — stacked book spines + a paper "someday" note. */
+/** WANT TO READ — three book spines standing side by side on the bottom
+ *  edge (clean, connected — the old tilted floating spines read random). */
 @Composable
 private fun BoxScope.BooksArt(dark: Boolean) {
     val spines = if (dark) listOf(0xFF7A5C4C, 0xFF9A7560, 0xFFC09379)
     else listOf(0xFF9C7562, 0xFFB98D79, 0xFFD39F91)
     Canvas(Modifier.fillMaxSize()) {
         val w = size.width; val h = size.height
-        val baseY = h * 0.94f
-        var x = w * 0.08f
+        val baseY = h * 0.97f
+        val cx = listOf(0.18f, 0.50f, 0.80f)
+        val bw = listOf(0.20f, 0.22f, 0.17f)
+        val bh = listOf(0.46f, 0.60f, 0.36f)
         spines.forEachIndexed { i, c ->
-            val bw = w * (0.16f + i * 0.05f)
-            val bh = h * (0.34f + i * 0.14f)
-            val rot = when (i) { 0 -> -0.08f; 1 -> 0f; else -> 0.07f }
-            drawPath(rotRect(x, baseY - bh, bw, bh, rot), color = Color(c))
-            x += bw * 0.94f
+            val x = w * cx[i] - w * bw[i] / 2f
+            val y = baseY - h * bh[i]
+            drawPath(Path().apply {
+                moveTo(x, baseY)
+                lineTo(x, y)
+                lineTo(x + w * bw[i], y)
+                lineTo(x + w * bw[i], baseY)
+                close()
+            }, color = Color(c))
+            // spine highlight — a thin lighter strip near the left edge
+            drawLine(Color.White.copy(alpha = 0.28f), androidx.compose.ui.geometry.Offset(x + w * bw[i] * 0.14f, y), androidx.compose.ui.geometry.Offset(x + w * bw[i] * 0.14f, baseY), strokeWidth = 1f)
         }
-        drawCircle(Color(0xFFF4C768).copy(alpha = 0.8f), radius = w * 0.015f, center = androidx.compose.ui.geometry.Offset(w * 0.90f, h * 0.14f))
+        // a small ribbon on the tallest spine
+        drawPath(Path().apply {
+            val x = w * 0.50f - w * 0.22f / 2f
+            moveTo(x + w * 0.22f * 0.42f, h * 0.97f - h * 0.60f)
+            lineTo(x + w * 0.22f * 0.58f, h * 0.97f - h * 0.60f)
+            lineTo(x + w * 0.22f * 0.58f, h * 0.97f - h * 0.60f + h * 0.16f)
+            lineTo(x + w * 0.22f * 0.50f, h * 0.97f - h * 0.60f + h * 0.11f)
+            lineTo(x + w * 0.22f * 0.42f, h * 0.97f - h * 0.60f + h * 0.16f)
+            close()
+        }, color = if (dark) Color(0xFFC98A6D) else Color(0xFFC07A5A))
     }
 }
 
@@ -527,13 +554,15 @@ private fun BoxScope.MountainArt(dark: Boolean) {
     }
 }
 
-/** COMPLETED — the FULL redesign: a rising sun over two ridgelines, a
- *  flag planted at the summit and a small bird — the "finished" summit
- *  scene (the old plain mountain read as an afterthought). */
+/** COMPLETED — a rising sun over two ridgelines, a flag planted at the
+ *  summit and a small bird, with a solid GROUND BAND across the bottom so
+ *  the whole scene connects to the card's bottom edge (the old scene
+ *  floated with nothing tying it down). */
 @Composable
 private fun BoxScope.PeakArt(dark: Boolean) {
     val far = if (dark) Color(0xFF4A6A5C) else Color(0xFFA9C7B4)
     val near = if (dark) Color(0xFF5E7E6C) else Color(0xFF8FB4A0)
+    val ground = if (dark) Color(0xFF3C5140) else Color(0xFF7DA48E)
     val sun = if (dark) Color(0xFFF4C768) else Color(0xFFF2B36B)
     val flag = if (dark) Color(0xFFE9F2E4) else Color(0xFFFDFEFC)
     Canvas(Modifier.fillMaxSize()) {
@@ -549,7 +578,8 @@ private fun BoxScope.PeakArt(dark: Boolean) {
             lineTo(w * 0.52f, h * 0.26f)
             lineTo(w * 0.72f, h * 0.62f)
             lineTo(w, h * 0.44f)
-            lineTo(w, h)
+            lineTo(w, h * 0.86f)
+            lineTo(0f, h * 0.86f)
             close()
         }, color = far)
         // near ridge
@@ -559,9 +589,12 @@ private fun BoxScope.PeakArt(dark: Boolean) {
             lineTo(w * 0.52f, h * 0.74f)
             lineTo(w * 0.74f, h * 0.46f)
             lineTo(w, h * 0.70f)
-            lineTo(w, h)
+            lineTo(w, h * 0.90f)
+            lineTo(0f, h * 0.90f)
             close()
         }, color = near)
+        // ground band — ties the ridges to the very bottom edge
+        drawRect(ground, topLeft = androidx.compose.ui.geometry.Offset(0f, h * 0.90f), size = androidx.compose.ui.geometry.Size(w, h * 0.10f))
         // summit flag
         val fx = w * 0.52f; val fy = h * 0.26f
         drawLine(if (dark) Color(0xFF3C3A2E) else Color(0xFF6B5A44), androidx.compose.ui.geometry.Offset(fx, fy), androidx.compose.ui.geometry.Offset(fx, fy - h * 0.14f), strokeWidth = 1.6f)
@@ -577,23 +610,37 @@ private fun BoxScope.PeakArt(dark: Boolean) {
     }
 }
 
-/** NOTES — a slip-stack with a pen scribble (more detail than the old
- *  blank stack). */
+/** NOTES — a proper NOTE: a cream notepad sheet with a folded corner and
+ *  ruled writing lines, a pencil resting against it — instantly reads as a
+ *  note (the old tilted slip-stack read as random shapes). */
 @Composable
 private fun BoxScope.NotesArt(dark: Boolean) {
-    val stack = if (dark) listOf(0xFF8A7BA8, 0xFFA08FC0, 0xFFC9B9D8)
-    else listOf(0xFFB7A9D7, 0xFFD3C6E7, 0xFFF0E1D5)
+    val paper = if (dark) Color(0xFFF0E4D0) else Color(0xFFFFFBF2)
+    val line = if (dark) Color(0xFFA08FC0) else Color(0xFF9C86C4)
+    val pen = if (dark) Color(0xFFE3B7A8) else Color(0xFFB3796A)
     Canvas(Modifier.fillMaxSize()) {
         val w = size.width; val h = size.height
-        val bw = w * 0.30f; val bh = h * 0.36f
-        val baseY = h * 0.92f
-        stack.forEachIndexed { i, c ->
-            drawPath(rotRect(w * 0.12f + i * w * 0.10f, baseY - bh + i * h * 0.02f, bw, bh, -0.10f + i * 0.05f), color = Color(c))
+        val nw = w * 0.44f; val nh = h * 0.60f
+        val x0 = w * 0.08f; val y0 = h * 0.97f - nh
+        // sheet with a folded (dog-ear) top-right corner
+        drawPath(Path().apply {
+            moveTo(x0, y0)
+            lineTo(x0 + nw * 0.72f, y0)
+            lineTo(x0 + nw, y0 + nh * 0.16f)   // fold
+            lineTo(x0 + nw, y0 + nh)
+            lineTo(x0, y0 + nh)
+            close()
+        }, color = paper)
+        // fold shadow line
+        drawLine(if (dark) Color(0xFFB3A48C) else Color(0xFFD9CBB2), androidx.compose.ui.geometry.Offset(x0 + nw * 0.72f, y0), androidx.compose.ui.geometry.Offset(x0 + nw, y0 + nh * 0.16f), strokeWidth = 1f)
+        // ruled writing lines
+        for (i in 1..4) {
+            val ly = y0 + nh * 0.18f + i * (nh - nh * 0.18f) * 0.19f
+            drawLine(line.copy(alpha = 0.55f), androidx.compose.ui.geometry.Offset(x0 + nw * 0.10f, ly), androidx.compose.ui.geometry.Offset(x0 + nw * 0.88f, ly), strokeWidth = 0.9f)
         }
-        // pen
-        val pen = if (dark) Color(0xFFE3B7A8) else Color(0xFFB3796A)
-        drawLine(pen, androidx.compose.ui.geometry.Offset(w * 0.76f, h * 0.34f), androidx.compose.ui.geometry.Offset(w * 0.92f, h * 0.20f), strokeWidth = 1.8f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
-        drawLine(pen.copy(alpha = 0.8f), androidx.compose.ui.geometry.Offset(w * 0.82f, h * 0.24f), androidx.compose.ui.geometry.Offset(w * 0.96f, h * 0.12f), strokeWidth = 1f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+        // pencil resting diagonally at the bottom right
+        drawLine(pen, androidx.compose.ui.geometry.Offset(w * 0.78f, h * 0.52f), androidx.compose.ui.geometry.Offset(w * 0.94f, h * 0.84f), strokeWidth = 2.2f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+        drawCircle(pen.copy(alpha = 0.65f), radius = w * 0.013f, center = androidx.compose.ui.geometry.Offset(w * 0.945f, h * 0.85f))
     }
 }
 
@@ -655,8 +702,8 @@ private fun BoxScope.MinimalSunArt(dark: Boolean) {
         drawArc(ink.copy(alpha = 0.85f), startAngle = 180f, sweepAngle = 180f, useCenter = false,
             topLeft = androidx.compose.ui.geometry.Offset(cx - r, cy - r), size = androidx.compose.ui.geometry.Size(r * 2f, r * 2f),
             style = androidx.compose.ui.graphics.drawscope.Stroke(width = w * 0.014f))
-        drawLine(ink.copy(alpha = 0.5f), androidx.compose.ui.geometry.Offset(w * 0.12f, h * 0.78f), androidx.compose.ui.geometry.Offset(w * 0.88f, h * 0.78f), strokeWidth = w * 0.012f)
-        drawCircle(ink, radius = w * 0.02f, center = androidx.compose.ui.geometry.Offset(w * 0.40f, h * 0.60f))
+        drawLine(ink.copy(alpha = 0.5f), androidx.compose.ui.geometry.Offset(w * 0.10f, h * 0.88f), androidx.compose.ui.geometry.Offset(w * 0.90f, h * 0.88f), strokeWidth = w * 0.012f)
+        drawCircle(ink, radius = w * 0.02f, center = androidx.compose.ui.geometry.Offset(w * 0.40f, h * 0.64f))
     }
 }
 
@@ -670,7 +717,7 @@ private fun BoxScope.MinimalRingsArt(dark: Boolean) {
         drawCircle(ink.copy(alpha = 0.30f), radius = w * 0.17f, center = androidx.compose.ui.geometry.Offset(cx, cy), style = androidx.compose.ui.graphics.drawscope.Stroke(width = w * 0.010f))
         drawCircle(ink.copy(alpha = 0.55f), radius = w * 0.10f, center = androidx.compose.ui.geometry.Offset(cx, cy), style = androidx.compose.ui.graphics.drawscope.Stroke(width = w * 0.010f))
         drawCircle(ink, radius = w * 0.02f, center = androidx.compose.ui.geometry.Offset(w * 0.30f, h * 0.28f))
-        drawLine(ink.copy(alpha = 0.40f), androidx.compose.ui.geometry.Offset(w * 0.14f, h * 0.78f), androidx.compose.ui.geometry.Offset(w * 0.86f, h * 0.78f), strokeWidth = w * 0.008f)
+        drawLine(ink.copy(alpha = 0.40f), androidx.compose.ui.geometry.Offset(w * 0.14f, h * 0.88f), androidx.compose.ui.geometry.Offset(w * 0.86f, h * 0.88f), strokeWidth = w * 0.008f)
     }
 }
 
@@ -686,6 +733,7 @@ private fun BoxScope.MinimalWaveArt(dark: Boolean) {
             cubicTo(w * 0.66f, h * 0.44f, w * 0.80f, h * 0.80f, w, h * 0.52f)
         }, color = ink.copy(alpha = 0.75f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = w * 0.013f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
         drawCircle(ink, radius = w * 0.018f, center = androidx.compose.ui.geometry.Offset(w * 0.30f, h * 0.22f))
+        drawLine(ink.copy(alpha = 0.35f), androidx.compose.ui.geometry.Offset(w * 0.10f, h * 0.90f), androidx.compose.ui.geometry.Offset(w * 0.90f, h * 0.90f), strokeWidth = w * 0.008f)
     }
 }
 

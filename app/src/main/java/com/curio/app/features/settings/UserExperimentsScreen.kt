@@ -342,7 +342,6 @@ fun UserExperimentsScreen(navController: NavController) {
 
 @Composable
 private fun ExperimentSwitchRow(
-    icon: String? = null,
     title: String,
     subtitle: String,
     checked: Boolean,
@@ -350,7 +349,7 @@ private fun ExperimentSwitchRow(
     onCheckedChange: (Boolean) -> Unit
 ) {
     SettingsOptionSwitchRow(
-        icon, title, subtitle, checked, enabled,
+        icon = null, title, subtitle, checked, enabled,
         modifier = Modifier.alpha(if (enabled) 1f else 0.45f),
         onCheckedChange = onCheckedChange
     )

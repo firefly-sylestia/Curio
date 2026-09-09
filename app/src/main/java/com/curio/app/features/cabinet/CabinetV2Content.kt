@@ -1,5 +1,6 @@
 package com.curio.app.features.cabinet
 
+import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -38,6 +39,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
@@ -75,6 +77,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -108,6 +112,7 @@ import com.curio.app.ui.components.CurioEmptyState
 import com.curio.app.ui.components.CurioEntryCard
 import com.curio.app.ui.components.CurioHoldPill
 import com.curio.app.ui.components.CurioTwoStepDeleteDialog
+import com.curio.app.ui.components.formatGlyph
 import com.curio.app.ui.components.isLiquidGlassPillsActive
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.curio.app.ui.theme.CurioIcon
@@ -181,7 +186,7 @@ fun CabinetV2Content(navController: NavController) {
     }
     val collections = AppPreferences.collectionsState
 
-    // ── Seed the four empty starter shelves (Currently Reading / Want to
+    // ── Seed the four empty starter shelves (Curiying now / Want to
     // Read / Completed / Personal) once — they become ordinary, editable
     // collections (ids prefixed `shelf:`); the virtual shelves (Favorites /
     // Saved entries / Notes) are computed below and never persisted.
@@ -196,6 +201,20 @@ fun CabinetV2Content(navController: NavController) {
     }
     val allLikes = remember(books, albums, series) { books + albums + series }
     val noteEntries = remember(entries) { entries.filter { it.format in noteFormats } }
+    // v3xx34 — the add-sheet's LIGHTWEIGHT projection (id + display text +
+    // format glyph), computed once. The picker never carries full
+    // [CurioEntry] objects — their capture payloads are what made the old
+    // add sheet lag on large archives.
+    val addOptions = remember(entries) {
+        entries.map { e ->
+            AddOption(
+                id = e.id,
+                name = e.topic.name,
+                subtitle = e.title?.ifBlank { null } ?: e.format.shortName,
+                glyph = formatGlyph(e.format)
+            )
+        }
+    }
 
     // v3xx — the COVER CACHE warmer: liked books / albums / series resolve
     // their cover art ALWAYS (not gated on the Settings fetch toggles — the
@@ -414,7 +433,7 @@ fun CabinetV2Content(navController: NavController) {
     var showCreateSheet by rememberSaveable { mutableStateOf(false) }
     var renameTarget by rememberSaveable { mutableStateOf<String?>(null) }
     var deleteTarget by rememberSaveable { mutableStateOf<String?>(null) }
-    var addTarget by rememberSaveable { mutableStateOf<String?>(null) }
+    var addTarget by rememberSaveable { mutableStateOf<AddTarget?>(null) }
     var pillTarget by remember { mutableStateOf<PillTarget?>(null) }
     // v3xx — the liked-tile ⋮ target: opens the cover-source sheet where the
     // user can switch a book/album/series to its OTHER art provider.
@@ -538,7 +557,7 @@ fun CabinetV2Content(navController: NavController) {
                         navController.navigate(CurioRoutes.entryDetail(id)) { launchSingleTop = true }
                     },
                     onMemberLongPress = { index -> pillTarget = PillTarget.Member(openCollection.id, index) },
-                    onAdd = { addTarget = openCollection.id },
+                    onAdd = { addTarget = AddTarget.Collection(openCollection) },
                     onRename = { renameTarget = openCollection.id },
                     onDelete = { deleteTarget = openCollection.id }
                 )
@@ -562,7 +581,9 @@ fun CabinetV2Content(navController: NavController) {
                             haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
                             navController.navigate(CurioRoutes.entryDetail(id)) { launchSingleTop = true }
                         }
-                    }
+                    },
+                    onLikedMore = { coverSourceItem = it },
+                    onAdd = { addTarget = AddTarget.Favorites }
                 )
                 openLevel == SHELF_LEVEL_SAVED -> v2VirtualShelfItems(
                     title = "Saved entries",
@@ -584,7 +605,8 @@ fun CabinetV2Content(navController: NavController) {
                             haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
                             navController.navigate(CurioRoutes.entryDetail(id)) { launchSingleTop = true }
                         }
-                    }
+                    },
+                    onLikedMore = { coverSourceItem = it }
                 )
                 openLevel == SHELF_LEVEL_NOTES -> v2VirtualShelfItems(
                     title = "Notes",
@@ -805,14 +827,22 @@ fun CabinetV2Content(navController: NavController) {
         )
     }
 
-    // ── Add-entries sheet (multi-select saved entries into a collection).
-    if (addTarget != null) {
-        val c = collections.firstOrNull { it.id == addTarget }
-        if (c != null) {
-            V2AddEntriesSheet(
-                collection = c,
-                entries = entries,
-                onAdd = { ids ->
+    // ── Add-to-shelf sheet (search topics / favorites / saved captures).
+    // v3xx34 — one redesigned picker for BOTH targets: a real collection
+    // (multi-pick saved captures + one-tap topic adds from favorites/search)
+    // and the Favorites virtual shelf (favorites mode: search topics to
+    // save them).
+    addTarget?.let { target ->
+        val c = (target as? AddTarget.Collection)?.collection
+        if (target is AddTarget.Collection && (c == null || collections.none { it.id == c.id })) {
+            LaunchedEffect(addTarget) { addTarget = null }
+        } else {
+            V2AddToShelfSheet(
+                target = target,
+                likes = allLikes,
+                addOptions = addOptions,
+                onAddEntries = { ids ->
+                    if (c == null) return@V2AddToShelfSheet
                     val existing = c.members.filter { it.kind == CurioCollectionMember.MemberKind.ENTRY }
                         .map { it.refName }.toSet()
                     val fresh = ids.filterNot { it in existing }
@@ -830,10 +860,24 @@ fun CabinetV2Content(navController: NavController) {
                     }
                     addTarget = null
                 },
+                onToggleTopic = { liked ->
+                    if (c != null) {
+                        val member = likedToMember(liked)
+                        val has = c.members.any {
+                            it.kind == member.kind && it.categoryName == member.categoryName &&
+                                it.refName == member.refName
+                        }
+                        val members = if (has) c.members.filterNot {
+                            it.kind == member.kind && it.categoryName == member.categoryName &&
+                                it.refName == member.refName
+                        } else c.members + member
+                        AppPreferences.addOrReplaceCollection(context, c.copy(members = members))
+                    } else {
+                        toggleLikedFavorite(liked, context)
+                    }
+                },
                 onDismiss = { addTarget = null }
             )
-        } else {
-            LaunchedEffect(addTarget) { addTarget = null }
         }
     }
 
@@ -2248,22 +2292,20 @@ private fun V2LikedTileCard(
             fallbackAccent
         )
     }
+    // v3xx35 — NO outline + NO background plate behind the art: the tile is
+    // the page surface and the cover art sits edge-to-edge on it (the old
+    // tinted Surface + 8dp frame read as an outline with a wash behind the
+    // album/series tiles).
     Surface(
         modifier = modifier.combinedClickable(onClick = onClick),
         shape = RoundedCornerShape(18.dp),
-        color = androidx.compose.ui.graphics.lerp(
-            cat?.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
-                ?: MaterialTheme.colorScheme.surfaceContainerHigh,
-            accent,
-            if (isCurioDarkTheme()) 0.10f else 0.16f
-        )
+        color = Color.Transparent
     ) {
         Column {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp)
-                    .padding(8.dp)
             ) {
                 V2JacketArt(item = item, accent = accent, modifier = Modifier.fillMaxSize())
             }
@@ -2357,7 +2399,12 @@ private fun LazyGridScope.v2VirtualShelfItems(
     selectionMode: Boolean,
     onOpenLiked: (V2Liked) -> Unit,
     onEntryLongClick: (String) -> Unit,
-    onEntryClick: (String) -> Unit
+    onEntryClick: (String) -> Unit,
+    // v3xx33 — the liked-row ⋮ (shelf toggles + cover source sheet).
+    onLikedMore: (V2Liked) -> Unit = {},
+    // v3xx34 — an Add pill in the header (Favorites opens the add sheet in
+    // favorites mode).
+    onAdd: (() -> Unit)? = null
 ) {
     val q = searchQuery.trim()
     fun shown(text: String): Boolean = q.isEmpty() || text.contains(q, ignoreCase = true)
@@ -2368,11 +2415,42 @@ private fun LazyGridScope.v2VirtualShelfItems(
     val total = shownLikes.size + shownEntries.size
 
     item(key = "v-head", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
-        V2PageSectionHeader(
-            title = title,
-            subtitle = null,
-            trailing = "$total item${if (total == 1) "" else "s"}"
-        )
+        if (onAdd != null) {
+            // v3xx34 — Favorites wears the collection-detail header language:
+            // title + count + an emphasized Add pill.
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().padding(top = 6.dp, bottom = 2.dp)
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = "$total item${if (total == 1) "" else "s"}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
+                    )
+                }
+                V2ToolbarPill(
+                    glyph = CurioIcons.Add,
+                    contentDescription = "Add to favorites",
+                    emphasized = true,
+                    onClick = onAdd
+                )
+            }
+        } else {
+            V2PageSectionHeader(
+                title = title,
+                subtitle = null,
+                trailing = "$total item${if (total == 1) "" else "s"}"
+            )
+        }
     }
     if (total == 0) {
         item(key = "v-empty", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
@@ -2405,7 +2483,7 @@ private fun LazyGridScope.v2VirtualShelfItems(
             span = { GridItemSpan(maxLineSpan) },
             contentType = "member"
         ) {
-            V2LikedRow(item = item, onClick = { onOpenLiked(item) })
+            V2LikedRow(item = item, onClick = { onOpenLiked(item) }, onMore = { onLikedMore(item) })
         }
     }
     v2EntryItems(
@@ -2796,6 +2874,64 @@ private fun StyleAutoChip(
     }
 }
 
+/** v3xx33 — the "Curiying now" / "Want to read" shelf toggles for a liked
+ *  item (shown in the liked-item sheet — the Cabinet half of the toggle,
+ *  the reveal bottom sheets are the other half). */
+@Composable
+private fun V2ShelfToggleChips(
+    context: Context,
+    topicName: String,
+    categoryId: CategoryId,
+    modifier: Modifier = Modifier
+) {
+    val haptics = LocalHapticFeedback.current
+    val collections = AppPreferences.collectionsState
+    fun inShelf(id: String): Boolean = collections.firstOrNull { it.id == id }
+        ?.members?.any {
+            it.kind == CurioCollectionMember.MemberKind.TOPIC &&
+                it.categoryName == categoryId.name && it.refName == topicName
+        } == true
+    val accent = MaterialTheme.colorScheme.primary
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    val surface = MaterialTheme.colorScheme.surfaceContainerHigh
+    @Composable fun chip(id: String, label: String, icon: String) {
+        val active = inShelf(id)
+        Surface(
+            onClick = {
+                haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                AppPreferences.toggleShelfTopic(context, id, categoryId, topicName)
+            },
+            shape = RoundedCornerShape(50),
+            color = if (active) accent.copy(alpha = 0.16f) else surface.copy(alpha = 0.7f)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+            ) {
+                CurioIcon(
+                    name = icon,
+                    contentDescription = null,
+                    tint = if (active) accent else onSurface,
+                    size = 15.dp
+                )
+                Text(
+                    label,
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = if (active) accent else onSurface
+                )
+            }
+        }
+    }
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        chip("shelf:currently-reading", "Curiying now", CurioIcons.PlayCircle)
+        chip("shelf:want-to-read", "Want to read", CurioIcons.Bookmark)
+    }
+}
+
 /** v3xx — the liked-item COVER SOURCE sheet: books / albums / series each
  *  have two art providers; if the current cover isn't right, tapping the
  *  other one re-resolves, persists, and re-downloads the bytes ("if you
@@ -2846,7 +2982,15 @@ private fun V2CoverSourceSheet(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(10.dp))
+            // v3xx33 — the Cabinet shelf toggles (Curiying now / Want to
+            // read), live from the liked-item sheet.
+            V2ShelfToggleChips(
+                context = context,
+                topicName = item.name,
+                categoryId = item.topic?.categoryId ?: item.kind.categoryId()
+            )
+            Spacer(Modifier.height(10.dp))
             Text(
                 text = "Cover source",
                 style = MaterialTheme.typography.labelSmall.copy(
@@ -2947,21 +3091,118 @@ private fun V2CoverSourceSheet(
     }
 }
 
-/** Add saved captures into a collection — multi-select sheet. */
+// ── Add-to-shelf model (v3xx34) ────────────────────────────────────────
+
+/** What the add sheet targets: a real collection (topic + capture members)
+ *  or the Favorites virtual shelf (favorites mode — topics only). */
+private sealed interface AddTarget {
+    data class Collection(val collection: CurioCollection) : AddTarget
+    data object Favorites : AddTarget
+}
+
+/** The add-sheet's lightweight saved-capture row — id + display text +
+ *  format glyph. Projected ONCE in the parent so the picker never carries
+ *  full [CurioEntry] objects (their capture payloads are what made the old
+ *  sheet lag on big archives). */
+private data class AddOption(
+    val id: String,
+    val name: String,
+    val subtitle: String,
+    val glyph: String
+)
+
+/** A liked item as a collection TOPIC member. */
+private fun likedToMember(liked: V2Liked): CurioCollectionMember =
+    CurioCollectionMember(
+        kind = CurioCollectionMember.MemberKind.TOPIC,
+        categoryName = liked.kind.categoryId().name,
+        refName = liked.name
+    )
+
+/** Whether a liked item sits in the favorites sets right now. */
+private fun isLikedFavorite(liked: V2Liked, context: Context): Boolean = when (liked.kind) {
+    V2Kind.BOOK -> AppPreferences.bookFavoritesState.contains(liked.name)
+    V2Kind.SERIES -> AppPreferences.seriesFavoritesState.contains(liked.name)
+    V2Kind.ALBUM -> AppPreferences.albumFavTracksState.containsKey(liked.name)
+}
+
+/** Save / un-save a liked item (favorites-mode add). Albums save their
+ *  first authored track — the reveal hearts per-track, so this keeps the
+ *  album inside the favorites sets the same way. */
+private fun toggleLikedFavorite(liked: V2Liked, context: Context) {
+    when (liked.kind) {
+        V2Kind.BOOK -> AppPreferences.toggleBookFavorite(context, liked.name)
+        V2Kind.SERIES -> AppPreferences.toggleSeriesFavorite(context, liked.name)
+        V2Kind.ALBUM -> {
+            val track = liked.topic?.tracks?.firstOrNull()?.title ?: liked.name
+            AppPreferences.toggleAlbumFavoriteTrack(context, liked.name, track)
+        }
+    }
+}
+
+/** With no query the saved-capture list renders at most this many rows —
+ *  search finds the rest. Keeps opening the picker instant on big archives. */
+private const val ADD_OPTION_CAP = 100
+
+/** v3xx34 — the redesigned add sheet: a search field over topics
+ *  (favorites + saved captures + one catalog fallback), a favorites
+ *  quick-pick list, and the saved-captures multi-pick. [target] decides
+ *  the mode: [AddTarget.Collection] adds topic/entry members;
+ *  [AddTarget.Favorites] saves / un-saves topics. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun V2AddEntriesSheet(
-    collection: CurioCollection,
-    entries: List<CurioEntry>,
-    onAdd: (List<String>) -> Unit,
+private fun V2AddToShelfSheet(
+    target: AddTarget,
+    likes: List<V2Liked>,
+    addOptions: List<AddOption>,
+    onAddEntries: (List<String>) -> Unit,
+    onToggleTopic: (V2Liked) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val context = LocalContext.current
+    val haptics = LocalHapticFeedback.current
+    var query by rememberSaveable { mutableStateOf("") }
     var picked by rememberSaveable { mutableStateOf<Set<String>>(emptySet()) }
-    val existing = remember(collection) {
-        collection.members.filter { it.kind == CurioCollectionMember.MemberKind.ENTRY }
-            .map { it.refName }.toSet()
+    val isFavorites = target is AddTarget.Favorites
+    val collection = (target as? AddTarget.Collection)?.collection
+
+    val existingTopicKeys = remember(collection) {
+        collection?.members?.filter { it.kind == CurioCollectionMember.MemberKind.TOPIC }
+            ?.map { "${it.categoryName}|${it.refName}" }?.toSet() ?: emptySet()
     }
-    val available = remember(entries, existing) { entries.filterNot { it.id in existing } }
+    val existingEntryIds = remember(collection) {
+        collection?.members?.filter { it.kind == CurioCollectionMember.MemberKind.ENTRY }
+            ?.map { it.refName }?.toSet() ?: emptySet()
+    }
+
+    val q = query.trim()
+    fun shown(text: String): Boolean = q.isEmpty() || text.contains(q, ignoreCase = true)
+
+    // Favorite quick-pick pool — liked books/series/albums, search-filtered.
+    val shownLikes = remember(q, likes) {
+        likes.filter { shown(it.name) || it.topic?.byline?.let { b -> shown(b) } == true }
+    }
+    // Saved-capture pool — the lightweight projection; already-added hidden.
+    val availableOptions = remember(q, addOptions, existingEntryIds) {
+        addOptions.filterNot { it.id in existingEntryIds }
+            .filter { shown(it.name) || shown(it.subtitle) }
+    }
+    // Catalog fallback — one best topic match when the pools come up empty
+    // (cached lanes only, never a full catalog load — stays O(1) per
+    // keystroke).
+    val catalogHit = remember(q, shownLikes, availableOptions) {
+        if (q.length >= 2 && shownLikes.isEmpty() && availableOptions.isEmpty()) {
+            TopicCatalog.findByName(q)?.let { V2Liked(it.name, topicKind(it), it) }
+        } else null
+    }
+    // Lag guard: cap the rendered capture list when idle; search finds more.
+    val cappedOptions = if (q.isEmpty() && availableOptions.size > ADD_OPTION_CAP)
+        availableOptions.take(ADD_OPTION_CAP) else availableOptions
+
+    fun inTarget(liked: V2Liked): Boolean =
+        if (isFavorites) isLikedFavorite(liked, context)
+        else "${liked.kind.categoryId().name}|${liked.name}" in existingTopicKeys
+
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -2969,72 +3210,348 @@ private fun V2AddEntriesSheet(
         containerColor = MaterialTheme.colorScheme.surface,
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
     ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(2.dp),
             modifier = Modifier
                 .fillMaxWidth()
+                .heightIn(max = 620.dp)
                 .padding(horizontal = 20.dp)
-                .padding(bottom = 24.dp)
+                .padding(bottom = 26.dp)
         ) {
-            Text(
-                text = "Add to ${collection.name}",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            if (available.isEmpty()) {
-                Text(
-                    text = "All your saved captures are already in this collection.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            } else {
-                LazyColumn(modifier = Modifier.heightIn(max = 380.dp)) {
-                    items(available, key = { it.id }) { e ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
+            item(key = "title") {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth().padding(top = 2.dp, bottom = 6.dp)
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = if (isFavorites) "Add to Favorites"
+                            else "Add to ${collection?.name ?: ""}",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = if (isFavorites) "Search topics to save them here"
+                            else "Search topics, or pick from favorites & saved captures",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    if (!isFavorites && picked.isNotEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.13f))
+                                .padding(horizontal = 10.dp, vertical = 5.dp)
                         ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = e.topic.name,
-                                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Text(
-                                    text = e.title?.ifBlank { null } ?: e.format.shortName,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                            Checkbox(
-                                checked = e.id in picked,
-                                onCheckedChange = { on ->
-                                    picked = if (on) picked + e.id else picked - e.id
-                                }
+                            Text(
+                                text = "${picked.size} picked",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                color = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
                 }
-                Surface(
-                    onClick = { onAdd(picked.toList()) },
-                    shape = RoundedCornerShape(50),
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.fillMaxWidth().height(46.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
+            }
+
+            item(key = "search") {
+                AddSearchField(
+                    query = query,
+                    onQueryChange = { query = it },
+                    placeholder = if (isFavorites) "Search topics to add…" else "Search topics or captures…"
+                )
+            }
+
+            if (shownLikes.isNotEmpty()) {
+                item(key = "likes-label") {
+                    AddSectionLabel(if (isFavorites) "Your favorites — tap to remove" else "From favorites")
+                }
+                items(shownLikes.size, key = { "lk-$it" }) { index ->
+                    val liked = shownLikes[index]
+                    AddTopicPickRow(
+                        liked = liked,
+                        added = inTarget(liked),
+                        favoritesMode = isFavorites,
+                        onClick = {
+                            haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                            onToggleTopic(liked)
+                        }
+                    )
+                }
+            }
+
+            if (!isFavorites && availableOptions.isNotEmpty()) {
+                item(key = "entries-label") {
+                    AddSectionLabel("Saved captures")
+                }
+                items(cappedOptions.size, key = { "en-${cappedOptions[it].id}" }) { index ->
+                    val opt = cappedOptions[index]
+                    AddEntryPickRow(
+                        option = opt,
+                        checked = opt.id in picked,
+                        onCheckedChange = { on ->
+                            picked = if (on) picked + opt.id else picked - opt.id
+                        }
+                    )
+                }
+                if (cappedOptions.size < availableOptions.size) {
+                    item(key = "entries-more") {
                         Text(
-                            text = if (picked.isEmpty()) "Add" else "Add ${picked.size}",
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
-                            color = MaterialTheme.colorScheme.onPrimary
+                            text = "…and ${availableOptions.size - cappedOptions.size} more — search to find them",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 53.dp, top = 4.dp, bottom = 4.dp)
                         )
                     }
                 }
             }
+
+            if (catalogHit != null) {
+                item(key = "catalog-label") {
+                    AddSectionLabel("Search results")
+                }
+                item(key = "catalog-hit") {
+                    AddTopicPickRow(
+                        liked = catalogHit,
+                        added = inTarget(catalogHit),
+                        favoritesMode = isFavorites,
+                        onClick = {
+                            haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                            onToggleTopic(catalogHit)
+                        }
+                    )
+                }
+            }
+
+            if (shownLikes.isEmpty() && availableOptions.isEmpty() && catalogHit == null) {
+                item(key = "empty") {
+                    Text(
+                        text = "Nothing matches — try a different search.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(vertical = 14.dp)
+                    )
+                }
+            }
+
+            if (!isFavorites && picked.isNotEmpty()) {
+                item(key = "add") {
+                    Surface(
+                        onClick = { onAddEntries(picked.toList()) },
+                        shape = RoundedCornerShape(50),
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(46.dp)
+                            .padding(top = 6.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = if (picked.size == 1) "Add 1 capture" else "Add ${picked.size} captures",
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
+                }
+            }
         }
+    }
+}
+
+/** The add sheet's frosted search field (the hub's frosted-tile language). */
+@Composable
+private fun AddSearchField(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    placeholder: String
+) {
+    val dark = isCurioDarkTheme()
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(if (dark) Color.White.copy(alpha = 0.08f) else Color(0xFFF2E8DC))
+            .padding(horizontal = 14.dp, vertical = 11.dp)
+    ) {
+        CurioIcon(
+            name = CurioIcons.Search,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            size = 18.dp
+        )
+        Spacer(Modifier.width(9.dp))
+        Box(modifier = Modifier.weight(1f)) {
+            if (query.isEmpty()) {
+                Text(
+                    text = placeholder,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    maxLines = 1
+                )
+            }
+            BasicTextField(
+                value = query,
+                onValueChange = onQueryChange,
+                singleLine = true,
+                textStyle = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        if (query.isNotEmpty()) {
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .clickable { onQueryChange("") }
+            ) {
+                CurioIcon(
+                    name = CurioIcons.Close,
+                    contentDescription = "Clear search",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    size = 16.dp,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+        }
+    }
+}
+
+/** A small settings-style section label inside the add sheet. */
+@Composable
+private fun AddSectionLabel(label: String) {
+    Text(
+        text = label,
+        style = MaterialTheme.typography.labelSmall.copy(
+            fontWeight = FontWeight.ExtraBold,
+            letterSpacing = 0.5.sp
+        ),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(top = 12.dp, bottom = 4.dp, start = 2.dp)
+    )
+}
+
+/** One liked-item pick row: kind tile + name/byline + the target state
+ *  (check = already in the collection; bookmark = already in favorites). */
+@Composable
+private fun AddTopicPickRow(
+    liked: V2Liked,
+    added: Boolean,
+    favoritesMode: Boolean,
+    onClick: () -> Unit
+) {
+    val accent = MaterialTheme.colorScheme.primary
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(accent.copy(alpha = 0.12f)),
+            contentAlignment = Alignment.Center
+        ) {
+            CurioIcon(
+                name = when (liked.kind) {
+                    V2Kind.BOOK -> CurioIcons.Books
+                    V2Kind.ALBUM -> CurioIcons.Album
+                    V2Kind.SERIES -> CurioIcons.Movie
+                },
+                contentDescription = null,
+                tint = accent,
+                size = 20.dp
+            )
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = liked.name,
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = liked.topic?.byline?.ifBlank { null } ?: when (liked.kind) {
+                    V2Kind.BOOK -> "Book"
+                    V2Kind.ALBUM -> "Album"
+                    V2Kind.SERIES -> "Series"
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        // The state glyph: collection mode = a check when already added;
+        // favorites mode = a filled bookmark when already saved.
+        CurioIcon(
+            name = if (favoritesMode) {
+                if (added) CurioIcons.Bookmark else CurioIcons.BookmarkBorder
+            } else {
+                if (added) CurioIcons.Check else CurioIcons.Add
+            },
+            contentDescription = null,
+            tint = if (added) accent else MaterialTheme.colorScheme.onSurfaceVariant,
+            size = 20.dp
+        )
+    }
+}
+
+/** One saved-capture pick row: format tile + name/subtitle + checkbox. */
+@Composable
+private fun AddEntryPickRow(
+    option: AddOption,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .clickable { onCheckedChange(!checked) }
+            .padding(vertical = 8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)),
+            contentAlignment = Alignment.Center
+        ) {
+            CurioIcon(
+                name = option.glyph,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                size = 20.dp
+            )
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = option.name,
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = option.subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Checkbox(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
 
@@ -3112,6 +3629,15 @@ private data class V2Liked(
 }
 
 private enum class V2Kind { BOOK, ALBUM, SERIES }
+
+/** The canonical lane for a liked kind (the lane where the reveal hearts
+ *  live) — maps liked items to collection TOPIC members and to the
+ *  favorites sets. */
+private fun V2Kind.categoryId(): CategoryId = when (this) {
+    V2Kind.BOOK -> CategoryId.BOOKS
+    V2Kind.ALBUM -> CategoryId.ALBUMS
+    V2Kind.SERIES -> CategoryId.SERIES
+}
 
 /** Kind-aware topic resolution for liked rows. Books/series/albums are
  *  hearted on their CANONICAL lane (BOOKS / SERIES / ALBUMS — that's where
@@ -3269,7 +3795,10 @@ private fun V2LikedRow(
     item: V2Liked,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onLongClick: (() -> Unit)? = null
+    onLongClick: (() -> Unit)? = null,
+    // v3xx33 — the row's ⋮ opens the liked-item sheet (shelf toggles +
+    // cover source), so the shelf toggles are reachable from Cabinet rows.
+    onMore: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
     val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
@@ -3354,12 +3883,29 @@ private fun V2LikedRow(
                 }
             }
             Spacer(Modifier.width(8.dp))
-            CurioIcon(
-                name = CurioIcons.ChevronRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                size = 20.dp
-            )
+            if (onMore != null) {
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(RoundedCornerShape(11.dp))
+                        .clickable(onClick = onMore),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CurioIcon(
+                        name = CurioIcons.MoreVert,
+                        contentDescription = "Curiying now / Want to read / cover source",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                        size = 19.dp
+                    )
+                }
+            } else {
+                CurioIcon(
+                    name = CurioIcons.ChevronRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                    size = 20.dp
+                )
+            }
         }
     }
 }
@@ -3464,10 +4010,17 @@ private fun V2JacketArt(item: V2Liked, accent: Color, modifier: Modifier = Modif
             androidx.compose.ui.graphics.lerp(accent, Color.Black, 0.42f)
         )
     )
+    // v3xx35 — the accent plate is only the LOADING placeholder now: once a
+    // cover is on screen (local cache or network) the art renders straight
+    // on the page — no colored wash peeking around the fitted image (the
+    // "background behind the album" look).
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(corner))
-            .background(plate)
+            .then(
+                if (url == null && local == null) Modifier.background(plate)
+                else Modifier
+            )
     ) {
         Box(Modifier.fillMaxSize().clip(RoundedCornerShape(corner))) {
             CurioIcon(
@@ -3513,7 +4066,7 @@ private fun V2JacketArt(item: V2Liked, accent: Color, modifier: Modifier = Modif
                     modifier = Modifier.fillMaxSize()
                 )
             }
-            if (item.kind == V2Kind.BOOK) {
+            if (item.kind == V2Kind.BOOK && (url != null || local != null)) {
                 Box(
                     modifier = Modifier
                         .fillMaxHeight()

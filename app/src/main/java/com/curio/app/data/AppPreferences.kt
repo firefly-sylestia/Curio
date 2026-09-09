@@ -283,14 +283,6 @@ object AppPreferences {
     private const val KEY_PET_CUSTOM_2 = "pet_custom_2"
     // v9.3 — custom flower bed design (32×18 pixel rows).
     private const val KEY_BED_DESIGN = "bed_design_rows"
-    // v9.x — sparkle currency (earned from daily/weekly claims + streak
-    // milestones) that funds the pet outfit shop.
-    private const val KEY_SPARKLES = "sparkles"
-    // v9.x — owned pet outfits (JSON array of outfit ids) + the equipped one.
-    private const val KEY_OWNED_OUTFITS = "owned_outfits"
-    private const val KEY_EQUIPPED_OUTFIT = "equipped_outfit"
-    // v323 — owned pet toys/games (JSON array of game ids).
-    private const val KEY_OWNED_GAMES = "owned_games"
     // Share card edit persistence — per-topic card customisations saved
     // on share/save so they restore next time the same topic is shared.
     private const val KEY_SHARE_CARD_EDITS = "share_card_edits"   // JSON: topicName → edit data
@@ -1015,7 +1007,7 @@ object AppPreferences {
     // Save shortcut repoints into it. When the experiment settles the toggle
     // is removed and the winning view ships always-on.
     var cabinetV2EnabledState by mutableStateOf(false)
-    // v3xx — the four empty starter shelves (Currently Reading / Want to
+    // v3xx — the four empty starter shelves (Curiying now / Want to
     // Read / Completed / Personal) were seeded once into the Cabinet's
     // collection store; the virtual shelves (Favorites / Saved entries /
     // Notes) are computed and never persisted.
@@ -1507,16 +1499,6 @@ object AppPreferences {
     /** v9.6 — experimental per-part size and position controls. */
     var petPartTransformsState by mutableStateOf(false)
         private set
-    /** v9.x — sparkle currency (outfit shop funds) + owned/equipped outfits. */
-    var sparklesState by mutableIntStateOf(0)
-        private set
-    var ownedOutfitsState by mutableStateOf<Set<String>>(emptySet())
-        private set
-    var equippedOutfitState by mutableStateOf<String?>(null)
-        private set
-    // v323 — owned pet toys/games (see [PetOutfits.Games]).
-    var ownedGamesState by mutableStateOf<Set<String>>(emptySet())
-        private set
 
     fun initThemeMode(context: Context) {
         themeModeState = getThemeMode(context)
@@ -1630,10 +1612,6 @@ object AppPreferences {
         petDesignState = getPetDesign(context)
         customPetsState = getCustomPets(context)
         bedDesignRowsState = getBedDesignRows(context)
-        sparklesState = getSparkles(context)
-        ownedOutfitsState = getOwnedOutfits(context)
-        equippedOutfitState = getEquippedOutfit(context)
-        ownedGamesState = getOwnedGames(context)
         evoPathState = getEvoPath(context)
         petPartTransformsState = isPetPartTransformsEnabled(context)
         updateCheckerEnabledState = isUpdateCheckerEnabled(context)
@@ -2644,79 +2622,6 @@ object AppPreferences {
         return acc
     }
 
-    // ── Sparkle currency + pet outfits (v9.x) ───────────────────────────
-    /** The player's sparkle balance (funds the outfit shop). */
-    fun getSparkles(context: Context): Int =
-        prefs(context).getInt(KEY_SPARKLES, 0)
-
-    /** Grants [amount] sparkles (never negative). */
-    fun addSparkles(context: Context, amount: Int) {
-        if (amount <= 0) return
-        val next = (sparklesState + amount).coerceAtLeast(0)
-        prefs(context).edit().putInt(KEY_SPARKLES, next).apply()
-        sparklesState = next
-    }
-
-    /** Spends [amount] sparkles; false when the balance is too low. */
-    fun spendSparkles(context: Context, amount: Int): Boolean {
-        if (amount <= 0) return true
-        if (sparklesState < amount) return false
-        val next = sparklesState - amount
-        prefs(context).edit().putInt(KEY_SPARKLES, next).apply()
-        sparklesState = next
-        return true
-    }
-
-    /** Owned outfit ids (JSON array, defensive read). */
-    fun getOwnedOutfits(context: Context): Set<String> {
-        val raw = prefs(context).getString(KEY_OWNED_OUTFITS, null) ?: return emptySet()
-        return try {
-            val arr = JSONArray(raw)
-            (0 until arr.length()).map { arr.getString(it) }.toSet()
-        } catch (_: Exception) {
-            emptySet()
-        }
-    }
-
-    /** Marks [outfitId] as owned. */
-    fun buyOutfit(context: Context, outfitId: String) {
-        val next = ownedOutfitsState + outfitId
-        val arr = JSONArray()
-        next.forEach { arr.put(it) }
-        prefs(context).edit().putString(KEY_OWNED_OUTFITS, arr.toString()).apply()
-        ownedOutfitsState = next
-    }
-
-    /** The equipped outfit id (null = none). */
-    fun getEquippedOutfit(context: Context): String? =
-        prefs(context).getString(KEY_EQUIPPED_OUTFIT, null)?.takeIf { it.isNotBlank() }
-
-    /** Equips [outfitId] (or null to unequip). */
-    fun setEquippedOutfit(context: Context, outfitId: String?) {
-        prefs(context).edit().putString(KEY_EQUIPPED_OUTFIT, outfitId).apply()
-        equippedOutfitState = outfitId
-    }
-
-    /** Owned pet-game ids (JSON array, defensive read). */
-    fun getOwnedGames(context: Context): Set<String> {
-        val raw = prefs(context).getString(KEY_OWNED_GAMES, null) ?: return emptySet()
-        return try {
-            val arr = JSONArray(raw)
-            (0 until arr.length()).map { arr.getString(it) }.toSet()
-        } catch (_: Exception) {
-            emptySet()
-        }
-    }
-
-    /** Marks [gameId] as owned (one-time toy purchase). */
-    fun buyGame(context: Context, gameId: String) {
-        val next = ownedGamesState + gameId
-        val arr = JSONArray()
-        next.forEach { arr.put(it) }
-        prefs(context).edit().putString(KEY_OWNED_GAMES, arr.toString()).apply()
-        ownedGamesState = next
-    }
-
     // ── Manage Categories (v7.94) — hidden set + custom order ──────────
     /** Whether [id] is hidden by the user (Manage Categories). */
     fun isCategoryHidden(id: CategoryId): Boolean = id in hiddenCategoriesState
@@ -3081,13 +2986,72 @@ object AppPreferences {
         return updated
     }
 
+    /**
+     * Toggle a topic in/out of a seeded shelf (Curiying now / Want to
+     * read / Completed / Personal). Creates the shelf on the fly if it
+     * hasn't been seeded yet (a reveal sheet can toggle before the Cabinet
+     * was ever opened). Returns the new on/off state.
+     */
+    fun toggleShelfTopic(context: Context, shelfId: String, categoryId: CategoryId, topicName: String): Boolean {
+        val collections = getCabinetCollections(context).toMutableList()
+        var idx = collections.indexOfFirst { it.id == shelfId }
+        if (idx < 0) {
+            collections.add(
+                CurioCollection(
+                    id = shelfId,
+                    name = shelfDisplayName(shelfId),
+                    createdAtMillis = System.currentTimeMillis(),
+                    members = emptyList()
+                )
+            )
+            idx = collections.lastIndex
+        }
+        val c = collections[idx]
+        val has = c.members.any {
+            it.kind == CurioCollectionMember.MemberKind.TOPIC &&
+                it.categoryName == categoryId.name && it.refName == topicName
+        }
+        val updated = if (has)
+            c.copy(members = c.members.filterNot {
+                it.kind == CurioCollectionMember.MemberKind.TOPIC &&
+                    it.categoryName == categoryId.name && it.refName == topicName
+            })
+        else
+            c.copy(members = c.members + CurioCollectionMember(
+                kind = CurioCollectionMember.MemberKind.TOPIC,
+                categoryName = categoryId.name,
+                refName = topicName
+            ))
+        collections[idx] = updated
+        saveCabinetCollections(context, collections)
+        return !has
+    }
+
+    /** Whether a topic sits in a seeded shelf right now. */
+    fun isTopicInShelf(context: Context, shelfId: String, categoryId: CategoryId, topicName: String): Boolean {
+        val c = getCabinetCollections(context).firstOrNull { it.id == shelfId } ?: return false
+        return c.members.any {
+            it.kind == CurioCollectionMember.MemberKind.TOPIC &&
+                it.categoryName == categoryId.name && it.refName == topicName
+        }
+    }
+
+    /** The display name for a seeded shelf id (used when creating it on the fly). */
+    private fun shelfDisplayName(id: String): String = when (id) {
+        "shelf:currently-reading" -> "Curiying now"
+        "shelf:want-to-read" -> "Want to Read"
+        "shelf:completed" -> "Completed"
+        "shelf:personal" -> "Personal"
+        else -> "Collection"
+    }
+
     // ── Built-in starter shelves (v3xx — Cabinet folders) ──────────────
     /** Whether the four empty starter shelves were seeded once. */
     fun isCabinetShelvesSeeded(context: Context): Boolean =
         prefs(context).getBoolean(KEY_CABINET_SHELVES_SEEDED, false)
 
     /**
-     * Seeds the four EMPTY starter shelves (Currently Reading / Want to
+     * Seeds the four EMPTY starter shelves (Curiying now / Want to
      * Read / Completed / Personal) into the collection store — one time.
      * They are ordinary [CurioCollection]s (ids prefixed `shelf:`), so the
      * existing add-captures / file-to-collection / rename / delete flows
@@ -3095,10 +3059,22 @@ object AppPreferences {
      * Notes) are computed from live data and are NOT persisted here.
      */
     fun seedCabinetShelves(context: Context) {
-        if (isCabinetShelvesSeeded(context)) return
+        if (isCabinetShelvesSeeded(context)) {
+            // v3xx33 — the reading shelf is renamed to the Curio verb
+            // ("Curiying now" — it holds series + albums too). Installs
+            // seeded under the old label get renamed here, once.
+            val collections = getCabinetCollections(context)
+            val renamed = collections.map { c ->
+                if (c.id == "shelf:currently-reading" && c.name != "Curiying now")
+                    c.copy(name = "Curiying now")
+                else c
+            }
+            if (renamed != collections) saveCabinetCollections(context, renamed)
+            return
+        }
         val now = System.currentTimeMillis()
         val shelves = listOf(
-            CurioCollection(id = "shelf:currently-reading", name = "Currently Reading", createdAtMillis = now, members = emptyList()),
+            CurioCollection(id = "shelf:currently-reading", name = "Curiying now", createdAtMillis = now, members = emptyList()),
             CurioCollection(id = "shelf:want-to-read", name = "Want to Read", createdAtMillis = now, members = emptyList()),
             CurioCollection(id = "shelf:completed", name = "Completed", createdAtMillis = now, members = emptyList()),
             CurioCollection(id = "shelf:personal", name = "Personal", createdAtMillis = now, members = emptyList())

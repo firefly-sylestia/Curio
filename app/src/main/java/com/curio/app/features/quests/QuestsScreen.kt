@@ -272,16 +272,6 @@ val glassBackdrop = rememberLayerBackdrop()
                 item("level-milestones") {
                     LevelMilestonesCard(level = level)
                 }
-                // v9.x — the pet outfit shop: spend sparkles (earned here) on
-                // cosmetic outfits. The wallet line doubles as the entry.
-                item("outfit-shop") {
-                    OutfitShopEntryCard(
-                        sparkles = AppPreferences.sparklesState,
-                        onClick = {
-                            navController.navigate(CurioRoutes.OUTFIT_SHOP) { launchSingleTop = true }
-                        }
-                    )
-                }
                 // v8.5 — Daily quests are FIRST under the hero: the page
                 // answers "what can I do today" before anything else
                 // (spec §3 + §4.1). Completing one fires the pet's
@@ -665,64 +655,6 @@ private fun LevelMilestonesCard(level: Int) {
                     }
                 }
             }
-        }
-    }
-}
-
-/** v9.x — the pet outfit shop entry: sparkle wallet + next unlock hint. */
-@Composable
-private fun OutfitShopEntryCard(
-    sparkles: Int,
-    onClick: () -> Unit
-) {
-    val level = CurioQuests.levelForXp(CurioQuests.xpState)
-    CurioSettingsCard {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onClick)
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Surface(
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
-                modifier = Modifier.size(44.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    CurioIcon(
-                        name = CurioIcons.AutoAwesome,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        size = 24.dp
-                    )
-                }
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    "Pet outfit shop",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                val nextReward = LevelRewards.nextReward(level)
-                Text(
-                    text = when {
-                        nextReward == null -> "$sparkles sparkles · every reward unlocked"
-                        else -> "$sparkles sparkles · next unlock: ${nextReward.title} at Level ${nextReward.level}"
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            CurioIcon(
-                name = CurioIcons.ChevronRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                size = 20.dp
-            )
         }
     }
 }

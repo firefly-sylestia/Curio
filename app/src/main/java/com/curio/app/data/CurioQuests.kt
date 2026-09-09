@@ -802,8 +802,6 @@ object CurioQuests {
             // before addXp so a coincidental level-up crossing (from chain
             // XP) can rightfully win over the streak line.
             CurioPet.noteStreakMilestone(context)
-            // v9.x — streak milestones pay sparkles (outfit-shop funding).
-            AppPreferences.addSparkles(context, 5)
         }
         // Route through addXp(0): chain-stage XP granted by this record is
         // folded into level/evolution detection, and everything persists.
@@ -850,8 +848,6 @@ object CurioQuests {
         // (level-up / evolution ceremony) win instead of being swallowed.
         CurioPet.noteQuestComplete(context)
         addXp(context, quest.xpReward)
-        // v9.x — daily claims pay the sparkle currency that funds outfits.
-        AppPreferences.addSparkles(context, 2)
     }
 
     // ── Weekly quests — three rotating week-long goals (v8.42) ─────────
@@ -991,8 +987,6 @@ object CurioQuests {
         // ceremony takes precedence over the quest line.
         CurioPet.noteQuestComplete(context)
         addXp(context, quest.xpReward)
-        // v9.x — weekly claims pay more sparkles (they span seven days).
-        AppPreferences.addSparkles(context, 5)
     }
 
     // ── Chain checks — award each stage's XP once when its target hits ──
