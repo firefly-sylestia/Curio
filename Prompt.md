@@ -1,4 +1,34 @@
 # Prompt Log — current request
+## Request (2026-09-08, completed — settings nav rail on every settings page)
+
+**Request (pending-prompt slot):** "in settings the top nav style to open the
+settings quickly it shows only the settings which i already have on the
+screen so rotate out differnt usefull settgins in their and keep the top
+bar in every sub settings pages too consistent design, and keep the first
+all setting and only rotate out the 2nd one for what page i have opened so
+its faster to switch,"
+
+**Rephrased (user confirmed via ask_user):** the settings top-nav rail
+should appear on EVERY settings-family page (not just the hub), keep "All
+Settings" first, put the page you have open in the SECOND slot
+(highlighted), and switching sections should REPLACE the current page (hub
+stays one back-press away). Scope: all 10 rail destinations + drill-ins
+(Book covers, Book browser, Recycle bin, Updates, Widget editor).
+
+**What shipped:**
+1. **Shared rail** — `SettingsNavRail` (now `internal`, `active: String?`)
+   rotates the open page into slot 2 right after "All Settings"
+   (highlighted); drill-ins pass null (no highlight, fixed order).
+2. **Every settings page** — the rail is the first scroll item below the
+   hero on: SettingsSectionScreen (Appearance/Preferences/Recording →
+   backup for DATA), UserExperiments + Experiments, ShareHub, BackupTools,
+   Support, ManageCategories, TopicHistory (fixed row under its own hero),
+   PetDesigner, BookCoverHub, BookBrowser (both branches), RecycleBin (both
+   branches), Updates, WidgetEditor. The hub keeps its rail (active "all").
+3. **Replace-current-page switching** — new shared `navigateToSettingsSection`
+   pops up to the hub then navigates with launchSingleTop, so the
+   visited-sections stack never grows and back always reaches the hub.
+
 ## Request (2026-09-08, completed + pushed `5c4345f4` / editor pass committed, not pushed — share-card smart fit + editor accuracy)
 
 **Request (pending-prompt slot):** "the spark pill smart fit is better,

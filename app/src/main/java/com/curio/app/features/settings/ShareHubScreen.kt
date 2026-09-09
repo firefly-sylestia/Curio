@@ -191,6 +191,14 @@ fun ShareHubScreen(navController: NavController) {
                     )
                 }
             }
+            // v3xx — the shared settings nav rail: switch sections without
+            // going back to the hub (the open page sits in the 2nd slot).
+            item(key = "settings-nav", span = { GridItemSpan(maxLineSpan) }, contentType = "settings-nav") {
+                SettingsNavRail(
+                    active = "share",
+                    onSelect = { navigateToSettingsSection(navController, it) }
+                )
+            }
             // ── Topic search ────────────────────────────────────────────
             item(span = { GridItemSpan(maxLineSpan) }) {
                 CurioSearchField(

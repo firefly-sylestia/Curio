@@ -127,6 +127,13 @@ fun BookBrowserScreen(navController: NavController) {
                         subtitle = "Every book, line by line · covers, ratings and years",
                         onBack = { navController.popBackStack() }
                     )
+                    // v3xx — the shared settings nav rail (drill-in page —
+                    // no chip highlighted).
+                    SettingsNavRail(
+                        active = null,
+                        onSelect = { navigateToSettingsSection(navController, it) },
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
                             "Loading books…",
@@ -162,6 +169,14 @@ fun BookBrowserScreen(navController: NavController) {
                                 searchPlaceholder = "Search books…"
                             )
                         }
+                    }
+                    // v3xx — the shared settings nav rail (drill-in page —
+                    // no chip highlighted).
+                    item(key = "settings-nav", contentType = "settings-nav") {
+                        SettingsNavRail(
+                            active = null,
+                            onSelect = { navigateToSettingsSection(navController, it) }
+                        )
                     }
                     if (shownBooks.isEmpty()) {
                         item(key = "empty", contentType = "empty") {

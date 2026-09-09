@@ -113,6 +113,14 @@ fun UserExperimentsScreen(navController: NavController) {
                     )
                 }
             }
+            // v3xx — the shared settings nav rail: switch sections without
+            // going back to the hub (the open page sits in the 2nd slot).
+            item(key = "settings-nav", contentType = "settings-nav") {
+                SettingsNavRail(
+                    active = "experiments",
+                    onSelect = { navigateToSettingsSection(navController, it) }
+                )
+            }
             // Liquid glass section
             item { CurioSectionLabel("Liquid glass") }
             item {

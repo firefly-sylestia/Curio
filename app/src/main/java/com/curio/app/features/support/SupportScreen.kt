@@ -33,7 +33,9 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.features.onboarding.CurioOnboardingState
 import com.curio.app.features.settings.SettingsHeroHeader
+import com.curio.app.features.settings.SettingsNavRail
 import com.curio.app.features.settings.heroPageBackground
+import com.curio.app.features.settings.navigateToSettingsSection
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -134,6 +136,15 @@ fun SupportScreen(navController: NavController) {
                             onBack = { navController.popBackStack() }
                         )
                     }
+                }
+                // v3xx — the shared settings nav rail: switch sections
+                // without going back to the hub (the open page sits in the
+                // 2nd slot).
+                item(key = "settings-nav", contentType = "settings-nav") {
+                    SettingsNavRail(
+                        active = "support",
+                        onSelect = { navigateToSettingsSection(navController, it) }
+                    )
                 }
                 item { CurioSectionLabel("Feedback") }
                 item {

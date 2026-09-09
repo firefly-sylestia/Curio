@@ -915,6 +915,21 @@ app/src/main/java/com/curio/app/
   tablet two-pane still consume the underlying row model untouched; the
   Appearance card keeps its PetLandmark. Removed from the hub face: the
   flat CurioSettingsRow list (rows live on in search + two-pane).
+- **v3xx30 — settings nav rail on EVERY settings-family page (user
+  follow-up 2026-09-08).** The hub's JSX nav rail now rides every
+  settings screen — the 10 rail destinations (Appearance, Pet designer,
+  Preferences, Recording, Manage categories, Topic history, Share hub,
+  Experiments, Backup, Support) PLUS the drill-in tool pages (Book
+  covers, Book browser, Recycle bin, Updates, Widget editor).
+  `SettingsNavRail` is now a SHARED composable (`active: String?`): the
+  OPEN page is rotated into the SECOND slot right after "All Settings"
+  (highlighted), so where you are sits next to the way back; drill-ins
+  pass null (no highlight, fixed order). Switching REPLACES the current
+  page via the shared `navigateToSettingsSection` (popUpTo the hub +
+  launchSingleTop) — the hub is always one back-press away and the
+  visited-sections stack never grows. The rail is the FIRST scroll item
+  below the hero (the hub's exact placement), phones + wide alike; the
+  hub itself keeps its rail (active "all").
 - **v3xx28 — Cabinet per-item colors + fresh grid per level (user
   follow-up 2026-09-08).** (1) **Extracted cover colors** — liked
   books/albums/series rows, tiles and the Everything preview now use the

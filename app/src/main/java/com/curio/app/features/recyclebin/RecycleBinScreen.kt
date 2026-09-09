@@ -61,7 +61,9 @@ import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ImageStorageManager
 import com.curio.app.data.RecycleBinExpiry
 import com.curio.app.features.settings.SettingsHeroHeader
+import com.curio.app.features.settings.SettingsNavRail
 import com.curio.app.features.settings.heroPageBackground
+import com.curio.app.features.settings.navigateToSettingsSection
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -175,6 +177,13 @@ fun RecycleBinScreen(navController: NavController) {
                         subtitle = "Recently deleted captures",
                         onBack = { navController.popBackStack() }
                     )
+                    // v3xx — the shared settings nav rail (drill-in page —
+                    // no chip highlighted).
+                    SettingsNavRail(
+                        active = null,
+                        onSelect = { navigateToSettingsSection(navController, it) },
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
                     CurioEmptyState(
                         glyph = CurioIcons.Restore,
                         headline = "Recycle bin is empty",
@@ -206,6 +215,14 @@ fun RecycleBinScreen(navController: NavController) {
                                 onBack = { navController.popBackStack() }
                             )
                         }
+                    }
+                    // v3xx — the shared settings nav rail (drill-in page —
+                    // no chip highlighted).
+                    item(key = "settings-nav", contentType = "settings-nav") {
+                        SettingsNavRail(
+                            active = null,
+                            onSelect = { navigateToSettingsSection(navController, it) }
+                        )
                     }
                     // ── Summary card ─────────────────────────────────
                     item("summary") {

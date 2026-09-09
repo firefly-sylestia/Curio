@@ -51,7 +51,9 @@ import com.curio.app.data.CurioCategory
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.LevelRewards
 import com.curio.app.features.settings.SettingsHeroHeader
+import com.curio.app.features.settings.SettingsNavRail
 import com.curio.app.features.settings.heroPageBackground
+import com.curio.app.features.settings.navigateToSettingsSection
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -186,6 +188,14 @@ val glassBackdrop = rememberLayerBackdrop()
                         onBack = { navController.popBackStack() }
                     )
                 }
+            }
+            // v3xx — the shared settings nav rail: switch sections without
+            // going back to the hub (the open page sits in the 2nd slot).
+            item(key = "settings-nav", contentType = "settings-nav") {
+                SettingsNavRail(
+                    active = "categories",
+                    onSelect = { navigateToSettingsSection(navController, it) }
+                )
             }
                                 // v9.x — locked-reorder notice: explains the level gate and
                 // shows how far away it is when the player hasn't unlocked it.

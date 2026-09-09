@@ -207,6 +207,19 @@ val glassBackdrop = rememberLayerBackdrop()
                     )
                 }
             }
+            // v3xx — the shared settings nav rail: switch sections without
+            // going back to the hub (the open page sits in the 2nd slot).
+            item(key = "settings-nav", contentType = "settings-nav") {
+                SettingsNavRail(
+                    active = when (page) {
+                        SettingsPage.APPEARANCE -> "appearance"
+                        SettingsPage.PREFERENCES -> "preferences"
+                        SettingsPage.RECORDING -> "recording"
+                        SettingsPage.DATA -> "backup"
+                    },
+                    onSelect = { navigateToSettingsSection(navController, it) }
+                )
+            }
                         item { CurioSectionLabel(page.title) }
             item {
                 SettingsPageContent(page, navController, highlightKey)

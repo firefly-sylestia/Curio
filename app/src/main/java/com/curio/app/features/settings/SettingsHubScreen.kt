@@ -779,6 +779,18 @@ fun settingsCardAccentInk(): Color {
     return curioRoseInk()
 }
 
+/** Jump to a settings rail destination, collapsing the stack above the hub:
+ *  switching sections REPLACES the current page, so the hub stays one
+ *  back-press away (never a growing stack of visited sections). "all" (the
+ *  null-route entry) targets the hub itself. */
+internal fun navigateToSettingsSection(navController: NavController, entry: SettingsNavEntry) {
+    val route = entry.route ?: CurioRoutes.SETTINGS
+    navController.navigate(route) {
+        popUpTo(CurioRoutes.SETTINGS) { inclusive = false }
+        launchSingleTop = true
+    }
+}
+
 /**
  * v72 — the option-card CHIP hue (the icon-chip fill + card-tint family),
  * matched to the hero the page wears (lane accent / sky-azure / brand
@@ -889,12 +901,8 @@ fun SettingsHubScreen(navController: NavController) {
                 // ── JSX nav rail — All Settings / Appearance / … ──
                 item(key = "nav", span = { GridItemSpan(maxLineSpan) }) {
                     SettingsNavRail(active = activeNav, onSelect = { entry ->
-                        if (entry.route != null) {
-                            activeNav = entry.id
-                            navController.navigate(entry.route) { launchSingleTop = true }
-                        } else {
-                            activeNav = "all"
-                        }
+                        activeNav = entry.id
+                        navigateToSettingsSection(navController, entry)
                     })
                 }
                 // ── Search — filters every section below as you type ──
@@ -1514,7 +1522,7 @@ private data class SettingsDesignGroup(
 )
 
 /** One nav-rail entry (JSX `sideNav` → horizontal chip rail on phones). */
-private data class SettingsNavEntry(
+internal data class SettingsNavEntry(
     val id: String,
     val label: String,
     val icon: String,
@@ -1963,22 +1971,41 @@ private fun SettingsGroupHeading(group: SettingsDesignGroup) {
     }
 }
 
-/** The JSX nav rail — horizontal chips on phones (the desktop sidebar's
- *  mobile twin). "All Settings" returns to the hub itself. */
+/**
+ * The JSX nav rail — horizontal chips on phones (the desktop sidebar's
+ * mobile twin). "All Settings" returns to the hub itself.
+ *
+ * [active] is the currently open rail page: it renders highlighted in the
+ * SECOND slot (right after "All Settings") so where you are sits next to
+ * the way back — every other section follows in its fixed order. Pass
+ * null on settings-family screens that aren't a rail destination (drill-in
+ * tool pages): nothing is highlighted and the order stays fixed. Shared by
+ * the hub AND every settings sub-page so the top bar is consistent and
+ * switching sections is one tap away.
+ */
 @Composable
-private fun SettingsNavRail(
-    active: String,
+internal fun SettingsNavRail(
+    active: String?,
     onSelect: (SettingsNavEntry) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val dark = isCurioDarkTheme()
+    // Rotate the active page into slot 2 (right after "All Settings"); the
+    // rest keeps the fixed rail order. No active page (or "all" — the hub)
+    // → the plain order.
+    val entries = remember(active) {
+        val first = settingsNavRail.firstOrNull()
+        val activeEntry = active?.let { id -> settingsNavRail.firstOrNull { it.id == id } }
+        if (first == null || activeEntry == null || activeEntry.id == first.id) settingsNavRail
+        else listOf(first, activeEntry) + settingsNavRail.filter { it.id != first.id && it.id != activeEntry.id }
+    }
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(7.dp),
         contentPadding = PaddingValues(vertical = 2.dp),
         modifier = modifier.fillMaxWidth()
     ) {
-        items(settingsNavRail, key = { it.id }) { entry ->
-            val selected = active == entry.id
+        items(entries, key = { it.id }) { entry ->
+            val selected = active != null && active == entry.id
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp),

@@ -68,6 +68,13 @@ fun WidgetEditorScreen(navController: NavController) {
             subtitle = if (ids.isEmpty()) "No Curio widgets placed yet" else "Tap a widget to edit it",
             onBack = { navController.popBackStack() }
         )
+        // v3xx — the shared settings nav rail (drill-in page — no chip
+        // highlighted).
+        SettingsNavRail(
+            active = null,
+            onSelect = { navigateToSettingsSection(navController, it) },
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
         Text(
             text = "Edits apply straight to the widget on your home screen. No launcher support is needed.",
             style = MaterialTheme.typography.bodySmall,

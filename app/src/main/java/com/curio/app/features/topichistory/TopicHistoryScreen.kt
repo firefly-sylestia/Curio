@@ -60,6 +60,8 @@ import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.formatSessionShort
 // settingsRoseAccent/settingsReadableInk live in the settings package
 // (SettingsHubScreen) — the same shared helpers the Onboarding/Cabinet heroes use.
+import com.curio.app.features.settings.SettingsNavRail
+import com.curio.app.features.settings.navigateToSettingsSection
 import com.curio.app.features.settings.settingsReadableInk
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -186,6 +188,14 @@ fun TopicHistoryScreen(navController: NavController) {
         //    tear seed and its OWN BOOKS-family glyphs, so it reads as part
         //    of the torn-banner family without copying Home's wildcard scatter.
         HistoryHeroHeader(onBack = { navController.popBackStack() })
+
+        // v3xx — the shared settings nav rail: switch sections without
+        // going back to the hub (the open page sits in the 2nd slot).
+        SettingsNavRail(
+            active = "history",
+            onSelect = { navigateToSettingsSection(navController, it) },
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
 
         if (sentimentsLoaded && entries.isEmpty() && pinnedTopics.isEmpty() &&
             favoritedTopics.isEmpty()

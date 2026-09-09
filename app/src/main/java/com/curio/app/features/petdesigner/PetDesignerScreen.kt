@@ -129,7 +129,9 @@ import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
 import androidx.compose.ui.draw.alpha
 import com.curio.app.features.settings.SettingsHeroHeader
+import com.curio.app.features.settings.SettingsNavRail
 import com.curio.app.features.settings.heroPageBackground
+import com.curio.app.features.settings.navigateToSettingsSection
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -669,6 +671,14 @@ fun PetDesignerScreen(navController: NavController) {
                         onBack = { navController.popBackStack() }
                     )
                 }
+            }
+            // v3xx — the shared settings nav rail: switch sections without
+            // going back to the hub (the open page sits in the 2nd slot).
+            item(key = "settings-nav", contentType = "settings-nav") {
+                SettingsNavRail(
+                    active = "pet",
+                    onSelect = { navigateToSettingsSection(navController, it) }
+                )
             }
             // ── Editor page: picker trigger / Editing header (v8.56) ──
             //    The editor is the center of the screen — one dialog is the

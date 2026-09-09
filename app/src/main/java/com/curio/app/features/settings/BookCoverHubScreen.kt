@@ -138,6 +138,14 @@ fun BookCoverHubScreen(navController: NavController) {
             ),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // v3xx — the shared settings nav rail: switch sections without
+            // going back to the hub (drill-in page — no chip highlighted).
+            item(key = "settings-nav", contentType = "settings-nav") {
+                SettingsNavRail(
+                    active = null,
+                    onSelect = { navigateToSettingsSection(navController, it) }
+                )
+            }
             // ── Opt-in / opt-out master switch (v320b) ─────────────────
             item(key = "master") {
                 val fetchOn = AppPreferences.bookFetchEnabledState
