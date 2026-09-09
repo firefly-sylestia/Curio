@@ -113,6 +113,14 @@ fun UserExperimentsScreen(navController: NavController) {
                     )
                 }
             }
+            // v3xx — the shared settings nav rail: switch sections without
+            // going back to the hub (the open page sits in the 2nd slot).
+            item(key = "settings-nav", contentType = "settings-nav") {
+                SettingsNavRail(
+                    active = "experiments",
+                    onSelect = { navigateToSettingsSection(navController, it) }
+                )
+            }
             // Liquid glass section
             item { CurioSectionLabel("Liquid glass") }
             item {
@@ -145,25 +153,26 @@ fun UserExperimentsScreen(navController: NavController) {
                 }
             }
 
-            // Appearance experiments
-            item { CurioSectionLabel("Appearance experiments") }
-            item {
-                CurioSettingsCard(shadowElevation = 0.dp) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    ExperimentSwitchRow("Subtle pill glow", "Gentler, top-only glow on pills in dark mode", AppPreferences.pillGlowSubtleState) {
-                        AppPreferences.setPillGlowSubtleEnabled(context, it)
-                    }
-                }
-                }
-            }
+            // v3xx — the "Subtle pill glow" experiment concluded: subtle is
+            // the always-on default (toggle removed).
 
-            // Category picker
-            item { CurioSectionLabel("Category picker") }
+            // v3xx — the app-wide HEADER STYLE: torn paper banner (default)
+            // or the content-height glass toolbar (the old Cabinet v2 look,
+            // more blurry + its own tint). Applies to every Settings/Cabinet
+            // hero plus Home and Profile (Spin keeps its own chrome).
+            item { CurioSectionLabel("Headers") }
             item {
                 CurioSettingsCard(shadowElevation = 0.dp) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    ExperimentSwitchRow("Classic category picker", "The new picker is the default. Turn this on to swap back to the old glass-pill picker view.", AppPreferences.classicPickerEnabledState) {
-                        AppPreferences.setClassicPickerEnabled(context, it)
+                    ExperimentSwitchRow(
+                        "Glass toolbar header",
+                        "Swap the torn paper banners for a content-height liquid-glass bar (more blur, own tint) across Settings, Cabinet, Home and Profile",
+                        AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS
+                    ) {
+                        AppPreferences.setHeaderStyle(
+                            context,
+                            if (it) AppPreferences.HeaderStyle.GLASS else AppPreferences.HeaderStyle.TORN
+                        )
                     }
                 }
                 }
@@ -250,9 +259,6 @@ fun UserExperimentsScreen(navController: NavController) {
                         AppPreferences.setVoiceToTextEnabled(context, it)
                     }
                     CurioSettingsDivider()
-                    ExperimentSwitchRow("Live explore notification", "Ongoing timer with pause and stop", AppPreferences.liveNotificationsEnabledState) {
-                        AppPreferences.setLiveNotificationsEnabled(context, it)
-                    }
                     CurioSettingsDivider()
                     // Pet outside app
                     ExperimentSwitchRow("Pet outside the app", "Let your pet float over other apps. Long-press to bring it home.", AppPreferences.petOutsideAppState) { wanted ->

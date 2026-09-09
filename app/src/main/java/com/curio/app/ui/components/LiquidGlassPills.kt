@@ -27,8 +27,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
-import com.curio.app.ui.components.liquidglass.CurioLegacyBlur
-import com.curio.app.ui.components.liquidglass.curioLegacyGlassCapsule
 import com.curio.app.ui.theme.isCurioDarkTheme
 import androidx.compose.ui.util.lerp
 import com.kyant.backdrop.backdrops.LayerBackdrop
@@ -273,22 +271,19 @@ fun Modifier.liquidGlassCapsule(
     compact: Boolean = false,
     // v292g — force FROST regardless of the Clear-glass toggle: chips
     // should always read as frosted glass even when glassClarity is ON.
-    forceFrost: Boolean = false
+    forceFrost: Boolean = false,
+    // v3xx — the GLASS TOOLBAR header style: a stronger blur multiplier
+    // (the app-wide "Glass toolbar header" option wants its bar noticeably
+    // more frosted than the small pills — 1.6× the standard 8dp frost).
+    blurMultiplier: Float = 1f
 ): Modifier {
     if (!isLiquidGlassRequested()) return this
     // v243 — pre-Android-12: no RenderEffect → serve the simulated glass
     // recipe so those users get the look instead of nothing.
-    // v264 — LEGACY GLASS BLUR (opt-in experiment): when the app-side blur
-    // engine has a snapshot, serve REAL frosted glass (the blurred page
-    // content) instead of the static veil. Only the bottom nav + Topic
-    // Reveal reach this branch on old devices (in-screen pills are gated to
-    // 12+ by [isInScreenGlassActive]), which is exactly the agreed scope.
+    // v3xx — the "Real blur (older devices)" experiment was REMOVED: old
+    // devices always serve the static faux-glass veil.
     if (android.os.Build.VERSION.SDK_INT < 31) {
-        return if (CurioLegacyBlur.isActive() && CurioLegacyBlur.snapshot != null) {
-            this.curioLegacyGlassCapsule(container)
-        } else {
-            this.fauxGlassCapsule(container)
-        }
+        return this.fauxGlassCapsule(container)
     }
     val effectiveBackdrop = backdrop
         ?: (if (useGlobalCapture) CurioGlassPills.backdrop else null)
@@ -380,7 +375,7 @@ fun Modifier.liquidGlassCapsule(
                         // the per-pixel cost.
                         blur(0.5f.dp.toPx() * blurScale)
                     } else {
-                        blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale)
+                        blur((if (clear) 1f.dp else 8f.dp).toPx() * blurScale * blurMultiplier)
                         // v246 — refraction blooms under the finger: the lens
                         // deepens with press progress, so the corners visibly
                         // bend the content while the pill is held.

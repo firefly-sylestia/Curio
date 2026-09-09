@@ -205,7 +205,6 @@ object CurioRoutes {
     const val EXPERIMENTS = "experiments"
     const val USER_EXPERIMENTS = "user_experiments"
     // v264 — the liquid-glass widget test bed (wallpaper + draggable glass shapes).
-    const val GLASS_WIDGET_LAB = "glass_widget_lab"
     const val GLASS_WIDGET_EDITOR = "glass_widget_editor"
     const val MANAGE_CATEGORIES = "manage-categories"
     const val TOPIC_HISTORY = "topic-history"
@@ -216,7 +215,6 @@ object CurioRoutes {
     const val SUPPORT = "support"
     // v112 — dedicated Updates sub-page (own UI, replaced the Support card).
     const val UPDATES = "updates"
-    const val PROMO = "promo"
     // v26 — recycle bin for soft-deleted captures (Settings entry).
     const val RECYCLE_BIN = "recycle-bin"
     const val DATABASE = "database"

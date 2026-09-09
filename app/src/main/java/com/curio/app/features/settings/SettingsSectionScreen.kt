@@ -207,6 +207,19 @@ val glassBackdrop = rememberLayerBackdrop()
                     )
                 }
             }
+            // v3xx — the shared settings nav rail: switch sections without
+            // going back to the hub (the open page sits in the 2nd slot).
+            item(key = "settings-nav", contentType = "settings-nav") {
+                SettingsNavRail(
+                    active = when (page) {
+                        SettingsPage.APPEARANCE -> "appearance"
+                        SettingsPage.PREFERENCES -> "preferences"
+                        SettingsPage.RECORDING -> "recording"
+                        SettingsPage.DATA -> "backup"
+                    },
+                    onSelect = { navigateToSettingsSection(navController, it) }
+                )
+            }
                         item { CurioSectionLabel(page.title) }
             item {
                 SettingsPageContent(page, navController, highlightKey)
@@ -410,7 +423,8 @@ private fun PreferencesSection(highlightKey: String? = null) {
     // flags the "Remove overlay permission" trip so the return only refreshes
     // the grant state instead of re-enabling the bubble.
     var overlayRevokeOpened by remember { mutableStateOf(false) }
-    var liveNotificationsEnabled by remember { mutableStateOf(AppPreferences.liveNotificationsEnabledState) }
+    // v3xx — the "Live explore notification" experiment concluded: always
+    // on, no toggle (the local state + row were removed).
     var exploreSessionsEnabled by remember { mutableStateOf(AppPreferences.exploreSessionsEnabledState) }
     // v27 — the daily shuffle reminder + its hour chips moved in from the
     // removed Notifications section.
@@ -430,7 +444,6 @@ private fun PreferencesSection(highlightKey: String? = null) {
             if (event == Lifecycle.Event.ON_RESUME) {
                 overlayEnabled = AppPreferences.isOverlayBubbleEnabled(context)
                 overlayUsable = AppPreferences.overlayActuallyUsable(context)
-                liveNotificationsEnabled = AppPreferences.isLiveNotificationsEnabled(context)
                 exploreSessionsEnabled = AppPreferences.isExploreSessionsEnabled(context)
                 reminderHour = AppPreferences.getReminderHour(context)
                 showBubbleOptInDialogEnabled = AppPreferences.isShowBubbleOptInDialog(context)

@@ -40,7 +40,9 @@ fun Modifier.curioGlassEdge(shape: Shape): Modifier = composed {
         // so the pill's own curved rim trims it at the rounded ends — the
         // catch reads as sitting INSIDE the pill, spanning its full length.
         val path = shape.createOutline(size, layoutDirection, this).toPath()
-        val subtle = AppPreferences.pillGlowSubtleState
+        // v3xx — the "Subtle pill glow" experiment concluded with the subtle
+        // look as the default; the toggle was removed and it's always on.
+        val subtle = true
         val stops = if (subtle) arrayOf(
             0f to Color.White.copy(alpha = 0.05f),
             0.14f to Color.White.copy(alpha = 0.02f),
@@ -83,12 +85,12 @@ fun Modifier.curioInnerGlow(
         drawContent()
         val path = shape.createOutline(size, layoutDirection, this).toPath()
         val glow = lerp(accent, Color.White, 0.75f)
-        // v101 — the "Subtle pill glow" option: when ON (the default) the
-        // glow is HALVED and hugs the pill's top (radius tied to the SHORT
-        // side) so it reads as a top catch instead of filling the pill;
-        // the fuller pushed-in glow stays when the option is off.
-        val subtle = AppPreferences.pillGlowSubtleState
-        val effectiveStrength = if (subtle) strength * 0.5f else strength
+        // v101 — the "Subtle pill glow" look: the glow is HALVED and hugs
+        // the pill's top (radius tied to the SHORT side) so it reads as a
+        // top catch instead of filling the pill. v3xx — the experiment
+        // concluded: subtle is the always-on default, no toggle.
+        val subtle = true
+        val effectiveStrength = strength * 0.5f
         // The radial must stay INSIDE the pill's curved ends, not wash over
         // them: the glow's reach is capped at ~0.55 of the short side from
         // its top-left anchor, and the pill outline clips whatever would

@@ -95,7 +95,6 @@ import com.curio.app.data.CurioQuests
 import com.curio.app.data.LevelRewards
 import com.curio.app.data.CurioRepositoryHolder
 import com.curio.app.data.ExploreSessionStore
-import com.curio.app.data.PromoMode
 import com.curio.app.data.StreakTracker
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.navigation.CurioRoutes
@@ -104,6 +103,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
+import com.curio.app.ui.components.CurioGlassToolbarMorph
 import com.curio.app.ui.components.isInScreenGlassActive
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.kyant.backdrop.backdrops.layerBackdrop
@@ -175,7 +175,14 @@ private val ProfileHeroHeight = 372.dp
 /** Extra layout space reserved for the under-sheet below the torn banner. */
 private val ProfileHeroSheetExtent = 24.dp
 /** Total hero footprint — the torn banner plus its under-sheet extent. */
-private val ProfileHeroTotalHeight = ProfileHeroHeight + ProfileHeroSheetExtent
+/**
+ * v3xx — style-aware reserved height: the torn banner is a fixed
+ * 372dp + sheet; the GLASS toolbar style is content-height (~230dp with
+ * the stats row — the bar grows to fit its content).
+ */
+private val ProfileHeroTotalHeight: Dp
+    get() = if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) 230.dp
+    else ProfileHeroHeight + ProfileHeroSheetExtent
 /** Fixed tear seed — Profile tears in the SAME bold pattern as Home's quest
  *  hero (same seed + personality), so both banners read as one family. */
 private const val PROFILE_TEAR_SEED = 0xC0FEE
@@ -183,6 +190,9 @@ private const val PROFILE_TEAR_SEED = 0xC0FEE
  *  frosted floating pills (Home's StickyBarThreshold, so the pop + color
  *  morph feel identical). */
 private val ProfilePillThreshold = 90.dp
+// v3xx — the collapsed height of the morphing glass header (below the
+// status bar): the slim identity bar holding the back pill + avatar + name.
+private val ProfileCompactHeaderHeight = 54.dp
 
 /** One mirrored hero watermark pair — the left glyph mirrors the right
  *  (the Home quest hero's construction, adapted for Profile). */
@@ -322,17 +332,13 @@ fun ProfileScreen(navController: NavController) {
     val streakDays = StreakTracker.getStreak(context)
     // v7.40 — the level tracker is now the shared XP system (quests/levels):
     // level + progress come from earned XP instead of raw saved counts.
-    // v7.107 — promo/demo-content mode swaps in promotional sample values
-    // (real rank math via the shared quests API, not junk numbers); turning
-    // it off reverts instantly through the reactive state.
-    val promoOn = AppPreferences.promoModeState
-    val displayStreak = if (promoOn) PromoMode.DEMO_STREAK else streakDays
-    val displaySaved = if (promoOn) PromoMode.DEMO_SAVED else totalSaved
-    val displayXp = if (promoOn) PromoMode.DEMO_XP else CurioQuests.xpState
+    val displayStreak = streakDays
+    val displaySaved = totalSaved
+    val displayXp = CurioQuests.xpState
     val level = CurioQuests.levelForXp(displayXp)
     val progress = CurioQuests.xpProgress(displayXp)
     // v53 — the hero tagline (custom pref or the streak-based automatic
-    // line). Reads the DISPLAY streak so promo mode shows its demo line.
+    // line).
     val heroTagline = remember(taglineRevision, displayStreak) {
         AppPreferences.getCustomStreakTagline(context).ifBlank { taglineForStreak(displayStreak) }
     }
@@ -530,7 +536,7 @@ fun ProfileScreen(navController: NavController) {
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
-                .padding(top = ProfileHeroTotalHeight + 8.dp, bottom = 16.dp)
+                .padding(top = (if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) ProfileCompactHeaderHeight else ProfileHeroTotalHeight) + 8.dp, bottom = 16.dp)
         )
 
         // ── Pinned Back + Settings pills — Home's scroll-reactive sticky
@@ -548,6 +554,134 @@ fun ProfileScreen(navController: NavController) {
                 else (listState.firstVisibleItemScrollOffset / stickyThresholdPx).coerceIn(0f, 1f)
             }
         }
+        // v3xx — GLASS header style: the pinned MORPHING toolbar replaces
+        // the floating Back + Settings pills (it carries its own back +
+        // settings pills and collapses from the full hero — name + tagline
+        // + avatar + the Level · Saved · Lanes row — to the compact
+        // identity bar holding the back pill + avatar + name on scroll).
+        if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
+            // The avatar pill — photo (or the name initial on the hero
+            // fill) — rides the full bar beside the title and the compact
+            // row beside the name.
+            val glassAvatar: @Composable (Color) -> Unit = { aInk ->
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .shadow(2.dp, CircleShape)
+                        .clip(CircleShape)
+                        .background(heroFill),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (!avatarPath.isNullOrBlank()) {
+                        ProfileAvatarImage(avatarPath, Modifier.fillMaxSize())
+                    } else {
+                        Text(
+                            displayName.firstOrNull()?.uppercase().orEmpty(),
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                            color = aInk
+                        )
+                    }
+                }
+            }
+            // The Settings pill — the same frosted glass capsule as the
+            // pinned search pill it replaces (opens Settings' hub).
+            val glassSettingsPill: @Composable (Color) -> Unit = { sInk ->
+                val pillBg = if (isCurioDarkTheme()) Color(0xFF1B1B1D) else Color.White
+                Surface(
+                    onClick = { navController.navigate(CurioRoutes.SETTINGS) { launchSingleTop = true } },
+                    shape = CircleShape,
+                    color = pillBg,
+                    contentColor = sInk,
+                    shadowElevation = 3.dp,
+                    modifier = Modifier
+                        .then(
+                            if (isInScreenGlassActive())
+                                Modifier.liquidGlassCapsule(
+                                    pillBg,
+                                    washAlpha = 0.45f,
+                                    backdrop = profileGlassBackdrop,
+                                    blurMultiplier = 1.6f
+                                )
+                            else Modifier
+                        )
+                        .size(44.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        CurioIcon(
+                            name = CurioIcons.Settings,
+                            contentDescription = "Settings",
+                            size = 19.dp,
+                            tint = sInk
+                        )
+                    }
+                }
+            }
+            CurioGlassToolbarMorph(
+                progress = stickyProgress,
+                compactHeight = ProfileCompactHeaderHeight,
+                title = displayName,
+                subtitle = heroTagline,
+                compactTitle = displayName,
+                onBack = {
+                    if (!isPopping) {
+                        isPopping = true
+                        navController.popBackStack()
+                        scope.launch { kotlinx.coroutines.delay(300); isPopping = false }
+                    }
+                },
+                titleTrailing = glassAvatar,
+                trailing = glassSettingsPill,
+                compactAvatar = { glassAvatar(heroInk) },
+                streakCount = displayStreak,
+                onStreakClick = { navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true } },
+                onEditClick = {
+                    nameInput = displayName
+                    // v97 — the tagline field rides the same Edit profile
+                    // dialog now (no separate tagline dialog).
+                    taglineInput = AppPreferences.getCustomStreakTagline(context)
+                    showNameDialog = true
+                },
+                content = { toolbarInk ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        ProfileHeroStat(
+                            glyph = CurioIcons.WorkspacePremium,
+                            value = "$level",
+                            label = "Level",
+                            ink = toolbarInk,
+                            modifier = Modifier.weight(1f)
+                        )
+                        VerticalDivider(
+                            modifier = Modifier.height(30.dp),
+                            color = toolbarInk.copy(alpha = 0.22f)
+                        )
+                        ProfileHeroStat(
+                            glyph = CurioIcons.Inventory2,
+                            value = "$displaySaved",
+                            label = "Saved",
+                            ink = toolbarInk,
+                            modifier = Modifier.weight(1f)
+                        )
+                        VerticalDivider(
+                            modifier = Modifier.height(30.dp),
+                            color = toolbarInk.copy(alpha = 0.22f)
+                        )
+                        ProfileHeroStat(
+                            glyph = CurioIcons.Palette,
+                            value = "${if (categoryCounts.isEmpty()) CurioCategories.visible.size else categoryCounts.size}",
+                            label = "Lanes",
+                            ink = toolbarInk,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                },
+                glassBackdrop = profileGlassBackdrop,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
+        } else {
         val frostShift = FastOutSlowInEasing.transform(stickyProgress)
         val pillScale = androidx.compose.ui.util.lerp(0.97f, 1f, frostShift)
         // Resting state = SOLID hero-card-color pills — the banner's own
@@ -656,6 +790,7 @@ fun ProfileScreen(navController: NavController) {
                     ) else Modifier
             )
         }
+        } // v3xx — end of the torn-style pinned pills
     }
 }
 
@@ -944,6 +1079,14 @@ private fun ProfileHero(
     // already resolves per-theme and per spin-lane) instead of forcing the
     // rose, so a lane-colored hero never wears mismatched rose icons.
     val symbolTint = ink
+    // v3xx — GLASS TOOLBAR style: the app-wide "Glass toolbar header"
+    // option swaps Profile's torn banner for the PINNED MORPHING glass bar
+    // (rendered as a sibling overlay in [ProfileScreen]); this hero item
+    // only clears the collapsed identity bar so the list flows beneath it.
+    if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
+        Spacer(Modifier.height(ProfileCompactHeaderHeight))
+        return
+    }
     Box(
         modifier = Modifier
             .fillMaxWidth()

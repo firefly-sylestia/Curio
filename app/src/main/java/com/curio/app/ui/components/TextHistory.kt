@@ -13,14 +13,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -32,14 +36,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.width
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import kotlinx.coroutines.delay
@@ -129,8 +137,19 @@ object TextHistoryStore {
         val t = text.trim()
         if (t.isEmpty() || t.length > 20000) return
         val cur = snapshot(ctx)
+        // Exact repeat of the field's LATEST snapshot — nothing changed, skip.
         val lastSameField = cur.firstOrNull { it.field == field }
         if (lastSameField != null && lastSameField.text.trim() == t) return
+        // v3xx — dedupe against ANY older entry: when the same text comes
+        // back (restore, retype, paste), don't stack a duplicate — MOVE the
+        // existing entry to the top with a fresh timestamp so it reads as
+        // the newest version instead of a repeat. Pin status rides along.
+        val existing = cur.firstOrNull { it.field == field && it.text.trim() == t }
+        if (existing != null) {
+            val moved = existing.copy(ts = System.currentTimeMillis())
+            save(ctx, listOf(moved) + cur.filterNot { it.id == existing.id })
+            return
+        }
         val fresh = TextHistoryEntry(id = System.currentTimeMillis(), field = field, text = t, ts = System.currentTimeMillis())
         save(ctx, listOf(fresh) + cur)
     }
@@ -249,14 +268,18 @@ fun TextHistoryPill(onClick: () -> Unit, modifier: Modifier = Modifier) {
 }
 
 /**
- * History browser — one centered overlay shared by every host (the share
- * bottom sheet, the full-screen editor dialog and the Enlarge writing sheet).
- * Lists every captured snapshot with a preview, field label, date/time and
- * Pin / Copy / Restore / Delete; tapping a row opens the full text.
+ * History browser — one shared bottom sheet for every host (the share
+ * bottom sheet, the full-screen editor dialog and the Enlarge writing
+ * sheet). v3xx — a proper ModalBottomSheet with a drag handle instead of
+ * the old centered dialog; a List / Tree toggle switches between the plain
+ * feed and a paragraph-branch tree. Lists every captured snapshot with a
+ * preview, field label, date/time and Pin / Copy / Restore / Delete;
+ * tapping a row opens the full text.
  *
  * [activeField] is the field currently being edited — Restore writes back
  * into it via [onRestore] (entries of that field are highlighted).
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextHistoryBrowser(
     ctx: Context,
@@ -268,7 +291,9 @@ fun TextHistoryBrowser(
     var previewId by remember { mutableStateOf<Long?>(null) }
     var toast by remember { mutableStateOf<String?>(null) }
     var armedClear by remember { mutableStateOf(false) }
+    var treeMode by remember { mutableStateOf(false) }
     val clipboard = LocalClipboardManager.current
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     LaunchedEffect(toast) {
         if (toast != null) {
@@ -284,137 +309,164 @@ fun TextHistoryBrowser(
 
     val fullEntry = entries.firstOrNull { it.id == previewId }
 
-    Dialog(
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
-    ) {            Surface(
-                shape = RoundedCornerShape(22.dp),
-                color = MaterialTheme.colorScheme.surface,
-                shadowElevation = 10.dp,
-                modifier = Modifier
-                    .padding(horizontal = 24.dp, vertical = 32.dp)
-                    .fillMaxWidth()
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    ) {
+        Column(Modifier.fillMaxWidth().fillMaxHeight(0.88f)) {
+            // ── Header ──────────────────────────────
+            Row(
+                Modifier.fillMaxWidth().padding(start = 20.dp, end = 12.dp, top = 6.dp, bottom = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(Modifier.fillMaxWidth()) {
-                // ── Header ──────────────────────────────
-                Row(
-                    Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(Modifier.weight(1f)) {
-                        Text(
-                            "Text history",
-                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            if (entries.isEmpty()) "No snapshots yet — edits you type or paste are kept here"
-                            else "${entries.size} snapshot${if (entries.size == 1) "" else "s"} · restoring into “$activeField”",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    if (entries.isNotEmpty()) {
-                        Text(
-                            if (armedClear) "Tap again to clear" else "Clear",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = if (armedClear) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(50))
-                                .clickable {
-                                    if (armedClear) {
-                                        TextHistoryStore.clearAll(ctx)
-                                        reload()
-                                    } else {
-                                        armedClear = true
-                                    }
-                                }
-                                .padding(horizontal = 10.dp, vertical = 6.dp)
-                        )
-                    }
-                    Spacer(Modifier.size(4.dp))
-                    CurioIcon(
-                        name = CurioIcons.Close,
-                        contentDescription = "Close history",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        size = 20.dp,
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .clickable(onClick = onDismiss)
-                            .padding(6.dp)
-                    )
-                }
-                if (toast != null) {
+                Column(Modifier.weight(1f)) {
                     Text(
-                        toast!!,
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(horizontal = 18.dp)
+                        "Text history",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        if (entries.isEmpty()) "No snapshots yet — edits you type or paste are kept here"
+                        else "${entries.size} snapshot${if (entries.size == 1) "" else "s"} · restoring into “$activeField”",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                // ── Entry list ─────────────────────────
-                if (entries.isEmpty()) {
-                    Box(
-                        Modifier.fillMaxWidth().height(300.dp).padding(24.dp),
-                        contentAlignment = Alignment.Center
+                if (entries.size > 1) {
+                    // List / Tree segmented toggle.
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                            .padding(3.dp)
                     ) {
-                        Text(
-                            "Snapshots stay on this device — “Reset layout” or a new card never clears them.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center
+                        HistoryModeChip("List", !treeMode, { treeMode = false })
+                        HistoryModeChip("Tree", treeMode, { treeMode = true })
+                    }
+                    Spacer(Modifier.size(6.dp))
+                }
+                if (entries.isNotEmpty()) {
+                    Text(
+                        if (armedClear) "Tap again" else "Clear",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = if (armedClear) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .clickable {
+                                if (armedClear) {
+                                    TextHistoryStore.clearAll(ctx)
+                                    reload()
+                                } else {
+                                    armedClear = true
+                                }
+                            }
+                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                    )
+                }
+                Spacer(Modifier.size(2.dp))
+                CurioIcon(
+                    name = CurioIcons.Close,
+                    contentDescription = "Close history",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    size = 20.dp,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .clickable(onClick = onDismiss)
+                        .padding(6.dp)
+                )
+            }
+            if (toast != null) {
+                Text(
+                    toast!!,
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
+            }
+            // ── Entry list ─────────────────────────
+            if (entries.isEmpty()) {
+                Box(
+                    Modifier.fillMaxWidth().weight(1f).padding(24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        "Snapshots stay on this device — “Reset layout” or a new card never clears them.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            } else if (treeMode) {
+                val branches = buildHistoryBranches(entries)
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    contentPadding = PaddingValues(start = 12.dp, top = 4.dp, end = 12.dp, bottom = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(branches, key = { it.key }) { branch ->
+                        HistoryBranchCard(
+                            branch = branch,
+                            activeField = activeField,
+                            onPreview = { previewId = it },
+                            onPin = { e -> TextHistoryStore.setPinned(ctx, e.id, !e.pinned); reload() },
+                            onCopy = { e -> clipboard.setText(AnnotatedString(e.text)); toast = "Copied" },
+                            onRestore = { e -> onRestore(e.text); toast = "Restored into $activeField" },
+                            onDelete = { e -> TextHistoryStore.delete(ctx, e.id); reload() }
                         )
                     }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth().height(360.dp),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        items(entries, key = { it.id }) { e ->
-                            val isActive = e.field == activeField
-                            Surface(
-                                shape = RoundedCornerShape(14.dp),
-                                color = if (isActive) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
-                                else MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.7f),
-                                modifier = Modifier.fillMaxWidth()
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    contentPadding = PaddingValues(start = 12.dp, top = 4.dp, end = 12.dp, bottom = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    items(entries, key = { it.id }) { e ->
+                        val isActive = e.field == activeField
+                        Surface(
+                            shape = RoundedCornerShape(14.dp),
+                            color = if (isActive) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+                            else MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.7f),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                Modifier.padding(start = 12.dp, top = 8.dp, bottom = 8.dp, end = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Row(
-                                    Modifier.padding(start = 12.dp, top = 8.dp, bottom = 8.dp, end = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                Column(
+                                    Modifier.weight(1f).clip(RoundedCornerShape(10.dp)).clickable { previewId = e.id }.padding(vertical = 2.dp),
+                                    verticalArrangement = Arrangement.spacedBy(2.dp)
                                 ) {
-                                    Column(
-                                        Modifier.weight(1f).clip(RoundedCornerShape(10.dp)).clickable { previewId = e.id }.padding(vertical = 2.dp),
-                                        verticalArrangement = Arrangement.spacedBy(2.dp)
-                                    ) {
-                                        Text(
-                                            e.text,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurface,
-                                            maxLines = 2,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                        Text(
-                                            "${e.field} · ${formatHistoryTime(e.ts)}",
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                    HistoryRowAction(e.pinned, e.pinned, CurioIcons.PushPin, "Unpin", "Pin to top") {
-                                        TextHistoryStore.setPinned(ctx, e.id, !e.pinned); reload()
-                                    }
-                                    HistoryRowAction(false, true, CurioIcons.ContentCopy, "Copy text", "Copy text") {
-                                        clipboard.setText(AnnotatedString(e.text))
-                                        toast = "Copied"
-                                    }
-                                    HistoryRowAction(isActive, isActive, CurioIcons.Restore, "Restore into $activeField", "Restore into $activeField (from ${e.field})") {
-                                        onRestore(e.text)
-                                        toast = "Restored into $activeField"
-                                    }
-                                    HistoryRowAction(false, true, CurioIcons.Delete, "Delete snapshot", "Delete snapshot") {
-                                        TextHistoryStore.delete(ctx, e.id)
-                                        reload()
-                                    }
+                                    Text(
+                                        e.text,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        "${e.field} · ${formatHistoryTime(e.ts)}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                HistoryRowAction(e.pinned, true, CurioIcons.PushPin, "Unpin", "Pin to top") {
+                                    TextHistoryStore.setPinned(ctx, e.id, !e.pinned); reload()
+                                }
+                                HistoryRowAction(false, true, CurioIcons.ContentCopy, "Copy text", "Copy text") {
+                                    clipboard.setText(AnnotatedString(e.text))
+                                    toast = "Copied"
+                                }
+                                HistoryRowAction(isActive, isActive, CurioIcons.Restore, "Restore into $activeField", "Restore into $activeField (from ${e.field})") {
+                                    onRestore(e.text)
+                                    toast = "Restored into $activeField"
+                                }
+                                HistoryRowAction(false, true, CurioIcons.Delete, "Delete snapshot", "Delete snapshot") {
+                                    TextHistoryStore.delete(ctx, e.id)
+                                    reload()
                                 }
                             }
                         }
@@ -492,7 +544,9 @@ fun TextHistoryBrowser(
 }
 
 /** One tiny round action button in a history row (icon-only, tinted when
- *  [enabled]; [active] highlights it in the primary colour). */
+ *  [enabled]; [active] highlights it in the primary colour). v3xx — pin is
+ *  always ENABLED so an unpinned entry can actually be pinned (the old
+ *  `enabled = e.pinned` made the button dead until it was already pinned). */
 @Composable
 private fun HistoryRowAction(
     active: Boolean,
@@ -514,4 +568,212 @@ private fun HistoryRowAction(
             .clickable(enabled = enabled, onClick = onClick)
             .padding(7.dp)
     )
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// v3xx — TREE VIEW (paragraph branches)
+// ═══════════════════════════════════════════════════════════════════════
+// Snapshots that SHARE paragraphs are grouped into BRANCHES: the shared
+// opening paragraphs form the trunk (rendered once), and each version in
+// the branch shows only the CHANGED paragraphs — removed lines struck
+// through, added lines highlighted — like small branches off a tree.
+
+private data class HistoryVersion(
+    val entry: TextHistoryEntry,
+    val removed: List<String>,
+    val added: List<String>
+)
+
+private data class HistoryBranch(
+    val key: Long,
+    val trunk: List<String>,
+    val versions: List<HistoryVersion>
+)
+
+private fun splitParagraphs(text: String): List<String> =
+    text.split('\n').map { it.trim() }.filter { it.isNotEmpty() }
+
+private fun commonPrefixLen(a: List<String>, b: List<String>): Int {
+    var i = 0
+    while (i < a.size && i < b.size && a[i] == b[i]) i++
+    return i
+}
+
+/** Groups [entries] (newest-first display order) into chronological
+ *  (oldest → newest) branches keyed on shared opening paragraphs. */
+private fun buildHistoryBranches(entries: List<TextHistoryEntry>): List<HistoryBranch> {
+    val chrono = entries.sortedBy { it.ts }
+    if (chrono.isEmpty()) return emptyList()
+    val out = mutableListOf<HistoryBranch>()
+    var prev: TextHistoryEntry? = null
+    var trunk: List<String> = emptyList()
+    var versions = mutableListOf<HistoryVersion>()
+    for (e in chrono) {
+        val paras = splitParagraphs(e.text)
+        val prevParas = prev?.let { splitParagraphs(it.text) }
+        val shared = if (prevParas != null) commonPrefixLen(prevParas, paras) else 0
+        if (prevParas != null && shared >= 1) {
+            // Same branch — the version node shows ONLY the changes vs the
+            // previous snapshot (removed lines struck, added lines fresh).
+            if (trunk.isEmpty()) trunk = paras.take(shared)
+            versions.add(HistoryVersion(e, prevParas.drop(shared), paras.drop(shared)))
+        } else {
+            if (versions.isNotEmpty()) {
+                out.add(HistoryBranch(versions.first().entry.id, trunk, versions))
+            }
+            // New branch: the first paragraph is the trunk, the rest (or the
+            // whole text when it is a single paragraph) is the first node.
+            trunk = paras.take(1)
+            versions = mutableListOf(
+                HistoryVersion(e, emptyList(), paras.drop(1).ifEmpty { paras })
+            )
+        }
+        prev = e
+    }
+    if (versions.isNotEmpty()) out.add(HistoryBranch(versions.first().entry.id, trunk, versions))
+    return out
+}
+
+/** One pill of the List / Tree segmented toggle in the browser header. */
+@Composable
+private fun HistoryModeChip(label: String, selected: Boolean, onClick: () -> Unit) {
+    Text(
+        text = label,
+        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+        color = if (selected) MaterialTheme.colorScheme.onPrimary
+        else MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(if (selected) MaterialTheme.colorScheme.primary else Color.Transparent)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+    )
+}
+
+/** One branch card in Tree mode: the shared trunk once, then each version
+ *  as a small tree node with a leading connector and its changed lines. */
+@Composable
+private fun HistoryBranchCard(
+    branch: HistoryBranch,
+    activeField: String,
+    onPreview: (Long) -> Unit,
+    onPin: (TextHistoryEntry) -> Unit,
+    onCopy: (TextHistoryEntry) -> Unit,
+    onRestore: (TextHistoryEntry) -> Unit,
+    onDelete: (TextHistoryEntry) -> Unit
+) {
+    val first = branch.versions.first().entry
+    val last = branch.versions.last().entry
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.7f),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
+            // Branch header — versions + field + time range.
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "${branch.versions.size} version${if (branch.versions.size == 1) "" else "s"}",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(Modifier.size(8.dp))
+                Text(
+                    "${first.field} · ${formatHistoryTime(last.ts)}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            // The trunk — the shared opening paragraphs, once.
+            if (branch.versions.size > 1) {
+                Spacer(Modifier.height(4.dp))
+                branch.trunk.forEach { para ->
+                    Text(
+                        para,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+            // Each version node — the changes, tree-style.
+            branch.versions.forEachIndexed { index, v ->
+                val isActive = v.entry.field == activeField
+                Row(
+                    Modifier.padding(top = 6.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    // The connector + node dot.
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.width(16.dp)
+                    ) {
+                        Box(
+                            Modifier
+                                .width(2.dp)
+                                .height(if (index == branch.versions.lastIndex) 10.dp else 22.dp)
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
+                        )
+                        Box(
+                            Modifier
+                                .size(6.dp)
+                                .clip(CircleShape)
+                                .background(if (isActive) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+                        )
+                    }
+                    Column(Modifier.weight(1f).padding(start = 6.dp)) {
+                        // Changed lines: removed struck-through, added fresh.
+                        v.removed.forEach { para ->
+                            Text(
+                                para,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    textDecoration = TextDecoration.LineThrough,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                ),
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        v.added.forEach { para ->
+                            Text(
+                                para,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = if (isActive) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.onSurface
+                                ),
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(top = 2.dp)
+                        ) {
+                            Text(
+                                formatHistoryTime(v.entry.ts),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .clickable { onPreview(v.entry.id) }
+                                    .padding(horizontal = 4.dp, vertical = 2.dp)
+                            )
+                            Spacer(Modifier.weight(1f))
+                            HistoryRowAction(v.entry.pinned, true, CurioIcons.PushPin, "Unpin", "Pin to top") { onPin(v.entry) }
+                            HistoryRowAction(false, true, CurioIcons.ContentCopy, "Copy text", "Copy text") { onCopy(v.entry) }
+                            HistoryRowAction(isActive, isActive, CurioIcons.Restore, "Restore into $activeField", "Restore into $activeField (from ${v.entry.field})") { onRestore(v.entry) }
+                            HistoryRowAction(false, true, CurioIcons.Delete, "Delete snapshot", "Delete snapshot") { onDelete(v.entry) }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

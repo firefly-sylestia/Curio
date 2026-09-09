@@ -68,6 +68,11 @@ object AppPreferences {
     private const val KEY_ALBUM_FETCH_ENABLED = "album_fetch_enabled"    // bool — opt-out, default false
     private const val KEY_SERIES_FETCH_ENABLED = "series_fetch_enabled"  // bool — opt-out, default false
     private const val KEY_SERIES_FAVORITES = "series_favorites"
+    // v3xx — when a book / album / series was LIKED ("kind|name" → epoch
+    // ms). Feeds the Cabinet Everything "Recent" rail with recently liked
+    // media next to recent captures; no reorder info is derivable from the
+    // favorite SETS (unordered), so the timestamps live in their own map.
+    private const val KEY_LIKED_AT = "liked_at"
     private const val KEY_THEME_MODE = "theme_mode"       // "light", "dark", "system" (v81)
     private const val KEY_CUSTOM_TAGLINE = "custom_streak_tagline"
     private const val KEY_LAST_NOTIFIED_UPDATE = "last_notified_update_version"
@@ -89,7 +94,6 @@ object AppPreferences {
     // near-black surfaces, so dark mode can draw a soft LIGHT glow shadow
     // (default OFF). The v28 hairline outline option was REMOVED.
     private const val KEY_DARK_GLOW = "dark_glow"
-    private const val KEY_PROMO_MODE = "promo_mode"   // hidden promo/demo-content mode
     // v7.7 — experimental peek-card redesign, four independent toggles so
     // each upgrade can be A/B'd on its own: top-lit gradient fill, tinted
     // hairline, soft shadows, roomier two-line near titles. Each OFF by
@@ -123,7 +127,6 @@ object AppPreferences {
     private const val KEY_SMART_DENSITY_MODE = "smart_density_mode"
     private const val KEY_LEGACY_SMART_DENSITY_LAYOUT = "smart_density_layout"
     private const val KEY_EXPLORE_SESSIONS_ENABLED = "explore_sessions_enabled"
-    private const val KEY_LIVE_NOTIFICATIONS_ENABLED = "live_notifications_enabled"
     private const val KEY_OVERLAY_BUBBLE_ENABLED = "overlay_bubble_enabled"
     // v23 — whether the "Show the explore bubble" opt-in row appears inside
     // the Explore now dialog (default OFF; the Notifications toggle
@@ -187,21 +190,21 @@ object AppPreferences {
     // New category picker ("Category Mix Studio"):
     // - KEY_NAMED_MIXES — the named mixes the user creates/saves (JSON
     //   array of NamedMix). Seeded from the old quick presets once.
-    // - KEY_CLASSIC_PICKER — ON restores the OLD glass-pill picker; the
-    //   new picker is the default (OFF).
+    // - (KEY_CLASSIC_PICKER removed — the old glass-pill picker experiment
+    //   was fully removed; the new picker is the only picker.)
     // - KEY_PICKER_MIXES_SEEDED — the starter mixes were written once, so
     //   deleting every mix doesn't resurrect them.
     private const val KEY_NAMED_MIXES = "named_mixes"               // JSON array of NamedMix
+    private const val KEY_CABINET_COLLECTIONS = "cabinet_collections" // JSON array of CurioCollection
     private const val KEY_LAST_MIX_NAME = "last_mix_name"          // String? — the applied deck's mix name
-    private const val KEY_CLASSIC_PICKER = "classic_picker"         // bool — old glass-pill picker
     private const val KEY_PICKER_MIXES_SEEDED = "picker_mixes_seeded" // bool — starter mixes written once
     // v3xx — picker page default + curated suggestions (add/remove):
-    // - KEY_PICKER_DEFAULT_PAGE — 0 = classic picker opens first (default),
-    //   1 = new picker opens first.
+    // - KEY_PICKER_DEFAULT_PAGE — which page of the new picker opens first
+    //   (0 = browse, 1 = mixes).
     // - KEY_PICKER_SUGGESTIONS — a JSON array of CategoryId names the user
     //   curated as the "fun to explore" list below the mixes. Empty/missing
     //   falls back to a curated default list.
-    private const val KEY_PICKER_DEFAULT_PAGE = "picker_default_page"   // int — 0 classic, 1 new
+    private const val KEY_PICKER_DEFAULT_PAGE = "picker_default_page"   // int — 0 browse, 1 mixes
     private const val KEY_PICKER_SUGGESTIONS = "picker_suggestions"     // JSON array of CategoryId
     // v3xx13 — per-page scroll persistence for the sheet's classic/new pager;
     // v3xx14 — page 0 is now per-TAB: the Curio/Knowledge/Mix mode survives
@@ -331,6 +334,8 @@ object AppPreferences {
         val added = !cur.remove(bookName)
         if (added) cur.add(bookName)
         persistBookFavorites(context, cur)
+        // v3xx — liked timestamp for the Cabinet Everything "Recent" rail.
+        recordLikedAt(context, "book|$bookName", added)
         return added
     }
 
@@ -338,6 +343,33 @@ object AppPreferences {
         val arr = org.json.JSONArray(cur.toList())
         prefs(context).edit().putString(KEY_BOOK_FAVORITES, arr.toString()).apply()
         bookFavoritesState = cur
+    }
+
+    // ── Liked timestamps (v3xx — Cabinet Everything "Recent" rail) ──────
+    // "kind|name" → epoch ms when the user last liked that book / album /
+    // series. Unliking removes the stamp. Reactive so the Cabinet rail
+    // re-sorts the moment a heart is tapped anywhere.
+    fun getLikedAt(context: Context): Map<String, Long> {
+        val raw = prefs(context).getString(KEY_LIKED_AT, null) ?: return emptyMap()
+        return runCatching {
+            val obj = org.json.JSONObject(raw)
+            val out = LinkedHashMap<String, Long>()
+            val keys = obj.keys()
+            while (keys.hasNext()) {
+                val k = keys.next()
+                out[k] = obj.optLong(k, 0L)
+            }
+            out.filterValues { it > 0L }
+        }.getOrDefault(emptyMap())
+    }
+
+    fun recordLikedAt(context: Context, key: String, liked: Boolean) {
+        val cur = getLikedAt(context).toMutableMap()
+        if (liked) cur[key] = System.currentTimeMillis() else cur.remove(key)
+        val obj = org.json.JSONObject()
+        cur.forEach { (k, v) -> obj.put(k, v) }
+        prefs(context).edit().putString(KEY_LIKED_AT, obj.toString()).apply()
+        likedAtState = cur
     }
 
     // ── Series favorites (v350 — heart pick) ────────────────────────────
@@ -359,6 +391,8 @@ object AppPreferences {
         val arr = org.json.JSONArray(cur.toList())
         prefs(context).edit().putString(KEY_SERIES_FAVORITES, arr.toString()).apply()
         seriesFavoritesState = cur
+        // v3xx — liked timestamp for the Cabinet Everything "Recent" rail.
+        recordLikedAt(context, "series|$showName", added)
         return added
     }
 
@@ -733,6 +767,9 @@ object AppPreferences {
         if (!list.remove(trackTitle)) list.add(trackTitle)
         if (list.isEmpty()) cur.remove(albumName) else cur[albumName] = list
         persistAlbumFavoriteTracks(context, cur)
+        // v3xx — an album is "liked" while it has any favorite track; keep
+        // its liked timestamp in step for the Cabinet Everything "Recent" rail.
+        recordLikedAt(context, "album|$albumName", list.isNotEmpty())
         return cur[albumName] ?: emptyList()
     }
 
@@ -923,16 +960,9 @@ object AppPreferences {
         private set
 
     // Hidden promo/demo-content mode (v7.107) — OFF by default; v24 it is
-    // reached from the Experiments screen (Settings → Experiments → Promo
-    // mode, or the Version row's five-tap in Support & diagnostics) and its
-    // own page's toggle is the one control. While ON, the app shows promo sample
-    // content everywhere (Home hero stats + recents, Profile level,
-    // Quests level, Cabinet grid) so the user can screenshot the app for
-    // store promotion. Demo data is derived from real topics via
-    // [PromoMode] — no user data is touched. Default OFF.
-    var promoModeState by mutableStateOf(false)
-        private set
-
+    // v3xx — the PROMO MODE experiment was fully REMOVED (screen, route,
+    // flag and all demo-content branches in Home/Profile/Quests/Cabinet
+    // were deleted; the app always shows real data).
     // Peek-deck upgrades (v7.7) — the Spin deck's background peek cards:
     // top-lit gradient fill, category-tinted hairline border, roomier
     // two-line near-card titles. v223 — the experiments CONCLUDED with all
@@ -976,16 +1006,20 @@ object AppPreferences {
     // v97 — the Paper stat card experiment PASSED: on by default app-wide
     // (the Experiments toggles stay for comparison).
     var paperStatCardsState by mutableStateOf(true)
-    // v101 — the pill glow (dark mode) is the SUBTLE top-only version by
-    // default (gentler glass edge + a glow that hugs the pill's top); the
-    // toggle restores the fuller glow for comparison.
-    var pillGlowSubtleState by mutableStateOf(true)
+    // v101 — the pill glow (dark mode) is the SUBTLE top-only version
+    // (gentler glass edge + a glow that hugs the pill's top). v3xx — the
+    // experiment concluded: subtle is the always-on default, no toggle.
     // v3xx — CABINET v2 experiment (Settings → Experiments → Cabinet v2,
     // default OFF): while enabled, the saved-entries + liked-books surfaces
     // render as the new collections view with jacket-art covers and Home's
     // Save shortcut repoints into it. When the experiment settles the toggle
     // is removed and the winning view ships always-on.
     var cabinetV2EnabledState by mutableStateOf(false)
+    // v3xx — the four empty starter shelves (Currently Reading / Want to
+    // Read / Completed / Personal) were seeded once into the Cabinet's
+    // collection store; the virtual shelves (Favorites / Saved entries /
+    // Notes) are computed and never persisted.
+    var cabinetShelvesSeededState by mutableStateOf(false)
     var paperStatTearState by mutableStateOf(false)
         private set
     // v108 — torn heroes wear ONLY their bottom tear by default; the white
@@ -1008,6 +1042,13 @@ object AppPreferences {
     // off restores the exact pre-toggle accent. Watermark glyphs, ink and
     // everything else are untouched — only the banner fill color deepens.
     var headerDeepState by mutableStateOf(true)
+        private set
+    // v3xx — the app-wide header style: TORN (default, the classic torn
+    // paper banner) or GLASS (the Cabinet v2 glass-toolbar look — a
+    // content-height liquid-glass bar with its own tint). Selected in
+    // Settings → Experiments → "Glass toolbar header".
+    enum class HeaderStyle { TORN, GLASS }
+    var headerStyleState by mutableStateOf(HeaderStyle.TORN)
         private set
     // v10 — dual-accent blend gradient toggle (default OFF). When on, the
     // hero card wears a richer multi-accent blend instead of the plain
@@ -1056,6 +1097,10 @@ object AppPreferences {
     // book favorites. The episode-list sheet heart updates instantly.
     var seriesFavoritesState by mutableStateOf<Set<String>>(emptySet())
         internal set
+    // v3xx — liked timestamps ("kind|name" → epoch ms) for the Cabinet
+    // Everything "Recent" rail (recently liked books/albums/series).
+    var likedAtState by mutableStateOf<Map<String, Long>>(emptyMap())
+        internal set
     // v350 — watched episodes per show: show name → set of "S1E3" keys.
     // Reactive so the episode sheet's toggles + progress update in place.
     var seriesWatchedState by mutableStateOf<Map<String, Set<String>>>(emptyMap())
@@ -1102,13 +1147,6 @@ object AppPreferences {
     var profileAvatarPathState by mutableStateOf("")
         internal set
 
-    // v280 — CUSTOM BLUR ENGINE (experiment, default OFF): when ON, the
-    // glass widget provider and live wallpaper use Curio's own blur
-    // engine instead of the system / Samsung One UI blur path. Gives
-    // consistent blur quality on every launcher.
-    var customBlurEngineState by mutableStateOf(false)
-        private set
-
     // Liquid-glass navigation pills experiment (v227) — OPT-IN (default
     // OFF): the three floating nav-style capsules (bottom tab bar, Topic
     // Reveal category/favorite bar, Pet Designer studio bar) render a
@@ -1117,16 +1155,6 @@ object AppPreferences {
     // instead of the solid elevated fill. Needs Android 12+ (RenderEffect);
     // older devices silently keep the current look.
     var liquidGlassPillsState by mutableStateOf(false)
-        private set
-
-    // v264 — LEGACY GLASS BLUR (experiment, default OFF): below Android 12
-    // there is no RenderEffect, so the real glass recipe can't run. When
-    // this is on, an APP-SIDE blur engine takes over for the bottom nav +
-    // Topic Reveal pills: the page layer is snapshotted in software,
-    // downscaled and stack-blurred (~8 updates/s), and the blurred pixels
-    // are drawn as the pills' real backdrop under the usual sheen/rim —
-    // frosted glass that actually shows the content scrolling behind it.
-    var legacyGlassBlurState by mutableStateOf(false)
         private set
 
     // v248 — CLASSIC ACTIVE INDICATOR (experiment, default OFF): the nav
@@ -1233,12 +1261,8 @@ object AppPreferences {
     var recycleBinExpiryDaysState by mutableStateOf(DEFAULT_RECYCLE_BIN_EXPIRY_DAYS)
         private set
 
-    // Live explore notifications — the persistent chronometer notification
-    // with Pause/Stop controls shown while exploring (like Samsung/Google's
-    // live-updating ongoing notifications). Default ON; off means no ongoing
-    // notification at all — only the end-of-session reminder + bubble.
-    var liveNotificationsEnabledState by mutableStateOf(true)
-        private set
+    // v3xx — the "Live explore notification" experiment concluded: the
+    // persistent chronometer notification is ALWAYS on (no toggle).
 
     // Floating explore bubble — a Messenger-style timer bubble drawn over
     // OTHER apps (the browser) via SYSTEM_ALERT_WINDOW. Default ON; off
@@ -1367,13 +1391,19 @@ object AppPreferences {
         private set
 
     /**
+     * Reactive Cabinet collections (v3xx — Cabinet v2 folders): named
+     * collections/folders holding pinned topics + saved entries. Seeded
+     * from prefs in [initThemeMode]; updated by [addOrReplaceCollection]
+     * / [deleteCollection].
+     */
+    var collectionsState by mutableStateOf<List<CurioCollection>>(emptyList())
+        private set
+
+    /**
      * Classic-picker toggle for the new category picker: OFF = the new
      * default picker; ON = the old glass-pill picker. Seeded from prefs
      * in [initThemeMode].
      */
-    var classicPickerEnabledState by mutableStateOf(false)
-        private set
-
     /** Whether the starter named mixes were already written once. */
     var pickerMixesSeededState by mutableStateOf(false)
         private set
@@ -1497,7 +1527,6 @@ object AppPreferences {
         heroBlueState = isHeroBlueEnabled(context)
         heroFollowLaneState = isHeroFollowLaneEnabled(context)
         darkGlowState = isDarkGlowEnabled(context)
-        promoModeState = isPromoModeEnabled(context)
         peekGradientState = isPeekGradientEnabled(context)
         peekHairlineState = isPeekHairlineEnabled(context)
         peekShadowsState = isPeekShadowsEnabled(context)
@@ -1512,8 +1541,8 @@ object AppPreferences {
         paperHoleRingStyleState = getPaperHoleRingStyle(context)
         paperStatCardsState = isPaperStatCardsEnabled(context)
         paperStatTearState = isPaperStatTearEnabled(context)
-        pillGlowSubtleState = isPillGlowSubtleEnabled(context)
         heroTearSheetState = isHeroTearSheetEnabled(context)
+        headerStyleState = getHeaderStyle(context)
         navPillButtonsState = isNavPillButtonsEnabled(context)
         homeTintState = isHomeTintEnabled(context)
         homeHeroTintState = isHomeHeroTintEnabled(context)
@@ -1529,19 +1558,19 @@ object AppPreferences {
         bookFavoritesState = getBookFavorites(context)
         seriesFavoritesState = getSeriesFavorites(context)
         seriesWatchedState = getSeriesWatched(context)
+        likedAtState = getLikedAt(context)
         albumFavTracksState = getAlbumFavoriteTracks(context)
         albumFavStripVisibleState = isAlbumFavStripVisible(context)
         albumFavRowsState = isAlbumFavRows(context)
         profileAvatarPathState = getProfileAvatarPath(context)
-        customBlurEngineState = isCustomBlurEngineEnabled(context)
         liquidGlassPillsState = isLiquidGlassPillsEnabled(context)
         forceGlassEnabled = prefs(context).getBoolean(KEY_FORCE_GLASS, false)
-        legacyGlassBlurState = isLegacyGlassBlurEnabled(context)
         glassClassicIndicatorState = isGlassClassicIndicatorEnabled(context)
         navIndicatorColorState = getNavIndicatorColor(context)
         navIndicatorOpacityState = getNavIndicatorOpacity(context)
         glassClarityState = isGlassClarityEnabled(context)
         cabinetV2EnabledState = isCabinetV2Enabled(context)
+        cabinetShelvesSeededState = isCabinetShelvesSeeded(context)
         glassBlurScaleState = getGlassBlurScale(context)
         glassRefractionScaleState = getGlassRefractionScale(context)
         glassReflectionScaleState = getGlassReflectionScale(context)
@@ -1555,7 +1584,6 @@ object AppPreferences {
         searchEngineState = getSearchEngine(context)
         musicServiceState = getMusicService(context)
         recycleBinExpiryDaysState = getRecycleBinExpiryDays(context)
-        liveNotificationsEnabledState = isLiveNotificationsEnabled(context)
         overlayBubbleEnabledState = isOverlayBubbleEnabled(context)
         showBubbleOptInDialogState = isShowBubbleOptInDialog(context)
         overlayAskDeclinedState = isOverlayAskDeclined(context)
@@ -1575,7 +1603,7 @@ object AppPreferences {
         hiddenCategoriesState = getHiddenCategories(context)
         categoryOrderState = getCategoryOrder(context)
         savedMixesState = getSavedMixes(context)
-        classicPickerEnabledState = isClassicPickerEnabled(context)
+        collectionsState = getCabinetCollections(context)
         pickerMixesSeededState = isPickerMixesSeeded(context)
         lastMixNameState = getLastMixName(context)
         bookFetchEnabledState = isBookFetchEnabled(context)
@@ -1716,14 +1744,6 @@ object AppPreferences {
 
     // ── Promo/demo-content mode (v7.107 hidden) ───────────────────────
     /** Whether the hidden promo demo-content mode is on (default off). */
-    fun isPromoModeEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_PROMO_MODE, false)
-
-    fun setPromoModeEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_PROMO_MODE, enabled).apply()
-        promoModeState = enabled
-    }
-
     // ── Peek-deck redesign (v7.7 experimental) ────────────────────────
     /** Whether the top-lit gradient peek-card fill is on (v223 — concluded ON, toggle removed). */
     fun isPeekGradientEnabled(context: Context): Boolean =
@@ -1868,12 +1888,12 @@ object AppPreferences {
     }
 
     // ── Paper & header experiments (v27) ─────────────────────────────
+    private const val KEY_HEADER_STYLE = "header_style"   // "TORN" | "GLASS"
     private const val KEY_PAPER_HEADER_CUTS = "paper_header_cuts"
     private const val KEY_PAPER_HEADER_HOLES = "paper_header_holes"
     private const val KEY_PAPER_HOLE_RINGS = "paper_hole_rings"
     private const val KEY_PAPER_HOLE_RING_STYLE = "paper_hole_ring_style"
     private const val KEY_PAPER_STAT_CARDS = "paper_stat_cards"
-    private const val KEY_PILL_GLOW_SUBTLE = "pill_glow_subtle"
     private const val KEY_HERO_TEAR_SHEET = "hero_tear_sheet"
     private const val KEY_HOME_TINT = "home_tint"
     private const val KEY_HOME_HERO_TINT = "home_hero_tint"
@@ -1885,9 +1905,9 @@ object AppPreferences {
     private const val KEY_STAR_ZOOM_3D = "star_zoom_3d"
     private const val KEY_DRAWER_CONSTELLATION = "drawer_constellation"
     private const val KEY_CABINET_V2 = "cabinet_v2_experiment"
+    private const val KEY_CABINET_SHELVES_SEEDED = "cabinet_shelves_seeded_v2"
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
     private const val KEY_FORCE_GLASS = "force_glass_override"
-    private const val KEY_LEGACY_GLASS_BLUR = "legacy_glass_blur"
     private const val KEY_GLASS_LAB_WALLPAPER = "glass_lab_wallpaper"
     private const val KEY_GLASS_CLASSIC_INDICATOR = "glass_classic_indicator"
     private const val KEY_NAV_INDICATOR_COLOR = "nav_indicator_color"
@@ -1897,17 +1917,7 @@ object AppPreferences {
     private const val KEY_GLASS_REFRACTION_SCALE = "glass_refraction_scale"
     private const val KEY_GLASS_REFLECTION_SCALE = "glass_reflection_scale"
     private const val KEY_GLASS_INDICATOR_SHADOW_SCALE = "glass_indicator_shadow_scale"
-    private const val KEY_CUSTOM_BLUR_ENGINE = "custom_blur_engine"
     // v292h — CRASH RECOVERY: tracks consecutive native crashes that
-
-    // ── Custom blur engine (v280 experiment) ────────────────────────
-    fun isCustomBlurEngineEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_CUSTOM_BLUR_ENGINE, false)
-
-    fun setCustomBlurEngineEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_CUSTOM_BLUR_ENGINE, enabled).apply()
-        customBlurEngineState = enabled
-    }
 
     /** Whether the header corner cut-lines + top-right ticks accent is on (experimental, default off). */
     fun isPaperHeaderCutsEnabled(context: Context): Boolean =
@@ -2012,14 +2022,8 @@ object AppPreferences {
         cabinetV2EnabledState = enabled
     }
 
-    /** Whether the dark-mode pill glow is the subtle top-only version (v101, default ON). */
-    fun isPillGlowSubtleEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_PILL_GLOW_SUBTLE, true)
-
-    fun setPillGlowSubtleEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_PILL_GLOW_SUBTLE, enabled).apply()
-        pillGlowSubtleState = enabled
-    }
+    // v3xx — the "Subtle pill glow" experiment concluded: subtle is the
+    // always-on default, toggle + plumbing removed.
 
     /** Whether the stat paper card wears torn paper edges (extended tear on top; experimental, default off). */
     fun isPaperStatTearEnabled(context: Context): Boolean =
@@ -2036,6 +2040,16 @@ object AppPreferences {
      * hero tears straight into the page. Turning it on restores the extra
      * paper layer for comparison (Settings → Experiments → Paper & headers).
      */
+    /** v3xx — the app-wide header style (torn banner default / glass toolbar). */
+    fun getHeaderStyle(context: Context): HeaderStyle =
+        runCatching { HeaderStyle.valueOf(prefs(context).getString(KEY_HEADER_STYLE, null) ?: "TORN") }
+            .getOrDefault(HeaderStyle.TORN)
+
+    fun setHeaderStyle(context: Context, style: HeaderStyle) {
+        prefs(context).edit().putString(KEY_HEADER_STYLE, style.name).apply()
+        headerStyleState = style
+    }
+
     fun isHeroTearSheetEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_HERO_TEAR_SHEET, false)
 
@@ -2123,14 +2137,6 @@ object AppPreferences {
 
     // Legacy glass blur (experiment, default OFF): an app-side blur engine
     // for pre-Android-12 devices (see the state field above).
-    fun isLegacyGlassBlurEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_LEGACY_GLASS_BLUR, false)
-
-    fun setLegacyGlassBlurEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_LEGACY_GLASS_BLUR, enabled).apply()
-        legacyGlassBlurState = enabled
-    }
-
     fun isGlassClassicIndicatorEnabled(context: Context): Boolean =
         prefs(context).getBoolean(KEY_GLASS_CLASSIC_INDICATOR, false)
 
@@ -2323,32 +2329,12 @@ object AppPreferences {
     }
 
     /**
-     * Whether the persistent live explore notification is on. Default ON.
-     * Off = no ongoing notification; the end reminder + bubble stay.
+     * v3xx — the "Live explore notification" experiment concluded: the
+     * persistent live explore notification is ALWAYS on (no toggle). It
+     * shows whenever explore sessions run and the permission is granted;
+     * the end reminder + bubble stay as they are.
      */
-    fun isLiveNotificationsEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_LIVE_NOTIFICATIONS_ENABLED, true)
-
-    fun setLiveNotificationsEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_LIVE_NOTIFICATIONS_ENABLED, enabled).apply()
-        liveNotificationsEnabledState = enabled
-        val session = ExploreSessionStore.getActiveSession(context) ?: return
-        if (enabled) {
-            // Flipped ON mid-session: bring the live notification back for
-            // the currently active session (the bubble stays if wanted).
-            com.curio.app.infrastructure.ExploreSessionService.start(context, session)
-        } else {
-            // Flipped OFF mid-session: drop the chronometer notification.
-            // Keep the service alive when the floating bubble still wants it
-            // (it swaps to the minimal bubble-active notification); otherwise
-            // stop it — the session + reminder survive either way.
-            if (isOverlayBubbleEnabled(context) && overlayActuallyUsable(context)) {
-                com.curio.app.infrastructure.ExploreSessionService.sync(context)
-            } else {
-                com.curio.app.infrastructure.ExploreSessionService.stop(context)
-            }
-        }
-    }
+    fun isLiveNotificationsEnabled(context: Context): Boolean = true
 
     /**
      * v23 — whether the Explore now dialog shows its "Show the explore
@@ -3009,18 +2995,123 @@ object AppPreferences {
         return updated
     }
 
+    // ── Cabinet collections (v3xx — Cabinet v2 folders) ──────────────
+    /**
+     * All saved Cabinet collections, newest first. Persisted as a JSON
+     * array of [CurioCollection] (id, name, createdAtMillis, members);
+     * members are [CurioCollectionMember] — either a pinned TOPIC
+     * (categoryName = CategoryId.name, refName = topic name) or a saved
+     * ENTRY (refName = the entry's stable id).
+     */
+    fun getCabinetCollections(context: Context): List<CurioCollection> {
+        val raw = prefs(context).getString(KEY_CABINET_COLLECTIONS, null) ?: return emptyList()
+        return try {
+            val arr = JSONArray(raw)
+            List(arr.length()) { i ->
+                val obj = arr.getJSONObject(i)
+                val membersArr = obj.optJSONArray("members") ?: JSONArray()
+                val members = List(membersArr.length()) { j ->
+                    val m = membersArr.getJSONObject(j)
+                    val kind = runCatching {
+                        CurioCollectionMember.MemberKind.valueOf(m.optString("kind", "TOPIC"))
+                    }.getOrDefault(CurioCollectionMember.MemberKind.TOPIC)
+                    CurioCollectionMember(
+                        kind = kind,
+                        categoryName = m.optString("cat", "").takeIf { it.isNotBlank() },
+                        refName = m.optString("ref", "")
+                    )
+                }
+                CurioCollection(
+                    id = obj.optString("id", "").ifBlank { "${obj.optLong("createdAtMillis", System.currentTimeMillis())}" },
+                    name = obj.optString("name", "Collection").ifBlank { "Collection" },
+                    createdAtMillis = obj.optLong("createdAtMillis", System.currentTimeMillis()),
+                    members = members.filter { it.refName.isNotBlank() },
+                    // v3xx — the custom card style (tone/art/icon), absent
+                    // on legacy collections → -1/null (auto/cycle).
+                    tone = obj.optInt("tone", -1),
+                    art = obj.optInt("art", -1),
+                    icon = obj.optString("icon", "").takeIf { it.isNotBlank() }
+                )
+            }.filter { it.id.isNotBlank() }
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    fun saveCabinetCollections(context: Context, collections: List<CurioCollection>) {
+        val arr = JSONArray()
+        collections.forEach { c ->
+            val members = JSONArray()
+            c.members.forEach { m ->
+                members.put(
+                    JSONObject()
+                        .put("kind", m.kind.name)
+                        .put("cat", m.categoryName ?: "")
+                        .put("ref", m.refName)
+                )
+            }
+            arr.put(
+                JSONObject()
+                    .put("id", c.id)
+                    .put("name", c.name)
+                    .put("createdAtMillis", c.createdAtMillis)
+                    .put("members", members)
+                    .put("tone", c.tone)
+                    .put("art", c.art)
+                    .put("icon", c.icon ?: "")
+            )
+        }
+        prefs(context).edit().putString(KEY_CABINET_COLLECTIONS, arr.toString()).apply()
+        collectionsState = collections
+    }
+
+    /** Adds a new collection, or replaces an EXISTING one matched by id. */
+    fun addOrReplaceCollection(context: Context, collection: CurioCollection): List<CurioCollection> {
+        val updated = getCabinetCollections(context).toMutableList().apply {
+            val idx = indexOfFirst { it.id == collection.id }
+            if (idx >= 0) this[idx] = collection else add(0, collection)
+        }
+        saveCabinetCollections(context, updated)
+        return updated
+    }
+
+    fun deleteCollection(context: Context, id: String): List<CurioCollection> {
+        val updated = getCabinetCollections(context).filterNot { it.id == id }
+        saveCabinetCollections(context, updated)
+        return updated
+    }
+
+    // ── Built-in starter shelves (v3xx — Cabinet folders) ──────────────
+    /** Whether the four empty starter shelves were seeded once. */
+    fun isCabinetShelvesSeeded(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_CABINET_SHELVES_SEEDED, false)
+
+    /**
+     * Seeds the four EMPTY starter shelves (Currently Reading / Want to
+     * Read / Completed / Personal) into the collection store — one time.
+     * They are ordinary [CurioCollection]s (ids prefixed `shelf:`), so the
+     * existing add-captures / file-to-collection / rename / delete flows
+     * all work on them. The virtual shelves (Favorites / Saved entries /
+     * Notes) are computed from live data and are NOT persisted here.
+     */
+    fun seedCabinetShelves(context: Context) {
+        if (isCabinetShelvesSeeded(context)) return
+        val now = System.currentTimeMillis()
+        val shelves = listOf(
+            CurioCollection(id = "shelf:currently-reading", name = "Currently Reading", createdAtMillis = now, members = emptyList()),
+            CurioCollection(id = "shelf:want-to-read", name = "Want to Read", createdAtMillis = now, members = emptyList()),
+            CurioCollection(id = "shelf:completed", name = "Completed", createdAtMillis = now, members = emptyList()),
+            CurioCollection(id = "shelf:personal", name = "Personal", createdAtMillis = now, members = emptyList())
+        )
+        saveCabinetCollections(context, getCabinetCollections(context) + shelves)
+        prefs(context).edit().putBoolean(KEY_CABINET_SHELVES_SEEDED, true).apply()
+        cabinetShelvesSeededState = true
+    }
+
     /**
      * Classic-picker toggle: false = the NEW picker is the default; true
      * restores the OLD glass-pill picker (the A/B side of the redesign).
      */
-    fun isClassicPickerEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_CLASSIC_PICKER, false)
-
-    fun setClassicPickerEnabled(context: Context, on: Boolean) {
-        prefs(context).edit().putBoolean(KEY_CLASSIC_PICKER, on).apply()
-        classicPickerEnabledState = on
-    }
-
     /** Whether the starter mixes were already written once. */
     fun isPickerMixesSeeded(context: Context): Boolean =
         prefs(context).getBoolean(KEY_PICKER_MIXES_SEEDED, false)
@@ -3576,6 +3667,38 @@ data class NamedMix(
     val laneIds: List<CategoryId>,
     val createdAtMillis: Long
 )
+
+/**
+ * One named Cabinet collection/folder (v3xx — Cabinet v2 collections): a
+ * keepsake folder holding pinned TOPICS (from the reveal's "File to…") and
+ * saved ENTRY ids (added from the Cabinet). [id] is the stable identity
+ * (UUID string) — rename/reorder keeps it, so collections can be replaced
+ * in place via [AppPreferences.addOrReplaceCollection].
+ */
+data class CurioCollection(
+    val id: String,
+    val name: String,
+    val createdAtMillis: Long,
+    val members: List<CurioCollectionMember>,
+    /** v3xx — CUSTOM CARD STYLE (chosen in the New-collection sheet): the
+     *  index into the Cabinet's tone swatch list (-1 = auto/cycle). */
+    val tone: Int = -1,
+    /** v3xx — the index into the Cabinet's art list (-1 = auto/cycle). */
+    val art: Int = -1,
+    /** v3xx — a custom icon glyph (null = the default sparkle). */
+    val icon: String? = null
+)
+
+/** One member of a [CurioCollection]. */
+data class CurioCollectionMember(
+    val kind: MemberKind,
+    /** TOPIC only — the CategoryId.name the topic lives in. */
+    val categoryName: String?,
+    /** TOPIC: the topic name; ENTRY: the entry's stable Room id. */
+    val refName: String
+) {
+    enum class MemberKind { TOPIC, ENTRY }
+}
 
 /**
  * A topic the user pinned on the Topic Reveal screen so they can revisit it

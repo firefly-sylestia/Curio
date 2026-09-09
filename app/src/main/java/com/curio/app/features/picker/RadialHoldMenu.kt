@@ -198,7 +198,8 @@ fun Modifier.radialHoldMenu(hold: HoldSession?): Modifier = composed {
  * ring consumed them; the compact menu ignores both).
  */
 @Composable
-internal fun RadialHoldMenuOverlay(
+// v3xx — public: Home's recents hold menu reuses this anchored menu.
+fun RadialHoldMenuOverlay(
     anchor: Offset,
     actions: List<HoldAction>,
     cursor: Offset?,

@@ -15,7 +15,10 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.border
 import androidx.compose.foundation.background
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -34,6 +37,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -55,18 +60,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryFamily
@@ -79,6 +92,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
+import com.curio.app.ui.components.CurioGlassToolbar
 import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.curioSearchFill
@@ -98,6 +112,7 @@ import com.curio.app.ui.components.SoftTornBottomShape
 import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.PlayfairDisplayFontFamily
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryBackgroundWash
 import com.curio.app.ui.theme.categoryInk
@@ -137,7 +152,19 @@ private val SettingsHeroSheetExtent = 24.dp
  *  Public so every settings screen can start its scroll content just below
  *  the hero (the hero overlays the content, letting rows disappear under
  *  the ragged tear as they scroll). */
-val SettingsHeroTotalHeight = SettingsHeroBannerHeight + SettingsHeroSheetExtent
+/**
+ * v3xx — the reserved scroll height under the settings hero. The torn
+ * banner is a fixed 204dp; the GLASS toolbar style is content-height
+ * (status bar + pills row + title/subtitle block ≈ 160dp idle — the
+ * search field morphs in place of the title, so the footprint never
+ * changes and the consumers' fixed reservation stays correct).
+ */
+val SettingsHeroTotalHeight: Dp
+    get() = if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
+        160.dp
+    } else {
+        SettingsHeroBannerHeight + SettingsHeroSheetExtent
+    }
 /** One mirrored hero watermark pair — the left glyph mirrors the right
  *  (the Profile/Home quest hero construction, adapted for Settings). */
 private data class SettingsHeroPair(
@@ -195,6 +222,28 @@ fun SettingsHeroHeader(
     // liquid glass — no self-sample cycle. Null → classic opaque pill.
     glassBackdrop: com.kyant.backdrop.backdrops.LayerBackdrop? = null
 ) {
+    // v3xx — GLASS TOOLBAR style: the app-wide "Glass toolbar header"
+    // option swaps the torn paper banner for the content-height glass bar
+    // (the old Cabinet v2 toolbar look, more blurry + its own tint). Every
+    // param maps 1:1; screens that never pass search/trailing just render
+    // the plain title bar.
+    if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
+        CurioGlassToolbar(
+            title = title,
+            subtitle = subtitle,
+            onBack = onBack,
+            trailing = trailing,
+            searchActive = searchActive,
+            searchQuery = searchQuery,
+            onSearchQueryChange = onSearchQueryChange,
+            onCloseSearch = onCloseSearch,
+            searchFocus = searchFocus,
+            searchPlaceholder = searchPlaceholder,
+            titleTrailing = titleTrailing,
+            glassBackdrop = glassBackdrop
+        )
+        return
+    }
     // v31 — the extraRow slot (the Topic Database's Category pill) is gone:
     // that pill now rides its own row BELOW the hero so the banner keeps
     // its original height and the header text never moves down.
@@ -730,6 +779,18 @@ fun settingsCardAccentInk(): Color {
     return curioRoseInk()
 }
 
+/** Jump to a settings rail destination, collapsing the stack above the hub:
+ *  switching sections REPLACES the current page, so the hub stays one
+ *  back-press away (never a growing stack of visited sections). "all" (the
+ *  null-route entry) targets the hub itself. */
+internal fun navigateToSettingsSection(navController: NavController, entry: SettingsNavEntry) {
+    val route = entry.route ?: CurioRoutes.SETTINGS
+    navController.navigate(route) {
+        popUpTo(CurioRoutes.SETTINGS) { inclusive = false }
+        launchSingleTop = true
+    }
+}
+
 /**
  * v72 — the option-card CHIP hue (the icon-chip fill + card-tint family),
  * matched to the hero the page wears (lane accent / sky-azure / brand
@@ -777,6 +838,8 @@ fun SettingsHubScreen(navController: NavController) {
     // Feed the quests system — opening Settings completes the journey quest.
     LaunchedEffect(Unit) { CurioQuests.onSettingsVisited(context) }
     var query by rememberSaveable { mutableStateOf("") }
+    // v3xx — the JSX nav rail's active chip ("all" = the hub itself).
+    var activeNav by rememberSaveable { mutableStateOf("all") }
     val needle = query.trim()
     val sections = remember(needle) { filterSettingsSections(SettingsSections, needle) }
     val searchResults = remember(needle) { collectSearchResults(SettingsSections, needle) }
@@ -827,19 +890,24 @@ fun SettingsHubScreen(navController: NavController) {
         ScreenEntrance {
             LazyVerticalGrid(
                 state = gridState,
-                columns = if (wide) GridCells.Adaptive(minSize = 300.dp) else GridCells.Fixed(1),
+                // v3xx — the JSX redesign: cards sit 2-up like the design
+                // (search, nav rail, headings and the footer span full width).
+                columns = GridCells.Fixed(2),
                 modifier = Modifier.layerBackdrop(glassBackdrop).fillMaxSize(),
                 contentPadding = PaddingValues(start = wideContentEdgePadding(), end = wideContentEdgePadding(), top = SettingsHeroTotalHeight, bottom = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                // ── JSX nav rail — All Settings / Appearance / … ──
+                item(key = "nav", span = { GridItemSpan(maxLineSpan) }) {
+                    SettingsNavRail(active = activeNav, onSelect = { entry ->
+                        activeNav = entry.id
+                        navigateToSettingsSection(navController, entry)
+                    })
+                }
                 // ── Search — filters every section below as you type ──
-                item(span = { GridItemSpan(maxLineSpan) }) {
-                    CurioSearchField(
-                        query = query,
-                        onQueryChange = { query = it },
-                        placeholder = "Search settings"
-                    )
+                item(key = "search", span = { GridItemSpan(maxLineSpan) }) {
+                    SettingsJsxSearchField(query = query, onQueryChange = { query = it })
                 }
                 if (searching) {
                     if (searchResults.isEmpty()) {
@@ -848,7 +916,7 @@ fun SettingsHubScreen(navController: NavController) {
                         val grouped = searchResults.groupBy { it.sectionLabel }
                         grouped.forEach { (sectionLabel, results) ->
                             item(span = { GridItemSpan(maxLineSpan) }) { CurioSectionLabel(sectionLabel) }
-                            item {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
                                 CurioSettingsCard(shadowElevation = 0.dp) {
                                     results.forEachIndexed { index, result ->
                                         if (index > 0) CurioSettingsDivider()
@@ -869,41 +937,50 @@ fun SettingsHubScreen(navController: NavController) {
                         }
                     }
                 } else {
-                sections.forEach { section ->
-                    item(span = { GridItemSpan(maxLineSpan) }) { CurioSectionLabel(section.label) }
-                    section.cards.forEach { card ->
-                        item {
-                            CurioSettingsCard(shadowElevation = 0.dp) {
-                                if (card.headerIcon != null && card.headerTitle != null && card.headerSubtitle != null) {
-                                    CurioCardHeader(card.headerIcon, card.headerTitle, card.headerSubtitle)
-                                }
-                                card.rows.forEachIndexed { index, row ->
-                                    if (index > 0) CurioSettingsDivider()
-                                    if (row.route == CurioRoutes.SETTINGS_APPEARANCE) {
-                                        // v8.xx — the Appearance row is a pet
-                                        // landmark: the pet pokes it, and the
-                                        // tour's Settings stop points at it.
-                                        PetLandmark(
-                                            id = "appearance",
-                                            kind = PetLandmarks.Kind.FUN,
-                                            screen = "settings"
-                                        ) { lm ->
-                                            Box(modifier = lm) {
-                                                CurioSettingsRow(row.icon, row.title, row.subtitle) {
-                                                    navController.navigate(row.route) { launchSingleTop = true }
-                                                }
-                                            }
-                                        }
-                                    } else {
-                                        CurioSettingsRow(row.icon, row.title, row.subtitle) {
-                                            navController.navigate(row.route) { launchSingleTop = true }
-                                        }
+                    // v3xx — the JSX groups + cards (the flat rows are gone
+                    // from the hub; the search index + two-pane still use
+                    // them underneath).
+                    settingsDesignGroups.forEach { group ->
+                        item(key = "g|${group.label}", span = { GridItemSpan(maxLineSpan) }) {
+                            SettingsGroupHeading(group)
+                        }
+                        group.cards.forEach { card ->
+                            item(key = "card|${card.id}") {
+                                if (card.id == "appearance") {
+                                    // v8.xx — the Appearance card stays a pet
+                                    // landmark: the pet pokes it, and the
+                                    // tour's Settings stop points at it.
+                                    PetLandmark(
+                                        id = "appearance",
+                                        kind = PetLandmarks.Kind.FUN,
+                                        screen = "settings"
+                                    ) { lm ->
+                                        SettingsDesignCardView(
+                                            card = card,
+                                            onClick = { navController.navigate(card.route) { launchSingleTop = true } },
+                                            modifier = lm
+                                        )
                                     }
+                                } else {
+                                    SettingsDesignCardView(
+                                        card = card,
+                                        onClick = { navController.navigate(card.route) { launchSingleTop = true } }
+                                    )
                                 }
                             }
                         }
                     }
-                }
+                    settingsSecondaryCards.forEach { card ->
+                        item(key = "sec|${card.id}") {
+                            SettingsSecondaryCardView(
+                                card = card,
+                                onClick = { navController.navigate(card.route) { launchSingleTop = true } }
+                            )
+                        }
+                    }
+                    item(key = "footer", span = { GridItemSpan(maxLineSpan) }) {
+                        SettingsFooterNote()
+                    }
                 }
             }
         }
@@ -1405,5 +1482,674 @@ private fun SettingsNoResults(query: String) {
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
             textAlign = TextAlign.Center
         )
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// v3xx — the JSX "Settings redesign" hub: grouped tone CARDS with decorative
+// visuals + a nav rail + search + a footer note — exactly the
+// CurioSettings_Redesign-3.jsx look (the app's own header stays untouched).
+// The existing rows/search/deep-index stay; these cards are the new face of
+// the hub (search still falls back to the row results).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** The JSX card tones (light pastel gradient + deep dark twin). */
+private enum class SettingsDesignTone {
+    CORAL, SAGE, BLUE, LAVENDER, YELLOW, MINT, PINK, VIOLET, SLATE, STEEL
+}
+
+/** The JSX decorative foot visuals each card wears. */
+private enum class SettingsDesignVisual {
+    SWATCHES, PET, COMPASS, WAVE, CARDS, PHOTOS, SHARE, FLASK, CLOUD, IMAGE
+}
+
+/** One big JSX-style setting card. */
+private data class SettingsDesignCard(
+    val id: String,
+    val title: String,
+    val subtitle: String,
+    val icon: String,
+    val tone: SettingsDesignTone,
+    val visual: SettingsDesignVisual,
+    val route: String
+)
+
+/** One labelled group of cards (JSX `group`). */
+private data class SettingsDesignGroup(
+    val label: String,
+    val glyph: String,
+    val cards: List<SettingsDesignCard>
+)
+
+/** One nav-rail entry (JSX `sideNav` → horizontal chip rail on phones). */
+internal data class SettingsNavEntry(
+    val id: String,
+    val label: String,
+    val icon: String,
+    val route: String? = null
+)
+
+/** The JSX side-nav, in order. "all" is the hub itself. */
+private val settingsNavRail = listOf(
+    SettingsNavEntry("all", "All Settings", CurioIcons.Home, null),
+    SettingsNavEntry("appearance", "Appearance", CurioIcons.DarkMode, CurioRoutes.SETTINGS_APPEARANCE),
+    SettingsNavEntry("pet", "Pet designer", CurioIcons.Pets, CurioRoutes.PET_DESIGNER),
+    SettingsNavEntry("preferences", "Preferences", CurioIcons.Tune, CurioRoutes.SETTINGS_PREFERENCES),
+    SettingsNavEntry("recording", "Recording", CurioIcons.Mic, CurioRoutes.SETTINGS_RECORDING),
+    SettingsNavEntry("categories", "Categories", CurioIcons.DragHandle, CurioRoutes.MANAGE_CATEGORIES),
+    SettingsNavEntry("history", "Topic history", CurioIcons.History, CurioRoutes.TOPIC_HISTORY),
+    SettingsNavEntry("share", "Share hub", CurioIcons.Share, CurioRoutes.SHARE_HUB),
+    SettingsNavEntry("experiments", "Experiments", CurioIcons.AutoAwesome, CurioRoutes.USER_EXPERIMENTS),
+    SettingsNavEntry("backup", "Backup", CurioIcons.Backup, CurioRoutes.SETTINGS_DATA),
+    SettingsNavEntry("support", "Support", CurioIcons.SupportAgent, CurioRoutes.SUPPORT)
+)
+
+/** The four JSX groups (plus the data & privacy group the user asked to
+ *  slot the book-fetching etc. into) — every card maps to a real screen. */
+private val settingsDesignGroups = listOf(
+    SettingsDesignGroup("Personalize", "\u2726", listOf(
+        SettingsDesignCard("appearance", "Appearance", "Theme, tint, and pastel color", CurioIcons.DarkMode, SettingsDesignTone.CORAL, SettingsDesignVisual.SWATCHES, CurioRoutes.SETTINGS_APPEARANCE),
+        SettingsDesignCard("pet", "Pet designer", "Draw your own Curie", CurioIcons.Pets, SettingsDesignTone.SAGE, SettingsDesignVisual.PET, CurioRoutes.PET_DESIGNER)
+    )),
+    SettingsDesignGroup("How it works", "\u2727", listOf(
+        SettingsDesignCard("preferences", "Preferences", "Search engine, explore, and pet behavior", CurioIcons.Tune, SettingsDesignTone.BLUE, SettingsDesignVisual.COMPASS, CurioRoutes.SETTINGS_PREFERENCES),
+        SettingsDesignCard("recording", "Recording", "Voice-note quality, dictation and offline transcripts", CurioIcons.Mic, SettingsDesignTone.LAVENDER, SettingsDesignVisual.WAVE, CurioRoutes.SETTINGS_RECORDING)
+    )),
+    SettingsDesignGroup("Organize your world", "\u2261", listOf(
+        SettingsDesignCard("categories", "Manage categories", "Show, hide, or reorder lanes", CurioIcons.DragHandle, SettingsDesignTone.YELLOW, SettingsDesignVisual.CARDS, CurioRoutes.MANAGE_CATEGORIES),
+        SettingsDesignCard("history", "Topic history", "Revisit what you explored", CurioIcons.History, SettingsDesignTone.MINT, SettingsDesignVisual.PHOTOS, CurioRoutes.TOPIC_HISTORY)
+    )),
+    SettingsDesignGroup("Share & explore", "\u25C7", listOf(
+        SettingsDesignCard("share", "Share hub", "Browse every design, pick a topic, share a card", CurioIcons.Share, SettingsDesignTone.PINK, SettingsDesignVisual.SHARE, CurioRoutes.SHARE_HUB),
+        SettingsDesignCard("experiments", "Experiments", "Try features before they ship", CurioIcons.AutoAwesome, SettingsDesignTone.VIOLET, SettingsDesignVisual.FLASK, CurioRoutes.USER_EXPERIMENTS)
+    )),
+    SettingsDesignGroup("Your data & privacy", "\u25C8", listOf(
+        SettingsDesignCard("backup", "Backup & restore", "Keep captures and settings safe", CurioIcons.Backup, SettingsDesignTone.SLATE, SettingsDesignVisual.CLOUD, CurioRoutes.SETTINGS_DATA),
+        SettingsDesignCard("bookcovers", "Book covers", "Cover-art fetching and providers", CurioIcons.Image, SettingsDesignTone.STEEL, SettingsDesignVisual.IMAGE, CurioRoutes.SETTINGS_BOOK_COVER)
+    ))
+)
+
+/** The JSX secondary cards — smaller horizontal rows under the groups. */
+private data class SettingsSecondaryCard(
+    val id: String,
+    val title: String,
+    val subtitle: String,
+    val icon: String,
+    val route: String
+)
+
+private val settingsSecondaryCards = listOf(
+    SettingsSecondaryCard("recycle", "Recycle bin", "Restore recently deleted captures", CurioIcons.Delete, CurioRoutes.RECYCLE_BIN),
+    SettingsSecondaryCard("updates", "Updates", "Your build, release notes & update checker", CurioIcons.Download, CurioRoutes.UPDATES),
+    SettingsSecondaryCard("support", "Help & feedback", "Get support or suggest a feature", CurioIcons.SupportAgent, CurioRoutes.SUPPORT)
+)
+
+/** Light + dark gradient pair for a tone (JSX `.coral` … `.violet` + the
+ *  two cool data tones). */
+private fun settingsToneGradient(tone: SettingsDesignTone, dark: Boolean): Pair<Color, Color> = when (tone) {
+    SettingsDesignTone.CORAL -> if (dark) Color(0xFF743F42) to Color(0xFF693A42) else Color(0xFFF4B6A8) to Color(0xFFE7A08F)
+    SettingsDesignTone.SAGE -> if (dark) Color(0xFF3C5140) to Color(0xFF34483A) else Color(0xFFD0E1C9) to Color(0xFFB7D0B4)
+    SettingsDesignTone.BLUE -> if (dark) Color(0xFF345363) to Color(0xFF314B59) else Color(0xFFC0DEEB) to Color(0xFFA5CADE)
+    SettingsDesignTone.LAVENDER -> if (dark) Color(0xFF4A4164) to Color(0xFF40385B) else Color(0xFFD6CFEB) to Color(0xFFBCAED9)
+    SettingsDesignTone.YELLOW -> if (dark) Color(0xFF62502F) to Color(0xFF57452A) else Color(0xFFF9DFA6) to Color(0xFFF1C875)
+    SettingsDesignTone.MINT -> if (dark) Color(0xFF385345) to Color(0xFF324A3E) else Color(0xFFCFE4D5) to Color(0xFFB5D3C0)
+    SettingsDesignTone.PINK -> if (dark) Color(0xFF693F4D) to Color(0xFF603946) else Color(0xFFF2C2C8) to Color(0xFFE5A6B1)
+    SettingsDesignTone.VIOLET -> if (dark) Color(0xFF50416B) to Color(0xFF45385E) else Color(0xFFD3C4E7) to Color(0xFFB9A5D5)
+    SettingsDesignTone.SLATE -> if (dark) Color(0xFF3A424C) to Color(0xFF333A44) else Color(0xFFCCD6DF) to Color(0xFFB8C6D1)
+    SettingsDesignTone.STEEL -> if (dark) Color(0xFF2F4A57) to Color(0xFF2B4350) else Color(0xFFC3D8E4) to Color(0xFFAECBDA)
+}
+
+/** The warm readable ink on a tone card (JSX `--ink` + the muted twin). */
+private fun settingsCardInk(dark: Boolean) =
+    if (dark) Color(0xFFF3EAE2) else Color(0xFF52383C)
+
+/** The JSX decorative foot visual — drawn minimally in Compose. */
+@Composable
+private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier = Modifier) {
+    when (visual) {
+        SettingsDesignVisual.SWATCHES -> Box(modifier) {
+            val colors = listOf(0xFFE8B0A0, 0xFFB8C9B0, 0xFFB7A9CF, 0xFFD6B1C1)
+            val offsets = listOf(androidx.compose.ui.unit.IntOffset(0, 16), androidx.compose.ui.unit.IntOffset(26, 6), androidx.compose.ui.unit.IntOffset(56, 20), androidx.compose.ui.unit.IntOffset(24, 38))
+            val rots = listOf(-11f, 1f, 12f, -2f)
+            colors.forEachIndexed { i, c ->
+                Box(
+                    modifier = Modifier
+                        .offset { offsets[i] }
+                        .rotate(rots[i])
+                        .size(width = 34.dp, height = 44.dp)
+                        .border(3.dp, Color(0xFFFFF9F3).copy(alpha = 0.85f), RoundedCornerShape(5.dp))
+                        .background(Color(c))
+                )
+            }
+        }
+        SettingsDesignVisual.PET -> Box(modifier) {
+            Box(
+                modifier = Modifier.offset(x = 22.dp, y = 26.dp).rotate(25f).size(width = 18.dp, height = 21.dp)
+                    .background(Color(0xFFEEE5D8), RoundedCornerShape(topStart = 6.dp, topEnd = 12.dp, bottomStart = 6.dp, bottomEnd = 10.dp))
+            )
+            Box(
+                modifier = Modifier.offset(x = 40.dp, y = 26.dp).rotate(-25f).size(width = 18.dp, height = 21.dp)
+                    .background(Color(0xFFEEE5D8), RoundedCornerShape(topStart = 12.dp, topEnd = 6.dp, bottomStart = 10.dp, bottomEnd = 6.dp))
+            )
+            Box(
+                modifier = Modifier.offset(x = 26.dp, y = 30.dp).size(width = 46.dp, height = 36.dp)
+                    .background(Color(0xFFF4EEE3), RoundedCornerShape(topStart = 23.dp, topEnd = 23.dp, bottomStart = 19.dp, bottomEnd = 19.dp))
+            )
+            Box(
+                modifier = Modifier.offset(x = 36.dp, y = 43.dp).size(width = 5.dp, height = 4.dp).background(Color(0xFF4B3A35), CircleShape)
+            )
+            Box(
+                modifier = Modifier.offset(x = 50.dp, y = 43.dp).size(width = 5.dp, height = 4.dp).background(Color(0xFF4B3A35), CircleShape)
+            )
+            Box(
+                modifier = Modifier.offset(x = 20.dp, y = 50.dp).size(width = 52.dp, height = 26.dp)
+                    .background(Color(0xFF9C735F).copy(alpha = 0.85f), RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp, bottomStart = 9.dp, bottomEnd = 9.dp))
+            )
+        }
+        SettingsDesignVisual.COMPASS -> Box(modifier) {
+            Canvas(Modifier.fillMaxSize()) {
+                val w = size.width; val h = size.height
+                drawPath(Path().apply { moveTo(w * 0.10f, h); lineTo(w * 0.34f, h * 0.38f); lineTo(w * 0.58f, h); close() }, color = Color(0xFF46656C).copy(alpha = 0.55f))
+                drawPath(Path().apply { moveTo(w * 0.40f, h); lineTo(w * 0.72f, h * 0.20f); lineTo(w, h); close() }, color = Color(0xFF495E74).copy(alpha = 0.40f))
+                drawCircle(Color.White.copy(alpha = 0.45f), radius = w * 0.34f, center = androidx.compose.ui.geometry.Offset(w * 0.78f, h * 0.62f))
+                // needle
+                val cx = w * 0.78f; val cy = h * 0.62f
+                drawLine(Color(0xFF687A91).copy(alpha = 0.8f), androidx.compose.ui.geometry.Offset(cx, cy - h * 0.30f), androidx.compose.ui.geometry.Offset(cx, cy + h * 0.30f), strokeWidth = 1.6f)
+                drawPath(Path().apply { moveTo(cx, cy - h * 0.26f); lineTo(cx - w * 0.05f, cy); lineTo(cx + w * 0.05f, cy); close() }, color = Color(0xFF687A91))
+            }
+        }
+        SettingsDesignVisual.WAVE -> Row(
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
+            modifier = modifier
+        ) {
+            listOf(10, 18, 32, 24, 40, 18, 30, 14, 36, 22, 28, 16).forEach { h ->
+                Box(
+                    modifier = Modifier
+                        .width(4.dp)
+                        .height(h.dp)
+                        .background(Color(0xFF6E628E).copy(alpha = 0.7f), RoundedCornerShape(50))
+                )
+            }
+        }
+        SettingsDesignVisual.CARDS -> Box(modifier) {
+            val colors = listOf(0xFF8DA993, 0xFFD2A87B, 0xFF9EB8C0, 0xFFF4EADC)
+            val offsets = listOf(androidx.compose.ui.unit.IntOffset(0, 0), androidx.compose.ui.unit.IntOffset(18, 6), androidx.compose.ui.unit.IntOffset(34, 14), androidx.compose.ui.unit.IntOffset(48, 22))
+            val rots = listOf(8f, -3f, -13f, -21f)
+            colors.forEachIndexed { i, c ->
+                Box(
+                    modifier = Modifier
+                        .offset { offsets[i] }
+                        .rotate(rots[i])
+                        .size(width = 44.dp, height = 30.dp)
+                        .border(2.dp, Color.White.copy(alpha = 0.75f), RoundedCornerShape(6.dp))
+                        .background(Color(c))
+                )
+            }
+        }
+        SettingsDesignVisual.PHOTOS -> Box(modifier) {
+            val colors = listOf(0xFF7E9C86, 0xFFC79F86, 0xFF9BB5A1)
+            val offsets = listOf(androidx.compose.ui.unit.IntOffset(0, 0), androidx.compose.ui.unit.IntOffset(22, 8), androidx.compose.ui.unit.IntOffset(42, 16))
+            val rots = listOf(10f, -4f, -15f)
+            colors.forEachIndexed { i, c ->
+                Box(
+                    modifier = Modifier
+                        .offset { offsets[i] }
+                        .rotate(rots[i])
+                        .size(width = 38.dp, height = 30.dp)
+                        .border(3.dp, Color(0xFFF8F0E8), RoundedCornerShape(4.dp))
+                        .background(Color(c))
+                )
+            }
+        }
+        SettingsDesignVisual.SHARE -> Box(modifier) {
+            Box(
+                modifier = Modifier
+                    .offset(x = 14.dp, y = 2.dp)
+                    .rotate(-7f)
+                    .size(width = 56.dp, height = 40.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0xFFF6E9D5))
+                    .padding(6.dp)
+            ) {
+                Text(
+                    text = "CURIO",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = 2.sp),
+                    color = Color(0xFF6B4F45)
+                )
+                Text(
+                    text = "stay curious",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = Color(0xFF6B4F45)
+                )
+            }
+            Box(
+                modifier = Modifier.offset(x = 0.dp, y = 0.dp).size(26.dp).background(Color.White.copy(alpha = 0.45f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                CurioIcon(name = CurioIcons.Share, contentDescription = null, tint = Color(0xFF6B4F45), size = 13.dp)
+            }
+        }
+        SettingsDesignVisual.FLASK -> Box(modifier) {
+            CurioIcon(
+                name = CurioIcons.AutoAwesome,
+                contentDescription = null,
+                tint = Color.White.copy(alpha = 0.8f),
+                size = 34.dp,
+                modifier = Modifier.offset(x = 30.dp, y = 8.dp)
+            )
+            CurioIcon(
+                name = CurioIcons.AutoAwesome,
+                contentDescription = null,
+                tint = Color.White.copy(alpha = 0.7f),
+                size = 16.dp,
+                modifier = Modifier.offset(x = 10.dp, y = 2.dp)
+            )
+        }
+        SettingsDesignVisual.CLOUD -> Box(modifier) {
+            Canvas(Modifier.fillMaxSize()) {
+                val w = size.width; val h = size.height
+                val c = Color(0xFF4C5660)
+                drawCircle(c.copy(alpha = 0.55f), radius = w * 0.22f, center = androidx.compose.ui.geometry.Offset(w * 0.32f, h * 0.55f))
+                drawCircle(c.copy(alpha = 0.45f), radius = w * 0.30f, center = androidx.compose.ui.geometry.Offset(w * 0.55f, h * 0.60f))
+                drawCircle(c.copy(alpha = 0.38f), radius = w * 0.20f, center = androidx.compose.ui.geometry.Offset(w * 0.78f, h * 0.62f))
+                drawCircle(c.copy(alpha = 0.32f), radius = w * 0.42f, center = androidx.compose.ui.geometry.Offset(w * 0.55f, h * 0.75f))
+            }
+        }
+        SettingsDesignVisual.IMAGE -> Box(modifier) {
+            val colors = listOf(0xFF9BB3A8, 0xFFF1DFCA, 0xFF9DB7DC)
+            val offsets = listOf(androidx.compose.ui.unit.IntOffset(0, 0), androidx.compose.ui.unit.IntOffset(18, 8), androidx.compose.ui.unit.IntOffset(34, 16))
+            val rots = listOf(-15f, 8f, -9f)
+            colors.forEachIndexed { i, c ->
+                Box(
+                    modifier = Modifier
+                        .offset { offsets[i] }
+                        .rotate(rots[i])
+                        .size(width = 40.dp, height = 26.dp)
+                        .border(2.dp, Color.White.copy(alpha = 0.7f), RoundedCornerShape(5.dp))
+                        .background(Color(c))
+                )
+            }
+        }
+    }
+}
+
+/** The JSX setting card — tone gradient, blob shapes, texture dots, frosted
+ *  icon tile, round arrow, title/subtitle and the decorative visual. */
+@Composable
+private fun SettingsDesignCardView(
+    card: SettingsDesignCard,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val dark = isCurioDarkTheme()
+    val (start, end) = settingsToneGradient(card.tone, dark)
+    val ink = settingsCardInk(dark)
+    val muted = ink.copy(alpha = if (dark) 0.74f else 0.72f)
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(204.dp)
+            .clip(RoundedCornerShape(26.dp))
+            .background(Brush.linearGradient(listOf(start, end)))
+            .clickable(onClick = onClick)
+    ) {
+        // ── Blobs + texture (the JSX ::before/::after + cardTexture) ──
+        Canvas(Modifier.fillMaxSize()) {
+            val w = size.width; val h = size.height
+            drawCircle(Color.White.copy(alpha = 0.20f), radius = w * 0.62f, center = androidx.compose.ui.geometry.Offset(w * 1.08f, h * 0.02f))
+            drawCircle(Color.White.copy(alpha = 0.13f), radius = w * 0.55f, center = androidx.compose.ui.geometry.Offset(-w * 0.12f, h * 1.18f))
+            // texture dots (JSX radial-gradient speckle)
+            repeat(5) { i ->
+                drawCircle(
+                    Color.White.copy(alpha = 0.28f),
+                    radius = 1.6.dp.toPx(),
+                    center = androidx.compose.ui.geometry.Offset(w * (0.10f + 0.16f * i), h * 0.80f)
+                )
+            }
+            // diagonal sheen (JSX linear-gradient band)
+            drawLine(
+                Color.White.copy(alpha = 0.12f),
+                androidx.compose.ui.geometry.Offset(0f, h * 0.68f),
+                androidx.compose.ui.geometry.Offset(w * 0.92f, 0f),
+                strokeWidth = 2.dp.toPx()
+            )
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(18.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // Frosted icon tile.
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(if (dark) Color.White.copy(alpha = 0.14f) else Color.White.copy(alpha = 0.33f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CurioIcon(name = card.icon, contentDescription = null, tint = ink, size = 21.dp)
+                }
+                Spacer(Modifier.weight(1f))
+                // Round arrow.
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFF63423A).copy(alpha = if (dark) 0.42f else 0.20f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CurioIcon(name = CurioIcons.ChevronRight, contentDescription = null, tint = Color(0xFFFFF9F1), size = 17.dp)
+                }
+            }
+            Spacer(Modifier.weight(1f))
+            Text(
+                text = card.title,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.2).sp),
+                color = ink,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth(0.76f)
+            )
+            Spacer(Modifier.height(3.dp))
+            Text(
+                text = card.subtitle,
+                style = MaterialTheme.typography.bodySmall.copy(lineHeight = 16.sp),
+                color = muted,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth(0.80f)
+            )
+        }
+        // ── Decorative visual, bottom-right ──
+        SettingsCardVisual(
+            visual = card.visual,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 12.dp, bottom = 8.dp)
+                .size(width = 92.dp, height = 62.dp)
+                .alpha(0.92f)
+        )
+    }
+}
+
+/** The JSX secondary card — a horizontal icon + text + arrow row. */
+@Composable
+private fun SettingsSecondaryCardView(
+    card: SettingsSecondaryCard,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val dark = isCurioDarkTheme()
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(
+                if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
+                else Color.White.copy(alpha = 0.68f)
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 15.dp, vertical = 13.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .clip(RoundedCornerShape(13.dp))
+                .background(if (dark) Color.White.copy(alpha = 0.09f) else Color(0xFFF2E8DC)),
+            contentAlignment = Alignment.Center
+        ) {
+            CurioIcon(
+                name = card.icon,
+                contentDescription = null,
+                tint = if (dark) Color(0xFFD7B8A9) else Color(0xFF755647),
+                size = 20.dp
+            )
+        }
+        Spacer(Modifier.width(13.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = card.title,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = card.subtitle,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        CurioIcon(
+            name = CurioIcons.ChevronRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+            size = 18.dp
+        )
+    }
+}
+
+/** The JSX group heading — Playfair-ish serif label + thin rule + glyph. */
+@Composable
+private fun SettingsGroupHeading(group: SettingsDesignGroup) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 14.dp, bottom = 10.dp, start = 2.dp, end = 2.dp)
+    ) {
+        Text(
+            text = group.glyph,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f)
+        )
+        Spacer(Modifier.width(7.dp))
+        Text(
+            text = group.label,
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontFamily = PlayfairDisplayFontFamily,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = (-0.3).sp
+            ),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.width(11.dp))
+        Box(
+            modifier = Modifier
+                .width(34.dp)
+                .height(1.dp)
+                .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f))
+        )
+    }
+}
+
+/**
+ * The JSX nav rail — horizontal chips on phones (the desktop sidebar's
+ * mobile twin). "All Settings" returns to the hub itself.
+ *
+ * [active] is the currently open rail page: it renders highlighted in the
+ * SECOND slot (right after "All Settings") so where you are sits next to
+ * the way back — every other section follows in its fixed order. Pass
+ * null on settings-family screens that aren't a rail destination (drill-in
+ * tool pages): nothing is highlighted and the order stays fixed. Shared by
+ * the hub AND every settings sub-page so the top bar is consistent and
+ * switching sections is one tap away.
+ */
+@Composable
+internal fun SettingsNavRail(
+    active: String?,
+    onSelect: (SettingsNavEntry) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val dark = isCurioDarkTheme()
+    // Rotate the active page into slot 2 (right after "All Settings"); the
+    // rest keeps the fixed rail order. No active page (or "all" — the hub)
+    // → the plain order.
+    val entries = remember(active) {
+        val first = settingsNavRail.firstOrNull()
+        val activeEntry = active?.let { id -> settingsNavRail.firstOrNull { it.id == id } }
+        if (first == null || activeEntry == null || activeEntry.id == first.id) settingsNavRail
+        else listOf(first, activeEntry) + settingsNavRail.filter { it.id != first.id && it.id != activeEntry.id }
+    }
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(7.dp),
+        contentPadding = PaddingValues(vertical = 2.dp),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        items(entries, key = { it.id }) { entry ->
+            val selected = active != null && active == entry.id
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier
+                    .width(82.dp)
+                    .heightIn(min = 60.dp)
+                    .clip(RoundedCornerShape(17.dp))
+                    .background(
+                        when {
+                            selected -> Color(0xFF815947)
+                            dark -> Color.White.copy(alpha = 0.07f)
+                            else -> Color.White.copy(alpha = 0.62f)
+                        }
+                    )
+                    .clickable { onSelect(entry) }
+                    .padding(horizontal = 6.dp, vertical = 9.dp)
+            ) {
+                CurioIcon(
+                    name = entry.icon,
+                    contentDescription = null,
+                    tint = if (selected) Color(0xFFFFF9F1) else MaterialTheme.colorScheme.onSurfaceVariant,
+                    size = 19.dp
+                )
+                Text(
+                    text = entry.label,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                        fontSize = 10.sp
+                    ),
+                    color = if (selected) Color(0xFFFFF9F1) else MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+/** The JSX search — rounded white box with the magnifier (search still
+ *  falls back to the deep row index below). */
+@Composable
+private fun SettingsJsxSearchField(
+    query: String,
+    onQueryChange: (String) -> Unit
+) {
+    val dark = isCurioDarkTheme()
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(50.dp)
+            .clip(RoundedCornerShape(19.dp))
+            .background(
+                if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f)
+                else Color.White.copy(alpha = 0.70f)
+            )
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f),
+                RoundedCornerShape(19.dp)
+            )
+            .padding(horizontal = 15.dp)
+    ) {
+        CurioIcon(
+            name = CurioIcons.Search,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            size = 20.dp
+        )
+        Spacer(Modifier.width(10.dp))
+        BasicTextField(
+            value = query,
+            onValueChange = onQueryChange,
+            singleLine = true,
+            textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            modifier = Modifier.weight(1f)
+        ) { inner ->
+            Box {
+                if (query.isEmpty()) {
+                    Text(
+                        text = "Search settings",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                inner()
+            }
+        }
+        if (query.isNotEmpty()) {
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .clickable { onQueryChange("") },
+                contentAlignment = Alignment.Center
+            ) {
+                CurioIcon(
+                    name = CurioIcons.Close,
+                    contentDescription = "Clear search",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    size = 15.dp
+                )
+            }
+        }
+    }
+}
+
+/** The JSX footer note — a soft panel under everything. */
+@Composable
+private fun SettingsFooterNote() {
+    val dark = isCurioDarkTheme()
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(26.dp))
+            .background(
+                if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.5f)
+                else Color(0xFFE9DFD4)
+            )
+            .padding(vertical = 26.dp, horizontal = 18.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(
+                text = "\u2726  \u2727  \u2726",
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (dark) Color(0xFFB48F83) else Color(0xFF8B695C),
+                letterSpacing = 8.sp
+            )
+            Text(
+                text = "Same curiosity, new horizons.",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontFamily = PlayfairDisplayFontFamily,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = "Curio is a little better when it feels like yours.",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }

@@ -56,7 +56,9 @@ import com.curio.app.data.CurioCategories
 import com.curio.app.data.UpdateChecker
 import com.curio.app.data.UpdateInfo
 import com.curio.app.features.settings.SettingsHeroHeader
+import com.curio.app.features.settings.SettingsNavRail
 import com.curio.app.features.settings.heroPageBackground
+import com.curio.app.features.settings.navigateToSettingsSection
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -283,6 +285,14 @@ fun UpdatesScreen(navController: NavController) {
                             onBack = { navController.popBackStack() }
                         )
                     }
+                }
+                // v3xx — the shared settings nav rail (drill-in page — no
+                // chip highlighted).
+                item(key = "settings-nav", contentType = "settings-nav") {
+                    SettingsNavRail(
+                        active = null,
+                        onSelect = { navigateToSettingsSection(navController, it) }
+                    )
                 }
                 item { CurioSectionLabel("Updates") }
                 // ── Status card — current version, check state, the

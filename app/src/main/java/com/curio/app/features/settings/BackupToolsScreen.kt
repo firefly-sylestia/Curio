@@ -347,6 +347,14 @@ val glassBackdrop = rememberLayerBackdrop()
                     )
                 }
             }
+            // v3xx — the shared settings nav rail: switch sections without
+            // going back to the hub (the open page sits in the 2nd slot).
+            item(key = "settings-nav", contentType = "settings-nav") {
+                SettingsNavRail(
+                    active = "backup",
+                    onSelect = { navigateToSettingsSection(navController, it) }
+                )
+            }
                         item { CurioSectionLabel("Your data") }
             item {
                 // v115 — the backup rows sit in the shared settings card so

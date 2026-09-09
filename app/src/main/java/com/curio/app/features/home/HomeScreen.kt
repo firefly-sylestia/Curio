@@ -9,9 +9,11 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -108,7 +110,6 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioQuests
 import com.curio.app.data.PinnedTopic
-import com.curio.app.data.PromoMode
 import com.curio.app.data.TopicCatalog
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.SavedQuote
@@ -138,12 +139,17 @@ import com.curio.app.navigation.navigateToQuestRoute
 import com.curio.app.navigation.navigateToTab
 import com.curio.app.features.recent.RecentFeedItem
 import com.curio.app.features.recent.buildRecentFeed
+import com.curio.app.features.picker.HoldAction
+import com.curio.app.features.picker.HoldSession
+import com.curio.app.features.picker.RadialHoldMenuOverlay
+import com.curio.app.features.picker.radialHoldMenu
 import com.curio.app.ui.adaptive.WideContentMaxWidth
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.theme.LocalCurioThemeTransition
 import com.curio.app.ui.theme.switchThemeWithReveal
 import com.curio.app.ui.components.CurioConstellation
+import com.curio.app.ui.components.CurioGlassToolbar
 import com.curio.app.ui.components.CurioDrawerState
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioNavTint
@@ -256,6 +262,14 @@ fun HomeScreen(navController: NavController) {
     val context = LocalContext.current
     // Satisfying haptics: confirm on the big spin CTA, light ticks on picks.
     val haptics = LocalHapticFeedback.current
+    // v3xx — recents rows: default tap opens the TOPIC (reveal); the hold
+    // opens the ANCHORED radial action menu (the category picker's menu)
+    // right at the held spot, carrying the write / open-entry / remove
+    // actions.
+    var recentOption by remember { mutableStateOf<RecentFeedItem?>(null) }
+    var recentOptionAnchor by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
+    var recentCursor by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
+    var recentEnd by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
     // v30 — Appearance "Hero follows Spin lane": the quest hero AND the Home
     // background take the category last picked on Spin (the Cabinet's
     // language) when the toggle is on; otherwise Home stays on the soft
@@ -371,23 +385,15 @@ fun HomeScreen(navController: NavController) {
     val recentFeed = remember(recentEntries, exploredTopics, unexploredTopics) {
         buildRecentFeed(recentEntries, exploredTopics, unexploredTopics)
     }
-    // v7.107 — promo/demo-content mode (hidden 5-tap unlock in Support):
-    // while ON, the hero stats and the recents feed are replaced with
-    // promotional SAMPLE data — real topics + all six capture formats, so
-    // screenshots look rich. Every row stays tappable; turning the mode
-    // off reverts instantly (all of this keys off the reactive state).
-    val promoOn = AppPreferences.promoModeState
-    val promoEntries by produceState<List<CurioEntry>>(initialValue = emptyList(), promoOn) {
-        value = if (promoOn) PromoMode.demoEntries() else emptyList()
-    }
-    val promoFeed = remember(promoEntries, promoOn) {
-        if (promoOn) {
-            buildRecentFeed(promoEntries, PromoMode.demoExplored(promoEntries), emptyList())
-        } else {
-            emptyList()
-        }
-    }
     var totalSaved by remember { mutableIntStateOf(0) }
+    // v27h — the Topics stat always shows the TRUE catalog total: the
+    // splash warm-cache seeds the first frame, then a lightweight IO count
+    // of the JSON assets refreshes it — so the number never reads 0 just
+    // because the database/catalog hasn't finished loading, and it tracks
+    // content drops. (Hoisted — the glass toolbar stat row reads it too.)
+    val topicsTotal by produceState(initialValue = TopicCatalog.totalTopicCount()) {
+        value = TopicJsonLoader.countCanonicalTopics()
+    }
     LaunchedEffect(Unit) {
         try {
             totalSaved = CurioRepositoryHolder.repo.count()
@@ -475,6 +481,71 @@ fun HomeScreen(navController: NavController) {
             // (shared with the sticky pills); questInk = the readable ink on
             // the active fill, carried through greeting, stat icons + watermark.
 
+            // v3xx — GLASS TOOLBAR style: the app-wide "Glass toolbar
+            // header" option swaps Home's torn quest banner for the
+            // content-height glass bar — greeting + name, with the Streak ·
+            // Cabinet · Topics stat row riding inside the bar (the same
+            // segments the torn banner pins above its tear).
+            if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
+                // v3xx — Home keeps its STATIC content-height glass toolbar
+                // as the first scroll item (user direction 2026-09-08: the
+                // morph collapse belongs to PROFILE only — Home stays as it
+                // was, and the pinned morph bar was covering the pet). NO
+                // glassBackdrop here: the toolbar is the FIRST item of the
+                // scroll Column, INSIDE the homeGlassBackdrop capture
+                // subtree — sampling it would self-capture (the v228
+                // RenderThread cycle). The toolbar falls back to the safe
+                // simulated-glass recipe instead (the bar's frosted tint +
+                // sheen still read as glass).
+                CurioGlassToolbar(
+                    title = greetingWordForNow(),
+                    subtitle = displayName,
+                    content = { ink ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            HeroStatSegment(
+                                glyph = "local_fire_department",
+                                value = "$streakDays",
+                                label = "Streak",
+                                tint = ink,
+                                ink = ink,
+                                modifier = Modifier.weight(1f),
+                                onClick = { navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true } }
+                            )
+                            VerticalDivider(
+                                modifier = Modifier.height(34.dp),
+                                color = ink.copy(alpha = 0.22f)
+                            )
+                            HeroStatSegment(
+                                glyph = CurioIcons.Inventory2,
+                                value = "$totalSaved",
+                                label = "Cabinet",
+                                tint = ink,
+                                ink = ink,
+                                modifier = Modifier.weight(1f),
+                                onClick = { navController.navigateToTab(CurioRoutes.CABINET) }
+                            )
+                            VerticalDivider(
+                                modifier = Modifier.height(34.dp),
+                                color = ink.copy(alpha = 0.22f)
+                            )
+                            HeroStatSegment(
+                                glyph = CurioIcons.AutoAwesome,
+                                value = "$topicsTotal",
+                                label = "Topics",
+                                tint = ink,
+                                ink = ink,
+                                modifier = Modifier.weight(1f),
+                                onClick = { navController.navigate(CurioRoutes.DATABASE) { launchSingleTop = true } }
+                            )
+                        }
+                    }
+                )
+            } else {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -637,15 +708,6 @@ fun HomeScreen(navController: NavController) {
                             // blend Profile's stat pane uses).
                             val statGlass = heroFill
                             val paperStatBg = paperStatCardColor(heroFill)
-                            // v27h — the Topics stat always shows the TRUE
-                            // catalog total: the splash warm-cache seeds the
-                            // first frame, then a lightweight IO count of the
-                            // JSON assets refreshes it — so the number never
-                            // reads 0 just because the database/catalog hasn't
-                            // finished loading, and it tracks content drops.
-                            val topicsTotal by produceState(initialValue = TopicCatalog.totalTopicCount()) {
-                                value = TopicJsonLoader.countCanonicalTopics()
-                            }
                             // v27h — torn paper edges (separate experiment):
                             // when on, the paper card wears a real torn-paper
                             // outline — an EXTENDED tear on the top edge and
@@ -726,7 +788,7 @@ fun HomeScreen(navController: NavController) {
                                         // family as the banner text.
                                         HeroStatSegment(
                                             glyph = "local_fire_department",
-                                            value = if (promoOn) PromoMode.DEMO_STREAK.toString() else "$streakDays",
+                                            value = "$streakDays",
                                             label = "Streak",
                                             tint = questInk,
                                             ink = questInk,
@@ -739,7 +801,7 @@ fun HomeScreen(navController: NavController) {
                                         )
                                         HeroStatSegment(
                                             glyph = CurioIcons.Inventory2,
-                                            value = if (promoOn) PromoMode.DEMO_SAVED.toString() else "$totalSaved",
+                                            value = "$totalSaved",
                                             label = "Cabinet",
                                             tint = questInk,
                                             ink = questInk,
@@ -773,6 +835,7 @@ fun HomeScreen(navController: NavController) {
                 // to a scroll-reactive STICKY bar outside the hero (they pop
                 // out of the coral into frosted floating pills on scroll).
             }
+            } // v3xx — end of the torn-hero branch (glass toolbar else)
 
             // Give the quest block a deliberate breathing room below the
             // hero's white sheet so the shuffle deck never feels pinned to
@@ -999,36 +1062,33 @@ fun HomeScreen(navController: NavController) {
                             color = MaterialTheme.colorScheme.onBackground
                         )
                         // v21 — View all opens Topic History (liked, disliked,
-                        // pinned & day-grouped spins). Promo mode hides it: it
-                        // would lead to the real (empty) history page.
-                        if (!promoOn) {
-                            Surface(
-                                onClick = { navController.navigate(CurioRoutes.TOPIC_HISTORY) { launchSingleTop = true } },
-                                shape = RoundedCornerShape(50),
-                                color = MaterialTheme.colorScheme.surfaceContainerLow
+                        // pinned & day-grouped spins).
+                        Surface(
+                            onClick = { navController.navigate(CurioRoutes.TOPIC_HISTORY) { launchSingleTop = true } },
+                            shape = RoundedCornerShape(50),
+                            color = MaterialTheme.colorScheme.surfaceContainerLow
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(2.dp)
-                                ) {
-                                // v49 — View all reads like the section
-                                // titles (onBackground ink), text + icon the
-                                // same color — the old theme-primary mauve
-                                // washed out against the cream pill in pastel
-                                // light.
-                                Text(
-                                    "View all",
-                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                    color = MaterialTheme.colorScheme.onBackground
-                                )
-                                CurioIcon(
-                                    CurioIcons.History,
-                                    "Open Topic History",
-                                    tint = MaterialTheme.colorScheme.onBackground,
-                                    size = 14.dp
-                                )
-                                }
+                            // v49 — View all reads like the section
+                            // titles (onBackground ink), text + icon the
+                            // same color — the old theme-primary mauve
+                            // washed out against the cream pill in pastel
+                            // light.
+                            Text(
+                                "View all",
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                            CurioIcon(
+                                CurioIcons.History,
+                                "Open Topic History",
+                                tint = MaterialTheme.colorScheme.onBackground,
+                                size = 14.dp
+                            )
                             }
                         }
                     }
@@ -1072,8 +1132,7 @@ fun HomeScreen(navController: NavController) {
                         .widthIn(max = if (windowWidthSizeClass().isWide) WideContentMaxWidth else Dp.Infinity)
                         .align(Alignment.CenterHorizontally)
                 ) {
-                // Promo mode swaps in the demo feed; otherwise the real one.
-                val recentPreview = (if (promoOn) promoFeed else recentFeed).take(5)
+                val recentPreview = recentFeed.take(5)
                 Row(
                     Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -1084,9 +1143,7 @@ fun HomeScreen(navController: NavController) {
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
                         color = MaterialTheme.colorScheme.onBackground
                     )
-                    // v7.107 — promo mode hides View all: it would lead to
-                    // the real (empty) Recents page, breaking the demo flow.
-                    if (!promoOn && recentPreview.isNotEmpty()) {
+                    if (recentPreview.isNotEmpty()) {
                         Surface(
                             onClick = { navController.navigate(CurioRoutes.RECENTS_ALL) { launchSingleTop = true } },
                             shape = RoundedCornerShape(50),
@@ -1142,12 +1199,18 @@ fun HomeScreen(navController: NavController) {
                                         category = CurioCategories.byId(explored.categoryId),
                                         topicName = explored.topicName,
                                         tag = if (explored.wasUnexplored) "Resumed" else null,
-                                        subtitle = "Explored · tap to write about it",
+                                        subtitle = "Explored · tap to open",
                                         onClick = {
                                             navController.navigate(
-                                                CurioRoutes.captureFor(explored.categoryId.routeSlug, explored.topicName)
+                                                CurioRoutes.revealFor(explored.categoryId.routeSlug, explored.topicName)
                                             ) { launchSingleTop = true }
-                                        }
+                                        },
+                                        hold = HoldSession(
+                                            onOpen = { pos -> recentOption = item; recentOptionAnchor = pos },
+                                            onMove = { recentCursor = it },
+                                            onEnd = { recentEnd = it },
+                                            onTap = {}
+                                        )
                                     )
                                 }
                                 is RecentFeedItem.Unexplored -> {
@@ -1161,23 +1224,41 @@ fun HomeScreen(navController: NavController) {
                                             navController.navigate(
                                                 CurioRoutes.revealFor(unexplored.categoryId.routeSlug, unexplored.topicName)
                                             ) { launchSingleTop = true }
-                                        }
+                                        },
+                                        hold = HoldSession(
+                                            onOpen = { pos -> recentOption = item; recentOptionAnchor = pos },
+                                            onMove = { recentCursor = it },
+                                            onEnd = { recentEnd = it },
+                                            onTap = {}
+                                        )
                                     )
                                 }
                                 is RecentFeedItem.SavedEntry -> {
                                     RecentEntryRow(
                                         entry = item.entry,
                                         onClick = {
-                                            navController.navigate(CurioRoutes.entryDetail(item.entry.id)) {
-                                                launchSingleTop = true
-                                            }
-                                        }
+                                            navController.navigate(
+                                                CurioRoutes.revealFor(item.entry.topic.categoryId.routeSlug, item.entry.topic.name)
+                                            ) { launchSingleTop = true }
+                                        },
+                                        hold = HoldSession(
+                                            onOpen = { pos -> recentOption = item; recentOptionAnchor = pos },
+                                            onMove = { recentCursor = it },
+                                            onEnd = { recentEnd = it },
+                                            onTap = {}
+                                        )
                                     )
                                 }
                             }
                         }
                     }
                 }
+
+                // v3xx — the recents long-press MENU renders at the screen
+                // level (sibling of the page background, below): the picker's
+                // anchored radial menu pops in AT the held spot instead of a
+                // centered dialog. Tap = topic; hold = write / open-entry /
+                // remove.
 
                 // Add breathing room before the bottom card / nav bar
                 Spacer(Modifier.height(12.dp))
@@ -1214,6 +1295,11 @@ fun HomeScreen(navController: NavController) {
             // One scroll-linked clock drives color, scale, lift and shadow.
             // FastOutSlowIn gives the fade a gentle start and finish while
             // keeping it perfectly scrubable with the user's finger.
+            // v3xx — Home ALWAYS shows the floating menu/avatar pills. The
+            // glass style keeps its STATIC scroll-with-content toolbar above
+            // (no pinned morph on Home — user direction 2026-09-08: the
+            // morph belongs to Profile only, and the pinned bar covered the
+            // pet while it wandered).
             val frostShift = FastOutSlowInEasing.transform(stickyProgress)
             val pillScale = androidx.compose.ui.util.lerp(0.97f, 1f, frostShift)
             // v27v — the resting pills follow the HERO TINT (hoisted at the
@@ -1356,6 +1442,98 @@ fun HomeScreen(navController: NavController) {
                     avatarPath = profileAvatarPath
                 )
             }
+        }
+    }
+
+    // v3xx — the recents long-press MENU (the category picker's anchored
+    // radial menu): renders as a top-level sibling so its full-screen scrim
+    // floats over the page. Built from the held [recentOption]; actions pop
+    // in at the finger position (see the recents rows above).
+    recentOption?.let { target ->
+        val holdActions = buildList {
+            when (target) {
+                is RecentFeedItem.Explored -> {
+                    add(
+                        HoldAction(
+                            CurioIcons.Edit,
+                            "Write about it",
+                            MaterialTheme.colorScheme.secondaryContainer,
+                            MaterialTheme.colorScheme.onSecondaryContainer,
+                            {
+                                navController.navigate(
+                                    CurioRoutes.captureFor(target.topic.categoryId.routeSlug, target.topic.topicName)
+                                ) { launchSingleTop = true }
+                            }
+                        )
+                    )
+                    add(
+                        HoldAction(
+                            CurioIcons.Delete,
+                            "Remove from Recents",
+                            MaterialTheme.colorScheme.errorContainer,
+                            MaterialTheme.colorScheme.onErrorContainer,
+                            {
+                                ExploreSessionStore.removeExplored(context, target.topic.categoryId, target.topic.topicName)
+                            }
+                        )
+                    )
+                }
+                is RecentFeedItem.Unexplored -> {
+                    add(
+                        HoldAction(
+                            CurioIcons.Edit,
+                            "Write about it",
+                            MaterialTheme.colorScheme.secondaryContainer,
+                            MaterialTheme.colorScheme.onSecondaryContainer,
+                            {
+                                navController.navigate(
+                                    CurioRoutes.captureFor(target.topic.categoryId.routeSlug, target.topic.topicName)
+                                ) { launchSingleTop = true }
+                            }
+                        )
+                    )
+                }
+                is RecentFeedItem.SavedEntry -> {
+                    add(
+                        HoldAction(
+                            CurioIcons.OpenInNew,
+                            "Open saved entry",
+                            MaterialTheme.colorScheme.primaryContainer,
+                            MaterialTheme.colorScheme.onPrimaryContainer,
+                            {
+                                navController.navigate(CurioRoutes.entryDetail(target.entry.id)) { launchSingleTop = true }
+                            }
+                        )
+                    )
+                    add(
+                        HoldAction(
+                            CurioIcons.Edit,
+                            "Write about it",
+                            MaterialTheme.colorScheme.secondaryContainer,
+                            MaterialTheme.colorScheme.onSecondaryContainer,
+                            {
+                                navController.navigate(
+                                    CurioRoutes.captureFor(target.entry.topic.categoryId.routeSlug, target.entry.topic.name)
+                                ) { launchSingleTop = true }
+                            }
+                        )
+                    )
+                }
+            }
+        }
+        if (holdActions.isNotEmpty()) {
+            RadialHoldMenuOverlay(
+                anchor = recentOptionAnchor ?: androidx.compose.ui.geometry.Offset.Zero,
+                actions = holdActions,
+                cursor = recentCursor,
+                endPos = recentEnd,
+                onCancel = {
+                    recentOption = null
+                    recentOptionAnchor = null
+                    recentCursor = null
+                    recentEnd = null
+                }
+            )
         }
     }
 
@@ -1762,24 +1940,30 @@ private fun PinnedTopicRow(
 // ═══════════════════════════════════════════════════════════════════════
 
 @Composable
-private fun RecentEntryRow(entry: CurioEntry, onClick: () -> Unit) {
+@OptIn(ExperimentalFoundationApi::class)
+private fun RecentEntryRow(
+    entry: CurioEntry,
+    onClick: () -> Unit,
+    // v3xx — the picker's radial hold session (menu opens at the finger).
+    hold: HoldSession? = null
+) {
     val cat = CurioCategories.byId(entry.topic.categoryId)
     // Solid category-tinted card in light mode — matches the recents topic
     // rows. v115 — dark mode: the Home recents go back to plain dark
     // surface cards (the category tint on pitch black was dropped); the
     // recents page (RecentScreen) keeps its tinted rows.
     Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(20.dp),
-        color = if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerLow else cat.categorySurface(),
-        // v27u — recents rows sit on a soft 2dp lift.
-        shadowElevation = 2.dp,
         modifier = Modifier
             .fillMaxWidth()
-            // v98 — dark pill: keep the previous colored fill + the pill
-            // shape; the white catch stays at the TOP EDGE only
-            // (curioGlassEdge) — the full-pill inner glow is gone.
+            // v27u — recents rows sit on a soft 2dp lift; the white catch
+            // stays at the TOP EDGE only (curioGlassEdge) — the full-pill
+            // inner glow is gone.
             .curioGlassEdge(RoundedCornerShape(20.dp))
+            .radialHoldMenu(hold)
+            .combinedClickable(onClick = onClick),
+        shape = RoundedCornerShape(20.dp),
+        color = if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerLow else cat.categorySurface(),
+        shadowElevation = 2.dp
     ) {
         Row(
             modifier = Modifier
@@ -2909,12 +3093,15 @@ private fun greetingWordForNow(): String {
 // ═══════════════════════════════════════════════════════════════════════
 
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 private fun ExploreTopicRow(
     category: CurioCategory,
     topicName: String,
     subtitle: String,
     onClick: () -> Unit,
-    tag: String? = null
+    tag: String? = null,
+    // v3xx — the picker's radial hold session (menu opens at the finger).
+    hold: HoldSession? = null
 ) {
     val accent = category.themedAccent()
     // Solid category-tinted card in light mode — the recents topics wear a
@@ -2924,17 +3111,20 @@ private fun ExploreTopicRow(
     // category tint on pitch black).
     val rowShape = RoundedCornerShape(20.dp)
     Surface(
-        onClick = onClick,
-        shape = rowShape,
-        color = if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerLow else category.categorySurface(),
-        // v27u — recents rows sit on a soft 2dp lift.
-        shadowElevation = 2.dp,
         modifier = Modifier
             .fillMaxWidth()
             // v98 — dark pill: previous color + pill shape kept; the white
             // catch stays at the TOP EDGE only (curioGlassEdge) — the
             // full-pill inner glow is gone.
             .curioGlassEdge(rowShape)
+            // v3xx — hold the row for more actions (write / remove): the
+            // anchored radial menu, opened at the held spot.
+            .radialHoldMenu(hold)
+            .combinedClickable(onClick = onClick),
+        shape = rowShape,
+        color = if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerLow else category.categorySurface(),
+        // v27u — recents rows sit on a soft 2dp lift.
+        shadowElevation = 2.dp
     ) {
         Row(
             modifier = Modifier

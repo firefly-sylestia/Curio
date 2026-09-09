@@ -80,8 +80,12 @@ fun CurioEntryCard(
     // so opening the Cabinet does not allocate a new gradient for every card.
     // cardGradient reads MaterialTheme, so resolve it in the composable
     // scope before remembering the non-composable Brush allocation.
+    // v3xx — key on the gradient COLORS (value types), not the list: the
+    // old remember(headerGradient) keyed on a fresh List<Color> instance
+    // every recomposition, so the cache never hit and every card re-
+    // allocated its Brush on each recomposition (Cabinet first-open jank).
     val headerGradient = CurioGradients.cardGradient(accent)
-    val headerBrush = remember(headerGradient) {
+    val headerBrush = remember(headerGradient[0], headerGradient[1]) {
         Brush.verticalGradient(headerGradient)
     }
 

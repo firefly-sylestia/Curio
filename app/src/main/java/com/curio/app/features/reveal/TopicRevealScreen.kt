@@ -31,6 +31,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -48,6 +49,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -97,6 +99,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -134,6 +137,8 @@ import androidx.navigation.NavController
 import com.curio.app.R
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
+import com.curio.app.data.CurioCollection
+import com.curio.app.data.CurioCollectionMember
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioPassport
 import com.curio.app.data.CurioPet
@@ -150,6 +155,7 @@ import com.curio.app.data.ExploreSessionStore
 import com.curio.app.data.TourController
 import com.curio.app.data.MusicService
 import com.curio.app.data.TopicCatalog
+import java.util.UUID
 import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.TopicRepository
 import com.curio.app.data.buildEngineSearchUrl
@@ -168,6 +174,9 @@ import com.curio.app.data.coverSwatchesFromArgbs
 import com.curio.app.data.coverSwatchesToArgbs
 import com.curio.app.data.fetchCoverSwatches
 import com.curio.app.ui.components.RichTextEditor
+import com.curio.app.ui.components.TextHistoryBrowser
+import com.curio.app.ui.components.TextHistoryPill
+import com.curio.app.ui.components.rememberTextHistoryCapture
 import com.curio.app.data.openSearchUrl
 import com.curio.app.data.resolveAppleMusicItemUrl
 import com.curio.app.data.resolveSpotifyItemUrl
@@ -182,6 +191,7 @@ import com.curio.app.ui.adaptive.RevealSharedElementKey
 import com.curio.app.ui.adaptive.CurioContentMaxWidth
 import com.curio.app.features.settings.BookCoverFetch
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.CurioHoldPill
 import com.curio.app.ui.components.CurioProgressPill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.curioFloatingNavContainerFor
@@ -319,6 +329,15 @@ fun TopicRevealScreen(
     var selectedAlbumTrack by remember { mutableStateOf<AlbumTrack?>(null) }
     // v350 — the series episode-list sheet (album-style) for SERIES topics.
     var showSeriesSheet by rememberSaveable { mutableStateOf(false) }
+    // v3xx — the episode an EPISODES chip opens the series sheet at (null =
+    // opened from the poster card, list starts at the top). Mirrors the
+    // album sheet's [selectedAlbumTrack].
+    var selectedSeriesEpisode by remember { mutableStateOf<com.curio.app.data.SeriesEpisode?>(null) }
+    // v3xx — "File to collection…" (Cabinet 5.1): long-pressing the top bar
+    // surfaces a pill whose action opens the collection picker; the topic
+    // is pinned into the chosen collection.
+    var showFileToPill by remember { mutableStateOf(false) }
+    var showFileToSheet by remember { mutableStateOf(false) }
     // v371 — the topic SHARE sheet + chapter-note sharing live at FUNCTION
     // level: the Book Notes sheet (rendered later in this composable) opens
     // the share card hosted in the floating-bar block, so both states must
@@ -782,11 +801,17 @@ fun TopicRevealScreen(
                 .verticalScroll(revealScroll)
         ) {
         // ── 1. Top bar (category chip + pin bookmark + close ✕) ────────
+        // v3xx — LONG-PRESS the bar's empty space to File the topic into a
+        // Cabinet collection (hold → pill → "File to…", Cabinet 5.1). The
+        // children (year pill / pin / close) keep their own taps.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .statusBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 0.dp),
+                .padding(horizontal = 16.dp, vertical = 0.dp)
+                .pointerInput(Unit) {
+                    detectTapGestures(onLongPress = { showFileToPill = true })
+                },
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -972,17 +997,25 @@ fun TopicRevealScreen(
                 // ── 2.57 Series episode-list section (series only) ──────
                 // Mirrors the book + album sections: a poster card with the
                 // synopsis preview and episode count; tapping it opens the
-                // full-height episode-list sheet (v350). Gated on
-                // [contentUiReady] like the book/album sections so the poster
-                // lookup never competes with the card morph.
+                // full-height episode-list sheet (v350), and an EPISODES chip
+                // row jumps the sheet straight to an episode. v3xx — the
+                // section shows for EVERY series topic (not just those with
+                // authored episodes): series without an episode guide still
+                // get the poster + synopsis card (they used to show
+                // NOTHING). Gated on [contentUiReady] like the book/album
+                // sections so the poster lookup never competes with the
+                // card morph.
                 val seriesTopic = resolved
-                if (seriesTopic != null && contentUiReady && seriesTopic.categoryId == CategoryId.SERIES &&
-                    !seriesTopic.episodes.isNullOrEmpty()) {
+                if (seriesTopic != null && contentUiReady && seriesTopic.categoryId == CategoryId.SERIES) {
                     RevealContentEntrance(delayMillis = 60) {
                         SeriesInfoSection(
                             cat = cat,
                             topic = seriesTopic,
                             onOpenSheet = { showSeriesSheet = true },
+                            onEpisodeClick = { ep ->
+                                selectedSeriesEpisode = ep
+                                showSeriesSheet = true
+                            },
                             modifier = Modifier.padding(top = if (hasTags) 16.dp else progressFloatGap)
                         )
                     }
@@ -1208,7 +1241,9 @@ fun TopicRevealScreen(
 
     // v350 — the series episode-list sheet (album-style, mirrors the book /
     // album sheets): poster header + favorite heart, watched-progress rail,
-    // the synopsis accordion, then the episodes grouped by season.
+    // the synopsis accordion, then the episodes grouped by season. v3xx — an
+    // episode chip on the reveal opens it scrolled to (and pre-expanding)
+    // that episode, mirroring the album track chips.
     val seriesSheetTopic = resolved
     if (seriesSheetTopic != null && seriesSheetTopic.categoryId == CategoryId.SERIES &&
         showSeriesSheet && !seriesSheetTopic.episodes.isNullOrEmpty()
@@ -1216,7 +1251,35 @@ fun TopicRevealScreen(
         EpisodeNotesSheet(
             cat = cat,
             topic = seriesSheetTopic,
-            onDismiss = { showSeriesSheet = false }
+            episode = selectedSeriesEpisode,
+            onSelectEpisode = { selectedSeriesEpisode = it },
+            onDismiss = {
+                showSeriesSheet = false
+                selectedSeriesEpisode = null
+            }
+        )
+    }
+
+    // v3xx — "File to collection…" (Cabinet 5.1): the hold pill + the
+    // collection picker. Any topic (resolved or legacy-named) can be filed.
+    if (showFileToPill) {
+        CurioHoldPill(
+            title = resolved?.name ?: topicName,
+            actions = listOf(
+                "File to collection…" to {
+                    showFileToPill = false
+                    showFileToSheet = true
+                }
+            ),
+            onDismiss = { showFileToPill = false }
+        )
+    }
+    if (showFileToSheet) {
+        FileToCollectionSheet(
+            topicName = resolved?.name ?: topicName,
+            categoryId = cat.id,
+            context = context,
+            onDismiss = { showFileToSheet = false }
         )
     }
 
@@ -3211,7 +3274,12 @@ private fun BookNotesSheet(
                             contentAlignment = Alignment.Center
                         ) {
                             HeartGlyph(
-                                color = if (isFavBook) Color(0xFFE5484D) else onSurfaceVariant,
+                                // v3xx — dark mode: the unselected header
+                                // heart wears the light ink twin too (the
+                                // 0.66-lightness variant vanished on the
+                                // cover-tinted chip).
+                                color = if (isFavBook) Color(0xFFE5484D)
+                                        else sheetActionIconTone(ink, onSurfaceVariant),
                                 iconSize = 19.dp,
                                 filled = isFavBook
                             )
@@ -3385,8 +3453,13 @@ private fun BookNotesSheet(
                                                 // row an accent heart vanished into
                                                 // the tint; the ink tone keeps the
                                                 // heart visible on the tinted row.
+                                                // v3xx — dark mode: the unselected
+                                                // heart wears the full-strength ink
+                                                // twin so it never vanishes into the
+                                                // cover-tinted dark wash.
                                                 color = if (isLiked) Color(0xFFE5484D)
-                                                        else if (isOpen) ink else onSurfaceVariant,
+                                                        else if (isOpen) ink
+                                                        else sheetActionIconTone(ink, onSurfaceVariant),
                                                 iconSize = 16.dp,
                                                 filled = isLiked
                                             )
@@ -3414,8 +3487,12 @@ private fun BookNotesSheet(
                                         CurioIcon(
                                             CurioIcons.FoldedCorner,
                                             if (chDone) "Mark chapter unread" else "Mark chapter read",
+                                            // v3xx — dark mode: the unselected
+                                            // toggle wears the full-strength ink
+                                            // twin (see [sheetActionIconTone]).
                                             tint = if (chDone) onAccent
-                                                else if (isOpen) ink else onSurfaceVariant,
+                                                else if (isOpen) ink
+                                                else sheetActionIconTone(ink, onSurfaceVariant),
                                             size = 16.dp,
                                             modifier = Modifier.padding(6.dp)
                                         )
@@ -3521,6 +3598,12 @@ private fun BookNotesSheet(
     noteEditorChapter?.let { editCh ->
         val editText = chapterNotes[editCh.number].orEmpty()
         val editSpans = chapterNoteSpans[editCh.number].orEmpty()
+        // v3xx — text-history capture + browser inside the enlarged editor:
+        // the pill sits in the header (lifted above the keyboard by the
+        // dialog's imePadding) and restores write straight back into this
+        // chapter's note slot.
+        var noteHistoryOpen by remember { mutableStateOf(false) }
+        rememberTextHistoryCapture(context, "Chapter note", editText, "book|$bookName|ch|${editCh.number}")
         Dialog(
             onDismissRequest = { noteEditorChapter = null },
             properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -3529,7 +3612,10 @@ private fun BookNotesSheet(
                 Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.surface
             ) {
-                Column(Modifier.fillMaxSize().padding(20.dp)) {
+                // v3xx — imePadding lifts the sheet above the keyboard and
+                // the editor area scrolls, so a long note's text is always
+                // reachable and selectable without closing the keyboard.
+                Column(Modifier.fillMaxSize().imePadding().padding(20.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                         Text(
                             "Note · CH ${editCh.number}${editCh.title.takeIf { it.isNotBlank() }?.let { " — $it" } ?: ""}",
@@ -3539,6 +3625,8 @@ private fun BookNotesSheet(
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f)
                         )
+                        TextHistoryPill(onClick = { noteHistoryOpen = true })
+                        Spacer(Modifier.width(8.dp))
                         TextButton(onClick = { noteEditorChapter = null }) {
                             Text("Done", fontWeight = FontWeight.Bold)
                         }
@@ -3547,29 +3635,34 @@ private fun BookNotesSheet(
                     // v375 — rich editing: every change saves the text AND its
                     // runs together (blank clears both). The compact field
                     // below reflects the text; its own edits clear the runs.
-                    RichTextEditor(
-                        text = editText,
-                        spans = editSpans,
-                        onRichTextChange = { newText, spans ->
-                            AppPreferences.setBookChapterNote(
-                                context, bookName, editCh.number, newText.take(2000)
-                            )
-                            AppPreferences.setBookChapterNoteSpans(
-                                context, bookName, editCh.number,
-                                if (newText.isBlank()) emptyList() else spans
-                            )
-                        },
-                        modifier = Modifier
+                    Column(
+                        Modifier
+                            .weight(1f)
                             .fillMaxWidth()
-                            .weight(1f),
-                        placeholder = "Write your thoughts on this chapter…",
-                        minHeight = 140.dp,
-                        maxCharacters = 2000,
-                        accent = MaterialTheme.colorScheme.primary,
-                        ink = MaterialTheme.colorScheme.onSurface,
-                        surface = MaterialTheme.colorScheme.surfaceVariant,
-                        showFieldBorder = true
-                    )
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        RichTextEditor(
+                            text = editText,
+                            spans = editSpans,
+                            onRichTextChange = { newText, spans ->
+                                AppPreferences.setBookChapterNote(
+                                    context, bookName, editCh.number, newText.take(2000)
+                                )
+                                AppPreferences.setBookChapterNoteSpans(
+                                    context, bookName, editCh.number,
+                                    if (newText.isBlank()) emptyList() else spans
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = "Write your thoughts on this chapter…",
+                            minHeight = 140.dp,
+                            maxCharacters = 2000,
+                            accent = MaterialTheme.colorScheme.primary,
+                            ink = MaterialTheme.colorScheme.onSurface,
+                            surface = MaterialTheme.colorScheme.surfaceVariant,
+                            showFieldBorder = true
+                        )
+                    }
                     Spacer(Modifier.height(8.dp))
                     // Share the note straight to the share card as a Chapter
                     // review — no copy/paste, no re-typing. v375 — the note's
@@ -3601,6 +3694,24 @@ private fun BookNotesSheet(
                     }
                 }
             }
+        }
+        // v3xx — the text-history browser for this chapter's note: restoring
+        // writes straight back into the same AppPreferences slot (plain text;
+        // rich runs clear so the restored text renders exactly).
+        if (noteHistoryOpen) {
+            TextHistoryBrowser(
+                ctx = context,
+                activeField = "Chapter note",
+                onRestore = { restored ->
+                    AppPreferences.setBookChapterNote(
+                        context, bookName, editCh.number, restored.take(2000)
+                    )
+                    AppPreferences.setBookChapterNoteSpans(
+                        context, bookName, editCh.number, emptyList()
+                    )
+                },
+                onDismiss = { noteHistoryOpen = false }
+            )
         }
     }
 }
@@ -3650,7 +3761,11 @@ private fun ChapterNoteField(
         CurioIcon(
             CurioIcons.Note,
             if (value.isBlank()) "Add a note" else "Chapter note",
-            tint = if (isOpen) accent.copy(alpha = 0.9f) else ink.copy(alpha = 0.55f),
+            // v3xx — dark mode: the closed-state note glyph lifts to a
+            // stronger alpha so the "add note" affordance never vanishes
+            // into the cover-tinted dark row.
+            tint = if (isOpen) accent.copy(alpha = 0.9f)
+                else ink.copy(alpha = if (isCurioDarkTheme()) 0.9f else 0.55f),
             size = 15.dp
         )
         BasicTextField(
@@ -3686,7 +3801,8 @@ private fun ChapterNoteField(
             CurioIcon(
                 CurioIcons.Fullscreen,
                 "Expand note",
-                tint = if (isOpen) ink else ink.copy(alpha = 0.8f),
+                // v3xx — dark mode: the expand chip glyph stays full-strength.
+                tint = if (isOpen) ink else ink.copy(alpha = if (isCurioDarkTheme()) 1f else 0.8f),
                 size = 15.dp,
                 modifier = Modifier.padding(7.dp)
             )
@@ -3701,7 +3817,10 @@ private fun ChapterNoteField(
                 CurioIcon(
                     CurioIcons.Share,
                     "Share as chapter review",
-                    tint = if (isOpen) onAccent else accent,
+                    // v3xx — dark mode: the share glyph uses the light ink
+                    // twin — the dimmed accent vanished into the dark row.
+                    tint = if (isOpen) onAccent
+                        else if (isCurioDarkTheme()) ink else accent,
                     size = 15.dp,
                     modifier = Modifier.padding(7.dp)
                 )
@@ -3726,8 +3845,11 @@ private fun BookSynopsisAccordion(
     initiallyExpanded: Boolean,
     modifier: Modifier = Modifier,
     // v350 — the series episode sheet reuses this accordion; the label swaps
-    // to "ABOUT THIS SERIES" while the behaviour stays identical.
-    label: String = "ABOUT THIS BOOK"
+    // to "ABOUT THIS SERIES" while the behaviour stays identical. v3xx — the
+    // glyph swaps too: the series sheet passes its own TV/clapperboard icon
+    // so a series never wears the book icon.
+    label: String = "ABOUT THIS BOOK",
+    icon: String = CurioIcons.MenuBook
 ) {
     var expanded by remember(initiallyExpanded) { mutableStateOf(initiallyExpanded) }
     Surface(
@@ -3753,7 +3875,7 @@ private fun BookSynopsisAccordion(
                     color = accent.copy(alpha = 0.16f)
                 ) {
                     CurioIcon(
-                        CurioIcons.MenuBook,
+                        icon,
                         null,
                         tint = ink,
                         size = 15.dp,
@@ -4490,7 +4612,12 @@ private fun AlbumNotesSheet(
                                     CurioIcon(
                                         srv.icon,
                                         "Open in ${srv.label}",
-                                        tint = accent,
+                                        // v3xx — dark mode: the LISTEN menu's
+                                        // service icons use the light variant
+                                        // tone — the dark accent vanished on
+                                        // the dropdown's dark surface.
+                                        tint = if (isCurioDarkTheme())
+                                            MaterialTheme.colorScheme.onSurfaceVariant else accent,
                                         size = 18.dp
                                     )
                                 }
@@ -4602,18 +4729,21 @@ private fun AlbumNotesSheet(
                                         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                         AppPreferences.toggleAlbumFavoriteTrack(context, topic.name, tr.title)
                                     }
-                            ) {
-                                HeartGlyph(
-                                    // v375 — full-strength onAccent on the solid
-                                    // accent selected row (the old 85% fade + weak
-                                    // onAccent made the heart nearly invisible).
-                                    color = if (fav) Color(0xFFE5484D)
-                                            else if (selected) onAccent
-                                            else onSurfaceVariant.copy(alpha = 0.6f),
-                                    iconSize = 18.dp,
-                                    filled = fav,
-                                    modifier = Modifier.align(Alignment.Center)
-                                )
+                            ) {                                            HeartGlyph(
+                                                // v375 — full-strength onAccent on the solid
+                                                // accent selected row (the old 85% fade + weak
+                                                // onAccent made the heart nearly invisible).
+                                                // v3xx — dark mode: the unselected heart wears
+                                                // the full-strength ink twin at FULL alpha (the
+                                                // old 0.6-alpha variant vanished into the
+                                                // cover-tinted dark wash).
+                                                color = if (fav) Color(0xFFE5484D)
+                                                        else if (selected) onAccent
+                                                        else sheetActionIconTone(ink, onSurfaceVariant, alpha = 0.6f),
+                                                iconSize = 18.dp,
+                                                filled = fav,
+                                                modifier = Modifier.align(Alignment.Center)
+                                            )
                             }
                         }
                     }
@@ -4658,10 +4788,14 @@ private fun SeriesInfoSection(
     cat: com.curio.app.data.CurioCategory,
     topic: CurioTopic,
     onOpenSheet: () -> Unit,
+    onEpisodeClick: (com.curio.app.data.SeriesEpisode) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // v3xx — the section shows for EVERY series topic: series without an
+    // authored episode guide still get the poster + synopsis card (they
+    // used to render NOTHING at all). The episode chips row only appears
+    // when there is a guide to jump into.
     val episodes = topic.episodes.orEmpty()
-    if (episodes.isEmpty()) return
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -4672,6 +4806,13 @@ private fun SeriesInfoSection(
             episodes = episodes,
             onClick = onOpenSheet
         )
+        if (episodes.isNotEmpty()) {
+            SeriesEpisodeChips(
+                cat = cat,
+                episodes = episodes,
+                onEpisodeClick = onEpisodeClick
+            )
+        }
     }
 }
 
@@ -4685,7 +4826,8 @@ private fun SeriesPosterCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val seasonCount = episodes.map { it.season }.distinct().size
+    val hasEpisodes = episodes.isNotEmpty()
+    val seasonCount = if (hasEpisodes) episodes.map { it.season }.distinct().size else 0
     Surface(
         shape = RoundedCornerShape(24.dp),
         color = cat.categorySurface(MaterialTheme.colorScheme.surface),
@@ -4719,18 +4861,20 @@ private fun SeriesPosterCard(
                     color = cat.categoryInk()
                 )
                 Spacer(Modifier.weight(1f))
-                val meta = buildString {
-                    append("${episodes.size} episode")
-                    if (episodes.size != 1) append("s")
-                    if (seasonCount > 1) append(" · $seasonCount seasons")
+                if (hasEpisodes) {
+                    val meta = buildString {
+                        append("${episodes.size} episode")
+                        if (episodes.size != 1) append("s")
+                        if (seasonCount > 1) append(" · $seasonCount seasons")
+                    }
+                    Text(
+                        text = meta,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
-                Text(
-                    text = meta,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
             }
 
             Spacer(Modifier.height(12.dp))
@@ -4770,7 +4914,7 @@ private fun SeriesPosterCard(
                             maxLines = 4,
                             overflow = TextOverflow.Ellipsis
                         )
-                    } else {
+                    } else if (hasEpisodes) {
                         episodes.take(4).forEach { ep ->
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -4804,6 +4948,101 @@ private fun SeriesPosterCard(
                     modifier = Modifier.align(Alignment.End)
                 )
             }
+        }
+    }
+}
+
+/** EPISODES chip row — mirror of the album TRACKS chips: taps jump the
+ *  episode-list sheet straight to that episode. Only shown when the topic
+ *  has an authored episode guide. */
+@Composable
+private fun SeriesEpisodeChips(
+    cat: com.curio.app.data.CurioCategory,
+    episodes: List<com.curio.app.data.SeriesEpisode>,
+    onEpisodeClick: (com.curio.app.data.SeriesEpisode) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(bottom = 8.dp)
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerHigh)
+            ) {
+                CurioIcon(
+                    name = CurioIcons.Movies,
+                    contentDescription = null,
+                    tint = cat.categoryInk(),
+                    size = 16.dp,
+                    modifier = Modifier.padding(7.dp)
+                )
+            }
+            Text(
+                text = "EPISODES".uppercase(),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 1.2.sp
+                ),
+                color = cat.categoryInk()
+            )
+            Text(
+                text = "${episodes.size}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(horizontal = 4.dp)
+        ) {
+            itemsIndexed(episodes) { _, ep ->
+                SeriesEpisodeChip(
+                    cat = cat,
+                    episode = ep,
+                    onClick = { onEpisodeClick(ep) }
+                )
+            }
+        }
+    }
+}
+
+/** One episode chip — S1E1 key + title (compact, no summary). */
+@Composable
+private fun SeriesEpisodeChip(
+    cat: com.curio.app.data.CurioCategory,
+    episode: com.curio.app.data.SeriesEpisode,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = cat.categorySurface(MaterialTheme.colorScheme.surfaceContainerLow),
+        shadowElevation = 2.dp,
+        modifier = modifier
+            .width(170.dp)
+            .height(64.dp)
+            .clickable(onClick = onClick)
+    ) {
+        Column(
+            modifier = Modifier.padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            Text(
+                text = episode.key(),
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                color = cat.categoryInk(),
+                maxLines = 1
+            )
+            Text(
+                text = episode.title,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
@@ -4879,6 +5118,8 @@ private fun SeriesPoster(
 private fun EpisodeNotesSheet(
     cat: com.curio.app.data.CurioCategory,
     topic: CurioTopic,
+    episode: com.curio.app.data.SeriesEpisode? = null,
+    onSelectEpisode: (com.curio.app.data.SeriesEpisode) -> Unit = {},
     onDismiss: () -> Unit
 ) {
     val episodes = topic.episodes.orEmpty()
@@ -4946,9 +5187,36 @@ private fun EpisodeNotesSheet(
     // v352 — per-episode Like hearts (show name → liked "S1E3" keys).
     val episodeLikes = AppPreferences.seriesEpisodeLikesState[showName].orEmpty()
     val watchedTotal = episodes.count { it.key() in watchedKeys }
-    var expandedKey by rememberSaveable { mutableStateOf<String?>(null) }
+    // The episode an EPISODES chip opened the sheet at (null = opened from
+    // the poster card, the list starts at the top). Pre-expands that
+    // episode's summary card and scrolls it into view, mirroring the album
+    // sheet's track jump.
+    val currentEpisode = episode
+    var expandedKey by rememberSaveable { mutableStateOf<String?>(episode?.key()) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val listState = rememberLazyListState()
+    // List index of an episode: the optional synopsis accordion first, then
+    // per season a header row followed by its episode rows.
+    fun episodeListIndex(target: com.curio.app.data.SeriesEpisode): Int {
+        var idx = if (hasSynopsis) 1 else 0
+        for (season in seasons) {
+            val seasonEps = episodes.filter { it.season == season }
+            if (season == target.season) {
+                return idx + seasonEps.indexOfFirst { it.key() == target.key() }.coerceAtLeast(0)
+            }
+            idx += 1 + seasonEps.size
+        }
+        return idx
+    }
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = if (currentEpisode != null)
+            episodeListIndex(currentEpisode)
+        else 0
+    )
+    LaunchedEffect(currentEpisode?.key()) {
+        if (currentEpisode != null && episodes.size > 1) {
+            listState.animateScrollToItem(episodeListIndex(currentEpisode))
+        }
+    }
 
     fun toggleEpisode(ep: com.curio.app.data.SeriesEpisode) {
         expandedKey = if (expandedKey == ep.key()) null else ep.key()
@@ -5037,7 +5305,12 @@ private fun EpisodeNotesSheet(
                             contentAlignment = Alignment.Center
                         ) {
                             HeartGlyph(
-                                color = if (isFavSeries) Color(0xFFE5484D) else onSurfaceVariant,
+                                // v3xx — dark mode: the unselected header
+                                // heart wears the light ink twin too (the
+                                // 0.66-lightness variant vanished on the
+                                // cover-tinted chip).
+                                color = if (isFavSeries) Color(0xFFE5484D)
+                                        else sheetActionIconTone(ink, onSurfaceVariant),
                                 iconSize = 19.dp,
                                 filled = isFavSeries
                             )
@@ -5111,7 +5384,10 @@ private fun EpisodeNotesSheet(
                             onSurface = onSurface,
                             synopsis = topic.synopsis.orEmpty(),
                             initiallyExpanded = !hasSynopsis || episodes.isEmpty(),
-                            label = "ABOUT THIS SERIES"
+                            label = "ABOUT THIS SERIES",
+                            // v3xx — the series sheet's accordion wears the
+                            // TV/clapperboard glyph, never the book icon.
+                            icon = CurioIcons.Movie
                         )
                     }
                 }
@@ -5146,7 +5422,10 @@ private fun EpisodeNotesSheet(
                         val isOpen = expandedKey == ep.key()
                         val isWatched = ep.key() in watchedKeys
                         Surface(
-                            onClick = { toggleEpisode(ep) },
+                            onClick = {
+                                toggleEpisode(ep)
+                                onSelectEpisode(ep)
+                            },
                             shape = RoundedCornerShape(14.dp),
                             // v371 — soft accent TINT over the surface for
                             // the open episode (mirrors the book chapter
@@ -5249,8 +5528,13 @@ private fun EpisodeNotesSheet(
                                                 // row an accent heart vanished into
                                                 // the tint; the ink tone keeps the
                                                 // heart visible on the tinted row.
+                                                // v3xx — dark mode: the unselected
+                                                // heart wears the full-strength ink
+                                                // twin so it never vanishes into the
+                                                // cover-tinted dark wash.
                                                 color = if (isLiked) Color(0xFFE5484D)
-                                                        else if (isOpen) ink else onSurfaceVariant,
+                                                        else if (isOpen) ink
+                                                        else sheetActionIconTone(ink, onSurfaceVariant),
                                                 iconSize = 16.dp,
                                                 filled = isLiked
                                             )
@@ -5277,7 +5561,11 @@ private fun EpisodeNotesSheet(
                                         CurioIcon(
                                             CurioIcons.FoldedCorner,
                                             if (isWatched) "Mark episode unwatched" else "Mark episode watched",
-                                            tint = if (isWatched) onAccent else onSurfaceVariant,
+                                            // v3xx — dark mode: the unselected
+                                            // toggle wears the full-strength ink
+                                            // twin (see [sheetActionIconTone]).
+                                            tint = if (isWatched) onAccent
+                                                else sheetActionIconTone(ink, onSurfaceVariant),
                                             size = 16.dp,
                                             modifier = Modifier.padding(6.dp)
                                         )
@@ -5437,6 +5725,19 @@ private fun AlbumSynopsisAccordion(
  * and it exports identically through the share-card software pipeline).
  * [iconSize] avoids shadowing DrawScope.size.
  */
+/** v3xx — dark-mode ACTION-ICON tone for the notes sheets (book chapters /
+ *  album tracks / series episodes): unselected sheet actions — the favorite
+ *  hearts, the read/watched toggles, the note chips — must stay clearly
+ *  visible on the cover-TINTED dark washes. The palette's [variant]
+ *  (onSurfaceVariant, 0.66 lightness) and its dimmed alpha versions drop
+ *  below small-icon contrast on the 0.20–0.27 containers, reading as dark
+ *  blobs in dark mode. Dark mode resolves the full-strength [ink] twin
+ *  (0.88 lightness) instead; light mode keeps [variant] (at [alpha] when
+ *  provided) exactly as before. */
+@Composable
+private fun sheetActionIconTone(ink: Color, variant: Color, alpha: Float = 1f): Color =
+    if (isCurioDarkTheme()) ink else variant.copy(alpha = alpha)
+
 @Composable
 private fun HeartGlyph(
     color: Color,
@@ -6087,3 +6388,183 @@ private fun hasNotificationPermission(context: Context): Boolean =
     Build.VERSION.SDK_INT < 33 ||
         ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
         PackageManager.PERMISSION_GRANTED
+
+/**
+ * v3xx — "File to collection…" (Cabinet 5.1): pin [topicName] into a
+ * collection. The sheet lists the user's collections (already-filed ones
+ * wear a check) plus a create-on-the-spot path; no duplicates are ever
+ * written (tapping an already-filed collection just dismisses).
+ */
+@Composable
+private fun FileToCollectionSheet(
+    topicName: String,
+    categoryId: CategoryId,
+    context: Context,
+    onDismiss: () -> Unit
+) {
+    val collections = AppPreferences.collectionsState
+    val haptics = LocalHapticFeedback.current
+    var creating by rememberSaveable { mutableStateOf(false) }
+    var newName by rememberSaveable { mutableStateOf("") }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 24.dp)
+        ) {
+            Text(
+                text = "File to collection",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = topicName,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (creating) {
+                OutlinedTextField(
+                    value = newName,
+                    onValueChange = { newName = it },
+                    singleLine = true,
+                    label = { Text("Collection name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Surface(
+                    onClick = {
+                        val name = newName.trim().ifBlank { "Collection" }
+                        val id = UUID.randomUUID().toString()
+                        AppPreferences.addOrReplaceCollection(
+                            context,
+                            CurioCollection(
+                                id = id,
+                                name = name,
+                                createdAtMillis = System.currentTimeMillis(),
+                                members = listOf(CurioCollectionMember(
+                                    kind = CurioCollectionMember.MemberKind.TOPIC,
+                                    categoryName = categoryId.name,
+                                    refName = topicName
+                                ))
+                            )
+                        )
+                        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                        onDismiss()
+                    },
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.fillMaxWidth().height(46.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "Create & file",
+                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
+            } else {
+                if (collections.isEmpty()) {
+                    Text(
+                        text = "No collections yet — create one below.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                collections.forEach { c ->
+                    val has = c.members.any {
+                        it.kind == CurioCollectionMember.MemberKind.TOPIC &&
+                            it.categoryName == categoryId.name && it.refName == topicName
+                    }
+                    Surface(
+                        onClick = {
+                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            if (!has) {
+                                AppPreferences.addOrReplaceCollection(
+                                    context,
+                                    c.copy(members = c.members + CurioCollectionMember(
+                                        kind = CurioCollectionMember.MemberKind.TOPIC,
+                                        categoryName = categoryId.name,
+                                        refName = topicName
+                                    ))
+                                )
+                            }
+                            onDismiss()
+                        },
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 11.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Inventory2,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                size = 17.dp
+                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = c.name,
+                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = "${c.members.size} item${if (c.members.size == 1) "" else "s"}",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            CurioIcon(
+                                name = if (has) CurioIcons.Check else CurioIcons.ChevronRight,
+                                contentDescription = if (has) "Already in this collection" else null,
+                                tint = if (has) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                size = 18.dp
+                            )
+                        }
+                    }
+                }
+                Surface(
+                    onClick = { creating = true },
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.13f),
+                    modifier = Modifier.fillMaxWidth().height(44.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Add,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                size = 17.dp
+                            )
+                            Text(
+                                text = "New collection…",
+                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

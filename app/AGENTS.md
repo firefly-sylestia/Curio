@@ -610,6 +610,518 @@ app/src/main/java/com/curio/app/
   `drop(1)`) to new `KEY_PICKER_PAGE0_SCROLL` / `KEY_PICKER_PAGE1_SCROLL`
   ("index:offset") behind `AppPreferences.PickerScrollPos`
   get/set helpers — survives closing the picker AND app restarts.
+- **v3xx15 — Cabinet v2 liked-row fixes + polaroid on every style, no photo
+  required.** (1) **Kind-aware liked resolution** (`findLikedTopic` in
+  CabinetV2Content.kt): liked books/series/albums search their CANONICAL lane
+  first (BOOKS/ALBUMS/SERIES — where the reveal hearts live) before the
+  global `TopicCatalog.findByName`, which walks lanes in enum order and
+  strict base-name-matched "Animal Farm" (the book) to "Animal Farm (1954)"
+  (the animated film) because ANIMATED_MOVIES precedes BOOKS. (2) **Rows
+  always open:** `V2Liked.open()` no longer silently no-ops when the topic
+  hasn't resolved yet (cold start before the lane pools warm) — it falls
+  back to the kind's canonical lane slug + name, and the reveal's
+  Room-backed per-category resolution finds the real topic. (3) **Label
+  contrast:** the liked-row kind/category label now uses `categoryInk()`
+  (theme-aware deep/light twin) instead of the raw accent, which blended
+  into the `categorySurface`-tinted row. (4) **Polaroid on all styles, no
+  photo needed:** the non-Collage print gate dropped `userPhoto != null`
+  (render + the sheet/full-screen Polaroid TOOL buttons are now always
+  available) — the print shows whenever `move.polaroidOnCard` is on, and
+  without a photo it renders the designed empty frame (camera hint, tap to
+  add photo) exactly like Collage; the sizing block null-guards `userPhoto`.
+- **v3xx16 — Cabinet v2 COLLECTIONS (the 5.1 plan) + UI consistency + Recents
+  tap-to-open.** (1) **Collections data layer** — `AppPreferences` gains
+  `CurioCollection` / `CurioCollectionMember` (kind TOPIC = pinned topic via
+  categoryName=CategoryId.name + refName; ENTRY = saved entry by stable Room
+  id), persisted as a JSON array under `KEY_CABINET_COLLECTIONS`, reactive
+  via `collectionsState`, with `get/saveCabinetCollections`,
+  `addOrReplaceCollection` (upsert by id), `deleteCollection`. (2) **v2
+  restyle** — CabinetV2Content now wears the classic torn Cabinet hero
+  (`CabinetHeroHeader`/`CabinetHeroActionPill`/`CabinetHeroBannerHeight*`
+  made `internal` in CabinetScreen.kt) with liquid-glass pills + hero search;
+  the grid clears the fixed banner (`contentTop`). (3) **Collections home**
+  — an Everything card (3×2 `V2CoverCollage` of `V2Liked` cover plates) +
+  one card per collection + New tile; empty Cabinet shows 3 suggested
+  discoveries + Shuffle (existing v2 behavior). (4) **Collection detail** —
+  members render saved entries as `CurioEntryCard`s and pinned topics as
+  `V2LikedRow`s; long-press a member → `CurioHoldPill` Move up/down/Remove
+  (`moveMember`/`removeMember` — reorder changes the folder's cover); Add
+  multi-select sheet (`V2AddEntriesSheet`); kebab → rename/delete. (5)
+  **Create from moodboard** — the create sheet lists GalleryWall captures;
+  picking one creates a collection pre-filled with that entry. (6) **Reveal
+  File-to** — TopicRevealScreen long-presses the top bar
+  (`detectTapGestures(onLongPress)` on the header Row) → `CurioHoldPill` →
+  `FileToCollectionSheet` (check-marked already-filed collections, create on
+  the spot, no duplicates). (7) **Recents tap-to-open** — RecentScreen +
+  Home preview rows now default-tap into the REVEAL page (topic stays open);
+  the write/save/open-entry actions moved to long-press → `CurioHoldPill`
+  (`optionItem`/`recentOption` state), with `removeExplored` on the
+  destructive action. (8) **Book browser restyle** — BookBrowserScreen wears
+  the settings-family torn rose hero (`SettingsHeroHeader` + `SearchOff`
+  empty state + `CurioVerticalScrollIndicator` + hero search), matching
+  Recents / Manage Categories.
+- **v3xx17 — experiment removals + app-wide header style.** (1) **Classic
+  picker removed** — `CategoryPickerContent`'s route (`CurioRoutes`
+  import + registration in CurioNavHost), the `KEY_CLASSIC_PICKER` pref +
+  `classicPickerEnabledState` + SpinScreen branch are gone; the new picker
+  is the only picker (`CategoryPickerScreen.kt` itself stays — it hosts
+  `PickerMode`, which NewCategoryPicker still uses). (2) **Promo mode
+  removed fully** — `PromoMode.kt`/`PromoModeScreen.kt` deleted, `PROMO`
+  route gone, `KEY_PROMO_MODE`/`promoModeState`/`setPromoModeEnabled` gone,
+  demo branches stripped from Home (stats, recents preview, View-all gate),
+  Profile (streak/saved/xp), Quests (xp), Cabinet (entries + long-press
+  gate); `TopicCatalog.sampleEntries()` stays as the harmless fallback for
+  `sample-*` ids in EntryDetail/SaveCapture. (3) **Blur experiments
+  removed** — `legacyGlassBlurState`/`customBlurEngineState` + their prefs
+  and the `LegacyGlassBlur.kt` + `CurioBlur.kt` files deleted; the
+  NavHost's legacy snapshotter plumbing and LiquidGlassPills' legacy
+  capture import gone; pre-Android-12 pills always serve the static
+  `fauxGlassCapsule` veil and the glass widget always uses system blur
+  (the `getWallpaper` custom-blur path deleted from GlassWidgetProvider).
+  (4) **Glass widget lab removed** — `GlassWidgetLabScreen.kt` +
+  `GLASS_WIDGET_LAB` route + the clock (`AnalogClockWidgetProvider` +
+  `glass_analog_*` res) and streak-circle (`FireWidgetProvider` +
+  `fire_widget_*` res) home-screen widgets deleted from the manifest;
+  the tile widget (`GlassWidgetProvider`) + editor
+  (`GlassWidgetEditorScreen`) stay. (5) **Subtle pill glow hardcoded** —
+  `curioGlassEdge`/`curioInnerGlow` read `subtle = true` directly,
+  `KEY_PILL_GLOW_SUBTLE` + toggle plumbing removed from both experiments
+  screens. (6) **Live explore notification always on** —
+  `isLiveNotificationsEnabled()` now returns `true` (the persistent
+  chronometer notification shows whenever sessions run + permission
+  granted); the toggle rows, `KEY_LIVE_NOTIFICATIONS_ENABLED` and the
+  NavHost's bring-the-bubble-back fallback are gone. (7) **Glass toolbar
+  header style** — new `AppPreferences.HeaderStyle` (TORN default /
+  GLASS), `KEY_HEADER_STYLE` + `get/setHeaderStyle`, toggled from a
+  "Glass toolbar header" switch in BOTH experiments screens (Headers
+  section). The new `CurioGlassToolbar` composable
+  (ui/components/CurioGlassToolbar.kt) is a content-height liquid-glass
+  bar (rose-tinted `lerp(surfaceContainerHigh, settingsRoseAccent)`,
+  1.6× `blurMultiplier` frost, bottom-rounded capsule, own back pill +
+  optional trailing pills / morph-open search / titleTrailing / content
+  slot) and replaces the torn banner in `SettingsHeroHeader`,
+  `CabinetHeroHeader`, `HomeScreen`'s quest hero and `ProfileHero` (Spin
+  untouched). Height reservations became style-aware: `SettingsHeroTotalHeight`
+  (160dp glass), `CabinetHeroBannerHeight`/`Compact`/`SheetExtent`
+  (160/160/0 glass), `ProfileHeroTotalHeight` (230dp glass).
+  **SAFETY:** the Home toolbar deliberately passes NO glassBackdrop — it
+  is the first item of the scroll Column INSIDE `homeGlassBackdrop`'s
+  capture subtree, so sampling it would be the v228 self-capture cycle;
+  it falls back to the simulated-glass recipe. Settings/Cabinet heroes
+  keep real glass via their v263 sibling-overlay capture (hero drawn
+  OUTSIDE the recorded grid).
+- **v3xx18 — Home/Profile glass headers MORPH with scroll.** The Home and
+  Profile glass toolbars are no longer static content-height bars: new
+  `CurioGlassToolbarMorph` (ui/components/CurioGlassToolbar.kt) is a
+  PINNED collapsing header (sibling overlay OUTSIDE the local glass
+  capture — Home's `homeGlassBackdrop`, Profile's `profileGlassBackdrop` —
+  so it samples the REAL backdrop, fixing the old in-capture simulated-
+  glass fallback). At the top it is the full bar (menu/back pill + title
+  + subtitle + avatar + the stat row); scrolling collapses it smoothly
+  (FastOutSlowIn, height lerps from the measured full height down to
+  `HomeCompactHeaderHeight`/`ProfileCompactHeaderHeight` = 54dp, full
+  content fades out rising while the compact row — avatar + display name
+  ("Curious Explorer") — fades in; `Modifier.layout` measures the natural
+  height once and reports the animated height, `clipToBounds` trims).
+  Home's floating menu/avatar pills and Profile's pinned Back/Settings
+  pills are HIDDEN in the glass style (the morph bar carries its own
+  menu/back + avatar/settings pills); `HomeScreen`'s scroll hero slot
+  became a `Spacer(HomeCompactHeaderHeight)` and `ProfileHero`'s glass
+  branch a `Spacer(ProfileCompactHeaderHeight)` for the collapsed-bar
+  clearance (content flows beneath the pinned bar). Scroll progress is
+  the existing `stickyProgress` (90dp threshold) on both screens.
+- **v3xx19 — morph-header refinement (user follow-up).** (1) The FULL
+  (not-scrolled) state is now MORE EXPANDED and shows the stats as a
+  proper stat CARD — the torn hero's rose-gradient pane (`curioDarkGlow`
+  + `shadow(clip=false)` + opaque `lerp(container, White, 0.06→0.26)`
+  vertical gradient, 20dp rounded) wraps the `content` slot, and the
+  title row breathes (top 14 / bottom 8). (2) The COMPACT bar now carries
+  glass pills beside the name: the STREAK pill (fire + days → opens
+  Quests) and the EDIT pill (Profile only → opens the Edit-profile
+  dialog), built on the same rose pill glass as the leading pill
+  (`streakCount`/`onStreakClick`/`onEditClick` params). `trailing`
+  (Profile's Settings pill) now rides the FULL row only — the collapsed
+  bar keeps avatar + name + streak + edit.
+- **v3xx20 — Cabinet FOLDERS (the JSX redesign, user-directed).** The
+  experimental Cabinet v2 view is rebuilt to the `Curio_Cabinet_Reimagined.jsx`
+  design (user's ask; scope answered: replace v2 behind the same toggle,
+  keep the torn rose hero, saved entries keep `CurioEntryCard`, "Add
+  something new" → Spin): (1) **Home order** — a JSX-style **Everything
+  card** (frosted icon tile + title + circular arrow + a media rail of the
+  user's REAL liked book/album/series jacket art + a "+" slot + item
+  count; tap → Everything library) → **Saved entries** section (classic
+  `CurioEntryCard` grid, tap opens, long-press multi-select batch delete
+  unchanged) → **Collections** section. (2) **Built-in shelves** — 7
+  JSX-style shelf cards (`features/cabinet/CabinetShelves.kt`, new):
+  `builtInShelves` (Favorites · Currently Reading · Want to Read · Saved
+  entries · Completed · Notes · Personal), each with a pastel tone
+  (light/dark pairs), a glyph, an item count and hand-drawn decorative
+  art (`V2ShelfArt` — star+mountain, open book, stacked books, hills,
+  paper stack, window, photos — Canvas + glyphs, theme-aware). The three
+  VIRTUAL shelves (Favorites = liked books/series/albums, Saved entries =
+  all captures, Notes = note-format captures) are computed live
+  (`shelf:*` levels via `v2VirtualShelfItems`); the four STARTER shelves
+  (Currently Reading / Want to Read / Completed / Personal) are seeded
+  ONCE as ordinary editable `CurioCollection`s (ids `shelf:*`, new
+  `KEY_CABINET_SHELVES_SEEDED` + `seedCabinetShelves` + state sync), so
+  add-captures / reveal File-to / rename / delete all work on them.
+  USER collections cycle a tone+art palette and keep the long-press
+  rename/delete pill. (3) **Everything library rebuilt** — the old
+  collapsible section lists are gone; the page now matches the JSX:
+  Filter + Sort pills (DropdownMenus), a grid/list view toggle, a type
+  filter rail (`TYPE_FILTERS`: All · Books · Albums · Series · Notes ·
+  Moodboards · Reviews, mapped to real kinds/formats via
+  `entryInType`/`likedShownForType`), a Recent rail (newest 6 captures,
+  `LazyRow` of `CurioEntryCard`), an All Items grid/list (entries as
+  `CurioEntryCard`, likes as new `V2LikedTileCard` jacket tiles /
+  `V2LikedRow` in list mode), and an "Add something new" button
+  (`V2AddSomethingButton` → `navigateToTab(SPIN)`). Multi-select batch
+  delete is preserved on the library page; select-all scope is now
+  level-aware (`visibleIds`). Deleted from the old v2: `V2CollectionCard`
+  (3×2 collage), `V2CoverCollage`, `V2PlainHeader`, `V2SectionHeader`
+  (collapsible sections) and the formatFilter/availableFormats chips.
+- **v3xx21 — Home header revert (morph = Profile-only) + pet fix + share-
+  card NO-overlap / NO-cut fit.** (1) **Home reverted** (user direction
+  2026-09-08: the morph belonged to PROFILE — "why did you implement the
+  profile look in home screen, apply that in profile and keep home as it
+  was"): the pinned `CurioGlassToolbarMorph` is GONE from `HomeScreen`;
+  Home is back to the pre-morph glass state — the STATIC content-height
+  `CurioGlassToolbar` as the first scroll item (glass style) or the torn
+  rose hero, plus the always-floating menu/avatar pills (`stickyProgress`
+  morph). The pinned full-width bar was covering the flower-bed pet while
+  it scrolled — the revert fixes that too. PROFILE keeps the morph
+  (v3xx18/19 unchanged). (2) **Share-card smart fit — no-clip guarantee**
+  (TopicShareCard.kt): `autoFitShape` now sizes the fact TEXT so the
+  WHOLE fact always fits its box — past the design's text floor the type
+  keeps shrinking (down to `FactFitHardFloor` 0.5×) instead of
+  ellipsizing; the box-growth caps were reverted to their validated
+  heights (Paper 1.85/1.8, mid-flow else 1.45/1.4) so the box never
+  touches the footer/title/card edge — v3xx31 later raised the 9:16 caps
+  and added the real geometry bounds (real-width measurement, free-
+  middle clamp, maxLines capacity bound) that supersede these static
+  caps (see v3xx31). Fit math is per-style:
+  `factBoxBaseLines(style, aspect)` (each style's natural line capacity)
+  and `factWrapFactor(style)` (Vinyl's narrow 220dp pane wraps ~1.15×
+  the canonical 252dp width), with a 0.85 safety margin over the
+  measured wrap count. (3) **Sparkle: dragged-over title returns to the top** — a title
+  the user MANUALLY dragged into the quick fact (or info rows,
+  `move.titlePlaced`) is RESET to its natural spot on the sparkle tap
+  (`resetTitleY` on `ShareAutoLayoutPlan`; commit zeroes `titleDx`/
+  `titleDy` and clears `titlePlaced`) instead of the old minimal-lift
+  guess; only the prospective grown-fact lift applies on top, and the
+  title-vs-fact overlap is excluded from the fact push. (4) **Collage
+  polaroid** — `PolaroidPrint(shadow = false)` on the Collage: the dark
+  `shadowElevation` blur behind the TILTED cream print read as a
+  "background showing behind the strip" (preview AND export); the tape +
+  tilt keep the scrapbook depth. Other styles keep the shadow.
+- **v3xx32 — Inline fact-editor caret ACCURACY (user follow-up 2026-09-08:
+  "the cursor in the inline editor is still wrong when I tap to edit — it's
+  very inaccurate, due to the hidden text small — fix it in both full
+  screen and bottom sheet").** Root cause: the invisible typing field's
+  style came from the card's `onFactStyle` report, which fired only inside
+  `onGloballyPositioned` — i.e. when the fact box's BOUNDS move. When the
+  smart fit shrinks the text inside a box that is clipped at its maxLines
+  cap (the node's bounds stay put), the report went STALE — the field
+  kept the old (bigger) size while the visible glyphs rendered smaller,
+  so the caret and tap-to-position landed off the visible text. Fix:
+  every style now re-reports its fact style on EVERY composition
+  (`LaunchedEffect(style) { callbacks.onFactStyle(style) }` after the
+  style val in Vinyl / Collage / Clean / Editorial (`bodyStyle`) /
+  Minimal / Signature / Custom / MiddleContent's `qStyle` + `frostStyle`)
+  — the field always uses the CURRENT rendered size (family, size, line
+  height, align, format tweaks). Second divergence fixed: the field now
+  seeds its `TextFieldValue` with the SAME annotated runs the card renders
+  (`buildRichAnnotated(factFieldText, unshifted cardFactSpans, marker)`)
+  so bold/italic/highlight and the enlarge-editor's per-run FONT SIZES
+  wrap identically in the field (the caret stays on the glyphs even on
+  sized runs); a span-only change (format toggle) refreshes the annotation
+  while preserving the live selection. Both the bottom-sheet preview and
+  the full-screen editor share the one ArrangeableCard field, so both are
+  fixed by these two changes.
+- **v3xx31 — Share-card smart-fit OVERHAUL (user follow-up 2026-09-08:
+  "the spark pill struggles with longer texts — it doesn't increase the
+  box height fully / place them properly / shrink the text, especially in
+  the Clean layout 9:16; the fit + font-size decrease should happen
+  within the slider, not hidden").** `TopicShareCard.kt` — five concrete
+  bugs fixed + the solver got real geometry: (1) **REAL-WIDTH wrap
+  measurement** — `rememberFactWrapLines` now measures at
+  `FactWrapMeasureWidth` = 252dp (the 280dp-base preview's content
+  width) instead of the DESIGN width (405/450dp): the old measurement
+  under-counted wraps by ~1.5× (previews render at 280dp; Clean's 30/26
+  padding leaves 224dp), so long facts got CUT — worst on Clean 9:16.
+  Vinyl's pane factor drops 1.7× → 1.15× (it was relative to the design
+  width). (2) **FREE-MIDDLE height clamp** — new `factAvailHeightDp` +
+  `factLineHeightDp` per style+aspect bound the grown box's rendered
+  height (realWraps × lineH × scale) to the gap between the header and
+  the footer credit, so the "via Curio" footer can never be pushed or
+  hidden behind the bottom design again; past the hard floor the box
+  simply can't fit that aspect. (3) **maxLines capacity bound** in
+  `fitScaleFor` (base·h ÷ (eff·1.2)): the render's maxLines cap now
+  always ≥ the real wrap count through the mid-range (the plain model +
+  margin still cut by a line or two). (4) **9:16 budgets raised to use
+  the tall canvas** — Clean/NEUMORPHIC 1.7→2.9, Minimal 1.6→2.7, Paper
+  2.0→2.6, Vinyl/Signature/Custom 1.5→2.2, Editorial 1.4→1.8, Collage
+  1.3→1.5 (3:4 caps stay validated; the clamp is the real bound).
+  `autoFitGrowByWrap` top end rises to 3.2×. (5) **Fit visible in the
+  sliders** — `FactFitHardFloor` 0.45→0.5 (the Text-size slider's floor),
+  so the rendered text size is always on the thumb; the Fact-height
+  sliders (sheet Crop + full-screen Box) no longer divide back through
+  the stale fit (that collapsed the box ~2.4×→1× on the first drag tick
+  and popped the text back to full size) — the first tick captures the
+  rendered height AND the fit's text shrink into `move.factScale` (the
+  grip-seed recipe), later ticks map 1:1. (6) **AUTO 9:16 detection** —
+  `runAutoLayout` computes `autoTall`: when even the hard-floor scale
+  can't fit the 3:4 free middle, the very next sparkle tap jumps
+  straight to the tall plan (`attempt = 5`), and attempt 5 now carries
+  the REAL tall fit (`autoFitShape` on PORTRAIT — taller box + correct
+  tall text) instead of the old 1.4×/1.18× guess.
+- **v3xx30 — Cabinet card style REVERT (user follow-up 2026-09-08).**
+  The user's original request was to REDRAW the collection card art, not
+  redesign the cards — the v3xx27 full-card whisper-alpha art read as
+  INVISIBLE on the cards ("I can see the design only while creating the
+  collection"), so `V2ShelfCard` is back to the JSX "CollectionCard"
+  layout the user liked: tone fill + frosted icon tile + title/item
+  count, with the REDRAWN art as a VISIBLE foot strip (86dp, full
+  alpha — the responsive scenes scale down to the strip exactly like the
+  old ones). Kept from v3xx27: the redrawn scenes (incl. PEAK +
+  MINIMAL_*), the anchored ⋮ DropdownMenu (onRename/onDelete — the user
+  asked for a real dropdown, not the centre overlay), and the
+  create-collection style picker. The `.alpha` import is gone from
+  CabinetShelves.kt.
+- **v3xx29 — Settings hub REDESIGN (user follow-up 2026-09-08; the
+  CurioSettings_Redesign-3.jsx look — committed, NOT pushed per user
+  instruction).** The phone hub (`SettingsHubScreen.kt`) is rebuilt to
+  match the JSX exactly while the app's own header (SettingsHeroHeader /
+  CurioGlassToolbar) stays untouched: (1) a **nav rail** — All Settings /
+  Appearance / Pet designer / Preferences / Recording / Categories /
+  Topic history / Share hub / Experiments / Backup / Support — as a
+  horizontal chip rail (the JSX desktop sidebar's mobile twin; active
+  chip = JSX brown #815947). (2) A **JSX search box** (rounded white,
+  magnifier + clear); the existing deep row index + search results UI
+  still run underneath. (3) **Tone CARDS in 5 groups** (Personalize ✦,
+  How it works ✧, Organize your world ≡, Share & explore ◇, Your data &
+  privacy ◈ — the last one slots Backup & restore + Book covers where
+  the user said "data etc gets the book fetching etc"): every card is a
+  pastel-gradient surface (10 tones, light pastel + deep dark twin),
+  blob + texture-dot Canvas art, frosted icon tile, round arrow,
+  title/subtitle capped at ~76% width, and a decorative foot visual
+  (swatches / pet / compass / wave / card stack / photos / share /
+  flask / cloud / image). (4) Secondary horizontal cards (Recycle bin,
+  Updates, Help & feedback) + the "Same curiosity, new horizons."
+  footer note in Playfair. Data model: `SettingsDesignGroup/Card`,
+  `SettingsNavEntry`, `settingsToneGradient`, `SettingsCardVisual`,
+  `SettingsDesignCardView`, `SettingsNavRail`, `SettingsJsxSearchField`,
+  `SettingsSecondaryCardView`, `SettingsFooterNote`. The search index +
+  tablet two-pane still consume the underlying row model untouched; the
+  Appearance card keeps its PetLandmark. Removed from the hub face: the
+  flat CurioSettingsRow list (rows live on in search + two-pane).
+- **v3xx30 — settings nav rail on EVERY settings-family page (user
+  follow-up 2026-09-08).** The hub's JSX nav rail now rides every
+  settings screen — the 10 rail destinations (Appearance, Pet designer,
+  Preferences, Recording, Manage categories, Topic history, Share hub,
+  Experiments, Backup, Support) PLUS the drill-in tool pages (Book
+  covers, Book browser, Recycle bin, Updates, Widget editor).
+  `SettingsNavRail` is now a SHARED composable (`active: String?`): the
+  OPEN page is rotated into the SECOND slot right after "All Settings"
+  (highlighted), so where you are sits next to the way back; drill-ins
+  pass null (no highlight, fixed order). Switching REPLACES the current
+  page via the shared `navigateToSettingsSection` (popUpTo the hub +
+  launchSingleTop) — the hub is always one back-press away and the
+  visited-sections stack never grows. The rail is the FIRST scroll item
+  below the hero (the hub's exact placement), phones + wide alike; the
+  hub itself keeps its rail (active "all").
+- **v3xx28 — Cabinet per-item colors + fresh grid per level (user
+  follow-up 2026-09-08).** (1) **Extracted cover colors** — liked
+  books/albums/series rows, tiles and the Everything preview now use the
+  DOMINANT COLOR of each cover's cached art (not the category accent) for
+  the accent dot/label, the jacket plate gradient and a subtle card
+  surface tint. `CabinetCoverCache.dominantCoverColor(context, kind,
+  name, fallback)` downsamples the cached `.img` (~24px), bucket-
+  quantizes RGB and caches the winner ARGB forever in a static map
+  (`kind|name` key); callers re-key on `version.intValue` so tiles that
+  composed before their cover landed re-extract when the warmer saves
+  the file. Fallback = category accent while bytes aren't on disk.
+  Reviews (`V2ReviewTileCard`) borrow the REVIEWED media's extracted
+  color via `reviewCoverKind(name)` (book/album/series decided by which
+  art store already holds that name) and the 1dp OUTLINE is gone — the
+  color tints the card instead. (2) **Grid per level** — `key(openLevel)`
+  wraps the LazyVerticalGrid and `rememberLazyGridState()` moved inside
+  it: the single shared scroll position was making a collection open
+  MID-list and page switches visibly jump (the glitch); every level now
+  opens from the TOP.
+- **v3xx27 — collection card DESIGN pass (user follow-up
+  2026-09-08).** (1) **Shelf cards now carry their art** — the drawn
+  scene fills the WHOLE card as a whisper-alpha background, not just a
+  foot strip ("the box designs itself… drawn elements not the icon"):
+  Favorites wears the glowing star-map CONSTELLATION, Currently Reading
+  an open-book scene, Want to Read stacked spines, Saved a photo
+  collage, Completed the FULL redesign (sun-arc summit + planted flag +
+  bird — `PEAK`), Notes a slip-stack with a pen scribble, Personal a
+  moonlit window with a sill plant. Plus four MINIMAL_* scenes (sun,
+  rings, wave, dots) borrowing the Minimal share card's sparse line
+  language for plenty of variety. Every scene is drawn with proportional
+  Canvas geometry so it scales from foot strip to full-card background.
+  (2) **New-collection sheet style picker** — the sheet now lets you
+  pick a card style: tone swatches (expanded palette of 9), live art
+  previews (all 13 scenes on their tone fills) and icon chips (12
+  glyphs), each independently optional — left on Auto the card cycles
+  the palette like before; tap a selected option again to reset to
+  Auto. `CurioCollection` gains `tone`/`art`/`icon` (indices into the
+  Cabinet palettes, -1/null = auto; backward-compatible JSON) and the
+  home grid renders each collection's custom style. (3) **⋮ dropdowns
+  are anchored now** — the collection card's ⋮ (V2ShelfCard) and the
+  collection-detail ⋮ (V2DetailHeader) open a DropdownMenu right under
+  the dots (Rename / Add captures / Delete); the old centre-screen
+  `CurioHoldPill` overlay for collections is gone (PillTarget.Collection
+  removed; the member long-press pill stays). (4) **Dead hint text
+  removed** — "· tap a member to open it" (hero subtitle) and "·
+  long-press a member for more" (detail header) are gone.
+- **v3xx26 — editor caret / box-outline accuracy (user follow-up
+  2026-09-08; the CI fix rode separately in `3f466b5c`).** The inline
+  quick-fact field (ArrangeableCard's transparent BasicTextField — shared
+  by the bottom-sheet preview AND the full-screen card editor) used
+  `heightIn(min = f.height.dp)` with `maxLines = 60`, so the field grew
+  past the visible fact box: the caret could sit BELOW the visible
+  glyphs and the selection outline (the `.border` on the fieldModifier)
+  extended past the box ("cursor/text position wrong and misleading",
+  "the box outline misleads"). The field is now clamped to the measured
+  box height (`heightIn(min = max = f.height.dp)`); the smart fit
+  re-measures on every keystroke and grows the box, so caret + outline
+  always hug the visible text. Root-cause note: the reported
+  `onFactStyle` already includes the smart-fit text scale (styles render
+  with `effectiveBodyScale`), so the caret metrics were otherwise
+  glyph-exact — the unbounded height was the mismatch.
+- **v3xx25 — share-card smart fit refinements (user follow-up
+  2026-09-08).** (1) **HEIGHT-FIRST fit** (`autoFitShape`) — the fact box
+  now grows toward the style's FULL `factFitBudget` cap whenever
+  `autoFitGrowByWrap` > 1 and the TEXT sizes to fit the grown box
+  (S² ≤ base·h/eff, floored at `FactFitHardFloor`); the old text-first
+  solver kept the box at its natural height and only shrank the type, so
+  a longer fact never LOOKED taller even when the card had room below
+  ("make its height maximum with longer text… height increase in
+  accordance with the bottom area"). The no-clip guarantee holds. (2)
+  **Fact-box auto-move** (`resetFact` on `ShareAutoLayoutPlan` +
+  `runAutoLayout` commit) — a quick-fact box the user manually dragged
+  (`factDx`/`factDy` ≠ 0) ONTO the title / info rows / favorites strip, or
+  off the card edge, is RESET to its natural spot on the sparkle tap
+  (the title-reset twin). (3) **Badge guard** — when the category pill's
+  measured rect is Zero (first composition), `titleLiftCap` falls back to
+  the title's own natural top `(t.top - 4dp)` instead of unbounded, so
+  the sparkle can never shove the title up over the category icon. (4)
+  **Footers smaller** — the "via Curio" credit text drops 10sp → 8sp at
+  lower alpha (both the rose-bulb and white-credit footers) and the bulb
+  mark 12dp → 10dp; the footers stay FIXED (only the author/year info
+  rows move). Not addressed this round: the inline/full-screen editor
+  caret-vs-text alignment and the fact-box outline fidelity (both follow
+  from the bounds-hub metrics — separate pass).
+- **v3xx24 — liked-media cover CACHE + Cabinet Everything rework (user
+  direction 2026-09-08).** (1) **`CoverCache.kt`** — a separate,
+  always-on cover store for liked books/albums/series: the resolved URL
+  is persisted per topic (reusing `bookCoverUrlsState` /
+  `sheetArtUrlsState` so reveal + cards agree) and the IMAGE BYTES
+  download once to `filesDir/cover_cache/<kind>-<name>.img`. An
+  always-on warmer in `CabinetV2Content` resolves every unwarmed liked
+  item on Cabinet open (throttled to 30/recompose); `V2JacketArt` loads
+  the local file FIRST (keyed on `CoverCache.version` so tiles re-check
+  the moment a cover lands) and its live resolve cascades BOTH
+  providers (books iTunes → Open Library, albums iTunes → MusicBrainz,
+  series TVMaze → iTunes) and persists the winner. The liked-tile ⋮
+  opens `V2CoverSourceSheet` — an explicit provider switch that
+  re-resolves, persists and re-caches ("if you didn't like that one").
+  (2) **AppPreferences likedAt** — `KEY_LIKED_AT` ("kind|name" → epoch
+  ms) written by `toggleBookFavorite` / `toggleSeriesFavorite` /
+  `toggleAlbumFavTrack`, feeding the Everything Recent rail. (3)
+  **Everything preview card** — theme-aware (`surfaceContainerHigh`
+  tokens; the hardcoded cream wash is gone), ONE chevron (the duplicate
+  arrow + the '+' slot are removed), and a horizontally SCROLLABLE cover
+  rail of real cached covers (was a fixed 5-slot row). (4) **Everything
+  page** — always `GridCells.Fixed(3)` on phones (the list/grid toggle
+  is deleted — the grid replaced the list; `viewMode` state and
+  `V2ViewTogglePill` are gone); grouped per-kind sections with distinct
+  tiles: `V2MediaTileCard` (BOOK portrait jacket / ALBUM square + vinyl
+  disc / SERIES poster), `V2ReviewTileCard` (ReelNotes get an OUTLINED
+  card: quote mark, star rating, preview), notes/moodboards keep
+  `CurioEntryCard`. `V2FilterRail` gained `available: Set<String>` and
+  only lists types with content; the Recent rail (`V2RecentCell` sealed
+  Entry/Liked) merges recent captures with recently liked media; media
+  sorts by likedAt (Recent) or name (A–Z). (5) **Back handling** —
+  `BackHandler` walks selection → search → open collection / Everything
+  / virtual shelf before leaving the Cabinet. (6) **Collection ⋮** —
+  `V2ShelfCard` gained `onMoreClick` (a real tappable ⋮ button opening
+  the same rename/delete pill); the Completed shelf icon is
+  `CurioIcons.Check` (the task_alt glyph read squished in the frosted
+  tile).
+- **v3xx23 — text history everywhere + bottom-sheet/tree browser + pin
+  fix; Home anchored hold menu; keyboard-aware full-screen editors;
+  one-shot rich-text tools (user follow-up 2026-09-08).** (1) **Text
+  history now covers every field** (TextHistory.kt + TopicShareCard.kt):
+  the share-card TITLE joins the captured fields (`editedTitle ?: ""` —
+  blank skips) alongside quick fact / custom fact / chapter review /
+  quote / photo caption; the chapter-note Enlarge editor (TopicRevealScreen
+  `noteEditorChapter`) gained a `TextHistoryPill` in its header +
+  `rememberTextHistoryCapture` + a `TextHistoryBrowser` that restores into
+  the same AppPreferences slot. The pill sits in the host headers which
+  now `imePadding()` above the keyboard. (2) **Dedupe + move-to-top**
+  (`TextHistoryStore.record`): a repeat of an OLDER entry no longer stacks
+  a duplicate — the existing entry MOVES to the top with a fresh ts
+  (pinned rides along); exact repeats of the field's latest snapshot still
+  skip. (3) **Browser = ModalBottomSheet** (was a centered Dialog) with a
+  drag handle + a **List / Tree toggle**: Tree groups snapshots into
+  `HistoryBranch`es keyed on shared opening paragraphs (`splitParagraphs` /
+  `commonPrefixLen`) — the trunk renders once, each version node shows
+  only its CHANGED paragraphs (removed struck through, added in
+  semi-bold) behind a small connector; List mode is the old feed. (4)
+  **PIN FIX** — `HistoryRowAction(e.pinned, e.pinned, …)` disabled the
+  pin on UNPINNED entries (only unpin ever worked): now `enabled = true`
+  so any snapshot can be pinned. (5) **Home hold menu** — the recents
+  rows (`ExploreTopicRow` / `RecentEntryRow`) now take `hold:
+  HoldSession?` and attach `radialHoldMenu` (the category picker's
+  gesture: real press position, scroll-cancel, long-press timer) before
+  `combinedClickable`; the old centered `CurioHoldPill` is replaced by
+  `RadialHoldMenuOverlay` rendered at the SCREEN level (sibling of the
+  page background — a fillMaxSize scrim can't live inside the scroll
+  flow), anchored at the held spot with Edit / Open-saved-entry / Remove
+  HoldActions. `RadialHoldMenuOverlay` + `HoldAction` became public for
+  this. (6) **Keyboard-aware full-screen editors** — the share-card
+  full-screen editor root, the Enlarge writing sheet and the chapter-note
+  Enlarge dialog all got `imePadding()` on their root Column/Box (content
+  lifts above the keyboard; the card re-zooms into the visible space)
+  and the text area is now a `weight(1f).verticalScroll` wrapper around
+  the RichTextEditor (weight inside a scrollable Column is illegal, so
+  the editor itself lost its weight). (7) **One-shot rich-text tools**
+  (RichTextEditor.kt, shared by the capture formats): applying B/I/
+  highlight/size to a SELECTION no longer arms the sticky `pending*`
+  flags (the toolbar never stays lit after one change); tapping a tool
+  with a collapsed caret still arms it for the next typed characters.
+- **v3xx22 — CI fix + dark-mode sheet icons + full series UI (user
+  follow-up).** (1) **CI fix** (CabinetShelves.kt — the pasted
+  `compileDebug/ReleaseKotlin` failure): the seven shelf-art composables
+  (`StarArt`/`ReadingArt`/`BooksArt`/`MountainArt`/`NotesArt`/
+  `WindowArt`/`PhotosArt`) are now `BoxScope.` extensions — their
+  top-level `.align(...)` calls need the outer Box's scope, and `V2ShelfArt`
+  already wraps them in a `Box(modifier)` — and the book-spine width is
+  `(22 + i * 8).dp` (was `22.dp + i * 8.dp` = Int × Dp mismatch). (2)
+  **Dark-mode sheet action icons** (TopicRevealScreen.kt): new
+  `sheetActionIconTone(ink, variant, alpha)` — in dark mode the
+  unselected sheet actions (favorite hearts on book chapters / album
+  tracks / series episodes, the read/watched toggles, the note chips, the
+  album LISTEN dropdown glyphs) resolve the full-strength cover-ink twin
+  (0.88 lightness) instead of `onSurfaceVariant` + dimmed alphas that
+  vanished into the 0.20–0.27 cover-tinted dark washes; light mode keeps
+  `variant` exactly as before. The chapter "Add a note" field icons
+  (note glyph, Expand chip, Share chip) lift to full alpha in dark mode
+  too. (3) **Series UI — every series topic shows a section**:
+  `SeriesInfoSection` no longer early-returns on an empty episode guide —
+  every SERIES reveal renders the poster + synopsis card (they used to
+  show NOTHING); the count meta, episode-title preview and "View the
+  episode list →" footer are gated on `hasEpisodes`. (4) **Episode
+  chips**: a `SeriesEpisodeChips` row (S1E1 key + title chips, mirroring
+  the album TRACKS chips) jumps the episode-list sheet straight to an
+  episode (`onEpisodeClick` → `selectedSeriesEpisode` +
+  `showSeriesSheet`, the sheet's `episode` param pre-expands it). (5)
+  **Series icons, not books**: the reveal poster card + chips wear
+  `CurioIcons.Movies` (clapperboard) and the series notes accordion its
+  own `CurioIcons.Movie` — a series never wears the book glyph.
 - **v355 — book/series notes sheets: no close button, no hint copy, rating
   below the author, tick-free read state.** User: "never add cross close
   button in a bottom sheet… remove it from the book synopsis sheet… remove
