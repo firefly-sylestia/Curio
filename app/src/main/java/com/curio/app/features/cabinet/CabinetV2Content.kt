@@ -1712,26 +1712,17 @@ private fun V2EverythingCard(
                                 fallbackAccent
                             )
                         }
+                        // v3xx35 — NO category-tint plate behind the covers: the
+                        // art renders edge-to-edge (V2JacketArt shows its own
+                        // accent placeholder only while a cover is loading).
                         Box(
                             modifier = Modifier
                                 .size(width = 64.dp, height = 88.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(
-                                    Brush.verticalGradient(
-                                        listOf(
-                                            androidx.compose.ui.graphics.lerp(
-                                                accent, Color.White,
-                                                if (dark) 0.14f else 0.46f
-                                            ),
-                                            androidx.compose.ui.graphics.lerp(accent, Color.Black, 0.40f)
-                                        )
-                                    )
-                                )
                         ) {
                             V2JacketArt(
                                 item = item,
                                 accent = accent,
-                                modifier = Modifier.fillMaxSize().padding(3.dp)
+                                modifier = Modifier.fillMaxSize()
                             )
                         }
                     }

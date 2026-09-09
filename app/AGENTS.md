@@ -1055,6 +1055,22 @@ app/src/main/java/com/curio/app/
   once a cover is on screen), with the book spine/sheen overlays gated on
   an image being present — kills the "background behind the album" look
   on Everything + every shelf grid.
+- **v3xx36 — Everything preview de-tinted + shelf art REFINED (user
+  follow-up 2026-09-09).** (1) **Everything preview de-tint** — the
+  Everything card's horizontally-scrolling cover rail dropped its
+  category-tint gradient plate: covers render edge-to-edge (`V2JacketArt`
+  shows its own accent placeholder only while a cover loads), matching
+  the de-plated shelf grids. (2) **Completed not cut at the sides** —
+  `PeakArt`'s far/near ridge polygons and the ground band now run a
+  little PAST both canvas edges (`-0.08w … 1.08w`) so the scene reads as
+  continuing mountains instead of shapes chopped by the frame (the old
+  polygons had vertical seams at x=0 and x=w). (3) **Notes refined** —
+  `NotesArt` gains a second sheet peeking out bottom-right (notepad
+  stack), a darker dog-ear FLAP triangle under the fold line, a small
+  heart doodle at the sheet's foot, and a proper pencil (thick body +
+  pink eraser cap + dark lead tip). (4) **Want to Read refined** —
+  `BooksArt` gains two title ticks near the top of every spine and a soft
+  grounding shadow oval under the row.
 - **v3xx28 — Cabinet per-item colors + fresh grid per level (user
   follow-up 2026-09-08).** (1) **Extracted cover colors** — liked
   books/albums/series rows, tiles and the Everything preview now use the

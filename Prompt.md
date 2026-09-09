@@ -1293,5 +1293,20 @@ updated in lockstep. Committed + pushed as 47e17d5c, CI green.)
 5. Recycle bin: frosted summary + rows with rounded 13dp accent tiles,
    Playfair "Recently deleted" heading + rule.
 
+## request log — cabinet Everything preview de-tint + shelf art refined (done 2026-09-09, pushed)
+1. Everything card previews: the cover rail's category-tint gradient plate
+   is gone — covers render edge-to-edge (V2JacketArt's accent placeholder
+   only shows while a cover loads), matching the de-plated shelf grids.
+2. Completed (PeakArt): the far/near ridge polygons + ground band now run
+   a little PAST both canvas edges (-0.08w … 1.08w) so the summit scene
+   reads as continuing mountains — the old polygons had vertical seams at
+   x=0 and x=w that looked chopped.
+3. Notes (NotesArt): second sheet peeking out bottom-right (notepad
+   stack), darker dog-ear FLAP triangle under the fold, a small heart
+   doodle at the sheet's foot, and a proper pencil (thick body + pink
+   eraser cap + dark lead tip).
+4. Want to Read (BooksArt): two title ticks near the top of every spine +
+   a soft grounding shadow oval under the row.
+
 ## next prompt 
-refine the cabinet everything card and its preview of books and albumns it have backgroud of category tint, and then refine notes drawing, properly extend completed drawing it looks cut from sides, and more refinement to want to read.
+(INCOMPLETE — awaiting the rest of the message) fix the lag of the cabinet screen, reason are the saved entries, keep the log in gitignore /home/user/fieldmind/logcat_recording_2026-09-09_20-16-45.txt 
