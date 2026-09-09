@@ -1462,5 +1462,32 @@ updated in lockstep. Committed + pushed as 47e17d5c, CI green.)
    content text + lower pages fade out/in, per the user's note ("keep the
    header stable and just smoothly fade out the text and the bottom pages").
 
+## request log — text history tree + covers-only Everything + support header (done 2026-09-09, pushed)
+1. Text history tree: Tree is now the DEFAULT view. The tree finally
+   reads as a TREE — one continuous trunk drawn by each field card with
+   every session heading and version node hanging off it on a short branch
+   stub (the old per-row stems broke at session dividers). Expanding a
+   version shows only a CLIPPED preview of the change: a few short +/−
+   snippets (added highlighted, removed struck) with a "+N more" footer —
+   never the full text; the delete dialog preview is shorter too. The
+   active row in the LIST view swapped the theme's ButterYellow
+   secondaryContainer (the bad yellow highlight) for the warm rose tint.
+2. Everything page: saved entries (captures/reviews/moodboards) are GONE —
+   it's a covers-only poster gallery of liked books/albums/series. Cards
+   are just the cover art (tall books, square albums, series posters) with
+   a whisper of rounding — no boxes, titles, category tints or chrome. The
+   Filter/Sort pills + their dropdowns were removed (the user: "remove the
+   filter and its drop down, not the all books etc but the filter pill");
+   the All · Books · Albums · Series chips stay. The most recently liked
+   item is featured a little larger (aspect ×0.82) and the staggered grid
+   packs everything else around it. Sort-A-to-Z state/plumbing deleted.
+3. Support: the "Reports & crash logs" card header is gone (the
+   "Feedback" section heading owns the group), same as the earlier
+   "About Curio" fix; unused CurioCardHeader import removed.
+4. CI fix ride-along: the unclosed block comment in CurioNavHost was a
+   `settings/*` inside the KDoc — Kotlin NESTS block comments, so that
+   `/*` consumed the closer and left the file unterminated at EOF. Fixed
+   the wording (pushed separately as 1f42cce4).
+
 ## next prompt 
 (empty — awaiting the next instruction.)

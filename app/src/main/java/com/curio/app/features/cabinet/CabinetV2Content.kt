@@ -325,9 +325,8 @@ fun CabinetV2Content(navController: NavController) {
     // (v3xx — the old grid/list view toggle is gone: Everything is always
     // the 3-column media grid, so there is no second view mode to store.)
     var typeFilter by rememberSaveable { mutableStateOf<String?>(null) }
-    var sortAtoZ by rememberSaveable { mutableStateOf(false) }
 
-    // ── Everything-level filters: search + type + sort.
+    // ── Everything-level filters: search + type.
     val filteredEntries = remember(entries, searchQuery) {
         val q = searchQuery.trim()
         if (q.isEmpty()) entries
@@ -336,10 +335,9 @@ fun CabinetV2Content(navController: NavController) {
                 it.tags.any { tag -> matchesQ(tag) }
         }
     }
-    val shownEntries = remember(filteredEntries, typeFilter, sortAtoZ) {
-        val base = filteredEntries.filter { entryInType(it, typeFilter) }
-        if (sortAtoZ) base.sortedBy { it.topic.name.lowercase() }
-        else base.sortedByDescending { it.capturedAtMillis }
+    val shownEntries = remember(filteredEntries, typeFilter) {
+        filteredEntries.filter { entryInType(it, typeFilter) }
+            .sortedByDescending { it.capturedAtMillis }
     }
     fun filteredLiked(all: List<V2Liked>): List<V2Liked> =
         if (searchQuery.isBlank()) all
@@ -352,31 +350,27 @@ fun CabinetV2Content(navController: NavController) {
     val likedAtMap = AppPreferences.likedAtState
     fun likedAtFor(item: V2Liked): Long =
         likedAtMap["${item.kind.name.lowercase()}|${item.name}"] ?: 0L
-    val shownBooks = remember(books, searchQuery, typeFilter, sortAtoZ, likedAtMap) {
-        val base = filteredLiked(books).filter { likedShownForType(typeFilter, V2Kind.BOOK) }
-        if (sortAtoZ) base.sortedBy { it.name.lowercase() }
-        else base.sortedByDescending { likedAtFor(it) }
+    val shownBooks = remember(books, searchQuery, typeFilter, likedAtMap) {
+        filteredLiked(books).filter { likedShownForType(typeFilter, V2Kind.BOOK) }
+            .sortedByDescending { likedAtFor(it) }
     }
-    val shownAlbums = remember(albums, searchQuery, typeFilter, sortAtoZ, likedAtMap) {
-        val base = filteredLiked(albums).filter { likedShownForType(typeFilter, V2Kind.ALBUM) }
-        if (sortAtoZ) base.sortedBy { it.name.lowercase() }
-        else base.sortedByDescending { likedAtFor(it) }
+    val shownAlbums = remember(albums, searchQuery, typeFilter, likedAtMap) {
+        filteredLiked(albums).filter { likedShownForType(typeFilter, V2Kind.ALBUM) }
+            .sortedByDescending { likedAtFor(it) }
     }
-    val shownSeries = remember(series, searchQuery, typeFilter, sortAtoZ, likedAtMap) {
-        val base = filteredLiked(series).filter { likedShownForType(typeFilter, V2Kind.SERIES) }
-        if (sortAtoZ) base.sortedBy { it.name.lowercase() }
-        else base.sortedByDescending { likedAtFor(it) }
+    val shownSeries = remember(series, searchQuery, typeFilter, likedAtMap) {
+        filteredLiked(series).filter { likedShownForType(typeFilter, V2Kind.SERIES) }
+            .sortedByDescending { likedAtFor(it) }
     }
 
-    // ── v3xx — the rail only lists types that actually hold content.
-    val railAvailable = remember(books, albums, series, noteEntries, entries) {
+    // ── v3xx — the Everything rail only lists LIKED MEDIA (saved captures
+    // are no longer part of the gallery), so only the kinds that actually
+    // hold content show a chip.
+    val railAvailable = remember(books, albums, series) {
         buildSet {
             if (books.isNotEmpty()) add("books")
             if (albums.isNotEmpty()) add("albums")
             if (series.isNotEmpty()) add("series")
-            if (noteEntries.isNotEmpty()) add("notes")
-            if (entries.any { it.format == CaptureFormat.GalleryWall }) add("moodboard")
-            if (entries.any { it.format == CaptureFormat.ReelNotes }) add("review")
         }
     }
 
@@ -575,36 +569,17 @@ fun CabinetV2Content(navController: NavController) {
                     }
                 }
                 v2EverythingMasonryItems(
-                    shownEntries = shownEntries,
                     shownBooks = shownBooks,
                     shownAlbums = shownAlbums,
                     shownSeries = shownSeries,
                     railAvailable = railAvailable,
                     typeFilter = typeFilter,
                     onTypeFilter = { typeFilter = it },
-                    sortAtoZ = sortAtoZ,
-                    onSort = { sortAtoZ = it },
-                    selectionMode = selectionMode,
-                    selectedEntryIds = selectedEntryIds,
-                    onEntryLongClick = { id ->
-                        selectionMode = true
-                        selectedEntryIds = selectedEntryIds + id
-                    },
-                    onEntryClick = { id ->
-                        if (selectionMode) {
-                            selectedEntryIds = if (id in selectedEntryIds) selectedEntryIds - id
-                            else selectedEntryIds + id
-                        } else {
-                            haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
-                            navController.navigate(CurioRoutes.entryDetail(id)) { launchSingleTop = true }
-                        }
-                    },
+                    likedAtFor = { likedAtFor(it) },
                     onOpenLiked = { item -> item.open(navController) },
                     onCoverSource = { coverSourceItem = it },
                     onAddNew = { navController.navigateToTab(CurioRoutes.SPIN) },
-                    onClearFilters = { searchQuery = ""; searchActive = false; typeFilter = null },
-                    pageAccent = pageAccent,
-                    wide = wide
+                    pageAccent = pageAccent
                 )
             }
         } else {
@@ -1225,57 +1200,45 @@ private fun LazyGridScope.v2DetailItems(
     }
 }
 
-/** EVERYTHING — the JSX masonry gallery (the CurioEverythingGallery
- *  concept): ONE dense gallery of variable-size cards — no Recent rail, no
- *  per-kind section headers. Books wear tall portrait jackets, albums
- *  square sleeves, series posters; captures and reviews size to their
- *  content so the grid packs them by height. The toolbar + filter chips
- *  ride the top full-line, and every card animates to its new spot when
- *  the category filter changes — the smooth reflow the JSX shows. */
+/** EVERYTHING — the JSX poster gallery (the CurioEverythingGallery
+ *  concept, now COVERS ONLY): no saved captures, no Recent rail, no
+ *  per-kind section headers, no card chrome — just the liked media's
+ *  cover art (books tall, albums square, series posters) with a whisper
+ *  of rounding, sized by kind. The most recently liked item is featured a
+ *  little larger and the staggered grid packs everything else around it.
+ *  The filter CHIPS ride the top full-line (the Filter/Sort pills are
+ *  gone — the JSX has no filter dropdown), and every cover animates to
+ *  its new spot when the category changes. */
 @OptIn(ExperimentalFoundationApi::class)
 private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
-    shownEntries: List<CurioEntry>,
     shownBooks: List<V2Liked>,
     shownAlbums: List<V2Liked>,
     shownSeries: List<V2Liked>,
     railAvailable: Set<String>,
     typeFilter: String?,
     onTypeFilter: (String?) -> Unit,
-    sortAtoZ: Boolean,
-    onSort: (Boolean) -> Unit,
-    selectionMode: Boolean,
-    selectedEntryIds: Set<String>,
-    onEntryLongClick: (String) -> Unit,
-    onEntryClick: (String) -> Unit,
+    likedAtFor: (V2Liked) -> Long,
     onOpenLiked: (V2Liked) -> Unit,
     onCoverSource: (V2Liked) -> Unit,
     onAddNew: () -> Unit,
-    onClearFilters: () -> Unit,
-    pageAccent: Color,
-    wide: Boolean
+    pageAccent: Color
 ) {
-    val reviewEntries = shownEntries.filter { it.format == CaptureFormat.ReelNotes }
-    val moodEntries = shownEntries.filter { it.format == CaptureFormat.GalleryWall }
-    val noteEntriesShown = shownEntries.filterNot {
-        it.format == CaptureFormat.ReelNotes || it.format == CaptureFormat.GalleryWall
-    }
-    val totalShown = shownEntries.size + shownBooks.size + shownAlbums.size + shownSeries.size
-    // Staggered-grid spans only offer FullLine / SingleLane (multi-lane
-    // spans aren't part of the API), so every card takes one lane and the
-    // masonry's varied sizes come from HEIGHT — the grid's native language:
-    // books stand tall (portrait jackets), albums sit square, series hang
-    // as posters, and captures/reviews size themselves to their content.
-    // Smooth reflow — every card animates to its new spot when the category
-    // filter changes (the JSX gallery's transition). animateItem is a member
-    // extension of the item scope, so it's applied per-item inside each
-    // item {} block below.
+    val allMedia = shownBooks + shownAlbums + shownSeries
+    val totalShown = allMedia.size
+    // Staggered-grid spans only offer FullLine / SingleLane, so every
+    // cover takes one lane and the size variation comes from HEIGHT — the
+    // grid's native language. The most recently liked item runs a touch
+    // taller (featured) and the rest pack around it. Smooth reflow: every
+    // cover animates to its new spot when the category filter changes
+    // (animateItem is a member extension of the item scope, so it's
+    // applied per-item inside each item {} block).
 
     if (totalShown == 0) {
         item(key = "e-empty", span = StaggeredGridItemSpan.FullLine, contentType = "empty") {
             CurioEmptyState(
                 glyph = CurioIcons.Inventory2,
                 headline = "Nothing saved yet",
-                subtext = "Save a capture or like a book, series or album and it shows up here.",
+                subtext = "Like a book, series or album and its cover shows up here.",
                 tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f)
             )
         }
@@ -1285,14 +1248,6 @@ private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
         return
     }
 
-    item(key = "toolbar", span = StaggeredGridItemSpan.FullLine, contentType = "toolbar") {
-        V2EverythingToolbar(
-            typeFilter = typeFilter,
-            onTypeFilter = onTypeFilter,
-            sortAtoZ = sortAtoZ,
-            onSort = onSort
-        )
-    }
     item(key = "filter-rail", span = StaggeredGridItemSpan.FullLine, contentType = "chips") {
         V2FilterRail(
             current = typeFilter,
@@ -1302,56 +1257,47 @@ private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
         )
     }
 
-    // ── Masonry cards — one packed gallery mixing every kind. Liked media
-    // keeps its cover aspect ratio (content-driven height); captures and
-    // reviews size to their content — the grid packs them by height.
+    // The most recently liked item — featured a little larger.
+    val featuredKey = allMedia.maxByOrNull { likedAtFor(it) }
+        ?.let { "${it.kind.name}|${it.name}" }
+
     fun emitMedia(likes: List<V2Liked>) {
         if (likes.isEmpty()) return
         likes.forEach { liked ->
+            val isFeatured = "${liked.kind.name}|${liked.name}" == featuredKey
             item(
                 key = "l|${liked.kind.name}|${liked.name}",
                 contentType = "media"
             ) {
-                V2MediaTileCard(
-                    item = liked,
-                    onClick = { onOpenLiked(liked) },
-                    onMore = { onCoverSource(liked) },
-                    modifier = Modifier.animateItem(
-                        fadeInSpec = tween(220),
-                        fadeOutSpec = tween(150),
-                        placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
-                    )
-                )
-            }
-        }
-    }
-
-    fun emitEntry(e: CurioEntry, review: Boolean) {
-        item(
-            key = "x|${e.id}",
-            contentType = if (review) "review" else "entry"
-        ) {
-            val reflow = Modifier.animateItem(
-                fadeInSpec = tween(220),
-                fadeOutSpec = tween(150),
-                placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
-            )
-            if (review) {
-                V2ReviewTileCard(
-                    entry = e,
-                    onClick = { onEntryClick(e.id) },
-                    onLongClick = { onEntryLongClick(e.id) },
-                    selected = e.id in selectedEntryIds,
-                    modifier = reflow
-                )
-            } else {
-                CurioEntryCard(
-                    entry = e,
-                    selected = e.id in selectedEntryIds,
-                    onLongClick = { onEntryLongClick(e.id) },
-                    onClick = { onEntryClick(e.id) },
-                    modifier = reflow
-                )
+                val fallbackAccent = liked.topic?.categoryId?.let { CurioCategories.byId(it) }
+                    ?.themedAccent() ?: MaterialTheme.colorScheme.primary
+                val baseAspect = when (liked.kind) {
+                    V2Kind.BOOK -> 0.667f   // portrait jacket
+                    V2Kind.ALBUM -> 1f      // square sleeve
+                    V2Kind.SERIES -> 0.72f  // poster
+                }
+                // Featured runs ~18% taller — a little larger, neighbours
+                // pack around it.
+                val aspect = if (isFeatured) baseAspect * 0.82f else baseAspect
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(aspect)
+                        .clip(RoundedCornerShape(6.dp))
+                        .then(
+                            Modifier.animateItem(
+                                fadeInSpec = tween(220),
+                                fadeOutSpec = tween(150),
+                                placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                            )
+                        )
+                        .combinedClickable(
+                            onClick = { onOpenLiked(liked) },
+                            onLongClick = { onCoverSource(liked) }
+                        )
+                ) {
+                    V2JacketArt(item = liked, accent = fallbackAccent, modifier = Modifier.fillMaxSize())
+                }
             }
         }
     }
@@ -1359,15 +1305,6 @@ private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
     if (typeFilter == null || typeFilter == "books") emitMedia(shownBooks)
     if (typeFilter == null || typeFilter == "albums") emitMedia(shownAlbums)
     if (typeFilter == null || typeFilter == "series") emitMedia(shownSeries)
-    if (typeFilter == null || typeFilter == "notes") {
-        noteEntriesShown.forEach { emitEntry(it, review = false) }
-    }
-    if (typeFilter == null || typeFilter == "moodboard") {
-        moodEntries.forEach { emitEntry(it, review = false) }
-    }
-    if (typeFilter == null || typeFilter == "review") {
-        reviewEntries.forEach { emitEntry(it, review = true) }
-    }
 
     item(key = "add-new", span = StaggeredGridItemSpan.FullLine, contentType = "action") {
         V2AddSomethingButton(onClick = onAddNew)
@@ -1769,76 +1706,6 @@ private fun V2EverythingCard(
  *  3-column media grid — the toggle only offered a second way to show the
  *  same list-shaped tiles that the grid replaced. */
 @Composable
-private fun V2EverythingToolbar(
-    typeFilter: String?,
-    onTypeFilter: (String?) -> Unit,
-    sortAtoZ: Boolean,
-    onSort: (Boolean) -> Unit
-) {
-    var filterOpen by remember { mutableStateOf(false) }
-    var sortOpen by remember { mutableStateOf(false) }
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Box {
-            V2ToolbarPill(
-                glyph = CurioIcons.Tune,
-                label = "Filter",
-                emphasized = typeFilter != null,
-                onClick = { filterOpen = true }
-            )
-            DropdownMenu(
-                expanded = filterOpen,
-                onDismissRequest = { filterOpen = false }
-            ) {
-                TYPE_FILTERS.forEach { (key, label, _) ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = label,
-                                fontWeight = if (typeFilter == key) FontWeight.ExtraBold else FontWeight.Normal
-                            )
-                        },
-                        onClick = { onTypeFilter(key); filterOpen = false }
-                    )
-                }
-            }
-        }
-        Box {
-            V2ToolbarPill(
-                glyph = if (sortAtoZ) CurioIcons.ArrowUpward else CurioIcons.ArrowDownward,
-                label = "Sort",
-                onClick = { sortOpen = true }
-            )
-            DropdownMenu(
-                expanded = sortOpen,
-                onDismissRequest = { sortOpen = false }
-            ) {
-                listOf(false to "Recent", true to "A–Z").forEach { (az, label) ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = label,
-                                fontWeight = if (sortAtoZ == az) FontWeight.ExtraBold else FontWeight.Normal
-                            )
-                        },
-                        onClick = { onSort(az); sortOpen = false }
-                    )
-                }
-            }
-        }
-        Spacer(Modifier.weight(1f))
-        Text(
-            text = TYPE_FILTERS.firstOrNull { it.first == typeFilter }?.second ?: "All",
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1
-        )
-    }
-}
-
 /** The JSX filter rail — horizontal type chips (All · Books · Albums …).
  *  v3xx — `available` limits the rail to types that actually hold content:
  *  a kind with nothing saved never shows an empty chip ("only show what's

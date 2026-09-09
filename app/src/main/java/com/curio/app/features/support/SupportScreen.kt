@@ -42,7 +42,6 @@ import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.navigation.CurioRoutes
-import com.curio.app.ui.components.CurioCardHeader
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioIcons
@@ -146,7 +145,6 @@ fun SupportScreen(navController: NavController) {
                 item {
                     SettingsOptionCard {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        CurioCardHeader(CurioIcons.BugReport, "Reports & crash logs", "Tell us what broke")
                         SettingsOptionRow(
                             CurioIcons.BugReport,
                             "Report a bug",

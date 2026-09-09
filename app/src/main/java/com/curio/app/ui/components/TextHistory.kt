@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -57,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -315,7 +317,9 @@ fun TextHistoryBrowser(
     var previewId by remember { mutableStateOf<Long?>(null) }
     var toast by remember { mutableStateOf<String?>(null) }
     var armedClear by remember { mutableStateOf(false) }
-    var treeMode by remember { mutableStateOf(false) }
+    // v3xx — TREE is the default view: the grouped, diff-first browser is
+    // what the user wants to land in (List stays one tap away).
+    var treeMode by remember { mutableStateOf(true) }
     // A restore into a non-empty field first asks HOW the snapshot should
     // come back (replace / add above / add below) via the settings-style
     // chooser below.
@@ -371,7 +375,7 @@ fun TextHistoryBrowser(
             title = { Text("Delete this snapshot?") },
             text = {
                 Text(
-                    "\u201C${deleteTarget.text.take(90)}${if (deleteTarget.text.length > 90) "…" else ""}\u201D\n\n" +
+                    "\u201C${previewLine(deleteTarget.text, 64)}\u201D\n\n" +
                         "This removes it from Text history for good — the field itself is untouched."
                 )
             },
@@ -519,7 +523,13 @@ fun TextHistoryBrowser(
                         val isActive = e.field == activeField
                         Surface(
                             shape = RoundedCornerShape(18.dp),
-                            color = if (isActive) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.55f)
+                            // v3xx — the active row used the theme's
+                            // ButterYellow secondaryContainer, which read as a
+                            // bad yellow highlight; the settings family's warm
+                            // rose tint marks the active field instead.
+                            color = if (isActive)
+                                if (dark) Color(0xFF815947).copy(alpha = 0.30f)
+                                else Color(0xFF815947).copy(alpha = 0.13f)
                             else if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
                             else Color.White.copy(alpha = 0.68f),
                             modifier = Modifier.fillMaxWidth()
@@ -701,6 +711,14 @@ private fun HistoryRowAction(
 
 private const val SESSION_GAP_MS = 20 * 60 * 1000L
 
+/** Tree geometry (relative to the frosted card's content): the trunk sits
+ *  at [TreeTrunkInset] from the card's left edge, and every version node
+ *  hangs [TreeNodeDotX] to its right on a short branch stub — the classic
+ *  trunk → branch → leaf read instead of floating dots. */
+private val TreeTrunkInset = 3.dp
+private val TreeNodeDotX = 15.dp
+private val TreeNodeDotY = 10.dp
+
 /** One burst of edits on the same field (snapshots within ~20 minutes). */
 private data class HistorySession(
     val startTs: Long,
@@ -817,7 +835,10 @@ private fun HistoryFieldCard(
                     .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f))
             )
         }
-        // ── Frosted card ─────────────────────────────────────────────
+        // ── Frosted card with the TREE TRUNK — ONE continuous vertical
+        //    stem runs down the card; every session heading and version node
+        //    hangs off it on a short branch stub. (The old per-row stems
+        //    broke at each session divider, which killed the tree read.)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -828,58 +849,77 @@ private fun HistoryFieldCard(
                 )
                 .padding(horizontal = 12.dp, vertical = 6.dp)
         ) {
-            tree.sessions.forEachIndexed { sIdx, session ->
-                if (sIdx > 0) {
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                        modifier = Modifier.padding(start = 18.dp, top = 6.dp)
+            Box {
+                // The trunk — spans the whole content height.
+                val trunkColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
+                Canvas(Modifier.matchParentSize()) {
+                    drawLine(
+                        color = trunkColor,
+                        start = Offset(TreeTrunkInset.toPx(), 0f),
+                        end = Offset(TreeTrunkInset.toPx(), size.height),
+                        strokeWidth = 2.dp.toPx()
                     )
                 }
-                // Session sub-heading — time range + edit count.
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 8.dp, bottom = 2.dp)
-                ) {
-                    Text(
-                        if (session.versions.size == 1) formatHistoryTime(session.startTs)
-                        else "${formatHistoryTime(session.startTs)} → ${formatHistoryTime(session.versions.last().ts)}",
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        if (session.versions.size == 1) "1 edit" else "${session.versions.size} edits",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                // Version nodes.
-                session.versions.forEachIndexed { vIdx, e ->
-                    HistoryVersionRow(
-                        entry = e,
-                        isLast = vIdx == session.versions.lastIndex,
-                        prev = session.versions.getOrNull(vIdx - 1),
-                        isActive = e.field == activeField,
-                        activeField = activeField,
-                        onPin = { onPin(e) },
-                        onCopy = { onCopy(e) },
-                        onRestore = { onRestore(e) },
-                        onDelete = { onDelete(e) }
-                    )
+                Column(Modifier.padding(start = TreeTrunkInset)) {
+                    tree.sessions.forEachIndexed { sIdx, session ->
+                        if (sIdx > 0) {
+                            // Hairline between sessions — starts right of the
+                            // trunk so the trunk reads as one unbroken line.
+                            HorizontalDivider(
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                                modifier = Modifier.padding(start = 14.dp, top = 6.dp)
+                            )
+                        }
+                        // Session sub-heading — a branch stub off the trunk,
+                        // then the time range + edit count.
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(top = 8.dp, bottom = 2.dp)
+                        ) {
+                            SessionBranchStub()
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                if (session.versions.size == 1) formatHistoryTime(session.startTs)
+                                else "${formatHistoryTime(session.startTs)} → ${formatHistoryTime(session.versions.last().ts)}",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                if (session.versions.size == 1) "1 edit" else "${session.versions.size} edits",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        // Version nodes — each hangs off the trunk.
+                        session.versions.forEachIndexed { vIdx, e ->
+                            HistoryVersionRow(
+                                entry = e,
+                                prev = session.versions.getOrNull(vIdx - 1),
+                                isActive = e.field == activeField,
+                                activeField = activeField,
+                                onPin = { onPin(e) },
+                                onCopy = { onCopy(e) },
+                                onRestore = { onRestore(e) },
+                                onDelete = { onDelete(e) }
+                            )
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-/** One version node inside a session — a proper tree connector (node dot on
- *  a continuous stem down the whole node), time and a +/− change badge, a
- *  COMPACT one-line preview that EXPANDS to show exactly what changed
- *  (added lines highlighted, removed struck through), then the actions. */
+/** One version node inside a session — a short branch stub runs from the
+ *  card's trunk to the node dot (the trunk itself is drawn once by
+ *  [HistoryFieldCard], so the tree stays continuous across sessions), the
+ *  time + a +/− change badge, a COMPACT one-line preview that EXPANDS to a
+ *  CLIPPED diff (previews of the added/removed lines, never the full
+ *  text), then the actions. */
 @Composable
 private fun HistoryVersionRow(
     entry: TextHistoryEntry,
-    isLast: Boolean,
     prev: TextHistoryEntry?,
     isActive: Boolean,
     activeField: String,
@@ -908,26 +948,25 @@ private fun HistoryVersionRow(
         else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
 
     Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.Top) {
-        // ── Connector — the node dot rides a continuous stem that spans the
-        //    node's whole height (hidden on the last row, nothing dangles).
+        // ── Branch + node — the stub starts exactly at the trunk (x=0 of
+        //    this column IS the trunk) and ends at the node dot.
         Box(
             modifier = Modifier
                 .width(18.dp)
                 .fillMaxHeight()
                 .drawBehind {
-                    if (!isLast) {
-                        drawLine(
-                            color = stemColor,
-                            start = Offset(center.x, 10.dp.toPx()),
-                            end = Offset(center.x, size.height),
-                            strokeWidth = 2.dp.toPx()
-                        )
-                    }
+                    drawLine(
+                        color = stemColor,
+                        start = Offset(0f, TreeNodeDotY.toPx()),
+                        end = Offset(TreeNodeDotX.toPx(), TreeNodeDotY.toPx()),
+                        strokeWidth = 1.5.dp.toPx()
+                    )
                 }
         ) {
             Box(
                 modifier = Modifier
-                    .align(Alignment.TopCenter)
+                    .align(Alignment.TopStart)
+                    .offset(x = TreeNodeDotX - 4.dp, y = TreeNodeDotY - 4.dp)
                     .size(8.dp)
                     .clip(CircleShape)
                     .background(dotColor)
@@ -982,7 +1021,11 @@ private fun HistoryVersionRow(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    addedLines.forEach { line ->
+                    // Clipped previews — a few short snippets of what changed,
+                    // never the full text (v3xx — the expanded node used to
+                    // dump whole paragraphs).
+                    val shownAdded = addedLines.take(4)
+                    shownAdded.forEach { line ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -998,14 +1041,20 @@ private fun HistoryVersionRow(
                                 color = MaterialTheme.colorScheme.primary
                             )
                             Text(
-                                line,
+                                previewLine(line),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.weight(1f)
                             )
                         }
                     }
-                    removedLines.forEach { line ->
+                    if (addedLines.size > shownAdded.size) {
+                        DiffMoreChip("${addedLines.size - shownAdded.size} more added")
+                    }
+                    val shownRemoved = removedLines.take(4)
+                    shownRemoved.forEach { line ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -1021,14 +1070,19 @@ private fun HistoryVersionRow(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
-                                line,
+                                previewLine(line),
                                 style = MaterialTheme.typography.bodySmall.copy(
                                     textDecoration = TextDecoration.LineThrough,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.weight(1f)
                             )
                         }
+                    }
+                    if (removedLines.size > shownRemoved.size) {
+                        DiffMoreChip("${removedLines.size - shownRemoved.size} more removed")
                     }
                     // Restore — empty field restores straight away; a field
                     // with text opens the Add above / Add below / Replace
@@ -1070,6 +1124,46 @@ private fun HistoryVersionRow(
             }
         }
     }
+}
+
+/** A compact one-line preview of a changed paragraph — long lines are
+ *  clipped so the expanded diff never dumps full text. */
+private fun previewLine(line: String, maxChars: Int = 56): String =
+    if (line.length <= maxChars) line else line.take(maxChars - 1) + "…"
+
+/** The "N more added/removed" footer of a clipped diff — a tiny quiet chip. */
+@Composable
+private fun DiffMoreChip(label: String) {
+    Text(
+        label,
+        style = MaterialTheme.typography.labelSmall.copy(
+            fontWeight = FontWeight.SemiBold,
+            fontStyle = FontStyle.Italic
+        ),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 2.dp, top = 1.dp)
+    )
+}
+
+/** A tiny horizontal branch stub — connects a session heading to the trunk
+ *  (its left edge sits exactly on the trunk's x, so the line reads as one
+ *  continuous branch off the tree). */
+@Composable
+private fun SessionBranchStub() {
+    val stubColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
+    Box(
+        Modifier
+            .width(14.dp)
+            .height(14.dp)
+            .drawBehind {
+                drawLine(
+                    color = stubColor,
+                    start = Offset(0f, center.y),
+                    end = Offset(size.width, center.y),
+                    strokeWidth = 1.5.dp.toPx()
+                )
+            }
+    )
 }
 
 /** The four round row actions (pin / copy / restore / delete) — shared by
