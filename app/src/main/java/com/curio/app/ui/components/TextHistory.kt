@@ -901,6 +901,12 @@ private fun HistoryVersionRow(
     val addedLines = currParas.filter { it !in prevParas }
     val removedLines = prevParas.filter { it !in currParas }
 
+    // Colors are read in the composable scope — drawBehind is not a
+    // @Composable context, so MaterialTheme must not be read inside it.
+    val stemColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.30f)
+    val dotColor = if (isActive) MaterialTheme.colorScheme.primary
+        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+
     Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.Top) {
         // ── Connector — the node dot rides a continuous stem that spans the
         //    node's whole height (hidden on the last row, nothing dangles).
@@ -911,7 +917,7 @@ private fun HistoryVersionRow(
                 .drawBehind {
                     if (!isLast) {
                         drawLine(
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.30f),
+                            color = stemColor,
                             start = Offset(center.x, 10.dp.toPx()),
                             end = Offset(center.x, size.height),
                             strokeWidth = 2.dp.toPx()
@@ -924,10 +930,7 @@ private fun HistoryVersionRow(
                     .align(Alignment.TopCenter)
                     .size(8.dp)
                     .clip(CircleShape)
-                    .background(
-                        if (isActive) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
-                    )
+                    .background(dotColor)
             )
         }
         Column(Modifier.weight(1f).padding(start = 8.dp)) {

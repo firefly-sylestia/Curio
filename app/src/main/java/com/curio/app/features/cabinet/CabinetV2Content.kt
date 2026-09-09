@@ -1228,11 +1228,10 @@ private fun LazyGridScope.v2DetailItems(
 /** EVERYTHING — the JSX masonry gallery (the CurioEverythingGallery
  *  concept): ONE dense gallery of variable-size cards — no Recent rail, no
  *  per-kind section headers. Books wear tall portrait jackets, albums
- *  square sleeves, series posters; captures cycle narrow / full-width for
- *  the packed rhythm and reviews keep their own outlined card. The toolbar
- *  + filter chips ride the top full-line, and every card animates to its
- *  new spot when the category filter changes — the smooth reflow the JSX
- *  shows. */
+ *  square sleeves, series posters; captures and reviews size to their
+ *  content so the grid packs them by height. The toolbar + filter chips
+ *  ride the top full-line, and every card animates to its new spot when
+ *  the category filter changes — the smooth reflow the JSX shows. */
 @OptIn(ExperimentalFoundationApi::class)
 private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
     shownEntries: List<CurioEntry>,
@@ -1261,17 +1260,15 @@ private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
         it.format == CaptureFormat.ReelNotes || it.format == CaptureFormat.GalleryWall
     }
     val totalShown = shownEntries.size + shownBooks.size + shownAlbums.size + shownSeries.size
-    // The JSX size vocabulary scaled to the grid: HALF = narrow card, FULL =
-    // wide card (the grid is 4 columns on phones, 8 on wide windows).
-    val half = if (wide) 4 else 2
-    val full = if (wide) 8 else 4
+    // Staggered-grid spans only offer FullLine / SingleLane (multi-lane
+    // spans aren't part of the API), so every card takes one lane and the
+    // masonry's varied sizes come from HEIGHT — the grid's native language:
+    // books stand tall (portrait jackets), albums sit square, series hang
+    // as posters, and captures/reviews size themselves to their content.
     // Smooth reflow — every card animates to its new spot when the category
-    // filter changes (the JSX gallery's transition).
-    val animateCard = Modifier.animateItem(
-        fadeInSpec = tween(220),
-        fadeOutSpec = tween(150),
-        placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
-    )
+    // filter changes (the JSX gallery's transition). animateItem is a member
+    // extension of the item scope, so it's applied per-item inside each
+    // item {} block below.
 
     if (totalShown == 0) {
         item(key = "e-empty", span = StaggeredGridItemSpan.FullLine, contentType = "empty") {
@@ -1306,42 +1303,46 @@ private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
     }
 
     // ── Masonry cards — one packed gallery mixing every kind. Liked media
-    // keeps its cover aspect ratio (content-driven height); captures cycle
-    // narrow / full-width for the packed rhythm.
+    // keeps its cover aspect ratio (content-driven height); captures and
+    // reviews size to their content — the grid packs them by height.
     fun emitMedia(likes: List<V2Liked>) {
         if (likes.isEmpty()) return
         likes.forEach { liked ->
             item(
                 key = "l|${liked.kind.name}|${liked.name}",
-                span = StaggeredGridItemSpan.Fixed(half),
                 contentType = "media"
             ) {
                 V2MediaTileCard(
                     item = liked,
                     onClick = { onOpenLiked(liked) },
                     onMore = { onCoverSource(liked) },
-                    modifier = animateCard
+                    modifier = Modifier.animateItem(
+                        fadeInSpec = tween(220),
+                        fadeOutSpec = tween(150),
+                        placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                    )
                 )
             }
         }
     }
 
-    var captureIndex = 0
     fun emitEntry(e: CurioEntry, review: Boolean) {
-        val wideSpan = !review && captureIndex % 3 == 0
-        captureIndex++
         item(
             key = "x|${e.id}",
-            span = StaggeredGridItemSpan.Fixed(if (wideSpan) full else half),
             contentType = if (review) "review" else "entry"
         ) {
+            val reflow = Modifier.animateItem(
+                fadeInSpec = tween(220),
+                fadeOutSpec = tween(150),
+                placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
+            )
             if (review) {
                 V2ReviewTileCard(
                     entry = e,
                     onClick = { onEntryClick(e.id) },
                     onLongClick = { onEntryLongClick(e.id) },
                     selected = e.id in selectedEntryIds,
-                    modifier = animateCard
+                    modifier = reflow
                 )
             } else {
                 CurioEntryCard(
@@ -1349,7 +1350,7 @@ private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
                     selected = e.id in selectedEntryIds,
                     onLongClick = { onEntryLongClick(e.id) },
                     onClick = { onEntryClick(e.id) },
-                    modifier = animateCard
+                    modifier = reflow
                 )
             }
         }

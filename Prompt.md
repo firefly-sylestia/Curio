@@ -1450,4 +1450,8 @@ love the doodles arts of apperance, per designer, and all other, just not the pr
 browser + Support duplicate-header prompt above shipped in this push; this
 is the next prompt.**
 
-next prompt. (empty — awaiting the user's doodle-redraw + rail-scroll details) why not keep the header stable and just smoothly fade out the text and the buttom pages, it ill be more smooth isnt it. 
+next prompt. Redraw Preferences, Backup/History and Book covers doodles in a
+properly different style (Appearance / Pet designer / all the others stay);
+fix the glitchy auto-scroll of the top nav rail — user detail (2026-09-09):
+keep the header stable and just smoothly fade out the text and the bottom
+pages instead of the rail scrolling — it'll be smoother. 
