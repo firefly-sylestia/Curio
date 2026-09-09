@@ -16,8 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -52,18 +53,21 @@ import com.curio.app.data.CurioQuests
 import com.curio.app.data.LevelRewards
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsNavRail
+import com.curio.app.features.settings.SettingsOptionCard
+import com.curio.app.features.settings.SettingsOptionDivider
+import com.curio.app.features.settings.SettingsSectionHeading
 import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.features.settings.navigateToSettingsSection
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
-import com.curio.app.ui.components.CurioSettingsDivider
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryInk
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.features.settings.SettingsHeroTotalHeight
@@ -104,8 +108,7 @@ fun ManageCategoriesScreen(navController: NavController) {
         base.map { cat -> cat.copy(isHidden = cat.id in AppPreferences.hiddenCategoriesState) }
     }
     // v26 — local DRAFT order while the user drags: steppers and the
-    // long-press drag mutate the draft and persist on release, so the list
-    // animates into place (animateItem) instead of jumping. Re-keyed off
+    // long-press drag mutate the draft and persist on release. Re-keyed off
     // [items] so external changes (hidden toggles) re-seed it cleanly.
     var draft by remember(items) { mutableStateOf(items) }
     var draggingId by remember { mutableStateOf<CategoryId?>(null) }
@@ -194,7 +197,8 @@ val glassBackdrop = rememberLayerBackdrop()
             item(key = "settings-nav", contentType = "settings-nav") {
                 SettingsNavRail(
                     active = "categories",
-                    onSelect = { navigateToSettingsSection(navController, it) }
+                    onSelect = { navigateToSettingsSection(navController, it) },
+                    navController = navController
                 )
             }
                                 // v9.x — locked-reorder notice: explains the level gate and
@@ -202,9 +206,11 @@ val glassBackdrop = rememberLayerBackdrop()
                 if (!reorderUnlocked) {
                     item("reorder-lock") {
                         val remaining = reorderLevel - CurioQuests.levelForXp(CurioQuests.xpState)
+                        val lockDark = isCurioDarkTheme()
                         Surface(
-                            shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+                            shape = RoundedCornerShape(20.dp),
+                            color = if (lockDark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
+                            else Color.White.copy(alpha = 0.68f),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 4.dp, vertical = 6.dp)
@@ -212,14 +218,26 @@ val glassBackdrop = rememberLayerBackdrop()
                             Row(
                                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                CurioIcon(
-                                    name = CurioIcons.DragHandle,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    size = 18.dp
-                                )
+                                // Frosted icon tile — the settings row language.
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(RoundedCornerShape(13.dp))
+                                        .background(
+                                            if (lockDark) Color.White.copy(alpha = 0.09f)
+                                            else Color(0xFFF2E8DC)
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CurioIcon(
+                                        name = CurioIcons.DragHandle,
+                                        contentDescription = null,
+                                        tint = if (lockDark) Color(0xFFD7B8A9) else Color(0xFF755647),
+                                        size = 20.dp
+                                    )
+                                }
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = "Custom order locked",
@@ -268,57 +286,60 @@ val glassBackdrop = rememberLayerBackdrop()
                     }
                 }
 
-                // ── Category rows — flat, with hairlines between them ───
-                // Draggable: long-press the ⋮ handle, then drag up/down; the
-                // lane glides into place and the order persists on release.
-                itemsIndexed(draft, key = { _, category -> category.id }) { index, category ->
-                    CategoryRow(
-                        category = category,
-                        isFirst = draft.firstOrNull()?.id == category.id,
-                        isLast = draft.lastOrNull()?.id == category.id,
-                        isDragging = draggingId == category.id,
-                        reorderEnabled = reorderUnlocked,
-                        modifier = Modifier.animateItem(),
-                        onMoveUp = { if (reorderUnlocked) { shiftDraft(category.id, -1); persistDraft() } },
-                        onMoveDown = { if (reorderUnlocked) { shiftDraft(category.id, +1); persistDraft() } },
-                        onDragStart = {
-                            if (reorderUnlocked) {
-                                draggingId = category.id
-                                dragAccum = 0f
-                            }
-                        },
-                        onDragDelta = { dy ->
-                            dragAccum += dy
-                            // A full row-height of travel swaps the lane one
-                            // slot; the residual carries into the next swap
-                            // so long fast drags feel continuous.
-                            while (dragAccum >= dragStepPx) {
-                                dragAccum -= dragStepPx
-                                shiftDraft(category.id, +1)
-                            }
-                            while (dragAccum <= -dragStepPx) {
-                                dragAccum += dragStepPx
-                                shiftDraft(category.id, -1)
-                            }
-                        },
-                        onDragEnd = {
-                            draggingId = null
-                            dragAccum = 0f
-                            persistDraft()
-                        },
-                        onDragCancel = {
-                            draggingId = null
-                            dragAccum = 0f
-                        },
-                        onVisibilityToggle = { visible ->
-                            // Persist instantly — the app-wide reactive state
-                            // updates and every consumer recomposes.
-                            AppPreferences.setCategoryHidden(context, category.id, !visible)
+                // ── Section heading + the frosted lanes card — the settings
+                //    option-card language (one card, hairline-divided rows,
+                //    exactly like the Recording page). ──
+                item("lanes-heading") {
+                    SettingsSectionHeading("Your lanes", "\u2726")
+                }
+                item("lanes") {
+                    SettingsOptionCard {
+                        draft.forEachIndexed { index, category ->
+                            if (index > 0) SettingsOptionDivider()
+                            CategoryRow(
+                                category = category,
+                                isFirst = draft.firstOrNull()?.id == category.id,
+                                isLast = draft.lastOrNull()?.id == category.id,
+                                isDragging = draggingId == category.id,
+                                reorderEnabled = reorderUnlocked,
+                                onMoveUp = { if (reorderUnlocked) { shiftDraft(category.id, -1); persistDraft() } },
+                                onMoveDown = { if (reorderUnlocked) { shiftDraft(category.id, +1); persistDraft() } },
+                                onDragStart = {
+                                    if (reorderUnlocked) {
+                                        draggingId = category.id
+                                        dragAccum = 0f
+                                    }
+                                },
+                                onDragDelta = { dy ->
+                                    dragAccum += dy
+                                    // A full row-height of travel swaps the lane one
+                                    // slot; the residual carries into the next swap
+                                    // so long fast drags feel continuous.
+                                    while (dragAccum >= dragStepPx) {
+                                        dragAccum -= dragStepPx
+                                        shiftDraft(category.id, +1)
+                                    }
+                                    while (dragAccum <= -dragStepPx) {
+                                        dragAccum += dragStepPx
+                                        shiftDraft(category.id, -1)
+                                    }
+                                },
+                                onDragEnd = {
+                                    draggingId = null
+                                    dragAccum = 0f
+                                    persistDraft()
+                                },
+                                onDragCancel = {
+                                    draggingId = null
+                                    dragAccum = 0f
+                                },
+                                onVisibilityToggle = { visible ->
+                                    // Persist instantly — the app-wide reactive state
+                                    // updates and every consumer recomposes.
+                                    AppPreferences.setCategoryHidden(context, category.id, !visible)
+                                }
+                            )
                         }
-                    )
-                    // Hairline between rows — the flat-list divider language.
-                    if (index < draft.lastIndex) {
-                        CurioSettingsDivider()
                     }
                 }
             }

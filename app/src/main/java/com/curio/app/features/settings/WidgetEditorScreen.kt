@@ -73,6 +73,7 @@ fun WidgetEditorScreen(navController: NavController) {
         SettingsNavRail(
             active = null,
             onSelect = { navigateToSettingsSection(navController, it) },
+            navController = navController,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
         Text(

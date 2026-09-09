@@ -677,7 +677,8 @@ fun PetDesignerScreen(navController: NavController) {
             item(key = "settings-nav", contentType = "settings-nav") {
                 SettingsNavRail(
                     active = "pet",
-                    onSelect = { navigateToSettingsSection(navController, it) }
+                    onSelect = { navigateToSettingsSection(navController, it) },
+                    navController = navController
                 )
             }
             // ── Editor page: picker trigger / Editing header (v8.56) ──

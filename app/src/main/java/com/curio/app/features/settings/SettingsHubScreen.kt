@@ -45,6 +45,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -65,6 +66,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -895,10 +897,14 @@ fun SettingsHubScreen(navController: NavController) {
             ) {
                 // ── JSX nav rail — All Settings / Appearance / … ──
                 item(key = "nav", span = { GridItemSpan(maxLineSpan) }) {
-                    SettingsNavRail(active = activeNav, onSelect = { entry ->
-                        activeNav = entry.id
-                        navigateToSettingsSection(navController, entry)
-                    })
+                    SettingsNavRail(
+                        active = activeNav,
+                        onSelect = { entry ->
+                            activeNav = entry.id
+                            navigateToSettingsSection(navController, entry)
+                        },
+                        navController = navController
+                    )
                 }
                 // ── Search — filters every section below as you type ──
                 item(key = "search", span = { GridItemSpan(maxLineSpan) }) {
@@ -1506,7 +1512,9 @@ private data class SettingsDesignCard(
     val icon: String,
     val tone: SettingsDesignTone,
     val visual: SettingsDesignVisual,
-    val route: String
+    val route: String,
+    /** v3xx — a slightly LARGER title (Appearance / Pet designer only). */
+    val bigTitle: Boolean = false
 )
 
 /** One labelled group of cards (JSX `group`). */
@@ -1543,8 +1551,8 @@ private val settingsNavRail = listOf(
  *  slot the book-fetching etc. into) — every card maps to a real screen. */
 private val settingsDesignGroups = listOf(
     SettingsDesignGroup("Personalize", "\u2726", listOf(
-        SettingsDesignCard("appearance", "Appearance", "Theme, tint, and pastel color", CurioIcons.DarkMode, SettingsDesignTone.CORAL, SettingsDesignVisual.SWATCHES, CurioRoutes.SETTINGS_APPEARANCE),
-        SettingsDesignCard("pet", "Pet designer", "Draw your own Curie", CurioIcons.Pets, SettingsDesignTone.SAGE, SettingsDesignVisual.PET, CurioRoutes.PET_DESIGNER)
+        SettingsDesignCard("appearance", "Appearance", "Theme, tint, and pastel color", CurioIcons.DarkMode, SettingsDesignTone.CORAL, SettingsDesignVisual.SWATCHES, CurioRoutes.SETTINGS_APPEARANCE, bigTitle = true),
+        SettingsDesignCard("pet", "Pet designer", "Draw your own Curie", CurioIcons.Pets, SettingsDesignTone.SAGE, SettingsDesignVisual.PET, CurioRoutes.PET_DESIGNER, bigTitle = true)
     )),
     SettingsDesignGroup("How it works", "\u2727", listOf(
         SettingsDesignCard("preferences", "Preferences", "Search engine, explore, and pet behavior", CurioIcons.Tune, SettingsDesignTone.BLUE, SettingsDesignVisual.COMPASS, CurioRoutes.SETTINGS_PREFERENCES),
@@ -1734,34 +1742,128 @@ private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier 
             }
         }
         SettingsDesignVisual.FLASK -> Box(modifier) {
-            // The science flask glyph — identifying and simple.
-            CurioIcon(
-                name = CurioIcons.Science,
-                contentDescription = null,
-                tint = Color.White.copy(alpha = 0.85f),
-                size = 44.dp,
-                modifier = Modifier.offset(x = 20.dp, y = 8.dp)
+            // The experiments flask — a proper drawing: glass flask with
+            // liquid + bubbles and two sparkles (no lone icon).
+            Canvas(Modifier.fillMaxSize()) {
+                val w = size.width
+                val h = size.height
+                val cx = w * 0.42f
+                val neckHalf = w * 0.06f
+                val shoulderY = h * 0.34f
+                val bodyL = cx - w * 0.24f
+                val bodyR = cx + w * 0.24f
+                val bottomY = h * 0.90f
+                // Neck — two rounded lines.
+                drawLine(Color.White.copy(alpha = 0.85f), Offset(cx - neckHalf, h * 0.06f), Offset(cx - neckHalf, shoulderY), strokeWidth = 2.dp.toPx())
+                drawLine(Color.White.copy(alpha = 0.85f), Offset(cx + neckHalf, h * 0.06f), Offset(cx + neckHalf, shoulderY), strokeWidth = 2.dp.toPx())
+                // Body — rounded-bottom triangle, glass fill + outline.
+                val outline = Path().apply {
+                    moveTo(cx - neckHalf, shoulderY)
+                    lineTo(cx + neckHalf, shoulderY)
+                    lineTo(bodyR, h * 0.46f)
+                    quadraticTo(bodyR, bottomY, cx, bottomY)
+                    quadraticTo(bodyL, bottomY, bodyL, h * 0.46f)
+                    close()
+                }
+                drawPath(outline, Color.White.copy(alpha = 0.16f))
+                drawPath(outline, Color.White.copy(alpha = 0.85f), style = Stroke(width = 2.dp.toPx()))
+                // Liquid — the same body, trimmed.
+                val liquid = Path().apply {
+                    moveTo(cx - w * 0.16f, h * 0.62f)
+                    lineTo(cx + w * 0.18f, h * 0.58f)
+                    lineTo(cx + w * 0.20f, h * 0.70f)
+                    quadraticTo(cx + w * 0.20f, bottomY - 2.dp.toPx(), cx, bottomY - 2.dp.toPx())
+                    quadraticTo(cx - w * 0.20f, bottomY - 2.dp.toPx(), cx - w * 0.18f, h * 0.66f)
+                    close()
+                }
+                drawPath(liquid, Color(0xFFC9B4E8).copy(alpha = 0.85f))
+                // Bubbles rising.
+                drawCircle(Color.White.copy(alpha = 0.85f), radius = 2.dp.toPx(), center = Offset(cx + w * 0.05f, h * 0.56f))
+                drawCircle(Color.White.copy(alpha = 0.65f), radius = 1.5.dp.toPx(), center = Offset(cx - w * 0.10f, h * 0.66f))
+            }
+            // Sparkles around the flask (the JSX flask scene).
+            Text(
+                text = "✦",
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
+                color = Color.White.copy(alpha = 0.85f),
+                modifier = Modifier.offset(x = 68.dp, y = 2.dp)
+            )
+            Text(
+                text = "✧",
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
+                color = Color.White.copy(alpha = 0.7f),
+                modifier = Modifier.offset(x = 6.dp, y = 46.dp)
             )
         }
         SettingsDesignVisual.CLOUD -> Box(modifier) {
-            // The backup cloud glyph — identifying and simple.
-            CurioIcon(
-                name = CurioIcons.Backup,
-                contentDescription = null,
-                tint = Color.White.copy(alpha = 0.85f),
-                size = 44.dp,
-                modifier = Modifier.offset(x = 22.dp, y = 8.dp)
-            )
+            // The backup cloud — a soft sun, a cloud, and an upload arrow
+            // (backup = sending your data up).
+            Canvas(Modifier.fillMaxSize()) {
+                val w = size.width
+                val h = size.height
+                // Soft sun behind the cloud.
+                drawCircle(Color(0xFFFFD9A0).copy(alpha = 0.55f), radius = w * 0.15f, center = Offset(w * 0.74f, h * 0.20f))
+                // The cloud — three lobes on a flat base.
+                val baseY = h * 0.74f
+                val cloud = Path().apply {
+                    moveTo(w * 0.06f, baseY)
+                    cubicTo(w * 0.03f, baseY - h * 0.26f, w * 0.14f, baseY - h * 0.44f, w * 0.28f, baseY - h * 0.34f)
+                    cubicTo(w * 0.28f, baseY - h * 0.56f, w * 0.46f, baseY - h * 0.62f, w * 0.54f, baseY - h * 0.44f)
+                    cubicTo(w * 0.64f, baseY - h * 0.58f, w * 0.82f, baseY - h * 0.46f, w * 0.82f, baseY - h * 0.28f)
+                    cubicTo(w * 0.96f, baseY - h * 0.22f, w * 0.94f, baseY, w * 0.78f, baseY)
+                    close()
+                }
+                drawPath(cloud, Color.White.copy(alpha = 0.82f))
+                // Upload arrow — stem + filled head.
+                val ax = w * 0.50f
+                val headY = h * 0.52f
+                drawLine(Color(0xFF8490A6).copy(alpha = 0.95f), Offset(ax, h * 0.96f), Offset(ax, headY), strokeWidth = 2.4.dp.toPx())
+                val head = Path().apply {
+                    moveTo(ax - w * 0.11f, headY + h * 0.16f)
+                    lineTo(ax, headY)
+                    lineTo(ax + w * 0.11f, headY + h * 0.16f)
+                    close()
+                }
+                drawPath(head, Color(0xFF8490A6).copy(alpha = 0.95f))
+            }
         }
         SettingsDesignVisual.IMAGE -> Box(modifier) {
-            // The image glyph — identifying and simple.
-            CurioIcon(
-                name = CurioIcons.Image,
-                contentDescription = null,
-                tint = Color.White.copy(alpha = 0.85f),
-                size = 44.dp,
-                modifier = Modifier.offset(x = 22.dp, y = 8.dp)
-            )
+            // Book covers — an open book whose right page carries a little
+            // cover art (sun over a hill).
+            Canvas(Modifier.fillMaxSize()) {
+                val w = size.width
+                val h = size.height
+                val baseY = h * 0.86f
+                // Left page.
+                val left = Path().apply {
+                    moveTo(w * 0.08f, baseY)
+                    lineTo(w * 0.08f, h * 0.22f)
+                    cubicTo(w * 0.28f, h * 0.16f, w * 0.42f, h * 0.28f, w * 0.50f, h * 0.38f)
+                    lineTo(w * 0.50f, baseY)
+                    close()
+                }
+                drawPath(left, Color.White.copy(alpha = 0.85f))
+                // Right page.
+                val right = Path().apply {
+                    moveTo(w * 0.50f, h * 0.38f)
+                    cubicTo(w * 0.58f, h * 0.28f, w * 0.72f, h * 0.16f, w * 0.92f, h * 0.22f)
+                    lineTo(w * 0.92f, baseY)
+                    lineTo(w * 0.50f, baseY)
+                    close()
+                }
+                drawPath(right, Color.White.copy(alpha = 0.62f))
+                // Cover art on the right page — sun over a hill.
+                drawCircle(Color(0xFFFFD9A0).copy(alpha = 0.9f), radius = 4.dp.toPx(), center = Offset(w * 0.70f, h * 0.40f))
+                val hill = Path().apply {
+                    moveTo(w * 0.58f, h * 0.60f)
+                    lineTo(w * 0.70f, h * 0.46f)
+                    lineTo(w * 0.84f, h * 0.60f)
+                    close()
+                }
+                drawPath(hill, Color(0xFF9BB5A1).copy(alpha = 0.95f))
+                // Spine.
+                drawLine(Color(0xFF6B4F45).copy(alpha = 0.45f), Offset(w * 0.50f, h * 0.38f), Offset(w * 0.50f, baseY), strokeWidth = 1.2.dp.toPx())
+            }
         }
     }
 }
@@ -1847,24 +1949,36 @@ private fun SettingsDesignCardView(
                     CurioIcon(name = CurioIcons.ChevronRight, contentDescription = null, tint = Color(0xFFFFF9F1), size = 17.dp)
                 }
             }
-            Spacer(Modifier.weight(1f))
+            // v3xx — the title + subtitle sit at the TOP of the card, right
+            // under the corner icon (never pushed to the bottom), and run
+            // FULL width so long subtitles aren't cut by a width cap. The
+            // decorative visual keeps the bottom-right corner.
+            Spacer(Modifier.height(12.dp))
             Text(
                 text = card.title,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.2).sp),
+                style = if (card.bigTitle) MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = (-0.3).sp,
+                    fontSize = 20.sp
+                ) else MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = (-0.2).sp
+                ),
                 color = ink,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxWidth(0.76f)
+                modifier = Modifier.fillMaxWidth()
             )
-            Spacer(Modifier.height(3.dp))
+            Spacer(Modifier.height(4.dp))
             Text(
                 text = card.subtitle,
-                style = MaterialTheme.typography.bodySmall.copy(lineHeight = 16.sp),
+                style = MaterialTheme.typography.bodySmall.copy(lineHeight = 17.sp),
                 color = muted,
-                maxLines = 3,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxWidth(0.80f)
+                modifier = Modifier.fillMaxWidth()
             )
+            Spacer(Modifier.weight(1f))
         }
     }
 }
@@ -1934,71 +2048,190 @@ private fun SettingsSecondaryCardView(
  * The JSX nav rail — horizontal chips on phones (the desktop sidebar's
  * mobile twin). "All Settings" returns to the hub itself.
  *
- * [active] is the currently open rail page: it renders highlighted in the
- * SECOND slot (right after "All Settings") so where you are sits next to
- * the way back — every other section follows in its fixed order. Pass
- * null on settings-family screens that aren't a rail destination (drill-in
- * tool pages): nothing is highlighted and the order stays fixed. Shared by
- * the hub AND every settings sub-page so the top bar is consistent and
- * switching sections is one tap away.
+ * [active] is the currently open rail page: it is highlighted in its
+ * NATURAL slot (the rail never reorders) and the row auto-scrolls to
+ * reveal it, so the top bar stays where you are instead of jumping back
+ * to the start. Pass null on settings-family screens that aren't a rail
+ * destination (drill-in tool pages): nothing is highlighted. Shared by
+ * the hub AND every settings sub-page; when [navController] is provided
+ * the page's QUICK TOOLS (its key deep settings) render under the chips
+ * so frequent controls are one tap away without opening the page.
  */
 @Composable
 internal fun SettingsNavRail(
     active: String?,
     onSelect: (SettingsNavEntry) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    navController: NavController? = null
 ) {
     val dark = isCurioDarkTheme()
-    // Rotate the active page into slot 2 (right after "All Settings"); the
-    // rest keeps the fixed rail order. No active page (or "all" — the hub)
-    // → the plain order.
-    val entries = remember(active) {
-        val first = settingsNavRail.firstOrNull()
-        val activeEntry = active?.let { id -> settingsNavRail.firstOrNull { it.id == id } }
-        if (first == null || activeEntry == null || activeEntry.id == first.id) settingsNavRail
-        else listOf(first, activeEntry) + settingsNavRail.filter { it.id != first.id && it.id != activeEntry.id }
+    // v3xx — the rail keeps its FIXED order: the opened page is highlighted
+    // in its NATURAL slot (never rotated next to "All Settings") and the
+    // row scrolls to reveal it, so the rail stays at your place in the list.
+    val listState = rememberLazyListState()
+    val activeIndex = remember(active) {
+        active?.let { id -> settingsNavRail.indexOfFirst { it.id == id }.takeIf { it >= 0 } }
     }
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(7.dp),
-        contentPadding = PaddingValues(vertical = 2.dp),
-        modifier = modifier.fillMaxWidth()
-    ) {
-        items(entries, key = { it.id }) { entry ->
-            val selected = active != null && active == entry.id
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier
-                    .width(82.dp)
-                    .heightIn(min = 60.dp)
-                    .clip(RoundedCornerShape(17.dp))
-                    .background(
-                        when {
-                            selected -> Color(0xFF815947)
-                            dark -> Color.White.copy(alpha = 0.07f)
-                            else -> Color.White.copy(alpha = 0.62f)
-                        }
+    LaunchedEffect(activeIndex) {
+        if (activeIndex != null) listState.animateScrollToItem(activeIndex)
+    }
+    Column(modifier = modifier.fillMaxWidth()) {
+        LazyRow(
+            state = listState,
+            horizontalArrangement = Arrangement.spacedBy(7.dp),
+            contentPadding = PaddingValues(vertical = 2.dp)
+        ) {
+            items(settingsNavRail, key = { it.id }) { entry ->
+                val selected = active != null && active == entry.id
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier
+                        .width(82.dp)
+                        .heightIn(min = 60.dp)
+                        .clip(RoundedCornerShape(17.dp))
+                        .background(
+                            when {
+                                selected -> Color(0xFF815947)
+                                dark -> Color.White.copy(alpha = 0.07f)
+                                else -> Color.White.copy(alpha = 0.62f)
+                            }
+                        )
+                        .clickable { onSelect(entry) }
+                        .padding(horizontal = 6.dp, vertical = 9.dp)
+                ) {
+                    CurioIcon(
+                        name = entry.icon,
+                        contentDescription = null,
+                        tint = if (selected) Color(0xFFFFF9F1) else MaterialTheme.colorScheme.onSurfaceVariant,
+                        size = 19.dp
                     )
-                    .clickable { onSelect(entry) }
-                    .padding(horizontal = 6.dp, vertical = 9.dp)
-            ) {
-                CurioIcon(
-                    name = entry.icon,
-                    contentDescription = null,
-                    tint = if (selected) Color(0xFFFFF9F1) else MaterialTheme.colorScheme.onSurfaceVariant,
-                    size = 19.dp
-                )
-                Text(
-                    text = entry.label,
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                        fontSize = 10.sp
-                    ),
-                    color = if (selected) Color(0xFFFFF9F1) else MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center
-                )
+                    Text(
+                        text = entry.label,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                            fontSize = 10.sp
+                        ),
+                        color = if (selected) Color(0xFFFFF9F1) else MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+        // The active page's quick tools — key deep settings surfaced right
+        // on the rail so a frequent control is one tap away without opening
+        // the page (only when a nav controller is available to open them).
+        if (navController != null) {
+            Spacer(Modifier.height(6.dp))
+            SettingsQuickTools(active = active, navController = navController)
+        }
+    }
+}
+
+/** One quick-tool chip — a deep setting surfaced on the rail itself. */
+private data class QuickTool(
+    val icon: String,
+    val label: String,
+    val route: String,
+    val page: SettingsPage? = null,
+    val rowKey: String? = null
+)
+
+/** The rail's quick tools rotate with the ACTIVE page: the page's key deep
+ *  settings surface under the nav chips so a frequent control is one tap
+ *  away without opening the page. Pages without deep rows (and the hub
+ *  itself) fall back to the app's most-reached settings. */
+private fun quickToolsFor(active: String?): List<QuickTool> = when (active) {
+    "appearance" -> listOf(
+        QuickTool(CurioIcons.DarkMode, "Theme", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-theme"),
+        QuickTool(CurioIcons.Palette, "Category tint", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-tint"),
+        QuickTool(CurioIcons.AutoAwesome, "Pastel colors", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-pastel"),
+        QuickTool(CurioIcons.AutoAwesome, "Adaptive Hero", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-hero-lane")
+    )
+    "preferences" -> listOf(
+        QuickTool(CurioIcons.Search, "Search engine", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-search-engine"),
+        QuickTool(CurioIcons.Timer, "Explore sessions", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-sessions"),
+        QuickTool(CurioIcons.Pets, "Pet games", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-pet-games"),
+        QuickTool(CurioIcons.Notifications, "Shuffle reminder", CurioRoutes.SETTINGS_PREFERENCES, SettingsPage.PREFERENCES, "pref-reminder")
+    )
+    "recording" -> listOf(
+        QuickTool(CurioIcons.Mic, "Audio quality", CurioRoutes.SETTINGS_RECORDING, SettingsPage.RECORDING, "recording-quality"),
+        QuickTool(CurioIcons.Edit, "Voice-to-text", CurioRoutes.SETTINGS_RECORDING, SettingsPage.RECORDING, "recording-voice"),
+        QuickTool(CurioIcons.Download, "Offline model", CurioRoutes.SETTINGS_RECORDING, SettingsPage.RECORDING, "recording-offline-model")
+    )
+    "backup" -> listOf(
+        QuickTool(CurioIcons.Backup, "Backup tools", CurioRoutes.SETTINGS_DATA),
+        QuickTool(CurioIcons.Delete, "Recycle bin", CurioRoutes.RECYCLE_BIN),
+        QuickTool(CurioIcons.Image, "Book covers", CurioRoutes.SETTINGS_BOOK_COVER),
+        QuickTool(CurioIcons.Download, "Updates", CurioRoutes.UPDATES)
+    )
+    else -> listOf(
+        QuickTool(CurioIcons.DarkMode, "Theme", CurioRoutes.SETTINGS_APPEARANCE, SettingsPage.APPEARANCE, "appearance-theme"),
+        QuickTool(CurioIcons.Mic, "Audio quality", CurioRoutes.SETTINGS_RECORDING, SettingsPage.RECORDING, "recording-quality"),
+        QuickTool(CurioIcons.Delete, "Recycle bin", CurioRoutes.RECYCLE_BIN),
+        QuickTool(CurioIcons.Download, "Updates", CurioRoutes.UPDATES)
+    )
+}
+
+/** The quick-tools chip row under the nav rail — frosted pills, one tap
+ *  opens the deep setting (with the row highlight when it lives inside a
+ *  sub-section screen). */
+@Composable
+private fun SettingsQuickTools(
+    active: String?,
+    navController: NavController
+) {
+    val tools = quickToolsFor(active)
+    if (tools.isEmpty()) return
+    val dark = isCurioDarkTheme()
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = "QUICK",
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 1.2.sp
+            ),
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+        )
+        Spacer(Modifier.width(8.dp))
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.weight(1f)
+        ) {
+            items(tools, key = { it.label }) { tool ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(
+                            if (dark) Color.White.copy(alpha = 0.07f)
+                            else Color.White.copy(alpha = 0.62f)
+                        )
+                        .clickable {
+                            if (tool.page != null && tool.rowKey != null) {
+                                SettingsHighlightTarget.page = tool.page
+                                SettingsHighlightTarget.rowKey = tool.rowKey
+                            }
+                            navController.navigate(tool.route) { launchSingleTop = true }
+                        }
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                ) {
+                    CurioIcon(
+                        name = tool.icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        size = 13.dp
+                    )
+                    Text(
+                        text = tool.label,
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
+                    )
+                }
             }
         }
     }

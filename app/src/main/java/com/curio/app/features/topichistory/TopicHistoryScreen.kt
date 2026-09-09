@@ -194,6 +194,7 @@ fun TopicHistoryScreen(navController: NavController) {
         SettingsNavRail(
             active = "history",
             onSelect = { navigateToSettingsSection(navController, it) },
+            navController = navController,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
 

@@ -1269,7 +1269,29 @@ updated in lockstep. Committed + pushed as 47e17d5c, CI green.)
    match. Existing hosts (TopicShareCard, TopicRevealScreen) updated to
    the new signature with currentText + mode handling.
 
-## next prompt 
- the settings page cards still needs a little bit of work, see the recordings style how much clean it is and also very good, i want the same quality refinemnet for all others a little more polish as they still feel cut or not good, and for experiments backup restore etc book covers they just have icons now which is bad replace it with a svg drawing but clean and matching, and then move each of the texts to the top side more touching the top corner icon, and a little bigger font for the appearnce pet designer those texts only, and then the all settings and the next one chnaging to what i open so chnage that to is the top rail have it then it shows that and stays in that postion of the place not at first, and also the top rails quick tools chnage and rotate them like more from insides too so its sometimes faster to find without opening pages and then the manage category page doesnt complement the design style so fix it and same with book cover fetching, and also recycle bin page too. they dont complement the design language more. 
+## request log — settings polish: hub cards + rail position/quick tools + 3 pages (done 2026-09-09, pushed)
+1. Hub cards (SettingsHubScreen): titles + subtitles moved to the TOP under
+   the corner icon (full width — the old 76%/80% caps cut text), bigTitle
+   flag bumps Appearance + Pet designer to 20sp, and Experiments / Backup /
+   Book covers got real drawings (flask + liquid + bubbles + sparkles,
+   cloud + sun + upload arrow, open book with a cover scene) instead of
+   lone icons.
+2. Nav rail: FIXED order — the open page is highlighted in its natural
+   slot (no more slot-2 rotation) and the row auto-scrolls to it. New
+   QUICK TOOLS row under the chips: per-page deep settings as frosted
+   pills (appearance/preferences/recording/backup sets + a frequent
+   fallback), deep-navigating via SettingsHighlightTarget; all 17 rail
+   call sites pass navController.
+3. Manage categories: lanes now live in ONE frosted SettingsOptionCard
+   with SettingsOptionDivider hairlines (the Recording look), Playfair
+   "Your lanes" heading, frosted reorder-lock notice with the warm icon
+   tile.
+4. Book covers page: the plain header/flat surface became the settings
+   chrome (torn-rose hero + watermark + sticky glass hero); master /
+   providers / stats / progress / failed cards are frosted with warm icon
+   tiles + Playfair headings.
+5. Recycle bin: frosted summary + rows with rounded 13dp accent tiles,
+   Playfair "Recently deleted" heading + rule.
 
- (empty slot for the next prompt) 
+## next prompt 
+refine the cabinet everything card and its preview of books and albumns it have backgroud of category tint, and then refine notes drawing, properly extend completed drawing it looks cut from sides, and more refinement to want to read.

@@ -971,6 +971,40 @@ app/src/main/java/com/curio/app/
   rows. Only verified-in-subset glyphs are used (CurioIcons constants).
   Custom content (chips, status header, release notes) keeps its own
   layout inside the glass cards.
+- **v3xx35 — settings polish: hub cards, rail position + quick tools,
+  three pages in the design language (user follow-up 2026-09-09).**
+  (1) **Hub cards** — `SettingsDesignCardView`: the title + subtitle now
+  sit at the TOP of the card right under the corner icon (the old
+  `Spacer(weight)` pushed them to the bottom) and run FULL width (the
+  old 76%/80% caps cut long subtitles); a `bigTitle` flag on the card
+  bumps Appearance + Pet designer to titleLarge 20sp (only those two);
+  the Experiments / Backup & restore / Book covers visuals are real
+  drawings now, not lone icons: a glass flask with lavender liquid +
+  bubbles + ✦/✧ sparkles, a cloud under a soft sun with an upload arrow,
+  and an open book whose right page carries a sun-over-hill cover scene.
+  (2) **Nav rail** — `SettingsNavRail` no longer rotates the open page
+  into slot 2: the rail keeps its FIXED order, highlights the page in
+  its natural slot and `animateScrollToItem`s to it (stays where you
+  are). New `navController` param + a `SettingsQuickTools` row under the
+  chips: the ACTIVE page's key deep settings as frosted pills (Theme /
+  Category tint / Pastel / Adaptive Hero on Appearance; Search engine /
+  Sessions / Pet games / Shuffle reminder on Preferences; Audio quality /
+  Voice-to-text / Offline model on Recording; Backup / Recycle bin /
+  Book covers / Updates on Backup; a frequent set everywhere else),
+  navigating via `SettingsHighlightTarget` deep highlight. All 17 rail
+  call sites pass `navController`. (3) **Design-language fixes** —
+  ManageCategoriesScreen: the lanes list is now ONE frosted
+  `SettingsOptionCard` with `SettingsOptionDivider` hairlines (the
+  Recording look; the old flat rows + CurioSettingsDivider are gone),
+  a Playfair "Your lanes" heading, and the reorder-lock notice is a
+  frosted card with the warm settings icon tile. BookCoverHubScreen:
+  the plain header + flat `surface` Column became the settings chrome
+  (torn-rose hero + watermark backdrop + sticky glass hero), cards are
+  frosted (master switch / providers / stats / progress / failed rows)
+  with warm icon tiles + Playfair section headings. RecycleBinScreen:
+  summary + trashed rows are frosted with rounded 13dp accent tiles
+  (settings tile shape), and "RECENTLY DELETED" is a Playfair heading +
+  rule.
 - **v3xx33/34 — Cabinet shelf art REDRAWN, "Curiying now" rename +
   shelf LOGIC, Favorites redesign + redesigned Add sheet (user follow-up
   2026-09-09).** (1) **Shelf art** — the five seeded-shelf arts in
