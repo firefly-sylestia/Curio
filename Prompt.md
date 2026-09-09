@@ -1,4 +1,44 @@
 # Prompt Log — current request
+## Request (2026-09-09, completed + pushed — Everything masonry gallery + text-history browser refinements + Support duplicate header)
+
+**Request (pending-prompt slot):** "the verything page inside well it needs
+redesign, the recent and then its getiing devided into category i dont want
+that" — the CurioEverythingGallery.jsx concept: a dense gallery of
+variable-size cards with filter tabs that smoothly reflow; also "the topic
+history page make the list view better too" (user confirmed via ask_user:
+the TEXT HISTORY browser's list), the tree view refinements (proper tree,
+show what added/removed, tap opens paste-top/paste-below/replace depending
+on the text box or the expanded tree, compact texts, better List/Tree +
+Clear buttons, delete confirmation), and remove duplicate section headers
+in settings sub-pages (Support's "About Curio").
+
+**What shipped:**
+1. **Everything masonry** (CabinetV2Content.kt) — `openLevel ==
+   "everything"` now renders a `LazyVerticalStaggeredGrid` (4 cols phone /
+   8 wide): FULL-line toolbar + filter rail on top, then ONE dense gallery
+   of variable-size cards — liked media keeps its cover aspect ratio
+   (books tall jackets, albums squares, series posters), captures cycle
+   narrow / full-width, reviews + moodboards get their own cards. The
+   Recent rail and the per-kind section headers are GONE. Every card
+   carries `Modifier.animateItem(...)` so switching the category filter
+   smoothly reflows the gallery (the JSX's transition). Dead code removed
+   (V2RecentCell / V2RecentMediaCell / recentFeed); V2ReviewTileCard gained
+   a modifier param.
+2. **Text History list** — rows lead with a frosted icon tile + field name
+   (bold) + time, then a 2-line text preview; the List / Tree toggle and
+   Clear button are frosted settings pills now (warm-rose active chip,
+   error-tinted armed Clear).
+3. **Text History tree** — node dots ride a continuous stem (no broken
+   stubs); each node shows a compact ONE-line preview that EXPANDS to the
+   diff (added lines highlighted, removed lines struck through, scrolls
+   when long) with a "Restore this version" pill; the copy-preview dialog
+   no longer opens from tree nodes; Restore into a field with text still
+   opens Add above / Add below / Replace. Delete now ALWAYS asks first.
+4. **Support duplicate header** — the "About Curio" card-internal header
+   removed (the section heading owns the title); scanned the other
+   settings sub-pages — Support was the only exact heading/card-title
+   duplicate.
+
 ## Request (2026-09-09, completed + pushed — CI smart-cast fix + settings design pass: doodle drawings, quick-tools cycle, rail glitch, page animation, topic history, book covers)
 
 **Request (pending-prompt slot):** "the settings drawings are still not
@@ -1404,10 +1444,10 @@ updated in lockstep. Committed + pushed as 47e17d5c, CI green.)
 3. .gitignore: `logcat_recording_*.txt`.
 
 ## next prompt 
-the verything page inside well it needs redesign, the recent and then its getiing devided into category i dont want that wait i will show you what i want
+love the doodles arts of apperance, per designer, and all other, just not the prefernace, and backup histroy and book covers, so redraw them properly a differnt style, also the auto scroll of the nav rail of the top is glitchy 
 
-**Status: pending — the user said they will show what they want for the
-Everything-page redesign; do not implement yet (the settings design pass
-that was pending above shipped on 2026-09-09).**
+**Status: pending (2026-09-09) — the Everything-page masonry + text-history
+browser + Support duplicate-header prompt above shipped in this push; this
+is the next prompt.**
 
-next prompt. (empty — awaiting the user's Everything-page details) 
+next prompt. (empty — awaiting the user's doodle-redraw + rail-scroll details) why not keep the header stable and just smoothly fade out the text and the buttom pages, it ill be more smooth isnt it. 

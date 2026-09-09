@@ -36,6 +36,14 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -360,19 +368,6 @@ fun CabinetV2Content(navController: NavController) {
         else base.sortedByDescending { likedAtFor(it) }
     }
 
-    // ── v3xx — the Recent rail mixes recent saves with recent LIKES. The
-    // liked-at stamps live in AppPreferences (kind|name → epoch ms); entries
-    // carry capturedAtMillis. One merged, newest-first feed renders both.
-    val recentFeed = remember(entries, books, albums, series, likedAtMap) {
-        val cells = mutableListOf<V2RecentCell>()
-        entries.forEach { cells.add(V2RecentCell.Entry(it)) }
-        (books + albums + series).forEach { item ->
-            val ts = likedAtFor(item)
-            if (ts > 0L) cells.add(V2RecentCell.Liked(item, ts))
-        }
-        cells.sortedByDescending { it.ts }.take(10)
-    }
-
     // ── v3xx — the rail only lists types that actually hold content.
     val railAvailable = remember(books, albums, series, noteEntries, entries) {
         buildSet {
@@ -532,15 +527,90 @@ fun CabinetV2Content(navController: NavController) {
         // remembered scroll made opening a collection land MID-list and made
         // page switches visibly jump (the glitch). key(openLevel) recreates
         // the grid per level, so every level opens from the TOP.
+        // The wide-window hero — the grid's first item on tablets/landscape
+        // (shared by the regular grid and the Everything masonry below).
+        val wideHero: @Composable () -> Unit = {
+            CabinetHeroHeader(
+                title = heroTitle,
+                subtitle = heroSubtitle,
+                activeCat = null,
+                legacyMode = false,
+                searchActive = searchActive,
+                searchQuery = searchQuery,
+                onSearchQueryChange = { searchQuery = it },
+                onCloseSearch = { searchActive = false; searchQuery = "" },
+                searchFocus = searchFocus,
+                trailing = heroTrailing,
+                glassBackdrop = glassBackdrop
+            )
+        }
+
         key(openLevel) {
+        // ── EVERYTHING — the JSX masonry gallery: a dense STAGGERED grid of
+        // variable-size cards (books tall jackets, albums squares, series
+        // posters, captures cycling narrow/wide) with filter tabs that
+        // smoothly reflow the gallery — every card animates to its new spot
+        // when the category changes (the CurioEverythingGallery concept).
+        if (openLevel == "everything") {
+            LazyVerticalStaggeredGrid(
+                state = rememberLazyStaggeredGridState(),
+                columns = StaggeredGridCells.Fixed(if (wide) 8 else 4),
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    end = 16.dp,
+                    top = contentTop,
+                    bottom = 24.dp + 84.dp +
+                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                ),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalItemSpacing = 12.dp,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .then(if (glassOn && glassBackdrop != null)
+                        Modifier.layerBackdrop(glassBackdrop) else Modifier)
+            ) {
+                if (wide) {
+                    item(key = "hero", span = StaggeredGridItemSpan.FullLine, contentType = "hero") {
+                        wideHero()
+                    }
+                }
+                v2EverythingMasonryItems(
+                    shownEntries = shownEntries,
+                    shownBooks = shownBooks,
+                    shownAlbums = shownAlbums,
+                    shownSeries = shownSeries,
+                    railAvailable = railAvailable,
+                    typeFilter = typeFilter,
+                    onTypeFilter = { typeFilter = it },
+                    sortAtoZ = sortAtoZ,
+                    onSort = { sortAtoZ = it },
+                    selectionMode = selectionMode,
+                    selectedEntryIds = selectedEntryIds,
+                    onEntryLongClick = { id ->
+                        selectionMode = true
+                        selectedEntryIds = selectedEntryIds + id
+                    },
+                    onEntryClick = { id ->
+                        if (selectionMode) {
+                            selectedEntryIds = if (id in selectedEntryIds) selectedEntryIds - id
+                            else selectedEntryIds + id
+                        } else {
+                            haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
+                            navController.navigate(CurioRoutes.entryDetail(id)) { launchSingleTop = true }
+                        }
+                    },
+                    onOpenLiked = { item -> item.open(navController) },
+                    onCoverSource = { coverSourceItem = it },
+                    onAddNew = { navController.navigateToTab(CurioRoutes.SPIN) },
+                    onClearFilters = { searchQuery = ""; searchActive = false; typeFilter = null },
+                    pageAccent = pageAccent,
+                    wide = wide
+                )
+            }
+        } else {
         LazyVerticalGrid(
             state = rememberLazyGridState(),
-            // v3xx — Everything is a 3-column media grid (the old 2-col + a
-            // separate list toggle are gone: list was replaced by the 3 grid);
-            // every other level keeps its 2-col card grid.
-            columns = if (wide) GridCells.Adaptive(minSize = 176.dp)
-            else if (openLevel == "everything") GridCells.Fixed(3)
-            else GridCells.Fixed(2),
+            columns = if (wide) GridCells.Adaptive(minSize = 176.dp) else GridCells.Fixed(2),
             contentPadding = PaddingValues(
                 start = 16.dp,
                 end = 16.dp,
@@ -557,19 +627,7 @@ fun CabinetV2Content(navController: NavController) {
         ) {
             if (wide) {
                 item(key = "hero", span = { GridItemSpan(maxLineSpan) }, contentType = "hero") {
-                    CabinetHeroHeader(
-                        title = heroTitle,
-                        subtitle = heroSubtitle,
-                        activeCat = null,
-                        legacyMode = false,
-                        searchActive = searchActive,
-                        searchQuery = searchQuery,
-                        onSearchQueryChange = { searchQuery = it },
-                        onCloseSearch = { searchActive = false; searchQuery = "" },
-                        searchFocus = searchFocus,
-                        trailing = heroTrailing,
-                        glassBackdrop = glassBackdrop
-                    )
+                    wideHero()
                 }
             }
 
@@ -666,38 +724,6 @@ fun CabinetV2Content(navController: NavController) {
                         }
                     }
                 )
-                openLevel == "everything" -> v2EverythingItems(
-                    shownEntries = shownEntries,
-                    shownBooks = shownBooks,
-                    shownAlbums = shownAlbums,
-                    shownSeries = shownSeries,
-                    recentFeed = recentFeed,
-                    railAvailable = railAvailable,
-                    typeFilter = typeFilter,
-                    onTypeFilter = { typeFilter = it },
-                    sortAtoZ = sortAtoZ,
-                    onSort = { sortAtoZ = it },
-                    selectionMode = selectionMode,
-                    selectedEntryIds = selectedEntryIds,
-                    onEntryLongClick = { id ->
-                        selectionMode = true
-                        selectedEntryIds = selectedEntryIds + id
-                    },
-                    onEntryClick = { id ->
-                        if (selectionMode) {
-                            selectedEntryIds = if (id in selectedEntryIds) selectedEntryIds - id
-                            else selectedEntryIds + id
-                        } else {
-                            haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
-                            navController.navigate(CurioRoutes.entryDetail(id)) { launchSingleTop = true }
-                        }
-                    },
-                    onOpenLiked = { item -> item.open(navController) },
-                    onCoverSource = { coverSourceItem = it },
-                    onAddNew = { navController.navigateToTab(CurioRoutes.SPIN) },
-                    onClearFilters = { searchQuery = ""; searchActive = false; typeFilter = null },
-                    pageAccent = pageAccent
-                )
                 else -> v2HomeItems(
                     everythingLikes = allLikes,
                     everythingCount = entries.size + allLikes.size,
@@ -753,6 +779,7 @@ fun CabinetV2Content(navController: NavController) {
                     onClearSearch = { searchQuery = ""; searchActive = false }
                 )
             }
+        }
         }
         }
 
@@ -1198,20 +1225,20 @@ private fun LazyGridScope.v2DetailItems(
     }
 }
 
-/** EVERYTHING — the JSX library page. v3xx — every kind renders in its OWN
- *  view (no more one-look-alike grid): the toolbar (Filter / Sort) + a type
- *  rail that only lists types with real content, a Recent rail that mixes
- *  recently saved captures WITH recently liked books/albums/series, then a
- *  3-column grid grouped by kind — Books wear portrait jackets, Albums
- *  square covers, Series posters, saved notes keep the entry card, and
- *  REVIEWS (ReelNotes) get their own OUTLINED review card. The old list /
- *  grid view toggle is gone (the grid replaced the list). */
-private fun LazyGridScope.v2EverythingItems(
+/** EVERYTHING — the JSX masonry gallery (the CurioEverythingGallery
+ *  concept): ONE dense gallery of variable-size cards — no Recent rail, no
+ *  per-kind section headers. Books wear tall portrait jackets, albums
+ *  square sleeves, series posters; captures cycle narrow / full-width for
+ *  the packed rhythm and reviews keep their own outlined card. The toolbar
+ *  + filter chips ride the top full-line, and every card animates to its
+ *  new spot when the category filter changes — the smooth reflow the JSX
+ *  shows. */
+@OptIn(ExperimentalFoundationApi::class)
+private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
     shownEntries: List<CurioEntry>,
     shownBooks: List<V2Liked>,
     shownAlbums: List<V2Liked>,
     shownSeries: List<V2Liked>,
-    recentFeed: List<V2RecentCell>,
     railAvailable: Set<String>,
     typeFilter: String?,
     onTypeFilter: (String?) -> Unit,
@@ -1225,18 +1252,29 @@ private fun LazyGridScope.v2EverythingItems(
     onCoverSource: (V2Liked) -> Unit,
     onAddNew: () -> Unit,
     onClearFilters: () -> Unit,
-    pageAccent: Color
+    pageAccent: Color,
+    wide: Boolean
 ) {
     val reviewEntries = shownEntries.filter { it.format == CaptureFormat.ReelNotes }
     val moodEntries = shownEntries.filter { it.format == CaptureFormat.GalleryWall }
     val noteEntriesShown = shownEntries.filterNot {
         it.format == CaptureFormat.ReelNotes || it.format == CaptureFormat.GalleryWall
     }
-    val totalShown =
-        shownEntries.size + shownBooks.size + shownAlbums.size + shownSeries.size
-    val anyContent = totalShown > 0 || recentFeed.isNotEmpty()
-    if (!anyContent) {
-        item(key = "e-empty", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
+    val totalShown = shownEntries.size + shownBooks.size + shownAlbums.size + shownSeries.size
+    // The JSX size vocabulary scaled to the grid: HALF = narrow card, FULL =
+    // wide card (the grid is 4 columns on phones, 8 on wide windows).
+    val half = if (wide) 4 else 2
+    val full = if (wide) 8 else 4
+    // Smooth reflow — every card animates to its new spot when the category
+    // filter changes (the JSX gallery's transition).
+    val animateCard = Modifier.animateItem(
+        fadeInSpec = tween(220),
+        fadeOutSpec = tween(150),
+        placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
+    )
+
+    if (totalShown == 0) {
+        item(key = "e-empty", span = StaggeredGridItemSpan.FullLine, contentType = "empty") {
             CurioEmptyState(
                 glyph = CurioIcons.Inventory2,
                 headline = "Nothing saved yet",
@@ -1244,27 +1282,13 @@ private fun LazyGridScope.v2EverythingItems(
                 tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f)
             )
         }
-        item(key = "add-new", span = { GridItemSpan(maxLineSpan) }, contentType = "action") {
+        item(key = "add-new", span = StaggeredGridItemSpan.FullLine, contentType = "action") {
             V2AddSomethingButton(onClick = onAddNew)
         }
         return
     }
-    if (totalShown == 0 && recentFeed.isNotEmpty()) {
-        // Filtered to nothing but the Cabinet still holds items.
-        item(key = "e-filtered", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
-            CurioEmptyState(
-                glyph = CurioIcons.SearchOff,
-                headline = "Nothing matches these filters",
-                subtext = "Try clearing the search or the type filter.",
-                tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
-                ctaLabel = "Clear filters",
-                onCtaClick = onClearFilters
-            )
-        }
-        return
-    }
 
-    item(key = "toolbar", span = { GridItemSpan(maxLineSpan) }, contentType = "toolbar") {
+    item(key = "toolbar", span = StaggeredGridItemSpan.FullLine, contentType = "toolbar") {
         V2EverythingToolbar(
             typeFilter = typeFilter,
             onTypeFilter = onTypeFilter,
@@ -1272,7 +1296,7 @@ private fun LazyGridScope.v2EverythingItems(
             onSort = onSort
         )
     }
-    item(key = "filter-rail", span = { GridItemSpan(maxLineSpan) }, contentType = "chips") {
+    item(key = "filter-rail", span = StaggeredGridItemSpan.FullLine, contentType = "chips") {
         V2FilterRail(
             current = typeFilter,
             onSelect = onTypeFilter,
@@ -1281,74 +1305,43 @@ private fun LazyGridScope.v2EverythingItems(
         )
     }
 
-    // ── Recent — recently saved captures + recently LIKED books / albums /
-    // series (the new likedAt timestamps), newest first, in one rail.
-    if (recentFeed.isNotEmpty() && typeFilter == null && !selectionMode) {
-        item(key = "h-recent", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
-            V2PageSectionHeader(title = "Recent", subtitle = "Latest saves & likes")
-        }
-        item(key = "recent-rail", span = { GridItemSpan(maxLineSpan) }, contentType = "rail") {
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(vertical = 2.dp)
+    // ── Masonry cards — one packed gallery mixing every kind. Liked media
+    // keeps its cover aspect ratio (content-driven height); captures cycle
+    // narrow / full-width for the packed rhythm.
+    fun emitMedia(likes: List<V2Liked>) {
+        if (likes.isEmpty()) return
+        likes.forEach { liked ->
+            item(
+                key = "l|${liked.kind.name}|${liked.name}",
+                span = StaggeredGridItemSpan.Fixed(half),
+                contentType = "media"
             ) {
-                recentFeed.forEach { cell ->
-                    when (cell) {
-                        is V2RecentCell.Entry -> item(key = cell.key) {
-                            CurioEntryCard(
-                                entry = cell.entry,
-                                onClick = { onEntryClick(cell.entry.id) },
-                                modifier = Modifier.width(150.dp)
-                            )
-                        }
-                        is V2RecentCell.Liked -> item(key = cell.key) {
-                            V2RecentMediaCell(
-                                item = cell.item,
-                                onClick = { onOpenLiked(cell.item) }
-                            )
-                        }
-                    }
-                }
+                V2MediaTileCard(
+                    item = liked,
+                    onClick = { onOpenLiked(liked) },
+                    onMore = { onCoverSource(liked) },
+                    modifier = animateCard
+                )
             }
         }
     }
 
-    // ── v3xx — grouped, per-kind sections (each kind keeps its own tile
-    // language + cover shape). Hidden rails/types never show a section; a
-    // single active filter shows only its kind with no headers.
-    fun sectionHeader(title: String, subtitle: String, n: Int) {
-        if (typeFilter != null) return
+    var captureIndex = 0
+    fun emitEntry(e: CurioEntry, review: Boolean) {
+        val wideSpan = !review && captureIndex % 3 == 0
+        captureIndex++
         item(
-            key = "s|$title",
-            span = { GridItemSpan(maxLineSpan) },
-            contentType = "header"
+            key = "x|${e.id}",
+            span = StaggeredGridItemSpan.Fixed(if (wideSpan) full else half),
+            contentType = if (review) "review" else "entry"
         ) {
-            V2PageSectionHeader(title = title, subtitle = subtitle, trailing = "$n")
-        }
-    }
-
-    fun mediaGrid(likes: List<V2Liked>, title: String, subtitle: String) {
-        if (likes.isEmpty()) return
-        sectionHeader(title, subtitle, likes.size)
-        items(likes, key = { "l|${it.kind.name}|${it.name}" }) { item ->
-            V2MediaTileCard(
-                item = item,
-                onClick = { onOpenLiked(item) },
-                onMore = { onCoverSource(item) }
-            )
-        }
-    }
-
-    fun entryGrid(list: List<CurioEntry>, title: String, subtitle: String, review: Boolean) {
-        if (list.isEmpty()) return
-        sectionHeader(title, subtitle, list.size)
-        items(list, key = { "x|$title|${it.id}" }) { e ->
             if (review) {
                 V2ReviewTileCard(
                     entry = e,
                     onClick = { onEntryClick(e.id) },
                     onLongClick = { onEntryLongClick(e.id) },
-                    selected = e.id in selectedEntryIds
+                    selected = e.id in selectedEntryIds,
+                    modifier = animateCard
                 )
             } else {
                 CurioEntryCard(
@@ -1356,32 +1349,26 @@ private fun LazyGridScope.v2EverythingItems(
                     selected = e.id in selectedEntryIds,
                     onLongClick = { onEntryLongClick(e.id) },
                     onClick = { onEntryClick(e.id) },
-                    modifier = Modifier
+                    modifier = animateCard
                 )
             }
         }
     }
 
-    if (typeFilter == null || typeFilter == "books") {
-        mediaGrid(shownBooks, "Books", "Your library")
-    }
-    if (typeFilter == null || typeFilter == "albums") {
-        mediaGrid(shownAlbums, "Albums", "On your turntable")
-    }
-    if (typeFilter == null || typeFilter == "series") {
-        mediaGrid(shownSeries, "Series", "On your watchlist")
-    }
+    if (typeFilter == null || typeFilter == "books") emitMedia(shownBooks)
+    if (typeFilter == null || typeFilter == "albums") emitMedia(shownAlbums)
+    if (typeFilter == null || typeFilter == "series") emitMedia(shownSeries)
     if (typeFilter == null || typeFilter == "notes") {
-        entryGrid(noteEntriesShown, "Notes", "Captures & journal", review = false)
+        noteEntriesShown.forEach { emitEntry(it, review = false) }
     }
     if (typeFilter == null || typeFilter == "moodboard") {
-        entryGrid(moodEntries, "Moodboards", "Visual collections", review = false)
+        moodEntries.forEach { emitEntry(it, review = false) }
     }
     if (typeFilter == null || typeFilter == "review") {
-        entryGrid(reviewEntries, "Reviews", "Your takes on the things you keep", review = true)
+        reviewEntries.forEach { emitEntry(it, review = true) }
     }
 
-    item(key = "add-new", span = { GridItemSpan(maxLineSpan) }, contentType = "action") {
+    item(key = "add-new", span = StaggeredGridItemSpan.FullLine, contentType = "action") {
         V2AddSomethingButton(onClick = onAddNew)
     }
 }
@@ -1969,79 +1956,7 @@ private fun v2TimeAgo(daysAgo: Int): String = when {
     else -> "${daysAgo / 30}mo ago"
 }
 
-/** v3xx — one cell of the Everything Recent rail: either a saved capture
- *  or a recently LIKED book/album/series (carrying its liked-at stamp). */
-private sealed interface V2RecentCell {
-    val key: String
-    val ts: Long
-
-    data class Entry(val entry: CurioEntry) : V2RecentCell {
-        override val key get() = "re|${entry.id}"
-        override val ts get() = entry.capturedAtMillis
-    }
-
-    data class Liked(val item: V2Liked, val likedAt: Long) : V2RecentCell {
-        override val key get() = "rl|${item.kind.name}|${item.name}"
-        override val ts get() = likedAt
-    }
-}
-
-/** A compact liked-media cell for the Recent rail — uniform plate so the
- *  rail reads level, contain-fit jacket art inside (real cached covers). */
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun V2RecentMediaCell(item: V2Liked, onClick: () -> Unit) {
-    val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
-    val accent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.width(100.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(width = 86.dp, height = 122.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(
-                    Brush.verticalGradient(
-                        listOf(
-                            androidx.compose.ui.graphics.lerp(accent, Color.White, if (isCurioDarkTheme()) 0.14f else 0.5f),
-                            androidx.compose.ui.graphics.lerp(accent, Color.Black, 0.40f)
-                        )
-                    )
-                )
-                .combinedClickable(onClick = onClick)
-        ) {
-            V2JacketArt(
-                item = item,
-                accent = accent,
-                modifier = Modifier.fillMaxSize().padding(3.dp)
-            )
-        }
-        Spacer(Modifier.height(6.dp))
-        Text(
-            text = item.name,
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Text(
-            text = when (item.kind) {
-                V2Kind.BOOK -> "Book"
-                V2Kind.ALBUM -> "Album"
-                V2Kind.SERIES -> "Series"
-            },
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-/** v3xx — a LIKED media tile in the Everything 3-column grid. Every kind
+/** v3xx — a LIKED media tile in the Everything masonry. Every kind
  *  renders in its OWN shape so nothing shares a look-alike cover box:
  *  BOOKS wear a portrait jacket (spine + sheen), ALBUMS a square cover
  *  with a vinyl disc peeking behind, SERIES a poster plate. */
@@ -2200,7 +2115,8 @@ private fun V2ReviewTileCard(
     entry: CurioEntry,
     onClick: () -> Unit,
     onLongClick: (() -> Unit)? = null,
-    selected: Boolean = false
+    selected: Boolean = false,
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val cat = CurioCategories.byId(entry.topic.categoryId)
@@ -2216,7 +2132,7 @@ private fun V2ReviewTileCard(
     } else fallbackAccent
     val data = entry.captureData as? CaptureData.ReelNotes
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         shape = RoundedCornerShape(18.dp),
         // v3xx — no more outline: the extracted cover color tints the card

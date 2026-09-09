@@ -175,12 +175,14 @@ fun SupportScreen(navController: NavController) {
                 }
                 // ── About Curio — merged here from the old Settings → About
                 //    page (v24): Replay intro + the project link. One page,
-                //    reached from Settings and Profile alike.
+                //    reached from Settings and Profile alike. v3xx — the
+                //    card's internal "About Curio" header was a duplicate of
+                //    the section heading above it; the heading owns the
+                //    title now and the rows wear the plain icon-tile rows.
                 item { SettingsSectionHeading("About Curio") }
                 item {
                     SettingsOptionCard {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        CurioCardHeader(CurioIcons.Info, "About Curio", "The app, the journey, and its source")
                         SettingsOptionRow(
                             CurioIcons.Replay,
                             "Replay intro",
