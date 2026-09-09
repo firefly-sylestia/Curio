@@ -1015,7 +1015,7 @@ object AppPreferences {
     // Save shortcut repoints into it. When the experiment settles the toggle
     // is removed and the winning view ships always-on.
     var cabinetV2EnabledState by mutableStateOf(false)
-    // v3xx — the four empty starter shelves (Currently Reading / Want to
+    // v3xx — the four empty starter shelves (Curiying now / Want to
     // Read / Completed / Personal) were seeded once into the Cabinet's
     // collection store; the virtual shelves (Favorites / Saved entries /
     // Notes) are computed and never persisted.
@@ -3081,13 +3081,72 @@ object AppPreferences {
         return updated
     }
 
+    /**
+     * Toggle a topic in/out of a seeded shelf (Curiying now / Want to
+     * read / Completed / Personal). Creates the shelf on the fly if it
+     * hasn't been seeded yet (a reveal sheet can toggle before the Cabinet
+     * was ever opened). Returns the new on/off state.
+     */
+    fun toggleShelfTopic(context: Context, shelfId: String, categoryId: CategoryId, topicName: String): Boolean {
+        val collections = getCabinetCollections(context).toMutableList()
+        var idx = collections.indexOfFirst { it.id == shelfId }
+        if (idx < 0) {
+            collections.add(
+                CurioCollection(
+                    id = shelfId,
+                    name = shelfDisplayName(shelfId),
+                    createdAtMillis = System.currentTimeMillis(),
+                    members = emptyList()
+                )
+            )
+            idx = collections.lastIndex
+        }
+        val c = collections[idx]
+        val has = c.members.any {
+            it.kind == CurioCollectionMember.MemberKind.TOPIC &&
+                it.categoryName == categoryId.name && it.refName == topicName
+        }
+        val updated = if (has)
+            c.copy(members = c.members.filterNot {
+                it.kind == CurioCollectionMember.MemberKind.TOPIC &&
+                    it.categoryName == categoryId.name && it.refName == topicName
+            })
+        else
+            c.copy(members = c.members + CurioCollectionMember(
+                kind = CurioCollectionMember.MemberKind.TOPIC,
+                categoryName = categoryId.name,
+                refName = topicName
+            ))
+        collections[idx] = updated
+        saveCabinetCollections(context, collections)
+        return !has
+    }
+
+    /** Whether a topic sits in a seeded shelf right now. */
+    fun isTopicInShelf(context: Context, shelfId: String, categoryId: CategoryId, topicName: String): Boolean {
+        val c = getCabinetCollections(context).firstOrNull { it.id == shelfId } ?: return false
+        return c.members.any {
+            it.kind == CurioCollectionMember.MemberKind.TOPIC &&
+                it.categoryName == categoryId.name && it.refName == topicName
+        }
+    }
+
+    /** The display name for a seeded shelf id (used when creating it on the fly). */
+    private fun shelfDisplayName(id: String): String = when (id) {
+        "shelf:currently-reading" -> "Curiying now"
+        "shelf:want-to-read" -> "Want to Read"
+        "shelf:completed" -> "Completed"
+        "shelf:personal" -> "Personal"
+        else -> "Collection"
+    }
+
     // ── Built-in starter shelves (v3xx — Cabinet folders) ──────────────
     /** Whether the four empty starter shelves were seeded once. */
     fun isCabinetShelvesSeeded(context: Context): Boolean =
         prefs(context).getBoolean(KEY_CABINET_SHELVES_SEEDED, false)
 
     /**
-     * Seeds the four EMPTY starter shelves (Currently Reading / Want to
+     * Seeds the four EMPTY starter shelves (Curiying now / Want to
      * Read / Completed / Personal) into the collection store — one time.
      * They are ordinary [CurioCollection]s (ids prefixed `shelf:`), so the
      * existing add-captures / file-to-collection / rename / delete flows
@@ -3095,10 +3154,22 @@ object AppPreferences {
      * Notes) are computed from live data and are NOT persisted here.
      */
     fun seedCabinetShelves(context: Context) {
-        if (isCabinetShelvesSeeded(context)) return
+        if (isCabinetShelvesSeeded(context)) {
+            // v3xx33 — the reading shelf is renamed to the Curio verb
+            // ("Curiying now" — it holds series + albums too). Installs
+            // seeded under the old label get renamed here, once.
+            val collections = getCabinetCollections(context)
+            val renamed = collections.map { c ->
+                if (c.id == "shelf:currently-reading" && c.name != "Curiying now")
+                    c.copy(name = "Curiying now")
+                else c
+            }
+            if (renamed != collections) saveCabinetCollections(context, renamed)
+            return
+        }
         val now = System.currentTimeMillis()
         val shelves = listOf(
-            CurioCollection(id = "shelf:currently-reading", name = "Currently Reading", createdAtMillis = now, members = emptyList()),
+            CurioCollection(id = "shelf:currently-reading", name = "Curiying now", createdAtMillis = now, members = emptyList()),
             CurioCollection(id = "shelf:want-to-read", name = "Want to Read", createdAtMillis = now, members = emptyList()),
             CurioCollection(id = "shelf:completed", name = "Completed", createdAtMillis = now, members = emptyList()),
             CurioCollection(id = "shelf:personal", name = "Personal", createdAtMillis = now, members = emptyList())

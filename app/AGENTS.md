@@ -971,6 +971,38 @@ app/src/main/java/com/curio/app/
   rows. Only verified-in-subset glyphs are used (CurioIcons constants).
   Custom content (chips, status header, release notes) keeps its own
   layout inside the glass cards.
+- **v3xx33/34 — Cabinet shelf art REDRAWN, "Curiying now" rename +
+  shelf LOGIC, Favorites redesign + redesigned Add sheet (user follow-up
+  2026-09-09).** (1) **Shelf art** — the five seeded-shelf arts in
+  CabinetShelves.kt are redrawn to actually read as what they are,
+  bottom-anchored (nothing floats/clips): Favorites = warm heart + halo
+  (`ConstellationArt` redrawn), Curiying now = connected open book with a
+  spine line + ribbon (`ReadingArt`), Want to Read = three upright book
+  spines (`BooksArt`), Completed = summit scene + solid ground band
+  (`PeakArt`), Notes = cream notepad with folded corner + ruled lines +
+  pencil (`NotesArt`); minimal arts' baselines lowered to the bottom edge.
+  (2) **Rename + logic** — "Currently Reading" is renamed **"Curiying
+  now"** (shelf id stays `shelf:currently-reading`; `seedCabinetShelves`
+  renames an installed shelf once) and now holds books, series AND albums:
+  new `AppPreferences.toggleShelfTopic`/`isTopicInShelf` persist a TOPIC
+  member in/out of a seeded shelf (creating the shelf on the fly), and
+  `CabinetShelfToggleChips` (TopicRevealScreen) puts the Curiying-now /
+  Want-to-read pills in ALL THREE reveal sheets (book/album/series) while
+  `V2ShelfToggleChips` (CabinetV2Content) puts the same toggles in the
+  liked-row ⋮ cover-source sheet. (3) **Favorites redesign** — the virtual
+  Favorites shelf wears the collection-detail header language (title +
+  count + emphasized **Add** pill via `v2VirtualShelfItems.onAdd`),
+  opening the Add sheet in favorites mode. (4) **Add sheet redesign** —
+  `V2AddEntriesSheet` is replaced by `V2AddToShelfSheet` keyed on a sealed
+  `AddTarget` (Collection | Favorites): a frosted search field over
+  favorites + saved captures + one `TopicCatalog.findByName` fallback, a
+  "From favorites" quick-pick (one-tap topic members; favorites mode
+  bookmark-saves/un-saves via `toggleLikedFavorite`), and the saved-
+  captures multi-pick (format tile + checkbox). (5) **Add-sheet lag fix**
+  — the sheet works off a lightweight `AddOption` projection (id + name +
+  subtitle + `formatGlyph`) computed ONCE in the parent (never the full
+  CurioEntry payloads), and the idle capture list is capped at
+  `ADD_OPTION_CAP` = 100 rows — search finds the rest.
 - **v3xx28 — Cabinet per-item colors + fresh grid per level (user
   follow-up 2026-09-08).** (1) **Extracted cover colors** — liked
   books/albums/series rows, tiles and the Everything preview now use the

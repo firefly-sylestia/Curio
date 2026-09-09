@@ -3041,7 +3041,93 @@ private fun chapterDisplayLabel(number: Int, title: String): String {
     return m?.value ?: "CH $number"
 }
 
+/** v3xx33 — the Cabinet shelf toggles shown in the book / album / series
+ *  bottom sheets: "Curiying now" and "Want to read" (the seeded Cabinet
+ *  shelves). Tapping adds or removes the topic in/out of the shelf, live —
+ *  so the shelves finally have logic (they used to sit empty forever). */
 @Composable
+private fun CabinetShelfToggleChips(
+    context: Context,
+    topicName: String,
+    categoryId: CategoryId,
+    ink: Color,
+    onSurface: Color,
+    surface: Color
+) {
+    val haptics = LocalHapticFeedback.current
+    // Reactive: recomposes whenever a shelf toggle writes collections.
+    val collections = AppPreferences.collectionsState
+    fun inShelf(id: String): Boolean = collections.firstOrNull { it.id == id }
+        ?.members?.any {
+            it.kind == CurioCollectionMember.MemberKind.TOPIC &&
+                it.categoryName == categoryId.name && it.refName == topicName
+        } == true
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+    ) {
+        ShelfToggleChip(
+            label = "Curiying now",
+            icon = CurioIcons.PlayCircle,
+            active = inShelf("shelf:currently-reading"),
+            ink = ink, onSurface = onSurface, surface = surface,
+            onClick = {
+                haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                AppPreferences.toggleShelfTopic(context, "shelf:currently-reading", categoryId, topicName)
+            }
+        )
+        ShelfToggleChip(
+            label = "Want to read",
+            icon = CurioIcons.Bookmark,
+            active = inShelf("shelf:want-to-read"),
+            ink = ink, onSurface = onSurface, surface = surface,
+            onClick = {
+                haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                AppPreferences.toggleShelfTopic(context, "shelf:want-to-read", categoryId, topicName)
+            }
+        )
+    }
+}
+
+/** One pill in [CabinetShelfToggleChips] — filled with the sheet accent
+ *  when the topic is in that shelf. */
+@Composable
+private fun ShelfToggleChip(
+    label: String,
+    icon: String,
+    active: Boolean,
+    ink: Color,
+    onSurface: Color,
+    surface: Color,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(50),
+        color = if (active) ink.copy(alpha = 0.18f) else surface.copy(alpha = 0.65f)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+        ) {
+            CurioIcon(
+                name = icon,
+                contentDescription = null,
+                tint = if (active) ink else onSurface,
+                size = 15.dp
+            )
+            Text(
+                label,
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                color = if (active) ink else onSurface
+            )
+        }
+    }
+}
+
 private fun BookNotesSheet(
     cat: com.curio.app.data.CurioCategory,
     topic: CurioTopic,
@@ -3287,6 +3373,17 @@ private fun BookNotesSheet(
                     }
                 }
             }
+
+            // v3xx33 — Cabinet shelf toggles: Curiying now / Want to read.
+            Spacer(Modifier.height(14.dp))
+            CabinetShelfToggleChips(
+                context = context,
+                topicName = topic.name,
+                categoryId = cat.id,
+                ink = ink,
+                onSurface = onSurface,
+                surface = surface
+            )
 
             // ── v378 — progress as ONE clean rail label (no divider bar, no
             // duplicate "N / M") — reading progress lives in the words only.
@@ -4532,6 +4629,17 @@ private fun AlbumNotesSheet(
                 // matching the book + series sheets' no-close model.
             }
 
+            // v3xx33 — Cabinet shelf toggles: Curiying now / Want to read.
+            Spacer(Modifier.height(12.dp))
+            CabinetShelfToggleChips(
+                context = context,
+                topicName = topic.name,
+                categoryId = cat.id,
+                ink = ink,
+                onSurface = onSurface,
+                surface = surface
+            )
+
             // ── v336 — Listen actions row: a LISTEN pill (always present)
             // offering Apple Music / Spotify / YouTube Music / Amazon Music /
             // Deezer straight from the sheet (no explore session), plus the
@@ -5364,6 +5472,17 @@ private fun EpisodeNotesSheet(
                     )
                 }
             }
+            Spacer(Modifier.height(12.dp))
+
+            // v3xx33 — Cabinet shelf toggles: Curiying now / Want to read.
+            CabinetShelfToggleChips(
+                context = context,
+                topicName = topic.name,
+                categoryId = cat.id,
+                ink = ink,
+                onSurface = onSurface,
+                surface = surface
+            )
             Spacer(Modifier.height(12.dp))
 
             // ── One scroll: synopsis accordion, then seasons + episodes ──
