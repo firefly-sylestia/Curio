@@ -4017,7 +4017,10 @@ private fun V2JacketArt(item: V2Liked, accent: Color, modifier: Modifier = Modif
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(corner))
-            .background(if (url == null && local == null) plate else Color.Transparent)
+            .then(
+                if (url == null && local == null) Modifier.background(plate)
+                else Modifier
+            )
     ) {
         Box(Modifier.fillMaxSize().clip(RoundedCornerShape(corner))) {
             CurioIcon(

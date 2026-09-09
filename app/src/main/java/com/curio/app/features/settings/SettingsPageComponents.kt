@@ -108,7 +108,7 @@ fun SettingsOptionInfoRow(
             .padding(vertical = 10.dp)
     ) {
         SettingsOptionIconTile(icon, dark)
-        SettingsOptionCopy(title, subtitle)
+        SettingsOptionCopy(title, subtitle, Modifier.weight(1f))
     }
 }
 
@@ -155,10 +155,17 @@ private fun SettingsOptionIconTile(icon: String?, dark: Boolean) {
     }
 }
 
-/** The shared title/subtitle text block of a settings row. */
+/** The shared title/subtitle text block of a settings row. Callers pass
+ *  the row's remaining width via [modifier] (the row scope's weight —
+ *  `Modifier.weight(1f)` cannot be written here: it resolves only inside
+ *  the Row/Column content receiver, not in a modifier argument). */
 @Composable
-private fun SettingsOptionCopy(title: String, subtitle: String) {
-    Column(modifier = Modifier.weight(1f)) {
+private fun SettingsOptionCopy(
+    title: String,
+    subtitle: String,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = title,
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
@@ -193,7 +200,7 @@ fun SettingsOptionRow(
             .padding(vertical = 10.dp)
     ) {
         SettingsOptionIconTile(icon, dark)
-        SettingsOptionCopy(title, subtitle)
+        SettingsOptionCopy(title, subtitle, Modifier.weight(1f))
         CurioIcon(
             name = CurioIcons.ChevronRight,
             contentDescription = null,
@@ -223,7 +230,7 @@ fun SettingsOptionSwitchRow(
             .padding(vertical = 9.dp)
     ) {
         SettingsOptionIconTile(icon, dark)
-        SettingsOptionCopy(title, subtitle)
+        SettingsOptionCopy(title, subtitle, Modifier.weight(1f))
         Switch(
             checked = checked,
             enabled = enabled,
