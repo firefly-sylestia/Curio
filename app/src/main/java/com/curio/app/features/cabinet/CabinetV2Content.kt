@@ -548,16 +548,17 @@ fun CabinetV2Content(navController: NavController) {
         // when the category changes (the CurioEverythingGallery concept).
         // Favorites stores ONLY liked media, so it wears the same gallery.
         if (openLevel == "everything" || openLevel == SHELF_LEVEL_FAVORITES) {
-            // v3xx — the JSX dense WALL: a span-capable STAGGERED masonry
+            // v3xx40 — the JSX dense WALL: a span-capable STAGGERED masonry
             // (each column packs continuously, so a cover NEVER leaves
-            // space below it) on a SEAM plate — the grid's own background
-            // fills every space between covers with one continuous border
-            // tone instead of holes. Covers keep their own aspect, the most
-            // recent is a REAL 2x (its tallest tile), and a recency size
-            // tier (2x → 0.55x) jumbles the wall.
+            // space below it). NO seam plate — the page's own surface shows
+            // between covers. Each cover keeps its OWN shape (book / album /
+            // poster aspect) and is scaled UNIFORMLY by a size tier — the
+            // tier widens AND tallens it together, never stretching one
+            // direction (3x, 2x, 1.5x, 1x, 0.5x of the base cover). The grid
+            // runs on 8 base columns so 0.5x is a true half-size cover.
             LazyVerticalStaggeredGrid(
                 state = rememberLazyStaggeredGridState(),
-                columns = StaggeredGridCells.Fixed(if (wide) 8 else 4),
+                columns = StaggeredGridCells.Fixed(8),
                 contentPadding = PaddingValues(
                     start = 10.dp,
                     end = 10.dp,
@@ -571,10 +572,9 @@ fun CabinetV2Content(navController: NavController) {
                 verticalItemSpacing = 10.dp,
                 modifier = Modifier
                     .fillMaxSize()
-                    // v3xx — the SEAM: this background shows through every
-                    // gap between covers, so the spaces read as one
-                    // continuous rounded border filling the wall.
-                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                    // v3xx40 — NO seam plate: the wall sits on the page's own
+                    // surface, so the gaps read as clean whitespace between
+                    // covers instead of a boxed border plate.
                     .then(if (glassOn && glassBackdrop != null)
                         Modifier.layerBackdrop(glassBackdrop) else Modifier)
             ) {
@@ -1186,19 +1186,18 @@ private fun LazyGridScope.v2DetailItems(
             )
         }
     }
-}
-
-/** EVERYTHING — the JSX dense wall (the CurioEverythingGallery concept,
+}/** EVERYTHING — the JSX dense wall (the CurioEverythingGallery concept,
  *  now COVERS ONLY): a STAGGERED masonry where every column packs
  *  continuously, so a cover NEVER leaves space below it. The liked media
- *  merge into ONE recency stream (no category grouping), each cover keeps
- *  its OWN aspect (books tall, albums square, series posters) inside a
- *  rounded tile that FILLS its slot (art crops to the tile). The most
- *  recent cover runs the biggest size tier (2x), then 1.5x / 1.2x / 1x /
- *  0.85x / 0.7x / 0.55x cycle down the wall for a properly jumbled look.
- *  The grid's SEAM background fills every space between covers as one
- *  continuous border. The filter chips + the corner Add pill ride the top
- *  full-line, and every cover animates to its new spot on reflow. */
+ *  merge into ONE recency stream (no category grouping). Each cover keeps
+ *  its OWN aspect shape (books tall, albums square, series posters) and
+ *  scales UNIFORMLY — the width multiplier spans that many grid columns
+ *  (3x / 2x / 1.5x / 1x / 0.5x), so a cover NEVER changes shape, only
+ *  size. The most recent cover runs the biggest tier, then the rest cycle
+ *  down the wall for a properly jumbled look. The wall's background is the
+ *  page's own surface (no plate behind the covers). The filter chips + the
+ *  corner Add pill ride the top full-line, and every cover animates to its
+ *  new spot on reflow. */
 @OptIn(ExperimentalFoundationApi::class)
 private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
     shownBooks: List<V2Liked>,
@@ -1216,11 +1215,12 @@ private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
     val allMedia = (shownBooks + shownAlbums + shownSeries)
         .sortedByDescending { likedAtFor(it) }
     val totalShown = allMedia.size
-    // v3xx — recency size tiers: a height multiplier on each cover's own
-    // aspect. The most recent runs 2x, then the wall steps down through
-    // 1.5x → 0.55x and cycles, so the masonry stays jumbled (the
-    // 2x / 1.5x / 1x / 0.75x / 0.5x wall the user asked for).
-    val tiers = floatArrayOf(2.0f, 1.5f, 1.2f, 1.0f, 0.85f, 0.7f, 0.55f)
+    // v3xx40 — UNIFORM-SIZE tiers: the multiplier scales BOTH the width and
+    // the height of the cover's own aspect (a 2x book is twice as wide AND
+    // twice as tall as a 1x book — the jacket shape never changes). Each
+    // tier is a SPAN on the 8-column grid (1x = 2 spans), so 3x / 2x / 1.5x /
+    // 1x / 0.5x are all REAL uniform scales and the masonry stays jumbled.
+    val tiers = floatArrayOf(3.0f, 2.0f, 1.5f, 1.0f, 1.0f, 1.0f, 0.5f)
 
     // Top full-line: the filter chips + the corner ADD pill (the app-wide
     // labeled Add, anchored TOP-RIGHT of the wall instead of a bottom
@@ -1255,35 +1255,35 @@ private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
     }
 
     allMedia.forEachIndexed { rank, liked ->
+        // The cover's OWN shape — the base aspect per kind, scaled
+        // UNIFORMLY by the size tier (never stretched in one direction).
+        val aspect = when (liked.kind) {
+            V2Kind.BOOK -> 0.667f   // portrait jacket
+            V2Kind.ALBUM -> 1f      // square sleeve
+            V2Kind.SERIES -> 0.72f  // poster
+        }
+        val fallbackAccent = liked.topic?.categoryId?.let { CurioCategories.byId(it) }
+            ?.themedAccent() ?: MaterialTheme.colorScheme.primary
+        val tier = tiers[rank % tiers.size]
+        // The tier as a SPAN on the 8-column grid: 1x = 2 spans (a quarter
+        // of the line, same as before), 2x = 4, 3x = 6, and 0.5x = 1 span —
+        // a REAL half-size cover. The multiplier widens the tile the same
+        // amount it tallens it (both from the aspect ratio), so shapes are
+        // never stretched.
+        val spanUnits = (tier * 2).toInt().coerceIn(1, 8)
         item(
             key = "l|${liked.kind.name}|${liked.name}",
+            span = StaggeredGridItemSpan(spanUnits),
             contentType = "media"
         ) {
-            val fallbackAccent = liked.topic?.categoryId?.let { CurioCategories.byId(it) }
-                ?.themedAccent() ?: MaterialTheme.colorScheme.primary
-            // The cover's OWN shape — never stretched beyond a sane band:
-            // books stay the tallest, and an album never reads as a tall
-            // book jacket (its floor is squarer).
-            val baseAspect = when (liked.kind) {
-                V2Kind.BOOK -> 0.667f   // portrait jacket
-                V2Kind.ALBUM -> 1f      // square sleeve
-                V2Kind.SERIES -> 0.72f  // poster
-            }
-            val minAspect = when (liked.kind) {
-                V2Kind.BOOK -> 0.42f
-                V2Kind.ALBUM -> 0.62f
-                V2Kind.SERIES -> 0.50f
-            }
-            val tier = tiers[rank % tiers.size]
-            val aspect = (baseAspect / tier).coerceIn(minAspect, 1f)
-            // Rounded tile on the seam plate: the art CROPS to fill the
-            // whole tile, so no cover ever leaves space below or beside it.
+            // Rounded cover tile: the art CROPS to fill the whole tile, so
+            // no cover ever leaves space below or beside it. No plate, no
+            // seam — the page's own surface shows between covers.
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(aspect)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f))
                     .then(
                         Modifier.animateItem(
                             fadeInSpec = tween(220),

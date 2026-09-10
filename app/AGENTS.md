@@ -7284,6 +7284,39 @@ app/src/main/java/com/curio/app/
   per save — the GC pauses froze the app. Now only new/changed rows
   decode; the map is only touched from the flow's single collection
   dispatcher.
+- **v3xx41 — Everything wall: uniform covers + NO seam, and the Text
+  history concept feature set (user 2026-09-10: "remove the background
+  fill… covers keep the shape they are in… 2x/3x/.5x in both width and
+  height… implement all the features of text history from the JSX").**
+  (1) **Everything masonry (CabinetV2Content.kt)** — the seam plate is
+  REMOVED (the grid's old background fill boxed every inter-cover gap;
+  covers now sit on the page's own surface) and the size tiers are
+  UNIFORM scales: each cover keeps its own aspect (book 0.667 / album
+  1 / series 0.72) and the tier widens + tallens it together. The grid
+  runs on `StaggeredGridCells.Fixed(8)` base columns with
+  `spanUnits = (tier * 2).toInt().coerceIn(1, 8)` so 3x → 6 spans, 2x →
+  4, 1.5x → 3, 1x → 2 and 0.5x → 1 — a REAL half-size cover (the old
+  4-column grid could never render 0.5x). (2) **Text history concept
+  (TextHistory.kt, from TextHistory (3).jsx)** — (a) SEARCH: frosted
+  `HistorySearchBox` pill (BasicTextField + placeholder + clear)
+  matching text or field label, live in BOTH views; (b) FILTER chips
+  (All / Edits / Initial / Pinned) — Initial = each field's first
+  snapshot, Edits = the rest, computed per field; tree is rebuilt from
+  the filtered set and a `SearchOff` no-results state offers Clear
+  filters; (c) COMPARE: a `Layers` action on every row arms a banner
+  ("tap another snapshot's compare"), the second pick opens
+  `CompareVersionsDialog` with a WORD-LEVEL LCS diff (`diffTokens`,
+  backtracked longest-common-subsequence) — removed words strike in red
+  (errorContainer), added words warm-highlight (tertiaryContainer), two
+  side-by-side `CompareVersionCard`s + removed/added word-count chips;
+  (d) COLLAPSIBLE groups: `HistoryFieldCard` headings toggle
+  `collapsedFields` with a KeyboardArrow chevron + `AnimatedVisibility`;
+  (e) CURRENT pill (`HistoryCurrentPill`) on each field's newest
+  snapshot + word-delta badges (`wordDeltaBadge`: "+3 words" / "Original")
+  in list rows and tree nodes; (f) the full-text preview gained stats
+  (words · characters) + a changes note (vs the previous snapshot of
+  the field) + Compare / Restore actions; (g) the header count reads
+  "X of Y snapshots" while filtering.
 - **v3xx40 — Cabinet doodle rebalance + settings hub polish (user
   follow-up 2026-09-10, 9-item batch).** (1) **Doodle empty state** —
   `CurioDoodleEmptyState` drops the leaf SPRIG (it read as a lopsided

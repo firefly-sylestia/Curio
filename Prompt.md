@@ -1,4 +1,52 @@
 # Prompt Log — current request
+## Request (2026-09-10, completed — Everything wall: no seam + uniform covers; Text history gets the JSX concept feature set)
+
+User: "the cabinets arrangement isn't good — remove the background fill,
+and the covers are getting different shapes but I want them to have the
+shape they are in and arrange in that shape… they can be 2x 3x .5x etc
+but in both width and height… also you see this jsx — it has better text
+history features and options — implement all of the features of text
+history properly in detail and properly and they should be working and a
+lot better, the jsx is a concept show." (Also: "don't clear the full
+prompt / it erases the prompt I added in the end" — the queued prompt is
+now preserved in the ## next prompt section.)
+
+**Shipped (2 files + docs, this commit):**
+1. **CabinetV2Content.kt — Everything wall fixed:** the SEAM plate (the
+   grid's background fill that boxed every gap between covers) is
+   REMOVED — covers sit clean on the page's own surface. The size tiers
+   are now UNIFORM scales instead of aspect-dividing: every cover keeps
+   its OWN shape (book 0.667 / album 1 / series 0.72) and the tier
+   widens AND tallens it together. The grid runs on 8 base columns and
+   each tier is a span (`(tier * 2).toInt().coerceIn(1, 8)`): 3x → 6
+   spans, 2x → 4, 1.5x → 3, 1x → 2, 0.5x → 1 — a REAL half-size cover
+   (the old 4-column grid could never render 0.5x).
+2. **TextHistory.kt — the JSX concept feature set:**
+   - SEARCH: frosted `HistorySearchBox` pill (placeholder + clear),
+     matches text or field label, live in List AND Tree views.
+   - FILTER chips: All / Edits / Initial / Pinned (Initial = each
+     field's first snapshot; Edits = the rest); the tree is rebuilt
+     from the filtered set; a SearchOff no-results state offers Clear
+     filters; the header reads "X of Y snapshots" while filtering.
+   - COMPARE: a Layers action on every row (list + tree) arms a banner
+     ("Comparing {time} — tap another snapshot's compare"), the second
+     pick opens a WORD-LEVEL LCS diff dialog — removed words struck in
+     red, added words warm-highlighted, two version cards + removed /
+     added word-count chips (the JSX compare panel).
+   - COLLAPSIBLE groups: field-card headings toggle with a chevron
+     (KeyboardArrow) + AnimatedVisibility (the JSX group collapse).
+   - CURRENT pills on each field's newest snapshot + +/− word-delta
+     badges ("+3 words" / "Original") in list rows and tree nodes.
+   - Full-text preview gained stats (words · characters) + a changes
+     note (vs the field's previous snapshot) + Compare / Restore
+     actions (the JSX detail panel).
+
+**Scope:** Android app only (web/ + desktop/ untouched).
+
+**Status:** committed + pushed; CI validates. A NEW prompt is queued in
+## next prompt below (shelf-art redraws, top-nav highlight animation, back
+mid-animation glitch).
+
 ## Request (2026-09-10, completed — empty-state tree removed, shelf arts rebalanced, per-card random texture, rail centering, quick-tools back-stack fix, backup box doodle, drag visibility, footer fix, secondary card doodles)
 
 User: the cabinet empty state of collections — the tree isn't right, you
@@ -93,3 +141,26 @@ this file on 2026-09-10 to keep it short. They live in git history
 (git log -p -- Prompt.md) if anything needs revisiting.
 
 ## next prompt
+
+**QUEUED 2026-09-10 (user, after "continue"):**
+
+1. After the current Everything-page + TextHistory work is pushed,
+   redraw these shelf/collection doodles PROPERLY:
+   - Cabinet collections "Curiying now" — the BOOK itself is bad;
+     redraw just the book (keep the mug/etc).
+   - "Saved entries" — redesign it properly.
+   - "Completed" — keep it MINIMAL.
+   - All the CUSTOM collection ones — do something UNIQUE for each
+     (not the current generic scenes).
+   - Settings "Help & feedback" — redraw its doodle too.
+2. TOP NAV BAR animation: the smooth-transition animation is NOT smooth
+   — when tapping a nav item it snaps to a solid color without the
+   moving highlight; fix so the active-highlight glides to the tapped
+   chip (no solid-color jump).
+3. BACK GLITCH: if the user taps back MID-animation and goes to "All
+   settings", the hub still shows the page that was open — make the
+   back/close mid-animation smooth (finish/cancel the transition
+   cleanly instead of leaving the old page stuck).
+
+Status: queued — finish Everything page + TextHistory first, then push,
+then follow this prompt.
