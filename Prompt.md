@@ -1,4 +1,36 @@
 # Prompt Log — current request
+## Request (2026-09-10, completed + pushed — styles + doodle empty state expanded app-wide)
+
+User confirmed scope via ask_user: WHOLE APP (not just Cabinet). Shipped:
+
+1. **New shared component `ui/components/CurioDoodleEmptyState.kt`** — the
+   JSX "Nothing here yet" scene (ground shadow, leaf sprig, two-book
+   stack, note card, ✦ twinkles) drawn in the flask doodle language,
+   with a theme-driven headline/subtext and an optional large primary
+   CTA pill (the "+ Add" style). The collection-detail scene moved out
+   of CabinetShelves into this shared file; `V2CollectionEmptyState` is
+   now a thin wrapper over it.
+2. **Labeled Add pill (46dp "+ Add") expanded** to the Favorites header
+   (was an icon-only V2ToolbarPill). The old `V2ToolbarPill` composable
+   is now dead → removed.
+3. **⋮ kebab (40dp circle) expanded** to the shelf cards (frosted-white
+   circle matching the icon tile) and the liked rows (surfaceContainerHigh
+   circle); the cover-overlay ⋮ got a modest 27→30dp bump (stays subtle
+   over artwork). EntryDetail's 44dp hero ⋮ was already the big style.
+4. **Doodle empty state expanded app-wide**: Cabinet v2 virtual shelves
+   (Favorites / Saved entries / Notes — added a proper "Saved entries"
+   copy instead of the wrong "Try a different search"), the Everything
+   masonry, the classic Cabinet's "Your Cabinet is empty", plus the
+   settings family: Recents, Recycle bin, Topic history (only its real
+   empty state — filter no-match stays compact), Book browser.
+5. Hygiene: unused imports removed (Arrangement/TextAlign/width/FontStyle
+   from CabinetShelves; CurioEmptyState from Recent/RecycleBin/BookBrowser
+   where it's no longer used). Search/filter no-match states keep the
+   compact CurioEmptyState (they're mid-search feedback, not empty pages).
+
+User's reference Curio_WantToRead_EmptyState.jsx stays untracked. Store
+changelog SKIPPED per the standing "skip cl for now" preference.
+
 ## Request (2026-09-10, completed + pushed — collection-detail Add pill, ⋮ kebab + doodle empty state)
 
 User: "the inside of collections — make the + button larger and pill with

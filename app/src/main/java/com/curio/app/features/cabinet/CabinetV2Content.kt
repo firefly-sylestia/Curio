@@ -116,6 +116,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.CurioDoodleEmptyState
 import com.curio.app.ui.components.CurioEmptyState
 import com.curio.app.ui.components.CurioEntryCard
 import com.curio.app.ui.components.CurioHoldPill
@@ -1225,11 +1226,9 @@ private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
 
     if (totalShown == 0) {
         item(key = "e-empty", span = StaggeredGridItemSpan.FullLine, contentType = "empty") {
-            CurioEmptyState(
-                glyph = CurioIcons.Inventory2,
+            CurioDoodleEmptyState(
                 headline = "Nothing saved yet",
-                subtext = "Like a book, series or album and its cover shows up here.",
-                tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f)
+                subtext = "Like a book, series or album and its cover shows up here."
             )
         }
         item(key = "add-new", span = StaggeredGridItemSpan.FullLine, contentType = "action") {
@@ -1868,6 +1867,7 @@ private fun V2MediaTileCard(
                 }
                 V2JacketArt(item = item, accent = accent, modifier = Modifier.fillMaxSize())
                 if (onMore != null) {
+                    // v3xx — the app-wide kebab (over art, kept subtler).
                     Surface(
                         onClick = onMore,
                         shape = RoundedCornerShape(50),
@@ -1875,14 +1875,14 @@ private fun V2MediaTileCard(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .padding(3.dp)
-                            .size(27.dp)
+                            .size(30.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                             CurioIcon(
                                 name = CurioIcons.MoreVert,
                                 contentDescription = "Cover source",
                                 tint = Color.White,
-                                size = 16.dp
+                                size = 17.dp
                             )
                         }
                     }
@@ -2222,12 +2222,32 @@ private fun LazyGridScope.v2VirtualShelfItems(
                         maxLines = 1
                     )
                 }
-                V2ToolbarPill(
-                    glyph = CurioIcons.Add,
-                    contentDescription = "Add to favorites",
-                    emphasized = true,
-                    onClick = onAdd
-                )
+                // v3xx — the app-wide labeled Add pill ("+ Add").
+                Surface(
+                    onClick = onAdd,
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.13f),
+                    modifier = Modifier.height(46.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.padding(horizontal = 20.dp)
+                    ) {
+                        CurioIcon(
+                            name = CurioIcons.Add,
+                            contentDescription = "Add to favorites",
+                            tint = MaterialTheme.colorScheme.primary,
+                            size = 22.dp
+                        )
+                        Text(
+                            text = "Add",
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1
+                        )
+                    }
+                }
             }
         } else {
             V2PageSectionHeader(
@@ -2239,26 +2259,21 @@ private fun LazyGridScope.v2VirtualShelfItems(
     }
     if (total == 0) {
         item(key = "v-empty", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)
-            ) {
-                CurioEmptyState(
-                    glyph = CurioIcons.Inventory2,
-                    headline = when {
-                        likes.isEmpty() && entries.isEmpty() -> "Nothing here yet"
-                        else -> "Nothing matches"
-                    },
-                    subtext = when {
-                        likes.isEmpty() && entries.isEmpty() && title == "Favorites" ->
-                            "Like a book, series or album from its page and it lands here."
-                        likes.isEmpty() && entries.isEmpty() && title == "Notes" ->
-                            "Save a voice note, journal or field note and it lands here."
-                        else -> "Try a different search."
-                    },
-                    tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f)
-                )
-            }
+            CurioDoodleEmptyState(
+                headline = when {
+                    likes.isEmpty() && entries.isEmpty() -> "Nothing here yet"
+                    else -> "Nothing matches"
+                },
+                subtext = when {
+                    likes.isEmpty() && entries.isEmpty() && title == "Favorites" ->
+                        "Like a book, series or album from its page and it lands here."
+                    likes.isEmpty() && entries.isEmpty() && title == "Notes" ->
+                        "Save a voice note, journal or field note and it lands here."
+                    likes.isEmpty() && entries.isEmpty() && title == "Saved entries" ->
+                        "Save a capture and it lands here."
+                    else -> "Try a different search."
+                }
+            )
         }
         return
     }
@@ -3562,52 +3577,7 @@ private fun V2EmptySuggestions(
     }
 }
 
-/** A compact toolbar pill (add / kebab / selection actions). */
-@Composable
-private fun V2ToolbarPill(
-    label: String? = null,
-    glyph: String? = null,
-    contentDescription: String? = null,
-    emphasized: Boolean = false,
-    destructive: Boolean = false,
-    onClick: () -> Unit
-) {
-    val ink = if (destructive) MaterialTheme.colorScheme.error
-    else if (emphasized) MaterialTheme.colorScheme.primary
-    else MaterialTheme.colorScheme.onSurfaceVariant
-    val fill = if (destructive) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.55f)
-    else if (emphasized) MaterialTheme.colorScheme.primary.copy(alpha = 0.13f)
-    else MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.75f)
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(50),
-        color = fill,
-        modifier = Modifier.height(34.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            modifier = Modifier.padding(horizontal = if (label != null) 13.dp else 9.dp)
-        ) {
-            if (glyph != null) {
-                CurioIcon(
-                    name = glyph,
-                    contentDescription = contentDescription,
-                    tint = ink,
-                    size = 17.dp
-                )
-            }
-            if (label != null) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                    color = ink,
-                    maxLines = 1
-                )
-            }
-        }
-    }
-}
+
 
 /** The full-width liked row: contain-fit jacket art + name / byline +
  *  category + chevron. Tap opens the reveal page (where the heart lives);
@@ -3707,18 +3677,20 @@ private fun V2LikedRow(
             }
             Spacer(Modifier.width(8.dp))
             if (onMore != null) {
+                // v3xx — the app-wide kebab: a slightly bigger 40dp circle.
                 Box(
                     modifier = Modifier
-                        .size(32.dp)
-                        .clip(RoundedCornerShape(11.dp))
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.75f))
                         .clickable(onClick = onMore),
                     contentAlignment = Alignment.Center
                 ) {
                     CurioIcon(
                         name = CurioIcons.MoreVert,
                         contentDescription = "Curiying now / Want to read / cover source",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                        size = 19.dp
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                        size = 20.dp
                     )
                 }
             } else {

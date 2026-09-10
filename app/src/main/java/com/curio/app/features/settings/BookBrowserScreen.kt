@@ -53,7 +53,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
-import com.curio.app.ui.components.CurioEmptyState
+import com.curio.app.ui.components.CurioDoodleEmptyState
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
@@ -182,11 +182,10 @@ fun BookBrowserScreen(navController: NavController) {
                     }
                     if (shownBooks.isEmpty()) {
                         item(key = "empty", contentType = "empty") {
-                            CurioEmptyState(
-                                glyph = CurioIcons.SearchOff,
+                            // v3xx — the app-wide doodle empty state.
+                            CurioDoodleEmptyState(
                                 headline = "No books match",
                                 subtext = "Try a different title or author.",
-                                tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
                                 ctaLabel = "Clear search",
                                 onCtaClick = { searchQuery = ""; searchActive = false }
                             )

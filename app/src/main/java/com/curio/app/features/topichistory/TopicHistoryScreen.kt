@@ -68,6 +68,7 @@ import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioCategoryChip
+import com.curio.app.ui.components.CurioDoodleEmptyState
 import com.curio.app.ui.components.CurioEmptyState
 import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
@@ -201,11 +202,10 @@ fun TopicHistoryScreen(navController: NavController) {
         if (sentimentsLoaded && entries.isEmpty() && pinnedTopics.isEmpty() &&
             favoritedTopics.isEmpty()
         ) {
-            CurioEmptyState(
-                glyph = CurioIcons.History,
+            // v3xx — the app-wide doodle empty state.
+            CurioDoodleEmptyState(
                 headline = "No shuffles yet",
-                subtext = "Shuffle the deck and your picks will appear here, grouped by day.",
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                subtext = "Shuffle the deck and your picks will appear here, grouped by day."
             )
             return
         }
