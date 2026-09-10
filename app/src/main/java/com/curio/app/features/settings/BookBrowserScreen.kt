@@ -53,7 +53,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
-import com.curio.app.ui.components.CurioEmptyState
+import com.curio.app.ui.components.CurioDoodleEmptyState
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
@@ -182,11 +182,10 @@ fun BookBrowserScreen(navController: NavController) {
                     }
                     if (shownBooks.isEmpty()) {
                         item(key = "empty", contentType = "empty") {
-                            CurioEmptyState(
-                                glyph = CurioIcons.SearchOff,
+                            // v3xx — the app-wide doodle empty state.
+                            CurioDoodleEmptyState(
                                 headline = "No books match",
                                 subtext = "Try a different title or author.",
-                                tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
                                 ctaLabel = "Clear search",
                                 onCtaClick = { searchQuery = ""; searchActive = false }
                             )
@@ -294,10 +293,13 @@ private fun BookBrowserRow(
         .substringAfterLast("(", "")
         .substringBeforeLast(")", "")
         .takeIf { it.all { c -> c.isDigit() } && it.length == 4 }
+    // v3xx — the settings design language: frosted card rows (matching the
+    // settings sub-pages) instead of the flat surface rows.
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = RoundedCornerShape(20.dp),
+        color = if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
+                else Color.White.copy(alpha = 0.68f),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(

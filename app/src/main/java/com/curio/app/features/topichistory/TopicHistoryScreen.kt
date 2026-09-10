@@ -61,13 +61,16 @@ import com.curio.app.data.formatSessionShort
 // settingsRoseAccent/settingsReadableInk live in the settings package
 // (SettingsHubScreen) — the same shared helpers the Onboarding/Cabinet heroes use.
 import com.curio.app.features.settings.SettingsNavRail
+import com.curio.app.features.settings.SettingsSectionHeading
 import com.curio.app.features.settings.navigateToSettingsSection
 import com.curio.app.features.settings.settingsReadableInk
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioCategoryChip
+import com.curio.app.ui.components.CurioDoodleEmptyState
 import com.curio.app.ui.components.CurioEmptyState
+import com.curio.app.ui.components.CurioGlassToolbar
 import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.ScreenEntrance
@@ -76,7 +79,6 @@ import com.curio.app.ui.components.SoftTornSheetShape
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.curioPillTintLift
-import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -183,11 +185,21 @@ fun TopicHistoryScreen(navController: NavController) {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // ── Torn hero header — Home's construction (rose banner, bold tear,
-        //    white under-sheet, mirrored watermark pairs) with History's own
-        //    tear seed and its OWN BOOKS-family glyphs, so it reads as part
-        //    of the torn-banner family without copying Home's wildcard scatter.
-        HistoryHeroHeader(onBack = { navController.popBackStack() })
+        // ── Header — the glass toolbar when the app-wide "Glass toolbar
+        //    header" style is on, otherwise the torn hero (Home's
+        //    construction: rose banner, bold tear, white under-sheet,
+        //    mirrored watermark pairs, History's own BOOKS-family glyphs so
+        //    it reads as part of the torn-banner family without copying
+        //    Home's wildcard scatter).
+        if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
+            CurioGlassToolbar(
+                title = "Topic History",
+                subtitle = "Favorites & every spin you've explored",
+                onBack = { navController.popBackStack() }
+            )
+        } else {
+            HistoryHeroHeader(onBack = { navController.popBackStack() })
+        }
 
         // v3xx — the shared settings nav rail: switch sections without
         // going back to the hub (the open page sits in the 2nd slot).
@@ -201,11 +213,10 @@ fun TopicHistoryScreen(navController: NavController) {
         if (sentimentsLoaded && entries.isEmpty() && pinnedTopics.isEmpty() &&
             favoritedTopics.isEmpty()
         ) {
-            CurioEmptyState(
-                glyph = CurioIcons.History,
+            // v3xx — the app-wide doodle empty state.
+            CurioDoodleEmptyState(
                 headline = "No shuffles yet",
-                subtext = "Shuffle the deck and your picks will appear here, grouped by day.",
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                subtext = "Shuffle the deck and your picks will appear here, grouped by day."
             )
             return
         }
@@ -299,26 +310,7 @@ fun TopicHistoryScreen(navController: NavController) {
                     // ── Pinned for later (pin button on Topic Reveal) ────
                     if (filteredPinned.isNotEmpty()) {
                         item(key = "pinned_header") {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 16.dp, bottom = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                CurioIcon(
-                                    CurioIcons.Bookmark, null,
-                                    tint = curioRoseInk(),
-                                    size = 16.dp
-                                )
-                                Text(
-                                    text = "Pinned for later",
-                                    style = MaterialTheme.typography.labelLarge.copy(
-                                        fontWeight = FontWeight.SemiBold
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
+                            SettingsSectionHeading("Pinned for later", CurioIcons.Bookmark)
                         }
                         items(filteredPinned, key = { "pin_${it.categoryId.name}_${it.topicName}" }) { pinned ->
                             PinnedRow(
@@ -343,14 +335,7 @@ fun TopicHistoryScreen(navController: NavController) {
 
                     grouped.forEach { (dayLabel: String, dayEntries: List<HistoryEntry>) ->
                         item(key = "header_$dayLabel") {
-                            Text(
-                                text = "$dayLabel · ${dayEntries.size}",
-                                style = MaterialTheme.typography.labelLarge.copy(
-                                    fontWeight = FontWeight.SemiBold
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-                            )
+                            SettingsSectionHeading("$dayLabel · ${dayEntries.size}")
                         }
                         items(dayEntries, key = { historyEntry: HistoryEntry -> historyEntry.id }) { entry ->
                             HistoryRow(
@@ -607,31 +592,40 @@ private fun HistoryCategoryFilterRow(
 @Composable
 private fun HistoryRow(entry: HistoryEntry, onClick: () -> Unit) {
     val cat = CurioCategories.byId(entry.categoryId)
+    val dark = isCurioDarkTheme()
 
+    // v3xx — the settings design language: frosted card + rounded icon
+    // tile (the tile wears the category's tint so the row keeps its lane
+    // identity).
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(20.dp),
+        color = if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
+                else Color.White.copy(alpha = 0.68f),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 12.dp),
+                .padding(horizontal = 12.dp, vertical = 11.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // ── Category accent dot ──────────────────────────────────────
+            // ── Category-tinted icon tile ────────────────────────────────
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .background(cat.tint, shape = CircleShape),
+                    .clip(RoundedCornerShape(13.dp))
+                    .background(
+                        if (dark) Color.White.copy(alpha = 0.09f)
+                        else cat.tint.copy(alpha = 0.30f)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 CurioIcon(
                     name = cat.iconGlyph,
                     contentDescription = null,
                     tint = cat.categoryInk(),
-                    size = 22.dp
+                    size = 20.dp
                 )
             }
 
@@ -708,22 +702,13 @@ private fun HistorySectionHeader(
     tint: Color,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    // v3xx — the settings design language: the shared Playfair heading with
+    // the little glyph + rule, the entry count folded into the label.
+    SettingsSectionHeading(
+        label = "$label · $count",
+        glyph = glyph,
         modifier = modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp, bottom = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        CurioIcon(glyph, null, tint = tint, size = 16.dp)
-        Text(
-            text = "$label · $count",
-            style = MaterialTheme.typography.labelLarge.copy(
-                fontWeight = FontWeight.SemiBold
-            ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
+    )
 }
 
 // ── Sentiment row — thumb glyph + category accent dot (mirrors PinnedRow) ──
@@ -737,23 +722,32 @@ private fun SentimentTopicRow(
 ) {
     val cat = CurioCategories.byId(topic.categoryId)
 
+    val dark = isCurioDarkTheme()
+    // v3xx — the settings design language: frosted card + rounded icon tile
+    // (the tile wears the category's tint so the row keeps its lane
+    // identity).
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(20.dp),
+        color = if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
+                else Color.White.copy(alpha = 0.68f),
         modifier = modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 12.dp),
+                .padding(horizontal = 12.dp, vertical = 11.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // ── Category accent dot with the sentiment thumb ────────────
+            // ── Category-tinted icon tile with the sentiment thumb ──────
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .background(cat.tint, shape = CircleShape),
+                    .clip(RoundedCornerShape(13.dp))
+                    .background(
+                        if (dark) Color.White.copy(alpha = 0.09f)
+                        else cat.tint.copy(alpha = 0.30f)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 CurioIcon(
@@ -828,24 +822,33 @@ private suspend fun resolveSentimentTopics(
 @Composable
 private fun PinnedRow(pinned: PinnedTopic, onClick: () -> Unit, onUnpin: () -> Unit) {
     val cat = CurioCategories.byId(pinned.categoryId)
+    val dark = isCurioDarkTheme()
 
+    // v3xx — the settings design language: frosted card + rounded icon tile
+    // (the tile wears the category's tint so the row keeps its lane
+    // identity).
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(20.dp),
+        color = if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
+                else Color.White.copy(alpha = 0.68f),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 12.dp),
+                .padding(horizontal = 12.dp, vertical = 11.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // ── Category accent dot with filled bookmark ────────────────
+            // ── Category-tinted icon tile with filled bookmark ──────────
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .background(cat.tint, shape = CircleShape),
+                    .clip(RoundedCornerShape(13.dp))
+                    .background(
+                        if (dark) Color.White.copy(alpha = 0.09f)
+                        else cat.tint.copy(alpha = 0.30f)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 CurioIcon(
@@ -874,15 +877,16 @@ private fun PinnedRow(pinned: PinnedTopic, onClick: () -> Unit, onUnpin: () -> U
                 )
             }
 
-            // ── Unpin affordance ────────────────────────────────────────
+            // ── Unpin affordance — the frosted chip language ────────────
             Surface(
                 onClick = onUnpin,
                 shape = CircleShape,
-                color = MaterialTheme.colorScheme.surfaceContainerLow
+                color = if (dark) Color.White.copy(alpha = 0.09f)
+                        else Color.White.copy(alpha = 0.62f)
             ) {
                 CurioIcon(
                     CurioIcons.BookmarkBorder, "Unpin",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = if (dark) Color(0xFFD7B8A9) else Color(0xFF755647),
                     size = 16.dp,
                     modifier = Modifier.padding(6.dp)
                 )

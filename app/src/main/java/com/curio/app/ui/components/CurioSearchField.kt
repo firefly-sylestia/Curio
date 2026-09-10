@@ -37,6 +37,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.curio.app.data.AppPreferences
+import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.isCurioDarkTheme
@@ -97,7 +99,18 @@ fun CurioSearchField(
     } else {
         Color(0xFF767680).copy(alpha = 0.12f)
     }
-    val resolvedFill = fill ?: iosFill
+    // v3xx22 — with the app-wide GLASS toolbar header style on, the search
+    // bar's default fill complements the glass bar: the toolbar's own
+    // rose-tinted container (same recipe the in-bar search wears), so the
+    // field reads as part of the glass family instead of a plain gray box.
+    val glassFill = curioSearchFill(
+        lerp(
+            MaterialTheme.colorScheme.surfaceContainerHigh,
+            settingsRoseAccent(),
+            if (isCurioDarkTheme()) 0.14f else 0.20f
+        )
+    )
+    val resolvedFill = fill ?: if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) glassFill else iosFill
     val pillShape = RoundedCornerShape(50)
 
     val interactionSource = remember { MutableInteractionSource() }

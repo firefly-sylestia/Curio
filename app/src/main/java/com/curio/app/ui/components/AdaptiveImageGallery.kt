@@ -23,8 +23,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -64,6 +67,8 @@ fun AdaptiveImageGallery(
 ) {
     if (uris.isEmpty()) return
     val context = LocalContext.current
+    // The window metrics the visible-slice math reads at tap time.
+    val windowInfo = LocalWindowInfo.current
     // Aspect ratio (w/h) per uri — measured off-thread; empty until loaded,
     // so the first frame renders as square fallbacks and recomposes once the
     // real shapes arrive.
@@ -71,12 +76,23 @@ fun AdaptiveImageGallery(
         value = uris.associateWith { uri -> imageAspectOf(context, uri) }
     }
     val zoomState = rememberMoodBoardZoomState()
+    // The gallery's top-left in WINDOW coordinates. Written by
+    // onGloballyPositioned while scrolling — a plain array, deliberately
+    // NOT snapshot state, so scroll frames don't recompose the gallery —
+    // and read live at tap time to aim the zoom at the visible screen.
+    val galleryOrigin = remember { FloatArray(2) }
     BoxWithConstraints(
         // While zoomed the gallery (and its overlay) must draw ABOVE later
         // siblings in the detail column — the same zIndex trick the saved
         // mood board uses — so the gliding image never slides under the
         // audio bar or the next section.
-        modifier = modifier.zIndex(if (zoomState.zoomedUri != null) 1000f else 0f)
+        modifier = modifier
+            .onGloballyPositioned { coords ->
+                val p = coords.positionInWindow()
+                galleryOrigin[0] = p.x
+                galleryOrigin[1] = p.y
+            }
+            .zIndex(if (zoomState.zoomedUri != null) 1000f else 0f)
     ) {
         val density = LocalDensity.current
         val containerW = with(density) { maxWidth.toPx() }
@@ -115,17 +131,30 @@ fun AdaptiveImageGallery(
                         row.tiles.forEach { tile ->
                             Surface(
                                 onClick = {
-                                    // Report the tile's spot in the gallery's
-                                    // own viewport so the zoom glides from
-                                    // exactly where the image sits.
+                                    // Aim the zoom at the VISIBLE slice of the
+                                    // window (see [visibleViewportOf]) — with
+                                    // many images the gallery is taller than
+                                    // the screen, and centering in the whole
+                                    // gallery would land the magnified image
+                                    // mid-gallery, off the visible screen and
+                                    // clipped by the page scroll.
+                                    val win = windowInfo.containerSize
+                                    val vp = visibleViewportOf(
+                                        galleryLeft = galleryOrigin[0],
+                                        galleryTop = galleryOrigin[1],
+                                        galleryW = containerW,
+                                        galleryH = safeHeight,
+                                        windowW = win.width.toFloat(),
+                                        windowH = win.height.toFloat()
+                                    )
                                     zoomState.zoomIn(
                                         uri = tile.uri,
                                         centerX = tile.xPx + tile.widthPx / 2f,
                                         centerY = tile.yPx + tile.heightPx / 2f,
                                         tileW = tile.widthPx,
                                         tileH = tile.heightPx,
-                                        viewW = containerW,
-                                        viewH = safeHeight
+                                        viewW = vp.widthPx,
+                                        viewH = vp.heightPx
                                     )
                                 },
                                 shape = RoundedCornerShape(cornerRadius),
@@ -157,19 +186,34 @@ fun AdaptiveImageGallery(
                 }
             }
             // In-place zoom overlay — LAST child (same as the mood boards):
-            // glides the tapped image from its gallery spot to the gallery's
-            // center (arc), pinch/pan refine, tap closes. No dark scrim.
+            // glides the tapped image from its gallery spot to the VISIBLE
+            // screen center (arc), pinch/pan refine, tap closes. No dark
+            // scrim. The overlay is laid out at the gallery's visible slice
+            // of the window (see [visibleViewportOf]) so the magnified image
+            // always lands ON the screen, even when the gallery is taller
+            // than it.
             layout.rows.flatMap { it.tiles }.firstOrNull { it.uri == zoomState.zoomedUri }
                 ?.let { tile ->
+                    val win = windowInfo.containerSize
+                    val vp = visibleViewportOf(
+                        galleryLeft = galleryOrigin[0],
+                        galleryTop = galleryOrigin[1],
+                        galleryW = containerW,
+                        galleryH = safeHeight,
+                        windowW = win.width.toFloat(),
+                        windowH = win.height.toFloat()
+                    )
                     MoodBoardZoomOverlay(
                         zoomState = zoomState,
                         tileUri = tile.uri,
-                        tileX = tile.xPx,
-                        tileY = tile.yPx,
+                        tileX = tile.xPx - vp.leftInGallery,
+                        tileY = tile.yPx - vp.topInGallery,
                         widthPx = tile.widthPx,
                         heightPx = tile.heightPx,
-                        viewW = containerW,
-                        viewH = safeHeight
+                        viewW = vp.widthPx,
+                        viewH = vp.heightPx,
+                        viewportLeft = vp.leftInGallery,
+                        viewportTop = vp.topInGallery
                     )
                 }
         }
@@ -297,6 +341,51 @@ private fun computeGalleryLayout(
     }
     val totalH = (y - gapPx).coerceAtLeast(0f)
     return GalleryLayout(rows, totalH)
+}
+
+/**
+ * The gallery's visible slice of the window — what the user can actually
+ * see on screen. [leftInGallery]/[topInGallery] are the slice's top-left
+ * in GALLERY pixels (what the zoom overlay's tile coordinates live in),
+ * [widthPx]/[heightPx] its size.
+ *
+ * With many images the gallery is taller than the window; zooming must
+ * center on THIS slice, not the whole gallery, or the magnified image
+ * lands mid-gallery — off the visible screen and clipped by the page
+ * scroll.
+ */
+private data class VisibleViewport(
+    val leftInGallery: Float,
+    val topInGallery: Float,
+    val widthPx: Float,
+    val heightPx: Float
+)
+
+/**
+ * Intersects the gallery's window rect with the window rect to find the
+ * visible slice. Degenerate/empty intersections clamp to a 1px viewport so
+ * the zoom never divides by zero.
+ */
+private fun visibleViewportOf(
+    galleryLeft: Float,
+    galleryTop: Float,
+    galleryW: Float,
+    galleryH: Float,
+    windowW: Float,
+    windowH: Float
+): VisibleViewport {
+    val left = maxOf(0f, galleryLeft)
+    val top = maxOf(0f, galleryTop)
+    val right = minOf(windowW, galleryLeft + galleryW)
+    val bottom = minOf(windowH, galleryTop + galleryH)
+    val w = (right - left).coerceAtLeast(1f)
+    val h = (bottom - top).coerceAtLeast(1f)
+    return VisibleViewport(
+        leftInGallery = left - galleryLeft,
+        topInGallery = top - galleryTop,
+        widthPx = w,
+        heightPx = h
+    )
 }
 
 /**

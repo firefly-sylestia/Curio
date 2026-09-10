@@ -68,7 +68,7 @@ import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
-import com.curio.app.ui.components.CurioEmptyState
+import com.curio.app.ui.components.CurioDoodleEmptyState
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
@@ -187,11 +187,10 @@ fun RecycleBinScreen(navController: NavController) {
                         navController = navController,
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
-                    CurioEmptyState(
-                        glyph = CurioIcons.Restore,
+                    // v3xx — the app-wide doodle empty state.
+                    CurioDoodleEmptyState(
                         headline = "Recycle bin is empty",
                         subtext = "Deleted captures wait here so you can bring them back. Nothing is lost yet.",
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
                         modifier = Modifier.padding(top = 8.dp)
                     )
                 }

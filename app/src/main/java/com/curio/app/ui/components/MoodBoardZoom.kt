@@ -329,6 +329,13 @@ fun MoodBoardTiles(
  * [tileX]/[tileY] are the tile's top-left in VIEWPORT pixels (board offset
  * already applied), [widthPx]/[heightPx] its size, [viewW]/[viewH] the
  * viewport the image glides within.
+ *
+ * [viewportLeft]/[viewportTop] let the caller lay the overlay out at a
+ * sub-region of its parent — the adaptive gallery passes the gallery's
+ * VISIBLE slice of the window so the magnified image lands on screen even
+ * when the gallery is taller than it. Defaults (0,0) keep the overlay
+ * covering its whole parent at the viewport size (the mood-board
+ * behavior).
  */
 @Composable
 fun MoodBoardZoomOverlay(
@@ -340,6 +347,8 @@ fun MoodBoardZoomOverlay(
     heightPx: Float,
     viewW: Float,
     viewH: Float,
+    viewportLeft: Float = 0f,
+    viewportTop: Float = 0f,
     modifier: Modifier = Modifier
 ) {
     if (zoomState.zoomedUri == null) return
@@ -495,7 +504,16 @@ fun MoodBoardZoomOverlay(
     // Tapping anywhere on the overlay closes — no dark scrim, no page.
     Box(
         modifier = modifier
-            .fillMaxSize()
+            // Laid out at the caller's viewport offset and sized to the
+            // viewport (the gallery's visible slice of the window), so the
+            // glide target — viewport-center — is ON the visible screen.
+            // The image's graphicsLayer translation lives in THIS box's
+            // coordinate space, and the tiles are reported viewport-local.
+            .offset { IntOffset(viewportLeft.roundToInt(), viewportTop.roundToInt()) }
+            .size(
+                width = with(density) { safeViewW.toDp() },
+                height = with(density) { safeViewH.toDp() }
+            )
             .zIndex(1000f)
             .pointerInput(tileUri) {
                 awaitEachGesture {

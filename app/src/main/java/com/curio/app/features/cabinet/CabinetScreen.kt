@@ -97,6 +97,7 @@ import com.curio.app.navigation.PendingCabinetFilter
 import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.CurioDoodleEmptyState
 import com.curio.app.ui.components.CurioEmptyState
 import com.curio.app.ui.components.CurioGlassToolbar
 import com.curio.app.ui.components.CurioNavTint
@@ -596,11 +597,10 @@ fun CabinetScreen(navController: NavController) {
                         onCtaClick = { navController.navigate(CurioRoutes.SETTINGS) { launchSingleTop = true } }
                     )
                 } else if (selectedFilters.isEmpty() && !showLegacyOnly) {
-                    CurioEmptyState(
-                        glyph = CurioIcons.Inventory2,
+                    // v3xx — the app-wide doodle empty state.
+                    CurioDoodleEmptyState(
                         headline = "Your Cabinet is empty",
                         subtext = "Every capture you save will live here. Shuffle to find your first one.",
-                        tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
                         ctaLabel = "Discover something",
                         onCtaClick = {
                             // Tab switch (not a plain push): Cabinet is itself

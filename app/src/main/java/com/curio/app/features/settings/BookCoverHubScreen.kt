@@ -52,8 +52,11 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import androidx.compose.ui.draw.alpha
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.theme.curioPillTintLift
+import com.curio.app.ui.theme.curioRoseInk
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
@@ -365,12 +368,12 @@ fun BookCoverHubScreen(navController: NavController) {
                                 Surface(
                                     onClick = { BookCoverFetchSession.cancel() },
                                     shape = RoundedCornerShape(50),
-                                    color = MaterialTheme.colorScheme.surfaceContainerHighest
+                                    color = curioPillTintLift()
                                 ) {
                                     Text(
                                         "Cancel",
                                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        color = curioRoseInk(),
                                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
                                     )
                                 }
@@ -435,12 +438,12 @@ fun BookCoverHubScreen(navController: NavController) {
                                         )
                                     },
                                     shape = RoundedCornerShape(50),
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = if (failedDark) Color(0xFF815947) else curioRoseInk()
                                 ) {
                                     Text(
                                         "Retry",
                                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                        color = MaterialTheme.colorScheme.onPrimary,
+                                        color = Color(0xFFFFF9F1),
                                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                     )
                                 }
@@ -512,7 +515,10 @@ private fun StatCell(value: String, label: String, modifier: Modifier = Modifier
     }
 }
 
-/** One action button in the hub (solid primary / neutral outline). */
+/** One action button in the hub — the settings-family action language:
+ *  the primary action wears the warm rose fill (cream ink), the secondary
+ *  actions the frosted rose-glass pills (the same family as the nav rail's
+ *  chips and quick tools). Disabled buttons dim to a whisper. */
 @Composable
 private fun HubButton(
     label: String,
@@ -521,13 +527,22 @@ private fun HubButton(
     enabled: Boolean,
     onClick: () -> Unit
 ) {
+    val dark = isCurioDarkTheme()
     Surface(
         onClick = onClick,
         enabled = enabled,
         shape = RoundedCornerShape(50),
-        color = if (emphasize) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.surfaceContainerHighest,
-        modifier = Modifier.fillMaxWidth().height(46.dp)
+        color = if (emphasize) {
+            // Dark: the nav rail's selected-chip brown-rose (cream ink stays
+            // readable); light: the deep brand coral.
+            if (dark) Color(0xFF815947) else curioRoseInk()
+        } else {
+            curioPillTintLift()
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(46.dp)
+            .alpha(if (enabled) 1f else 0.5f)
     ) {
         Row(
             horizontalArrangement = Arrangement.Center,
@@ -536,16 +551,14 @@ private fun HubButton(
         ) {
             CurioIcon(
                 glyph, null,
-                tint = if (emphasize) MaterialTheme.colorScheme.onPrimary
-                       else MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = if (emphasize) Color(0xFFFFF9F1) else curioRoseInk(),
                 size = 16.dp
             )
             Spacer(Modifier.size(6.dp))
             Text(
                 label,
                 style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                color = if (emphasize) MaterialTheme.colorScheme.onPrimary
-                        else MaterialTheme.colorScheme.onSurfaceVariant
+                color = if (emphasize) Color(0xFFFFF9F1) else curioRoseInk()
             )
         }
     }

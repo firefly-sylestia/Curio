@@ -7284,6 +7284,118 @@ app/src/main/java/com/curio/app/
   per save — the GC pauses froze the app. Now only new/changed rows
   decode; the map is only touched from the flow's single collection
   dispatcher.
+- **v3xx42 — Shelf-art final pass + nav rail highlight GLIDE + back
+  mid-animation fix (user 2026-09-10: "curying now the book itself is
+  bad just the book… saved entries properly redesign… completed keep it
+  minimal… custom ones do something unique… help and feedback from
+  settings… top nav bar isn't smooth, tapping goes solid colour without
+  that highlight… back mid-animation still stays in that page").**
+  (1) **CabinetShelves.kt arts:** ReadingArt's BOOK redrawn — dark COVER
+  slab (rounded, own spine crease) under THREE stepped page layers per
+  side (peek at the outer edge), typed paragraph lines per page (left
+  justified / right first-line indent), spine join + crease shadow,
+  knotted ribbon with V-tail; mug kept (nudged to 0.86w). PhotosArt
+  redesigned as a COLLAGE — one big front polaroid (sun + two hills +
+  birds, drawn unrotated in the photo window) with angled washi tape +
+  a golden `fiveStar` mark, moon-night and heart prints behind,
+  grounded by the shared shadow. PeakArt kept MINIMAL — one clean
+  summit + snow tip + planted flag + thin ground band (sun/ridge/
+  birds/badge removed). The four custom MINIMAL_* scenes are now
+  UNIQUE: hot-air BALLOON (envelope, band + seam, ropes, basket,
+  cloud), ringed PLANET (globe + atmosphere line + front/back ring
+  arcs + moon + twinkles), SAILBOAT (hull, mast, sail, pennant, waves,
+  wind puff), KITE (diamond + spars + bow tail + wavy line to a tiny
+  hand + cloud). (2) **SettingsHubScreen.kt:** the CHAT (Help &
+  feedback) doodle is a support-chat WINDOW (header bar dots + title
+  line, incoming white ? bubble, outgoing message bubble with ink
+  lines, paper plane flying out). `SettingsRailBoundsTransform` spring
+  goes 0.95/500 → **0.8/140** (the stiffness-500 pill settled ~150ms
+  — under half the 450ms page fade — so taps read as a solid snap;
+  now it visibly glides); rail centering is INSTANT (`scrollBy` after
+  one frame, replacing the ~300ms `animateScrollBy` that dragged the
+  shared-element pill's target bounds mid-morph). (3) **CurioNavHost
+  transitions:** settings-family enter/exit/popEnter/popExit drop the
+  `scaleIn/scaleOut(0.985, Springs.Calm)` (stiffness 750 — instant
+  pop) for pure `fadeIn/fadeOut(tween(Morph))` — the pill morph is the
+  only motion, and tween fades converge cleanly when the user pops
+  BACK mid-transition (a re-targeted spring left the old page stuck on
+  All Settings).
+- **v3xx41 — Everything wall: uniform covers + NO seam, and the Text
+  history concept feature set (user 2026-09-10: "remove the background
+  fill… covers keep the shape they are in… 2x/3x/.5x in both width and
+  height… implement all the features of text history from the JSX").**
+  (1) **Everything masonry (CabinetV2Content.kt)** — the seam plate is
+  REMOVED (the grid's old background fill boxed every inter-cover gap;
+  covers now sit on the page's own surface) and the size tiers are
+  UNIFORM scales: each cover keeps its own aspect (book 0.667 / album
+  1 / series 0.72) and the tier widens + tallens it together. The grid
+  runs on `StaggeredGridCells.Fixed(8)` base columns with
+  `spanUnits = (tier * 2).toInt().coerceIn(1, 8)` so 3x → 6 spans, 2x →
+  4, 1.5x → 3, 1x → 2 and 0.5x → 1 — a REAL half-size cover (the old
+  4-column grid could never render 0.5x). (2) **Text history concept
+  (TextHistory.kt, from TextHistory (3).jsx)** — (a) SEARCH: frosted
+  `HistorySearchBox` pill (BasicTextField + placeholder + clear)
+  matching text or field label, live in BOTH views; (b) FILTER chips
+  (All / Edits / Initial / Pinned) — Initial = each field's first
+  snapshot, Edits = the rest, computed per field; tree is rebuilt from
+  the filtered set and a `SearchOff` no-results state offers Clear
+  filters; (c) COMPARE: a `Layers` action on every row arms a banner
+  ("tap another snapshot's compare"), the second pick opens
+  `CompareVersionsDialog` with a WORD-LEVEL LCS diff (`diffTokens`,
+  backtracked longest-common-subsequence) — removed words strike in red
+  (errorContainer), added words warm-highlight (tertiaryContainer), two
+  side-by-side `CompareVersionCard`s + removed/added word-count chips;
+  (d) COLLAPSIBLE groups: `HistoryFieldCard` headings toggle
+  `collapsedFields` with a KeyboardArrow chevron + `AnimatedVisibility`;
+  (e) CURRENT pill (`HistoryCurrentPill`) on each field's newest
+  snapshot + word-delta badges (`wordDeltaBadge`: "+3 words" / "Original")
+  in list rows and tree nodes; (f) the full-text preview gained stats
+  (words · characters) + a changes note (vs the previous snapshot of
+  the field) + Compare / Restore actions; (g) the header count reads
+  "X of Y snapshots" while filtering.
+- **v3xx40 — Cabinet doodle rebalance + settings hub polish (user
+  follow-up 2026-09-10, 9-item batch).** (1) **Doodle empty state** —
+  `CurioDoodleEmptyState` drops the leaf SPRIG (it read as a lopsided
+  tree): the book stack breathes wider, gains a spine tick on the bottom
+  book, and the note card leans against the stack with a corner fold.
+  (2) **Shelf arts rebalanced** (CabinetShelves.kt) — every scene's hero
+  is bigger + CENTRED with a shared `groundShadow` helper (dark ink at
+  0.10/0.18 alpha, tied to the card foot) replacing the far-off filler
+  dots: `ReadingArt`'s book grew (half 0.36w) with a spine crease line +
+  a rounded mug (saucer, handle, taller S-steam), `PeakArt`'s near peak
+  is TALLER with the flag planted ON the summit + a zigzag-hem snow cap
+  + thinner ground band, `PhotosArt` fans three prints from a shared
+  base point (bigger 0.34w prints, photo inner-shadow hairline, angled
+  tape, a paperclip detail), the four MINIMAL_* customs re-centred (sun
+  rises from a horizon with hills, rings gain a second orbit dot, wave
+  gets two drops, dots drift along a drawn arc), `StarArt` centred at
+  0.38u. (3) **Per-card texture RANDOMIZED** — `SettingsCardTexture`
+  seeds 3 outlined bubbles + 5 speckle dots from the card id
+  (`kotlin.random.Random(seed.hashCode())`, remembered per id), so every
+  settings card wears a different-but-stable scatter instead of the
+  same six dots. (4) **Rail auto-centre** — `SettingsNavRail`'s
+  `LaunchedEffect(active)` glides the row (`animateScrollBy`, calm
+  spring) so the ACTIVE chip sits mid-viewport, not glued to the left
+  edge (skips when drift < 10% of the viewport; one frame settle first).
+  (5) **Quick tools popUpTo** — the rail's quick-tool chips now navigate
+  with `popUpTo(SETTINGS) { inclusive = false }` like the rail chips, so
+  deep pages REPLACE each other instead of stacking back-presses. (6)
+  **Backup doodle REDRAWN** — the CLOUD visual is an open ARCHIVE BOX
+  now (lid + label plate + two file folders peeking out + a curved
+  restore arrow looping back in): the old four-lobe cloud + up arrow
+  was the Backup icon drawn bigger. (7) **Manage Categories drag
+  visibility** — the dragged row swaps to a LIFTED CARD shell
+  (`shadow(6dp)` → clip → opaque surfaceContainerHighest / #F7F1E6 fill
+  → 1.5dp primary outline, full alpha, zIndex 1) so it never ghosts
+  into the rows it slides over. (8) **Footer note** — the ✦✧✦ dots line
+  is gone; the light panel is now a `lerp(background, settingsRoseAccent(),
+  0.07f)` blend with a hairline border (was the hard beige #E9DFD4
+  block). (9) **Secondary cards = card doodles** — Recycle bin /
+  Updates / Help & feedback traded the plain white rows for compact
+  members of the big-card family: tone gradients (STEEL/SAGE/LAVENDER),
+  frosted tile + round arrow + three NEW visuals (`TRASH` = ribbed can
+  + tilted lid + paper ball, `REFRESH` = two chase arcs around a version
+  chip, `CHAT` = question bubble + reply bubble with ink lines).
 - **v3xx37 — Cabinet lag fix: light entry projection + batched cover
   warmer (user follow-up 2026-09-09, logcat showed repeated 15–52MB
   GCs + 89/43 skipped frames while viewing the Cabinet).** (1) **Light

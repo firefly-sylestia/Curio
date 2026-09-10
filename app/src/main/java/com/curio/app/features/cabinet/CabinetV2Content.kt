@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,6 +35,9 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -109,6 +111,7 @@ import com.curio.app.navigation.CurioRoutes
 import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.CurioDoodleEmptyState
 import com.curio.app.ui.components.CurioEmptyState
 import com.curio.app.ui.components.CurioEntryCard
 import com.curio.app.ui.components.CurioHoldPill
@@ -317,9 +320,8 @@ fun CabinetV2Content(navController: NavController) {
     // (v3xx — the old grid/list view toggle is gone: Everything is always
     // the 3-column media grid, so there is no second view mode to store.)
     var typeFilter by rememberSaveable { mutableStateOf<String?>(null) }
-    var sortAtoZ by rememberSaveable { mutableStateOf(false) }
 
-    // ── Everything-level filters: search + type + sort.
+    // ── Everything-level filters: search + type.
     val filteredEntries = remember(entries, searchQuery) {
         val q = searchQuery.trim()
         if (q.isEmpty()) entries
@@ -328,10 +330,9 @@ fun CabinetV2Content(navController: NavController) {
                 it.tags.any { tag -> matchesQ(tag) }
         }
     }
-    val shownEntries = remember(filteredEntries, typeFilter, sortAtoZ) {
-        val base = filteredEntries.filter { entryInType(it, typeFilter) }
-        if (sortAtoZ) base.sortedBy { it.topic.name.lowercase() }
-        else base.sortedByDescending { it.capturedAtMillis }
+    val shownEntries = remember(filteredEntries, typeFilter) {
+        filteredEntries.filter { entryInType(it, typeFilter) }
+            .sortedByDescending { it.capturedAtMillis }
     }
     fun filteredLiked(all: List<V2Liked>): List<V2Liked> =
         if (searchQuery.isBlank()) all
@@ -344,44 +345,27 @@ fun CabinetV2Content(navController: NavController) {
     val likedAtMap = AppPreferences.likedAtState
     fun likedAtFor(item: V2Liked): Long =
         likedAtMap["${item.kind.name.lowercase()}|${item.name}"] ?: 0L
-    val shownBooks = remember(books, searchQuery, typeFilter, sortAtoZ, likedAtMap) {
-        val base = filteredLiked(books).filter { likedShownForType(typeFilter, V2Kind.BOOK) }
-        if (sortAtoZ) base.sortedBy { it.name.lowercase() }
-        else base.sortedByDescending { likedAtFor(it) }
+    val shownBooks = remember(books, searchQuery, typeFilter, likedAtMap) {
+        filteredLiked(books).filter { likedShownForType(typeFilter, V2Kind.BOOK) }
+            .sortedByDescending { likedAtFor(it) }
     }
-    val shownAlbums = remember(albums, searchQuery, typeFilter, sortAtoZ, likedAtMap) {
-        val base = filteredLiked(albums).filter { likedShownForType(typeFilter, V2Kind.ALBUM) }
-        if (sortAtoZ) base.sortedBy { it.name.lowercase() }
-        else base.sortedByDescending { likedAtFor(it) }
+    val shownAlbums = remember(albums, searchQuery, typeFilter, likedAtMap) {
+        filteredLiked(albums).filter { likedShownForType(typeFilter, V2Kind.ALBUM) }
+            .sortedByDescending { likedAtFor(it) }
     }
-    val shownSeries = remember(series, searchQuery, typeFilter, sortAtoZ, likedAtMap) {
-        val base = filteredLiked(series).filter { likedShownForType(typeFilter, V2Kind.SERIES) }
-        if (sortAtoZ) base.sortedBy { it.name.lowercase() }
-        else base.sortedByDescending { likedAtFor(it) }
+    val shownSeries = remember(series, searchQuery, typeFilter, likedAtMap) {
+        filteredLiked(series).filter { likedShownForType(typeFilter, V2Kind.SERIES) }
+            .sortedByDescending { likedAtFor(it) }
     }
 
-    // ── v3xx — the Recent rail mixes recent saves with recent LIKES. The
-    // liked-at stamps live in AppPreferences (kind|name → epoch ms); entries
-    // carry capturedAtMillis. One merged, newest-first feed renders both.
-    val recentFeed = remember(entries, books, albums, series, likedAtMap) {
-        val cells = mutableListOf<V2RecentCell>()
-        entries.forEach { cells.add(V2RecentCell.Entry(it)) }
-        (books + albums + series).forEach { item ->
-            val ts = likedAtFor(item)
-            if (ts > 0L) cells.add(V2RecentCell.Liked(item, ts))
-        }
-        cells.sortedByDescending { it.ts }.take(10)
-    }
-
-    // ── v3xx — the rail only lists types that actually hold content.
-    val railAvailable = remember(books, albums, series, noteEntries, entries) {
+    // ── v3xx — the Everything rail only lists LIKED MEDIA (saved captures
+    // are no longer part of the gallery), so only the kinds that actually
+    // hold content show a chip.
+    val railAvailable = remember(books, albums, series) {
         buildSet {
             if (books.isNotEmpty()) add("books")
             if (albums.isNotEmpty()) add("albums")
             if (series.isNotEmpty()) add("series")
-            if (noteEntries.isNotEmpty()) add("notes")
-            if (entries.any { it.format == CaptureFormat.GalleryWall }) add("moodboard")
-            if (entries.any { it.format == CaptureFormat.ReelNotes }) add("review")
         }
     }
 
@@ -532,15 +516,91 @@ fun CabinetV2Content(navController: NavController) {
         // remembered scroll made opening a collection land MID-list and made
         // page switches visibly jump (the glitch). key(openLevel) recreates
         // the grid per level, so every level opens from the TOP.
+        // The wide-window hero — the grid's first item on tablets/landscape
+        // (shared by the regular grid and the Everything masonry below).
+        val wideHero: @Composable () -> Unit = {
+            CabinetHeroHeader(
+                title = heroTitle,
+                subtitle = heroSubtitle,
+                activeCat = null,
+                legacyMode = false,
+                searchActive = searchActive,
+                searchQuery = searchQuery,
+                onSearchQueryChange = { searchQuery = it },
+                onCloseSearch = { searchActive = false; searchQuery = "" },
+                searchFocus = searchFocus,
+                trailing = heroTrailing,
+                glassBackdrop = glassBackdrop
+            )
+        }
+
         key(openLevel) {
+        // ── EVERYTHING / FAVORITES — the JSX masonry gallery: a dense
+        // STAGGERED grid of covers-only posters (books tall jackets, albums
+        // squares, series posters — no cards, no titles, no boxes, just the
+        // art with a whisper of rounded corners) with filter chips that
+        // smoothly reflow the gallery — every cover animates to its new spot
+        // when the category changes (the CurioEverythingGallery concept).
+        // Favorites stores ONLY liked media, so it wears the same gallery.
+        if (openLevel == "everything" || openLevel == SHELF_LEVEL_FAVORITES) {
+            // v3xx42 — the Everything wall on a PLAIN 8-column LazyVerticalGrid:
+            // this foundation's StaggeredGridItemSpan(Int) constructor is
+            // private (CI), so a staggered masonry with custom spans can't
+            // compile here — instead every cover keeps its own shape and is
+            // scaled UNIFORMLY by a SPAN (3x = 6 of 8 columns, 2x = 4,
+            // 1.5x = 3, 1x = 2, 0.5x = 1). The tier cycle is chosen so
+            // consecutive spans sum to the line (6+1+1, 4+4, 3+3+2), so rows
+            // pack without holes; no seam plate — the page's own surface
+            // shows between covers.
+            LazyVerticalGrid(
+                state = rememberLazyGridState(),
+                columns = GridCells.Fixed(8),
+                contentPadding = PaddingValues(
+                    start = 10.dp,
+                    end = 10.dp,
+                    top = contentTop,
+                    bottom = 24.dp + 84.dp +
+                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                ),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    // v3xx42 — NO seam plate: the wall sits on the page's own
+                    // surface, so the gaps read as clean whitespace between
+                    // covers instead of a boxed border plate.
+                    .then(if (glassOn && glassBackdrop != null)
+                        Modifier.layerBackdrop(glassBackdrop) else Modifier)
+            ) {
+                if (wide) {
+                    item(key = "hero", span = { GridItemSpan(maxLineSpan) }, contentType = "hero") {
+                        wideHero()
+                    }
+                }
+                v2EverythingMasonryItems(
+                    shownBooks = shownBooks,
+                    shownAlbums = shownAlbums,
+                    shownSeries = shownSeries,
+                    railAvailable = railAvailable,
+                    typeFilter = typeFilter,
+                    onTypeFilter = { typeFilter = it },
+                    likedAtFor = { likedAtFor(it) },
+                    onOpenLiked = { item -> item.open(navController) },
+                    onCoverSource = { coverSourceItem = it },
+                    // Everything's add-new dives into Spin; Favorites opens
+                    // the add-to-favorites sheet (same as its old Add pill).
+                    onAddNew = if (openLevel == SHELF_LEVEL_FAVORITES) {
+                        { addTarget = AddTarget.Favorites }
+                    } else {
+                        { navController.navigateToTab(CurioRoutes.SPIN) }
+                    },
+                    pageAccent = pageAccent
+                )
+            }
+        } else {
         LazyVerticalGrid(
             state = rememberLazyGridState(),
-            // v3xx — Everything is a 3-column media grid (the old 2-col + a
-            // separate list toggle are gone: list was replaced by the 3 grid);
-            // every other level keeps its 2-col card grid.
-            columns = if (wide) GridCells.Adaptive(minSize = 176.dp)
-            else if (openLevel == "everything") GridCells.Fixed(3)
-            else GridCells.Fixed(2),
+            columns = if (wide) GridCells.Adaptive(minSize = 176.dp) else GridCells.Fixed(2),
             contentPadding = PaddingValues(
                 start = 16.dp,
                 end = 16.dp,
@@ -557,19 +617,7 @@ fun CabinetV2Content(navController: NavController) {
         ) {
             if (wide) {
                 item(key = "hero", span = { GridItemSpan(maxLineSpan) }, contentType = "hero") {
-                    CabinetHeroHeader(
-                        title = heroTitle,
-                        subtitle = heroSubtitle,
-                        activeCat = null,
-                        legacyMode = false,
-                        searchActive = searchActive,
-                        searchQuery = searchQuery,
-                        onSearchQueryChange = { searchQuery = it },
-                        onCloseSearch = { searchActive = false; searchQuery = "" },
-                        searchFocus = searchFocus,
-                        trailing = heroTrailing,
-                        glassBackdrop = glassBackdrop
-                    )
+                    wideHero()
                 }
             }
 
@@ -596,30 +644,6 @@ fun CabinetV2Content(navController: NavController) {
                     onAdd = { addTarget = AddTarget.Collection(openCollection) },
                     onRename = { renameTarget = openCollection.id },
                     onDelete = { deleteTarget = openCollection.id }
-                )
-                openLevel == SHELF_LEVEL_FAVORITES -> v2VirtualShelfItems(
-                    title = "Favorites",
-                    likes = allLikes,
-                    entries = emptyList(),
-                    searchQuery = searchQuery,
-                    selectedEntryIds = selectedEntryIds,
-                    selectionMode = selectionMode,
-                    onOpenLiked = { item -> item.open(navController) },
-                    onEntryLongClick = { id ->
-                        selectionMode = true
-                        selectedEntryIds = selectedEntryIds + id
-                    },
-                    onEntryClick = { id ->
-                        if (selectionMode) {
-                            selectedEntryIds = if (id in selectedEntryIds) selectedEntryIds - id
-                            else selectedEntryIds + id
-                        } else {
-                            haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
-                            navController.navigate(CurioRoutes.entryDetail(id)) { launchSingleTop = true }
-                        }
-                    },
-                    onLikedMore = { coverSourceItem = it },
-                    onAdd = { addTarget = AddTarget.Favorites }
                 )
                 openLevel == SHELF_LEVEL_SAVED -> v2VirtualShelfItems(
                     title = "Saved entries",
@@ -665,38 +689,6 @@ fun CabinetV2Content(navController: NavController) {
                             navController.navigate(CurioRoutes.entryDetail(id)) { launchSingleTop = true }
                         }
                     }
-                )
-                openLevel == "everything" -> v2EverythingItems(
-                    shownEntries = shownEntries,
-                    shownBooks = shownBooks,
-                    shownAlbums = shownAlbums,
-                    shownSeries = shownSeries,
-                    recentFeed = recentFeed,
-                    railAvailable = railAvailable,
-                    typeFilter = typeFilter,
-                    onTypeFilter = { typeFilter = it },
-                    sortAtoZ = sortAtoZ,
-                    onSort = { sortAtoZ = it },
-                    selectionMode = selectionMode,
-                    selectedEntryIds = selectedEntryIds,
-                    onEntryLongClick = { id ->
-                        selectionMode = true
-                        selectedEntryIds = selectedEntryIds + id
-                    },
-                    onEntryClick = { id ->
-                        if (selectionMode) {
-                            selectedEntryIds = if (id in selectedEntryIds) selectedEntryIds - id
-                            else selectedEntryIds + id
-                        } else {
-                            haptics.performHapticFeedback(HapticFeedbackType.KeyboardTap)
-                            navController.navigate(CurioRoutes.entryDetail(id)) { launchSingleTop = true }
-                        }
-                    },
-                    onOpenLiked = { item -> item.open(navController) },
-                    onCoverSource = { coverSourceItem = it },
-                    onAddNew = { navController.navigateToTab(CurioRoutes.SPIN) },
-                    onClearFilters = { searchQuery = ""; searchActive = false; typeFilter = null },
-                    pageAccent = pageAccent
                 )
                 else -> v2HomeItems(
                     everythingLikes = allLikes,
@@ -753,6 +745,7 @@ fun CabinetV2Content(navController: NavController) {
                     onClearSearch = { searchQuery = ""; searchActive = false }
                 )
             }
+        }
         }
         }
 
@@ -1128,20 +1121,11 @@ private fun LazyGridScope.v2DetailItems(
         )
     }
     if (collection.members.isEmpty()) {
+        // v3xx — the JSX "Nothing here yet" scene (stacked books + leaf
+        // sprig + note card + twinkles) drawn in the app's flask doodle
+        // language — see V2CollectionEmptyState in CabinetShelves.kt.
         item(key = "d-empty", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)
-            ) {
-                CurioEmptyState(
-                    glyph = CurioIcons.Inventory2,
-                    headline = "This collection is empty",
-                    subtext = "Pin discoveries from their pages (hold the top bar → File to…) or add saved captures here.",
-                    tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
-                    ctaLabel = "Add captures",
-                    onCtaClick = onAdd
-                )
-            }
+            V2CollectionEmptyState(onAdd = onAdd)
         }
         return
     }
@@ -1196,193 +1180,125 @@ private fun LazyGridScope.v2DetailItems(
             )
         }
     }
-}
-
-/** EVERYTHING — the JSX library page. v3xx — every kind renders in its OWN
- *  view (no more one-look-alike grid): the toolbar (Filter / Sort) + a type
- *  rail that only lists types with real content, a Recent rail that mixes
- *  recently saved captures WITH recently liked books/albums/series, then a
- *  3-column grid grouped by kind — Books wear portrait jackets, Albums
- *  square covers, Series posters, saved notes keep the entry card, and
- *  REVIEWS (ReelNotes) get their own OUTLINED review card. The old list /
- *  grid view toggle is gone (the grid replaced the list). */
-private fun LazyGridScope.v2EverythingItems(
-    shownEntries: List<CurioEntry>,
+}/** EVERYTHING — the JSX dense wall (the CurioEverythingGallery concept,
+ *  now COVERS ONLY): a span-based masonry on an 8-column grid. The liked
+ *  media merge into ONE recency stream (no category grouping). Each cover
+ *  keeps its OWN aspect shape (books tall, albums square, series posters)
+ *  and scales UNIFORMLY — the width multiplier spans that many grid
+ *  columns (3x / 2x / 1.5x / 1x / 0.5x), so a cover NEVER changes shape,
+ *  only size. The most recent cover runs the biggest tier, then the rest
+ *  cycle down the wall in a PACKING order (6+1+1, 4+4, 3+3+2 per line) so
+ *  rows never leave holes. The wall's background is the page's own surface
+ *  (no plate behind the covers). The filter chips + the corner Add pill
+ *  ride the top full-line, and every cover animates to its new spot on
+ *  reflow. */
+@OptIn(ExperimentalFoundationApi::class)
+private fun LazyGridScope.v2EverythingMasonryItems(
     shownBooks: List<V2Liked>,
     shownAlbums: List<V2Liked>,
     shownSeries: List<V2Liked>,
-    recentFeed: List<V2RecentCell>,
     railAvailable: Set<String>,
     typeFilter: String?,
     onTypeFilter: (String?) -> Unit,
-    sortAtoZ: Boolean,
-    onSort: (Boolean) -> Unit,
-    selectionMode: Boolean,
-    selectedEntryIds: Set<String>,
-    onEntryLongClick: (String) -> Unit,
-    onEntryClick: (String) -> Unit,
+    likedAtFor: (V2Liked) -> Long,
     onOpenLiked: (V2Liked) -> Unit,
     onCoverSource: (V2Liked) -> Unit,
     onAddNew: () -> Unit,
-    onClearFilters: () -> Unit,
     pageAccent: Color
 ) {
-    val reviewEntries = shownEntries.filter { it.format == CaptureFormat.ReelNotes }
-    val moodEntries = shownEntries.filter { it.format == CaptureFormat.GalleryWall }
-    val noteEntriesShown = shownEntries.filterNot {
-        it.format == CaptureFormat.ReelNotes || it.format == CaptureFormat.GalleryWall
-    }
-    val totalShown =
-        shownEntries.size + shownBooks.size + shownAlbums.size + shownSeries.size
-    val anyContent = totalShown > 0 || recentFeed.isNotEmpty()
-    if (!anyContent) {
-        item(key = "e-empty", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
-            CurioEmptyState(
-                glyph = CurioIcons.Inventory2,
-                headline = "Nothing saved yet",
-                subtext = "Save a capture or like a book, series or album and it shows up here.",
-                tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f)
-            )
-        }
-        item(key = "add-new", span = { GridItemSpan(maxLineSpan) }, contentType = "action") {
-            V2AddSomethingButton(onClick = onAddNew)
-        }
-        return
-    }
-    if (totalShown == 0 && recentFeed.isNotEmpty()) {
-        // Filtered to nothing but the Cabinet still holds items.
-        item(key = "e-filtered", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
-            CurioEmptyState(
-                glyph = CurioIcons.SearchOff,
-                headline = "Nothing matches these filters",
-                subtext = "Try clearing the search or the type filter.",
-                tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
-                ctaLabel = "Clear filters",
-                onCtaClick = onClearFilters
-            )
-        }
-        return
-    }
+    val allMedia = (shownBooks + shownAlbums + shownSeries)
+        .sortedByDescending { likedAtFor(it) }
+    val totalShown = allMedia.size
+    // v3xx42 — UNIFORM-SIZE tiers as SPANS on the 8-column grid (1x = 2
+    // spans): every cover keeps its own aspect and the tier scales BOTH
+    // dimensions together (3x = 6 columns, 2x = 4, 1.5x = 3, 1x = 2,
+    // 0.5x = 1). The cycle PACKS perfectly — 3x+0.5x+0.5x = 8, 2x+2x = 8,
+    // 1.5x+1.5x+1x = 8 — so rows never leave holes.
+    val tiers = floatArrayOf(3f, 0.5f, 0.5f, 2f, 2f, 1.5f, 1.5f, 1f)
 
-    item(key = "toolbar", span = { GridItemSpan(maxLineSpan) }, contentType = "toolbar") {
-        V2EverythingToolbar(
-            typeFilter = typeFilter,
-            onTypeFilter = onTypeFilter,
-            sortAtoZ = sortAtoZ,
-            onSort = onSort
-        )
-    }
-    item(key = "filter-rail", span = { GridItemSpan(maxLineSpan) }, contentType = "chips") {
-        V2FilterRail(
-            current = typeFilter,
-            onSelect = onTypeFilter,
-            accent = pageAccent,
-            available = railAvailable
-        )
-    }
-
-    // ── Recent — recently saved captures + recently LIKED books / albums /
-    // series (the new likedAt timestamps), newest first, in one rail.
-    if (recentFeed.isNotEmpty() && typeFilter == null && !selectionMode) {
-        item(key = "h-recent", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
-            V2PageSectionHeader(title = "Recent", subtitle = "Latest saves & likes")
-        }
-        item(key = "recent-rail", span = { GridItemSpan(maxLineSpan) }, contentType = "rail") {
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(vertical = 2.dp)
-            ) {
-                recentFeed.forEach { cell ->
-                    when (cell) {
-                        is V2RecentCell.Entry -> item(key = cell.key) {
-                            CurioEntryCard(
-                                entry = cell.entry,
-                                onClick = { onEntryClick(cell.entry.id) },
-                                modifier = Modifier.width(150.dp)
-                            )
-                        }
-                        is V2RecentCell.Liked -> item(key = cell.key) {
-                            V2RecentMediaCell(
-                                item = cell.item,
-                                onClick = { onOpenLiked(cell.item) }
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // ── v3xx — grouped, per-kind sections (each kind keeps its own tile
-    // language + cover shape). Hidden rails/types never show a section; a
-    // single active filter shows only its kind with no headers.
-    fun sectionHeader(title: String, subtitle: String, n: Int) {
-        if (typeFilter != null) return
-        item(
-            key = "s|$title",
-            span = { GridItemSpan(maxLineSpan) },
-            contentType = "header"
+    // Top full-line: the filter chips + the corner ADD pill (the app-wide
+    // labeled Add, anchored TOP-RIGHT of the wall instead of a bottom
+    // button).
+    item(key = "everything-head", span = { GridItemSpan(maxLineSpan) }, contentType = "head") {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            V2PageSectionHeader(title = title, subtitle = subtitle, trailing = "$n")
+            V2FilterRail(
+                current = typeFilter,
+                onSelect = onTypeFilter,
+                accent = pageAccent,
+                available = railAvailable,
+                modifier = Modifier.weight(1f)
+            )
+            V2AddPillCompact(onClick = onAddNew)
         }
     }
 
-    fun mediaGrid(likes: List<V2Liked>, title: String, subtitle: String) {
-        if (likes.isEmpty()) return
-        sectionHeader(title, subtitle, likes.size)
-        items(likes, key = { "l|${it.kind.name}|${it.name}" }) { item ->
-            V2MediaTileCard(
-                item = item,
-                onClick = { onOpenLiked(item) },
-                onMore = { onCoverSource(item) }
+    if (totalShown == 0) {
+        item(key = "e-empty", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
+            CurioDoodleEmptyState(
+                headline = "Nothing saved yet",
+                subtext = "Like a book, series or album and its cover shows up here."
             )
         }
+        return
     }
 
-    fun entryGrid(list: List<CurioEntry>, title: String, subtitle: String, review: Boolean) {
-        if (list.isEmpty()) return
-        sectionHeader(title, subtitle, list.size)
-        items(list, key = { "x|$title|${it.id}" }) { e ->
-            if (review) {
-                V2ReviewTileCard(
-                    entry = e,
-                    onClick = { onEntryClick(e.id) },
-                    onLongClick = { onEntryLongClick(e.id) },
-                    selected = e.id in selectedEntryIds
-                )
-            } else {
-                CurioEntryCard(
-                    entry = e,
-                    selected = e.id in selectedEntryIds,
-                    onLongClick = { onEntryLongClick(e.id) },
-                    onClick = { onEntryClick(e.id) },
-                    modifier = Modifier
+    allMedia.forEachIndexed { rank, liked ->
+        // The cover's OWN shape — the base aspect per kind, scaled
+        // UNIFORMLY by the size tier (never stretched in one direction).
+        val aspect = when (liked.kind) {
+            V2Kind.BOOK -> 0.667f   // portrait jacket
+            V2Kind.ALBUM -> 1f      // square sleeve
+            V2Kind.SERIES -> 0.72f  // poster
+        }
+        val tier = tiers[rank % tiers.size]
+        // The tier as a SPAN on the 8-column grid: 1x = 2 spans (a quarter
+        // of the line), 2x = 4, 3x = 6 and 0.5x = 1 — a real half-size
+        // cover; the multiplier widens the tile the same amount it tallens
+        // it (both from the aspect ratio), so shapes are never stretched.
+        val spanCount = (tier * 2).toInt().coerceIn(1, 8)
+        item(
+            key = "l|${liked.kind.name}|${liked.name}",
+            span = { GridItemSpan(spanCount) },
+            contentType = "media"
+        ) {
+            // The fallback accent resolves INSIDE the item's composable
+            // lambda (the wall builder itself is not @Composable).
+            val fallbackAccent = liked.topic?.categoryId?.let { CurioCategories.byId(it) }
+                ?.themedAccent() ?: MaterialTheme.colorScheme.primary
+            // Rounded cover tile: the art CROPS to fill the whole tile, so
+            // no cover ever leaves space below or beside it. No plate, no
+            // seam — the page's own surface shows between covers.
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(aspect)
+                    .clip(RoundedCornerShape(10.dp))
+                    .then(
+                        Modifier.animateItem(
+                            fadeInSpec = tween(220),
+                            fadeOutSpec = tween(150),
+                            placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                        )
+                    )
+                    .combinedClickable(
+                        onClick = { onOpenLiked(liked) },
+                        onLongClick = { onCoverSource(liked) }
+                    )
+            ) {
+                V2JacketArt(
+                    item = liked,
+                    accent = fallbackAccent,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
                 )
             }
         }
-    }
-
-    if (typeFilter == null || typeFilter == "books") {
-        mediaGrid(shownBooks, "Books", "Your library")
-    }
-    if (typeFilter == null || typeFilter == "albums") {
-        mediaGrid(shownAlbums, "Albums", "On your turntable")
-    }
-    if (typeFilter == null || typeFilter == "series") {
-        mediaGrid(shownSeries, "Series", "On your watchlist")
-    }
-    if (typeFilter == null || typeFilter == "notes") {
-        entryGrid(noteEntriesShown, "Notes", "Captures & journal", review = false)
-    }
-    if (typeFilter == null || typeFilter == "moodboard") {
-        entryGrid(moodEntries, "Moodboards", "Visual collections", review = false)
-    }
-    if (typeFilter == null || typeFilter == "review") {
-        entryGrid(reviewEntries, "Reviews", "Your takes on the things you keep", review = true)
-    }
-
-    item(key = "add-new", span = { GridItemSpan(maxLineSpan) }, contentType = "action") {
-        V2AddSomethingButton(onClick = onAddNew)
     }
 }
 
@@ -1731,6 +1647,7 @@ private fun V2EverythingCard(
             } else {
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                     contentPadding = PaddingValues(vertical = 2.dp)
                 ) {
                     items(likes, key = { "${it.kind.name}|${it.name}" }) { item ->
@@ -1748,12 +1665,21 @@ private fun V2EverythingCard(
                                 fallbackAccent
                             )
                         }
-                        // v3xx35 — NO category-tint plate behind the covers: the
-                        // art renders edge-to-edge (V2JacketArt shows its own
-                        // accent placeholder only while a cover is loading).
+                        // v3xx — the preview keeps each cover's OWN shape
+                        // (books tall, albums square, series posters — no more
+                        // albums squeezed into book jackets), centered in the
+                        // rail, inside the same thin rounded frame as the
+                        // gallery.
+                        val tileSize = when (item.kind) {
+                            V2Kind.ALBUM -> Modifier.size(width = 64.dp, height = 64.dp)
+                            V2Kind.SERIES -> Modifier.size(width = 64.dp, height = 88.dp)
+                            else -> Modifier.size(width = 59.dp, height = 88.dp)
+                        }
                         Box(
-                            modifier = Modifier
-                                .size(width = 64.dp, height = 88.dp)
+                            modifier = tileSize
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f))
+                                .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.16f), RoundedCornerShape(10.dp))
                         ) {
                             V2JacketArt(
                                 item = item,
@@ -1776,81 +1702,6 @@ private fun V2EverythingCard(
     }
 }
 
-/** The Everything library toolbar — Filter + Sort pills (with menus). The
- *  old grid/list view toggle is GONE (v3xx): Everything is always the
- *  3-column media grid — the toggle only offered a second way to show the
- *  same list-shaped tiles that the grid replaced. */
-@Composable
-private fun V2EverythingToolbar(
-    typeFilter: String?,
-    onTypeFilter: (String?) -> Unit,
-    sortAtoZ: Boolean,
-    onSort: (Boolean) -> Unit
-) {
-    var filterOpen by remember { mutableStateOf(false) }
-    var sortOpen by remember { mutableStateOf(false) }
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Box {
-            V2ToolbarPill(
-                glyph = CurioIcons.Tune,
-                label = "Filter",
-                emphasized = typeFilter != null,
-                onClick = { filterOpen = true }
-            )
-            DropdownMenu(
-                expanded = filterOpen,
-                onDismissRequest = { filterOpen = false }
-            ) {
-                TYPE_FILTERS.forEach { (key, label, _) ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = label,
-                                fontWeight = if (typeFilter == key) FontWeight.ExtraBold else FontWeight.Normal
-                            )
-                        },
-                        onClick = { onTypeFilter(key); filterOpen = false }
-                    )
-                }
-            }
-        }
-        Box {
-            V2ToolbarPill(
-                glyph = if (sortAtoZ) CurioIcons.ArrowUpward else CurioIcons.ArrowDownward,
-                label = "Sort",
-                onClick = { sortOpen = true }
-            )
-            DropdownMenu(
-                expanded = sortOpen,
-                onDismissRequest = { sortOpen = false }
-            ) {
-                listOf(false to "Recent", true to "A–Z").forEach { (az, label) ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = label,
-                                fontWeight = if (sortAtoZ == az) FontWeight.ExtraBold else FontWeight.Normal
-                            )
-                        },
-                        onClick = { onSort(az); sortOpen = false }
-                    )
-                }
-            }
-        }
-        Spacer(Modifier.weight(1f))
-        Text(
-            text = TYPE_FILTERS.firstOrNull { it.first == typeFilter }?.second ?: "All",
-            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1
-        )
-    }
-}
-
 /** The JSX filter rail — horizontal type chips (All · Books · Albums …).
  *  v3xx — `available` limits the rail to types that actually hold content:
  *  a kind with nothing saved never shows an empty chip ("only show what's
@@ -1860,11 +1711,12 @@ private fun V2FilterRail(
     current: String?,
     onSelect: (String?) -> Unit,
     accent: Color,
-    available: Set<String>
+    available: Set<String>,
+    // v3xx — lets the rail share a row with the corner Add pill (weight).
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
             .horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -1903,57 +1755,33 @@ private fun V2FilterRail(
     }
 }
 
-/** The JSX "Add something new" action — dashed hairline + rose circle. */
+/** The app-wide labeled Add pill — "+ Add" (46dp), anchored TOP-RIGHT of
+ *  the Everything wall beside the filter chips (the JSX fab as a pill; the
+ *  old full-width bottom button is gone). */
 @Composable
-private fun V2AddSomethingButton(onClick: () -> Unit) {
+private fun V2AddPillCompact(onClick: () -> Unit) {
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(22.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
-        border = androidx.compose.foundation.BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
-        ),
-        modifier = Modifier.fillMaxWidth()
+        shape = RoundedCornerShape(50),
+        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.13f),
+        modifier = Modifier.height(46.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(13.dp),
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.padding(horizontal = 16.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(46.dp)
-                    .clip(RoundedCornerShape(50))
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)),
-                contentAlignment = Alignment.Center
-            ) {
-                CurioIcon(
-                    name = CurioIcons.Add,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    size = 24.dp
-                )
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Add something new",
-                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = "Save a book, note, image or anything…",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
             CurioIcon(
-                name = CurioIcons.AutoAwesome,
+                name = CurioIcons.Add,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.55f),
-                size = 22.dp
+                tint = MaterialTheme.colorScheme.primary,
+                size = 20.dp
+            )
+            Text(
+                text = "Add",
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
+                color = MaterialTheme.colorScheme.primary,
+                maxLines = 1
             )
         }
     }
@@ -1969,79 +1797,7 @@ private fun v2TimeAgo(daysAgo: Int): String = when {
     else -> "${daysAgo / 30}mo ago"
 }
 
-/** v3xx — one cell of the Everything Recent rail: either a saved capture
- *  or a recently LIKED book/album/series (carrying its liked-at stamp). */
-private sealed interface V2RecentCell {
-    val key: String
-    val ts: Long
-
-    data class Entry(val entry: CurioEntry) : V2RecentCell {
-        override val key get() = "re|${entry.id}"
-        override val ts get() = entry.capturedAtMillis
-    }
-
-    data class Liked(val item: V2Liked, val likedAt: Long) : V2RecentCell {
-        override val key get() = "rl|${item.kind.name}|${item.name}"
-        override val ts get() = likedAt
-    }
-}
-
-/** A compact liked-media cell for the Recent rail — uniform plate so the
- *  rail reads level, contain-fit jacket art inside (real cached covers). */
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun V2RecentMediaCell(item: V2Liked, onClick: () -> Unit) {
-    val cat = item.topic?.categoryId?.let { CurioCategories.byId(it) }
-    val accent = cat?.themedAccent() ?: MaterialTheme.colorScheme.primary
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.width(100.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(width = 86.dp, height = 122.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(
-                    Brush.verticalGradient(
-                        listOf(
-                            androidx.compose.ui.graphics.lerp(accent, Color.White, if (isCurioDarkTheme()) 0.14f else 0.5f),
-                            androidx.compose.ui.graphics.lerp(accent, Color.Black, 0.40f)
-                        )
-                    )
-                )
-                .combinedClickable(onClick = onClick)
-        ) {
-            V2JacketArt(
-                item = item,
-                accent = accent,
-                modifier = Modifier.fillMaxSize().padding(3.dp)
-            )
-        }
-        Spacer(Modifier.height(6.dp))
-        Text(
-            text = item.name,
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Text(
-            text = when (item.kind) {
-                V2Kind.BOOK -> "Book"
-                V2Kind.ALBUM -> "Album"
-                V2Kind.SERIES -> "Series"
-            },
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-/** v3xx — a LIKED media tile in the Everything 3-column grid. Every kind
+/** v3xx — a LIKED media tile in the Everything masonry. Every kind
  *  renders in its OWN shape so nothing shares a look-alike cover box:
  *  BOOKS wear a portrait jacket (spine + sheen), ALBUMS a square cover
  *  with a vinyl disc peeking behind, SERIES a poster plate. */
@@ -2111,6 +1867,7 @@ private fun V2MediaTileCard(
                 }
                 V2JacketArt(item = item, accent = accent, modifier = Modifier.fillMaxSize())
                 if (onMore != null) {
+                    // v3xx — the app-wide kebab (over art, kept subtler).
                     Surface(
                         onClick = onMore,
                         shape = RoundedCornerShape(50),
@@ -2118,14 +1875,14 @@ private fun V2MediaTileCard(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .padding(3.dp)
-                            .size(27.dp)
+                            .size(30.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                             CurioIcon(
                                 name = CurioIcons.MoreVert,
                                 contentDescription = "Cover source",
                                 tint = Color.White,
-                                size = 16.dp
+                                size = 17.dp
                             )
                         }
                     }
@@ -2200,7 +1957,8 @@ private fun V2ReviewTileCard(
     entry: CurioEntry,
     onClick: () -> Unit,
     onLongClick: (() -> Unit)? = null,
-    selected: Boolean = false
+    selected: Boolean = false,
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val cat = CurioCategories.byId(entry.topic.categoryId)
@@ -2216,7 +1974,7 @@ private fun V2ReviewTileCard(
     } else fallbackAccent
     val data = entry.captureData as? CaptureData.ReelNotes
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         shape = RoundedCornerShape(18.dp),
         // v3xx — no more outline: the extracted cover color tints the card
@@ -2464,12 +2222,32 @@ private fun LazyGridScope.v2VirtualShelfItems(
                         maxLines = 1
                     )
                 }
-                V2ToolbarPill(
-                    glyph = CurioIcons.Add,
-                    contentDescription = "Add to favorites",
-                    emphasized = true,
-                    onClick = onAdd
-                )
+                // v3xx — the app-wide labeled Add pill ("+ Add").
+                Surface(
+                    onClick = onAdd,
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.13f),
+                    modifier = Modifier.height(46.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.padding(horizontal = 20.dp)
+                    ) {
+                        CurioIcon(
+                            name = CurioIcons.Add,
+                            contentDescription = "Add to favorites",
+                            tint = MaterialTheme.colorScheme.primary,
+                            size = 22.dp
+                        )
+                        Text(
+                            text = "Add",
+                            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1
+                        )
+                    }
+                }
             }
         } else {
             V2PageSectionHeader(
@@ -2481,26 +2259,21 @@ private fun LazyGridScope.v2VirtualShelfItems(
     }
     if (total == 0) {
         item(key = "v-empty", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)
-            ) {
-                CurioEmptyState(
-                    glyph = CurioIcons.Inventory2,
-                    headline = when {
-                        likes.isEmpty() && entries.isEmpty() -> "Nothing here yet"
-                        else -> "Nothing matches"
-                    },
-                    subtext = when {
-                        likes.isEmpty() && entries.isEmpty() && title == "Favorites" ->
-                            "Like a book, series or album from its page and it lands here."
-                        likes.isEmpty() && entries.isEmpty() && title == "Notes" ->
-                            "Save a voice note, journal or field note and it lands here."
-                        else -> "Try a different search."
-                    },
-                    tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f)
-                )
-            }
+            CurioDoodleEmptyState(
+                headline = when {
+                    likes.isEmpty() && entries.isEmpty() -> "Nothing here yet"
+                    else -> "Nothing matches"
+                },
+                subtext = when {
+                    likes.isEmpty() && entries.isEmpty() && title == "Favorites" ->
+                        "Like a book, series or album from its page and it lands here."
+                    likes.isEmpty() && entries.isEmpty() && title == "Notes" ->
+                        "Save a voice note, journal or field note and it lands here."
+                    likes.isEmpty() && entries.isEmpty() && title == "Saved entries" ->
+                        "Save a capture and it lands here."
+                    else -> "Try a different search."
+                }
+            )
         }
         return
     }
@@ -2552,21 +2325,53 @@ private fun V2DetailHeader(
                 maxLines = 1
             )
         }
-        V2ToolbarPill(
-            glyph = CurioIcons.Add,
-            contentDescription = "Add saved captures",
-            emphasized = true,
-            onClick = onAdd
-        )
+        // v3xx — the Add action is a LARGER labeled pill ("+ Add") — the
+        // style that will expand app-wide; the ⋮ sits in a slightly bigger
+        // circular button next to it (still an ANCHORED dropdown below).
+        Surface(
+            onClick = onAdd,
+            shape = RoundedCornerShape(50),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.13f),
+            modifier = Modifier.height(46.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.padding(horizontal = 20.dp)
+            ) {
+                CurioIcon(
+                    name = CurioIcons.Add,
+                    contentDescription = "Add saved captures",
+                    tint = MaterialTheme.colorScheme.primary,
+                    size = 22.dp
+                )
+                Text(
+                    text = "Add",
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1
+                )
+            }
+        }
         Spacer(Modifier.width(8.dp))
         // v3xx — the collection ⋮ is an ANCHORED dropdown (Rename / Add
         // captures / Delete) right under the dots — no center-screen overlay.
         Box {
-            V2ToolbarPill(
-                glyph = CurioIcons.MoreVert,
-                contentDescription = "Rename, add or delete collection",
-                onClick = { moreOpen = true }
-            )
+            Surface(
+                onClick = { moreOpen = true },
+                shape = RoundedCornerShape(50),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.75f),
+                modifier = Modifier.size(40.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    CurioIcon(
+                        name = CurioIcons.MoreVert,
+                        contentDescription = "Rename, add or delete collection",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        size = 20.dp
+                    )
+                }
+            }
             DropdownMenu(
                 expanded = moreOpen,
                 onDismissRequest = { moreOpen = false }
@@ -3672,7 +3477,13 @@ private fun V2Kind.categoryId(): CategoryId = when (this) {
  *  global [TopicCatalog.findByName] walks lanes in enum order and would hand
  *  "Animal Farm" (the book) to "Animal Farm (1954)" (the animated film)
  *  because ANIMATED_MOVIES precedes BOOKS. The global search stays as the
- *  fallback for legacy / renamed names. */
+ *  fallback for legacy / renamed names — but it is CANONICAL-LANE
+ *  GUARDED: a liked book must NEVER resolve to a series, film, album or
+ *  author that merely shares its name (the "wrong entry opens" bug — the
+ *  saved book opening the wrong lane's reveal). Only a global hit that
+ *  lives on the SAME canonical lane is accepted; anything else falls
+ *  through to the canonical-lane open, which resolves by name within the
+ *  right lane at reveal time. */
 private fun findLikedTopic(kind: V2Kind, name: String): CurioTopic? {
     val lane = when (kind) {
         V2Kind.BOOK -> CategoryId.BOOKS
@@ -3682,7 +3493,7 @@ private fun findLikedTopic(kind: V2Kind, name: String): CurioTopic? {
     TopicJsonLoader.cached(lane)?.firstOrNull {
         it.matchesSavedNameStrict(name) || it.matchesSavedName(name)
     }?.let { return it }
-    return TopicCatalog.findByName(name)
+    return TopicCatalog.findByName(name)?.takeIf { it.categoryId == lane }
 }
 
 /** Best-fitting jacket shape for a suggested topic's lane. */
@@ -3766,52 +3577,7 @@ private fun V2EmptySuggestions(
     }
 }
 
-/** A compact toolbar pill (add / kebab / selection actions). */
-@Composable
-private fun V2ToolbarPill(
-    label: String? = null,
-    glyph: String? = null,
-    contentDescription: String? = null,
-    emphasized: Boolean = false,
-    destructive: Boolean = false,
-    onClick: () -> Unit
-) {
-    val ink = if (destructive) MaterialTheme.colorScheme.error
-    else if (emphasized) MaterialTheme.colorScheme.primary
-    else MaterialTheme.colorScheme.onSurfaceVariant
-    val fill = if (destructive) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.55f)
-    else if (emphasized) MaterialTheme.colorScheme.primary.copy(alpha = 0.13f)
-    else MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.75f)
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(50),
-        color = fill,
-        modifier = Modifier.height(34.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            modifier = Modifier.padding(horizontal = if (label != null) 13.dp else 9.dp)
-        ) {
-            if (glyph != null) {
-                CurioIcon(
-                    name = glyph,
-                    contentDescription = contentDescription,
-                    tint = ink,
-                    size = 17.dp
-                )
-            }
-            if (label != null) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
-                    color = ink,
-                    maxLines = 1
-                )
-            }
-        }
-    }
-}
+
 
 /** The full-width liked row: contain-fit jacket art + name / byline +
  *  category + chevron. Tap opens the reveal page (where the heart lives);
@@ -3911,18 +3677,20 @@ private fun V2LikedRow(
             }
             Spacer(Modifier.width(8.dp))
             if (onMore != null) {
+                // v3xx — the app-wide kebab: a slightly bigger 40dp circle.
                 Box(
                     modifier = Modifier
-                        .size(32.dp)
-                        .clip(RoundedCornerShape(11.dp))
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.75f))
                         .clickable(onClick = onMore),
                     contentAlignment = Alignment.Center
                 ) {
                     CurioIcon(
                         name = CurioIcons.MoreVert,
                         contentDescription = "Curiying now / Want to read / cover source",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                        size = 19.dp
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                        size = 20.dp
                     )
                 }
             } else {
@@ -3944,7 +3712,15 @@ private fun V2LikedRow(
  *  authored imageUrl, then the keyless resolver when the matching fetch
  *  consent toggle is on. */
 @Composable
-private fun V2JacketArt(item: V2Liked, accent: Color, modifier: Modifier = Modifier) {
+private fun V2JacketArt(
+    item: V2Liked,
+    accent: Color,
+    modifier: Modifier = Modifier,
+    // v3xx — how the art fits its tile: Fit preserves the cover (letterboxed
+    // when the tile isn't its aspect), Crop fills every corner of the tile
+    // (the Everything masonry wall, so no space shows below a cover).
+    contentScale: ContentScale = ContentScale.Fit
+) {
     val context = LocalContext.current
     val topic = item.topic
     // v3xx — the COVER CACHE's local file first: when the bytes are already
@@ -4069,7 +3845,7 @@ private fun V2JacketArt(item: V2Liked, accent: Color, modifier: Modifier = Modif
                         .crossfade(true)
                         .build(),
                     contentDescription = "Cover art for ${item.name}",
-                    contentScale = ContentScale.Fit,
+                    contentScale = contentScale,
                     onError = {
                         // A stale local file — drop it and fall back to the
                         // URL cascade.
@@ -4085,7 +3861,7 @@ private fun V2JacketArt(item: V2Liked, accent: Color, modifier: Modifier = Modif
                         .crossfade(true)
                         .build(),
                     contentDescription = "Cover art for ${item.name}",
-                    contentScale = ContentScale.Fit,
+                    contentScale = contentScale,
                     onError = {
                         if (coverIndex < candidates.size) coverIndex++
                         else { resolved = null; liveDone = true }
@@ -4093,25 +3869,10 @@ private fun V2JacketArt(item: V2Liked, accent: Color, modifier: Modifier = Modif
                     modifier = Modifier.fillMaxSize()
                 )
             }
-            if (item.kind == V2Kind.BOOK && (url != null || local != null)) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(5.dp)
-                        .background(Color.Black.copy(alpha = 0.20f))
-                )
-                Box(
-                    modifier = Modifier.fillMaxSize().background(
-                        Brush.linearGradient(
-                            listOf(
-                                Color.White.copy(alpha = 0.20f),
-                                Color.White.copy(alpha = 0.02f),
-                                Color.White.copy(alpha = 0f)
-                            )
-                        )
-                    )
-                )
-            }
+            // v3xx — PURE cover art: no fake spine strip, no gradient wash
+            // (the "overlay or background" on book covers). The art renders
+            // edge-to-edge with a whisper of rounded corners and nothing
+            // else on top.
         }
     }
 }

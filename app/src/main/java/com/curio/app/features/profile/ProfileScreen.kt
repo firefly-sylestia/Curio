@@ -180,7 +180,12 @@ private val ProfileHeroSheetExtent = 24.dp
  * the stats row — the bar grows to fit its content).
  */
 private val ProfileHeroTotalHeight: Dp
-    get() = if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) 230.dp
+    // v3xx22 — 264dp: the full glass bar's resting footprint grew with the
+    // restored Edit + streak action row (status bar + title row + action
+    // pills + stats card); the scroll content reserves this so the pinned
+    // bar never covers the first card (the old 230dp + 54dp compact spacer
+    // left the header looking cut off from the top).
+    get() = if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) 264.dp
     else ProfileHeroHeight + ProfileHeroSheetExtent
 /** Fixed tear seed — Profile tears in the SAME bold pattern as Home's quest
  *  hero (same seed + personality), so both banners read as one family. */
@@ -524,7 +529,7 @@ fun ProfileScreen(navController: NavController) {
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
-                .padding(top = (if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) ProfileCompactHeaderHeight else ProfileHeroTotalHeight) + 8.dp, bottom = 16.dp)
+                .padding(top = ProfileHeroTotalHeight + 8.dp, bottom = 16.dp)
         )
 
         // ── Pinned Back + Settings pills — Home's scroll-reactive sticky
@@ -628,6 +633,73 @@ fun ProfileScreen(navController: NavController) {
                     // dialog now (no separate tagline dialog).
                     taglineInput = AppPreferences.getCustomStreakTagline(context)
                     showNameDialog = true
+                },
+                // v3xx22 — the restored Edit + streak action row in the FULL
+                // bar (the torn hero's action pills, brought back into the
+                // glass header); the compact row keeps its own pills too.
+                fullActions = { aInk ->
+                    val actionPillBg = if (isCurioDarkTheme()) {
+                        lerp(MaterialTheme.colorScheme.surfaceContainerHigh, Color.Black, 0.15f)
+                    } else {
+                        lerp(MaterialTheme.colorScheme.surfaceContainerHigh, curioPillTintLift(), 0.38f)
+                    }
+                    // Edit profile — opens the same edit dialog as the torn hero.
+                    Surface(
+                        onClick = {
+                            nameInput = displayName
+                            taglineInput = AppPreferences.getCustomStreakTagline(context)
+                            showNameDialog = true
+                        },
+                        shape = RoundedCornerShape(50),
+                        color = actionPillBg,
+                        contentColor = aInk,
+                        shadowElevation = 3.dp
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            CurioIcon(
+                                name = CurioIcons.Edit,
+                                contentDescription = null,
+                                size = 15.dp,
+                                tint = aInk
+                            )
+                            Text(
+                                "Edit profile",
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                color = aInk
+                            )
+                        }
+                    }
+                    if (displayStreak > 0) {
+                        Surface(
+                            onClick = { navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true } },
+                            shape = RoundedCornerShape(50),
+                            color = actionPillBg,
+                            contentColor = aInk,
+                            shadowElevation = 3.dp
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                CurioIcon(
+                                    name = CurioIcons.LocalFire,
+                                    contentDescription = "Streak",
+                                    size = 15.dp,
+                                    tint = aInk
+                                )
+                                Text(
+                                    "$displayStreak-day streak",
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                                    color = aInk
+                                )
+                            }
+                        }
+                    }
                 },
                 content = { toolbarInk ->
                     Row(
@@ -1072,7 +1144,10 @@ private fun ProfileHero(
     // (rendered as a sibling overlay in [ProfileScreen]); this hero item
     // only clears the collapsed identity bar so the list flows beneath it.
     if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
-        Spacer(Modifier.height(ProfileCompactHeaderHeight))
+        // v3xx22 — reserve the FULL bar footprint (not just the collapsed
+        // 54dp) so the pinned morph header never covers the first content
+        // card at rest — the bar collapses over the spacer as you scroll.
+        Spacer(Modifier.height(ProfileHeroTotalHeight))
         return
     }
     Box(

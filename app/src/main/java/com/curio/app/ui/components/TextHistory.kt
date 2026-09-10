@@ -1,6 +1,7 @@
 package com.curio.app.ui.components
 
 import android.content.Context
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,11 +14,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +32,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -37,11 +45,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -49,6 +62,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -307,11 +321,21 @@ fun TextHistoryBrowser(
     var previewId by remember { mutableStateOf<Long?>(null) }
     var toast by remember { mutableStateOf<String?>(null) }
     var armedClear by remember { mutableStateOf(false) }
-    var treeMode by remember { mutableStateOf(false) }
+    // v3xx — TREE is the default view: the grouped, diff-first browser is
+    // what the user wants to land in (List stays one tap away).
+    var treeMode by remember { mutableStateOf(true) }
+    // JSX concept features: search, filters, compare, collapsible groups.
+    var query by remember { mutableStateOf("") }
+    var filter by remember { mutableStateOf(FILTER_ALL) }
+    var compareA by remember { mutableStateOf<TextHistoryEntry?>(null) }
+    var comparePair by remember { mutableStateOf<Pair<TextHistoryEntry, TextHistoryEntry>?>(null) }
+    var collapsedFields by remember { mutableStateOf(setOf<String>()) }
     // A restore into a non-empty field first asks HOW the snapshot should
     // come back (replace / add above / add below) via the settings-style
     // chooser below.
     var pendingRestore by remember { mutableStateOf<TextHistoryEntry?>(null) }
+    // Deleting a snapshot always asks first (v3xx — no silent deletes).
+    var pendingDelete by remember { mutableStateOf<TextHistoryEntry?>(null) }
     val clipboard = LocalClipboardManager.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     // Frosted surfaces (the Settings sub-page language) for rows + cards.
@@ -340,6 +364,21 @@ fun TextHistoryBrowser(
         }
     }
 
+    // JSX compare flow: first tap arms the banner, second tap opens the
+    // word-level diff dialog (tapping the SAME snapshot cancels).
+    fun comparePick(e: TextHistoryEntry) {
+        val a = compareA
+        if (a == null) {
+            compareA = e
+            toast = "Pick another snapshot to compare"
+        } else if (a.id == e.id) {
+            compareA = null
+        } else {
+            comparePair = a to e
+            compareA = null
+        }
+    }
+
     val pending = pendingRestore
     if (pending != null) {
         RestoreModeDialog(
@@ -353,7 +392,62 @@ fun TextHistoryBrowser(
         )
     }
 
+    // Delete confirmation — a snapshot never vanishes silently.
+    val deleteTarget = pendingDelete
+    if (deleteTarget != null) {
+        AlertDialog(
+            onDismissRequest = { pendingDelete = null },
+            title = { Text("Delete this snapshot?") },
+            text = {
+                Text(
+                    "\u201C${previewLine(deleteTarget.text, 64)}\u201D\n\n" +
+                        "This removes it from Text history for good — the field itself is untouched."
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        TextHistoryStore.delete(ctx, deleteTarget.id)
+                        pendingDelete = null
+                        reload()
+                    }
+                ) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingDelete = null }) { Text("Cancel") }
+            }
+        )
+    }
+
     val fullEntry = entries.firstOrNull { it.id == previewId }
+
+    // ── Search + filter (the JSX filter-row + search box) — applied to
+    //    BOTH views; the tree is rebuilt from the filtered set. ──
+    val isFiltering = query.isNotBlank() || filter != FILTER_ALL
+    // First (chronological) snapshot id per field — the Initial / Edits split.
+    val initialIds = remember(entries) {
+        entries.groupBy { it.field }.mapValues { (_, es) -> es.minByOrNull { it.ts }?.id }
+    }
+    // Latest snapshot id per field — the CURRENT pill (the JSX current-pill).
+    val latestIds = remember(entries) {
+        entries.groupBy { it.field }.mapValues { (_, es) -> es.maxByOrNull { it.ts }?.id }
+    }
+    val filteredEntries = remember(entries, query, filter) {
+        val q = query.trim().lowercase()
+        entries.filter { e ->
+            val matchesQuery =
+                q.isEmpty() || e.text.lowercase().contains(q) || e.field.lowercase().contains(q)
+            val matchesFilter = when (filter) {
+                FILTER_PINNED -> e.pinned
+                FILTER_INITIAL -> initialIds[e.field] == e.id
+                FILTER_EDITS -> initialIds[e.field] != e.id
+                else -> true
+            }
+            matchesQuery && matchesFilter
+        }
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -374,19 +468,23 @@ fun TextHistoryBrowser(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        if (entries.isEmpty()) "No snapshots yet — edits you type or paste are kept here"
-                        else "${entries.size} snapshot${if (entries.size == 1) "" else "s"} · restoring into “$activeField”",
+                        when {
+                            entries.isEmpty() -> "No snapshots yet — edits you type or paste are kept here"
+                            isFiltering -> "${filteredEntries.size} of ${entries.size} snapshot${if (entries.size == 1) "" else "s"} · restoring into “$activeField”"
+                            else -> "${entries.size} snapshot${if (entries.size == 1) "" else "s"} · restoring into “$activeField”"
+                        },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 if (entries.size > 1) {
-                    // List / Tree segmented toggle.
+                    // List / Tree segmented toggle — the frosted settings
+                    // pill language (warm-rose active chip).
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .clip(RoundedCornerShape(50))
-                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                            .background(if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f) else Color.White.copy(alpha = 0.68f))
                             .padding(3.dp)
                     ) {
                         HistoryModeChip("List", !treeMode, { treeMode = false })
@@ -395,12 +493,18 @@ fun TextHistoryBrowser(
                     Spacer(Modifier.size(6.dp))
                 }
                 if (entries.isNotEmpty()) {
+                    // Clear — frosted pill; error-tinted once armed.
                     Text(
                         if (armedClear) "Tap again" else "Clear",
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                        color = if (armedClear) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (armedClear) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
                             .clip(RoundedCornerShape(50))
+                            .background(
+                                if (armedClear) MaterialTheme.colorScheme.error
+                                else if (dark) Color.White.copy(alpha = 0.09f)
+                                else Color.White.copy(alpha = 0.68f)
+                            )
                             .clickable {
                                 if (armedClear) {
                                     TextHistoryStore.clearAll(ctx)
@@ -409,7 +513,7 @@ fun TextHistoryBrowser(
                                     armedClear = true
                                 }
                             }
-                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                            .padding(horizontal = 12.dp, vertical = 7.dp)
                     )
                 }
                 Spacer(Modifier.size(2.dp))
@@ -432,6 +536,63 @@ fun TextHistoryBrowser(
                     modifier = Modifier.padding(horizontal = 20.dp)
                 )
             }
+            // ── Search + filters (the JSX topbar search + filter-row) ──
+            if (entries.isNotEmpty()) {
+                HistorySearchBox(
+                    query = query,
+                    onQueryChange = { query = it },
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 8.dp)
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    HISTORY_FILTERS.forEach { f ->
+                        HistoryModeChip(f, filter == f, { filter = f })
+                    }
+                }
+            }
+            // Compare banner — one snapshot armed, waiting for the second.
+            val armed = compareA
+            if (armed != null) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(9.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 6.dp)
+                        .clip(RoundedCornerShape(15.dp))
+                        .background(
+                            if (dark) Color(0xFF815947).copy(alpha = 0.30f) else Color(0xFFF5DFE3)
+                        )
+                        .padding(horizontal = 12.dp, vertical = 9.dp)
+                ) {
+                    CurioIcon(
+                        name = CurioIcons.Layers,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        size = 16.dp
+                    )
+                    Text(
+                        "Comparing ${formatHistoryTime(armed.ts)} — tap another snapshot's compare",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        "Cancel",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            textDecoration = TextDecoration.Underline
+                        ),
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.clickable { compareA = null }
+                    )
+                }
+            }
             // ── Entry list ─────────────────────────
             if (entries.isEmpty()) {
                 Box(
@@ -445,24 +606,69 @@ fun TextHistoryBrowser(
                         textAlign = TextAlign.Center
                     )
                 }
+            } else if (filteredEntries.isEmpty()) {
+                // Search / filter found nothing — a clear way back out.
+                Column(
+                    modifier = Modifier.fillMaxWidth().weight(1f).padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    CurioIcon(
+                        name = CurioIcons.SearchOff,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        size = 34.dp
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        "No snapshots match",
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        if (query.isNotBlank()) "Try a different search or filter."
+                        else "Try another filter.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        "Clear filters",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.ExtraBold),
+                        color = if (dark) Color(0xFFFFF9F1) else Color(0xFF52383C),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(if (dark) Color(0xFF815947) else Color(0xFFF2E8DC))
+                            .clickable { query = ""; filter = FILTER_ALL }
+                            .padding(horizontal = 14.dp, vertical = 7.dp)
+                    )
+                }
             } else if (treeMode) {
-                val fields = buildHistoryTree(entries)
+                val fields = buildHistoryTree(filteredEntries)
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth().weight(1f),
                     contentPadding = PaddingValues(start = 12.dp, top = 4.dp, end = 12.dp, bottom = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(fields, key = { it.field }) { fieldTree ->
-                        HistoryFieldCard(
-                            tree = fieldTree,
-                            activeField = activeField,
-                            onPreview = { previewId = it },
-                            onPin = { e -> TextHistoryStore.setPinned(ctx, e.id, !e.pinned); reload() },
-                            onCopy = { e -> clipboard.setText(AnnotatedString(e.text)); toast = "Copied" },
-                            onRestore = { restoreEntry(it) },
-                            onDelete = { e -> TextHistoryStore.delete(ctx, e.id); reload() }
-                        )
-                    }
+                items(fields, key = { it.field }) { fieldTree ->
+                    val isCollapsed = fieldTree.field in collapsedFields
+                    HistoryFieldCard(
+                        tree = fieldTree,
+                        collapsed = isCollapsed,
+                        onToggle = {
+                            collapsedFields = if (isCollapsed) collapsedFields - fieldTree.field
+                            else collapsedFields + fieldTree.field
+                        },
+                        activeField = activeField,
+                        onPin = { e -> TextHistoryStore.setPinned(ctx, e.id, !e.pinned); reload() },
+                        onCopy = { e -> clipboard.setText(AnnotatedString(e.text)); toast = "Copied" },
+                        onRestore = { restoreEntry(it) },
+                        onDelete = { e -> pendingDelete = e },
+                        onCompare = { comparePick(it) },
+                        isCurrent = { e -> latestIds[e.field] == e.id }
+                    )
+                }
                 }
             } else {
                 LazyColumn(
@@ -470,34 +676,85 @@ fun TextHistoryBrowser(
                     contentPadding = PaddingValues(start = 12.dp, top = 4.dp, end = 12.dp, bottom = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    items(entries, key = { it.id }) { e ->
+                    items(filteredEntries, key = { it.id }) { e ->
                         val isActive = e.field == activeField
+                        val prevSameField = entries
+                            .filter { it.field == e.field && it.ts < e.ts }
+                            .maxByOrNull { it.ts }
+                        val delta = wordDeltaBadge(prevSameField, e)
                         Surface(
-                            shape = RoundedCornerShape(16.dp),
-                            color = if (isActive) MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.55f)
+                            shape = RoundedCornerShape(18.dp),
+                            // v3xx — the active row used the theme's
+                            // ButterYellow secondaryContainer, which read as a
+                            // bad yellow highlight; the settings family's warm
+                            // rose tint marks the active field instead.
+                            color = if (isActive)
+                                if (dark) Color(0xFF815947).copy(alpha = 0.30f)
+                                else Color(0xFF815947).copy(alpha = 0.13f)
                             else if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
                             else Color.White.copy(alpha = 0.68f),
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(
-                                Modifier.padding(start = 12.dp, top = 8.dp, bottom = 8.dp, end = 4.dp),
+                                Modifier.padding(start = 12.dp, top = 10.dp, bottom = 10.dp, end = 4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
+                                // ── Frosted icon tile — the field reads first. ──
+                                Box(
+                                    modifier = Modifier
+                                        .size(38.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(if (dark) Color.White.copy(alpha = 0.09f) else Color(0xFFF2E8DC)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CurioIcon(
+                                        name = CurioIcons.Edit,
+                                        contentDescription = null,
+                                        tint = if (dark) Color(0xFFD7B8A9) else Color(0xFF755647),
+                                        size = 18.dp
+                                    )
+                                }
+                                Spacer(Modifier.size(11.dp))
                                 Column(
-                                    Modifier.weight(1f).clip(RoundedCornerShape(10.dp)).clickable { previewId = e.id }.padding(vertical = 2.dp),
+                                    Modifier.weight(1f).clip(RoundedCornerShape(10.dp)).clickable { previewId = e.id }.padding(vertical = 1.dp),
                                     verticalArrangement = Arrangement.spacedBy(2.dp)
                                 ) {
+                                    // Field (bold, top) + time — the snapshot
+                                    // meta reads before the text.
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            e.field,
+                                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                            color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier.weight(1f, fill = false)
+                                        )
+                                        Spacer(Modifier.width(6.dp))
+                                        Text(
+                                            formatHistoryTime(e.ts),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        if (delta != null) {
+                                            Spacer(Modifier.width(6.dp))
+                                            Text(
+                                                delta,
+                                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                                color = MaterialTheme.colorScheme.tertiary
+                                            )
+                                        }
+                                        if (latestIds[e.field] == e.id) {
+                                            Spacer(Modifier.width(6.dp))
+                                            HistoryCurrentPill()
+                                        }
+                                    }
                                     Text(
                                         e.text,
-                                        style = MaterialTheme.typography.bodyMedium,
+                                        style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurface,
                                         maxLines = 2,
                                         overflow = TextOverflow.Ellipsis
-                                    )
-                                    Text(
-                                        "${e.field} · ${formatHistoryTime(e.ts)}",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = if (isActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                                 HistoryActionsRow(
@@ -510,7 +767,8 @@ fun TextHistoryBrowser(
                                         toast = "Copied"
                                     },
                                     onRestore = { restoreEntry(e) },
-                                    onDelete = { TextHistoryStore.delete(ctx, e.id); reload() }
+                                    onCompare = { comparePick(e) },
+                                    onDelete = { pendingDelete = e }
                                 )
                             }
                         }
@@ -568,6 +826,42 @@ fun TextHistoryBrowser(
                         )
                     }
                     Spacer(Modifier.height(12.dp))
+                    // Stats + what changed vs the previous snapshot (the JSX
+                    // detail-panel stats / Changes note).
+                    val words = wordCount(fullEntry.text)
+                    val chars = fullEntry.text.length
+                    val prevOf = entries
+                        .filter { it.field == fullEntry.field && it.ts < fullEntry.ts }
+                        .maxByOrNull { it.ts }
+                    val changedPair = if (prevOf != null) {
+                        val d = diffTokens(prevOf.text, fullEntry.text)
+                        d.first.count { it.changed } to d.second.count { it.changed }
+                    } else 0 to 0
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            "$words words · $chars characters",
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.weight(1f))
+                        if (prevOf != null) {
+                            Text(
+                                if (changedPair.second > 0 || changedPair.first > 0)
+                                    "+${changedPair.second} · −${changedPair.first} words"
+                                else "No word-level change",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                color = MaterialTheme.colorScheme.tertiary
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        if (prevOf == null) "Original version — the first snapshot of this field."
+                        else "Changed from the version saved ${formatHistoryTime(prevOf.ts)}.",
+                        style = MaterialTheme.typography.labelSmall.copy(fontStyle = FontStyle.Italic),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(10.dp))
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                         TextButton(onClick = {
                             clipboard.setText(AnnotatedString(fullEntry.text))
@@ -575,6 +869,24 @@ fun TextHistoryBrowser(
                             previewId = null
                         }) {
                             Text("Copy", fontWeight = FontWeight.Bold)
+                        }
+                        if (entries.size > 1) {
+                            Spacer(Modifier.size(8.dp))
+                            TextButton(onClick = {
+                                val e = fullEntry
+                                previewId = null
+                                comparePick(e)
+                            }) {
+                                Text("Compare", fontWeight = FontWeight.Bold)
+                            }
+                        }
+                        Spacer(Modifier.size(8.dp))
+                        TextButton(onClick = {
+                            val e = fullEntry
+                            previewId = null
+                            restoreEntry(e)
+                        }) {
+                            Text("Restore", fontWeight = FontWeight.Bold)
                         }
                         Spacer(Modifier.size(8.dp))
                         TextButton(onClick = { previewId = null }) {
@@ -584,6 +896,17 @@ fun TextHistoryBrowser(
                 }
             }
         }
+    }
+
+    // Word-level compare dialog — the JSX compare panel with removed/added
+    // highlights.
+    val pair = comparePair
+    if (pair != null) {
+        CompareVersionsDialog(
+            a = pair.first,
+            b = pair.second,
+            onDismiss = { comparePair = null }
+        )
     }
 }
 
@@ -626,6 +949,106 @@ private fun HistoryRowAction(
 // icon tiles, hairline dividers.
 
 private const val SESSION_GAP_MS = 20 * 60 * 1000L
+
+// ── Filters (the JSX filter-row, adapted to the linear snapshot model) ──
+private const val FILTER_ALL = "All"
+private const val FILTER_EDITS = "Edits"
+private const val FILTER_INITIAL = "Initial"
+private const val FILTER_PINNED = "Pinned"
+private val HISTORY_FILTERS = listOf(FILTER_ALL, FILTER_EDITS, FILTER_INITIAL, FILTER_PINNED)
+
+// ── Word-level diff (the JSX compare panel) ────────────────────────────
+/** One word of a compared snapshot; [changed] marks words that differ
+ *  between the two versions (removed on the older side, added on the
+ *  newer). */
+private data class DiffToken(val word: String, val changed: Boolean)
+
+/** Splits [a] and [b] into tokens and runs a classic LCS (longest common
+ *  subsequence) over the words, so "changed" is the TRUE word-level edit:
+ *  unchanged words are shared, everything else is marked on one side only. */
+private fun diffTokens(a: String, b: String): Pair<List<DiffToken>, List<DiffToken>> {
+    val ta = a.split(Regex("\\s+")).filter { it.isNotEmpty() }
+    val tb = b.split(Regex("\\s+")).filter { it.isNotEmpty() }
+    val n = ta.size
+    val m = tb.size
+    val dp = Array(n + 1) { IntArray(m + 1) }
+    for (i in n - 1 downTo 0) {
+        for (j in m - 1 downTo 0) {
+            dp[i][j] = if (ta[i] == tb[j]) dp[i + 1][j + 1] + 1
+            else maxOf(dp[i + 1][j], dp[i][j + 1])
+        }
+    }
+    val aOut = mutableListOf<DiffToken>()
+    val bOut = mutableListOf<DiffToken>()
+    var i = 0
+    var j = 0
+    while (i < n && j < m) {
+        if (ta[i] == tb[j]) {
+            aOut.add(DiffToken(ta[i], false))
+            bOut.add(DiffToken(tb[j], false))
+            i++
+            j++
+        } else if (dp[i + 1][j] >= dp[i][j + 1]) {
+            aOut.add(DiffToken(ta[i], true))
+            i++
+        } else {
+            bOut.add(DiffToken(tb[j], true))
+            j++
+        }
+    }
+    while (i < n) { aOut.add(DiffToken(ta[i], true)); i++ }
+    while (j < m) { bOut.add(DiffToken(tb[j], true)); j++ }
+    return aOut to bOut
+}
+
+/** Word-delta badge of [curr] vs its [prev] snapshot — "+3 words",
+ *  "−2 words" or "Original" for the first version (the JSX delta). */
+private fun wordDeltaBadge(prev: TextHistoryEntry?, curr: TextHistoryEntry): String? {
+    if (prev == null) return "Original"
+    val a = prev.text.trim().split(Regex("\\s+")).count { it.isNotEmpty() }
+    val b = curr.text.trim().split(Regex("\\s+")).count { it.isNotEmpty() }
+    val d = b - a
+    return when {
+        d > 0 -> "+$d words"
+        d < 0 -> "−${-d} words"
+        else -> null
+    }
+}
+
+/** The highlighted snapshot text — changed words wear a soft container
+ *  background (error-tint on the removed side, warm-tint on the added),
+ *  removed words also get a strike-through. Built from the most basic
+ *  AnnotatedString API (constructor + Range — the Builder's withStyle
+ *  helpers don't resolve in this compose version), so the whole version
+ *  renders as a single flowing paragraph. */
+private fun buildDiffString(tokens: List<DiffToken>, removed: Boolean, scheme: ColorScheme): AnnotatedString {
+    val bg = if (removed) scheme.errorContainer else scheme.tertiaryContainer
+    val fg = if (removed) scheme.onErrorContainer else scheme.onTertiaryContainer
+    val style = SpanStyle(
+        background = bg,
+        color = fg,
+        textDecoration = if (removed) TextDecoration.LineThrough else null
+    )
+    val spans = mutableListOf<AnnotatedString.Range<SpanStyle>>()
+    val text = StringBuilder()
+    tokens.forEach { tok ->
+        if (text.isNotEmpty()) text.append(' ')
+        val start = text.length
+        text.append(tok.word)
+        if (tok.changed) {
+            spans.add(AnnotatedString.Range(style, start, text.length))
+        }
+    }
+    return AnnotatedString(text.toString(), spanStyles = spans)
+}
+
+/** Tree geometry (relative to the frosted card's content): the trunk sits
+ *  at [TreeTrunkInset] from the card's left edge, and every version node
+ *  hangs [TreeNodeDotX] to its right on a short branch stub — the classic
+ *  trunk → branch → leaf read instead of floating dots. */
+private val TreeTrunkInset = 3.dp
+private val TreeNodeDotX = 15.dp
+private val TreeNodeDotY = 10.dp
 
 /** One burst of edits on the same field (snapshots within ~20 minutes). */
 private data class HistorySession(
@@ -678,41 +1101,48 @@ private fun diffSummary(prev: TextHistoryEntry?, curr: TextHistoryEntry): Pair<I
     return added to removed
 }
 
-/** One pill of the List / Tree segmented toggle in the browser header. */
+/** One pill of the List / Tree segmented toggle in the browser header — the
+ *  frosted settings chip: warm-rose fill when selected, transparent glass
+ *  otherwise. */
 @Composable
 private fun HistoryModeChip(label: String, selected: Boolean, onClick: () -> Unit) {
     Text(
         text = label,
         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-        color = if (selected) MaterialTheme.colorScheme.onPrimary
-        else MaterialTheme.colorScheme.onSurfaceVariant,
+        color = if (selected) Color(0xFFFFF9F1) else MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier
             .clip(RoundedCornerShape(50))
-            .background(if (selected) MaterialTheme.colorScheme.primary else Color.Transparent)
+            .background(if (selected) Color(0xFF815947) else Color.Transparent)
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 6.dp)
     )
 }
 
 /** One field's tree card — settings-style heading, then each edit session
- *  as a soft sub-group of version nodes. */
+ *  as a soft sub-group of version nodes. Tapping the heading collapses /
+ *  expands the whole field (the JSX collapsible groups). */
 @Composable
 private fun HistoryFieldCard(
     tree: FieldTree,
+    collapsed: Boolean,
+    onToggle: () -> Unit,
     activeField: String,
-    onPreview: (Long) -> Unit,
     onPin: (TextHistoryEntry) -> Unit,
     onCopy: (TextHistoryEntry) -> Unit,
     onRestore: (TextHistoryEntry) -> Unit,
-    onDelete: (TextHistoryEntry) -> Unit
+    onDelete: (TextHistoryEntry) -> Unit,
+    onCompare: (TextHistoryEntry) -> Unit,
+    isCurrent: (TextHistoryEntry) -> Boolean
 ) {
     val dark = isCurioDarkTheme()
     val versionCount = tree.sessions.sumOf { it.versions.size }
     Column(Modifier.fillMaxWidth()) {
-        // ── Heading: glyph + Playfair label + count + rule (settings) ──
+        // ── Heading: glyph + Playfair label + count + rule + chevron ──
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(start = 4.dp, end = 4.dp, bottom = 8.dp)
+            modifier = Modifier
+                .padding(start = 4.dp, end = 4.dp, bottom = 8.dp)
+                .clickable(onClick = onToggle)
         ) {
             Text(
                 text = "\u2726",
@@ -742,8 +1172,19 @@ private fun HistoryFieldCard(
                     .height(1.dp)
                     .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f))
             )
+            Spacer(Modifier.width(4.dp))
+            CurioIcon(
+                name = if (collapsed) CurioIcons.KeyboardArrowDown else CurioIcons.KeyboardArrowUp,
+                contentDescription = if (collapsed) "Expand group" else "Collapse group",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 18.dp
+            )
         }
-        // ── Frosted card ─────────────────────────────────────────────
+        // ── Frosted card with the TREE TRUNK — ONE continuous vertical
+        //    stem runs down the card; every session heading and version node
+        //    hangs off it on a short branch stub. (The old per-row stems
+        //    broke at each session divider, which killed the tree read.)
+        AnimatedVisibility(visible = !collapsed) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -754,65 +1195,89 @@ private fun HistoryFieldCard(
                 )
                 .padding(horizontal = 12.dp, vertical = 6.dp)
         ) {
-            tree.sessions.forEachIndexed { sIdx, session ->
-                if (sIdx > 0) {
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                        modifier = Modifier.padding(start = 18.dp, top = 6.dp)
+            Box {
+                // The trunk — spans the whole content height.
+                val trunkColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
+                Canvas(Modifier.matchParentSize()) {
+                    drawLine(
+                        color = trunkColor,
+                        start = Offset(TreeTrunkInset.toPx(), 0f),
+                        end = Offset(TreeTrunkInset.toPx(), size.height),
+                        strokeWidth = 2.dp.toPx()
                     )
                 }
-                // Session sub-heading — time range + edit count.
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 8.dp, bottom = 2.dp)
-                ) {
-                    Text(
-                        if (session.versions.size == 1) formatHistoryTime(session.startTs)
-                        else "${formatHistoryTime(session.startTs)} → ${formatHistoryTime(session.versions.last().ts)}",
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        if (session.versions.size == 1) "1 edit" else "${session.versions.size} edits",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                // Version nodes.
-                session.versions.forEachIndexed { vIdx, e ->
-                    HistoryVersionRow(
-                        entry = e,
-                        isLast = vIdx == session.versions.lastIndex,
-                        prev = session.versions.getOrNull(vIdx - 1),
-                        isActive = e.field == activeField,
-                        activeField = activeField,
-                        onPreview = { onPreview(e.id) },
-                        onPin = { onPin(e) },
-                        onCopy = { onCopy(e) },
-                        onRestore = { onRestore(e) },
-                        onDelete = { onDelete(e) }
-                    )
+                Column(Modifier.padding(start = TreeTrunkInset)) {
+                    tree.sessions.forEachIndexed { sIdx, session ->
+                        if (sIdx > 0) {
+                            // Hairline between sessions — starts right of the
+                            // trunk so the trunk reads as one unbroken line.
+                            HorizontalDivider(
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                                modifier = Modifier.padding(start = 14.dp, top = 6.dp)
+                            )
+                        }
+                        // Session sub-heading — a branch stub off the trunk,
+                        // then the time range + edit count.
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(top = 8.dp, bottom = 2.dp)
+                        ) {
+                            SessionBranchStub()
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                if (session.versions.size == 1) formatHistoryTime(session.startTs)
+                                else "${formatHistoryTime(session.startTs)} → ${formatHistoryTime(session.versions.last().ts)}",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                if (session.versions.size == 1) "1 edit" else "${session.versions.size} edits",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        // Version nodes — each hangs off the trunk.
+                        session.versions.forEachIndexed { vIdx, e ->
+                            HistoryVersionRow(
+                                entry = e,
+                                prev = session.versions.getOrNull(vIdx - 1),
+                                isActive = e.field == activeField,
+                                isCurrent = isCurrent(e),
+                                activeField = activeField,
+                                onPin = { onPin(e) },
+                                onCopy = { onCopy(e) },
+                                onRestore = { onRestore(e) },
+                                onCompare = { onCompare(e) },
+                                onDelete = { onDelete(e) }
+                            )
+                        }
+                    }
                 }
             }
+        }
         }
     }
 }
 
-/** One version node inside a session — connector + node dot, time and a
- *  +/− line-change badge, the full text (2 lines), then the row actions. */
+/** One version node inside a session — a short branch stub runs from the
+ *  card's trunk to the node dot (the trunk itself is drawn once by
+ *  [HistoryFieldCard], so the tree stays continuous across sessions), the
+ *  time + a +/− change badge, a COMPACT one-line preview that EXPANDS to a
+ *  CLIPPED diff (previews of the added/removed lines, never the full
+ *  text), then the actions. */
 @Composable
 private fun HistoryVersionRow(
     entry: TextHistoryEntry,
-    isLast: Boolean,
     prev: TextHistoryEntry?,
     isActive: Boolean,
+    isCurrent: Boolean,
     activeField: String,
-    onPreview: () -> Unit,
     onPin: () -> Unit,
     onCopy: () -> Unit,
     onRestore: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onCompare: () -> Unit
 ) {
     val (added, removed) = diffSummary(prev, entry)
     val badge = buildString {
@@ -820,27 +1285,42 @@ private fun HistoryVersionRow(
         if (added > 0 && removed > 0) append(" · ")
         if (removed > 0) append("−$removed")
     }
+    var expanded by remember { mutableStateOf(false) }
+    // The diff — what changed vs the previous version, line by line.
+    val prevParas = prev?.let { splitParagraphs(it.text) }?.toSet().orEmpty()
+    val currParas = splitParagraphs(entry.text)
+    val addedLines = currParas.filter { it !in prevParas }
+    val removedLines = prevParas.filter { it !in currParas }
+
+    // Colors are read in the composable scope — drawBehind is not a
+    // @Composable context, so MaterialTheme must not be read inside it.
+    val stemColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.30f)
+    val dotColor = if (isActive) MaterialTheme.colorScheme.primary
+        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+
     Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.Top) {
-        // Connector — node dot at the top, then a short stem down toward
-        // the next node (no dangling line on the last row).
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.width(18.dp)
+        // ── Branch + node — the stub starts exactly at the trunk (x=0 of
+        //    this column IS the trunk) and ends at the node dot.
+        Box(
+            modifier = Modifier
+                .width(18.dp)
+                .fillMaxHeight()
+                .drawBehind {
+                    drawLine(
+                        color = stemColor,
+                        start = Offset(0f, TreeNodeDotY.toPx()),
+                        end = Offset(TreeNodeDotX.toPx(), TreeNodeDotY.toPx()),
+                        strokeWidth = 1.5.dp.toPx()
+                    )
+                }
         ) {
             Box(
                 modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .offset(x = TreeNodeDotX - 4.dp, y = TreeNodeDotY - 4.dp)
                     .size(8.dp)
                     .clip(CircleShape)
-                    .background(
-                        if (isActive) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
-                    )
-            )
-            Box(
-                modifier = Modifier
-                    .width(2.dp)
-                    .height(if (isLast) 6.dp else 18.dp)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
+                    .background(dotColor)
             )
         }
         Column(Modifier.weight(1f).padding(start = 8.dp)) {
@@ -860,20 +1340,123 @@ private fun HistoryVersionRow(
                         else MaterialTheme.colorScheme.tertiary
                     )
                 }
+                if (isCurrent) {
+                    Spacer(Modifier.width(6.dp))
+                    HistoryCurrentPill()
+                }
             }
-            // The FULL text — the whole version reads at a glance (the old
-            // change-only diff was the confusing part).
+            // COMPACT preview — ONE line, tapping it expands the diff (the
+            // tree never floods with giant texts).
             Text(
                 entry.text,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
-                    .clickable(onClick = onPreview)
-                    .padding(top = 2.dp, bottom = 2.dp, end = 4.dp)
+                    .clickable { expanded = !expanded }
+                    .padding(top = 3.dp, bottom = 3.dp, end = 4.dp)
             )
+            // ── Expanded — the proper tree view: exactly what was added /
+            //    removed, compact chips, scrolls when long. ──
+            AnimatedVisibility(visible = expanded) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 150.dp)
+                        .verticalScroll(rememberScrollState())
+                        .padding(top = 2.dp, bottom = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(3.dp)
+                ) {
+                    if (addedLines.isEmpty() && removedLines.isEmpty()) {
+                        Text(
+                            "Initial version",
+                            style = MaterialTheme.typography.labelSmall.copy(fontStyle = FontStyle.Italic),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    // Clipped previews — a few short snippets of what changed,
+                    // never the full text (v3xx — the expanded node used to
+                    // dump whole paragraphs).
+                    val shownAdded = addedLines.take(4)
+                    shownAdded.forEach { line ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(7.dp))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
+                                .padding(horizontal = 7.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                "+",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                previewLine(line),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                    if (addedLines.size > shownAdded.size) {
+                        DiffMoreChip("${addedLines.size - shownAdded.size} more added")
+                    }
+                    val shownRemoved = removedLines.take(4)
+                    shownRemoved.forEach { line ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(7.dp))
+                                .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                                .padding(horizontal = 7.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                "−",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                previewLine(line),
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    textDecoration = TextDecoration.LineThrough,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                    if (removedLines.size > shownRemoved.size) {
+                        DiffMoreChip("${removedLines.size - shownRemoved.size} more removed")
+                    }
+                    // Restore — empty field restores straight away; a field
+                    // with text opens the Add above / Add below / Replace
+                    // chooser (the paste options depend on the text box).
+                    Text(
+                        "Restore this version",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                        color = if (isCurioDarkTheme()) Color(0xFFFFF9F1) else Color(0xFF52383C),
+                        modifier = Modifier
+                            .padding(top = 2.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(
+                                if (isCurioDarkTheme()) Color(0xFF815947) else Color(0xFFF2E8DC)
+                            )
+                            .clickable(onClick = onRestore)
+                            .padding(horizontal = 11.dp, vertical = 5.dp)
+                    )
+                }
+            }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     entry.field,
@@ -891,6 +1474,7 @@ private fun HistoryVersionRow(
                     onPin = onPin,
                     onCopy = onCopy,
                     onRestore = onRestore,
+                    onCompare = onCompare,
                     onDelete = onDelete
                 )
             }
@@ -898,8 +1482,50 @@ private fun HistoryVersionRow(
     }
 }
 
-/** The four round row actions (pin / copy / restore / delete) — shared by
- *  the list rows and the tree version rows. */
+/** A compact one-line preview of a changed paragraph — long lines are
+ *  clipped so the expanded diff never dumps full text. */
+private fun previewLine(line: String, maxChars: Int = 56): String =
+    if (line.length <= maxChars) line else line.take(maxChars - 1) + "…"
+
+/** The "N more added/removed" footer of a clipped diff — a tiny quiet chip. */
+@Composable
+private fun DiffMoreChip(label: String) {
+    Text(
+        label,
+        style = MaterialTheme.typography.labelSmall.copy(
+            fontWeight = FontWeight.SemiBold,
+            fontStyle = FontStyle.Italic
+        ),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 2.dp, top = 1.dp)
+    )
+}
+
+/** A tiny horizontal branch stub — connects a session heading to the trunk
+ *  (its left edge sits exactly on the trunk's x, so the line reads as one
+ *  continuous branch off the tree). */
+@Composable
+private fun SessionBranchStub() {
+    val stubColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
+    Box(
+        Modifier
+            .width(14.dp)
+            .height(14.dp)
+            .drawBehind {
+                drawLine(
+                    color = stubColor,
+                    start = Offset(0f, center.y),
+                    end = Offset(size.width, center.y),
+                    strokeWidth = 1.5.dp.toPx()
+                )
+            }
+    )
+}
+
+/** The round row actions (pin / copy / restore / compare / delete) — shared
+ *  by the list rows and the tree version rows. Compare arms the JSX
+ *  two-tap flow: pick this snapshot, then another, and the word-level diff
+ *  dialog opens. */
 @Composable
 private fun HistoryActionsRow(
     pinned: Boolean,
@@ -908,11 +1534,15 @@ private fun HistoryActionsRow(
     onPin: () -> Unit,
     onCopy: () -> Unit,
     onRestore: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onCompare: (() -> Unit)? = null
 ) {
     HistoryRowAction(pinned, true, CurioIcons.PushPin, "Unpin", "Pin to top") { onPin() }
     HistoryRowAction(false, true, CurioIcons.ContentCopy, "Copy text", "Copy text") { onCopy() }
     HistoryRowAction(active, active, CurioIcons.Restore, "Restore into $activeField", "Restore into $activeField") { onRestore() }
+    if (onCompare != null) {
+        HistoryRowAction(false, true, CurioIcons.Layers, "Compare with another version", "Compare with another version") { onCompare() }
+    }
     HistoryRowAction(false, true, CurioIcons.Delete, "Delete snapshot", "Delete snapshot") { onDelete() }
 }
 
@@ -1026,5 +1656,208 @@ private fun RestoreModeRow(
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
             size = 18.dp
         )
+    }
+}
+
+/** The frosted search pill under the browser header — the JSX topbar search
+ *  box. Matches the rest of the sheet's glass language. */
+@Composable
+private fun HistorySearchBox(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val dark = isCurioDarkTheme()
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(50))
+            .background(
+                if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
+                else Color.White.copy(alpha = 0.68f)
+            )
+            .padding(start = 12.dp, end = 6.dp, top = 8.dp, bottom = 8.dp)
+    ) {
+        CurioIcon(
+            name = CurioIcons.Search,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            size = 17.dp
+        )
+        Spacer(Modifier.width(9.dp))
+        Box(Modifier.weight(1f)) {
+            if (query.isEmpty()) {
+                Text(
+                    "Search snapshots…",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            BasicTextField(
+                value = query,
+                onValueChange = onQueryChange,
+                singleLine = true,
+                textStyle = MaterialTheme.typography.bodySmall.copy(
+                    color = MaterialTheme.colorScheme.onSurface
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        if (query.isNotEmpty()) {
+            CurioIcon(
+                name = CurioIcons.Close,
+                contentDescription = "Clear search",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 16.dp,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .clickable { onQueryChange("") }
+                    .padding(5.dp)
+            )
+        }
+    }
+}
+
+/** The tiny warm "CURRENT" pill — marks the newest snapshot of each field
+ *  (the JSX current-pill). */
+@Composable
+private fun HistoryCurrentPill() {
+    val dark = isCurioDarkTheme()
+    Text(
+        "CURRENT",
+        style = MaterialTheme.typography.labelSmall.copy(
+            fontWeight = FontWeight.ExtraBold,
+            letterSpacing = 0.4.sp
+        ),
+        color = if (dark) Color(0xFFFFF9F1) else Color(0xFF52383C),
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(if (dark) Color(0xFF815947) else Color(0xFFF2E8DC))
+            .padding(horizontal = 7.dp, vertical = 2.dp)
+    )
+}
+
+/** The JSX compare panel — two snapshots side by side with the TRUE
+ *  word-level diff: changed words highlighted (strike-through red on the
+ *  older version, warm-tint on the newer) + added/removed word counts. */
+@Composable
+private fun CompareVersionsDialog(
+    a: TextHistoryEntry,
+    b: TextHistoryEntry,
+    onDismiss: () -> Unit
+) {
+    val (older, newer) = if (a.ts <= b.ts) a to b else b to a
+    val (aTokens, bTokens) = remember(older.id, newer.id) { diffTokens(older.text, newer.text) }
+    val removedCount = aTokens.count { it.changed }
+    val addedCount = bTokens.count { it.changed }
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            shape = RoundedCornerShape(24.dp),
+            color = MaterialTheme.colorScheme.surface,
+            shadowElevation = 10.dp,
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 40.dp).fillMaxWidth()
+        ) {
+            Column(Modifier.padding(20.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            "Comparing versions",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            "Word-level changes between two snapshots",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    CurioIcon(
+                        name = CurioIcons.Close,
+                        contentDescription = "Close comparison",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        size = 20.dp,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .clickable(onClick = onDismiss)
+                            .padding(6.dp)
+                    )
+                }
+                Spacer(Modifier.height(14.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 440.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    CompareVersionCard(
+                        label = "Earlier · ${formatHistoryTime(older.ts)}",
+                        tokens = aTokens,
+                        removed = true
+                    )
+                    CompareVersionCard(
+                        label = "Later · ${formatHistoryTime(newer.ts)}",
+                        tokens = bTokens,
+                        removed = false
+                    )
+                }
+                Spacer(Modifier.height(12.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        "$removedCount word${if (removedCount == 1) "" else "s"} removed",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(MaterialTheme.colorScheme.errorContainer)
+                            .padding(horizontal = 10.dp, vertical = 5.dp)
+                    )
+                    Text(
+                        "$addedCount word${if (addedCount == 1) "" else "s"} added",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                        color = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(50))
+                            .background(MaterialTheme.colorScheme.tertiaryContainer)
+                            .padding(horizontal = 10.dp, vertical = 5.dp)
+                    )
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    TextButton(onClick = onDismiss) { Text("Done", fontWeight = FontWeight.Bold) }
+                }
+            }
+        }
+    }
+}
+
+/** One side of the compare dialog — the highlighted version text. */
+@Composable
+private fun CompareVersionCard(
+    label: String,
+    tokens: List<DiffToken>,
+    removed: Boolean
+) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(Modifier.padding(12.dp)) {
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                buildDiffString(tokens, removed, MaterialTheme.colorScheme),
+                style = MaterialTheme.typography.bodySmall.copy(lineHeight = 20.sp),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
 }

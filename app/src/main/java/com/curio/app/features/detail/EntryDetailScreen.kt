@@ -8,7 +8,6 @@ import org.json.JSONArray
 import org.json.JSONObject
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -87,7 +86,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.util.lerp
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.zIndex
@@ -1115,9 +1113,6 @@ private fun Modifier.heroFrostPlate(
  * Scroll-linked controls kept separate from the detail body so paper canvases,
  * rich text, and image content do not recompose for every scroll pixel.
  */
-// v250 — the glass more-menu's expanded width (matches CurioDropdownMenu's default).
-private val MoreMenuWidth = 236.dp
-
 @Composable
 private fun BoxScope.DetailStickyBar(
     detailScroll: androidx.compose.foundation.ScrollState,
@@ -1170,20 +1165,16 @@ private fun BoxScope.DetailStickyBar(
         lerp(heroFill, lerp(heroFill, Color.White, 0.10f), frostShift)
         else lerp(heroFill, lerp(heroFill, curioPillTintLift(), 0.38f), frostShift)
     val stickyFrostBrush = Brush.verticalGradient(0f to frostFill, 1f to frostFill.copy(alpha = 0.97f))
+    // v250 — iOS-STYLE MORPH state lives at function scope: the pill
+    // below fades with it AND the floating glass panel appended after
+    // this Box reads the same progress.
+    BackHandler(enabled = menuExpanded) { menuExpanded = false }
+
     // The ride-up must be LAYOUT-space (Modifier.offset), not a draw-time
     // graphicsLayer translation — the more-menu's popup anchors to the
     // button's layout position, so a draw-time translate would leave the
     // menu hanging below the popped pill.
     val stickyLift = (DetailStickyBarRestTop - DetailStickyBarPoppedTop) * frostShift
-        // v250 — iOS-STYLE MORPH state lives at function scope: the pill
-        // below fades with it AND the floating glass panel appended after
-        // this Box reads the same progress.
-        val morph by animateFloatAsState(
-            targetValue = if (menuExpanded) 1f else 0f,
-            animationSpec = spring(dampingRatio = 0.85f, stiffness = 420f),
-            label = "moreMenuMorph"
-        )
-        BackHandler(enabled = menuExpanded) { menuExpanded = false }
 
     Row(
         modifier = Modifier
@@ -1252,7 +1243,6 @@ private fun BoxScope.DetailStickyBar(
                     elevation = 6.dp * frostShift,
                     frostBrush = stickyFrostBrush
                 ))
-                    .graphicsLayer { if (detailGlassActive) alpha = 1f - morph }
                     .clickable(
                         interactionSource = moreInteraction,
                         indication = null
@@ -1267,10 +1257,11 @@ private fun BoxScope.DetailStickyBar(
                     modifier = Modifier.padding(10.dp)
                 )
             }
-            if (!detailGlassActive) {
             // v30 — the shared accent-themed menu: an opaque surface tinted
             // toward the entry's category accent, Share/Edit in the themed
             // ink, Delete in error red. No more hardcoded light container.
+            // v3xx22 — always the normal dropdown (the glass more-panel is
+            // gone — user: no glass dropdown in the saved detail view).
             CurioDropdownMenu(
                 expanded = menuExpanded,
                 onDismissRequest = { menuExpanded = false },
@@ -1358,114 +1349,7 @@ private fun BoxScope.DetailStickyBar(
                     }
                 )
             }
-            }
         }
-
-        // v250 — the GLASS MORE-PANEL: floats over the page, blooming from
-        // the pill's corner (top-end transform origin) with the same spring
-        // that fades the pill, so the handoff reads as one morphing surface.
-        // A full-screen scrim behind it dismisses on any outside tap.
-        if (detailGlassActive && morph > 0.01f) {
-            // v301 — tap-outside dismiss: the full-screen Box catches taps
-            // ANYWHERE that aren't on the glass panel itself, dismissing
-            // the menu. BackHandler still handles system-back.
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .clickable(interactionSource = null, indication = null) {
-                    menuExpanded = false
-                }
-            ) {
-            Surface(
-                shape = RoundedCornerShape(20.dp),
-                color = Color.Transparent,
-                shadowElevation = 0.dp,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .statusBarsPadding()
-                    // v292b — anchors level with the pills' row (top 10dp,
-                    // end 20dp) instead of floating above/below them.
-                    .padding(top = DetailStickyBarRestTop, end = 20.dp)
-                    .graphicsLayer {
-                        alpha = morph
-                        val sc = lerp(0.55f, 1f, morph)
-                        scaleX = sc
-                        scaleY = sc
-                        transformOrigin = TransformOrigin(1f, 0f)
-                    }
-                    .liquidGlassCapsule(
-                        heroFill,
-                        washAlpha = 0.45f,
-                        backdrop = glassBackdrop,
-                        shape = RoundedCornerShape(20.dp)
-                    )
-                    .width(MoreMenuWidth)
-            ) {
-                Column(Modifier.padding(vertical = 6.dp)) {
-                                CurioDropdownItem(
-                                    text = { Text("Share") },
-                                    leadingIcon = {
-                                        CurioIcon(name = CurioIcons.Share, contentDescription = null, size = 20.dp)
-                                    },
-                                    onClick = {
-                                        menuExpanded = false
-                                        showShareSheet = true
-                                    }
-                                )
-                                if (isMultiSectionEntry(resolvedEntry)) {
-                                    CurioDropdownItem(
-                                        text = { Text("Edit entry") },
-                                        leadingIcon = {
-                                            CurioIcon(name = CurioIcons.Edit, contentDescription = null, size = 20.dp)
-                                        },
-                                        onClick = {
-                                            menuExpanded = false
-                                            navController.navigate(CurioRoutes.editEntry(resolvedEntry.id)) {
-                                                launchSingleTop = true
-                                            }
-                                        }
-                                    )
-                                } else if (isMoodBoardEntry(resolvedEntry)) {
-                                    CurioDropdownItem(
-                                        text = { Text("Edit mood board") },
-                                        leadingIcon = {
-                                            CurioIcon(name = CurioIcons.Edit, contentDescription = null, size = 20.dp)
-                                        },
-                                        onClick = {
-                                            menuExpanded = false
-                                            navController.navigate(CurioRoutes.editMoodBoard(resolvedEntry.id)) {
-                                                launchSingleTop = true
-                                            }
-                                        }
-                                    )
-                                } else {
-                                    CurioDropdownItem(
-                                        text = { Text("Edit entry") },
-                                        leadingIcon = {
-                                            CurioIcon(name = CurioIcons.Edit, contentDescription = null, size = 20.dp)
-                                        },
-                                        onClick = {
-                                            menuExpanded = false
-                                            navController.navigate(CurioRoutes.editEntry(resolvedEntry.id)) {
-                                                launchSingleTop = true
-                                            }
-                                        }
-                                    )
-                                }
-                                CurioDropdownItem(
-                                    text = { Text("Delete") },
-                                    danger = true,
-                                    leadingIcon = {
-                                        CurioIcon(name = CurioIcons.Delete, contentDescription = null, size = 20.dp)
-                                    },
-                                    onClick = {
-                                        menuExpanded = false
-                                        onDeleteRequest()
-                                    }
-                                )
-                }
-            }
-        }
-            }
 
         // v149 + v229d — the share sheet opens from the More menu; it lives
         // here so it survives the sticky bar's scroll-driven recompositions
@@ -4320,7 +4204,7 @@ private fun OpenNotebookRender(entry: CurioEntry, category: CurioCategory, navCo
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Share Card — rendered off-screen, captured as PNG, shared via Intent.ACTION_SEND
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════��══════
 
 /**
  * Self-contained share card composable designed for bitmap capture.
@@ -4573,7 +4457,7 @@ private fun CurioShareCard(
 // source pills (see the call site above). The old bespoke EntryShareSheet and
 // its ShareFormatPill helper are gone — only the plain-text payload builder
 // remains, reused as the sheet's share-as-text override.
-// ═══════════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════════��═════════════════════
 
 /** Plain-text share payload for an entry (the sheet's Text format).
  *  When [isQuote] is true, the payload is just the quote + author.

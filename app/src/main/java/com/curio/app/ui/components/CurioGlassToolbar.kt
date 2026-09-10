@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
@@ -103,19 +104,26 @@ fun CurioGlassToolbar(
     )
     val ink = MaterialTheme.colorScheme.onSurface
 
+    // v3xx22 — the bar keeps its bottom curve in EVERY mode: the liquid path
+    // rounds the capsule itself, but the simulated + plain fills were square.
+    val glassBottomShape = RoundedCornerShape(bottomStart = 26.dp, bottomEnd = 26.dp)
     val glassMod = when {
         isLiquidGlassPillsActive() && glassBackdrop != null ->
             Modifier.liquidGlassCapsule(
                 container = container.copy(alpha = 0.92f),
                 washAlpha = 0.62f,
                 backdrop = glassBackdrop,
-                shape = RoundedCornerShape(bottomStart = 26.dp, bottomEnd = 26.dp),
+                shape = glassBottomShape,
                 // v3xx — the glass-toolbar bar is deliberately MORE blurry
                 // than the small pills (1.6× the standard 8dp frost).
                 blurMultiplier = 1.6f
             )
-        isLiquidGlassRequested() -> Modifier.fauxGlassCapsule(container, corner = 26.dp)
-        else -> Modifier.background(container.copy(alpha = 0.96f))
+        isLiquidGlassRequested() -> Modifier
+            .clip(glassBottomShape)
+            .fauxGlassCapsule(container, corner = 26.dp)
+        else -> Modifier
+            .clip(glassBottomShape)
+            .background(container.copy(alpha = 0.96f))
     }
 
     Column(
@@ -288,6 +296,11 @@ fun CurioGlassToolbarMorph(
     // v3xx — the stat content row inside the FULL bar (Home's Streak ·
     // Cabinet · Topics, Profile's Level · Saved · Lanes).
     content: (@Composable (ink: Color) -> Unit)? = null,
+    // v3xx22 — an ACTION PILL row in the FULL bar between the title row and
+    // the stat content (Profile's Edit + streak pills — the torn hero's
+    // action row, brought back into the glass header). The compact row keeps
+    // its own streak/edit pills on collapse.
+    fullActions: (@Composable (ink: Color) -> Unit)? = null,
     // v3xx — the avatar shown in the compact row beside [compactTitle].
     compactAvatar: (@Composable () -> Unit)? = null,
     // v3xx19 — the compact bar's glass pills: the streak counter (fire +
@@ -317,19 +330,27 @@ fun CurioGlassToolbarMorph(
     // content lifts as it collapses instead of just clipping.
     var fullH by remember { mutableIntStateOf(0) }
 
+    // v3xx22 — the bar keeps its bottom curve in EVERY mode (see the
+    // [CurioGlassToolbar] note): the liquid path rounds the capsule itself,
+    // the simulated + plain fills clip to the same bottom curve.
+    val glassBottomShape = RoundedCornerShape(bottomStart = 26.dp, bottomEnd = 26.dp)
     val glassMod = when {
         isLiquidGlassPillsActive() && glassBackdrop != null ->
             Modifier.liquidGlassCapsule(
                 container = container.copy(alpha = 0.92f),
                 washAlpha = 0.62f,
                 backdrop = glassBackdrop,
-                shape = RoundedCornerShape(bottomStart = 26.dp, bottomEnd = 26.dp),
+                shape = glassBottomShape,
                 // v3xx — the glass-toolbar bar is deliberately MORE blurry
                 // than the small pills (1.6× the standard 8dp frost).
                 blurMultiplier = 1.6f
             )
-        isLiquidGlassRequested() -> Modifier.fauxGlassCapsule(container, corner = 26.dp)
-        else -> Modifier.background(container.copy(alpha = 0.96f))
+        isLiquidGlassRequested() -> Modifier
+            .clip(glassBottomShape)
+            .fauxGlassCapsule(container, corner = 26.dp)
+        else -> Modifier
+            .clip(glassBottomShape)
+            .background(container.copy(alpha = 0.96f))
     }
 
     // The leading pill (back or menu) — the same glass-capsule treatment as
@@ -448,6 +469,17 @@ fun CurioGlassToolbarMorph(
                 // (Profile's Settings pill): the collapsed bar keeps just
                 // the avatar + name + streak + edit per the request.
                 if (trailing != null) trailing(ink)
+            }
+            if (fullActions != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    fullActions(ink)
+                }
             }
             if (content != null) {
                 val statPaneShape = RoundedCornerShape(20.dp)

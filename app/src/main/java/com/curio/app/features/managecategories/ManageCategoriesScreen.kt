@@ -1,10 +1,14 @@
 package com.curio.app.features.managecategories
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.draw.clip
@@ -28,7 +33,9 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,14 +43,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import kotlin.math.roundToInt
+import kotlinx.coroutines.delay
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
@@ -71,6 +86,10 @@ import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.curio.app.features.settings.SettingsHeroTotalHeight
+
+/** Plain float holder for drag geometry — deliberately NOT Compose state so
+ *  writes from layout callbacks never recompose the list mid-drag. */
+private class WindowPosRef { var value = 0f }
 
 /**
  * Manage Categories — see Curio category-management contract.
@@ -111,14 +130,59 @@ fun ManageCategoriesScreen(navController: NavController) {
     // long-press drag mutate the draft and persist on release. Re-keyed off
     // [items] so external changes (hidden toggles) re-seed it cleanly.
     var draft by remember(items) { mutableStateOf(items) }
+    // v3xx — REAL drag-reorder: the WHOLE row is the drag surface (long-press
+    // anywhere, so the list scroll can't steal the gesture), the dragged row
+    // follows the finger exactly, neighbours shift with springs as slots are
+    // crossed, and the list AUTO-SCROLLS when the finger reaches its edges.
     var draggingId by remember { mutableStateOf<CategoryId?>(null) }
-    // Residual drag travel (px) — swaps fire when a full row step accrues.
-    var dragAccum by remember { mutableFloatStateOf(0f) }
+    // The dragged row's finger-follow travel (px, viewport space).
+    var dragTravelY by remember { mutableFloatStateOf(0f) }
+    // Auto-scroll applied so far during the drag (px, content space) — feeds
+    // the slot math so a stationary finger at the edge still swaps lanes as
+    // the list scrolls under it.
+    var scrollAccum by remember { mutableFloatStateOf(0f) }
+    // The finger's y inside the LIST VIEWPORT (px) — read by the auto-scroll
+    // loop; Float.MAX_VALUE when idle (no drag → no auto-scroll).
+    var dragFingerY by remember { mutableFloatStateOf(Float.MAX_VALUE) }
     // Average row height (the 56dp reorder column + 20dp padding dominates).
-    val dragStepPx = with(LocalDensity.current) { 76.dp.toPx() }
+    val rowHeightPx = with(LocalDensity.current) { 76.dp.toPx() }
+    // Auto-scroll edge zone + top speed (px per 16ms frame).
+    val edgeZonePx = with(LocalDensity.current) { 120.dp.toPx() }
+    val autoScrollMaxPx = 10f
     // v5.8 — saveable-backed: keep the list's scroll position on rotation.
     val listState = rememberLazyListState()
 val glassBackdrop = rememberLayerBackdrop()
+    // ── Drag geometry, held WITHOUT recomposition (plain holders): the list
+    //    viewport top/height and every row's window top. Read only inside the
+    //    drag callbacks / auto-scroll loop, so layout changes never recompose
+    //    the whole list mid-drag.
+    val listTopRef = remember { WindowPosRef() }
+    val viewportHRef = remember { WindowPosRef() }
+    val rowTops = remember { mutableMapOf<CategoryId, Float>() }
+
+    // v3xx — AUTO-SCROLL while dragging: while a row is held, scroll the
+    // list when the finger is inside the top/bottom edge zones, with speed
+    // proportional to how deep the finger is in the zone. The scrolled
+    // distance accumulates into [scrollAccum] so the slot math follows.
+    LaunchedEffect(draggingId) {
+        if (draggingId == null) return@LaunchedEffect
+        while (true) {
+            val finger = dragFingerY
+            val viewportH = viewportHRef.value
+            val delta = when {
+                finger < edgeZonePx ->
+                    -((edgeZonePx - finger) / edgeZonePx) * autoScrollMaxPx
+                viewportH > 0f && finger > viewportH - edgeZonePx ->
+                    ((finger - (viewportH - edgeZonePx)) / edgeZonePx) * autoScrollMaxPx
+                else -> 0f
+            }
+            if (delta != 0f) {
+                val scrolled = listState.scrollBy(delta)
+                if (scrolled != 0f) scrollAccum += delta
+            }
+            delay(16)
+        }
+    }
     // v-tablet — the torn hero is NOT sticky on wide windows (landscape
     // tablet): it leads the list as its first item and scrolls away with it;
     // the pinned glass overlay stays phone-only.
@@ -171,7 +235,14 @@ val glassBackdrop = rememberLayerBackdrop()
                 // v142 — full-bleed bottom: the NavHost no longer reserves
                 // the nav-bar slot for this route, so the page clears the
                 // gesture bar itself (the wash runs to the bottom edge).
-                modifier = Modifier.layerBackdrop(glassBackdrop)
+                modifier = Modifier
+                    // v3xx — the auto-scroll loop reads the list viewport's
+                    // window top + height (non-state holders, no recompose).
+                    .onGloballyPositioned { coords ->
+                        listTopRef.value = coords.positionInWindow().y
+                        viewportHRef.value = coords.size.height.toFloat()
+                    }
+                    .layerBackdrop(glassBackdrop)
                     .fillMaxSize()
                     .navigationBarsPadding(),                    contentPadding = PaddingValues(
                     start = wideContentEdgePadding(),
@@ -275,7 +346,9 @@ val glassBackdrop = rememberLayerBackdrop()
                             onClick = {
                                 // v26 — restore the default lane order.
                                 draggingId = null
-                                dragAccum = 0f
+                                dragTravelY = 0f
+                                scrollAccum = 0f
+                                dragFingerY = Float.MAX_VALUE
                                 AppPreferences.setCategoryOrder(
                                     context, CurioCategories.all.map { it.id }
                                 )
@@ -294,51 +367,113 @@ val glassBackdrop = rememberLayerBackdrop()
                 }
                 item("lanes") {
                     SettingsOptionCard {
+                        // ── Drag-reorder math (v3xx): while a row is held the
+                        //    draft is FROZEN (no mutation until release) — the
+                        //    dragged row follows the finger exactly, neighbours
+                        //    shift one slot with springs as the target moves,
+                        //    and on release the order is committed ONCE and
+                        //    every row springs to its final slot (the buttery
+                        //    settle instead of a snap).
+                        val origIndex = draft.indexOfFirst { it.id == draggingId }
+                        val lastIndex = draft.lastIndex
+                        val dragActive = draggingId != null
+                        val effectiveTravel = if (dragActive) dragTravelY + scrollAccum else 0f
+                        val targetIndex = if (dragActive)
+                            (origIndex + (effectiveTravel / rowHeightPx).roundToInt()).coerceIn(0, lastIndex)
+                        else origIndex
                         draft.forEachIndexed { index, category ->
                             if (index > 0) SettingsOptionDivider()
-                            CategoryRow(
-                                category = category,
-                                isFirst = draft.firstOrNull()?.id == category.id,
-                                isLast = draft.lastOrNull()?.id == category.id,
-                                isDragging = draggingId == category.id,
-                                reorderEnabled = reorderUnlocked,
-                                onMoveUp = { if (reorderUnlocked) { shiftDraft(category.id, -1); persistDraft() } },
-                                onMoveDown = { if (reorderUnlocked) { shiftDraft(category.id, +1); persistDraft() } },
-                                onDragStart = {
-                                    if (reorderUnlocked) {
-                                        draggingId = category.id
-                                        dragAccum = 0f
-                                    }
-                                },
-                                onDragDelta = { dy ->
-                                    dragAccum += dy
-                                    // A full row-height of travel swaps the lane one
-                                    // slot; the residual carries into the next swap
-                                    // so long fast drags feel continuous.
-                                    while (dragAccum >= dragStepPx) {
-                                        dragAccum -= dragStepPx
-                                        shiftDraft(category.id, +1)
-                                    }
-                                    while (dragAccum <= -dragStepPx) {
-                                        dragAccum += dragStepPx
-                                        shiftDraft(category.id, -1)
-                                    }
-                                },
-                                onDragEnd = {
-                                    draggingId = null
-                                    dragAccum = 0f
-                                    persistDraft()
-                                },
-                                onDragCancel = {
-                                    draggingId = null
-                                    dragAccum = 0f
-                                },
-                                onVisibilityToggle = { visible ->
-                                    // Persist instantly — the app-wide reactive state
-                                    // updates and every consumer recomposes.
-                                    AppPreferences.setCategoryHidden(context, category.id, !visible)
+                            val isDragged = category.id == draggingId
+                            // The placeholder shift: rows between the dragged
+                            // row's ORIGINAL slot and its current TARGET slot
+                            // shift one slot out of the way (±rowHeight).
+                            val shiftBy = when {
+                                !dragActive || isDragged -> 0f
+                                targetIndex > origIndex && index in (origIndex + 1)..targetIndex -> -rowHeightPx
+                                targetIndex < origIndex && index in targetIndex until origIndex -> rowHeightPx
+                                else -> 0f
+                            }
+                            key(category.id) {
+                                val offsetAnim = remember { Animatable(0f) }
+                                val desired = if (isDragged) dragTravelY else shiftBy
+                                LaunchedEffect(desired, isDragged) {
+                                    if (isDragged) offsetAnim.snapTo(desired)
+                                    else offsetAnim.animateTo(
+                                        desired,
+                                        animationSpec = spring(dampingRatio = 0.95f, stiffness = 500f)
+                                    )
                                 }
-                            )
+                                CategoryRow(
+                                    category = category,
+                                    isFirst = draft.firstOrNull()?.id == category.id,
+                                    isLast = draft.lastOrNull()?.id == category.id,
+                                    isDragging = isDragged,
+                                    reorderEnabled = reorderUnlocked,
+                                    dragOffsetY = offsetAnim.value,
+                                    onMoveUp = { if (reorderUnlocked) { shiftDraft(category.id, -1); persistDraft() } },
+                                    onMoveDown = { if (reorderUnlocked) { shiftDraft(category.id, +1); persistDraft() } },
+                                    onDragStart = { offset ->
+                                        draggingId = category.id
+                                        dragTravelY = 0f
+                                        scrollAccum = 0f
+                                        dragFingerY = (rowTops[category.id] ?: listTopRef.value) +
+                                            offset.y - listTopRef.value
+                                    },
+                                    onDrag = { change, dy ->
+                                        dragTravelY += dy
+                                        // The finger's VIEWPORT position = its
+                                        // position inside the row + the row's
+                                        // window top, minus the list top. Auto-
+                                        // scroll moves the CONTENT, not the
+                                        // finger, so this stays correct as the
+                                        // list scrolls under the drag.
+                                        dragFingerY = (rowTops[category.id] ?: listTopRef.value) +
+                                            change.position.y - listTopRef.value
+                                    },
+                                    onDragEnd = {
+                                        val id = draggingId
+                                        if (id != null) {
+                                            val from = draft.indexOfFirst { it.id == id }
+                                            if (from >= 0) {
+                                                val to = (from + ((dragTravelY + scrollAccum) / rowHeightPx).roundToInt())
+                                                    .coerceIn(0, draft.lastIndex)
+                                                if (to != from) {
+                                                    draft = draft.toMutableList().apply { add(to, removeAt(from)) }
+                                                    persistDraft()
+                                                }
+                                            }
+                                        }
+                                        draggingId = null
+                                        dragTravelY = 0f
+                                        scrollAccum = 0f
+                                        dragFingerY = Float.MAX_VALUE
+                                    },
+                                    onDragCancel = {
+                                        draggingId = null
+                                        dragTravelY = 0f
+                                        scrollAccum = 0f
+                                        dragFingerY = Float.MAX_VALUE
+                                    },
+                                    onVisibilityToggle = { visible ->
+                                        // Persist instantly — the app-wide reactive state
+                                        // updates and every consumer recomposes.
+                                        AppPreferences.setCategoryHidden(context, category.id, !visible)
+                                    },
+                                    // v3xx — the WHOLE row is the drag surface
+                                    // (long-press anywhere; taps still reach the
+                                    // switch/steppers). The long-press gesture
+                                    // lives INSIDE CategoryRow — here we only
+                                    // track each row's window top so the drag
+                                    // math has accurate finger/row positions.
+                                    modifier = Modifier.then(
+                                        if (reorderUnlocked)
+                                            Modifier.onGloballyPositioned { coords ->
+                                                rowTops[category.id] = coords.positionInWindow().y
+                                            }
+                                        else Modifier
+                                    )
+                                )
+                            }
                         }
                     }
                 }
@@ -368,6 +503,7 @@ val glassBackdrop = rememberLayerBackdrop()
 }
 
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 private fun CategoryRow(
     category: CurioCategory,
     isFirst: Boolean,
@@ -375,10 +511,14 @@ private fun CategoryRow(
     isDragging: Boolean = false,
     reorderEnabled: Boolean = true,
     modifier: Modifier = Modifier,
+    // v3xx — the row's animated drag/placeholder offset (px), driven by the
+    // card's per-row Animatable so the dragged row follows the finger and
+    // neighbours glide as slots are crossed.
+    dragOffsetY: Float = 0f,
     onMoveUp: () -> Unit,
     onMoveDown: () -> Unit,
-    onDragStart: () -> Unit,
-    onDragDelta: (Float) -> Unit,
+    onDragStart: (Offset) -> Unit,
+    onDrag: (PointerInputChange, Float) -> Unit,
     onDragEnd: () -> Unit,
     onDragCancel: () -> Unit,
     onVisibilityToggle: (Boolean) -> Unit
@@ -388,48 +528,72 @@ private fun CategoryRow(
         animationSpec = spring(dampingRatio = 0.85f, stiffness = 380f),
         label = "hiddenAlpha"
     )
+    // v3xx40 — while DRAGGING the row must stay clearly visible: the flat
+    // row disappears against the neighbours it slides over, so the dragged
+    // row swaps to a LIFTED CARD look — an opaque surface, hairline primary
+    // outline, soft shadow and FULL alpha (the hidden fade is suppressed
+    // for the dragged row). Neighbours keep the flat look.
+    // (Shadow BEFORE the fill per the shadow-order rule.)
+    val rowAlpha = if (isDragging) 1f else hiddenAlpha
+    val draggedShell = if (isDragging)
+        Modifier
+            .shadow(6.dp, RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(14.dp))
+            .background(
+                if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHighest
+                else Color(0xFFF7F1E6)
+            )
+            .border(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.55f), RoundedCornerShape(14.dp))
+    else Modifier
 
     // Flat row — no card shell: a tinted icon chip, the name + Hidden
     // status, the reorder steppers + drag handle, and the visibility
     // switch, sitting directly on the watermark backdrop. While dragging
-    // the row lifts (zIndex + slight scale) above its neighbors.
+    // the row lifts (zIndex + slight scale + the card shell) above its
+    // neighbors.
     Row(
         modifier = modifier
             .fillMaxWidth()
             .graphicsLayer {
                 scaleX = if (isDragging) 1.03f else 1f
                 scaleY = if (isDragging) 1.03f else 1f
-                alpha = if (isDragging) 0.9f else 1f
             }
             .zIndex(if (isDragging) 1f else 0f)
+            // v3xx — the finger-follow / placeholder offset (layout-space so
+            // the row physically moves; zIndex keeps the dragged row above).
+            .offset { IntOffset(0, dragOffsetY.roundToInt()) }
+            .then(draggedShell)
             .padding(horizontal = 4.dp, vertical = 10.dp)
-            .alpha(hiddenAlpha),
+            .alpha(rowAlpha)
+            // v3xx — the whole row is the long-press drag surface: the list
+            // scroll can never steal the gesture once the long press lands.
+            .then(
+                if (reorderEnabled)
+                    Modifier.pointerInput(Unit) {
+                        detectDragGesturesAfterLongPress(
+                            onDragStart = onDragStart,
+                            onDrag = { change, amount ->
+                                change.consume()
+                                onDrag(change, amount.y)
+                            },
+                            onDragEnd = onDragEnd,
+                            onDragCancel = onDragCancel
+                        )
+                    }
+                else Modifier
+            ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // ── Reorder stepper + real drag handle (v26: long-press to drag) ──
+        // ── Reorder stepper + drag handle (v26: long-press to drag; the
+        //    pointer input itself now lives on the WHOLE row — v3xx — so
+        //    this column is just the visual affordance) ──
         // v9.x — the whole reorder column is level-gated: locked players see
         // a dimmed lock icon instead of the handle, so the payoff is visible.
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(2.dp),
-            modifier = Modifier
-                .size(width = 40.dp, height = 56.dp)
-                .then(
-                    if (reorderEnabled) {
-                        Modifier.pointerInput(category.id) {
-                            detectDragGesturesAfterLongPress(
-                                onDragStart = { onDragStart() },
-                                onDrag = { change, amount ->
-                                    change.consume()
-                                    onDragDelta(amount.y)
-                                },
-                                onDragEnd = { onDragEnd() },
-                                onDragCancel = { onDragCancel() }
-                            )
-                        }
-                    } else Modifier
-                )
+            modifier = Modifier.size(width = 40.dp, height = 56.dp)
         ) {
             if (reorderEnabled) {
                 ReorderButton(

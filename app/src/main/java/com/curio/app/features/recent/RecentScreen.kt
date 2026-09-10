@@ -51,7 +51,7 @@ import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
-import com.curio.app.ui.components.CurioEmptyState
+import com.curio.app.ui.components.CurioDoodleEmptyState
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioHoldPill
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
@@ -183,11 +183,10 @@ val glassBackdrop = rememberLayerBackdrop()
                         subtitle = "Your latest discoveries, all in one place",
                         onBack = { navController.popBackStack() }
                     )
-                    CurioEmptyState(
-                        glyph = CurioIcons.History,
+                    // v3xx — the app-wide doodle empty state.
+                    CurioDoodleEmptyState(
                         headline = "No discoveries yet",
                         subtext = "Explore a topic or save a capture. Your recent finds will show up here.",
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
                         modifier = Modifier.padding(top = 8.dp)
                     )
                 }
