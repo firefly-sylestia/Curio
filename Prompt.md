@@ -205,3 +205,32 @@ this file on 2026-09-10 to keep it short. They live in git history
 (git log -p -- Prompt.md) if anything needs revisiting.
 
 ## next prompt
+
+**ACTIVE 2026-09-10 (user, after a CI failure was pasted in):**
+
+1. COLLECTIONS: "Want to read" etc. — the shelf name is already shown in
+   the page header, but the card/shelf repeats it below → remove the
+   duplicate label; AUDIT every collection for the same duplication.
+2. FAVORITES vs EVERYTHING are basically the same — differentiate:
+   Favorites should show the FAVORITE TOPICS (the topics you liked), not
+   the saved entries; Everything shows only books / series / albums.
+3. RENAME Everything → "Cupboard" (a shelf-y name) and design the page
+   properly.
+4. The Cupboard wall SHIFTS its size (tiles resize when it reflows) —
+   fix that.
+5. Fix the workflow too (add / save flow into the renamed page).
+6. CABINET saved entries still doesn't load INSTANTLY — it shows a
+   loading state; fix the loading properly.
+7. PROFILE + HOME glass header: the top doesn't reach all the way to the
+   status bar → fix.
+8. Glass header morph-collapse: the extended (expanded) look doesn't
+   COLLAPSE — it stays in the long/expanded state after scroll; make it
+   collapse like the spec.
+9. Commit and push everything.
+
+Status: queued — CI compile errors (private StaggeredGridItemSpan ctor,
+GridItemSpan conversion, TextHistory padding/withStyle) are being fixed
+and pushed FIRST.  
+
+next prompt
+use ask user for test results, and we will be doing more refinements in animations and all more refinemnets in the text history tree too and also the add a caption filed is note paper style chnage it to just a text box 

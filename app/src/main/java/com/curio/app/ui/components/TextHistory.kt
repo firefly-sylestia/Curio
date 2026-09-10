@@ -541,7 +541,7 @@ fun TextHistoryBrowser(
                 HistorySearchBox(
                     query = query,
                     onQueryChange = { query = it },
-                    modifier = Modifier.padding(horizontal = 16.dp, top = 4.dp, bottom = 8.dp)
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 8.dp)
                 )
                 Row(
                     modifier = Modifier
@@ -1017,27 +1017,29 @@ private fun wordDeltaBadge(prev: TextHistoryEntry?, curr: TextHistoryEntry): Str
 
 /** The highlighted snapshot text — changed words wear a soft container
  *  background (error-tint on the removed side, warm-tint on the added),
- *  removed words also get a strike-through. One AnnotatedString, so the
- *  whole version renders as a single flowing paragraph. */
+ *  removed words also get a strike-through. Built from the most basic
+ *  AnnotatedString API (constructor + Range — the Builder's withStyle
+ *  helpers don't resolve in this compose version), so the whole version
+ *  renders as a single flowing paragraph. */
 private fun buildDiffString(tokens: List<DiffToken>, removed: Boolean, scheme: ColorScheme): AnnotatedString {
     val bg = if (removed) scheme.errorContainer else scheme.tertiaryContainer
     val fg = if (removed) scheme.onErrorContainer else scheme.onTertiaryContainer
-    val sb = AnnotatedString.Builder()
-    tokens.forEachIndexed { i, tok ->
-        if (i > 0) sb.append(" ")
+    val style = SpanStyle(
+        background = bg,
+        color = fg,
+        textDecoration = if (removed) TextDecoration.LineThrough else null
+    )
+    val spans = mutableListOf<AnnotatedString.Range<SpanStyle>>()
+    val text = StringBuilder()
+    tokens.forEach { tok ->
+        if (text.isNotEmpty()) text.append(' ')
+        val start = text.length
+        text.append(tok.word)
         if (tok.changed) {
-            sb.withStyle(
-                SpanStyle(
-                    background = bg,
-                    color = fg,
-                    textDecoration = if (removed) TextDecoration.LineThrough else null
-                )
-            ) { append(tok.word) }
-        } else {
-            sb.append(tok.word)
+            spans.add(AnnotatedString.Range(style, start, text.length))
         }
     }
-    return sb.toAnnotatedString()
+    return AnnotatedString(text.toString(), spanStyles = spans)
 }
 
 /** Tree geometry (relative to the frosted card's content): the trunk sits

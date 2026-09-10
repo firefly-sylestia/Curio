@@ -35,11 +35,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
-import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -548,17 +543,18 @@ fun CabinetV2Content(navController: NavController) {
         // when the category changes (the CurioEverythingGallery concept).
         // Favorites stores ONLY liked media, so it wears the same gallery.
         if (openLevel == "everything" || openLevel == SHELF_LEVEL_FAVORITES) {
-            // v3xx40 — the JSX dense WALL: a span-capable STAGGERED masonry
-            // (each column packs continuously, so a cover NEVER leaves
-            // space below it). NO seam plate — the page's own surface shows
-            // between covers. Each cover keeps its OWN shape (book / album /
-            // poster aspect) and is scaled UNIFORMLY by a size tier — the
-            // tier widens AND tallens it together, never stretching one
-            // direction (3x, 2x, 1.5x, 1x, 0.5x of the base cover). The grid
-            // runs on 8 base columns so 0.5x is a true half-size cover.
-            LazyVerticalStaggeredGrid(
-                state = rememberLazyStaggeredGridState(),
-                columns = StaggeredGridCells.Fixed(8),
+            // v3xx42 — the Everything wall on a PLAIN 8-column LazyVerticalGrid:
+            // this foundation's StaggeredGridItemSpan(Int) constructor is
+            // private (CI), so a staggered masonry with custom spans can't
+            // compile here — instead every cover keeps its own shape and is
+            // scaled UNIFORMLY by a SPAN (3x = 6 of 8 columns, 2x = 4,
+            // 1.5x = 3, 1x = 2, 0.5x = 1). The tier cycle is chosen so
+            // consecutive spans sum to the line (6+1+1, 4+4, 3+3+2), so rows
+            // pack without holes; no seam plate — the page's own surface
+            // shows between covers.
+            LazyVerticalGrid(
+                state = rememberLazyGridState(),
+                columns = GridCells.Fixed(8),
                 contentPadding = PaddingValues(
                     start = 10.dp,
                     end = 10.dp,
@@ -567,19 +563,17 @@ fun CabinetV2Content(navController: NavController) {
                         WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
                 ),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
-                // v3xx — staggered grids space columns via verticalItemSpacing
-                // (there is no verticalArrangement param on this layout).
-                verticalItemSpacing = 10.dp,
+                verticalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier
                     .fillMaxSize()
-                    // v3xx40 — NO seam plate: the wall sits on the page's own
+                    // v3xx42 — NO seam plate: the wall sits on the page's own
                     // surface, so the gaps read as clean whitespace between
                     // covers instead of a boxed border plate.
                     .then(if (glassOn && glassBackdrop != null)
                         Modifier.layerBackdrop(glassBackdrop) else Modifier)
             ) {
                 if (wide) {
-                    item(key = "hero", span = StaggeredGridItemSpan.FullLine, contentType = "hero") {
+                    item(key = "hero", span = { GridItemSpan(maxLineSpan) }, contentType = "hero") {
                         wideHero()
                     }
                 }
@@ -1187,19 +1181,19 @@ private fun LazyGridScope.v2DetailItems(
         }
     }
 }/** EVERYTHING — the JSX dense wall (the CurioEverythingGallery concept,
- *  now COVERS ONLY): a STAGGERED masonry where every column packs
- *  continuously, so a cover NEVER leaves space below it. The liked media
- *  merge into ONE recency stream (no category grouping). Each cover keeps
- *  its OWN aspect shape (books tall, albums square, series posters) and
- *  scales UNIFORMLY — the width multiplier spans that many grid columns
- *  (3x / 2x / 1.5x / 1x / 0.5x), so a cover NEVER changes shape, only
- *  size. The most recent cover runs the biggest tier, then the rest cycle
- *  down the wall for a properly jumbled look. The wall's background is the
- *  page's own surface (no plate behind the covers). The filter chips + the
- *  corner Add pill ride the top full-line, and every cover animates to its
- *  new spot on reflow. */
+ *  now COVERS ONLY): a span-based masonry on an 8-column grid. The liked
+ *  media merge into ONE recency stream (no category grouping). Each cover
+ *  keeps its OWN aspect shape (books tall, albums square, series posters)
+ *  and scales UNIFORMLY — the width multiplier spans that many grid
+ *  columns (3x / 2x / 1.5x / 1x / 0.5x), so a cover NEVER changes shape,
+ *  only size. The most recent cover runs the biggest tier, then the rest
+ *  cycle down the wall in a PACKING order (6+1+1, 4+4, 3+3+2 per line) so
+ *  rows never leave holes. The wall's background is the page's own surface
+ *  (no plate behind the covers). The filter chips + the corner Add pill
+ *  ride the top full-line, and every cover animates to its new spot on
+ *  reflow. */
 @OptIn(ExperimentalFoundationApi::class)
-private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
+private fun LazyGridScope.v2EverythingMasonryItems(
     shownBooks: List<V2Liked>,
     shownAlbums: List<V2Liked>,
     shownSeries: List<V2Liked>,
@@ -1215,17 +1209,17 @@ private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
     val allMedia = (shownBooks + shownAlbums + shownSeries)
         .sortedByDescending { likedAtFor(it) }
     val totalShown = allMedia.size
-    // v3xx40 — UNIFORM-SIZE tiers: the multiplier scales BOTH the width and
-    // the height of the cover's own aspect (a 2x book is twice as wide AND
-    // twice as tall as a 1x book — the jacket shape never changes). Each
-    // tier is a SPAN on the 8-column grid (1x = 2 spans), so 3x / 2x / 1.5x /
-    // 1x / 0.5x are all REAL uniform scales and the masonry stays jumbled.
-    val tiers = floatArrayOf(3.0f, 2.0f, 1.5f, 1.0f, 1.0f, 1.0f, 0.5f)
+    // v3xx42 — UNIFORM-SIZE tiers as SPANS on the 8-column grid (1x = 2
+    // spans): every cover keeps its own aspect and the tier scales BOTH
+    // dimensions together (3x = 6 columns, 2x = 4, 1.5x = 3, 1x = 2,
+    // 0.5x = 1). The cycle PACKS perfectly — 3x+0.5x+0.5x = 8, 2x+2x = 8,
+    // 1.5x+1.5x+1x = 8 — so rows never leave holes.
+    val tiers = floatArrayOf(3f, 0.5f, 0.5f, 2f, 2f, 1.5f, 1.5f, 1f)
 
     // Top full-line: the filter chips + the corner ADD pill (the app-wide
     // labeled Add, anchored TOP-RIGHT of the wall instead of a bottom
     // button).
-    item(key = "everything-head", span = StaggeredGridItemSpan.FullLine, contentType = "head") {
+    item(key = "everything-head", span = { GridItemSpan(maxLineSpan) }, contentType = "head") {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1245,7 +1239,7 @@ private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
     }
 
     if (totalShown == 0) {
-        item(key = "e-empty", span = StaggeredGridItemSpan.FullLine, contentType = "empty") {
+        item(key = "e-empty", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
             CurioDoodleEmptyState(
                 headline = "Nothing saved yet",
                 subtext = "Like a book, series or album and its cover shows up here."
@@ -1262,20 +1256,21 @@ private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
             V2Kind.ALBUM -> 1f      // square sleeve
             V2Kind.SERIES -> 0.72f  // poster
         }
-        val fallbackAccent = liked.topic?.categoryId?.let { CurioCategories.byId(it) }
-            ?.themedAccent() ?: MaterialTheme.colorScheme.primary
         val tier = tiers[rank % tiers.size]
         // The tier as a SPAN on the 8-column grid: 1x = 2 spans (a quarter
-        // of the line, same as before), 2x = 4, 3x = 6, and 0.5x = 1 span —
-        // a REAL half-size cover. The multiplier widens the tile the same
-        // amount it tallens it (both from the aspect ratio), so shapes are
-        // never stretched.
-        val spanUnits = (tier * 2).toInt().coerceIn(1, 8)
+        // of the line), 2x = 4, 3x = 6 and 0.5x = 1 — a real half-size
+        // cover; the multiplier widens the tile the same amount it tallens
+        // it (both from the aspect ratio), so shapes are never stretched.
+        val spanCount = (tier * 2).toInt().coerceIn(1, 8)
         item(
             key = "l|${liked.kind.name}|${liked.name}",
-            span = StaggeredGridItemSpan(spanUnits),
+            span = { GridItemSpan(spanCount) },
             contentType = "media"
         ) {
+            // The fallback accent resolves INSIDE the item's composable
+            // lambda (the wall builder itself is not @Composable).
+            val fallbackAccent = liked.topic?.categoryId?.let { CurioCategories.byId(it) }
+                ?.themedAccent() ?: MaterialTheme.colorScheme.primary
             // Rounded cover tile: the art CROPS to fill the whole tile, so
             // no cover ever leaves space below or beside it. No plate, no
             // seam — the page's own surface shows between covers.
