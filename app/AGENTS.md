@@ -7284,6 +7284,49 @@ app/src/main/java/com/curio/app/
   per save — the GC pauses froze the app. Now only new/changed rows
   decode; the map is only touched from the flow's single collection
   dispatcher.
+- **v3xx40 — Cabinet doodle rebalance + settings hub polish (user
+  follow-up 2026-09-10, 9-item batch).** (1) **Doodle empty state** —
+  `CurioDoodleEmptyState` drops the leaf SPRIG (it read as a lopsided
+  tree): the book stack breathes wider, gains a spine tick on the bottom
+  book, and the note card leans against the stack with a corner fold.
+  (2) **Shelf arts rebalanced** (CabinetShelves.kt) — every scene's hero
+  is bigger + CENTRED with a shared `groundShadow` helper (dark ink at
+  0.10/0.18 alpha, tied to the card foot) replacing the far-off filler
+  dots: `ReadingArt`'s book grew (half 0.36w) with a spine crease line +
+  a rounded mug (saucer, handle, taller S-steam), `PeakArt`'s near peak
+  is TALLER with the flag planted ON the summit + a zigzag-hem snow cap
+  + thinner ground band, `PhotosArt` fans three prints from a shared
+  base point (bigger 0.34w prints, photo inner-shadow hairline, angled
+  tape, a paperclip detail), the four MINIMAL_* customs re-centred (sun
+  rises from a horizon with hills, rings gain a second orbit dot, wave
+  gets two drops, dots drift along a drawn arc), `StarArt` centred at
+  0.38u. (3) **Per-card texture RANDOMIZED** — `SettingsCardTexture`
+  seeds 3 outlined bubbles + 5 speckle dots from the card id
+  (`kotlin.random.Random(seed.hashCode())`, remembered per id), so every
+  settings card wears a different-but-stable scatter instead of the
+  same six dots. (4) **Rail auto-centre** — `SettingsNavRail`'s
+  `LaunchedEffect(active)` glides the row (`animateScrollBy`, calm
+  spring) so the ACTIVE chip sits mid-viewport, not glued to the left
+  edge (skips when drift < 10% of the viewport; one frame settle first).
+  (5) **Quick tools popUpTo** — the rail's quick-tool chips now navigate
+  with `popUpTo(SETTINGS) { inclusive = false }` like the rail chips, so
+  deep pages REPLACE each other instead of stacking back-presses. (6)
+  **Backup doodle REDRAWN** — the CLOUD visual is an open ARCHIVE BOX
+  now (lid + label plate + two file folders peeking out + a curved
+  restore arrow looping back in): the old four-lobe cloud + up arrow
+  was the Backup icon drawn bigger. (7) **Manage Categories drag
+  visibility** — the dragged row swaps to a LIFTED CARD shell
+  (`shadow(6dp)` → clip → opaque surfaceContainerHighest / #F7F1E6 fill
+  → 1.5dp primary outline, full alpha, zIndex 1) so it never ghosts
+  into the rows it slides over. (8) **Footer note** — the ✦✧✦ dots line
+  is gone; the light panel is now a `lerp(background, settingsRoseAccent(),
+  0.07f)` blend with a hairline border (was the hard beige #E9DFD4
+  block). (9) **Secondary cards = card doodles** — Recycle bin /
+  Updates / Help & feedback traded the plain white rows for compact
+  members of the big-card family: tone gradients (STEEL/SAGE/LAVENDER),
+  frosted tile + round arrow + three NEW visuals (`TRASH` = ribbed can
+  + tilted lid + paper ball, `REFRESH` = two chase arcs around a version
+  chip, `CHAT` = question bubble + reply bubble with ink lines).
 - **v3xx37 — Cabinet lag fix: light entry projection + batched cover
   warmer (user follow-up 2026-09-09, logcat showed repeated 15–52MB
   GCs + 89/43 skipped frames while viewing the Cabinet).** (1) **Light

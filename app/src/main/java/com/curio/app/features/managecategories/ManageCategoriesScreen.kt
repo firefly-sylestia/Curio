@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
@@ -42,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
@@ -526,25 +528,43 @@ private fun CategoryRow(
         animationSpec = spring(dampingRatio = 0.85f, stiffness = 380f),
         label = "hiddenAlpha"
     )
+    // v3xx40 — while DRAGGING the row must stay clearly visible: the flat
+    // row disappears against the neighbours it slides over, so the dragged
+    // row swaps to a LIFTED CARD look — an opaque surface, hairline primary
+    // outline, soft shadow and FULL alpha (the hidden fade is suppressed
+    // for the dragged row). Neighbours keep the flat look.
+    // (Shadow BEFORE the fill per the shadow-order rule.)
+    val rowAlpha = if (isDragging) 1f else hiddenAlpha
+    val draggedShell = if (isDragging)
+        Modifier
+            .shadow(6.dp, RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(14.dp))
+            .background(
+                if (isCurioDarkTheme()) MaterialTheme.colorScheme.surfaceContainerHighest
+                else Color(0xFFF7F1E6)
+            )
+            .border(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.55f), RoundedCornerShape(14.dp))
+    else Modifier
 
     // Flat row — no card shell: a tinted icon chip, the name + Hidden
     // status, the reorder steppers + drag handle, and the visibility
     // switch, sitting directly on the watermark backdrop. While dragging
-    // the row lifts (zIndex + slight scale) above its neighbors.
+    // the row lifts (zIndex + slight scale + the card shell) above its
+    // neighbors.
     Row(
         modifier = modifier
             .fillMaxWidth()
             .graphicsLayer {
                 scaleX = if (isDragging) 1.03f else 1f
                 scaleY = if (isDragging) 1.03f else 1f
-                alpha = if (isDragging) 0.9f else 1f
             }
             .zIndex(if (isDragging) 1f else 0f)
             // v3xx — the finger-follow / placeholder offset (layout-space so
             // the row physically moves; zIndex keeps the dragged row above).
             .offset { IntOffset(0, dragOffsetY.roundToInt()) }
+            .then(draggedShell)
             .padding(horizontal = 4.dp, vertical = 10.dp)
-            .alpha(hiddenAlpha)
+            .alpha(rowAlpha)
             // v3xx — the whole row is the long-press drag surface: the list
             // scroll can never steal the gesture once the long press lands.
             .then(

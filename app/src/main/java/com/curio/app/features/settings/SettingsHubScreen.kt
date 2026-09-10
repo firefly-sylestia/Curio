@@ -48,6 +48,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -60,6 +61,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
@@ -1513,9 +1515,12 @@ private enum class SettingsDesignTone {
     CORAL, SAGE, BLUE, LAVENDER, YELLOW, MINT, PINK, VIOLET, SLATE, STEEL
 }
 
-/** The JSX decorative foot visuals each card wears. */
+/** The JSX decorative foot visuals each card wears. v3xx40 — TRASH /
+ *  REFRESH / CHAT join for the secondary card doodles (Recycle bin /
+ *  Updates / Help & feedback). */
 private enum class SettingsDesignVisual {
-    SWATCHES, PET, COMPASS, WAVE, CARDS, PHOTOS, SHARE, FLASK, CLOUD, IMAGE
+    SWATCHES, PET, COMPASS, WAVE, CARDS, PHOTOS, SHARE, FLASK, CLOUD, IMAGE,
+    TRASH, REFRESH, CHAT
 }
 
 /** One big JSX-style setting card. */
@@ -1586,19 +1591,24 @@ private val settingsDesignGroups = listOf(
     ))
 )
 
-/** The JSX secondary cards — smaller horizontal rows under the groups. */
+/** The JSX secondary cards — smaller horizontal rows under the groups.
+ *  v3xx40 — they wear the same CARD-DOODLE design as the big cards now:
+ *  a tone gradient + a small decorative visual, so Recycle bin / Updates /
+ *  Help & feedback read as part of the same family. */
 private data class SettingsSecondaryCard(
     val id: String,
     val title: String,
     val subtitle: String,
     val icon: String,
-    val route: String
+    val route: String,
+    val tone: SettingsDesignTone,
+    val visual: SettingsDesignVisual
 )
 
 private val settingsSecondaryCards = listOf(
-    SettingsSecondaryCard("recycle", "Recycle bin", "Restore recently deleted captures", CurioIcons.Delete, CurioRoutes.RECYCLE_BIN),
-    SettingsSecondaryCard("updates", "Updates", "Your build, release notes & update checker", CurioIcons.Download, CurioRoutes.UPDATES),
-    SettingsSecondaryCard("support", "Help & feedback", "Get support or suggest a feature", CurioIcons.SupportAgent, CurioRoutes.SUPPORT)
+    SettingsSecondaryCard("recycle", "Recycle bin", "Restore recently deleted captures", CurioIcons.Delete, CurioRoutes.RECYCLE_BIN, SettingsDesignTone.STEEL, SettingsDesignVisual.TRASH),
+    SettingsSecondaryCard("updates", "Updates", "Your build, release notes & update checker", CurioIcons.Download, CurioRoutes.UPDATES, SettingsDesignTone.SAGE, SettingsDesignVisual.REFRESH),
+    SettingsSecondaryCard("support", "Help & feedback", "Get support or suggest a feature", CurioIcons.SupportAgent, CurioRoutes.SUPPORT, SettingsDesignTone.LAVENDER, SettingsDesignVisual.CHAT)
 )
 
 /** Light + dark gradient pair for a tone (JSX `.coral` … `.violet` + the
@@ -2026,42 +2036,85 @@ private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier 
             )
         }
         SettingsDesignVisual.CLOUD -> Box(modifier) {
-            // The backup & restore doodle — a fuller FOUR-LOBE cloud with a
-            // clear upload arrow (stem, head and a small base tray line)
-            // rising through it, plus two tiny accent dots: one clean
-            // subject, no sparkle text.
+            // v3xx40 — the backup & restore doodle REDRAWN: the old
+            // cloud + upload arrow was the Backup ICON drawn bigger (it
+            // matched the card's frosted icon too closely). Now: an open
+            // ARCHIVE BOX with file folders peeking out and a curved
+            // restore arrow looping back into it — one clean subject, the
+            // doodle family (pastel fill + white outline), no sparkles.
             Canvas(Modifier.fillMaxSize()) {
                 val w = size.width
                 val h = size.height
                 val stroke = 2.dp.toPx()
-                // The cloud — four lobes on a flat base, fill + outline.
-                val baseY = h * 0.78f
-                val cloud = Path().apply {
-                    moveTo(w * 0.08f, baseY)
-                    cubicTo(w * 0.04f, baseY - h * 0.22f, w * 0.14f, baseY - h * 0.44f, w * 0.28f, baseY - h * 0.38f)
-                    cubicTo(w * 0.28f, baseY - h * 0.62f, w * 0.46f, baseY - h * 0.70f, w * 0.56f, baseY - h * 0.52f)
-                    cubicTo(w * 0.64f, baseY - h * 0.66f, w * 0.82f, baseY - h * 0.60f, w * 0.86f, baseY - h * 0.40f)
-                    cubicTo(w * 0.97f, baseY - h * 0.34f, w * 0.95f, baseY - h * 0.04f, w * 0.82f, baseY)
+                val boxL = w * 0.16f; val boxR = w * 0.84f
+                val boxTop = h * 0.46f; val boxBot = h * 0.90f
+                // Grounding shadow.
+                drawOval(
+                    Color.Black.copy(alpha = 0.10f),
+                    topLeft = Offset(w * 0.10f, boxBot - 2.dp.toPx()),
+                    size = Size(w * 0.80f, 6.dp.toPx())
+                )
+                // Folders peeking out of the box — two tilted file slips.
+                val folder1 = Path().apply {
+                    moveTo(w * 0.28f, boxTop + h * 0.02f)
+                    lineTo(w * 0.44f, boxTop - h * 0.16f)
+                    lineTo(w * 0.54f, boxTop - h * 0.13f)
+                    lineTo(w * 0.40f, boxTop + h * 0.05f)
                     close()
                 }
-                drawPath(cloud, Color(0xFFDEE6EB).copy(alpha = 0.92f))
-                drawPath(cloud, Color.White.copy(alpha = 0.95f), style = Stroke(width = stroke * 0.8f))
-                // Up arrow inside the cloud — stem + head, white, with a
-                // small base tray line (the "upload" mark).
-                val ax = w * 0.50f
-                val headY = h * 0.38f
-                drawLine(Color.White.copy(alpha = 0.95f), Offset(ax, h * 0.70f), Offset(ax, headY), strokeWidth = 2.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
-                val head = Path().apply {
-                    moveTo(ax - w * 0.10f, headY + h * 0.14f)
-                    lineTo(ax, headY)
-                    lineTo(ax + w * 0.10f, headY + h * 0.14f)
+                drawPath(folder1, Color(0xFFF2D8A8).copy(alpha = 0.95f))
+                drawPath(folder1, Color.White.copy(alpha = 0.9f), style = Stroke(width = stroke * 0.55f))
+                val folder2 = Path().apply {
+                    moveTo(w * 0.46f, boxTop + h * 0.03f)
+                    lineTo(w * 0.62f, boxTop - h * 0.20f)
+                    lineTo(w * 0.73f, boxTop - h * 0.17f)
+                    lineTo(w * 0.59f, boxTop + h * 0.06f)
                     close()
                 }
-                drawPath(head, Color.White.copy(alpha = 0.95f))
-                drawLine(Color.White.copy(alpha = 0.7f), Offset(ax - w * 0.13f, h * 0.74f), Offset(ax + w * 0.13f, h * 0.74f), strokeWidth = stroke * 0.6f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
-                // Two tiny accent dots below the cloud (no sparkles).
-                drawCircle(Color.White.copy(alpha = 0.55f), radius = 2.dp.toPx(), center = Offset(w * 0.20f, h * 0.92f))
-                drawCircle(Color.White.copy(alpha = 0.35f), radius = 1.5.dp.toPx(), center = Offset(w * 0.80f, h * 0.94f))
+                drawPath(folder2, Color(0xFFB9CDE0).copy(alpha = 0.95f))
+                drawPath(folder2, Color.White.copy(alpha = 0.9f), style = Stroke(width = stroke * 0.55f))
+                // The box body — trapezoid (slightly narrower at the foot),
+                // soft slate fill + white outline + a label plate.
+                val body = Path().apply {
+                    moveTo(boxL, boxTop)
+                    lineTo(boxR, boxTop)
+                    lineTo(boxR - w * 0.05f, boxBot)
+                    lineTo(boxL + w * 0.05f, boxBot)
+                    close()
+                }
+                drawPath(body, Color(0xFFC7D4DE).copy(alpha = 0.92f))
+                drawPath(body, Color.White.copy(alpha = 0.95f), style = Stroke(width = stroke * 0.7f))
+                // Label plate on the box front.
+                val plate = androidx.compose.ui.geometry.Rect(w * 0.38f, h * 0.60f, w * 0.62f, h * 0.72f)
+                drawRoundRect(Color.White.copy(alpha = 0.85f), topLeft = plate.topLeft, size = plate.size, cornerRadius = CornerRadius(2.dp.toPx()))
+                drawLine(Color(0xFF6B5A52).copy(alpha = 0.45f), Offset(plate.left + 3.dp.toPx(), plate.top + plate.height * 0.5f), Offset(plate.right - 3.dp.toPx(), plate.top + plate.height * 0.5f), strokeWidth = 1.2f)
+                // The lid — tilted open, resting on the box's back edge.
+                val lid = Path().apply {
+                    moveTo(boxL - w * 0.04f, boxTop)
+                    lineTo(boxR + w * 0.04f, boxTop)
+                    lineTo(boxR + w * 0.01f, boxTop - h * 0.10f)
+                    lineTo(boxL - w * 0.01f, boxTop - h * 0.10f)
+                    close()
+                }
+                drawPath(lid, Color(0xFFD8E2EA).copy(alpha = 0.95f))
+                drawPath(lid, Color.White.copy(alpha = 0.95f), style = Stroke(width = stroke * 0.7f))
+                // Restore arrow — a curved loop ABOVE the lid flowing back
+                // down into the box (the "restore" direction, the opposite
+                // of the upload icon's arrow).
+                val loop = Path().apply {
+                    moveTo(w * 0.86f, h * 0.30f)
+                    cubicTo(w * 0.84f, h * 0.14f, w * 0.60f, h * 0.08f, w * 0.46f, h * 0.16f)
+                }
+                drawPath(loop, Color.White.copy(alpha = 0.95f), style = Stroke(width = stroke * 0.7f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
+                val loopHead = Path().apply {
+                    moveTo(w * 0.50f, h * 0.055f)
+                    lineTo(w * 0.45f, h * 0.165f)
+                    lineTo(w * 0.565f, h * 0.175f)
+                    close()
+                }
+                drawPath(loopHead, Color.White.copy(alpha = 0.95f))
+                // One soft accent dot (no sparkles).
+                drawCircle(Color.White.copy(alpha = 0.5f), radius = 1.6f, center = Offset(w * 0.10f, h * 0.22f))
             }
         }
         SettingsDesignVisual.IMAGE -> Box(modifier) {
@@ -2102,11 +2155,166 @@ private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier 
                 modifier = Modifier.offset(x = 6.dp, y = 46.dp)
             )
         }
+        SettingsDesignVisual.TRASH -> Box(modifier) {
+            // The recycle-bin doodle — a hand-drawn wastebasket: tapered
+            // can with vertical ribs, a tilted lid with a handle, and a
+            // crumpled paper ball beside it (one clean subject, the doodle
+            // family).
+            Canvas(Modifier.fillMaxSize()) {
+                val w = size.width; val h = size.height
+                val stroke = 2.dp.toPx()
+                val cx = w * 0.44f
+                val topY = h * 0.30f; val botY = h * 0.88f
+                val halfTop = w * 0.17f; val halfBot = w * 0.13f
+                // Grounding shadow.
+                drawOval(Color.Black.copy(alpha = 0.10f), topLeft = Offset(cx - w * 0.22f, botY - 2.dp.toPx()), size = Size(w * 0.44f, 5.dp.toPx()))
+                // Can body — tapered, soft steel fill + outline.
+                val can = Path().apply {
+                    moveTo(cx - halfTop, topY)
+                    lineTo(cx + halfTop, topY)
+                    lineTo(cx + halfBot, botY)
+                    lineTo(cx - halfBot, botY)
+                    close()
+                }
+                drawPath(can, Color(0xFFB9C9D6).copy(alpha = 0.9f))
+                drawPath(can, Color.White.copy(alpha = 0.95f), style = Stroke(width = stroke * 0.7f))
+                // Ribs — two vertical lines inside the can.
+                listOf(-0.4f, 0.4f).forEach { fx ->
+                    val xTop = cx + halfTop * fx
+                    val xBot = cx + halfBot * fx
+                    drawLine(Color.White.copy(alpha = 0.65f), Offset(xTop, topY + h * 0.07f), Offset(xBot, botY - h * 0.05f), strokeWidth = stroke * 0.45f)
+                }
+                // Tilted lid — an ellipse + handle knob, leaning on top.
+                rotate(-0.12f, Offset(cx, topY)) {
+                    drawOval(Color(0xFFCBD9E4).copy(alpha = 0.95f), topLeft = Offset(cx - halfTop - w * 0.02f, topY - h * 0.10f), size = Size(halfTop * 2 + w * 0.04f, h * 0.11f))
+                    drawOval(Color.White.copy(alpha = 0.95f), topLeft = Offset(cx - halfTop - w * 0.02f, topY - h * 0.10f), size = Size(halfTop * 2 + w * 0.04f, h * 0.11f), style = Stroke(width = stroke * 0.6f))
+                    drawLine(Color.White.copy(alpha = 0.9f), Offset(cx - w * 0.05f, topY - h * 0.10f), Offset(cx + w * 0.05f, topY - h * 0.10f), strokeWidth = stroke * 0.5f)
+                }
+                // A crumpled paper ball beside the can.
+                drawCircle(Color(0xFFFFFBF2).copy(alpha = 0.95f), radius = w * 0.055f, center = Offset(w * 0.78f, botY - h * 0.03f))
+                drawCircle(Color.White.copy(alpha = 0.9f), radius = w * 0.055f, center = Offset(w * 0.78f, botY - h * 0.03f), style = Stroke(width = stroke * 0.5f))
+                drawLine(Color(0xFF9A715D).copy(alpha = 0.4f), Offset(w * 0.755f, botY - h * 0.05f), Offset(w * 0.80f, botY - h * 0.015f), strokeWidth = 0.9f)
+            }
+        }
+        SettingsDesignVisual.REFRESH -> Box(modifier) {
+            // The updates doodle — a hand-drawn refresh loop: two curved
+            // arrows chasing each other around a version chip (one clean
+            // subject, the doodle family).
+            Canvas(Modifier.fillMaxSize()) {
+                val w = size.width; val h = size.height
+                val stroke = 2.dp.toPx()
+                val cx = w * 0.48f; val cy = h * 0.52f; val r = w * 0.22f
+                // Top arc — clockwise, with the arrowhead at its right end.
+                drawArc(Color.White.copy(alpha = 0.95f), startAngle = 200f, sweepAngle = 130f, useCenter = false,
+                    topLeft = Offset(cx - r, cy - r), size = Size(r * 2f, r * 2f),
+                    style = Stroke(width = stroke * 0.7f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
+                val headA = Path().apply {
+                    moveTo(cx + r * 0.94f, cy - r * 0.50f)
+                    lineTo(cx + r * 0.86f, cy - r * 0.05f)
+                    lineTo(cx + r * 0.42f, cy - r * 0.42f)
+                    close()
+                }
+                drawPath(headA, Color.White.copy(alpha = 0.95f))
+                // Bottom arc — counter-clockwise, arrowhead at its left end.
+                drawArc(Color.White.copy(alpha = 0.75f), startAngle = 20f, sweepAngle = 130f, useCenter = false,
+                    topLeft = Offset(cx - r, cy - r), size = Size(r * 2f, r * 2f),
+                    style = Stroke(width = stroke * 0.7f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
+                val headB = Path().apply {
+                    moveTo(cx - r * 0.94f, cy + r * 0.50f)
+                    lineTo(cx - r * 0.86f, cy + r * 0.05f)
+                    lineTo(cx - r * 0.42f, cy + r * 0.42f)
+                    close()
+                }
+                drawPath(headB, Color.White.copy(alpha = 0.75f))
+                // Version chip in the middle — a small rounded plate.
+                val chip = androidx.compose.ui.geometry.Rect(cx - w * 0.13f, cy - h * 0.10f, cx + w * 0.13f, cy + h * 0.10f)
+                drawRoundRect(Color(0xFFFFFBF2).copy(alpha = 0.9f), topLeft = chip.topLeft, size = chip.size, cornerRadius = CornerRadius(3.dp.toPx()))
+                drawRoundRect(Color.White.copy(alpha = 0.9f), topLeft = chip.topLeft, size = chip.size, cornerRadius = CornerRadius(3.dp.toPx()), style = Stroke(width = stroke * 0.5f))
+                drawLine(Color(0xFF6B5A52).copy(alpha = 0.5f), Offset(chip.left + 4.dp.toPx(), chip.top + chip.height * 0.5f), Offset(chip.right - 4.dp.toPx(), chip.top + chip.height * 0.5f), strokeWidth = 1.3f)
+            }
+        }
+        SettingsDesignVisual.CHAT -> Box(modifier) {
+            // The help & feedback doodle — two speech bubbles: a big
+            // question bubble and a small reply bubble with lines (one
+            // clean subject, the doodle family).
+            Canvas(Modifier.fillMaxSize()) {
+                val w = size.width; val h = size.height
+                val stroke = 2.dp.toPx()
+                // Big bubble — round with a tail bottom-left.
+                val bigRect = androidx.compose.ui.geometry.Rect(w * 0.06f, h * 0.10f, w * 0.62f, h * 0.62f)
+                val bigBubble = Path().apply {
+                    addOval(bigRect)
+                }
+                drawPath(bigBubble, Color(0xFFE4DBF2).copy(alpha = 0.92f))
+                drawPath(bigBubble, Color.White.copy(alpha = 0.95f), style = Stroke(width = stroke * 0.7f))
+                val tail1 = Path().apply {
+                    moveTo(bigRect.left + bigRect.width * 0.22f, bigRect.bottom - 2f)
+                    lineTo(bigRect.left + bigRect.width * 0.12f, bigRect.bottom + h * 0.16f)
+                    lineTo(bigRect.left + bigRect.width * 0.42f, bigRect.bottom - 2f)
+                    close()
+                }
+                drawPath(tail1, Color(0xFFE4DBF2).copy(alpha = 0.92f))
+                drawPath(tail1, Color.White.copy(alpha = 0.9f), style = Stroke(width = stroke * 0.5f))
+                // Question mark — a drawn hook + dot (no text glyph).
+                drawArc(Color.White.copy(alpha = 0.95f), startAngle = 180f, sweepAngle = 220f, useCenter = false,
+                    topLeft = Offset(w * 0.26f, h * 0.18f), size = Size(w * 0.16f, h * 0.24f),
+                    style = Stroke(width = stroke * 0.65f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
+                drawLine(Color.White.copy(alpha = 0.95f), Offset(w * 0.34f, h * 0.40f), Offset(w * 0.34f, h * 0.44f), strokeWidth = stroke * 0.65f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                drawCircle(Color.White.copy(alpha = 0.95f), radius = stroke * 0.5f, center = Offset(w * 0.34f, h * 0.50f))
+                // Small reply bubble — bottom-right, with two ink lines.
+                val smallRect = androidx.compose.ui.geometry.Rect(w * 0.46f, h * 0.48f, w * 0.95f, h * 0.82f)
+                val smallBubble = Path().apply {
+                    addOval(smallRect)
+                }
+                drawPath(smallBubble, Color(0xFFDCE8F0).copy(alpha = 0.95f))
+                drawPath(smallBubble, Color.White.copy(alpha = 0.95f), style = Stroke(width = stroke * 0.6f))
+                val tail2 = Path().apply {
+                    moveTo(smallRect.right - smallRect.width * 0.40f, smallRect.bottom - 2f)
+                    lineTo(smallRect.right - smallRect.width * 0.30f, smallRect.bottom + h * 0.12f)
+                    lineTo(smallRect.right - smallRect.width * 0.12f, smallRect.bottom - 2f)
+                    close()
+                }
+                drawPath(tail2, Color(0xFFDCE8F0).copy(alpha = 0.95f))
+                drawPath(tail2, Color.White.copy(alpha = 0.9f), style = Stroke(width = stroke * 0.45f))
+                drawLine(Color(0xFF6B5A52).copy(alpha = 0.45f), Offset(smallRect.left + smallRect.width * 0.18f, smallRect.top + smallRect.height * 0.40f), Offset(smallRect.left + smallRect.width * 0.78f, smallRect.top + smallRect.height * 0.40f), strokeWidth = 1.1f)
+                drawLine(Color(0xFF6B5A52).copy(alpha = 0.45f), Offset(smallRect.left + smallRect.width * 0.18f, smallRect.top + smallRect.height * 0.62f), Offset(smallRect.left + smallRect.width * 0.58f, smallRect.top + smallRect.height * 0.62f), strokeWidth = 1.1f)
+            }
+        }
+    }
+}
+
+/** One card's random-but-STABLE bubble/speckle decoration, seeded from the
+ *  card id: 2-3 outlined bubbles + 4-6 speckle dots at seeded positions
+ *  (fractions of the card's size). Never recomposes — the same card id
+ *  always produces the same pattern. */
+private class SettingsCardTexture(seed: String) {
+    data class Bubble(val x: Float, val y: Float, val size: Float)
+    data class Speck(val x: Float, val y: Float, val size: Float)
+
+    private val rnd = kotlin.random.Random(seed.hashCode())
+    val bubbles: List<Bubble> = List(3) { i ->
+        // Bubbles hug the top-right / bottom-left corners (the JSX texture
+        // zones), away from the title block at the top-left.
+        val topRight = i == 0
+        val bx = if (topRight) 0.72f + rnd.nextFloat() * 0.24f else 0.22f + rnd.nextFloat() * 0.24f
+        val by = if (topRight) 0.08f + rnd.nextFloat() * 0.20f else 0.78f + rnd.nextFloat() * 0.16f
+        Bubble(bx.coerceIn(0.05f, 0.96f), by.coerceIn(0.06f, 0.92f), 0.06f + rnd.nextFloat() * 0.10f)
+    }
+    val specks: List<Speck> = List(5) {
+        Speck(
+            0.08f + rnd.nextFloat() * 0.84f,
+            0.62f + rnd.nextFloat() * 0.32f,
+            rnd.nextFloat()
+        )
     }
 }
 
 /** The JSX setting card — tone gradient, blob shapes, texture dots, frosted
- *  icon tile, round arrow, title/subtitle and the decorative visual. */
+ *  icon tile, round arrow, title/subtitle and the decorative visual.
+ *  v3xx40 — the bubble/texture decoration is RANDOMIZED per card (seeded
+ *  from the card id, so it stays stable across recompositions and
+ *  restarts): every card scatters its outlined bubbles + speckle dots at
+ *  different spots/sizes instead of wearing the same pattern. */
 @Composable
 private fun SettingsDesignCardView(
     card: SettingsDesignCard,
@@ -2117,6 +2325,9 @@ private fun SettingsDesignCardView(
     val (start, end) = settingsToneGradient(card.tone, dark)
     val ink = settingsCardInk(dark)
     val muted = ink.copy(alpha = if (dark) 0.74f else 0.72f)
+    // Per-card seeded pattern: derived once per card id (stable — the same
+    // card always wears the same random-looking decoration).
+    val texture = remember(card.id) { SettingsCardTexture(card.id) }
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -2125,24 +2336,30 @@ private fun SettingsDesignCardView(
             .background(Brush.linearGradient(listOf(start, end)))
             .clickable(onClick = onClick)
     ) {
-        // ── Blobs + texture (the JSX ::before/::after + cardTexture) ──
+        // ── Blobs + texture (the JSX ::before/::after + cardTexture) —
+        //    the big corner blobs stay, the bubbles + speckle are the
+        //    card's own random scatter. ──
         Canvas(Modifier.fillMaxSize()) {
             val w = size.width; val h = size.height
             drawCircle(Color.White.copy(alpha = 0.20f), radius = w * 0.62f, center = androidx.compose.ui.geometry.Offset(w * 1.08f, h * 0.02f))
             drawCircle(Color.White.copy(alpha = 0.13f), radius = w * 0.55f, center = androidx.compose.ui.geometry.Offset(-w * 0.12f, h * 1.18f))
-            // Bubble dots (JSX .cardTexture) — outlined bubbles + a light
-            // speckle; the diagonal sheen line is gone.
-            drawCircle(Color.White.copy(alpha = 0.16f), radius = w * 0.16f, center = androidx.compose.ui.geometry.Offset(w * 0.94f, h * 0.16f), style = Stroke(width = 1.4.dp.toPx()))
-            drawCircle(Color.White.copy(alpha = 0.13f), radius = w * 0.07f, center = androidx.compose.ui.geometry.Offset(w * 0.34f, h * 0.88f), style = Stroke(width = 1.2.dp.toPx()))
-            listOf(
-                androidx.compose.ui.geometry.Offset(w * 0.12f, h * 0.80f),
-                androidx.compose.ui.geometry.Offset(w * 0.20f, h * 0.88f),
-                androidx.compose.ui.geometry.Offset(w * 0.46f, h * 0.78f),
-                androidx.compose.ui.geometry.Offset(w * 0.60f, h * 0.86f),
-                androidx.compose.ui.geometry.Offset(w * 0.72f, h * 0.70f),
-                androidx.compose.ui.geometry.Offset(w * 0.84f, h * 0.78f)
-            ).forEach { c ->
-                drawCircle(Color.White.copy(alpha = 0.30f), radius = 1.5.dp.toPx(), center = c)
+            // Outlined bubbles — random spots/sizes.
+            texture.bubbles.forEach { b ->
+                drawCircle(
+                    Color.White.copy(alpha = 0.15f),
+                    radius = w * b.size,
+                    center = androidx.compose.ui.geometry.Offset(w * b.x, h * b.y),
+                    style = Stroke(width = (if (b.size > 0.11f) 1.4f else 1.1f).dp.toPx())
+                )
+            }
+
+            // Speckle dots — random scatter.
+            texture.specks.forEach { s ->
+                drawCircle(
+                    Color.White.copy(alpha = 0.30f),
+                    radius = (1.1f + s.size * 1.4f).dp.toPx(),
+                    center = androidx.compose.ui.geometry.Offset(w * s.x, h * s.y)
+                )
             }
         }
         // ── Decorative visual, bottom-right — drawn FIRST so it sits BEHIND
@@ -2220,7 +2437,10 @@ private fun SettingsDesignCardView(
     }
 }
 
-/** The JSX secondary card — a horizontal icon + text + arrow row. */
+/** The JSX secondary card — v3xx40 REBUILT as a compact member of the
+ *  big-card family: the tone gradient + frosted icon tile + title + the
+ *  small doodle visual on the right (was a plain white row that read
+ *  apart from the tone cards above it). */
 @Composable
 private fun SettingsSecondaryCardView(
     card: SettingsSecondaryCard,
@@ -2228,55 +2448,75 @@ private fun SettingsSecondaryCardView(
     modifier: Modifier = Modifier
 ) {
     val dark = isCurioDarkTheme()
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+    val (start, end) = settingsToneGradient(card.tone, dark)
+    val ink = settingsCardInk(dark)
+    val muted = ink.copy(alpha = if (dark) 0.74f else 0.72f)
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(
-                if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
-                else Color.White.copy(alpha = 0.68f)
-            )
+            .height(104.dp)
+            .clip(RoundedCornerShape(22.dp))
+            .background(Brush.linearGradient(listOf(start, end)))
             .clickable(onClick = onClick)
-            .padding(horizontal = 15.dp, vertical = 13.dp)
     ) {
-        Box(
+        // The small decorative visual, bottom-right, behind the text.
+        SettingsCardVisual(
+            visual = card.visual,
             modifier = Modifier
-                .size(40.dp)
-                .clip(RoundedCornerShape(13.dp))
-                .background(if (dark) Color.White.copy(alpha = 0.09f) else Color(0xFFF2E8DC)),
-            contentAlignment = Alignment.Center
-        ) {
-            CurioIcon(
-                name = card.icon,
-                contentDescription = null,
-                tint = if (dark) Color(0xFFD7B8A9) else Color(0xFF755647),
-                size = 20.dp
-            )
-        }
-        Spacer(Modifier.width(13.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = card.title,
-                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = card.subtitle,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-        CurioIcon(
-            name = CurioIcons.ChevronRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-            size = 18.dp
+                .align(Alignment.BottomEnd)
+                .padding(end = 8.dp, bottom = 6.dp)
+                .size(width = 76.dp, height = 52.dp)
+                .alpha(0.92f)
         )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 15.dp, vertical = 12.dp)
+        ) {
+            // Frosted icon tile — the big cards' language.
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(13.dp))
+                    .background(if (dark) Color.White.copy(alpha = 0.14f) else Color.White.copy(alpha = 0.33f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CurioIcon(
+                    name = card.icon,
+                    contentDescription = null,
+                    tint = ink,
+                    size = 20.dp
+                )
+            }
+            Spacer(Modifier.width(13.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = card.title,
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
+                    color = ink,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = card.subtitle,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = muted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            // Round arrow — the big cards' corner arrow, smaller.
+            Box(
+                modifier = Modifier
+                    .size(30.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF63423A).copy(alpha = if (dark) 0.42f else 0.20f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CurioIcon(name = CurioIcons.ChevronRight, contentDescription = null, tint = Color(0xFFFFF9F1), size = 15.dp)
+            }
+        }
     }
 }
 
@@ -2318,8 +2558,8 @@ internal fun SettingsNavRail(
     val dark = isCurioDarkTheme()
     // v3xx — the rail keeps its FIXED order: the opened page is highlighted
     // in its NATURAL slot (never rotated next to "All Settings"). The row
-    // starts AT the active chip via the initial index, so no scroll runs on
-    // composition — the header never glides. (The old animateScrollToItem
+    // starts AT the active chip via the initial index, so no big scroll runs
+    // on composition — the header never glides. (The old animateScrollToItem
     // re-animated from index 0 on every page open: the rail visibly jumped
     // on top of the page transition.)
     val listState = rememberLazyListState(
@@ -2327,6 +2567,29 @@ internal fun SettingsNavRail(
             settingsNavRail.indexOfFirst { it.id == id }.takeIf { it >= 0 }
         } ?: 0
     )
+    // v3xx40 — CENTER the active chip (user: "keep the active scroll in
+    // middle, not always on the left side"): after the initial index lands
+    // the active chip at the row's LEFT edge, glide the row so the chip
+    // sits mid-viewport. The correction is small (≤ half the rail's width)
+    // and animates once per active change — the header stays put. Chips
+    // near either end (All Settings, Support) clamp naturally.
+    LaunchedEffect(active) {
+        if (active == null) return@LaunchedEffect
+        val idx = settingsNavRail.indexOfFirst { it.id == active }
+        if (idx < 0) return@LaunchedEffect
+        // Give the row a frame to lay out at the initial index.
+        withFrameNanos { }
+        val info = listState.layoutInfo
+        val item = info.visibleItemsInfo.firstOrNull { it.index == idx } ?: return@LaunchedEffect
+        val itemCenter = item.offset + item.size / 2f
+        val viewportCenter = info.viewportEndOffset / 2f
+        val drift = itemCenter - viewportCenter
+        // Only glide when the chip is meaningfully off-centre (>10% of the
+        // viewport) so near-centred chips don't twitch.
+        if (kotlin.math.abs(drift) > info.viewportEndOffset * 0.10f) {
+            listState.animateScrollBy(drift, spring(dampingRatio = 0.95f, stiffness = 200f))
+        }
+    }
     Column(modifier = modifier.fillMaxWidth()) {
         LazyRow(
             state = listState,
@@ -2506,7 +2769,16 @@ private fun SettingsQuickTools(
                                 SettingsHighlightTarget.page = tool.page
                                 SettingsHighlightTarget.rowKey = tool.rowKey
                             }
-                            navController.navigate(tool.route) { launchSingleTop = true }
+                            // v3xx40 — navigate like the rail chips do
+                            // (popUpTo the Settings hub): the deep pages
+                            // REPLACE the current screen instead of stacking,
+                            // so tapping quick tools on several pages in a
+                            // row never builds a tower of back-presses — the
+                            // hub stays ONE back away.
+                            navController.navigate(tool.route) {
+                                popUpTo(CurioRoutes.SETTINGS) { inclusive = false }
+                                launchSingleTop = true
+                            }
                         }
                         .padding(horizontal = 10.dp, vertical = 6.dp)
                 ) {
@@ -2598,7 +2870,10 @@ private fun SettingsJsxSearchField(
     }
 }
 
-/** The JSX footer note — a soft panel under everything. */
+/** The JSX footer note — a soft panel under everything.
+ *  v3xx40 — the ✦✧✦ dots line is GONE (read as decoration noise) and the
+ *  light-mode panel is a quieter blend of the page background (the old
+ *  hard beige block clashed with the wash). */
 @Composable
 private fun SettingsFooterNote() {
     val dark = isCurioDarkTheme()
@@ -2608,18 +2883,21 @@ private fun SettingsFooterNote() {
             .clip(RoundedCornerShape(26.dp))
             .background(
                 if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.5f)
-                else Color(0xFFE9DFD4)
+                else androidx.compose.ui.graphics.lerp(
+                    MaterialTheme.colorScheme.background,
+                    settingsRoseAccent(),
+                    0.07f
+                )
             )
-            .padding(vertical = 26.dp, horizontal = 18.dp),
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.10f),
+                RoundedCornerShape(26.dp)
+            )
+            .padding(vertical = 24.dp, horizontal = 18.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(
-                text = "\u2726  \u2727  \u2726",
-                style = MaterialTheme.typography.bodyLarge,
-                color = if (dark) Color(0xFFB48F83) else Color(0xFF8B695C),
-                letterSpacing = 8.sp
-            )
             Text(
                 text = "Same curiosity, new horizons.",
                 style = MaterialTheme.typography.titleMedium.copy(

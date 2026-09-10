@@ -30,11 +30,11 @@ import com.curio.app.ui.theme.isCurioDarkTheme
 
 /**
  * Curio's doodle-art empty state — the JSX "Nothing here yet" scene
- * (stacked books + leaf sprig + note card + twinkles) drawn in the app's
- * flask doodle language (white outlines + pastel fills), with a headline,
- * muted subtext and an optional large primary CTA pill. Used app-wide for
- * empty pages: Cabinet shelves (classic + v2), Everything, Recents,
- * Recycle bin, Topic history and the Book browser.
+ * (stacked books + note card + twinkles) drawn in the app's flask doodle
+ * language (white outlines + pastel fills), with a headline, muted subtext
+ * and an optional large primary CTA pill. Used app-wide for empty pages:
+ * Cabinet shelves (classic + v2), Everything, Recents, Recycle bin, Topic
+ * history and the Book browser.
  */
 @Composable
 fun CurioDoodleEmptyState(
@@ -48,7 +48,6 @@ fun CurioDoodleEmptyState(
     val dark = isCurioDarkTheme()
     val paper = if (dark) Color(0xFFE8DCC8) else Color(0xFFF9F2E6)
     val book = if (dark) Color(0xFFB98D79) else Color(0xFFD9A887)
-    val leaf = if (dark) Color(0xFF9DB58F) else Color(0xFF8FA07E)
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.fillMaxWidth().padding(vertical = 16.dp)
@@ -63,44 +62,43 @@ fun CurioDoodleEmptyState(
                     topLeft = androidx.compose.ui.geometry.Offset(w * 0.12f, h * 0.82f),
                     size = androidx.compose.ui.geometry.Size(w * 0.76f, h * 0.10f)
                 )
-                // Leaf sprig — a stem with four leaves, left side.
-                drawLine(leaf.copy(alpha = 0.8f), androidx.compose.ui.geometry.Offset(w * 0.18f, h * 0.78f), androidx.compose.ui.geometry.Offset(w * 0.18f, h * 0.30f), strokeWidth = 1.6f)
-                val lw = w * 0.075f; val lh = w * 0.045f
-                listOf(
-                    0.72f to -24f,
-                    0.56f to 20f,
-                    0.40f to -26f,
-                    0.26f to 22f
-                ).forEachIndexed { i, (t, rot) ->
-                    val cy = h * (0.30f + 0.46f * (1f - t))
-                    val cx = w * 0.18f + (if (i % 2 == 0) -1f else 1f) * w * 0.07f
-                    rotate(rot, androidx.compose.ui.geometry.Offset(cx, cy)) {
-                        val tl = androidx.compose.ui.geometry.Offset(cx - lw / 2f, cy - lh / 2f)
-                        drawOval(leaf.copy(alpha = 0.85f), topLeft = tl, size = androidx.compose.ui.geometry.Size(lw, lh))
-                        drawOval(Color.White.copy(alpha = 0.8f), topLeft = tl, size = androidx.compose.ui.geometry.Size(lw, lh), style = Stroke(width = stroke * 0.5f))
-                    }
+                // Book stack — bottom cream book, top terracotta book
+                // (the old leaf sprig read as a lopsided tree — removed;
+                // the stack breathes wider with the space).
+                val bw = w * 0.64f; val bh = h * 0.16f
+                rotate(-2f, androidx.compose.ui.geometry.Offset(w * 0.44f, h * 0.74f)) {
+                    drawRoundRect(paper.copy(alpha = 0.92f), androidx.compose.ui.geometry.Offset(w * 0.12f, h * 0.68f), androidx.compose.ui.geometry.Size(bw, bh), androidx.compose.ui.geometry.CornerRadius(bh * 0.3f))
+                    drawRoundRect(Color.White.copy(alpha = 0.9f), androidx.compose.ui.geometry.Offset(w * 0.12f, h * 0.68f), androidx.compose.ui.geometry.Size(bw, bh), androidx.compose.ui.geometry.CornerRadius(bh * 0.3f), style = Stroke(width = stroke * 0.7f))
+                    // Bottom book's spine line — a short cream tick near the
+                    // left edge so the stack reads as real books.
+                    drawLine(Color.White.copy(alpha = 0.55f), androidx.compose.ui.geometry.Offset(w * 0.16f, h * 0.71f), androidx.compose.ui.geometry.Offset(w * 0.16f, h * 0.81f), strokeWidth = 1.2f)
                 }
-                // Book stack — bottom cream book, top terracotta book.
-                val bw = w * 0.52f; val bh = h * 0.15f
-                rotate(-2f, androidx.compose.ui.geometry.Offset(w * 0.52f, h * 0.74f)) {
-                    drawRoundRect(paper.copy(alpha = 0.92f), androidx.compose.ui.geometry.Offset(w * 0.26f, h * 0.70f), androidx.compose.ui.geometry.Size(bw, bh), androidx.compose.ui.geometry.CornerRadius(bh * 0.3f))
-                    drawRoundRect(Color.White.copy(alpha = 0.9f), androidx.compose.ui.geometry.Offset(w * 0.26f, h * 0.70f), androidx.compose.ui.geometry.Size(bw, bh), androidx.compose.ui.geometry.CornerRadius(bh * 0.3f), style = Stroke(width = stroke * 0.7f))
-                }
-                rotate(3f, androidx.compose.ui.geometry.Offset(w * 0.52f, h * 0.60f)) {
-                    drawRoundRect(book.copy(alpha = 0.9f), androidx.compose.ui.geometry.Offset(w * 0.30f, h * 0.56f), androidx.compose.ui.geometry.Size(bw * 0.92f, bh), androidx.compose.ui.geometry.CornerRadius(bh * 0.3f))
-                    drawRoundRect(Color.White.copy(alpha = 0.9f), androidx.compose.ui.geometry.Offset(w * 0.30f, h * 0.56f), androidx.compose.ui.geometry.Size(bw * 0.92f, bh), androidx.compose.ui.geometry.CornerRadius(bh * 0.3f), style = Stroke(width = stroke * 0.7f))
+                rotate(3f, androidx.compose.ui.geometry.Offset(w * 0.42f, h * 0.58f)) {
+                    drawRoundRect(book.copy(alpha = 0.9f), androidx.compose.ui.geometry.Offset(w * 0.16f, h * 0.53f), androidx.compose.ui.geometry.Size(bw * 0.88f, bh), androidx.compose.ui.geometry.CornerRadius(bh * 0.3f))
+                    drawRoundRect(Color.White.copy(alpha = 0.9f), androidx.compose.ui.geometry.Offset(w * 0.16f, h * 0.53f), androidx.compose.ui.geometry.Size(bw * 0.88f, bh), androidx.compose.ui.geometry.CornerRadius(bh * 0.3f), style = Stroke(width = stroke * 0.7f))
                     // Title ticks.
-                    drawLine(Color.White.copy(alpha = 0.85f), androidx.compose.ui.geometry.Offset(w * 0.36f, h * 0.615f), androidx.compose.ui.geometry.Offset(w * 0.56f, h * 0.615f), strokeWidth = 1.1f)
-                    drawLine(Color.White.copy(alpha = 0.6f), androidx.compose.ui.geometry.Offset(w * 0.36f, h * 0.645f), androidx.compose.ui.geometry.Offset(w * 0.50f, h * 0.645f), strokeWidth = 1.1f)
+                    drawLine(Color.White.copy(alpha = 0.85f), androidx.compose.ui.geometry.Offset(w * 0.22f, h * 0.595f), androidx.compose.ui.geometry.Offset(w * 0.46f, h * 0.595f), strokeWidth = 1.1f)
+                    drawLine(Color.White.copy(alpha = 0.6f), androidx.compose.ui.geometry.Offset(w * 0.22f, h * 0.625f), androidx.compose.ui.geometry.Offset(w * 0.40f, h * 0.625f), strokeWidth = 1.1f)
                 }
-                // Note card — a small white index card with writing lines.
-                val cw = w * 0.30f; val ch = h * 0.34f
-                rotate(4f, androidx.compose.ui.geometry.Offset(w * 0.80f, h * 0.52f)) {
-                    drawRoundRect(Color(0xFFFFFBF2).copy(alpha = 0.95f), androidx.compose.ui.geometry.Offset(w * 0.68f, h * 0.36f), androidx.compose.ui.geometry.Size(cw, ch), androidx.compose.ui.geometry.CornerRadius(cw * 0.06f))
-                    drawRoundRect(Color.White.copy(alpha = 0.95f), androidx.compose.ui.geometry.Offset(w * 0.68f, h * 0.36f), androidx.compose.ui.geometry.Size(cw, ch), androidx.compose.ui.geometry.CornerRadius(cw * 0.06f), style = Stroke(width = stroke * 0.6f))
+                // Note card — a small white index card with writing lines,
+                // leaning against the stack on the right.
+                val cw = w * 0.26f; val ch = h * 0.38f
+                rotate(5f, androidx.compose.ui.geometry.Offset(w * 0.72f, h * 0.52f)) {
+                    drawRoundRect(Color(0xFFFFFBF2).copy(alpha = 0.95f), androidx.compose.ui.geometry.Offset(w * 0.62f, h * 0.32f), androidx.compose.ui.geometry.Size(cw, ch), androidx.compose.ui.geometry.CornerRadius(cw * 0.07f))
+                    drawRoundRect(Color.White.copy(alpha = 0.95f), androidx.compose.ui.geometry.Offset(w * 0.62f, h * 0.32f), androidx.compose.ui.geometry.Size(cw, ch), androidx.compose.ui.geometry.CornerRadius(cw * 0.07f), style = Stroke(width = stroke * 0.6f))
+                    // Corner fold — a small triangle clipped from the card's
+                    // top-right, with the fold line drawn in.
+                    val fold = Path().apply {
+                        moveTo(w * 0.62f + cw - cw * 0.20f, h * 0.32f)
+                        lineTo(w * 0.62f + cw, h * 0.32f + cw * 0.20f)
+                        lineTo(w * 0.62f + cw, h * 0.32f)
+                        close()
+                    }
+                    drawPath(fold, paper.copy(alpha = 0.9f))
+                    drawLine(Color.White.copy(alpha = 0.8f), androidx.compose.ui.geometry.Offset(w * 0.62f + cw - cw * 0.20f, h * 0.32f), androidx.compose.ui.geometry.Offset(w * 0.62f + cw, h * 0.32f + cw * 0.20f), strokeWidth = stroke * 0.45f)
                     for (i in 0..2) {
                         val ly = h * 0.42f + i * h * 0.085f
-                        drawLine(Color(0xFF9A715D).copy(alpha = 0.5f), androidx.compose.ui.geometry.Offset(w * 0.72f, ly), androidx.compose.ui.geometry.Offset(w * 0.72f + cw * 0.66f, ly), strokeWidth = 1.0f)
+                        drawLine(Color(0xFF9A715D).copy(alpha = 0.5f), androidx.compose.ui.geometry.Offset(w * 0.66f, ly), androidx.compose.ui.geometry.Offset(w * 0.66f + cw * 0.62f, ly), strokeWidth = 1.0f)
                     }
                 }
                 // Twinkles.
