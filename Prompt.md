@@ -233,4 +233,4 @@ GridItemSpan conversion, TextHistory padding/withStyle) are being fixed
 and pushed FIRST.  
 
 next prompt
-use ask user for test results, and we will be doing more refinements in animations and all more refinemnets in the text history tree too and also the add a caption filed is note paper style chnage it to just a text box 
+use ask user for test results, and we will be doing more refinements in animations and all more refinemnets in the text history tree too and also the add a caption filed is note paper style chnage it to just a text box  and in dark mode the book buttom sheet is still inaccuarte colors the box and text the add note one, and also the albumns colors are fully differnt fix them
