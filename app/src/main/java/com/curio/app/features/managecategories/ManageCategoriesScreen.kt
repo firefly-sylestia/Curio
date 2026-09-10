@@ -4,8 +4,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,6 +48,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -454,27 +457,17 @@ val glassBackdrop = rememberLayerBackdrop()
                                         // updates and every consumer recomposes.
                                         AppPreferences.setCategoryHidden(context, category.id, !visible)
                                     },
-                                    // v3xx — the WHOLE row is the drag surface:
-                                    // long-press anywhere (except taps, which
-                                    // still reach the switch/steppers) so the
-                                    // list scroll can never steal the gesture.
+                                    // v3xx — the WHOLE row is the drag surface
+                                    // (long-press anywhere; taps still reach the
+                                    // switch/steppers). The long-press gesture
+                                    // lives INSIDE CategoryRow — here we only
+                                    // track each row's window top so the drag
+                                    // math has accurate finger/row positions.
                                     modifier = Modifier.then(
                                         if (reorderUnlocked)
-                                            Modifier
-                                                .onGloballyPositioned { coords ->
-                                                    rowTops[category.id] = coords.positionInWindow().y
-                                                }
-                                                .pointerInput(category.id) {
-                                                    detectDragGesturesAfterLongPress(
-                                                        onDragStart = { offset -> onDragStart(offset) },
-                                                        onDrag = { change, amount ->
-                                                            change.consume()
-                                                            onDrag(change, amount.y)
-                                                        },
-                                                        onDragEnd = { onDragEnd() },
-                                                        onDragCancel = { onDragCancel() }
-                                                    )
-                                                }
+                                            Modifier.onGloballyPositioned { coords ->
+                                                rowTops[category.id] = coords.positionInWindow().y
+                                            }
                                         else Modifier
                                     )
                                 )
@@ -508,6 +501,7 @@ val glassBackdrop = rememberLayerBackdrop()
 }
 
 @Composable
+@OptIn(ExperimentalFoundationApi::class)
 private fun CategoryRow(
     category: CurioCategory,
     isFirst: Boolean,
@@ -550,7 +544,24 @@ private fun CategoryRow(
             // the row physically moves; zIndex keeps the dragged row above).
             .offset { IntOffset(0, dragOffsetY.roundToInt()) }
             .padding(horizontal = 4.dp, vertical = 10.dp)
-            .alpha(hiddenAlpha),
+            .alpha(hiddenAlpha)
+            // v3xx — the whole row is the long-press drag surface: the list
+            // scroll can never steal the gesture once the long press lands.
+            .then(
+                if (reorderEnabled)
+                    Modifier.pointerInput(Unit) {
+                        detectDragGesturesAfterLongPress(
+                            onDragStart = onDragStart,
+                            onDrag = { change, amount ->
+                                change.consume()
+                                onDrag(change, amount.y)
+                            },
+                            onDragEnd = onDragEnd,
+                            onDragCancel = onDragCancel
+                        )
+                    }
+                else Modifier
+            ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {

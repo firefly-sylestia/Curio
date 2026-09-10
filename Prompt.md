@@ -101,6 +101,22 @@ only, not shipped):**
 - **Category picker chips** (Picker + Spin sheet) — same instant swap.
   (The bottom nav pill glide and drawer are already animated.)
 
+**CI fix (2026-09-10, pushed — `compileDebug/ReleaseKotlin` failures from
+the doodles push):**
+- `CabinetV2Content.kt` — `LazyVerticalStaggeredGrid` has no
+  `verticalArrangement` param → replaced with `verticalItemSpacing =
+  10.dp`; the full-line items used `StaggeredGridItemSpan(maxLineSpan)`
+  (private ctor in this foundation) → now `span =
+  StaggeredGridItemSpan.FullLine` (3 spots: wide hero, everything-head,
+  e-empty).
+- `ManageCategoriesScreen.kt` — missing `scrollBy` and
+  `positionInWindow` imports; the long-press drag `pointerInput` at the
+  CategoryRow CALL SITE referenced CategoryRow's params (out of scope)
+  → moved the `detectDragGesturesAfterLongPress` block inside
+  CategoryRow (where the callbacks live) + added
+  `@OptIn(ExperimentalFoundationApi::class)`; the call site keeps only
+  the row-top tracking for the drag math.
+
 ## Archive
 Older completed request logs (2026-09-08 → 2026-09-09) were trimmed from
 this file on 2026-09-10 to keep it short. They live in git history

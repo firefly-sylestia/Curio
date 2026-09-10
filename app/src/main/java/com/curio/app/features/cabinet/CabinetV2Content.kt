@@ -566,7 +566,9 @@ fun CabinetV2Content(navController: NavController) {
                         WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
                 ),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                // v3xx — staggered grids space columns via verticalItemSpacing
+                // (there is no verticalArrangement param on this layout).
+                verticalItemSpacing = 10.dp,
                 modifier = Modifier
                     .fillMaxSize()
                     // v3xx — the SEAM: this background shows through every
@@ -577,7 +579,7 @@ fun CabinetV2Content(navController: NavController) {
                         Modifier.layerBackdrop(glassBackdrop) else Modifier)
             ) {
                 if (wide) {
-                    item(key = "hero", span = { StaggeredGridItemSpan(maxLineSpan) }, contentType = "hero") {
+                    item(key = "hero", span = StaggeredGridItemSpan.FullLine, contentType = "hero") {
                         wideHero()
                     }
                 }
@@ -1223,7 +1225,7 @@ private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
     // Top full-line: the filter chips + the corner ADD pill (the app-wide
     // labeled Add, anchored TOP-RIGHT of the wall instead of a bottom
     // button).
-    item(key = "everything-head", span = { StaggeredGridItemSpan(maxLineSpan) }, contentType = "head") {
+    item(key = "everything-head", span = StaggeredGridItemSpan.FullLine, contentType = "head") {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1243,7 +1245,7 @@ private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
     }
 
     if (totalShown == 0) {
-        item(key = "e-empty", span = { StaggeredGridItemSpan(maxLineSpan) }, contentType = "empty") {
+        item(key = "e-empty", span = StaggeredGridItemSpan.FullLine, contentType = "empty") {
             CurioDoodleEmptyState(
                 headline = "Nothing saved yet",
                 subtext = "Like a book, series or album and its cover shows up here."
