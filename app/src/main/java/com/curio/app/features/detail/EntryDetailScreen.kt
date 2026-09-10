@@ -1165,15 +1165,16 @@ private fun BoxScope.DetailStickyBar(
         lerp(heroFill, lerp(heroFill, Color.White, 0.10f), frostShift)
         else lerp(heroFill, lerp(heroFill, curioPillTintLift(), 0.38f), frostShift)
     val stickyFrostBrush = Brush.verticalGradient(0f to frostFill, 1f to frostFill.copy(alpha = 0.97f))
+    // v250 — iOS-STYLE MORPH state lives at function scope: the pill
+    // below fades with it AND the floating glass panel appended after
+    // this Box reads the same progress.
+    BackHandler(enabled = menuExpanded) { menuExpanded = false }
+
     // The ride-up must be LAYOUT-space (Modifier.offset), not a draw-time
     // graphicsLayer translation — the more-menu's popup anchors to the
     // button's layout position, so a draw-time translate would leave the
     // menu hanging below the popped pill.
     val stickyLift = (DetailStickyBarRestTop - DetailStickyBarPoppedTop) * frostShift
-        // v250 — iOS-STYLE MORPH state lives at function scope: the pill
-        // below fades with it AND the floating glass panel appended after
-        // this Box reads the same progress.
-        BackHandler(enabled = menuExpanded) { menuExpanded = false }
 
     Row(
         modifier = Modifier
@@ -4203,7 +4204,7 @@ private fun OpenNotebookRender(entry: CurioEntry, category: CurioCategory, navCo
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Share Card — rendered off-screen, captured as PNG, shared via Intent.ACTION_SEND
-// ═══════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════��══════
 
 /**
  * Self-contained share card composable designed for bitmap capture.
@@ -4456,7 +4457,7 @@ private fun CurioShareCard(
 // source pills (see the call site above). The old bespoke EntryShareSheet and
 // its ShareFormatPill helper are gone — only the plain-text payload builder
 // remains, reused as the sheet's share-as-text override.
-// ═══════════════════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════════��═════════════════════
 
 /** Plain-text share payload for an entry (the sheet's Text format).
  *  When [isQuote] is true, the payload is just the quote + author.

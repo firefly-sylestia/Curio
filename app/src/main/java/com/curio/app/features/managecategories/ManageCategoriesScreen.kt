@@ -176,7 +176,7 @@ val glassBackdrop = rememberLayerBackdrop()
             }
             if (delta != 0f) {
                 val scrolled = listState.scrollBy(delta)
-                if (scrolled) scrollAccum += delta
+                if (scrolled != 0f) scrollAccum += delta
             }
             delay(16)
         }
