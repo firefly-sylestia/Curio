@@ -2612,18 +2612,19 @@ internal fun SettingsNavRail(
         // animateScrollBy glided the row for ~300ms DURING the page
         // transition, dragging the shared-element pill's target bounds as it
         // morphed — that's the jitter that read as "goes solid colour").
-        // Instant centering lands the chip before the pill glide starts, so
-        // the morph has stable start/end bounds.
+        // scrollToItem positions the chip so its centre lands mid-viewport
+        // instantly (no LazyListState.scrollBy in this foundation), so the
+        // pill morph has stable start/end bounds; end chips clamp naturally.
         withFrameNanos { }
         val info = listState.layoutInfo
         val item = info.visibleItemsInfo.firstOrNull { it.index == idx } ?: return@LaunchedEffect
-        val itemCenter = item.offset + item.size / 2f
-        val viewportCenter = info.viewportEndOffset / 2f
-        val drift = itemCenter - viewportCenter
+        val viewportCenter = info.viewportEndOffset / 2
         // Only move when the chip is meaningfully off-centre (>10% of the
         // viewport) so near-centred chips don't twitch.
-        if (kotlin.math.abs(drift) > info.viewportEndOffset * 0.10f) {
-            listState.scrollBy(drift)
+        if (kotlin.math.abs(item.offset + item.size / 2 - viewportCenter) > info.viewportEndOffset * 0.10f) {
+            // The item's top offset that puts its centre at the viewport
+            // center (scrollToItem clamps out-of-range offsets itself).
+            listState.scrollToItem(idx, (viewportCenter - item.size / 2).coerceAtLeast(0))
         }
     }
     Column(modifier = modifier.fillMaxWidth()) {
