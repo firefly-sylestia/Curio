@@ -149,7 +149,7 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.theme.LocalCurioThemeTransition
 import com.curio.app.ui.theme.switchThemeWithReveal
 import com.curio.app.ui.components.CurioConstellation
-import com.curio.app.ui.components.CurioGlassToolbar
+import com.curio.app.ui.components.CurioGlassToolbarMorph
 import com.curio.app.ui.components.CurioDrawerState
 import com.curio.app.ui.components.CurioForwardArrow
 import com.curio.app.ui.components.CurioNavTint
@@ -172,6 +172,7 @@ import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogContainerColor
+import com.curio.app.ui.theme.curioPillTintLift
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.categoryBackgroundWash
@@ -239,6 +240,14 @@ private val HomeQuestSheetExtent = 24.dp
 /** Scroll distance (dp) before the menu + profile pills fully pin as
  *  frosted floating pills. */
 private val StickyBarThreshold = 90.dp
+// v3xx22 — the morphing glass header's collapsed height (below the status
+// bar): the slim identity bar holding the menu pill + avatar + greeting.
+private val HomeCompactHeaderHeight = 54.dp
+/** v3xx22 — the FULL glass toolbar's resting footprint (status bar + title
+ *  row + stat row) — the scroll content reserves this so the pinned morph
+ *  bar never covers the first real card at rest (a hair of slack is fine;
+ *  the bar is content-height). */
+private val HomeGlassToolbarFullHeight = 200.dp
 /** Fixed tear seed — Home's tear never re-rolls and matches the detail
  *  hero's SoftTorn construction exactly (uniform tear style). */
 // v7.37 — Home's hero tears in its OWN pattern: a different fixed seed
@@ -482,69 +491,16 @@ fun HomeScreen(navController: NavController) {
             // the active fill, carried through greeting, stat icons + watermark.
 
             // v3xx — GLASS TOOLBAR style: the app-wide "Glass toolbar
-            // header" option swaps Home's torn quest banner for the
-            // content-height glass bar — greeting + name, with the Streak ·
-            // Cabinet · Topics stat row riding inside the bar (the same
-            // segments the torn banner pins above its tear).
+            // header" option swaps Home's torn quest banner for the PINNED
+            // MORPHING glass bar (rendered as a sibling overlay in the
+            // sticky-bar slot below — greeting + name + the Streak ·
+            // Cabinet · Topics stat row in the full bar, collapsing to a
+            // slim "Good morning Jugnu" identity bar on scroll). This scroll
+            // slot only RESERVES the full bar's resting footprint so the
+            // pinned bar never covers the first real card (v3xx22 — the
+            // user asked for the morph collapse on Home again).
             if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
-                // v3xx — Home keeps its STATIC content-height glass toolbar
-                // as the first scroll item (user direction 2026-09-08: the
-                // morph collapse belongs to PROFILE only — Home stays as it
-                // was, and the pinned morph bar was covering the pet). NO
-                // glassBackdrop here: the toolbar is the FIRST item of the
-                // scroll Column, INSIDE the homeGlassBackdrop capture
-                // subtree — sampling it would self-capture (the v228
-                // RenderThread cycle). The toolbar falls back to the safe
-                // simulated-glass recipe instead (the bar's frosted tint +
-                // sheen still read as glass).
-                CurioGlassToolbar(
-                    title = greetingWordForNow(),
-                    subtitle = displayName,
-                    content = { ink ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            HeroStatSegment(
-                                glyph = "local_fire_department",
-                                value = "$streakDays",
-                                label = "Streak",
-                                tint = ink,
-                                ink = ink,
-                                modifier = Modifier.weight(1f),
-                                onClick = { navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true } }
-                            )
-                            VerticalDivider(
-                                modifier = Modifier.height(34.dp),
-                                color = ink.copy(alpha = 0.22f)
-                            )
-                            HeroStatSegment(
-                                glyph = CurioIcons.Inventory2,
-                                value = "$totalSaved",
-                                label = "Cabinet",
-                                tint = ink,
-                                ink = ink,
-                                modifier = Modifier.weight(1f),
-                                onClick = { navController.navigateToTab(CurioRoutes.CABINET) }
-                            )
-                            VerticalDivider(
-                                modifier = Modifier.height(34.dp),
-                                color = ink.copy(alpha = 0.22f)
-                            )
-                            HeroStatSegment(
-                                glyph = CurioIcons.AutoAwesome,
-                                value = "$topicsTotal",
-                                label = "Topics",
-                                tint = ink,
-                                ink = ink,
-                                modifier = Modifier.weight(1f),
-                                onClick = { navController.navigate(CurioRoutes.DATABASE) { launchSingleTop = true } }
-                            )
-                        }
-                    }
-                )
+                Spacer(Modifier.height(HomeGlassToolbarFullHeight))
             } else {
             Box(
                 modifier = Modifier
@@ -1295,11 +1251,13 @@ fun HomeScreen(navController: NavController) {
             // One scroll-linked clock drives color, scale, lift and shadow.
             // FastOutSlowIn gives the fade a gentle start and finish while
             // keeping it perfectly scrubable with the user's finger.
-            // v3xx — Home ALWAYS shows the floating menu/avatar pills. The
-            // glass style keeps its STATIC scroll-with-content toolbar above
-            // (no pinned morph on Home — user direction 2026-09-08: the
-            // morph belongs to Profile only, and the pinned bar covered the
-            // pet while it wandered).
+            // v3xx22 — GLASS style: the pinned MORPHING toolbar replaces the
+            // floating pills (it carries its own menu + avatar and collapses
+            // from the full greeting+stats bar to a slim "Good morning
+            // Jugnu" identity bar on scroll — the user asked for the morph
+            // collapse on Home again). The torn style keeps the classic
+            // always-floating menu/avatar pills below.
+            val homeGlassOn = AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS
             val frostShift = FastOutSlowInEasing.transform(stickyProgress)
             val pillScale = androidx.compose.ui.util.lerp(0.97f, 1f, frostShift)
             // v27v — the resting pills follow the HERO TINT (hoisted at the
@@ -1374,6 +1332,83 @@ fun HomeScreen(navController: NavController) {
             // the liquid-glass press feel (shrink + refraction bloom).
             val menuPillInteraction = remember { MutableInteractionSource() }
             val avatarPillInteraction = remember { MutableInteractionSource() }
+            // v3xx22 — the glass style's avatar pill (photo or Person glyph),
+            // reused by the morph bar's full row and compact row.
+            val morphAvatar: @Composable (Color) -> Unit = { aInk ->
+                TopBarPill(
+                    onClick = { navController.navigate(CurioRoutes.PROFILE) { launchSingleTop = true } },
+                    glyph = CurioIcons.Person,
+                    contentDescription = "Profile",
+                    shape = CircleShape,
+                    bg = if (isCurioDarkTheme()) Color(0xFF1B1B1D) else Color.White,
+                    rim = pillRim,
+                    iconTint = aInk,
+                    elevation = 3.dp,
+                    pillInteraction = avatarPillInteraction,
+                    avatarPath = profileAvatarPath
+                )
+            }
+            if (homeGlassOn) {
+                CurioGlassToolbarMorph(
+                    progress = stickyProgress,
+                    compactHeight = HomeCompactHeaderHeight,
+                    title = greetingWordForNow(),
+                    subtitle = displayName,
+                    compactTitle = "${greetingWordForNow()} $displayName",
+                    onMenuClick = { CurioDrawerState.requestOpen() },
+                    trailing = morphAvatar,
+                    compactAvatar = { morphAvatar(questInk) },
+                    // v3xx22 — the stats row (Streak · Cabinet · Topics)
+                    // rides the FULL bar and fades out on collapse, so the
+                    // slim compact bar reads as just the greeting.
+                    content = { ink ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            HeroStatSegment(
+                                glyph = "local_fire_department",
+                                value = "$streakDays",
+                                label = "Streak",
+                                tint = ink,
+                                ink = ink,
+                                modifier = Modifier.weight(1f),
+                                onClick = { navController.navigate(CurioRoutes.QUESTS) { launchSingleTop = true } }
+                            )
+                            VerticalDivider(
+                                modifier = Modifier.height(34.dp),
+                                color = ink.copy(alpha = 0.22f)
+                            )
+                            HeroStatSegment(
+                                glyph = CurioIcons.Inventory2,
+                                value = "$totalSaved",
+                                label = "Cabinet",
+                                tint = ink,
+                                ink = ink,
+                                modifier = Modifier.weight(1f),
+                                onClick = { navController.navigateToTab(CurioRoutes.CABINET) }
+                            )
+                            VerticalDivider(
+                                modifier = Modifier.height(34.dp),
+                                color = ink.copy(alpha = 0.22f)
+                            )
+                            HeroStatSegment(
+                                glyph = CurioIcons.AutoAwesome,
+                                value = "$topicsTotal",
+                                label = "Topics",
+                                tint = ink,
+                                ink = ink,
+                                modifier = Modifier.weight(1f),
+                                onClick = { navController.navigate(CurioRoutes.DATABASE) { launchSingleTop = true } }
+                            )
+                        }
+                    },
+                    glassBackdrop = homeGlassBackdrop,
+                    modifier = Modifier.align(Alignment.TopCenter)
+                )
+            } else {
             Row(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
@@ -1442,6 +1477,7 @@ fun HomeScreen(navController: NavController) {
                     avatarPath = profileAvatarPath
                 )
             }
+            } // v3xx22 — end of the glass-morph-or-floating-pills branch
         }
     }
 
@@ -2240,6 +2276,9 @@ private fun ReminderNudgeCard(onTap: () -> Unit, surface: Color = MaterialTheme.
 private val HomeDrawerHeroHeight = 186.dp
 private val HomeDrawerSheetExtent = 22.dp
 private const val HOME_DRAWER_TEAR_SEED = 0xD2A7E
+// v3xx22 — the drawer hero's resting footprint in the GLASS toolbar style:
+// the rounded-bottom glass bar (status bar + pill row + greeting block).
+private val DrawerGlassHeroHeight = 140.dp
 
 // v147 — the drawer now renders from the NavHost root (above the floating
 // pill bar), so its content is called from CurioNavHost: internal instead
@@ -2286,12 +2325,16 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
             // is inside the LazyColumn as the last item so it scrolls with
             // content — expanded sections (About, Your Curiosity) never
             // hide behind a pinned footer.
+            // v3xx22 — the glass style's drawer hero is the shorter rounded
+            // glass bar, so the rows' top clearance is style-aware.
+            val drawerGlassOn = AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(
                     start = 16.dp,
                     end = 16.dp,
-                    top = HomeDrawerHeroHeight + HomeDrawerSheetExtent + 14.dp,
+                    top = if (drawerGlassOn) DrawerGlassHeroHeight + 14.dp
+                          else HomeDrawerHeroHeight + HomeDrawerSheetExtent + 14.dp,
                     bottom = 16.dp
                 ),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -2432,7 +2475,11 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
             }
             }
 
-            // -- Torn rose hero - drawn on top, rows vanish at the seam -----
+            // -- Drawer hero — the GLASS toolbar bar (style on) or the torn
+            // celestial sky banner (rows vanish at the seam) --------------
+            if (drawerGlassOn) {
+                DrawerGlassHero(displayName = displayName)
+            } else {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -2629,6 +2676,142 @@ internal fun HomeDrawerContent(onNavigate: (String) -> Unit) {
                             }
                         }
                     }
+                }
+            }
+            } // v3xx22 — end of the glass-or-torn drawer hero branch
+        }
+    }
+}
+
+/** v3xx22 — the drawer hero when the app-wide GLASS toolbar header style is
+ *  on: the same rose-tinted glass bar as the app headers — rounded bottom
+ *  curve, its own frost — holding the avatar + CURIO greeting block and the
+ *  sun/moon theme-flip pill (the sky hero's toggle, restyled as a glass
+ *  pill). The menu rows scroll beneath it exactly like the torn hero. */
+@Composable
+private fun DrawerGlassHero(
+    displayName: String
+) {
+    val context = LocalContext.current
+    val dark = isCurioDarkTheme()
+    val rose = settingsRoseAccent()
+    val container = lerp(
+        MaterialTheme.colorScheme.surfaceContainerHigh,
+        rose,
+        if (dark) 0.14f else 0.20f
+    )
+    val ink = MaterialTheme.colorScheme.onSurface
+    val pillBg = if (dark) lerp(container, Color.Black, 0.15f)
+    else lerp(container, curioPillTintLift(), 0.38f)
+    val avatarPath = AppPreferences.profileAvatarPathState
+    // v(theme switch) — the quick flip plays a Telegram-style circular
+    // reveal from the sun/moon pill itself.
+    val isDarkNow = isCurioDarkTheme()
+    val themeTransition = LocalCurioThemeTransition.current
+    val transitionScope = rememberCoroutineScope()
+    var sunMoonBounds by remember {
+        mutableStateOf(Rect.Zero)
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(DrawerGlassHeroHeight)
+            .clip(RoundedCornerShape(bottomStart = 26.dp, bottomEnd = 26.dp))
+            .background(container.copy(alpha = 0.96f))
+            .statusBarsPadding()
+    ) {
+        // Sun/moon theme-flip pill — top end.
+        Surface(
+            onClick = {
+                switchThemeWithReveal(
+                    transition = themeTransition,
+                    scope = transitionScope,
+                    context = context,
+                    center = sunMoonBounds.takeIf { it != Rect.Zero }?.center ?: Offset.Zero,
+                    newMode = if (isDarkNow) AppPreferences.THEME_LIGHT
+                              else AppPreferences.THEME_DARK,
+                )
+            },
+            shape = CircleShape,
+            color = pillBg,
+            contentColor = ink,
+            shadowElevation = 2.dp,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 10.dp, end = 14.dp)
+                .size(40.dp)
+                .onGloballyPositioned { coords -> sunMoonBounds = coords.boundsInWindow() }
+        ) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                CurioIcon(
+                    name = if (isDarkNow) CurioIcons.LightMode else CurioIcons.DarkMode,
+                    contentDescription = "Toggle theme",
+                    size = 18.dp,
+                    tint = ink
+                )
+            }
+        }
+        // Avatar + CURIO greeting block — bottom start (the sky hero's row).
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(start = 24.dp, end = 24.dp, bottom = 18.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .shadow(2.dp, CircleShape)
+                    .clip(CircleShape)
+                    .background(CurioColors.CreamWhite),
+                contentAlignment = Alignment.Center
+            ) {
+                if (avatarPath.isNotBlank()) {
+                    ProfileAvatarImage(avatarPath, Modifier.fillMaxSize())
+                } else {
+                    Text(
+                        displayName.firstOrNull()?.uppercase().orEmpty(),
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
+                        color = Color(0xFF2C5A53)
+                    )
+                }
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    "CURIO",
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 2.sp
+                    ),
+                    color = ink.copy(alpha = 0.85f)
+                )
+                val nameParts = displayName.trim().split(Regex("\\s+")).filter { it.isNotBlank() }
+                val firstName = nameParts.firstOrNull() ?: displayName
+                val greeting = "Hi $firstName"
+                val greetingStyle = when {
+                    greeting.length <= 16 -> MaterialTheme.typography.headlineMedium
+                    greeting.length <= 26 -> MaterialTheme.typography.titleLarge
+                    else -> MaterialTheme.typography.titleMedium
+                }
+                Text(
+                    greeting,
+                    style = greetingStyle.copy(fontWeight = FontWeight.ExtraBold),
+                    color = ink,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                val restOfName = nameParts.drop(1).joinToString(" ")
+                val bio = AppPreferences.getCustomStreakTagline(context)
+                val subtitle = restOfName.ifBlank { bio }
+                if (subtitle.isNotBlank()) {
+                    Text(
+                        subtitle,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = ink.copy(alpha = 0.78f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
         }

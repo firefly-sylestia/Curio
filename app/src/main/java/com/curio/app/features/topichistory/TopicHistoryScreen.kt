@@ -70,6 +70,7 @@ import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioCategoryChip
 import com.curio.app.ui.components.CurioDoodleEmptyState
 import com.curio.app.ui.components.CurioEmptyState
+import com.curio.app.ui.components.CurioGlassToolbar
 import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.ScreenEntrance
@@ -184,11 +185,21 @@ fun TopicHistoryScreen(navController: NavController) {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // ── Torn hero header — Home's construction (rose banner, bold tear,
-        //    white under-sheet, mirrored watermark pairs) with History's own
-        //    tear seed and its OWN BOOKS-family glyphs, so it reads as part
-        //    of the torn-banner family without copying Home's wildcard scatter.
-        HistoryHeroHeader(onBack = { navController.popBackStack() })
+        // ── Header — the glass toolbar when the app-wide "Glass toolbar
+        //    header" style is on, otherwise the torn hero (Home's
+        //    construction: rose banner, bold tear, white under-sheet,
+        //    mirrored watermark pairs, History's own BOOKS-family glyphs so
+        //    it reads as part of the torn-banner family without copying
+        //    Home's wildcard scatter).
+        if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
+            CurioGlassToolbar(
+                title = "Topic History",
+                subtitle = "Favorites & every spin you've explored",
+                onBack = { navController.popBackStack() }
+            )
+        } else {
+            HistoryHeroHeader(onBack = { navController.popBackStack() })
+        }
 
         // v3xx — the shared settings nav rail: switch sections without
         // going back to the hub (the open page sits in the 2nd slot).

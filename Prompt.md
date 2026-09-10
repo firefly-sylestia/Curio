@@ -1,4 +1,49 @@
 # Prompt Log — current request
+## Request (2026-09-10, completed — glass toolbar polish app-wide: header curves, nav-rail overlap, TopicHistory/Stats glass, Profile header, Home sticky morph, drawer, search, normal detail menu)
+
+User: without the liquid-glass option the glass toolbar header lost its
+curve look; Settings nav rail sits a little under the header; Topic
+History and Stats don't have the glass toolbar style; the Profile header
+is cut off at the top / disconnected with bad height — bring back the
+Edit profile + streak pills like the pre-glass header; the Home header
+is squished (stats squished too) — make it sticky with the morph
+collapse animation so it hides the Streak/Cabinet/Topics stats and just
+says the greeting without squishing; the drawer doesn't have the glass
+design; same for Stats & Insights; the search bar needs a complementing
+glass design; and the 3-dot menu in the saved detail view should be the
+normal dropdown again (no glass panel).
+
+**Shipped (8 files, pushed):**
+1. **CurioGlassToolbar.kt** — the plain + faux-glass paths now clip to
+   the same bottom curve (26dp bottom corners) the liquid path has, so
+   the header keeps its curve in every mode. `CurioGlassToolbarMorph`
+   gained a `fullActions` slot (an action-pill row between the title row
+   and the stat card, used by Profile's Edit + streak pills).
+2. **HomeScreen.kt** — glass style now uses the PINNED morph toolbar at
+   the sticky-bar location: it collapses with scroll, hiding the
+   Streak/Cabinet/Topics stat card and leaving just the menu pill +
+   avatar + "Good morning Jugnu" compact bar (no squish). The static
+   glass toolbar was removed from the hero; a reserve spacer takes its
+   place. Drawer got a `DrawerGlassHero` (glass capsule header with the
+   greeting, profile avatar + chevron, streak + Edit pills, theme + quest
+   toggles) when the glass style is on.
+3. **ProfileScreen.kt** — reserves the full morph bar height (fixes the
+   top cut-off/gap); the FULL bar brings back the Edit profile + streak
+   action pills (fullActions); the compact row keeps its own streak/edit.
+4. **SettingsHubScreen.kt** — glass nav-rail reserve bumped 160→176dp so
+   the rail clears the taller glass header.
+5. **TopicHistoryScreen.kt** — uses `CurioGlassToolbar` when the glass
+   style is on (was always the torn hero).
+6. **StatsScreen.kt** — uses `CurioGlassToolbar` when the glass style is
+   on (was always the sky header).
+7. **CurioSearchField.kt** — glass-aware default fill (liquid-capsule
+   recipe tinted to the glass container) when the glass style is on, so
+   the search bar complements the glass header.
+8. **EntryDetailScreen.kt** — the 3-dot more menu is ALWAYS the normal
+   `CurioDropdownMenu` again; the glass more-panel is gone (the back/more
+   pills keep their glass capsules; only the dropdown reverted). Dead
+   `MoreMenuWidth` const + glass-panel imports removed.
+
 ## Request (2026-09-10, completed + pushed — Everything gallery: real 2x covers, natural aspects, framed + uniform spacing, Add pill)
 
 User: previews (home Everything card + the gallery) show wrong categories

@@ -160,7 +160,10 @@ private val SettingsHeroSheetExtent = 24.dp
  */
 val SettingsHeroTotalHeight: Dp
     get() = if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
-        160.dp
+        // v3xx22 — 176dp: the bar's real footprint (status bar + pills row
+        // + title block ≈ 172dp on a modern phone). The old 160dp left the
+        // settings nav rail peeking from under the header (user fix).
+        176.dp
     } else {
         SettingsHeroBannerHeight + SettingsHeroSheetExtent
     }

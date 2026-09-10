@@ -49,6 +49,7 @@ import coil.compose.AsyncImage
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.curio.app.R
+import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioEntry
@@ -64,6 +65,7 @@ import com.curio.app.features.settings.heroPageBackground
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.components.CurioBadgeMedal
 import com.curio.app.ui.components.CurioConstellation
+import com.curio.app.ui.components.CurioGlassToolbar
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.CurioColors
@@ -132,12 +134,17 @@ fun StatsScreen(navController: NavController) {
             modifier = Modifier.fillMaxSize(),
             alphaScale = 0.40f
         )
+        // v3xx22 — the glass toolbar style swaps the celestial sky band for
+        // the app-wide glass bar (title + subtitle, no back pill — the page
+        // is a plain NavHost destination), reserving the bar's footprint so
+        // the first card clears it.
+        val statsGlass = AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
                 start = 16.dp,
                 end = 16.dp,
-                top = StatsHeaderHeight + 14.dp,
+                top = if (statsGlass) 150.dp else StatsHeaderHeight + 14.dp,
                 bottom = 24.dp
             ),
             verticalArrangement = Arrangement.spacedBy(14.dp)
@@ -185,12 +192,19 @@ fun StatsScreen(navController: NavController) {
             item { Spacer(Modifier.navigationBarsPadding().height(4.dp)) }
         }
 
-        // ── Celestial header — a slice of the observatory sky ─────────────
-        StatsSkyHeader(
-            skyTop = skyTop,
-            skyBottom = skyBottom,
-            skyInk = skyInk
-        )
+        // ── Header — the glass toolbar (style on) or the celestial sky ────
+        if (statsGlass) {
+            CurioGlassToolbar(
+                title = "Your Curiosity",
+                subtitle = "Stats, streaks & insights"
+            )
+        } else {
+            StatsSkyHeader(
+                skyTop = skyTop,
+                skyBottom = skyBottom,
+                skyInk = skyInk
+            )
+        }
 
     }
 }
