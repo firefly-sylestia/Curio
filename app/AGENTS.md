@@ -7284,6 +7284,42 @@ app/src/main/java/com/curio/app/
   per save — the GC pauses froze the app. Now only new/changed rows
   decode; the map is only touched from the flow's single collection
   dispatcher.
+- **v3xx42 — Shelf-art final pass + nav rail highlight GLIDE + back
+  mid-animation fix (user 2026-09-10: "curying now the book itself is
+  bad just the book… saved entries properly redesign… completed keep it
+  minimal… custom ones do something unique… help and feedback from
+  settings… top nav bar isn't smooth, tapping goes solid colour without
+  that highlight… back mid-animation still stays in that page").**
+  (1) **CabinetShelves.kt arts:** ReadingArt's BOOK redrawn — dark COVER
+  slab (rounded, own spine crease) under THREE stepped page layers per
+  side (peek at the outer edge), typed paragraph lines per page (left
+  justified / right first-line indent), spine join + crease shadow,
+  knotted ribbon with V-tail; mug kept (nudged to 0.86w). PhotosArt
+  redesigned as a COLLAGE — one big front polaroid (sun + two hills +
+  birds, drawn unrotated in the photo window) with angled washi tape +
+  a golden `fiveStar` mark, moon-night and heart prints behind,
+  grounded by the shared shadow. PeakArt kept MINIMAL — one clean
+  summit + snow tip + planted flag + thin ground band (sun/ridge/
+  birds/badge removed). The four custom MINIMAL_* scenes are now
+  UNIQUE: hot-air BALLOON (envelope, band + seam, ropes, basket,
+  cloud), ringed PLANET (globe + atmosphere line + front/back ring
+  arcs + moon + twinkles), SAILBOAT (hull, mast, sail, pennant, waves,
+  wind puff), KITE (diamond + spars + bow tail + wavy line to a tiny
+  hand + cloud). (2) **SettingsHubScreen.kt:** the CHAT (Help &
+  feedback) doodle is a support-chat WINDOW (header bar dots + title
+  line, incoming white ? bubble, outgoing message bubble with ink
+  lines, paper plane flying out). `SettingsRailBoundsTransform` spring
+  goes 0.95/500 → **0.8/140** (the stiffness-500 pill settled ~150ms
+  — under half the 450ms page fade — so taps read as a solid snap;
+  now it visibly glides); rail centering is INSTANT (`scrollBy` after
+  one frame, replacing the ~300ms `animateScrollBy` that dragged the
+  shared-element pill's target bounds mid-morph). (3) **CurioNavHost
+  transitions:** settings-family enter/exit/popEnter/popExit drop the
+  `scaleIn/scaleOut(0.985, Springs.Calm)` (stiffness 750 — instant
+  pop) for pure `fadeIn/fadeOut(tween(Morph))` — the pill morph is the
+  only motion, and tween fades converge cleanly when the user pops
+  BACK mid-transition (a re-targeted spring left the old page stuck on
+  All Settings).
 - **v3xx41 — Everything wall: uniform covers + NO seam, and the Text
   history concept feature set (user 2026-09-10: "remove the background
   fill… covers keep the shape they are in… 2x/3x/.5x in both width and

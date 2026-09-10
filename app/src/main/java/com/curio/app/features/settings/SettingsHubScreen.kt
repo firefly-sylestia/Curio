@@ -48,7 +48,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -2234,50 +2233,78 @@ private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier 
             }
         }
         SettingsDesignVisual.CHAT -> Box(modifier) {
-            // The help & feedback doodle — two speech bubbles: a big
-            // question bubble and a small reply bubble with lines (one
-            // clean subject, the doodle family).
+            // The help & feedback doodle — a support CHAT window (v3xx42):
+            // a rounded window with a header bar (two dots + a title line),
+            // an incoming white bubble carrying a drawn question mark, an
+            // outgoing message bubble with two ink lines, and a small paper
+            // plane flying out of the corner — it reads as "talk to
+            // support" instead of two floating bubbles.
             Canvas(Modifier.fillMaxSize()) {
                 val w = size.width; val h = size.height
                 val stroke = 2.dp.toPx()
-                // Big bubble — round with a tail bottom-left.
-                val bigRect = androidx.compose.ui.geometry.Rect(w * 0.06f, h * 0.10f, w * 0.62f, h * 0.62f)
-                val bigBubble = Path().apply {
-                    addOval(bigRect)
+                val ink = Color(0xFF6B5A52)
+                val windowFill = Color(0xFFE4DBF2).copy(alpha = 0.92f)
+                val outFill = Color(0xFFC9B8E6).copy(alpha = 0.9f)
+                val windowRect = androidx.compose.ui.geometry.Rect(w * 0.07f, h * 0.13f, w * 0.83f, h * 0.77f)
+                val window = Path().apply {
+                    addRoundRect(androidx.compose.ui.geometry.RoundRect(windowRect, androidx.compose.ui.geometry.CornerRadius(w * 0.06f)))
                 }
-                drawPath(bigBubble, Color(0xFFE4DBF2).copy(alpha = 0.92f))
-                drawPath(bigBubble, Color.White.copy(alpha = 0.95f), style = Stroke(width = stroke * 0.7f))
-                val tail1 = Path().apply {
-                    moveTo(bigRect.left + bigRect.width * 0.22f, bigRect.bottom - 2f)
-                    lineTo(bigRect.left + bigRect.width * 0.12f, bigRect.bottom + h * 0.16f)
-                    lineTo(bigRect.left + bigRect.width * 0.42f, bigRect.bottom - 2f)
+                drawPath(window, windowFill)
+                drawPath(window, Color.White.copy(alpha = 0.95f), style = Stroke(width = stroke * 0.6f))
+                // Header bar — two dots + a short title line, then a rule.
+                drawCircle(Color.White.copy(alpha = 0.85f), radius = w * 0.012f, center = Offset(w * 0.14f, h * 0.205f))
+                drawCircle(Color.White.copy(alpha = 0.85f), radius = w * 0.012f, center = Offset(w * 0.185f, h * 0.205f))
+                drawLine(Color.White.copy(alpha = 0.7f), Offset(w * 0.26f, h * 0.205f), Offset(w * 0.56f, h * 0.205f), strokeWidth = stroke * 0.45f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                drawLine(Color.White.copy(alpha = 0.45f), Offset(w * 0.09f, h * 0.255f), Offset(w * 0.81f, h * 0.255f), strokeWidth = stroke * 0.35f)
+                // Incoming bubble (help) — white, tail bottom-left, with a
+                // drawn question mark in ink.
+                val inRect = androidx.compose.ui.geometry.Rect(w * 0.13f, h * 0.31f, w * 0.42f, h * 0.52f)
+                val inBubble = Path().apply {
+                    addRoundRect(androidx.compose.ui.geometry.RoundRect(inRect, androidx.compose.ui.geometry.CornerRadius(w * 0.045f)))
+                }
+                drawPath(inBubble, Color.White.copy(alpha = 0.92f))
+                drawPath(inBubble, Color.White.copy(alpha = 0.95f), style = Stroke(width = stroke * 0.45f))
+                val inTail = Path().apply {
+                    moveTo(inRect.left + inRect.width * 0.12f, inRect.bottom - 1f)
+                    lineTo(inRect.left + inRect.width * 0.02f, inRect.bottom + h * 0.07f)
+                    lineTo(inRect.left + inRect.width * 0.38f, inRect.bottom - 1f)
                     close()
                 }
-                drawPath(tail1, Color(0xFFE4DBF2).copy(alpha = 0.92f))
-                drawPath(tail1, Color.White.copy(alpha = 0.9f), style = Stroke(width = stroke * 0.5f))
-                // Question mark — a drawn hook + dot (no text glyph).
-                drawArc(Color.White.copy(alpha = 0.95f), startAngle = 180f, sweepAngle = 220f, useCenter = false,
-                    topLeft = Offset(w * 0.26f, h * 0.18f), size = Size(w * 0.16f, h * 0.24f),
-                    style = Stroke(width = stroke * 0.65f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
-                drawLine(Color.White.copy(alpha = 0.95f), Offset(w * 0.34f, h * 0.40f), Offset(w * 0.34f, h * 0.44f), strokeWidth = stroke * 0.65f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
-                drawCircle(Color.White.copy(alpha = 0.95f), radius = stroke * 0.5f, center = Offset(w * 0.34f, h * 0.50f))
-                // Small reply bubble — bottom-right, with two ink lines.
-                val smallRect = androidx.compose.ui.geometry.Rect(w * 0.46f, h * 0.48f, w * 0.95f, h * 0.82f)
-                val smallBubble = Path().apply {
-                    addOval(smallRect)
+                drawPath(inTail, Color.White.copy(alpha = 0.92f))
+                drawArc(ink.copy(alpha = 0.85f), startAngle = 190f, sweepAngle = 200f, useCenter = false,
+                    topLeft = Offset(inRect.left + inRect.width * 0.30f, inRect.top + inRect.height * 0.16f), size = Size(inRect.width * 0.40f, inRect.height * 0.52f),
+                    style = Stroke(width = stroke * 0.55f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
+                drawLine(ink.copy(alpha = 0.85f), Offset(inRect.left + inRect.width * 0.50f, inRect.top + inRect.height * 0.66f), Offset(inRect.left + inRect.width * 0.50f, inRect.top + inRect.height * 0.76f), strokeWidth = stroke * 0.55f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                drawCircle(ink.copy(alpha = 0.85f), radius = stroke * 0.42f, center = Offset(inRect.left + inRect.width * 0.50f, inRect.top + inRect.height * 0.90f))
+                // Outgoing bubble (your message) — deeper lavender, tail
+                // bottom-right, with two ink lines.
+                val outRect = androidx.compose.ui.geometry.Rect(w * 0.40f, h * 0.56f, w * 0.76f, h * 0.72f)
+                val outBubble = Path().apply {
+                    addRoundRect(androidx.compose.ui.geometry.RoundRect(outRect, androidx.compose.ui.geometry.CornerRadius(w * 0.04f)))
                 }
-                drawPath(smallBubble, Color(0xFFDCE8F0).copy(alpha = 0.95f))
-                drawPath(smallBubble, Color.White.copy(alpha = 0.95f), style = Stroke(width = stroke * 0.6f))
-                val tail2 = Path().apply {
-                    moveTo(smallRect.right - smallRect.width * 0.40f, smallRect.bottom - 2f)
-                    lineTo(smallRect.right - smallRect.width * 0.30f, smallRect.bottom + h * 0.12f)
-                    lineTo(smallRect.right - smallRect.width * 0.12f, smallRect.bottom - 2f)
+                drawPath(outBubble, outFill)
+                drawPath(outBubble, Color.White.copy(alpha = 0.9f), style = Stroke(width = stroke * 0.45f))
+                val outTail = Path().apply {
+                    moveTo(outRect.right - outRect.width * 0.16f, outRect.bottom - 1f)
+                    lineTo(outRect.right + w * 0.04f, outRect.bottom + h * 0.06f)
+                    lineTo(outRect.right - outRect.width * 0.60f, outRect.bottom - 1f)
                     close()
                 }
-                drawPath(tail2, Color(0xFFDCE8F0).copy(alpha = 0.95f))
-                drawPath(tail2, Color.White.copy(alpha = 0.9f), style = Stroke(width = stroke * 0.45f))
-                drawLine(Color(0xFF6B5A52).copy(alpha = 0.45f), Offset(smallRect.left + smallRect.width * 0.18f, smallRect.top + smallRect.height * 0.40f), Offset(smallRect.left + smallRect.width * 0.78f, smallRect.top + smallRect.height * 0.40f), strokeWidth = 1.1f)
-                drawLine(Color(0xFF6B5A52).copy(alpha = 0.45f), Offset(smallRect.left + smallRect.width * 0.18f, smallRect.top + smallRect.height * 0.62f), Offset(smallRect.left + smallRect.width * 0.58f, smallRect.top + smallRect.height * 0.62f), strokeWidth = 1.1f)
+                drawPath(outTail, outFill)
+                drawLine(ink.copy(alpha = 0.6f), Offset(outRect.left + outRect.width * 0.14f, outRect.top + outRect.height * 0.36f), Offset(outRect.left + outRect.width * 0.86f, outRect.top + outRect.height * 0.36f), strokeWidth = 1.2f)
+                drawLine(ink.copy(alpha = 0.6f), Offset(outRect.left + outRect.width * 0.14f, outRect.top + outRect.height * 0.64f), Offset(outRect.left + outRect.width * 0.60f, outRect.top + outRect.height * 0.64f), strokeWidth = 1.2f)
+                // Paper plane — flying out of the window's top-right corner
+                // (feedback sent).
+                val px = w * 0.90f; val py = h * 0.09f; val ps = w * 0.11f
+                val plane = Path().apply {
+                    moveTo(px - ps, py + ps * 0.15f)
+                    lineTo(px + ps * 0.85f, py + ps * 0.95f)
+                    lineTo(px + ps * 0.32f, py + ps * 0.32f)
+                    lineTo(px - ps * 0.05f, py - ps * 0.75f)
+                    close()
+                }
+                drawPath(plane, outFill)
+                drawPath(plane, Color.White.copy(alpha = 0.95f), style = Stroke(width = stroke * 0.45f))
             }
         }
     }
@@ -2527,10 +2554,13 @@ private fun SettingsSecondaryCardView(
  *  the new screen's chip across the page transition. */
 private const val SettingsRailActiveKey = "settings-rail-active"
 
-/** Bounds animation for the rail morph — a near-critical spring so the
- *  pill glides between chips quickly with zero overshoot wobble. */
+/** Bounds animation for the rail morph — a CALM spring so the pill is
+ *  actually SEEN gliding between chips (v3xx42: the old stiffness-500
+ *  spring settled in ~150ms — under half the 450ms page fade — so the
+ *  tap read as the chip snapping to a solid colour, no moving highlight).
+ *  0.8 / 140 settles in ~350ms, pacing the glide to the page crossfade. */
 private val SettingsRailBoundsTransform = BoundsTransform { _, _ ->
-    spring(dampingRatio = 0.95f, stiffness = 500f)
+    spring(dampingRatio = 0.8f, stiffness = 140f)
 }
 
 /**
@@ -2577,17 +2607,23 @@ internal fun SettingsNavRail(
         if (active == null) return@LaunchedEffect
         val idx = settingsNavRail.indexOfFirst { it.id == active }
         if (idx < 0) return@LaunchedEffect
-        // Give the row a frame to lay out at the initial index.
+        // Give the row a frame to lay out at the initial index, then SNAP the
+        // row to centre the active chip in ONE frame (v3xx42 — the old
+        // animateScrollBy glided the row for ~300ms DURING the page
+        // transition, dragging the shared-element pill's target bounds as it
+        // morphed — that's the jitter that read as "goes solid colour").
+        // Instant centering lands the chip before the pill glide starts, so
+        // the morph has stable start/end bounds.
         withFrameNanos { }
         val info = listState.layoutInfo
         val item = info.visibleItemsInfo.firstOrNull { it.index == idx } ?: return@LaunchedEffect
         val itemCenter = item.offset + item.size / 2f
         val viewportCenter = info.viewportEndOffset / 2f
         val drift = itemCenter - viewportCenter
-        // Only glide when the chip is meaningfully off-centre (>10% of the
+        // Only move when the chip is meaningfully off-centre (>10% of the
         // viewport) so near-centred chips don't twitch.
         if (kotlin.math.abs(drift) > info.viewportEndOffset * 0.10f) {
-            listState.animateScrollBy(drift, spring(dampingRatio = 0.95f, stiffness = 200f))
+            listState.scrollBy(drift)
         }
     }
     Column(modifier = modifier.fillMaxWidth()) {

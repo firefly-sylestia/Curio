@@ -1,4 +1,68 @@
 # Prompt Log — current request
+## Request (2026-09-10, completed — shelf art final pass: book/saved/completed/customs + help&feedback; nav rail highlight glide + back-glitch fix)
+
+User (queued after the Everything/TextHistory push): "redraw cabinets
+collections curying now the book itself is bad just the book, the saved
+entries properly redesign that, completed too keep it minimal, and all the
+custom ones do something unique, and the help and feedback one from
+settings, and also the top nav bar that smooth transition animation isn't
+that smooth when i tap something it goes solid color without that
+highlight so fix that and a glitch when if mid animation i tap back and
+go to all settings it still stays in that page it was open so make it a
+little bit smooth."
+
+**Shipped (3 code files + docs, this commit):**
+1. **CabinetShelves.kt — art final pass:**
+   - CURIYING NOW (ReadingArt): the BOOK itself is redrawn — a dark
+     COVER slab (rounded, own spine crease) under THREE stepped page
+     layers per side (each peeks at the outer edge = page thickness),
+     typed PARAGRAPH lines per page (left justified, right with a
+     first-line indent), clean spine join + crease shadow, knotted
+     ribbon bookmark with V-notch tail; the mug + steam stay (slightly
+     right-shifted, 0.86w).
+   - SAVED ENTRIES (PhotosArt): redesigned as a proper COLLAGE — one
+     BIG front polaroid (sun-over-hills landscape + two birds, drawn
+     unrotated inside the photo window), angled washi tape on its top
+     edge, a golden fiveStar favourite mark on the caption band, plus
+     two smaller tilted prints behind (crescent-moon night + heart),
+     grounded by a shared shadow.
+   - COMPLETED (PeakArt): kept MINIMAL — one clean summit silhouette,
+     a small snow cap on the apex, a planted flag, a thin ground band.
+     Sun / second ridge / birds / badge circle removed.
+   - CUSTOM collection arts are now UNIQUE scenes (not the four generic
+     minimal sun/rings/wave/dots): hot-air BALLOON (envelope + centre
+     band + seam stitch + ropes + basket + cloud), ringed PLANET (globe
+     + atmosphere line + ring passing in front + orbiting moon +
+     twinkle stars), SAILBOAT (hull + mast + sail + pennant + waves +
+     wind puff), KITE (diamond + cross spars + bow tail + wavy line to
+     a tiny hand + cloud).
+2. **SettingsHubScreen.kt — Help & feedback + rail animation:**
+   - CHAT doodle redrawn: a support-CHAT WINDOW (rounded, lavender)
+     with a header bar (two dots + title line), an incoming white
+     question bubble, an outgoing message bubble with two ink lines,
+     and a paper plane flying out the corner.
+   - SettingsRailBoundsTransform spring 0.95/500 → **0.8/140** (the
+     old stiffness-500 pill settled in ~150ms — under half the 450ms
+     page fade — so taps read as a solid-colour snap; 0.8/140 settles
+     ~350ms and visibly GLIDES).
+   - Rail centering is now INSTANT (`scrollBy` after one frame instead
+     of `animateScrollBy(spring)`): the old ~300ms row glide ran DURING
+     the page transition, dragging the shared-element pill's target
+     bounds as it morphed (the jitter). The chip lands centred before
+     the pill glide starts.
+3. **CurioNavHost.kt — settings-family transitions are PURE tweens:**
+   enter/exit/popEnter/popExit for settings-family routes dropped the
+   `scaleIn/scaleOut(0.985, Springs.Calm)` (stiffness 750 — an instant
+   pop) and now `fadeIn/fadeOut(tween(Morph))` only. Fixes both
+   complaints: no solid-colour jump (the pill morph is the only motion,
+   and it glides), and backing out MID-transition converges cleanly —
+   a spring re-targeted from a mid-flight value was what left the old
+   page stuck on All Settings.
+
+**Scope:** Android app only (web/ + desktop/ untouched).
+
+**Status:** committed + pushed; CI validates. No pending prompt.
+
 ## Request (2026-09-10, completed — Everything wall: no seam + uniform covers; Text history gets the JSX concept feature set)
 
 User: "the cabinets arrangement isn't good — remove the background fill,
@@ -43,9 +107,9 @@ now preserved in the ## next prompt section.)
 
 **Scope:** Android app only (web/ + desktop/ untouched).
 
-**Status:** committed + pushed; CI validates. A NEW prompt is queued in
-## next prompt below (shelf-art redraws, top-nav highlight animation, back
-mid-animation glitch).
+**Status:** committed + pushed; CI validates. The follow-up it queued
+(shelf-art redraws, nav highlight glide, back mid-animation fix) shipped
+in the next request entry above.
 
 ## Request (2026-09-10, completed — empty-state tree removed, shelf arts rebalanced, per-card random texture, rail centering, quick-tools back-stack fix, backup box doodle, drag visibility, footer fix, secondary card doodles)
 
@@ -141,26 +205,3 @@ this file on 2026-09-10 to keep it short. They live in git history
 (git log -p -- Prompt.md) if anything needs revisiting.
 
 ## next prompt
-
-**QUEUED 2026-09-10 (user, after "continue"):**
-
-1. After the current Everything-page + TextHistory work is pushed,
-   redraw these shelf/collection doodles PROPERLY:
-   - Cabinet collections "Curiying now" — the BOOK itself is bad;
-     redraw just the book (keep the mug/etc).
-   - "Saved entries" — redesign it properly.
-   - "Completed" — keep it MINIMAL.
-   - All the CUSTOM collection ones — do something UNIQUE for each
-     (not the current generic scenes).
-   - Settings "Help & feedback" — redraw its doodle too.
-2. TOP NAV BAR animation: the smooth-transition animation is NOT smooth
-   — when tapping a nav item it snaps to a solid color without the
-   moving highlight; fix so the active-highlight glides to the tapped
-   chip (no solid-color jump).
-3. BACK GLITCH: if the user taps back MID-animation and goes to "All
-   settings", the hub still shows the page that was open — make the
-   back/close mid-animation smooth (finish/cancel the transition
-   cleanly instead of leaving the old page stuck).
-
-Status: queued — finish Everything page + TextHistory first, then push,
-then follow this prompt.

@@ -606,14 +606,15 @@ fun CurioNavHost(
                     // chrome reads as staying put, but the switch gets a
                     // gentle lift instead of a flat fade (v3xx).
                     isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->
-                        // v3xx — the nav rail's active pill morphs between
-                        // chips (shared element) while the page lifts in: a
-                        // whisper of scale (0.985, calm spring) on the fade
-                        // reads as a morph instead of a flat crossfade.
-                        scaleIn(
-                            initialScale = 0.985f,
-                            animationSpec = CurioMotion.Springs.Calm
-                        ) + fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
+                        // v3xx42 — PURE crossfade (no spring scale): the
+                        // nav rail's active pill morphs between chips (shared
+                        // element) and is the ONLY motion. A tween fade also
+                        // converges cleanly when the user taps BACK mid-
+                        // transition — a spring re-targeted from a mid-flight
+                        // value is what left the old page stuck on the hub.
+                        // (The old stiffness-750 Calm spring settled
+                        // instantly — a solid-colour pop.)
+                        fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
                     // Reveal is the continuation of the landed Spin ticket:
                     // fade instead of the generic horizontal page slide — the
                     // shared "reveal-hero" element (Spin ticket → Reveal
@@ -675,10 +676,8 @@ fun CurioNavHost(
                     // the incoming page's fade-in (the shared chrome reads
                     // as staying still).
                     isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->
-                        scaleOut(
-                            targetScale = 0.985f,
-                            animationSpec = CurioMotion.Springs.Calm
-                        ) + fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
+                        // v3xx42 — pure fade out (mirrors the enter fade).
+                        fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
                     // Leave the Spin ticket in place while Reveal expands:
                     // the fade is paced to the shared-element morph so the
                     // source card stays visible for the whole expansion
@@ -722,14 +721,15 @@ fun CurioNavHost(
                     // → section): the page underneath fades back in the same
                     // gentle crossfade as the forward switch.
                     isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->
-                        // v3xx — the nav rail's active pill morphs between
-                        // chips (shared element) while the page lifts in: a
-                        // whisper of scale (0.985, calm spring) on the fade
-                        // reads as a morph instead of a flat crossfade.
-                        scaleIn(
-                            initialScale = 0.985f,
-                            animationSpec = CurioMotion.Springs.Calm
-                        ) + fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
+                        // v3xx42 — PURE crossfade (no spring scale): the
+                        // nav rail's active pill morphs between chips (shared
+                        // element) and is the ONLY motion. A tween fade also
+                        // converges cleanly when the user taps BACK mid-
+                        // transition — a spring re-targeted from a mid-flight
+                        // value is what left the old page stuck on the hub.
+                        // (The old stiffness-750 Calm spring settled
+                        // instantly — a solid-colour pop.)
+                        fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
                     // Popping back from Topic Reveal: fade only — the shared
                     // element morph reverses the hero into the card, and a
                     // directional slide would fight it.
@@ -761,10 +761,8 @@ fun CurioNavHost(
                     // Popping back inside settings: the outgoing page fades
                     // out over the same crossfade.
                     isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->
-                        scaleOut(
-                            targetScale = 0.985f,
-                            animationSpec = CurioMotion.Springs.Calm
-                        ) + fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
+                        // v3xx42 — pure fade out (mirrors the enter fade).
+                        fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
                     // Popping Topic Reveal: fade the page out under the
                     // reversing morph instead of sliding it sideways.
                     initialState.destination.route == CurioRoutes.REVEAL ->
