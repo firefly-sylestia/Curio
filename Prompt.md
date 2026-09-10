@@ -1,4 +1,41 @@
 # Prompt Log — current request
+## Request (2026-09-10, completed + pushed — Everything gallery: real 2x covers, natural aspects, framed + uniform spacing, Add pill)
+
+User: previews (home Everything card + the gallery) show wrong categories
+— albums render like tall books; no real 2x/3x covers (only "2x longer");
+spacing not uniform; wants a little rounded-corner border; remove the
+bottom "Add something new" and keep just the Add pill.
+
+**Root causes found:** (1) the home rail forced EVERY cover into 64×88
+portrait (albums looked like books); (2) the gallery's tier multiplier
+multiplied the base aspect (rank 0 = ×0.5 → an album at 0.5 aspect is
+TALLER than a book jacket); (3) LazyVerticalStaggeredGrid can only scale
+HEIGHT (no column spans) → "2x" was only 2x taller.
+
+**What shipped (CabinetV2Content.kt only):**
+1. **Real 2x featured cover** — the gallery switched from the staggered
+   grid to a span-capable `LazyVerticalGrid` (the JSX's 12-column dense
+   grid): the most-recent cover spans 2 columns at its own aspect = full
+   2x in BOTH dimensions (not just taller).
+2. **Covers keep their own shape** — tier-stretching is GONE; books stay
+   0.667 portrait, albums square 1.0, series 0.72 poster, in the gallery
+   AND the home Everything rail (albums now 64×64 square, centered;
+   books 59×88, series 64×88).
+3. **Framed covers** — each tile wears a 1dp rounded-corner border (10dp
+   radius) over a whisper of surface fill — a print-like frame instead
+   of a bare crop.
+4. **Uniform spacing** — one 12dp gap on all sides (edges now match the
+   internal gaps; was 16dp sides vs 12dp gaps, ragged wall bottom).
+5. **Add pill** — the full-width "Add something new" card is REMOVED;
+   both the empty and populated gallery end with the centered "+ Add"
+   labeled pill (V2AddPill). Unused V2AddSomethingButton + the 5
+   staggered-grid imports + tierMultiplier deleted.
+
+Note: 3x sizing isn't expressible in a 4-column grid (max span is 2 of
+4); the 2x featured is the honest maximum — a 3x tier would need a
+custom layout. Say the word if you want that. Store changelog SKIPPED
+per the standing "skip cl for now" preference.
+
 ## Request (2026-09-10, completed + pushed — styles + doodle empty state expanded app-wide)
 
 User confirmed scope via ask_user: WHOLE APP (not just Cabinet). Shipped:

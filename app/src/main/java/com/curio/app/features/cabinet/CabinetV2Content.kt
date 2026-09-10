@@ -38,11 +38,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
-import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -548,25 +543,30 @@ fun CabinetV2Content(navController: NavController) {
         // when the category changes (the CurioEverythingGallery concept).
         // Favorites stores ONLY liked media, so it wears the same gallery.
         if (openLevel == "everything" || openLevel == SHELF_LEVEL_FAVORITES) {
-            LazyVerticalStaggeredGrid(
-                state = rememberLazyStaggeredGridState(),
-                columns = StaggeredGridCells.Fixed(if (wide) 8 else 4),
+            // v3xx — a span-capable UNIFORM grid (the JSX's 12-column dense
+            // grid): covers keep their OWN aspect (books tall, albums
+            // square, series posters), the most recent is a REAL 2x (spans
+            // 2 columns — full size, not just taller), and every gap is the
+            // same 12dp on all sides.
+            LazyVerticalGrid(
+                state = rememberLazyGridState(),
+                columns = GridCells.Fixed(if (wide) 8 else 4),
                 contentPadding = PaddingValues(
-                    start = 16.dp,
-                    end = 16.dp,
+                    start = 12.dp,
+                    end = 12.dp,
                     top = contentTop,
                     bottom = 24.dp + 84.dp +
                         WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
                 ),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalItemSpacing = 12.dp,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier
                     .fillMaxSize()
                     .then(if (glassOn && glassBackdrop != null)
                         Modifier.layerBackdrop(glassBackdrop) else Modifier)
             ) {
                 if (wide) {
-                    item(key = "hero", span = StaggeredGridItemSpan.FullLine, contentType = "hero") {
+                    item(key = "hero", span = { GridItemSpan(maxLineSpan) }, contentType = "hero") {
                         wideHero()
                     }
                 }
@@ -1178,14 +1178,14 @@ private fun LazyGridScope.v2DetailItems(
 /** EVERYTHING — the JSX poster gallery (the CurioEverythingGallery
  *  concept, now COVERS ONLY): no saved captures, no Recent rail, no
  *  per-kind section headers, no card chrome — just the liked media's
- *  cover art (books tall, albums square, series posters) with a whisper
- *  of rounding, sized by kind. The most recently liked item is featured a
- *  little larger and the staggered grid packs everything else around it.
- *  The filter CHIPS ride the top full-line (the Filter/Sort pills are
- *  gone — the JSX has no filter dropdown), and every cover animates to
- *  its new spot when the category changes. */
+ *  cover art, each at its OWN aspect (books tall, albums square, series
+ *  posters), inside a thin rounded frame. The most recently liked item is
+ *  a REAL 2x (spans 2 columns — full size, not just taller) and the wall
+ *  packs with one uniform gap on all sides. The filter CHIPS ride the top
+ *  full-line, and every cover animates to its new spot when the category
+ *  changes. */
 @OptIn(ExperimentalFoundationApi::class)
-private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
+private fun LazyGridScope.v2EverythingMasonryItems(
     shownBooks: List<V2Liked>,
     shownAlbums: List<V2Liked>,
     shownSeries: List<V2Liked>,
@@ -1198,46 +1198,33 @@ private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
     onAddNew: () -> Unit,
     pageAccent: Color
 ) {
-    // v3xx — JUMBLED recency wall: all liked media merge into ONE
-    // recency-ordered stream (no category grouping — books, albums and
-    // series interleave exactly as they were liked). Staggered-grid spans
-    // only offer FullLine / SingleLane, so every cover takes one lane and
-    // the size variation comes from HEIGHT — the grid's native language.
-    // Sizes step down by recency tier: the most recent runs 2x (featured,
-    // neighbours pack around it), then 1.5x / 1x / 0.75x / 0.5x down the
-    // wall — a magazine-like mix. Smooth reflow: every cover animates to
-    // its new spot when the filter changes (animateItem is a member
-    // extension of the item scope, so it's applied per-item inside each
-    // item {} block).
+    // v3xx — recency wall: all liked media merge into ONE recency-ordered
+    // stream (no category grouping — books, albums and series interleave
+    // exactly as they were liked). Every cover keeps its OWN aspect (books
+    // tall, albums square, series posters — the art's real shape, never
+    // stretched by the category or a size tier) inside a thin rounded
+    // frame; the most recent is a REAL 2x (spans 2 columns — full size in
+    // BOTH dimensions, not just taller). Gaps are one uniform 12dp on all
+    // sides; reflow still animates per cover (animateItem is a member
+    // extension of the item scope).
     val allMedia = (shownBooks + shownAlbums + shownSeries)
         .sortedByDescending { likedAtFor(it) }
     val totalShown = allMedia.size
 
-    // Size tier for a recency rank — a multiplier on the cover's base
-    // aspect (smaller aspect = taller card): rank 0 (most recent) 2x, then
-    // ~1.5x / 1x / 0.75x / 0.5x as the wall ages.
-    fun tierMultiplier(rank: Int): Float = when {
-        rank == 0 -> 0.5f     // 2x — the most recent, featured
-        rank <= 2 -> 0.67f    // ~1.5x
-        rank <= 7 -> 1f       // 1x
-        rank <= 15 -> 1.33f   // ~0.75x
-        else -> 2f            // ~0.5x
-    }
-
     if (totalShown == 0) {
-        item(key = "e-empty", span = StaggeredGridItemSpan.FullLine, contentType = "empty") {
+        item(key = "e-empty", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
             CurioDoodleEmptyState(
                 headline = "Nothing saved yet",
                 subtext = "Like a book, series or album and its cover shows up here."
             )
         }
-        item(key = "add-new", span = StaggeredGridItemSpan.FullLine, contentType = "action") {
-            V2AddSomethingButton(onClick = onAddNew)
+        item(key = "add-new", span = { GridItemSpan(maxLineSpan) }, contentType = "action") {
+            V2AddPill(onClick = onAddNew)
         }
         return
     }
 
-    item(key = "filter-rail", span = StaggeredGridItemSpan.FullLine, contentType = "chips") {
+    item(key = "filter-rail", span = { GridItemSpan(maxLineSpan) }, contentType = "chips") {
         V2FilterRail(
             current = typeFilter,
             onSelect = onTypeFilter,
@@ -1246,27 +1233,32 @@ private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
         )
     }
 
-    // One jumbled, recency-ranked stream — the tier comes from the rank.
+    // The most recent cover runs 2x (spans 2 of 4 columns on phones, 2 of
+    // 8 wide) at its own aspect — a real 2x in BOTH dimensions.
     allMedia.forEachIndexed { rank, liked ->
         item(
             key = "l|${liked.kind.name}|${liked.name}",
+            span = { GridItemSpan(if (rank == 0) 2 else 1) },
             contentType = "media"
         ) {
             val fallbackAccent = liked.topic?.categoryId?.let { CurioCategories.byId(it) }
                 ?.themedAccent() ?: MaterialTheme.colorScheme.primary
-            val baseAspect = when (liked.kind) {
+            // The cover's OWN shape — never a tier-stretched aspect (that
+            // was what made albums read as tall book jackets).
+            val aspect = when (liked.kind) {
                 V2Kind.BOOK -> 0.667f   // portrait jacket
                 V2Kind.ALBUM -> 1f      // square sleeve
                 V2Kind.SERIES -> 0.72f  // poster
             }
-            // Tiered size: the recency rank drives how tall the card runs
-            // (2x most recent → 0.5x oldest), neighbours pack around it.
-            val aspect = (baseAspect * tierMultiplier(rank)).coerceIn(0.3f, 2.6f)
+            // Framed cover: thin rounded border + a whisper of tile fill so
+            // the fitted art reads as a print (no category wash behind it).
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(aspect)
-                    .clip(RoundedCornerShape(6.dp))
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f))
+                    .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.16f), RoundedCornerShape(10.dp))
                     .then(
                         Modifier.animateItem(
                             fadeInSpec = tween(220),
@@ -1284,8 +1276,8 @@ private fun LazyStaggeredGridScope.v2EverythingMasonryItems(
         }
     }
 
-    item(key = "add-new", span = StaggeredGridItemSpan.FullLine, contentType = "action") {
-        V2AddSomethingButton(onClick = onAddNew)
+    item(key = "add-new", span = { GridItemSpan(maxLineSpan) }, contentType = "action") {
+        V2AddPill(onClick = onAddNew)
     }
 }
 
@@ -1634,6 +1626,7 @@ private fun V2EverythingCard(
             } else {
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                     contentPadding = PaddingValues(vertical = 2.dp)
                 ) {
                     items(likes, key = { "${it.kind.name}|${it.name}" }) { item ->
@@ -1651,12 +1644,21 @@ private fun V2EverythingCard(
                                 fallbackAccent
                             )
                         }
-                        // v3xx35 — NO category-tint plate behind the covers: the
-                        // art renders edge-to-edge (V2JacketArt shows its own
-                        // accent placeholder only while a cover is loading).
+                        // v3xx — the preview keeps each cover's OWN shape
+                        // (books tall, albums square, series posters — no more
+                        // albums squeezed into book jackets), centered in the
+                        // rail, inside the same thin rounded frame as the
+                        // gallery.
+                        val tileSize = when (item.kind) {
+                            V2Kind.ALBUM -> Modifier.size(width = 64.dp, height = 64.dp)
+                            V2Kind.SERIES -> Modifier.size(width = 64.dp, height = 88.dp)
+                            else -> Modifier.size(width = 59.dp, height = 88.dp)
+                        }
                         Box(
-                            modifier = Modifier
-                                .size(width = 64.dp, height = 88.dp)
+                            modifier = tileSize
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f))
+                                .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.16f), RoundedCornerShape(10.dp))
                         ) {
                             V2JacketArt(
                                 item = item,
@@ -1731,58 +1733,38 @@ private fun V2FilterRail(
     }
 }
 
-/** The JSX "Add something new" action — dashed hairline + rose circle. */
+/** The app-wide labeled Add pill — "+ Add", centered at the foot of the
+ *  gallery (the full-width "Add something new" button is gone). */
 @Composable
-private fun V2AddSomethingButton(onClick: () -> Unit) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(22.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
-        border = androidx.compose.foundation.BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
-        ),
-        modifier = Modifier.fillMaxWidth()
+private fun V2AddPill(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 6.dp),
+        horizontalArrangement = Arrangement.Center
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(13.dp),
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp)
+        Surface(
+            onClick = onClick,
+            shape = RoundedCornerShape(50),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.13f),
+            modifier = Modifier.height(46.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(46.dp)
-                    .clip(RoundedCornerShape(50))
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)),
-                contentAlignment = Alignment.Center
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.padding(horizontal = 20.dp)
             ) {
                 CurioIcon(
                     name = CurioIcons.Add,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
-                    size = 24.dp
+                    size = 22.dp
                 )
-            }
-            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Add something new",
+                    text = "Add",
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = "Save a book, note, image or anything…",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1
                 )
             }
-            CurioIcon(
-                name = CurioIcons.AutoAwesome,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.55f),
-                size = 22.dp
-            )
         }
     }
 }
