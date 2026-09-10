@@ -36,6 +36,15 @@ Note: 3x sizing isn't expressible in a 4-column grid (max span is 2 of
 custom layout. Say the word if you want that. Store changelog SKIPPED
 per the standing "skip cl for now" preference.
 
+**CI fix (74e3fa54):** compileDebug/ReleaseKotlin failed on
+CurioDoodleEmptyState.kt with Unresolved reference errors — the new
+shared file used `Modifier.fillMaxSize()` without importing
+`androidx.compose.foundation.layout.fillMaxSize` and called the
+`DrawScope.rotate(...)` extension without importing
+`androidx.compose.ui.graphics.drawscope.rotate`. Both imports added
+(matching the codebase's existing drawscope.rotate usage in SpinScreen,
+CurioConfetti, PaperStatCard, the floating pet and SettingsHub).
+
 ## Request (2026-09-10, completed + pushed — styles + doodle empty state expanded app-wide)
 
 User confirmed scope via ask_user: WHOLE APP (not just Cabinet). Shipped:
