@@ -1927,46 +1927,49 @@ private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier 
             )
         }
         SettingsDesignVisual.SHARE -> Box(modifier) {
-            // The share doodle — a tilted mini card with two ink lines and
-            // an upward share arrow (the flask language).
+            // The share doodle — a proper mini share card (cream body, a
+            // small rose image block and two ink lines) with a clean upward
+            // share ARROW rising from its top-right corner: one clear
+            // subject, no sparkle text.
             Canvas(Modifier.fillMaxSize()) {
                 val w = size.width; val h = size.height
                 val stroke = 2.dp.toPx()
                 // Mini card, tilted.
-                val cw = w * 0.58f; val ch = h * 0.48f
-                val pos = Offset(w * 0.12f, h * 0.38f)
+                val cw = w * 0.56f; val ch = h * 0.46f
+                val pos = Offset(w * 0.10f, h * 0.40f)
                 rotate(-6f, Offset(pos.x + cw / 2, pos.y + ch / 2)) {
                     val rect = androidx.compose.ui.geometry.Rect(pos.x, pos.y, pos.x + cw, pos.y + ch)
-                    drawRoundRect(Color(0xFFF6E9D5).copy(alpha = 0.9f), topLeft = rect.topLeft, size = rect.size, cornerRadius = CornerRadius(7.dp.toPx()))
+                    // Body + outline.
+                    drawRoundRect(Color(0xFFF6E9D5).copy(alpha = 0.92f), topLeft = rect.topLeft, size = rect.size, cornerRadius = CornerRadius(7.dp.toPx()))
                     drawRoundRect(Color.White.copy(alpha = 0.85f), topLeft = rect.topLeft, size = rect.size, cornerRadius = CornerRadius(7.dp.toPx()), style = Stroke(width = stroke * 0.8f))
-                    // Two ink lines ("CURIO" + "stay curious").
-                    drawRoundRect(Color(0xFF6B4F45).copy(alpha = 0.55f), topLeft = Offset(rect.left + 5.dp.toPx(), rect.top + 5.dp.toPx()), size = Size(rect.width * 0.42f, 2.4.dp.toPx()), cornerRadius = CornerRadius(1.2.dp.toPx()))
-                    drawRoundRect(Color(0xFF6B4F45).copy(alpha = 0.35f), topLeft = Offset(rect.left + 5.dp.toPx(), rect.top + 9.dp.toPx()), size = Size(rect.width * 0.62f, 2.4.dp.toPx()), cornerRadius = CornerRadius(1.2.dp.toPx()))
+                    // Small rose image block inside the card (top-left).
+                    val imgW = rect.width * 0.34f; val imgH = rect.height * 0.52f
+                    val imgRect = androidx.compose.ui.geometry.Rect(rect.left + 5.dp.toPx(), rect.top + 5.dp.toPx(), rect.left + 5.dp.toPx() + imgW, rect.top + 5.dp.toPx() + imgH)
+                    drawRoundRect(Color(0xFFE8B4B0).copy(alpha = 0.9f), topLeft = imgRect.topLeft, size = imgRect.size, cornerRadius = CornerRadius(3.dp.toPx()))
+                    drawRoundRect(Color.White.copy(alpha = 0.6f), topLeft = imgRect.topLeft, size = imgRect.size, cornerRadius = CornerRadius(3.dp.toPx()), style = Stroke(width = stroke * 0.4f))
+                    // A little sun in the image.
+                    drawCircle(Color(0xFFF4C768).copy(alpha = 0.95f), radius = imgW * 0.20f, center = Offset(imgRect.left + imgW * 0.55f, imgRect.top + imgH * 0.42f))
+                    // Two ink lines beside the image ("CURIO" + "stay curious").
+                    val tx = rect.left + 5.dp.toPx() + imgW + 4.dp.toPx()
+                    drawRoundRect(Color(0xFF6B4F45).copy(alpha = 0.55f), topLeft = Offset(tx, rect.top + 6.dp.toPx()), size = Size(rect.width - (tx - rect.left) - 4.dp.toPx(), 2.4.dp.toPx()), cornerRadius = CornerRadius(1.2.dp.toPx()))
+                    drawRoundRect(Color(0xFF6B4F45).copy(alpha = 0.35f), topLeft = Offset(tx, rect.top + 11.dp.toPx()), size = Size((rect.width - (tx - rect.left) - 4.dp.toPx()) * 0.72f, 2.4.dp.toPx()), cornerRadius = CornerRadius(1.2.dp.toPx()))
                 }
-                // Upward share arrow — stem + head.
+                // Upward share arrow — a clear stem + filled head, rising
+                // off the card's top-right corner.
                 val ax = w * 0.80f
-                val baseY = h * 0.82f
-                drawLine(Color.White.copy(alpha = 0.9f), Offset(ax, baseY), Offset(ax, baseY - h * 0.40f), strokeWidth = 2.dp.toPx())
+                val baseY = h * 0.84f
+                drawLine(Color.White.copy(alpha = 0.95f), Offset(ax, baseY), Offset(ax, baseY - h * 0.42f), strokeWidth = 2.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
                 val head = Path().apply {
-                    moveTo(ax - w * 0.10f, baseY - h * 0.28f)
-                    lineTo(ax, baseY - h * 0.44f)
-                    lineTo(ax + w * 0.10f, baseY - h * 0.28f)
+                    moveTo(ax - w * 0.11f, baseY - h * 0.29f)
+                    lineTo(ax, baseY - h * 0.46f)
+                    lineTo(ax + w * 0.11f, baseY - h * 0.29f)
                     close()
                 }
-                drawPath(head, Color.White.copy(alpha = 0.9f))
+                drawPath(head, Color.White.copy(alpha = 0.95f))
+                // Two soft accent dots (no sparkles).
+                drawCircle(Color.White.copy(alpha = 0.55f), radius = 2.dp.toPx(), center = Offset(w * 0.90f, h * 0.18f))
+                drawCircle(Color.White.copy(alpha = 0.35f), radius = 1.5.dp.toPx(), center = Offset(w * 0.95f, h * 0.26f))
             }
-            Text(
-                text = "✦",
-                style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
-                color = Color.White.copy(alpha = 0.85f),
-                modifier = Modifier.offset(x = 68.dp, y = 2.dp)
-            )
-            Text(
-                text = "✧",
-                style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
-                color = Color.White.copy(alpha = 0.7f),
-                modifier = Modifier.offset(x = 4.dp, y = 46.dp)
-            )
         }
         SettingsDesignVisual.FLASK -> Box(modifier) {
             // The experiments flask — a proper drawing: glass flask with
@@ -2023,29 +2026,31 @@ private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier 
             )
         }
         SettingsDesignVisual.CLOUD -> Box(modifier) {
-            // The backup doodle — ONE clean cloud with an up arrow rising
-            // through it (the flask language): soft slate fill, white
-            // outline, no sun behind.
+            // The backup & restore doodle — a fuller FOUR-LOBE cloud with a
+            // clear upload arrow (stem, head and a small base tray line)
+            // rising through it, plus two tiny accent dots: one clean
+            // subject, no sparkle text.
             Canvas(Modifier.fillMaxSize()) {
                 val w = size.width
                 val h = size.height
                 val stroke = 2.dp.toPx()
-                // The cloud — three lobes on a flat base, fill + outline.
-                val baseY = h * 0.76f
+                // The cloud — four lobes on a flat base, fill + outline.
+                val baseY = h * 0.78f
                 val cloud = Path().apply {
-                    moveTo(w * 0.10f, baseY)
-                    cubicTo(w * 0.06f, baseY - h * 0.24f, w * 0.16f, baseY - h * 0.44f, w * 0.30f, baseY - h * 0.34f)
-                    cubicTo(w * 0.30f, baseY - h * 0.56f, w * 0.46f, baseY - h * 0.62f, w * 0.54f, baseY - h * 0.44f)
-                    cubicTo(w * 0.64f, baseY - h * 0.58f, w * 0.80f, baseY - h * 0.48f, w * 0.82f, baseY - h * 0.30f)
-                    cubicTo(w * 0.94f, baseY - h * 0.24f, w * 0.92f, baseY, w * 0.76f, baseY)
+                    moveTo(w * 0.08f, baseY)
+                    cubicTo(w * 0.04f, baseY - h * 0.22f, w * 0.14f, baseY - h * 0.44f, w * 0.28f, baseY - h * 0.38f)
+                    cubicTo(w * 0.28f, baseY - h * 0.62f, w * 0.46f, baseY - h * 0.70f, w * 0.56f, baseY - h * 0.52f)
+                    cubicTo(w * 0.64f, baseY - h * 0.66f, w * 0.82f, baseY - h * 0.60f, w * 0.86f, baseY - h * 0.40f)
+                    cubicTo(w * 0.97f, baseY - h * 0.34f, w * 0.95f, baseY - h * 0.04f, w * 0.82f, baseY)
                     close()
                 }
-                drawPath(cloud, Color(0xFFDEE6EB).copy(alpha = 0.9f))
+                drawPath(cloud, Color(0xFFDEE6EB).copy(alpha = 0.92f))
                 drawPath(cloud, Color.White.copy(alpha = 0.95f), style = Stroke(width = stroke * 0.8f))
-                // Up arrow inside the cloud — stem + head, white.
+                // Up arrow inside the cloud — stem + head, white, with a
+                // small base tray line (the "upload" mark).
                 val ax = w * 0.50f
-                val headY = h * 0.40f
-                drawLine(Color.White.copy(alpha = 0.95f), Offset(ax, h * 0.72f), Offset(ax, headY), strokeWidth = 2.dp.toPx())
+                val headY = h * 0.38f
+                drawLine(Color.White.copy(alpha = 0.95f), Offset(ax, h * 0.70f), Offset(ax, headY), strokeWidth = 2.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
                 val head = Path().apply {
                     moveTo(ax - w * 0.10f, headY + h * 0.14f)
                     lineTo(ax, headY)
@@ -2053,19 +2058,11 @@ private fun SettingsCardVisual(visual: SettingsDesignVisual, modifier: Modifier 
                     close()
                 }
                 drawPath(head, Color.White.copy(alpha = 0.95f))
+                drawLine(Color.White.copy(alpha = 0.7f), Offset(ax - w * 0.13f, h * 0.74f), Offset(ax + w * 0.13f, h * 0.74f), strokeWidth = stroke * 0.6f, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                // Two tiny accent dots below the cloud (no sparkles).
+                drawCircle(Color.White.copy(alpha = 0.55f), radius = 2.dp.toPx(), center = Offset(w * 0.20f, h * 0.92f))
+                drawCircle(Color.White.copy(alpha = 0.35f), radius = 1.5.dp.toPx(), center = Offset(w * 0.80f, h * 0.94f))
             }
-            Text(
-                text = "✦",
-                style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
-                color = Color.White.copy(alpha = 0.85f),
-                modifier = Modifier.offset(x = 78.dp, y = 2.dp)
-            )
-            Text(
-                text = "✧",
-                style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
-                color = Color.White.copy(alpha = 0.7f),
-                modifier = Modifier.offset(x = 4.dp, y = 46.dp)
-            )
         }
         SettingsDesignVisual.IMAGE -> Box(modifier) {
             // The book-covers doodle — a small hand-drawn stack of books
