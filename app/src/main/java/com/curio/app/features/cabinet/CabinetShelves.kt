@@ -37,6 +37,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -322,13 +323,17 @@ fun V2ShelfCard(
     }
 }
 // ────────────────────────────────────────────────────────────────────────
-// Shelf art — v3xx RESPONSIVE CARD SCENES: every scene is drawn with
+// Shelf art — RESPONSIVE CARD SCENES: every scene is drawn with
 // proportional Canvas geometry, so the SAME art scales from the card's
-// foot strip to the create-collection sheet's preview tiles. The classic
-// favourites (star, open book, spines, mountain, notes, window, photos)
-// were refined with more detail, Completed got a FULL redesign (PEAK:
-// sun-arc summit + planted flag), and the four MINIMAL_* scenes borrow
-// the Minimal share card's sparse line language for plenty of variety.
+// foot strip to the create-collection sheet's preview tiles. v3xx-pass-2
+// redrew the disliked scenes in the flask doodle family (pastel fills +
+// white outlines + drawn ✦ twinkles — the old fixed-dp Text sparkles
+// misplaced on narrow cards and vanished in the sheet previews):
+// Favorites is a heart CONSTELLATION, Curiying now a curved open book,
+// Saved entries a fanned polaroid stack, Completed a curved snow-capped
+// summit, Notes a spiral-bound notebook, plus a night-sky star cluster,
+// layered mountains and the four MINIMAL scenes. Want to Read (spines)
+// and Personal (window) were left exactly as they were.
 // ────────────────────────────────────────────────────────────────────────
 
 @Composable
@@ -354,19 +359,6 @@ fun V2ShelfArt(
             V2ShelfArtType.MINIMAL_DOTS -> MinimalDotsArt(dark)
         }
     }
-}
-
-private fun mountainPath(w: Float, h: Float): Path = Path().apply {
-    moveTo(0f, h)
-    lineTo(w * 0.06f, h * 0.42f)
-    lineTo(w * 0.22f, h * 0.70f)
-    lineTo(w * 0.36f, h * 0.22f)
-    lineTo(w * 0.56f, h * 0.80f)
-    lineTo(w * 0.74f, h * 0.50f)
-    lineTo(w * 0.94f, h * 0.30f)
-    lineTo(w, h * 0.42f)
-    lineTo(w, h)
-    close()
 }
 
 /** A rotated rectangle path (centre-less; rotates about the top-left). */
@@ -403,82 +395,111 @@ private fun fiveStar(cx: Float, cy: Float, outer: Float): Path {
     }
 }
 
-/** FAVORITES — a hand-drawn five-point star: golden fill + white outline
- *  (the doodle family's fill + stroke), two sparkles. */
+/** A 4-point twinkle star centred at (cx, cy) — the ✦ mark drawn as a
+ *  path so it scales with the scene (fixed-dp Text sparkles misplaced on
+ *  narrow cards and vanished in the sheet previews). */
+private fun fourStar(cx: Float, cy: Float, r: Float): Path = Path().apply {
+    for (i in 0 until 8) {
+        val ang = -Math.PI / 2.0 + i * Math.PI / 4.0
+        val rad = if (i % 2 == 0) r else r * 0.30f
+        val x = cx + (rad * kotlin.math.cos(ang)).toFloat()
+        val y = cy + (rad * kotlin.math.sin(ang)).toFloat()
+        if (i == 0) moveTo(x, y) else lineTo(x, y)
+    }
+    close()
+}
+
+/** World-space point for a print-local offset rotated by [rot] about the
+ *  print's top-left (x0, y0) — keeps inset doodles glued to their frame. */
+private fun rotPoint(x0: Float, y0: Float, rot: Float, lx: Float, ly: Float): androidx.compose.ui.geometry.Offset =
+    androidx.compose.ui.geometry.Offset(
+        x0 + lx * kotlin.math.cos(rot) - ly * kotlin.math.sin(rot),
+        y0 + lx * kotlin.math.sin(rot) + ly * kotlin.math.cos(rot)
+    )
+
+/** A rotated polaroid print: white paper body + a photo inset that shares
+ *  the body's rotation, so the inset never slips out of the frame. */
+private fun DrawScope.polaroidPrint(
+    x: Float, y: Float, tw: Float, th: Float, rot: Float,
+    photo: Color, stroke: Float
+) {
+    drawPath(rotRect(x, y, tw, th, rot), Color.White.copy(alpha = 0.92f))
+    drawPath(rotRect(x, y, tw, th, rot), Color.White.copy(alpha = 0.95f), style = Stroke(width = stroke * 0.5f))
+    val m = tw * 0.055f
+    val ix = x + m * kotlin.math.cos(rot) - m * kotlin.math.sin(rot)
+    val iy = y + m * kotlin.math.sin(rot) + m * kotlin.math.cos(rot)
+    drawPath(rotRect(ix, iy, tw - 2 * m, th * 0.70f, rot), photo.copy(alpha = 0.85f))
+    drawPath(rotRect(ix, iy, tw - 2 * m, th * 0.70f, rot), Color.White.copy(alpha = 0.8f), style = Stroke(width = stroke * 0.4f))
+}
+
+/** CUSTOM — a night-sky star cluster: one big golden star with a comet
+ *  trail, a small echo star and two twinkles — pastel fills + white
+ *  outlines (doodle family). */
 @Composable
 private fun BoxScope.StarArt(dark: Boolean) {
     val star = if (dark) Color(0xFFC79A45) else Color(0xFFE8A33D)
     Canvas(Modifier.fillMaxSize()) {
         val w = size.width; val h = size.height
         val stroke = 1.8.dp.toPx()
-        val cx = w * 0.68f; val cy = h * 0.50f
-        // Star — the classic 5-point, soft fill + clean outline.
-        val outer = fiveStar(cx, cy, w * 0.22f)
+        val u = minOf(w, h)
+        // Big star — centre-right, soft fill + clean outline.
+        val cx = w * 0.70f; val cy = h * 0.50f
+        val outer = fiveStar(cx, cy, u * 0.34f)
         drawPath(outer, star.copy(alpha = 0.55f))
         drawPath(outer, Color.White.copy(alpha = 0.9f), style = Stroke(width = stroke))
-        // Echo star inside — the doodle's "inner line" detail.
-        val inner = fiveStar(cx, cy, w * 0.09f)
-        drawPath(inner, Color.White.copy(alpha = 0.7f), style = Stroke(width = stroke * 0.6f))
+        // Comet trail — a thin curved line rising off the big star.
+        val comet = Path().apply {
+            moveTo(cx + u * 0.20f, cy - u * 0.18f)
+            quadraticTo(cx + u * 0.44f, cy - u * 0.42f, cx + u * 0.66f, cy - u * 0.30f)
+        }
+        drawPath(comet, Color.White.copy(alpha = 0.55f), style = Stroke(width = stroke * 0.6f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
+        drawCircle(Color.White.copy(alpha = 0.9f), radius = u * 0.030f, center = androidx.compose.ui.geometry.Offset(cx + u * 0.66f, cy - u * 0.30f))
+        // Small echo star, bottom-left.
+        val small = fiveStar(w * 0.24f, h * 0.62f, u * 0.16f)
+        drawPath(small, star.copy(alpha = 0.45f))
+        drawPath(small, Color.White.copy(alpha = 0.8f), style = Stroke(width = stroke * 0.7f))
+        // Twinkles + a lone dot.
+        drawCircle(Color.White.copy(alpha = 0.85f), radius = u * 0.028f, center = androidx.compose.ui.geometry.Offset(w * 0.33f, h * 0.30f))
+        drawPath(fourStar(w * 0.90f, h * 0.22f, u * 0.050f), Color.White.copy(alpha = 0.9f))
+        drawPath(fourStar(w * 0.12f, h * 0.18f, u * 0.036f), Color.White.copy(alpha = 0.7f))
     }
-    Text(
-        text = "✦",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
-        color = Color.White.copy(alpha = 0.85f),
-        modifier = Modifier.offset(x = 82.dp, y = 2.dp)
-    )
-    Text(
-        text = "✧",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
-        color = Color.White.copy(alpha = 0.7f),
-        modifier = Modifier.offset(x = 6.dp, y = 44.dp)
-    )
 }
 
-/** FAVORITES — a hand-drawn heart (the universal favorites symbol): soft
- *  rose fill + white outline (doodle family) with two sparkles. */
+/** FAVORITES — the heart drawn as a CONSTELLATION: rose twinkle-stars
+ *  joined by fine connecting lines (the favorites symbol as a star map),
+ *  with two loose stars — the doodle family's white strokes + pastel
+ *  fills. */
 @Composable
 private fun BoxScope.ConstellationArt(dark: Boolean) {
     val heart = if (dark) Color(0xFFC95E7E) else Color(0xFFE05A7C)
     Canvas(Modifier.fillMaxSize()) {
         val w = size.width; val h = size.height
         val stroke = 1.8.dp.toPx()
-        val hx = w * 0.60f; val hy = h * 0.60f; val hs = w * 0.30f
-        // Heart — classic two-lobe shape with a pointed tip, bottom-anchored.
-        val heartPath = Path().apply {
-            moveTo(hx, hy + hs * 0.62f)
-            cubicTo(hx - hs * 0.95f, hy - hs * 0.10f, hx - hs * 0.48f, hy - hs * 0.82f, hx, hy - hs * 0.28f)
-            cubicTo(hx + hs * 0.48f, hy - hs * 0.82f, hx + hs * 0.95f, hy - hs * 0.10f, hx, hy + hs * 0.62f)
-            close()
+        val u = minOf(w, h)
+        // Heart nodes, as fractions of the canvas.
+        val xs = floatArrayOf(0.30f, 0.42f, 0.50f, 0.58f, 0.70f, 0.71f, 0.50f, 0.29f)
+        val ys = floatArrayOf(0.36f, 0.24f, 0.34f, 0.24f, 0.36f, 0.56f, 0.80f, 0.56f)
+        val pts = List(8) { androidx.compose.ui.geometry.Offset(w * xs[it], h * ys[it]) }
+        // Connecting lines — thin white, tracing the heart outline.
+        for (i in pts.indices) {
+            val a = pts[i]; val b = pts[(i + 1) % pts.size]
+            drawLine(Color.White.copy(alpha = 0.45f), a, b, strokeWidth = stroke * 0.55f)
         }
-        drawPath(heartPath, heart.copy(alpha = 0.55f))
-        drawPath(heartPath, Color.White.copy(alpha = 0.9f), style = Stroke(width = stroke))
-        // Inner echo heart — the doodle's inner-line detail.
-        val h2 = hs * 0.52f
-        val inner = Path().apply {
-            moveTo(hx, hy + h2 * 0.62f)
-            cubicTo(hx - h2 * 0.95f, hy - h2 * 0.10f, hx - h2 * 0.48f, hy - h2 * 0.82f, hx, hy - h2 * 0.28f)
-            cubicTo(hx + h2 * 0.48f, hy - h2 * 0.82f, hx + h2 * 0.95f, hy - h2 * 0.10f, hx, hy + h2 * 0.62f)
-            close()
+        // Rose twinkle-stars at every node.
+        pts.forEach { p ->
+            drawPath(fourStar(p.x, p.y, u * 0.055f), heart.copy(alpha = 0.75f))
+            drawPath(fourStar(p.x, p.y, u * 0.055f), Color.White.copy(alpha = 0.9f), style = Stroke(width = stroke * 0.5f))
         }
-        drawPath(inner, Color.White.copy(alpha = 0.65f), style = Stroke(width = stroke * 0.55f))
+        // Two loose stars for the night-sky feel.
+        drawPath(fourStar(w * 0.86f, h * 0.22f, u * 0.040f), Color.White.copy(alpha = 0.9f))
+        drawCircle(Color.White.copy(alpha = 0.8f), radius = u * 0.022f, center = androidx.compose.ui.geometry.Offset(w * 0.16f, h * 0.20f))
+        drawCircle(Color.White.copy(alpha = 0.7f), radius = u * 0.016f, center = androidx.compose.ui.geometry.Offset(w * 0.93f, h * 0.40f))
     }
-    Text(
-        text = "✦",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
-        color = Color.White.copy(alpha = 0.85f),
-        modifier = Modifier.offset(x = 82.dp, y = 2.dp)
-    )
-    Text(
-        text = "✧",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
-        color = Color.White.copy(alpha = 0.7f),
-        modifier = Modifier.offset(x = 6.dp, y = 44.dp)
-    )
 }
 
-/** CURIYING NOW — a hand-drawn open book: two pages joined at the spine
- *  with page lines + a ribbon bookmark, pastel fill + white outline (the
- *  doodle family), sitting on the strip's bottom edge. */
+/** CURIYING NOW — a hand-drawn open book with gently CURVED pages, page
+ *  lines, a knotted ribbon bookmark, a grounding shadow and a twinkle
+ *  above the spine — pastel fills + white outlines (doodle family). */
 @Composable
 private fun BoxScope.ReadingArt(dark: Boolean) {
     val page = if (dark) Color(0xFFE8DCC8) else Color(0xFFF9F2E6)
@@ -487,62 +508,61 @@ private fun BoxScope.ReadingArt(dark: Boolean) {
     Canvas(Modifier.fillMaxSize()) {
         val w = size.width; val h = size.height
         val stroke = 1.8.dp.toPx()
-        val baseY = h * 0.97f
+        val u = minOf(w, h)
         val cxm = w * 0.50f          // spine
-        val topY = h * 0.26f         // page tops
-        val half = w * 0.34f         // one page width
-        // left page — fill + outline
+        val baseY = h * 0.96f
+        val topY = h * 0.30f         // page tops
+        val half = w * 0.40f         // one page width
+        // Grounding shadow — a soft ellipse under the book.
+        drawOval(
+            Color.White.copy(alpha = 0.28f),
+            topLeft = androidx.compose.ui.geometry.Offset(cxm - half * 0.92f, baseY - h * 0.035f),
+            size = androidx.compose.ui.geometry.Size(half * 1.84f, h * 0.07f)
+        )
+        // Left page — curved outer edge.
         val left = Path().apply {
             moveTo(cxm, baseY)
-            lineTo(cxm, topY + h * 0.10f)
-            lineTo(cxm - half * 0.86f, topY)
-            lineTo(cxm - half, baseY)
+            lineTo(cxm, topY + h * 0.12f)
+            quadraticTo(cxm - half * 0.22f, topY - h * 0.04f, cxm - half * 0.98f, topY + h * 0.02f)
+            quadraticTo(cxm - half * 1.06f, h * 0.52f, cxm - half * 0.94f, baseY)
             close()
         }
-        drawPath(left, page.copy(alpha = 0.9f))
+        drawPath(left, page.copy(alpha = 0.92f))
         drawPath(left, Color.White.copy(alpha = 0.9f), style = Stroke(width = stroke * 0.7f))
-        // right page (mirrored, slightly shaded) — fill + outline
+        // Right page (mirrored, slightly shaded).
         val right = Path().apply {
             moveTo(cxm, baseY)
-            lineTo(cxm, topY + h * 0.10f)
-            lineTo(cxm + half * 0.86f, topY)
-            lineTo(cxm + half, baseY)
+            lineTo(cxm, topY + h * 0.12f)
+            quadraticTo(cxm + half * 0.22f, topY - h * 0.04f, cxm + half * 0.98f, topY + h * 0.02f)
+            quadraticTo(cxm + half * 1.06f, h * 0.52f, cxm + half * 0.94f, baseY)
             close()
         }
         drawPath(right, page.copy(alpha = 0.75f))
         drawPath(right, Color.White.copy(alpha = 0.9f), style = Stroke(width = stroke * 0.7f))
-        // page lines — three per side
+        // Page lines — three per side, fanning out down the page.
         for (i in 1..3) {
-            val ly = topY + h * 0.10f + i * (baseY - topY - h * 0.10f) * 0.20f
-            drawLine(line.copy(alpha = 0.45f), androidx.compose.ui.geometry.Offset(cxm - half * 0.74f, ly), androidx.compose.ui.geometry.Offset(cxm - w * 0.045f, ly), strokeWidth = 0.9f)
-            drawLine(line.copy(alpha = 0.45f), androidx.compose.ui.geometry.Offset(cxm + w * 0.045f, ly), androidx.compose.ui.geometry.Offset(cxm + half * 0.74f, ly), strokeWidth = 0.9f)
+            val t = i / 4f
+            val ly = topY + h * 0.12f + (baseY - topY - h * 0.12f) * t * 0.82f
+            val spread = 0.14f + t * 0.16f
+            drawLine(line.copy(alpha = 0.45f), androidx.compose.ui.geometry.Offset(cxm - half * spread - half * 0.10f, ly), androidx.compose.ui.geometry.Offset(cxm - half * 0.08f, ly), strokeWidth = 0.9f)
+            drawLine(line.copy(alpha = 0.45f), androidx.compose.ui.geometry.Offset(cxm + half * 0.08f, ly), androidx.compose.ui.geometry.Offset(cxm + half * spread + half * 0.10f, ly), strokeWidth = 0.9f)
         }
-        // spine — a clean white join
-        drawLine(Color.White.copy(alpha = 0.85f), androidx.compose.ui.geometry.Offset(cxm, topY + h * 0.10f), androidx.compose.ui.geometry.Offset(cxm, baseY), strokeWidth = 1.4f)
-        // ribbon bookmark hanging from the spine top — fill + outline
+        // Spine — a clean white join.
+        drawLine(Color.White.copy(alpha = 0.85f), androidx.compose.ui.geometry.Offset(cxm, topY + h * 0.12f), androidx.compose.ui.geometry.Offset(cxm, baseY), strokeWidth = 1.4f)
+        // Knotted ribbon bookmark hanging from the spine top.
         val ribbonPath = Path().apply {
-            moveTo(cxm - w * 0.028f, topY + h * 0.02f)
-            lineTo(cxm + w * 0.028f, topY + h * 0.02f)
-            lineTo(cxm + w * 0.028f, topY + h * 0.22f)
-            lineTo(cxm, topY + h * 0.15f)
-            lineTo(cxm - w * 0.028f, topY + h * 0.22f)
+            moveTo(cxm - w * 0.030f, topY + h * 0.02f)
+            lineTo(cxm + w * 0.030f, topY + h * 0.02f)
+            lineTo(cxm + w * 0.030f, topY + h * 0.20f)
+            lineTo(cxm, topY + h * 0.14f)
+            lineTo(cxm - w * 0.030f, topY + h * 0.20f)
             close()
         }
         drawPath(ribbonPath, ribbon.copy(alpha = 0.9f))
         drawPath(ribbonPath, Color.White.copy(alpha = 0.85f), style = Stroke(width = stroke * 0.5f))
+        // Twinkle above the spine.
+        drawPath(fourStar(cxm, h * 0.09f, u * 0.045f), Color.White.copy(alpha = 0.9f))
     }
-    Text(
-        text = "✦",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
-        color = Color.White.copy(alpha = 0.85f),
-        modifier = Modifier.offset(x = 82.dp, y = 2.dp)
-    )
-    Text(
-        text = "✧",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
-        color = Color.White.copy(alpha = 0.7f),
-        modifier = Modifier.offset(x = 6.dp, y = 44.dp)
-    )
 }
 
 /** WANT TO READ — three hand-drawn book spines standing side by side on
@@ -604,50 +624,80 @@ private fun BoxScope.BooksArt(dark: Boolean) {
     )
 }
 
-/** MOUNTAIN — a hand-drawn layered peak: pastel fill + white outline
- *  (doodle family), a low sun and flower dots. */
+/** CUSTOM — hand-drawn layered mountains with soft CURVED peaks, a
+ *  snow-capped summit, doodle pine trees and flower dots — pastel fills +
+ *  white outlines (doodle family). */
 @Composable
 private fun BoxScope.MountainArt(dark: Boolean) {
     val hills = if (dark) Color(0xFF5E7E6C) else Color(0xFF8FB4A0)
+    val farHill = if (dark) Color(0xFF4A6A5C) else Color(0xFFA9C7B4)
+    val pines = if (dark) Color(0xFF3C5140) else Color(0xFF7DA48E)
     val flowers = if (dark) Color(0xFFE9F2E4) else Color(0xFFFDFEFC)
     Canvas(Modifier.fillMaxSize()) {
         val w = size.width; val h = size.height
         val stroke = 1.8.dp.toPx()
-        // low sun — fill + outline
-        val sunR = w * 0.09f
-        val sunC = androidx.compose.ui.geometry.Offset(w * 0.82f, h * 0.24f)
+        // Low sun, high in the sky.
+        val sunR = w * 0.085f
+        val sunC = androidx.compose.ui.geometry.Offset(w * 0.82f, h * 0.20f)
         drawCircle(Color(0xFFF2B36B).copy(alpha = 0.55f), radius = sunR, center = sunC)
         drawCircle(Color.White.copy(alpha = 0.85f), radius = sunR, center = sunC, style = Stroke(width = stroke * 0.6f))
-        // peak — fill + outline
-        val peak = mountainPath(w, h)
-        drawPath(peak, hills.copy(alpha = 0.55f))
-        drawPath(peak, Color.White.copy(alpha = 0.85f), style = Stroke(width = stroke * 0.7f))
-        // flower dots — small white blossoms
-        listOf(0.16f, 0.30f, 0.44f, 0.62f, 0.80f).forEachIndexed { i, fx ->
-            val cx = w * fx
-            val cy = h * (0.86f + 0.03f * (i % 3))
-            drawCircle(flowers.copy(alpha = 0.9f), radius = 3.2f, center = androidx.compose.ui.geometry.Offset(cx, cy))
-            drawCircle(Color.White.copy(alpha = 0.7f), radius = 3.2f, center = androidx.compose.ui.geometry.Offset(cx, cy), style = Stroke(width = 1f))
+        // Far swell — one smooth rise past both edges.
+        val far = Path().apply {
+            moveTo(-w * 0.06f, h * 0.80f)
+            quadraticTo(w * 0.30f, h * 0.30f, w * 0.62f, h * 0.66f)
+            quadraticTo(w * 0.90f, h * 0.44f, w * 1.06f, h * 0.78f)
+            lineTo(w * 1.06f, h * 0.94f)
+            lineTo(-w * 0.06f, h * 0.94f)
+            close()
+        }
+        drawPath(far, farHill.copy(alpha = 0.55f))
+        drawPath(far, Color.White.copy(alpha = 0.7f), style = Stroke(width = stroke * 0.5f))
+        // Near peak with a snow cap.
+        val near = Path().apply {
+            moveTo(-w * 0.06f, h * 0.94f)
+            quadraticTo(w * 0.22f, h * 0.72f, w * 0.40f, h * 0.40f)
+            quadraticTo(w * 0.70f, h * 0.72f, w * 1.06f, h * 0.90f)
+            close()
+        }
+        drawPath(near, hills.copy(alpha = 0.68f))
+        drawPath(near, Color.White.copy(alpha = 0.85f), style = Stroke(width = stroke * 0.6f))
+        // Snow cap on the summit.
+        val cap = Path().apply {
+            moveTo(w * 0.36f, h * 0.48f)
+            quadraticTo(w * 0.40f, h * 0.40f, w * 0.44f, h * 0.50f)
+            quadraticTo(w * 0.41f, h * 0.52f, w * 0.36f, h * 0.48f)
+            close()
+        }
+        drawPath(cap, Color.White.copy(alpha = 0.85f))
+        // Doodle pine trees at the foot.
+        listOf(0.16f, 0.52f, 0.84f).forEach { fx ->
+            val px = w * fx; val py = h * 0.94f
+            val tree = Path().apply {
+                moveTo(px, py - h * 0.20f)
+                lineTo(px + w * 0.05f, py - h * 0.10f)
+                lineTo(px + w * 0.03f, py - h * 0.10f)
+                lineTo(px + w * 0.07f, py - h * 0.02f)
+                lineTo(px + w * 0.03f, py - h * 0.02f)
+                lineTo(px, py)
+                close()
+            }
+            drawPath(tree, pines.copy(alpha = 0.7f))
+            drawPath(tree, Color.White.copy(alpha = 0.8f), style = Stroke(width = stroke * 0.4f))
+        }
+        // Flower dots.
+        listOf(0.26f, 0.68f).forEachIndexed { i, fx ->
+            val cx2 = w * fx
+            val cy2 = h * (0.84f + 0.02f * i)
+            drawCircle(flowers.copy(alpha = 0.9f), radius = 2.8f, center = androidx.compose.ui.geometry.Offset(cx2, cy2))
+            drawCircle(Color.White.copy(alpha = 0.7f), radius = 2.8f, center = androidx.compose.ui.geometry.Offset(cx2, cy2), style = Stroke(width = 1f))
         }
     }
-    Text(
-        text = "✦",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
-        color = Color.White.copy(alpha = 0.85f),
-        modifier = Modifier.offset(x = 82.dp, y = 2.dp)
-    )
-    Text(
-        text = "✧",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
-        color = Color.White.copy(alpha = 0.7f),
-        modifier = Modifier.offset(x = 6.dp, y = 44.dp)
-    )
 }
 
-/** COMPLETED — a hand-drawn rising sun over two ridgelines with a summit
- *  flag: pastel fills + white outlines (doodle family). The ridges run a
- *  little PAST the canvas edges so they read as continuing mountains, not
- *  shapes chopped by the frame. */
+/** COMPLETED — a hand-drawn summit scene: a rising sun, two smooth CURVED
+ *  ridgelines (the near one snow-capped), a planted flag and two birds —
+ *  pastel fills + white outlines (doodle family). The ridges run a little
+ *  PAST the canvas edges so they read as continuing mountains. */
 @Composable
 private fun BoxScope.PeakArt(dark: Boolean) {
     val far = if (dark) Color(0xFF4A6A5C) else Color(0xFFA9C7B4)
@@ -658,73 +708,67 @@ private fun BoxScope.PeakArt(dark: Boolean) {
     Canvas(Modifier.fillMaxSize()) {
         val w = size.width; val h = size.height
         val stroke = 1.8.dp.toPx()
-        // rising sun over the far ridge — fill + outline
-        val sunR = w * 0.11f
-        val sunC = androidx.compose.ui.geometry.Offset(w * 0.30f, h * 0.44f)
-        drawCircle(sun.copy(alpha = 0.55f), radius = sunR, center = sunC)
-        drawCircle(Color.White.copy(alpha = 0.85f), radius = sunR, center = sunC, style = Stroke(width = stroke * 0.6f))
-        // far ridge — extends past BOTH edges, fill + outline
+        // Rising sun — high enough to clear every ridge.
+        val sunR = w * 0.10f
+        val sunC = androidx.compose.ui.geometry.Offset(w * 0.24f, h * 0.26f)
+        drawCircle(sun.copy(alpha = 0.6f), radius = sunR, center = sunC)
+        drawCircle(Color.White.copy(alpha = 0.9f), radius = sunR, center = sunC, style = Stroke(width = stroke * 0.6f))
+        // Far ridge — one smooth swell past both edges.
         val farPath = Path().apply {
-            moveTo(-w * 0.08f, h * 0.70f)
-            lineTo(w * 0.18f, h * 0.30f)
-            lineTo(w * 0.34f, h * 0.54f)
-            lineTo(w * 0.52f, h * 0.26f)
-            lineTo(w * 0.72f, h * 0.62f)
-            lineTo(w * 1.08f, h * 0.44f)
-            lineTo(w * 1.08f, h * 0.88f)
-            lineTo(-w * 0.08f, h * 0.88f)
+            moveTo(-w * 0.10f, h * 0.78f)
+            quadraticTo(w * 0.16f, h * 0.18f, w * 0.42f, h * 0.52f)
+            quadraticTo(w * 0.58f, h * 0.70f, w * 1.10f, h * 0.34f)
+            lineTo(w * 1.10f, h * 0.95f)
+            lineTo(-w * 0.10f, h * 0.95f)
             close()
         }
         drawPath(farPath, far.copy(alpha = 0.5f))
         drawPath(farPath, Color.White.copy(alpha = 0.7f), style = Stroke(width = stroke * 0.5f))
-        // near ridge — same treatment
+        // Near ridge — a second swell with a flat summit for the flag.
         val nearPath = Path().apply {
-            moveTo(-w * 0.08f, h * 0.82f)
-            lineTo(w * 0.30f, h * 0.52f)
-            lineTo(w * 0.52f, h * 0.74f)
-            lineTo(w * 0.74f, h * 0.46f)
-            lineTo(w * 1.08f, h * 0.72f)
-            lineTo(w * 1.08f, h * 0.92f)
-            lineTo(-w * 0.08f, h * 0.92f)
+            moveTo(-w * 0.10f, h * 0.90f)
+            quadraticTo(w * 0.28f, h * 0.62f, w * 0.60f, h * 0.48f)
+            quadraticTo(w * 0.92f, h * 0.60f, w * 1.10f, h * 0.84f)
+            lineTo(w * 1.10f, h * 0.97f)
+            lineTo(-w * 0.10f, h * 0.97f)
             close()
         }
-        drawPath(nearPath, near.copy(alpha = 0.6f))
-        drawPath(nearPath, Color.White.copy(alpha = 0.8f), style = Stroke(width = stroke * 0.6f))
-        // ground band — ties the ridges to the very bottom edge
-        drawRect(ground.copy(alpha = 0.6f), topLeft = androidx.compose.ui.geometry.Offset(-w * 0.08f, h * 0.90f), size = androidx.compose.ui.geometry.Size(w * 1.16f, h * 0.10f))
-        drawRect(Color.White.copy(alpha = 0.7f), topLeft = androidx.compose.ui.geometry.Offset(-w * 0.08f, h * 0.90f), size = androidx.compose.ui.geometry.Size(w * 1.16f, h * 0.10f), style = Stroke(width = stroke * 0.4f))
-        // summit flag — white pole + filled pennant with outline
-        val fx = w * 0.52f; val fy = h * 0.26f
-        drawLine(Color.White.copy(alpha = 0.9f), androidx.compose.ui.geometry.Offset(fx, fy), androidx.compose.ui.geometry.Offset(fx, fy - h * 0.14f), strokeWidth = 1.5f)
+        drawPath(nearPath, near.copy(alpha = 0.68f))
+        drawPath(nearPath, Color.White.copy(alpha = 0.85f), style = Stroke(width = stroke * 0.6f))
+        // Ground band — ties the ridges to the bottom edge.
+        drawRect(ground.copy(alpha = 0.55f), topLeft = androidx.compose.ui.geometry.Offset(-w * 0.10f, h * 0.94f), size = androidx.compose.ui.geometry.Size(w * 1.2f, h * 0.08f))
+        drawRect(Color.White.copy(alpha = 0.6f), topLeft = androidx.compose.ui.geometry.Offset(-w * 0.10f, h * 0.94f), size = androidx.compose.ui.geometry.Size(w * 1.2f, h * 0.08f), style = Stroke(width = stroke * 0.4f))
+        // Snow cap on the near peak.
+        val cap = Path().apply {
+            moveTo(w * 0.50f, h * 0.50f)
+            quadraticTo(w * 0.60f, h * 0.44f, w * 0.70f, h * 0.52f)
+            quadraticTo(w * 0.64f, h * 0.56f, w * 0.56f, h * 0.54f)
+            quadraticTo(w * 0.52f, h * 0.52f, w * 0.50f, h * 0.50f)
+            close()
+        }
+        drawPath(cap, Color.White.copy(alpha = 0.85f))
+        // Summit flag — white pole + filled pennant.
+        val fx = w * 0.60f; val fy = h * 0.48f
+        drawLine(Color.White.copy(alpha = 0.9f), androidx.compose.ui.geometry.Offset(fx, fy), androidx.compose.ui.geometry.Offset(fx, fy - h * 0.16f), strokeWidth = 1.5f)
         val pennant = Path().apply {
-            moveTo(fx, fy - h * 0.14f)
-            lineTo(fx + w * 0.09f, fy - h * 0.10f)
+            moveTo(fx, fy - h * 0.16f)
+            lineTo(fx + w * 0.09f, fy - h * 0.11f)
             lineTo(fx, fy - h * 0.06f)
             close()
         }
         drawPath(pennant, flag.copy(alpha = 0.9f))
         drawPath(pennant, Color.White.copy(alpha = 0.85f), style = Stroke(width = stroke * 0.5f))
-        // bird
-        drawLine(flag.copy(alpha = 0.8f), androidx.compose.ui.geometry.Offset(w * 0.82f, h * 0.20f), androidx.compose.ui.geometry.Offset(w * 0.86f, h * 0.16f), strokeWidth = 1.2f)
-        drawLine(flag.copy(alpha = 0.8f), androidx.compose.ui.geometry.Offset(w * 0.86f, h * 0.16f), androidx.compose.ui.geometry.Offset(w * 0.90f, h * 0.20f), strokeWidth = 1.2f)
+        // Two birds.
+        drawLine(flag.copy(alpha = 0.8f), androidx.compose.ui.geometry.Offset(w * 0.84f, h * 0.22f), androidx.compose.ui.geometry.Offset(w * 0.88f, h * 0.18f), strokeWidth = 1.2f)
+        drawLine(flag.copy(alpha = 0.8f), androidx.compose.ui.geometry.Offset(w * 0.88f, h * 0.18f), androidx.compose.ui.geometry.Offset(w * 0.92f, h * 0.22f), strokeWidth = 1.2f)
+        drawLine(flag.copy(alpha = 0.65f), androidx.compose.ui.geometry.Offset(w * 0.78f, h * 0.30f), androidx.compose.ui.geometry.Offset(w * 0.81f, h * 0.27f), strokeWidth = 1.1f)
+        drawLine(flag.copy(alpha = 0.65f), androidx.compose.ui.geometry.Offset(w * 0.81f, h * 0.27f), androidx.compose.ui.geometry.Offset(w * 0.84f, h * 0.30f), strokeWidth = 1.1f)
     }
-    Text(
-        text = "✦",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
-        color = Color.White.copy(alpha = 0.85f),
-        modifier = Modifier.offset(x = 82.dp, y = 2.dp)
-    )
-    Text(
-        text = "✧",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
-        color = Color.White.copy(alpha = 0.7f),
-        modifier = Modifier.offset(x = 6.dp, y = 44.dp)
-    )
 }
 
-/** NOTES — a hand-drawn notepad sheet (second sheet peeking behind) with a
- *  folded dog-ear, ruled lines, a little heart and a pencil — pastel fills
- *  + white outlines (doodle family). */
+/** NOTES — a hand-drawn SPIRAL notebook: cream sheet with rings binding
+ *  the top edge, ruled lines, a heart doodle and a pencil resting on it —
+ *  pastel fills + white outlines (doodle family). */
 @Composable
 private fun BoxScope.NotesArt(dark: Boolean) {
     val paper = if (dark) Color(0xFFEAD9BE) else Color(0xFFFFFBF2)
@@ -736,44 +780,28 @@ private fun BoxScope.NotesArt(dark: Boolean) {
     Canvas(Modifier.fillMaxSize()) {
         val w = size.width; val h = size.height
         val stroke = 1.8.dp.toPx()
-        val nw = w * 0.44f; val nh = h * 0.60f
-        val x0 = w * 0.08f; val y0 = h * 0.97f - nh
-        // second sheet peeking out bottom-right — a notepad stack
-        val shade = androidx.compose.ui.geometry.Rect(
-            androidx.compose.ui.geometry.Offset(x0 + nw * 0.07f, y0 + nh * 0.10f),
-            androidx.compose.ui.geometry.Size(nw, nh)
-        )
-        drawRoundRect(paperShade.copy(alpha = 0.85f), shade.topLeft, shade.size, androidx.compose.ui.geometry.CornerRadius(nw * 0.05f))
-        drawRoundRect(Color.White.copy(alpha = 0.7f), shade.topLeft, shade.size, androidx.compose.ui.geometry.CornerRadius(nw * 0.05f), style = Stroke(width = stroke * 0.4f))
-        // sheet with a folded (dog-ear) top-right corner — fill + outline
-        val sheet = Path().apply {
-            moveTo(x0, y0)
-            lineTo(x0 + nw * 0.72f, y0)
-            lineTo(x0 + nw, y0 + nh * 0.16f)   // fold
-            lineTo(x0 + nw, y0 + nh)
-            lineTo(x0, y0 + nh)
-            close()
+        val nw = w * 0.46f; val nh = h * 0.62f
+        val x0 = w * 0.10f; val y0 = h * 0.94f - nh
+        val rad = nw * 0.045f
+        // Sheet — rounded corners, cream fill + white outline.
+        drawRoundRect(paper.copy(alpha = 0.92f), androidx.compose.ui.geometry.Offset(x0, y0), androidx.compose.ui.geometry.Size(nw, nh), androidx.compose.ui.geometry.CornerRadius(rad))
+        drawRoundRect(Color.White.copy(alpha = 0.9f), androidx.compose.ui.geometry.Offset(x0, y0), androidx.compose.ui.geometry.Size(nw, nh), androidx.compose.ui.geometry.CornerRadius(rad), style = Stroke(width = stroke * 0.7f))
+        // Spiral binding — five rings along the top edge.
+        val holes = 5
+        for (i in 0 until holes) {
+            val hx = x0 + nw * (0.16f + 0.68f * i / (holes - 1))
+            val hy = y0 + nh * 0.045f
+            drawCircle(paperShade.copy(alpha = 0.95f), radius = nw * 0.045f, center = androidx.compose.ui.geometry.Offset(hx, hy))
+            drawCircle(Color.White.copy(alpha = 0.85f), radius = nw * 0.045f, center = androidx.compose.ui.geometry.Offset(hx, hy), style = Stroke(width = stroke * 0.5f))
+            drawCircle(Color.White.copy(alpha = 0.9f), radius = nw * 0.014f, center = androidx.compose.ui.geometry.Offset(hx, hy))
         }
-        drawPath(sheet, paper.copy(alpha = 0.92f))
-        drawPath(sheet, Color.White.copy(alpha = 0.9f), style = Stroke(width = stroke * 0.7f))
-        // the folded flap — a darker triangle tucked under the fold line
-        val flap = Path().apply {
-            moveTo(x0 + nw * 0.72f, y0)
-            lineTo(x0 + nw, y0 + nh * 0.16f)
-            lineTo(x0 + nw, y0)
-            close()
-        }
-        drawPath(flap, paperShade.copy(alpha = 0.9f))
-        drawPath(flap, Color.White.copy(alpha = 0.8f), style = Stroke(width = stroke * 0.4f))
-        // fold line
-        drawLine(Color.White.copy(alpha = 0.8f), androidx.compose.ui.geometry.Offset(x0 + nw * 0.72f, y0), androidx.compose.ui.geometry.Offset(x0 + nw, y0 + nh * 0.16f), strokeWidth = 1f)
-        // ruled writing lines (stop before the fold)
+        // Ruled lines.
         for (i in 1..4) {
-            val ly = y0 + nh * 0.18f + i * (nh - nh * 0.18f) * 0.19f
-            drawLine(line.copy(alpha = 0.55f), androidx.compose.ui.geometry.Offset(x0 + nw * 0.10f, ly), androidx.compose.ui.geometry.Offset(x0 + nw * 0.88f, ly), strokeWidth = 0.9f)
+            val ly = y0 + nh * 0.22f + i * nh * 0.15f
+            drawLine(line.copy(alpha = 0.5f), androidx.compose.ui.geometry.Offset(x0 + nw * 0.10f, ly), androidx.compose.ui.geometry.Offset(x0 + nw * 0.90f, ly), strokeWidth = 0.9f)
         }
-        // a little heart doodle at the foot of the sheet
-        val hx = x0 + nw * 0.26f; val hy = y0 + nh * 0.84f; val hs = nw * 0.10f
+        // A little heart doodle at the foot of the sheet.
+        val hx = x0 + nw * 0.30f; val hy = y0 + nh * 0.82f; val hs = nw * 0.11f
         val heartPath = Path().apply {
             moveTo(hx, hy + hs * 0.60f)
             cubicTo(hx - hs * 0.92f, hy - hs * 0.10f, hx - hs * 0.46f, hy - hs * 0.80f, hx, hy - hs * 0.26f)
@@ -782,26 +810,17 @@ private fun BoxScope.NotesArt(dark: Boolean) {
         }
         drawPath(heartPath, pen.copy(alpha = 0.75f))
         drawPath(heartPath, Color.White.copy(alpha = 0.7f), style = Stroke(width = stroke * 0.4f))
-        // pencil resting diagonally — body + eraser + lead
-        val p0x = w * 0.70f; val p0y = h * 0.42f
-        val p1x = w * 0.945f; val p1y = h * 0.86f
+        // Pencil resting diagonally at the bottom-right — thick body with a
+        // white highlight, pink eraser cap and dark lead tip.
+        val p0x = w * 0.62f; val p0y = h * 0.34f
+        val p1x = w * 0.955f; val p1y = h * 0.88f
         drawLine(pen.copy(alpha = 0.9f), androidx.compose.ui.geometry.Offset(p0x, p0y), androidx.compose.ui.geometry.Offset(p1x, p1y), strokeWidth = w * 0.030f)
-        drawLine(Color.White.copy(alpha = 0.8f), androidx.compose.ui.geometry.Offset(p0x, p0y), androidx.compose.ui.geometry.Offset(p1x, p1y), strokeWidth = stroke * 0.5f)
+        drawLine(Color.White.copy(alpha = 0.7f), androidx.compose.ui.geometry.Offset(p0x, p0y), androidx.compose.ui.geometry.Offset(p1x, p1y), strokeWidth = stroke * 0.5f)
         drawCircle(eraser, radius = w * 0.017f, center = androidx.compose.ui.geometry.Offset(p0x, p0y))
         drawCircle(lead, radius = w * 0.011f, center = androidx.compose.ui.geometry.Offset(p1x, p1y))
+        // Twinkle above the sheet.
+        drawPath(fourStar(w * 0.94f, h * 0.12f, w * 0.032f), Color.White.copy(alpha = 0.9f))
     }
-    Text(
-        text = "✦",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
-        color = Color.White.copy(alpha = 0.85f),
-        modifier = Modifier.offset(x = 82.dp, y = 2.dp)
-    )
-    Text(
-        text = "✧",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
-        color = Color.White.copy(alpha = 0.7f),
-        modifier = Modifier.offset(x = 6.dp, y = 44.dp)
-    )
 }
 
 /** PERSONAL — a hand-drawn window with a moon and a plant on the sill:
@@ -858,75 +877,80 @@ private fun BoxScope.WindowArt(dark: Boolean) {
     )
 }
 
-/** SAVED ENTRIES — hand-drawn layered photo tiles with a ♡ and a sun on
- *  one print: pastel fills + white outlines (doodle family). */
+/** SAVED ENTRIES — a fanned stack of three polaroid prints: white paper
+ *  frames holding a sun-and-ridge photo, a heart photo and a star photo,
+ *  with tape on the front print — pastel fills + white outlines (doodle
+ *  family). */
 @Composable
 private fun BoxScope.PhotosArt(dark: Boolean) {
-    val fills = if (dark) listOf(Color(0xFF46657A), Color(0xFF5A7B8C), Color(0xFF6F92A3))
+    val photos = if (dark) listOf(Color(0xFF46657A), Color(0xFF5A7B8C), Color(0xFF6F92A3))
     else listOf(Color(0xFF9CC3D9), Color(0xFF7FB0CE), Color(0xFF5E9CC2))
     Canvas(Modifier.fillMaxSize()) {
         val w = size.width; val h = size.height
         val stroke = 1.8.dp.toPx()
-        val tw = w * 0.30f; val th = h * 0.40f
-        val cx = w * 0.78f; val cy = h * 0.76f
-        fills.forEachIndexed { i, c ->
-            val tile = rotRect(cx - i * tw * 0.16f, cy - th + i * th * 0.06f, tw, th, -0.10f + i * 0.06f)
-            drawPath(tile, c.copy(alpha = 0.85f))
-            drawPath(tile, Color.White.copy(alpha = 0.9f), style = Stroke(width = stroke * 0.6f))
+        val tw = w * 0.30f; val th = h * 0.46f
+        val cx = w * 0.72f; val cy = h * 0.80f
+        // Back print — a sun-and-ridge photo, tilted left.
+        polaroidPrint(cx - tw * 0.26f, cy - th, tw, th, -0.14f, photos[0], stroke)
+        drawCircle(Color(0xFFF4C768).copy(alpha = 0.9f), radius = tw * 0.10f,
+            center = rotPoint(cx - tw * 0.26f, cy - th, -0.14f, tw * 0.60f, th * 0.30f))
+        drawLine(Color.White.copy(alpha = 0.8f),
+            rotPoint(cx - tw * 0.26f, cy - th, -0.14f, tw * 0.20f, th * 0.62f),
+            rotPoint(cx - tw * 0.26f, cy - th, -0.14f, tw * 0.80f, th * 0.52f),
+            strokeWidth = stroke * 0.5f)
+        // Middle print — a heart photo.
+        polaroidPrint(cx - tw * 0.10f, cy - th * 0.94f, tw, th, -0.04f, photos[1], stroke)
+        val hm = rotPoint(cx - tw * 0.10f, cy - th * 0.94f, -0.04f, tw * 0.52f, th * 0.34f)
+        val hs = tw * 0.14f
+        val heartPath = Path().apply {
+            moveTo(hm.x, hm.y + hs * 0.55f)
+            cubicTo(hm.x - hs * 0.9f, hm.y - hs * 0.08f, hm.x - hs * 0.45f, hm.y - hs * 0.78f, hm.x, hm.y - hs * 0.24f)
+            cubicTo(hm.x + hs * 0.45f, hm.y - hs * 0.78f, hm.x + hs * 0.9f, hm.y - hs * 0.08f, hm.x, hm.y + hs * 0.55f)
+            close()
         }
-        // little heart on the top tile + a sun on the print
-        drawCircle(Color.White.copy(alpha = 0.9f), radius = w * 0.018f, center = androidx.compose.ui.geometry.Offset(cx + tw * 0.30f, cy - th * 0.64f))
-        val sunR = tw * 0.10f
-        val sunC = androidx.compose.ui.geometry.Offset(cx - tw * 0.66f, cy - th * 0.78f)
-        drawCircle(Color(0xFFF4C768).copy(alpha = 0.85f), radius = sunR, center = sunC)
-        drawCircle(Color.White.copy(alpha = 0.85f), radius = sunR, center = sunC, style = Stroke(width = stroke * 0.4f))
+        drawPath(heartPath, Color(0xFFE8A3A3).copy(alpha = 0.9f))
+        drawPath(heartPath, Color.White.copy(alpha = 0.85f), style = Stroke(width = stroke * 0.4f))
+        // Front print — a star photo, tilted right, with tape.
+        polaroidPrint(cx + tw * 0.08f, cy - th * 0.90f, tw, th, 0.10f, photos[2], stroke)
+        val sm = rotPoint(cx + tw * 0.08f, cy - th * 0.90f, 0.10f, tw * 0.55f, th * 0.34f)
+        drawPath(fourStar(sm.x, sm.y, tw * 0.16f), Color.White.copy(alpha = 0.9f))
+        // Tape strips on the front print's top edge.
+        val tape1 = rotPoint(cx + tw * 0.08f, cy - th * 0.90f, 0.10f, tw * 0.12f, -th * 0.02f)
+        val tape2 = rotPoint(cx + tw * 0.08f, cy - th * 0.90f, 0.10f, tw * 0.66f, -th * 0.02f)
+        listOf(tape1, tape2).forEach { tp ->
+            drawPath(rotRect(tp.x, tp.y, tw * 0.22f, th * 0.10f, 0.10f), Color.White.copy(alpha = 0.75f))
+            drawPath(rotRect(tp.x, tp.y, tw * 0.22f, th * 0.10f, 0.10f), Color.White.copy(alpha = 0.6f), style = Stroke(width = stroke * 0.35f))
+        }
     }
-    Text(
-        text = "✦",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
-        color = Color.White.copy(alpha = 0.85f),
-        modifier = Modifier.offset(x = 82.dp, y = 2.dp)
-    )
-    Text(
-        text = "✧",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
-        color = Color.White.copy(alpha = 0.7f),
-        modifier = Modifier.offset(x = 6.dp, y = 44.dp)
-    )
 }
 
-/** MINIMAL — sun arc + horizon + lone dot (the Minimal share card's sparse
- *  language), white-outlined in the doodle family. */
+/** MINIMAL — sun arc + ray ticks + horizon + lone dot (the Minimal share
+ *  card's sparse language), white-outlined in the doodle family. */
 @Composable
 private fun BoxScope.MinimalSunArt(dark: Boolean) {
     val ink = if (dark) Color(0xFFF3E9E2) else Color(0xFF6B5A52)
     Canvas(Modifier.fillMaxSize()) {
         val w = size.width; val h = size.height
         val stroke = 1.8.dp.toPx()
-        val cx = w * 0.72f; val cy = h * 0.34f; val r = w * 0.17f
-        drawArc(ink.copy(alpha = 0.55f), startAngle = 180f, sweepAngle = 180f, useCenter = true,
+        val cx = w * 0.68f; val cy = h * 0.34f; val r = w * 0.17f
+        drawArc(ink.copy(alpha = 0.5f), startAngle = 180f, sweepAngle = 180f, useCenter = true,
             topLeft = androidx.compose.ui.geometry.Offset(cx - r, cy - r), size = androidx.compose.ui.geometry.Size(r * 2f, r * 2f))
         drawArc(Color.White.copy(alpha = 0.85f), startAngle = 180f, sweepAngle = 180f, useCenter = false,
             topLeft = androidx.compose.ui.geometry.Offset(cx - r, cy - r), size = androidx.compose.ui.geometry.Size(r * 2f, r * 2f),
             style = Stroke(width = stroke * 0.6f))
+        // Ray ticks above the arc.
+        listOf(-0.6f, 0f, 0.6f).forEach { off ->
+            val rx = cx + r * off
+            drawLine(Color.White.copy(alpha = 0.8f), androidx.compose.ui.geometry.Offset(rx, cy - r - h * 0.04f), androidx.compose.ui.geometry.Offset(rx, cy - r - h * 0.09f), strokeWidth = stroke * 0.5f)
+        }
         drawLine(ink.copy(alpha = 0.5f), androidx.compose.ui.geometry.Offset(w * 0.10f, h * 0.88f), androidx.compose.ui.geometry.Offset(w * 0.90f, h * 0.88f), strokeWidth = w * 0.012f)
-        drawCircle(Color.White.copy(alpha = 0.9f), radius = w * 0.02f, center = androidx.compose.ui.geometry.Offset(w * 0.40f, h * 0.64f))
+        drawCircle(Color.White.copy(alpha = 0.9f), radius = w * 0.02f, center = androidx.compose.ui.geometry.Offset(w * 0.36f, h * 0.62f))
+        drawPath(fourStar(w * 0.24f, h * 0.22f, w * 0.028f), Color.White.copy(alpha = 0.85f))
     }
-    Text(
-        text = "✦",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
-        color = Color.White.copy(alpha = 0.85f),
-        modifier = Modifier.offset(x = 82.dp, y = 2.dp)
-    )
-    Text(
-        text = "✧",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
-        color = Color.White.copy(alpha = 0.7f),
-        modifier = Modifier.offset(x = 6.dp, y = 44.dp)
-    )
 }
 
-/** MINIMAL — two rings + a dot + a baseline, white-outlined doodle style. */
+/** MINIMAL — two rings with a drifting dot inside + a baseline + a lone
+ *  twinkle, white-outlined doodle style. */
 @Composable
 private fun BoxScope.MinimalRingsArt(dark: Boolean) {
     val ink = if (dark) Color(0xFFF3E9E2) else Color(0xFF6B5A52)
@@ -938,24 +962,15 @@ private fun BoxScope.MinimalRingsArt(dark: Boolean) {
         drawCircle(Color.White.copy(alpha = 0.8f), radius = w * 0.17f, center = androidx.compose.ui.geometry.Offset(cx, cy), style = Stroke(width = stroke * 0.5f))
         drawCircle(ink.copy(alpha = 0.40f), radius = w * 0.10f, center = androidx.compose.ui.geometry.Offset(cx, cy))
         drawCircle(Color.White.copy(alpha = 0.9f), radius = w * 0.10f, center = androidx.compose.ui.geometry.Offset(cx, cy), style = Stroke(width = stroke * 0.6f))
-        drawCircle(Color.White.copy(alpha = 0.9f), radius = w * 0.02f, center = androidx.compose.ui.geometry.Offset(w * 0.30f, h * 0.28f))
+        // A small filled dot drifting inside the inner ring.
+        drawCircle(Color.White.copy(alpha = 0.9f), radius = w * 0.018f, center = androidx.compose.ui.geometry.Offset(cx + w * 0.04f, cy - w * 0.06f))
         drawLine(ink.copy(alpha = 0.40f), androidx.compose.ui.geometry.Offset(w * 0.14f, h * 0.88f), androidx.compose.ui.geometry.Offset(w * 0.86f, h * 0.88f), strokeWidth = w * 0.008f)
+        drawPath(fourStar(w * 0.28f, h * 0.26f, w * 0.030f), Color.White.copy(alpha = 0.9f))
     }
-    Text(
-        text = "✦",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
-        color = Color.White.copy(alpha = 0.85f),
-        modifier = Modifier.offset(x = 82.dp, y = 2.dp)
-    )
-    Text(
-        text = "✧",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
-        color = Color.White.copy(alpha = 0.7f),
-        modifier = Modifier.offset(x = 6.dp, y = 44.dp)
-    )
 }
 
-/** MINIMAL — one soft wave + a dot, white-outlined doodle style. */
+/** MINIMAL — one soft wave with a small ripple under it + a dot, a lone
+ *  twinkle and a baseline, white-outlined doodle style. */
 @Composable
 private fun BoxScope.MinimalWaveArt(dark: Boolean) {
     val ink = if (dark) Color(0xFFF3E9E2) else Color(0xFF6B5A52)
@@ -963,58 +978,39 @@ private fun BoxScope.MinimalWaveArt(dark: Boolean) {
         val w = size.width; val h = size.height
         val stroke = 1.8.dp.toPx()
         val wave = Path().apply {
-            moveTo(0f, h * 0.60f)
-            cubicTo(w * 0.20f, h * 0.30f, w * 0.34f, h * 0.86f, w * 0.52f, h * 0.62f)
-            cubicTo(w * 0.66f, h * 0.44f, w * 0.80f, h * 0.80f, w, h * 0.52f)
+            moveTo(0f, h * 0.58f)
+            cubicTo(w * 0.20f, h * 0.28f, w * 0.34f, h * 0.84f, w * 0.52f, h * 0.60f)
+            cubicTo(w * 0.66f, h * 0.42f, w * 0.80f, h * 0.78f, w, h * 0.50f)
         }
         drawPath(wave, ink.copy(alpha = 0.35f), style = Stroke(width = w * 0.030f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
         drawPath(wave, Color.White.copy(alpha = 0.85f), style = Stroke(width = stroke * 0.6f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
+        // Small ripple under the wave's right hump.
+        val ripple = Path().apply {
+            moveTo(w * 0.56f, h * 0.76f)
+            cubicTo(w * 0.62f, h * 0.68f, w * 0.70f, h * 0.68f, w * 0.76f, h * 0.76f)
+        }
+        drawPath(ripple, Color.White.copy(alpha = 0.5f), style = Stroke(width = stroke * 0.45f, cap = androidx.compose.ui.graphics.StrokeCap.Round))
         drawCircle(Color.White.copy(alpha = 0.9f), radius = w * 0.018f, center = androidx.compose.ui.geometry.Offset(w * 0.30f, h * 0.22f))
+        drawPath(fourStar(w * 0.82f, h * 0.16f, w * 0.028f), Color.White.copy(alpha = 0.85f))
         drawLine(ink.copy(alpha = 0.35f), androidx.compose.ui.geometry.Offset(w * 0.10f, h * 0.90f), androidx.compose.ui.geometry.Offset(w * 0.90f, h * 0.90f), strokeWidth = w * 0.008f)
     }
-    Text(
-        text = "✦",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
-        color = Color.White.copy(alpha = 0.85f),
-        modifier = Modifier.offset(x = 82.dp, y = 2.dp)
-    )
-    Text(
-        text = "✧",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
-        color = Color.White.copy(alpha = 0.7f),
-        modifier = Modifier.offset(x = 6.dp, y = 44.dp)
-    )
 }
 
-/** MINIMAL — a sparse dot grid, white-dotted in the doodle family. */
+/** MINIMAL — a loose scatter of dots drifting along a gentle arc, with a
+ *  lone twinkle — white-dotted in the doodle family. */
 @Composable
 private fun BoxScope.MinimalDotsArt(dark: Boolean) {
     val ink = if (dark) Color(0xFFF3E9E2) else Color(0xFF6B5A52)
     Canvas(Modifier.fillMaxSize()) {
         val w = size.width; val h = size.height
         val stroke = 1.8.dp.toPx()
-        val xs = listOf(0.24f, 0.50f, 0.76f)
-        val ys = listOf(0.30f, 0.52f, 0.74f)
-        xs.forEachIndexed { i, fx ->
-            ys.forEachIndexed { j, fy ->
-                val alt = (i + j) % 2 == 0
-                val r = if (alt) w * 0.020f else w * 0.012f
-                val c = androidx.compose.ui.geometry.Offset(w * fx, h * fy)
-                drawCircle(ink.copy(alpha = if (alt) 0.45f else 0.20f), radius = r, center = c)
-                drawCircle(Color.White.copy(alpha = if (alt) 0.9f else 0.55f), radius = r, center = c, style = Stroke(width = if (alt) stroke * 0.5f else stroke * 0.35f))
-            }
+        listOf(0.20f to 0.62f, 0.34f to 0.44f, 0.50f to 0.36f, 0.66f to 0.40f, 0.80f to 0.54f).forEachIndexed { i, (fx, fy) ->
+            val r = if (i % 2 == 0) w * 0.022f else w * 0.014f
+            val c = androidx.compose.ui.geometry.Offset(w * fx, h * fy)
+            drawCircle(ink.copy(alpha = 0.45f), radius = r, center = c)
+            drawCircle(Color.White.copy(alpha = 0.9f), radius = r, center = c, style = Stroke(width = if (i % 2 == 0) stroke * 0.5f else stroke * 0.35f))
         }
+        drawPath(fourStar(w * 0.90f, h * 0.22f, w * 0.030f), Color.White.copy(alpha = 0.85f))
+        drawCircle(Color.White.copy(alpha = 0.6f), radius = w * 0.010f, center = androidx.compose.ui.geometry.Offset(w * 0.16f, h * 0.30f))
     }
-    Text(
-        text = "✦",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 13.sp),
-        color = Color.White.copy(alpha = 0.85f),
-        modifier = Modifier.offset(x = 82.dp, y = 2.dp)
-    )
-    Text(
-        text = "✧",
-        style = MaterialTheme.typography.titleSmall.copy(fontSize = 9.sp),
-        color = Color.White.copy(alpha = 0.7f),
-        modifier = Modifier.offset(x = 6.dp, y = 44.dp)
-    )
 }

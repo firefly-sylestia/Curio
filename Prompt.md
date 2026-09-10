@@ -1,4 +1,45 @@
 # Prompt Log — current request
+## Request (2026-09-10, completed + pushed — Cabinet shelf doodles redrawn again)
+
+User: "the doodles art isnt great, properly redraw them again, redesign —
+favorites, curiying now, saved entries, completed, notes, and all the
+custom ones; NOT want to read or personal."
+
+**What shipped (CabinetShelves.kt only):** 11 of the 13 shelf scenes
+redrawn in the flask doodle family (pastel fills + white outlines +
+drawn ✦ twinkles). The old fixed-dp ✦/✧ Text sparkles — which misplaced
+on narrow cards and vanished entirely in the 52dp create-sheet preview
+tiles — are replaced by proportional in-canvas fourStar twinkles, so the
+same scene scales from the 86dp card foot strip to the sheet previews:
+
+1. **Favorites (ConstellationArt)** — the heart is now a CONSTELLATION:
+   eight rose twinkle-stars joined by fine white connecting lines + two
+   loose stars (heart-as-star-map, matching the art type's name).
+2. **Curiying now (ReadingArt)** — curved open book (quadratic page
+   edges instead of straight V sides), fanning page lines, knotted
+   ribbon, soft grounding shadow ellipse, twinkle above the spine.
+3. **Saved entries (PhotosArt)** — fanned stack of THREE POLAROIDS
+   (new polaroidPrint + rotPoint helpers keep the photo inset glued to
+   the rotated frame): sun-and-ridge photo, heart photo, star photo,
+   tape strips on the front print.
+4. **Completed (PeakArt)** — ridgelines rebuilt as smooth quadratic
+   swells (were jagged lineTo polygons), snow cap on the near summit,
+   sun raised clear of the ridges, flag + two birds kept.
+5. **Notes (NotesArt)** — redesigned from dog-ear notepad to a
+   SPIRAL-BOUND notebook: five rings along the top edge, ruled lines,
+   heart doodle, pencil with highlight + eraser + lead, twinkle.
+6. **Custom pool** — StarArt (big golden star + comet trail + echo star
+   + twinkles), MountainArt (curved layered swells + snow cap + doodle
+   pines + flowers), and the four MINIMAL scenes refined (sun got ray
+   ticks, rings a drifting dot, wave a ripple, dots a deliberate arc
+   scatter).
+
+Want to Read (BooksArt) and Personal (WindowArt) untouched per the
+request. Orphaned mountainPath helper removed. Compile-safety pass done
+per root AGENTS.md (imports, signature checks, no Gradle in this env —
+CI will confirm). Store changelog SKIPPED per the standing "skip cl for
+now" preference.
+
 ## Request (2026-09-09, completed + pushed — CI compile fixes for 98f9f74a)
 
 CI broke on the cabinet-doodles + masonry push (98f9f74a): both
