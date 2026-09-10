@@ -2,7 +2,9 @@ package com.curio.app.features.settings
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -92,6 +94,8 @@ import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.CurioCategory
 import com.curio.app.navigation.CurioRoutes
+import com.curio.app.ui.adaptive.LocalRevealSharedScope
+import com.curio.app.ui.adaptive.LocalRevealVisibilityScope
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -2280,6 +2284,18 @@ private fun SettingsSecondaryCardView(
 }
 
 
+/** The shared-element key for the settings nav rail's active pill — every
+ *  rail-bearing screen marks its ACTIVE chip with this same key, so
+ *  switching sections morphs the highlight from the old screen's chip to
+ *  the new screen's chip across the page transition. */
+private const val SettingsRailActiveKey = "settings-rail-active"
+
+/** Bounds animation for the rail morph — a near-critical spring so the
+ *  pill glides between chips quickly with zero overshoot wobble. */
+private val SettingsRailBoundsTransform = BoundsTransform { _, _ ->
+    spring(dampingRatio = 0.95f, stiffness = 500f)
+}
+
 /**
  * The JSX nav rail — horizontal chips on phones (the desktop sidebar's
  * mobile twin). "All Settings" returns to the hub itself.
@@ -2322,40 +2338,75 @@ internal fun SettingsNavRail(
         ) {
             items(settingsNavRail, key = { it.id }) { entry ->
                 val selected = active != null && active == entry.id
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                // v3xx — the ACTIVE chip's pill is a SHARED ELEMENT: every
+                // settings-family screen marks its active chip with the same
+                // key, so switching sections morphs the highlight from the
+                // old screen's chip to the new screen's chip while the pages
+                // crossfade (the iOS-style rail glide). Falls back to a plain
+                // pill when the shared scopes are absent.
+                val sharedScope = LocalRevealSharedScope.current
+                val visScope = LocalRevealVisibilityScope.current
+                val activeState = if (selected && sharedScope != null && visScope != null)
+                    sharedScope.rememberSharedContentState(SettingsRailActiveKey)
+                else null
+                Box(
                     modifier = Modifier
                         .width(82.dp)
                         .heightIn(min = 60.dp)
                         .clip(RoundedCornerShape(17.dp))
+                        // Unselected chips keep their frosted tile; the
+                        // selected chip's pill is the shared element above.
                         .background(
-                            when {
-                                selected -> Color(0xFF815947)
-                                dark -> Color.White.copy(alpha = 0.07f)
-                                else -> Color.White.copy(alpha = 0.62f)
-                            }
+                            if (selected) Color.Transparent
+                            else if (dark) Color.White.copy(alpha = 0.07f)
+                            else Color.White.copy(alpha = 0.62f)
                         )
                         .clickable { onSelect(entry) }
-                        .padding(horizontal = 6.dp, vertical = 9.dp)
                 ) {
-                    CurioIcon(
-                        name = entry.icon,
-                        contentDescription = null,
-                        tint = if (selected) Color(0xFFFFF9F1) else MaterialTheme.colorScheme.onSurfaceVariant,
-                        size = 19.dp
-                    )
-                    Text(
-                        text = entry.label,
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                            fontSize = 10.sp
-                        ),
-                        color = if (selected) Color(0xFFFFF9F1) else MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        textAlign = TextAlign.Center
-                    )
+                    if (selected) {
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .then(
+                                    if (activeState != null && sharedScope != null && visScope != null)
+                                        sharedScope.run {
+                                            Modifier.sharedElement(
+                                                activeState,
+                                                visScope,
+                                                boundsTransform = SettingsRailBoundsTransform
+                                            )
+                                        }
+                                    else Modifier
+                                )
+                                .clip(RoundedCornerShape(17.dp))
+                                .background(Color(0xFF815947))
+                        )
+                    }
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier
+                            .matchParentSize()
+                            .padding(horizontal = 6.dp, vertical = 9.dp)
+                    ) {
+                        CurioIcon(
+                            name = entry.icon,
+                            contentDescription = null,
+                            tint = if (selected) Color(0xFFFFF9F1) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            size = 19.dp
+                        )
+                        Text(
+                            text = entry.label,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                                fontSize = 10.sp
+                            ),
+                            color = if (selected) Color(0xFFFFF9F1) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
         }

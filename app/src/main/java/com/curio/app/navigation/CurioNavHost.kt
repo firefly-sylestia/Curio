@@ -1,7 +1,9 @@
 package com.curio.app.navigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -274,6 +276,27 @@ private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch(
  * page-switch glitch. All transitions now use matched tweens, and tab
  * switches crossfade.
  */
+
+/**
+ * v3xx — wraps a settings-family destination with the shared-transition
+ * scopes (the same locals Spin/Reveal use for the "reveal-hero" morph), so
+ * the settings nav rail's active pill can be a SHARED ELEMENT: switching
+ * sections morphs the highlight from the old screen's chip to the new
+ * screen's chip while the pages crossfade. Every rail-bearing destination
+ * is wrapped with this so both sides of any switch can participate.
+ */
+@Composable
+private fun SettingsSharedScope(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    content: @Composable () -> Unit
+) {
+    CompositionLocalProvider(
+        LocalRevealSharedScope provides sharedTransitionScope,
+        LocalRevealVisibilityScope provides animatedVisibilityScope
+    ) { content() }
+}
+
 @Composable
 fun CurioNavHost(
     navController: NavHostController = rememberNavController()
@@ -577,13 +600,20 @@ fun CurioNavHost(
             enterTransition = {
                 when {
                     // Settings-internal switches (hub ⇄ sections ⇄ drill-in
-                    // tools): pure crossfade. Both pages share the same
-                    // chrome (hero + nav rail) in the same place, so the
-                    // fade reads as the header staying put while the content
-                    // text and the lower pages fade out/in — no scale, no
-                    // directional slide.
+                    // tools): the rail's active pill MORPHS between chips
+                    // (shared element) while the pages crossfade with a
+                    // whisper of scale (0.985, calm spring) — the shared
+                    // chrome reads as staying put, but the switch gets a
+                    // gentle lift instead of a flat fade (v3xx).
                     isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->
-                        fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
+                        // v3xx — the nav rail's active pill morphs between
+                        // chips (shared element) while the page lifts in: a
+                        // whisper of scale (0.985, calm spring) on the fade
+                        // reads as a morph instead of a flat crossfade.
+                        scaleIn(
+                            initialScale = 0.985f,
+                            animationSpec = CurioMotion.Springs.Calm
+                        ) + fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
                     // Reveal is the continuation of the landed Spin ticket:
                     // fade instead of the generic horizontal page slide — the
                     // shared "reveal-hero" element (Spin ticket → Reveal
@@ -645,7 +675,10 @@ fun CurioNavHost(
                     // the incoming page's fade-in (the shared chrome reads
                     // as staying still).
                     isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->
-                        fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
+                        scaleOut(
+                            targetScale = 0.985f,
+                            animationSpec = CurioMotion.Springs.Calm
+                        ) + fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
                     // Leave the Spin ticket in place while Reveal expands:
                     // the fade is paced to the shared-element morph so the
                     // source card stays visible for the whole expansion
@@ -689,7 +722,14 @@ fun CurioNavHost(
                     // → section): the page underneath fades back in the same
                     // gentle crossfade as the forward switch.
                     isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->
-                        fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
+                        // v3xx — the nav rail's active pill morphs between
+                        // chips (shared element) while the page lifts in: a
+                        // whisper of scale (0.985, calm spring) on the fade
+                        // reads as a morph instead of a flat crossfade.
+                        scaleIn(
+                            initialScale = 0.985f,
+                            animationSpec = CurioMotion.Springs.Calm
+                        ) + fadeIn(animationSpec = tween(CurioMotion.Durations.Morph))
                     // Popping back from Topic Reveal: fade only — the shared
                     // element morph reverses the hero into the card, and a
                     // directional slide would fight it.
@@ -721,7 +761,10 @@ fun CurioNavHost(
                     // Popping back inside settings: the outgoing page fades
                     // out over the same crossfade.
                     isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->
-                        fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
+                        scaleOut(
+                            targetScale = 0.985f,
+                            animationSpec = CurioMotion.Springs.Calm
+                        ) + fadeOut(animationSpec = tween(CurioMotion.Durations.Morph))
                     // Popping Topic Reveal: fade the page out under the
                     // reversing morph instead of sliding it sideways.
                     initialState.destination.route == CurioRoutes.REVEAL ->
@@ -893,49 +936,79 @@ fun CurioNavHost(
                 StatsScreen(navController = navController)
             }
             composable(CurioRoutes.SETTINGS) {
-                SettingsHubScreen(navController = navController)
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    SettingsHubScreen(navController = navController)
+                }
             }
             composable(CurioRoutes.SETTINGS_APPEARANCE) {
-                SettingsSectionScreen(navController = navController, page = SettingsPage.APPEARANCE)
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    SettingsSectionScreen(navController = navController, page = SettingsPage.APPEARANCE)
+                }
             }
             composable(CurioRoutes.SETTINGS_PREFERENCES) {
-                SettingsSectionScreen(navController = navController, page = SettingsPage.PREFERENCES)
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    SettingsSectionScreen(navController = navController, page = SettingsPage.PREFERENCES)
+                }
             }
             composable(CurioRoutes.SETTINGS_RECORDING) {
-                SettingsSectionScreen(navController = navController, page = SettingsPage.RECORDING)
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    SettingsSectionScreen(navController = navController, page = SettingsPage.RECORDING)
+                }
             }
             composable(CurioRoutes.SETTINGS_DATA) {
-                BackupToolsScreen(navController = navController)
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    BackupToolsScreen(navController = navController)
+                }
             }
             composable(CurioRoutes.SETTINGS_BOOK_COVER) {
-                BookCoverHubScreen(navController = navController)
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    BookCoverHubScreen(navController = navController)
+                }
             }
             composable(CurioRoutes.SETTINGS_BOOK_BROWSER) {
-                com.curio.app.features.settings.BookBrowserScreen(navController = navController)
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    com.curio.app.features.settings.BookBrowserScreen(navController = navController)
+                }
             }
             composable(CurioRoutes.SHARE_HUB) {
-                ShareHubScreen(navController = navController)
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    ShareHubScreen(navController = navController)
+                }
             }
             composable(CurioRoutes.EXPERIMENTS) {
-                ExperimentsScreen(navController = navController)
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    ExperimentsScreen(navController = navController)
+                }
             }
             composable(CurioRoutes.USER_EXPERIMENTS) {
-                UserExperimentsScreen(navController = navController)
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    UserExperimentsScreen(navController = navController)
+                }
             }
             composable(CurioRoutes.GLASS_WIDGET_EDITOR) {
-                com.curio.app.features.settings.WidgetEditorScreen(navController = navController)
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    com.curio.app.features.settings.WidgetEditorScreen(navController = navController)
+                }
             }
             composable(CurioRoutes.MANAGE_CATEGORIES) {
-                ManageCategoriesScreen(navController = navController)
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    ManageCategoriesScreen(navController = navController)
+                }
             }
             composable(CurioRoutes.TOPIC_HISTORY) {
-                TopicHistoryScreen(navController = navController)
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    TopicHistoryScreen(navController = navController)
+                }
             }
             composable(CurioRoutes.RECYCLE_BIN) {
-                RecycleBinScreen(navController = navController)
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    RecycleBinScreen(navController = navController)
+                }
             }
             composable(CurioRoutes.RECENTS_ALL) {
-                RecentScreen(navController = navController)
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    RecentScreen(navController = navController)
+                }
             }
             composable(CurioRoutes.CRASH) {
                 CurioCrashScreen(navController = navController)
@@ -944,10 +1017,14 @@ fun CurioNavHost(
                 BugReportScreen(navController = navController)
             }
             composable(CurioRoutes.SUPPORT) {
-                SupportScreen(navController = navController)
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    SupportScreen(navController = navController)
+                }
             }
             composable(CurioRoutes.UPDATES) {
-                UpdatesScreen(navController = navController)
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    UpdatesScreen(navController = navController)
+                }
             }
             composable(CurioRoutes.DATABASE) {
                 TopicDatabaseScreen(navController = navController)
@@ -956,7 +1033,9 @@ fun CurioNavHost(
                 FieldMindObservationScreen(navController = navController)
             }
             composable(CurioRoutes.PET_DESIGNER) {
-                PetDesignerScreen(navController = navController)
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    PetDesignerScreen(navController = navController)
+                }
             }
             composable(route = CurioRoutes.LIGHTBOX) {
                 // The image URI is handed off out-of-band via LightboxTarget
