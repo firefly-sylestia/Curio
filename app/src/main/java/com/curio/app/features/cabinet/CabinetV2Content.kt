@@ -1113,20 +1113,11 @@ private fun LazyGridScope.v2DetailItems(
         )
     }
     if (collection.members.isEmpty()) {
+        // v3xx — the JSX "Nothing here yet" scene (stacked books + leaf
+        // sprig + note card + twinkles) drawn in the app's flask doodle
+        // language — see V2CollectionEmptyState in CabinetShelves.kt.
         item(key = "d-empty", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)
-            ) {
-                CurioEmptyState(
-                    glyph = CurioIcons.Inventory2,
-                    headline = "This collection is empty",
-                    subtext = "Pin discoveries from their pages (hold the top bar → File to…) or add saved captures here.",
-                    tint = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f),
-                    ctaLabel = "Add captures",
-                    onCtaClick = onAdd
-                )
-            }
+            V2CollectionEmptyState(onAdd = onAdd)
         }
         return
     }
@@ -2319,21 +2310,53 @@ private fun V2DetailHeader(
                 maxLines = 1
             )
         }
-        V2ToolbarPill(
-            glyph = CurioIcons.Add,
-            contentDescription = "Add saved captures",
-            emphasized = true,
-            onClick = onAdd
-        )
+        // v3xx — the Add action is a LARGER labeled pill ("+ Add") — the
+        // style that will expand app-wide; the ⋮ sits in a slightly bigger
+        // circular button next to it (still an ANCHORED dropdown below).
+        Surface(
+            onClick = onAdd,
+            shape = RoundedCornerShape(50),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.13f),
+            modifier = Modifier.height(46.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.padding(horizontal = 20.dp)
+            ) {
+                CurioIcon(
+                    name = CurioIcons.Add,
+                    contentDescription = "Add saved captures",
+                    tint = MaterialTheme.colorScheme.primary,
+                    size = 22.dp
+                )
+                Text(
+                    text = "Add",
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1
+                )
+            }
+        }
         Spacer(Modifier.width(8.dp))
         // v3xx — the collection ⋮ is an ANCHORED dropdown (Rename / Add
         // captures / Delete) right under the dots — no center-screen overlay.
         Box {
-            V2ToolbarPill(
-                glyph = CurioIcons.MoreVert,
-                contentDescription = "Rename, add or delete collection",
-                onClick = { moreOpen = true }
-            )
+            Surface(
+                onClick = { moreOpen = true },
+                shape = RoundedCornerShape(50),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.75f),
+                modifier = Modifier.size(40.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    CurioIcon(
+                        name = CurioIcons.MoreVert,
+                        contentDescription = "Rename, add or delete collection",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        size = 20.dp
+                    )
+                }
+            }
             DropdownMenu(
                 expanded = moreOpen,
                 onDismissRequest = { moreOpen = false }

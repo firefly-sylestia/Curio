@@ -1014,3 +1014,117 @@ private fun BoxScope.MinimalDotsArt(dark: Boolean) {
         drawCircle(Color.White.copy(alpha = 0.6f), radius = w * 0.010f, center = androidx.compose.ui.geometry.Offset(w * 0.16f, h * 0.30f))
     }
 }
+
+/** COLLECTION DETAIL empty state — the JSX "Nothing here yet" scene
+ *  (stacked books + leaf sprig + note card + twinkles) redrawn in the
+ *  app's flask doodle language (white outlines + pastel fills). The
+ *  primary CTA is the large labeled "+ Add a capture" pill. */
+@Composable
+fun V2CollectionEmptyState(onAdd: () -> Unit) {
+    val dark = isCurioDarkTheme()
+    val ink = if (dark) Color(0xFFF3E9E2) else Color(0xFF553E42)
+    val muted = ink.copy(alpha = 0.62f)
+    val paper = if (dark) Color(0xFFE8DCC8) else Color(0xFFF9F2E6)
+    val book = if (dark) Color(0xFFB98D79) else Color(0xFFD9A887)
+    val leaf = if (dark) Color(0xFF9DB58F) else Color(0xFF8FA07E)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
+    ) {
+        Box(modifier = Modifier.width(230.dp).height(152.dp)) {
+            Canvas(Modifier.fillMaxSize()) {
+                val w = size.width; val h = size.height
+                val stroke = 1.8.dp.toPx()
+                // Ground shadow.
+                drawOval(
+                    ink.copy(alpha = 0.10f),
+                    topLeft = androidx.compose.ui.geometry.Offset(w * 0.12f, h * 0.82f),
+                    size = androidx.compose.ui.geometry.Size(w * 0.76f, h * 0.10f)
+                )
+                // Leaf sprig — a stem with four leaves, left side.
+                drawLine(leaf.copy(alpha = 0.8f), androidx.compose.ui.geometry.Offset(w * 0.18f, h * 0.78f), androidx.compose.ui.geometry.Offset(w * 0.18f, h * 0.30f), strokeWidth = 1.6f)
+                val lw = w * 0.075f; val lh = w * 0.045f
+                listOf(
+                    0.72f to -24f,
+                    0.56f to 20f,
+                    0.40f to -26f,
+                    0.26f to 22f
+                ).forEachIndexed { i, (t, rot) ->
+                    val cy = h * (0.30f + 0.46f * (1f - t))
+                    val cx = w * 0.18f + (if (i % 2 == 0) -1f else 1f) * w * 0.07f
+                    rotate(rot, androidx.compose.ui.geometry.Offset(cx, cy)) {
+                        val tl = androidx.compose.ui.geometry.Offset(cx - lw / 2f, cy - lh / 2f)
+                        drawOval(leaf.copy(alpha = 0.85f), topLeft = tl, size = androidx.compose.ui.geometry.Size(lw, lh))
+                        drawOval(Color.White.copy(alpha = 0.8f), topLeft = tl, size = androidx.compose.ui.geometry.Size(lw, lh), style = Stroke(width = stroke * 0.5f))
+                    }
+                }
+                // Book stack — bottom cream book, top terracotta book.
+                val bw = w * 0.52f; val bh = h * 0.15f
+                rotate(-2f, androidx.compose.ui.geometry.Offset(w * 0.52f, h * 0.74f)) {
+                    drawRoundRect(paper.copy(alpha = 0.92f), androidx.compose.ui.geometry.Offset(w * 0.26f, h * 0.70f), androidx.compose.ui.geometry.Size(bw, bh), androidx.compose.ui.geometry.CornerRadius(bh * 0.3f))
+                    drawRoundRect(Color.White.copy(alpha = 0.9f), androidx.compose.ui.geometry.Offset(w * 0.26f, h * 0.70f), androidx.compose.ui.geometry.Size(bw, bh), androidx.compose.ui.geometry.CornerRadius(bh * 0.3f), style = Stroke(width = stroke * 0.7f))
+                }
+                rotate(3f, androidx.compose.ui.geometry.Offset(w * 0.52f, h * 0.60f)) {
+                    drawRoundRect(book.copy(alpha = 0.9f), androidx.compose.ui.geometry.Offset(w * 0.30f, h * 0.56f), androidx.compose.ui.geometry.Size(bw * 0.92f, bh), androidx.compose.ui.geometry.CornerRadius(bh * 0.3f))
+                    drawRoundRect(Color.White.copy(alpha = 0.9f), androidx.compose.ui.geometry.Offset(w * 0.30f, h * 0.56f), androidx.compose.ui.geometry.Size(bw * 0.92f, bh), androidx.compose.ui.geometry.CornerRadius(bh * 0.3f), style = Stroke(width = stroke * 0.7f))
+                    // Title ticks.
+                    drawLine(Color.White.copy(alpha = 0.85f), androidx.compose.ui.geometry.Offset(w * 0.36f, h * 0.615f), androidx.compose.ui.geometry.Offset(w * 0.56f, h * 0.615f), strokeWidth = 1.1f)
+                    drawLine(Color.White.copy(alpha = 0.6f), androidx.compose.ui.geometry.Offset(w * 0.36f, h * 0.645f), androidx.compose.ui.geometry.Offset(w * 0.50f, h * 0.645f), strokeWidth = 1.1f)
+                }
+                // Note card — a small white index card with writing lines.
+                val cw = w * 0.30f; val ch = h * 0.34f
+                rotate(4f, androidx.compose.ui.geometry.Offset(w * 0.80f, h * 0.52f)) {
+                    drawRoundRect(Color(0xFFFFFBF2).copy(alpha = 0.95f), androidx.compose.ui.geometry.Offset(w * 0.68f, h * 0.36f), androidx.compose.ui.geometry.Size(cw, ch), androidx.compose.ui.geometry.CornerRadius(cw * 0.06f))
+                    drawRoundRect(Color.White.copy(alpha = 0.95f), androidx.compose.ui.geometry.Offset(w * 0.68f, h * 0.36f), androidx.compose.ui.geometry.Size(cw, ch), androidx.compose.ui.geometry.CornerRadius(cw * 0.06f), style = Stroke(width = stroke * 0.6f))
+                    for (i in 0..2) {
+                        val ly = h * 0.42f + i * h * 0.085f
+                        drawLine(ink.copy(alpha = 0.45f), androidx.compose.ui.geometry.Offset(w * 0.72f, ly), androidx.compose.ui.geometry.Offset(w * 0.72f + cw * 0.66f, ly), strokeWidth = 1.0f)
+                    }
+                }
+                // Twinkles.
+                drawPath(fourStar(w * 0.84f, h * 0.18f, w * 0.030f), Color.White.copy(alpha = 0.9f))
+                drawPath(fourStar(w * 0.13f, h * 0.22f, w * 0.022f), Color.White.copy(alpha = 0.75f))
+            }
+        }
+        Spacer(Modifier.height(10.dp))
+        Text(
+            text = "Nothing here yet",
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+            color = ink
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = "Save something from your discoveries, or add a capture here.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = muted,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 28.dp)
+        )
+        Spacer(Modifier.height(18.dp))
+        // Primary CTA — the large labeled pill.
+        Surface(
+            onClick = onAdd,
+            shape = RoundedCornerShape(50),
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.height(50.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(7.dp),
+                modifier = Modifier.padding(horizontal = 26.dp)
+            ) {
+                CurioIcon(
+                    name = CurioIcons.Add,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    size = 20.dp
+                )
+                Text(
+                    text = "Add a capture",
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.ExtraBold),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        }
+    }
+}

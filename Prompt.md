@@ -1,4 +1,37 @@
 # Prompt Log — current request
+## Request (2026-09-10, completed + pushed — collection-detail Add pill, ⋮ kebab + doodle empty state)
+
+User: "the inside of collections — make the + button larger and pill with
+an Add text; see the WantToRead JSX for the empty state but draw it in the
+app's doodle art style; then we'll expand the button + 3-dot style
+app-wide — don't take the JSX button/3-dot style, just make them a little
+bigger and better."
+
+**What shipped:**
+1. **Detail Add pill** (V2DetailHeader, CabinetV2Content.kt): the old
+   34dp icon-only V2ToolbarPill is replaced by a LARGER 46dp labeled pill
+   — "+ Add" (Add glyph 22dp + "Add" titleSmall ExtraBold, primary
+   tint, pill 50% radius). This is the button style to expand app-wide.
+2. **Detail ⋮ kebab** (V2DetailHeader): bumped from 34dp pill to a 40dp
+   circular button with a 20dp MoreVert glyph (surfaceContainerHigh
+   fill) — a little bigger + better; the anchored Rename/Add/Delete
+   DropdownMenu is unchanged (app style, not the JSX's menu).
+3. **Collection-detail empty state** (V2CollectionEmptyState,
+   CabinetShelves.kt): the JSX "Nothing here yet" scene redrawn in the
+   flask doodle language — Canvas scene (230×152dp, fully proportional)
+   with a ground shadow, a leaf sprig (stem + four rotated leaves,
+   sage fill + white outlines), a two-book stack (cream + terracotta
+   rounded rects, title ticks), a white note card with writing lines, and
+   two fourStar twinkles; headline "Nothing here yet", muted copy, and a
+   large primary "+ Add a capture" pill (50dp) wired to the same onAdd.
+   Used for BOTH user collections and the seeded starter shelves
+   (Curiying now / Want to Read / Completed / Personal share v2DetailItems).
+
+The user's reference file Curio_WantToRead_EmptyState.jsx was left
+untracked (not committed). Next up per user: expand the Add-pill + ⋮
+styles across the rest of the app. Store changelog SKIPPED per the
+standing "skip cl for now" preference.
+
 ## Request (2026-09-10, completed + pushed — Cabinet shelf doodles redrawn again)
 
 User: "the doodles art isnt great, properly redraw them again, redesign —
