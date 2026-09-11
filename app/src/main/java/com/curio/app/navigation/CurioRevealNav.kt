@@ -57,14 +57,16 @@ fun Modifier.trackRevealTaps(): Modifier = pointerInput(Unit) {
     }
 }
 
-/** How long the screen-reveal iris takes — a touch faster than the light/dark
- *  wipe (680ms) so opening a screen stays snappy. */
-private const val SCREEN_REVEAL_DURATION_MS = 440
+/** How long the screen-reveal iris takes — well under half the light/dark
+ *  wipe (680ms) so opening a screen stays snappy (user: "make it more
+ *  faster"). Input is no longer blocked while it plays (v3xx48), so a quick
+ *  tap during the iris lands on the new screen instead of being swallowed. */
+private const val SCREEN_REVEAL_DURATION_MS = 300
 
 /** Beat between freezing the old frame and letting the reveal animate, so the
  *  destination has really drawn underneath the frozen frame first. Shorter
  *  than the theme wipe's settle because nothing is being recoloured. */
-private const val SCREEN_REVEAL_SETTLE_MS = 32L
+private const val SCREEN_REVEAL_SETTLE_MS = 20L
 
 /** A warmed frame older than this is thrown away rather than revealed. */
 private const val FRAME_FRESHNESS_MS = 900L

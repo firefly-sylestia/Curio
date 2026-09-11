@@ -427,15 +427,13 @@ private fun CurioThemeTransitionOverlay(
                             }
                         }
                     }
-                    .pointerInput(Unit) {
-                        // Swallow all input for the (sub-second) reveal so the user
-                        // can't stack taps on a half-morphed screen.
-                        awaitPointerEventScope {
-                            while (true) {
-                                awaitPointerEvent().changes.forEach { it.consume() }
-                            }
-                        }
-                    },
+                    // v3xx48 — NO input blocking. The frozen frame used to
+                    // swallow every pointer event for the whole reveal, so the
+                    // first ~440ms of a new screen was dead to the touch
+                    // (user: "now mid transition i cant tap anything"). The
+                    // overlay is a plain Image now: it draws above the
+                    // destination but never claims a hit, so quick taps land on
+                    // the screen that is actually there.
             )
         }
     }

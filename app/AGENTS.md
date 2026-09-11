@@ -7284,6 +7284,39 @@ app/src/main/java/com/curio/app/
   per save — the GC pauses froze the app. Now only new/changed rows
   decode; the map is only touched from the flow's single collection
   dispatcher.
+- **v3xx48 — the glass header really collapses, the reveal is faster +
+  tappable, the Cupboard regains its size ladder and its switch animation,
+  the text-history CURRENT pill is fixed (user 2026-09-11).**
+  (1) **`CurioGlassToolbarMorph` — CLIP BEFORE the size-reporting layout.**
+  `.layout { layout(w, lerp(full, compact + inset, eased)) }` reports the
+  animated height but measures its child at the CONTENT's natural height, so
+  a `clipToBounds()` placed INSIDE it clipped against the full hero and did
+  nothing: the glass kept painting its whole expanded area ("the glass
+  extended area stays in its initial size where the stats was") while only the
+  reservation shrank. The clip now WRAPS the layout node, so it is exactly
+  the animated height from y=0 (the status-bar strip stays covered) and the
+  full content is trimmed as the bar collapses.
+  (2) **Screen reveal (`CurioRevealNav` + `ThemeTransition`).** 440ms → 300ms
+  and the settle beat 32 → 20ms ("make it more faster"), and the frozen frame
+  NO LONGER swallows input: the overlay's consuming `pointerInput` is gone, so
+  the overlay draws above the destination without claiming a hit and quick
+  taps land on the screen that is really there ("mid transition i cant tap
+  anything").
+  (3) **Cupboard wall (`buildCupboardShelves`).** The size ladder is back as
+  SHELF HEIGHTS — 0.50 / 0.28 / 0.34 / 0.21 of the wall width, cycling, so the
+  smallest shelf is ~0.34x the feature one and the wall keeps the big/small
+  contrast the old 3x…0.5x tiers had ("it doesnt have that 3x sizes or smaller
+  one like .5x") while each shelf still fills the width exactly. A filter
+  switch also FADES the wall into its new arrangement again (`wallSwap`
+  Animatable, 0.25 → 1 over 280ms, per-shelf alpha + a whisper of scale) —
+  packed shelves can't slide covers to new slots the way the old grid's
+  per-cover lazy items did, so the swap needed its own motion.
+  (4) **`HistoryCurrentPill` + the list-view meta row.** The pill wears the
+  theme accent (primary wash + 28% rim, extra-bold tracked label) instead of
+  two hardcoded browns, and refuses to wrap; the row's TIME is flexible
+  (`weight(1f, fill = false)`) so the fixed delta + pill can never be pushed
+  past the row's rounded clip and cut off ("the current pill is broken and
+  looks off").
 - **v3xx47 — the app-wide TOUCH feedback is a pressed LOOK, not a ripple
   (`ui/theme/CurioPressIndication.kt`, NEW; wired in `CurioTheme`).** The user
   meant the TOUCH highlight, not the selected state: "remove weird selection

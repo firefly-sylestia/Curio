@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -734,10 +735,19 @@ fun TextHistoryBrowser(
                                             modifier = Modifier.weight(1f, fill = false)
                                         )
                                         Spacer(Modifier.width(6.dp))
+                                        // v3xx48 — the time is FLEXIBLE too, so
+                                        // the two texts absorb the squeeze and
+                                        // the fixed-size delta + CURRENT pill
+                                        // can never be pushed out and clipped
+                                        // by the row's rounded clip (the
+                                        // reported "broken" pill).
                                         Text(
                                             formatHistoryTime(e.ts),
                                             style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier.weight(1f, fill = false)
                                         )
                                         if (delta != null) {
                                             Spacer(Modifier.width(6.dp))
@@ -1642,21 +1652,31 @@ private fun HistorySearchBox(
 }
 
 /** The tiny warm "CURRENT" pill — marks the newest snapshot of each field
- *  (the JSX current-pill). */
+ *  (the JSX current-pill).
+ *
+ *  v3xx48 — it wears the THEME's accent now instead of the two hardcoded
+ *  browns: a soft primary wash with the primary ink and a hairline rim, so it
+ *  reads as one of the app's chips on the frosted rows (and in the Material
+ *  theme, and in dark mode) rather than a heavy block of foreign brown — the
+ *  reported "the current pill is broken and looks off". It also refuses to
+ *  wrap or ellipsize, so a tight meta row can never clip it into "CURRE…". */
 @Composable
 private fun HistoryCurrentPill() {
-    val dark = isCurioDarkTheme()
+    val accent = MaterialTheme.colorScheme.primary
     Text(
         "CURRENT",
         style = MaterialTheme.typography.labelSmall.copy(
             fontWeight = FontWeight.ExtraBold,
-            letterSpacing = 0.4.sp
+            letterSpacing = 0.6.sp
         ),
-        color = if (dark) Color(0xFFFFF9F1) else Color(0xFF52383C),
+        color = accent,
+        maxLines = 1,
+        softWrap = false,
         modifier = Modifier
             .clip(RoundedCornerShape(50))
-            .background(if (dark) Color(0xFF815947) else Color(0xFFF2E8DC))
-            .padding(horizontal = 7.dp, vertical = 2.dp)
+            .background(accent.copy(alpha = 0.14f))
+            .border(1.dp, accent.copy(alpha = 0.28f), RoundedCornerShape(50))
+            .padding(horizontal = 8.dp, vertical = 3.dp)
     )
 }
 

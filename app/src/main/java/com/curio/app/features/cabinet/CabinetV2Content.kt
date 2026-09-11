@@ -38,9 +38,12 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -608,6 +611,24 @@ fun CabinetV2Content(navController: NavController) {
             // and no shelf leaves a gap.
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                 val wallWidth = (maxWidth - 20.dp).coerceAtLeast(1.dp)
+                // v3xx48 — SWITCHING A FILTER ANIMATES AGAIN. The packed
+                // shelves can't slide covers to new slots (they aren't lazy
+                // items any more), so a chip tap now FADES the wall into its
+                // new arrangement: the covers dip and ease back while the
+                // shelves re-pack underneath, instead of the covers snapping
+                // (user: "why the animation isnt there anymore when switching
+                // between category").
+                val wallSwap = remember { Animatable(1f) }
+                var lastFilter by remember { mutableStateOf(typeFilter) }
+                LaunchedEffect(typeFilter) {
+                    if (lastFilter == typeFilter) return@LaunchedEffect
+                    lastFilter = typeFilter
+                    wallSwap.snapTo(0.25f)
+                    wallSwap.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(280, easing = FastOutSlowInEasing)
+                    )
+                }
                 val shelves = remember(shownBooks, shownAlbums, shownSeries, wallWidth) {
                     buildCupboardShelves(
                         items = (shownBooks + shownAlbums + shownSeries)
@@ -650,7 +671,8 @@ fun CabinetV2Content(navController: NavController) {
                         // onto the wall, so adding never dumps the user out to
                         // another screen.
                         onAddNew = { showCupboardAdd = true },
-                        pageAccent = pageAccent
+                        pageAccent = pageAccent,
+                        wallSwap = { wallSwap.value }
                     )
                 }
             }
@@ -1300,8 +1322,19 @@ private fun buildCupboardShelves(
     val width = availableWidth.value
     if (width <= 0f) return emptyList()
     val gap = CUPBOARD_GAP_DP
-    // Feature shelf, then a tighter one — alternated down the wall.
-    val targets = floatArrayOf(width * 0.46f, width * 0.32f)
+    // v3xx48 — the SIZE LADDER is back, as SHELF heights. The old grid gave
+    // every cover a tier (3x … 0.5x) and packed lines by spans, which is what
+    // left holes; here each shelf has ONE height so it always fills the
+    // width, and the heights cycle a feature → small → medium → smallest
+    // rhythm. The smallest shelf is ~0.34x the feature one, so the wall reads
+    // with the same big/small contrast the tiers had (user: "it doesnt have
+    // that 3x sizes or smaller one like .5x").
+    val targets = floatArrayOf(
+        width * 0.50f,
+        width * 0.28f,
+        width * 0.34f,
+        width * 0.21f
+    )
     // A shelf is closed once its projected height would drop under 80% of its
     // target, so it stays close to (never far under) the intended size.
     val minFactor = 0.8f
@@ -1343,7 +1376,10 @@ private fun LazyListScope.v2EverythingMasonryItems(
     onOpenLiked: (V2Liked) -> Unit,
     onCoverSource: (V2Liked) -> Unit,
     onAddNew: () -> Unit,
-    pageAccent: Color
+    pageAccent: Color,
+    // v3xx48 — the wall's filter-swap fade (see the caller); read inside the
+    // item lambdas so the covers dip and ease back when the chips change.
+    wallSwap: () -> Float
 ) {
     // Top line: the filter chips + the corner ADD pill (the app-wide labeled
     // Add, anchored TOP-RIGHT of the wall instead of a bottom button).
@@ -1378,10 +1414,18 @@ private fun LazyListScope.v2EverythingMasonryItems(
 
     shelves.forEachIndexed { index, shelf ->
         item(key = "shelf|$index", contentType = "shelf") {
+            val swap = wallSwap()
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(shelf.height)
+                    .graphicsLayer {
+                        alpha = swap
+                        // A whisper of scale rides the fade so the swap reads as
+                        // the wall settling rather than a blink.
+                        scaleX = 0.985f + swap * 0.015f
+                        scaleY = 0.985f + swap * 0.015f
+                    }
                     .then(
                         Modifier.animateItem(
                             fadeInSpec = tween(220),

@@ -79,6 +79,22 @@ the `CurioTheme` root via `LocalIndication`, replacing Material's ripple
 app-wide (bottom sheets included). Trade-off: a background-less label (a bare
 `TextButton`) now only tints its glyphs instead of getting a circle.
 
+**Fifth commit (v3xx48):** the user pushed the local commits and asked for:
+reveal faster + tappable mid-transition; the glass header reaching the status
+bar (Home + Profile, glitchy on Profile) and its extended area actually
+collapsing ("it stays in its initial size where the stats was") — also without
+liquid glass; the Cupboard's 3x/0.5x size variety back; the category-switch
+animation back; and the text-history list-view CURRENT pill fixed.
+Shipped: (1) `CurioGlassToolbarMorph` clip moved OUTSIDE the size-reporting
+`.layout {}` so the glass is trimmed to the animated height instead of
+painting the full hero; (2) screen reveal 440→300ms, settle 20ms, and the
+frozen frame no longer consumes pointer events; (3) `buildCupboardShelves`
+cycles four shelf heights (0.50/0.28/0.34/0.21 × wall width) and a filter
+switch fades the wall (`wallSwap` Animatable) since packed shelves can't slide
+covers to new slots; (4) `HistoryCurrentPill` wears the theme accent with a
+rim and never wraps, and the list row's time is flexible so the pill can't be
+clipped.
+
 **Still pending (user's wish-list):** the rest of the animations pass — motion
 specific to navigation and bottom sheets beyond the page transitions already
 refined, further glass-header morph polish (it collapses correctly now; more

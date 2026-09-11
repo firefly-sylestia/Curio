@@ -429,6 +429,16 @@ fun CurioGlassToolbarMorph(
             // overflow so the bar visibly shrinks with the scroll. The
             // status-bar strip lives INSIDE the measured height (the rows pad
             // themselves), so the glass fills it (v3xx43).
+            // v3xx48 — CLIP FIRST, then report the animated height. The clip
+            // has to wrap the size-reporting layout node: placed inside it,
+            // the clip measured against the CONTENT's natural height and did
+            // nothing, so the glass kept painting its full hero height while
+            // only the reported height shrank — the reported "the glass
+            // extended area stays in its initial size where the stats were".
+            // Outside it, the clip is exactly the animated height (from y=0,
+            // so the status-bar strip stays covered), which is what trims the
+            // full content out of view as the bar collapses.
+            .clipToBounds()
             .layout { measurable, constraints ->
                 val full = measurable.measure(constraints)
                 val targetH = androidx.compose.ui.util.lerp(
@@ -438,7 +448,6 @@ fun CurioGlassToolbarMorph(
                 ).toInt().coerceAtLeast(1)
                 layout(full.width, targetH) { full.place(0, 0) }
             }
-            .clipToBounds()
             .then(glassMod)
     ) {
         // ── FULL state — fades out + rises as the bar collapses. More
