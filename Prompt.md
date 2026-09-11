@@ -352,6 +352,36 @@ collapsible field groups, CURRENT pills, +/− word deltas and preview stats.
 
 **Status:** committed + pushed.
 
+## Request (2026-09-11, completed — CI break on v0/fix-settings-compose-import: SupabaseClient parseSession)
+
+User pointed at the branch and pasted the CI log:
+`SupabaseClient.kt:48:36 Inapplicable candidate(s): fun parseSession(body: String)`
+on both compile tasks.
+
+**Cause:** `refreshSession` called `execute(request).let(::parseSession)`, but
+`execute` is a `Unit` helper — `::parseSession` takes a `String`, so the
+reference could never apply. `refreshSession` therefore never parsed the token
+response (it would also have returned a Session built from a Unit).
+
+**Fix (1 line):** call `executeBody(request).let(::parseSession)` — the same
+body-returning helper `authRequest` already uses, so the refresh token flow
+parses the access/refresh/user fields it needs.
+
+**Also (same branch, same root cause as the earlier rail fix):** the branch's
+`eb740255`/`85a3b1c2` read the rail's `matchParentSize` failure as "API
+unavailable" and swapped it for `fillMaxSize()`. `matchParentSize` is a
+`BoxScope` extension, so the real problem was the lambda having no receiver.
+Restored `.matchParentSize()` and declared `chipContent` as
+`@Composable BoxScope.(Boolean) -> Unit` — identical to the fix already on
+`main`. This matters because `fillMaxSize()` in a bounded host stretches the
+82dp chip: `WidgetEditorScreen` (and other drill-in pages) host the rail in a
+plain `Column(fillMaxSize())`, so a chip would fill the whole remaining page
+height; `matchParentSize` sizes the content to the chip's own Box instead.
+This leaves `SettingsHubScreen.kt` byte-identical to `main`, so the merge
+takes it cleanly.
+
+**Status:** committed + pushed.
+
 ## Request (2026-09-11, completed — CI compile break: `matchParentSize` in the rail chip)
 
 User pasted the CI failure: `SettingsHubScreen.kt:2706:30 Unresolved reference
@@ -368,7 +398,159 @@ shared-element `Box { chipContent(true) }` and the fallback `chipContent(selecte
 in the outer `Box` content) already have a `BoxScope` receiver in scope, so the
 receiver resolves at both and the chip keeps filling its parent Box.
 
-**Status:** committed + pushed.
+**Status:** committed + pushed (main).
+
+## Request (2026-09-11, completed — Supabase plan audit: what is actually built, and making the new secrets count)
+
+User asked how far the 6-item Supabase plan has been implemented, noted the
+repository secrets for `SUPABASE_URL` + the publishable key were just added,
+asked for item 1 to be re-verified, and listed the plan: (1) Supabase client
+support via the version-catalog path, (2) auth/session data layer + Online
+Mode UI, (3) Room capture sync, (4) 24-hour text share cards + Community
+interactions, (5) schema/RLS security, (6) verification.
+
+**Verified against the branch (nothing guessed):**
+
+1. **PARTIAL.** `data/SupabaseClient.kt` + `data/SupabaseSessionStore.kt`
+exist and compile (CI error fixed this branch). Gradle wiring is sound —
+`libs.com.squareup.okhttp3.okhttp` is a real catalog alias (okhttp 5.3.2,
+gradle/libs.versions.toml:110) and only the URL + publishable/anon key are
+read (`build.gradle.kts:79-90,131-132`); the service-role key is never
+referenced, so nothing privileged can ship in the APK. Deviations from the
+plan: it is a hand-rolled OkHttp/JSONObject client, NOT the Supabase Kotlin
+client, no catalog alias was added for it, and the files sit in
+`com.curio.app.data` rather than a `data/supabase` package.
+2. **NOT STARTED.** `AppPreferences.isOnlineModeEnabled/setOnlineModeEnabled`
+exist but are called from NOWHERE (no settings row, no profile surface, no
+auth screen, no nav route — `CurioRoutes` has no auth entry).
+3. **NOT STARTED.** No sync/upload code references Room captures.
+4. **NOT STARTED.** No Community feed, no share-card upload, no expiry logic.
+5. **NOT VERIFIABLE FROM HERE.** No SQL/migrations in the repo, and no local
+Supabase access, so profiles/captures/share-cards/reactions tables and RLS
+cannot be inspected; the SQL still needs to be run/pasted.
+6. **CI could not verify anything** — see the finding below.
+
+**Finding (the real blocker):** both workflows exported `KEYSTORE_*`,
+Google Books, LibraryThing and Spotify to Gradle but **never**
+`SUPABASE_URL`/`SUPABASE_PUBLISHABLE_KEY`, so the secrets the user added
+reached nothing and every CI/release APK baked an empty
+`BuildConfig.SUPABASE_URL` (`SupabaseClient.isConfigured` = false — Online
+Mode could only ever report unconfigured). Also, PR #110 sat
+`CONFLICTING` against `main`, and a conflicting PR gets no `pull_request`
+run — 0 workflow runs exist for the pushed commit.
+
+**Shipped:** `android.yml` + `release.yml` now export `SUPABASE_URL` and
+both key names (`SUPABASE_PUBLISHABLE_KEY`, falling back to
+`SUPABASE_ANON_KEY`) with a non-secret warning when absent; the contract is
+recorded in `.github/AGENTS.md` (service-role key stays out of every build).
+`origin/main` was merged into this branch and the `Prompt.md` conflict
+resolved by keeping both entries, which clears the PR conflict so CI can run.
+
+**Status:** committed + pushed. Follow-up work (auth UI, sync, community) is
+tracked in the entry below; the branch is NOT merged to `main` (user
+directive).
+
+## Request (2026-09-11, completed — plan item 2: the auth/session layer + Online Mode UI)
+
+User: "don't merge it to main yet, continue."
+
+**Shipped (branch `v0/fix-settings-compose-import` only):**
+
+1. **`data/supabase/` package** (the plan's stated location): `SupabaseClient`
+   + `SupabaseSessionStore` moved there via `git mv` (package line updated,
+   no external references existed).
+2. **`data/supabase/OnlineAccount.kt` — the auth/session layer:**
+   observable `state` (session / busy / error / notice) that the UI reads,
+   plus `restore`, `signIn`, `signUp`, `signOut` and `setOnlineMode`.
+   Sign-in stores the session and turns Online Mode on; sign-out always
+   clears locally and turns Online Mode off; a sign-up that needs email
+   confirmation reports a notice instead of pretending to sign in.
+   `onlineAuthMessage` keeps rate-limit / unconfirmed-email / bad-credential
+   failures actionable and collapses everything else to one generic line, so
+   a raw response body can never reach the UI.
+3. **`features/settings/OnlineModeScreen.kt`** (route
+   `CurioRoutes.SETTINGS_ONLINE`): the account form (frosted email + password
+   fields matching the family's search-field surface, reveal toggle,
+   rose `Sign in` pill + `Create account`), the signed-in account row +
+   `Sign out`, and the **Online mode** switch that states the text-only
+   contract (photos/audio/screenshots never leave the device) and is only
+   live while signed in. Built from the shared settings components
+   (`SettingsHeroHeader` + pinned phone hero, `SettingsNavRail`,
+   `SettingsOptionCard`/`Row`/`InfoRow`/`SwitchRow`, Playfair section
+   headings), so it reads as part of the settings family.
+4. **Wiring:** route constant, `CurioNavHost` composable inside
+   `SettingsSharedScope`, hub design card (*Your data & privacy*), settings
+   rail chip ("Online"), hub search row + deep-index row.
+
+**Docs:** `app/AGENTS.md` gained the *Online layer (Supabase)* contract and
+the child index entry; new `data/supabase/AGENTS.md` child doc (public
+credentials only, no media upload, offline-first, UI-safe errors); the
+current store changelog gained the user-visible ADD line.
+
+**Static verification (this workspace has no Android SDK, so no Gradle):**
+`git diff --check` clean, delimiter balance + an unused-import sweep over the
+new files, and a symbol audit that caught two real breaks — `CurioIcon`
+needed its own import (only `CurioIcons` was imported) and the rail chip's
+`BoxScope` receiver. CI on the branch is the authoritative compile check.
+
+**Status:** committed + pushed (branch only, no merge to `main`).
+
+## Request (2026-09-11, in progress — plan items 4+5: the schema, the 24-hour cards and the Community feed)
+
+User: "Build the 24-hour text share cards and the Community feed on top of the
+new schema."
+
+**Order of work:** the schema had to exist first (it did not — nothing SQL was
+in the repo), so the backend script went in with the feature.
+
+**Shipped:**
+
+1. **`supabase/schema.sql`** (new, with its own child AGENTS.md): idempotent
+   script for `profiles`, `cloud_captures`, `community_cards`,
+   `community_reactions`, `community_reports` + RLS policies + indexes + the
+   `curio_purge_expired_cards()` sweep + a PASS/FAIL self-check block. Key
+   choices: RLS is the boundary (policies for `authenticated` only, zero
+   `anon` policies, no service-role key anywhere); identity columns default
+   to `auth.uid()` so the client never sends one; community reads AND writes
+   require Online Mode on for both the reader and the card's author; the
+   insert policy refuses a lifetime over 25 hours; `expires_at` defaults to
+   now() + 24 hours and every read filters `expires_at > now()`.
+2. **`data/supabase/CommunityApi.kt`**: the feed (live cards newest-first,
+   likes embedded through PostgREST so one request carries counts + whether
+   you liked it), post, like (idempotent), unlike, report (one per card per
+   user) and author delete, with `draftProblem()` + `communityMessage()`
+   keeping every failure safe to render. `CommunityCardDraft` has no field
+   for an image, audio or screenshot — text-only is structural, not a rule
+   the UI has to remember.
+3. **`features/community/CommunityScreen.kt`** (route `CurioRoutes.COMMUNITY`,
+   reached from the Online mode page's *Community* row): the 24-hour wall,
+   each card rendered by the real `TopicShareCard` scaled into the feed
+   width, with like / report / take-down, an hours-left label, and the
+   composer sheet (topic + words + lane + style, caps + validation).
+   Eligibility gates first: not configured, not signed in, or Online Mode
+   off → a locked card that opens Settings → Online mode.
+4. **`SupabaseClient.updateOnlineMode` is now an UPSERT** (`on_conflict=id`,
+   merge-duplicates). It was a PATCH, and a brand-new account has no
+   `profiles` row — so the switch looked on in the app while the server still
+   refused every community call. `requestBuilder`/`executeBody` became
+   `internal` so the community layer shares the one HTTP client.
+
+**Docs:** `supabase/AGENTS.md` (new) + root AGENTS.md child index;
+`app/AGENTS.md` online-layer section extended with the community contract;
+store changelog ADD line.
+
+**Verified statically** (no Android SDK here): delimiter balance + unused-import
+sweep on all new files, `git diff --check`, and signature checks for every
+shared component used (`SettingsOption*`, `TopicShareCard`, `ShareCardStyle`,
+`ShareCardAspect`, `CurioCategories.byId`). CI on the branch is the compile
+check.
+
+**Still open:** the reveal-page share sheet does not yet offer "post to
+community" (the API is ready for it — that is the next slice), and the SQL
+must be pasted into the Supabase dashboard by the user (no project access
+here).
+
+**Status:** committing + pushing (branch only, no merge to `main`).
 
 ## Archive
 

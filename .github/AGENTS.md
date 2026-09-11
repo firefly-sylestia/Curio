@@ -142,6 +142,12 @@ The release workflow requires the signing secrets; the Android CI workflow consu
 - `KEY_ALIAS` — Signing key alias
 - `KEY_PASSWORD` — Signing key password
 
+Optional build-config secrets are exported to the Gradle build and baked into `BuildConfig`; when unset, the feature they configure degrades quietly instead of failing the build:
+
+- `SUPABASE_URL` + `SUPABASE_PUBLISHABLE_KEY` (or `SUPABASE_ANON_KEY`) — Supabase project URL and public client key for account sign-in and Online Mode. **Both** `android.yml` and `release.yml` export it, and `app/build.gradle.kts` reads `SUPABASE_PUBLISHABLE_KEY` before falling back to `SUPABASE_ANON_KEY`, so the repo works whichever name is configured; `android.yml` logs a warning when neither is present so an unconfigured APK is visible in the log. The **service-role key must never be added as a secret or exported to a build** — it would ship inside the APK.
+- `GOOGLE_BOOKS_API_KEY`, `LIBRARY_THING_API_KEY` — keyed cover providers (unset keeps the keyless paths).
+- `SPOTIFY_CLIENT_ID` + `SPOTIFY_CLIENT_SECRET` — Spotify client-credentials flow for music topics (unset keeps the search links).
+
 ## Work Guidance
 
 - Keep workflow names, artifact names, and user-facing copy Curio-specific.
