@@ -112,6 +112,7 @@ create table if not exists public.community_cards (
     category_glyph text not null default '',
     accent_hex     text not null default '#8E8E93',
     fact_text      text not null,
+    caption        text not null default '',   -- the poster's own line above the card
     style          text not null default 'PAPER',
     aspect         text not null default 'CLASSIC',
     body_scale     real not null default 1.0,
@@ -124,6 +125,19 @@ create table if not exists public.community_cards (
         ('PAPER','VINYL','COLLAGE','NEUMORPHIC','EDITORIAL','MINIMAL','SIGNATURE')),
     constraint community_cards_aspect check (aspect in ('PORTRAIT','CLASSIC'))
 );
+
+-- EVOLUTION: `create table if not exists` above does nothing to a table that
+-- already exists, so every column added later lands here too — re-pasting the
+-- file upgrades an older install instead of silently skipping the column.
+alter table public.community_cards add column if not exists caption text not null default '';
+
+do $$
+begin
+    if not exists (select 1 from pg_constraint where conname = 'community_cards_caption_len') then
+        alter table public.community_cards
+            add constraint community_cards_caption_len check (char_length(caption) <= 180);
+    end if;
+end $$;
 
 -- Reads are always "live cards, newest first" — the partial index keeps that
 -- cheap and keeps expired rows out of the hot path until the sweep runs.
@@ -232,6 +246,67 @@ create policy reac_delete_own on public.community_reactions
     using (user_id = auth.uid());
 
 -- ───────────────────────────────────────────────────────────────────────────
+-- 4b. community_comments — the replies under a card
+--     Comments die with the card (cascade), so they can never outlive the
+--     24-hour promise. Text only, exactly like the cards themselves.
+-- ───────────────────────────────────────────────────────────────────────────
+create table if not exists public.community_comments (
+    id            uuid primary key default gen_random_uuid(),
+    card_id       uuid not null references public.community_cards (id) on delete cascade,
+    author        uuid not null default auth.uid() references auth.users (id) on delete cascade,
+    author_handle text not null default 'A curious soul',
+    body          text not null,
+    created_at    timestamptz not null default now(),
+    constraint community_comments_body_len check (char_length(body) between 1 and 400)
+);
+
+create index if not exists community_comments_card_idx
+    on public.community_comments (card_id, created_at);
+
+alter table public.community_comments enable row level security;
+
+-- Readable only while the card is live AND both sides have Online Mode on.
+drop policy if exists cmt_select_visible on public.community_comments;
+create policy cmt_select_visible on public.community_comments
+    for select to authenticated
+    using (
+        exists (
+            select 1 from public.community_cards c
+            where c.id = community_comments.card_id
+              and c.expires_at > now()
+              and exists (
+                  select 1 from public.profiles p
+                  where p.id = c.owner and p.online_mode_enabled
+              )
+        )
+        and exists (
+            select 1 from public.profiles me
+            where me.id = auth.uid() and me.online_mode_enabled
+        )
+    );
+
+drop policy if exists cmt_insert_own on public.community_comments;
+create policy cmt_insert_own on public.community_comments
+    for insert to authenticated
+    with check (
+        author = auth.uid()
+        and exists (
+            select 1 from public.profiles me
+            where me.id = auth.uid() and me.online_mode_enabled
+        )
+        and exists (
+            select 1 from public.community_cards c
+            where c.id = community_comments.card_id and c.expires_at > now()
+        )
+    );
+
+-- Only the comment's own author may remove it.
+drop policy if exists cmt_delete_own on public.community_comments;
+create policy cmt_delete_own on public.community_comments
+    for delete to authenticated
+    using (author = auth.uid());
+
+-- ───────────────────────────────────────────────────────────────────────────
 -- 5. community_reports — moderation queue (write-only for users)
 -- ───────────────────────────────────────────────────────────────────────────
 create table if not exists public.community_reports (
@@ -303,12 +378,14 @@ grant select, insert, update, delete on public.profiles to authenticated;
 grant select, insert, update, delete on public.cloud_captures to authenticated;
 grant select, insert, delete on public.community_cards to authenticated;
 grant select, insert, delete on public.community_reactions to authenticated;
+grant select, insert, delete on public.community_comments to authenticated;
 grant select, insert on public.community_reports to authenticated;
 
 revoke all on public.profiles from anon;
 revoke all on public.cloud_captures from anon;
 revoke all on public.community_cards from anon;
 revoke all on public.community_reactions from anon;
+revoke all on public.community_comments from anon;
 revoke all on public.community_reports from anon;
 
 -- ───────────────────────────────────────────────────────────────────────────
@@ -326,7 +403,8 @@ begin
       join pg_namespace n on n.oid = c.relnamespace
      where n.nspname = 'public'
        and c.relname in ('profiles','cloud_captures','community_cards',
-                         'community_reactions','community_reports')
+                         'community_reactions','community_comments',
+                         'community_reports')
        and c.relrowsecurity = false;
     if rls_off is null then
         raise notice 'PASS  RLS enabled on every Curio table';
@@ -340,7 +418,8 @@ begin
      where schemaname = 'public'
        and roles::text like '%anon%'
        and tablename in ('profiles','cloud_captures','community_cards',
-                         'community_reactions','community_reports');
+                         'community_reactions','community_comments',
+                         'community_reports');
     if anon_open is null then
         raise notice 'PASS  no anon policies on Curio tables';
     else
@@ -350,7 +429,8 @@ begin
     select string_agg(t, ', ')
       into missing
       from unnest(array['profiles','cloud_captures','community_cards',
-                        'community_reactions','community_reports']) as t
+                        'community_reactions','community_comments',
+                        'community_reports']) as t
      where not exists (
         select 1 from pg_class c
           join pg_namespace n on n.oid = c.relnamespace

@@ -202,6 +202,8 @@ object CurioRoutes {
     const val SETTINGS_ONLINE = "settings/online"
     // v3xx — the 24-hour community wall of text share cards.
     const val COMMUNITY = "community"
+    // v3xx — one card's own view: the full card, its caption, replies + share.
+    const val COMMUNITY_CARD = "community/{cardId}"
     const val SETTINGS_BOOK_COVER = "settings/book-cover"
     // v3xx — the Book browser: every book as a scrollable line-by-line list
     // (covers, ratings, years) — moved out of the Book covers hub's strip.
@@ -240,6 +242,8 @@ object CurioRoutes {
     fun captureFor(categorySlug: String, topicName: String) =
         "capture/$categorySlug/${Uri.encode(topicName)}"
     fun entryDetail(entryId: String) = "detail/$entryId"
+    /** One community card's own view. */
+    fun communityCard(cardId: String) = "community/$cardId"
     /** Edit a saved GalleryWall (mood board) entry — preloads + re-saves in place. */
     fun editMoodBoard(entryId: String) = "edit-moodboard/$entryId"
     /**

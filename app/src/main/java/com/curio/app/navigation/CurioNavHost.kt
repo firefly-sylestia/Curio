@@ -106,6 +106,7 @@ import com.curio.app.features.settings.BackupToolsScreen
 import com.curio.app.features.settings.BookCoverHubScreen
 import com.curio.app.features.settings.ExperimentsScreen
 import com.curio.app.features.settings.UserExperimentsScreen
+import com.curio.app.features.community.CommunityCardScreen
 import com.curio.app.features.community.CommunityScreen
 import com.curio.app.features.settings.OnlineModeScreen
 import com.curio.app.features.settings.SettingsHubScreen
@@ -1007,6 +1008,17 @@ fun CurioNavHost(
             composable(CurioRoutes.COMMUNITY) {
                 SettingsSharedScope(sharedTransitionScope, this) {
                     CommunityScreen(navController = navController)
+                }
+            }
+            composable(
+                route = CurioRoutes.COMMUNITY_CARD,
+                arguments = listOf(navArgument("cardId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    CommunityCardScreen(
+                        navController = navController,
+                        cardId = backStackEntry.arguments?.getString("cardId").orEmpty()
+                    )
                 }
             }
             composable(CurioRoutes.SETTINGS_BOOK_COVER) {

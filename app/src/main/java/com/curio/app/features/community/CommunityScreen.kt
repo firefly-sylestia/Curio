@@ -1,6 +1,7 @@
 package com.curio.app.features.community
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,6 +24,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -116,6 +118,7 @@ fun CommunityScreen(navController: NavController) {
     var error by remember { mutableStateOf<String?>(null) }
     var composing by remember { mutableStateOf(false) }
     var reporting by remember { mutableStateOf<CommunityCard?>(null) }
+    var commentsFor by remember { mutableStateOf<CommunityCard?>(null) }
     var notice by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
@@ -298,6 +301,8 @@ fun CommunityScreen(navController: NavController) {
                 items(cards, key = { it.id }) { card ->
                     CommunityCardItem(
                         card = card,
+                        onOpen = { navController.navigate(CurioRoutes.communityCard(card.id)) },
+                        onComments = { commentsFor = card },
                         onLike = {
                             val active = token ?: return@CommunityCardItem
                             val userId = account.session?.userId
@@ -363,6 +368,18 @@ fun CommunityScreen(navController: NavController) {
         )
     }
 
+    commentsFor?.let { open ->
+        token?.let { active ->
+            CommunityCommentsSheet(
+                card = open,
+                accessToken = active,
+                myUserId = account.session?.userId,
+                onDismiss = { commentsFor = null },
+                onChanged = { scope.launch { load() } }
+            )
+        }
+    }
+
     reporting?.let { card ->
         ReportCardDialog(
             onDismiss = { reporting = null },
@@ -383,16 +400,17 @@ fun CommunityScreen(navController: NavController) {
 }
 
 /**
- * One card in the wall: the REAL share card, rebuilt from the stored
- * text/style data and scaled into the feed's width (the card's own geometry
- * is 405×720 / 450×600 dp, too tall for a list at 1×).
+ * A community card drawn at whatever width it is given.
+ *
+ * The REAL share card is rendered (never a simplified lookalike), scaled as a
+ * LAYER: its own geometry is 405×720 / 450×600 dp, so scaling keeps the
+ * internal layout and text wrapping identical to the exported image while the
+ * feed and the card view can show it at their own width.
  */
 @Composable
-private fun CommunityCardItem(
+internal fun CommunityCardCanvas(
     card: CommunityCard,
-    onLike: () -> Unit,
-    onReport: () -> Unit,
-    onDelete: () -> Unit
+    modifier: Modifier = Modifier
 ) {
     val style = runCatching { ShareCardStyle.valueOf(card.style) }
         .getOrDefault(ShareCardStyle.PAPER)
@@ -402,45 +420,67 @@ private fun CommunityCardItem(
     val cardHeight = aspect.heightDp.dp
     val accent = remember(card.accentHex) { parseAccent(card.accentHex) }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
-        BoxWithConstraints(
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+        val density = LocalDensity.current
+        val scale = with(density) {
+            (maxWidth.toPx() / cardWidth.toPx()).coerceAtMost(1f)
+        }
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clipToBounds()
+                .height(cardHeight * scale)
         ) {
-            val density = LocalDensity.current
-            val scale = with(density) {
-                (maxWidth.toPx() / cardWidth.toPx()).coerceAtMost(1f)
-            }
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(cardHeight * scale)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(cardWidth, cardHeight)
-                        .graphicsLayer(
-                            scaleX = scale,
-                            scaleY = scale,
-                            transformOrigin = TransformOrigin(0f, 0f)
-                        )
-                ) {
-                    TopicShareCard(
-                        topicName = card.topicName,
-                        categoryName = card.categoryName,
-                        categoryGlyph = card.categoryGlyph,
-                        accent = accent,
-                        factText = card.factText,
-                        sharerName = card.authorHandle,
-                        aspect = aspect,
-                        style = style,
-                        byline = card.byline,
-                        bodyScale = card.bodyScale
+                    .size(cardWidth, cardHeight)
+                    .graphicsLayer(
+                        scaleX = scale,
+                        scaleY = scale,
+                        transformOrigin = TransformOrigin(0f, 0f)
                     )
-                }
+            ) {
+                TopicShareCard(
+                    topicName = card.topicName,
+                    categoryName = card.categoryName,
+                    categoryGlyph = card.categoryGlyph,
+                    accent = accent,
+                    factText = card.factText,
+                    sharerName = card.authorHandle,
+                    aspect = aspect,
+                    style = style,
+                    byline = card.byline,
+                    bodyScale = card.bodyScale
+                )
             }
         }
+    }
+}
+
+/** One card in the wall: the caption, the card itself, then the actions. */
+@Composable
+private fun CommunityCardItem(
+    card: CommunityCard,
+    onOpen: () -> Unit,
+    onComments: () -> Unit,
+    onLike: () -> Unit,
+    onReport: () -> Unit,
+    onDelete: () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        if (card.caption.isNotBlank()) {
+            Text(
+                text = card.caption,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(bottom = 6.dp)
+            )
+        }
+        CommunityCardCanvas(
+            card = card,
+            modifier = Modifier
+                .clipToBounds()
+                .clickable(onClick = onOpen)
+        )
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -454,6 +494,12 @@ private fun CommunityCardItem(
                 label = if (card.likeCount > 0) card.likeCount.toString() else "Like",
                 tinted = card.likedByMe,
                 onClick = onLike
+            )
+            CommunityAction(
+                glyph = CurioIcons.FormatQuote,
+                label = if (card.commentCount > 0) card.commentCount.toString() else "Comment",
+                tinted = false,
+                onClick = onComments
             )
             CommunityAction(CurioIcons.Flag, "Report", false, onReport)
             if (card.mine) {
@@ -470,7 +516,7 @@ private fun CommunityCardItem(
 }
 
 @Composable
-private fun CommunityAction(
+internal fun CommunityAction(
     glyph: String,
     label: String,
     tinted: Boolean,
@@ -505,6 +551,7 @@ private fun CommunityComposerSheet(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var topic by remember { mutableStateOf("") }
+    var caption by remember { mutableStateOf("") }
     var fact by remember { mutableStateOf("") }
     var lane by remember { mutableStateOf(CurioCategories.byId(CategoryId.WILDCARD)) }
     var style by remember { mutableStateOf(ShareCardStyle.PAPER) }
@@ -525,14 +572,16 @@ private fun CommunityComposerSheet(
         categorySlug = lane.id.name.lowercase(),
         categoryGlyph = lane.iconGlyph,
         accentHex = hexOf(lane.accent),
-        factText = fact
+        factText = fact,
+        caption = caption
     )
     val problem = CommunityApi.draftProblem(draft)
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = curioDialogContainerColor()
+        containerColor = MaterialTheme.colorScheme.surface,
+        dragHandle = { BottomSheetDefaults.DragHandle() }
     ) {
         Column(
             modifier = Modifier
@@ -556,6 +605,16 @@ private fun CommunityComposerSheet(
                 onValueChange = { topic = it },
                 singleLine = true,
                 label = { Text("What is it about?") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                value = caption,
+                onValueChange = {
+                    if (it.length <= CommunityApi.MAX_CAPTION_CHARS) caption = it
+                },
+                singleLine = true,
+                label = { Text("Your line above the card (optional)") },
+                supportingText = { Text("${caption.length}/${CommunityApi.MAX_CAPTION_CHARS}") },
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
@@ -632,9 +691,9 @@ private fun CommunityComposerSheet(
     }
 }
 
-/** The report reasons the sheet offers — one tap, no free text. */
+/** The report reasons the dialog offers — one tap, no free text. */
 @Composable
-private fun ReportCardDialog(
+internal fun ReportCardDialog(
     onDismiss: () -> Unit,
     onReport: (String) -> Unit
 ) {
@@ -665,6 +724,6 @@ private fun ReportCardDialog(
 /** `#RRGGBB` from a Color, and back again (the card stores the hex). */
 private fun hexOf(color: Color): String = "#%06X".format(0xFFFFFF and color.toArgb())
 
-private fun parseAccent(hex: String): Color =
+internal fun parseAccent(hex: String): Color =
     runCatching { Color(0xFF000000 or hex.removePrefix("#").toLong(16)) }
         .getOrDefault(Color(0xFF8E8E93))

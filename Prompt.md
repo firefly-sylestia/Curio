@@ -552,6 +552,48 @@ here).
 
 **Status:** committing + pushing (branch only, no merge to `main`).
 
+## Request (2026-09-11, in progress — community hub refinement: captions, sharing, the card view and replies)
+
+User: "dont push it yet properly refine things, and did u redraw things i asked,
+also proper buttom sheet comments style etc and what features does the
+community hub have where to acess and is it always on". Their earlier answers:
+the built-in collection cards to redraw are Favorites / Curiying now /
+Want to Read / Saved entries / Completed (NOT Notes, Personal or the custom
+balloon art), the starter shelves keep their destructive delete, the member
+lists keep their current cards — and the Community hub is the priority.
+
+**Shipped this turn (locally committed, NOT pushed — user asked to hold):**
+
+1. **Captions.** `community_cards.caption` (≤180 chars, DB check constraint),
+   posted from the composer's new "Your line above the card" field, shown
+   above the card in the wall and in the card's own view.
+2. **Replies in a proper bottom sheet.** New `CommunityCommentsSheet` — one
+   sheet used by BOTH the wall and the card view: drag handle, swipe-down or
+   back to close (no close cross, per the app's sheet rule), composer riding
+   above the keyboard, the reply list capped with `heightIn` (a weighted
+   scrollable inside a sheet's wrap-content column is measured with an
+   infinite max height and crashes). `community_comments` table + RLS: a
+   reply is visible only while its card is live and both sides have Online
+   Mode on, only its author may delete it, and it cascades with the card so
+   nothing outlives the 24 hours. Schema additions are idempotent
+   (`alter table … add column if not exists` + a guarded constraint block),
+   so re-pasting the file upgrades an existing install.
+3. **The card's own view** (`CommunityCardScreen`, route
+   `community/{cardId}`, opened by tapping a card): the full card at the
+   feed's width, the poster and remaining life, and the actions — like,
+   comment, **share as the same PNG the reveal page produces**
+   (`shareComposableCard` + the FileProvider authority), report, and take
+   down your own.
+4. **Feed polish:** captions render above each card, the comment action
+   shows the live reply count and opens the sheet in place, and the whole
+   card is tappable into its view.
+
+**Still not done (queued):** the built-in collection-card redraw the user
+listed, and the friend-request / DM work that follows it.
+
+**Status:** committed locally on `v0/fix-settings-compose-import`, deliberately
+NOT pushed (user asked to hold the push while refining).
+
 ## Archive
 
 Older completed request logs (2026-09-08 → 2026-09-10) were trimmed from this

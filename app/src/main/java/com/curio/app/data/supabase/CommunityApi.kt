@@ -23,6 +23,8 @@ data class CommunityCard(
     val categoryGlyph: String,
     val accentHex: String,
     val factText: String,
+    /** The poster's own line above the card (blank when they wrote none). */
+    val caption: String,
     val style: String,
     val aspect: String,
     val bodyScale: Float,
@@ -31,6 +33,8 @@ data class CommunityCard(
     val expiresAtMillis: Long,
     val likeCount: Int,
     val likedByMe: Boolean,
+    /** How many replies hang under the card. */
+    val commentCount: Int,
     /** True when this device's account posted the card. */
     val mine: Boolean
 ) {
@@ -56,10 +60,21 @@ data class CommunityCardDraft(
     val categoryGlyph: String,
     val accentHex: String,
     val factText: String,
+    /** The poster's own line above the card — optional, never media. */
+    val caption: String = "",
     val style: String = "PAPER",
     val aspect: String = "CLASSIC",
     val bodyScale: Float = 1f,
     val byline: String = ""
+)
+
+/** One reply under a card. Text only, and it dies with the card. */
+data class CommunityComment(
+    val id: String,
+    val authorHandle: String,
+    val body: String,
+    val createdAtMillis: Long,
+    val mine: Boolean
 )
 
 /** A community failure whose [message] is already safe to show the user. */
@@ -78,11 +93,28 @@ object CommunityApi {
 
     private const val CARDS = "/rest/v1/community_cards"
     private const val REACTIONS = "/rest/v1/community_reactions"
+    private const val COMMENTS = "/rest/v1/community_comments"
     private const val REPORTS = "/rest/v1/community_reports"
+
+    /**
+     * The columns one card needs, including the two embedded children the
+     * parser counts (likes and replies). Kept in one place so the feed and the
+     * single-card fetch can never drift apart.
+     */
+    private const val CARD_COLUMNS =
+        "id,owner,author_handle,topic_name,category_name,category_glyph,accent_hex," +
+            "fact_text,caption,style,aspect,body_scale,byline,created_at,expires_at," +
+            "community_reactions(user_id),community_comments(id)"
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
 
     /** The server's own ceiling for a card's text (also a DB check constraint). */
     const val MAX_FACT_CHARS = 600
+
+    /** Ceiling for the poster's caption (mirrors the DB check constraint). */
+    const val MAX_CAPTION_CHARS = 180
+
+    /** Ceiling for one reply (mirrors the DB check constraint). */
+    const val MAX_COMMENT_CHARS = 400
 
     /** How many live cards one feed load asks for. */
     private const val FEED_LIMIT = 40
@@ -96,7 +128,9 @@ object CommunityApi {
         draft.topicName.isBlank() -> "What is your card about?"
         draft.factText.isBlank() -> "Add the words you want on the card."
         draft.factText.length > MAX_FACT_CHARS ->
-            "Keep it under $MAX_FACT_CHARS characters (it's ${draft.factText.length})."
+            "Keep the card under $MAX_FACT_CHARS characters (it's ${draft.factText.length})."
+        draft.caption.length > MAX_CAPTION_CHARS ->
+            "Keep your caption under $MAX_CAPTION_CHARS characters (it's ${draft.caption.length})."
         else -> null
     }
 
@@ -104,17 +138,95 @@ object CommunityApi {
     suspend fun feed(accessToken: String, myUserId: String?): Result<List<CommunityCard>> =
         withContext(Dispatchers.IO) {
             mapped {
-                val select = listOf(
-                    "id", "owner", "author_handle", "topic_name", "category_name",
-                    "category_glyph", "accent_hex", "fact_text", "style", "aspect",
-                    "body_scale", "byline", "created_at", "expires_at",
-                    "community_reactions(user_id)"
-                ).joinToString(",")
-                val path = "$CARDS?select=$select" +
+                val path = "$CARDS?select=$CARD_COLUMNS" +
                     "&expires_at=gt.${Instant.now()}" +
                     "&order=created_at.desc&limit=$FEED_LIMIT"
                 val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
                 parseCards(SupabaseClient.executeBody(request), myUserId)
+            }
+        }
+
+    /**
+     * One card by id — what the card's own view opens with. A card that has
+     * expired (or an RLS refusal) answers with an empty list, so the caller
+     * gets the same "it's gone" message either way instead of a raw 404.
+     */
+    suspend fun card(accessToken: String, cardId: String, myUserId: String?): Result<CommunityCard> =
+        withContext(Dispatchers.IO) {
+            mapped {
+                val path = "$CARDS?select=$CARD_COLUMNS&id=eq.$cardId&limit=1"
+                val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
+                parseCards(SupabaseClient.executeBody(request), myUserId).firstOrNull()
+                    ?: throw IllegalStateException("That card has expired — cards only last 24 hours.")
+            }
+        }
+
+    // ── replies ──────────────────────────────────────────────────────────
+
+    /** The replies under a card, oldest first (a conversation reads downwards). */
+    suspend fun comments(
+        accessToken: String,
+        cardId: String,
+        myUserId: String?
+    ): Result<List<CommunityComment>> = withContext(Dispatchers.IO) {
+        mapped {
+            val path = "$COMMENTS?select=id,author,author_handle,body,created_at" +
+                "&card_id=eq.$cardId&order=created_at.asc&limit=200"
+            val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
+            val array = JSONArray(SupabaseClient.executeBody(request))
+            buildList(array.length()) {
+                for (index in 0 until array.length()) {
+                    val row = array.optJSONObject(index) ?: continue
+                    add(
+                        CommunityComment(
+                            id = row.optString("id"),
+                            authorHandle = row.optString("author_handle")
+                                .ifBlank { "A curious soul" },
+                            body = row.optString("body"),
+                            createdAtMillis = epochMillis(row.optString("created_at")),
+                            mine = myUserId != null && row.optString("author") == myUserId
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    suspend fun comment(
+        accessToken: String,
+        cardId: String,
+        body: String,
+        handle: String
+    ): Result<Unit> = withContext(Dispatchers.IO) {
+        mappedUnit {
+            val text = body.trim()
+            if (text.isEmpty()) throw IllegalArgumentException("Write something first.")
+            if (text.length > MAX_COMMENT_CHARS) {
+                throw IllegalArgumentException(
+                    "Keep it under $MAX_COMMENT_CHARS characters (it's ${text.length})."
+                )
+            }
+            val payload = JSONObject()
+                .put("card_id", cardId)
+                .put("body", text)
+                .put("author_handle", handle.trim().ifBlank { "A curious soul" })
+            val request = SupabaseClient.requestBuilder(COMMENTS, accessToken)
+                .header("Prefer", "return=minimal")
+                .post(payload.toString().toRequestBody(jsonMediaType))
+                .build()
+            SupabaseClient.executeBody(request)
+        }
+    }
+
+    /** Only a comment's own author may remove it. */
+    suspend fun deleteComment(accessToken: String, commentId: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            mappedUnit {
+                val request = SupabaseClient
+                    .requestBuilder("$COMMENTS?id=eq.$commentId", accessToken)
+                    .delete()
+                    .build()
+                SupabaseClient.executeBody(request)
             }
         }
 
@@ -134,6 +246,7 @@ object CommunityApi {
                 .put("category_glyph", draft.categoryGlyph)
                 .put("accent_hex", draft.accentHex)
                 .put("fact_text", draft.factText.trim())
+                .put("caption", draft.caption.trim())
                 .put("style", draft.style)
                 .put("aspect", draft.aspect)
                 .put("body_scale", draft.bodyScale.toDouble())
@@ -235,6 +348,7 @@ object CommunityApi {
                 categoryGlyph = row.optString("category_glyph"),
                 accentHex = row.optString("accent_hex"),
                 factText = row.optString("fact_text"),
+                caption = row.optString("caption"),
                 style = row.optString("style").ifBlank { "PAPER" },
                 aspect = row.optString("aspect").ifBlank { "CLASSIC" },
                 bodyScale = row.optDouble("body_scale", 1.0).toFloat(),
@@ -243,6 +357,7 @@ object CommunityApi {
                 expiresAtMillis = epochMillis(row.optString("expires_at")),
                 likeCount = likes,
                 likedByMe = likedByMe,
+                commentCount = row.optJSONArray("community_comments")?.length() ?: 0,
                 mine = myUserId != null && owner == myUserId
             )
         }
