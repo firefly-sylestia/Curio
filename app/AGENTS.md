@@ -7284,6 +7284,22 @@ app/src/main/java/com/curio/app/
   per save — the GC pauses froze the app. Now only new/changed rows
   decode; the map is only touched from the flow's single collection
   dispatcher.
+- **v3xx47 — the app-wide TOUCH feedback is a pressed LOOK, not a ripple
+  (`ui/theme/CurioPressIndication.kt`, NEW; wired in `CurioTheme`).** The user
+  meant the TOUCH highlight, not the selected state: "remove weird selection
+  highlights … the touch highlight, for all around the app … maybe with
+  animation or a pressed look" — Material's expanding ripple reads as a
+  foreign blob on this app's rounded cards, pills and rows. `CurioPressIndication`
+  is an `IndicationNodeFactory` whose node paints the element into an offscreen
+  layer and tints it with `BlendMode.SrcAtop` (press in 90ms, out 260ms,
+  `onSurface` at 0.14 alpha), so the wash lands ONLY on pixels the element
+  already drew and therefore follows its own shape — no ripple geometry to size
+  against, nothing bleeding past a card's corners. Provided once at the theme
+  root via `LocalIndication`, so every `clickable` / `selectable` / Material
+  surface / indication-reading control wears it, bottom sheets included.
+  KNOWN TRADE-OFF: an element that paints NO background (a bare `TextButton`
+  label) only tints its glyphs — Material's ripple used to add a circle there.
+  At rest the node draws straight through (no layer, no cost).
 - **v3xx46 — the shared PRESS FEEDBACK + haptics primitive
   (`ui/components/CurioPressFeedback.kt`, NEW; user 2026-09-11: "Press
   feedback … and more haptics all over the over").** `Modifier

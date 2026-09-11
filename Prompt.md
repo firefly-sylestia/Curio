@@ -67,6 +67,18 @@ a chip (0.96) and a full-width card (0.985) both read as a press. Applied to
 `SettingsOptionRow` (every settings-family row), the hub's tone + secondary
 cards, the quick-tool chips, and Home's saved / pinned rows.
 
+**Fourth commit (v3xx47, NOT pushed — user said "dont push this"):** the user
+clarified that by "selection highlight" they meant the **TOUCH highlight**, not
+the selected state ("for all around the app not the pressed or selected but the
+touch … maybe with animation or a pressed look"). New
+`ui/theme/CurioPressIndication.kt` — an `IndicationNodeFactory` that paints the
+touched element into an offscreen layer and tints it with `BlendMode.SrcAtop`
+(in 90ms, out 260ms, `onSurface` @ 0.14), so the press wash only lands on the
+pixels the element already drew and follows its own rounded shape. Provided at
+the `CurioTheme` root via `LocalIndication`, replacing Material's ripple
+app-wide (bottom sheets included). Trade-off: a background-less label (a bare
+`TextButton`) now only tints its glyphs instead of getting a circle.
+
 **Still pending (user's wish-list):** the rest of the animations pass — motion
 specific to navigation and bottom sheets beyond the page transitions already
 refined, further glass-header morph polish (it collapses correctly now; more

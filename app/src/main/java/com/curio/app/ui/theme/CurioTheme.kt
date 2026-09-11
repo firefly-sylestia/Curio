@@ -3,6 +3,7 @@ package com.curio.app.ui.theme
 import android.app.Activity
 import android.content.Context
 import android.content.res.Configuration
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonColors
@@ -12,7 +13,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import android.graphics.Color as AndroidColor
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
@@ -203,12 +206,24 @@ fun CurioTheme(
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography  = CurioTypography,
-        shapes      = CurioShapes,
-        content     = content
-    )
+    // v3xx47 — ONE touch feedback for the whole app: the pressed-look
+    // indication (see [CurioPressIndication]) replaces Material's expanding
+    // ripple everywhere, so cards, rows, chips, pills and every control inside
+    // the bottom sheets respond to a touch the same animated way. Tint keys off
+    // the scheme's onSurface, so the wash darkens light surfaces and lightens
+    // dark ones.
+    val pressIndication = remember(colorScheme.onSurface) {
+        CurioPressIndication(colorScheme.onSurface)
+    }
+
+    CompositionLocalProvider(LocalIndication provides pressIndication) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography  = CurioTypography,
+            shapes      = CurioShapes,
+            content     = content
+        )
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
