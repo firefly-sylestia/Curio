@@ -45,7 +45,7 @@ object SupabaseClient {
             val request = requestBuilder("/auth/v1/token?grant_type=refresh_token")
                 .post(body.toString().toRequestBody(jsonMediaType))
                 .build()
-            execute(request).let(::parseSession)
+            executeBody(request).let(::parseSession)
         }
     }
 

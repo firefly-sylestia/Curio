@@ -352,6 +352,36 @@ collapsible field groups, CURRENT pills, +/− word deltas and preview stats.
 
 **Status:** committed + pushed.
 
+## Request (2026-09-11, completed — CI break on v0/fix-settings-compose-import: SupabaseClient parseSession)
+
+User pointed at the branch and pasted the CI log:
+`SupabaseClient.kt:48:36 Inapplicable candidate(s): fun parseSession(body: String)`
+on both compile tasks.
+
+**Cause:** `refreshSession` called `execute(request).let(::parseSession)`, but
+`execute` is a `Unit` helper — `::parseSession` takes a `String`, so the
+reference could never apply. `refreshSession` therefore never parsed the token
+response (it would also have returned a Session built from a Unit).
+
+**Fix (1 line):** call `executeBody(request).let(::parseSession)` — the same
+body-returning helper `authRequest` already uses, so the refresh token flow
+parses the access/refresh/user fields it needs.
+
+**Also (same branch, same root cause as the earlier rail fix):** the branch's
+`eb740255`/`85a3b1c2` read the rail's `matchParentSize` failure as "API
+unavailable" and swapped it for `fillMaxSize()`. `matchParentSize` is a
+`BoxScope` extension, so the real problem was the lambda having no receiver.
+Restored `.matchParentSize()` and declared `chipContent` as
+`@Composable BoxScope.(Boolean) -> Unit` — identical to the fix already on
+`main`. This matters because `fillMaxSize()` in a bounded host stretches the
+82dp chip: `WidgetEditorScreen` (and other drill-in pages) host the rail in a
+plain `Column(fillMaxSize())`, so a chip would fill the whole remaining page
+height; `matchParentSize` sizes the content to the chip's own Box instead.
+This leaves `SettingsHubScreen.kt` byte-identical to `main`, so the merge
+takes it cleanly.
+
+**Status:** committed + pushed.
+
 ## Archive
 
 Older completed request logs (2026-09-08 → 2026-09-10) were trimmed from this
