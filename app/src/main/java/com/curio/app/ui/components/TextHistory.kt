@@ -666,6 +666,9 @@ fun TextHistoryBrowser(
                         onRestore = { restoreEntry(it) },
                         onDelete = { e -> pendingDelete = e },
                         onCompare = { comparePick(it) },
+                        // v3xx45 — a version's preview opens the word-level
+                        // compare against the snapshot before it.
+                        onComparePair = { a, b -> comparePair = a to b },
                         isCurrent = { e -> latestIds[e.field] == e.id }
                     )
                 }
@@ -826,41 +829,28 @@ fun TextHistoryBrowser(
                         )
                     }
                     Spacer(Modifier.height(12.dp))
-                    // Stats + what changed vs the previous snapshot (the JSX
-                    // detail-panel stats / Changes note).
+                    // Stats only — the "what changed" story lives in the
+                    // COMPARE panel now (v3xx45: the inline changes note and
+                    // its +/− word counts are gone; compare is the changes
+                    // view).
                     val words = wordCount(fullEntry.text)
                     val chars = fullEntry.text.length
                     val prevOf = entries
                         .filter { it.field == fullEntry.field && it.ts < fullEntry.ts }
                         .maxByOrNull { it.ts }
-                    val changedPair = if (prevOf != null) {
-                        val d = diffTokens(prevOf.text, fullEntry.text)
-                        d.first.count { it.changed } to d.second.count { it.changed }
-                    } else 0 to 0
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            "$words words · $chars characters",
-                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(Modifier.weight(1f))
-                        if (prevOf != null) {
-                            Text(
-                                if (changedPair.second > 0 || changedPair.first > 0)
-                                    "+${changedPair.second} · −${changedPair.first} words"
-                                else "No word-level change",
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                                color = MaterialTheme.colorScheme.tertiary
-                            )
-                        }
-                    }
-                    Spacer(Modifier.height(4.dp))
                     Text(
-                        if (prevOf == null) "Original version — the first snapshot of this field."
-                        else "Changed from the version saved ${formatHistoryTime(prevOf.ts)}.",
-                        style = MaterialTheme.typography.labelSmall.copy(fontStyle = FontStyle.Italic),
+                        "$words words · $chars characters",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    if (prevOf == null) {
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            "Original version — the first snapshot of this field.",
+                            style = MaterialTheme.typography.labelSmall.copy(fontStyle = FontStyle.Italic),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                     Spacer(Modifier.height(10.dp))
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                         TextButton(onClick = {
@@ -870,12 +860,15 @@ fun TextHistoryBrowser(
                         }) {
                             Text("Copy", fontWeight = FontWeight.Bold)
                         }
-                        if (entries.size > 1) {
+                        if (prevOf != null) {
                             Spacer(Modifier.size(8.dp))
+                            // Direct compare against the version before it —
+                            // no two-tap arming needed from the preview.
                             TextButton(onClick = {
                                 val e = fullEntry
+                                val p = prevOf
                                 previewId = null
-                                comparePick(e)
+                                comparePair = p to e
                             }) {
                                 Text("Compare", fontWeight = FontWeight.Bold)
                             }
@@ -1132,9 +1125,12 @@ private fun HistoryFieldCard(
     onRestore: (TextHistoryEntry) -> Unit,
     onDelete: (TextHistoryEntry) -> Unit,
     onCompare: (TextHistoryEntry) -> Unit,
+    // v3xx45 — a version's preview opens the word-level COMPARE against the
+    // snapshot before it (the compare view replaces the old inline changes
+    // list); the two entries are handed straight to the diff dialog.
+    onComparePair: (TextHistoryEntry, TextHistoryEntry) -> Unit,
     isCurrent: (TextHistoryEntry) -> Boolean
 ) {
-    val dark = isCurioDarkTheme()
     val versionCount = tree.sessions.sumOf { it.versions.size }
     Column(Modifier.fillMaxWidth()) {
         // ── Heading: glyph + Playfair label + count + rule + chevron ──
@@ -1180,104 +1176,122 @@ private fun HistoryFieldCard(
                 size = 18.dp
             )
         }
-        // ── Frosted card with the TREE TRUNK — ONE continuous vertical
-        //    stem runs down the card; every session heading and version node
-        //    hangs off it on a short branch stub. (The old per-row stems
-        //    broke at each session divider, which killed the tree read.)
-        AnimatedVisibility(visible = !collapsed) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(20.dp))
-                .background(
-                    if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
-                    else Color.White.copy(alpha = 0.68f)
+        // ── v3xx45 — the .jsx TREE: one continuous rail with every version
+        //    as its own node CARD, rendered NEWEST FIRST so the CURRENT
+        //    version (with its change badge) sits at the top where it is read
+        //    first, and the older sessions follow below.
+        LineageRail(
+            sessions = tree.sessions,
+            collapsed = collapsed,
+            activeField = activeField,
+            isCurrent = isCurrent,
+            onPin = onPin,
+            onCopy = onCopy,
+            onRestore = onRestore,
+            onCompare = onCompare,
+            onDelete = onDelete,
+            onComparePair = onComparePair
+        )
+    }
+}
+
+/**
+ * v3xx45 — the .jsx tree: a single continuous rail with each version as its
+ * own node card hanging off it. Versions render NEWEST FIRST (the current
+ * snapshot leads, its change badge on top), and every node's +/− badge is a
+ * TRUE delta against the snapshot chronologically before it — the running
+ * pointer walks the field across session boundaries so the first snapshot of
+ * a new edit burst never reports its whole text as "+N".
+ */
+@Composable
+private fun LineageRail(
+    sessions: List<HistorySession>,
+    collapsed: Boolean,
+    activeField: String,
+    isCurrent: (TextHistoryEntry) -> Boolean,
+    onPin: (TextHistoryEntry) -> Unit,
+    onCopy: (TextHistoryEntry) -> Unit,
+    onRestore: (TextHistoryEntry) -> Unit,
+    onDelete: (TextHistoryEntry) -> Unit,
+    onCompare: (TextHistoryEntry) -> Unit,
+    onComparePair: (TextHistoryEntry, TextHistoryEntry) -> Unit
+) {
+    val chrono = remember(sessions) { sessions.flatMap { it.versions }.sortedBy { it.ts } }
+    val prevOf = remember(chrono) {
+        chrono.mapIndexedNotNull { index, e ->
+            if (index == 0) null else e.id to chrono[index - 1]
+        }.toMap()
+    }
+    val newestFirst = remember(sessions) { sessions.reversed() }
+    AnimatedVisibility(visible = !collapsed) {
+        Box(Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 2.dp)) {
+            // The rail — ONE unbroken stem down the whole group.
+            val trunkColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
+            Canvas(Modifier.matchParentSize()) {
+                drawLine(
+                    color = trunkColor,
+                    start = Offset(TreeTrunkInset.toPx(), 0f),
+                    end = Offset(TreeTrunkInset.toPx(), size.height),
+                    strokeWidth = 2.dp.toPx()
                 )
-                .padding(horizontal = 12.dp, vertical = 6.dp)
-        ) {
-            Box {
-                // The trunk — spans the whole content height.
-                val trunkColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
-                Canvas(Modifier.matchParentSize()) {
-                    drawLine(
-                        color = trunkColor,
-                        start = Offset(TreeTrunkInset.toPx(), 0f),
-                        end = Offset(TreeTrunkInset.toPx(), size.height),
-                        strokeWidth = 2.dp.toPx()
-                    )
-                }
-                Column(Modifier.padding(start = TreeTrunkInset)) {
-                    // v3xx44 — the +/− badge compares each snapshot against the
-                    // FIELD's previous snapshot, not just the previous one in
-                    // its own session: the first snapshot of a new session used
-                    // to report its whole text as "+N" (a brand-new edit burst
-                    // read as if everything had just been added). The running
-                    // pointer below walks the field chronologically across
-                    // session boundaries, so every badge is a true delta.
-                    var prevEntry: TextHistoryEntry? = null
-                    tree.sessions.forEachIndexed { sIdx, session ->
-                        if (sIdx > 0) {
-                            // Hairline between sessions — starts right of the
-                            // trunk so the trunk reads as one unbroken line.
-                            HorizontalDivider(
-                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                                modifier = Modifier.padding(start = 14.dp, top = 6.dp)
-                            )
-                        }
-                        // Session sub-heading — a branch stub off the trunk,
-                        // then the time range + edit count.
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(top = 8.dp, bottom = 2.dp)
-                        ) {
-                            SessionBranchStub()
-                            Spacer(Modifier.width(4.dp))
-                            Text(
-                                if (session.versions.size == 1) formatHistoryTime(session.startTs)
-                                else "${formatHistoryTime(session.startTs)} → ${formatHistoryTime(session.versions.last().ts)}",
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                if (session.versions.size == 1) "1 edit" else "${session.versions.size} edits",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        // Version nodes — each hangs off the trunk.
-                        session.versions.forEach { e ->
-                            HistoryVersionRow(
-                                entry = e,
-                                // v3xx44 — the field's previous snapshot (a
-                                // session's first node compares against the last
-                                // node before it, so the badge stays truthful).
-                                prev = prevEntry,
-                                isActive = e.field == activeField,
-                                isCurrent = isCurrent(e),
-                                activeField = activeField,
-                                onPin = { onPin(e) },
-                                onCopy = { onCopy(e) },
-                                onRestore = { onRestore(e) },
-                                onCompare = { onCompare(e) },
-                                onDelete = { onDelete(e) }
-                            )
-                            prevEntry = e
-                        }
+            }
+            Column(Modifier.padding(start = TreeTrunkInset)) {
+                newestFirst.forEachIndexed { sIdx, session ->
+                    if (sIdx > 0) {
+                        HorizontalDivider(
+                            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                            modifier = Modifier.padding(start = 14.dp, top = 6.dp)
+                        )
+                    }
+                    // Session sub-heading — a branch stub off the rail, then
+                    // the time range + edit count.
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(top = 8.dp, bottom = 2.dp)
+                    ) {
+                        SessionBranchStub()
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            if (session.versions.size == 1) formatHistoryTime(session.versions.first().ts)
+                            else "${formatHistoryTime(session.versions.first().ts)} → ${formatHistoryTime(session.versions.last().ts)}",
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            if (session.versions.size == 1) "1 edit" else "${session.versions.size} edits",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    session.versions.reversed().forEach { e ->
+                        HistoryVersionRow(
+                            entry = e,
+                            prev = prevOf[e.id],
+                            isActive = e.field == activeField,
+                            isCurrent = isCurrent(e),
+                            activeField = activeField,
+                            onPin = { onPin(e) },
+                            onCopy = { onCopy(e) },
+                            onRestore = { onRestore(e) },
+                            onCompare = { onCompare(e) },
+                            onComparePrev = {
+                                prevOf[e.id]?.let { p -> onComparePair(p, e) }
+                            },
+                            onDelete = { onDelete(e) }
+                        )
                     }
                 }
             }
         }
-        }
     }
 }
 
-/** One version node inside a session — a short branch stub runs from the
- *  card's trunk to the node dot (the trunk itself is drawn once by
- *  [HistoryFieldCard], so the tree stays continuous across sessions), the
- *  time + a +/− change badge, a COMPACT one-line preview that EXPANDS to a
- *  CLIPPED diff (previews of the added/removed lines, never the full
- *  text), then the actions. */
+/** One version NODE — a card hanging off the rail (the .jsx `.tree-card`
+ *  language): the time plus a TRUE +/− change badge (and the CURRENT pill on
+ *  the newest), the snapshot text whose tap opens the word-level COMPARE
+ *  against the version before it — the compare panel IS the changes view, the
+ *  old inline diff list is gone — then the row actions. */
 @Composable
 private fun HistoryVersionRow(
     entry: TextHistoryEntry,
@@ -1289,34 +1303,31 @@ private fun HistoryVersionRow(
     onCopy: () -> Unit,
     onRestore: () -> Unit,
     onDelete: () -> Unit,
-    onCompare: () -> Unit
+    onCompare: () -> Unit,
+    onComparePrev: () -> Unit
 ) {
+    val dark = isCurioDarkTheme()
     val (added, removed) = diffSummary(prev, entry)
     val badge = buildString {
         if (added > 0) append("+$added")
         if (added > 0 && removed > 0) append(" · ")
         if (removed > 0) append("−$removed")
     }
-    var expanded by remember { mutableStateOf(false) }
-    // The diff — what changed vs the previous version, line by line.
-    val prevParas = prev?.let { splitParagraphs(it.text) }?.toSet().orEmpty()
-    val currParas = splitParagraphs(entry.text)
-    val addedLines = currParas.filter { it !in prevParas }
-    val removedLines = prevParas.filter { it !in currParas }
-
     // Colors are read in the composable scope — drawBehind is not a
     // @Composable context, so MaterialTheme must not be read inside it.
     val stemColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.30f)
-    val dotColor = if (isActive) MaterialTheme.colorScheme.primary
+    val dotColor = if (isCurrent || isActive) MaterialTheme.colorScheme.primary
         else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+    val cardColor = if (isActive)
+        MaterialTheme.colorScheme.primary.copy(alpha = if (dark) 0.20f else 0.10f)
+    else if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
+    else Color.White.copy(alpha = 0.72f)
 
-    Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.Top) {
-        // ── Branch + node — the stub starts exactly at the trunk (x=0 of
-        //    this column IS the trunk) and ends at the node dot.
-        // v3xx44 — a FIXED 18dp connector box: `fillMaxHeight()` inside this
-        // Top-aligned Row measured against an unbounded (LazyColumn) height,
-        // so the box collapsed to zero and the stub + dot drew outside their
-        // own bounds — visible, but with no measured height for the row.
+    Row(Modifier.padding(top = 7.dp), verticalAlignment = Alignment.Top) {
+        // ── Branch + node — the stub starts at the rail (x=0 of this column
+        //    IS the rail) and ends at the node dot. A FIXED 18dp connector
+        //    box: `fillMaxHeight()` measured against an unbounded
+        //    (LazyColumn) height, so it collapsed to zero.
         Box(
             modifier = Modifier
                 .width(18.dp)
@@ -1334,188 +1345,83 @@ private fun HistoryVersionRow(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .offset(x = TreeNodeDotX - 4.dp, y = TreeNodeDotY - 4.dp)
-                    .size(8.dp)
+                    .size(if (isCurrent) 9.dp else 8.dp)
                     .clip(CircleShape)
                     .background(dotColor)
             )
         }
-        Column(Modifier.weight(1f).padding(start = 8.dp)) {
-            // Time + change badge.
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    formatHistoryTime(entry.ts),
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                if (badge.isNotEmpty()) {
-                    Spacer(Modifier.width(6.dp))
+        // The node CARD — each version reads as its own card on the rail.
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = cardColor,
+            modifier = Modifier.weight(1f).padding(start = 8.dp)
+        ) {
+            Column(Modifier.padding(start = 12.dp, end = 5.dp, top = 9.dp, bottom = 4.dp)) {
+                // Time + TRUE change badge + CURRENT pill.
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        badge,
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                        color = if (isActive) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.tertiary
+                        formatHistoryTime(entry.ts),
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                }
-                if (isCurrent) {
-                    Spacer(Modifier.width(6.dp))
-                    HistoryCurrentPill()
-                }
-            }
-            // COMPACT preview — ONE line, tapping it expands the diff (the
-            // tree never floods with giant texts).
-            Text(
-                entry.text,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .clickable { expanded = !expanded }
-                    .padding(top = 3.dp, bottom = 3.dp, end = 4.dp)
-            )
-            // ── Expanded — the proper tree view: exactly what was added /
-            //    removed, compact chips, scrolls when long. ──
-            AnimatedVisibility(visible = expanded) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 150.dp)
-                        .verticalScroll(rememberScrollState())
-                        .padding(top = 2.dp, bottom = 4.dp),
-                    verticalArrangement = Arrangement.spacedBy(3.dp)
-                ) {
-                    if (addedLines.isEmpty() && removedLines.isEmpty()) {
+                    if (badge.isNotEmpty()) {
+                        Spacer(Modifier.width(6.dp))
                         Text(
-                            "Initial version",
-                            style = MaterialTheme.typography.labelSmall.copy(fontStyle = FontStyle.Italic),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            badge,
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                            color = if (isActive) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.tertiary
                         )
                     }
-                    // Clipped previews — a few short snippets of what changed,
-                    // never the full text (v3xx — the expanded node used to
-                    // dump whole paragraphs).
-                    val shownAdded = addedLines.take(4)
-                    shownAdded.forEach { line ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(7.dp))
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
-                                .padding(horizontal = 7.dp, vertical = 4.dp)
-                        ) {
-                            Text(
-                                "+",
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            Text(
-                                previewLine(line),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
+                    if (isCurrent) {
+                        Spacer(Modifier.width(6.dp))
+                        HistoryCurrentPill()
                     }
-                    if (addedLines.size > shownAdded.size) {
-                        DiffMoreChip("${addedLines.size - shownAdded.size} more added")
-                    }
-                    val shownRemoved = removedLines.take(4)
-                    shownRemoved.forEach { line ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(7.dp))
-                                .background(MaterialTheme.colorScheme.surfaceContainerLow)
-                                .padding(horizontal = 7.dp, vertical = 4.dp)
-                        ) {
-                            Text(
-                                "−",
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                previewLine(line),
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    textDecoration = TextDecoration.LineThrough,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                ),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                    }
-                    if (removedLines.size > shownRemoved.size) {
-                        DiffMoreChip("${removedLines.size - shownRemoved.size} more removed")
-                    }
-                    // Restore — empty field restores straight away; a field
-                    // with text opens the Add above / Add below / Replace
-                    // chooser (the paste options depend on the text box).
+                }
+                // The snapshot text — tapping it opens the COMPARE against
+                // the version before it.
+                Text(
+                    entry.text,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable(onClick = onComparePrev)
+                        .padding(top = 3.dp, bottom = 3.dp, end = 4.dp)
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "Restore this version",
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                        color = if (isCurioDarkTheme()) Color(0xFFFFF9F1) else Color(0xFF52383C),
-                        modifier = Modifier
-                            .padding(top = 2.dp)
-                            .clip(RoundedCornerShape(50))
-                            .background(
-                                if (isCurioDarkTheme()) Color(0xFF815947) else Color(0xFFF2E8DC)
-                            )
-                            .clickable(onClick = onRestore)
-                            .padding(horizontal = 11.dp, vertical = 5.dp)
+                        entry.field,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (isActive) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.weight(1f))
+                    HistoryActionsRow(
+                        pinned = entry.pinned,
+                        active = isActive,
+                        activeField = activeField,
+                        onPin = onPin,
+                        onCopy = onCopy,
+                        onRestore = onRestore,
+                        onCompare = onCompare,
+                        onDelete = onDelete
                     )
                 }
-            }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    entry.field,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (isActive) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.weight(1f))
-                HistoryActionsRow(
-                    pinned = entry.pinned,
-                    active = isActive,
-                    activeField = activeField,
-                    onPin = onPin,
-                    onCopy = onCopy,
-                    onRestore = onRestore,
-                    onCompare = onCompare,
-                    onDelete = onDelete
-                )
             }
         }
     }
 }
 
 /** A compact one-line preview of a changed paragraph — long lines are
- *  clipped so the expanded diff never dumps full text. */
+ *  clipped so an inline preview never dumps full text. */
 private fun previewLine(line: String, maxChars: Int = 56): String =
     if (line.length <= maxChars) line else line.take(maxChars - 1) + "…"
-
-/** The "N more added/removed" footer of a clipped diff — a tiny quiet chip. */
-@Composable
-private fun DiffMoreChip(label: String) {
-    Text(
-        label,
-        style = MaterialTheme.typography.labelSmall.copy(
-            fontWeight = FontWeight.SemiBold,
-            fontStyle = FontStyle.Italic
-        ),
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(start = 2.dp, top = 1.dp)
-    )
-}
 
 /** A tiny horizontal branch stub — connects a session heading to the trunk
  *  (its left edge sits exactly on the trunk's x, so the line reads as one

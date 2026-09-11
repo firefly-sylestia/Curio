@@ -2,6 +2,8 @@ package com.curio.app.navigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -15,6 +17,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideOutHorizontally
 import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -140,6 +143,7 @@ import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.pet.CurioFloatingPet
 import com.curio.app.ui.pet.PetPointer
 import com.curio.app.ui.theme.CurioMotion
+import com.curio.app.ui.theme.CurioRevealHost
 
 /**
  * Decodes a nav-argument string safely — malformed percent-escapes or
@@ -301,6 +305,34 @@ private fun SettingsSharedScope(
 fun CurioNavHost(
     navController: NavHostController = rememberNavController()
 ) {
+    // v3xx45 — SCREEN REVEAL experiment (Settings ▸ Experiments, default OFF).
+    // Every destination change tries to peel the frozen pre-tap frame away in
+    // the same feathered iris as the light/dark flip; when no frame is armed
+    // (pin/back/deep-link navigation, experiment off, failed capture) the
+    // normal page transitions run untouched — see CurioRevealNav.
+    DisposableEffect(navController) {
+        val listener = NavController.OnDestinationChangedListener { controller, destination, _ ->
+            // Navigations whose motion is hand-tuned elsewhere keep it: the
+            // shared-element hero morphs (Reveal / Pet Designer, either side
+            // of the hand-off) and SWITCHES INSIDE the settings family, where
+            // the nav-rail pill morph IS the transition. Opening Settings (or
+            // Profile) FROM another screen still gets the iris — only the
+            // internal rail switches opt out.
+            val targetPrefix = destination.route?.substringBefore("/")
+            val sourcePrefix = controller.previousBackStackEntry
+                ?.destination?.route?.substringBefore("/")
+            val heroNav =
+                targetPrefix == CurioRoutes.REVEAL.substringBefore("/") ||
+                    sourcePrefix == CurioRoutes.REVEAL.substringBefore("/") ||
+                    targetPrefix == CurioRoutes.PET_DESIGNER ||
+                    sourcePrefix == CurioRoutes.PET_DESIGNER
+            val settingsInternal = targetPrefix in settingsFamilyRoutePrefixes &&
+                sourcePrefix in settingsFamilyRoutePrefixes
+            CurioRevealNav.onDestinationChanged(skipReveal = heroNav || settingsInternal)
+        }
+        navController.addOnDestinationChangedListener(listener)
+        onDispose { navController.removeOnDestinationChangedListener(listener) }
+    }
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
     val routePrefix = remember(currentRoute) {
@@ -533,6 +565,7 @@ fun CurioNavHost(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .then(PetPointer.trackerModifier())
+            .trackRevealTaps()
     ) {
         Row(modifier = Modifier.fillMaxSize()) {
             if (wide && showBottomBar) {
@@ -598,7 +631,10 @@ fun CurioNavHost(
             // glitchy — this was promised in the header doc but never
             // implemented).
             enterTransition = {
-                when {
+                // Screen reveal owns the motion for this navigation — the old
+                // frame is already frozen over the destination.
+                if (CurioRevealHost.suppressDefaultTransition) EnterTransition.None
+                else when {
                     // Settings-internal switches (hub ⇄ sections ⇄ drill-in
                     // tools): the rail's active pill MORPHS between chips
                     // (shared element) while the pages crossfade with a
@@ -670,7 +706,8 @@ fun CurioNavHost(
                 }
             },
             exitTransition = {
-                when {
+                if (CurioRevealHost.suppressDefaultTransition) ExitTransition.None
+                else when {
                     // Settings-internal switches mirror the calm fade: the
                     // outgoing page's text + lower content fades out under
                     // the incoming page's fade-in (the shared chrome reads
@@ -716,7 +753,8 @@ fun CurioNavHost(
                 }
             },
             popEnterTransition = {
-                when {
+                if (CurioRevealHost.suppressDefaultTransition) EnterTransition.None
+                else when {
                     // Popping back inside settings (section → hub, drill-in
                     // → section): the page underneath fades back in the same
                     // gentle crossfade as the forward switch.
@@ -757,7 +795,8 @@ fun CurioNavHost(
                 }
             },
             popExitTransition = {
-                when {
+                if (CurioRevealHost.suppressDefaultTransition) ExitTransition.None
+                else when {
                     // Popping back inside settings: the outgoing page fades
                     // out over the same crossfade.
                     isSettingsFamilyRoute(initialState) && isSettingsFamilyRoute(targetState) ->

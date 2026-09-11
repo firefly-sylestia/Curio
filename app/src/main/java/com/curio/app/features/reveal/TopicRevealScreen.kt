@@ -3903,10 +3903,14 @@ private fun ChapterNoteField(
             cursorBrush = SolidColor(accent),
             decorationBox = { inner ->
                 if (value.isBlank()) {
+                    // v3xx45 — the placeholder wears the sheet's REAL muted
+                    // tone at full strength. The old 0.85-alpha fade left the
+                    // "Add a note…" hint nearly invisible on the dark,
+                    // cover-tinted sheet (the reported dark-mode inaccuracy).
                     Text(
                         "Add a note…",
                         style = MaterialTheme.typography.bodySmall,
-                        color = boxMuted.copy(alpha = 0.85f)
+                        color = boxMuted
                     )
                 }
                 inner()
@@ -4501,19 +4505,30 @@ private fun AlbumNotesSheet(
     // on first composition — no default-then-switch flash after a restart.
     // The first-ever open (nothing stored) still resolves + persists.
     val albumArtKey = "album|${topic.name}"
+    // v3xx45 — the palette source is the ARTWORK THE POSTER SHOWS: the
+    // authored catalogue cover first (AlbumCoverPoster prefers it too), then
+    // the persisted resolver URL, then a fresh lookup. The palette used to
+    // key off the resolver's URL while the poster showed the authored cover,
+    // so the sheet was tinted from a DIFFERENT image than the one on screen —
+    // and with the album-fetch toggle off that other URL was uncached, the
+    // swatch extraction returned nothing, and the sheet fell back to the flat
+    // category tint. Matching the poster's URL means the wash, cards and
+    // accent all come from the real cover the user actually sees.
+    val authoredArt = topic.imageUrl?.takeIf { it.isNotBlank() }
     var paletteUrl by remember(topic.imageUrl) {
         mutableStateOf(
-            AppPreferences.sheetArtUrlsState[albumArtKey]?.takeIf { it.isNotBlank() } ?: topic.imageUrl
+            authoredArt ?: AppPreferences.sheetArtUrlsState[albumArtKey]?.takeIf { it.isNotBlank() }
         )
     }
     LaunchedEffect(topic.imageUrl, AppPreferences.albumFetchEnabledState) {
         val stored = AppPreferences.sheetArtUrlsState[albumArtKey]?.takeIf { it.isNotBlank() }
-        val resolved = if (stored != null) stored
-        else if (AppPreferences.albumFetchEnabledState)
-            AlbumArtFetch.resolveArtworkUrl(topic.name, topic.byline)
-        else null
-        paletteUrl = resolved ?: topic.imageUrl
-        if (resolved != null && stored == null) {
+        val resolved = authoredArt
+            ?: stored
+            ?: if (AppPreferences.albumFetchEnabledState)
+                AlbumArtFetch.resolveArtworkUrl(topic.name, topic.byline)
+            else null
+        paletteUrl = resolved
+        if (resolved != null && resolved != authoredArt && stored == null) {
             AppPreferences.setSheetArtUrl(context, albumArtKey, resolved)
         }
     }

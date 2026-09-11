@@ -1007,6 +1007,11 @@ object AppPreferences {
     // Save shortcut repoints into it. When the experiment settles the toggle
     // is removed and the winning view ships always-on.
     var cabinetV2EnabledState by mutableStateOf(false)
+    // v3xx45 — SCREEN REVEAL experiment (Settings → Dev page, default OFF):
+    // opening a screen plays the SAME circular iris as the light/dark flip —
+    // the current screen is frozen and peels away from where you tapped, a
+    // touch faster than the theme wipe. Off = today's plain transitions.
+    var screenRevealEnabledState by mutableStateOf(false)
     // v3xx — the four empty starter shelves (Curiying now / Want to
     // Read / Completed / Personal) were seeded once into the Cabinet's
     // collection store; the virtual shelves (Favorites / Saved entries /
@@ -1552,6 +1557,7 @@ object AppPreferences {
         navIndicatorOpacityState = getNavIndicatorOpacity(context)
         glassClarityState = isGlassClarityEnabled(context)
         cabinetV2EnabledState = isCabinetV2Enabled(context)
+        screenRevealEnabledState = isScreenRevealEnabled(context)
         cabinetShelvesSeededState = isCabinetShelvesSeeded(context)
         glassBlurScaleState = getGlassBlurScale(context)
         glassRefractionScaleState = getGlassRefractionScale(context)
@@ -1883,6 +1889,7 @@ object AppPreferences {
     private const val KEY_STAR_ZOOM_3D = "star_zoom_3d"
     private const val KEY_DRAWER_CONSTELLATION = "drawer_constellation"
     private const val KEY_CABINET_V2 = "cabinet_v2_experiment"
+    private const val KEY_SCREEN_REVEAL = "screen_reveal_transitions"
     private const val KEY_CABINET_SHELVES_SEEDED = "cabinet_shelves_seeded_v2"
     private const val KEY_LIQUID_GLASS_PILLS = "liquid_glass_pills"
     private const val KEY_FORCE_GLASS = "force_glass_override"
@@ -1998,6 +2005,16 @@ object AppPreferences {
     fun setCabinetV2Enabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_CABINET_V2, enabled).apply()
         cabinetV2EnabledState = enabled
+    }
+
+    /** Whether the screen-reveal transition experiment is on (default OFF;
+     *  see the state comment above). */
+    fun isScreenRevealEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_SCREEN_REVEAL, false)
+
+    fun setScreenRevealEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_SCREEN_REVEAL, enabled).apply()
+        screenRevealEnabledState = enabled
     }
 
     // v3xx — the "Subtle pill glow" experiment concluded: subtle is the

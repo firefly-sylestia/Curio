@@ -7284,6 +7284,56 @@ app/src/main/java/com/curio/app/
   per save — the GC pauses froze the app. Now only new/changed rows
   decode; the map is only touched from the flow's single collection
   dispatcher.
+- **v3xx45 — SCREEN REVEAL experiment, packed Cupboard shelves, the .jsx
+  Text-history tree, plain caption box + cover-true album sheet (user
+  2026-09-11: "similar to the dark mode and light mode transition cant we
+  use that for like settings or profile open … make it a toggle and also
+  make it faster a little", "the album colors are fully different", "the
+  text history doesnt match the concept .jsx", "the changes view is bad the
+  compare is the better one", "the add a caption field is note paper style
+  change it to just a text box").**
+  (1) **Screen reveal (`navigation/CurioRevealNav.kt`, NEW).** The
+  light/dark flip's feathered circular iris now also opens SCREENS, gated by
+  a Settings ▸ Experiments toggle (`AppPreferences.screenRevealEnabledState`,
+  default OFF). It CANNOT wrap the ~120 `navigate()` call sites, so the
+  frame is captured optimistically on pointer-DOWN
+  (`Modifier.trackRevealTaps()` on the NavHost root Box, Initial pass only —
+  no hit-test change) and stashed in `CurioRevealNav`;
+  `NavController.addOnDestinationChangedListener` then plays it via
+  `CurioThemeTransitionState.startTransitionWithFrame(frame, center)` — a
+  non-suspend arm of the SAME transition machinery the theme flip uses
+  (`captureFrameNow()` is the new grab-only snapshot). No fresh frame
+  (back/pin/deep-link/experiment off/failed capture) = the normal page
+  transitions run untouched, so it can never wedge navigation. Shared-
+  element routes (`reveal`, `pet-designer`) opt out entirely — their
+  hand-tuned morph is better than an iris. While the reveal owns a
+  navigation `CurioRevealHost.suppressDefaultTransition` makes the NavHost
+  return `EnterTransition.None`/`ExitTransition.None` so the iris is the
+  ONLY motion. Faster than the flip: `revealDurationMs` 440 (vs 680) and
+  `revealSettleDelayMs` 32 (vs 80), both restored in
+  `finishTransition()` so the next theme flip keeps its own timings.
+  Frames are reused within 700ms and recycled aggressively.
+  (2) **Cupboard wall = packed SHELVES (`CabinetV2Content.kt`).** No span
+  tweak can fix a grid line: it shares ONE height, so a tall book beside
+  two small albums always left a hole (the reported "space left below
+  those 2"). The wall is now `BoxWithConstraints` → `buildCupboardShelves()`
+  packing covers into rows at a COMMON height (each cover's width = height x
+  its own aspect, so widths + gaps sum to exactly the measured width), one
+  `LazyColumn` item per shelf. The old 8-column `LazyVerticalGrid` span
+  cycle + `mediaTierIndex` are gone.
+  (3) **Text history = the .jsx tree (`ui/components/TextHistory.kt`).**
+  New `LineageRail`: one continuous rail, every version its own NODE CARD,
+  sessions + versions rendered NEWEST FIRST (the CURRENT version leads with
+  its badge), and each node's tap opens the word-level COMPARE against the
+  snapshot chronologically before it (`onComparePair`, resolved from a
+  `prevOf` map built across session boundaries). The inline "changes" diff
+  list + its +/− word counts are GONE — compare IS the changes view.
+  (4) **Caption + album/book sheets.** `PaperLineField(paper = false)` is a
+  genuinely plain box now (theme `surface` + 1dp `outlineVariant` hairline,
+  not the papery `surfaceVariant` wash); `ChapterNoteField`'s placeholder
+  drops its 0.85-alpha fade; `AlbumNotesSheet` keys its palette off the
+  AUTHORED cover (`topic.imageUrl`) first — the same art `AlbumCoverPoster`
+  shows — so the sheet can no longer be tinted from a different image.
 - **v3xx44 — settings rail highlight lands with the tap + text-history
   tree badges (user test feedback: "the active indicator in settings top
   rail too slow and feels broken").** (1) **`SettingsRailBoundsTransform`

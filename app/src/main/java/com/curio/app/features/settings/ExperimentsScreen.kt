@@ -188,6 +188,21 @@ fun ExperimentsScreen(navController: NavController) {
                 }
                 }
             }
+            // v3xx45 — SCREEN REVEAL experiment (default OFF): opening any
+            // screen plays the same feathered iris as the light/dark flip,
+            // centred on your tap, a touch faster than the theme wipe.
+            item { SettingsSectionHeading("Transitions") }
+            item {
+                SettingsOptionCard {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        ExperimentSwitchRow(
+                            "Screen reveal transitions",
+                            "Experimental: opening a screen plays the same soft circular reveal as the light/dark flip, growing from where you tapped. Off keeps the current page transitions.",
+                            AppPreferences.screenRevealEnabledState
+                        ) { wanted -> AppPreferences.setScreenRevealEnabled(context, wanted) }
+                    }
+                }
+            }
             // v293 — Pet behavior + explore options moved here from Preferences/Recording.
             item { SettingsSectionHeading("Pet & explore") }
             item {

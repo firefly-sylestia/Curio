@@ -1,5 +1,6 @@
 package com.curio.app.features.capture.formats
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -521,12 +522,18 @@ fun PaperLineField(
         // pastel — resolved in the composable scope, then passed in.
         val ink = notePaperInk(paperColor)
         // v125 — the plain (non-paper) quick-title field renders as a simple
-        // rounded input on the theme surface; the paper path keeps the
-        // NotePaperCard slip (one source of truth for every style).
+        // rounded input; the paper path keeps the NotePaperCard slip (one
+        // source of truth for every style).
+        // v3xx45 — a genuinely PLAIN text box: a neutral theme surface with a
+        // hairline outline. The old surfaceVariant wash was warm and papery
+        // (and the app's surfaceVariant is a cream tone), so the caption field
+        // still read as a note-paper slip — the reported "add a caption is
+        // still note-paper style".
         if (!paper) {
             Surface(
                 shape = RoundedCornerShape(14.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                color = MaterialTheme.colorScheme.surface,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 BasicTextField(

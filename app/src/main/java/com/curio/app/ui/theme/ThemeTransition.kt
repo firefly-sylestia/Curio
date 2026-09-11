@@ -70,6 +70,18 @@ class CurioThemeTransitionState {
         private set
     var progress = Animatable(0f)
         private set
+    /**
+     * Duration of the reveal wipe. The light/dark flip uses the full
+     * [THEME_REVEAL_DURATION_MS]; the SCREEN REVEAL experiment sets a snappier
+     * value just before it starts, so navigating never feels slow.
+     */
+    var revealDurationMs: Int = THEME_REVEAL_DURATION_MS
+    /**
+     * Beat between freezing the frame and animating the reveal. The light/dark
+     * flip needs enough time for the new color scheme to draw underneath; the
+     * SCREEN REVEAL experiment shortens it (nothing is being recoloured).
+     */
+    var revealSettleDelayMs: Long = THEME_CONTENT_SETTLE_DELAY_MS
 
     private var captureView: View? = null
     /**
@@ -119,6 +131,31 @@ class CurioThemeTransitionState {
         // always begins from 0 on a new capture.
         progress = Animatable(0f)
         screenshotBitmap = bitmap
+        revealCenter = center
+        isAnimating = true
+        return true
+    }
+
+    /**
+     * Freeze the frame the user is currently looking at, without starting an
+     * animation. Used by the SCREEN REVEAL experiment, which grabs the frame on
+     * pointer-DOWN (before the tap's click handler navigates) and hands it back
+     * to [startTransitionWithFrame] once the destination changes. Null when no
+     * view is attached or the copy fails, so the caller falls back to the plain
+     * page transitions.
+     */
+    suspend fun captureFrameNow(): Bitmap? = windowFrame(captureView)
+
+    /**
+     * Arm a reveal from an ALREADY-CAPTURED frame (see [captureFrameNow]).
+     * The frame is adopted as-is; callers must not touch it afterwards — the
+     * transition recycles it in [finishTransition].
+     */
+    fun startTransitionWithFrame(frame: Bitmap, center: Offset): Boolean {
+        if (isAnimating) return false
+        if (frame.isRecycled) return false
+        progress = Animatable(0f)
+        screenshotBitmap = frame
         revealCenter = center
         isAnimating = true
         return true
@@ -226,6 +263,13 @@ class CurioThemeTransitionState {
         screenshotBitmap = null
         revealCenter = Offset.Zero
         isAnimating = false
+        // Release the NavHost's transition suppression with the reveal — from
+        // here on, page changes animate normally again.
+        CurioRevealHost.suppressDefaultTransition = false
+        // Restore the theme-flip timings: the screen reveal shortens both, and
+        // leaving them behind would make the next light/dark flip snap.
+        revealDurationMs = THEME_REVEAL_DURATION_MS
+        revealSettleDelayMs = THEME_CONTENT_SETTLE_DELAY_MS
         captureView?.postDelayed(
             { old?.takeUnless { it.isRecycled }?.recycle() },
             BITMAP_RECYCLE_DELAY_MS,
@@ -249,6 +293,26 @@ private const val MASK_CURVE_SEGMENTS = 24
 
 /** CompositionLocal exposing the app-wide transition state to any theme switch site. */
 val LocalCurioThemeTransition = staticCompositionLocalOf<CurioThemeTransitionState?> { null }
+
+/**
+ * v3xx45 — app-wide handle to the live theme-transition state, set by
+ * [CurioThemeTransitionHost]. It lets NON-composable call sites (navigation)
+ * run the very same reveal without threading a CompositionLocal through every
+ * screen: the screen-reveal experiment freezes the current frame and peels it
+ * away in the same feathered iris as the light/dark flip.
+ */
+object CurioRevealHost {
+    var transition: CurioThemeTransitionState? = null
+
+    /**
+     * True while a SCREEN REVEAL owns the current navigation: the NavHost asks
+     * this and returns `EnterTransition.None` / `ExitTransition.None` so the
+     * iris is the only motion on screen (the outgoing page is already frozen
+     * over the destination). Reset when the reveal finishes.
+     */
+    @Volatile
+    var suppressDefaultTransition: Boolean = false
+}
 
 /**
  * Draws [content] with the in-flight theme reveal layered on top. The reveal
@@ -286,11 +350,11 @@ private fun CurioThemeTransitionOverlay(
         state.resetProgress()
         // Let the freshly-selected color scheme draw one frame below the frozen snapshot.
         withFrameNanos { }
-        delay(THEME_CONTENT_SETTLE_DELAY_MS)
+        delay(state.revealSettleDelayMs)
         state.progress.animateTo(
             targetValue = 1f,
             animationSpec = tween(
-                durationMillis = THEME_REVEAL_DURATION_MS,
+                durationMillis = state.revealDurationMs,
                 easing = FastOutSlowInEasing,
             ),
         )
@@ -389,6 +453,10 @@ fun CurioThemeTransitionHost(
     content: @Composable () -> Unit,
 ) {
     val state = remember { CurioThemeTransitionState() }
+    DisposableEffect(state) {
+        CurioRevealHost.transition = state
+        onDispose { CurioRevealHost.transition = null }
+    }
     CompositionLocalProvider(LocalCurioThemeTransition provides state) {
         CurioThemeTransitionOverlay(state = state, content = content)
     }

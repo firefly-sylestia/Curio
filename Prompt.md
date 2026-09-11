@@ -1,5 +1,60 @@
 # Prompt Log — current request
 
+## Request (2026-09-11, completed — screen-reveal transitions toggle, packed Cupboard shelves, .jsx text-history tree, caption box + cover-true album sheet)
+
+User (queued prompt + ask_user answers): test results "Haven't built it yet";
+the album sheet's colours are wrong "from the album's real cover art"; the
+Cupboard wall leaves empty space ("the first image is good and then to its
+side there are 2 things placed but then theres space left below those 2 so
+properly fix the spaces"); text history should match the concept `.jsx`
+("Tree view layout, Version cards' content, Replace Changes with Compare,
+also make the current text at the top … show its changes in the top"); the
+caption field "is note paper style change it to just a text box"; the book
+sheet's add-note box + text colours are still wrong in dark mode; and
+"similar to the dark mode and light mode transition cant we use that for
+like settings or profile open, and the screen changes in that transition
+style, make it a toggle and also make it faster a little" (plus a wider
+animations/haptics wish-list logged as pending).
+
+**Shipped (7 code files + docs, this commit):**
+
+1. **`navigation/CurioRevealNav.kt` (NEW) + `ThemeTransition.kt` +
+   `CurioNavHost.kt` + `AppPreferences.kt` + `ExperimentsScreen.kt` —
+   SCREEN REVEAL experiment (Settings ▸ Experiments, default OFF). The
+   theme flip's feathered iris now opens screens too: the frame is captured
+   on pointer-DOWN (`trackRevealTaps()`), stashed, and played from the
+   NavController's destination listener via the new non-suspend
+   `startTransitionWithFrame`; while it owns a navigation the NavHost
+   returns `EnterTransition.None`/`ExitTransition.None` so the iris is the
+   only motion. 440ms (vs the flip's 680ms) + a 32ms settle, both restored
+   after the reveal. Shared-element routes (`reveal`, `pet-designer`) opt
+   out; no fresh frame = the normal transitions, untouched.
+2. **`CabinetV2Content.kt` — Cupboard wall packed into shelves.**
+   `BoxWithConstraints` measures the wall; `buildCupboardShelves()` packs
+   covers into rows at one shared height (width = height x the cover's own
+   aspect), so widths + gaps fill the width exactly and no hole is ever
+   left. The 8-column grid span cycle + `mediaTierIndex` are gone.
+3. **`ui/components/TextHistory.kt` — the `.jsx` tree.** `LineageRail`: one
+   rail, each version a node card, newest first (current at the top with
+   its badge), sessions newest-first, and a node tap opens the word-level
+   COMPARE against the version before it — the inline changes list and its
+   +/− counts are removed.
+4. **`CaptureFormatComponents.kt`** — `PaperLineField(paper = false)` is a
+   plain text box (theme `surface` + hairline outline).
+5. **`TopicRevealScreen.kt`** — the book sheet's "Add a note…" placeholder
+   drops its 0.85-alpha fade (dark-mode readability); `AlbumNotesSheet`
+   keys its palette off the AUTHORED cover first, so the sheet matches the
+   poster's art.
+
+**Scope:** Android app only (web/ + desktop/ untouched; the user's untracked
+concept `.jsx` files were left untracked).
+
+**Status:** committed + pushed; CI validates.
+
+**Still pending (user's wish-list, not in this commit):** the broader
+animations pass (sheets + press feedback) and more haptics across the app;
+the user has not built this batch yet, so test results are still outstanding.
+
 ## Request (2026-09-11, completed — settings rail highlight speed/feel + text-history tree badges)
 
 User test results (ask_user): "All landed well" for the Cabinet/header batch;

@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -35,6 +36,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -84,6 +86,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -237,18 +240,6 @@ fun CabinetV2Content(navController: NavController) {
             }
             .distinctBy { "${it.topic?.categoryId?.name}|${it.name}" }
             .sortedBy { it.name.lowercase() }
-    }
-
-    // ── v3xx43 — the Cupboard wall's tile SIZES are stable: the size tier is
-    // keyed off each cover's position in the FULL media list (name-ordered),
-    // not its rank in the currently filtered list — so filtering the wall
-    // re-flows it WITHOUT any cover changing size (the reported "tiles resize
-    // when it reflows" bug).
-    val mediaTierIndex: Map<String, Int> = remember(books, albums, series) {
-        (books + albums + series)
-            .sortedWith(compareBy({ it.name.lowercase() }, { it.kind.name }))
-            .mapIndexed { i, item -> "${item.kind.name}|${item.name}" to i }
-            .toMap()
     }
 
     // ── Seed the four empty starter shelves (Curiying now / Want to
@@ -601,60 +592,66 @@ fun CabinetV2Content(navController: NavController) {
         // Favorites is the LIKED-TOPIC shelf now, so it renders in the
         // regular grid below instead of wearing this media wall.
         if (openLevel == "everything") {
-            // v3xx42 — the Everything wall on a PLAIN 8-column LazyVerticalGrid:
-            // this foundation's StaggeredGridItemSpan(Int) constructor is
-            // private (CI), so a staggered masonry with custom spans can't
-            // compile here — instead every cover keeps its own shape and is
-            // scaled UNIFORMLY by a SPAN (3x = 6 of 8 columns, 2x = 4,
-            // 1.5x = 3, 1x = 2, 0.5x = 1). The tier cycle is chosen so
-            // consecutive spans sum to the line (6+1+1, 4+4, 3+3+2), so rows
-            // pack without holes; no seam plate — the page's own surface
-            // shows between covers.
-            LazyVerticalGrid(
-                state = rememberLazyGridState(),
-                columns = GridCells.Fixed(8),
-                contentPadding = PaddingValues(
-                    start = 10.dp,
-                    end = 10.dp,
-                    top = contentTop,
-                    bottom = 24.dp + 84.dp +
-                        WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-                ),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-                modifier = Modifier
-                    .fillMaxSize()
-                    // v3xx42 — NO seam plate: the wall sits on the page's own
-                    // surface, so the gaps read as clean whitespace between
-                    // covers instead of a boxed border plate.
-                    .then(if (glassOn && glassBackdrop != null)
-                        Modifier.layerBackdrop(glassBackdrop) else Modifier)
-            ) {
-                if (wide) {
-                    item(key = "hero", span = { GridItemSpan(maxLineSpan) }, contentType = "hero") {
-                        wideHero()
-                    }
+            // v3xx45 — THE CUPBOARD WALL IS A PACKED SHELF MOSAIC.
+            //
+            // The wall used to be an 8-column LazyVerticalGrid with a span
+            // cycle (6+1+1, 4+4, 3+3+2). Spans fill a LINE horizontally, but a
+            // grid line shares ONE height — so a tall book beside two small
+            // albums always left a hole under the albums (the reported "space
+            // left below those 2"). No span tweak can fix that.
+            //
+            // Instead the covers are packed into SHELVES: each shelf is a row
+            // laid out at a single height, with every cover's width derived
+            // from its OWN aspect, so the widths plus the gaps sum to exactly
+            // the available width. Covers keep their shape, nothing stretches,
+            // and no shelf leaves a gap.
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                val wallWidth = (maxWidth - 20.dp).coerceAtLeast(1.dp)
+                val shelves = remember(shownBooks, shownAlbums, shownSeries, wallWidth) {
+                    buildCupboardShelves(
+                        items = (shownBooks + shownAlbums + shownSeries)
+                            .sortedByDescending { likedAtFor(it) },
+                        availableWidth = wallWidth
+                    )
                 }
-                v2EverythingMasonryItems(
-                    shownBooks = shownBooks,
-                    shownAlbums = shownAlbums,
-                    shownSeries = shownSeries,
-                    railAvailable = railAvailable,
-                    typeFilter = typeFilter,
-                    onTypeFilter = { typeFilter = it },
-                    likedAtFor = { likedAtFor(it) },
-                    onOpenLiked = { item -> item.open(navController) },
-                    onCoverSource = { coverSourceItem = it },
-                    // Everything's add-new dives into Spin; Favorites opens
-                    // the add-to-favorites sheet (same as its old Add pill).
-                    // v3xx43 — the Cupboard's Add searches the CATALOG
-                    // (books / series / albums) and pins the picked media
-                    // onto the wall, so adding never dumps the user out to
-                    // another screen.
-                    onAddNew = { showCupboardAdd = true },
-                    mediaTierIndex = mediaTierIndex,
-                    pageAccent = pageAccent
-                )
+                LazyColumn(
+                    state = rememberLazyListState(),
+                    contentPadding = PaddingValues(
+                        start = 10.dp,
+                        end = 10.dp,
+                        top = contentTop,
+                        bottom = 24.dp + 84.dp +
+                            WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        // v3xx42 — NO seam plate: the wall sits on the page's
+                        // own surface, so the gaps read as clean whitespace
+                        // between covers instead of a boxed border plate.
+                        .then(if (glassOn && glassBackdrop != null)
+                            Modifier.layerBackdrop(glassBackdrop) else Modifier)
+                ) {
+                    if (wide) {
+                        item(key = "hero", contentType = "hero") {
+                            wideHero()
+                        }
+                    }
+                    v2EverythingMasonryItems(
+                        shelves = shelves,
+                        railAvailable = railAvailable,
+                        typeFilter = typeFilter,
+                        onTypeFilter = { typeFilter = it },
+                        onOpenLiked = { item -> item.open(navController) },
+                        onCoverSource = { coverSourceItem = it },
+                        // v3xx43 — the Cupboard's Add searches the CATALOG
+                        // (books / series / albums) and pins the picked media
+                        // onto the wall, so adding never dumps the user out to
+                        // another screen.
+                        onAddNew = { showCupboardAdd = true },
+                        pageAccent = pageAccent
+                    )
+                }
             }
         } else {
         LazyVerticalGrid(
@@ -1264,49 +1261,92 @@ private fun LazyGridScope.v2DetailItems(
             )
         }
     }
-}/** EVERYTHING — the JSX dense wall (the CurioEverythingGallery concept,
- *  now COVERS ONLY): a span-based masonry on an 8-column grid. The liked
- *  media merge into ONE recency stream (no category grouping). Each cover
- *  keeps its OWN aspect shape (books tall, albums square, series posters)
- *  and scales UNIFORMLY — the width multiplier spans that many grid
- *  columns (3x / 2x / 1.5x / 1x / 0.5x), so a cover NEVER changes shape,
- *  only size. The most recent cover runs the biggest tier, then the rest
- *  cycle down the wall in a PACKING order (6+1+1, 4+4, 3+3+2 per line) so
- *  rows never leave holes. The wall's background is the page's own surface
- *  (no plate behind the covers). The filter chips + the corner Add pill
- *  ride the top full-line, and every cover animates to its new spot on
- *  reflow. */
+}/**
+ * One packed shelf of the Cupboard wall — a row of covers at a shared height,
+ * with widths derived from each cover's own aspect so the line always fills
+ * the available width exactly.
+ */
+private data class CupboardShelf(val items: List<V2Liked>, val height: Dp)
+
+/** Every cover's own aspect (width / height): books are portrait jackets,
+ *  albums square sleeves, series posters. */
+private fun cupboardAspect(liked: V2Liked): Float = when (liked.kind) {
+    V2Kind.BOOK -> 0.667f
+    V2Kind.ALBUM -> 1f
+    V2Kind.SERIES -> 0.72f
+}
+
+/** Horizontal gap between the wall's covers (also the row gap). */
+private const val CUPBOARD_GAP_DP = 10f
+
+/**
+ * v3xx45 — packs [items] (display order) into SHELVES with no leftover space.
+ *
+ * A grid line shares ONE height, so a tall book beside two small albums always
+ * leaves a hole under the albums — the reported "space left below those 2".
+ * Here each shelf is a row of covers at a COMMON height: every cover's width
+ * is `height x its aspect`, so the widths plus the gaps sum to exactly
+ * [availableWidth]. Nothing is stretched and nothing is left empty. Shelf
+ * heights alternate feature / tight so the wall keeps its dense, varied look.
+ * The final (possibly short) shelf is capped at its target height so a lone
+ * leftover cover can't blow up to full width.
+ */
+private fun buildCupboardShelves(
+    items: List<V2Liked>,
+    availableWidth: Dp
+): List<CupboardShelf> {
+    if (items.isEmpty()) return emptyList()
+    val width = availableWidth.value
+    if (width <= 0f) return emptyList()
+    val gap = CUPBOARD_GAP_DP
+    // Feature shelf, then a tighter one — alternated down the wall.
+    val targets = floatArrayOf(width * 0.46f, width * 0.32f)
+    // A shelf is closed once its projected height would drop under 80% of its
+    // target, so it stays close to (never far under) the intended size.
+    val minFactor = 0.8f
+    val shelves = mutableListOf<CupboardShelf>()
+    var i = 0
+    var shelfIndex = 0
+    while (i < items.size) {
+        val target = targets[shelfIndex % targets.size]
+        val shelf = mutableListOf<V2Liked>()
+        var aspectSum = 0f
+        while (i < items.size) {
+            val nextSum = aspectSum + cupboardAspect(items[i])
+            val projected = (width - gap * shelf.size) / nextSum
+            if (shelf.isNotEmpty() && projected < target * minFactor) break
+            shelf.add(items[i])
+            aspectSum = nextSum
+            i++
+        }
+        val isLast = i >= items.size
+        val raw = (width - gap * (shelf.size - 1)) / aspectSum
+        val height = (if (isLast) minOf(raw, target) else raw).coerceAtLeast(1f)
+        shelves.add(CupboardShelf(shelf, height.dp))
+        shelfIndex++
+    }
+    return shelves
+}
+
+/** EVERYTHING (the Cupboard) — the dense covers-only wall. The liked media
+ *  merge into ONE recency stream (no category grouping) and are packed into
+ *  tightly-filled shelves by [buildCupboardShelves], so no cover ever leaves
+ *  a gap. The wall's background is the page's own surface (no plate behind
+ *  the covers); the filter chips + the corner Add pill ride the top line. */
 @OptIn(ExperimentalFoundationApi::class)
-private fun LazyGridScope.v2EverythingMasonryItems(
-    shownBooks: List<V2Liked>,
-    shownAlbums: List<V2Liked>,
-    shownSeries: List<V2Liked>,
+private fun LazyListScope.v2EverythingMasonryItems(
+    shelves: List<CupboardShelf>,
     railAvailable: Set<String>,
     typeFilter: String?,
     onTypeFilter: (String?) -> Unit,
-    likedAtFor: (V2Liked) -> Long,
     onOpenLiked: (V2Liked) -> Unit,
     onCoverSource: (V2Liked) -> Unit,
     onAddNew: () -> Unit,
-    // v3xx43 — stable tier lookup (full-list position), so a cover keeps its
-    // size when the filter reflows the wall.
-    mediaTierIndex: Map<String, Int>,
     pageAccent: Color
 ) {
-    val allMedia = (shownBooks + shownAlbums + shownSeries)
-        .sortedByDescending { likedAtFor(it) }
-    val totalShown = allMedia.size
-    // v3xx42 — UNIFORM-SIZE tiers as SPANS on the 8-column grid (1x = 2
-    // spans): every cover keeps its own aspect and the tier scales BOTH
-    // dimensions together (3x = 6 columns, 2x = 4, 1.5x = 3, 1x = 2,
-    // 0.5x = 1). The cycle PACKS perfectly — 3x+0.5x+0.5x = 8, 2x+2x = 8,
-    // 1.5x+1.5x+1x = 8 — so rows never leave holes.
-    val tiers = floatArrayOf(3f, 0.5f, 0.5f, 2f, 2f, 1.5f, 1.5f, 1f)
-
-    // Top full-line: the filter chips + the corner ADD pill (the app-wide
-    // labeled Add, anchored TOP-RIGHT of the wall instead of a bottom
-    // button).
-    item(key = "everything-head", span = { GridItemSpan(maxLineSpan) }, contentType = "head") {
+    // Top line: the filter chips + the corner ADD pill (the app-wide labeled
+    // Add, anchored TOP-RIGHT of the wall instead of a bottom button).
+    item(key = "everything-head", contentType = "head") {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1325,8 +1365,8 @@ private fun LazyGridScope.v2EverythingMasonryItems(
         }
     }
 
-    if (totalShown == 0) {
-        item(key = "e-empty", span = { GridItemSpan(maxLineSpan) }, contentType = "empty") {
+    if (shelves.isEmpty()) {
+        item(key = "e-empty", contentType = "empty") {
             CurioDoodleEmptyState(
                 headline = "Your Cupboard is empty",
                 subtext = "Add a book, series or album and its cover shows up on this wall."
@@ -1335,58 +1375,49 @@ private fun LazyGridScope.v2EverythingMasonryItems(
         return
     }
 
-    allMedia.forEachIndexed { rank, liked ->
-        // The cover's OWN shape — the base aspect per kind, scaled
-        // UNIFORMLY by the size tier (never stretched in one direction).
-        val aspect = when (liked.kind) {
-            V2Kind.BOOK -> 0.667f   // portrait jacket
-            V2Kind.ALBUM -> 1f      // square sleeve
-            V2Kind.SERIES -> 0.72f  // poster
-        }
-        // v3xx43 — the tier comes from the cover's position in the FULL
-        // media list (never its filtered rank): filtering the wall moves
-        // covers around but NEVER resizes them.
-        val tier = tiers[(mediaTierIndex["${liked.kind.name}|${liked.name}"] ?: rank) % tiers.size]
-        // The tier as a SPAN on the 8-column grid: 1x = 2 spans (a quarter
-        // of the line), 2x = 4, 3x = 6 and 0.5x = 1 — a real half-size
-        // cover; the multiplier widens the tile the same amount it tallens
-        // it (both from the aspect ratio), so shapes are never stretched.
-        val spanCount = (tier * 2).toInt().coerceIn(1, 8)
-        item(
-            key = "l|${liked.kind.name}|${liked.name}",
-            span = { GridItemSpan(spanCount) },
-            contentType = "media"
-        ) {
-            // The fallback accent resolves INSIDE the item's composable
-            // lambda (the wall builder itself is not @Composable).
-            val fallbackAccent = liked.topic?.categoryId?.let { CurioCategories.byId(it) }
-                ?.themedAccent() ?: MaterialTheme.colorScheme.primary
-            // Rounded cover tile: the art CROPS to fill the whole tile, so
-            // no cover ever leaves space below or beside it. No plate, no
-            // seam — the page's own surface shows between covers.
-            Box(
+    shelves.forEachIndexed { index, shelf ->
+        item(key = "shelf|$index", contentType = "shelf") {
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(aspect)
-                    .clip(RoundedCornerShape(10.dp))
+                    .height(shelf.height)
                     .then(
                         Modifier.animateItem(
                             fadeInSpec = tween(220),
                             fadeOutSpec = tween(150),
                             placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
                         )
-                    )
-                    .combinedClickable(
-                        onClick = { onOpenLiked(liked) },
-                        onLongClick = { onCoverSource(liked) }
-                    )
+                    ),
+                horizontalArrangement = Arrangement.spacedBy(CUPBOARD_GAP_DP.dp)
             ) {
-                V2JacketArt(
-                    item = liked,
-                    accent = fallbackAccent,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
+                shelf.items.forEach { liked ->
+                    // The fallback accent resolves INSIDE the item's composable
+                    // lambda (the wall builder itself is not @Composable).
+                    val fallbackAccent = liked.topic?.categoryId?.let { CurioCategories.byId(it) }
+                        ?.themedAccent() ?: MaterialTheme.colorScheme.primary
+                    // Every cover is sized to the shelf height by its OWN
+                    // aspect, so the row fills the width exactly and no cover
+                    // ever leaves space beside or below it.
+                    Box(
+                        modifier = Modifier
+                            .size(
+                                width = (shelf.height.value * cupboardAspect(liked)).dp,
+                                height = shelf.height
+                            )
+                            .clip(RoundedCornerShape(10.dp))
+                            .combinedClickable(
+                                onClick = { onOpenLiked(liked) },
+                                onLongClick = { onCoverSource(liked) }
+                            )
+                    ) {
+                        V2JacketArt(
+                            item = liked,
+                            accent = fallbackAccent,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                }
             }
         }
     }
