@@ -129,7 +129,7 @@ fun OnlineModeScreen(navController: NavController) {
                 item(key = "hero", contentType = "hero") {
                     SettingsHeroHeader(
                         title = "Online mode",
-                        subtitle = "Account, sync and community",
+                        subtitle = "Account and sync",
                         onBack = { navController.popBackStack() }
                     )
                 }
@@ -279,7 +279,7 @@ fun OnlineModeScreen(navController: NavController) {
         if (!wide) {
             SettingsHeroHeader(
                 title = "Online mode",
-                subtitle = "Account, sync and community",
+                subtitle = "Account and sync",
                 onBack = { navController.popBackStack() },
                 glassBackdrop = glassBackdrop
             )

@@ -1423,7 +1423,7 @@ private val SettingsDeepIndex: List<SettingsDeepRow> = listOf(
     SettingsDeepRow(CurioIcons.Backup, "Open backup tools", "Export, restore, or import FieldMind data", CurioRoutes.SETTINGS_DATA),
     SettingsDeepRow(CurioIcons.History, "Backup workspace", "Full backup tools remain in the data workspace", CurioRoutes.SETTINGS_DATA),
     // ── Online mode (own screen — no row pulse) ──────────────────────
-    SettingsDeepRow(CurioIcons.Refresh, "Online mode", "Sign in for sync and community", CurioRoutes.SETTINGS_ONLINE),
+    SettingsDeepRow(CurioIcons.Refresh, "Online mode", "Sign in to sync your account", CurioRoutes.SETTINGS_ONLINE),
     // ── Updates (v112 — dedicated sub-page) ─────────────────────────
     SettingsDeepRow(CurioIcons.Info, "Version", "App version and build number", CurioRoutes.UPDATES),
     SettingsDeepRow(CurioIcons.Download, "Check for updates", "See the latest release", CurioRoutes.UPDATES),

@@ -10,4 +10,7 @@
     <include domain="database" path="." />
     <include domain="sharedpref" path="." />
     <exclude domain="sharedpref" path="curio_crash_logs.xml" />
+    <!-- Mirrors data_extraction_rules.xml: the account session's tokens are
+         never cloud-backed-up. -->
+    <exclude domain="sharedpref" path="curio_supabase_session.xml" />
 </full-backup-content>
