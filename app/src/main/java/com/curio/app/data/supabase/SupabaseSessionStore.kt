@@ -1,4 +1,4 @@
-package com.curio.app.data
+package com.curio.app.data.supabase
 
 import android.content.Context
 

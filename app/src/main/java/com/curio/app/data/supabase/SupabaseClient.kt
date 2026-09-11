@@ -1,4 +1,4 @@
-package com.curio.app.data
+package com.curio.app.data.supabase
 
 import android.util.Base64
 import com.curio.app.BuildConfig

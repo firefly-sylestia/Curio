@@ -1353,6 +1353,8 @@ private val SettingsSections = listOf(
                 headerSubtitle = null,
                 rows = listOf(
                     SettingsRowEntry(CurioIcons.Backup, "Backup & restore", "Keep captures and settings safe", CurioRoutes.SETTINGS_DATA),
+                    // v3xx — the account + Online Mode page.
+                    SettingsRowEntry(CurioIcons.Refresh, "Online mode", "Sign in and keep your account in sync", CurioRoutes.SETTINGS_ONLINE),
                     // v26 — recycle bin for soft-deleted captures.
                     SettingsRowEntry(CurioIcons.Delete, "Recycle bin", "Restore recently deleted captures", CurioRoutes.RECYCLE_BIN),
                     // v112 — the dedicated Updates sub-page (its own UI,
@@ -1420,6 +1422,8 @@ private val SettingsDeepIndex: List<SettingsDeepRow> = listOf(
     // ── Backup & restore (own screen — no row pulse) ─────────────────
     SettingsDeepRow(CurioIcons.Backup, "Open backup tools", "Export, restore, or import FieldMind data", CurioRoutes.SETTINGS_DATA),
     SettingsDeepRow(CurioIcons.History, "Backup workspace", "Full backup tools remain in the data workspace", CurioRoutes.SETTINGS_DATA),
+    // ── Online mode (own screen — no row pulse) ──────────────────────
+    SettingsDeepRow(CurioIcons.Refresh, "Online mode", "Sign in for sync and community", CurioRoutes.SETTINGS_ONLINE),
     // ── Updates (v112 — dedicated sub-page) ─────────────────────────
     SettingsDeepRow(CurioIcons.Info, "Version", "App version and build number", CurioRoutes.UPDATES),
     SettingsDeepRow(CurioIcons.Download, "Check for updates", "See the latest release", CurioRoutes.UPDATES),
@@ -1582,6 +1586,7 @@ private val settingsNavRail = listOf(
     SettingsNavEntry("share", "Share hub", CurioIcons.Share, CurioRoutes.SHARE_HUB),
     SettingsNavEntry("experiments", "Experiments", CurioIcons.AutoAwesome, CurioRoutes.USER_EXPERIMENTS),
     SettingsNavEntry("backup", "Backup", CurioIcons.Backup, CurioRoutes.SETTINGS_DATA),
+    SettingsNavEntry("online", "Online", CurioIcons.Refresh, CurioRoutes.SETTINGS_ONLINE),
     SettingsNavEntry("support", "Support", CurioIcons.SupportAgent, CurioRoutes.SUPPORT)
 )
 
@@ -1613,7 +1618,9 @@ private val settingsDesignGroups = listOf(
     )),
     SettingsDesignGroup("Your data & privacy", "\u25C8", listOf(
         SettingsDesignCard("backup", "Backup & restore", "Keep captures and settings safe", CurioIcons.Backup, SettingsDesignTone.SLATE, SettingsDesignVisual.CLOUD, CurioRoutes.SETTINGS_DATA),
-        SettingsDesignCard("bookcovers", "Book covers", "Cover-art fetching and providers", CurioIcons.Image, SettingsDesignTone.STEEL, SettingsDesignVisual.IMAGE, CurioRoutes.SETTINGS_BOOK_COVER)
+        SettingsDesignCard("bookcovers", "Book covers", "Cover-art fetching and providers", CurioIcons.Image, SettingsDesignTone.STEEL, SettingsDesignVisual.IMAGE, CurioRoutes.SETTINGS_BOOK_COVER),
+        // v3xx — the account + Online Mode page (sign in, then sync).
+        SettingsDesignCard("online", "Online mode", "Sign in and keep your account in sync", CurioIcons.Refresh, SettingsDesignTone.BLUE, SettingsDesignVisual.REFRESH, CurioRoutes.SETTINGS_ONLINE)
     ))
 )
 

@@ -106,6 +106,7 @@ import com.curio.app.features.settings.BackupToolsScreen
 import com.curio.app.features.settings.BookCoverHubScreen
 import com.curio.app.features.settings.ExperimentsScreen
 import com.curio.app.features.settings.UserExperimentsScreen
+import com.curio.app.features.settings.OnlineModeScreen
 import com.curio.app.features.settings.SettingsHubScreen
 import com.curio.app.features.settings.SettingsPage
 import com.curio.app.features.settings.SettingsSectionScreen
@@ -995,6 +996,11 @@ fun CurioNavHost(
             composable(CurioRoutes.SETTINGS_DATA) {
                 SettingsSharedScope(sharedTransitionScope, this) {
                     BackupToolsScreen(navController = navController)
+                }
+            }
+            composable(CurioRoutes.SETTINGS_ONLINE) {
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    OnlineModeScreen(navController = navController)
                 }
             }
             composable(CurioRoutes.SETTINGS_BOOK_COVER) {

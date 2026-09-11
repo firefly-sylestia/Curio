@@ -400,7 +400,7 @@ receiver resolves at both and the chip keeps filling its parent Box.
 
 **Status:** committed + pushed (main).
 
-## Request (2026-09-11, in progress — Supabase plan audit: what is actually built, and making the new secrets count)
+## Request (2026-09-11, completed — Supabase plan audit: what is actually built, and making the new secrets count)
 
 User asked how far the 6-item Supabase plan has been implemented, noted the
 repository secrets for `SUPABASE_URL` + the publishable key were just added,
@@ -446,7 +446,54 @@ recorded in `.github/AGENTS.md` (service-role key stays out of every build).
 `origin/main` was merged into this branch and the `Prompt.md` conflict
 resolved by keeping both entries, which clears the PR conflict so CI can run.
 
-**Status:** pushing; CI run to be confirmed on the PR.
+**Status:** committed + pushed. Follow-up work (auth UI, sync, community) is
+tracked in the entry below; the branch is NOT merged to `main` (user
+directive).
+
+## Request (2026-09-11, completed — plan item 2: the auth/session layer + Online Mode UI)
+
+User: "don't merge it to main yet, continue."
+
+**Shipped (branch `v0/fix-settings-compose-import` only):**
+
+1. **`data/supabase/` package** (the plan's stated location): `SupabaseClient`
+   + `SupabaseSessionStore` moved there via `git mv` (package line updated,
+   no external references existed).
+2. **`data/supabase/OnlineAccount.kt` — the auth/session layer:**
+   observable `state` (session / busy / error / notice) that the UI reads,
+   plus `restore`, `signIn`, `signUp`, `signOut` and `setOnlineMode`.
+   Sign-in stores the session and turns Online Mode on; sign-out always
+   clears locally and turns Online Mode off; a sign-up that needs email
+   confirmation reports a notice instead of pretending to sign in.
+   `onlineAuthMessage` keeps rate-limit / unconfirmed-email / bad-credential
+   failures actionable and collapses everything else to one generic line, so
+   a raw response body can never reach the UI.
+3. **`features/settings/OnlineModeScreen.kt`** (route
+   `CurioRoutes.SETTINGS_ONLINE`): the account form (frosted email + password
+   fields matching the family's search-field surface, reveal toggle,
+   rose `Sign in` pill + `Create account`), the signed-in account row +
+   `Sign out`, and the **Online mode** switch that states the text-only
+   contract (photos/audio/screenshots never leave the device) and is only
+   live while signed in. Built from the shared settings components
+   (`SettingsHeroHeader` + pinned phone hero, `SettingsNavRail`,
+   `SettingsOptionCard`/`Row`/`InfoRow`/`SwitchRow`, Playfair section
+   headings), so it reads as part of the settings family.
+4. **Wiring:** route constant, `CurioNavHost` composable inside
+   `SettingsSharedScope`, hub design card (*Your data & privacy*), settings
+   rail chip ("Online"), hub search row + deep-index row.
+
+**Docs:** `app/AGENTS.md` gained the *Online layer (Supabase)* contract and
+the child index entry; new `data/supabase/AGENTS.md` child doc (public
+credentials only, no media upload, offline-first, UI-safe errors); the
+current store changelog gained the user-visible ADD line.
+
+**Static verification (this workspace has no Android SDK, so no Gradle):**
+`git diff --check` clean, delimiter balance + an unused-import sweep over the
+new files, and a symbol audit that caught two real breaks — `CurioIcon`
+needed its own import (only `CurioIcons` was imported) and the rail chip's
+`BoxScope` receiver. CI on the branch is the authoritative compile check.
+
+**Status:** committed + pushed (branch only, no merge to `main`).
 
 ## Archive
 

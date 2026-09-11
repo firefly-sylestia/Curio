@@ -198,6 +198,8 @@ object CurioRoutes {
     const val SETTINGS_PREFERENCES = "settings/preferences"
     const val SETTINGS_RECORDING = "settings/recording"
     const val SETTINGS_DATA = "settings/data"
+    // v3xx — the account + Online Mode page (sign-in, sync, community).
+    const val SETTINGS_ONLINE = "settings/online"
     const val SETTINGS_BOOK_COVER = "settings/book-cover"
     // v3xx — the Book browser: every book as a scrollable line-by-line list
     // (covers, ratings, years) — moved out of the Book covers hub's strip.
