@@ -136,6 +136,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.rememberCurioControlTick
 import com.curio.app.ui.components.liquidglass.CurioLiquidGlassTabBar
 import com.curio.app.ui.components.liquidglass.CurioLiquidGlassTabBarItem
 import com.curio.app.ui.components.isInScreenGlassActive
@@ -1984,6 +1985,8 @@ private fun AccessoryRow(
     onToggle: (Boolean) -> Unit
 ) {
     val enabled = design.isProceduralEnabled(element)
+    // v3xx51 — the shared one-tick haptic on the element toggle.
+    val tick = rememberCurioControlTick()
     Surface(
         shape = RoundedCornerShape(18.dp),
         color = MaterialTheme.colorScheme.surface,
@@ -2026,7 +2029,7 @@ private fun AccessoryRow(
             }
             Switch(
                 checked = enabled,
-                onCheckedChange = onToggle
+                onCheckedChange = { tick { onToggle(it) } }
             )
         }
     }
@@ -4874,6 +4877,8 @@ private fun ChoiceChip(label: String, selected: Boolean, onClick: () -> Unit) {
 /** A labeled switch row (face/reaction toggles). */
 @Composable
 private fun ToggleRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    // v3xx51 — the shared one-tick haptic on every switch flip.
+    val tick = rememberCurioControlTick()
     Spacer(Modifier.height(4.dp))
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -4886,7 +4891,7 @@ private fun ToggleRow(label: String, checked: Boolean, onCheckedChange: (Boolean
         )
         Switch(
             checked = checked,
-            onCheckedChange = onCheckedChange
+            onCheckedChange = { tick { onCheckedChange(it) } }
         )
     }
 }

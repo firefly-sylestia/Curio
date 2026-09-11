@@ -95,6 +95,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioSettingsCard
 import com.curio.app.ui.components.CurioSettingsDivider
+import com.curio.app.ui.components.rememberCurioControlTick
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.MorphEntrance
 import com.curio.app.ui.components.SoftTornBottomShape
@@ -809,6 +810,8 @@ private fun ReminderRow(
     reminderWanted: Boolean,
     onReminderChange: (Boolean) -> Unit
 ) {
+    // v3xx51 — the shared one-tick haptic on every switch flip.
+    val tick = rememberCurioControlTick()
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -836,7 +839,7 @@ private fun ReminderRow(
                 overflow = TextOverflow.Ellipsis
             )
         }
-        Switch(checked = reminderWanted, onCheckedChange = onReminderChange)
+        Switch(checked = reminderWanted, onCheckedChange = { tick { onReminderChange(it) } })
     }
 }
 
@@ -845,6 +848,8 @@ private fun ReminderRow(
 @Composable
 private fun BubbleOptInRow() {
     val context = LocalContext.current
+    // v3xx51 — the shared one-tick haptic on every switch flip.
+    val tick = rememberCurioControlTick()
     var bubbleEnabled by remember { mutableStateOf(AppPreferences.isOverlayBubbleEnabled(context)) }
     Row(
         modifier = Modifier
@@ -876,9 +881,11 @@ private fun BubbleOptInRow() {
         Switch(
             checked = bubbleEnabled,
             onCheckedChange = { enabled ->
-                bubbleEnabled = enabled
-                if (enabled) AppPreferences.setOverlayAskDeclined(context, false)
-                AppPreferences.setOverlayBubbleEnabled(context, enabled)
+                tick {
+                    bubbleEnabled = enabled
+                    if (enabled) AppPreferences.setOverlayAskDeclined(context, false)
+                    AppPreferences.setOverlayBubbleEnabled(context, enabled)
+                }
             }
         )
     }
@@ -1021,6 +1028,8 @@ private fun ThemeSlide() {
             // (the chip onClick lambdas aren't @Composable).
             val themeTransition = LocalCurioThemeTransition.current
             val transitionScope = rememberCoroutineScope()
+            // v3xx51 — the shared one-tick haptic for the Pastel switch below.
+            val tick = rememberCurioControlTick()
             var lightChipBounds by remember { mutableStateOf(Rect.Zero) }
             var darkChipBounds by remember { mutableStateOf(Rect.Zero) }
             var systemChipBounds by remember { mutableStateOf(Rect.Zero) }
@@ -1097,7 +1106,7 @@ private fun ThemeSlide() {
                     }
                     Switch(
                         checked = pastel,
-                        onCheckedChange = { AppPreferences.setPastelColorsEnabled(context, it) }
+                        onCheckedChange = { tick { AppPreferences.setPastelColorsEnabled(context, it) } }
                     )
                 }
             }

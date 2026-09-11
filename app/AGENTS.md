@@ -7284,6 +7284,15 @@ app/src/main/java/com/curio/app/
   per save — the GC pauses froze the app. Now only new/changed rows
   decode; the map is only touched from the flow's single collection
   dispatcher.
+- **v3xx51 — the control tick reaches every switch.** `rememberCurioControlTick()`
+  (CurioPressFeedback) now also wraps the switches outside the settings family
+  — Bug report's crash-log toggle, Onboarding's reminder / explore-bubble /
+  pastel toggles, the Pet designer's element + face/reaction toggles, the
+  reveal dialog's bubble opt-in, and the share sheet's four (polaroid-on-card
+  ×2, long-fact auto-fit, include-a-link). The helper is a `@Composable`
+  factory, so it must be hoisted to the enclosing composable body and used
+  INSIDE the non-composable `onCheckedChange` lambda (`{ tick { … } }`) —
+  never called from within that lambda (root AGENTS.md rule 3).
 - **v3xx50 — the Cabinet's SKELETON system + the settings rail's vanishing
   active label.** (1) **Skeleton system** (`ui/components/CurioSkeleton.kt`):
   `CurioEntrySkeletonCard` is a 20dp-radius / 96dp-header placeholder that

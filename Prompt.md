@@ -54,6 +54,16 @@ what u can do then after doing it ask me questions and doubts".
    unchanged once it lands) and the bounds spring is critically damped
    (1.0 / 420) so the highlight lands and stops.
 
+6. **Switch haptics completed (v3xx51)** — the previous task's last open
+   item ("extend press feedbacks and haptics for sheet toggles etc"): the
+   shared `rememberCurioControlTick()` now also wraps the switches outside
+   the settings family — Bug report's crash-log toggle, Onboarding's
+   reminder / explore-bubble / pastel toggles, the Pet designer's element +
+   face/reaction toggles, the reveal dialog's bubble opt-in and the share
+   sheet's four toggles. (The sheet's own drag handle + the ripple→pressed
+   look landed in the earlier commits; no sheet-open buzz was added because
+   it would fire on programmatic opens too.)
+
 **Open questions for the user (asked at the end of this turn):** what
 "redraw the collections ... do it properly" should change; whether the
 built-in starter shelves should keep their destructive "Delete collection"

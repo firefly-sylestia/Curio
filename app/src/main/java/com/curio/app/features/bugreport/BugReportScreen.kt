@@ -25,6 +25,7 @@ import androidx.navigation.NavController
 import com.curio.app.BuildConfig
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.ui.components.CurioBackButton
+import com.curio.app.ui.components.rememberCurioControlTick
 import com.curio.app.ui.theme.CurioColors
 import com.curio.app.ui.theme.isCurioDarkTheme
 
@@ -100,6 +101,9 @@ fun BugReportScreen(navController: NavController) {
 
             // Include crash logs toggle
             if (crashHistory.isNotEmpty()) {
+                // v3xx51 — the shared one-tick haptic: every switch in the app
+                // answers a flip (see CurioPressFeedback).
+                val tick = rememberCurioControlTick()
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -119,7 +123,7 @@ fun BugReportScreen(navController: NavController) {
                     }
                     Switch(
                         checked = includeCrashLog,
-                        onCheckedChange = { includeCrashLog = it },
+                        onCheckedChange = { tick { includeCrashLog = it } },
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = CurioColors.CoralBlush,
                             checkedTrackColor = CurioColors.CoralBlush.copy(alpha = 0.3f)

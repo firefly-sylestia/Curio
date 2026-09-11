@@ -193,6 +193,7 @@ import com.curio.app.ui.adaptive.CurioContentMaxWidth
 import com.curio.app.features.settings.BookCoverFetch
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioHoldPill
+import com.curio.app.ui.components.rememberCurioControlTick
 import com.curio.app.ui.components.CurioProgressPill
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.curioFloatingNavContainerFor
@@ -1469,6 +1470,8 @@ fun TopicRevealScreen(
         // The glow's accent: the topic's own category shade (the filter
         // chips glow with their lane accent too).
         val pillGlowAccent = cat.themedAccent()
+        // v3xx51 — the shared one-tick haptic for this dialog's switch.
+        val tick = rememberCurioControlTick()
         // v11 — the dialog wears the shared Curio dialog theme: the card-
         // matching 24dp shape, the pastel-aware container, and the readable
         // action ink (deep rose on light/pastel so the buttons never wash
@@ -1529,7 +1532,7 @@ fun TopicRevealScreen(
                                 color = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.weight(1f)
                             )
-                            Switch(checked = bubbleOptIn, onCheckedChange = { bubbleOptIn = it })
+                            Switch(checked = bubbleOptIn, onCheckedChange = { tick { bubbleOptIn = it } })
                         }
                     }
                 }
