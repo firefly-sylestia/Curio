@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -2704,7 +2703,7 @@ internal fun SettingsNavRail(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                         modifier = Modifier
-                            .matchParentSize()
+                            .fillMaxSize()
                             .padding(horizontal = 6.dp, vertical = 9.dp)
                     ) {
                         CurioIcon(
