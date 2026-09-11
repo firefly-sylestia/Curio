@@ -2607,7 +2607,9 @@ internal fun SettingsNavRail(
     val railActiveIndex = active?.let { id -> settingsNavRail.indexOfFirst { it.id == id } } ?: -1
     val railInitialOffset = with(LocalDensity.current) {
         if (railActiveIndex <= 0) 0
-        else (railActiveIndex * railChipPitch - (railViewport - railChipWidth) / 2)
+        // Dp arithmetic: the pitch must be the receiver (Int * Dp has no
+        // operator — Dp.times(Int) does).
+        else (railChipPitch * railActiveIndex - (railViewport - railChipWidth) / 2)
             .coerceAtLeast(0.dp)
             .roundToPx()
     }

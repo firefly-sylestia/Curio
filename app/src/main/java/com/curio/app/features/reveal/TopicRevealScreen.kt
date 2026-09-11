@@ -4540,15 +4540,19 @@ private fun AlbumNotesSheet(
         )
     }
     LaunchedEffect(paletteUrl) {
+        // Read the delegated state into a local — a `paletteUrl != null`
+        // check cannot smart-cast a delegated property, so the cache write
+        // below needs this snapshot.
+        val url = paletteUrl
         val fetched = fetchCoverSwatches(
             context,
-            paletteUrl,
+            url,
             networkAllowed = AppPreferences.albumFetchEnabledState
         )
         // Keep the cached palette when the refresh finds nothing.
         coverSwatches = fetched ?: coverSwatches
-        if (fetched != null && paletteUrl != null) {
-            AppPreferences.setCoverSwatchCache(context, paletteUrl, coverSwatchesToArgbs(fetched))
+        if (fetched != null && url != null) {
+            AppPreferences.setCoverSwatchCache(context, url, coverSwatchesToArgbs(fetched))
         }
     }
     val coverPal = cat.notesSheetPalette(coverSwatches)

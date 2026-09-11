@@ -64,7 +64,7 @@ private const val SCREEN_REVEAL_DURATION_MS = 440
 /** Beat between freezing the old frame and letting the reveal animate, so the
  *  destination has really drawn underneath the frozen frame first. Shorter
  *  than the theme wipe's settle because nothing is being recoloured. */
-private const val SCREEN_REVEAL_SETTLE_MS = 32
+private const val SCREEN_REVEAL_SETTLE_MS = 32L
 
 /** A warmed frame older than this is thrown away rather than revealed. */
 private const val FRAME_FRESHNESS_MS = 900L
