@@ -101,6 +101,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
+import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.components.CurioGlassToolbar
 import com.curio.app.ui.components.CurioSearchField
 import com.curio.app.ui.components.curioSearchFill
@@ -2362,7 +2363,9 @@ private fun SettingsDesignCardView(
             .height(204.dp)
             .clip(RoundedCornerShape(26.dp))
             .background(Brush.linearGradient(listOf(start, end)))
-            .clickable(onClick = onClick)
+            // v3xx46 — the hub cards squish + tick on press (a big surface
+            // gets a gentler scale so it reads as a press, not a jump).
+            .curioPressClickable(pressedScale = 0.985f, onClick = onClick)
     ) {
         // ── Blobs + texture (the JSX ::before/::after + cardTexture) —
         //    the big corner blobs stay, the bubbles + speckle are the
@@ -2485,7 +2488,8 @@ private fun SettingsSecondaryCardView(
             .height(104.dp)
             .clip(RoundedCornerShape(22.dp))
             .background(Brush.linearGradient(listOf(start, end)))
-            .clickable(onClick = onClick)
+            // v3xx46 — the secondary cards share the press language.
+            .curioPressClickable(pressedScale = 0.98f, onClick = onClick)
     ) {
         // The small decorative visual, bottom-right, behind the text.
         SettingsCardVisual(
@@ -2791,7 +2795,8 @@ private fun SettingsQuickTools(
                             if (dark) Color.White.copy(alpha = 0.07f)
                             else Color.White.copy(alpha = 0.62f)
                         )
-                        .clickable {
+                        // v3xx46 — the quick-tool chips squish + tick too.
+                        .curioPressClickable(pressedScale = 0.96f) {
                             if (tool.page != null && tool.rowKey != null) {
                                 SettingsHighlightTarget.page = tool.page
                                 SettingsHighlightTarget.rowKey = tool.rowKey

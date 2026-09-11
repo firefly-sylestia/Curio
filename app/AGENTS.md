@@ -7284,6 +7284,26 @@ app/src/main/java/com/curio/app/
   per save — the GC pauses froze the app. Now only new/changed rows
   decode; the map is only touched from the flow's single collection
   dispatcher.
+- **v3xx46 — the shared PRESS FEEDBACK + haptics primitive
+  (`ui/components/CurioPressFeedback.kt`, NEW; user 2026-09-11: "Press
+  feedback … and more haptics all over the over").** `Modifier
+  .curioPressClickable(...)` is a drop-in for `Modifier.clickable(onClick)`:
+  it owns a `MutableInteractionSource`, reads `collectIsPressedAsState()`,
+  scales the surface on `CurioMotion.Springs.Press` (quick snap-back, no
+  rubbery overshoot) and fires ONE light haptic on the DOWN edge only
+  (`LaunchedEffect(pressed)`, `HapticFeedbackType.TextHandleMove` — the same
+  tick the nav pills use). The ripple is carried over from
+  `LocalIndication.current`, so no surface loses its press wash, and
+  `Modifier.scale` is a draw-only transform — neighbours never reflow while
+  a surface squishes. Scale is a parameter because the same 0.94 reads as a
+  press on a chip and a jump on a full-width card: chips 0.96, settings rows
+  0.975, Home's saved/pinned rows 0.975, secondary cards 0.98, the big hub
+  cards 0.985. Applied to `SettingsOptionRow` (so EVERY settings-family row
+  ticks), the hub's `SettingsDesignCardView` / `SettingsSecondaryCardView`,
+  `SettingsQuickTools` chips, and Home's `SavedEntryRow` / `PinnedTopicRow`.
+  Surfaces that already own a haptic or their own press handling were left
+  alone (the nav pills, the `Surface(onClick=…)` cards, the v244 settings
+  search pill's `indication = null` interaction source).
 - **v3xx45 — SCREEN REVEAL experiment, packed Cupboard shelves, the .jsx
   Text-history tree, plain caption box + cover-true album sheet (user
   2026-09-11: "similar to the dark mode and light mode transition cant we

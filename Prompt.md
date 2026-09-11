@@ -51,9 +51,27 @@ concept `.jsx` files were left untracked).
 
 **Status:** committed + pushed; CI validates.
 
-**Still pending (user's wish-list, not in this commit):** the broader
-animations pass (sheets + press feedback) and more haptics across the app;
-the user has not built this batch yet, so test results are still outstanding.
+**CI fix (second commit, `4b774680`):** four compile errors in the first
+push — a missing `LazyListScope` import in `CabinetV2Content` (which cascaded
+into unresolved `item` / `animateItem` plus the tween/spring inference
+failures inside the item lambda), `Int * Dp` in the settings rail's initial
+offset, a delegated `paletteUrl` that cannot smart-cast for the album sheet's
+swatch-cache write, and an `Int` constant assigned to the `Long`
+`revealSettleDelayMs`.
+
+**Press feedback + haptics (third commit, v3xx46):** new
+`ui/components/CurioPressFeedback.kt` — `Modifier.curioPressClickable` squishes
+on `CurioMotion.Springs.Press`, fires one light haptic on the DOWN edge only,
+and keeps the ripple via `LocalIndication.current`; the scale is a parameter so
+a chip (0.96) and a full-width card (0.985) both read as a press. Applied to
+`SettingsOptionRow` (every settings-family row), the hub's tone + secondary
+cards, the quick-tool chips, and Home's saved / pinned rows.
+
+**Still pending (user's wish-list):** the rest of the animations pass — motion
+specific to navigation and bottom sheets beyond the page transitions already
+refined, further glass-header morph polish (it collapses correctly now; more
+needs their eyes on it), and haptics beyond the surfaces above (the nav bar
+already ticks). The user's build result for this batch is still outstanding.
 
 ## Request (2026-09-11, completed — settings rail highlight speed/feel + text-history tree badges)
 

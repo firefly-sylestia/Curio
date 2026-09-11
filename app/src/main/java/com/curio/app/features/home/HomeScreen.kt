@@ -150,6 +150,7 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.theme.LocalCurioThemeTransition
 import com.curio.app.ui.theme.switchThemeWithReveal
 import com.curio.app.ui.components.CurioConstellation
+import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.components.CurioGlassToolbarMorph
 import com.curio.app.ui.components.CurioDrawerState
 import com.curio.app.ui.components.CurioForwardArrow
@@ -1902,7 +1903,8 @@ private fun SavedQuoteRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick)
+            // v3xx46 — the shared press language (squish + one light tick).
+            .curioPressClickable(pressedScale = 0.975f, onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -1954,7 +1956,8 @@ private fun PinnedTopicRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .clickable(onClick = onClick)
+            // v3xx46 — same press feedback as the Saved row beside it.
+            .curioPressClickable(pressedScale = 0.975f, onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

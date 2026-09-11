@@ -1,3 +1,4 @@
+ADD: Every settings row, hub card and quick-tool chip — plus Home's saved and pinned rows — now gives PRESS FEEDBACK: the surface squishes a hair under your finger and springs back, with one light haptic tick as you touch down (the ripple stays).
 ADD: Settings — a new "Screen reveal transitions" experiment: opening a screen plays the same soft circular reveal as the light/dark flip, growing from where you tapped, and a touch faster than the theme wipe.
 ADD: Cabinet — the Cupboard wall packs into tight shelves now: every cover keeps its own shape and size and no cover leaves a gap beside or below it (the wall used to leave holes under the short covers).
 ADD: Text history — the tree matches the concept design: newest version card on TOP with its change badge, sessions newest-first, and tapping a snapshot opens the word-level COMPARE against the version before it (compare is the changes view now — the inline changes list is gone).

@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.PlayfairDisplayFontFamily
@@ -209,7 +210,9 @@ fun SettingsOptionRow(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .clickable(onClick = onClick)
+            // v3xx46 — every settings row squishes + ticks on press now (the
+            // shared press primitive); the ripple rides along via LocalIndication.
+            .curioPressClickable(pressedScale = 0.975f, onClick = onClick)
             .padding(vertical = 10.dp)
     ) {
         SettingsOptionIconTile(icon, dark)
