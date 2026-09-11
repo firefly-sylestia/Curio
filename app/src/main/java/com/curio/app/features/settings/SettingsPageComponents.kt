@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.curio.app.ui.components.curioPressClickable
+import com.curio.app.ui.components.rememberCurioControlTick
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.PlayfairDisplayFontFamily
@@ -247,10 +248,13 @@ fun SettingsOptionSwitchRow(
     ) {
         SettingsOptionIconTile(icon, dark)
         SettingsOptionCopy(title, subtitle, Modifier.weight(1f))
+        // v3xx46 — every settings switch ticks as it flips (this row is the
+        // switch the whole settings family, Experiments included, is built on).
+        val tick = rememberCurioControlTick()
         Switch(
             checked = checked,
             enabled = enabled,
-            onCheckedChange = onCheckedChange,
+            onCheckedChange = { wanted -> tick { onCheckedChange(wanted) } },
             colors = SwitchDefaults.colors()
         )
     }

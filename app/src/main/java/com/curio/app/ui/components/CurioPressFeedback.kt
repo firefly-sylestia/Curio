@@ -45,10 +45,53 @@ fun Modifier.curioPressClickable(
     onClickLabel: String? = null,
     onClick: () -> Unit
 ): Modifier {
+    val press = rememberCurioPressSource(
+        pressedScale = pressedScale,
+        hapticOnPress = hapticOnPress && enabled
+    )
+    return this
+        .then(press.modifier)
+        .clickable(
+            interactionSource = press.interactionSource,
+            indication = LocalIndication.current,
+            enabled = enabled,
+            onClickLabel = onClickLabel,
+            onClick = onClick
+        )
+}
+
+/**
+ * The press half of [curioPressClickable] for surfaces that OWN their click
+ * gesture — Material3's clickable `Surface`, a `combinedClickable` card, a
+ * `ListItem` — which only let you hand in an `interactionSource`. Feed
+ * [interactionSource] into that parameter and [modifier] into the surface's
+ * modifier chain; the scale + the one-tick haptic then work exactly as they
+ * do for [curioPressClickable].
+ *
+ * Both halves are required: the surface needs the SAME source the press
+ * feedback observes, so never pass a different one.
+ */
+class CurioPressSource(
+    val interactionSource: MutableInteractionSource,
+    val modifier: Modifier
+)
+
+/**
+ * Builds a [CurioPressSource] — see its docs. The returned interaction source
+ * is remembered across recompositions, so passing it to a `Surface` keeps the
+ * press state stable.
+ *
+ * @param pressedScale 1f disables the squish (e.g. a disabled row).
+ */
+@Composable
+fun rememberCurioPressSource(
+    pressedScale: Float = 0.97f,
+    hapticOnPress: Boolean = true
+): CurioPressSource {
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (pressed && enabled) pressedScale else 1f,
+        targetValue = if (pressed) pressedScale else 1f,
         animationSpec = CurioMotion.Springs.Press,
         label = "curioPressScale"
     )
@@ -56,17 +99,35 @@ fun Modifier.curioPressClickable(
     // Fire on the DOWN edge only — keyed on `pressed` so a release (or a
     // drag-off) never ticks, and a cancelled press can't leave a stray buzz.
     LaunchedEffect(pressed) {
-        if (pressed && enabled && hapticOnPress) {
+        if (pressed && hapticOnPress) {
             haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         }
     }
-    return this
-        .scale(scale)
-        .clickable(
-            interactionSource = interaction,
-            indication = LocalIndication.current,
-            enabled = enabled,
-            onClickLabel = onClickLabel,
-            onClick = onClick
-        )
+    return CurioPressSource(interaction, Modifier.scale(scale))
+}
+
+/**
+ * Wraps a control's change callback with the shared one-tick haptic — the
+ * feedback for ON/OFF controls (switches, segmented rows) that have no press
+ * state of their own to squish. Use it as the `onCheckedChange` /
+ * `onSelected` argument:
+ *
+ * ```
+ * val tick = rememberCurioControlTick()
+ * Switch(onCheckedChange = { tick { onCheckedChange(it) } })
+ * ```
+ *
+ * The tick fires only for a real user change (the returned lambda is never
+ * invoked by initial composition), so a screen that opens with a switch
+ * already ON stays silent.
+ */
+@Composable
+fun rememberCurioControlTick(): (() -> Unit) -> Unit {
+    val haptics = LocalHapticFeedback.current
+    return remember(haptics) {
+        { action ->
+            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            action()
+        }
+    }
 }

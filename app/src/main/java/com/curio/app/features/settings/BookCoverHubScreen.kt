@@ -52,6 +52,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.components.rememberCurioControlTick
 import androidx.compose.ui.draw.alpha
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
@@ -201,9 +202,13 @@ fun BookCoverHubScreen(navController: NavController) {
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
+                        // v3xx46 — the switch ticks as it flips.
+                        val tick = rememberCurioControlTick()
                         Switch(
                             checked = fetchOn,
-                            onCheckedChange = { AppPreferences.setBookFetchEnabled(context, it) }
+                            onCheckedChange = { wanted ->
+                                tick { AppPreferences.setBookFetchEnabled(context, wanted) }
+                            }
                         )
                     }
                 }

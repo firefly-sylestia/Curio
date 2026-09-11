@@ -7302,8 +7302,22 @@ app/src/main/java/com/curio/app/
   ticks), the hub's `SettingsDesignCardView` / `SettingsSecondaryCardView`,
   `SettingsQuickTools` chips, and Home's `SavedEntryRow` / `PinnedTopicRow`.
   Surfaces that already own a haptic or their own press handling were left
-  alone (the nav pills, the `Surface(onClick=…)` cards, the v244 settings
-  search pill's `indication = null` interaction source).
+  alone (the nav pills, the v244 settings search pill's `indication = null`
+  interaction source).
+  **Extended the same cycle:** `rememberCurioPressSource()` is the press half
+  for surfaces that OWN their gesture — Material3's clickable `Surface` and
+  `combinedClickable` cards that only accept an `interactionSource`; hand the
+  returned source to that parameter and the returned modifier to the surface's
+  chain (both halves are required — the surface must observe the SAME source).
+  Used by `V2ShelfCard` (CabinetShelves, `combinedClickable`) and Profile's
+  `SettingsNavCard` (clickable `Surface`). `rememberCurioControlTick()` wraps
+  an ON/OFF control's callback with the one tick — wired into
+  `SettingsOptionSwitchRow` (which every settings + Experiments switch is
+  built on, so it covers the whole family), Book covers' fetch switch and
+  Manage categories' per-lane visibility switch. NOTE: sheets do NOT tick on
+  open — that needs a shared sheet wrapper (there are ~60 `ModalBottomSheet`
+  call sites), and ticking only the handful that were edited would read as
+  inconsistent.
 - **v3xx45 — SCREEN REVEAL experiment, packed Cupboard shelves, the .jsx
   Text-history tree, plain caption box + cover-true album sheet (user
   2026-09-11: "similar to the dark mode and light mode transition cant we

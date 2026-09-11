@@ -79,6 +79,7 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioVerticalScrollIndicator
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.components.ScreenEntrance
+import com.curio.app.ui.components.rememberCurioControlTick
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.categoryInk
@@ -657,9 +658,11 @@ private fun CategoryRow(
         }
 
         // ── Visibility toggle ───────────────────────────────────────────
+        // v3xx46 — the lane's visibility switch ticks as it flips.
+        val tick = rememberCurioControlTick()
         Switch(
             checked = !category.isHidden,
-            onCheckedChange = { newVisible -> onVisibilityToggle(newVisible) },
+            onCheckedChange = { newVisible -> tick { onVisibilityToggle(newVisible) } },
             colors = SwitchDefaults.colors(
                 checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
                 checkedTrackColor = MaterialTheme.colorScheme.primary,

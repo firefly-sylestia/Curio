@@ -4,6 +4,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -41,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.curio.app.ui.components.CurioDoodleEmptyState
+import com.curio.app.ui.components.rememberCurioPressSource
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.isCurioDarkTheme
@@ -203,8 +205,19 @@ fun V2ShelfCard(
     val muted = ink.copy(alpha = 0.62f)
     var moreOpen by remember { mutableStateOf(false) }
     val hasMenu = onRename != null || onDelete != null
+    // v3xx46 — the collection cards squish + tick on press. Material3's
+    // clickable Surface owns the gesture, so the press source is handed to it
+    // and the scale rides its modifier chain.
+    val press = rememberCurioPressSource(pressedScale = 0.98f)
     Surface(
-        modifier = modifier.combinedClickable(onClick = onClick, onLongClick = if (hasMenu) ({ moreOpen = true }) else null),
+        modifier = modifier
+            .then(press.modifier)
+            .combinedClickable(
+                interactionSource = press.interactionSource,
+                indication = LocalIndication.current,
+                onClick = onClick,
+                onLongClick = if (hasMenu) ({ moreOpen = true }) else null
+            ),
         shape = RoundedCornerShape(22.dp),
         color = tone.fill()
     ) {
