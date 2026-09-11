@@ -124,7 +124,7 @@ object CommunityApi {
         draft: CommunityCardDraft,
         handle: String
     ): Result<Unit> = withContext(Dispatchers.IO) {
-        mapped {
+        mappedUnit {
             draftProblem(draft)?.let { throw IllegalArgumentException(it) }
             val payload = JSONObject()
                 .put("author_handle", handle.trim().ifBlank { "A curious soul" })
@@ -149,7 +149,7 @@ object CommunityApi {
     /** Idempotent like — reacting twice leaves one reaction. */
     suspend fun like(accessToken: String, cardId: String): Result<Unit> =
         withContext(Dispatchers.IO) {
-            mapped {
+            mappedUnit {
                 val payload = JSONObject().put("card_id", cardId)
                 val request = SupabaseClient.requestBuilder(REACTIONS, accessToken)
                     .header("Prefer", "resolution=merge-duplicates,return=minimal")
@@ -161,7 +161,7 @@ object CommunityApi {
 
     suspend fun unlike(accessToken: String, cardId: String, myUserId: String): Result<Unit> =
         withContext(Dispatchers.IO) {
-            mapped {
+            mappedUnit {
                 val request = SupabaseClient
                     .requestBuilder("$REACTIONS?card_id=eq.$cardId&user_id=eq.$myUserId", accessToken)
                     .delete()
@@ -173,7 +173,7 @@ object CommunityApi {
     /** Files a report. One per card per user (the DB's unique constraint). */
     suspend fun report(accessToken: String, cardId: String, reason: String): Result<Unit> =
         withContext(Dispatchers.IO) {
-            mapped {
+            mappedUnit {
                 val payload = JSONObject().put("card_id", cardId).put("reason", reason)
                 val request = SupabaseClient.requestBuilder(REPORTS, accessToken)
                     .header("Prefer", "return=minimal")
@@ -186,7 +186,7 @@ object CommunityApi {
     /** Pulls your own card early (the author is the only one who can). */
     suspend fun delete(accessToken: String, cardId: String): Result<Unit> =
         withContext(Dispatchers.IO) {
-            mapped {
+            mappedUnit {
                 val request = SupabaseClient
                     .requestBuilder("$CARDS?id=eq.$cardId", accessToken)
                     .delete()
@@ -202,6 +202,14 @@ object CommunityApi {
     } catch (failure: Throwable) {
         Result.failure(CommunityError(communityMessage(failure)))
     }
+
+    /**
+     * The writes answer with a response body nobody wants, so they go through
+     * this overload: the block returns Unit and the body is discarded (a plain
+     * `mapped { executeBody(…) }` would infer `Result<String>` and fail to match
+     * the call's declared `Result<Unit>`).
+     */
+    private fun mappedUnit(block: () -> Unit): Result<Unit> = mapped(block)
 
     private fun parseCards(body: String, myUserId: String?): List<CommunityCard> {
         val array = JSONArray(body)

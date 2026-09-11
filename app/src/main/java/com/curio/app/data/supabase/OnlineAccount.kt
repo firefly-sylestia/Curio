@@ -29,7 +29,13 @@ object OnlineAccount {
         val error: String? = null,
         /** Non-error outcome worth telling the user (e.g. confirm your email). */
         val notice: String? = null
-    )
+    ) {
+        /** True when a session is held, so Online Mode can be offered. */
+        val signedIn: Boolean get() = session != null
+
+        /** The signed-in email, when the account reported one. */
+        val email: String? get() = session?.email
+    }
 
     var state: State by mutableStateOf(State())
         private set
