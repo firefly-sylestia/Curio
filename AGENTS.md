@@ -401,6 +401,7 @@ npm run dev
 - [app/AGENTS.md](app/AGENTS.md) — Active Curio Android app module
 - [app/CURIO_DATA_PLAN.md](app/CURIO_DATA_PLAN.md) — Curio topic data contract
 - [gradle/AGENTS.md](gradle/AGENTS.md) — Gradle version catalog and wrapper
+- [supabase/AGENTS.md](supabase/AGENTS.md) — Online backend schema + RLS (`schema.sql`, pasted into the Supabase dashboard; RLS is the security boundary)
 - [fastlane/AGENTS.md](fastlane/AGENTS.md) — Android store metadata and release notes
 - [desktop/](desktop/) — Compose Multiplatform desktop port (see the
   Desktop App section above)

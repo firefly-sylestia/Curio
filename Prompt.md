@@ -495,6 +495,63 @@ needed its own import (only `CurioIcons` was imported) and the rail chip's
 
 **Status:** committed + pushed (branch only, no merge to `main`).
 
+## Request (2026-09-11, in progress — plan items 4+5: the schema, the 24-hour cards and the Community feed)
+
+User: "Build the 24-hour text share cards and the Community feed on top of the
+new schema."
+
+**Order of work:** the schema had to exist first (it did not — nothing SQL was
+in the repo), so the backend script went in with the feature.
+
+**Shipped:**
+
+1. **`supabase/schema.sql`** (new, with its own child AGENTS.md): idempotent
+   script for `profiles`, `cloud_captures`, `community_cards`,
+   `community_reactions`, `community_reports` + RLS policies + indexes + the
+   `curio_purge_expired_cards()` sweep + a PASS/FAIL self-check block. Key
+   choices: RLS is the boundary (policies for `authenticated` only, zero
+   `anon` policies, no service-role key anywhere); identity columns default
+   to `auth.uid()` so the client never sends one; community reads AND writes
+   require Online Mode on for both the reader and the card's author; the
+   insert policy refuses a lifetime over 25 hours; `expires_at` defaults to
+   now() + 24 hours and every read filters `expires_at > now()`.
+2. **`data/supabase/CommunityApi.kt`**: the feed (live cards newest-first,
+   likes embedded through PostgREST so one request carries counts + whether
+   you liked it), post, like (idempotent), unlike, report (one per card per
+   user) and author delete, with `draftProblem()` + `communityMessage()`
+   keeping every failure safe to render. `CommunityCardDraft` has no field
+   for an image, audio or screenshot — text-only is structural, not a rule
+   the UI has to remember.
+3. **`features/community/CommunityScreen.kt`** (route `CurioRoutes.COMMUNITY`,
+   reached from the Online mode page's *Community* row): the 24-hour wall,
+   each card rendered by the real `TopicShareCard` scaled into the feed
+   width, with like / report / take-down, an hours-left label, and the
+   composer sheet (topic + words + lane + style, caps + validation).
+   Eligibility gates first: not configured, not signed in, or Online Mode
+   off → a locked card that opens Settings → Online mode.
+4. **`SupabaseClient.updateOnlineMode` is now an UPSERT** (`on_conflict=id`,
+   merge-duplicates). It was a PATCH, and a brand-new account has no
+   `profiles` row — so the switch looked on in the app while the server still
+   refused every community call. `requestBuilder`/`executeBody` became
+   `internal` so the community layer shares the one HTTP client.
+
+**Docs:** `supabase/AGENTS.md` (new) + root AGENTS.md child index;
+`app/AGENTS.md` online-layer section extended with the community contract;
+store changelog ADD line.
+
+**Verified statically** (no Android SDK here): delimiter balance + unused-import
+sweep on all new files, `git diff --check`, and signature checks for every
+shared component used (`SettingsOption*`, `TopicShareCard`, `ShareCardStyle`,
+`ShareCardAspect`, `CurioCategories.byId`). CI on the branch is the compile
+check.
+
+**Still open:** the reveal-page share sheet does not yet offer "post to
+community" (the API is ready for it — that is the next slice), and the SQL
+must be pasted into the Supabase dashboard by the user (no project access
+here).
+
+**Status:** committing + pushing (branch only, no merge to `main`).
+
 ## Archive
 
 Older completed request logs (2026-09-08 → 2026-09-10) were trimmed from this

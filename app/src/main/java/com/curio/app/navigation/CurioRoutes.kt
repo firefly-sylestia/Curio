@@ -200,6 +200,8 @@ object CurioRoutes {
     const val SETTINGS_DATA = "settings/data"
     // v3xx — the account + Online Mode page (sign-in and sync).
     const val SETTINGS_ONLINE = "settings/online"
+    // v3xx — the 24-hour community wall of text share cards.
+    const val COMMUNITY = "community"
     const val SETTINGS_BOOK_COVER = "settings/book-cover"
     // v3xx — the Book browser: every book as a scrollable line-by-line list
     // (covers, ratings, years) — moved out of the Book covers hub's strip.

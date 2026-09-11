@@ -50,6 +50,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.supabase.OnlineAccount
+import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
@@ -241,6 +242,18 @@ fun OnlineModeScreen(navController: NavController) {
                             }
                         }
                     }
+                }
+            }
+
+            item { SettingsSectionHeading("Community") }
+            item {
+                SettingsOptionCard {
+                    SettingsOptionRow(
+                        icon = CurioIcons.Share,
+                        title = "Community",
+                        subtitle = "Text cards from the last 24 hours",
+                        onClick = { navController.navigate(CurioRoutes.COMMUNITY) }
+                    )
                 }
             }
 

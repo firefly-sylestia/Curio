@@ -59,14 +59,25 @@ object SupabaseClient {
         }
     }
 
+    /**
+     * Mirrors the account's Online Mode switch into its `profiles` row.
+     *
+     * An UPSERT (not a PATCH): a brand-new account has no row yet, and the
+     * community RLS policies read `profiles.online_mode_enabled` — a PATCH
+     * that matched zero rows would leave the switch looking on in the app
+     * while the server still refused every community call.
+     */
     suspend fun updateOnlineMode(accessToken: String, enabled: Boolean): Result<Unit> =
         withContext(Dispatchers.IO) {
             runCatching {
                 requireConfigured()
                 val userId = userIdFromAccessToken(accessToken)
-                val body = JSONObject().put("online_mode_enabled", enabled)
-                val request = requestBuilder("/rest/v1/profiles?id=eq.$userId", accessToken)
-                    .patch(body.toString().toRequestBody(jsonMediaType))
+                val body = JSONObject()
+                    .put("id", userId)
+                    .put("online_mode_enabled", enabled)
+                val request = requestBuilder("/rest/v1/profiles?on_conflict=id", accessToken)
+                    .header("Prefer", "resolution=merge-duplicates,return=minimal")
+                    .post(body.toString().toRequestBody(jsonMediaType))
                     .build()
                 execute(request)
             }
@@ -85,7 +96,7 @@ object SupabaseClient {
             }
         }
 
-    private fun requestBuilder(path: String, accessToken: String? = null): Request.Builder {
+    internal fun requestBuilder(path: String, accessToken: String? = null): Request.Builder {
         val builder = Request.Builder()
             .url(BuildConfig.SUPABASE_URL.trimEnd('/') + path)
             .header("apikey", BuildConfig.SUPABASE_PUBLISHABLE_KEY)
@@ -98,7 +109,7 @@ object SupabaseClient {
         executeBody(request)
     }
 
-    private fun executeBody(request: Request): String {
+    internal fun executeBody(request: Request): String {
         http.newCall(request).execute().use { response ->
             val body = response.body?.string().orEmpty()
             if (!response.isSuccessful) {
