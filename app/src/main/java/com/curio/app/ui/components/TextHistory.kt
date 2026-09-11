@@ -1207,6 +1207,14 @@ private fun HistoryFieldCard(
                     )
                 }
                 Column(Modifier.padding(start = TreeTrunkInset)) {
+                    // v3xx44 — the +/− badge compares each snapshot against the
+                    // FIELD's previous snapshot, not just the previous one in
+                    // its own session: the first snapshot of a new session used
+                    // to report its whole text as "+N" (a brand-new edit burst
+                    // read as if everything had just been added). The running
+                    // pointer below walks the field chronologically across
+                    // session boundaries, so every badge is a true delta.
+                    var prevEntry: TextHistoryEntry? = null
                     tree.sessions.forEachIndexed { sIdx, session ->
                         if (sIdx > 0) {
                             // Hairline between sessions — starts right of the
@@ -1238,10 +1246,13 @@ private fun HistoryFieldCard(
                             )
                         }
                         // Version nodes — each hangs off the trunk.
-                        session.versions.forEachIndexed { vIdx, e ->
+                        session.versions.forEach { e ->
                             HistoryVersionRow(
                                 entry = e,
-                                prev = session.versions.getOrNull(vIdx - 1),
+                                // v3xx44 — the field's previous snapshot (a
+                                // session's first node compares against the last
+                                // node before it, so the badge stays truthful).
+                                prev = prevEntry,
                                 isActive = e.field == activeField,
                                 isCurrent = isCurrent(e),
                                 activeField = activeField,
@@ -1251,6 +1262,7 @@ private fun HistoryFieldCard(
                                 onCompare = { onCompare(e) },
                                 onDelete = { onDelete(e) }
                             )
+                            prevEntry = e
                         }
                     }
                 }
@@ -1301,10 +1313,14 @@ private fun HistoryVersionRow(
     Row(Modifier.padding(top = 6.dp), verticalAlignment = Alignment.Top) {
         // ── Branch + node — the stub starts exactly at the trunk (x=0 of
         //    this column IS the trunk) and ends at the node dot.
+        // v3xx44 — a FIXED 18dp connector box: `fillMaxHeight()` inside this
+        // Top-aligned Row measured against an unbounded (LazyColumn) height,
+        // so the box collapsed to zero and the stub + dot drew outside their
+        // own bounds — visible, but with no measured height for the row.
         Box(
             modifier = Modifier
                 .width(18.dp)
-                .fillMaxHeight()
+                .height(18.dp)
                 .drawBehind {
                     drawLine(
                         color = stemColor,

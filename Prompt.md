@@ -1,5 +1,41 @@
 # Prompt Log — current request
 
+## Request (2026-09-11, completed — settings rail highlight speed/feel + text-history tree badges)
+
+User test results (ask_user): "All landed well" for the Cabinet/header batch;
+next up selected: **Animations refinement pass**, **Text history tree**, and the
+concrete report "the active indicator in settings top rail too slow and feels
+broken".
+
+**Shipped (2 code files + docs, this commit):**
+
+1. **SettingsHubScreen.kt — the rail highlight lands with the tap.**
+   `SettingsRailBoundsTransform` 0.8/140 → **0.9/320** (~350ms → ~200ms
+   settle: responsive, still a visible glide rather than the old stiffness-500
+   instant snap). The "feels broken" part was the POST-COMPOSITION centring
+   correction: `LaunchedEffect(active)` + `scrollToItem` snapped the whole
+   header sideways one frame after every section switch, right under the
+   gliding pill. The rail geometry is fixed (82dp chip + 7dp gap), so the
+   centred offset is now computed up front from
+   `LocalConfiguration.screenWidthDp` and passed as
+   `initialFirstVisibleItemScrollOffset` — the row composes already centred and
+   nothing scrolls after composition (the effect is gone).
+2. **TextHistory.kt — tree refinements.** (a) A version node's +/− badge now
+   compares against the FIELD's previous snapshot across session boundaries
+   (running `prevEntry` in `HistoryFieldCard`) — a new session's first node
+   used to report its whole text as "+N". (b) The version connector Box is a
+   fixed 18dp box instead of `fillMaxHeight()`, which measured 0 height inside
+   an unbounded LazyColumn item (the stub + dot drew outside their own
+   bounds).
+
+**Scope:** Android app only (web/ + desktop/ untouched).
+
+**Status:** committed + pushed; CI validates.
+
+**Remaining:** the broader ANIMATIONS pass needs specifics — I fixed the
+highest-signal animation complaint (the rail). More text-history tree
+refinements are queued for the user's next specifics.
+
 ## Request (2026-09-11, completed — Favorites = liked topics, Everything → Cupboard, stable wall, instant Cabinet, glass header to the top + a real collapse)
 
 User (ACTIVE 2026-09-10, after a CI failure was pasted in):

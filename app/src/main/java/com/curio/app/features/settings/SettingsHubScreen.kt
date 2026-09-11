@@ -138,6 +138,7 @@ import androidx.compose.ui.layout.findRootCoordinates
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.IntOffset
 import kotlin.math.roundToInt
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
@@ -2554,13 +2555,13 @@ private fun SettingsSecondaryCardView(
  *  the new screen's chip across the page transition. */
 private const val SettingsRailActiveKey = "settings-rail-active"
 
-/** Bounds animation for the rail morph — a CALM spring so the pill is
- *  actually SEEN gliding between chips (v3xx42: the old stiffness-500
- *  spring settled in ~150ms — under half the 450ms page fade — so the
- *  tap read as the chip snapping to a solid colour, no moving highlight).
- *  0.8 / 140 settles in ~350ms, pacing the glide to the page crossfade. */
+/** Bounds animation for the rail morph — a snappy, VISIBLE glide. v3xx44:
+ *  0.9 / 320 settles in ~200ms, so the highlight lands with the tap instead
+ *  of lagging behind it (v3xx42's 0.8 / 140 took ~350ms and read as "too
+ *  slow"), while still being a real travel rather than the old stiffness-500
+ *  instant snap (~150ms, no moving highlight). */
 private val SettingsRailBoundsTransform = BoundsTransform { _, _ ->
-    spring(dampingRatio = 0.8f, stiffness = 140f)
+    spring(dampingRatio = 0.9f, stiffness = 320f)
 }
 
 /**
@@ -2592,41 +2593,28 @@ internal fun SettingsNavRail(
     // on composition — the header never glides. (The old animateScrollToItem
     // re-animated from index 0 on every page open: the rail visibly jumped
     // on top of the page transition.)
-    val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = active?.let { id ->
-            settingsNavRail.indexOfFirst { it.id == id }.takeIf { it >= 0 }
-        } ?: 0
-    )
-    // v3xx40 — CENTER the active chip (user: "keep the active scroll in
-    // middle, not always on the left side"): after the initial index lands
-    // the active chip at the row's LEFT edge, glide the row so the chip
-    // sits mid-viewport. The correction is small (≤ half the rail's width)
-    // and animates once per active change — the header stays put. Chips
-    // near either end (All Settings, Support) clamp naturally.
-    LaunchedEffect(active) {
-        if (active == null) return@LaunchedEffect
-        val idx = settingsNavRail.indexOfFirst { it.id == active }
-        if (idx < 0) return@LaunchedEffect
-        // Give the row a frame to lay out at the initial index, then SNAP the
-        // row to centre the active chip in ONE frame (v3xx42 — the old
-        // animateScrollBy glided the row for ~300ms DURING the page
-        // transition, dragging the shared-element pill's target bounds as it
-        // morphed — that's the jitter that read as "goes solid colour").
-        // scrollToItem positions the chip so its centre lands mid-viewport
-        // instantly (no LazyListState.scrollBy in this foundation), so the
-        // pill morph has stable start/end bounds; end chips clamp naturally.
-        withFrameNanos { }
-        val info = listState.layoutInfo
-        val item = info.visibleItemsInfo.firstOrNull { it.index == idx } ?: return@LaunchedEffect
-        val viewportCenter = info.viewportEndOffset / 2
-        // Only move when the chip is meaningfully off-centre (>10% of the
-        // viewport) so near-centred chips don't twitch.
-        if (kotlin.math.abs(item.offset + item.size / 2 - viewportCenter) > info.viewportEndOffset * 0.10f) {
-            // The item's top offset that puts its centre at the viewport
-            // center (scrollToItem clamps out-of-range offsets itself).
-            listState.scrollToItem(idx, (viewportCenter - item.size / 2).coerceAtLeast(0))
-        }
+    // v3xx44 — the row composes ALREADY SCROLLED to centre the active chip
+    // (v3xx40 asked for the active chip mid-viewport). The rail's geometry is
+    // fixed (82dp chips on a 7dp rhythm), so the offset can be computed up
+    // front and handed to the list as its INITIAL scroll — nothing scrolls
+    // after composition. The old post-composition `scrollToItem` correction
+    // snapped the whole header sideways one frame AFTER every section switch,
+    // right underneath the gliding highlight — that is what read as broken.
+    val railChipWidth = 82.dp
+    val railChipPitch = 89.dp
+    val railViewport = (LocalConfiguration.current.screenWidthDp.dp - 40.dp)
+        .coerceAtLeast(railChipPitch)
+    val railActiveIndex = active?.let { id -> settingsNavRail.indexOfFirst { it.id == id } } ?: -1
+    val railInitialOffset = with(LocalDensity.current) {
+        if (railActiveIndex <= 0) 0
+        else (railActiveIndex * railChipPitch - (railViewport - railChipWidth) / 2)
+            .coerceAtLeast(0.dp)
+            .roundToPx()
     }
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = 0,
+        initialFirstVisibleItemScrollOffset = railInitialOffset
+    )
     Column(modifier = modifier.fillMaxWidth()) {
         LazyRow(
             state = listState,

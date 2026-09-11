@@ -7284,6 +7284,25 @@ app/src/main/java/com/curio/app/
   per save — the GC pauses froze the app. Now only new/changed rows
   decode; the map is only touched from the flow's single collection
   dispatcher.
+- **v3xx44 — settings rail highlight lands with the tap + text-history
+  tree badges (user test feedback: "the active indicator in settings top
+  rail too slow and feels broken").** (1) **`SettingsRailBoundsTransform`
+  (SettingsHubScreen.kt) 0.8/140 → 0.9/320** (~350ms → ~200ms settle):
+  the highlight arrives with the tap and still visibly travels instead of
+  snapping. (2) **The rail no longer moves AFTER composition:** the old
+  `LaunchedEffect(active)` + `scrollToItem` centring correction snapped
+  the whole header sideways one frame after every section switch, right
+  under the gliding pill — that is the "feels broken". The row now
+  composes ALREADY centred: the rail geometry is fixed (82dp chip +
+  7dp gap), so `railInitialOffset` is computed from
+  `LocalConfiguration.screenWidthDp` and handed in as
+  `initialFirstVisibleItemScrollOffset`. (3) **TextHistory.kt tree:** each
+  version node's +/− badge now compares against the FIELD's previous
+  snapshot walked ACROSS session boundaries (a running `prevEntry` in
+  `HistoryFieldCard`) — a session's first node used to report its whole
+  text as "+N"; the version connector Box is a fixed `height(18.dp)`
+  instead of `fillMaxHeight()` (which measured 0 in an unbounded
+  LazyColumn item, so the stub/dot drew outside their own bounds).
 - **v3xx43 — Favorites = liked TOPICS, Everything → CUPBOARD, stable
   wall sizes, instant Cabinet, glass headers to the status bar + a real
   collapse (user 2026-09-10).**

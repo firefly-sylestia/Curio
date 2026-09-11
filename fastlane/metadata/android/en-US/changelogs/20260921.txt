@@ -1,3 +1,5 @@
+FIX: Settings — the top nav rail's active highlight lands WITH your tap now (it was ~350ms behind it) and the rail no longer jerks sideways right after a section switch: the active chip is centred from the first frame, so only the highlight moves.
+FIX: Text history — the +/− change badge on a tree snapshot is accurate now: a new edit session's first snapshot compares against your previous snapshot instead of counting its whole text as newly added.
 ADD: Cabinet — Favorites lists the TOPICS you liked now (the heart on any reveal page), instead of repeating the same media covers that live in the Cupboard — the two shelves finally show different things.
 ADD: Cabinet — "Everything" is the CUPBOARD now: the wall holds only your books, albums and series (its card, hero and empty state say so), and saved captures stay on their own shelf.
 ADD: Cabinet — the Cupboard's Add opens a CATALOG search: type a book, album or series and tap it to pin it on the wall; tap something already on the wall to take it back off.
