@@ -588,7 +588,11 @@ object CurioBackupManager {
         // showing the pre-restore theme/reminder values until process restart.
         AppPreferences.initThemeMode(context)
         if (AppPreferences.isReminderEnabled(context)) {
-            DailyReminderScheduler.schedule(context, AppPreferences.getReminderHour(context))
+            DailyReminderScheduler.schedule(
+                context,
+                AppPreferences.getReminderHour(context),
+                AppPreferences.getReminderMinute(context)
+            )
         } else {
             DailyReminderScheduler.cancel(context)
         }

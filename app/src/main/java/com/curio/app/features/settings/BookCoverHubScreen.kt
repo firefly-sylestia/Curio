@@ -189,13 +189,16 @@ fun BookCoverHubScreen(navController: NavController) {
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                "Book cover fetching",
+                                // v3xx51 — one merged consent now covers
+                                // books, albums and series (the per-category
+                                // toggles were merged).
+                                "Cover fetching",
                                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 if (fetchOn)
-                                    "ON · covers and ratings can be downloaded"
+                                    "ON · book covers, ratings, album art and series posters can download"
                                 else
                                     "OFF by default · nothing downloads until you turn this on",
                                 style = MaterialTheme.typography.bodySmall,

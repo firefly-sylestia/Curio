@@ -18,14 +18,15 @@ import com.curio.app.infrastructure.DailyReminderReceiver
 object DailyReminderScheduler {
     private const val REQUEST_CODE = 4107
 
-    fun schedule(context: Context, hour: Int) {
+    fun schedule(context: Context, hour: Int, minute: Int = 0) {
         val safeHour = hour.coerceIn(0, 23)
+        val safeMinute = minute.coerceIn(0, 59)
         val alarmManager = context.getSystemService(AlarmManager::class.java)
         alarmManager.cancel(pendingIntent(context))
 
         val firstTrigger = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, safeHour)
-            set(Calendar.MINUTE, 0)
+            set(Calendar.MINUTE, safeMinute)
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
             if (timeInMillis <= System.currentTimeMillis()) {

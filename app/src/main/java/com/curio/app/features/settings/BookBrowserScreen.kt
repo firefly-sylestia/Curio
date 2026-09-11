@@ -315,7 +315,12 @@ private fun BookBrowserRow(
                     .clip(RoundedCornerShape(5.dp))
                     .background(MaterialTheme.colorScheme.surfaceContainerHighest)
             ) {
-                val cover = BookCoverFetch.coverCandidates(book.name, book.imageUrl).firstOrNull()
+                // v3xx51 — honour the merged cover-fetch consent: every
+                // candidate here is a network URL, so with fetching OFF the
+                // row keeps its empty plate instead of silently downloading.
+                val cover = if (AppPreferences.coverFetchEnabledState) {
+                    BookCoverFetch.coverCandidates(book.name, book.imageUrl).firstOrNull()
+                } else null
                 if (cover != null) {
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)

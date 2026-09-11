@@ -65,8 +65,8 @@ object AppPreferences {
     // v350 — per-category cover-fetch consent: ALBUMS and SERIES get their
     // own toggles alongside books (opt-OUT by default like books), so the
     // user can switch fetching on for each category in Settings.
-    private const val KEY_ALBUM_FETCH_ENABLED = "album_fetch_enabled"    // bool — opt-out, default false
-    private const val KEY_SERIES_FETCH_ENABLED = "series_fetch_enabled"  // bool — opt-out, default false
+    private const val KEY_ALBUM_FETCH_ENABLED = "album_fetch_enabled"    // legacy — superseded by KEY_COVER_FETCH_ENABLED
+    private const val KEY_SERIES_FETCH_ENABLED = "series_fetch_enabled"  // legacy — superseded by KEY_COVER_FETCH_ENABLED
     private const val KEY_SERIES_FAVORITES = "series_favorites"
     // v3xx — when a book / album / series was LIKED ("kind|name" → epoch
     // ms). Feeds the Cabinet Everything "Recent" rail with recently liked
@@ -118,6 +118,9 @@ object AppPreferences {
     private const val KEY_3D_BUTTON_GRADIENT = "3d_button_gradient"
     private const val KEY_REMINDER_ENABLED = "reminder_enabled"
     private const val KEY_REMINDER_HOUR = "reminder_hour"
+    // v3xx51 — the reminder's MINUTE (the clock picker can set any time, not
+    // just the preset hours). Defaults to 0 = on the hour.
+    private const val KEY_REMINDER_MINUTE = "reminder_minute"
     private const val KEY_TINT_WASH_ENABLED = "tint_wash_enabled"
     private const val KEY_SHARE_AUTO_FIT = "share_auto_fit"
     private const val KEY_ENTRY_META_ENABLED = "entry_meta_enabled"
@@ -220,7 +223,9 @@ object AppPreferences {
     // surprise data usage), which provider the bulk fetch uses, the books
     // whose covers failed (survive restarts so "Retry failed" works), and
     // the keyless-fetched average ratings (book name → Google Books rating).
-    private const val KEY_BOOK_FETCH_ENABLED = "book_fetch_enabled"    // bool — opt-out, default false
+    private const val KEY_BOOK_FETCH_ENABLED = "book_fetch_enabled"    // legacy — superseded by KEY_COVER_FETCH_ENABLED
+    // v3xx51 — the MERGED cover-fetch consent (books + albums + series).
+    private const val KEY_COVER_FETCH_ENABLED = "cover_fetch_enabled"  // bool — opt-out, default false
     private const val KEY_BOOK_COVER_PROVIDER = "book_cover_provider"  // BookCoverProvider.name
     private const val KEY_BOOK_COVER_FAILED = "book_cover_failed"     // JSON array of book names
     // v360 — book names whose covers VERIFIED as real images (not Open
@@ -1426,9 +1431,12 @@ object AppPreferences {
      */
     var bookFetchEnabledState by mutableStateOf(false)
         private set
-    // v350 — per-category cover-fetch consent states (album + series toggles
-    // beside the book one) so each category's poster fetch can be switched on
-    // and off independently.
+    // v3xx51 — the MERGED cover-fetch consent (books + albums + series). The
+    // per-category mirrors below stay in lockstep with it so existing readers
+    // need no changes.
+    var coverFetchEnabledState by mutableStateOf(false)
+        private set
+    // v350 — per-category cover-fetch consent mirrors (album + series).
     var albumFetchEnabledState by mutableStateOf(false)
         private set
     var seriesFetchEnabledState by mutableStateOf(false)
@@ -1597,9 +1605,12 @@ object AppPreferences {
         collectionsState = getCabinetCollections(context)
         pickerMixesSeededState = isPickerMixesSeeded(context)
         lastMixNameState = getLastMixName(context)
-        bookFetchEnabledState = isBookFetchEnabled(context)
-        albumFetchEnabledState = isAlbumFetchEnabled(context)
-        seriesFetchEnabledState = isSeriesFetchEnabled(context)
+        // v3xx51 — one merged consent feeds all three mirrors (see
+        // [isCoverFetchEnabled], which migrates any legacy per-category on).
+        coverFetchEnabledState = isCoverFetchEnabled(context)
+        bookFetchEnabledState = coverFetchEnabledState
+        albumFetchEnabledState = coverFetchEnabledState
+        seriesFetchEnabledState = coverFetchEnabledState
         bookCoverProviderState = getBookCoverProvider(context)
         bookCoverFailedState = getBookCoverFailed(context)
         bookCoverDoneState = getBookCoverDone(context)
@@ -2767,7 +2778,11 @@ object AppPreferences {
         reminderEnabledState = enabled
         prefs(context).edit().putBoolean(KEY_REMINDER_ENABLED, enabled).apply()
         if (enabled) {
-            DailyReminderScheduler.schedule(context, getReminderHour(context))
+            DailyReminderScheduler.schedule(
+                context,
+                getReminderHour(context),
+                getReminderMinute(context)
+            )
         } else {
             DailyReminderScheduler.cancel(context)
         }
@@ -2776,11 +2791,26 @@ object AppPreferences {
     fun getReminderHour(context: Context): Int =
         prefs(context).getInt(KEY_REMINDER_HOUR, 18)   // default 6 PM
 
-    fun setReminderHour(context: Context, hour: Int) {
+    /** v3xx51 — the reminder's minute (0 by default = the preset hours). */
+    fun getReminderMinute(context: Context): Int =
+        prefs(context).getInt(KEY_REMINDER_MINUTE, 0).coerceIn(0, 59)
+
+    /** Preset hour pick — snaps back to the top of the hour. */
+    fun setReminderHour(context: Context, hour: Int) = setReminderTime(context, hour, 0)
+
+    /**
+     * v3xx51 — the EXACT reminder time from the clock picker (hour + minute).
+     * Writes both keys and re-arms the alarm in one go.
+     */
+    fun setReminderTime(context: Context, hour: Int, minute: Int) {
         val safeHour = hour.coerceIn(0, 23)
-        prefs(context).edit().putInt(KEY_REMINDER_HOUR, safeHour).apply()
+        val safeMinute = minute.coerceIn(0, 59)
+        prefs(context).edit()
+            .putInt(KEY_REMINDER_HOUR, safeHour)
+            .putInt(KEY_REMINDER_MINUTE, safeMinute)
+            .apply()
         if (isReminderEnabled(context)) {
-            DailyReminderScheduler.schedule(context, safeHour)
+            DailyReminderScheduler.schedule(context, safeHour, safeMinute)
         }
     }
 
@@ -3160,38 +3190,50 @@ object AppPreferences {
         lastMixNameState = name
     }
 
-    // ── Book-cover hub (v320 / v320b) ────────────────────────────────
+    // ── Cover fetching consent (v320 → v3xx51 MERGED) ────────────────
     /**
-     * Whether bulk book-cover + rating fetching is ENABLED. Opt-OUT by
-     * default (false) — the user flips it on in the hub, so the app never
-     * bulk-downloads covers (or hits Google Books) without explicit consent.
+     * v3xx51 — ONE consent for ALL cover fetching. Books, albums and series
+     * used to have separate toggles, which the user merged into a single
+     * "Cover fetching" switch. This is the canonical gate: every reader
+     * (the hub's bulk pass, the reveal's on-demand resolvers, the Cabinet
+     * cover cache and the share cards) checks it, and nothing reaches the
+     * network while it is OFF.
+     *
+     * Opt-OUT by default (false) — nothing downloads without explicit
+     * consent. The legacy per-category keys are still honoured ONCE on read
+     * (an install that had any of them on migrates to the merged key), then
+     * never written again.
      */
-    fun isBookFetchEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_BOOK_FETCH_ENABLED, false)
+    fun isCoverFetchEnabled(context: Context): Boolean {
+        val p = prefs(context)
+        if (p.contains(KEY_COVER_FETCH_ENABLED)) {
+            return p.getBoolean(KEY_COVER_FETCH_ENABLED, false)
+        }
+        val legacy = p.getBoolean(KEY_BOOK_FETCH_ENABLED, false) ||
+            p.getBoolean(KEY_ALBUM_FETCH_ENABLED, false) ||
+            p.getBoolean(KEY_SERIES_FETCH_ENABLED, false)
+        if (legacy) p.edit().putBoolean(KEY_COVER_FETCH_ENABLED, true).apply()
+        return legacy
+    }
 
-    fun setBookFetchEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_BOOK_FETCH_ENABLED, enabled).apply()
+    fun setCoverFetchEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_COVER_FETCH_ENABLED, enabled).apply()
+        // All three mirrors move together — every existing reader keeps
+        // working unchanged off its own state field.
+        coverFetchEnabledState = enabled
         bookFetchEnabledState = enabled
-    }
-
-    // v350 — per-category consent toggles for album + series poster fetching.
-    // Same opt-OUT-by-default semantics as the book toggle; the READER of a
-    // topic checks its own category's toggle before touching the network.
-    fun isAlbumFetchEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_ALBUM_FETCH_ENABLED, false)
-
-    fun setAlbumFetchEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_ALBUM_FETCH_ENABLED, enabled).apply()
         albumFetchEnabledState = enabled
-    }
-
-    fun isSeriesFetchEnabled(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_SERIES_FETCH_ENABLED, false)
-
-    fun setSeriesFetchEnabled(context: Context, enabled: Boolean) {
-        prefs(context).edit().putBoolean(KEY_SERIES_FETCH_ENABLED, enabled).apply()
         seriesFetchEnabledState = enabled
     }
+
+    // Legacy per-category accessors — thin aliases of the merged consent (so
+    // the ~15 existing call sites keep compiling AND behave identically).
+    fun isBookFetchEnabled(context: Context): Boolean = isCoverFetchEnabled(context)
+    fun setBookFetchEnabled(context: Context, enabled: Boolean) = setCoverFetchEnabled(context, enabled)
+    fun isAlbumFetchEnabled(context: Context): Boolean = isCoverFetchEnabled(context)
+    fun setAlbumFetchEnabled(context: Context, enabled: Boolean) = setCoverFetchEnabled(context, enabled)
+    fun isSeriesFetchEnabled(context: Context): Boolean = isCoverFetchEnabled(context)
+    fun setSeriesFetchEnabled(context: Context, enabled: Boolean) = setCoverFetchEnabled(context, enabled)
 
     /** The selected cover provider (a BookCoverProvider enum name). v356 —
      *  defaults to ITUNES (the keyless first-choice source). v361 — when the

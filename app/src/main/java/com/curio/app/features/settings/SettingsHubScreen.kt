@@ -700,12 +700,13 @@ fun heroPageBackground(default: Color = MaterialTheme.colorScheme.background): C
     heroLaneCategory()?.categoryBackgroundWash() ?: default
 
 /**
- * v223 — whether the torn shared heroes wear the Material theme's
- * primaryContainer ("Material hero tears" Appearance option). Needs the
- * Material theme itself on — the Appearance row greys out otherwise.
+ * v223/v3xx51 — whether the torn shared heroes wear the Material theme's
+ * primaryContainer. The "Material hero tears" Appearance option was removed
+ * per user request: the Material container hero is now PART of the Material
+ * theme (on whenever the theme is on), so this simply reads that theme.
+ * The dormant `materialHeroTearsState` pref API stays for compatibility.
  */
-fun materialHeroTearsOn(): Boolean =
-    AppPreferences.materialThemeState && AppPreferences.materialHeroTearsState
+fun materialHeroTearsOn(): Boolean = AppPreferences.materialThemeState
 
 /** The settings hero's rose-wood fill — the SAME treatment as Home/Profile
  *  (the muted rose-wood base, its airy pastel twin in pastel mode) so
@@ -964,6 +965,7 @@ fun SettingsHubScreen(navController: NavController) {
                         }
                         group.cards.forEach { card ->
                             item(key = "card|${card.id}") {
+                                val cardEnabled = settingsNavEntryEnabled(card.id)
                                 if (card.id == "appearance") {
                                     // v8.xx — the Appearance card stays a pet
                                     // landmark: the pet pokes it, and the
@@ -976,13 +978,15 @@ fun SettingsHubScreen(navController: NavController) {
                                         SettingsDesignCardView(
                                             card = card,
                                             onClick = { navController.navigate(card.route) { launchSingleTop = true } },
-                                            modifier = lm
+                                            modifier = lm,
+                                            enabled = cardEnabled
                                         )
                                     }
                                 } else {
                                     SettingsDesignCardView(
                                         card = card,
-                                        onClick = { navController.navigate(card.route) { launchSingleTop = true } }
+                                        onClick = { navController.navigate(card.route) { launchSingleTop = true } },
+                                        enabled = cardEnabled
                                     )
                                 }
                             }
@@ -1122,7 +1126,8 @@ private fun SettingsTwoPaneHub(
                                             icon = result.row.icon,
                                             title = result.row.title,
                                             subtitle = result.row.subtitle,
-                                            selected = sectionPageFor(result.row.route)?.name == selectedPageName
+                                            selected = sectionPageFor(result.row.route)?.name == selectedPageName,
+                                            enabled = settingsNavEntryEnabled(rowIdForRoute(result.row.route))
                                         ) { handleRow(result.row, result.deep) }
                                     }
                                 }
@@ -1148,7 +1153,8 @@ private fun SettingsTwoPaneHub(
                                                         icon = row.icon,
                                                         title = row.title,
                                                         subtitle = row.subtitle,
-                                                        selected = sectionPageFor(row.route)?.name == selectedPageName
+                                                        selected = sectionPageFor(row.route)?.name == selectedPageName,
+                                                        enabled = settingsNavEntryEnabled(rowIdForRoute(row.route))
                                                     ) { handleRow(row) }
                                                 }
                                             }
@@ -1157,7 +1163,8 @@ private fun SettingsTwoPaneHub(
                                                 icon = row.icon,
                                                 title = row.title,
                                                 subtitle = row.subtitle,
-                                                selected = sectionPageFor(row.route)?.name == selectedPageName
+                                                selected = sectionPageFor(row.route)?.name == selectedPageName,
+                                                enabled = settingsNavEntryEnabled(rowIdForRoute(row.route))
                                             ) { handleRow(row) }
                                         }
                                     }
@@ -1203,6 +1210,11 @@ private fun sectionPageFor(route: String): SettingsPage? = when (route) {
     else -> null
 }
 
+/** v3xx51 — the gate id for a settings row route: only the Pet designer is
+ *  conditioned (see [settingsNavEntryEnabled]). */
+private fun rowIdForRoute(route: String): String =
+    if (route == CurioRoutes.PET_DESIGNER) "pet" else ""
+
 /** A nav-list row for the two-pane hub: icon + label, with the selected
  *  page's row wearing a soft action tint so the active section reads at a
  *  glance. */
@@ -1212,13 +1224,19 @@ private fun SettingsNavRow(
     title: String,
     subtitle: String,
     selected: Boolean,
+    /** v3xx51 — greyed + un-tappable when its screen is gated (Pet designer
+     *  while Curie is off). */
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     Surface(
-        onClick = onClick,
+        onClick = { if (enabled) onClick() },
+        enabled = enabled,
         color = if (selected) curioDialogActionColor().copy(alpha = 0.14f) else Color.Transparent,
         shape = RoundedCornerShape(18.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .alpha(if (enabled) 1f else 0.42f)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -1566,6 +1584,13 @@ private val settingsNavRail = listOf(
     SettingsNavEntry("backup", "Backup", CurioIcons.Backup, CurioRoutes.SETTINGS_DATA),
     SettingsNavEntry("support", "Support", CurioIcons.SupportAgent, CurioRoutes.SUPPORT)
 )
+
+/** Whether a settings entry is tappable right now. Only the Pet designer
+ *  has a live gate: it edits the companion, so with Curie switched off the
+ *  hub card / rail chip / two-pane row grey out and do nothing. */
+@Composable
+private fun settingsNavEntryEnabled(id: String): Boolean =
+    if (id == "pet") AppPreferences.petEnabledState else true
 
 /** The four JSX groups (plus the data & privacy group the user asked to
  *  slot the book-fetching etc. into) — every card maps to a real screen. */
@@ -2348,7 +2373,10 @@ private class SettingsCardTexture(seed: String) {
 private fun SettingsDesignCardView(
     card: SettingsDesignCard,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** v3xx51 — a live gate (the Pet designer card greys out while Curie is
+     *  off): the card dims and its press/click is swallowed. */
+    enabled: Boolean = true
 ) {
     val dark = isCurioDarkTheme()
     val (start, end) = settingsToneGradient(card.tone, dark)
@@ -2365,7 +2393,8 @@ private fun SettingsDesignCardView(
             .background(Brush.linearGradient(listOf(start, end)))
             // v3xx46 — the hub cards squish + tick on press (a big surface
             // gets a gentler scale so it reads as a press, not a jump).
-            .curioPressClickable(pressedScale = 0.985f, onClick = onClick)
+            .curioPressClickable(pressedScale = 0.985f, onClick = { if (enabled) onClick() })
+            .alpha(if (enabled) 1f else 0.45f)
     ) {
         // ── Blobs + texture (the JSX ::before/::after + cardTexture) —
         //    the big corner blobs stay, the bubbles + speckle are the
@@ -2636,6 +2665,10 @@ internal fun SettingsNavRail(
         ) {
             items(settingsNavRail, key = { it.id }) { entry ->
                 val selected = active != null && active == entry.id
+                // v3xx51 — the Pet designer chip greys out while Curie is off
+                // (the designer edits the companion, so there is nothing to
+                // design) — the whole entry is un-tappable, not just hidden.
+                val entryEnabled = settingsNavEntryEnabled(entry.id)
                 // v3xx — the ACTIVE chip's pill is a SHARED ELEMENT: every
                 // settings-family screen marks its active chip with the same
                 // key, so switching sections morphs the highlight from the
@@ -2656,6 +2689,42 @@ internal fun SettingsNavRail(
                 val activeState = if (selected && sharedScope != null && visScope != null)
                     sharedScope.rememberSharedContentState(SettingsRailActiveKey)
                 else null
+                // v3xx51 — THE FIX for "the active pill's text doesn't show
+                // while it moves": the shared element used to carry ONLY the
+                // accent fill, so while it glided (and through the settle)
+                // the opaque overlay paint sat ON TOP of the arriving chip's
+                // icon + label — the text was hidden for the whole flight.
+                // The shared element now carries the chip's COMPLETE look
+                // (fill + icon + label), so the label travels WITH the pill
+                // and is readable the entire time; it lands pixel-identical
+                // over the chip's own copy.
+                val chipContent: @Composable (Boolean) -> Unit = { isSelected ->
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier
+                            .matchParentSize()
+                            .padding(horizontal = 6.dp, vertical = 9.dp)
+                    ) {
+                        CurioIcon(
+                            name = entry.icon,
+                            contentDescription = null,
+                            tint = if (isSelected) Color(0xFFFFF9F1) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            size = 19.dp
+                        )
+                        Text(
+                            text = entry.label,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                fontSize = 10.sp
+                            ),
+                            color = if (isSelected) Color(0xFFFFF9F1) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
                 Box(
                     modifier = Modifier
                         .width(82.dp)
@@ -2671,51 +2740,27 @@ internal fun SettingsNavRail(
                                 else -> Color.White.copy(alpha = 0.62f)
                             }
                         )
-                        .clickable { onSelect(entry) }
+                        .clickable(enabled = entryEnabled) { onSelect(entry) }
+                        .alpha(if (entryEnabled) 1f else 0.42f)
                 ) {
-                    if (selected) {
+                    if (selected && activeState != null && sharedScope != null && visScope != null) {
                         Box(
                             modifier = Modifier
                                 .matchParentSize()
                                 .then(
-                                    if (activeState != null && sharedScope != null && visScope != null)
-                                        sharedScope.run {
-                                            Modifier.sharedElement(
-                                                activeState,
-                                                visScope,
-                                                boundsTransform = SettingsRailBoundsTransform
-                                            )
-                                        }
-                                    else Modifier
+                                    sharedScope.run {
+                                        Modifier.sharedElement(
+                                            activeState,
+                                            visScope,
+                                            boundsTransform = SettingsRailBoundsTransform
+                                        )
+                                    }
                                 )
                                 .clip(RoundedCornerShape(17.dp))
                                 .background(SettingsRailAccent)
-                        )
-                    }
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier
-                            .matchParentSize()
-                            .padding(horizontal = 6.dp, vertical = 9.dp)
-                    ) {
-                        CurioIcon(
-                            name = entry.icon,
-                            contentDescription = null,
-                            tint = if (selected) Color(0xFFFFF9F1) else MaterialTheme.colorScheme.onSurfaceVariant,
-                            size = 19.dp
-                        )
-                        Text(
-                            text = entry.label,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                                fontSize = 10.sp
-                            ),
-                            color = if (selected) Color(0xFFFFF9F1) else MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            textAlign = TextAlign.Center
-                        )
+                        ) { chipContent(true) }
+                    } else {
+                        chipContent(selected)
                     }
                 }
             }

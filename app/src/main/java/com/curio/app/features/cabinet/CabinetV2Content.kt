@@ -296,11 +296,14 @@ fun CabinetV2Content(navController: NavController) {
     }
 
     // v3xx — the COVER CACHE warmer: liked books / albums / series resolve
-    // their cover art ALWAYS (not gated on the Settings fetch toggles — the
-    // cache is the point: URL persisted + image bytes on disk), so the
-    // Cabinet grid fills with real covers on first open and loads them
-    // INSTANTLY from the local file on every later visit. Throttled per
-    // recomposition to a small batch so a big shelf never bursts the pipe.
+    // their cover art and keep the bytes on disk, so the Cabinet grid fills
+    // with real covers on first open and loads them INSTANTLY from the local
+    // file on every later visit. Throttled per recomposition to a small batch
+    // so a big shelf never bursts the pipe.
+    // v3xx51 — it is gated on the MERGED cover-fetch consent now (it used to
+    // download regardless of the Settings toggles), so with fetching OFF the
+    // warmer only pre-warms dominant colours from bytes ALREADY on disk and
+    // never reaches the network.
     val unwarmedLikes = remember(allLikes) {
         allLikes.filter {
             CabinetCoverCache.persistedUrl(
@@ -316,7 +319,8 @@ fun CabinetV2Content(navController: NavController) {
     // downloads up to 30 missing covers WITHOUT per-download version bumps
     // and bumps the version ONCE after the batch — the old per-save bump
     // recomposed every version-keyed tile per download.
-    LaunchedEffect(allLikes.size, unwarmedLikes.size) {
+    val coverFetchConsent = AppPreferences.coverFetchEnabledState
+    LaunchedEffect(allLikes.size, unwarmedLikes.size, coverFetchConsent) {
         var newCovers = 0
         withContext(kotlinx.coroutines.Dispatchers.IO) {
             allLikes.forEach { item ->
@@ -326,6 +330,7 @@ fun CabinetV2Content(navController: NavController) {
                     item.name
                 )
             }
+            if (!coverFetchConsent) return@withContext
             for (item in unwarmedLikes) {
                 if (newCovers >= 30) break
                 if (CabinetCoverCache.localCoverFile(
@@ -4148,15 +4153,17 @@ private fun V2JacketArt(
     var coverIndex by remember(item.name, candidates) { mutableIntStateOf(0) }
     var resolved by remember(item.name) { mutableStateOf<String?>(null) }
     var liveDone by remember(item.name) { mutableStateOf(false) }
-    // v3xx — the per-tile live resolve is ALWAYS armed (no Settings consent
-    // gate): the cover cache is always-on by design, so an item liked mid-
-    // session resolves here even before the warmer's next pass. Albums /
-    // series cascade BOTH providers (iTunes then MusicBrainz / TVMaze then
-    // iTunes) — if provider 0 misses, provider 1 fills the gap instead of
-    // leaving a bare gradient plate. The winner is persisted to the same
-    // sheetArt store the reveal reads, so every surface agrees instantly.
-    LaunchedEffect(item.name, item.kind, coverIndex, liveDone) {
-        if (!liveDone && item.kind != V2Kind.BOOK && coverIndex >= candidates.size) {
+    // v3xx51 — the per-tile live resolve now honours the MERGED cover-fetch
+    // consent. It used to be ALWAYS armed ("the cover cache is always-on by
+    // design"), which is exactly why artwork downloaded even with every
+    // Settings fetch toggle OFF. With consent ON the behaviour is unchanged:
+    // albums / series cascade BOTH providers (iTunes then MusicBrainz /
+    // TVMaze then iTunes) and the winner is persisted to the same sheetArt
+    // store the reveal reads. With consent OFF nothing here touches the
+    // network (the tile serves only bytes already on disk).
+    val fetchConsent = AppPreferences.coverFetchEnabledState
+    LaunchedEffect(item.name, item.kind, coverIndex, liveDone, fetchConsent) {
+        if (fetchConsent && !liveDone && item.kind != V2Kind.BOOK && coverIndex >= candidates.size) {
             var found: String? = null
             when (item.kind) {
                 V2Kind.ALBUM -> {
@@ -4192,7 +4199,10 @@ private fun V2JacketArt(
         }
     }
     val local = cached?.toURI()?.toString()
-    val url = resolved ?: candidates.getOrNull(coverIndex)
+    // v3xx51 — with the cover-fetch consent OFF the URL cascade is skipped
+    // entirely (every candidate is a network fetch, including Coil's own
+    // load), so the tile shows the cached file or its plate and nothing else.
+    val url = if (fetchConsent) resolved ?: candidates.getOrNull(coverIndex) else null
     val corner = if (item.kind == V2Kind.ALBUM) 10.dp else 8.dp
     val plate = Brush.verticalGradient(
         listOf(

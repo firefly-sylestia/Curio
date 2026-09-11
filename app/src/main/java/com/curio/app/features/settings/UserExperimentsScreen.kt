@@ -174,36 +174,22 @@ fun UserExperimentsScreen(navController: NavController) {
                 }
             }
 
-            // Cover fetching — per-category consent, v350. Each category
-            // (books / albums / series) gets its own toggle so the user can
-            // switch poster fetching on per category; they all stay OFF by
-            // default (nothing downloads without explicit consent).
+            // Cover fetching — v3xx51 MERGED: the separate Books / Albums /
+            // Series toggles (v350) collapse into ONE consent. Every reader
+            // (reveal resolvers, the Cabinet cover cache, share cards) now
+            // checks this single switch, and with it OFF nothing reaches the
+            // network — the old per-category split meant fetching kept
+            // happening on the paths that only checked one of the keys.
             item { SettingsSectionHeading("Cover fetching") }
             item {
                 SettingsOptionCard {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         ExperimentSwitchRow(
-                            "Books",
-                            "Fetch book covers + ratings from the keyless providers",
-                            AppPreferences.bookFetchEnabledState
+                            "Cover fetching",
+                            "Download book covers + ratings, album artwork and series posters (keyless providers)",
+                            AppPreferences.coverFetchEnabledState
                         ) {
-                            AppPreferences.setBookFetchEnabled(context, it)
-                        }
-                        CurioSettingsDivider()
-                        ExperimentSwitchRow(
-                            "Albums",
-                            "Fetch album artwork (iTunes / MusicBrainz, keyless)",
-                            AppPreferences.albumFetchEnabledState
-                        ) {
-                            AppPreferences.setAlbumFetchEnabled(context, it)
-                        }
-                        CurioSettingsDivider()
-                        ExperimentSwitchRow(
-                            "Series",
-                            "Fetch series posters (TVMaze / iTunes, keyless)",
-                            AppPreferences.seriesFetchEnabledState
-                        ) {
-                            AppPreferences.setSeriesFetchEnabled(context, it)
+                            AppPreferences.setCoverFetchEnabled(context, it)
                         }
                     }
                 }
