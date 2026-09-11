@@ -295,6 +295,7 @@ object AppPreferences {
     // on share/save so they restore next time the same topic is shared.
     private const val KEY_SHARE_CARD_EDITS = "share_card_edits"   // JSON: topicName → edit data
     private const val KEY_SHARED_CARDS = "shared_cards"            // JSON array of shared card records
+    private const val KEY_ONLINE_MODE_ENABLED = "online_mode_enabled"
 
     // ── Display name ─────────────────────────────────────────────────
     fun getDisplayName(context: Context): String =
@@ -303,6 +304,14 @@ object AppPreferences {
     fun setDisplayName(context: Context, name: String) {
         prefs(context).edit().putString(KEY_DISPLAY_NAME, name).apply()
         displayNameState = name
+    }
+
+    // ── Online Mode ──────────────────────────────────────────────────
+    fun isOnlineModeEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_ONLINE_MODE_ENABLED, false)
+
+    fun setOnlineModeEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_ONLINE_MODE_ENABLED, enabled).apply()
     }
 
     // ── Favorite song (v... — Vinyl share card) ───────────────────────
