@@ -296,6 +296,10 @@ object AppPreferences {
     private const val KEY_SHARE_CARD_EDITS = "share_card_edits"   // JSON: topicName → edit data
     private const val KEY_SHARED_CARDS = "shared_cards"            // JSON array of shared card records
     private const val KEY_ONLINE_MODE_ENABLED = "online_mode_enabled"
+    // The opt-in that puts the Community wall on the bottom navigation bar.
+    // Off by default: Online Mode alone is about sync, this is the louder
+    // "I want the community in my nav" choice.
+    private const val KEY_COMMUNITY_TAB_ENABLED = "community_tab_enabled"
 
     // ── Display name ─────────────────────────────────────────────────
     fun getDisplayName(context: Context): String =
@@ -312,6 +316,18 @@ object AppPreferences {
 
     fun setOnlineModeEnabled(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_ONLINE_MODE_ENABLED, enabled).apply()
+        // Sign-in/sign-out move this switch too (OnlineAccount), and the nav
+        // bar's Community tab hangs off it — keep the Compose mirror in step.
+        onlineModeEnabledState = enabled
+    }
+
+    // ── Community tab (opt-in bottom-nav entry) ───────────────────────
+    fun isCommunityTabEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_COMMUNITY_TAB_ENABLED, false)
+
+    fun setCommunityTabEnabled(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_COMMUNITY_TAB_ENABLED, enabled).apply()
+        communityTabEnabledState = enabled
     }
 
     // ── Favorite song (v... — Vinyl share card) ───────────────────────
@@ -1161,6 +1177,27 @@ object AppPreferences {
     var profileAvatarPathState by mutableStateOf("")
         internal set
 
+    // ── Online Mode + the Community tab (observable mirrors) ──────────
+    // Both are read from COMPOSITION (the bottom nav bar decides whether the
+    // Community tab exists, and every online surface tests the gate), so the
+    // stored prefs are mirrored into Compose state here. Without this the nav
+    // bar would keep a stale tab list until the next app launch.
+    /** Mirrors [isOnlineModeEnabled] so the nav chrome reacts to the switch. */
+    var onlineModeEnabledState by mutableStateOf(false)
+        private set
+    /** Mirrors [isCommunityTabEnabled] — the opt-in Community nav tab. */
+    var communityTabEnabledState by mutableStateOf(false)
+        private set
+
+    /**
+     * Whether the Community tab belongs on the bottom nav right now.
+     * Requires BOTH switches: Online Mode (the account layer is live) and the
+     * explicit "show it in the nav" opt-in. The gate is a getter so every
+     * caller — nav bar, rail, glass tab bar — reads the same answer.
+     */
+    val communityTabVisible: Boolean
+        get() = communityTabEnabledState && onlineModeEnabledState
+
     // Liquid-glass navigation pills experiment (v227) — OPT-IN (default
     // OFF): the three floating nav-style capsules (bottom tab bar, Topic
     // Reveal category/favorite bar, Pet Designer studio bar) render a
@@ -1646,6 +1683,8 @@ object AppPreferences {
         updateCheckerEnabledState = isUpdateCheckerEnabled(context)
         autoBackupEnabledState = isAutoBackupEnabled(context)
         autoBackupFrequencyDaysState = getAutoBackupFrequencyDays(context)
+        onlineModeEnabledState = isOnlineModeEnabled(context)
+        communityTabEnabledState = isCommunityTabEnabled(context)
     }
 
     // ── Theme mode (v81) ────────────────────────────────────────────

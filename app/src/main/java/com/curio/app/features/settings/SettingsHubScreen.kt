@@ -202,7 +202,11 @@ private data class SettingsHeroPair(
 fun SettingsHeroHeader(
     title: String,
     subtitle: String,
-    onBack: () -> Unit,
+    // v3xx — NULLABLE: a tab root has nothing to go back to (the Community
+    // wall's opt-in bottom-nav entry), so it omits the back pill entirely
+    // instead of showing a dead one. Every other caller still passes a
+    // lambda, so the pill renders exactly as before.
+    onBack: (() -> Unit)? = null,
     // Narrow the torn banner on landscape/tablet so it doesn't cover
     // most of the already-short vertical space.
     compact: Boolean = false,
@@ -352,6 +356,7 @@ fun SettingsHeroHeader(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         val backInteraction = remember { MutableInteractionSource() }
+                        if (onBack != null) {
                         CurioBackButton(
                             onClick = onBack,
                             modifier = Modifier.then(
@@ -394,6 +399,12 @@ fun SettingsHeroHeader(
                             disableRipple = true,
                             pillInteraction = backInteraction
                         )
+                        } else {
+                            // No back pill (a tab root): keep any trailing
+                            // pills pinned to the trailing edge instead of
+                            // letting SpaceBetween slide them to the start.
+                            Spacer(Modifier.weight(1f))
+                        }
                         if (searchActive) {
                             // v294 — Cancel pill removed; back button handles closing search.
                         } else if (trailing != null) {
