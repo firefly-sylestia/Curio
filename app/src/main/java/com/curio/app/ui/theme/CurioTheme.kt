@@ -216,14 +216,19 @@ fun CurioTheme(
         CurioPressIndication(colorScheme.onSurface)
     }
 
-    CompositionLocalProvider(LocalIndication provides pressIndication) {
-        MaterialTheme(
-            colorScheme = colorScheme,
-            typography  = CurioTypography,
-            shapes      = CurioShapes,
-            content     = content
-        )
-    }
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography  = CurioTypography,
+        shapes      = CurioShapes,
+        content = {
+            // The provider must sit INSIDE MaterialTheme: MaterialTheme itself
+            // provides its ripple to LocalIndication, so an outer provider
+            // would simply be overridden by it.
+            CompositionLocalProvider(LocalIndication provides pressIndication) {
+                content()
+            }
+        }
+    )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

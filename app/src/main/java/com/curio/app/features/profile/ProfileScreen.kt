@@ -105,8 +105,8 @@ import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioBackButton
 import com.curio.app.ui.components.CurioGlassToolbarMorph
+import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.components.isInScreenGlassActive
-import com.curio.app.ui.components.rememberCurioPressSource
 import com.curio.app.ui.components.liquidGlassCapsule
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
@@ -1836,15 +1836,15 @@ private fun ProgressAndAchievementsCard(
 @Composable
 private fun SettingsNavCard(onOpenSettings: () -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        // v3xx46 — the Settings row squishes + ticks on press (the surface
-        // owns the click, so it takes the shared press source).
-        val press = rememberCurioPressSource(pressedScale = 0.98f)
-        Surface(
-            onClick = onOpenSettings,
-            interactionSource = press.interactionSource,
-            color = Color.Transparent,
-            shape = RoundedCornerShape(18.dp),
-            modifier = Modifier.fillMaxWidth().then(press.modifier)
+        // v3xx46/47 — the Settings row squishes + ticks on press. It is a
+        // plain Box rather than Material3's clickable Surface: that Surface
+        // passes its OWN ripple() down (ignoring LocalIndication), so the
+        // row would keep the very touch highlight the app replaced.
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .curioPressClickable(pressedScale = 0.98f, onClick = onOpenSettings)
         ) {
             Row(
                 modifier = Modifier.padding(vertical = 6.dp),
