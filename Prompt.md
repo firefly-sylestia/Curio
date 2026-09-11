@@ -352,6 +352,24 @@ collapsible field groups, CURRENT pills, +/− word deltas and preview stats.
 
 **Status:** committed + pushed.
 
+## Request (2026-09-11, completed — CI compile break: `matchParentSize` in the rail chip)
+
+User pasted the CI failure: `SettingsHubScreen.kt:2706:30 Unresolved reference
+'matchParentSize'` on both `compileDebugKotlin` and `compileReleaseKotlin`.
+
+**Cause:** the settings rail's `chipContent` lambda was declared as a plain
+`@Composable (Boolean) -> Unit`, but its body calls `Modifier.matchParentSize()`
+— a `BoxScope` extension. A plain lambda has no `BoxScope` receiver, so the
+call could not resolve (even though both call sites sit inside `Box` content).
+
+**Fix (1 line, `SettingsHubScreen.kt`):** declare the lambda as a `BoxScope`
+extension — `@Composable BoxScope.(Boolean) -> Unit`. Both call sites (the
+shared-element `Box { chipContent(true) }` and the fallback `chipContent(selected)`
+in the outer `Box` content) already have a `BoxScope` receiver in scope, so the
+receiver resolves at both and the chip keeps filling its parent Box.
+
+**Status:** committed + pushed.
+
 ## Archive
 
 Older completed request logs (2026-09-08 → 2026-09-10) were trimmed from this

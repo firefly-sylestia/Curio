@@ -2698,7 +2698,7 @@ internal fun SettingsNavRail(
                 // (fill + icon + label), so the label travels WITH the pill
                 // and is readable the entire time; it lands pixel-identical
                 // over the chip's own copy.
-                val chipContent: @Composable (Boolean) -> Unit = { isSelected ->
+                val chipContent: @Composable BoxScope.(Boolean) -> Unit = { isSelected ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(4.dp),
