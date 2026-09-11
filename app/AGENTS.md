@@ -7284,6 +7284,17 @@ app/src/main/java/com/curio/app/
   per save — the GC pauses froze the app. Now only new/changed rows
   decode; the map is only touched from the flow's single collection
   dispatcher.
+- **v3xx49 — the collapse clock runs the header's real collapsible distance
+  (Home + Profile).** A fixed 90dp clock (`StickyBarThreshold` /
+  `ProfilePillThreshold`) drove a header that gives back ~122dp (Home) / ~186dp
+  (Profile) of reserved space, so the page slid up faster than the finger for
+  the first 90dp and then snapped back to 1:1 — the reported "jump/flicker at
+  the collapse point". Progress is now `scroll / (fullReserve − compact − inset)`
+  in GLASS mode, so `d(reserve)/d(scroll) = −1` and the content below the
+  header stays exactly under the finger while the header collapses in place,
+  reaching the compact floor precisely when the clock hits 1. Torn-paper mode
+  keeps the 90dp clock: there it only drives the floating pills' pop/frost
+  morph.
 - **v3xx48 — the glass header really collapses, the reveal is faster +
   tappable, the Cupboard regains its size ladder and its switch animation,
   the text-history CURRENT pill is fixed (user 2026-09-11).**

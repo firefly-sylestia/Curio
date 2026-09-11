@@ -436,14 +436,31 @@ fun HomeScreen(navController: NavController) {
             // for it, so the header genuinely collapses (the old static 200dp
             // reservation kept the page looking permanently expanded after
             // scrolling — the reported "doesn't collapse" bug).
-            val homeStickyThresholdPx = with(LocalDensity.current) { StickyBarThreshold.toPx() }
-            val homeStickyProgress by remember {
-                derivedStateOf { (homeScroll.value / homeStickyThresholdPx).coerceIn(0f, 1f) }
-            }
             // The collapsed bar still owns the status-bar strip (the glass
             // fills it now), so the reservation floors at compact + inset.
             val statusTopDp = with(LocalDensity.current) {
                 WindowInsets.statusBars.getTop(this).toDp()
+            }
+            // v3xx49 — the collapse clock runs the DISTANCE THE HEADER CAN
+            // ACTUALLY GIVE BACK (full reservation − the compact floor), not a
+            // fixed 90dp. A 90dp clock against a ~120dp space reclaim meant
+            // the page slid up ~1.3× faster than the finger for 90dp and then
+            // snapped back to 1:1 — the reported "jump/flicker at the collapse
+            // point". Matching the two makes the header track the scroll
+            // exactly: whatever the finger takes, the header gives back.
+            val homeCollapsePx = with(LocalDensity.current) {
+                if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
+                    (HomeGlassToolbarFullHeight - (HomeCompactHeaderHeight + statusTopDp))
+                        .coerceAtLeast(1.dp)
+                        .toPx()
+                } else {
+                    // Torn-paper style: the clock still only drives the floating
+                    // pills' frost morph, which is tuned to 90dp.
+                    StickyBarThreshold.toPx()
+                }
+            }
+            val homeStickyProgress by remember {
+                derivedStateOf { (homeScroll.value / homeCollapsePx).coerceIn(0f, 1f) }
             }
             val glassHeaderReserve = if (
                 AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS

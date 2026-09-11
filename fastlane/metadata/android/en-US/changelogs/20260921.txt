@@ -1,3 +1,4 @@
+FIX: Home / Profile — the glass header tracks your scroll exactly now: it used to reclaim its space faster than your finger moved for the first stretch and then snap back to normal speed, which read as a jump right as the header finished collapsing.
 FIX: The glass header really collapses now: the glass itself shrinks with the bar (it used to keep its full expanded height, so the area where the stats were stayed behind) — the status-bar strip is still covered.
 ADD: Screen reveal is quicker (300ms) and no longer swallows your taps — you can tap again while the reveal is still playing.
 ADD: The Cupboard wall has its size ladder back: shelves cycle feature → small → medium → smallest, so the wall reads with big and small covers again while still leaving no gaps, and switching a filter fades the wall into its new arrangement instead of snapping.

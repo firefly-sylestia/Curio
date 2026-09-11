@@ -434,18 +434,35 @@ fun ProfileScreen(navController: NavController) {
         // static 264dp spacer left the header looking permanently expanded
         // after scrolling (the reported "doesn't collapse" bug). The clock is
         // hoisted so the pinned bar and the spacer read the SAME progress.
-        val profileStickyThresholdPx = with(LocalDensity.current) { ProfilePillThreshold.toPx() }
-        val profileStickyProgress by remember {
-            derivedStateOf {
-                if (listState.firstVisibleItemIndex >= 1) 1f
-                else (listState.firstVisibleItemScrollOffset / profileStickyThresholdPx)
-                    .coerceIn(0f, 1f)
-            }
-        }
         // The collapsed bar still owns the status-bar strip (the glass fills
         // it now), so the reservation floors at compact + inset.
         val statusTopDp = with(LocalDensity.current) {
             WindowInsets.statusBars.getTop(this).toDp()
+        }
+        // v3xx49 — the collapse clock runs the DISTANCE THE HERO CAN GIVE BACK
+        // (the full reservation − the compact floor), not a fixed 90dp. A 90dp
+        // clock against ~186dp of reclaimed space slid the list up ~2× faster
+        // than the finger and then snapped back to 1:1 — the reported
+        // "jump/flicker at the collapse point" on Profile. Matching the two
+        // makes the hero track the scroll exactly, and the `index >= 1` guard
+        // only fires long after the clock has already parked at 1.
+        val profileCollapsePx = with(LocalDensity.current) {
+            if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
+                (ProfileHeroTotalHeight - (ProfileCompactHeaderHeight + statusTopDp))
+                    .coerceAtLeast(1.dp)
+                    .toPx()
+            } else {
+                // Torn-paper style: the clock only drives the floating pills'
+                // pop + frost morph, which is tuned to 90dp.
+                ProfilePillThreshold.toPx()
+            }
+        }
+        val profileStickyProgress by remember {
+            derivedStateOf {
+                if (listState.firstVisibleItemIndex >= 1) 1f
+                else (listState.firstVisibleItemScrollOffset / profileCollapsePx)
+                    .coerceIn(0f, 1f)
+            }
         }
         val glassHeaderReserve = androidx.compose.ui.unit.lerp(
             ProfileHeroTotalHeight,
