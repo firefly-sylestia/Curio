@@ -1,3 +1,5 @@
+ADD: Cabinet — opening the Cabinet (and a shelf page) holds the frame with a proper SKELETON grid now: the same card shapes, in the same columns, as many placeholders as the saved entries you actually have — so nothing flashes and nothing jumps when your archive lands.
+FIX: Settings — the top nav rail's active chip keeps its label readable the whole time: the highlight used to arrive after the text (the label vanished for a beat on the pale chip), and it settles dead flat now instead of drifting to rest.
 FIX: Home / Profile — the glass header tracks your scroll exactly now: it used to reclaim its space faster than your finger moved for the first stretch and then snap back to normal speed, which read as a jump right as the header finished collapsing.
 FIX: The glass header really collapses now: the glass itself shrinks with the bar (it used to keep its full expanded height, so the area where the stats were stayed behind) — the status-bar strip is still covered.
 ADD: Screen reveal is quicker (300ms) and no longer swallows your taps — you can tap again while the reveal is still playing.

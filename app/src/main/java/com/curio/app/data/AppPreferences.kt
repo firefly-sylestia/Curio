@@ -196,6 +196,9 @@ object AppPreferences {
     //   deleting every mix doesn't resurrect them.
     private const val KEY_NAMED_MIXES = "named_mixes"               // JSON array of NamedMix
     private const val KEY_CABINET_COLLECTIONS = "cabinet_collections" // JSON array of CurioCollection
+    // v3xx50 — the last known saved-entry count, so a cold Cabinet open can
+    // paint a skeleton of EXACTLY that many cards (see getCabinetEntryCount).
+    private const val KEY_CABINET_ENTRY_COUNT = "cabinet_entry_count"   // int
     private const val KEY_LAST_MIX_NAME = "last_mix_name"          // String? — the applied deck's mix name
     private const val KEY_PICKER_MIXES_SEEDED = "picker_mixes_seeded" // bool — starter mixes written once
     // v3xx — picker page default + curated suggestions (add/remove):
@@ -3001,6 +3004,22 @@ object AppPreferences {
         val updated = getCabinetCollections(context).filterNot { it.id == id }
         saveCabinetCollections(context, updated)
         return updated
+    }
+
+    /**
+     * v3xx50 — the LAST number of saved entries this install had, persisted
+     * across launches. The Cabinet's loading state paints a skeleton of
+     * exactly this many cards, so a cold open matches the archive that is
+     * arriving instead of showing a generic couple of boxes.
+     */
+    fun getCabinetEntryCount(context: Context): Int =
+        prefs(context).getInt(KEY_CABINET_ENTRY_COUNT, 0)
+
+    /** Records the saved-entry count for the next cold open's skeleton. */
+    fun setCabinetEntryCount(context: Context, count: Int) {
+        if (count < 0) return
+        if (prefs(context).getInt(KEY_CABINET_ENTRY_COUNT, 0) == count) return
+        prefs(context).edit().putInt(KEY_CABINET_ENTRY_COUNT, count).apply()
     }
 
     /**

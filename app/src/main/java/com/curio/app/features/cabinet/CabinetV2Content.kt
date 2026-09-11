@@ -119,6 +119,7 @@ import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioDoodleEmptyState
+import com.curio.app.ui.components.CurioEntrySkeletonCard
 import com.curio.app.ui.components.CurioEmptyState
 import com.curio.app.ui.components.CurioEntryCard
 import com.curio.app.ui.components.CurioHoldPill
@@ -179,14 +180,32 @@ fun CabinetV2Content(navController: NavController) {
     // light query's ReelNotes-only formatDataJson column.
     // v3xx43 — INSTANT: start from the repository's last light emission so the
     // shelves paint on the first frame instead of flashing a loading state.
+    // v3xx50 — ARCHIVE-READY: the page may only claim "empty" once the first
+    // real emission has arrived. Before that it holds a skeleton the size of
+    // the archive this install last had (the reported "cabinet opening is
+    // bad" was the empty/suggestions state flashing before the read landed).
+    var archiveReady by rememberSaveable {
+        mutableStateOf(CurioRepositoryHolder.repo.peekLight().isNotEmpty())
+    }
     val entries by androidx.compose.runtime.produceState<List<CurioEntry>>(
         initialValue = CurioRepositoryHolder.repo.peekLight()
     ) {
         try {
-            CurioRepositoryHolder.repo.observeLight().collect { value = it }
+            CurioRepositoryHolder.repo.observeLight().collect {
+                value = it
+                if (!archiveReady) archiveReady = true
+            }
         } catch (_: Exception) {
             value = emptyList()
         }
+    }
+    // v3xx50 — the skeleton's size = the last known saved-entry count (capped
+    // so a big archive can't compose hundreds of placeholder cards).
+    val skeletonCount = remember {
+        AppPreferences.getCabinetEntryCount(context).coerceIn(4, 12)
+    }
+    LaunchedEffect(entries.size, archiveReady) {
+        if (archiveReady) AppPreferences.setCabinetEntryCount(context, entries.size)
     }
     val entriesById = remember(entries) { entries.associateBy { it.id } }
     val books = remember(AppPreferences.bookFavoritesState, AppPreferences.bookCoverUrlsState) {
@@ -739,6 +758,10 @@ fun CabinetV2Content(navController: NavController) {
                         ) { launchSingleTop = true }
                     }
                 )
+                // v3xx50 — the saved/notes shelves hold the same archive, so
+                // they hold the same skeleton instead of an empty verdict.
+                (openLevel == SHELF_LEVEL_SAVED || openLevel == SHELF_LEVEL_NOTES) && !archiveReady ->
+                    v2SkeletonItems(count = skeletonCount)
                 openLevel == SHELF_LEVEL_SAVED -> v2VirtualShelfItems(
                     title = "Saved entries",
                     likes = emptyList(),
@@ -822,7 +845,10 @@ fun CabinetV2Content(navController: NavController) {
                             CurioRoutes.revealFor(t.categoryId.routeSlug, t.name)
                         ) { launchSingleTop = true }
                     },
-                    showSuggestions = !rawContent,
+                    // v3xx50 — only claim "empty" once the archive has
+                    // actually been read (see [archiveReady]).
+                    showSuggestions = archiveReady && !rawContent,
+                    savedSkeletonCount = if (archiveReady) 0 else skeletonCount,
                     onEntryLongClick = { id ->
                         selectionMode = true
                         selectedEntryIds = selectedEntryIds + id
@@ -1098,6 +1124,9 @@ private fun LazyGridScope.v2HomeItems(
     onShuffle: () -> Unit,
     onOpenSuggestion: (CurioTopic) -> Unit,
     showSuggestions: Boolean,
+    /** v3xx50 — when > 0 the archive has not been read yet: paint this many
+     *  entry-card placeholders in the Saved-entries slot. */
+    savedSkeletonCount: Int,
     onEntryLongClick: (String) -> Unit,
     onEntryClick: (String) -> Unit,
     onClearSearch: () -> Unit
@@ -1151,6 +1180,18 @@ private fun LazyGridScope.v2HomeItems(
                 onEntryLongClick = onEntryLongClick,
                 onEntryClick = onEntryClick
             )
+        } else if (savedSkeletonCount > 0) {
+            // v3xx50 — the archive is still arriving: hold the exact slot the
+            // real cards will occupy (same header, same 2-column grid) with
+            // as many placeholders as there are saved entries to come.
+            item(key = "h-saved", span = { GridItemSpan(maxLineSpan) }, contentType = "header") {
+                V2PageSectionHeader(
+                    title = "Saved entries",
+                    subtitle = "Your latest additions",
+                    trailing = null
+                )
+            }
+            v2SkeletonItems(count = savedSkeletonCount)
         }
     }
 
@@ -1202,6 +1243,16 @@ private fun LazyGridScope.v2HomeItems(
         item(key = "new-collection", span = { GridItemSpan(maxLineSpan) }, contentType = "action") {
             V2NewCollectionTile(onClick = onNewCollection)
         }
+    }
+}
+
+/** v3xx50 — entry-card placeholders for a level whose archive has not been
+ *  read yet (the Cabinet home's Saved-entries slot, the Saved entries and
+ *  Notes shelves). They use the SAME grid cells the real cards do, so the
+ *  page keeps its shape when the data lands. */
+private fun LazyGridScope.v2SkeletonItems(count: Int) {
+    items(count, key = { index -> "skel|$index" }, contentType = { "skeleton" }) { _ ->
+        CurioEntrySkeletonCard(modifier = Modifier.fillMaxWidth())
     }
 }
 

@@ -1,5 +1,67 @@
 # Prompt Log — current request
 
+## Request (2026-09-11, in progress — Cabinet loading skeleton + settings rail label + collections redraw)
+
+User (queued prompt): "the cabinet loading is still kinda bugged the saved
+entryies now open fast but cabinet opening is bad, also use a skeleton system
+maybe for accurate amount exactly the number of saved entries are there like
+that..and redraw the collections cutsom ones and curying now one do it
+properly and also the settings nav rail the indicator istelf does goes fast
+and its better but the text disappers for a momemt for the acive indicator
+and it slowly comes to a rest so ix that". Earlier in the same thread: "do
+what u can do then after doing it ask me questions and doubts".
+
+**Diagnosis**
+
+1. **Cabinet opening.** The V2 Cabinet home treated "entries is still empty"
+   as "you have nothing", so a cold open flashed the
+   suggestions/empty state and then swapped in the real shelves — the same
+   class of bug the classic Cabinet already guarded with `entriesReady`, but
+   V2 had no such gate for its home/shelf levels. And the loading state it
+   did have was four generic full-width boxes, nothing like the 2-column
+   card grid.
+2. **Settings rail.** The active chip's label is cream; the chip painted NO
+   fill of its own (the accent pill was only the shared-element overlay, and
+   that instance is hidden while the glide runs) → cream on the pale
+   frosted tile until the pill landed. The 0.9-damped spring also overshot,
+   so the pill visibly "came to rest" after arriving.
+3. **Collections redraw — AMBIGUOUS.** "custom ones and curying now one do it
+   properly" has several readings (the collection pages' member layout, the
+   collection CARDS on the Cabinet home, the empty state, or the untracked
+   `Curio_WantToRead_EmptyState.jsx` concept). Per the root AGENTS.md
+   ask-when-unsure rule (and the user's own "then ask me questions"), the
+   redraw is queued as a question instead of guessed at.
+
+**Shipped (5 code files + docs, this commit):**
+
+1. **`ui/components/CurioSkeleton.kt` (NEW)** — the app-wide skeleton
+   system: `CurioEntrySkeletonCard` (20dp radius, 96dp hero header, two text
+   bars, shimmer read in the draw phase so it never recomposes) and
+   `CabinetEntrySkeletonGrid(count, topInset, wide)` which mirrors the real
+   grid's columns/paddings/gaps.
+2. **`AppPreferences.kt`** — `getCabinetEntryCount` / `setCabinetEntryCount`
+   (key `cabinet_entry_count`): the last known saved-entry count, so the
+   skeleton is sized to the real archive on the next cold open.
+3. **`CabinetV2Content.kt`** — `archiveReady` (false until the first
+   `observeLight()` emission) gates `showSuggestions`, and the home's
+   Saved-entries slot plus the Saved entries / Notes shelves hold
+   `v2SkeletonItems(skeletonCount)` until then; the count is persisted for
+   the next launch.
+4. **`CabinetScreen.kt`** (classic) — the four wide boxes became
+   `CabinetEntrySkeletonGrid`, sized from the persisted count.
+5. **`SettingsHubScreen.kt`** — the active chip paints `SettingsRailAccent`
+   in its own layer (identical to the gliding overlay, so the glide is
+   unchanged once it lands) and the bounds spring is critically damped
+   (1.0 / 420) so the highlight lands and stops.
+
+**Open questions for the user (asked at the end of this turn):** what
+"redraw the collections ... do it properly" should change; whether the
+built-in starter shelves should keep their destructive "Delete collection"
+menu entry (deleting one currently loses its members for good); whether the
+collection pages' member list should become the concept's row list.
+
+**Status:** committing + pushing now; CI validates.
+
 ## Request (2026-09-11, completed — screen-reveal transitions toggle, packed Cupboard shelves, .jsx text-history tree, caption box + cover-true album sheet)
 
 User (queued prompt + ask_user answers): test results "Haven't built it yet";

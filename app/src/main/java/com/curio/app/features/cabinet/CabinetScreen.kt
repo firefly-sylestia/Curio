@@ -53,6 +53,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.LaunchedEffect
@@ -97,6 +98,7 @@ import com.curio.app.navigation.PendingCabinetFilter
 import com.curio.app.navigation.navigateToTab
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.windowWidthSizeClass
+import com.curio.app.ui.components.CabinetEntrySkeletonGrid
 import com.curio.app.ui.components.CurioDoodleEmptyState
 import com.curio.app.ui.components.CurioEmptyState
 import com.curio.app.ui.components.CurioGlassToolbar
@@ -165,6 +167,15 @@ fun CabinetScreen(navController: NavController) {
     }
     // Satisfying haptics: a light tick when an entry is opened / actioned.
     val haptics = LocalHapticFeedback.current
+    val context = LocalContext.current
+    // v3xx50 — the loading skeleton's size: the last known saved-entry count
+    // (see AppPreferences.getCabinetEntryCount), so a cold open paints the
+    // same number of placeholders as the archive it is about to show. 4 is
+    // the floor (a fresh install still gets a placeholder shape); 12 the cap
+    // (a huge archive must not compose hundreds of cards for one frame).
+    val skeletonCount = remember {
+        AppPreferences.getCabinetEntryCount(context).coerceIn(4, 12)
+    }
     // Wide windows (tablet / landscape) spread the grid into more columns.
     val wide = windowWidthSizeClass().isWide
     // Compact hero on tablets/landscape — 192dp instead of 232dp.
@@ -267,6 +278,10 @@ fun CabinetScreen(navController: NavController) {
         } catch (_: Exception) {
             value = emptyList()
         }
+    }
+    // v3xx50 — remember the archive's size for the NEXT cold open's skeleton.
+    LaunchedEffect(entries.size, entriesReady) {
+        if (entriesReady) AppPreferences.setCabinetEntryCount(context, entries.size)
     }
 
     val visibleEntries = remember(entries, selectedFilters, showLegacyOnly, searchQuery) {
@@ -566,24 +581,16 @@ fun CabinetScreen(navController: NavController) {
             // v3xx43 — a cold first frame: the archive has not reached us yet,
             // so hold the frame with quiet card skeletons instead of the
             // "Cabinet is empty" doodle (the loading flash the user reported).
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = contentTop)
-            ) {
-                repeat(4) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(118.dp)
-                            .padding(horizontal = 16.dp, vertical = 6.dp)
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(
-                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
-                            )
-                    )
-                }
-            }
+            // v3xx50 — the skeleton is the app-wide SYSTEM: it mirrors the
+            // grid's own columns / paddings / gaps and paints the number of
+            // saved entries this install last had, so the page keeps its
+            // shape when the archive lands instead of swapping a few generic
+            // wide boxes for a 2-column card grid.
+            CabinetEntrySkeletonGrid(
+                count = skeletonCount,
+                topInset = contentTop,
+                wide = wide
+            )
         } else if (visibleEntries.isEmpty()) {
             // v119 — the empty state registers the same "grid" landmark the
             // filled grid does, so the pet-led tour's Cabinet stop keeps its

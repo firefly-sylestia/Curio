@@ -7284,6 +7284,32 @@ app/src/main/java/com/curio/app/
   per save — the GC pauses froze the app. Now only new/changed rows
   decode; the map is only touched from the flow's single collection
   dispatcher.
+- **v3xx50 — the Cabinet's SKELETON system + the settings rail's vanishing
+  active label.** (1) **Skeleton system** (`ui/components/CurioSkeleton.kt`):
+  `CurioEntrySkeletonCard` is a 20dp-radius / 96dp-header placeholder that
+  matches `CurioEntryCard`'s shape, with a shimmer sweep whose animated value
+  is read in the DRAW phase (a sweeping skeleton never recomposes);
+  `CabinetEntrySkeletonGrid(count, topInset, wide)` lays `count` of them out
+  in the SAME grid the real cards use (2 columns on phones, adaptive on wide,
+  the grid's own paddings/gaps). The count is the LAST KNOWN saved-entry
+  count, persisted by the new `AppPreferences.getCabinetEntryCount` /
+  `setCabinetEntryCount` (key `cabinet_entry_count`) — so a cold open paints
+  exactly as many placeholders as the archive it is about to show, capped at
+  12 so a huge archive can't compose hundreds of cards for one frame. (2)
+  **No more empty flash on a cold open:** `CabinetV2Content` tracks
+  `archiveReady` (false until the first `observeLight()` emission), gates its
+  `showSuggestions` on it, and holds the home's Saved-entries slot (and the
+  Saved entries / Notes shelves) with `v2SkeletonItems` until then; the
+  classic `CabinetScreen` swaps its four wide boxes for
+  `CabinetEntrySkeletonGrid`. Both screens remember the count for the next
+  launch. (3) **Settings rail:** the active chip now paints its OWN fill the
+  instant it becomes active (`SettingsRailAccent`, shared with the gliding
+  shared-element pill) — the shared element only exists in the transition
+  overlay (the arriving chip's own instance is hidden while the glide runs),
+  so with a transparent chip the active label sat cream-on-near-white until
+  the pill landed ("the text disappears for a moment for the active
+  indicator"). The bounds spring is critically damped (1.0 / 420) so the
+  highlight lands and STOPS instead of visibly settling.
 - **v3xx49 — the collapse clock runs the header's real collapsible distance
   (Home + Profile).** A fixed 90dp clock (`StickyBarThreshold` /
   `ProfilePillThreshold`) drove a header that gives back ~122dp (Home) / ~186dp

@@ -2559,13 +2559,20 @@ private fun SettingsSecondaryCardView(
  *  the new screen's chip across the page transition. */
 private const val SettingsRailActiveKey = "settings-rail-active"
 
+/** The active rail chip's pill colour — painted in the chip's own layer AND
+ *  by the shared element that glides between chips (see [SettingsNavRail]). */
+private val SettingsRailAccent = Color(0xFF815947)
+
 /** Bounds animation for the rail morph — a snappy, VISIBLE glide. v3xx44:
  *  0.9 / 320 settles in ~200ms, so the highlight lands with the tap instead
  *  of lagging behind it (v3xx42's 0.8 / 140 took ~350ms and read as "too
  *  slow"), while still being a real travel rather than the old stiffness-500
- *  instant snap (~150ms, no moving highlight). */
+ *  instant snap (~150ms, no moving highlight).
+ *  v3xx50 — CRITICALLY damped (1.0 / 420): the old 0.9 overshoot left the
+ *  pill visibly "coming to rest" after it had already arrived, which the
+ *  user read as the rail being slow. No overshoot, so it lands and STOPS. */
 private val SettingsRailBoundsTransform = BoundsTransform { _, _ ->
-    spring(dampingRatio = 0.9f, stiffness = 320f)
+    spring(dampingRatio = 1f, stiffness = 420f)
 }
 
 /**
@@ -2635,6 +2642,15 @@ internal fun SettingsNavRail(
                 // old screen's chip to the new screen's chip while the pages
                 // crossfade (the iOS-style rail glide). Falls back to a plain
                 // pill when the shared scopes are absent.
+                // v3xx50 — the chip ALSO paints its own fill the instant it
+                // becomes active. The shared element is only drawn in the
+                // transition overlay (the arriving chip's own instance is
+                // hidden while the glide runs), so with a transparent chip
+                // the active label sat on the pale frosted tile — cream on
+                // near-white — until the pill landed: the reported "the text
+                // disappears for a moment on the active indicator". The
+                // layer below and the overlay are the same colour and shape,
+                // so once the glide lands they are indistinguishable.
                 val sharedScope = LocalRevealSharedScope.current
                 val visScope = LocalRevealVisibilityScope.current
                 val activeState = if (selected && sharedScope != null && visScope != null)
@@ -2646,11 +2662,14 @@ internal fun SettingsNavRail(
                         .heightIn(min = 60.dp)
                         .clip(RoundedCornerShape(17.dp))
                         // Unselected chips keep their frosted tile; the
-                        // selected chip's pill is the shared element above.
+                        // selected chip paints the pill in its own layer (see
+                        // above) with the shared element gliding on top.
                         .background(
-                            if (selected) Color.Transparent
-                            else if (dark) Color.White.copy(alpha = 0.07f)
-                            else Color.White.copy(alpha = 0.62f)
+                            when {
+                                selected -> SettingsRailAccent
+                                dark -> Color.White.copy(alpha = 0.07f)
+                                else -> Color.White.copy(alpha = 0.62f)
+                            }
                         )
                         .clickable { onSelect(entry) }
                 ) {
@@ -2670,7 +2689,7 @@ internal fun SettingsNavRail(
                                     else Modifier
                                 )
                                 .clip(RoundedCornerShape(17.dp))
-                                .background(Color(0xFF815947))
+                                .background(SettingsRailAccent)
                         )
                     }
                     Column(
