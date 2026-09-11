@@ -10,10 +10,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateBottomPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -112,7 +116,15 @@ fun CommunityScreen(navController: NavController) {
     val listState = rememberLazyListState()
     val glassBackdrop = rememberLayerBackdrop()
 
-    var onlineMode by remember { mutableStateOf(AppPreferences.isOnlineModeEnabled(context)) }
+    // The observable mirror, not a local copy: the Online Mode switch on the
+    // account page and the bottom-bar opt-in both feed this page, so it has to
+    // follow whatever they last wrote.
+    val onlineMode = AppPreferences.onlineModeEnabledState
+    // True while the opt-in Community tab is on the bottom bar: then this page
+    // IS a tab root, so it drops the settings rail and the back pill (tapping
+    // a tab must not offer a "back" — the bar is the navigation) and clears
+    // the floating bar at the bottom of the list.
+    val asTab = AppPreferences.communityTabVisible
     var cards by remember { mutableStateOf<List<CommunityCard>>(emptyList()) }
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -122,7 +134,6 @@ fun CommunityScreen(navController: NavController) {
     var notice by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
-    LaunchedEffect(account.session) { onlineMode = AppPreferences.isOnlineModeEnabled(context) }
 
     val eligible = account.signedIn && onlineMode && token != null
 
@@ -172,7 +183,14 @@ fun CommunityScreen(navController: NavController) {
                 start = wideContentEdgePadding(),
                 end = wideContentEdgePadding(),
                 top = if (wide) 0.dp else SettingsHeroTotalHeight,
-                bottom = 28.dp
+                // As a tab root the last card has to clear the floating pill
+                // bar (the NavHost drops the system nav inset on tab routes
+                // because the bar carries it) — same 84dp the Cabinet uses.
+                bottom = 28.dp + if (asTab) {
+                    84.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                } else {
+                    0.dp
+                }
             ),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
@@ -181,16 +199,18 @@ fun CommunityScreen(navController: NavController) {
                     SettingsHeroHeader(
                         title = "Community",
                         subtitle = "Text cards — gone in 24 hours",
-                        onBack = { navController.popBackStack() }
+                        onBack = if (asTab) null else ({ navController.popBackStack() })
                     )
                 }
             }
-            item(key = "settings-nav", contentType = "settings-nav") {
-                SettingsNavRail(
-                    active = null,
-                    onSelect = { navigateToSettingsSection(navController, it) },
-                    navController = navController
-                )
+            if (!asTab) {
+                item(key = "settings-nav", contentType = "settings-nav") {
+                    SettingsNavRail(
+                        active = null,
+                        onSelect = { navigateToSettingsSection(navController, it) },
+                        navController = navController
+                    )
+                }
             }
 
             if (!eligible) {
@@ -254,6 +274,17 @@ fun CommunityScreen(navController: NavController) {
                             )
                         }
                         Spacer(Modifier.width(10.dp))
+                        TextButton(onClick = { navController.navigate(CurioRoutes.FRIENDS) }) {
+                            CurioIcon(
+                                name = CurioIcons.Notes,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                size = 16.dp
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text("Friends")
+                        }
+                        Spacer(Modifier.weight(1f))
                         if (loading) {
                             CircularProgressIndicator(
                                 strokeWidth = 2.dp,
@@ -340,7 +371,7 @@ fun CommunityScreen(navController: NavController) {
             SettingsHeroHeader(
                 title = "Community",
                 subtitle = "Text cards — gone in 24 hours",
-                onBack = { navController.popBackStack() },
+                onBack = if (asTab) null else ({ navController.popBackStack() }),
                 glassBackdrop = glassBackdrop
             )
         }

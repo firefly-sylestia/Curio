@@ -218,8 +218,29 @@ object CurioBottomNavItems {
         icon = CurioIcons.Inventory2,
         selectedIcon = CurioIcons.Inventory2
     )
+    // The Community wall — the ONLY optional tab. It appears on the bar only
+    // when the user opted in (Settings → Online mode → "Community tab") AND
+    // Online mode itself is on, because the wall is useless without an
+    // account and the user asked for it to be strictly opt-in.
+    val Community = CurioBottomDestination(
+        route = CurioRoutes.COMMUNITY,
+        label = "Community",
+        icon = CurioIcons.Hub
+    )
 
-    val all: List<CurioBottomDestination> = listOf(Home, Shuffle, Cabinet)
+    /** Every destination, whether or not it is currently shown. */
+    val all: List<CurioBottomDestination> = listOf(Home, Shuffle, Cabinet, Community)
+
+    /**
+     * The destinations the bar actually renders right now.
+     *
+     * Reads [AppPreferences.communityTabVisible] — Compose state — so every
+     * nav surface (phone pill bar, liquid-glass tab bar, wide-window rail)
+     * picks the tab up and drops it again the moment either switch moves,
+     * without restarting the app.
+     */
+    fun visibleItems(): List<CurioBottomDestination> =
+        if (AppPreferences.communityTabVisible) all else all.filter { it.route != CurioRoutes.COMMUNITY }
 }
 
 // v124 — the phone bottom nav is a FLOATING PILL BAR: every tab renders
@@ -398,7 +419,7 @@ fun CurioFloatingNavBar(
         val glassWanted = isLiquidGlassRequested()
         val glassBackdrop = if (glassOn) CurioGlassPills.backdrop else null
         if (glassOn && glassBackdrop != null) {
-            val items = CurioBottomNavItems.all
+            val items = CurioBottomNavItems.visibleItems()
             // v243 — remember the LAST real tab: on pushed routes (entry
             // detail, settings sub-pages…) neither selectedRoute nor
             // routePrefix matches a tab, and the old coerceAtLeast(0)
@@ -511,7 +532,7 @@ fun CurioFloatingNavBar(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                CurioBottomNavItems.all.forEach { destination ->
+                CurioBottomNavItems.visibleItems().forEach { destination ->
                     // The hierarchy walk handles nested-graph destinations;
                     // today all routes are flat so the hierarchy contains
                     // exactly the current route + start destination.
@@ -715,7 +736,7 @@ fun CurioNavigationRail(
         // the rail surface itself spans the full window height.
         content = {
             Spacer(Modifier.height(10.dp))
-            CurioBottomNavItems.all.forEach { destination ->
+            CurioBottomNavItems.visibleItems().forEach { destination ->
                 val selected = selectedRoute == destination.route ||
                     navBackStackEntry?.destination?.hierarchy?.any { routeEntry ->
                         routeEntry.route?.substringBefore("/") == destination.route

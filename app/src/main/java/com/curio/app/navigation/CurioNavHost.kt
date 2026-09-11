@@ -108,6 +108,8 @@ import com.curio.app.features.settings.ExperimentsScreen
 import com.curio.app.features.settings.UserExperimentsScreen
 import com.curio.app.features.community.CommunityCardScreen
 import com.curio.app.features.community.CommunityScreen
+import com.curio.app.features.community.DirectMessageScreen
+import com.curio.app.features.community.FriendsScreen
 import com.curio.app.features.settings.OnlineModeScreen
 import com.curio.app.features.settings.SettingsHubScreen
 import com.curio.app.features.settings.SettingsPage
@@ -251,8 +253,8 @@ private fun AnimatedContentTransitionScope<NavBackStackEntry>.isTabSwitch(
     // Browse-mode Reveal is a pushed read-only page, not a tab — it never
     // crossfades like a tab switch.
     !isBrowseRevealRoute(targetState) && !isBrowseRevealRoute(initialState) &&
-        initialState.destination.route?.substringBefore("/") in CurioRoutes.bottomNavRoutePrefixes &&
-        targetState.destination.route?.substringBefore("/") in CurioRoutes.bottomNavRoutePrefixes
+        initialState.destination.route?.substringBefore("/") in CurioRoutes.liveTabPrefixes() &&
+        targetState.destination.route?.substringBefore("/") in CurioRoutes.liveTabPrefixes()
 
 /**
  * The Curio NavHost — single-NavHost scaffold for the active app.
@@ -369,8 +371,12 @@ fun CurioNavHost(
     // (it floats its own Like/Dislike pill instead, see
     // TopicRevealScreen).
     val isRevealRoutePrefix = routePrefix == CurioRoutes.REVEAL.substringBefore("/")
+    // v3xx — [CurioRoutes.liveTabPrefixes] (not the static set) so the bar
+    // shows on the Community wall only while its opt-in tab is on; with the
+    // opt-in off the wall is a plain pushed page reached from Settings and
+    // keeps the old chromeless look.
     val showBottomBar =
-        routePrefix in CurioRoutes.bottomNavRoutePrefixes && !isRevealRoutePrefix
+        routePrefix in CurioRoutes.liveTabPrefixes() && !isRevealRoutePrefix
     // v193 — the floating pill bar stays composed briefly after the route
     // leaves the tab set so the previously-selected pill COLLAPSES with the
     // same spring it expands with. The old `showBottomBar` gate unmounted
@@ -1018,6 +1024,29 @@ fun CurioNavHost(
                     CommunityCardScreen(
                         navController = navController,
                         cardId = backStackEntry.arguments?.getString("cardId").orEmpty()
+                    )
+                }
+            }
+            composable(CurioRoutes.FRIENDS) {
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    FriendsScreen(navController = navController)
+                }
+            }
+            composable(
+                route = CurioRoutes.DIRECT_MESSAGE,
+                arguments = listOf(
+                    navArgument("userId") { type = NavType.StringType },
+                    navArgument("handle") {
+                        type = NavType.StringType
+                        defaultValue = ""
+                    }
+                )
+            ) { backStackEntry ->
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    DirectMessageScreen(
+                        navController = navController,
+                        otherUserId = backStackEntry.arguments?.getString("userId").orEmpty(),
+                        handle = backStackEntry.arguments?.getString("handle").orEmpty()
                     )
                 }
             }

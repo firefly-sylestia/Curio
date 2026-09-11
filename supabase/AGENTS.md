@@ -14,7 +14,7 @@ The backend artifacts for Curio's online layer: the database schema and its Row 
 
 ## Ownership
 
-- `schema.sql` — the whole online schema in one idempotent script: `profiles`, `cloud_captures`, `community_cards`, `community_reactions`, `community_reports`, their RLS policies, indexes, the expiry sweep function and a self-check block.
+- `schema.sql` — the whole online schema in one idempotent script: `profiles`, `cloud_captures`, `community_cards`, `community_reactions`, `community_comments`, `community_reports`, `friend_requests`, `dm_messages`, their RLS policies, indexes, the immutability triggers, `curio_are_friends()`, the expiry sweep function and a self-check block.
 
 There is no deployment automation: the file is pasted into the Supabase dashboard's SQL Editor (Database → SQL Editor → Run). Re-running it is safe by design.
 
@@ -28,6 +28,9 @@ There is no deployment automation: the file is pasted into the Supabase dashboar
 - **Identity comes from the token, not the client.** `owner` / `user_id` / `reporter` default to `auth.uid()`, so the app never sends an identity column and cannot attempt to post or react as somebody else.
 - **Online Mode gates community access** on both sides: the policies require the acting user's and the card author's `profiles.online_mode_enabled` to be true, and the client mirrors the switch through `SupabaseClient.updateOnlineMode` (an upsert, so a brand-new account gets its row).
 - Cards are immutable once posted (there is deliberately no update policy), and only the author may delete one early.
+- **Social layer (§5b–5d).** `profiles.discoverable` (default true) plus a second SELECT policy exposes the PUBLIC identity — id, display name — but only for accounts with Online Mode on, so turning the switch off hides you from search. `friend_requests` carries its own status, so an `accepted` row IS the friendship; a generated `pair_key` keeps one request per pair in either direction and its partial unique index (`where status <> 'declined'`) still allows a fresh ask after a decline. `dm_messages` is text only, readable by its two participants, and insertable ONLY between accepted friends (via `curio_are_friends`, a `security definer` boolean test, granted to `authenticated`).
+- **Immutability triggers.** The two sides of a request or a message are pinned by `curio_pin_request_parties()` / `curio_pin_message_parties()`. RLS cannot express this: an UPDATE policy's `USING` sees the old row and its `WITH CHECK` sees the new one, so neither can compare them — without the triggers an addressee could accept a request and swap the requester for a third party in the same statement.
+- **Discoverability is the consent boundary.** Reads/writes of the social tables require Online Mode on for the acting user, and asking/messaging additionally requires it on for the other side (+ `discoverable` when asking).
 
 ## Work Guidance
 

@@ -88,14 +88,15 @@ fun OnlineModeScreen(navController: NavController) {
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var revealPassword by rememberSaveable { mutableStateOf(false) }
-    var onlineMode by remember { mutableStateOf(AppPreferences.isOnlineModeEnabled(context)) }
+    // The switch reads the OBSERVABLE mirror (seeded in AppPreferences
+    // .initThemeMode), so signing in / out — which flips the same pref through
+    // OnlineAccount — moves it here too. Before it was a local copy synced off
+    // the session, which could drift from what the nav chrome was reading.
+    val onlineMode = AppPreferences.onlineModeEnabledState
 
     // A returning user is already signed in; a stored session is the only
     // thing that makes Online Mode available.
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
-    // Sign in turns the pref on and sign out turns it off, so the switch
-    // follows the account instead of drifting from it.
-    LaunchedEffect(account.session) { onlineMode = AppPreferences.isOnlineModeEnabled(context) }
 
     Box(
         modifier = Modifier
@@ -249,10 +250,36 @@ fun OnlineModeScreen(navController: NavController) {
             item {
                 SettingsOptionCard {
                     SettingsOptionRow(
-                        icon = CurioIcons.Share,
+                        icon = CurioIcons.Hub,
                         title = "Community",
                         subtitle = "Text cards from the last 24 hours",
                         onClick = { navController.navigate(CurioRoutes.COMMUNITY) }
+                    )
+                    SettingsOptionDivider()
+                    SettingsOptionRow(
+                        icon = CurioIcons.Notes,
+                        title = "Friends & messages",
+                        subtitle = "Friend requests and private messages",
+                        onClick = { navController.navigate(CurioRoutes.FRIENDS) }
+                    )
+                    SettingsOptionDivider()
+                    // The nav tab is strictly opt-in, and only meaningful with
+                    // an account: the row shows the EFFECTIVE state (tab on
+                    // AND Online Mode on), so it never reads "on" while the
+                    // tab is actually hidden.
+                    SettingsOptionSwitchRow(
+                        icon = CurioIcons.Hub,
+                        title = "Community tab",
+                        subtitle = if (onlineMode && account.signedIn) {
+                            "Puts Community on the bottom bar next to Home, Shuffle and Cabinet. Off by default."
+                        } else {
+                            "Needs Online mode on — then Community joins the bottom bar. Off by default."
+                        },
+                        checked = AppPreferences.communityTabVisible,
+                        enabled = onlineMode && account.signedIn,
+                        onCheckedChange = { wanted ->
+                            AppPreferences.setCommunityTabEnabled(context, wanted)
+                        }
                     )
                 }
             }
@@ -271,7 +298,10 @@ fun OnlineModeScreen(navController: NavController) {
                         checked = onlineMode && account.signedIn,
                         enabled = account.signedIn && !account.busy,
                         onCheckedChange = { wanted ->
-                            onlineMode = wanted
+                            // No local copy to move: setOnlineMode writes the
+                            // pref, which updates the observable state this
+                            // switch reads (so the row, the tab and the wall
+                            // can never disagree).
                             scope.launch { OnlineAccount.setOnlineMode(context, wanted) }
                         }
                     )
