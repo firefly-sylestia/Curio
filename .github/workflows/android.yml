@@ -80,7 +80,24 @@ jobs:
           # search links.
           SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
           SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
+          # Supabase (account sign-in + Online Mode backend). The project URL
+          # and the publishable/anon key are PUBLIC client credentials and are
+          # baked into BuildConfig; the service-role key must NEVER be added
+          # here or anywhere else in this workflow. Unset leaves
+          # SupabaseClient.isConfigured false, so Online Mode reports
+          # unconfigured instead of crashing.
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          # Either secret name is accepted — app/build.gradle.kts reads
+          # SUPABASE_PUBLISHABLE_KEY first and falls back to SUPABASE_ANON_KEY,
+          # so the build works whichever name the repository uses.
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
+          if [ -z "$SUPABASE_URL" ] || { [ -z "$SUPABASE_PUBLISHABLE_KEY" ] && [ -z "$SUPABASE_ANON_KEY" ]; }; then
+            echo "::warning::Supabase URL/key secrets not provided — this build's Online Mode will report unconfigured."
+          else
+            echo "Supabase project URL + publishable key were provided to the build."
+          fi
           # Bundle the source catalogs as Android assets. The app imports these
           # JSON files into its user database on first launch (and retries for
           # existing installs whose previous import produced zero rows).
