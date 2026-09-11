@@ -3646,6 +3646,13 @@ private fun BookNotesSheet(
                                             accent = accent,
                                             onAccent = onAccent,
                                             ink = ink,
+                                            // v3xx43 — the sheet's real
+                                            // container/text roles, so the
+                                            // add-note box reads correctly on
+                                            // the dark cover-tinted sheet.
+                                            surfaceHigh = surfaceHigh,
+                                            onSurface = onSurface,
+                                            onSurfaceVariant = onSurfaceVariant,
                                             isOpen = isOpen,
                                             onSave = { text ->
                                                 AppPreferences.setBookChapterNote(
@@ -3841,26 +3848,40 @@ private fun ChapterNoteField(
     ink: Color,
     isOpen: Boolean,
     onSave: (String) -> Unit,
+    // v3xx43 — the sheet's OWN container + text roles. The old box mixed
+    // ink-alpha washes (a light 8% ink over a dark cover-tinted sheet read as
+    // a gray smudge, with dim gray text inside it — the reported "inaccurate
+    // colors in dark mode"); the box now wears the sheet's surface container
+    // and its real onSurface / onSurfaceVariant text tones in BOTH themes.
+    surfaceHigh: Color = Color.Unspecified,
+    onSurface: Color = Color.Unspecified,
+    onSurfaceVariant: Color = Color.Unspecified,
     // v371 — EXPAND opens the full white writing sheet; SHARE seeds the
     // share card with the current note as a Chapter review.
     onExpand: () -> Unit = {},
     onShare: (String) -> Unit = {}
 ) {
     var value by rememberSaveable(initial) { mutableStateOf(initial) }
-    // v384 — the note box is fully palette-aware: the old closed-state
-    // colours came from the raw Material scheme (surfaceVariant / onSurface /
-    // onSurfaceVariant), which clashed with the cover-tinted sheet in dark
-    // mode (a flat gray box with dim gray text on the coloured wash). Every
-    // tone now derives from the sheet's [ink]/[accent] so the box reads
-    // cleanly on light AND dark cover palettes.
+    val dark = isCurioDarkTheme()
+    // Fallbacks keep the field legible for callers that only pass ink/accent.
+    val boxSurface = if (surfaceHigh == Color.Unspecified) ink.copy(alpha = 0.08f)
+        else surfaceHigh.copy(alpha = if (dark) 0.92f else 0.78f)
+    val boxInk = if (onSurface == Color.Unspecified) ink else onSurface
+    val boxMuted = if (onSurfaceVariant == Color.Unspecified) ink.copy(alpha = 0.7f)
+        else onSurfaceVariant
     androidx.compose.foundation.layout.Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                if (isOpen) accent.copy(alpha = 0.14f)
-                else ink.copy(alpha = 0.08f),
+                if (isOpen) accent.copy(alpha = if (dark) 0.22f else 0.14f)
+                else boxSurface,
+                RoundedCornerShape(12.dp)
+            )
+            .border(
+                1.dp,
+                if (isOpen) accent.copy(alpha = 0.5f) else boxInk.copy(alpha = 0.12f),
                 RoundedCornerShape(12.dp)
             )
             .padding(horizontal = 10.dp, vertical = 8.dp)
@@ -3868,11 +3889,7 @@ private fun ChapterNoteField(
         CurioIcon(
             CurioIcons.Note,
             if (value.isBlank()) "Add a note" else "Chapter note",
-            // v3xx — dark mode: the closed-state note glyph lifts to a
-            // stronger alpha so the "add note" affordance never vanishes
-            // into the cover-tinted dark row.
-            tint = if (isOpen) accent.copy(alpha = 0.9f)
-                else ink.copy(alpha = if (isCurioDarkTheme()) 0.9f else 0.55f),
+            tint = if (isOpen) accent else boxMuted,
             size = 15.dp
         )
         BasicTextField(
@@ -3882,16 +3899,14 @@ private fun ChapterNoteField(
                 onSave(value)
             },
             singleLine = true,
-            textStyle = MaterialTheme.typography.bodySmall.copy(
-                color = if (isOpen) ink else ink.copy(alpha = 0.9f)
-            ),
+            textStyle = MaterialTheme.typography.bodySmall.copy(color = boxInk),
             cursorBrush = SolidColor(accent),
             decorationBox = { inner ->
                 if (value.isBlank()) {
                     Text(
                         "Add a note…",
                         style = MaterialTheme.typography.bodySmall,
-                        color = (if (isOpen) accent else ink).copy(alpha = 0.55f)
+                        color = boxMuted.copy(alpha = 0.85f)
                     )
                 }
                 inner()
@@ -3899,17 +3914,16 @@ private fun ChapterNoteField(
             modifier = Modifier.weight(1f)
         )
         // v371 — EXPAND: opens the full writing sheet (long notes, no more
-        // tiny single-line box). v384 — palette-ink chip in every state.
+        // tiny single-line box).
         Surface(
             onClick = onExpand,
             shape = CircleShape,
-            color = if (isOpen) ink.copy(alpha = 0.16f) else ink.copy(alpha = 0.10f)
+            color = boxInk.copy(alpha = if (isOpen) 0.16f else 0.10f)
         ) {
             CurioIcon(
                 CurioIcons.Fullscreen,
                 "Expand note",
-                // v3xx — dark mode: the expand chip glyph stays full-strength.
-                tint = if (isOpen) ink else ink.copy(alpha = if (isCurioDarkTheme()) 1f else 0.8f),
+                tint = if (isOpen) boxInk else boxMuted,
                 size = 15.dp,
                 modifier = Modifier.padding(7.dp)
             )
@@ -4272,20 +4286,27 @@ private fun AlbumCoverPoster(
     artist: String,
     accent: Color,
     imageUrl: String? = null,
+    // v3xx43 — the URL the CALLER already resolved (the album notes sheet's
+    // palette source). Seeding the poster from it keeps the artwork and the
+    // sheet's cover palette on the SAME image, so the poster can no longer
+    // render a generated gradient while the sheet wears the real cover's
+    // colors (the reported "album colors are fully different").
+    resolvedUrl: String? = null,
     modifier: Modifier = Modifier
 ) {
     // v333 — albums now ship an AUTHORED `imageUrl` in the catalog (iTunes /
     // MusicBrainz artwork), so the poster prefers it and only falls back to
     // the on-the-fly keyless resolver for albums without one (older rows).
     val authoredUrl = imageUrl?.takeIf { it.isNotBlank() }
-    var artUrl by remember(albumTitle, artist, authoredUrl) { mutableStateOf<String?>(authoredUrl) }
-    var failed by remember(albumTitle, artist, authoredUrl) { mutableStateOf(false) }
+    val seedUrl = authoredUrl ?: resolvedUrl?.takeIf { it.isNotBlank() }
+    var artUrl by remember(albumTitle, artist, seedUrl) { mutableStateOf<String?>(seedUrl) }
+    var failed by remember(albumTitle, artist, seedUrl) { mutableStateOf(false) }
     // v350 — the ALBUM cover-fetch toggle now gates the keyless fallback
     // (authored art always shows; the network resolver only runs when the
     // album toggle is ON, mirroring the book + series consent gates).
     val consent = AppPreferences.albumFetchEnabledState
-    LaunchedEffect(albumTitle, artist, authoredUrl, consent) {
-        if (artUrl == null && !failed && authoredUrl == null && consent) {
+    LaunchedEffect(albumTitle, artist, seedUrl, consent) {
+        if (artUrl == null && !failed && seedUrl == null && consent) {
             artUrl = AlbumArtFetch.resolveArtworkUrl(albumTitle, artist)
             if (artUrl == null) failed = true
         }
@@ -4594,6 +4615,11 @@ private fun AlbumNotesSheet(
                     artist = topic.byline,
                     accent = accent,
                     imageUrl = topic.imageUrl,
+                    // v3xx43 — the sheet's own resolved artwork drives both the
+                    // poster AND the cover palette, so the two can never
+                    // disagree (a gradient poster on a real-cover-colored
+                    // sheet was the "album colors are fully different" bug).
+                    resolvedUrl = paletteUrl,
                     modifier = Modifier
                         .size(84.dp)
                         .shadow(3.dp, RoundedCornerShape(12.dp))

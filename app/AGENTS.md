@@ -7284,6 +7284,77 @@ app/src/main/java/com/curio/app/
   per save — the GC pauses froze the app. Now only new/changed rows
   decode; the map is only touched from the flow's single collection
   dispatcher.
+- **v3xx43 — Favorites = liked TOPICS, Everything → CUPBOARD, stable
+  wall sizes, instant Cabinet, glass headers to the status bar + a real
+  collapse (user 2026-09-10).**
+  (1) **Duplicate shelf labels gone** — `V2DetailHeader` (CabinetV2Content)
+  dropped its name/count block (the pinned hero already prints the
+  collection's name + item count) and lost its `name`/`count` params; it
+  is now the actions strip (Add + kebab) with `Arrangement.End`.
+  `v2VirtualShelfItems` lost its `v-head` section header entirely (same
+  duplicate on Saved entries / Notes) and its unused `onAdd` param.
+  (2) **Favorites is the LIKED-TOPIC shelf** — new `likedTopics` in
+  `CabinetV2Content` reads `AppPreferences.topicSentimentsState`
+  (SENTIMENT_LIKE, key `CATEGORY:topicId`) and resolves each id against
+  the warm lane pools (`TopicJsonLoader.cached`, guarded by a
+  `catalogReady` poll with a 3s cap), deduped + name-sorted. The level
+  renders through the new `v2LikedTopicItems` / `V2LikedTopicRow` — a
+  category-tinted glyph tile + name/byline/lane row that opens the
+  topic's real reveal (skeleton rows while the pools warm, doodle empty
+  state after). `shelfCounts[FAVORITES]` and the hero subtitle now count
+  liked topics; `V2ShelfId.FAVORITES` no longer shares the media wall.
+  (3) **Everything → CUPBOARD** — hero title + subtitle, the home card's
+  title/subtitle/count (liked media only, no captures), its empty rail
+  copy, the no-match state and the open-everything content description
+  all say Cupboard now; `heroSubtitle` reads "Books · albums · series"
+  and the home fallback line reads "Collections · Cupboard · your
+  keepsakes". The internal level key stays `"everything"` (no state
+  churn); its copy and card count are media-only.
+  (4) **Stable wall sizes** — `mediaTierIndex` maps every liked item
+  (`KIND|NAME`) to its position in the FULL name-sorted media list, and
+  `v2EverythingMasonryItems` takes that map so a cover's size tier comes
+  from its stable position, never its rank in the filtered list:
+  filtering the wall re-flows it without any cover changing size.
+  (5) **Cupboard Add = catalog search** — new `V2CupboardAddSheet`
+  (`showCupboardAdd`): a search field over the BOOKS / ALBUMS / SERIES
+  lane pools (sync, warm cache), rows via the existing
+  `AddTopicPickRow`, tapping toggles the item's media favorite via
+  `toggleLikedFavorite` — so pinning IS liking and the wall updates
+  live (an empty query lists what is on the wall, doubling as the
+  manager). The old Add-to-Favorites sheet mode (`AddTarget.Favorites`)
+  is now unreachable — liking topics happens on the reveal.
+  (6) **Instant Cabinet** — `CaptureRepository` keeps
+  `lightSnapshot` (`@Volatile`, written by `observeLight`) and exposes
+  `peekLight()`; `CabinetScreen` + `CabinetV2Content` seed their
+  `produceState` from it, and `CabinetScreen` gains `entriesReady`
+  (flipped by the first real DB emission) so a cold first frame shows
+  quiet card skeletons instead of the "Your Cabinet is empty" doodle.
+  (7) **Glass headers reach the status bar** —
+  `CurioGlassToolbar` / `CurioGlassToolbarMorph`
+  (ui/components/CurioGlassToolbar.kt) moved `statusBarsPadding()` from
+  the bar to its CONTENT (the leading Row / the full Column / the
+  compact Row), so the capsule fills the status-bar strip; the morph
+  bar's collapsed height is now `compactH + WindowInsets.statusBars`
+  (`getTop`), so the compact row is never clipped. Home + Profile
+  reserve `compact + inset` at full collapse.
+  (8) **The morph bar really collapses** — the reservation spacer was
+  static (Home 200dp / Profile 264dp), which left the page looking
+  permanently expanded. `HomeScreen` hoists
+  `homeStickyProgress` above the scroll content and reserves
+  `lerp(HomeGlassToolbarFullHeight, HomeCompactHeaderHeight + inset,
+  ease)`; `ProfileScreen` hoists `profileStickyProgress` the same way
+  and passes `reserveHeight` into `ProfileHero` (new param, default
+  `ProfileHeroTotalHeight`), so the list rises as the bar shrinks.
+  (9) **Queued polish** — the GalleryWall caption is a PLAIN text box
+  (`PaperLineField(paper = false)`; the per-field style/color values
+  still feed the board's new quote cards + the saved payload),
+  `ChapterNoteField` (book sheet's add-note box) takes the sheet's
+  `surfaceHigh` / `onSurface` / `onSurfaceVariant` and wears a 1dp
+  hairline instead of ink-alpha washes (the dark-mode gray-smudge fix),
+  and `AlbumCoverPoster` gained `resolvedUrl` — the album notes sheet
+  seeds the poster with its palette's own artwork URL, so the poster
+  and the sheet colors can never disagree (the "album colors are fully
+  different" bug).
 - **v3xx42 — Shelf-art final pass + nav rail highlight GLIDE + back
   mid-animation fix (user 2026-09-10: "curying now the book itself is
   bad just the book… saved entries properly redesign… completed keep it

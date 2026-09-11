@@ -398,16 +398,15 @@ fun GalleryWallFormat(
             )
         }
 
-        // ── Caption field — wears the note-paper slip like the other text
-        //    boxes, with its own per-field paper-style toggle.
+        // ── Caption field — v3xx43: a PLAIN text box (user request). The
+        //    note-paper slip + its style/color toggles are gone from this
+        //    field; the per-field `captionStyle`/`captionColor` values still
+        //    feed the board's new quote cards + the saved payload.
         PaperLineField(
             value = caption,
             onValueChange = { caption = it },
             label = "Add a caption (optional)",
-            paperStyle = captionStyle,
-            onPaperStyleChange = { captionStyle = it },
-            paperColor = captionColor,
-            onPaperColorChange = { captionColor = it },
+            paper = false,
             // v3xx — the caption joins the global text-history feed too.
             historyField = "Caption",
             // v158 — the dictation mic rides the caption label row too

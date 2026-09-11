@@ -19,7 +19,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -425,6 +427,30 @@ fun ProfileScreen(navController: NavController) {
         // records into its own layer; the sticky back/search pills are a
         // SIBLING of this LazyColumn, so they can never sample themselves.
         val profileGlassBackdrop = rememberLayerBackdrop()
+        // v3xx43 — the glass header's reservation COLLAPSES with it: the
+        // pinned morph bar shrinks to ProfileCompactHeaderHeight on scroll, so
+        // the spacer it owns shrinks too and the list rises with it — the old
+        // static 264dp spacer left the header looking permanently expanded
+        // after scrolling (the reported "doesn't collapse" bug). The clock is
+        // hoisted so the pinned bar and the spacer read the SAME progress.
+        val profileStickyThresholdPx = with(LocalDensity.current) { ProfilePillThreshold.toPx() }
+        val profileStickyProgress by remember {
+            derivedStateOf {
+                if (listState.firstVisibleItemIndex >= 1) 1f
+                else (listState.firstVisibleItemScrollOffset / profileStickyThresholdPx)
+                    .coerceIn(0f, 1f)
+            }
+        }
+        // The collapsed bar still owns the status-bar strip (the glass fills
+        // it now), so the reservation floors at compact + inset.
+        val statusTopDp = with(LocalDensity.current) {
+            WindowInsets.statusBars.getTop(this).toDp()
+        }
+        val glassHeaderReserve = androidx.compose.ui.unit.lerp(
+            ProfileHeroTotalHeight,
+            ProfileCompactHeaderHeight + statusTopDp,
+            FastOutSlowInEasing.transform(profileStickyProgress)
+        )
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize().layerBackdrop(profileGlassBackdrop),
@@ -443,6 +469,9 @@ fun ProfileScreen(navController: NavController) {
                     family = heroFamily,
                     fill = heroFill,
                     ink = heroInk,
+                    // v3xx43 — the glass style's reservation shrinks with the
+                    // pinned morph bar (see profileStickyProgress above).
+                    reserveHeight = glassHeaderReserve,
                     onEditName = {
                         nameInput = displayName
                         // v97 — the tagline field rides the same Edit profile
@@ -540,13 +569,8 @@ fun ProfileScreen(navController: NavController) {
         // the same eased scroll progress (no post-pop bounce), and the
         // colors are animated paint values (no ripple flash) — the exact
         // Home mechanism.
-        val stickyThresholdPx = with(LocalDensity.current) { ProfilePillThreshold.toPx() }
-        val stickyProgress by remember {
-            derivedStateOf {
-                if (listState.firstVisibleItemIndex >= 1) 1f
-                else (listState.firstVisibleItemScrollOffset / stickyThresholdPx).coerceIn(0f, 1f)
-            }
-        }
+        // v3xx43 — profileStickyProgress is hoisted above the list (it also
+        // drives the glass header's reservation).
         // v3xx — GLASS header style: the pinned MORPHING toolbar replaces
         // the floating Back + Settings pills (it carries its own back +
         // settings pills and collapses from the full hero — name + tagline
@@ -610,7 +634,7 @@ fun ProfileScreen(navController: NavController) {
                 }
             }
             CurioGlassToolbarMorph(
-                progress = stickyProgress,
+                progress = profileStickyProgress,
                 compactHeight = ProfileCompactHeaderHeight,
                 title = displayName,
                 subtitle = heroTagline,
@@ -742,7 +766,7 @@ fun ProfileScreen(navController: NavController) {
                 modifier = Modifier.align(Alignment.TopCenter)
             )
         } else {
-        val frostShift = FastOutSlowInEasing.transform(stickyProgress)
+        val frostShift = FastOutSlowInEasing.transform(profileStickyProgress)
         val pillScale = androidx.compose.ui.util.lerp(0.97f, 1f, frostShift)
         // Resting state = SOLID hero-card-color pills — the banner's own
         // fill at full opacity with a rim blended toward the readable ink,
@@ -1128,6 +1152,9 @@ private fun ProfileHero(
     family: CategoryFamily,
     fill: Color,
     ink: Color,
+    // v3xx43 — the space this item reserves for the pinned glass header; the
+    // caller animates it down as the header collapses.
+    reserveHeight: Dp = ProfileHeroTotalHeight,
     onEditName: () -> Unit
 ) {
     val initial = name.firstOrNull()?.uppercase().orEmpty()
@@ -1146,8 +1173,9 @@ private fun ProfileHero(
     if (AppPreferences.headerStyleState == AppPreferences.HeaderStyle.GLASS) {
         // v3xx22 — reserve the FULL bar footprint (not just the collapsed
         // 54dp) so the pinned morph header never covers the first content
-        // card at rest — the bar collapses over the spacer as you scroll.
-        Spacer(Modifier.height(ProfileHeroTotalHeight))
+        // card at rest. v3xx43 — the reservation now ANIMATES down to the
+        // compact height as the bar collapses, so the list rises with it.
+        Spacer(Modifier.height(reserveHeight))
         return
     }
     Box(

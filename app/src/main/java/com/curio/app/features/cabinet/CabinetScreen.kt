@@ -248,9 +248,22 @@ fun CabinetScreen(navController: NavController) {
     // v3xx37 — the LIGHT flow: the grid needs light columns only (the full
     // flow's per-emission re-read of every payload JSON blob is what lagged
     // the Cabinet on large archives).
-    val entries by produceState<List<CurioEntry>>(initialValue = emptyList()) {
+    // v3xx43 — INSTANT OPEN: the first frame starts from the repository's
+    // last light emission ([CaptureRepository.peekLight]) instead of an empty
+    // list, and [entriesReady] flips on the first real DB emission — so the
+    // page paints the saved captures immediately and can never flash the
+    // "Your Cabinet is empty" state while the archive is still arriving.
+    var entriesReady by rememberSaveable {
+        mutableStateOf(CurioRepositoryHolder.repo.peekLight().isNotEmpty())
+    }
+    val entries by produceState<List<CurioEntry>>(
+        initialValue = CurioRepositoryHolder.repo.peekLight()
+    ) {
         try {
-            CurioRepositoryHolder.repo.observeLight().collect { value = it }
+            CurioRepositoryHolder.repo.observeLight().collect {
+                value = it
+                if (!entriesReady) entriesReady = true
+            }
         } catch (_: Exception) {
             value = emptyList()
         }
@@ -549,7 +562,29 @@ fun CabinetScreen(navController: NavController) {
         // drawn on top in this root Box), so cards disappear under the
         // ragged tear and the pinned chips as they scroll — the settings
         // overlay pattern.
-        if (visibleEntries.isEmpty()) {
+        if (visibleEntries.isEmpty() && !entriesReady) {
+            // v3xx43 — a cold first frame: the archive has not reached us yet,
+            // so hold the frame with quiet card skeletons instead of the
+            // "Cabinet is empty" doodle (the loading flash the user reported).
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = contentTop)
+            ) {
+                repeat(4) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(118.dp)
+                            .padding(horizontal = 16.dp, vertical = 6.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(
+                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
+                            )
+                    )
+                }
+            }
+        } else if (visibleEntries.isEmpty()) {
             // v119 — the empty state registers the same "grid" landmark the
             // filled grid does, so the pet-led tour's Cabinet stop keeps its
             // anchor even with nothing saved yet (otherwise the guide bubble
