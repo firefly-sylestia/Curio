@@ -382,6 +382,72 @@ takes it cleanly.
 
 **Status:** committed + pushed.
 
+## Request (2026-09-11, completed — CI compile break: `matchParentSize` in the rail chip)
+
+User pasted the CI failure: `SettingsHubScreen.kt:2706:30 Unresolved reference
+'matchParentSize'` on both `compileDebugKotlin` and `compileReleaseKotlin`.
+
+**Cause:** the settings rail's `chipContent` lambda was declared as a plain
+`@Composable (Boolean) -> Unit`, but its body calls `Modifier.matchParentSize()`
+— a `BoxScope` extension. A plain lambda has no `BoxScope` receiver, so the
+call could not resolve (even though both call sites sit inside `Box` content).
+
+**Fix (1 line, `SettingsHubScreen.kt`):** declare the lambda as a `BoxScope`
+extension — `@Composable BoxScope.(Boolean) -> Unit`. Both call sites (the
+shared-element `Box { chipContent(true) }` and the fallback `chipContent(selected)`
+in the outer `Box` content) already have a `BoxScope` receiver in scope, so the
+receiver resolves at both and the chip keeps filling its parent Box.
+
+**Status:** committed + pushed (main).
+
+## Request (2026-09-11, in progress — Supabase plan audit: what is actually built, and making the new secrets count)
+
+User asked how far the 6-item Supabase plan has been implemented, noted the
+repository secrets for `SUPABASE_URL` + the publishable key were just added,
+asked for item 1 to be re-verified, and listed the plan: (1) Supabase client
+support via the version-catalog path, (2) auth/session data layer + Online
+Mode UI, (3) Room capture sync, (4) 24-hour text share cards + Community
+interactions, (5) schema/RLS security, (6) verification.
+
+**Verified against the branch (nothing guessed):**
+
+1. **PARTIAL.** `data/SupabaseClient.kt` + `data/SupabaseSessionStore.kt`
+exist and compile (CI error fixed this branch). Gradle wiring is sound —
+`libs.com.squareup.okhttp3.okhttp` is a real catalog alias (okhttp 5.3.2,
+gradle/libs.versions.toml:110) and only the URL + publishable/anon key are
+read (`build.gradle.kts:79-90,131-132`); the service-role key is never
+referenced, so nothing privileged can ship in the APK. Deviations from the
+plan: it is a hand-rolled OkHttp/JSONObject client, NOT the Supabase Kotlin
+client, no catalog alias was added for it, and the files sit in
+`com.curio.app.data` rather than a `data/supabase` package.
+2. **NOT STARTED.** `AppPreferences.isOnlineModeEnabled/setOnlineModeEnabled`
+exist but are called from NOWHERE (no settings row, no profile surface, no
+auth screen, no nav route — `CurioRoutes` has no auth entry).
+3. **NOT STARTED.** No sync/upload code references Room captures.
+4. **NOT STARTED.** No Community feed, no share-card upload, no expiry logic.
+5. **NOT VERIFIABLE FROM HERE.** No SQL/migrations in the repo, and no local
+Supabase access, so profiles/captures/share-cards/reactions tables and RLS
+cannot be inspected; the SQL still needs to be run/pasted.
+6. **CI could not verify anything** — see the finding below.
+
+**Finding (the real blocker):** both workflows exported `KEYSTORE_*`,
+Google Books, LibraryThing and Spotify to Gradle but **never**
+`SUPABASE_URL`/`SUPABASE_PUBLISHABLE_KEY`, so the secrets the user added
+reached nothing and every CI/release APK baked an empty
+`BuildConfig.SUPABASE_URL` (`SupabaseClient.isConfigured` = false — Online
+Mode could only ever report unconfigured). Also, PR #110 sat
+`CONFLICTING` against `main`, and a conflicting PR gets no `pull_request`
+run — 0 workflow runs exist for the pushed commit.
+
+**Shipped:** `android.yml` + `release.yml` now export `SUPABASE_URL` and
+both key names (`SUPABASE_PUBLISHABLE_KEY`, falling back to
+`SUPABASE_ANON_KEY`) with a non-secret warning when absent; the contract is
+recorded in `.github/AGENTS.md` (service-role key stays out of every build).
+`origin/main` was merged into this branch and the `Prompt.md` conflict
+resolved by keeping both entries, which clears the PR conflict so CI can run.
+
+**Status:** pushing; CI run to be confirmed on the PR.
+
 ## Archive
 
 Older completed request logs (2026-09-08 → 2026-09-10) were trimmed from this
