@@ -65,8 +65,17 @@ internal object CurioSecureStore {
     /** The vault's key, created on first use. */
     private fun key(alias: String = KEY_ALIAS): SecretKey {
         val store = KeyStore.getInstance(KEYSTORE).apply { load(null) }
-        val existing = store.getEntry(alias, null)
-        if (existing is KeyStore.SecretKeyEntry) return existing.secretKey
+        val existing = runCatching { store.getEntry(alias, null) }.getOrNull()
+        if (existing is KeyStore.SecretKeyEntry) {
+            return runCatching { existing.secretKey }.getOrElse {
+                runCatching { store.deleteEntry(alias) }
+                return generateKey(alias)
+            }
+        }
+        return generateKey(alias)
+    }
+
+    private fun generateKey(alias: String): SecretKey {
         val generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, KEYSTORE)
         generator.init(
             KeyGenParameterSpec.Builder(
@@ -94,21 +103,30 @@ internal object CurioSecureStore {
             runCatching { prefs(context).edit().remove(name).apply() }
             return true
         }
-        return runCatching {
-            val cipher = Cipher.getInstance(TRANSFORMATION)
-                .apply { init(Cipher.ENCRYPT_MODE, keyFor(name)) }
-            val iv = Base64.encodeToString(cipher.iv, Base64.NO_WRAP)
-            val body = Base64.encodeToString(
-                cipher.doFinal(value.toByteArray(Charsets.UTF_8)),
-                Base64.NO_WRAP
-            )
-            prefs(context).edit().putString(name, "$iv:$body").apply()
-            true
-        }.getOrElse { failure ->
+        val sealed = runCatching { seal(context, name, value) }.recoverCatching { failure ->
+            if (!name.startsWith(DM_NAME_PREFIX) && name != "dm-device-id") throw failure
+            runCatching {
+                KeyStore.getInstance(KEYSTORE).apply { load(null) }.deleteEntry(DM_KEY_ALIAS)
+            }
+            seal(context, name, value)
+        }
+        return sealed.getOrElse { failure ->
             // Never log the value; the failure itself is what matters.
             Log.w(TAG, "Could not seal a stored value", failure)
             false
         }
+    }
+
+    private fun seal(context: Context, name: String, value: String): Boolean {
+        val cipher = Cipher.getInstance(TRANSFORMATION)
+            .apply { init(Cipher.ENCRYPT_MODE, keyFor(name)) }
+        val iv = Base64.encodeToString(cipher.iv, Base64.NO_WRAP)
+        val body = Base64.encodeToString(
+            cipher.doFinal(value.toByteArray(Charsets.UTF_8)),
+            Base64.NO_WRAP
+        )
+        prefs(context).edit().putString(name, "$iv:$body").apply()
+        return true
     }
 
     /** The sealed value, or null when it is absent, expired or tampered with. */
