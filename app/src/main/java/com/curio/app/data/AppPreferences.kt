@@ -308,6 +308,7 @@ object AppPreferences {
     // "I want the community in my nav" choice.
     private const val KEY_COMMUNITY_TAB_ENABLED = "community_tab_enabled"
     private const val KEY_TERMS_ACCEPTED_VERSION = "terms_accepted_version"
+    private const val KEY_LOCAL_FRIEND_IDS = "local_friend_ids"
     const val CURRENT_TERMS_VERSION = 1
 
     // ── Display name ─────────────────────────────────────────────────
@@ -357,6 +358,13 @@ object AppPreferences {
 
   fun acceptCurrentTerms(context: Context) {
   prefs(context).edit().putInt(KEY_TERMS_ACCEPTED_VERSION, CURRENT_TERMS_VERSION).apply()
+  }
+
+  fun getLocalFriendIds(context: Context): Set<String> =
+  prefs(context).getStringSet(KEY_LOCAL_FRIEND_IDS, emptySet()).orEmpty()
+
+  fun rememberLocalFriend(context: Context, userId: String) {
+  prefs(context).edit().putStringSet(KEY_LOCAL_FRIEND_IDS, getLocalFriendIds(context) + userId).apply()
   }
 
   // ── Community tab (opt-in bottom-nav entry) ───────────────────────
@@ -512,7 +520,7 @@ object AppPreferences {
         return added
     }
 
-    // ── Series watched progress (v350) ───────────────────────────────────
+    // ── Series watched progress (v350) ───────────────────────────���───────
     // Per-show set of watched episode keys ("S1E3"): JSON object show name →
     // JSON array of keys. The episode-list sheet toggles an episode; the UI
     // derives watched counts per season from the authored episode list.
@@ -2048,7 +2056,7 @@ object AppPreferences {
         heroShadowState = enabled
     }
 
-    // ── Paper & header experiments (v27) ─────────────────────────────
+    // ── Paper & header experiments (v27) ──────────────────────────��──
     private const val KEY_HEADER_STYLE = "header_style"   // "TORN" | "GLASS"
     private const val KEY_PAPER_HEADER_CUTS = "paper_header_cuts"
     private const val KEY_PAPER_HEADER_HOLES = "paper_header_holes"
