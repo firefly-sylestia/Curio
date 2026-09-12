@@ -505,6 +505,7 @@ fun DirectMessageScreen(
             modifier = Modifier
                 .layerBackdrop(glassBackdrop)
                 .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))
                 // ONE inset consumer for the whole screen, and it is the
                 // UNION rather than a sum: the bottom inset is
                 // max(navigation bar, keyboard). Chaining
@@ -1171,9 +1172,8 @@ private fun MessageComposer(
 
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .windowInsetsPadding(WindowInsets.ime)
-            .padding(
+  .fillMaxWidth()
+  .padding(
                 start = wideContentEdgePadding(),
                 end = wideContentEdgePadding(),
                 bottom = 10.dp
