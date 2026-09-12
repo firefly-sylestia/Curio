@@ -272,7 +272,7 @@ fun FriendsScreen(navController: NavController) {
                     value = query,
                     onValueChange = { query = it },
                     singleLine = true,
-                    label = { Text("Search by name") },
+                    label = { Text("Search by name or @username") },
                     supportingText = {
                         Text(
                             if (searching) "Searching…"
@@ -521,7 +521,7 @@ private fun PersonRow(
         PersonBadge(person.label)
         Spacer(Modifier.width(12.dp))
         Text(
-            text = person.label,
+            text = person.identityLabel,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f)
