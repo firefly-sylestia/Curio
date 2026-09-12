@@ -69,6 +69,10 @@ object OnlineAccount {
                     SupabaseSessionStore.save(context, refreshed)
                     AppPreferences.setOnlineModeEnabled(context, true)
                     state = state.copy(session = refreshed, busy = false, error = null)
+                    recoveryScope.launch {
+                        restoreProfileIdentity(context, refreshed)
+                        publishIdentity(context, refreshed.accessToken, refreshed.userId)
+                    }
                 },
                 onFailure = {
                     // Keep the cached session for offline use, but avoid trapping
@@ -91,8 +95,9 @@ object OnlineAccount {
             onSuccess = { session ->
                 SupabaseSessionStore.save(context, session)
                 AppPreferences.setOnlineModeEnabled(context, true)
+                restoreProfileIdentity(context, session)
                 state = State(session = session)
-                publishIdentity(context, session.accessToken)
+                publishIdentity(context, session.accessToken, session.userId)
                 true
             },
             onFailure = { failure ->
@@ -126,8 +131,9 @@ object OnlineAccount {
                 } else {
                     SupabaseSessionStore.save(context, session)
                     AppPreferences.setOnlineModeEnabled(context, true)
+                    restoreProfileIdentity(context, session)
                     state = State(session = session)
-                    publishIdentity(context, session.accessToken)
+                    publishIdentity(context, session.accessToken, session.userId)
                     true
                 }
             },
@@ -196,13 +202,34 @@ object OnlineAccount {
      * moment a session exists. Best-effort — a failed push is a blank second
      * line or an absent bio, never a blocked sign-in.
      */
-    private fun publishIdentity(context: Context, accessToken: String) {
+    private fun publishIdentity(context: Context, accessToken: String, userId: String) {
         val name = AppPreferences.getDisplayName(context)
         val bio = AppPreferences.getCustomStreakTagline(context)
         recoveryScope.launch {
+            // Register a public device key as soon as the account is active,
+            // rather than making a friend open a DM before they can receive
+            // the first encrypted message.
+            runCatching { CurioDmCrypto.identity(context) }
+                .onSuccess { SocialApi.publishDmIdentity(accessToken, it, userId) }
             if (name.isNotBlank()) SocialApi.updateDisplayName(accessToken, name)
             if (bio.isNotBlank()) SocialApi.updateBio(accessToken, bio)
         }
+    }
+
+    /**
+     * Rehydrates identity fields that belong to the online profile after an
+     * app-data clear.  In particular, never let the default local display
+     * name overwrite a name or username that the account already owns.
+     */
+    private suspend fun restoreProfileIdentity(context: Context, session: SupabaseClient.Session) {
+        val profile = SocialApi.profile(session.accessToken, session.userId).getOrNull() ?: return
+        profile.username.takeIf { it.isNotBlank() }?.let {
+            AppPreferences.setUsername(context, it)
+        }
+        profile.displayName.takeIf { it.isNotBlank() }?.let {
+            AppPreferences.setDisplayName(context, it)
+        }
+        AppPreferences.setSocialAvatarStyle(context, profile.avatarStyle)
     }
 }
 

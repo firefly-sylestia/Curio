@@ -222,15 +222,15 @@ fun SocialProfileScreen(navController: NavController, userId: String) {
                 }
             }
 
-            item { SettingsSectionHeading("Cards from the last 24 hours") }
+            item { SettingsSectionHeading("Posts from the last 24 hours") }
 
             if (cards.isEmpty() && !loading) {
                 item(key = "empty") {
                     SettingsOptionCard {
                         SettingsOptionInfoRow(
                             CurioIcons.Info,
-                            "No live cards",
-                            "Cards only last a day, and nothing is kept after that."
+                            "No live posts",
+                            "Topic cards, notes and quotes only last a day."
                         )
                     }
                 }

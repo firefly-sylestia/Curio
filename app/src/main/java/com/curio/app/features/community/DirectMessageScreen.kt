@@ -181,15 +181,7 @@ fun DirectMessageScreen(
                 // fail AES-GCM authentication on that phone.
                 val envelope = SocialApi.dmEnvelope(active, conversationId, identity.deviceId).getOrNull()
                 runCatching {
-                    if (envelope != null) {
-                        CurioDmCrypto.ensureConversationKey(context, conversationId, envelope)
-                    } else {
-                        CurioDmCrypto.ensureConversationKey(context, conversationId)
-                    }
-                }.getOrElse {
-                    // A stale or damaged device envelope must not crash the screen.
-                    // Keep the local key and let the next send publish a fresh envelope.
-                    CurioDmCrypto.ensureConversationKey(context, conversationId)
+                    envelope?.let { CurioDmCrypto.installEnvelope(context, conversationId, it) }
                 }
                 val fresh = raw.map { message ->
                     if (message.migrationState == "legacy") message.copy(body = "Legacy message — re-encryption required")
@@ -272,20 +264,32 @@ fun DirectMessageScreen(
         val conversationId = dmConversationId(me, otherUserId)
         val encrypted = runCatching {
             val mine = CurioDmCrypto.identity(context)
-            SocialApi.publishDmIdentity(active, mine, me)
-            val key = SocialApi.dmEnvelope(active, conversationId, mine.deviceId)
+            SocialApi.publishDmIdentity(active, mine, me).getOrThrow()
+            val ownEnvelope = SocialApi.dmEnvelope(active, conversationId, mine.deviceId)
                 .getOrNull()
-                ?.let { envelope -> runCatching { CurioDmCrypto.ensureConversationKey(context, conversationId, envelope) }.getOrNull() }
-                ?: CurioDmCrypto.conversationKey(context, conversationId)
+            val keyVersion = ownEnvelope?.keyVersion
+                ?: ((System.currentTimeMillis() / 1_000L) + (System.nanoTime() and 0x3ffL))
+                    .coerceAtMost(Int.MAX_VALUE.toLong())
+                    .toInt()
+            val key = ownEnvelope
+                ?.let { envelope -> CurioDmCrypto.installEnvelope(context, conversationId, envelope) }
+                ?: CurioDmCrypto.existingKey(context, conversationId, keyVersion)
+                ?: CurioDmCrypto.newKey(context, conversationId, keyVersion)
             SocialApi.dmIdentities(active, listOf(otherUserId)).getOrThrow().forEach { peer ->
-                SocialApi.saveDmEnvelope(active, conversationId, otherUserId, CurioDmCrypto.wrapConversationKey(key, peer)).getOrThrow()
+                SocialApi.saveDmEnvelope(active, conversationId, otherUserId, CurioDmCrypto.wrapConversationKey(key, peer, keyVersion)).getOrThrow()
             }
-            SocialApi.saveDmEnvelope(active, conversationId, me, CurioDmCrypto.wrapConversationKey(key, mine)).getOrThrow()
-            CurioDmCrypto.encrypt(context, conversationId, text)
-        }.getOrElse {
+            SocialApi.saveDmEnvelope(active, conversationId, me, CurioDmCrypto.wrapConversationKey(key, mine, keyVersion)).getOrThrow()
+            CurioDmCrypto.encrypt(context, conversationId, key, keyVersion, text)
+        }.getOrElse { failure ->
             pending = pending.filterNot { it.id == optimistic.id }
             draft = text
-            error = "Secure storage is unavailable. Message was not sent."
+            // This preparation also contacts the server to exchange public
+            // keys. Do not misreport a friend/RLS/network failure as a broken
+            // keystore — that sent people looking for a device fix when the
+            // actionable problem was the server response.
+            error = failure.message
+                ?.takeIf { it.isNotBlank() }
+                ?: "Couldn't prepare this encrypted message. Please try again."
             sending = false
             return
         }

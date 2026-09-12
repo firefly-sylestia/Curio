@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,6 +45,8 @@ import com.curio.app.data.supabase.CommunityApi
 import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityComment
 import com.curio.app.data.supabase.SocialApi
+import com.curio.app.data.supabase.RealtimeWatch
+import com.curio.app.data.supabase.SupabaseRealtime
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
@@ -92,6 +95,7 @@ internal fun CommunityCommentsSheet(
     var friendIds by remember {
         mutableStateOf(AppPreferences.getLocalFriendIds(context))
     }
+    var pushed by remember(card.id) { mutableStateOf(0) }
 
     suspend fun load() {
         loading = true
@@ -122,6 +126,28 @@ internal fun CommunityCommentsSheet(
                 friendIds = friends.mapTo(mutableSetOf()) { it.person.userId }
             }
         }
+    }
+
+    // A socket frame is only a hint; reload through the normal RLS-protected
+    // API so replies, edits and deletions update live without trusting payloads.
+    DisposableEffect(card.id, accessToken) {
+        val owner = "comments:${card.id}"
+        SupabaseRealtime.watch(
+            owner = owner,
+            accessToken = accessToken,
+            watches = listOf(
+                RealtimeWatch(
+                    table = "community_comments",
+                    filter = "card_id=eq.${card.id}",
+                    events = listOf("INSERT", "UPDATE", "DELETE")
+                )
+            )
+        ) { scope.launch { pushed++ } }
+        onDispose { SupabaseRealtime.unwatch(owner) }
+    }
+
+    LaunchedEffect(pushed) {
+        if (pushed > 0) load()
     }
 
     // BRANCH ORDER, derived once per reply list — and HERE, in the composable
