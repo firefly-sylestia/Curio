@@ -62,6 +62,17 @@ data class CurioDirectMessage(
     val mine: Boolean
 )
 
+/**
+ * One reaction somebody left on one message. [kind] is a glyph NAME from
+ * Curio's own icon set — the caller decides how it renders and whether the
+ * reacting [userId] is the reader.
+ */
+data class CurioDmReaction(
+    val messageId: String,
+    val userId: String,
+    val kind: String
+)
+
 /** One row in the inbox: the person, the last line, and how many are unread. */
 data class CurioDmThread(
     val person: CurioPerson,
@@ -85,6 +96,8 @@ object SocialApi {
     private const val PROFILES = "/rest/v1/profiles"
     private const val REQUESTS = "/rest/v1/friend_requests"
     private const val MESSAGES = "/rest/v1/dm_messages"
+    private const val TYPING = "/rest/v1/dm_typing"
+    private const val REACTIONS = "/rest/v1/dm_reactions"
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
 
     /** The server's own ceiling for one message (also a DB check constraint). */
@@ -409,6 +422,133 @@ object SocialApi {
             mappedUnit {
                 val request = SupabaseClient
                     .requestBuilder("$MESSAGES?id=eq.$messageId", accessToken)
+                    .delete()
+                    .build()
+                SupabaseClient.executeBody(request)
+            }
+        }
+
+    // ── typing ───────────────────────────────────────────────────────────
+
+    /**
+     * How long an "is typing…" row stays meaningful. The writer refreshes its
+     * row every couple of seconds while there is text in the composer, so a
+     * row older than this means the other person stopped, sent, or closed the
+     * app — the composer should go quiet rather than lie.
+     */
+    private const val TYPING_FRESH_MS = 7_000L
+
+    /**
+     * Upserts YOUR "is typing…" row for [toUserId], or clears it.
+     *
+     * Best-effort by design: this fires on every keystroke pause and on every
+     * send, so a failure must never surface as an error — the ticker simply
+     * stops, which is exactly what "no longer typing" looks like anyway.
+     */
+    suspend fun setTyping(
+        accessToken: String,
+        toUserId: String,
+        typing: Boolean
+    ): Unit = withContext(Dispatchers.IO) {
+        runCatching {
+            if (typing) {
+                val payload = JSONObject().put("recipient", toUserId)
+                val request = SupabaseClient.requestBuilder(TYPING, accessToken)
+                    .header("Prefer", "resolution=merge-duplicates,return=minimal")
+                    .post(payload.toString().toRequestBody(jsonMediaType))
+                    .build()
+                SupabaseClient.executeBody(request)
+            } else {
+                val request = SupabaseClient
+                    .requestBuilder("$TYPING?recipient=eq.$toUserId", accessToken)
+                    .delete()
+                    .build()
+                SupabaseClient.executeBody(request)
+            }
+            Unit
+        }
+    }
+
+    /**
+     * True when [otherUserId] has a fresh typing row addressed to this account.
+     *
+     * A missing table (a project that has not been re-pasted since the typing
+     * feature landed) answers false instead of failing the poll.
+     */
+    suspend fun isTyping(
+        accessToken: String,
+        myUserId: String,
+        otherUserId: String
+    ): Boolean = withContext(Dispatchers.IO) {
+        runCatching {
+            val path = "$TYPING?select=updated_at&sender=eq.$otherUserId" +
+                "&recipient=eq.$myUserId&limit=1"
+            val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
+            val rows = JSONArray(SupabaseClient.executeBody(request))
+            val stamp = rows.optJSONObject(0)?.optString("updated_at").orEmpty()
+            if (stamp.isBlank()) return@runCatching false
+            val at = epochMillis(stamp)
+            at > 0L && System.currentTimeMillis() - at <= TYPING_FRESH_MS
+        }.getOrDefault(false)
+    }
+
+    // ── reactions ────────────────────────────────────────────────────────
+
+    /**
+     * Every reaction on the given messages, keyed by message id.
+     *
+     * The glyph is stored as a NAME from Curio's own icon set, so a reaction
+     * row is a few bytes on the server and nothing is ever uploaded.
+     */
+    suspend fun reactions(
+        accessToken: String,
+        messageIds: Collection<String>
+    ): Result<Map<String, List<CurioDmReaction>>> = withContext(Dispatchers.IO) {
+        mapped {
+            val wanted = messageIds.filter { it.isNotBlank() }.distinct()
+            if (wanted.isEmpty()) return@mapped emptyMap()
+            val path = "$REACTIONS?select=message_id,user_id,kind" +
+                "&message_id=in.(${wanted.joinToString(",")})&limit=500"
+            val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
+            val rows = JSONArray(SupabaseClient.executeBody(request))
+            buildMap<String, MutableList<CurioDmReaction>> {
+                for (index in 0 until rows.length()) {
+                    val row = rows.optJSONObject(index) ?: continue
+                    val messageId = row.optString("message_id").takeIf { it.isNotBlank() } ?: continue
+                    val kind = row.optString("kind").trim().takeIf { it.isNotBlank() } ?: continue
+                    getOrPut(messageId) { mutableListOf() } += CurioDmReaction(
+                        messageId = messageId,
+                        userId = row.optString("user_id"),
+                        kind = kind
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * Leaves [kind] on one of your own thread's messages. A second reaction
+     * from the same account REPLACES the first (the primary key is the
+     * message + the person), which is the documented behaviour of the UI.
+     */
+    suspend fun react(accessToken: String, messageId: String, kind: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            mappedUnit {
+                val payload = JSONObject().put("message_id", messageId).put("kind", kind)
+                val request = SupabaseClient.requestBuilder(REACTIONS, accessToken)
+                    .header("Prefer", "resolution=merge-duplicates,return=minimal")
+                    .post(payload.toString().toRequestBody(jsonMediaType))
+                    .build()
+                SupabaseClient.executeBody(request)
+            }
+        }
+
+    /** Takes your reaction off a message. */
+    suspend fun clearReaction(accessToken: String, messageId: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            mappedUnit {
+                val request = SupabaseClient
+                    .requestBuilder("$REACTIONS?message_id=eq.$messageId", accessToken)
                     .delete()
                     .build()
                 SupabaseClient.executeBody(request)

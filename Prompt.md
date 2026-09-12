@@ -21,6 +21,16 @@ conversation; and the whole social UI lacks proper box cards and pill icons.
 They asked for real research into social UI, a custom Curio look, and then a
 detailed report of what we will do and what to borrow from other apps.
 
+Follow-up instruction (same request): build it all, and "focus more on the ui
+itself — i want beautiful ui and buttons" — account & profile, the Messages and
+Friends redesign, the share flow, reactions plus a typing indicator (backend
+included), a proper reply-with-mention in comments, and a friend flow that
+knows when you are already friends. Asked whether Supabase stores messages
+encrypted (it does not — `dm_messages.body` is plain `text`, readable by the
+two participants only through RLS, so the product line stays "private, not
+end-to-end encrypted"). Also reported a CI failure from the previous push and
+asked for that to be fixed and pushed before anything else.
+
 **Slice 1 — SHIPPED this commit (identity + profile, the root cause of five of
 the complaints above).**
 
@@ -838,11 +848,66 @@ lists keep their current cards — and the Community hub is the priority.
    shows the live reply count and opens the sheet in place, and the whole
    card is tappable into its view.
 
-**Still not done (queued):** the built-in collection-card redraw the user
-listed, and the friend-request / DM work that follows it.
+**Slice 2 — CI repair (shipped as `c71681a4`).** The slice-1 push failed to
+compile: `animateColorAsState` was imported from the wrong package in
+`CaptureStudio`, `Surface` and `LauncherEffect` imports were missing from
+`CommunityScreen`, and a mangled line break in `DirectMessageScreen` broke the
+ime padding plus a `let` chain. All four fixed; also replaced the
+`WindowInsets.union` call (an experimental opt-in) with two chained inset
+consumers so the composer sits exactly `max(nav bar, keyboard)` above the
+bottom edge.
 
-**Status:** committed locally on `v0/fix-settings-compose-import`, deliberately
-NOT pushed (user asked to hold the push while refining).
+**Slice 3 — account and Edit profile (this commit).**
+
+1. **`CurioAccountComponents.kt` (new).** Sign in and Create account are two
+   MODES with ONE primary action, not a field row with a stray "create
+   account" text button beside a "sign in" button. Create asks for the
+   password twice, every rule is validated BEFORE the network call, and the
+   server's own answer is shown in a soft message box — which is why a taken
+   username finally says it is taken instead of appearing to do nothing. The
+   signed-in card carries the username (rules stated up front, server verdict
+   shown) and the 16-portrait picker.
+2. **Online mode page** now renders those two components instead of its own
+   copy of the form, so Settings and Edit profile can never disagree about
+   what an account is.
+3. **Edit profile** gained a "Curio account" section (sign in or the username
+   and portrait), and its body scrolls now that it holds four sections.
+4. **The Community row left Profile** (as asked).
+
+**Slice 4 — Friends and Messages, plus the reactions + typing backend (this
+commit).**
+
+1. **`SocialComponents.kt` (new) — Curio's social language.** Box cards
+   (`SocialCard`), pill actions with glyphs (`SocialPill` / `SocialIconPill`),
+   person cards, thread cards, empty cards, day rules, the social search pill
+   and the reaction palette. Every social surface is built from this kit, which
+   is why a name, a portrait and a set of actions look the same everywhere.
+2. **`SocialRelation`.** One derived answer per person (NONE / OUTGOING /
+   INCOMING / FRIEND / SELF) decides which pills a card offers, so "Add
+   friend" can no longer appear on someone who is already a friend, already
+   asked, or is you. That was the "add friend goes even if already friends"
+   bug.
+3. **The conversation screen rewritten.** It opens from the DEVICE's own copy
+   (`SocialMessageCache`, newest 200 lines, text only) before the network is
+   asked anything; day rules and sender runs with one timestamp each; "Seen"
+   on the newest of my delivered lines only; tap a bubble for the reaction
+   palette; a polled "Typing…" line in the header and a breathing bubble in
+   the thread; optimistic send with a spring entry; a frosted-pill composer
+   with a round send button that grows when there is something to send.
+4. **Schema: `dm_typing` + `dm_reactions`** (idempotent, with RLS, grants,
+   the anon revokes, the self-check table lists, and a `curio_stamp_typing`
+   trigger so the freshness stamp is the SERVER's clock). `SocialApi` gained
+   `setTyping` / `isTyping` / `reactions` / `react` / `clearReaction`.
+   **The typing and reactions features need the schema re-pasted in the
+   Supabase SQL editor** — until then `isTyping` answers false and reactions
+   simply do not render, and nothing else breaks.
+
+**Still not done (queued):** the built-in collection-card redraw the user
+listed; inline sharing of notes / quotes; reply-with-mention in comments; and
+an unread divider in the inbox.
+
+**Status:** pushed (`c71681a4` for the CI repair); this commit carries slices 3
+and 4.
 
 ## Archive
 

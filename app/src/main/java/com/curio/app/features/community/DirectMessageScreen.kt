@@ -1,6 +1,15 @@
 package com.curio.app.features.community
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,7 +18,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,17 +25,15 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,16 +46,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.supabase.CurioDirectMessage
+import com.curio.app.data.supabase.CurioDmReaction
 import com.curio.app.data.supabase.CurioPerson
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.data.supabase.SocialApi
@@ -68,9 +78,12 @@ import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
-import com.curio.app.ui.theme.curioDialogActionButtonColors
+import com.curio.app.ui.theme.CurioMotion
+import com.curio.app.ui.theme.curioDialogActionColor
+import com.curio.app.ui.theme.isCurioDarkTheme
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -81,9 +94,22 @@ import kotlinx.coroutines.launch
  * request, so a stranger cannot be messaged even with the right id. Text only —
  * there is no media column to fill.
  *
- * There is no realtime channel yet: the thread loads on entry and after every
- * send, which is honest about what it is — a message arrives when you come back
- * to the conversation.
+ * What the surface does now, top to bottom:
+ *
+ *  - **It opens instantly and survives losing signal.** The thread renders the
+ *    last messages kept on the device ([SocialMessageCache]) before the network
+ *    is asked anything, then the server's copy replaces it. A message you
+ *    already saw is never a blank screen again.
+ *  - **A header you can act on** — portrait, live username, and one honest
+ *    line about what "private" means here — plus a tap through to the profile.
+ *  - **A read conversation**: day rules, grouped runs from one person, a single
+ *    timestamp per run, and a read receipt on your last line.
+ *  - **Reactions**: tap a bubble and a palette slides in under it. The glyph
+ *    is stored as a name from Curio's own icon set, so nothing is uploaded.
+ *  - **"is typing…"**: a real, server-backed row that expires on its own, shown
+ *    as a live line in the header and as a breathing bubble in the thread.
+ *  - **A composer that sends the moment you tap**: the message appears
+ *    immediately on a spring, the field clears, and the network catches up.
  */
 @Composable
 fun DirectMessageScreen(
@@ -99,54 +125,88 @@ fun DirectMessageScreen(
     val glassBackdrop = rememberLayerBackdrop()
 
     val onlineMode = AppPreferences.onlineModeEnabledState
-    var messages by remember { mutableStateOf<List<CurioDirectMessage>>(emptyList()) }
-    var person by remember { mutableStateOf<CurioPerson?>(null) }
-    var draft by remember { mutableStateOf("") }
-    var loading by remember { mutableStateOf(false) }
-    var sending by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
-
-    LaunchedEffect(Unit) { OnlineAccount.restore(context) }
-
-
     val token = account.session?.accessToken
     val myUserId = account.session?.userId
     val eligible = account.signedIn && onlineMode && token != null && myUserId != null
 
+    // Filled from the device's own copy the instant the account resolves, so
+    // a conversation you have already had is never a blank screen.
+    var messages by remember { mutableStateOf<List<CurioDirectMessage>>(emptyList()) }
+    // Sent-but-not-yet-confirmed messages, drawn exactly like real ones.
+    var pending by remember { mutableStateOf<List<CurioDirectMessage>>(emptyList()) }
+    var person by remember { mutableStateOf<CurioPerson?>(null) }
+    var reactions by remember { mutableStateOf<Map<String, List<CurioDmReaction>>>(emptyMap()) }
+    var draft by remember { mutableStateOf("") }
+    var peerTyping by remember { mutableStateOf(false) }
+    var reactionTarget by remember { mutableStateOf<String?>(null) }
+    var loading by remember { mutableStateOf(false) }
+    var sending by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var loadedOnce by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) { OnlineAccount.restore(context) }
+
     suspend fun load(active: String, me: String) {
         loading = true
         SocialApi.messages(active, otherUserId, me).fold(
-            onSuccess = {
-                messages = it
+            onSuccess = { fresh ->
+                messages = fresh
+                SocialMessageCache.write(context, otherUserId, fresh)
                 error = null
+                loadedOnce = true
             },
-            onFailure = { error = it.message }
+            onFailure = { failure ->
+                // The cache already put something on screen; only speak up
+                // when there was nothing to fall back on.
+                if (messages.isEmpty()) error = failure.message
+            }
         )
         loading = false
+        // Reactions ride the same refresh, best-effort: a failure hides a
+        // glyph, it never blanks the conversation.
+        val ids = messages.map { it.id }
+        if (ids.isNotEmpty()) {
+            SocialApi.reactions(active, ids).onSuccess { reactions = it }
+        }
     }
 
-    // Who this conversation is with. The route carries an id, and the account
-    // page may not have resolved a name, so the thread resolves the person
-    // itself: the header can then show a portrait and a live username instead
-    // of the word "Message".
+    // Who this conversation is with — resolved here so the header shows a
+    // portrait and the LIVE username rather than the name the route carried.
     suspend fun loadPerson(active: String) {
-        SocialApi.people(active, listOf(otherUserId)).fold(
-            onSuccess = { person = it[otherUserId] },
-            onFailure = { /* the header falls back to the passed-in handle */ }
-        )
+        SocialApi.people(active, listOf(otherUserId)).onSuccess { person = it[otherUserId] }
     }
 
     suspend fun send(active: String, me: String) {
         val text = draft.trim()
         if (text.isEmpty() || sending) return
         sending = true
+        error = null
+
+        // Optimistic: the bubble is on screen before the request leaves, and
+        // its id is local-only so a refresh can never show it twice.
+        val optimistic = CurioDirectMessage(
+            id = "local-${System.currentTimeMillis()}",
+            senderId = me,
+            body = text,
+            createdAtMillis = System.currentTimeMillis(),
+            readAtMillis = null,
+            mine = true
+        )
+        pending = pending + optimistic
+        draft = ""
+
         SocialApi.send(active, otherUserId, text, me).fold(
             onSuccess = {
-                draft = ""
-                error = null
+                SocialApi.setTyping(active, otherUserId, false)
+                pending = pending.filterNot { it.id == optimistic.id }
                 load(active, me)
             },
-            onFailure = { error = it.message }
+            onFailure = { failure ->
+                // The bubble must not linger as if it were delivered.
+                pending = pending.filterNot { it.id == optimistic.id }
+                draft = text
+                error = failure.message ?: "That message didn't send."
+            }
         )
         sending = false
     }
@@ -154,8 +214,16 @@ fun DirectMessageScreen(
     LaunchedEffect(eligible, token, myUserId) {
         if (!eligible || token == null || myUserId == null) {
             messages = emptyList()
+            pending = emptyList()
+            reactions = emptyMap()
+            peerTyping = false
             return@LaunchedEffect
         }
+        // The device's copy first — the account id is known here, so "mine"
+        // is labelled correctly — then the server's own record.
+        SocialMessageCache.migrateIfNeeded(context)
+        val cached = SocialMessageCache.read(context, otherUserId, myUserId)
+        if (cached.isNotEmpty()) messages = cached
         load(token, myUserId)
         loadPerson(token)
         // A receipt is a courtesy, not a requirement: a failure here must never
@@ -163,14 +231,57 @@ fun DirectMessageScreen(
         SocialApi.markRead(token, otherUserId, myUserId)
     }
 
-    // Keep the newest line in view — on open and after every sent message.
-    LaunchedEffect(messages.size) {
-        if (messages.isNotEmpty()) listState.animateScrollToItem(messages.lastIndex)
+    // "is typing…" — polled, not pushed (Curio's online layer has no realtime
+    // socket by design). Three seconds is fast enough to feel live and slow
+    // enough to be invisible on battery and data.
+    LaunchedEffect(eligible, token, myUserId) {
+        if (!eligible || token == null || myUserId == null) return@LaunchedEffect
+        while (true) {
+            peerTyping = SocialApi.isTyping(token, myUserId, otherUserId)
+            delay(3_000)
+        }
+    }
+
+    // Tell the other side when this side is writing: a short debounce stops a
+    // request per keystroke, and the row clears itself after a pause.
+    LaunchedEffect(draft, eligible, token) {
+        if (!eligible || token == null) return@LaunchedEffect
+        if (draft.isBlank()) {
+            SocialApi.setTyping(token, otherUserId, false)
+            return@LaunchedEffect
+        }
+        delay(700)
+        SocialApi.setTyping(token, otherUserId, true)
+        delay(6_000)
+        SocialApi.setTyping(token, otherUserId, false)
+    }
+
+    val thread = remember(messages, pending) { messages + pending }
+
+    // The rows that sit ABOVE the messages in the same LazyColumn. Scrolling
+    // needs the message's real index, not its index within the conversation.
+    val headerRows = (if (wide) 1 else 0) +
+        1 + // the peer card
+        (if (error != null) 1 else 0) +
+        (if (thread.isEmpty() && !loading && loadedOnce) 1 else 0)
+
+    // Keep the newest line in view — on open, after every send, and when the
+    // other side starts typing under us.
+    LaunchedEffect(thread.size, peerTyping, headerRows) {
+        if (thread.isEmpty()) return@LaunchedEffect
+        val newest = headerRows + thread.lastIndex + if (peerTyping) 1 else 0
+        listState.animateScrollToItem(newest)
     }
 
     // The live username wins over the name the route carried, so a rename shows
     // up in the conversation too.
-    val title = person?.let { "@${it.handle}" } ?: handle.ifBlank { "Message" }
+    val fallback = person?.label?.takeIf { it.isNotBlank() }
+        ?: handle.ifBlank { "Message" }
+    val title = person?.let { "@${it.handle}" } ?: fallback
+
+    // Who was the last to say something, from this account — the only message
+    // that may wear a read receipt.
+    val myLastIndex = thread.indexOfLast { it.mine }
 
     Box(
         modifier = Modifier
@@ -194,9 +305,9 @@ fun DirectMessageScreen(
                 .fillMaxSize()
                 // ONE inset consumer for the whole screen: the thread shrinks
                 // and the composer rides just above the keyboard. Padding both
-                // the list AND the composer (which is what the old layout did)
-                // lifted the composer twice as far as the keyboard and left a
-                // gap of empty page underneath it.
+                // the list AND the composer (which is what an earlier layout
+                // did) lifted the composer twice as far as the keyboard and
+                // left a gap of empty page underneath it.
                 //
                 // Two chained consumers rather than a union: the outer one
                 // takes the navigation bar and CONSUMES it, so the inner IME
@@ -210,6 +321,31 @@ fun DirectMessageScreen(
                 val activeToken = token
                 val activeUserId = myUserId
 
+                fun openReactions(messageId: String) {
+                    reactionTarget = if (reactionTarget == messageId) null else messageId
+                }
+
+                fun pickReaction(messageId: String, kind: String) {
+                    val mine = reactions[messageId]?.firstOrNull { it.userId == activeUserId }
+                    reactionTarget = null
+                    scope.launch {
+                        val result = if (mine?.kind == kind) {
+                            SocialApi.clearReaction(activeToken, messageId)
+                        } else {
+                            SocialApi.react(activeToken, messageId, kind)
+                        }
+                        result.fold(
+                            onSuccess = {
+                                SocialApi.reactions(activeToken, listOf(messageId))
+                                    .onSuccess { fresh ->
+                                        reactions = reactions - messageId + fresh
+                                    }
+                            },
+                            onFailure = { error = it.message }
+                        )
+                    }
+                }
+
                 LazyColumn(
                     state = listState,
                     modifier = Modifier
@@ -221,7 +357,7 @@ fun DirectMessageScreen(
                         top = if (wide) 0.dp else SettingsHeroTotalHeight,
                         bottom = 12.dp
                     ),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     if (wide) {
                         item(key = "hero", contentType = "hero") {
@@ -236,7 +372,8 @@ fun DirectMessageScreen(
                     item(key = "peer") {
                         MessagePeerHeader(
                             person = person,
-                            fallback = title,
+                            fallback = fallback,
+                            typing = peerTyping,
                             onOpenProfile = {
                                 navController.navigate(CurioRoutes.socialProfile(otherUserId)) {
                                     launchSingleTop = true
@@ -245,78 +382,51 @@ fun DirectMessageScreen(
                         )
                     }
 
-                    error?.let { message -> item { SocialNote(message, true) } }
+                    error?.let { message -> item(key = "error") { SocialNote(message, true) } }
 
-                    if (messages.isEmpty() && !loading) {
-                        item {
-                            SettingsOptionCard {
-                                SettingsOptionInfoRow(
-                                    CurioIcons.Notes,
-                                    "No messages yet",
-                                    "Say hello — this conversation is just the two of you."
-                                )
-                            }
-                        }
-                    }
-
-                    items(messages, key = { it.id }) { message ->
-                        MessageBubble(message)
-                    }
-                }
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            start = wideContentEdgePadding(),
-                            end = wideContentEdgePadding(),
-                            bottom = 10.dp
-                        )
-                ) {
-                    OutlinedTextField(
-                        value = draft,
-                        onValueChange = { if (it.length <= SocialApi.MAX_MESSAGE_CHARS) draft = it },
-                        minLines = 1,
-                        maxLines = 4,
-                        enabled = !sending,
-                        placeholder = { Text("Message $title") },
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-                        shape = RoundedCornerShape(22.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        if (sending) {
-                            CircularProgressIndicator(
-                                strokeWidth = 2.dp,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(Modifier.width(8.dp))
-                        }
-                        Text(
-                            text = "${draft.length}/${SocialApi.MAX_MESSAGE_CHARS}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(Modifier.weight(1f))
-                        Button(
-                            onClick = { scope.launch { send(activeToken, activeUserId) } },
-                            enabled = draft.isNotBlank() && !sending,
-                            shape = RoundedCornerShape(50),
-                            colors = curioDialogActionButtonColors()
-                        ) {
-                            Text(
-                                text = "Send",
-                                style = MaterialTheme.typography.labelLarge.copy(
-                                    fontWeight = FontWeight.SemiBold
-                                )
+                    if (thread.isEmpty() && !loading && loadedOnce) {
+                        item(key = "empty") {
+                            SocialEmptyCard(
+                                icon = CurioIcons.Notes,
+                                title = "Nothing said yet",
+                                body = "This thread is only the two of you — start it with a hello."
                             )
                         }
                     }
+
+                    itemsIndexedWithDays(thread) { index, message, dayLabel, firstOfRun, lastOfRun ->
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            if (dayLabel != null) SocialDayDivider(dayLabel)
+                            MessageEntry(
+                                message = message,
+                                firstOfRun = firstOfRun,
+                                lastOfRun = lastOfRun,
+                                // Only the newest of MY messages can be seen:
+                                // an older receipt would be a lie if a newer
+                                // message was still unread.
+                                receipt = if (index == myLastIndex) message.readAtMillis else null,
+                                accent = reactionTarget == message.id,
+                                reactions = reactions[message.id].orEmpty(),
+                                myUserId = activeUserId,
+                                onTap = { openReactions(message.id) },
+                                onPick = { kind -> pickReaction(message.id, kind) },
+                                animateIn = message.id.startsWith("local-")
+                            )
+                        }
+                    }
+
+                    if (peerTyping && thread.isNotEmpty()) {
+                        item(key = "typing") { TypingBubble(person) }
+                    }
                 }
+
+                MessageComposer(
+                    draft = draft,
+                    title = fallback,
+                    sending = sending,
+                    onDraftChange = { if (it.length <= SocialApi.MAX_MESSAGE_CHARS) draft = it },
+                    onSend = { scope.launch { send(activeToken, activeUserId) } }
+                )
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -331,7 +441,7 @@ fun DirectMessageScreen(
                     if (wide) {
                         item(key = "hero", contentType = "hero") {
                             SettingsHeroHeader(
-                                title = title,
+                                title = fallback,
                                 subtitle = "Private messages",
                                 onBack = { navController.popBackStack() }
                             )
@@ -382,7 +492,7 @@ fun DirectMessageScreen(
         if (!wide) {
             SettingsHeroHeader(
                 title = title,
-                subtitle = "Private messages",
+                subtitle = if (peerTyping) "Typing…" else "Private messages",
                 onBack = { navController.popBackStack() },
                 glassBackdrop = glassBackdrop
             )
@@ -391,19 +501,66 @@ fun DirectMessageScreen(
 }
 
 /**
+ * Walks a conversation once and hands each row its framing: the day rule it
+ * opens, and whether it starts or ends a run from one person.
+ *
+ * Grouping is what makes a long thread readable — without it every line wears
+ * its own timestamp and portrait and the conversation reads as a log rather
+ * than as people talking. A run breaks on a change of sender, a gap of more
+ * than five minutes, or a new day.
+ */
+private fun androidx.compose.foundation.lazy.LazyListScope.itemsIndexedWithDays(
+    thread: List<CurioDirectMessage>,
+    row: @Composable (index: Int, message: CurioDirectMessage, dayLabel: String?, first: Boolean, last: Boolean) -> Unit
+) {
+    items(thread.size, key = { thread[it].id }) { index ->
+        val message = thread[index]
+        val previous = thread.getOrNull(index - 1)
+        val next = thread.getOrNull(index + 1)
+        val newDay = previous == null ||
+            socialDayLabel(previous.createdAtMillis) != socialDayLabel(message.createdAtMillis)
+        val sameAsPrevious = !newDay && previous != null &&
+            previous.mine == message.mine &&
+            message.createdAtMillis - previous.createdAtMillis <= 5 * 60 * 1000
+        val sameAsNext = next != null &&
+            socialDayLabel(next.createdAtMillis) == socialDayLabel(message.createdAtMillis) &&
+            next.mine == message.mine &&
+            next.createdAtMillis - message.createdAtMillis <= 5 * 60 * 1000
+        row(
+            index,
+            message,
+            if (newDay) socialDayLabel(message.createdAtMillis) else null,
+            !sameAsPrevious,
+            !sameAsNext
+        )
+    }
+}
+
+/**
  * Who you are talking to: the portrait, the live username and a tap that opens
- * their profile, plus one honest line about what "private" means here.
+ * their profile, plus one honest line about what "private" means here. When
+ * they are writing, that line becomes their name — the header answers the
+ * question the thread is about to.
  */
 @Composable
 private fun MessagePeerHeader(
     person: CurioPerson?,
     fallback: String,
+    typing: Boolean,
     onOpenProfile: () -> Unit
 ) {
+    val dark = isCurioDarkTheme()
     Surface(
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        modifier = Modifier.fillMaxWidth()
+        shape = RoundedCornerShape(22.dp),
+        color = if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
+        else androidx.compose.ui.graphics.Color.White.copy(alpha = 0.72f),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.10f),
+                shape = RoundedCornerShape(22.dp)
+            )
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -412,7 +569,7 @@ private fun MessagePeerHeader(
                 .clickable(onClick = onOpenProfile)
                 .padding(14.dp)
         ) {
-            SocialAvatar(style = person?.avatarStyle ?: 0, avatarSize = 42.dp)
+            SocialAvatar(style = person?.avatarStyle ?: 0, avatarSize = 46.dp)
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -420,24 +577,36 @@ private fun MessagePeerHeader(
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
-                    text = fallback,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.SemiBold
-                    ),
+                    text = person?.label ?: fallback,
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1
                 )
+                if (typing) {
+                    Text(
+                        text = "Typing…",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = curioDialogActionColor()
+                    )
+                } else {
+                    Text(
+                        text = person?.let { "@${it.handle}" } ?: "Open profile",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
                 Text(
                     text = "Only the two of you can see this thread. Messages are stored on Curio's " +
-                        "server so they can be delivered, which means they are private but not " +
-                        "end-to-end encrypted.",
+                        "server to be delivered — private, but not end-to-end encrypted.",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             CurioIcon(
                 name = CurioIcons.ChevronRight,
-                contentDescription = null,
+                contentDescription = "Open profile",
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 size = 18.dp
             )
@@ -446,55 +615,428 @@ private fun MessagePeerHeader(
 }
 
 /**
- * One message. Yours sits on the right in the accent container, theirs on the
- * left on the elevated surface — the reading direction of every messenger, so
- * who said what needs no label.
+ * One message, its framing and — when tapped — the reaction palette under it.
+ *
+ * [animateIn] is set only for messages this device just sent, so a bubble
+ * a user wrote arrives on a spring while history arrives still.
  */
 @Composable
-private fun MessageBubble(message: CurioDirectMessage) {
+private fun MessageEntry(
+    message: CurioDirectMessage,
+    firstOfRun: Boolean,
+    lastOfRun: Boolean,
+    receipt: Long?,
+    accent: Boolean,
+    reactions: List<CurioDmReaction>,
+    myUserId: String,
+    onTap: () -> Unit,
+    onPick: (String) -> Unit,
+    animateIn: Boolean
+) {
+    // `initial = !animateIn` is what makes this safe to use for EVERY row: a
+    // historic message starts already visible (no animation at all), while a
+    // message this device just sent starts hidden and springs in. A row never
+    // animates OUT — the optimistic bubble is replaced by the server's copy of
+    // the same text in the same frame, and an exit animation there would read
+    // as the message being taken away.
+    val visible = remember {
+        MutableTransitionState(!animateIn).apply { if (animateIn) targetState = true }
+    }
+    AnimatedVisibility(
+        visibleState = visible,
+        enter = slideInVertically(initialOffsetY = { it / 2 }) +
+            fadeIn(animationSpec = tween(CurioMotion.Durations.Quick)),
+        exit = ExitTransition.None
+    ) {
+        Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            MessageBubble(
+                message = message,
+                firstOfRun = firstOfRun,
+                lastOfRun = lastOfRun,
+                receipt = receipt,
+                reactions = reactions,
+                myUserId = myUserId,
+                onTap = onTap
+            )
+            if (accent) {
+                ReactionBar(
+                    current = reactions.firstOrNull { it.userId == myUserId }?.kind,
+                    mine = message.mine,
+                    onPick = onPick
+                )
+            }
+        }
+    }
+}
+
+/**
+ * One message. Yours sits on the right in the accent container, theirs on the
+ * left on the raised surface — the reading direction of every messenger, so
+ * who said what needs no label. Corners open up on the first line of a run and
+ * only the last line of a run gets the full rounding and the timestamp.
+ */
+@Composable
+private fun MessageBubble(
+    message: CurioDirectMessage,
+    firstOfRun: Boolean,
+    lastOfRun: Boolean,
+    receipt: Long?,
+    reactions: List<CurioDmReaction>,
+    myUserId: String,
+    onTap: () -> Unit
+) {
+    val mine = message.mine
+    val shape = if (mine) {
+        RoundedCornerShape(
+            topStart = 20.dp,
+            topEnd = if (firstOfRun) 20.dp else 7.dp,
+            bottomStart = if (lastOfRun) 20.dp else 7.dp,
+            bottomEnd = 7.dp
+        )
+    } else {
+        RoundedCornerShape(
+            topStart = if (firstOfRun) 20.dp else 7.dp,
+            topEnd = 20.dp,
+            bottomStart = 7.dp,
+            bottomEnd = if (lastOfRun) 20.dp else 7.dp
+        )
+    }
+
+    val mineGlyph = reactions.firstOrNull { it.userId == myUserId }?.kind
+    val others = reactions.filterNot { it.userId == myUserId }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = if (message.mine) Arrangement.End else Arrangement.Start,
+        horizontalArrangement = if (mine) Arrangement.End else Arrangement.Start,
         verticalAlignment = Alignment.Bottom
     ) {
-        if (message.mine) {
-            Text(
-                text = socialStamp(message.createdAtMillis),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(end = 6.dp, bottom = 4.dp)
-            )
-        }
-        Box(
-            modifier = Modifier
-                .weight(1f, fill = false)
-                .clip(
-                    RoundedCornerShape(
-                        topStart = 18.dp,
-                        topEnd = 18.dp,
-                        bottomStart = if (message.mine) 18.dp else 4.dp,
-                        bottomEnd = if (message.mine) 4.dp else 18.dp
+        if (mine && lastOfRun) {
+            Column(
+                horizontalAlignment = Alignment.End,
+                modifier = Modifier.padding(end = 6.dp, bottom = 2.dp)
+            ) {
+                Text(
+                    text = socialStamp(message.createdAtMillis),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (receipt != null) {
+                    Text(
+                        text = "Seen ${socialStamp(receipt)}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = curioDialogActionColor()
                     )
-                )
-                .background(
-                    if (message.mine) MaterialTheme.colorScheme.primaryContainer
-                    else MaterialTheme.colorScheme.surfaceContainerHigh
-                )
-                .padding(horizontal = 14.dp, vertical = 9.dp)
-        ) {
-            Text(
-                text = message.body,
-                style = MaterialTheme.typography.bodyMedium,
-                color = if (message.mine) MaterialTheme.colorScheme.onPrimaryContainer
-                else MaterialTheme.colorScheme.onSurface
-            )
+                }
+            }
         }
-        if (!message.mine) {
+
+        Column(
+            horizontalAlignment = if (mine) Alignment.End else Alignment.Start,
+            modifier = Modifier.weight(1f, fill = false)
+        ) {
+            Box(
+                modifier = Modifier
+                    .clip(shape)
+                    .background(
+                        if (mine) MaterialTheme.colorScheme.primaryContainer
+                        else MaterialTheme.colorScheme.surfaceContainerHigh
+                    )
+                    .clickable(onClick = onTap)
+                    .padding(horizontal = 14.dp, vertical = 9.dp)
+            ) {
+                Text(
+                    text = message.body,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (mine) MaterialTheme.colorScheme.onPrimaryContainer
+                    else MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            // The reaction chips sit OUTSIDE the bubble, on its tail corner, so
+            // the bubble keeps its own shape and a reaction never reflows the
+            // text it is attached to.
+            if (mineGlyph != null || others.isNotEmpty()) {
+                ReactionChips(mineGlyph = mineGlyph, others = others)
+            }
+        }
+
+        if (!mine && lastOfRun) {
             Text(
                 text = socialStamp(message.createdAtMillis),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(start = 6.dp, bottom = 4.dp)
+                modifier = Modifier.padding(start = 6.dp, bottom = 2.dp)
+            )
+        }
+    }
+}
+
+/** The reaction chips already on a message — mine first, then everyone else's. */
+@Composable
+private fun ReactionChips(mineGlyph: String?, others: List<CurioDmReaction>) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(top = 3.dp)
+    ) {
+        if (mineGlyph != null) {
+            ReactionChip(kind = mineGlyph, count = 1, mine = true)
+        }
+        others.groupBy { it.kind }.forEach { (kind, group) ->
+            ReactionChip(kind = kind, count = group.size, mine = false)
+        }
+    }
+}
+
+@Composable
+private fun ReactionChip(kind: String, count: Int, mine: Boolean) {
+    val ink = if (mine) curioDialogActionColor() else MaterialTheme.colorScheme.onSurfaceVariant
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = if (mine) {
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerHigh
+        }
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+        ) {
+            CurioIcon(
+                name = SocialReactions.iconFor(kind),
+                contentDescription = SocialReactions.labelFor(kind),
+                tint = ink,
+                size = 13.dp
+            )
+            if (count > 1) {
+                Text(
+                    text = count.toString(),
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = ink
+                )
+            }
+        }
+    }
+}
+
+/**
+ * The palette under a tapped message. Every glyph is a name from Curio's own
+ * icon set, so a reaction is a word on the server and never an upload.
+ */
+@Composable
+private fun ReactionBar(
+    current: String?,
+    mine: Boolean,
+    onPick: (String) -> Unit
+) {
+    val visible = remember { MutableTransitionState(false).apply { targetState = true } }
+    AnimatedVisibility(
+        visibleState = visible,
+        enter = fadeIn(animationSpec = tween(CurioMotion.Durations.Quick)) +
+            slideInVertically(initialOffsetY = { it / 3 }),
+        exit = ExitTransition.None
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = if (mine) 0.dp else 2.dp)
+        ) {
+            if (mine) Spacer(Modifier.weight(1f))
+            SocialReactions.PALETTE.forEach { (glyph, meaning) ->
+                val chosen = current == glyph
+                Surface(
+                    onClick = { onPick(glyph) },
+                    shape = RoundedCornerShape(50),
+                    color = if (chosen) {
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
+                    } else {
+                        MaterialTheme.colorScheme.surfaceContainerHigh
+                    }
+                ) {
+                    CurioIcon(
+                        name = glyph,
+                        contentDescription = meaning,
+                        tint = if (chosen) curioDialogActionColor()
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        size = 16.dp,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+            }
+            if (!mine) Spacer(Modifier.weight(1f))
+        }
+    }
+}
+
+/** Three breathing dots — the other person is writing, shown in the thread. */
+@Composable
+private fun TypingBubble(person: CurioPerson?) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        SocialAvatar(style = person?.avatarStyle ?: 0, avatarSize = 26.dp)
+        Spacer(Modifier.width(8.dp))
+        Surface(
+            shape = RoundedCornerShape(topStart = 7.dp, topEnd = 18.dp, bottomStart = 7.dp, bottomEnd = 18.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHigh
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
+            ) {
+                (0..2).forEach { dot -> TypingDot(delayMillis = dot * 160L) }
+            }
+        }
+    }
+}
+
+/** One dot of [TypingBubble], pulsing on its own offset so the row breathes. */
+@Composable
+private fun TypingDot(delayMillis: Long) {
+    var up by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(delayMillis)
+        while (true) {
+            up = true
+            delay(420)
+            up = false
+            delay(420)
+        }
+    }
+    val lift by animateFloatAsState(
+        targetValue = if (up) 1f else 0.55f,
+        animationSpec = tween(400),
+        label = "typingDot"
+    )
+    Box(
+        modifier = Modifier
+            .size(6.dp)
+            .scale(lift)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f + 0.5f * lift))
+    )
+}
+
+/**
+ * The composer: a frosted pill you write in and one circular accent button
+ * that sends. The send control does not appear — it grows the moment there is
+ * something to send, which is the feedback that says "this is ready".
+ */
+@Composable
+private fun MessageComposer(
+    draft: String,
+    title: String,
+    sending: Boolean,
+    onDraftChange: (String) -> Unit,
+    onSend: () -> Unit
+) {
+    val dark = isCurioDarkTheme()
+    val armed = draft.isNotBlank() && !sending
+    val sendScale by animateFloatAsState(
+        targetValue = if (armed) 1f else 0.86f,
+        animationSpec = spring(dampingRatio = 0.5f, stiffness = 900f),
+        label = "sendScale"
+    )
+    val nearLimit = draft.length > SocialApi.MAX_MESSAGE_CHARS * 8 / 10
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                start = wideContentEdgePadding(),
+                end = wideContentEdgePadding(),
+                bottom = 10.dp
+            ),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .weight(1f)
+                    .height(52.dp)
+                    .clip(RoundedCornerShape(26.dp))
+                    .background(
+                        if (dark) MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.75f)
+                        else androidx.compose.ui.graphics.Color.White.copy(alpha = 0.85f)
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f),
+                        shape = RoundedCornerShape(26.dp)
+                    )
+                    .padding(horizontal = 16.dp)
+            ) {
+                BasicTextField(
+                    value = draft,
+                    onValueChange = onDraftChange,
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(
+                        color = MaterialTheme.colorScheme.onSurface
+                    ),
+                    cursorBrush = SolidColor(curioDialogActionColor()),
+                    // A message is a sentence, not a word: capitals and
+                    // sentence punctuation are the default here (the field is
+                    // unlabelled, so this is the only cue it needs).
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Sentences,
+                        imeAction = ImeAction.Send
+                    ),
+                    modifier = Modifier.weight(1f)
+                ) { inner ->
+                    Box(contentAlignment = Alignment.CenterStart) {
+                        if (draft.isEmpty()) {
+                            Text(
+                                text = "Message $title",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1
+                            )
+                        }
+                        inner()
+                    }
+                }
+            }
+            Surface(
+                onClick = { if (armed) onSend() },
+                shape = CircleShape,
+                color = if (armed) curioDialogActionColor()
+                else MaterialTheme.colorScheme.surfaceContainerHigh,
+                modifier = Modifier
+                    .size(52.dp)
+                    .scale(sendScale)
+            ) {
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                    CurioIcon(
+                        name = CurioIcons.ArrowForward,
+                        contentDescription = "Send",
+                        tint = if (armed) androidx.compose.ui.graphics.Color.White
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        size = 20.dp
+                    )
+                }
+            }
+        }
+        if (nearLimit) {
+            Text(
+                text = "${draft.length}/${SocialApi.MAX_MESSAGE_CHARS}",
+                style = MaterialTheme.typography.labelSmall,
+                color = if (draft.length >= SocialApi.MAX_MESSAGE_CHARS) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+                modifier = Modifier.padding(start = 6.dp)
             )
         }
     }

@@ -1,3 +1,14 @@
+ADD: Friends — every person is a box card now: their portrait, their live name and @username, and the actions that match where you actually stand — Message for a friend, Accept or Decline for a request waiting on you, Cancel for one you sent, Add friend for a stranger. Adding someone you are already friends with is impossible now.
+ADD: Messages — the conversation reads like a chat: day rules, messages from one person grouped into one block with a single timestamp, and "Seen" on your last delivered line.
+ADD: Messages — reactions. Tap any bubble and a palette slides in; a reaction is one of Curio's own drawn glyphs (never an upload), and tapping the same one again takes it off.
+ADD: Messages — a live "Typing…" line in the header and a breathing bubble in the thread while the other person is writing.
+ADD: Messages — a conversation opens instantly from what this phone already has (the last 200 lines are kept on the device), so losing signal no longer blanks a thread.
+ADD: Messages — sending is instant: the bubble springs in the moment you tap Send, the field empties, and delivery follows.
+ADD: Messages — the composer is one frosted pill with a round send button that grows as soon as there is something to send.
+ADD: Friends — search is the same frosted pill as the message composer, with a one-line result state instead of a hint line.
+ADD: Settings → Online mode and Edit profile — signing in and claiming a username are one form with two clear modes (Sign in · Create account): every rule is stated before you press the button and the server's answer is always shown, so a taken username finally says it is taken.
+ADD: Profile — Edit profile carries your Curio account now: sign in, your username and your portrait pick, all in one place.
+REMOVE: Profile — the Community row is gone; the community is reached from the app navigation and Settings → Online mode, and signing in lives in Edit profile.
 ADD: Community — every card and reply now shows the author's PORTRAIT and their CURRENT username, and tapping either one opens their profile page.
 FIX: Community — changing your username updates the name on everything you already posted (old cards used to keep the name you had when you posted them).
 ADD: Community — a member profile page: the portrait, the username, their live cards from the last 24 hours, and Add friend or Message depending on where you stand.

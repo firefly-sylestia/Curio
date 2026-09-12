@@ -6,6 +6,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -133,6 +135,8 @@ import com.curio.app.ui.theme.curioGoldInk
 import com.curio.app.ui.theme.isCurioDarkTheme
 import com.curio.app.ui.theme.heroHeaderInk
 import com.curio.app.ui.theme.headerAccent
+import com.curio.app.features.settings.CurioAccountIdentityCard
+import com.curio.app.features.settings.CurioAuthCard
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
@@ -216,7 +220,6 @@ private data class ProfileHeroPair(
 @Composable
 fun ProfileScreen(navController: NavController) {
     val context = LocalContext.current
-    val onlineAccount = OnlineAccount.state
     val lifecycleOwner = LocalLifecycleOwner.current
     // v311 — debounce back-tap: two quick taps on the back pill would pop
     // Profile AND the screen behind it, leaving a blank screen. A short
@@ -559,28 +562,9 @@ fun ProfileScreen(navController: NavController) {
                     }
                 }
             }
-            item {
-                Box(Modifier.padding(horizontal = wideContentEdgePadding())) {
-                    CurioSettingsCard(shadowElevation = 0.dp) {
-                        CurioSettingsRow(
-                            icon = CurioIcons.Hub,
-                            title = if (onlineAccount.signedIn) "Community" else "Join Community",
-                            subtitle = if (onlineAccount.signedIn) {
-                                "Friends, messages and today's discoveries"
-                            } else {
-                                "Sign in to connect your Curio profile"
-                            },
-                            onClick = {
-                                navController.navigate(
-                                    if (onlineAccount.signedIn && AppPreferences.onlineModeEnabledState) {
-                                        CurioRoutes.COMMUNITY
-                                    } else CurioRoutes.SETTINGS_ONLINE
-                                )
-                            }
-                        )
-                    }
-                }
-            }
+            // v3xx — the Community row is gone from Profile. Signing in and
+            // claiming a username now live in Edit profile, and Community is
+            // reached from the app navigation (or Settings → Online mode).
             item {
                 Box(Modifier.padding(horizontal = wideContentEdgePadding())) {
                     CurioSettingsCard(shadowElevation = 0.dp) {
@@ -995,12 +979,19 @@ private fun ProfileDialogs(
             onDismissRequest = onDismiss,
             title = { Text("Edit profile", fontWeight = FontWeight.ExtraBold) },
             text = {
+                val account = OnlineAccount.state
                 // v170 — section hierarchy: Profile photo (bigger label +
                 // icon), Your name, Bio. The tagline field IS the Bio — the
                 // "Tagline" label, the "Use automatic tagline" button and
                 // both helper texts are gone (leaving it empty still falls
                 // back to the automatic streak line on the hero).
-                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                // v3xx — the body scrolls now that the Curio account section
+                // (sign in · username · portrait) lives here too, so the last
+                // section is never clipped on a short screen.
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
                     // ── Profile photo ──
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         // v117 — a clean preview with NO badge and no tap-to-
@@ -1091,6 +1082,27 @@ private fun ProfileDialogs(
                             placeholder = { Text("Keep the spark going today.") },
                             modifier = Modifier.fillMaxWidth()
                         )
+                    }
+
+                    // ── Curio account ──
+                    // The community tab row is gone from Profile; this is now
+                    // the one place the account lives. Signed out it is the
+                    // sign-in / create-account form; signed in it is the
+                    // username (with its rules stated before you press Save)
+                    // and the portrait picker.
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        EditSectionLabel(icon = CurioIcons.Person, text = "Curio account")
+                        if (account.signedIn) {
+                            CurioAccountIdentityCard(email = account.email)
+                        } else {
+                            Text(
+                                "Sign in to claim a username, carry your portrait into Community and " +
+                                    "keep your liked topics in sync.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            CurioAuthCard()
+                        }
                     }
                 }
             },

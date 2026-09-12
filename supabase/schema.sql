@@ -545,6 +545,130 @@ create policy dm_delete_own on public.dm_messages
     using (sender = auth.uid());
 
 -- ───────────────────────────────────────────────────────────────────────────
+-- 5e. dm_typing — "is typing…", one row per (sender, recipient) pair
+--
+-- Deliberately tiny and self-cleaning: the client upserts its own row while
+-- the composer has text, and every read ignores rows older than a few
+-- seconds, so a crashed app leaves nothing behind that anyone would see.
+-- A row is not a message and carries no content — only WHO is typing to WHOM.
+-- ───────────────────────────────────────────────────────────────────────────
+create table if not exists public.dm_typing (
+    sender     uuid not null default auth.uid() references auth.users (id) on delete cascade,
+    recipient  uuid not null references auth.users (id) on delete cascade,
+    updated_at timestamptz not null default now(),
+    primary key (sender, recipient),
+    constraint dm_typing_not_self check (sender <> recipient)
+);
+
+-- The stamp is the server's clock, never the phone's: an upsert that kept
+-- resending a client timestamp could otherwise look "stale" on a device whose
+-- clock is behind, and "fresh" forever on one that is ahead.
+create or replace function public.curio_stamp_typing()
+returns trigger
+language plpgsql
+as $$
+begin
+    new.updated_at := now();
+    return new;
+end $$;
+
+drop trigger if exists dm_typing_stamp on public.dm_typing;
+create trigger dm_typing_stamp
+    before insert or update on public.dm_typing
+    for each row execute function public.curio_stamp_typing();
+
+alter table public.dm_typing enable row level security;
+
+-- The other side may only see that you are typing; you alone may write your
+-- own row (and only to an accepted friend, exactly like a message).
+drop policy if exists dm_typing_select_parties on public.dm_typing;
+create policy dm_typing_select_parties on public.dm_typing
+    for select to authenticated
+    using (sender = auth.uid() or recipient = auth.uid());
+
+drop policy if exists dm_typing_upsert_own on public.dm_typing;
+create policy dm_typing_upsert_own on public.dm_typing
+    for insert to authenticated
+    with check (
+        sender = auth.uid()
+        and exists (
+            select 1 from public.profiles me
+            where me.id = auth.uid() and me.online_mode_enabled
+        )
+        and public.curio_are_friends(auth.uid(), dm_typing.recipient)
+    );
+
+drop policy if exists dm_typing_update_own on public.dm_typing;
+create policy dm_typing_update_own on public.dm_typing
+    for update to authenticated
+    using (sender = auth.uid())
+    with check (sender = auth.uid());
+
+drop policy if exists dm_typing_delete_own on public.dm_typing;
+create policy dm_typing_delete_own on public.dm_typing
+    for delete to authenticated
+    using (sender = auth.uid());
+
+-- ───────────────────────────────────────────────────────────────────────────
+-- 5f. dm_reactions — one reaction per person per message
+--
+-- [kind] is a short glyph NAME from the app's own icon set (never uploaded
+-- artwork), so a reaction is a single small word on the server. A second
+-- reaction from the same person replaces the first — the unique key is what
+-- makes that a guaranteed fact rather than a client convention.
+-- ───────────────────────────────────────────────────────────────────────────
+create table if not exists public.dm_reactions (
+    message_id uuid not null references public.dm_messages (id) on delete cascade,
+    user_id    uuid not null default auth.uid() references auth.users (id) on delete cascade,
+    kind       text not null,
+    created_at timestamptz not null default now(),
+    primary key (message_id, user_id),
+    constraint dm_reactions_kind_len check (char_length(kind) between 1 and 32)
+);
+
+create index if not exists dm_reactions_message_idx
+    on public.dm_reactions (message_id);
+
+alter table public.dm_reactions enable row level security;
+
+-- Only the two people in the conversation can see (or leave) a reaction on
+-- one of its messages. Both halves are re-checked against the message row, so
+-- a reaction can never be planted on somebody else's thread.
+drop policy if exists dm_reactions_select_parties on public.dm_reactions;
+create policy dm_reactions_select_parties on public.dm_reactions
+    for select to authenticated
+    using (
+        exists (
+            select 1 from public.dm_messages m
+            where m.id = dm_reactions.message_id
+              and (m.sender = auth.uid() or m.recipient = auth.uid())
+        )
+    );
+
+drop policy if exists dm_reactions_insert_own on public.dm_reactions;
+create policy dm_reactions_insert_own on public.dm_reactions
+    for insert to authenticated
+    with check (
+        user_id = auth.uid()
+        and exists (
+            select 1 from public.dm_messages m
+            where m.id = dm_reactions.message_id
+              and (m.sender = auth.uid() or m.recipient = auth.uid())
+        )
+    );
+
+drop policy if exists dm_reactions_update_own on public.dm_reactions;
+create policy dm_reactions_update_own on public.dm_reactions
+    for update to authenticated
+    using (user_id = auth.uid())
+    with check (user_id = auth.uid());
+
+drop policy if exists dm_reactions_delete_own on public.dm_reactions;
+create policy dm_reactions_delete_own on public.dm_reactions
+    for delete to authenticated
+    using (user_id = auth.uid());
+
+-- ───────────────────────────────────────────────────────────────────────────
 -- 6. Expiry sweep — housekeeping for the 24-hour cards
 -- ───────────────────────────────────────────────────────────────────────────
 create or replace function public.curio_purge_expired_cards()
@@ -585,11 +709,14 @@ grant select, insert, delete on public.community_comments to authenticated;
 grant select, insert on public.community_reports to authenticated;
 grant select, insert, update, delete on public.friend_requests to authenticated;
 grant select, insert, update, delete on public.dm_messages to authenticated;
+grant select, insert, update, delete on public.dm_typing to authenticated;
+grant select, insert, update, delete on public.dm_reactions to authenticated;
 
 revoke all on function public.curio_are_friends(uuid, uuid) from public, anon;
 grant execute on function public.curio_are_friends(uuid, uuid) to authenticated;
 revoke all on function public.curio_pin_request_parties() from public, anon, authenticated;
 revoke all on function public.curio_pin_message_parties() from public, anon, authenticated;
+revoke all on function public.curio_stamp_typing() from public, anon, authenticated;
 revoke all on function public.curio_stamp_author_handle() from public, anon, authenticated;
 
 revoke all on public.profiles from anon;
@@ -600,6 +727,8 @@ revoke all on public.community_comments from anon;
 revoke all on public.community_reports from anon;
 revoke all on public.friend_requests from anon;
 revoke all on public.dm_messages from anon;
+revoke all on public.dm_typing from anon;
+revoke all on public.dm_reactions from anon;
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 8. Self-check
@@ -617,7 +746,8 @@ begin
      where n.nspname = 'public'
        and c.relname in ('profiles','cloud_captures','community_cards',
                          'community_reactions','community_comments',
-                         'community_reports','friend_requests','dm_messages')
+                         'community_reports','friend_requests','dm_messages',
+                         'dm_typing','dm_reactions')
        and c.relrowsecurity = false;
     if rls_off is null then
         raise notice 'PASS  RLS enabled on every Curio table';
@@ -632,7 +762,8 @@ begin
        and roles::text like '%anon%'
        and tablename in ('profiles','cloud_captures','community_cards',
                          'community_reactions','community_comments',
-                         'community_reports','friend_requests','dm_messages');
+                         'community_reports','friend_requests','dm_messages',
+                         'dm_typing','dm_reactions');
     if anon_open is null then
         raise notice 'PASS  no anon policies on Curio tables';
     else
@@ -643,7 +774,8 @@ begin
       into missing
       from unnest(array['profiles','cloud_captures','community_cards',
                         'community_reactions','community_comments',
-                        'community_reports','friend_requests','dm_messages']) as t
+                        'community_reports','friend_requests','dm_messages',
+                        'dm_typing','dm_reactions']) as t
      where not exists (
         select 1 from pg_class c
           join pg_namespace n on n.oid = c.relnamespace
