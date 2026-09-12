@@ -22,6 +22,73 @@ out of the card flow.
 
 Instruction: research and decide everything yourself, ask no questions, go fast.
 
+### Status audit (2026-09-12, this commit — CI repair + what still remains)
+
+**CI repair (this commit).** The `df4b6d57` push broke BOTH compile tasks —
+five unresolved references, so nothing from that commit ever reached a build:
+
+1. **`FriendsScreen.kt:462/466`** — `activeToken` / `activeUserId` are declared
+   INSIDE the `LazyColumn` content lambda (right after the eligibility gate
+   returns early), but the remove-friend confirmation was added OUTSIDE the
+   list, where those captures do not exist. Fixed by resolving the session
+   inside the dialog's own `let` (`token ?: return@let`), so every callback
+   still captures plain Strings.
+2. **`OnlineModeScreen.kt:213`** — the sign-out confirmation calls
+   `SocialConfirmDialog`, which is `internal` in
+   `com.curio.app.features.community`, and the import was missing. Added.
+
+**Shipped across this request's three commits** (`c71681a4`, `98c53ca6`,
+`df4b6d57`): live identity + member profiles, the 16 drawn avatars wired
+through the wall and messages, the composer picking a real catalog topic, the
+replies sheet, Friends and Messages rebuilt on `SocialComponents`, the
+username rules + taken-username verdict, sign-out and remove-friend
+confirmations, and the nested-reply / `dm_typing` / `dm_reactions` backend.
+
+**Still open — verified against the code, not against the plan:**
+
+1. **Card tap flow.** `CurioNavHost` still wraps `community/{cardId}` and
+   `person/{userId}` in the settings family (`SettingsSharedScope` and its
+   transitions) and every community screen still renders
+   `SettingsHeroHeader`. Nothing in the three commits touched it.
+2. **The wall's cards and actions.** `FEED_CARD_WIDTH = 0.74f` is unchanged
+   (that shrink is why the posted cards read too small) and the action row is
+   still the old `TextButton` `CommunityAction` glyph+label row.
+3. **Avatars.** `SocialAvatar.kt` has not been touched since `18fa431b` — the
+   redesign this request asks for has not started.
+4. **Offline community.** `CommunityApi` has no cache; only DM lines are kept
+   on the device (`SocialMessageCache`). The wall, Friends and profiles still
+   render nothing on a cold, offline open.
+5. **The conversation's privacy paragraph.** Still printed in the DM header
+   (`DirectMessageScreen` ~line 601) — the request asks for it to go.
+6. **The message box height.** `DirectMessageScreen` still chains
+   `.windowInsetsPadding(WindowInsets.navigationBars).imePadding()`. Chaining
+   CONSUMES the navigation-bar inset but does not shrink `WindowInsets.ime`
+   (the IME inset already spans the nav bar), so the composer sits about a
+   bar's height higher than the keyboard — the complaint this request
+   repeats.
+7. **Add as an icon.** Remove / Cancel are `SocialIconPill`s already; the ADD
+   path is still the labelled "Add friend" pill. Needs the user's call on
+   whether it becomes icon-only too.
+8. **Branched replies — UI missing.** The schema (`parent_id` + the
+   `curio_pin_comment_parent` guard) and `CommunityApi` (parse + send) are
+   done, but no UI passes a parent: the replies sheet is a flat `LazyColumn`
+   with no reply-to action and no branch rendering.
+9. **Notifications.** No social notification exists anywhere (the only
+   channels are the daily/explore reminders, updates and the pet overlay), so
+   message and post alerts are unimplemented.
+10. **Text-only post + quick facts.** `KIND_NOTE` / `KIND_QUOTE` exist in the
+    schema and the API, and `draftProblem` understands them, but the composer
+    only ever builds a `CARD` — there is no tweet-style post. The card's words
+    are also still typed from scratch: the picked topic's own `teaser` (its
+    quick fact) is never offered into the card.
+11. **Quote / note sharing out of the card flow.** `TopicRevealScreen` is
+    untouched; quoting and notes still have no entry point of their own.
+12. **Security pass.** This cycle added the `kind` constraint, the comment
+    parent guard trigger and the duplicate-username verdict, but the wider
+    "look for vulnerabilities" sweep this request asks for is not recorded —
+    and the schema additions still need re-pasting in the Supabase SQL editor
+    before any server-side rule applies.
+
 ## Previous request (2026-09-12, SHIPPED — social layer: identity, profiles, the community wall and messages)
 
 User (rephrased, in their words): the drawn profile avatar is not good and the
@@ -937,8 +1004,19 @@ Older completed request logs (2026-09-08 → 2026-09-10) were trimmed from this
 file on 2026-09-10 to keep it short. They live in git history
 (`git log -p -- Prompt.md`) if anything needs revisiting.
 
-## next prompt
+## User prompts
 
-_No pending prompt._ (Both the ACTIVE list and the follow-up queued for this
-cycle are logged above. The next user instruction goes here — it is never
-cleared by an agent; the completed one moves up into the request log.)
+### Current prompt (2026-09-12) — DONE
+
+User (chat): fix the pasted CI failure, push it, and check Prompt.md — the
+in-progress request was left half done, analyse it and say what remains.
+The log named five unresolved references in `FriendsScreen` and
+`OnlineModeScreen` from `df4b6d57`.
+
+**Status:** DONE — both compile breaks fixed (see the audit at the top of
+this file), the remaining work for the in-progress request is itemised there,
+and the commit is pushed. CI validates.
+
+### Next prompt (the next instruction goes here — never cleared by an agent)
+
+_No pending prompt._

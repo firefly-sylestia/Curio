@@ -1,3 +1,5 @@
+ADD: Settings → Online mode — signing out asks first: the dialog says Online mode turns off and that your captures, recordings and conversations stay on this device.
+ADD: Friends — removing a friend asks first, naming the person, and says neither of you can message the other until you add each other again.
 ADD: Friends — every person is a box card now: their portrait, their live name and @username, and the actions that match where you actually stand — Message for a friend, Accept or Decline for a request waiting on you, Cancel for one you sent, Add friend for a stranger. Adding someone you are already friends with is impossible now.
 ADD: Messages — the conversation reads like a chat: day rules, messages from one person grouped into one block with a single timestamp, and "Seen" on your last delivered line.
 ADD: Messages — reactions. Tap any bubble and a palette slides in; a reaction is one of Curio's own drawn glyphs (never an upload), and tapping the same one again takes it off.

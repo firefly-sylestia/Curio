@@ -448,6 +448,11 @@ fun FriendsScreen(navController: NavController) {
         }
 
         removing?.let { friend ->
+            // This dialog sits OUTSIDE the list, where the session the list
+            // smart-casts above is only nullable — resolve it once here so
+            // every callback below captures a plain String.
+            val activeToken = token ?: return@let
+            val activeUserId = myUserId ?: return@let
             SocialConfirmDialog(
                 title = "Remove ${friend.person.label}?",
                 body = "They stop being a friend and neither of you can message the other " +
