@@ -1,5 +1,102 @@
 # Prompt Log — current request
 
+## Request (2026-09-12, IN PROGRESS — social layer: identity, profiles, the community wall and messages)
+
+User (rephrased, in their words): the drawn profile avatar is not good and the
+community page does not show an avatar at all; there is no way to open a
+profile from a post or from a comment; a username change does not update the
+names on older posts; the comments, the action buttons and the post flow look
+bad; sharing forces you to type a topic by hand; remove the old Share a card
+button and give me a floating plus that shares a TOPIC as a card, plus a share
+to community option inside the share dialog; remove the community tab option
+from Profile and put sign-in and the username in Edit Profile; add proper hint
+texts about what is private and what is not; no em dashes and no lowercase
+sentence starts; the username save flow says nothing when a name is invalid or
+taken; the sign-in and create-account flow is bad (one screen, one button);
+the card in the community feed is too big; the comments lack polish; Friends,
+the inbox and a conversation all need a redesign (no reactions, no typing
+indicator, no profile header in a conversation, messages do not persist and do
+not sync fast); the message box rises far too high while typing in a friends
+conversation; and the whole social UI lacks proper box cards and pill icons.
+They asked for real research into social UI, a custom Curio look, and then a
+detailed report of what we will do and what to borrow from other apps.
+
+**Slice 1 — SHIPPED this commit (identity + profile, the root cause of five of
+the complaints above).**
+
+1. **`SocialAvatar.kt` rewritten.** The old renderer was four shapes cycling
+   through four colours. It is now 16 genuinely DIFFERENT characters (beanie,
+   bob plus glasses, curls, cap plus headphones, long hair plus earring, bead,
+   pigtails, wizard hat, leaf crown, goggles, beret, top bun, freckles, hood,
+   space helmet), each with its own ground, garment, skin and hair tones, all
+   drawn on a shared 100x100 design grid with a soft inner rim, so an avatar
+   reads the same at 24dp in a row and at 96dp on a profile.
+2. **Identity is resolved LIVE (`CommunityApi`).** The stored `author_handle`
+   is stamped at insert time by a database trigger, so on its own it freezes a
+   member's name at post time. `feed` / `card` / `comments` now enrich every
+   row through `withAuthors` / `withCommentAuthors`, which call
+   `SocialApi.people(token, ids)` once per screen and fill `authorName` plus
+   `authorAvatar`; `CommunityCard` and `CommunityComment` gained `authorId`,
+   `authorName`, `authorAvatar` and an `authorLabel` accessor (live username
+   first, snapshot second). That fixes BOTH the missing portrait and the stale
+   username, and it is also why the exported share card now carries the
+   current name.
+3. **`SocialProfileScreen.kt` (NEW) plus the `person/{userId}` route.** The
+   missing destination: portrait, username, an Add friend / Message /
+   this-is-you action, a plain-language privacy line, and the member's live
+   24-hour cards. It is opened from a card's author row, a reply's author, and
+   the conversation header, and it is wrapped in `SettingsSharedScope` like the
+   card view. It reads only the public half of `profiles` (username + avatar
+   style) through the same `SocialApi.people` call the rest of the layer uses.
+4. **The wall was rebuilt around that identity.** Each card is a box card now:
+   the author's portrait and live username on top (tap opens the profile), the
+   caption, the card art at 74 percent of the width so the wall reads as a
+   wall, and one action row. The header Share a card button is GONE, replaced
+   by a floating Share a topic button (ExtendedFloatingActionButton, cleared
+   over the floating nav bar when Community is a tab root) plus a You shortcut
+   into your own profile.
+5. **The composer picks a TOPIC instead of a name.** A search box over
+   `TopicJsonLoader.loadIndex()` (falling back to the warm lane pools) finds
+   real topics; picking one supplies the name, lane, glyph and accent, so a
+   card can never disagree with the topic it names. The manual LANE chips went
+   away with the free-text field. The labels are clearer too (A caption above
+   the card / The words on the card).
+6. **Replies are cards now.** `CommunityReplyRow` renders the author's
+   portrait and live username (both tap through to the profile), the words in
+   a rounded card, and exactly one pill action: Remove on your own reply, Add
+   on someone else's. `CommunityCommentsSheet` gained an `onOpenProfile`
+   callback, wired from both hosts.
+7. **Messages got a real header and an honest privacy line.**
+   `DirectMessageScreen` used to be handed an EMPTY handle by the NavHost, so
+   it always titled itself Message. It now resolves the other person itself
+   (`SocialApi.people`) and shows a tappable header card with their portrait,
+   live username and the hint: only the two of you can see this thread,
+   messages are stored on Curio's server so they can be delivered, which means
+   they are private but not end-to-end encrypted.
+8. **The message box no longer over-lifts.** The screen had `imePadding()` on
+   the composer WHILE the window also moved for the keyboard, so the box was
+   lifted twice. The inset is now consumed once, at the root, with
+   `WindowInsets.navigationBars.union(WindowInsets.ime)`, and the composer
+   rides directly above the keyboard with no gap underneath.
+
+**Verified statically** (Gradle is prohibited here): a delimiter-balance check
+over all nine touched files, a symbol audit of every shared component the new
+screen uses (`SettingsHeroHeader`, `SettingsOptionCard`, `SettingsOptionInfoRow`,
+`curioDialogActionButtonColors`, `CommunityCardCanvas`, `SocialAvatar`), a
+scope audit of the reply/author rows, and a construction audit proving
+`CommunityCard` / `CommunityComment` are only built inside `CommunityApi` (so
+adding required fields cannot break another call site). CI is the compile
+check.
+
+**Still queued for the next slice (the research + plan the user asked for is
+in the reply that accompanies this commit):** the Friends list, inbox and
+conversation redesign; reactions beyond a single like; a typing indicator;
+local persistence plus faster sync for messages; splitting sign-in from
+create-account with real validation messages; Edit Profile carrying sign-in,
+username and portrait; removing the community tab option from Profile; the
+share-to-community entry inside the share dialog; and the inline share mode
+for text, quotes and paper notes.
+
 ## Request (2026-09-12, in progress — CAPTURE STUDIO: Save your take revamp)
 
 User (verbatim intent, rephrased): *revamp "save your take" and ship it as an

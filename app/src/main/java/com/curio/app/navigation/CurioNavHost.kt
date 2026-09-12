@@ -110,6 +110,7 @@ import com.curio.app.features.community.CommunityCardScreen
 import com.curio.app.features.community.CommunityScreen
 import com.curio.app.features.community.DirectMessageScreen
 import com.curio.app.features.community.FriendsScreen
+import com.curio.app.features.community.SocialProfileScreen
 import com.curio.app.features.settings.OnlineModeScreen
 import com.curio.app.features.settings.SettingsHubScreen
 import com.curio.app.features.settings.SettingsPage
@@ -1022,6 +1023,19 @@ fun CurioNavHost(
                     CommunityCardScreen(
                         navController = navController,
                         cardId = backStackEntry.arguments?.getString("cardId").orEmpty()
+                    )
+                }
+            }
+            // v3xx53 — a member's public profile, reached from a card, a reply,
+            // a friend row or a conversation.
+            composable(
+                route = CurioRoutes.SOCIAL_PROFILE,
+                arguments = listOf(navArgument("userId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                SettingsSharedScope(sharedTransitionScope, this) {
+                    SocialProfileScreen(
+                        navController = navController,
+                        userId = backStackEntry.arguments?.getString("userId").orEmpty()
                     )
                 }
             }

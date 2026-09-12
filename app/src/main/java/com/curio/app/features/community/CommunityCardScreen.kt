@@ -1,6 +1,7 @@
 package com.curio.app.features.community
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,6 +29,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -123,7 +126,7 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                     categoryGlyph = current.categoryGlyph,
                     accent = parseAccent(current.accentHex),
                     factText = current.factText,
-                    sharerName = current.authorHandle,
+                    sharerName = current.authorLabel,
                     aspect = aspect,
                     style = style,
                     byline = current.byline,
@@ -229,15 +232,32 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                     item(key = "meta") {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(50))
+                                .clickable {
+                                    if (current.authorId.isNotBlank()) {
+                                        navController.navigate(
+                                            CurioRoutes.socialProfile(current.authorId)
+                                        ) { launchSingleTop = true }
+                                    }
+                                }
                         ) {
-                            Column(modifier = Modifier.weight(1f)) {
+                            // The portrait and the LIVE username: renaming
+                            // yourself updates every card you ever posted.
+                            SocialAvatar(style = current.authorAvatar, avatarSize = 38.dp)
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 10.dp)
+                            ) {
                                 Text(
-                                    text = current.authorHandle,
+                                    text = "@${current.authorLabel}",
                                     style = MaterialTheme.typography.bodyMedium.copy(
                                         fontWeight = FontWeight.SemiBold
                                     ),
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1
                                 )
                                 Text(
                                     text = listOfNotNull(
@@ -250,6 +270,12 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
+                            CurioIcon(
+                                name = CurioIcons.ChevronRight,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                size = 18.dp
+                            )
                             if (loading) {
                                 CircularProgressIndicator(
                                     strokeWidth = 2.dp,
@@ -355,7 +381,10 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
             accessToken = activeToken,
             myUserId = myUserId,
             onDismiss = { commentsOpen = false },
-            onChanged = { scope.launch { load() } }
+            onChanged = { scope.launch { load() } },
+            onOpenProfile = { id ->
+                navController.navigate(CurioRoutes.socialProfile(id)) { launchSingleTop = true }
+            }
         )
     }
 }

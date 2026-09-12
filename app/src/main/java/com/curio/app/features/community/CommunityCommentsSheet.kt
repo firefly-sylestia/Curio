@@ -1,5 +1,6 @@
 package com.curio.app.features.community
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,6 +21,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -40,6 +42,8 @@ import com.curio.app.data.supabase.CommunityApi
 import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityComment
 import com.curio.app.data.supabase.SocialApi
+import com.curio.app.ui.theme.CurioIcon
+import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
 import kotlinx.coroutines.launch
@@ -66,7 +70,10 @@ internal fun CommunityCommentsSheet(
     /** Called after a reply is added or removed, so the host can refresh its
      *  comment count. */
     onChanged: () -> Unit = {},
-    onAddFriend: (String) -> Unit = {}
+    onAddFriend: (String) -> Unit = {},
+    /** Opens a reply author's profile — the second place a member is reachable
+     *  from, next to the card's own author row. */
+    onOpenProfile: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -149,6 +156,7 @@ internal fun CommunityCommentsSheet(
                 items(replies, key = { it.id }) { reply ->
                     CommunityReplyRow(
                         reply = reply,
+                        onAuthor = { if (reply.authorId.isNotBlank()) onOpenProfile(reply.authorId) },
                         onAddFriend = {
                             if (myUserId != null) {
                                 scope.launch {
@@ -232,50 +240,105 @@ internal fun CommunityCommentsSheet(
     }
 }
 
-/** One reply: author, when, the words, and a remove for your own. */
+/**
+ * One reply: the author's PORTRAIT and live username (tap either to open their
+ * profile), when it was written, the words in a card of their own, and one
+ * compact pill for the only action that fits — Remove on your own reply,
+ * Add friend on someone else's.
+ */
 @Composable
 internal fun CommunityReplyRow(
     reply: CommunityComment,
+    onAuthor: () -> Unit,
     onAddFriend: () -> Unit,
     onDelete: () -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = reply.authorHandle,
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = MaterialTheme.colorScheme.onSurface
+    Surface(
+        shape = RoundedCornerShape(18.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            SocialAvatar(
+                style = reply.authorAvatar,
+                avatarSize = 34.dp,
+                onClick = onAuthor
             )
-            Spacer(Modifier.width(6.dp))
-            Text(
-                text = agoLabel(reply.createdAtMillis),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.weight(1f))
-            if (reply.mine) {
-                TextButton(onClick = onDelete) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "Remove",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = curioDialogActionColor()
+                        text = "@${reply.authorLabel}",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        modifier = Modifier.clickable(onClick = onAuthor)
                     )
-                }
-            } else if (reply.authorId.isNotBlank()) {
-                TextButton(onClick = onAddFriend) {
+                    Spacer(Modifier.width(6.dp))
                     Text(
-                        text = "Add friend",
+                        text = agoLabel(reply.createdAtMillis),
                         style = MaterialTheme.typography.labelSmall,
-                        color = curioDialogActionColor()
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    Spacer(Modifier.weight(1f))
+                    if (reply.mine) {
+                        ReplyPill(
+                            glyph = CurioIcons.Close,
+                            label = "Remove",
+                            onClick = onDelete
+                        )
+                    } else if (reply.authorId.isNotBlank()) {
+                        ReplyPill(
+                            glyph = CurioIcons.Person,
+                            label = "Add",
+                            onClick = onAddFriend
+                        )
+                    }
                 }
+                Text(
+                    text = reply.body,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
             }
         }
-        Text(
-            text = reply.body,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+    }
+}
+
+/** A compact action pill — icon plus a label, the app's own pill language. */
+@Composable
+private fun ReplyPill(glyph: String, label: String, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(50),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp)
+        ) {
+            CurioIcon(
+                name = glyph,
+                contentDescription = null,
+                tint = curioDialogActionColor(),
+                size = 13.dp
+            )
+            Spacer(Modifier.width(4.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+                color = curioDialogActionColor()
+            )
+        }
     }
 }
 

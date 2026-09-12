@@ -1,3 +1,12 @@
+ADD: Community — every card and reply now shows the author's PORTRAIT and their CURRENT username, and tapping either one opens their profile page.
+FIX: Community — changing your username updates the name on everything you already posted (old cards used to keep the name you had when you posted them).
+ADD: Community — a member profile page: the portrait, the username, their live cards from the last 24 hours, and Add friend or Message depending on where you stand.
+ADD: Community — share a TOPIC now, not a typed name: the composer searches the real catalog and takes the lane, glyph and colour from the topic you pick, so a card can never disagree with the topic it is about.
+ADD: Community — posting moved to a floating "Share a topic" button, and the wall's cards are box cards with the author on top, the art at a comfortable size, and the actions in one row.
+ADD: Community — replies are cards of their own, with the author's portrait, their username and a single action pill (Remove on your own, Add on someone else's).
+ADD: Messages — the conversation has a proper header now: the other person's portrait and username, tappable into their profile, plus one plain line explaining that messages are private but not end-to-end encrypted (they are stored so they can be delivered).
+FIX: Messages — the typing box stays just above the keyboard. It used to be lifted twice as far as the keyboard and left a strip of empty page underneath it.
+ADD: 16 code-drawn profile portraits, redrawn from scratch: a beanie, a bob, glasses, curls, headphones, a wizard hat, an explorer's goggles, a leaf crown, a space helmet and more, so no two members look alike.
 ADD: Save your take — a "Take studio" experiment (Settings → Experiments → Capture, off by default): the capture page as a designed workspace — a tinted topic hero with the lane medallion, the topic and a mood chip that opens the mood row inside the card; your takes on a rail that rides the bottom tray (each pill springs as it becomes active); format, mood and tags gathered into one tools sheet with a two-up format picker that says what each note captures; and a live pulsing "Recording" badge on the hero, the recording take and your save dock. The paper notes are untouched, saving works exactly as before, and flipping the switch off restores today's page.
 ADD: Community: choose from 16 private, code-drawn profile icons — no photo upload.
 ADD: Community — Profile entry point, editable usernames, and safer identity handling.

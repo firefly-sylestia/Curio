@@ -17,7 +17,18 @@ import java.time.OffsetDateTime
  */
 data class CommunityCard(
     val id: String,
+    /** The author's account id (`owner`) — the door to their profile. */
+    val authorId: String,
+    /** The handle SNAPSHOT taken when the card was posted. Only a fallback:
+     *  the live username is [authorName], so renaming yourself renames your
+     *  old cards too. */
     val authorHandle: String,
+    /** The author's CURRENT username, resolved from `profiles` on every load
+     *  (blank when their profile is not readable — they turned Online Mode
+     *  off, or the lookup failed). */
+    val authorName: String = "",
+    /** The author's chosen portrait (0–15). */
+    val authorAvatar: Int = 0,
     val topicName: String,
     val categoryName: String,
     val categoryGlyph: String,
@@ -43,6 +54,16 @@ data class CommunityCard(
         get() = expiresAtMillis.takeIf { it > 0 }
             ?.let { ((it - System.currentTimeMillis()).coerceAtLeast(0L)) / 3_600_000L }
             ?: 0L
+
+    /**
+     * What to PRINT for the author: the live username first, the post-time
+     * snapshot second. Never a product label — a member's card must always
+     * carry a real human identity.
+     */
+    val authorLabel: String
+        get() = authorName.trim().removePrefix("@").ifBlank {
+            authorHandle.trim().removePrefix("@").ifBlank { "a curious soul" }
+        }
 }
 
 /**
@@ -73,10 +94,21 @@ data class CommunityComment(
     val id: String,
     val authorId: String,
     val authorHandle: String,
+    /** The author's CURRENT username (blank when unreadable) — see
+     *  [CommunityCard.authorName]. */
+    val authorName: String = "",
+    /** The author's chosen portrait (0–15). */
+    val authorAvatar: Int = 0,
     val body: String,
     val createdAtMillis: Long,
     val mine: Boolean
-)
+) {
+    /** Live username first, post-time snapshot second. */
+    val authorLabel: String
+        get() = authorName.trim().removePrefix("@").ifBlank {
+            authorHandle.trim().removePrefix("@").ifBlank { "a curious soul" }
+        }
+}
 
 /** A community failure whose [message] is already safe to show the user. */
 class CommunityError(message: String) : Exception(message)
@@ -120,6 +152,9 @@ object CommunityApi {
     /** How many live cards one feed load asks for. */
     private const val FEED_LIMIT = 40
 
+    /** How many live cards one profile asks for. */
+    private const val PROFILE_LIMIT = 24
+
     /**
      * Why this draft cannot be posted, or null when it is fine. Media-backed
      * content never reaches here at all: [CommunityCardDraft] has no field to
@@ -138,14 +173,38 @@ object CommunityApi {
     /** The live feed — newest first, expired cards already filtered out. */
     suspend fun feed(accessToken: String, myUserId: String?): Result<List<CommunityCard>> =
         withContext(Dispatchers.IO) {
-            mapped {
+            val parsed = mapped {
                 val path = "$CARDS?select=$CARD_COLUMNS" +
                     "&expires_at=gt.${Instant.now()}" +
                     "&order=created_at.desc&limit=$FEED_LIMIT"
                 val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
                 parseCards(SupabaseClient.executeBody(request), myUserId)
             }
+            // Identity is resolved after the parse (one extra request for
+            // every author on screen) — see [withAuthors].
+            parsed.map { withAuthors(accessToken, it) }
         }
+
+    /**
+     * Every live card by ONE author — what their profile shows. Reads the same
+     * live window as the feed (a profile can never show an expired card) and
+     * asks for the newest page of them.
+     */
+    suspend fun cardsByAuthor(
+        accessToken: String,
+        authorId: String,
+        myUserId: String?
+    ): Result<List<CommunityCard>> = withContext(Dispatchers.IO) {
+        val parsed = mapped {
+            val path = "$CARDS?select=$CARD_COLUMNS" +
+                "&owner=eq.$authorId" +
+                "&expires_at=gt.${Instant.now()}" +
+                "&order=created_at.desc&limit=$PROFILE_LIMIT"
+            val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
+            parseCards(SupabaseClient.executeBody(request), myUserId)
+        }
+        parsed.map { withAuthors(accessToken, it) }
+    }
 
     /**
      * One card by id — what the card's own view opens with. A card that has
@@ -154,12 +213,13 @@ object CommunityApi {
      */
     suspend fun card(accessToken: String, cardId: String, myUserId: String?): Result<CommunityCard> =
         withContext(Dispatchers.IO) {
-            mapped {
+            val parsed = mapped {
                 val path = "$CARDS?select=$CARD_COLUMNS&id=eq.$cardId&limit=1"
                 val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
                 parseCards(SupabaseClient.executeBody(request), myUserId).firstOrNull()
                     ?: throw IllegalStateException("That card has expired — cards only last 24 hours.")
             }
+            parsed.map { withAuthors(accessToken, listOf(it)).first() }
         }
 
     // ── replies ──────────────────────────────────────────────────────────
@@ -170,7 +230,7 @@ object CommunityApi {
         cardId: String,
         myUserId: String?
     ): Result<List<CommunityComment>> = withContext(Dispatchers.IO) {
-        mapped {
+        val parsed = mapped {
             val path = "$COMMENTS?select=id,author,author_handle,body,created_at" +
                 "&card_id=eq.$cardId&order=created_at.asc&limit=200"
             val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
@@ -192,6 +252,9 @@ object CommunityApi {
                 }
             }
         }
+        // A reply shows the author's CURRENT name and portrait too, so a
+        // rename never leaves an old handle stranded in a thread.
+        parsed.map { withCommentAuthors(accessToken, it) }
     }
 
     suspend fun comment(
@@ -344,6 +407,7 @@ object CommunityApi {
             }
             cards += CommunityCard(
                 id = row.optString("id"),
+                authorId = owner,
                 authorHandle = row.optString("author_handle").ifBlank { "A curious soul" },
                 topicName = row.optString("topic_name"),
                 categoryName = row.optString("category_name"),
@@ -364,6 +428,49 @@ object CommunityApi {
             )
         }
         return cards
+    }
+
+    /**
+     * Fills in each card's author identity from `profiles`.
+     *
+     * WHY this exists: the row's `author_handle` is stamped at INSERT time by a
+     * database trigger (so a modified client can never forge someone else's
+     * name), which means the stored handle freezes the poster's name at the
+     * moment they posted. Resolving the LIVE profile on read is what makes a
+     * username change show up on older cards — and it is also the only source
+     * of the author's portrait, because a card row carries no avatar.
+     *
+     * One request covers every distinct author on screen. A profile that is no
+     * longer readable (Online Mode off) simply leaves the row's snapshot in
+     * place rather than failing the whole feed.
+     */
+    private suspend fun withAuthors(
+        accessToken: String,
+        cards: List<CommunityCard>
+    ): List<CommunityCard> {
+        if (cards.isEmpty()) return cards
+        val authors = SocialApi.people(accessToken, cards.map { it.authorId })
+            .getOrDefault(emptyMap())
+        if (authors.isEmpty()) return cards
+        return cards.map { card ->
+            val person = authors[card.authorId] ?: return@map card
+            card.copy(authorName = person.username, authorAvatar = person.avatarStyle)
+        }
+    }
+
+    /** The reply-side twin of [withAuthors]. */
+    private suspend fun withCommentAuthors(
+        accessToken: String,
+        replies: List<CommunityComment>
+    ): List<CommunityComment> {
+        if (replies.isEmpty()) return replies
+        val authors = SocialApi.people(accessToken, replies.map { it.authorId })
+            .getOrDefault(emptyMap())
+        if (authors.isEmpty()) return replies
+        return replies.map { reply ->
+            val person = authors[reply.authorId] ?: return@map reply
+            reply.copy(authorName = person.username, authorAvatar = person.avatarStyle)
+        }
     }
 
     /** PostgREST answers with an offset timestamp — 0 when it cannot be read. */

@@ -1,6 +1,7 @@
 package com.curio.app.features.community
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,8 +15,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,6 +29,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,6 +51,7 @@ import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.supabase.CurioDirectMessage
+import com.curio.app.data.supabase.CurioPerson
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.data.supabase.SocialApi
 import com.curio.app.features.settings.SettingsHeroHeader
@@ -62,6 +67,7 @@ import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
 import com.curio.app.ui.adaptive.windowWidthSizeClass
 import com.curio.app.ui.components.CurioWatermarkBackdrop
+import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.kyant.backdrop.backdrops.layerBackdrop
@@ -95,12 +101,12 @@ fun DirectMessageScreen(
 
     val onlineMode = AppPreferences.onlineModeEnabledState
     var messages by remember { mutableStateOf<List<CurioDirectMessage>>(emptyList()) }
+    var person by remember { mutableStateOf<CurioPerson?>(null) }
     var draft by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
     var sending by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf<String?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }                    LaunchedEffect(Unit) { OnlineAccount.restore(context) }
 
-    LaunchedEffect(Unit) { OnlineAccount.restore(context) }
 
     val token = account.session?.accessToken
     val myUserId = account.session?.userId
@@ -116,6 +122,17 @@ fun DirectMessageScreen(
             onFailure = { error = it.message }
         )
         loading = false
+    }
+
+    // Who this conversation is with. The route carries an id, and the account
+    // page may not have resolved a name, so the thread resolves the person
+    // itself: the header can then show a portrait and a live username instead
+    // of the word "Message".
+    suspend fun loadPerson(active: String) {
+        SocialApi.people(active, listOf(otherUserId)).fold(
+            onSuccess = { person = it[otherUserId] },
+            onFailure = { /* the header falls back to the passed-in handle */ }
+        )
     }
 
     suspend fun send(active: String, me: String) {
@@ -139,6 +156,7 @@ fun DirectMessageScreen(
             return@LaunchedEffect
         }
         load(token, myUserId)
+        loadPerson(token)
         // A receipt is a courtesy, not a requirement: a failure here must never
         // blank a thread that loaded fine.
         SocialApi.markRead(token, otherUserId, myUserId)
@@ -149,7 +167,9 @@ fun DirectMessageScreen(
         if (messages.isNotEmpty()) listState.animateScrollToItem(messages.lastIndex)
     }
 
-    val title = handle.ifBlank { "Message" }
+    // The live username wins over the name the route carried, so a rename shows
+    // up in the conversation too.
+    val title = person?.let { "@${it.handle}" } ?: handle.ifBlank { "Message" }
 
     Box(
         modifier = Modifier
@@ -171,6 +191,14 @@ fun DirectMessageScreen(
             modifier = Modifier
                 .layerBackdrop(glassBackdrop)
                 .fillMaxSize()
+                // ONE inset consumer for the whole screen: the thread shrinks
+                // and the composer rides just above the keyboard. Padding both
+                // the list AND the composer (which is what the old layout did)
+                // lifted the composer twice as far as the keyboard and left a
+                // gap of empty page underneath it.
+                .windowInsetsPadding(
+                    WindowInsets.navigationBars.union(WindowInsets.ime)
+                )
         ) {
             if (eligible && token != null && myUserId != null) {
                 val activeToken = token
@@ -199,6 +227,18 @@ fun DirectMessageScreen(
                         }
                     }
 
+                    item(key = "peer") {
+                        MessagePeerHeader(
+                            person = person,
+                            fallback = title,
+                            onOpenProfile = {
+                                navController.navigate(CurioRoutes.socialProfile(otherUserId)) {
+                                    launchSingleTop = true
+                                }
+                            }
+                        )
+                    }
+
                     error?.let { message -> item { SocialNote(message, true) } }
 
                     if (messages.isEmpty() && !loading) {
@@ -221,12 +261,10 @@ fun DirectMessageScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .imePadding()
                         .padding(
                             start = wideContentEdgePadding(),
                             end = wideContentEdgePadding(),
-                            bottom = 10.dp +
-                                WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                            bottom = 10.dp
                         )
                 ) {
                     OutlinedTextField(
@@ -341,6 +379,61 @@ fun DirectMessageScreen(
                 subtitle = "Private messages",
                 onBack = { navController.popBackStack() },
                 glassBackdrop = glassBackdrop
+            )
+        }
+    }
+}
+
+/**
+ * Who you are talking to: the portrait, the live username and a tap that opens
+ * their profile, plus one honest line about what "private" means here.
+ */
+@Composable
+private fun MessagePeerHeader(
+    person: CurioPerson?,
+    fallback: String,
+    onOpenProfile: () -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onOpenProfile)
+                .padding(14.dp)
+        ) {
+            SocialAvatar(style = person?.avatarStyle ?: 0, avatarSize = 42.dp)
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = fallback,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1
+                )
+                Text(
+                    text = "Only the two of you can see this thread. Messages are stored on Curio's " +
+                        "server so they can be delivered, which means they are private but not " +
+                        "end-to-end encrypted.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            CurioIcon(
+                name = CurioIcons.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                size = 18.dp
             )
         }
     }
