@@ -343,9 +343,7 @@ private fun SocialProfileHeader(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = listOfNotNull(person?.handleLabel, person?.presenceLabel)
-                            .joinToString(" · ")
-                            .ifBlank { "@…" },
+text = person?.handleLabel?.ifBlank { "@…" } ?: "@…",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -434,8 +432,8 @@ private fun SocialProfileHeader(
             }
 
             Text(
-                text = "A profile shows only your name, portrait and whether you were recently " +
-                    "around. Your email, saved entries, cards and messages are never part of it.",
+                text = "A profile shows only your name and portrait. Your activity status is " +
+                    "available only inside direct chats; email, saved entries, cards and messages are never part of it.",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

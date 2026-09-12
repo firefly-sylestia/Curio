@@ -40,7 +40,8 @@ data class CurioPerson(
     val visibility: String = PROFILE_VISIBILITY_PUBLIC,
     /** True when this member publishes no last-active stamp at all. */
     val hideActivity: Boolean = false,
-    /** Their own line, shown on the profile. Blank when they wrote none. */
+    val presenceMode: String = com.curio.app.data.AppPreferences.PRESENCE_ACTIVE,
+    /** Their own line, shown inside direct chats only. */
     val bio: String = "",
     /** Last-active stamp, 0 when unknown — or when activity is hidden. */
     val lastActiveMillis: Long = 0L
@@ -86,6 +87,13 @@ data class CurioPerson(
                 else -> null
             }
         }
+
+    val presenceExactLabel: String?
+        get() = if (hideActivity || lastActiveMillis <= 0L) null else
+            java.text.DateFormat.getDateTimeInstance(
+                java.text.DateFormat.MEDIUM,
+                java.text.DateFormat.SHORT
+            ).format(java.util.Date(lastActiveMillis))
 }
 
 /** One accepted friendship, with the person on the other side. */
@@ -215,8 +223,8 @@ object SocialApi {
      * asks for — and it falls back to the base read when they are missing.
      */
     private const val PERSON_COLUMNS = "id,display_name,username,avatar_style"
-    private const val PERSON_COLUMNS_PRIVACY =
-        "$PERSON_COLUMNS,profile_visibility,hide_activity,last_active_at,bio"
+private const val PERSON_COLUMNS_PRIVACY =
+    "$PERSON_COLUMNS,profile_visibility,hide_activity,presence_mode,last_active_at,bio"
 
     /** How many NEW messages one live tick asks for. */
     private const val LIVE_TICK_LIMIT = 100
@@ -409,7 +417,8 @@ object SocialApi {
     suspend fun updatePrivacy(
         accessToken: String,
         visibility: String,
-        hideActivity: Boolean
+        hideActivity: Boolean,
+        presenceMode: String = if (hideActivity) com.curio.app.data.AppPreferences.PRESENCE_HIDDEN else com.curio.app.data.AppPreferences.PRESENCE_ACTIVE
     ): Result<Unit> = withContext(Dispatchers.IO) {
         mappedUnit {
             val clean = if (visibility == PROFILE_VISIBILITY_FRIENDS) {
@@ -420,8 +429,11 @@ object SocialApi {
             val userId = SupabaseClient.userIdFromAccessToken(accessToken)
             val body = JSONObject()
                 .put("profile_visibility", clean)
-                .put("hide_activity", hideActivity)
-            if (hideActivity) body.put("last_active_at", JSONObject.NULL)
+                .put("hide_activity", presenceMode == com.curio.app.data.AppPreferences.PRESENCE_HIDDEN)
+                .put("presence_mode", presenceMode)
+            if (presenceMode == com.curio.app.data.AppPreferences.PRESENCE_HIDDEN) {
+                body.put("last_active_at", JSONObject.NULL)
+            }
             val request = SupabaseClient.requestBuilder("$PROFILES?id=eq.$userId", accessToken)
                 .patch(body.toString().toRequestBody(jsonMediaType))
                 .header("Prefer", "return=minimal")
@@ -591,6 +603,15 @@ object SocialApi {
                     SOCIAL_WRITE_GAP_MS,
                     "One at a time — try again in a moment."
                 )
+                // Treat the action as idempotent: the unique pair constraint
+                // is expected to reject a second tap, so check both directions
+                // before inserting and return a useful state instead of a raw
+                // Postgres duplicate-key error.
+                val existingPath = "$REQUESTS?select=id,status&or=(and(requester.eq.${id(myUserId)},addressee.eq.${id(userId)}),and(requester.eq.${id(userId)},addressee.eq.${id(myUserId)}))&status=in.(pending,accepted)&limit=1"
+                val existingRequest = SupabaseClient.requestBuilder(existingPath, accessToken).get().build()
+                if (JSONArray(SupabaseClient.executeBody(existingRequest)).length() > 0) {
+                    throw IllegalStateException("You are already friends or a request is already waiting.")
+                }
                 val payload = JSONObject().put("addressee", userId)
                 val request = SupabaseClient.requestBuilder(REQUESTS, accessToken)
                     .header("Prefer", "return=minimal")
@@ -1005,6 +1026,15 @@ object SocialApi {
                     .orEmpty()
                     .ifBlank { PROFILE_VISIBILITY_PUBLIC },
                 hideActivity = row.optBoolean("hide_activity", false),
+                presenceMode = row.optString("presence_mode", "").takeIf {
+                    it == com.curio.app.data.AppPreferences.PRESENCE_ACTIVE ||
+                        it == com.curio.app.data.AppPreferences.PRESENCE_DND ||
+                        it == com.curio.app.data.AppPreferences.PRESENCE_HIDDEN
+                } ?: if (row.optBoolean("hide_activity", false)) {
+                    com.curio.app.data.AppPreferences.PRESENCE_HIDDEN
+                } else {
+                    com.curio.app.data.AppPreferences.PRESENCE_ACTIVE
+                },
                 bio = row.optString("bio", "").takeUnless { it == "null" }.orEmpty(),
                 lastActiveMillis = epochMillis(row.optString("last_active_at"))
             )

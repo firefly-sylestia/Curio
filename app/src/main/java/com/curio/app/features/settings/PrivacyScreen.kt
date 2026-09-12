@@ -70,9 +70,9 @@ fun PrivacyScreen(navController: NavController) {
     val glassBackdrop = rememberLayerBackdrop()
 
     // The observable mirrors, so the switches move the instant they are tapped
-    // and every other reader (the profile page, the presence tick) agrees.
+    // and the direct-message presence reader agrees.
     val visibility = AppPreferences.profileVisibilityState
-    val hideActivity = AppPreferences.hideActivityState
+    val presenceMode = AppPreferences.presenceModeState
     val token = account.session?.accessToken
 
     var blocked by remember { mutableStateOf<List<CurioPerson>>(emptyList()) }
@@ -92,16 +92,16 @@ fun PrivacyScreen(navController: NavController) {
 
     // The local preference is authoritative and lands immediately; the server
     // copy follows, and a failure is reported instead of silently dropped.
-    fun applyPrivacy(nextVisibility: String, nextHide: Boolean) {
+    fun applyPrivacy(nextVisibility: String, nextPresenceMode: String) {
         AppPreferences.setProfileVisibility(context, nextVisibility)
-        AppPreferences.setActivityHidden(context, nextHide)
+        AppPreferences.setPresenceMode(context, nextPresenceMode)
         scope.launch {
             val active = token
             if (active == null) {
                 notice = "Saved on this device. Sign in to apply it to your account."
                 return@launch
             }
-            SocialApi.updatePrivacy(active, nextVisibility, nextHide).fold(
+            SocialApi.updatePrivacy(active, nextVisibility, nextPresenceMode == AppPreferences.PRESENCE_HIDDEN, nextPresenceMode).fold(
                 onSuccess = { notice = "Saved." },
                 onFailure = {
                     notice = "Saved on this device — it will sync when you're back online."
@@ -109,7 +109,11 @@ fun PrivacyScreen(navController: NavController) {
             )
             // Hiding activity takes the stamp away NOW; showing it again
             // publishes a fresh one so the line comes back straight away.
-            if (nextHide) SocialPresence.withdraw(context) else SocialPresence.publish(context, force = true)
+            if (nextPresenceMode == AppPreferences.PRESENCE_ACTIVE) {
+                SocialPresence.publish(context, force = true)
+            } else {
+                SocialPresence.withdraw(context)
+            }
         }
     }
 
@@ -174,7 +178,7 @@ fun PrivacyScreen(navController: NavController) {
                         onCheckedChange = { wanted ->
                             applyPrivacy(
                                 if (wanted) PROFILE_VISIBILITY_FRIENDS else PROFILE_VISIBILITY_PUBLIC,
-                                hideActivity
+                                presenceMode
                             )
                         }
                     )
@@ -191,18 +195,25 @@ fun PrivacyScreen(navController: NavController) {
             item { SettingsSectionHeading("Activity") }
             item {
                 SettingsOptionCard {
-                    SettingsOptionSwitchRow(
+                    SettingsOptionRow(
                         icon = CurioIcons.VisibilityOff,
-                        title = "Hide my activity",
-                        subtitle = if (hideActivity) {
-                            "Nothing is published about when you were last around."
-                        } else {
-                            "Your profile shows a quiet \"Active now\" line to people who open it."
-                        },
-                        checked = hideActivity,
-                        onCheckedChange = { wanted ->
-                            applyPrivacy(visibility, wanted)
-                        }
+                        title = "Show active status",
+                        subtitle = if (presenceMode == AppPreferences.PRESENCE_ACTIVE) "Selected · In direct chats, show when you were last active." else "In direct chats, show when you were last active.",
+                        onClick = { applyPrivacy(visibility, AppPreferences.PRESENCE_ACTIVE) }
+                    )
+                    SettingsOptionDivider()
+                    SettingsOptionRow(
+                        icon = CurioIcons.VisibilityOff,
+                        title = "Do not disturb",
+                        subtitle = "Show DND in direct chats and do not publish activity time.",
+                        onClick = { applyPrivacy(visibility, AppPreferences.PRESENCE_DND) }
+                    )
+                    SettingsOptionDivider()
+                    SettingsOptionRow(
+                        icon = CurioIcons.VisibilityOff,
+                        title = "Show nothing",
+                        subtitle = "Hide your status and activity time completely.",
+                        onClick = { applyPrivacy(visibility, AppPreferences.PRESENCE_HIDDEN) }
                     )
                 }
             }
