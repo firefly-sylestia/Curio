@@ -339,8 +339,14 @@ object SupabaseRealtime {
             "phx_reply" -> {
                 val payload = frame.optJSONObject("payload") ?: return
                 if (payload.optString("status") == "ok") {
+                    val wasLinked = isLinked
                     isLinked = true
                     lastProblem = null
+                    // A reconnect has no database event to announce the time
+                    // spent offline. Refresh every subscriber immediately on
+                    // the successful JOIN so a restored network is visible
+                    // without waiting for the next polling safety tick.
+                    if (!wasLinked && frame.optString("ref") == "1") notifySubscribers()
                 } else {
                     val reason = payload.optJSONObject("response")?.optString("reason")
                     refuse(reason?.takeIf { it.isNotBlank() } ?: "Realtime channel refused")
@@ -353,19 +359,26 @@ object SupabaseRealtime {
                 if (payload.optString("status") == "ok" &&
                     payload.optString("extension").contains("postgres_changes")
                 ) {
+                    val wasLinked = isLinked
                     isLinked = true
                     lastProblem = null
+                    if (!wasLinked) notifySubscribers()
                 }
             }
             "postgres_changes" -> {
                 // A change is a HINT. The payload is deliberately ignored: the
                 // screen refetches through REST, so RLS decides what is visible
                 // and a tampered frame cannot put a row on screen.
-                subscriptions.values.forEach { subscription ->
-                    runCatching { subscription.onChange() }
-                }
+                notifySubscribers()
             }
             "phx_error" -> refuse("Realtime channel error")
+        }
+    }
+
+    /** Fans out a reconnect or server-change hint without trusting frame data. */
+    private fun notifySubscribers() {
+        subscriptions.values.forEach { subscription ->
+            runCatching { subscription.onChange() }
         }
     }
 }
