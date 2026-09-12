@@ -13,7 +13,7 @@ import javax.crypto.spec.SecretKeySpec
 data class CurioEncryptedMessage(
     val ciphertext: String,
     val nonce: String,
-    val version: String = VERSION
+    val version: String = CurioDmCrypto.VERSION
 )
 
 object CurioDmCrypto {
