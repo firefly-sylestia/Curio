@@ -142,19 +142,19 @@ fun OnlineModeScreen(navController: NavController) {
                 }
             }
 
-            item { SettingsSectionHeading("Community") }
+            item { SettingsSectionHeading("Social") }
             item {
                 SettingsOptionCard {
-                    // The tab is strictly opt-in and is the only Community control
-                    // kept in Settings; the full Community and Friends experiences
+                    // The tab is strictly opt-in and is the only Social control
+                    // kept in Settings; the full Social and Friends experiences
                     // are available from the app navigation.
                     SettingsOptionSwitchRow(
-                        icon = CurioIcons.Hub,
-                        title = "Community tab",
+                        icon = CurioIcons.Public,
+                        title = "Social tab",
                         subtitle = if (onlineMode && account.signedIn) {
-                            "Show Community in the app navigation."
+                            "Show Social in the app navigation."
                         } else {
-                            "Turn on Online mode and sign in to show Community."
+                            "Turn on Online mode and sign in to show Social."
                         },
                         checked = AppPreferences.communityTabVisible,
                         enabled = onlineMode && account.signedIn,

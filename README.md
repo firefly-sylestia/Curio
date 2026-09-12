@@ -53,8 +53,10 @@ Start a timed session and a persistent floating bubble follows you over other ap
 ### 🗄️ The Cabinet — Your Personal Museum
 Browse by category, search your collection, zoom images in a lightbox, and explore rich entry pages. Your keepsakes pack into **shelves** — Favorites, Curiying now, Want to Read, Completed, Notes, Personal, your own collections — with the **Cupboard** holding every book, album and series you keep. Streaks, levels, and lane stats make the habit rewarding.
 
-### 👥 Community, Friends & Messages — optional, off by default
-Switch on **Online mode** and Curio grows a social half: a 24-hour wall of share cards, replies that branch, a friends list, and private conversations. Every member picks one of **28 hand-drawn portraits**; a display name and a `@username` are separate things; profiles carry a bio. Friends can see your shelf of liked topics; strangers can't message you. This layer is the *only* part of Curio that ever talks to a server, it is **off unless you turn it on**, and turning it off again (or signing out) takes the tab and the cached conversations with it.
+### 👥 Social, Friends & Messages — optional, off by default
+Switch on **Online mode** and Curio grows a social half: a 24-hour wall of posts, replies that branch, a friends list, and private conversations. Every member picks one of **28 hand-drawn portraits**; a display name and a `@username` are separate things; profiles carry a bio. Friends can see your shelf of liked topics; strangers can't message you. This layer is the *only* part of Curio that ever talks to a server, it is **off unless you turn it on**, and turning it off again (or signing out) takes the tab and the cached conversations with it.
+
+Three kinds of post share the wall: a **topic card** (the topic's own art, words and style), a **note** (a tweet-style line of your own) and a **quote** (the topic's own words, credited to whoever said them). **Direct messages are exempt from the content filter** — two friends writing privately write what they like; the filter guards the public surfaces (the wall, its replies, usernames, display names and bios), where anyone can read what is written. Curio is a small place and its conduct rules are short: slurs, sexual content and harassment get an account banned.
 
 ### 🎨 Design Identity
 A **Material-inspired custom design language** — not a hand-invented look, but one assembled from the established design language of the modern web. Material 3's open design system is the foundation; on top sits a warm-cream paper world drawn from the editorial, tactile aesthetic of today's best apps: torn-paper heroes, category colors, custom typography, and motion throughout. Three theme styles (Curio, AMOLED, Material You).
@@ -62,7 +64,9 @@ A **Material-inspired custom design language** — not a hand-invented look, but
 ### 🔒 Privacy First
 Everything lives on your device. No analytics. No tracking. No ads. Open source. Your captures, recordings, photos and screenshots never leave the phone — the online layer carries text only (a card's topic, its words, a reply, your name, your portrait number). Turn Online mode off and nothing about you is sent anywhere. Signing out forgets the device's cached conversations, and the stored session token is sealed with the Android Keystore rather than kept in readable preferences.
 
-> **Read this before switching Online mode on:** messages, replies and cards are **private by policy, not end-to-end encrypted**. They are stored on Curio's server so they can be delivered to the other person, and access is enforced by row-level security (only the people in a conversation, or the friends a card is visible to, can read it). The server itself holds the plain text. If you need content that no server can read, don't put it in a message.
+> **Read this before switching Online mode on:** messages, replies and posts are **private by policy, not end-to-end encrypted**. They are stored on Curio's server so they can be delivered to the other person, and access is enforced by row-level security (only the people in a conversation, or the friends a post is visible to, can read it). The server itself holds the plain text. If you need content that no server can read, don't put it in a message.
+>
+> **How long it is kept:** a wall post, its replies and a direct message each live **24 hours** on the server and are then swept away — an expired message is gone even for the two people in it. Your own device keeps the conversations it received (a private copy for you), and signing out deletes that copy along with the session token.
 
 ---
 

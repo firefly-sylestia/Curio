@@ -1,5 +1,6 @@
 package com.curio.app.data.supabase
 
+import com.curio.app.data.CurioContentFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -341,6 +342,10 @@ object CommunityApi {
                     "Keep it under $MAX_COMMENT_CHARS characters (it's ${text.length})."
                 )
             }
+            // v3xx53 — the app-level filter. It runs HERE, on the way out, so
+            // no screen can post around it; the same fold is a CHECK in
+            // supabase/schema.sql, so a modified client can't either.
+            CurioContentFilter.problem(text)?.let { throw IllegalArgumentException(it) }
             val payload = JSONObject()
                 .put("card_id", cardId)
                 .put("body", text)
@@ -377,6 +382,11 @@ object CommunityApi {
     ): Result<Unit> = withContext(Dispatchers.IO) {
         mappedUnit {
             draftProblem(draft)?.let { throw IllegalArgumentException(it) }
+            // v3xx53 — the app-level filter (see CommunityApi.comment): the
+            // words a person typed, plus the handle and byline that ride with
+            // them.
+            CurioContentFilter.problemIn(draft.factText, draft.caption, draft.byline, handle)
+                ?.let { throw IllegalArgumentException(it) }
             val payload = JSONObject()
                 .put("author_handle", handle.trim().ifBlank { "A curious soul" })
                 .put("kind", draft.kind)

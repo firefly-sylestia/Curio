@@ -797,9 +797,12 @@ internal object SocialReactions {
  * conversation, entries expire after [SocialCache.TTL_THREAD_MS], and the
  * oldest threads are evicted past the kind's ceiling.
  *
- * It is a CACHE, not a store of record: the server owns the messages, and
- * writing the same conversation again replaces its copy (no growth, no
- * duplicates). Only text is ever kept — the same rule as the online layer.
+ * The server keeps a message for 24 HOURS; this copy is the long-lived one,
+ * because what you received is yours to keep (see [SocialCache.TTL_THREAD_MS]).
+ * That is why opening a conversation merges the server window into what is
+ * already here instead of replacing it. Writing the same conversation again
+ * replaces its copy (no growth, no duplicates). Only text is ever kept — the
+ * same rule as the online layer.
  */
 internal object SocialMessageCache {
     private const val KIND = "thread"

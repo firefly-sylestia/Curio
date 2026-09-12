@@ -46,7 +46,12 @@ internal object SocialCache {
     const val DIR = "curio_social_cache"
 
     /** How long each kind stays fresh. Zero means "until the version bumps". */
-    const val TTL_THREAD_MS = 14L * 24 * 60 * 60 * 1000
+    // v3xx53 — conversations live 24 HOURS ON THE SERVER (a message that has
+    // expired is unreadable even to its own participants) and, by design, a
+    // year ON THIS DEVICE: what you received is yours to keep, so the copy of
+    // the thread this phone holds is the long-lived one. The screen merges the
+    // two, so a 25-hour-old message is still there when you open the thread.
+    const val TTL_THREAD_MS = 365L * 24 * 60 * 60 * 1000
     const val TTL_PERSON_MS = 30L * 24 * 60 * 60 * 1000
     const val TTL_WALL_MS = 3L * 60 * 60 * 1000
     const val TTL_INBOX_MS = 12L * 60 * 60 * 1000

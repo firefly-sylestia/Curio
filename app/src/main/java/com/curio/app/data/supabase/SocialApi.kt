@@ -1,5 +1,6 @@
 package com.curio.app.data.supabase
 
+import com.curio.app.data.CurioContentFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -271,6 +272,9 @@ object SocialApi {
                 require(normalized.matches(Regex("[a-z0-9_]{3,24}"))) {
                     "Usernames use 3 to 24 letters, numbers or underscores."
                 }
+                CurioContentFilter.problem(normalized)?.let {
+                    throw IllegalArgumentException(it)
+                }
                 lastRenameAt = throttle(
                     lastRenameAt,
                     RENAME_GAP_MS,
@@ -353,6 +357,9 @@ object SocialApi {
         withContext(Dispatchers.IO) {
             mappedUnit {
                 val clean = displayName.trim().take(40)
+                // v3xx53 — names carry the same filter as everything else, and
+                // the wording says what happens to an account that ignores it.
+                CurioContentFilter.problem(clean)?.let { throw IllegalArgumentException(it) }
                 val userId = SupabaseClient.userIdFromAccessToken(accessToken)
                 val body = JSONObject().put(
                     "display_name",
@@ -378,6 +385,7 @@ object SocialApi {
         withContext(Dispatchers.IO) {
             mappedUnit {
                 val clean = bio.trim().take(MAX_BIO_CHARS)
+                CurioContentFilter.problem(clean)?.let { throw IllegalArgumentException(it) }
                 val userId = SupabaseClient.userIdFromAccessToken(accessToken)
                 val body = JSONObject().put(
                     "bio",
@@ -748,6 +756,11 @@ object SocialApi {
                     "Keep it under $MAX_MESSAGE_CHARS characters (it's ${text.length})."
                 )
             }
+            // v3xx53 — a direct message is NOT filtered. Two friends having a
+            // private conversation write what they like; only the PUBLIC
+            // surfaces (parts of `CommunityApi`, plus usernames, display names
+            // and bios) pass CurioContentFilter. RLS — the two participants,
+            // friends only — is what protects a thread, not a word list.
             if (toUserId == myUserId) throw IllegalArgumentException("You can't message yourself.")
             id(toUserId)
             lastMessageAt = throttle(lastMessageAt, WRITE_GAP_MS, "Slow down a moment.")

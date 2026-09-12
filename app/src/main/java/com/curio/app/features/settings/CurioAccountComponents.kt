@@ -45,6 +45,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
+import com.curio.app.data.CurioContentFilter
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.data.supabase.SOCIAL_AVATAR_STYLE_COUNT
 import com.curio.app.data.supabase.SocialApi
@@ -282,6 +283,9 @@ internal fun CurioAccountIdentityCard(
         clean.isEmpty() -> null
         !clean.matches(Regex("[a-z0-9_]{3,24}")) ->
             "Usernames use 3 to 24 letters, numbers or underscores."
+        // v3xx53 — the same text filter every post and message goes through,
+        // stated BEFORE the request instead of only as the server's answer.
+        !CurioContentFilter.isClean(clean) -> CurioContentFilter.BLOCKED_MESSAGE
         else -> null
     }
     val changed = clean.isNotEmpty() && clean != savedName.trim().removePrefix("@").lowercase()
@@ -334,6 +338,15 @@ internal fun CurioAccountIdentityCard(
             else -> "Free to claim — save it and it is yours." to false
         }
         AccountMessage(text = status.first, isError = status.second)
+
+        // v3xx53 — the ACCOUNT POLICY, stated where the name is chosen. The
+        // filter above is the enforcement; this is the warning, and it is
+        // deliberately not hidden behind a tap.
+        Text(
+            text = CurioContentFilter.NAME_WARNING,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.error.copy(alpha = 0.85f)
+        )
 
         Row(
             verticalAlignment = Alignment.CenterVertically,

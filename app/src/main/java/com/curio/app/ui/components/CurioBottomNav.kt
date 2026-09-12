@@ -218,18 +218,25 @@ object CurioBottomNavItems {
         icon = CurioIcons.Inventory2,
         selectedIcon = CurioIcons.Inventory2
     )
-    // The Community wall — the ONLY optional tab. It appears on the bar only
-    // when the user opted in (Settings → Online mode → "Community tab") AND
-    // Online mode itself is on, because the wall is useless without an
-    // account and the user asked for it to be strictly opt-in.
-    val Community = CurioBottomDestination(
+    // The SOCIAL wall — the ONLY optional tab. It appears on the bar only when
+    // the user opted in (Settings → Online mode → "Social tab") AND Online mode
+    // itself is on, because the wall is useless without an account and the user
+    // asked for it to be strictly opt-in.
+    //
+    // v3xx53 — the tab is called SOCIAL now, not Community: it carries the wall,
+    // the friends list and the messages, which is more than "a community", and
+    // the label finally matches the app's own copy elsewhere. Its glyph is the
+    // globe (`CurioIcons.Public`) instead of `hub`'s connected dots. The route
+    // stays CurioRoutes.COMMUNITY — renaming a route is saveable churn for no
+    // user-visible gain.
+    val Social = CurioBottomDestination(
         route = CurioRoutes.COMMUNITY,
-        label = "Community",
-        icon = CurioIcons.Hub
+        label = "Social",
+        icon = CurioIcons.Public
     )
 
     /** Every destination, whether or not it is currently shown. */
-    val all: List<CurioBottomDestination> = listOf(Home, Shuffle, Cabinet, Community)
+    val all: List<CurioBottomDestination> = listOf(Home, Shuffle, Cabinet, Social)
 
     /**
      * The destinations the bar actually renders right now.

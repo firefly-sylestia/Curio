@@ -174,8 +174,18 @@ fun DirectMessageScreen(
         loading = true
         SocialApi.messages(active, otherUserId, me).fold(
             onSuccess = { fresh ->
-                messages = fresh
-                SocialMessageCache.write(context, otherUserId, fresh)
+                // v3xx53 — the SERVER keeps 24 hours; the DEVICE keeps what it
+                // received. Merging (rather than replacing) is what makes "gone
+                // from the server" and "gone from Curio" two different things:
+                // opening a conversation can never lose a message this phone
+                // already had. Newest wins per id, so a cached row still gets
+                // its fresh read receipt.
+                val known = SocialMessageCache.read(context, otherUserId, me)
+                val merged = (known + fresh)
+                    .distinctBy { it.id }
+                    .sortedBy { it.createdAtMillis }
+                messages = merged
+                SocialMessageCache.write(context, otherUserId, merged)
                 error = null
                 loadedOnce = true
             },
@@ -1074,6 +1084,9 @@ private fun MessageComposer(
     onSend: () -> Unit
 ) {
     val dark = isCurioDarkTheme()
+    // A direct message is deliberately NOT run through CurioContentFilter —
+    // this is a private conversation between two friends, and the filter
+    // guards the public surfaces instead. See SocialApi.send.
     val armed = draft.isNotBlank() && !sending
     val sendScale by animateFloatAsState(
         targetValue = if (armed) 1f else 0.86f,

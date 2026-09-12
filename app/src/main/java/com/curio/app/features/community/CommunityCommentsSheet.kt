@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.curio.app.data.AppPreferences
+import com.curio.app.data.CurioContentFilter
 import com.curio.app.data.supabase.CommunityApi
 import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityComment
@@ -218,6 +219,17 @@ internal fun CommunityCommentsSheet(
                 )
             }
 
+            // v3xx53 — the app-level filter, surfaced as you type: send stays
+            // disabled and the line says why (the API refuses it again on the
+            // way out, and the schema's CHECK is the third gate).
+            if (CurioContentFilter.carriesBadWord(text)) {
+                Text(
+                    text = CurioContentFilter.BLOCKED_MESSAGE,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+
             // Who this reply answers — the one line that makes a branch
             // explicit, and the only way to leave it again.
             replyTo?.let { target ->
@@ -287,7 +299,7 @@ internal fun CommunityCommentsSheet(
                             )
                         }
                     },
-                    enabled = text.isNotBlank(),
+                    enabled = text.isNotBlank() && CurioContentFilter.isClean(text),
                     shape = RoundedCornerShape(50),
                     colors = curioDialogActionButtonColors()
                 ) {
