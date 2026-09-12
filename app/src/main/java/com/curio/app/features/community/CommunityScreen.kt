@@ -457,6 +457,21 @@ fun CommunityScreen(navController: NavController) {
                                 )
                             }
                         },
+                        onDislike = {
+                            val active = token ?: return@CommunityCardItem
+                            val userId = account.session?.userId
+                            scope.launch {
+                                val call = if (card.dislikedByMe && userId != null) {
+                                    CommunityApi.undislike(active, card.id, userId)
+                                } else {
+                                    CommunityApi.dislike(active, card.id)
+                                }
+                                call.fold(
+                                    onSuccess = { load() },
+                                    onFailure = { error = it.message }
+                                )
+                            }
+                        },
                         onReport = { reporting = card },
                         onDelete = {
                             val active = token ?: return@CommunityCardItem
@@ -657,9 +672,10 @@ private fun CommunityCardItem(
     card: CommunityCard,
     onOpen: () -> Unit,
     onAuthor: () -> Unit,
-    onComments: () -> Unit,
-    onLike: () -> Unit,
-    onReport: () -> Unit,
+  onComments: () -> Unit,
+  onLike: () -> Unit,
+  onDislike: () -> Unit,
+  onReport: () -> Unit,
     onDelete: () -> Unit
 ) {
     Surface(
@@ -754,7 +770,7 @@ private fun CommunityCardItem(
                     glyph = CurioIcons.ThumbDown,
                     label = if (card.dislikeCount > 0) card.dislikeCount.toString() else "",
                     tinted = card.dislikedByMe,
-                    onClick = {}
+                    onClick = onDislike
                 )
                 CommunityAction(
                     glyph = CurioIcons.FormatQuote,

@@ -415,7 +415,7 @@ object CommunityApi {
     suspend fun like(accessToken: String, cardId: String): Result<Unit> =
         withContext(Dispatchers.IO) {
             mappedUnit {
-                val payload = JSONObject().put("card_id", cardId)
+                val payload = JSONObject().put("card_id", cardId).put("kind", "like")
                 val request = SupabaseClient.requestBuilder(REACTIONS, accessToken)
                     .header("Prefer", "resolution=merge-duplicates,return=minimal")
                     .post(payload.toString().toRequestBody(jsonMediaType))
@@ -434,6 +434,21 @@ object CommunityApi {
                 SupabaseClient.executeBody(request)
             }
         }
+
+    suspend fun dislike(accessToken: String, cardId: String): Result<Unit> =
+        withContext(Dispatchers.IO) {
+            mappedUnit {
+                val payload = JSONObject().put("card_id", cardId).put("kind", "dislike")
+                val request = SupabaseClient.requestBuilder(REACTIONS, accessToken)
+                    .header("Prefer", "resolution=merge-duplicates,return=minimal")
+                    .post(payload.toString().toRequestBody(jsonMediaType))
+                    .build()
+                SupabaseClient.executeBody(request)
+            }
+        }
+
+    suspend fun undislike(accessToken: String, cardId: String, myUserId: String): Result<Unit> =
+        unlike(accessToken, cardId, myUserId)
 
     /** Files a report. One per card per user (the DB's unique constraint). */
     suspend fun report(accessToken: String, cardId: String, reason: String): Result<Unit> =
