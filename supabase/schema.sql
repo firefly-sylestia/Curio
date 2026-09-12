@@ -31,8 +31,6 @@ create table if not exists public.profiles (
 
 alter table public.profiles enable row level security;
 
--- A user sees only their own profile (never anyone else's), and may create
--- and update it. No delete policy: the row follows the auth user.
 drop policy if exists prof_select_own on public.profiles;
 create policy prof_select_own on public.profiles
     for select to authenticated
@@ -53,13 +51,13 @@ create policy prof_update_own on public.profiles
 -- 2. cloud_captures — text-only mirror of Room captures (owner-private)
 -- ───────────────────────────────────────────────────────────────────────────
 create table if not exists public.cloud_captures (
-    id             text primary key,           -- the stable Room capture id
+    id             text primary key,
     owner          uuid not null default auth.uid() references auth.users (id) on delete cascade,
     topic_name     text not null default '',
     category_slug  text not null default '',
     capture_format text not null default '',
     title          text not null default '',
-    body_text      text not null default '',   -- serialized TEXT content only
+    body_text      text not null default '',
     created_at     timestamptz not null default now(),
     updated_at     timestamptz not null default now(),
     deleted_at     timestamptz
@@ -72,7 +70,6 @@ create index if not exists cloud_captures_live_idx
 
 alter table public.cloud_captures enable row level security;
 
--- Strictly owner-scoped: a capture is readable and writable only by its owner.
 drop policy if exists cc_select_own on public.cloud_captures;
 create policy cc_select_own on public.cloud_captures
     for select to authenticated
@@ -96,14 +93,9 @@ create policy cc_delete_own on public.cloud_captures
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 3. community_cards — TEMPORARY text share cards (24 hours)
---    No media columns exist by design: a card is text + topic + style data,
---    which is exactly what the Android share-card renderer needs.
 -- ───────────────────────────────────────────────────────────────────────────
 create table if not exists public.community_cards (
     id             uuid primary key default gen_random_uuid(),
-    -- `default auth.uid()` means the app never sends an identity column: it
-    -- cannot even attempt to post as somebody else (the policy would refuse,
-    -- and there is nothing to spoof).
     owner          uuid not null default auth.uid() references auth.users (id) on delete cascade,
     author_handle  text not null default 'A curious soul',
     topic_name     text not null,
@@ -112,7 +104,7 @@ create table if not exists public.community_cards (
     category_glyph text not null default '',
     accent_hex     text not null default '#8E8E93',
     fact_text      text not null,
-    caption        text not null default '',   -- the poster's own line above the card
+    caption        text not null default '',
     style          text not null default 'PAPER',
     aspect         text not null default 'CLASSIC',
     body_scale     real not null default 1.0,
@@ -126,9 +118,6 @@ create table if not exists public.community_cards (
     constraint community_cards_aspect check (aspect in ('PORTRAIT','CLASSIC'))
 );
 
--- EVOLUTION: `create table if not exists` above does nothing to a table that
--- already exists, so every column added later lands here too — re-pasting the
--- file upgrades an older install instead of silently skipping the column.
 alter table public.community_cards add column if not exists caption text not null default '';
 
 do $$
@@ -139,11 +128,12 @@ begin
     end if;
 end $$;
 
--- Reads are always "live cards, newest first" — the partial index keeps that
--- cheap and keeps expired rows out of the hot path until the sweep runs.
-create index if not exists community_cards_live_idx
-    on public.community_cards (created_at desc)
-    where expires_at > now();
+-- NOTE: the old `community_cards_live_idx` partial index (WHERE expires_at >
+-- now()) has been removed — Postgres requires partial-index predicates to be
+-- IMMUTABLE, and now() is only STABLE, so that index failed with 42P17 on
+-- creation. `community_cards_expiry_idx` below (plain index on expires_at)
+-- covers the same read pattern; Postgres applies expires_at > now() as an
+-- ordinary WHERE filter at query time, which has no immutability requirement.
 create index if not exists community_cards_owner_idx
     on public.community_cards (owner, created_at desc);
 create index if not exists community_cards_expiry_idx
@@ -151,9 +141,6 @@ create index if not exists community_cards_expiry_idx
 
 alter table public.community_cards enable row level security;
 
--- READ: any signed-in user whose own Online Mode is on may read LIVE cards
--- whose author also has Online Mode on. An expired card is invisible even
--- before the purge runs.
 drop policy if exists comm_select_live on public.community_cards;
 create policy comm_select_live on public.community_cards
     for select to authenticated
@@ -169,8 +156,6 @@ create policy comm_select_live on public.community_cards
         )
     );
 
--- CREATE: you may only post as yourself, only while Online Mode is on, and
--- only with a 24-hour lifetime (a longer expiry is refused server-side).
 drop policy if exists comm_insert_own on public.community_cards;
 create policy comm_insert_own on public.community_cards
     for insert to authenticated
@@ -183,8 +168,6 @@ create policy comm_insert_own on public.community_cards
         )
     );
 
--- DELETE: authors may pull their own card early. No update policy at all —
--- a posted card is immutable, which also means nobody can extend its life.
 drop policy if exists comm_delete_own on public.community_cards;
 create policy comm_delete_own on public.community_cards
     for delete to authenticated
@@ -205,7 +188,6 @@ create index if not exists community_reactions_card_idx
 
 alter table public.community_reactions enable row level security;
 
--- A reaction is visible only while its card is visible (same rule).
 drop policy if exists reac_select_visible on public.community_reactions;
 create policy reac_select_visible on public.community_reactions
     for select to authenticated
@@ -247,8 +229,6 @@ create policy reac_delete_own on public.community_reactions
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 4b. community_comments — the replies under a card
---     Comments die with the card (cascade), so they can never outlive the
---     24-hour promise. Text only, exactly like the cards themselves.
 -- ───────────────────────────────────────────────────────────────────────────
 create table if not exists public.community_comments (
     id            uuid primary key default gen_random_uuid(),
@@ -265,7 +245,6 @@ create index if not exists community_comments_card_idx
 
 alter table public.community_comments enable row level security;
 
--- Readable only while the card is live AND both sides have Online Mode on.
 drop policy if exists cmt_select_visible on public.community_comments;
 create policy cmt_select_visible on public.community_comments
     for select to authenticated
@@ -300,7 +279,6 @@ create policy cmt_insert_own on public.community_comments
         )
     );
 
--- Only the comment's own author may remove it.
 drop policy if exists cmt_delete_own on public.community_comments;
 create policy cmt_delete_own on public.community_comments
     for delete to authenticated
@@ -324,8 +302,6 @@ create index if not exists community_reports_card_idx
 
 alter table public.community_reports enable row level security;
 
--- Reporters may see the reports they filed; the moderation team reads the
--- table through the service role (which bypasses RLS), never the app.
 drop policy if exists rep_insert_own on public.community_reports;
 create policy rep_insert_own on public.community_reports
     for insert to authenticated
@@ -337,18 +313,7 @@ create policy rep_select_own on public.community_reports
     using (reporter = auth.uid());
 
 -- ───────────────────────────────────────────────────────────────────────────
--- 5b. profile discoverability — the social layer needs to find people
---
---     Friend requests are impossible without a way to look someone up, so
---     `profiles` gains a `discoverable` flag and a second READ policy for
---     the PUBLIC identity of accounts that opted in. Policies are OR-ed, so
---     the self-read above still works exactly as before.
---
---     What becomes readable: id, display_name, online_mode_enabled and the
---     timestamps — profiles holds no private data (captures, cards, replies
---     and messages all live in their own RLS-protected tables). An account
---     that keeps Online Mode OFF is not discoverable at all, which is the
---     consent boundary: turning the switch off hides you from search.
+-- 5b. profile discoverability
 -- ───────────────────────────────────────────────────────────────────────────
 alter table public.profiles add column if not exists discoverable boolean not null default true;
 
@@ -359,8 +324,6 @@ create policy prof_select_discoverable on public.profiles
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 5c. friend_requests — one request per pair, either direction
---     A request carries its own status, so "accepted" IS the friendship and
---     no second table can drift out of sync with it.
 -- ───────────────────────────────────────────────────────────────────────────
 create table if not exists public.friend_requests (
     id           uuid primary key default gen_random_uuid(),
@@ -373,10 +336,6 @@ create table if not exists public.friend_requests (
     constraint friend_requests_not_self check (requester <> addressee)
 );
 
--- The unordered pair, so A→B and B→A can never both sit there as separate
--- pending requests. PARTIAL (declined rows are excluded) so a declined
--- request does not permanently block a later one, and unfriending leaves a
--- clean slate because the row is deleted.
 alter table public.friend_requests add column if not exists pair_key text
     generated always as (
         least(requester::text, addressee::text) || ':' || greatest(requester::text, addressee::text)
@@ -389,11 +348,6 @@ create index if not exists friend_requests_incoming_idx
 create index if not exists friend_requests_outgoing_idx
     on public.friend_requests (requester, created_at desc);
 
--- The two sides of a request are IMMUTABLE. RLS alone cannot express that:
--- an UPDATE policy's USING sees the old row and its WITH CHECK sees the new
--- one, so neither can compare them — without this trigger an addressee could
--- accept a request and swap the requester for a third party in the same
--- statement, manufacturing a friendship that person never agreed to.
 create or replace function public.curio_pin_request_parties()
 returns trigger
 language plpgsql
@@ -416,15 +370,11 @@ create trigger friend_requests_pin_parties
 
 alter table public.friend_requests enable row level security;
 
--- READ: only the two sides of the request can see it.
 drop policy if exists fr_select_own on public.friend_requests;
 create policy fr_select_own on public.friend_requests
     for select to authenticated
     using (requester = auth.uid() or addressee = auth.uid());
 
--- CREATE: you may only ask as yourself, only at someone who can actually be
--- reached (they have Online Mode on), and only while your own Online Mode is
--- on. Asking yourself is refused by the constraint above.
 drop policy if exists fr_insert_own on public.friend_requests;
 create policy fr_insert_own on public.friend_requests
     for insert to authenticated
@@ -442,18 +392,12 @@ create policy fr_insert_own on public.friend_requests
         )
     );
 
--- ANSWER: only the ADDRESSEE may move a pending request, and only to
--- accepted / declined — an accepted row IS the friendship, so this is the
--- single place one can come into being. The trigger above pins the pair and
--- stops an answered request from being answered again.
 drop policy if exists fr_respond_addressee on public.friend_requests;
 create policy fr_respond_addressee on public.friend_requests
     for update to authenticated
     using (addressee = auth.uid() and status = 'pending')
     with check (addressee = auth.uid() and status in ('accepted', 'declined'));
 
--- REMOVE: either side may delete — the requester cancels a pending ask, and
--- either friend unfriends. The row goes, so the pair is free again.
 drop policy if exists fr_delete_own on public.friend_requests;
 create policy fr_delete_own on public.friend_requests
     for delete to authenticated
@@ -461,14 +405,6 @@ create policy fr_delete_own on public.friend_requests
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 5c(ii). curio_are_friends — the ONE definition of "these two are friends"
---     Defined AFTER the table above: a SQL-language function is parsed and
---     validated at CREATE time, so it cannot be declared before the relation
---     it reads exists.
---
---     SECURITY DEFINER so the answer is a fact about the pair, not a view
---     through the caller's own RLS (which would only ever see the caller's
---     side of a request). It returns a boolean about two specific ids and
---     nothing else, and the app's role is granted EXECUTE on it in §7.
 -- ───────────────────────────────────────────────────────────────────────────
 create or replace function public.curio_are_friends(a uuid, b uuid)
 returns boolean
@@ -487,10 +423,6 @@ $$;
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 5d. dm_messages — direct messages, text only, friends only
---     No media column exists by design (same rule as the cards), and the
---     INSERT policy requires an ACCEPTED request between the two people, so
---     nobody can message a stranger. Reads stay open to both participants
---     even after an unfriend: you keep the conversation you were part of.
 -- ───────────────────────────────────────────────────────────────────────────
 create table if not exists public.dm_messages (
     id         uuid primary key default gen_random_uuid(),
@@ -508,8 +440,6 @@ create index if not exists dm_messages_thread_idx
 create index if not exists dm_messages_inbox_idx
     on public.dm_messages (recipient, created_at desc);
 
--- Same immutability rule as a friend request: a receipt is the only update a
--- message ever takes, so the participants must not be re-pointable.
 create or replace function public.curio_pin_message_parties()
 returns trigger
 language plpgsql
@@ -528,14 +458,11 @@ create trigger dm_messages_pin_parties
 
 alter table public.dm_messages enable row level security;
 
--- READ: only the two people in the conversation.
 drop policy if exists dm_select_participants on public.dm_messages;
 create policy dm_select_participants on public.dm_messages
     for select to authenticated
     using (sender = auth.uid() or recipient = auth.uid());
 
--- CREATE: you send as yourself, to someone with Online Mode on, while your
--- own Online Mode is on, and ONLY to someone who accepted your request.
 drop policy if exists dm_insert_friends on public.dm_messages;
 create policy dm_insert_friends on public.dm_messages
     for insert to authenticated
@@ -552,15 +479,12 @@ create policy dm_insert_friends on public.dm_messages
         and public.curio_are_friends(auth.uid(), dm_messages.recipient)
     );
 
--- READ RECEIPT: the RECIPIENT may stamp read_at on their own inbox
--- (the participants themselves are pinned by the trigger above).
 drop policy if exists dm_update_receipt on public.dm_messages;
 create policy dm_update_receipt on public.dm_messages
     for update to authenticated
     using (recipient = auth.uid())
     with check (recipient = auth.uid());
 
--- DELETE: only your own message.
 drop policy if exists dm_delete_own on public.dm_messages;
 create policy dm_delete_own on public.dm_messages
     for delete to authenticated
@@ -568,7 +492,6 @@ create policy dm_delete_own on public.dm_messages
 
 -- ───────────────────────────────────────────────────────────────────────────
 -- 6. Expiry sweep — housekeeping for the 24-hour cards
---    Reads already filter on `expires_at`, so this only reclaims space.
 -- ───────────────────────────────────────────────────────────────────────────
 create or replace function public.curio_purge_expired_cards()
 returns integer
@@ -595,13 +518,9 @@ revoke all on function public.curio_purge_expired_cards() from public, anon, aut
 --     '7 * * * *',
 --     $$select public.curio_purge_expired_cards();$$
 -- );
---
--- Without pg_cron, run the function manually whenever you like:
---   select public.curio_purge_expired_cards();
 
 -- ───────────────────────────────────────────────────────────────────────────
--- 7. Grants — RLS still gates every row; these only let the signed-in role
---    reach the tables at all. `anon` gets nothing anywhere.
+-- 7. Grants
 -- ───────────────────────────────────────────────────────────────────────────
 grant usage on schema public to authenticated;
 grant select, insert, update, delete on public.profiles to authenticated;
@@ -613,9 +532,6 @@ grant select, insert on public.community_reports to authenticated;
 grant select, insert, update, delete on public.friend_requests to authenticated;
 grant select, insert, update, delete on public.dm_messages to authenticated;
 
--- The friendship test is callable by any signed-in user (it only ever
--- answers about two ids); the trigger helpers are NOT — they run as the
--- table owner when the trigger fires.
 revoke all on function public.curio_are_friends(uuid, uuid) from public, anon;
 grant execute on function public.curio_are_friends(uuid, uuid) to authenticated;
 revoke all on function public.curio_pin_request_parties() from public, anon, authenticated;
@@ -631,7 +547,7 @@ revoke all on public.friend_requests from anon;
 revoke all on public.dm_messages from anon;
 
 -- ───────────────────────────────────────────────────────────────────────────
--- 8. Self-check — prints PASS/FAIL per expectation so a bad paste is obvious
+-- 8. Self-check
 -- ───────────────────────────────────────────────────────────────────────────
 do $$
 declare
