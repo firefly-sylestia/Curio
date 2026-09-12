@@ -489,7 +489,9 @@ fun DirectMessageScreen(
                         result.fold(
                             onSuccess = {
                                 SocialApi.reactions(activeToken, listOf(messageId))
-                                    .onSuccess { fresh -> reactions = reactions + (messageId to fresh) }
+                                    .onSuccess { fresh ->
+                                        reactions = reactions + (messageId to fresh[messageId].orEmpty())
+                                    }
                             },
                             onFailure = {
                                 reactions = reactions + (messageId to (mine?.let { listOf(it) } ?: emptyList()))
@@ -527,6 +529,7 @@ fun DirectMessageScreen(
                             person = person,
                             fallback = fallback,
                             typing = peerTyping,
+                            activityAtMillis = thread.lastOrNull { !it.mine }?.createdAtMillis,
                             onOpenProfile = {
                                 navController.navigate(CurioRoutes.socialProfile(otherUserId)) {
                                     launchSingleTop = true
@@ -700,6 +703,7 @@ private fun MessagePeerHeader(
     person: CurioPerson?,
     fallback: String,
     typing: Boolean,
+    activityAtMillis: Long?,
     onOpenProfile: () -> Unit
 ) {
     val dark = isCurioDarkTheme()
@@ -749,13 +753,14 @@ private fun MessagePeerHeader(
                     Text(
 text = listOfNotNull(
                             person?.handleLabel,
-                            when (person?.presenceMode) {
-                                AppPreferences.PRESENCE_DND -> "Do not disturb"
-                                AppPreferences.PRESENCE_ACTIVE -> listOfNotNull(
-                                    person?.presenceLabel,
-                                    person?.presenceExactLabel?.let { "($it)" }
-                                ).joinToString(" ").takeIf { it.isNotBlank() }
-                                else -> null
+                            activityAtMillis?.let { sentAt ->
+                                val ageMinutes = ((System.currentTimeMillis() - sentAt).coerceAtLeast(0L) / 60_000L)
+                                when {
+                                    ageMinutes < 5L -> "Active now"
+                                    ageMinutes < 60L -> "Active ${ageMinutes}m ago"
+                                    ageMinutes < 24L * 60L -> "Active ${ageMinutes / 60L}h ago"
+                                    else -> null
+                                }
                             }
                         ).joinToString(" · ").ifBlank { "Open profile" },
                         style = MaterialTheme.typography.labelSmall,
@@ -1113,7 +1118,7 @@ private fun MessageComposer(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))
+            .windowInsetsPadding(WindowInsets.ime)
             .padding(
                 start = wideContentEdgePadding(),
                 end = wideContentEdgePadding(),

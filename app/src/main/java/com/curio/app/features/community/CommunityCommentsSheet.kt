@@ -89,6 +89,7 @@ internal fun CommunityCommentsSheet(
     // the chip above the composer names the person, so a branch is never
     // posted at the wrong place by accident.
     var replyTo by remember { mutableStateOf<CommunityComment?>(null) }
+    var friendIds by remember { mutableStateOf<Set<String>>(emptySet()) }
 
     suspend fun load() {
         loading = true
@@ -114,6 +115,11 @@ internal fun CommunityCommentsSheet(
             if (cached.isNotEmpty()) replies = cached
         }
         load()
+        if (myUserId != null) {
+            SocialApi.friends(accessToken, myUserId).onSuccess { friends ->
+                friendIds = friends.mapTo(mutableSetOf()) { it.person.userId }
+            }
+        }
     }
 
     // BRANCH ORDER, derived once per reply list — and HERE, in the composable
@@ -184,6 +190,7 @@ internal fun CommunityCommentsSheet(
                         depth = depth,
                         onAuthor = { if (reply.authorId.isNotBlank()) onOpenProfile(reply.authorId) },
                         onReply = { replyTo = if (replyTo?.id == reply.id) null else reply },
+                        canAddFriend = myUserId == null || (reply.authorId != myUserId && reply.authorId !in friendIds),
                         onAddFriend = {
                             if (myUserId != null) {
                                 scope.launch {
@@ -329,6 +336,7 @@ internal fun CommunityReplyRow(
     onAuthor: () -> Unit,
     /** Arms the composer to answer THIS reply — the branch's own door. */
     onReply: () -> Unit,
+    canAddFriend: Boolean = true,
     onAddFriend: () -> Unit,
     onDelete: () -> Unit
 ) {
@@ -395,11 +403,13 @@ internal fun CommunityReplyRow(
                                 onClick = onReply
                             )
                             Spacer(Modifier.width(6.dp))
-                            ReplyPill(
-                                glyph = CurioIcons.Person,
-                                label = "Add",
-                                onClick = onAddFriend
-                            )
+                            if (canAddFriend) {
+                                ReplyPill(
+                                    glyph = CurioIcons.Person,
+                                    label = "Add",
+                                    onClick = onAddFriend
+                                )
+                            }
                         }
                     }
                 }
