@@ -42,6 +42,9 @@ create table if not exists public.profiles (
 
 alter table public.profiles enable row level security;
 alter table public.profiles add column if not exists username text;
+alter table public.profiles add column if not exists presence_mode text not null default 'active';
+alter table public.profiles drop constraint if exists profiles_presence_mode_check;
+alter table public.profiles add constraint profiles_presence_mode_check check (presence_mode in ('active', 'dnd', 'hidden'));
 alter table public.profiles add column if not exists avatar_style smallint not null default 0;
 -- v3xx52 — the portrait count grew from 16 to 28 (the soft set), so the range
 -- check is REPLACED rather than merely created: an install that already
@@ -1334,7 +1337,7 @@ exception
         raise notice 'NOTE  add these tables to the supabase_realtime publication from the dashboard';
 end $$;
 
--- ───────────────────────────────────────────────────────────────────────────
+-- ─────────────────────────────────────────────────────────────────���─────────
 -- 8. Self-check
 -- ───────────────────────────────────────────────────────────────────────────
 do $$

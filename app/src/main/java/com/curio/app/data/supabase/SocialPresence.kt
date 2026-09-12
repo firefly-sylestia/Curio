@@ -35,7 +35,7 @@ object SocialPresence {
     suspend fun publish(context: Context, force: Boolean = false) {
         val token = OnlineAccount.state.session?.accessToken ?: return
         if (!AppPreferences.isOnlineModeEnabled(context)) return
-        if (AppPreferences.isActivityHidden(context)) return
+        if (AppPreferences.getPresenceMode(context) != AppPreferences.PRESENCE_ACTIVE) return
         val now = System.currentTimeMillis()
         if (!force && now - lastStampAt < GAP_MS) return
         lastStampAt = now

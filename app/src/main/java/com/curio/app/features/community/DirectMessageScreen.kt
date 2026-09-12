@@ -747,9 +747,17 @@ private fun MessagePeerHeader(
                     // The @username, and — only when the other member left
                     // activity visible — a quiet presence line beside it.
                     Text(
-                        text = listOfNotNull(person?.handleLabel, person?.presenceLabel)
-                            .joinToString(" · ")
-                            .ifBlank { "Open profile" },
+text = listOfNotNull(
+                            person?.handleLabel,
+                            when (person?.presenceMode) {
+                                AppPreferences.PRESENCE_DND -> "Do not disturb"
+                                AppPreferences.PRESENCE_ACTIVE -> listOfNotNull(
+                                    person?.presenceLabel,
+                                    person?.presenceExactLabel?.let { "($it)" }
+                                ).joinToString(" ").takeIf { it.isNotBlank() }
+                                else -> null
+                            }
+                        ).joinToString(" · ").ifBlank { "Open profile" },
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

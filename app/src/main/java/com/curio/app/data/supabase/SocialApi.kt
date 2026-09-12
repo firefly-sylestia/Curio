@@ -40,7 +40,8 @@ data class CurioPerson(
     val visibility: String = PROFILE_VISIBILITY_PUBLIC,
     /** True when this member publishes no last-active stamp at all. */
     val hideActivity: Boolean = false,
-    /** Their own line, shown on the profile. Blank when they wrote none. */
+    val presenceMode: String = com.curio.app.data.AppPreferences.PRESENCE_ACTIVE,
+    /** Their own line, shown inside direct chats only. */
     val bio: String = "",
     /** Last-active stamp, 0 when unknown — or when activity is hidden. */
     val lastActiveMillis: Long = 0L
@@ -222,8 +223,8 @@ object SocialApi {
      * asks for — and it falls back to the base read when they are missing.
      */
     private const val PERSON_COLUMNS = "id,display_name,username,avatar_style"
-    private const val PERSON_COLUMNS_PRIVACY =
-        "$PERSON_COLUMNS,profile_visibility,hide_activity,last_active_at,bio"
+private const val PERSON_COLUMNS_PRIVACY =
+    "$PERSON_COLUMNS,profile_visibility,hide_activity,presence_mode,last_active_at,bio"
 
     /** How many NEW messages one live tick asks for. */
     private const val LIVE_TICK_LIMIT = 100
@@ -416,7 +417,8 @@ object SocialApi {
     suspend fun updatePrivacy(
         accessToken: String,
         visibility: String,
-        hideActivity: Boolean
+        hideActivity: Boolean,
+        presenceMode: String = if (hideActivity) com.curio.app.data.AppPreferences.PRESENCE_HIDDEN else com.curio.app.data.AppPreferences.PRESENCE_ACTIVE
     ): Result<Unit> = withContext(Dispatchers.IO) {
         mappedUnit {
             val clean = if (visibility == PROFILE_VISIBILITY_FRIENDS) {
@@ -427,8 +429,11 @@ object SocialApi {
             val userId = SupabaseClient.userIdFromAccessToken(accessToken)
             val body = JSONObject()
                 .put("profile_visibility", clean)
-                .put("hide_activity", hideActivity)
-            if (hideActivity) body.put("last_active_at", JSONObject.NULL)
+                .put("hide_activity", presenceMode == com.curio.app.data.AppPreferences.PRESENCE_HIDDEN)
+                .put("presence_mode", presenceMode)
+            if (presenceMode == com.curio.app.data.AppPreferences.PRESENCE_HIDDEN) {
+                body.put("last_active_at", JSONObject.NULL)
+            }
             val request = SupabaseClient.requestBuilder("$PROFILES?id=eq.$userId", accessToken)
                 .patch(body.toString().toRequestBody(jsonMediaType))
                 .header("Prefer", "return=minimal")
@@ -1021,6 +1026,15 @@ object SocialApi {
                     .orEmpty()
                     .ifBlank { PROFILE_VISIBILITY_PUBLIC },
                 hideActivity = row.optBoolean("hide_activity", false),
+                presenceMode = row.optString("presence_mode", "").takeIf {
+                    it == com.curio.app.data.AppPreferences.PRESENCE_ACTIVE ||
+                        it == com.curio.app.data.AppPreferences.PRESENCE_DND ||
+                        it == com.curio.app.data.AppPreferences.PRESENCE_HIDDEN
+                } ?: if (row.optBoolean("hide_activity", false)) {
+                    com.curio.app.data.AppPreferences.PRESENCE_HIDDEN
+                } else {
+                    com.curio.app.data.AppPreferences.PRESENCE_ACTIVE
+                },
                 bio = row.optString("bio", "").takeUnless { it == "null" }.orEmpty(),
                 lastActiveMillis = epochMillis(row.optString("last_active_at"))
             )

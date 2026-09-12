@@ -365,6 +365,10 @@ object AppPreferences {
     // same thing. See `supabase/schema.sql` §5e.
     private const val KEY_PROFILE_VISIBILITY = "social_profile_visibility"
     private const val KEY_HIDE_ACTIVITY = "social_hide_activity"
+    private const val KEY_PRESENCE_MODE = "social_presence_mode"
+    const val PRESENCE_ACTIVE = "active"
+    const val PRESENCE_DND = "dnd"
+    const val PRESENCE_HIDDEN = "hidden"
 
     /**
      * Who may see this account's profile: "public" (any discoverable member)
@@ -388,9 +392,23 @@ object AppPreferences {
     fun isActivityHidden(context: Context): Boolean =
         prefs(context).getBoolean(KEY_HIDE_ACTIVITY, false)
 
+    fun getPresenceMode(context: Context): String = prefs(context)
+        .getString(KEY_PRESENCE_MODE, if (isActivityHidden(context)) PRESENCE_HIDDEN else PRESENCE_ACTIVE)
+        ?.takeIf { it == PRESENCE_ACTIVE || it == PRESENCE_DND || it == PRESENCE_HIDDEN }
+        ?: PRESENCE_ACTIVE
+
+    fun setPresenceMode(context: Context, mode: String) {
+        val clean = mode.takeIf { it == PRESENCE_ACTIVE || it == PRESENCE_DND || it == PRESENCE_HIDDEN } ?: PRESENCE_ACTIVE
+        prefs(context).edit()
+            .putString(KEY_PRESENCE_MODE, clean)
+            .putBoolean(KEY_HIDE_ACTIVITY, clean == PRESENCE_HIDDEN)
+            .apply()
+        presenceModeState = clean
+        hideActivityState = clean == PRESENCE_HIDDEN
+    }
+
     fun setActivityHidden(context: Context, hidden: Boolean) {
-        prefs(context).edit().putBoolean(KEY_HIDE_ACTIVITY, hidden).apply()
-        hideActivityState = hidden
+        setPresenceMode(context, if (hidden) PRESENCE_HIDDEN else PRESENCE_ACTIVE)
     }
 
     // ── Favorite song (v... — Vinyl share card) ───────────────────────
@@ -1262,7 +1280,9 @@ object AppPreferences {
         private set
     /** Mirrors [isActivityHidden] — no last-active stamp is ever published. */
     var hideActivityState by mutableStateOf(false)
-        private set
+    private set
+    var presenceModeState by mutableStateOf(PRESENCE_ACTIVE)
+    private set
 
     /**
      * Whether the Community tab belongs on the bottom nav right now.
@@ -1769,6 +1789,7 @@ object AppPreferences {
         communityTabEnabledState = isCommunityTabEnabled(context)
         profileVisibilityState = getProfileVisibility(context)
         hideActivityState = isActivityHidden(context)
+    presenceModeState = getPresenceMode(context)
     }
 
     // ── Theme mode (v81) ────────────────────────────────────────────
