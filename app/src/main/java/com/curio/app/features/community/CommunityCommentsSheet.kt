@@ -188,7 +188,10 @@ internal fun CommunityCommentsSheet(
                                 accessToken,
                                 card.id,
                                 text,
-                                AppPreferences.getDisplayName(context)
+                                    AppPreferences.getUsername(context).ifBlank {
+                                        AppPreferences.getDisplayName(context)
+                                    }
+
                             ).fold(
                                 onSuccess = {
                                     text = ""
