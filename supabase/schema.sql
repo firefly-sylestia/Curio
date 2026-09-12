@@ -1438,7 +1438,7 @@ do $$
 declare
     t text;
 begin
-    foreach t in array array['dm_messages', 'friend_requests', 'community_cards'] loop
+    foreach t in array array['dm_messages', 'friend_requests', 'community_cards', 'community_comments'] loop
         if not exists (
             select 1 from pg_publication_tables
              where pubname = 'supabase_realtime'
@@ -1448,7 +1448,7 @@ begin
             execute format('alter publication supabase_realtime add table public.%I', t);
         end if;
     end loop;
-    raise notice 'PASS  realtime publication covers dm_messages, friend_requests and community_cards';
+    raise notice 'PASS  realtime publication covers messages, requests, cards and comments';
 exception
     when undefined_object then
         raise notice 'PASS  no supabase_realtime publication here — the app falls back to polling';
