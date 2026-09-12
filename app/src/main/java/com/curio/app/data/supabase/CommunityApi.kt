@@ -19,8 +19,10 @@ data class CommunityCard(
     val id: String,
     val authorHandle: String,
     val topicName: String,
+    val categorySlug: String = "",
     val categoryName: String,
     val categoryGlyph: String,
+    val isTextPost: Boolean = false,
     val accentHex: String,
     val factText: String,
     /** The poster's own line above the card (blank when they wrote none). */
@@ -55,6 +57,7 @@ data class CommunityCard(
  */
 data class CommunityCardDraft(
     val topicName: String,
+    val isTextPost: Boolean = false,
     val categoryName: String,
     val categorySlug: String,
     val categoryGlyph: String,
@@ -103,7 +106,7 @@ object CommunityApi {
      * single-card fetch can never drift apart.
      */
     private const val CARD_COLUMNS =
-        "id,owner,author_handle,topic_name,category_name,category_glyph,accent_hex," +
+        "id,owner,author_handle,topic_name,category_slug,category_name,category_glyph,accent_hex," +
             "fact_text,caption,style,aspect,body_scale,byline,created_at,expires_at," +
             "community_reactions(user_id),community_comments(id)"
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
@@ -126,8 +129,8 @@ object CommunityApi {
      * carry it, which is the whole point of the draft shape.
      */
     fun draftProblem(draft: CommunityCardDraft): String? = when {
-        draft.topicName.isBlank() -> "What is your card about?"
-        draft.factText.isBlank() -> "Add the words you want on the card."
+        draft.factText.isBlank() -> if (draft.isTextPost) "Write something to share." else "Add the words you want on the card."
+        !draft.isTextPost && draft.topicName.isBlank() -> "What is your card about?"
         draft.factText.length > MAX_FACT_CHARS ->
             "Keep the card under $MAX_FACT_CHARS characters (it's ${draft.factText.length})."
         draft.caption.length > MAX_CAPTION_CHARS ->
@@ -242,8 +245,8 @@ object CommunityApi {
             draftProblem(draft)?.let { throw IllegalArgumentException(it) }
             val payload = JSONObject()
                 .put("author_handle", handle.trim().ifBlank { "A curious soul" })
-                .put("topic_name", draft.topicName.trim())
-                .put("category_slug", draft.categorySlug)
+                .put("topic_name", draft.topicName.trim().ifBlank { "Text post" })
+                .put("category_slug", if (draft.isTextPost) "text" else draft.categorySlug)
                 .put("category_name", draft.categoryName)
                 .put("category_glyph", draft.categoryGlyph)
                 .put("accent_hex", draft.accentHex)
@@ -346,8 +349,10 @@ object CommunityApi {
                 id = row.optString("id"),
                 authorHandle = row.optString("author_handle").ifBlank { "A curious soul" },
                 topicName = row.optString("topic_name"),
+                categorySlug = row.optString("category_slug"),
                 categoryName = row.optString("category_name"),
                 categoryGlyph = row.optString("category_glyph"),
+                isTextPost = row.optString("category_slug") == "text",
                 accentHex = row.optString("accent_hex"),
                 factText = row.optString("fact_text"),
                 caption = row.optString("caption"),

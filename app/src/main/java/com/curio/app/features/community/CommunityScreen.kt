@@ -500,12 +500,41 @@ private fun CommunityCardItem(
                 modifier = Modifier.padding(bottom = 6.dp)
             )
         }
-        CommunityCardCanvas(
-            card = card,
-            modifier = Modifier
-                .clipToBounds()
-                .clickable(onClick = onOpen)
-        )
+        if (card.isTextPost) {
+            Surface(
+                onClick = onOpen,
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                tonalElevation = 1.dp,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(
+                    modifier = Modifier.padding(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    if (card.caption.isNotBlank()) {
+                        Text(
+                            text = card.caption,
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    Text(
+                        text = card.factText,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        lineHeight = 25.sp
+                    )
+                }
+            }
+        } else {
+            CommunityCardCanvas(
+                card = card,
+                modifier = Modifier
+                    .clipToBounds()
+                    .clickable(onClick = onOpen)
+            )
+        }
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -575,6 +604,7 @@ private fun CommunityComposerSheet(
     onPost: (CommunityCardDraft) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var isTextPost by remember { mutableStateOf(true) }
     var topic by remember { mutableStateOf("") }
     var caption by remember { mutableStateOf("") }
     var fact by remember { mutableStateOf("") }
@@ -593,6 +623,7 @@ private fun CommunityComposerSheet(
     }
     val draft = CommunityCardDraft(
         topicName = topic,
+        isTextPost = isTextPost,
         categoryName = lane.displayName,
         categorySlug = lane.id.name.lowercase(),
         categoryGlyph = lane.iconGlyph,
@@ -617,39 +648,70 @@ private fun CommunityComposerSheet(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = "Share a card",
+                text = "Create a post",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
             )
             Text(
-                text = "Text only — it disappears after 24 hours.",
+                text = "Share a thought or turn it into a Curio card. Posts disappear after 24 hours.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            OutlinedTextField(
-                value = topic,
-                onValueChange = { topic = it },
-                singleLine = true,
-                label = { Text("What is it about?") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            OutlinedTextField(
-                value = caption,
-                onValueChange = {
-                    if (it.length <= CommunityApi.MAX_CAPTION_CHARS) caption = it
-                },
-                singleLine = true,
-                label = { Text("Your line above the card (optional)") },
-                supportingText = { Text("${caption.length}/${CommunityApi.MAX_CAPTION_CHARS}") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            OutlinedTextField(
-                value = fact,
-                onValueChange = { if (it.length <= CommunityApi.MAX_FACT_CHARS) fact = it },
-                minLines = 3,
-                label = { Text("Your card") },
-                supportingText = { Text("${fact.length}/${CommunityApi.MAX_FACT_CHARS}") },
-                modifier = Modifier.fillMaxWidth()
-            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(
+                    selected = isTextPost,
+                    onClick = { isTextPost = true },
+                    label = { Text("Post") },
+                    leadingIcon = {
+                        CurioIcon(CurioIcons.Edit, contentDescription = null, size = 16.dp)
+                    }
+                )
+                FilterChip(
+                    selected = !isTextPost,
+                    onClick = { isTextPost = false },
+                    label = { Text("Card") },
+                    leadingIcon = {
+                        CurioIcon(CurioIcons.Layers, contentDescription = null, size = 16.dp)
+                    }
+                )
+            }
+            if (isTextPost) {
+                OutlinedTextField(
+                    value = fact,
+                    onValueChange = { if (it.length <= CommunityApi.MAX_FACT_CHARS) fact = it },
+                    minLines = 5,
+                    label = { Text("What's on your mind?") },
+                    supportingText = { Text("${fact.length}/${CommunityApi.MAX_FACT_CHARS}") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            } else {
+                if (!isTextPost) {
+                    OutlinedTextField(
+                        value = topic,
+                        onValueChange = { topic = it },
+                        singleLine = true,
+                        label = { Text("What is it about?") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = caption,
+                        onValueChange = {
+                            if (it.length <= CommunityApi.MAX_CAPTION_CHARS) caption = it
+                        },
+                        singleLine = true,
+                        label = { Text("Your line above the card (optional)") },
+                        supportingText = { Text("${caption.length}/${CommunityApi.MAX_CAPTION_CHARS}") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = fact,
+                        onValueChange = { if (it.length <= CommunityApi.MAX_FACT_CHARS) fact = it },
+                        minLines = 3,
+                        label = { Text("Your card") },
+                        supportingText = { Text("${fact.length}/${CommunityApi.MAX_FACT_CHARS}") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
             Text(
                 text = "LANE",
                 style = MaterialTheme.typography.labelSmall.copy(
