@@ -63,9 +63,9 @@ data class CurioDirectMessage(
 )
 
 /**
- * One reaction somebody left on one message. [kind] is a glyph NAME from
- * Curio's own icon set — the caller decides how it renders and whether the
- * reacting [userId] is the reader.
+ * One reaction somebody left on one message. [kind] is the reaction itself —
+ * an emoji character — so the server stores a few bytes and the caller only
+ * decides whether the reacting [userId] is the reader.
  */
 data class CurioDmReaction(
     val messageId: String,
@@ -141,6 +141,12 @@ object SocialApi {
 
     /** How many messages one thread load asks for. */
     private const val THREAD_LIMIT = 200
+
+    /** The columns a conversation read needs — one list, both paths. */
+    private const val MESSAGE_COLUMNS = "id,sender,recipient,body,created_at,read_at"
+
+    /** How many NEW messages one live tick asks for. */
+    private const val LIVE_TICK_LIMIT = 100
 
     /** How many recent messages the inbox groups into conversations. */
     private const val INBOX_SCAN = 200
@@ -393,28 +399,62 @@ object SocialApi {
         myUserId: String
     ): Result<List<CurioDirectMessage>> = withContext(Dispatchers.IO) {
         mapped {
-            val path = "$MESSAGES?select=id,sender,recipient,body,created_at,read_at" +
+            val path = "$MESSAGES?select=$MESSAGE_COLUMNS" +
                 "&or=(and(sender.eq.${id(myUserId)},recipient.eq.${id(otherUserId)})," +
                 "and(sender.eq.${id(otherUserId)},recipient.eq.${id(myUserId)}))" +
                 "&order=created_at.asc&limit=$THREAD_LIMIT"
             val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
-            val rows = JSONArray(SupabaseClient.executeBody(request))
-            buildList(rows.length()) {
-                for (index in 0 until rows.length()) {
-                    val row = rows.optJSONObject(index) ?: continue
-                    add(
-                        CurioDirectMessage(
-                            id = row.optString("id"),
-                            senderId = row.optString("sender"),
-                            body = row.optString("body"),
-                            createdAtMillis = epochMillis(row.optString("created_at")),
-                            readAtMillis = row.optString("read_at")
-                                .takeIf { it.isNotBlank() }
-                                ?.let(::epochMillis),
-                            mine = row.optString("sender") == myUserId
-                        )
+            parseMessages(SupabaseClient.executeBody(request), myUserId)
+        }
+    }
+
+    /**
+     * ONLY what arrived after [sinceMillis] — what an open conversation polls.
+     *
+     * A live thread must not re-read its whole page every few seconds: this
+     * asks the server for the rows newer than the newest one on screen, so a
+     * tick costs a few hundred bytes and can run several times a minute. The
+     * requested window backs off by a second to absorb clock skew between the
+     * phone and the server, and the caller de-dupes by id (re-reading one
+     * message is free; missing one is not).
+     */
+    suspend fun messagesSince(
+        accessToken: String,
+        otherUserId: String,
+        myUserId: String,
+        sinceMillis: Long
+    ): Result<List<CurioDirectMessage>> = withContext(Dispatchers.IO) {
+        mapped {
+            val stamp = Instant
+                .ofEpochMilli((sinceMillis - 1_000L).coerceAtLeast(0L))
+                .toString()
+            val path = "$MESSAGES?select=$MESSAGE_COLUMNS" +
+                "&or=(and(sender.eq.${id(myUserId)},recipient.eq.${id(otherUserId)})," +
+                "and(sender.eq.${id(otherUserId)},recipient.eq.${id(myUserId)}))" +
+                "&created_at=gt.$stamp&order=created_at.asc&limit=$LIVE_TICK_LIMIT"
+            val request = SupabaseClient.requestBuilder(path, accessToken).get().build()
+            parseMessages(SupabaseClient.executeBody(request), myUserId)
+        }
+    }
+
+    /** One PostgREST page of `dm_messages` rows, oldest first. */
+    private fun parseMessages(body: String, myUserId: String): List<CurioDirectMessage> {
+        val rows = JSONArray(body)
+        return buildList(rows.length()) {
+            for (index in 0 until rows.length()) {
+                val row = rows.optJSONObject(index) ?: continue
+                add(
+                    CurioDirectMessage(
+                        id = row.optString("id"),
+                        senderId = row.optString("sender"),
+                        body = row.optString("body"),
+                        createdAtMillis = epochMillis(row.optString("created_at")),
+                        readAtMillis = row.optString("read_at")
+                            .takeIf { it.isNotBlank() }
+                            ?.let(::epochMillis),
+                        mine = row.optString("sender") == myUserId
                     )
-                }
+                )
             }
         }
     }
@@ -553,8 +593,9 @@ object SocialApi {
     /**
      * Every reaction on the given messages, keyed by message id.
      *
-     * The glyph is stored as a NAME from Curio's own icon set, so a reaction
-     * row is a few bytes on the server and nothing is ever uploaded.
+     * `kind` holds the emoji itself, so a reaction row is a few bytes on the
+     * server, nothing is ever uploaded, and the renderer needs no mapping
+     * table to stay in step with this file.
      */
     suspend fun reactions(
         accessToken: String,

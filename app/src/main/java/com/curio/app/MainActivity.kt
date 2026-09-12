@@ -24,7 +24,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.curio.app.infrastructure.CurioCrashReporter
 import com.curio.app.infrastructure.ExploreSessionService
+import com.curio.app.features.community.SocialNotificationWatcher
 import com.curio.app.navigation.CurioNavHost
+import com.curio.app.navigation.PendingCommunityOpen
+import com.curio.app.navigation.PendingDirectMessageOpen
 import com.curio.app.navigation.PendingEntryOpen
 import com.curio.app.navigation.PendingSpinOpen
 import com.curio.app.ui.theme.CurioTheme
@@ -88,6 +91,8 @@ class MainActivity : ComponentActivity() {
         if (savedInstanceState == null) {
             PendingEntryOpen.capture(intent)
             PendingSpinOpen.capture(intent)
+            PendingDirectMessageOpen.capture(intent)
+            PendingCommunityOpen.capture(intent)
         }
 
         // Wire the asset manager into the topic loader before any Compose
@@ -217,6 +222,11 @@ class MainActivity : ComponentActivity() {
                 CurioThemeTransitionHost {
                     CurioNavHost()
                 }
+                // v3xx54 — social arrivals while the app is alive (a friend's
+                // message, a new community post). It no-ops unless the user is
+                // signed in, Online Mode is on, and the Notifications switch
+                // is on, so an offline user never pays for it.
+                SocialNotificationWatcher()
             }
         }
     }
@@ -278,5 +288,7 @@ class MainActivity : ComponentActivity() {
         // notification targets arrive here instead of onCreate.
         PendingEntryOpen.capture(intent)
         PendingSpinOpen.capture(intent)
+        PendingDirectMessageOpen.capture(intent)
+        PendingCommunityOpen.capture(intent)
     }
 }

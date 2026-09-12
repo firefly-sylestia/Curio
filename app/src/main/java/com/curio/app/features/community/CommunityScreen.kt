@@ -70,17 +70,20 @@ import com.curio.app.data.TopicJsonLoader
 import com.curio.app.data.supabase.CommunityApi
 import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CommunityCardDraft
+import com.curio.app.data.supabase.CurioPerson
+import com.curio.app.data.supabase.KIND_CARD
+import com.curio.app.data.supabase.KIND_NOTE
+import com.curio.app.data.supabase.KIND_QUOTE
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
-import com.curio.app.features.settings.SettingsNavRail
 import com.curio.app.features.settings.SettingsOptionCard
 import com.curio.app.features.settings.SettingsOptionInfoRow
 import com.curio.app.features.settings.SettingsOptionRow
 import com.curio.app.features.settings.SettingsSectionHeading
 import com.curio.app.features.settings.heroPageBackground
-import com.curio.app.features.settings.navigateToSettingsSection
 import com.curio.app.features.settings.settingsRoseAccent
+import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
 import com.curio.app.ui.adaptive.wideContentEdgePadding
@@ -133,6 +136,9 @@ fun CommunityScreen(navController: NavController) {
     var cards by remember { mutableStateOf<List<CommunityCard>>(emptyList()) }
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    // True while the WALL on screen is the device's own copy (the first
+    // request failed), so the page can say so instead of pretending.
+    var offlineCopy by remember { mutableStateOf(false) }
     var composing by remember { mutableStateOf(false) }
     var reporting by remember { mutableStateOf<CommunityCard?>(null) }
     var commentsFor by remember { mutableStateOf<CommunityCard?>(null) }
@@ -149,14 +155,43 @@ fun CommunityScreen(navController: NavController) {
             onSuccess = {
                 cards = it
                 error = null
+                offlineCopy = false
+                // The page the device just saw is kept, so the next open (in a
+                // lift, in a tunnel, in airplane mode) still shows a wall.
+                SocialFeedCache.write(context, it)
+                // Every author on the wall is remembered too, so a profile or
+                // a conversation opened from a card names them at once.
+                SocialPeopleCache.remember(
+                    context,
+                    it.map { card ->
+                        CurioPerson(
+                            userId = card.authorId,
+                            displayName = card.authorName,
+                            username = card.authorName.ifBlank { card.authorHandle },
+                            avatarStyle = card.authorAvatar
+                        )
+                    }
+                )
             },
-            onFailure = { error = it.message }
+            onFailure = { failure ->
+                // The device's own copy is already on screen: say nothing at
+                // all unless there was nothing to fall back on.
+                if (cards.isEmpty()) error = failure.message else offlineCopy = true
+            }
         )
         loading = false
     }
 
     LaunchedEffect(eligible, token) {
-        if (eligible) load() else cards = emptyList()
+        if (eligible) {
+            // The device's copy FIRST — an offline open is a wall, not a blank
+            // screen — then the server's answer replaces it in place.
+            val cached = SocialFeedCache.read(context)
+            if (cards.isEmpty()) cards = cached
+            load()
+        } else {
+            cards = emptyList()
+        }
     }
 
     Box(
@@ -249,6 +284,16 @@ fun CommunityScreen(navController: NavController) {
                 }
             } else {
                 item { SettingsSectionHeading("Last 24 hours") }
+                if (offlineCopy) {
+                    // Honest, quiet, and only when it is true: the wall below is
+                    // the device's own copy because the request failed.
+                    item(key = "offline-copy") {
+                        SocialNote(
+                            "Offline — showing the wall as you last saw it.",
+                            false
+                        )
+                    }
+                }
                 item {
                     // The wall's actions. Posting lives on the floating button
                     // at the bottom (one clear door), so this row only carries
@@ -620,13 +665,19 @@ private fun CommunityCardItem(
                 )
             }
 
-            CommunityCardCanvas(
-                card = card,
-                modifier = Modifier
-                    .clipToBounds()
-                    .clickable(onClick = onOpen),
-                widthFraction = FEED_CARD_WIDTH
-            )
+            if (card.kind == KIND_CARD) {
+                CommunityCardCanvas(
+                    card = card,
+                    modifier = Modifier
+                        .clipToBounds()
+                        .clickable(onClick = onOpen),
+                    widthFraction = FEED_CARD_WIDTH
+                )
+            } else {
+                // A NOTE or a QUOTE has no topic and no card art: the words ARE
+                // the post, so they get the room the art would have taken.
+                SocialTextPost(card = card, onClick = onOpen)
+            }
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -655,9 +706,22 @@ private fun CommunityCardItem(
     }
 }
 
-/** How much of the wall's width one card claims (centred). */
-private const val FEED_CARD_WIDTH = 0.74f
+/**
+ * How much of the wall's width one card claims.
+ *
+ * FULL width: the card IS the post, and a share card shrunk to three quarters
+ * of the page made every post read like a thumbnail. The list's own edge
+ * padding is the only gutter a card needs.
+ */
+private const val FEED_CARD_WIDTH = 1f
 
+/**
+ * One action on a card, as a PILL: an icon and its count on one rounded
+ * surface, accent-filled while it is the state you are in (a like you left),
+ * quiet when it is a door (reply, share, report). TextButton's bare label was
+ * the "bad" action row — a pill reads as one touchable thing, and the press
+ * squish is the feedback that says the tap landed.
+ */
 @Composable
 internal fun CommunityAction(
     glyph: String,
@@ -665,34 +729,55 @@ internal fun CommunityAction(
     tinted: Boolean,
     onClick: () -> Unit
 ) {
-    TextButton(onClick = onClick) {
-        CurioIcon(
-            name = glyph,
-            contentDescription = null,
-            tint = if (tinted) curioDialogActionColor() else MaterialTheme.colorScheme.onSurfaceVariant,
-            size = 16.dp
+    val ink = if (tinted) curioDialogActionColor() else MaterialTheme.colorScheme.onSurfaceVariant
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = if (tinted) {
+            curioDialogActionColor().copy(alpha = 0.16f)
+        } else {
+            MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.7f)
+        },
+        modifier = Modifier.curioPressClickable(
+            pressedScale = 0.94f,
+            hapticOnPress = false,
+            onClickLabel = label,
+            onClick = onClick
         )
-        Spacer(Modifier.width(6.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = if (tinted) curioDialogActionColor() else MaterialTheme.colorScheme.onSurfaceVariant
-        )
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp)
+        ) {
+            CurioIcon(
+                name = glyph,
+                contentDescription = null,
+                tint = ink,
+                size = 15.dp
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = if (tinted) FontWeight.Bold else FontWeight.Medium
+                ),
+                color = ink
+            )
+        }
     }
 }
 
 /**
- * The composer: pick a TOPIC, write the words, choose a card style.
+ * The composer: pick WHAT KIND of post this is, then write it.
  *
- * The topic is chosen from the app's own catalog rather than typed, which is
- * the whole point of the flow — a card IS a topic being passed on, so its
- * name, lane, glyph and accent come from the catalog entry and can never
- * disagree with the card that renders. Searching covers every lane through
- * the loader's lightweight index (the same one the Topic Database searches),
- * with the warm lane pools as the fallback on a cold install.
+ * Three kinds, one sheet. A **Card** is a topic being passed on — the topic is
+ * chosen from the app's own catalog rather than typed, and its own quick fact
+ * seeds the words, so a card can never disagree with the topic it is about. A
+ * **Note** is a tweet-style text post: words, no topic, no art. A **Quote** is
+ * a line someone else said, credited on the card.
  *
- * Lane chips are gone with the free-text field: a topic already knows its
- * lane, so there is nothing left to get wrong.
+ * Searching covers every lane through the loader's lightweight index (the same
+ * one the Topic Database searches), with the warm lane pools as the fallback on
+ * a cold install.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -701,10 +786,16 @@ private fun CommunityComposerSheet(
     onPost: (CommunityCardDraft) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // CARD / NOTE / QUOTE — what is being posted. Card is the default because
+    // it is what the wall is known for; the other two exist so a thought that
+    // is NOT about a topic never has to borrow one.
+    var kind by remember { mutableStateOf(KIND_CARD) }
     var picked by remember { mutableStateOf<CurioTopic?>(null) }
     var query by remember { mutableStateOf("") }
     var caption by remember { mutableStateOf("") }
     var fact by remember { mutableStateOf("") }
+    // Who said it — the QUOTE's credit, stored in the card's byline.
+    var credit by remember { mutableStateOf("") }
     var style by remember { mutableStateOf(ShareCardStyle.PAPER) }
     // The whole-catalog index, loaded once. It is the prebuilt lightweight
     // index (name/byline keys only), so searching never parses a lane.
@@ -741,14 +832,19 @@ private fun CommunityComposerSheet(
             ShareCardStyle.SIGNATURE
         )
     }
+    val topicCard = kind == KIND_CARD
     val draft = CommunityCardDraft(
-        topicName = picked?.name.orEmpty(),
-        categoryName = lane?.displayName.orEmpty(),
-        categorySlug = lane?.id?.name?.lowercase().orEmpty(),
-        categoryGlyph = lane?.iconGlyph.orEmpty(),
-        accentHex = lane?.let { hexOf(it.accent) }.orEmpty(),
+        kind = kind,
+        // A note and a quote have NO topic by design — the card renderer is
+        // not involved at all for them, so there is nothing to disagree with.
+        topicName = if (topicCard) picked?.name.orEmpty() else "",
+        categoryName = if (topicCard) lane?.displayName.orEmpty() else "",
+        categorySlug = if (topicCard) lane?.id?.name?.lowercase().orEmpty() else "",
+        categoryGlyph = if (topicCard) lane?.iconGlyph.orEmpty() else "",
+        accentHex = if (topicCard) lane?.let { hexOf(it.accent) }.orEmpty() else "",
         factText = fact,
-        caption = caption
+        caption = caption,
+        byline = if (kind == KIND_QUOTE) credit.trim() else ""
     )
     val problem = CommunityApi.draftProblem(draft)
 
@@ -767,17 +863,47 @@ private fun CommunityComposerSheet(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = "Share a topic",
+                text = when (kind) {
+                    KIND_NOTE -> "Write a note"
+                    KIND_QUOTE -> "Share a quote"
+                    else -> "Share a topic"
+                },
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold)
             )
             Text(
-                text = "Pick a topic and write the words that go on its card. It shows on the wall for 24 hours, " +
-                    "and only this text is ever posted.",
+                text = "It shows on the wall for 24 hours. Only this text is ever posted — never a" +
+                    " photo, a video or a recording.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            // WHAT KIND — the chips decide whether a topic picker, a credit
+            // line or card art is part of this post at all.
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.horizontalScroll(rememberScrollState())
+            ) {
+                listOf(
+                    KIND_CARD to "Topic card",
+                    KIND_NOTE to "Note",
+                    KIND_QUOTE to "Quote"
+                ).forEach { (value, label) ->
+                    FilterChip(
+                        selected = kind == value,
+                        onClick = {
+                            kind = value
+                            // Switching away from a topic card drops the
+                            // topic: a note and a quote carry no topic, and a
+                            // stale one must not leak into them.
+                            if (value != KIND_CARD) picked = null
+                        },
+                        label = {
+                            Text(label, style = MaterialTheme.typography.labelSmall)
+                        }
+                    )
+                }
+            }
 
-            if (picked == null) {
+            if (topicCard && picked == null) {
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
@@ -809,12 +935,18 @@ private fun CommunityComposerSheet(
                                 onClick = {
                                     picked = topic
                                     query = ""
+                                    // The topic's OWN quick fact seeds the
+                                    // card — a card is that topic being passed
+                                    // on, so it starts from the fact the app
+                                    // already wrote for it, and stays fully
+                                    // editable.
+                                    if (fact.isBlank()) fact = quickFactOf(topic)
                                 }
                             )
                         }
                     }
                 }
-            } else {
+            } else if (topicCard) {
                 // The chosen topic, wearing its lane — tap to pick again.
                 Surface(
                     onClick = { picked = null },
@@ -868,7 +1000,7 @@ private fun CommunityComposerSheet(
                     if (it.length <= CommunityApi.MAX_CAPTION_CHARS) caption = it
                 },
                 singleLine = true,
-                label = { Text("A caption above the card (optional)") },
+                label = { Text("A caption above it (optional)") },
                 supportingText = { Text("${caption.length}/${CommunityApi.MAX_CAPTION_CHARS}") },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -876,30 +1008,49 @@ private fun CommunityComposerSheet(
                 value = fact,
                 onValueChange = { if (it.length <= CommunityApi.MAX_FACT_CHARS) fact = it },
                 minLines = 3,
-                label = { Text("The words on the card") },
+                label = {
+                    Text(
+                        when (kind) {
+                            KIND_NOTE -> "Your note"
+                            KIND_QUOTE -> "The quote"
+                            else -> "The words on the card"
+                        }
+                    )
+                },
                 supportingText = { Text("${fact.length}/${CommunityApi.MAX_FACT_CHARS}") },
                 modifier = Modifier.fillMaxWidth()
             )
-            Text(
-                text = "STYLE",
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 1.2.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.horizontalScroll(rememberScrollState())
-            ) {
-                styles.forEach { option ->
-                    FilterChip(
-                        selected = option == style,
-                        onClick = { style = option },
-                        label = {
-                            Text(option.label, style = MaterialTheme.typography.labelSmall)
-                        }
-                    )
+            if (kind == KIND_QUOTE) {
+                OutlinedTextField(
+                    value = credit,
+                    onValueChange = { if (it.length <= 80) credit = it },
+                    singleLine = true,
+                    label = { Text("Who said it") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            if (topicCard) {
+                Text(
+                    text = "STYLE",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.2.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.horizontalScroll(rememberScrollState())
+                ) {
+                    styles.forEach { option ->
+                        FilterChip(
+                            selected = option == style,
+                            onClick = { style = option },
+                            label = {
+                                Text(option.label, style = MaterialTheme.typography.labelSmall)
+                            }
+                        )
+                    }
                 }
             }
             Row(
@@ -910,7 +1061,16 @@ private fun CommunityComposerSheet(
                 TextButton(onClick = onDismiss) { Text("Cancel") }
                 Spacer(Modifier.width(8.dp))
                 Button(
-                    onClick = { onPost(draft.copy(style = style.name)) },
+                    onClick = {
+                        // For a note or a quote the card style is irrelevant —
+                        // the renderer is not involved — so it is only carried
+                        // on a topic card.
+                        onPost(
+                            draft.copy(
+                                style = if (topicCard) style.name else ShareCardStyle.PAPER.name
+                            )
+                        )
+                    },
                     enabled = problem == null,
                     shape = RoundedCornerShape(50),
                     colors = curioDialogActionButtonColors()
@@ -927,6 +1087,22 @@ private fun CommunityComposerSheet(
             }
         }
     }
+}
+
+/**
+ * The topic's own quick fact, trimmed to what a card can hold.
+ *
+ * This is what makes "sharing a topic" mean something: the words start from
+ * the fact the app already has for that topic (its teaser), and the writer
+ * edits it. A teaser longer than the card's budget is cut at the last full
+ * sentence that fits, never mid-word.
+ */
+private fun quickFactOf(topic: CurioTopic): String {
+    val teaser = topic.teaser.trim()
+    if (teaser.length <= CommunityApi.MAX_FACT_CHARS) return teaser
+    val slice = teaser.take(CommunityApi.MAX_FACT_CHARS)
+    val stop = slice.lastIndexOf(". ")
+    return if (stop > 60) slice.take(stop + 1) else slice.trimEnd()
 }
 
 /**

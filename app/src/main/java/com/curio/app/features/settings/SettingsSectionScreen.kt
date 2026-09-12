@@ -420,6 +420,10 @@ private fun PreferencesSection(highlightKey: String? = null) {
     var reminderMinute by remember { mutableStateOf(AppPreferences.getReminderMinute(context)) }
     var showReminderTimePicker by remember { mutableStateOf(false) }
     var showBubbleOptInDialogEnabled by remember { mutableStateOf(AppPreferences.showBubbleOptInDialogState) }
+    // v3xx54 — messages + community notifications (default ON).
+    var socialNotificationsEnabled by remember {
+        mutableStateOf(AppPreferences.socialNotificationsState)
+    }
     // v19 — the explore search-engine picker (which engine the "Explore in
     // browser" button opens).
     var showSearchEngineDialog by remember { mutableStateOf(false) }
@@ -438,6 +442,7 @@ private fun PreferencesSection(highlightKey: String? = null) {
                 reminderHour = AppPreferences.getReminderHour(context)
                 reminderMinute = AppPreferences.getReminderMinute(context)
                 showBubbleOptInDialogEnabled = AppPreferences.isShowBubbleOptInDialog(context)
+                socialNotificationsEnabled = AppPreferences.socialNotificationsState
                 // v8.1 — returning from the system overlay-settings page: a
                 // grant re-enables the bubble and clears the declined flag;
                 // coming back without granting records the "no" so automatic
@@ -657,6 +662,21 @@ private fun PreferencesSection(highlightKey: String? = null) {
             ) {
                 showBubbleOptInDialogEnabled = it
                 AppPreferences.setShowBubbleOptInDialog(context, it)
+            }
+        }
+        SettingsOptionDivider()
+        // v3xx54 — one switch for the whole social layer: a friend's message
+        // and a new community post. With it off nothing else changes — sync,
+        // unread badges and the wall stay exactly as they are.
+        SettingsRowPulse(highlightKey == "pref-social-notify") {
+            CompactSwitchRow(
+                CurioIcons.Hub,
+                "Messages and community",
+                "Notify when a friend messages you or someone posts",
+                socialNotificationsEnabled
+            ) {
+                socialNotificationsEnabled = it
+                AppPreferences.setSocialNotifications(context, it)
             }
         }
     }

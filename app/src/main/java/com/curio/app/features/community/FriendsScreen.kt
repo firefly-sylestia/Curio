@@ -49,6 +49,7 @@ import com.curio.app.ui.components.CurioWatermarkBackdrop
 import com.curio.app.ui.theme.CurioIcons
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -121,6 +122,15 @@ fun FriendsScreen(navController: NavController) {
             onSuccess = { threads = it },
             onFailure = { error = it.message }
         )
+        // Every identity this screen just resolved is REMEMBERED, so opening a
+        // conversation from here can draw the real name and portrait on the
+        // first frame instead of waiting for the network to answer again.
+        SocialPeopleCache.remember(
+            context,
+            friends.map { it.person } +
+                requests.map { it.person } +
+                threads.map { it.person }
+        )
         loading = false
     }
 
@@ -131,6 +141,21 @@ fun FriendsScreen(navController: NavController) {
             friends = emptyList()
             requests = emptyList()
             threads = emptyList()
+        }
+    }
+
+    // THE INBOX KEEPS UP WHILE YOU WATCH — the list used to be a snapshot from
+    // the moment it composed, so a message (or a request) that arrived while
+    // it was open only appeared after leaving the screen and coming back.
+    // This asks for the same three lists on a slow tick and swaps them in
+    // WITHOUT touching the loading state: no spinner, no flicker, just a new
+    // line and a fresh unread badge where there is one.
+    LaunchedEffect(eligible, token, myUserId) {
+        if (!eligible || token == null || myUserId == null) return@LaunchedEffect
+        while (true) {
+            delay(INBOX_TICK_MS)
+            SocialApi.threads(token, myUserId).onSuccess { if (it != threads) threads = it }
+            SocialApi.requests(token, myUserId).onSuccess { if (it != requests) requests = it }
         }
     }
 
@@ -488,3 +513,10 @@ fun FriendsScreen(navController: NavController) {
         }
     }
 }
+
+/**
+ * How often an OPEN inbox asks whether anything moved. Slower than a thread's
+ * tick on purpose: the list is a directory, not a conversation, and a reply
+ * the user is waiting on lives in the thread they will open anyway.
+ */
+private const val INBOX_TICK_MS = 12_000L

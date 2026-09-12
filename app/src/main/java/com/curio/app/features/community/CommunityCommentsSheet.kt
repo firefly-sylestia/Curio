@@ -1,6 +1,7 @@
 package com.curio.app.features.community
 
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -83,6 +84,10 @@ internal fun CommunityCommentsSheet(
     var loading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var text by remember { mutableStateOf("") }
+    // BRANCHED REPLIES: the reply this one answers. Null = a top-level reply;
+    // the chip above the composer names the person, so a branch is never
+    // posted at the wrong place by accident.
+    var replyTo by remember { mutableStateOf<CommunityComment?>(null) }
 
     suspend fun load() {
         loading = true
@@ -153,10 +158,17 @@ internal fun CommunityCommentsSheet(
                         )
                     }
                 }
-                items(replies, key = { it.id }) { reply ->
+                // The thread is FLATTENED into branch order (each top-level
+                // reply followed by the replies that answer it), so a branch
+                // reads under the line it belongs to instead of at the bottom
+                // of the sheet where it would mean nothing.
+                val branch = remember(replies) { branchOrder(replies) }
+                items(branch, key = { it.first.id }) { (reply, depth) ->
                     CommunityReplyRow(
                         reply = reply,
+                        depth = depth,
                         onAuthor = { if (reply.authorId.isNotBlank()) onOpenProfile(reply.authorId) },
+                        onReply = { replyTo = if (replyTo?.id == reply.id) null else reply },
                         onAddFriend = {
                             if (myUserId != null) {
                                 scope.launch {
@@ -192,31 +204,68 @@ internal fun CommunityCommentsSheet(
                 )
             }
 
+            // Who this reply answers — the one line that makes a branch
+            // explicit, and the only way to leave it again.
+            replyTo?.let { target ->
+                Surface(
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(start = 12.dp, end = 6.dp, top = 6.dp, bottom = 6.dp)
+                    ) {
+                        Text(
+                            text = "Replying to @${target.authorLabel}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        CurioIcon(
+                            name = CurioIcons.Close,
+                            contentDescription = "Stop replying to @${target.authorLabel}",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            size = 14.dp,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .clickable { replyTo = null }
+                        )
+                    }
+                }
+            }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 OutlinedTextField(
                     value = text,
                     onValueChange = {
                         if (it.length <= CommunityApi.MAX_COMMENT_CHARS) text = it
                     },
-                    label = { Text("Add a reply") },
+                    label = {
+                        Text(
+                            if (replyTo == null) "Add a reply"
+                            else "Reply to @${replyTo?.authorLabel}"
+                        )
+                    },
                     maxLines = 3,
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(Modifier.width(8.dp))
                 Button(
                     onClick = {
+                        val parent = replyTo
+                        val handle = AppPreferences.getUsername(context).ifBlank {
+                            AppPreferences.getDisplayName(context)
+                        }
                         scope.launch {
                             CommunityApi.comment(
                                 accessToken,
                                 card.id,
                                 text,
-                                    AppPreferences.getUsername(context).ifBlank {
-                                        AppPreferences.getDisplayName(context)
-                                    }
-
+                                handle,
+                                parentId = parent?.id
                             ).fold(
                                 onSuccess = {
                                     text = ""
+                                    replyTo = null
                                     load()
                                     onChanged()
                                 },
@@ -249,14 +298,26 @@ internal fun CommunityCommentsSheet(
 @Composable
 internal fun CommunityReplyRow(
     reply: CommunityComment,
+    /** 0 = a reply to the card, 1 = a reply inside a branch. */
+    depth: Int,
     onAuthor: () -> Unit,
+    /** Arms the composer to answer THIS reply — the branch's own door. */
+    onReply: () -> Unit,
     onAddFriend: () -> Unit,
     onDelete: () -> Unit
 ) {
     Surface(
         shape = RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        modifier = Modifier.fillMaxWidth()
+        color = if (depth == 0) {
+            MaterialTheme.colorScheme.surfaceContainerLow
+        } else {
+            // A branch is quieter than its parent: the wall's own surface
+            // container, one step back — the reply reads as an answer.
+            MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f)
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = (depth * 18).dp)
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -296,12 +357,22 @@ internal fun CommunityReplyRow(
                             label = "Remove",
                             onClick = onDelete
                         )
-                    } else if (reply.authorId.isNotBlank()) {
-                        ReplyPill(
-                            glyph = CurioIcons.Person,
-                            label = "Add",
-                            onClick = onAddFriend
-                        )
+                    } else {
+                        // Reply arms the composer for this line (branches), and
+                        // Add friend stays available beside it.
+                        if (reply.authorId.isNotBlank()) {
+                            ReplyPill(
+                                glyph = CurioIcons.FormatQuote,
+                                label = "Reply",
+                                onClick = onReply
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            ReplyPill(
+                                glyph = CurioIcons.Person,
+                                label = "Add",
+                                onClick = onAddFriend
+                            )
+                        }
                     }
                 }
                 Text(
@@ -340,6 +411,24 @@ private fun ReplyPill(glyph: String, label: String, onClick: () -> Unit) {
             )
         }
     }
+}
+
+/**
+ * Branch order: every top-level reply, each immediately followed by the
+ * replies that answer it. A reply whose parent was removed (or that arrived
+ * with a parent we cannot see) still renders — at the top level — so nothing
+ * a member wrote is ever hidden.
+ */
+private fun branchOrder(replies: List<CommunityComment>): List<Pair<CommunityComment, Int>> {
+    val children = replies.filter { it.parentId != null }.groupBy { it.parentId }
+    val out = ArrayList<Pair<CommunityComment, Int>>(replies.size)
+    replies.filter { it.parentId == null }.forEach { root ->
+        out += root to 0
+        children[root.id].orEmpty().forEach { child -> out += child to 1 }
+    }
+    val placed = out.map { it.first.id }.toSet()
+    replies.filterNot { it.id in placed }.forEach { out += it to 0 }
+    return out
 }
 
 /** "just now" / "12m ago" / "3h ago" — replies live at most 24 hours. */

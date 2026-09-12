@@ -143,6 +143,18 @@ object OnlineAccount {
         if (token != null) SupabaseClient.signOut(token)
         SupabaseSessionStore.clear(context)
         AppPreferences.setOnlineModeEnabled(context, false)
+        // The device's social copy goes too: every cached conversation and
+        // every remembered person lives in this one prefs file (see
+        // SocialMessageCache / SocialPeopleCache in features/community).
+        // Signing out must not leave the previous account's threads readable
+        // by whoever opens the app next.
+        runCatching {
+            context.applicationContext
+                .getSharedPreferences(SOCIAL_CACHE_PREFS, Context.MODE_PRIVATE)
+                .edit()
+                .clear()
+                .apply()
+        }
         state = State()
     }
 
@@ -165,6 +177,13 @@ object OnlineAccount {
         state = state.copy(error = null, notice = null)
     }
 }
+
+/**
+ * The prefs file the social caches share (messages + remembered people).
+ * Owned here as well as in `features/community/SocialComponents.kt` so
+ * signing out can forget it without the data layer reaching into the UI.
+ */
+internal const val SOCIAL_CACHE_PREFS = "curio_social_cache"
 
 /**
  * Maps a transport failure to copy that is safe to render: rate limits and

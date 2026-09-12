@@ -307,6 +307,28 @@ private fun SettingsSharedScope(
     ) { content() }
 }
 
+/**
+ * The SOCIAL layer's own scopes — the community, a member's profile, one
+ * card's view and a conversation.
+ *
+ * It provides exactly the same shared-transition locals as the settings
+ * wrapper, because a social page's hero morphs the same way; what matters is
+ * that the community is NOT a settings destination. Its screens draw their
+ * own header and never mount the settings rail, so the social layer reads as
+ * people rather than as a corner of Settings.
+ */
+@Composable
+private fun SocialSharedScope(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    content: @Composable () -> Unit
+) {
+    CompositionLocalProvider(
+        LocalRevealSharedScope provides sharedTransitionScope,
+        LocalRevealVisibilityScope provides animatedVisibilityScope
+    ) { content() }
+}
+
 @Composable
 fun CurioNavHost(
     navController: NavHostController = rememberNavController()
@@ -499,12 +521,32 @@ fun CurioNavHost(
     // the boot gates (splash/onboarding/crash) the effect returns WITHOUT
     // consuming; it re-runs when the splash lands on HOME (keyed on
     // currentRoute).
-    LaunchedEffect(currentRoute, PendingEntryOpen.trigger, PendingSpinOpen.trigger) {
+    LaunchedEffect(
+        currentRoute,
+        PendingEntryOpen.trigger,
+        PendingSpinOpen.trigger,
+        PendingDirectMessageOpen.trigger,
+        PendingCommunityOpen.trigger
+    ) {
         val prefix = currentRoute?.substringBefore("/")
         // Wait for a stable root: null (first frame) and the boot gates own
         // navigation until the splash lands on HOME — the effect re-runs
         // there (keyed on currentRoute) and consumes the target once.
         if (prefix == null || prefix in CurioRoutes.bootGatePrefixes) return@LaunchedEffect
+        // A MESSAGE notification tap — open that conversation (the people
+        // page anchored beneath, so Back returns to the app).
+        PendingDirectMessageOpen.take()?.let { (userId, handle) ->
+            navController.navigate(CurioRoutes.directMessage(userId, handle)) {
+                launchSingleTop = true
+            }
+            return@LaunchedEffect
+        }
+        // A COMMUNITY notification tap — land on the 24-hour wall, where the
+        // post the notification is about actually is.
+        if (PendingCommunityOpen.take()) {
+            navController.navigateToTab(CurioRoutes.COMMUNITY)
+            return@LaunchedEffect
+        }
         // Daily-reminder tap — land on the Spin deck (the shuffle page the
         // notification nudges toward), with the tab switch's popUpTo-HOME
         // back stack so Back returns to Home.
@@ -1019,7 +1061,7 @@ fun CurioNavHost(
                 route = CurioRoutes.COMMUNITY_CARD,
                 arguments = listOf(navArgument("cardId") { type = NavType.StringType })
             ) { backStackEntry ->
-                SettingsSharedScope(sharedTransitionScope, this) {
+                SocialSharedScope(sharedTransitionScope, this) {
                     CommunityCardScreen(
                         navController = navController,
                         cardId = backStackEntry.arguments?.getString("cardId").orEmpty()
@@ -1032,7 +1074,7 @@ fun CurioNavHost(
                 route = CurioRoutes.SOCIAL_PROFILE,
                 arguments = listOf(navArgument("userId") { type = NavType.StringType })
             ) { backStackEntry ->
-                SettingsSharedScope(sharedTransitionScope, this) {
+                SocialSharedScope(sharedTransitionScope, this) {
                     SocialProfileScreen(
                         navController = navController,
                         userId = backStackEntry.arguments?.getString("userId").orEmpty()
@@ -1045,14 +1087,20 @@ fun CurioNavHost(
             composable(
                 route = CurioRoutes.DIRECT_MESSAGE,
                 arguments = listOf(
-                    navArgument("userId") { type = NavType.StringType }
+                    navArgument("userId") { type = NavType.StringType },
+                    // What the CALLER already knows this person as — the header
+                    // shows it on the first frame instead of a placeholder.
+                    navArgument("handle") {
+                        type = NavType.StringType
+                        defaultValue = ""
+                    }
                 )
             ) { backStackEntry ->
-                SettingsSharedScope(sharedTransitionScope, this) {
+                SocialSharedScope(sharedTransitionScope, this) {
                     DirectMessageScreen(
                         navController = navController,
                         otherUserId = backStackEntry.arguments?.getString("userId").orEmpty(),
-                        handle = ""
+                        handle = backStackEntry.arguments?.getString("handle").orEmpty()
                     )
                 }
             }

@@ -14,6 +14,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,10 +22,11 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -50,10 +52,13 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.curio.app.data.AppPreferences
 import com.curio.app.data.CategoryId
@@ -104,13 +109,14 @@ import kotlinx.coroutines.launch
  *    line about what "private" means here — plus a tap through to the profile.
  *  - **A read conversation**: day rules, grouped runs from one person, a single
  *    timestamp per run, and a read receipt on your last line.
- *  - **Reactions**: tap a bubble and a palette slides in under it. The glyph
- *    is stored as a name from Curio's own icon set, so nothing is uploaded.
+ *  - **Reactions**: tap a bubble and a palette slides in under it. The emoji
+ *    itself is what the server stores, so nothing is uploaded.
  *  - **"is typing…"**: a real, server-backed row that expires on its own, shown
  *    as a live line in the header and as a breathing bubble in the thread.
  *  - **A composer that sends the moment you tap**: the message appears
  *    immediately on a spring, the field clears, and the network catches up.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DirectMessageScreen(
     navController: NavController,
@@ -134,7 +140,18 @@ fun DirectMessageScreen(
     var messages by remember { mutableStateOf<List<CurioDirectMessage>>(emptyList()) }
     // Sent-but-not-yet-confirmed messages, drawn exactly like real ones.
     var pending by remember { mutableStateOf<List<CurioDirectMessage>>(emptyList()) }
-    var person by remember { mutableStateOf<CurioPerson?>(null) }
+    var person by remember {
+        // On screen from the FIRST frame: the device remembers every identity
+        // it has resolved, and the route carries the handle the caller already
+        // had (Friends, a thread row, a profile). The network only refines
+        // both — a conversation never opens on a placeholder.
+        mutableStateOf(
+            SocialPeopleCache.read(context, otherUserId)
+                ?: handle.trim()
+                    .takeIf { it.isNotBlank() }
+                    ?.let { CurioPerson(userId = otherUserId, displayName = it) }
+        )
+    }
     var reactions by remember { mutableStateOf<Map<String, List<CurioDmReaction>>>(emptyMap()) }
     var draft by remember { mutableStateOf("") }
     var peerTyping by remember { mutableStateOf(false) }
@@ -173,7 +190,13 @@ fun DirectMessageScreen(
     // Who this conversation is with — resolved here so the header shows a
     // portrait and the LIVE username rather than the name the route carried.
     suspend fun loadPerson(active: String) {
-        SocialApi.people(active, listOf(otherUserId)).onSuccess { person = it[otherUserId] }
+        SocialApi.people(active, listOf(otherUserId)).onSuccess { found ->
+            found[otherUserId]?.let { fresh ->
+                person = fresh
+                // Remembered so the NEXT open draws the real name instantly.
+                SocialPeopleCache.remember(context, fresh)
+            }
+        }
     }
 
     suspend fun send(active: String, me: String) {
@@ -242,6 +265,45 @@ fun DirectMessageScreen(
         }
     }
 
+    // THE LIVE THREAD — what makes RECEIVING instant.
+    //
+    // The thread used to refresh only when the screen was entered, so a
+    // message that arrived while it was open stayed invisible until the user
+    // backed out and came back. Every tick now asks for just what is NEWER
+    // than the newest message already on screen (a strict `created_at >`
+    // filter — a few hundred bytes), merges it in, keeps the device's copy
+    // current and marks the arrival read. A line the other person sends lands
+    // in front of you while you are looking at the conversation.
+    LaunchedEffect(eligible, token, myUserId, otherUserId) {
+        if (!eligible || token == null || myUserId == null) return@LaunchedEffect
+        while (true) {
+            delay(LIVE_TICK_MS)
+            // Only CONFIRMED messages anchor the window: an optimistic bubble
+            // carries the phone's own clock, and a fast phone would otherwise
+            // push the window past the very messages this poll exists to find.
+            val anchor = messages
+                .filterNot { it.id.startsWith(LOCAL_ID_PREFIX) }
+                .maxOfOrNull { it.createdAtMillis }
+                ?: continue
+            val fresh = SocialApi.messagesSince(token, otherUserId, myUserId, anchor)
+                .getOrNull()
+                .orEmpty()
+                .filter { row -> (messages + pending).none { it.id == row.id } }
+            if (fresh.isEmpty()) continue
+            val merged = (messages + fresh)
+                .distinctBy { it.id }
+                .sortedBy { it.createdAtMillis }
+            messages = merged
+            SocialMessageCache.write(context, otherUserId, merged)
+            // An arrival means the other side stopped writing.
+            peerTyping = false
+            if (fresh.any { !it.mine }) {
+                SocialApi.markRead(token, otherUserId, myUserId)
+            }
+            SocialApi.reactions(token, merged.map { it.id }).onSuccess { reactions = it }
+        }
+    }
+
     // Tell the other side when this side is writing: a short debounce stops a
     // request per keystroke, and the row clears itself after a pause.
     LaunchedEffect(draft, eligible, token) {
@@ -274,10 +336,13 @@ fun DirectMessageScreen(
     }
 
     // The live username wins over the name the route carried, so a rename shows
-    // up in the conversation too.
+    // up in the conversation too. A locally remembered or route-carried person
+    // has no @username yet — it shows their name rather than a made-up handle.
     val fallback = person?.label?.takeIf { it.isNotBlank() }
         ?: handle.ifBlank { "Message" }
-    val title = person?.let { "@${it.handle}" } ?: fallback
+    val title = person?.takeIf { it.username.isNotBlank() }
+        ?.let { "@${it.handle}" }
+        ?: fallback
 
     // Who was the last to say something, from this account — the only message
     // that may wear a read receipt.
@@ -303,19 +368,17 @@ fun DirectMessageScreen(
             modifier = Modifier
                 .layerBackdrop(glassBackdrop)
                 .fillMaxSize()
-                // ONE inset consumer for the whole screen: the thread shrinks
-                // and the composer rides just above the keyboard. Padding both
-                // the list AND the composer (which is what an earlier layout
-                // did) lifted the composer twice as far as the keyboard and
-                // left a gap of empty page underneath it.
-                //
-                // Two chained consumers rather than a union: the outer one
-                // takes the navigation bar and CONSUMES it, so the inner IME
-                // pad only adds what the keyboard covers beyond the bar — the
-                // bottom inset is max(bar, keyboard), exactly, without the
-                // experimental union API.
-                .windowInsetsPadding(WindowInsets.navigationBars)
-                .imePadding()
+                // ONE inset consumer for the whole screen, and it is the
+                // UNION rather than a sum: the bottom inset is
+                // max(navigation bar, keyboard). Chaining
+                // `.windowInsetsPadding(navigationBars).imePadding()` CONSUMES
+                // the bar but does not shrink the IME inset — the keyboard's
+                // inset already spans the bar — so the composer ended up a
+                // bar's height ABOVE the keyboard with an empty strip under
+                // it. The union says exactly what the layout means.
+                .windowInsetsPadding(
+                    WindowInsets.navigationBars.union(WindowInsets.ime)
+                )
         ) {
             if (eligible && token != null && myUserId != null) {
                 val activeToken = token
@@ -410,7 +473,7 @@ fun DirectMessageScreen(
                                 myUserId = activeUserId,
                                 onTap = { openReactions(message.id) },
                                 onPick = { kind -> pickReaction(message.id, kind) },
-                                animateIn = message.id.startsWith("local-")
+                                animateIn = message.id.startsWith(LOCAL_ID_PREFIX)
                             )
                         }
                     }
@@ -538,9 +601,9 @@ private fun androidx.compose.foundation.lazy.LazyListScope.itemsIndexedWithDays(
 
 /**
  * Who you are talking to: the portrait, the live username and a tap that opens
- * their profile, plus one honest line about what "private" means here. When
- * they are writing, that line becomes their name — the header answers the
- * question the thread is about to.
+ * their profile. When they are writing the @username gives way to a live
+ * "Typing…" line, so the header answers the question the thread is about to
+ * ask without any standing paragraph about it.
  */
 @Composable
 private fun MessagePeerHeader(
@@ -597,12 +660,6 @@ private fun MessagePeerHeader(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Text(
-                    text = "Only the two of you can see this thread. Messages are stored on Curio's " +
-                        "server to be delivered — private, but not end-to-end encrypted.",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
             CurioIcon(
                 name = CurioIcons.ChevronRight,
@@ -804,11 +861,10 @@ private fun ReactionChip(kind: String, count: Int, mine: Boolean) {
             horizontalArrangement = Arrangement.spacedBy(3.dp),
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
         ) {
-            CurioIcon(
-                name = SocialReactions.iconFor(kind),
-                contentDescription = SocialReactions.labelFor(kind),
-                tint = ink,
-                size = 13.dp
+            Text(
+                text = SocialReactions.emojiFor(kind),
+                style = MaterialTheme.typography.labelMedium.copy(fontSize = 13.sp),
+                color = ink
             )
             if (count > 1) {
                 Text(
@@ -846,24 +902,27 @@ private fun ReactionBar(
                 .padding(start = if (mine) 0.dp else 2.dp)
         ) {
             if (mine) Spacer(Modifier.weight(1f))
-            SocialReactions.PALETTE.forEach { (glyph, meaning) ->
-                val chosen = current == glyph
+            SocialReactions.PALETTE.forEach { (emoji, meaning) ->
+                // The emoji IS the reaction: it is drawn as text, so what the
+                // picker shows is exactly what the server stores — and a
+                // legacy row's icon name still resolves to its emoji.
+                val chosen = current != null && SocialReactions.emojiFor(current) == emoji
                 Surface(
-                    onClick = { onPick(glyph) },
+                    onClick = { onPick(emoji) },
                     shape = RoundedCornerShape(50),
                     color = if (chosen) {
                         MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
                     } else {
                         MaterialTheme.colorScheme.surfaceContainerHigh
-                    }
+                    },
+                    modifier = Modifier.semantics { contentDescription = meaning }
                 ) {
-                    CurioIcon(
-                        name = glyph,
-                        contentDescription = meaning,
-                        tint = if (chosen) curioDialogActionColor()
+                    Text(
+                        text = emoji,
+                        style = MaterialTheme.typography.titleMedium.copy(fontSize = 17.sp),
+                        color = if (chosen) curioDialogActionColor()
                         else MaterialTheme.colorScheme.onSurfaceVariant,
-                        size = 16.dp,
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp)
                     )
                 }
             }
@@ -1041,3 +1100,14 @@ private fun MessageComposer(
         }
     }
 }
+
+/**
+ * How often an OPEN conversation asks whether anything new arrived. Short
+ * enough that a reply feels like it lands while you watch; long enough that
+ * the tick is invisible on battery and data (each one is a few hundred bytes,
+ * because it asks only for messages newer than the newest on screen).
+ */
+private const val LIVE_TICK_MS = 2_500L
+
+/** The id prefix of a bubble that is sent but not yet confirmed. */
+private const val LOCAL_ID_PREFIX = "local-"

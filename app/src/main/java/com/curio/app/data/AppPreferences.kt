@@ -137,6 +137,10 @@ object AppPreferences {
     // the Explore now dialog (default OFF; the Notifications toggle
     // re-shows it there as a single-line choice).
     private const val KEY_SHOW_BUBBLE_OPT_IN_DIALOG = "show_bubble_opt_in_dialog"
+    // v3xx54 — notify for social arrivals: a friend's message, or someone new
+    // on the community wall. Default ON (a message app that stays silent is a
+    // message app you keep opening by hand); the Notifications page owns it.
+    private const val KEY_SOCIAL_NOTIFICATIONS = "social_notifications_enabled"
     // v19 — the search engine the "Explore in browser" button opens (Google
     // by default; DuckDuckGo, Bing, Brave, Ecosia, Startpage, Yahoo).
     private const val KEY_SEARCH_ENGINE = "search_engine"
@@ -1353,6 +1357,11 @@ object AppPreferences {
     var showBubbleOptInDialogState by mutableStateOf(false)
         private set
 
+    // v3xx54 — social notifications (a DM or a new community post), default
+    // ON. Read by the app-level watcher and the Notifications page switch.
+    var socialNotificationsState by mutableStateOf(true)
+        private set
+
     // v8.1 — whether the user has declined the "Display over other apps"
     // permission (see [isOverlayAskDeclined]). Suppresses the automatic
     // explore-start prompt; explicit Settings toggles always work and
@@ -1655,6 +1664,7 @@ object AppPreferences {
         recycleBinExpiryDaysState = getRecycleBinExpiryDays(context)
         overlayBubbleEnabledState = isOverlayBubbleEnabled(context)
         showBubbleOptInDialogState = isShowBubbleOptInDialog(context)
+        socialNotificationsState = isSocialNotificationsEnabled(context)
         overlayAskDeclinedState = isOverlayAskDeclined(context)
         voiceToTextEnabledState = isVoiceToTextEnabled(context)
         offlineModelIdState = getOfflineModelId(context)
@@ -2439,6 +2449,19 @@ object AppPreferences {
     fun setShowBubbleOptInDialog(context: Context, enabled: Boolean) {
         prefs(context).edit().putBoolean(KEY_SHOW_BUBBLE_OPT_IN_DIALOG, enabled).apply()
         showBubbleOptInDialogState = enabled
+    }
+
+    /**
+     * v3xx54 — whether Curio notifies for a friend's message and for new
+     * community posts. Default ON; turning it off leaves sync, unread badges
+     * and the wall exactly as they are, it only stops the notifications.
+     */
+    fun isSocialNotificationsEnabled(context: Context): Boolean =
+        prefs(context).getBoolean(KEY_SOCIAL_NOTIFICATIONS, true)
+
+    fun setSocialNotifications(context: Context, enabled: Boolean) {
+        prefs(context).edit().putBoolean(KEY_SOCIAL_NOTIFICATIONS, enabled).apply()
+        socialNotificationsState = enabled
     }
 
     /**

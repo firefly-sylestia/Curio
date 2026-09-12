@@ -126,6 +126,71 @@ object PendingEntryOpen {
 }
 
 /**
+ * Out-of-band handoff for a MESSAGE notification's tap.
+ *
+ * A "new message" notification has to open the conversation it is about, not
+ * the app's front door. Like [PendingEntryOpen], the target is stashed here
+ * because MainActivity may be cold-started (onCreate) or already running
+ * (onNewIntent), and the NavHost is the only place that can navigate with the
+ * right back stack. Consumed once the host sits on a stable root route.
+ */
+object PendingDirectMessageOpen {
+    const val EXTRA_USER_ID = "com.curio.app.extra.OPEN_DM_USER_ID"
+    const val EXTRA_HANDLE = "com.curio.app.extra.OPEN_DM_HANDLE"
+
+    private var userId: String? = null
+    private var handle: String = ""
+    private val counter = mutableIntStateOf(0)
+
+    fun capture(intent: Intent?) {
+        val id = intent?.getStringExtra(EXTRA_USER_ID)
+        if (id.isNullOrBlank()) return
+        userId = id
+        handle = intent.getStringExtra(EXTRA_HANDLE).orEmpty()
+        counter.intValue++
+    }
+
+    /** Monotonic bump — the NavHost keys its open-effect on this. */
+    val trigger: Int get() = counter.intValue
+
+    /** Consumes and returns (userId, handle), if a conversation is pending. */
+    fun take(): Pair<String, String>? {
+        val id = userId ?: return null
+        val label = handle
+        userId = null
+        handle = ""
+        return id to label
+    }
+}
+
+/**
+ * Out-of-band handoff for a COMMUNITY notification's tap: the new post lives
+ * on the 24-hour wall, so the tap lands there instead of on Home.
+ */
+object PendingCommunityOpen {
+    const val EXTRA_OPEN_COMMUNITY = "com.curio.app.extra.OPEN_COMMUNITY"
+
+    private var pending = false
+    private val counter = mutableIntStateOf(0)
+
+    fun capture(intent: Intent?) {
+        if (intent?.getBooleanExtra(EXTRA_OPEN_COMMUNITY, false) != true) return
+        pending = true
+        counter.intValue++
+    }
+
+    /** Monotonic bump — the NavHost keys its open-effect on this. */
+    val trigger: Int get() = counter.intValue
+
+    /** Consumes the request, answering whether the wall should open. */
+    fun take(): Boolean {
+        if (!pending) return false
+        pending = false
+        return true
+    }
+}
+
+/**
  * Out-of-band handoff for the daily-reminder notification tap.
  *
  * The daily shuffle reminder ("A little curiosity awaits") carries a boolean
@@ -205,9 +270,11 @@ object CurioRoutes {
     // ONLY optional bottom-nav tab: it joins [bottomNavRoutePrefixes] while
     // the user's opt-in tab is showing (see [liveTabPrefixes]).
     const val COMMUNITY = "community"
-    // v3xx — the social layer: friend requests + direct messages.
+    // v3xx — the social layer: friend requests + direct messages. The handle
+    // rides in the query so the thread can name who it is with on the FIRST
+    // frame (the caller already knows it; the id alone is opaque).
     const val FRIENDS = "friends"
-    const val DIRECT_MESSAGE = "dm/{userId}"
+    const val DIRECT_MESSAGE = "dm/{userId}?handle={handle}"
     // v3xx — one card's own view: the full card, its caption, replies + share.
     const val COMMUNITY_CARD = "community/{cardId}"
     // v3xx53 — a member's public profile: reaching it from a card, a reply, a
@@ -258,10 +325,11 @@ object CurioRoutes {
     fun socialProfile(userId: String) = "person/${Uri.encode(userId)}"
     /**
      * One conversation with [userId]. The handle rides along so the thread can
-     * show who it is with before any message loads (the id alone is opaque).
+     * show who it is with before any message loads (the id alone is opaque),
+     * and so the header never wears a placeholder.
      */
     fun directMessage(userId: String, handle: String = "") =
-        "dm/${Uri.encode(userId)}"
+        "dm/${Uri.encode(userId)}?handle=${Uri.encode(handle)}"
     /** Edit a saved GalleryWall (mood board) entry — preloads + re-saves in place. */
     fun editMoodBoard(entryId: String) = "edit-moodboard/$entryId"
     /**

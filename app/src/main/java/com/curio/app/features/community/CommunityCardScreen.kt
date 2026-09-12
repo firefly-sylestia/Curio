@@ -36,18 +36,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import android.content.Intent
 import com.curio.app.data.CategoryId
 import com.curio.app.data.CurioCategories
 import com.curio.app.data.supabase.CommunityApi
 import com.curio.app.data.supabase.CommunityCard
+import com.curio.app.data.supabase.KIND_CARD
+import com.curio.app.data.supabase.KIND_QUOTE
 import com.curio.app.data.supabase.OnlineAccount
 import com.curio.app.features.settings.SettingsHeroHeader
 import com.curio.app.features.settings.SettingsHeroTotalHeight
-import com.curio.app.features.settings.SettingsNavRail
 import com.curio.app.features.settings.SettingsOptionCard
 import com.curio.app.features.settings.SettingsOptionInfoRow
 import com.curio.app.features.settings.heroPageBackground
-import com.curio.app.features.settings.navigateToSettingsSection
 import com.curio.app.features.settings.settingsRoseAccent
 import com.curio.app.navigation.CurioRoutes
 import com.curio.app.ui.adaptive.isWide
@@ -73,6 +74,11 @@ import kotlinx.coroutines.launch
  * the replies underneath. Comments live here rather than in the feed so the
  * wall stays scannable, and they die with the card (the DB cascades), which is
  * what keeps the 24-hour promise honest.
+ *
+ * This is a SOCIAL page, not a settings one: it carries the app's torn hero
+ * (the established Curio header) and none of the settings chrome — the
+ * settings rail that used to ride this list is gone, so opening a card from
+ * the wall stays inside the community.
  */
 @Composable
 fun CommunityCardScreen(navController: NavController, cardId: String) {
@@ -90,6 +96,10 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
     var error by remember { mutableStateOf<String?>(null) }
     var reporting by remember { mutableStateOf(false) }
     var commentsOpen by remember { mutableStateOf(false) }
+    // Taking a card down is irreversible — it asks first, like every other
+    // destructive move in the social layer.
+    var takingDown by remember { mutableStateOf(false) }
+    var busy by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) { OnlineAccount.restore(context) }
 
@@ -110,6 +120,23 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
 
     /** Shares the card as the same PNG the reveal page produces. */
     fun share(current: CommunityCard) {
+        if (current.kind != KIND_CARD) {
+            // A note or a quote has no card art of its own, so it is shared as
+            // the TEXT it is (the credit riding under a quote) instead of as a
+            // card for a topic it was never about.
+            val body = buildString {
+                append(current.factText)
+                if (current.kind == KIND_QUOTE && current.byline.isNotBlank()) {
+                    append("\n— ").append(current.byline)
+                }
+            }
+            val send = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, body)
+            }
+            context.startActivity(Intent.createChooser(send, "Share"))
+            return
+        }
         val aspect = runCatching { ShareCardAspect.valueOf(current.aspect) }
             .getOrDefault(ShareCardAspect.CLASSIC)
         val style = runCatching { ShareCardStyle.valueOf(current.style) }
@@ -178,14 +205,6 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                     )
                 }
             }
-            item(key = "settings-nav", contentType = "settings-nav") {
-                SettingsNavRail(
-                    active = null,
-                    onSelect = { navigateToSettingsSection(navController, it) },
-                    navController = navController
-                )
-            }
-
             when {
                 token == null -> item {
                     SettingsOptionCard {
@@ -227,7 +246,13 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                         }
                     }
                     item(key = "card", contentType = "card") {
-                        CommunityCardCanvas(card = current)
+                        if (current.kind == KIND_CARD) {
+                            CommunityCardCanvas(card = current)
+                        } else {
+                            // A note or a quote is words: it is rendered as
+                            // text here exactly as it is on the wall.
+                            SocialTextPost(card = current, onClick = {})
+                        }
                     }
                     item(key = "meta") {
                         Row(
@@ -319,12 +344,7 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                             CommunityAction(CurioIcons.Flag, "Report", false) { reporting = true }
                             if (current.mine) {
                                 CommunityAction(CurioIcons.Delete, "Take down", false) {
-                                    scope.launch {
-                                        CommunityApi.delete(token, current.id).fold(
-                                            onSuccess = { navController.popBackStack() },
-                                            onFailure = { error = it.message }
-                                        )
-                                    }
+                                    takingDown = true
                                 }
                             }
                         }
@@ -349,6 +369,37 @@ fun CommunityCardScreen(navController: NavController, cardId: String) {
                 subtitle = "Gone in 24 hours",
                 onBack = { navController.popBackStack() },
                 glassBackdrop = glassBackdrop
+            )
+        }
+    }
+
+    if (takingDown) {
+        // `?.let` hands the lambda a definitely non-null token, so the delete
+        // never leans on a smart cast across a lambda boundary.
+        token?.let { active ->
+            SocialConfirmDialog(
+                title = "Take this card down?",
+                body = "It disappears from the wall for everyone right away. " +
+                    "Its replies go with it.",
+                confirmLabel = "Take down",
+                busy = busy,
+                onDismiss = { if (!busy) takingDown = false },
+                onConfirm = {
+                    busy = true
+                    scope.launch {
+                        CommunityApi.delete(active, cardId).fold(
+                            onSuccess = {
+                                takingDown = false
+                                busy = false
+                                navController.popBackStack()
+                            },
+                            onFailure = {
+                                error = it.message
+                                busy = false
+                            }
+                        )
+                    }
+                }
             )
         }
     }

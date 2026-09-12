@@ -35,12 +35,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.curio.app.data.supabase.CommunityCard
 import com.curio.app.data.supabase.CurioDirectMessage
+import com.curio.app.data.supabase.KIND_QUOTE
 import com.curio.app.data.supabase.CurioDmThread
 import com.curio.app.data.supabase.CurioPerson
+import com.curio.app.data.supabase.KIND_CARD
+import com.curio.app.data.supabase.SOCIAL_CACHE_PREFS
 import com.curio.app.ui.theme.CurioDialogShape
 import com.curio.app.ui.theme.CurioIcon
 import com.curio.app.ui.theme.CurioIcons
+import com.curio.app.ui.components.curioPressClickable
 import com.curio.app.ui.theme.CurioMotion
 import com.curio.app.ui.theme.curioDialogActionButtonColors
 import com.curio.app.ui.theme.curioDialogActionColor
@@ -368,13 +373,61 @@ internal fun SocialPersonCard(
                     )
                 }
                 SocialRelation.NONE -> {
-                    SocialPill(
-                        label = "Add friend",
+                    // ICON, not a word: adding someone is the one move this row
+                    // exists for, and the accent disc says it louder than a
+                    // label ever did (the content description keeps it
+                    // readable to a screen reader).
+                    SocialIconPill(
                         icon = CurioIcons.Add,
+                        contentDescription = "Add ${person.label} as a friend",
                         tone = SocialPillTone.ACCENT,
                         onClick = onAdd
                     )
                 }
+            }
+        }
+    }
+}
+
+/**
+ * A TEXT POST — the body of a NOTE or a QUOTE.
+ *
+ * A topic card is art plus words; a note is WORDS, and a quote is words plus
+ * who said them. Drawing those through the share-card renderer would put a
+ * topic they are not about behind them, so they get this instead: the app's
+ * own text surface, sized by what was written, with the credit on its own
+ * line for a quote.
+ */
+@Composable
+internal fun SocialTextPost(
+    card: CommunityCard,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(22.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.6f),
+        modifier = modifier
+            .fillMaxWidth()
+            .curioPressClickable(pressedScale = 0.99f, onClick = onClick)
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = card.factText,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            if (card.kind == KIND_QUOTE && card.byline.isNotBlank()) {
+                Text(
+                    text = "— ${card.byline}",
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
@@ -671,28 +724,58 @@ internal fun socialDayLabel(millis: Long): String {
 /**
  * Curio's reaction palette.
  *
- * Each entry is a NAME from the app's own icon set — reactions are never
- * uploaded images, so the server stores a short word and the renderer is a
- * glyph the app already ships.
+ * A reaction IS an emoji — the character is what the server stores, so a
+ * reaction costs a few bytes, renders the same on every device and needs no
+ * image of its own. [LEGACY] maps the icon NAMES the first release wrote, so a
+ * conversation that already carries reactions keeps showing them instead of
+ * going blank after this change.
  */
 internal object SocialReactions {
-    /** (icon name, what it means) — the order is also the picker's order. */
+    /** (emoji, what it means) — the order is also the picker's order. */
     val PALETTE: List<Pair<String, String>> = listOf(
-        CurioIcons.ThumbUp to "Love it",
-        CurioIcons.LocalFire to "On fire",
-        CurioIcons.MoodHappy to "Haha",
-        CurioIcons.AutoAwesome to "Sparkle",
-        CurioIcons.Star to "Starred",
-        CurioIcons.Lightbulb to "Insightful"
+        "❤️" to "Love",
+        "😂" to "Haha",
+        "😮" to "Wow",
+        "😢" to "Sad",
+        "👍" to "Like",
+        "🙏" to "Thanks"
     )
 
-    /** The glyph for a stored reaction name — a calm fallback if unknown. */
-    fun iconFor(kind: String): String =
-        PALETTE.firstOrNull { it.first == kind }?.first ?: CurioIcons.AutoAwesome
+    /** Icon names written by the previous build → the emoji they mean now. */
+    private val LEGACY = mapOf(
+        "ThumbUp" to "👍",
+        "LocalFire" to "🔥",
+        "MoodHappy" to "😂",
+        "AutoAwesome" to "✨",
+        "Star" to "⭐",
+        "Lightbulb" to "💡"
+    )
+
+    /** What a legacy icon name meant, for its content description. */
+    private val LEGACY_LABELS = mapOf(
+        "ThumbUp" to "Like",
+        "LocalFire" to "On fire",
+        "MoodHappy" to "Haha",
+        "AutoAwesome" to "Sparkle",
+        "Star" to "Starred",
+        "Lightbulb" to "Insightful"
+    )
+
+    /** The emoji for a stored reaction — a calm fallback when it is empty. */
+    fun emojiFor(kind: String): String {
+        val trimmed = kind.trim()
+        if (trimmed.isEmpty()) return PALETTE.first().first
+        if (PALETTE.any { it.first == trimmed }) return trimmed
+        return LEGACY[trimmed] ?: trimmed
+    }
 
     /** What a reaction means, for a content description. */
-    fun labelFor(kind: String): String =
-        PALETTE.firstOrNull { it.first == kind }?.second ?: "Reaction"
+    fun labelFor(kind: String): String {
+        val trimmed = kind.trim()
+        return PALETTE.firstOrNull { it.first == trimmed }?.second
+            ?: LEGACY_LABELS[trimmed]
+            ?: "Reaction"
+    }
 }
 
 /**
@@ -711,15 +794,13 @@ internal object SocialReactions {
  * Only text is ever kept — the same rule as the online layer itself.
  */
 internal object SocialMessageCache {
-    private const val NAME = "curio_social_cache"
     private const val CAP = 200
     private const val VERSION_KEY = "cache_version"
 
     /** Bump when the stored shape changes, so stale blobs are dropped once. */
     private const val VERSION = 2
 
-    private fun prefs(context: Context) =
-        context.applicationContext.getSharedPreferences(NAME, Context.MODE_PRIVATE)
+    private fun prefs(context: Context) = socialCachePrefs(context)
 
     private fun key(otherUserId: String) = "thread_$otherUserId"
 
@@ -805,4 +886,189 @@ internal object SocialMessageCache {
     fun clear(context: Context) {
         runCatching { prefs(context).edit().clear().apply() }
     }
+}
+
+/**
+ * THE ON-DEVICE PEOPLE CACHE.
+ *
+ * Why it exists: a name is the FIRST thing a social surface draws, and every
+ * surface used to ask the server for it after composing — so a friend's name
+ * landed a beat late and the header wore a placeholder in the meantime. This
+ * remembers the last resolved identity of each account (display name,
+ * @username, portrait) so a row, a conversation header or a profile can draw
+ * the real person on the first frame, and the network only ever REFINES it.
+ *
+ * It holds identity and nothing else — no message, no card, no email — and it
+ * is cleared with the message cache when the account signs out.
+ */
+/**
+ * The ONE prefs file the social caches share — messages and remembered
+ * people. Signing out clears the file, so both are forgotten together.
+ */
+private fun socialCachePrefs(context: Context) =
+    context.applicationContext
+        .getSharedPreferences(SOCIAL_CACHE_PREFS, Context.MODE_PRIVATE)
+
+internal object SocialPeopleCache {
+    private const val KEY_PREFIX = "person_"
+    private const val ORDER_KEY = "person_order"
+
+    /** How many accounts are remembered; beyond this the oldest are dropped. */
+    private const val CAP = 300
+
+    fun read(context: Context, userId: String): CurioPerson? {
+        if (userId.isBlank()) return null
+        return runCatching {
+            val raw = socialCachePrefs(context).getString(KEY_PREFIX + userId, null) ?: return null
+            val row = JSONObject(raw)
+            CurioPerson(
+                userId = userId,
+                displayName = row.optString("n"),
+                username = row.optString("u"),
+                avatarStyle = row.optInt("a", 0).coerceIn(0, 15)
+            )
+        }.getOrNull()
+    }
+
+    /** Remembers one identity (best-effort — a cache write never fails a screen). */
+    fun remember(context: Context, person: CurioPerson) {
+        if (person.userId.isBlank()) return
+        runCatching {
+            val store = socialCachePrefs(context)
+            val row = JSONObject()
+                .put("n", person.displayName)
+                .put("u", person.username)
+                .put("a", person.avatarStyle)
+            val order = order(store).filterNot { it == person.userId } + person.userId
+            val kept = order.takeLast(CAP)
+            val editor = store.edit().putString(KEY_PREFIX + person.userId, row.toString())
+            (order - kept.toSet()).forEach { editor.remove(KEY_PREFIX + it) }
+            editor.putString(ORDER_KEY, JSONArray(kept).toString())
+            editor.apply()
+        }
+    }
+
+    /** Remembers a whole page of identities in one write. */
+    fun remember(context: Context, people: Collection<CurioPerson>) {
+        people.forEach { remember(context, it) }
+    }
+
+    private fun order(store: android.content.SharedPreferences): List<String> = runCatching {
+        val raw = store.getString(ORDER_KEY, null) ?: return emptyList()
+        val array = JSONArray(raw)
+        (0 until array.length()).mapNotNull { index ->
+            array.optString(index).takeIf { it.isNotBlank() }
+        }
+    }.getOrDefault(emptyList())
+
+    /** Forgets every remembered identity (used when signing out). */
+    fun clear(context: Context) {
+        runCatching {
+            val store = socialCachePrefs(context)
+            val editor = store.edit()
+            order(store).forEach { editor.remove(KEY_PREFIX + it) }
+            editor.remove(ORDER_KEY).apply()
+        }
+    }
+}
+
+/**
+ * THE ON-DEVICE WALL CACHE.
+ *
+ * Why it exists: the community page was BLANK whenever the first request
+ * failed — open the wall on a train and it said nothing at all. This keeps the
+ * last page of cards the device actually saw, so opening Community offline
+ * shows the 24-hour wall it last loaded (with the age of that copy stated)
+ * instead of an empty screen, and the network replaces it the moment it
+ * answers.
+ *
+ * Text only, like everything else in the social layer, and it is a cache: the
+ * server owns the cards, `expires_at` still decides what is alive, and an
+ * expired copy is dropped on read rather than shown past its 24 hours.
+ */
+internal object SocialFeedCache {
+    private const val KEY = "feed_cards"
+    private const val KEY_AT = "feed_at"
+    private const val CAP = 40
+
+    /** The last page of cards, minus anything that has already expired. */
+    fun read(context: Context): List<CommunityCard> = runCatching {
+        val raw = socialCachePrefs(context).getString(KEY, null) ?: return emptyList()
+        val array = JSONArray(raw)
+        val now = System.currentTimeMillis()
+        buildList(array.length()) {
+            for (index in 0 until array.length()) {
+                val row = array.optJSONObject(index) ?: continue
+                val card = fromJson(row)
+                // A cached card is only shown while the server would still
+                // serve it: the 24-hour promise holds offline too.
+                if (card.expiresAtMillis > now) add(card)
+            }
+        }
+    }.getOrDefault(emptyList())
+
+    /** When the cached page was written (0 when there is nothing cached). */
+    fun cachedAt(context: Context): Long =
+        runCatching { socialCachePrefs(context).getLong(KEY_AT, 0L) }.getOrDefault(0L)
+
+    fun write(context: Context, cards: List<CommunityCard>) {
+        runCatching {
+            val array = JSONArray()
+            cards.take(CAP).forEach { array.put(toJson(it)) }
+            socialCachePrefs(context)
+                .edit()
+                .putString(KEY, array.toString())
+                .putLong(KEY_AT, System.currentTimeMillis())
+                .apply()
+        }
+    }
+
+    private fun toJson(card: CommunityCard): JSONObject = JSONObject()
+        .put("id", card.id)
+        .put("author", card.authorId)
+        .put("handle", card.authorHandle)
+        .put("name", card.authorName)
+        .put("avatar", card.authorAvatar)
+        .put("kind", card.kind)
+        .put("topic", card.topicName)
+        .put("cat", card.categoryName)
+        .put("glyph", card.categoryGlyph)
+        .put("accent", card.accentHex)
+        .put("fact", card.factText)
+        .put("caption", card.caption)
+        .put("style", card.style)
+        .put("aspect", card.aspect)
+        .put("scale", card.bodyScale.toDouble())
+        .put("byline", card.byline)
+        .put("created", card.createdAtMillis)
+        .put("expires", card.expiresAtMillis)
+        .put("likes", card.likeCount)
+        .put("liked", card.likedByMe)
+        .put("comments", card.commentCount)
+        .put("mine", card.mine)
+
+    private fun fromJson(row: JSONObject): CommunityCard = CommunityCard(
+        id = row.optString("id"),
+        authorId = row.optString("author"),
+        authorHandle = row.optString("handle"),
+        authorName = row.optString("name"),
+        authorAvatar = row.optInt("avatar", 0),
+        kind = row.optString("kind").ifBlank { KIND_CARD },
+        topicName = row.optString("topic"),
+        categoryName = row.optString("cat"),
+        categoryGlyph = row.optString("glyph"),
+        accentHex = row.optString("accent"),
+        factText = row.optString("fact"),
+        caption = row.optString("caption"),
+        style = row.optString("style"),
+        aspect = row.optString("aspect"),
+        bodyScale = row.optDouble("scale", 1.0).toFloat(),
+        byline = row.optString("byline"),
+        createdAtMillis = row.optLong("created"),
+        expiresAtMillis = row.optLong("expires"),
+        likeCount = row.optInt("likes"),
+        likedByMe = row.optBoolean("liked"),
+        commentCount = row.optInt("comments"),
+        mine = row.optBoolean("mine")
+    )
 }
