@@ -64,7 +64,8 @@ internal fun CommunityCommentsSheet(
     onDismiss: () -> Unit,
     /** Called after a reply is added or removed, so the host can refresh its
      *  comment count. */
-    onChanged: () -> Unit = {}
+    onChanged: () -> Unit = {},
+    onAddFriend: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -147,6 +148,7 @@ internal fun CommunityCommentsSheet(
                 items(replies, key = { it.id }) { reply ->
                     CommunityReplyRow(
                         reply = reply,
+                        onAddFriend = { onAddFriend(reply.authorId) },
                         onDelete = {
                             scope.launch {
                                 CommunityApi.deleteComment(accessToken, reply.id).fold(
@@ -222,6 +224,7 @@ internal fun CommunityCommentsSheet(
 @Composable
 internal fun CommunityReplyRow(
     reply: CommunityComment,
+    onAddFriend: () -> Unit,
     onDelete: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -237,11 +240,19 @@ internal fun CommunityReplyRow(
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Spacer(Modifier.weight(1f))
             if (reply.mine) {
-                Spacer(Modifier.weight(1f))
                 TextButton(onClick = onDelete) {
                     Text(
                         text = "Remove",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = curioDialogActionColor()
+                    )
+                }
+            } else if (reply.authorId.isNotBlank()) {
+                TextButton(onClick = onAddFriend) {
+                    Text(
+                        text = "Add friend",
                         style = MaterialTheme.typography.labelSmall,
                         color = curioDialogActionColor()
                     )
