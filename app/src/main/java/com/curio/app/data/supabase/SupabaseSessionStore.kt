@@ -59,8 +59,13 @@ object SupabaseSessionStore {
         runCatching { legacy(context).edit().clear().apply() }
     }
 
+    /**
+     * Signs out without destroying the device's DM identity or conversation
+     * keys. Those are not session credentials and are required to restore
+     * encrypted conversations after a later sign-in on this same device.
+     */
     fun clear(context: Context) {
-        CurioSecureStore.wipe(context)
+        CurioSecureStore.clearSession(context)
         runCatching { legacy(context).edit().clear().apply() }
     }
 
